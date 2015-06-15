@@ -1,0 +1,25 @@
+.form-control {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.tt-menu {
+  border: 1px solid silver;
+  width: 100%;
+  padding: 4px;
+  background-color: #eee;
+}
+.tt-menu:hover {
+    cursor: pointer;
+}
+
+.twitter-typeahead {
+    width: 100%;
+}
+
+form select {
+    width: 100%;
+    height: auto;
+    padding: 6px 0px;
+    line-height: 22px;
+}

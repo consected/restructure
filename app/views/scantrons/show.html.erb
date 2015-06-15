@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Ms:</strong>
+  <%= @scantron.ms %>
+</p>
+
+<p>
+  <strong>Scantron:</strong>
+  <%= @scantron.scantron_id %>
+</p>
+
+<p>
+  <strong>Source:</strong>
+  <%= @scantron.source %>
+</p>
+
+<p>
+  <strong>Rank:</strong>
+  <%= @scantron.rank %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @scantron.user %>
+</p>
+
+<%= link_to 'Edit', edit_scantron_path(@scantron) %> |
+<%= link_to 'Back', scantrons_path %>

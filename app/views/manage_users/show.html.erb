@@ -1,0 +1,6 @@
+<p>Email: <%= @user.email %></p>
+<% if @user.new_password %><p>New password: <%= @user.new_password %> </p><% end %>
+<%= link_to 'New User', new_manage_user_path %> |
+<%= link_to 'Edit', edit_manage_user_path(@user) %> |
+<%= link_to 'List Users', manage_users_path %>
+

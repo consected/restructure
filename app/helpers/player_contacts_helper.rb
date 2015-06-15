@@ -1,0 +1,2 @@
+module PlayerContactsHelper
+end

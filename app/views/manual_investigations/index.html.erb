@@ -1,0 +1,61 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Manual Investigations</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Fill in addresses</th>
+      <th>In survey</th>
+      <th>Verify survey participation</th>
+      <th>Verify player and or match</th>
+      <th>Accuracy</th>
+      <th>Accuracy score</th>
+      <th>Accruedseasons</th>
+      <th>First contract</th>
+      <th>Second contract</th>
+      <th>Third contract</th>
+      <th>Changed</th>
+      <th>Changed column</th>
+      <th>Verified</th>
+      <th>Pilotq1</th>
+      <th>Mailing</th>
+      <th>Outreach vfy</th>
+      <th>Insert audit key</th>
+      <th>User</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @manual_investigations.each do |manual_investigation| %>
+      <tr>
+        <td><%= manual_investigation.fill_in_addresses %></td>
+        <td><%= manual_investigation.in_survey %></td>
+        <td><%= manual_investigation.verify_survey_participation %></td>
+        <td><%= manual_investigation.verify_player_and_or_match %></td>
+        <td><%= manual_investigation.accuracy %></td>
+        <td><%= manual_investigation.accuracy_score %></td>
+        <td><%= manual_investigation.accruedseasons %></td>
+        <td><%= manual_investigation.first_contract %></td>
+        <td><%= manual_investigation.second_contract %></td>
+        <td><%= manual_investigation.third_contract %></td>
+        <td><%= manual_investigation.changed %></td>
+        <td><%= manual_investigation.changed_column %></td>
+        <td><%= manual_investigation.verified %></td>
+        <td><%= manual_investigation.pilotq1 %></td>
+        <td><%= manual_investigation.mailing %></td>
+        <td><%= manual_investigation.outreach_vfy %></td>
+        <td><%= manual_investigation.insert_audit_key %></td>
+        <td><%= manual_investigation.user %></td>
+        <td><%= link_to 'Show', manual_investigation %></td>
+        <td><%= link_to 'Edit', edit_manual_investigation_path(manual_investigation) %></td>
+        <td><%= link_to 'Destroy', manual_investigation, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Manual investigation', new_manual_investigation_path %>

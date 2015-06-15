@@ -1,0 +1,17 @@
+li.list-group-item {
+    strong {
+        text-transform: capitalize;
+    }
+
+}
+
+li.address-state {
+    
+    strong {
+        text-transform: uppercase;
+    }
+    
+    small {
+        display: inline-block;
+    }
+}

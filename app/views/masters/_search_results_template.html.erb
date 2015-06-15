@@ -1,0 +1,133 @@
+<div id="search-results-template" type="text/x-handlebars-template" class="hidden">
+  {{#if masters.length}}
+  <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+      
+    {{#each masters}}
+    <div class="panel-heading" role="tab" id="master-{{id}}">
+        <h3 class="panel-title">     
+          <a data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class="collapsed">
+            <span class="msid">{{id}}</span> : 
+            <strong class="player-names">
+            {{capitalize player_infos.0.first_name}} 
+            {{capitalize player_infos.0.middle_name}} 
+            {{capitalize player_infos.0.last_name}}
+            {{#if player_infos.0.nick_name}}
+            ({{capitalize player_infos.0.nick_name}})
+            </strong>
+            <small>DOB</small> {{local_date player_infos.0.birth_date '?'}}
+            <small>DOD</small> {{local_date player_infos.0.death_date '?'}}
+            <small>Rank</small> {{player_infos.0.rank}}
+            {{/if}}
+          </a>
+        </h4>
+      </div>
+      <div id="master-{{id}}-player-infos" class="panel-collapse collapse" role="tabpanel" aria-labelledby="master-{{id}}">
+        <div class="panel-body">
+      
+          <div class="row">
+            <div class="col-md-12">
+              {{#each player_infos}}
+                <div class="row">
+                  <div class="col-md-12">
+                    <ul class="list-group">
+                      <li class="list-group-item">
+                        <h4 class="list-group-item-heading">Player Info</h4>
+{{!--
+                        {{#if pro_info}}
+                        <p><a href="#pro-info-{{this.id}}-{{pro_info.id}}" data-toggle="collapse" aria-expanded="false" class="collapsed">Show Associated Pro Info</a></p>
+                        {{else}}
+                        <p>No pro information available</p>
+                        {{/if}}
+--}}
+                      </li>
+                      {{#each this}}
+                      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,rank" }}
+                      <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+                      {{/in}}
+                      {{/each}}
+
+                    </ul>
+                  </div>
+                    
+                  {{#with pro_info}}                        
+                    <div class="col-md-12" id="pro-info-{{../id}}-{{this.id}}">        
+
+                      <ul class="list-group">
+                          <li class="list-group-item">
+                            <h4  class="list-group-item-heading">Pro Info</h4>
+                          </li>
+                          {{#each this }}
+                          {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year" }}
+                          <li class="list-group-item pro-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+                          {{/in}}
+                          {{/each}}
+                      </ul>
+
+                    </div>  
+                  {{/with}}
+                </div>  
+              {{else}}
+              <h4>No player or pro info to show</h4>
+              <p><a href="/masters/{{id}}/player_infos/new">Create Player Info record</a> </p>
+              {{/each}}
+            </div>
+          
+            
+          
+            <div class="col-md-6">
+              {{#each addresses}}
+              
+                  <ul class="list-group">
+                      <li class="list-group-item">
+                        <h4 class="list-group-item-heading">Addresses</h4>                        
+                      </li>
+                      {{#each this}}
+                      {{#in this @key "street,street2,street3,city,state,zip,source,rec_type" }}
+                      <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+                      {{/in}}
+                      {{/each}}
+
+                  </ul>
+                  
+              
+              {{else}}
+              <p>No addresses</p>
+              {{/each}}
+            </div>
+            <div class="col-md-6">
+              {{#each player_contacts}}
+              
+                  <ul class="list-group">
+                      <li class="list-group-item">
+                        <h4 class="list-group-item-heading">Contact Details</h4>                        
+                      </li>
+                      {{#each this}}
+                      {{#in this @key "email,data,source,active" }}
+                      <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+                      {{/in}}
+                      {{/each}}
+
+                  </ul>
+                  
+              
+              {{else}}
+              <p>No addresses</p>
+              {{/each}}
+            </div>
+          </div>
+            
+        </div>
+      </div>
+    {{/each}}
+      
+    </div>
+  {{else}}
+      <h2>No Results</h2>
+  {{/if}}
+  
+  
+</div>
+  
+  
+  

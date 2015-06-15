@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Pro Infos</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Master</th>
+      <th>User</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @pro_infos.each do |pro_info| %>
+      <tr>
+        <td><%= pro_info.master %></td>
+        <td><%= pro_info.user %></td>
+        <td><%= link_to 'Show', pro_info %></td>
+        <td><%= link_to 'Edit', edit_pro_info_path(pro_info) %></td>
+        <td><%= link_to 'Destroy', pro_info, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Pro info', new_pro_info_path %>

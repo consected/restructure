@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Ms:</strong>
+  <%= @player_contact.ms %>
+</p>
+
+<p>
+  <strong>Pctype:</strong>
+  <%= @player_contact.pctype %>
+</p>
+
+<p>
+  <strong>Pcdata:</strong>
+  <%= @player_contact.pcdata %>
+</p>
+
+<p>
+  <strong>Source:</strong>
+  <%= @player_contact.source %>
+</p>
+
+<p>
+  <strong>Rank:</strong>
+  <%= @player_contact.rank %>
+</p>
+
+<p>
+  <strong>Pcdate:</strong>
+  <%= @player_contact.pcdate %>
+</p>
+
+<p>
+  <strong>Active:</strong>
+  <%= @player_contact.active %>
+</p>
+
+<%= link_to 'Edit', edit_player_contact_path(@player_contact) %> |
+<%= link_to 'Back', player_contacts_path %>

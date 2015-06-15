@@ -1,0 +1,213 @@
+# encoding: UTF-8
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
+#
+# Note that this schema.rb definition is the authoritative source for your
+# database schema. If you need to create the application database on another
+# system, you should be using db:schema:load, not running all the migrations
+# from scratch. The latter is a flawed and unsustainable approach (the more migrations
+# you'll amass, the slower it'll run and the greater likelihood for issues).
+#
+# It's strongly recommended that you check this file into your version control system.
+
+ActiveRecord::Schema.define(version: 20150611202453) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
+  create_table "addresses", force: :cascade do |t|
+    t.integer  "master_id"
+    t.string   "street"
+    t.string   "street2"
+    t.string   "street3"
+    t.string   "city"
+    t.string   "state"
+    t.string   "zip"
+    t.string   "source"
+    t.integer  "rank"
+    t.string   "rec_type"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "addresses", ["master_id"], name: "index_addresses_on_master_id", using: :btree
+  add_index "addresses", ["user_id"], name: "index_addresses_on_user_id", using: :btree
+
+  create_table "admins", force: :cascade do |t|
+    t.string   "email",              default: "", null: false
+    t.string   "encrypted_password", default: "", null: false
+    t.integer  "sign_in_count",      default: 0
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string   "current_sign_in_ip"
+    t.string   "last_sign_in_ip"
+    t.integer  "failed_attempts",    default: 0
+    t.string   "unlock_token"
+    t.datetime "locked_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "colleges", force: :cascade do |t|
+    t.string  "name"
+    t.integer "synonym_for_id"
+  end
+
+  create_table "manage_users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "manual_investigations", force: :cascade do |t|
+    t.string   "fill_in_addresses",           limit: 1
+    t.string   "in_survey",                   limit: 1
+    t.string   "verify_survey_participation", limit: 1
+    t.string   "verify_player_and_or_match",  limit: 1
+    t.string   "accuracy",                    limit: 15
+    t.integer  "accuracy_score"
+    t.string   "changed_column"
+    t.integer  "verified"
+    t.integer  "pilotq1"
+    t.integer  "mailing"
+    t.integer  "outreach_vfy"
+    t.integer  "insert_audit_key"
+    t.integer  "user_id"
+    t.datetime "created_at",                             null: false
+    t.datetime "updated_at",                             null: false
+    t.integer  "rank"
+    t.integer  "master_id"
+    t.integer  "is_changed"
+    t.integer  "scantron_id"
+  end
+
+  add_index "manual_investigations", ["master_id"], name: "index_manual_investigations_on_master_id", using: :btree
+  add_index "manual_investigations", ["scantron_id"], name: "index_manual_investigations_on_scantron_id", using: :btree
+  add_index "manual_investigations", ["user_id"], name: "index_manual_investigations_on_user_id", using: :btree
+
+  create_table "masters", force: :cascade do |t|
+  end
+
+  create_table "player_contacts", force: :cascade do |t|
+    t.integer  "master_id"
+    t.string   "rec_type"
+    t.string   "data"
+    t.string   "source"
+    t.integer  "rank"
+    t.boolean  "active"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "player_contacts", ["master_id"], name: "index_player_contacts_on_master_id", using: :btree
+  add_index "player_contacts", ["user_id"], name: "index_player_contacts_on_user_id", using: :btree
+
+  create_table "player_infos", force: :cascade do |t|
+    t.integer  "master_id"
+    t.string   "first_name"
+    t.string   "last_name"
+    t.string   "middle_name"
+    t.string   "nick_name"
+    t.date     "birth_date"
+    t.date     "death_date"
+    t.string   "occupation_category"
+    t.string   "company"
+    t.string   "company_description"
+    t.string   "transaction_status"
+    t.string   "transaction_substatus"
+    t.integer  "user_id"
+    t.datetime "created_at",                      null: false
+    t.datetime "updated_at",                      null: false
+    t.string   "contact_pref"
+    t.integer  "start_year"
+    t.string   "in_survey",             limit: 1
+    t.integer  "rank"
+    t.string   "notes"
+    t.integer  "contact_id"
+    t.integer  "pro_info_id"
+  end
+
+  add_index "player_infos", ["master_id"], name: "index_player_infos_on_master_id", using: :btree
+  add_index "player_infos", ["pro_info_id"], name: "index_player_infos_on_pro_info_id", using: :btree
+  add_index "player_infos", ["user_id"], name: "index_player_infos_on_user_id", using: :btree
+
+  create_table "pro_infos", force: :cascade do |t|
+    t.integer  "master_id"
+    t.integer  "pro_id"
+    t.string   "in_survey"
+    t.string   "first_name"
+    t.string   "middle_name"
+    t.string   "nick_name"
+    t.string   "last_name"
+    t.string   "birth_date"
+    t.string   "death_date"
+    t.integer  "start_year"
+    t.integer  "end_year"
+    t.decimal  "accrued_seasons"
+    t.string   "college"
+    t.string   "first_contract"
+    t.string   "second_contract"
+    t.string   "third_contract"
+    t.string   "career_info"
+    t.string   "birthplace"
+    t.integer  "user_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+    t.integer  "rank"
+  end
+
+  add_index "pro_infos", ["master_id"], name: "index_pro_infos_on_master_id", using: :btree
+  add_index "pro_infos", ["user_id"], name: "index_pro_infos_on_user_id", using: :btree
+
+  create_table "scantrons", force: :cascade do |t|
+    t.integer  "master_id"
+    t.integer  "scantron_id"
+    t.string   "source"
+    t.integer  "rank"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "scantrons", ["master_id"], name: "index_scantrons_on_master_id", using: :btree
+  add_index "scantrons", ["user_id"], name: "index_scantrons_on_user_id", using: :btree
+
+  create_table "users", force: :cascade do |t|
+    t.string   "email",                  default: "", null: false
+    t.string   "encrypted_password",     default: "", null: false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer  "sign_in_count",          default: 0,  null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.inet     "current_sign_in_ip"
+    t.inet     "last_sign_in_ip"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.integer  "failed_attempts",        default: 0,  null: false
+    t.string   "unlock_token"
+    t.datetime "locked_at"
+  end
+
+  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
+  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
+  add_index "users", ["unlock_token"], name: "index_users_on_unlock_token", unique: true, using: :btree
+
+  add_foreign_key "addresses", "masters"
+  add_foreign_key "addresses", "users"
+  add_foreign_key "manual_investigations", "masters"
+  add_foreign_key "manual_investigations", "scantrons"
+  add_foreign_key "manual_investigations", "users"
+  add_foreign_key "player_contacts", "masters"
+  add_foreign_key "player_contacts", "users"
+  add_foreign_key "player_infos", "masters"
+  add_foreign_key "player_infos", "pro_infos"
+  add_foreign_key "player_infos", "users"
+  add_foreign_key "pro_infos", "masters"
+  add_foreign_key "pro_infos", "users"
+  add_foreign_key "scantrons", "masters"
+  add_foreign_key "scantrons", "users"
+end

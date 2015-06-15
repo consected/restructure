@@ -1,0 +1,168 @@
+<div class="container-fluid">
+<%= form_for @master, method: :get, remote: true do |f| %>
+
+  <div class="row">
+    <div class="form-group col-sm-3">
+      <%= f.label :master_id %>
+      <%= f.number_field :id, class: 'form-control', min: 0 %>
+    </div>
+
+    <%= f.fields_for :player_infos do |pif| %>
+      <div class="form-group col-sm-2">
+        <%= pif.label :first_name %>
+        <%= pif.text_field :first_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= pif.label :middle_name %>
+        <%= pif.text_field :middle_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= pif.label :nick_name %>
+        <%= pif.text_field :nick_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= pif.label :last_name %>
+        <%= pif.text_field :last_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= pif.label :birth_date %>
+        <%= pif.date_field :birth_date, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= pif.label :death_date %>
+        <%= pif.date_field :death_date, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= pif.label :start_year %>
+        <%= pif.number_field :start_year, in: Settings::StartYearRange, class: 'form-control'  %>
+      </div>
+
+    <% end %>
+  </div>
+    <p><a href="#pro-info-search" data-toggle="collapse" class="collapsed">Search Pro Fields</a></p>
+  <div class="row collapse" id="pro-info-search" >
+    <%= f.fields_for :pro_infos do |f| %>
+      <div class="form-group col-sm-3">
+        <%= f.label :pro_id %>
+        <%= f.number_field :pro_id, class: 'form-control', min: 0  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :first_name %>
+        <%= f.text_field :first_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :middle_name %>
+        <%= f.text_field :middle_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :nick_name %>
+        <%= f.text_field :nick_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :last_name %>
+        <%= f.text_field :last_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :birth_date %>
+        <%= f.date_field :birth_date, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= f.label :college %>
+        <%= f.text_field :college, class: 'form-control college-input typeahead'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :start_year %>
+        <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control after-college-input'  %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="row">
+    <%=f.fields_for :addresses do |f| %>
+      <div class="form-group col-sm-2">
+        <%= f.label :street %>
+        <%= f.text_field :street, class: 'form-control' %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :street2 %>
+        <%= f.text_field :street2, class: 'form-control' %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :city %>
+        <%= f.text_field :city, class: 'form-control' %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :state %>
+        <%= f.collection_select :state, state_hash, :first, :last, class: 'form-control', include_blank: true  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :zip %>
+        <%= f.text_field :zip, class: 'form-control', pattern: "\\d{5,5}" %>
+      </div>
+    <% end %>
+    <%= f.fields_for :player_infos do |f| %>
+      <div class="form-group col-sm-2">
+        <%= f.label :contact_pref %>
+        <%= f.text_field :contact_pref, class: 'form-control' %>
+      </div>      
+    <% end %>
+      
+    <%= f.fields_for :player_contacts do |f| %>  
+      <div class="form-group col-sm-2">
+          <%= f.label :email %>
+          <%= f.text_field :data, class: 'form-control' %>
+          <%= f.hidden_field :rec_type, value: "EMAIL", "data-only-for": "#master_player_contacts_attributes_0_data" %>
+      </div>
+    <% end %>
+      
+    <%= f.fields_for :manual_investigations do |f| %>
+      <div class="form-group col-sm-2">
+        <%= f.label :in_survey %>
+        <%= f.select :in_survey, yes_no_selections, class: 'form-control', include_blank: true  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :rank %>
+        <%= f.number_field :rank, class: 'form-control' %>
+      </div>
+
+      <div class="form-group col-sm-2">
+        <%= f.label :scantron_id %>
+        <%= f.text_field :scantron_id, class: 'form-control' %>
+      </div>
+      
+    </div>
+    <% end %>
+    <%= f.fields_for :player_infos do |f| %>
+    <div class="row">
+      <div class="form-group col-sm-18 col-sm-offset-1">
+        <%= f.label :notes %>
+        <%= f.text_field :notes, class: 'form-control' %>
+      </div>
+    </div>
+    <% end %>
+  
+  <div class="form-group actions ">
+    <%= f.submit :submit %>
+  </div>
+<% end %>
+</div>
+
+<script>
+  var college_list = <%= college_array %>;
+  _fpa.setup_typeahead('input.college-input', college_list, "colleges");
+</script>
+
+<% if @master_id %>
+<script>
+  $('#master_id').val('<%=@master_id%>');
+</script>
+  <% @do_search = true %>
+<% end %>
+
+<% if @do_search %>
+<script>
+  window.setTimeout(function(){
+    $('form#new_master').submit();
+  },1);
+</script>
+<% end %>

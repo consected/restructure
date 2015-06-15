@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  ms_id: 
+  pctype: MyString
+  pcdata: MyString
+  source: MyString
+  rank: 1
+  pcdate: 2015-06-02
+  active: false
+
+two:
+  ms_id: 
+  pctype: MyString
+  pcdata: MyString
+  source: MyString
+  rank: 1
+  pcdate: 2015-06-02
+  active: false

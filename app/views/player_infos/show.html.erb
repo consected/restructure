@@ -1,0 +1,84 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Master:</strong>
+  <%= @player_info.master %>
+</p>
+
+<p>
+  <strong>First name:</strong>
+  <%= @player_info.first_name %>
+</p>
+
+<p>
+  <strong>Last name:</strong>
+  <%= @player_info.last_name %>
+</p>
+
+<p>
+  <strong>Middle name:</strong>
+  <%= @player_info.middle_name %>
+</p>
+
+<p>
+  <strong>Nick name:</strong>
+  <%= @player_info.nick_name %>
+</p>
+
+<p>
+  <strong>Birth date:</strong>
+  <%= @player_info.birth_date %>
+</p>
+
+<p>
+  <strong>Death date:</strong>
+  <%= @player_info.death_date %>
+</p>
+
+<p>
+  <strong>Occupation category:</strong>
+  <%= @player_info.occupation_category %>
+</p>
+
+<p>
+  <strong>Company:</strong>
+  <%= @player_info.company %>
+</p>
+
+<p>
+  <strong>Company description:</strong>
+  <%= @player_info.company_description %>
+</p>
+
+<p>
+  <strong>Transaction status:</strong>
+  <%= @player_info.transaction_status %>
+</p>
+
+<p>
+  <strong>Transaction substatus:</strong>
+  <%= @player_info.transaction_substatus %>
+</p>
+
+<p>
+  <strong>Website:</strong>
+  <%= @player_info.website %>
+</p>
+
+<p>
+  <strong>Alternate website:</strong>
+  <%= @player_info.alternate_website %>
+</p>
+
+<p>
+  <strong>Twitter:</strong>
+  <%= @player_info.twitter_id %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @player_info.user %>
+</p>
+
+<%= link_to 'Edit', edit_player_info_path(@player_info) %> |
+<%= link_to 'Back', player_infos_path %>

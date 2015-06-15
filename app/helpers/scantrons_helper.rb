@@ -1,0 +1,2 @@
+module ScantronsHelper
+end
