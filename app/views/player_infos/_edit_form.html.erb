@@ -1,0 +1,24 @@
+<div class="data-results">
+  <div data-result="player-info-edit-form-<%=@player_info.master_id%>-<%=@player_info.id%>">
+    <div class="col-md-24">
+      <%=form_for([@master, @player_info], remote: true) do |f|%>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <a class="show-entity show-player-info pull-right glyphicon glyphicon-remove-sign" title="cancel" href="/masters/<%=@player_info.master_id%>/player_infos/<%=@player_info.id%>" data-remote="true" data-player-id="<%=@player_info.id%>" data-result-target="#player-info-<%=  @player_info.id %>" data-template="player-info-result-template"></a>
+          <h4 class="list-group-item-heading">Edit Player Info</h4>
+        </li>
+        <li class="list-group-item player-info-first_name">
+            <%= f.label :first_name %>
+            <%= f.text_field :first_name %>
+        </li>  
+        <li class="list-group-item player-info-last_name">
+            <%= f.label :last_name %>
+            <%= f.text_field :last_name %>
+        </li>  
+
+      </ul>
+      <%= f.submit %>  
+      <% end %>
+    </div>
+  </div>
+</div>

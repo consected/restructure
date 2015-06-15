@@ -36,7 +36,11 @@ _fpa = {
     
     var html = template(data);
     block.html(html);
+    
+    _fpa.handle_edit_links();
     _fpa.reset_page_size();
+    if(_fpa.postprocessors[template_name])
+        _fpa.postprocessors[template_name](block, data);
   },
           
   reset_page_size:function(){
@@ -44,7 +48,7 @@ _fpa = {
     var hh = $('html').height();
     if(bh < hh) $('body').height(hh);
   },
-          
+  
   inherit_from: function(original_prototype, new_t){
     function F() {}
     F.prototype = original_prototype;    
@@ -107,6 +111,41 @@ _fpa = {
     });
 
   },
+  
+  handle_edit_links: function(){
+    var block = $("a[data-remote='true']").not('.attached');
+      
+    block.on("ajax:success", function(e, data, status, xhr) {    
+        
+        if(xhr.responseJSON){
+            var t = $(this).attr('data-result-target');
+            _fpa.view_template($(t), $(this).attr('data-template'), xhr.responseJSON);
+        } else {
+            var html = $(xhr.responseText);
+            $('.query-error').remove();
+            html.find('div[data-result]').each(function(){
+                var d = $(this);
+                var di = d.attr('data-result');
+                var targets = $('div[data-subscription="'+di+'"]');
+                var res = {};
+                res[di] = d;
+                targets.each(function(){
+                    var pre = $(this).attr('data-preprocessor');
+                    if(pre && _fpa.preprocessors[pre])
+                      _fpa.preprocessors[pre](res);
+                    $(this).html(d.html());
+                    window.setTimeout(function(){_fpa.handle_edit_links();},1);
+                });
+
+            });
+        }
+
+    }).on("ajax:error", function(e, xhr, status, error){
+      _fpa.flash_notice("An error occurred.", 'danger');
+      
+    }).addClass('attached');
+  },
+  
   flash_notice: function(msg, type){
       if(!type) type = 'info';
       $('.flash').append('<div class="alert alert-'+type+' query-error" role="alert">'+msg+'</div>');

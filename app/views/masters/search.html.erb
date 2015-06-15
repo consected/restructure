@@ -1,4 +1,26 @@
+<%= render partial: 'search_form_simple' %>
 <%= render partial: 'search_form' %>
+
+<% if @master_id %>
+<script>
+  $('#simple_master_id').val('<%=@master_id%>');
+  $('#master_id').val('<%=@master_id%>');
+</script>
+  <% @do_search = true %>
+<% end %>
+
+<% if @do_search %>
+<script>
+  window.setTimeout(function(){
+    if($('#advanced_search_master').is(':visible')){
+      $('form#advanced_search_master').submit();
+    }
+    else{
+      $('form#simple_search_master').submit();
+    }
+  },1);
+</script>
+<% end %>
 
 <div  class="container-fluid">
   <div id="master_results_block" class="" data-subscription="masters" data-template="search-results-template" data-preprocessor="master_search_results" ></div>

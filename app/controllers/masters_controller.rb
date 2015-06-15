@@ -7,7 +7,13 @@ class MastersController < ApplicationController
   def index
     #search_params
     redirect_to '/masters/search/' and return if search_params.nil? || search_params.length == 0
-    @masters = Master.search_on_params search_params[:master] 
+    
+    if params[:mode] == 'SIMPLE'
+      @masters = Master.simple_search_on_params search_params[:master] 
+    else
+      @masters = Master.search_on_params search_params[:master] 
+    end
+    
     @masters.take(ResultsLimit)
     
     m = {
@@ -34,12 +40,17 @@ class MastersController < ApplicationController
   def search
     @master_id ||= params[:nav_q]
     
-    @master =  Master.new    
+    @master =  Master.new 
+    
+    # Advanced search fields
     @master.pro_infos.build
     @master.player_infos.build
     @master.manual_investigations.build
     @master.addresses.build
     @master.player_contacts.build
+    
+    # Simple search fields
+    @master.general_infos.build
          
     render :search
   end

@@ -8,8 +8,9 @@ class PlayerInfosController < ApplicationController
 #    @player_infos = PlayerInfo.all
 #  end
 #
-#  def show
-#  end
+  def show
+    render json: {player_info: @player_info}
+  end
 
   def new
     @player_info = @master.player_infos.build
@@ -17,6 +18,7 @@ class PlayerInfosController < ApplicationController
 
   # GET /player_infos/1/edit
   def edit
+    render partial: 'edit_form'
   end
 
   # POST /player_infos

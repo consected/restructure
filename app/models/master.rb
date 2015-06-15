@@ -8,11 +8,14 @@ class Master < ActiveRecord::Base
   has_many :player_contacts
   has_many :addresses
   
+  # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
+  has_many :general_infos, class_name: 'PlayerInfo'
+  
   # TODO - make this real!
-  has_one :address, -> { where rank: 1 }
+  has_one :address, -> { where('rank <> 999').order(rank: :desc).limit(1)  }
   
   
-  accepts_nested_attributes_for :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses
+  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses
   
   # Build a Master search using the Master and nested attributes passed in
   # Any attributes that are nil will be rejected and will not appear in the query
@@ -25,12 +28,11 @@ class Master < ActiveRecord::Base
     selects = []
     
     params.each do |k,v|
-      logger.info "k: #{k}"
-      
       
       if v.is_a? Hash
-      
+        
         if v.first.first == "0"
+          # Grab the first array item from the parameters if there is one to reset the context
           v = v.first.last
         end
         
@@ -56,9 +58,39 @@ class Master < ActiveRecord::Base
       
     end
     
-    Master.select(selects).joins(joins).where(wheres)
+    Master.select(selects).joins(joins).uniq.where(wheres)
     
   end
+  
+  
+  def self.simple_search_on_params params
+    logger.info "Search Simple with #{params}"
+    w = ""
+    wcond = {}
+    joins = []
+    
+    p = params[:general_infos_attributes]['0']
+    first = true
+    
+    if params[:id]
+      first = false
+      w << "masters.id = :id"
+      wcond[:id] =  params[:id].to_i
+    end
+    
+    p.each do |k,v|
+      unless v.nil?
+        w << " AND " unless first
+        w << "(player_infos.#{k} = :#{k} OR pro_infos.#{k} = :#{k})"      
+        wcond[k.to_sym] = v
+        joins  = [:player_infos, :pro_infos]
+        first = false
+      end
+    end
+    logger.info "where: #{w}, #{wcond}"
+    Master.joins(joins).uniq.where(w, wcond)
+  end
+  
   
 #  def as_json options=nil
 #    

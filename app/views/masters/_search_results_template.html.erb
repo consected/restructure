@@ -1,4 +1,28 @@
-<div id="search-results-template" type="text/x-handlebars-template" class="hidden">
+<script id="player-info-result-partial" type="text/x-handlebars-template" class="hidden">
+  <div class="col-md-12">
+    <ul class="list-group">
+      <li class="list-group-item">
+        <a class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <h4 class="list-group-item-heading">Player Info</h4>
+      </li>
+      {{#each this}}
+      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,rank" }}
+      <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+      {{/in}}
+      {{/each}}
+
+    </ul>
+  </div>
+</script>
+<script>
+  Handlebars.registerPartial('player_info_result', $('#player-info-result-partial').html());
+</script>
+
+<script id="player-info-result-template" type="text/x-handlebars-template" class="hidden">
+    {{>player_info_result player_info}}
+</script>
+
+<script id="search-results-template" type="text/x-handlebars-template" class="hidden">
   {{#if masters.length}}
   <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
@@ -6,52 +30,33 @@
     {{#each masters}}
     <div class="panel-heading" role="tab" id="master-{{id}}">
         <h3 class="panel-title">     
-          <a data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class="collapsed">
+          <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is masters.length '!==' 1}}collapsed{{/is}}">
             <span class="msid">{{id}}</span> : 
             <strong class="player-names">
             {{capitalize player_infos.0.first_name}} 
             {{capitalize player_infos.0.middle_name}} 
             {{capitalize player_infos.0.last_name}}
             {{#if player_infos.0.nick_name}}
-            ({{capitalize player_infos.0.nick_name}})
-            </strong>
-            <small>DOB</small> {{local_date player_infos.0.birth_date '?'}}
-            <small>DOD</small> {{local_date player_infos.0.death_date '?'}}
-            <small>Rank</small> {{player_infos.0.rank}}
+              ({{capitalize player_infos.0.nick_name}})
+              </strong>
+              <small>DOB</small> {{local_date player_infos.0.birth_date '?'}}
+              <small>DOD</small> {{local_date player_infos.0.death_date '?'}}
+              <small>Rank</small> {{player_infos.0.rank}}
             {{/if}}
           </a>
         </h4>
       </div>
-      <div id="master-{{id}}-player-infos" class="panel-collapse collapse" role="tabpanel" aria-labelledby="master-{{id}}">
+      <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <div class="panel-body">
       
           <div class="row">
             <div class="col-md-12">
               {{#each player_infos}}
-                <div class="row">
-                  <div class="col-md-12">
-                    <ul class="list-group">
-                      <li class="list-group-item">
-                        <h4 class="list-group-item-heading">Player Info</h4>
-{{!--
-                        {{#if pro_info}}
-                        <p><a href="#pro-info-{{this.id}}-{{pro_info.id}}" data-toggle="collapse" aria-expanded="false" class="collapsed">Show Associated Pro Info</a></p>
-                        {{else}}
-                        <p>No pro information available</p>
-                        {{/if}}
---}}
-                      </li>
-                      {{#each this}}
-                      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,rank" }}
-                      <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-                      {{/in}}
-                      {{/each}}
-
-                    </ul>
-                  </div>
+                <div class="row" id="player-info-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
+                  {{>player_info_result master_id=../id}}
                     
                   {{#with pro_info}}                        
-                    <div class="col-md-12" id="pro-info-{{../id}}-{{this.id}}">        
+                    <div class="col-md-12" id="pro-info-{{../id}}-{{id}}">        
 
                       <ul class="list-group">
                           <li class="list-group-item">
@@ -127,7 +132,7 @@
   {{/if}}
   
   
-</div>
+</script>
   
   
   

@@ -1,5 +1,10 @@
-<div class="container-fluid">
-<%= form_for @master, method: :get, remote: true do |f| %>
+<div class="container-fluid collapse" id="master-search-advanced">
+<p>
+    <a href="#master-search-simple" data-toggle="collapse" class="collapsed">Simple Search</a>
+    <a href="#" id="clear-fields">Clear Fields</a>
+</p>
+    
+<%= form_for @master, method: :get, remote: true, html: {id: 'advanced_search_master', class: 'search_master'} do |f| %>
 
   <div class="row">
     <div class="form-group col-sm-3">
@@ -39,8 +44,8 @@
 
     <% end %>
   </div>
-    <p><a href="#pro-info-search" data-toggle="collapse" class="collapsed">Search Pro Fields</a></p>
-  <div class="row collapse" id="pro-info-search" >
+    
+  <div class="row" id="pro-info-search" >
     <%= f.fields_for :pro_infos do |f| %>
       <div class="form-group col-sm-3">
         <%= f.label :pro_id %>
@@ -152,17 +157,3 @@
   _fpa.setup_typeahead('input.college-input', college_list, "colleges");
 </script>
 
-<% if @master_id %>
-<script>
-  $('#master_id').val('<%=@master_id%>');
-</script>
-  <% @do_search = true %>
-<% end %>
-
-<% if @do_search %>
-<script>
-  window.setTimeout(function(){
-    $('form#new_master').submit();
-  },1);
-</script>
-<% end %>

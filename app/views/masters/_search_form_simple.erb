@@ -1,0 +1,54 @@
+<div class="container-fluid collapse in" id="master-search-simple">
+<p>
+    <a href="#master-search-advanced" data-toggle="collapse" class="collapsed">Advanced Search</a>
+    <a href="#" id="clear-fields">Clear Fields</a>
+</p>
+    
+<%= form_for @master, method: :get, remote: true, html: {id: 'simple_search_master', class: 'search_master'} do |f| %>
+
+  <div class="row">
+    <%= hidden_field_tag :mode, "SIMPLE" %>
+    <div class="form-group col-sm-3">
+      <%= f.label :master_id %>
+      <%= f.number_field :id, id: 'simple_master_id', class: 'form-control', min: 0 %>
+    </div>
+
+    <%= f.fields_for :general_infos do |pif| %>
+      <div class="form-group col-sm-2">
+        <%= pif.label :first_name %>
+        <%= pif.text_field :first_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= pif.label :middle_name %>
+        <%= pif.text_field :middle_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= pif.label :nick_name %>
+        <%= pif.text_field :nick_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= pif.label :last_name %>
+        <%= pif.text_field :last_name, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= pif.label :birth_date %>
+        <%= pif.date_field :birth_date, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= pif.label :death_date %>
+        <%= pif.date_field :death_date, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2">
+        <%= pif.label :start_year %>
+        <%= pif.number_field :start_year, in: Settings::StartYearRange, class: 'form-control'  %>
+      </div>
+
+    <% end %>
+  </div>
+  <div class="form-group actions ">
+    <%= f.submit :submit %>
+  </div>
+<%end%>
+</div>
+  
+  
