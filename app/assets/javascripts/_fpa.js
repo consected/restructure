@@ -79,7 +79,8 @@ _fpa = {
     // data-only-for allows hidden and other inputs to be blanked if the dependent
     // 'only-for' input is blank. This ensures the data is set only for the times when the
     // related data is a real value
-    block.on('click', function(){
+    block.on('click', function(ev){
+      
       _fpa.clear_flash_notices();
    
     }).on('ajax:before', function(){

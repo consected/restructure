@@ -21,7 +21,8 @@ class MastersController < ApplicationController
         player_infos: {order: {rank: :desc}, include: :pro_info},
         player_contacts: {order: {rank: :desc}},
         manual_investigations: {order: {rank: :desc}},
-        addresses: {order: {rank: :desc}}
+        addresses: {order: {rank: :desc}},
+        trackers: {order: {created_at: :desc}, methods: :protocol_name}
       }) 
     }
 

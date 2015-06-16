@@ -1,7 +1,7 @@
 module PlayerInfosHelper
   
   def college_array
-    res = College.array
+    res = College.selector_array
     res.to_json.html_safe
   end
   

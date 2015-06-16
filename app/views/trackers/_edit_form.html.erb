@@ -1,0 +1,49 @@
+<div class="data-results">
+  <div data-result="tracker-edit-form-<%=@tracker.master_id%>-<%=@tracker.id%>">
+      <div class="form-group">
+          <%  if @tracker.id 
+                cancel_href = "/masters/#{@tracker.master_id}/trackers/#{@tracker.id}"
+              else
+                cancel_href = "/masters/#{@tracker.master_id}/trackers/cancel"
+              end
+          %>  
+          <a class="show-entity show-tracker pull-right glyphicon glyphicon-remove-sign" title="cancel" href="<%= cancel_href %>" data-remote="true" data-player-id="<%=@tracker.id%>" data-result-target="#tracker-<%=  @tracker.id %>" data-template="tracker-result-template"></a>
+          <h4 class="form-group-heading">Edit Tracker Record</h4>
+        </div>
+    <div class="row">
+      <%=form_for([@master, @tracker], remote: true, html: {class: "", "data-result-target" => "#tracker-#{@master.id}-#{@tracker.id}", "data-template" => "tracker-result-template"}) do |f|%>
+      
+        
+        <div class="form-group tracker-protocol">
+            <%= f.label :protocol %>
+            <%= f.select :protocol_id, options_for_select(protocol_array)%>
+        </div>
+        <div class="form-group tracker-event">
+            <%= f.label :event %>
+            <%= f.text_field :event %>
+        </div>  
+        <div class="form-group tracker-event_date">
+            <%= f.label :event_date %>
+            <%= f.date_field :event_date %>
+        </div>
+        <div class="form-group tracker-c_method">
+            <%= f.label :c_method %>
+            <%= f.text_field :c_method %>
+        </div>
+        <div class="form-group tracker-outcome">
+            <%= f.label :outcome %>
+            <%= f.text_field :outcome %>
+        </div>
+        <div class="form-group tracker-outcome_date">
+            <%= f.label :outcome_date %>
+            <%= f.text_field :outcome_date %>
+        </div>
+        
+        <div class="form-group">
+          <%= f.submit class: "btn btn-primary" %>  
+        </div>
+      
+      <% end %>
+    </div>
+  </div>
+</div>

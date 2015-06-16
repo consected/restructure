@@ -1,0 +1,44 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Master:</strong>
+  <%= @tracker.master %>
+</p>
+
+<p>
+  <strong>Protocol:</strong>
+  <%= @tracker.protocol %>
+</p>
+
+<p>
+  <strong>Event:</strong>
+  <%= @tracker.event %>
+</p>
+
+<p>
+  <strong>Event date:</strong>
+  <%= @tracker.event_date %>
+</p>
+
+<p>
+  <strong>C method:</strong>
+  <%= @tracker.c_method %>
+</p>
+
+<p>
+  <strong>Outcome:</strong>
+  <%= @tracker.outcome %>
+</p>
+
+<p>
+  <strong>Outcome date:</strong>
+  <%= @tracker.outcome_date %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @tracker.user %>
+</p>
+
+<%= link_to 'Edit', edit_tracker_path(@tracker) %> |
+<%= link_to 'Back', trackers_path %>

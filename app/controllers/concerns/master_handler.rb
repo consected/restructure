@@ -1,10 +1,12 @@
 module MasterHandler
   extend ActiveSupport::Concern
   
+  UseMasterParam = %w(new create index) 
+  
   included do
     before_action :authenticate_user!
 
-    before_action :set_me_and_master, only: [:new, :edit, :create, :update, :destroy]
+    before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
   end
   
   def set_me_and_master
@@ -15,7 +17,7 @@ module MasterHandler
     # @player_info  = PlayerInfo.find(params[:id])
     # This allows for us to retrieve the @master consistently, so that the master association
     # is not used repetitively (potentially breaking the current_user functionality)
-    if action_name == 'new' || action_name == 'create'
+    if UseMasterParam.include? action_name 
       @master = Master.find(params[:master_id])
     else
       object = controller_name.classify.constantize.find(params[:id])

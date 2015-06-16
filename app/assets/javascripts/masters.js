@@ -17,9 +17,10 @@ $(document).ready(function(){
         $('#master-search-advanced').collapse('hide');
     });
     
-    $('.clear-fields').on('click', function(){
+    $('.clear-fields').on('click', function(ev){
+        ev.preventDefault();
         forms.find(':visible input, :visible select').not('[type="submit"], [type="hidden"]').val(null);
     });
-    
+        
  
 });

@@ -5,10 +5,10 @@ class Master < ActiveRecord::Base
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
   has_many :manual_investigations  , inverse_of: :master
-  has_many :pro_infos , inverse_of: :master
-  
+  has_many :pro_infos , inverse_of: :master  
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
   has_many :addresses  , inverse_of: :master
+  has_many :trackers  , inverse_of: :master
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
   has_many :general_infos, class_name: 'PlayerInfo' 
@@ -17,7 +17,7 @@ class Master < ActiveRecord::Base
   has_one :address, -> { order(RankNotNullClause).limit(1)  } 
   
   
-  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses
+  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses, :trackers
   
   # Build a Master search using the Master and nested attributes passed in
   # Any attributes that are nil will be rejected and will not appear in the query

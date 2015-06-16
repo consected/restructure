@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   
   
+  resources :protocols
   devise_for :admins, :skip => [:registrations]
   devise_for :users, :skip => [:registrations]                                          
 
@@ -21,6 +22,7 @@ Rails.application.routes.draw do
     resources :manual_investigations
     resources :addresses
     resources :scantrons
+    resources :trackers
 
   end
   

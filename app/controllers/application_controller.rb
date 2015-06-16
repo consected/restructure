@@ -35,6 +35,7 @@ protected
       
       if current_admin
         @primary_navs << {label: 'Users', url: '/manage_users/', route: 'manage_users#home'}
+        @primary_navs << {label: 'Protocols', url: '/protocols/', route: 'protocols#home'}
       end
       
       res  = @primary_navs.select {|n| n[:route] == "#{controller_name}##{action_name}" }            

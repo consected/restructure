@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150611202453) do
+ActiveRecord::Schema.define(version: 20150616202829) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -161,6 +161,15 @@ ActiveRecord::Schema.define(version: 20150611202453) do
   add_index "pro_infos", ["master_id"], name: "index_pro_infos_on_master_id", using: :btree
   add_index "pro_infos", ["user_id"], name: "index_pro_infos_on_user_id", using: :btree
 
+  create_table "protocols", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "protocols", ["user_id"], name: "index_protocols_on_user_id", using: :btree
+
   create_table "scantrons", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "scantron_id"
@@ -173,6 +182,23 @@ ActiveRecord::Schema.define(version: 20150611202453) do
 
   add_index "scantrons", ["master_id"], name: "index_scantrons_on_master_id", using: :btree
   add_index "scantrons", ["user_id"], name: "index_scantrons_on_user_id", using: :btree
+
+  create_table "trackers", force: :cascade do |t|
+    t.integer  "master_id"
+    t.integer  "protocol_id"
+    t.string   "event"
+    t.datetime "event_date"
+    t.string   "c_method"
+    t.string   "outcome"
+    t.datetime "outcome_date"
+    t.integer  "user_id"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "trackers", ["master_id"], name: "index_trackers_on_master_id", using: :btree
+  add_index "trackers", ["protocol_id"], name: "index_trackers_on_protocol_id", using: :btree
+  add_index "trackers", ["user_id"], name: "index_trackers_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
@@ -208,6 +234,10 @@ ActiveRecord::Schema.define(version: 20150611202453) do
   add_foreign_key "player_infos", "users"
   add_foreign_key "pro_infos", "masters"
   add_foreign_key "pro_infos", "users"
+  add_foreign_key "protocols", "users"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
+  add_foreign_key "trackers", "masters"
+  add_foreign_key "trackers", "protocols"
+  add_foreign_key "trackers", "users"
 end

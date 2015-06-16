@@ -1,0 +1,41 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Trackers</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Master</th>
+      <th>Protocol</th>
+      <th>Event</th>
+      <th>Event date</th>
+      <th>C method</th>
+      <th>Outcome</th>
+      <th>Outcome date</th>
+      <th>User</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @trackers.each do |tracker| %>
+      <tr>
+        <td><%= tracker.master %></td>
+        <td><%= tracker.protocol %></td>
+        <td><%= tracker.event %></td>
+        <td><%= tracker.event_date %></td>
+        <td><%= tracker.c_method %></td>
+        <td><%= tracker.outcome %></td>
+        <td><%= tracker.outcome_date %></td>
+        <td><%= tracker.user %></td>
+        <td><%= link_to 'Show', tracker %></td>
+        <td><%= link_to 'Edit', edit_tracker_path(tracker) %></td>
+        <td><%= link_to 'Destroy', tracker, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Tracker', new_tracker_path %>

@@ -67,6 +67,19 @@
   </ul>
 </script>
 
+<script id="tracker_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  
+      
+      {{#each this}}
+      {{#in this @key "event,event_date,c_method,outcome,outcome_date,protocol_name" }}
+      <td class="tracker-{{@key}}">{{pretty_string this  return_string="true" capitalize="true"}}</td>
+      {{/in}}
+      {{/each}}
+
+  
+</script>
+
 <script>
   $('script.handlebars-partial').each(function(){
     var id = $(this).attr('id');
@@ -95,6 +108,12 @@
   {{/with}}
 </script>
 
+<script id="tracker-result-template" type="text/x-handlebars-template" class="hidden">
+  {{#with tracker}}
+    {{>tracker_result }}
+  {{/with}}
+</script>
+
 <script id="search-results-template" type="text/x-handlebars-template" class="hidden">
   {{#if masters.length}}
   <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
@@ -102,6 +121,7 @@
       
     {{#each masters}}
     <div class="panel-heading" role="tab" id="master-{{id}}">
+        <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="pull-right collapsed"><span class="caret"></span> tracker</a>
         <h3 class="panel-title">     
           <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
             <span class="msid">{{id}}</span> : 
@@ -119,15 +139,40 @@
               <small>Rank</small> {{player_infos.0.rank}}
             
           </a>
-        </h4>
+        </h3>
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <div class="panel-body">
-      
+          <div id="trackers-{{id}}" class="row collapse tracker-block">
+            <table class="table">
+              <thead><tr>
+              
+                <th>event</th>
+                <th>event date</th>
+                <th>contact method</th>
+                <th>outcome</th>
+                <th>outcome date</th>
+                <th>protocol</th>
+              </tr></thead>
+              <tbody>
+              {{#each trackers}}
+                <tr class="index-{{@index}}" id="tracker-{{../id}}-{{id}}" >
+                  
+                    {{>tracker_result master_id=../id}}
+                </tr>
+              {{else}}
+              <tr><td><h4>No Tracker Records</h4></td></tr>
+              {{/each}}
+              </tbody>
+            </table>
+            <div class="row" id="tracker-{{id}}-" data-subscription="tracker-edit-form-{{id}}-"></div>
+            <p><a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> </p>
+          </div>
+          
           <div class="row">
             <div class="col-md-12">
               {{#each player_infos}}
-                <div class="row" id="player-info-{{../id}}-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
+                <div class="row index-{{@index}}" id="player-info-{{../id}}-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
                   {{>player_info_result master_id=../id}}
                   {{>pro_info_result pro_info player_info_id=id}}
                   
@@ -144,7 +189,7 @@
           
             <div class="col-md-6">
               {{#each addresses}}
-                <div class="" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}">
+                <div class="index-{{@index}}" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}">
                   {{>address_result master_id=../id}}
                 </div>
               
@@ -158,7 +203,7 @@
             </div>
             <div class="col-md-6">
               {{#each player_contacts}}
-                <div class="" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}">
+                <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}">
                   {{>player_contact_result master_id=../id}}
                 </div>
               

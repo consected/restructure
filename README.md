@@ -11,6 +11,7 @@ Things you may want to cover:
 * System dependencies: 
     * Postgres Client
     * Rails
+    * memcached
 
 * Configuration
     * RBENV setup
