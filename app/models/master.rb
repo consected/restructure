@@ -1,18 +1,20 @@
 class Master < ActiveRecord::Base
 
+  PlayerInfoRankOrderClause = ' case rank < 20 when true then rank * -1 else rank  end'.freeze
+  RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
   # inverse_of required to ensure the current_user propagates between associated models correctly
-  has_many :player_infos, inverse_of: :master
-  has_many :manual_investigations  
-  has_many :pro_infos
+  has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
+  has_many :manual_investigations  , inverse_of: :master
+  has_many :pro_infos , inverse_of: :master
   
-  has_many :player_contacts
-  has_many :addresses
+  has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
+  has_many :addresses  , inverse_of: :master
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
-  has_many :general_infos, class_name: 'PlayerInfo'
+  has_many :general_infos, class_name: 'PlayerInfo' 
   
   # TODO - make this real!
-  has_one :address, -> { where('rank <> 999').order(rank: :desc).limit(1)  }
+  has_one :address, -> { order(RankNotNullClause).limit(1)  } 
   
   
   accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses
@@ -83,7 +85,7 @@ class Master < ActiveRecord::Base
         w << " AND " unless first
         w << "(player_infos.#{k} = :#{k} OR pro_infos.#{k} = :#{k})"      
         wcond[k.to_sym] = v
-        joins  = [:player_infos, :pro_infos]
+        joins  = [:player_infos, "left outer join pro_infos on pro_infos.master_id = masters.id"]
         first = false
       end
     end

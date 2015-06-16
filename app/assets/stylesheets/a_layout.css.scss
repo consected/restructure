@@ -1,0 +1,48 @@
+a.navbar-brand {
+    padding-top: 4px;
+    
+    > img {
+
+        width:200px;
+        height: auto;
+    }
+}
+
+.flash {
+    position: fixed;
+    width: 100%;
+    z-index: 200;
+}
+
+.alert.alert-timedout {
+    display: none;
+}
+
+
+body.sessions.new {
+    .flash { 
+        position: relative;
+        width: auto;
+    }    
+}
+
+
+a.glyphicon.show-entity, a.glyphicon.edit-entity {
+    color: white;
+    background-color: #CC0000;
+    display: inline-block;
+    padding: 6px;
+    
+    border: 1px solid #ff0000;
+    border-radius: 6px;
+    text-decoration: none;
+    
+    &:hover {
+        background-color: #ff0000;
+        text-decoration: none;
+    }
+    
+    &:active {
+        background-color: #770000;
+    }
+}

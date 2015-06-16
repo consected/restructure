@@ -1,4 +1,4 @@
-<script id="player-info-result-partial" type="text/x-handlebars-template" class="hidden">
+<script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <div class="col-md-12">
     <ul class="list-group">
       <li class="list-group-item">
@@ -14,12 +14,85 @@
     </ul>
   </div>
 </script>
+
+<script id="pro_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+                            
+      <div class="col-md-12" id="pro-info-{{player_info_id}}-{{id}}">        
+
+        <ul class="list-group">
+            <li class="list-group-item">
+              <h4  class="list-group-item-heading">Pro Info</h4>
+            </li>
+            {{#each this }}
+            {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year" }}
+            <li class="list-group-item pro-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+            {{/in}}
+            {{/each}}
+        </ul>
+
+      </div>  
+    
+</script>
+
+<script id="address_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  <ul class="list-group">
+      <li class="list-group-item">
+        <a class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+
+        <h4 class="list-group-item-heading">Addresses</h4>                        
+      </li>
+      {{#each this}}
+      {{#in this @key "street,street2,street3,city,state,zip,source,rec_type" }}
+      <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+      {{/in}}
+      {{/each}}
+
+  </ul>
+</script>
+
+<script id="player_contact_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  <ul class="list-group">
+      <li class="list-group-item">
+        <a class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <h4 class="list-group-item-heading">Contact Details</h4>                        
+      </li>
+      {{#each this}}
+      {{#in this @key "data,source,rec_type,rank,active" }}
+      <li class="list-group-item player-contact-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+      {{/in}}
+      {{/each}}
+
+  </ul>
+</script>
+
 <script>
-  Handlebars.registerPartial('player_info_result', $('#player-info-result-partial').html());
+  $('script.handlebars-partial').each(function(){
+    var id = $(this).attr('id');
+    
+    id = id.replace('-partial', '');
+    Handlebars.registerPartial(id, $(this).html());
+  });
 </script>
 
 <script id="player-info-result-template" type="text/x-handlebars-template" class="hidden">
-    {{>player_info_result player_info}}
+  {{#with player_info}}  
+    {{>player_info_result }}
+    {{>pro_info_result pro_info player_info_id=id}}
+  {{/with}}
+</script>
+
+<script id="address-result-template" type="text/x-handlebars-template" class="hidden">
+  {{#with address}}
+    {{>address_result }}
+  {{/with}}
+</script>
+
+<script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden">
+  {{#with player_contact}}
+    {{>player_contact_result }}
+  {{/with}}
 </script>
 
 <script id="search-results-template" type="text/x-handlebars-template" class="hidden">
@@ -30,51 +103,40 @@
     {{#each masters}}
     <div class="panel-heading" role="tab" id="master-{{id}}">
         <h3 class="panel-title">     
-          <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is masters.length '!==' 1}}collapsed{{/is}}">
+          <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
             <span class="msid">{{id}}</span> : 
             <strong class="player-names">
             {{capitalize player_infos.0.first_name}} 
             {{capitalize player_infos.0.middle_name}} 
             {{capitalize player_infos.0.last_name}}
+            
             {{#if player_infos.0.nick_name}}
               ({{capitalize player_infos.0.nick_name}})
-              </strong>
+            {{/if}}
+            </strong>
               <small>DOB</small> {{local_date player_infos.0.birth_date '?'}}
               <small>DOD</small> {{local_date player_infos.0.death_date '?'}}
               <small>Rank</small> {{player_infos.0.rank}}
-            {{/if}}
+            
           </a>
         </h4>
       </div>
-      <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
+      <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <div class="panel-body">
       
           <div class="row">
             <div class="col-md-12">
               {{#each player_infos}}
-                <div class="row" id="player-info-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
+                <div class="row" id="player-info-{{../id}}-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
                   {{>player_info_result master_id=../id}}
-                    
-                  {{#with pro_info}}                        
-                    <div class="col-md-12" id="pro-info-{{../id}}-{{id}}">        
-
-                      <ul class="list-group">
-                          <li class="list-group-item">
-                            <h4  class="list-group-item-heading">Pro Info</h4>
-                          </li>
-                          {{#each this }}
-                          {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year" }}
-                          <li class="list-group-item pro-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-                          {{/in}}
-                          {{/each}}
-                      </ul>
-
-                    </div>  
-                  {{/with}}
+                  {{>pro_info_result pro_info player_info_id=id}}
+                  
                 </div>  
               {{else}}
-              <h4>No player or pro info to show</h4>
-              <p><a href="/masters/{{id}}/player_infos/new">Create Player Info record</a> </p>
+                <div class="row" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">
+                  <h4>No player or pro info to show</h4>
+                  <p><a href="/masters/{{id}}/player_infos/new" data-remote="true">Create Player Info record</a> </p>
+                </div>
               {{/each}}
             </div>
           
@@ -82,43 +144,31 @@
           
             <div class="col-md-6">
               {{#each addresses}}
+                <div class="" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}">
+                  {{>address_result master_id=../id}}
+                </div>
               
-                  <ul class="list-group">
-                      <li class="list-group-item">
-                        <h4 class="list-group-item-heading">Addresses</h4>                        
-                      </li>
-                      {{#each this}}
-                      {{#in this @key "street,street2,street3,city,state,zip,source,rec_type" }}
-                      <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-                      {{/in}}
-                      {{/each}}
-
-                  </ul>
-                  
-              
-              {{else}}
-              <p>No addresses</p>
               {{/each}}
+              
+              <div class="" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-">
+                {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
+              </div>
+              <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true">Create Address record</a> </p>
+              
             </div>
             <div class="col-md-6">
               {{#each player_contacts}}
+                <div class="" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}">
+                  {{>player_contact_result master_id=../id}}
+                </div>
               
-                  <ul class="list-group">
-                      <li class="list-group-item">
-                        <h4 class="list-group-item-heading">Contact Details</h4>                        
-                      </li>
-                      {{#each this}}
-                      {{#in this @key "email,data,source,active" }}
-                      <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-                      {{/in}}
-                      {{/each}}
-
-                  </ul>
-                  
-              
-              {{else}}
-              <p>No addresses</p>
               {{/each}}
+              
+              <div class="" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-">
+                {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
+              </div>
+              <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true">Create Contact record</a> </p>
+              
             </div>
           </div>
             

@@ -1,74 +1,60 @@
 class AddressesController < ApplicationController
-  before_action :set_address, only: [:show, :edit, :update, :destroy]
+  include MasterHandler
 
-  # GET /addresses
-  # GET /addresses.json
-  def index
-    @addresses = Address.all
-  end
+  before_action :set_address, only: [:show]
 
-  # GET /addresses/1
-  # GET /addresses/1.json
+
   def show
+    
+    
+    a = {address: @address.as_json}
+    
+    
+    logger.info a.as_json
+    render json: a
   end
 
-  # GET /addresses/new
   def new
-    @address = Address.new
-  end
+    @address = @master.addresses.build
+    render partial: 'edit_form'
+    end
 
-  # GET /addresses/1/edit
   def edit
+    render partial: 'edit_form'
   end
 
-  # POST /addresses
-  # POST /addresses.json
   def create
-    @address = Address.new(address_params)
+    logger.info "Starting create: #{Address.to_s.underscore.pluralize.to_sym}"
+    @address = @master.addresses.build(address_params)
 
-    respond_to do |format|
-      if @address.save
-        format.html { redirect_to @address, notice: 'Address was successfully created.' }
-        format.json { render :show, status: :created, location: @address }
-      else
-        format.html { render :new }
-        format.json { render json: @address.errors, status: :unprocessable_entity }
-      end
+    if @address.save
+      show
+    else
+      logger.warn "Error creating address: #{@address.errors.inspect}"
+      render json: @address.errors, status: :unprocessable_entity     
     end
   end
 
-  # PATCH/PUT /addresses/1
-  # PATCH/PUT /addresses/1.json
   def update
-    respond_to do |format|
-      if @address.update(address_params)
-        format.html { redirect_to @address, notice: 'Address was successfully updated.' }
-        format.json { render :show, status: :ok, location: @address }
-      else
-        format.html { render :edit }
-        format.json { render json: @address.errors, status: :unprocessable_entity }
-      end
+    if @address.update(address_params)
+      show
+    else
+      logger.warn "Error updating player info: #{@address.errors.inspect}"
+      render json: @address.errors, status: :unprocessable_entity 
     end
   end
 
-  # DELETE /addresses/1
-  # DELETE /addresses/1.json
   def destroy
-    @address.destroy
-    respond_to do |format|
-      format.html { redirect_to addresses_url, notice: 'Address was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    not_authorized
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_address
+      return if params[:id] == 'cancel'
       @address = Address.find(params[:id])
     end
-
-    # Never trust parameters from the scary internet, only allow the white list through.
+ 
     def address_params
-      params.require(:address).permit(:master_id, :street, :street2, :street3, :city, :state, :zip, :source, :rank, :type, :user_id)
+      params.require(:address).permit(:master_id, :street, :street2, :street3, :city, :state, :zip, :source, :rank, :rec_type, :user_id)
     end
 end

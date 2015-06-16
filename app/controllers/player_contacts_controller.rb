@@ -1,71 +1,56 @@
 class PlayerContactsController < ApplicationController
   
-  before_action :authenticate_user!
-  before_action :set_player_contact, only: [:show, :edit, :update, :destroy]
+  include MasterHandler
+  before_action :set_player_contact, only: [:show]
 
-  # GET /player_contacts
-  # GET /player_contacts.json
-  def index
-    @player_contacts = PlayerContact.all
-  end
-
-  # GET /player_contacts/1
-  # GET /player_contacts/1.json
+  
   def show
+    p = {player_contact: @player_contact.as_json}
+    
+    
+    logger.info p.as_json
+    render json: p
   end
 
-  # GET /player_contacts/new
   def new
-    @player_contact = PlayerContact.new
+    @player_contact = @master.player_contacts.build
+    render partial: 'edit_form'
   end
 
-  # GET /player_contacts/1/edit
   def edit
+    render partial: 'edit_form'
   end
 
-  # POST /player_contacts
-  # POST /player_contacts.json
   def create
-    @player_contact = PlayerContact.new(player_contact_params)
+  
+    @player_contact = @master.player_contacts.build(player_contact_params)
 
-    respond_to do |format|
-      if @player_contact.save
-        format.html { redirect_to @player_contact, notice: 'Player contact was successfully created.' }
-        format.json { render :show, status: :created, location: @player_contact }
-      else
-        format.html { render :new }
-        format.json { render json: @player_contact.errors, status: :unprocessable_entity }
-      end
+    if @player_contact.save
+      show
+    else
+      logger.warn "Error creating player contact: #{@master.errors.inspect}"
+      render json: @master.errors, status: :unprocessable_entity     
     end
   end
 
-  # PATCH/PUT /player_contacts/1
-  # PATCH/PUT /player_contacts/1.json
   def update
-    respond_to do |format|
-      if @player_contact.update(player_contact_params)
-        format.html { redirect_to @player_contact, notice: 'Player contact was successfully updated.' }
-        format.json { render :show, status: :ok, location: @player_contact }
-      else
-        format.html { render :edit }
-        format.json { render json: @player_contact.errors, status: :unprocessable_entity }
-      end
+    if @player_contact.update(player_contact_params)
+      show
+    else
+      logger.warn "Error updating player contact: #{@player_contact.errors.inspect}"
+      render json: @player_contact.errors, status: :unprocessable_entity 
     end
+    
   end
 
-  # DELETE /player_contacts/1
-  # DELETE /player_contacts/1.json
   def destroy
-    @player_contact.destroy
-    respond_to do |format|
-      format.html { redirect_to player_contacts_url, notice: 'Player contact was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+    not_authorized
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_player_contact
+      return if params[:id] == 'cancel'
+
       @player_contact = PlayerContact.find(params[:id])
     end
 

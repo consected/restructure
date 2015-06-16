@@ -1,7 +1,7 @@
 <div class="container-fluid collapse" id="master-search-advanced">
 <p>
-    <a href="#master-search-simple" data-toggle="collapse" class="collapsed">Simple Search</a>
-    <a href="#" id="clear-fields">Clear Fields</a>
+    <a href="#master-search-simple" data-toggle="collapse" class="collapsed">Simple Search</a> &nbsp;&nbsp;
+    <a href="#" class="clear-fields">Clear Fields</a>
 </p>
     
 <%= form_for @master, method: :get, remote: true, html: {id: 'advanced_search_master', class: 'search_master'} do |f| %>
@@ -102,7 +102,7 @@
       </div>
       <div class="form-group col-sm-2">
         <%= f.label :zip %>
-        <%= f.text_field :zip, class: 'form-control', pattern: "\\d{5,5}" %>
+        <%= f.text_field :zip, zip_field_props(class: 'form-control') %>
       </div>
     <% end %>
     <%= f.fields_for :player_infos do |f| %>

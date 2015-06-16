@@ -46,4 +46,8 @@ protected
       return nil unless current_user || current_admin
       (current_user || current_admin).email
     end
+    
+    def not_authorized
+      flash[:danger] = "You are not authorized to perform the requested action"
+    end
 end

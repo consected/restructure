@@ -6,16 +6,17 @@
   <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tags %>
 </head>
-<body>
+<body <%= body_classes %>>
     <%= render partial: 'layouts/navbar' %>
-    <div class="flash">
+    <div class="flash">  
       <% flash.each do |key, value| 
           f_class = 'alert-info'
           f_class = "alert-#{key.to_s}" unless key == 'notice'
       %>
-      <p class="alert <%= f_class %>">
+      <div class="alert <%= f_class %>" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <%= value %>
-      </p>
+      </div>
       <% end %>
     </div>
 

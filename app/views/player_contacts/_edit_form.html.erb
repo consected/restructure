@@ -1,0 +1,43 @@
+<div class="data-results">
+  <div data-result="player-contact-edit-form-<%=@player_contact.master_id%>-<%=@player_contact.id%>">
+    <div class="">
+      <%=form_for([@master, @player_contact], remote: true, html: {"data-result-target" => "#player-contact-#{@master.id}-#{@player_contact.id}", "data-template" => "player-contact-result-template"}) do |f|%>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <%  if @player_contact.id 
+                cancel_href = "/masters/#{@player_contact.master_id}/player_contacts/#{@player_contact.id}"
+              else
+                cancel_href = "/masters/#{@player_contact.master_id}/player_contacts/cancel"
+              end
+          %>            
+          <a class="show-entity show-player-contact pull-right glyphicon glyphicon-remove-sign" title="cancel" href="<%=cancel_href%>" data-remote="true" data-player-id="<%=@player_contact.id%>" data-result-target="#player-contact-<%=  @player_contact.id %>" data-template="player-contact-result-template"></a>
+          <h4 class="list-group-item-heading">Edit Player Info</h4>
+        </li>
+        <li class="list-group-item player-contact-rec_type">
+            <%= f.label :rec_type %>
+            <%= f.text_field :rec_type %>
+        </li>
+        <li class="list-group-item player-contact-data">
+            <%= f.label :data %>
+            <%= f.text_field :data %>
+        </li>  
+        <li class="list-group-item player-contact-source">
+            <%= f.label :source %>
+            <%= f.text_field :source %>
+        </li>
+        <li class="list-group-item player-contact-rank">
+            <%= f.label :rank %>
+            <%= f.number_field :rank %>
+        </li>
+        <li class="list-group-item player-contact-active">
+            <%= f.label :active %>
+            <%= f.text_field :active %>
+        </li>
+        <li class="list-group-item">
+          <%= f.submit class: "btn btn-primary" %>  
+        </li>
+      </ul>
+      <% end %>
+    </div>
+  </div>
+</div>

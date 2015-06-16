@@ -33,14 +33,17 @@ _fpa = {
       data._code_flag = {};
       data._code_flag[data.code] = true;
     }
-    
+    if(_fpa.preprocessors[template_name])
+        _fpa.preprocessors[template_name](block, data);
+        
     var html = template(data);
     block.html(html);
-    
-    _fpa.handle_edit_links();
-    _fpa.reset_page_size();
     if(_fpa.postprocessors[template_name])
         _fpa.postprocessors[template_name](block, data);
+    
+    _fpa.handle_remotes();
+    _fpa.reset_page_size();
+    
   },
           
   reset_page_size:function(){
@@ -70,13 +73,16 @@ _fpa = {
     });
   },
   
-  handle_loaded_forms: function(){
-    var block = $("form[data-remote='true']");
+  handle_remotes: function(){
+    var block = $("form[data-remote='true'], a[data-remote='true']").not('.attached');
     
     // data-only-for allows hidden and other inputs to be blanked if the dependent
     // 'only-for' input is blank. This ensures the data is set only for the times when the
     // related data is a real value
-    block.on('ajax:before', function(){
+    block.on('click', function(){
+      _fpa.clear_flash_notices();
+   
+    }).on('ajax:before', function(){
         $(this).find('input[data-only-for]').each(function(){
             var dof = $(this).attr('data-only-for');
             var dofv = $(dof).val();
@@ -85,41 +91,29 @@ _fpa = {
             }
         });
         return true;
-    });
-  
-    block.on("ajax:success", function(e, data, status, xhr) {    
+    }).on("ajax:success", function(e, data, status, xhr) {    
       var data = xhr.responseJSON;
-      $('.query-error').remove();
-      for(var di in data ){
-          if (data.hasOwnProperty(di)){
-              var d = data[di];
-              var targets = $('div[data-subscription="'+di+'"]');
-              var res = {};
-              res[di] = d;
-              targets.each(function(){
-                  var pre = $(this).attr('data-preprocessor');
-                  if(pre && _fpa.preprocessors[pre])
-                      _fpa.preprocessors[pre](res);
-                  _fpa.view_template($(this), $(this).attr('data-template'), res);
-              });
-          }
-      }
+      _fpa.clear_flash_notices();
 
-    }).on("ajax:error", function(e, xhr, status, error){
-      _fpa.flash_notice("An error occurred.", 'danger');
-      
-    });
-
-  },
-  
-  handle_edit_links: function(){
-    var block = $("a[data-remote='true']").not('.attached');
-      
-    block.on("ajax:success", function(e, data, status, xhr) {    
-        
         if(xhr.responseJSON){
             var t = $(this).attr('data-result-target');
-            _fpa.view_template($(t), $(this).attr('data-template'), xhr.responseJSON);
+            if(t){
+                _fpa.view_template($(t), $(this).attr('data-template'), xhr.responseJSON);
+            }else{
+                for(var di in data ){
+                    if (data.hasOwnProperty(di)){
+                        var d = data[di];
+                        var targets = $('div[data-subscription="'+di+'"]');
+                        var res = {};
+                        res[di] = d;
+                        targets.each(function(){
+                            var pre = $(this).attr('data-preprocessor');                            
+                            _fpa.view_template($(this), $(this).attr('data-template'), res);                  
+                        });              
+                        window.setTimeout(function(){_fpa.handle_remotes();},1);
+                    }
+                }                
+            }
         } else {
             var html = $(xhr.responseText);
             $('.query-error').remove();
@@ -130,25 +124,45 @@ _fpa = {
                 var res = {};
                 res[di] = d;
                 targets.each(function(){
-                    var pre = $(this).attr('data-preprocessor');
-                    if(pre && _fpa.preprocessors[pre])
-                      _fpa.preprocessors[pre](res);
+                    var pre = $(this).attr('data-preprocessor');                    
+                    if(_fpa.preprocessors[pre])
+                        _fpa.preprocessors[pre](block, data);
                     $(this).html(d.html());
-                    window.setTimeout(function(){_fpa.handle_edit_links();},1);
+                    if(_fpa.postprocessors[pre])
+                        _fpa.postprocessors[pre](block, data);
+                    window.setTimeout(function(){_fpa.handle_remotes();},1);
                 });
 
             });
-        }
-
+        }    
     }).on("ajax:error", function(e, xhr, status, error){
+      _fpa.clear_flash_notices();
       _fpa.flash_notice("An error occurred.", 'danger');
       
     }).addClass('attached');
+
+
+    
+      
+    
   },
   
   flash_notice: function(msg, type){
       if(!type) type = 'info';
-      $('.flash').append('<div class="alert alert-'+type+' query-error" role="alert">'+msg+'</div>');
+      
+      var a = '<div class="alert alert-'+type+'" role="alert">';
+      a += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
+      a += msg;
+      a += '</div>';
+      
+      $('.flash').append(a);
+  },
+  clear_flash_notices: function(type){
+    if(!type)
+        type = '';
+    else
+        type = '.alert-'+type;
+    $('.flash div.alert'+type).remove();
   }
 
 };
@@ -220,5 +234,5 @@ $('html').ready(function(){
     $('[data-show-popover="auto"]').popover('show');
   });
   
-  _fpa.handle_loaded_forms();
+  _fpa.handle_remotes();
 });

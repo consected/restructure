@@ -8,7 +8,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">FPHS</a>
+        <a class="navbar-brand" href="/"><%= image_tag 'FPHS_Logo.jpg' %></a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
@@ -26,12 +26,14 @@
         </li>
         <% end %>
       </ul>
-      <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
-        <div class="form-group">
-          <%= text_field_tag :nav_q, "", class: "form-control", placeholder: "MSID Search" %>
-        </div>
-        <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
-          
+      <% if current_user %>
+        <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
+          <div class="form-group">
+            <%= text_field_tag :nav_q, "", class: "form-control", placeholder: "MSID Search" %>
+          </div>
+          <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
+
+        <% end %>
       <% end %>
       <ul class="nav navbar-nav navbar-right">
       <% @secondary_navs.each do |nav| %>  

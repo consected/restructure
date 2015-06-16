@@ -1,0 +1,55 @@
+<div class="data-results">
+  <div data-result="address-edit-form-<%=@address.master_id%>-<%=@address.id%>">
+    <div class="">
+      <%=form_for([@master, @address], remote: true, html: {"data-result-target" => "#address-#{@master.id}-#{@address.id}", "data-template" => "address-result-template"}) do |f|%>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <%  if @address.id 
+                cancel_href = "/masters/#{@address.master_id}/addresses/#{@address.id}"
+              else
+                cancel_href = "/masters/#{@address.master_id}/addresses/cancel"
+              end
+          %>  
+          <a class="show-entity show-address pull-right glyphicon glyphicon-remove-sign" title="cancel" href="<%= cancel_href %>" data-remote="true" data-player-id="<%=@address.id%>" data-result-target="#address-<%=  @address.id %>" data-template="address-result-template"></a>
+          <h4 class="list-group-item-heading">Edit Player Info</h4>
+        </li>
+        <li class="list-group-item address-street">
+            <%= f.label :street %>
+            <%= f.text_field :street %>
+        </li>  
+        <li class="list-group-item address-street2">
+            <%= f.label :street2 %>
+            <%= f.text_field :street2 %>
+        </li>
+        <li class="list-group-item address-street3">
+            <%= f.label :street3 %>
+            <%= f.text_field :street3 %>
+        </li>
+        <li class="list-group-item address-city">
+            <%= f.label :city %>
+            <%= f.text_field :city %>
+        </li>
+        <li class="list-group-item address-state">
+            <%= f.label :state %>
+            <%= f.text_field :state %>
+        </li>
+        <li class="list-group-item address-zip">
+            <%= f.label :zip %>
+            <%= f.text_field :zip, zip_field_props %>
+        </li>
+        <li class="list-group-item address-source">
+            <%= f.label :source %>
+            <%= f.text_field :source %>
+        </li>
+        <li class="list-group-item address-rec_type">
+            <%= f.label :rec_type %>
+            <%= f.text_field :rec_type %>
+        </li>
+        <li class="list-group-item">
+          <%= f.submit class: "btn btn-primary" %>  
+        </li>
+      </ul>
+      <% end %>
+    </div>
+  </div>
+</div>

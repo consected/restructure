@@ -9,11 +9,13 @@ module UserHandler
     validates :user_id, presence: true
     belongs_to :master, inverse_of: self.to_s.underscore.pluralize.to_sym
     belongs_to :user
-    
+    # Ensure the user id is saved
+    before_save :user_id_will_change!
     before_save :downcase_attributes
   end
   
   def user_id= cu
+    @user_id = cu
     if respond_to? :master
       self.master.current_user = cu
     end
@@ -30,7 +32,7 @@ module UserHandler
     end
   end
   
-  def downcase_attributes
+  def downcase_attributes    
     self.attributes.each do |k, v|
       
       logger.info "Downcasing attribute (#{k})"

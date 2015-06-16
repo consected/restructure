@@ -1,23 +1,55 @@
 <div class="data-results">
   <div data-result="player-info-edit-form-<%=@player_info.master_id%>-<%=@player_info.id%>">
     <div class="col-md-24">
-      <%=form_for([@master, @player_info], remote: true) do |f|%>
+      <%=form_for([@master, @player_info], remote: true, html: {"data-result-target" => "#player-info-#{@master.id}-#{@player_info.id}", "data-template" => "player-info-result-template"}) do |f|%>
       <ul class="list-group">
         <li class="list-group-item">
-          <a class="show-entity show-player-info pull-right glyphicon glyphicon-remove-sign" title="cancel" href="/masters/<%=@player_info.master_id%>/player_infos/<%=@player_info.id%>" data-remote="true" data-player-id="<%=@player_info.id%>" data-result-target="#player-info-<%=  @player_info.id %>" data-template="player-info-result-template"></a>
+          <%  if @player_info.id 
+                cancel_href = "/masters/#{@player_info.master_id}/player_infoss/#{@player_info.id}"
+              else
+                cancel_href = "/masters/#{@player_info.master_id}/player_infoss/cancel"
+              end
+          %>            
+          
+            <a class="show-entity show-player-info pull-right glyphicon glyphicon-remove-sign" title="cancel" href="<%=cancel_href%>" data-remote="true" data-player-id="<%=@player_info.id%>" data-result-target="#player-info-<%=  @player_info.master_id %>-<%=  @player_info.id %>" data-template="player-info-result-template"></a>
           <h4 class="list-group-item-heading">Edit Player Info</h4>
         </li>
         <li class="list-group-item player-info-first_name">
             <%= f.label :first_name %>
             <%= f.text_field :first_name %>
         </li>  
+        <li class="list-group-item player-info-middle_name">
+            <%= f.label :middle_name %>
+            <%= f.text_field :middle_name %>
+        </li>
         <li class="list-group-item player-info-last_name">
             <%= f.label :last_name %>
             <%= f.text_field :last_name %>
-        </li>  
-
+        </li>
+        <li class="list-group-item player-info-nick_name">
+            <%= f.label :nick_name %>
+            <%= f.text_field :nick_name %>
+        </li>
+        <li class="list-group-item player-info-birth_date">
+            <%= f.label :birth_date %>
+            <%= f.date_field :birth_date %>
+        </li>
+        <li class="list-group-item player-info-death_date">
+            <%= f.label :death_date %>
+            <%= f.date_field :death_date %>
+        </li>
+        <li class="list-group-item player-info-start_year">
+            <%= f.label :start_year %>
+            <%= f.number_field :start_year, in: Settings::StartYearRange %>
+        </li>
+        <li class="list-group-item player-info-rank">
+            <%= f.label :rank %>
+            <%= f.text_field :rank %>
+        </li>
+        <li class="list-group-item">
+          <%= f.submit class: "btn btn-primary" %>  
+        </li>
       </ul>
-      <%= f.submit %>  
       <% end %>
     </div>
   </div>
