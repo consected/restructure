@@ -288,10 +288,18 @@
 
     Handlebars.registerHelper('pretty_string', function(stre, options) {
         if(stre === null || stre === '' ) return "";
-
-        if(stre.length >= 8)
-            var startTime = new Date(Date.parse(stre + 'T00:00:00Z'));
-
+        var startTime;
+        var asTimestamp;
+        if(stre.length >= 8){
+            if(stre.indexOf('t') && stre.indexOf('z')){
+                startTime = new Date(Date.parse(stre ));
+                asTimestamp = true;
+            }
+            else{
+                startTime = new Date(Date.parse(stre + 'T00:00:00Z'));
+                asTimestamp = false;
+            }
+        }
         if((!startTime || startTime == 'Invalid Date' ) && options.hash.return_string){
             if(options.hash.capitalize)
                 return _fpa.utils.capitalize(stre);

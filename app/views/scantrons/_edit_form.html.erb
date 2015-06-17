@@ -1,0 +1,30 @@
+<div class="data-results">
+  <div data-result="<%= edit_form_id %>">
+    <div class="col-md-24">
+      <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <%= inline_cancel_button %>
+          <h4 class="list-group-item-heading">Edit Scantron Info</h4>
+        </li>
+        <li class="list-group-item player-info-first_name">
+            <%= f.label :scantron_id %>
+            <%= f.number_field :scantron_id %>
+        </li>  
+        <li class="list-group-item player-info-last_name">
+            <%= f.label :source %>
+            <%= f.text_field :source %>
+        </li>
+        <li class="list-group-item player-info-middle_name">
+            <%= f.label :rank %>
+            <%= f.number_field :rank %>
+        </li>
+        
+        <li class="list-group-item">
+          <%= f.submit class: "btn btn-primary" %>  
+        </li>
+      </ul>
+      <% end %>
+    </div>
+  </div>
+</div>

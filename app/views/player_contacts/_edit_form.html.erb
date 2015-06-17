@@ -1,16 +1,10 @@
 <div class="data-results">
-  <div data-result="player-contact-edit-form-<%=@player_contact.master_id%>-<%=@player_contact.id%>">
+  <div data-result="<%= edit_form_id %>">
     <div class="">
-      <%=form_for([@master, @player_contact], remote: true, html: {"data-result-target" => "#player-contact-#{@master.id}-#{@player_contact.id}", "data-template" => "player-contact-result-template"}) do |f|%>
+      <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
       <ul class="list-group">
         <li class="list-group-item">
-          <%  if @player_contact.id 
-                cancel_href = "/masters/#{@player_contact.master_id}/player_contacts/#{@player_contact.id}"
-              else
-                cancel_href = "/masters/#{@player_contact.master_id}/player_contacts/cancel"
-              end
-          %>            
-          <a class="show-entity show-player-contact pull-right glyphicon glyphicon-remove-sign" title="cancel" href="<%=cancel_href%>" data-remote="true" data-player-id="<%=@player_contact.id%>" data-result-target="#player-contact-<%=  @player_contact.id %>" data-template="player-contact-result-template"></a>
+          <%= inline_cancel_button %>
           <h4 class="list-group-item-heading">Edit Player Contact</h4>
         </li>
         <li class="list-group-item player-contact-rec_type">

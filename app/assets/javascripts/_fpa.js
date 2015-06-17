@@ -104,7 +104,7 @@ _fpa = {
                 for(var di in data ){
                     if (data.hasOwnProperty(di)){
                         var d = data[di];
-                        var targets = $('div[data-subscription="'+di+'"]');
+                        var targets = $('[data-subscription="'+di+'"]');
                         var res = {};
                         res[di] = d;
                         targets.each(function(){
@@ -118,17 +118,17 @@ _fpa = {
         } else {
             var html = $(xhr.responseText);
             $('.query-error').remove();
-            html.find('div[data-result]').each(function(){
+            html.find('[data-result]').each(function(){
                 var d = $(this);
                 var di = d.attr('data-result');
-                var targets = $('div[data-subscription="'+di+'"]');
+                var targets = $('[data-subscription="'+di+'"]');
                 var res = {};
                 res[di] = d;
                 targets.each(function(){
                     var pre = $(this).attr('data-preprocessor');                    
                     if(_fpa.preprocessors[pre])
                         _fpa.preprocessors[pre](block, data);
-                    $(this).html(d.html());
+                    $(this).html(d);
                     if(_fpa.postprocessors[pre])
                         _fpa.postprocessors[pre](block, data);
                     window.setTimeout(function(){_fpa.handle_remotes();},1);

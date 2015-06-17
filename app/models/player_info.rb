@@ -9,5 +9,8 @@ class PlayerInfo < ActiveRecord::Base
   belongs_to :pro_info, inverse_of: :player_info
   
  
+  def as_json
+    super(include: :pro_info)
+  end
   
 end

@@ -1,30 +1,23 @@
 <div class="data-results">
-  <div data-result="player-info-edit-form-<%=@player_info.master_id%>-<%=@player_info.id%>">
+  <div data-result="<%= edit_form_id %>">
     <div class="col-md-24">
-      <%=form_for([@master, @player_info], remote: true, html: {"data-result-target" => "#player-info-#{@master.id}-#{@player_info.id}", "data-template" => "player-info-result-template"}) do |f|%>
+      <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
       <ul class="list-group">
         <li class="list-group-item">
-          <%  if @player_info.id 
-                cancel_href = "/masters/#{@player_info.master_id}/player_infoss/#{@player_info.id}"
-              else
-                cancel_href = "/masters/#{@player_info.master_id}/player_infoss/cancel"
-              end
-          %>            
-          
-            <a class="show-entity show-player-info pull-right glyphicon glyphicon-remove-sign" title="cancel" href="<%=cancel_href%>" data-remote="true" data-player-id="<%=@player_info.id%>" data-result-target="#player-info-<%=  @player_info.master_id %>-<%=  @player_info.id %>" data-template="player-info-result-template"></a>
+          <%= inline_cancel_button %>
           <h4 class="list-group-item-heading">Edit Player Info</h4>
         </li>
         <li class="list-group-item player-info-first_name">
             <%= f.label :first_name %>
             <%= f.text_field :first_name %>
         </li>  
-        <li class="list-group-item player-info-middle_name">
-            <%= f.label :middle_name %>
-            <%= f.text_field :middle_name %>
-        </li>
         <li class="list-group-item player-info-last_name">
             <%= f.label :last_name %>
             <%= f.text_field :last_name %>
+        </li>
+        <li class="list-group-item player-info-middle_name">
+            <%= f.label :middle_name %>
+            <%= f.text_field :middle_name %>
         </li>
         <li class="list-group-item player-info-nick_name">
             <%= f.label :nick_name %>

@@ -11,4 +11,8 @@ class Tracker < ActiveRecord::Base
     self.protocol.name
   end
   
+  def as_json
+    super(methods: :protocol_name)
+  end
+  
 end

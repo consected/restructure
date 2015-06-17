@@ -67,6 +67,25 @@
   </ul>
 </script>
 
+
+<script id="scantron_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  <ul class="list-group">
+      <li class="list-group-item">
+        <a class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+
+        <h4 class="list-group-item-heading">Addresses</h4>                        
+      </li>
+      {{#each this}}
+      {{#in this @key "scantron_id,rank,source,rec_type" }}
+      <li class="list-group-item scantron-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+      {{/in}}
+      {{/each}}
+
+  </ul>
+</script>
+
+
 <script id="tracker_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
   
@@ -102,6 +121,12 @@
   {{/with}}
 </script>
 
+<script id="scantron-result-template" type="text/x-handlebars-template" class="hidden">
+  {{#with scantron}}
+    {{>scantron_result }}
+  {{/with}}
+</script>
+
 <script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden">
   {{#with player_contact}}
     {{>player_contact_result }}
@@ -120,8 +145,7 @@
     <div class="panel panel-default">
       
     {{#each masters}}
-    <div class="panel-heading" role="tab" id="master-{{id}}">
-        <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="pull-right collapsed"><span class="caret"></span> tracker</a>
+      <div class="panel-heading" role="tab" id="master-{{id}}">          
         <h3 class="panel-title">     
           <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
             <span class="msid">{{id}}</span> : 
@@ -134,89 +158,116 @@
               ({{capitalize player_infos.0.nick_name}})
             {{/if}}
             </strong>
-              <small>DOB</small> {{local_date player_infos.0.birth_date '?'}}
-              <small>DOD</small> {{local_date player_infos.0.death_date '?'}}
+              <small>DOB</small> {{local_date player_infos.0.birth_date '-'}}
+              <small>DOD</small> {{local_date player_infos.0.death_date '-'}}
               <small>Rank</small> {{player_infos.0.rank}}
             
           </a>
         </h3>
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
+        <ul class="nav nav-pills ">
+          <li role="presentation">
+            <a href="#" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
+          </li>
+          <li role="presentation">
+            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="collapsed"><span class="caret"></span> tracker ({{trackers.length}})</a>
+          </li>
+          <li role="presentation">
+            <a href="#" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
+          </li>
+        </ul>
+
         <div class="panel-body">
+          
+          <div id="extras-{{id}}" class="row collapse extras-block">
+            <div class="col-md-6">
+                {{#each scantrons}}
+                  <div class="index-{{@index}}" id="scantron-{{../id}}-{{id}}" data-subscription="scantron-edit-form-{{../id}}-{{id}}">
+                    {{>scantron_result master_id=../id}}
+                  </div>
+                {{/each}}
+
+                <div class="" id="scantron-{{id}}-" data-subscription="scantron-edit-form-{{id}}-">
+                  {{#unless scantrons}}<h4>No Scantron records</h4>{{/unless}}                
+                </div>
+                <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-remote="true">Create Scantron record</a> </p>
+
+            </div>
+          </div>
+  
           <div id="trackers-{{id}}" class="row collapse tracker-block">
             <table class="table">
               <thead><tr>
-              
-                <th>event</th>
-                <th>event date</th>
-                <th>contact method</th>
-                <th>outcome</th>
-                <th>outcome date</th>
-                <th>protocol</th>
-              </tr></thead>
+                <th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>protocol</th></tr></thead>
+              <tfoot><tr><td colspan="6">
+                <a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> \n\
+              </td></tr></tfoot>
               <tbody>
               {{#each trackers}}
-                <tr class="index-{{@index}}" id="tracker-{{../id}}-{{id}}" >
-                  
+                <tr class="index-{{@index}}" id="tracker-{{../id}}-{{id}}" >                  
                     {{>tracker_result master_id=../id}}
-                </tr>
-              {{else}}
-              <tr><td><h4>No Tracker Records</h4></td></tr>
+                </tr>              
               {{/each}}
+              <tr id="tracker-{{id}}-" data-subscription="tracker-edit-form-{{id}}-">
+              {{#is trackers.length 0}}<td colspan="6"><h4>No Tracker Records</h4></td>{{/is}}
+              </tr>
+              
               </tbody>
             </table>
-            <div class="row" id="tracker-{{id}}-" data-subscription="tracker-edit-form-{{id}}-"></div>
-            <p><a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> </p>
+            
+            
           </div>
           
-          <div class="row">
-            <div class="col-md-12">
-              {{#each player_infos}}
-                <div class="row index-{{@index}}" id="player-info-{{../id}}-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
-                  {{>player_info_result master_id=../id}}
-                  {{>pro_info_result pro_info player_info_id=id}}
-                  
-                </div>  
-              {{else}}
-                <div class="row" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">
-                  <h4>No player or pro info to show</h4>
-                  <p><a href="/masters/{{id}}/player_infos/new" data-remote="true">Create Player Info record</a> </p>
-                </div>
-              {{/each}}
-            </div>
-          
-            
-          
-            <div class="col-md-6">
-              {{#each addresses}}
-                <div class="index-{{@index}}" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}">
-                  {{>address_result master_id=../id}}
-                </div>
-              
-              {{/each}}
-              
-              <div class="" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-">
-                {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
+          <div id="details-{{id}}" class="collapse in details-block">
+            <div class="row">
+              <div class="col-md-12">
+                {{#each player_infos}}
+                  <div class="row index-{{@index}}" id="player-info-{{../id}}-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
+                    {{>player_info_result master_id=../id}}
+                    {{>pro_info_result pro_info player_info_id=id}}
+
+                  </div>  
+                {{else}}
+                  <div class="row" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">
+                    <h4>No player or pro info to show</h4>
+                    <p><a href="/masters/{{id}}/player_infos/new" data-remote="true">Create Player Info record</a> </p>
+                  </div>
+                {{/each}}
               </div>
-              <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true">Create Address record</a> </p>
-              
-            </div>
-            <div class="col-md-6">
-              {{#each player_contacts}}
-                <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}">
-                  {{>player_contact_result master_id=../id}}
+
+
+
+              <div class="col-md-6">
+                {{#each addresses}}
+                  <div class="index-{{@index}}" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}">
+                    {{>address_result master_id=../id}}
+                  </div>
+
+                {{/each}}
+
+                <div class="" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-">
+                  {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
                 </div>
-              
-              {{/each}}
-              
-              <div class="" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-">
-                {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
+                <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true">Create Address record</a> </p>
+
               </div>
-              <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true">Create Contact record</a> </p>
-              
+              <div class="col-md-6">
+                {{#each player_contacts}}
+                  <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}">
+                    {{>player_contact_result master_id=../id}}
+                  </div>
+
+                {{/each}}
+
+                <div class="" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-">
+                  {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
+                </div>
+                <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true">Create Contact record</a> </p>
+
+              </div>
             </div>
           </div>
-            
         </div>
       </div>
     {{/each}}

@@ -22,7 +22,8 @@ class MastersController < ApplicationController
         player_contacts: {order: {rank: :desc}},
         manual_investigations: {order: {rank: :desc}},
         addresses: {order: {rank: :desc}},
-        trackers: {order: {created_at: :desc}, methods: :protocol_name}
+        trackers: {order: {created_at: :desc}, methods: :protocol_name},
+        scantrons: {order: {scantron_id: :asc}}
       }) 
     }
 

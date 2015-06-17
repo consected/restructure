@@ -19,24 +19,31 @@ protected
       @primary_navs = []
       @secondary_navs = []
       
+      admin_sub = []
+      if current_admin
+        
+        admin_sub << {label: 'users', url: '/manage_users/', route: 'manage_users#home'}
+        admin_sub << {label: 'protocols', url: '/protocols/', route: 'protocols#home'}
+        
+      else
+        admin_sub << {label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in', }
+      end
+      
       if current_user || current_admin
         
         user_sub = []
         user_sub << {label: 'password', url: "/#{current_user ? "users" : current_admin ? "admins" : "exit"}/edit"}
         user_sub << {label: 'logout', url: "/#{current_user ? "users" : current_admin ? "admins" : "exit"}/sign_out", extras: {method: :delete}}
-        
+        @secondary_navs << {label: 'Administration', url: "#", sub: admin_sub, extras: {}}
         @secondary_navs << {label: '<span class="glyphicon glyphicon-user"></span>', url: "#", sub: user_sub, extras: {title: current_email}}
       end 
+      
+      
       if current_user
         @primary_navs << {label: 'Research', url: '/masters/', route: 'masters#index'}
-        @primary_navs << {label: 'Create MSID', url: '/masters/new', route: 'masters#new'}
-
+        @primary_navs << {label: 'Create MSID', url: '/masters/new', route: 'masters#new'}        
       end
       
-      if current_admin
-        @primary_navs << {label: 'Users', url: '/manage_users/', route: 'manage_users#home'}
-        @primary_navs << {label: 'Protocols', url: '/protocols/', route: 'protocols#home'}
-      end
       
       res  = @primary_navs.select {|n| n[:route] == "#{controller_name}##{action_name}" }            
       res.first[:active] = true if res && res.first
