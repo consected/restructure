@@ -7,9 +7,9 @@ class Master < ActiveRecord::Base
   has_many :manual_investigations  , inverse_of: :master
   has_many :pro_infos , inverse_of: :master  
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
-  has_many :addresses  , inverse_of: :master
+  has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
   has_many :trackers  , inverse_of: :master
-  has_many :scantrons  , inverse_of: :master
+  has_many :scantrons, -> { order(RankNotNullClause)}  , inverse_of: :master
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
   has_many :general_infos, class_name: 'PlayerInfo' 

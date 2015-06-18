@@ -9,6 +9,10 @@ module UserHandler
     validates :user_id, presence: true
     belongs_to :master, inverse_of: self.to_s.underscore.pluralize.to_sym
     belongs_to :user
+    
+    
+    has_many :item_flags, as: :item
+    
     # Ensure the user id is saved
     before_save :user_id_will_change!
     before_save :downcase_attributes
@@ -39,6 +43,12 @@ module UserHandler
       self.send("#{k}=".to_sym, v.downcase) if self.attributes[k].is_a? String
     end
     true
+  end
+  
+  def as_json extras={}
+    extras[:include] ||= []
+    extras[:include] << :item_flags
+    super(extras)    
   end
   
 end

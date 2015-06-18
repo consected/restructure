@@ -2,6 +2,9 @@ li.list-group-item {
     strong {
         text-transform: capitalize;
     }
+    strong {
+        text-transform: none;
+    }
 
 }
 
@@ -14,4 +17,29 @@ li.address-state {
     small {
         display: inline-block;
     }
+}
+
+span.heading-rank {
+    font-size: 85%;
+    color: #8a6d3b;
+    font-style:  italic;
+        
+    &:before {
+        content: 'rank';
+        padding-right: 6px;
+        padding-left: 12px;
+    }    
+}
+
+small.list-small-label  {
+   display: inline-block;
+   margin-right: 1.6em;
+}
+
+li.list-group-item.is-combo small {
+   margin-right: 0.6em;
+}
+
+.item-flags-count-0 a.flag-entity {
+    color:#AAA;
 }

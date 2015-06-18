@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150616202829) do
+ActiveRecord::Schema.define(version: 20150618161945) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -55,6 +55,26 @@ ActiveRecord::Schema.define(version: 20150616202829) do
     t.integer "synonym_for_id"
   end
 
+  create_table "item_flag_names", force: :cascade do |t|
+    t.string   "name"
+    t.string   "item_type"
+    t.integer  "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "item_flag_names", ["user_id"], name: "index_item_flag_names_on_user_id", using: :btree
+
+  create_table "item_flags", force: :cascade do |t|
+    t.integer  "item_id"
+    t.string   "item_type"
+    t.integer  "item_flag_name_id"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+  end
+
+  add_index "item_flags", ["item_flag_name_id"], name: "index_item_flags_on_item_flag_name_id", using: :btree
+
   create_table "manage_users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -97,8 +117,9 @@ ActiveRecord::Schema.define(version: 20150616202829) do
     t.integer  "rank"
     t.boolean  "active"
     t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.date     "active_date"
   end
 
   add_index "player_contacts", ["master_id"], name: "index_player_contacts_on_master_id", using: :btree
@@ -224,6 +245,8 @@ ActiveRecord::Schema.define(version: 20150616202829) do
 
   add_foreign_key "addresses", "masters"
   add_foreign_key "addresses", "users"
+  add_foreign_key "item_flag_names", "users"
+  add_foreign_key "item_flags", "item_flag_names"
   add_foreign_key "manual_investigations", "masters"
   add_foreign_key "manual_investigations", "scantrons"
   add_foreign_key "manual_investigations", "users"

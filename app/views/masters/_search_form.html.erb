@@ -3,7 +3,16 @@
     <a href="#master-search-simple" data-toggle="collapse" class="collapsed">Simple Search</a> &nbsp;&nbsp;
     <a href="#" class="clear-fields">Clear Fields</a>
 </p>
-    
+<%
+# Note the use of  
+#   child_index: 0 
+# on every fields_for helper call, to ensure that separated blocks referencing the same model are
+# not treated as separate objects
+# When a fields_for helper is used for the same symbol multiple times within a form 
+# (typically to allow for presentation of fields from the same model across separated blocks)
+# the params return something like "model_atts" => {"0"=>{...}, "1"=>{...}, "2"=>{...}}
+# The child_index ensure they are merged down into "model_atts" => {"0"=>{..., ..., ...}} 
+%>    
 <%= form_for @master, method: :get, remote: true, html: {id: 'advanced_search_master', class: 'search_master'} do |f| %>
 
   <div class="row">
@@ -12,7 +21,7 @@
       <%= f.number_field :id, class: 'form-control', min: 0 %>
     </div>
 
-    <%= f.fields_for :player_infos do |pif| %>
+    <%= f.fields_for :player_infos, child_index: 0 do |pif| %>
       <div class="form-group col-sm-2">
         <%= pif.label :first_name %>
         <%= pif.text_field :first_name, class: 'form-control'  %>
@@ -46,7 +55,7 @@
   </div>
     
   <div class="row" id="pro-info-search" >
-    <%= f.fields_for :pro_infos do |f| %>
+    <%= f.fields_for :pro_infos, child_index: 0 do |f| %>
       <div class="form-group col-sm-3">
         <%= f.label :pro_id %>
         <%= f.number_field :pro_id, class: 'form-control', min: 0  %>
@@ -83,7 +92,7 @@
   </div>
 
   <div class="row">
-    <%=f.fields_for :addresses do |f| %>
+    <%=f.fields_for :addresses, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :street %>
         <%= f.text_field :street, class: 'form-control' %>
@@ -105,14 +114,14 @@
         <%= f.text_field :zip, zip_field_props(class: 'form-control') %>
       </div>
     <% end %>
-    <%= f.fields_for :player_infos do |f| %>
+    <%= f.fields_for :player_infos, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :contact_pref %>
         <%= f.text_field :contact_pref, class: 'form-control' %>
       </div>      
     <% end %>
       
-    <%= f.fields_for :player_contacts do |f| %>  
+    <%= f.fields_for :player_contacts, child_index: 0 do |f| %>  
       <div class="form-group col-sm-2">
           <%= f.label :email %>
           <%= f.text_field :data, class: 'form-control' %>
@@ -120,24 +129,27 @@
       </div>
     <% end %>
       
-    <%= f.fields_for :manual_investigations do |f| %>
+    <%= f.fields_for :manual_investigations, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :in_survey %>
         <%= f.select :in_survey, yes_no_selections, class: 'form-control', include_blank: true  %>
       </div>
+    <% end %>
+    <%= f.fields_for :player_infos, child_index: 0 do |f| %>  
       <div class="form-group col-sm-2">
         <%= f.label :rank %>
         <%= f.number_field :rank, class: 'form-control' %>
       </div>
-
+    <% end %>
+      
+    <%= f.fields_for :scantrons, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :scantron_id %>
         <%= f.text_field :scantron_id, class: 'form-control' %>
       </div>
-      
-    </div>
     <% end %>
-    <%= f.fields_for :player_infos do |f| %>
+    </div>
+    <%= f.fields_for :player_infos, child_index: 0 do |f| %>
     <div class="row">
       <div class="form-group col-sm-18 col-sm-offset-1">
         <%= f.label :notes %>

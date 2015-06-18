@@ -18,12 +18,12 @@ class MastersController < ApplicationController
     
     m = {
       masters: @masters.as_json(include: {
-        player_infos: {order: {rank: :desc}, include: :pro_info},
-        player_contacts: {order: {rank: :desc}},
-        manual_investigations: {order: {rank: :desc}},
-        addresses: {order: {rank: :desc}},
-        trackers: {order: {created_at: :desc}, methods: :protocol_name},
-        scantrons: {order: {scantron_id: :asc}}
+        player_infos: {order: {rank: :desc}, include: [:pro_info, :item_flags]},
+        player_contacts: {order: {rank: :desc}, include: [:item_flags]},
+        manual_investigations: {order: {rank: :desc}, include: [:item_flags]},
+        addresses: {order: {rank: :desc}, include: [:item_flags]},
+        trackers: {order: {created_at: :desc}, methods: :protocol_name, include: [:item_flags]},
+        scantrons: {order: {scantron_id: :asc}, include: [:item_flags]}
       }) 
     }
 

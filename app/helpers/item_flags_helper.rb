@@ -1,0 +1,29 @@
+module ItemFlagsHelper
+  def flag_edit_form_id 
+    "item-flag-edit-form-#{@master.id}-#{@item_type}-#{@item.id}-#{@id}"
+  end
+  
+  def flag_edit_form_hash extras={}
+    extras.merge({remote: true, html: {"data-result-target" => "#item-flag-#{@master.id}-#{@item.id}-#{@id}", "data-template" => "item-flag-result-template"}})
+  end
+  
+  def item_flag_path
+    "#{url_for([@master, @item])}/item_flags/#{@id}"
+  end
+  
+  def flag_inline_cancel_button
+    if @id 
+      cancel_href = item_flag_path
+    else
+      cancel_href = "#{item_flag_path}cancel"
+    end
+          
+    "<a class=\"show-entity show-item-flag pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-item-flag-id=\"#{@id}\" data-result-target=\"#item-flag-#{@master.id}-#{@item.id}-#{@id}\" data-template=\"item-flag-result-template\"></a>".html_safe
+  end
+  
+
+  def item_flags_array a
+    [1,2,3]
+  end
+  
+end

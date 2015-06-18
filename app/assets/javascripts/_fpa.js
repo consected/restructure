@@ -107,8 +107,7 @@ _fpa = {
                         var targets = $('[data-subscription="'+di+'"]');
                         var res = {};
                         res[di] = d;
-                        targets.each(function(){
-                            var pre = $(this).attr('data-preprocessor');                            
+                        targets.each(function(){                                                        
                             _fpa.view_template($(this), $(this).attr('data-template'), res);                  
                         });              
                         window.setTimeout(function(){_fpa.handle_remotes();},1);

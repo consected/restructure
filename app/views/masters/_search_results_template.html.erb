@@ -2,11 +2,13 @@
   <div class="col-md-12">
     <ul class="list-group">
       <li class="list-group-item">
-        <a class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-        <h4 class="list-group-item-heading">Player Info</h4>
+        {{>item_flag_link}}
+        <a class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
+        <h4 class="list-group-item-heading">Player Info <span class="heading-rank">{{rank}}</span></h4>
+        {{>item_flag_container}}
       </li>
       {{#each this}}
-      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,rank" }}
+      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year" }}
       <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/in}}
       {{/each}}
@@ -24,7 +26,7 @@
               <h4  class="list-group-item-heading">Pro Info</h4>
             </li>
             {{#each this }}
-            {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year" }}
+            {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
             <li class="list-group-item pro-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
             {{/in}}
             {{/each}}
@@ -40,7 +42,7 @@
       <li class="list-group-item">
         <a class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
 
-        <h4 class="list-group-item-heading">Addresses</h4>                        
+        <h4 class="list-group-item-heading">Addresses <span class="heading-rank">{{rank}}</span></h4>                        
       </li>
       {{#each this}}
       {{#in this @key "street,street2,street3,city,state,zip,source,rec_type" }}
@@ -51,16 +53,18 @@
   </ul>
 </script>
 
-<script id="player_contact_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+<script id="manual_investigation_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
   <ul class="list-group">
       <li class="list-group-item">
-        <a class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-        <h4 class="list-group-item-heading">Contact Details</h4>                        
+        <a class="edit-entity edit-manual_investigation pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/manual_investigations/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+
+        <h4 class="list-group-item-heading">Manual Investigations</h4>                        
       </li>
       {{#each this}}
-      {{#in this @key "data,source,rec_type,rank,active" }}
-      <li class="list-group-item player-contact-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+      {{#in this @key "in_survey" }}
+      <li class="list-group-item manual_investigation-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/in}}
       {{/each}}
 
@@ -68,20 +72,50 @@
 </script>
 
 
+<script id="player_contact_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  <ul class="list-group">
+      <li class="list-group-item is-heading">
+        <a class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <h4 class="list-group-item-heading">{{rec_type}} <small>({{#if active}}active{{else}}inactive{{/if}})</small> <span class="heading-rank">{{rank}}</span></h4>                        
+      </li>
+      
+      <li class="list-group-item player-contact-data"><small>contact</small> <strong class="email">{{data}}</strong></li>
+      
+      <li class="list-group-item is-combo player-contact-source_rank_active">      
+        <div class="row">
+          <div class="col-md-12">
+            <small>source</small> <strong>{{pretty_string source return_string="true" capitalize="true"}}</strong>
+          </div>
+          <div class="col-md-12">
+            <small>active date</small> <strong>{{pretty_string active_date return_string="true" capitalize="true"}}</strong>
+          </div>
+        </div>
+      
+      
+      </li>
+      
+  </ul>
+</script>
+
+
 <script id="scantron_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
   <ul class="list-group">
-      <li class="list-group-item">
+      <li class="list-group-item scantron-scantron_id">
         <a class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-
-        <h4 class="list-group-item-heading">Addresses</h4>                        
+        <small>Scantron</small> <strong>{{scantron_id}}</strong>
       </li>
-      {{#each this}}
-      {{#in this @key "scantron_id,rank,source,rec_type" }}
-      <li class="list-group-item scantron-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-      {{/in}}
-      {{/each}}
-
+      <li class="list-group-item is-combo scantron-rank_and_source">     
+        <div class="row">
+          <div class="col-md-8">
+            <small>Rank</small> <strong>{{rank}}</strong>
+          </div>
+          <div class="col-md-16">
+            <small>Source</small> <strong>{{source}}</strong>
+          </div>
+        </div>
+      </li>
   </ul>
 </script>
 
@@ -98,6 +132,32 @@
 
   
 </script>
+
+<script id="item_flag_link-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <span class="pull-left item-flags-count-{{item_flags.length}}">
+  <a class="flag-entity glyphicon glyphicon-tag" href="/masters/{{master_id}}/player_infos/{{this.id}}/item_flags" data-remote="true" data-result-target="#item-flags-{{master_id}}-{{item_type}}-{{this.id}}" data-template="item-flags-result-template"></a>
+  </span>
+</script>                                      
+                                      
+<script id="item_flag_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
+  <div id="item-flags-{{master_id}}-{{item_type}}-{{id}}"></div>
+</script>
+
+
+<script id="item_flags_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#each item_flags.results}}
+    {{>item_flags_result}}
+  {{else}}
+    <span class="no-item-flags">no flags</span>
+  {{/each}}
+  <span class="add-flag"><a href="/masters/{{master_id}}/{{item_type}}/{{item_id}}/item_flags/new" data-remote="true">+flag</a></span>    
+  <div class="" id="item-flag-{{item_type}}-{{item_id}}-" data-subscription="item-flag-edit-form-{{master_id}}-{{item_type}}-{{item_id}}-{{id}}">
+</script>
+
+<script id="item_flag_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+   <span class="item-flag">{{this.id}}</span>
+</script>
+
 
 <script>
   $('script.handlebars-partial').each(function(){
@@ -138,6 +198,21 @@
     {{>tracker_result }}
   {{/with}}
 </script>
+
+<script id="item-flag-result-template" type="text/x-handlebars-template" class="hidden">
+  {{#with tracker}}
+    {{>item_flag_result }}
+  {{/with}}
+</script>
+
+
+<script id="item-flags-result-template" type="text/x-handlebars-template" class="hidden">
+  {{#with item_flags}}
+    {{>item_flags_result }}
+  {{/with}}
+</script>
+
+
 
 <script id="search-results-template" type="text/x-handlebars-template" class="hidden">
   {{#if masters.length}}
@@ -192,6 +267,19 @@
                   {{#unless scantrons}}<h4>No Scantron records</h4>{{/unless}}                
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-remote="true">Create Scantron record</a> </p>
+
+            </div>
+            <div class="col-md-6">
+                {{#each manual_investigations}}
+                  <div class="index-{{@index}}" id="manual_investigation-{{../id}}-{{id}}" data-subscription="manual_investigation-edit-form-{{../id}}-{{id}}">
+                    {{>manual_investigation_result master_id=../id}}
+                  </div>
+                {{/each}}
+
+                <div class="" id="manual_investigation-{{id}}-" data-subscription="manual_investigation-edit-form-{{id}}-">
+                  {{#unless manual_investigations}}<h4>No Manual records</h4>{{/unless}}                
+                </div>
+                <p class="text-center"><a href="/masters/{{id}}/manual_investigations/new" data-remote="true">Create Manual record</a> </p>
 
             </div>
           </div>

@@ -11,8 +11,13 @@ class Tracker < ActiveRecord::Base
     self.protocol.name
   end
   
-  def as_json
-    super(methods: :protocol_name)
+  def as_json extras={}
+    extras[:methods] ||= []
+    extras[:include] ||= []
+    
+    extras[:methods] << :protocol_name
+    extras[:include] << :item_flags
+    super(extras)
   end
   
 end

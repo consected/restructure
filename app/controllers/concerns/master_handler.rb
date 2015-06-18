@@ -66,6 +66,10 @@ module MasterHandler
   end
 
   
+  def flags
+    
+  end
+  
   private
 
     def set_me_and_master

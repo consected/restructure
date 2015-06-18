@@ -24,16 +24,19 @@ protected
         
         admin_sub << {label: 'users', url: '/manage_users/', route: 'manage_users#home'}
         admin_sub << {label: 'protocols', url: '/protocols/', route: 'protocols#home'}
+        admin_sub << {label: 'password', url: "/admins/edit"}
+        admin_sub << {label: 'logout_admin', url: "/admins/sign_out", extras: {method: :delete}}
         
       else
         admin_sub << {label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in', }
       end
       
-      if current_user || current_admin
-        
+      if current_user 
         user_sub = []
-        user_sub << {label: 'password', url: "/#{current_user ? "users" : current_admin ? "admins" : "exit"}/edit"}
-        user_sub << {label: 'logout', url: "/#{current_user ? "users" : current_admin ? "admins" : "exit"}/sign_out", extras: {method: :delete}}
+        user_sub << {label: 'password', url: "/users/edit"}
+        user_sub << {label: 'logout', url: "/users/sign_out", extras: {method: :delete}}
+      end
+      if current_user  || current_admin
         @secondary_navs << {label: 'Administration', url: "#", sub: admin_sub, extras: {}}
         @secondary_navs << {label: '<span class="glyphicon glyphicon-user"></span>', url: "#", sub: user_sub, extras: {title: current_email}}
       end 

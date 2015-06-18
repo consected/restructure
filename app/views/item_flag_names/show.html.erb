@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @item_flag_name.name %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @item_flag_name.user %>
+</p>
+
+<%= link_to 'Edit', edit_item_flag_name_path(@item_flag_name) %> |
+<%= link_to 'Back', item_flag_names_path %>

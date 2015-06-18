@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   
   
+  resources :item_flag_names
   resources :protocols
   devise_for :admins, :skip => [:registrations]
   devise_for :users, :skip => [:registrations]                                          
@@ -16,13 +17,20 @@ Rails.application.routes.draw do
   get 'masters/search', as: 'msid_search'
   get 'masters/search' => 'masters#search'
   resources :masters, only: [:show, :index, :new, :create] do
-    resources :player_infos
+    resources :player_infos    
     resources :player_contacts
     resources :pro_infos
     resources :manual_investigations
     resources :addresses
     resources :scantrons
     resources :trackers
+    
+    get ':item_controller/:item_id/item_flags/new', to: 'item_flags#new'
+    get ':item_controller/:item_id/item_flags/', to: 'item_flags#index'
+    get ':item_controller/:item_id/item_flags/:id', to: 'item_flags#show'
+    get ':item_controller/:item_id/item_flags/:id/edit', to: 'item_flags#edit'
+    patch ':item_controller/:item_id/item_flags/:id', to: 'item_flags#update'
+    post ':item_controller/:item_id/item_flags/:id', to: 'item_flags#create'
 
   end
   
