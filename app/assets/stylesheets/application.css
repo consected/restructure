@@ -12,6 +12,7 @@
  *
  *= require bootstrap   
  *= require bootstrap-theme
+ *= require chosen
  *= require_tree .
  *= require_self
  */

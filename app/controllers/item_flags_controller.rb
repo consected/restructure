@@ -20,8 +20,7 @@ class ItemFlagsController < ApplicationController
   end
   
   def show
-    
-    
+    index
   end
   
   def new
@@ -29,9 +28,27 @@ class ItemFlagsController < ApplicationController
     render partial: 'edit_form'
   end
   
+  def create
+    
+    logger.debug "Flag list: #{secure_params}"
+    flag_list = secure_params[:item_flag_name_id]
+    
+    @item.item_flags.destroy_all
+    flag_list.each do |f|
+      unless f.blank?
+        i = @item.item_flags.build item_flag_name_id: f
+        logger.info "Added flag #{f} to #{@item}"
+        i.save
+      end
+    end
+    
+    show
+  end
+  
 
   private
     def set_item
+      return if params[:id] == 'cancel'
       @item_flag = @item.item_flags.find(params[:id])
       @id = @item_flag
     end
@@ -44,6 +61,6 @@ class ItemFlagsController < ApplicationController
     end
   
     def secure_params
-      params.require(:item_flag).permit(:item_id, :item_type, :item_flag_name_id)
+      params.require(:item_flag).permit(item_flag_name_id: [])
     end
 end

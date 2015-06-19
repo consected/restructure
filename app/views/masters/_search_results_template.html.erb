@@ -2,10 +2,10 @@
   <div class="col-md-12">
     <ul class="list-group">
       <li class="list-group-item">
-        {{>item_flag_link}}
+        
         <a class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
         <h4 class="list-group-item-heading">Player Info <span class="heading-rank">{{rank}}</span></h4>
-        {{>item_flag_container}}
+        {{>item_flag_container item_type="player_info"}}
       </li>
       {{#each this}}
       {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year" }}
@@ -24,6 +24,8 @@
         <ul class="list-group">
             <li class="list-group-item">
               <h4  class="list-group-item-heading">Pro Info</h4>
+              {{>item_flag_container item_type="pro_info"}}
+
             </li>
             {{#each this }}
             {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
@@ -43,6 +45,8 @@
         <a class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
 
         <h4 class="list-group-item-heading">Addresses <span class="heading-rank">{{rank}}</span></h4>                        
+                {{>item_flag_container item_type="address"}}
+
       </li>
       {{#each this}}
       {{#in this @key "street,street2,street3,city,state,zip,source,rec_type" }}
@@ -78,6 +82,8 @@
       <li class="list-group-item is-heading">
         <a class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
         <h4 class="list-group-item-heading">{{rec_type}} <small>({{#if active}}active{{else}}inactive{{/if}})</small> <span class="heading-rank">{{rank}}</span></h4>                        
+                    {{>item_flag_container item_type="player_contact"}}
+
       </li>
       
       <li class="list-group-item player-contact-data"><small>contact</small> <strong class="email">{{data}}</strong></li>
@@ -125,7 +131,7 @@
   
       
       {{#each this}}
-      {{#in this @key "event,event_date,c_method,outcome,outcome_date,protocol_name" }}
+      {{#in this @key "event,event_date,c_method,outcome,outcome_date,protocol_name,notes" }}
       <td class="tracker-{{@key}}">{{pretty_string this  return_string="true" capitalize="true"}}</td>
       {{/in}}
       {{/each}}
@@ -135,27 +141,38 @@
 
 <script id="item_flag_link-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <span class="pull-left item-flags-count-{{item_flags.length}}">
-  <a class="flag-entity glyphicon glyphicon-tag" href="/masters/{{master_id}}/player_infos/{{this.id}}/item_flags" data-remote="true" data-result-target="#item-flags-{{master_id}}-{{item_type}}-{{this.id}}" data-template="item-flags-result-template"></a>
+  <a class="flag-entity glyphicon glyphicon-tag" href="/masters/{{master_id}}/{{item_type}}/{{this.id}}/item_flags" data-remote="true" data-result-target="#item-flags-{{master_id}}-{{item_type}}-{{this.id}}" data-template="item-flags-result-template"></a>
   </span>
 </script>                                      
                                       
 <script id="item_flag_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
-  <div id="item-flags-{{master_id}}-{{item_type}}-{{id}}"></div>
+  <div id="item-flags-{{master_id}}-{{item_type}}-{{id}}" class="item-flags-block">
+  <div class="" id="item-flag-{{master_id}}-{{item_type}}-{{id}}-" data-subscription="item-flag-edit-form-{{master_id}}-{{item_type}}-{{id}}-"   data-preprocessor="item_flags_edit_form">        
+  {{>item_flags_result results=item_flags item_id=id id=""}}
+  </div>
+  </div>
 </script>
 
 
 <script id="item_flags_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#each item_flags.results}}
-    {{>item_flags_result}}
+  
+  <div class="">
+  
+  <select multiple="true" disabled="disabled" class="form-control">
+  {{#each results}}
+    {{>item_flag_result}}
   {{else}}
     <span class="no-item-flags">no flags</span>
   {{/each}}
-  <span class="add-flag"><a href="/masters/{{master_id}}/{{item_type}}/{{item_id}}/item_flags/new" data-remote="true">+flag</a></span>    
-  <div class="" id="item-flag-{{item_type}}-{{item_id}}-" data-subscription="item-flag-edit-form-{{master_id}}-{{item_type}}-{{item_id}}-{{id}}">
+  </select>
+  <a href="/masters/{{master_id}}/{{item_type}}/{{item_id}}/item_flags/new" data-remote="true" class="add-flags glyphicon glyphicon-pencil"></a>
+  </div>
+  
+  
 </script>
 
 <script id="item_flag_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-   <span class="item-flag">{{this.id}}</span>
+   <option selected="true" class="item-flag" value="id">{{item_flag_name.name}}</option>
 </script>
 
 
@@ -284,12 +301,12 @@
             </div>
           </div>
   
-          <div id="trackers-{{id}}" class="row collapse tracker-block">
+          <div id="trackers-{{id}}" class="collapse tracker-block panel panel-default">
             <table class="table">
               <thead><tr>
-                <th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>protocol</th></tr></thead>
+                <th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th>protocol</th></tr></thead>
               <tfoot><tr><td colspan="6">
-                <a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> \n\
+                <a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> 
               </td></tr></tfoot>
               <tbody>
               {{#each trackers}}

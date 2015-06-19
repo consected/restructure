@@ -3,19 +3,15 @@
     <div class="">
       
       <%=form_for(:item_flag, flag_edit_form_hash(path: url_for([@master, @item])) ) do |f|%>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <%= flag_inline_cancel_button %>
-          <h4 class="list-group-item-heading">Edit Flag</h4>
-        </li>
-        <li class="list-group-item item-flags_item_flag_id">
-            <%= f.label :flag %>
-            <%= f.select :item_flag_name_id, options_for_select(item_flags_array(@item)) %>
-        </li>
+        <div class="form-group item-flags_item_flag_id">
+            
+            <%= collection_select(:item_flag, :item_flag_name_id, item_flags_array(@item), :id, :name, {selected: flags_selected}, multiple: true) %>
+        </div>
         
-        <li class="list-group-item">
+        <div class="form-group">
+            <%= flag_inline_cancel_button %>
           <%= f.submit class: "btn btn-primary" %>  
-        </li>
+        </div>
       </ul>
       <% end %>
     </div>

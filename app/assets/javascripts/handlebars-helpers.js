@@ -56,17 +56,6 @@
         }
         return right.indexOf(left) !== -1;
     });
-
-
-
-
-
-    var with_content = function(context, name, type, options){
-         var rcl = new _re.content_list(context);
-         return options.fn(rcl.get_content_by_name(name, type));
-    };
-       
-  
     
 
     var isHelper = function() {
@@ -148,58 +137,6 @@
         return res;
     });
     
-    Handlebars.registerHelper('funding_level_chart',function(context, security_type){
-      var elid = 'flchart-'+context.id;
-      var res = '<div class="funding-level-chart-summary" id="'+elid+'">';
-      
-      var off = new _re.offerings(context);
-      var fl, barpercent, ot;
-      
-      if(off.mode==='listing-only'){
-       return _re.blocks.listing_only_no_funding + _re.blocks.set_popovers;
-      }
-      
-      if(off.multitype){
-        if(security_type==='equity'){
-          fl = off.equity_funding_level;
-          ot = off.offering_terms.equity;
-        }
-        if(security_type==='debt'){
-          fl = off.debt_funding_level;
-          ot = off.offering_terms.debt;
-        }
-      }else{
-        fl = off.funding_level;  
-        ot = off.offering_terms;
-      }
-      
-      
-      if(!off.funding_level || !ot){
-        barpercent = 0;
-        return '';
-      }
-      else
-      {        
-        barpercent = (fl / off.offering_terms.minimum_capital_contribution_amount) * 100;
-      }
-      res += '<div class="barchart"><span class="barchart_bar_ready" data-bar-percentage="'+barpercent+'"></span></div>';
- 
-      res += '</div>';
-     
-     
-      return res;
-    });
-
-    Handlebars.registerHelper('userinfo', function(obj, userid, attribute){
-      var res = '';
-      if(!obj) return res;
-      var us = _re.utils.symbolize_userid(userid);
-      var u = obj[us];
-      if(!u) return res;
-      res = u[attribute];
-      return res;
-    });
-
     Handlebars.registerHelper('symbolize',function(text){
       if(text==null) return;
         return _re.utils.symbolize(text);
@@ -209,39 +146,6 @@
         return _re.utils.escape_plaintext(text);
     });
 
-
-    Handlebars.registerHelper('newsroom_post',function(text){
-      // search for wisia urls
-      var wistia_r = /https?:\/\/(.+)?(wistia.com|wi.st)\/.*/;
-      var jtext = $(text);
-      var texts = [];
-      var wistia_urls = [];
-      var wistia_ids = [];
-      if(_re.block_counters_wistia == null) _re.block_counters_wistia = 0;
-      jtext.find('*').each(function(){
-        if($(this).find('*').length == 0) {
-          var t = $(this).text();
-          texts.push(t);
-          var wres = wistia_r.exec(t);
-          if(wres && wres.length > 0 && wres[0]){
-            wistia_urls.push(wres[0]);
-            var wid = "re_wistia_url_"+_re.block_counters_wistia;
-            var wh = "<div id=\""+wid+"\" class=\"re_wistia_vid re-ajax-loading\" data-wistia-url=\""+wres[0]+"\">"+wres[0]+"</div>";
-            if($(this).is('a')){              
-              $(this).after(wh);
-              $(this).remove();
-            }else{
-              $(this).html(wh);
-            }
-            wistia_ids.push(wid);
-            _re.block_counters_wistia++;
-          }
-        }
-      });
-      
-      return jtext.outerHTML();
-      
-    });
 
     Handlebars.registerHelper('nl2br', function(text) {
         var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
@@ -267,10 +171,6 @@
             Array.prototype.slice.call(arguments, 0, -1)
         ));
     });
-
-
-
-
 
 
     // Display date in local format, without adjusting the timezone and giving the appearance of changing the day

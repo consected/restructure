@@ -2,7 +2,15 @@ _fpa.preprocessors = {};
 
 _fpa.postprocessors = {};
 
+_fpa.preprocessors.default = function(block, data){
     
+};
+_fpa.postprocessors.default = function(block, data){
+    
+  $('select[multiple]').chosen();  
+  
+    
+};    
 _fpa.postprocessors['search-results-template'] = function(block, data){
 
     block.find('.list-group').each(function(){
@@ -18,7 +26,14 @@ _fpa.postprocessors['search-results-template'] = function(block, data){
           all.css({minWidth: wmax, width: wmax}).addClass('list-small-label');
     });
 
+   
+};
 
+_fpa.postprocessors.item_flags_edit_form = function(block, data){
+  
+};
+_fpa.postprocessors['item-flags-result-template'] = function(block, data){
+  
 };
 /*
 _fpa.postprocessors['item-flags-result-template'] = function(block, data){

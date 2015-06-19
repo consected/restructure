@@ -12,8 +12,8 @@
 //
 //= require jquery
 //= require jquery_ujs
-
 //= require bootstrap
 //= require typeahead
+//= require chosen.jquery
 //= require handlebars-v3.0.3
 //= require_tree .

@@ -33,11 +33,13 @@ _fpa = {
       data._code_flag = {};
       data._code_flag[data.code] = true;
     }
+    _fpa.preprocessors.default();
     if(_fpa.preprocessors[template_name])
         _fpa.preprocessors[template_name](block, data);
         
     var html = template(data);
     block.html(html);
+    _fpa.postprocessors.default();
     if(_fpa.postprocessors[template_name])
         _fpa.postprocessors[template_name](block, data);
     
@@ -125,9 +127,11 @@ _fpa = {
                 res[di] = d;
                 targets.each(function(){
                     var pre = $(this).attr('data-preprocessor');                    
+                    _fpa.preprocessors.default();
                     if(_fpa.preprocessors[pre])
                         _fpa.preprocessors[pre](block, data);
                     $(this).html(d);
+                    _fpa.postprocessors.default();
                     if(_fpa.postprocessors[pre])
                         _fpa.postprocessors[pre](block, data);
                     window.setTimeout(function(){_fpa.handle_remotes();},1);

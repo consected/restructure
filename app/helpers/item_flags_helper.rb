@@ -4,7 +4,7 @@ module ItemFlagsHelper
   end
   
   def flag_edit_form_hash extras={}
-    extras.merge({remote: true, html: {"data-result-target" => "#item-flag-#{@master.id}-#{@item.id}-#{@id}", "data-template" => "item-flag-result-template"}})
+    extras.merge({remote: true, html: {"data-result-target" => "#item-flag-#{@master.id}-#{@item_type}-#{@item.id}-#{@id}", "data-template" => "item-flags-result-template"}})
   end
   
   def item_flag_path
@@ -23,7 +23,13 @@ module ItemFlagsHelper
   
 
   def item_flags_array a
-    [1,2,3]
+    ItemFlagName.selector_collection.where(item_type: @item_type)
+  end
+  
+  def flags_selected
+    s = @item.item_flags.map {|i| i.item_flag_name_id}
+    logger.info "Selected #{s}"
+    s
   end
   
 end

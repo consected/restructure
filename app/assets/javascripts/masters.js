@@ -21,5 +21,5 @@ $(document).ready(function(){
         ev.preventDefault();
         forms.find(':visible input, :visible select').not('[type="submit"], [type="hidden"]').val(null);
     });
-        
+    
 });
