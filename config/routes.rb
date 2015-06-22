@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   
   
+  resources :general_selections
   resources :item_flag_names
   resources :protocols
   devise_for :admins, :skip => [:registrations]

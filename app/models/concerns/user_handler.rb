@@ -46,8 +46,8 @@ module UserHandler
   end
   
   def as_json extras={}
-    extras[:include] ||= []
-    extras[:include] << :item_flags
+    extras[:include] ||= {}
+    extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
     super(extras)    
   end
   

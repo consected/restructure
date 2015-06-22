@@ -2,46 +2,59 @@
   <table><tr>  
     <td colspan="6" data-result="<%= edit_form_id %>">
     
-      <div>
-        <%= inline_cancel_button %>
+      <div>        
         <h4 class="form-group-heading">Edit Tracker Record</h4>
       </div>
       
       <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
 
-
-        <p class="tracker-protocol">
-            <%= f.label :protocol %>
-            <%= f.select :protocol_id, options_for_select(protocol_array)%>
-        </p>
-        <p class="tracker-event">
-            <%= f.label :event %>
-            <%= f.text_field :event %>
-        </p>  
-        <p class="tracker-event_date">
-            <%= f.label :event_date %>
-            <%= f.date_field :event_date %>
-        </p>
-        <p class="tracker-c_method">
-            <%= f.label :c_method %>
-            <%= f.text_field :c_method %>
-        </p>
-        <p class="tracker-outcome">
-            <%= f.label :outcome %>
-            <%= f.text_field :outcome %>
-        </p>
-        <p class="tracker-outcome_date">
-            <%= f.label :outcome_date %>
-            <%= f.text_field :outcome_date %>
-        </p>
-        <p class="tracker-notes">
-            <%= f.label :notes %>
-            <%= f.text_field :notes %>
-        </p>
-        <p>
-          <%= f.submit class: "btn btn-primary" %>  
-        </p>
-
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group tracker-protocol">
+                <%= f.label :protocol %>
+                <%= f.select :protocol_id, protocol_array%>
+            </div>  
+            <div class="form-group tracker-c_method">
+              <%= f.label :contact_method %>
+              <%= f.select :c_method, general_selection(:tracker_contact_method) %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group tracker-event">
+                <%= f.label :event %>
+                <%= f.text_field :event %>
+            </div>  
+            <div class="form-group tracker-event_date">
+                <%= f.label :event_date %>
+                <%= f.date_field :event_date %>
+            </div>    
+          </div>
+          <div class="col-md-6">
+            <div class="form-group tracker-outcome">
+              <%= f.label :outcome %>
+              <%= f.text_field :outcome %>
+            </div>
+            <div class="form-group tracker-outcome_date">
+              <%= f.label :outcome_date %>
+              <%= f.date_field :outcome_date %>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group tracker-notes">
+              <%= f.label :notes %>
+              <%= f.text_field :notes %>
+            </div>
+            <div  class="form-group">
+              <%= inline_cancel_button %> <%= f.submit class: "btn btn-primary" %>
+            </div>
+              
+          </div>
+        </div>
+        
+          
+          
+        
+        
       <% end %>
 
     

@@ -14,22 +14,37 @@ module SelectorCache
     ArrayCacheKey = "#{self.to_s}_array".freeze
     ArrayPairCacheKey = "#{self.to_s}_hash".freeze
     CollectionCacheKey = "#{self.to_s}_collection".freeze
+    NameValuePairCacheKey = "#{self.to_s}_nameval".freeze
     
-    def selector_array
-      Rails.cache.fetch(ArrayCacheKey){
-        all.collect {|c| c.name }
+    def selector_array conditions=nil
+      ckey="#{ArrayCacheKey}#{conditions}"
+      Rails.cache.fetch(ckey){
+        where(conditions).collect {|c| c.name }
       }    
     end
     
-    def selector_array_pair
-      Rails.cache.fetch(ArrayPairCacheKey){
-        all.collect {|c| [c.name, c.id] }
+    def selector_array_pair conditions=nil
+      ckey="#{ArrayPairCacheKey}#{conditions}"
+      
+      Rails.cache.fetch(ckey){
+        where(conditions).collect {|c| [c.name, c.id] }
       }
     end
     
-    def selector_collection
-      Rails.cache.fetch(CollectionCacheKey){
-        all
+    def selector_name_value_pair conditions=nil
+      ckey="#{NameValuePairCacheKey}#{conditions}"
+      
+      Rails.cache.fetch(ckey){
+        where(conditions).collect {|c| [c.name, c.value] }
+      }
+    end
+    
+    def selector_collection conditions=nil
+      
+      ckey="#{CollectionCacheKey}#{conditions}"
+      
+      Rails.cache.fetch(ckey){
+        where(conditions)
       }
     end
     

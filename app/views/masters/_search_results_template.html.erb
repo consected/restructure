@@ -2,7 +2,7 @@
   <div class="col-md-12">
     <ul class="list-group">
       <li class="list-group-item">
-        
+
         <a class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
         <h4 class="list-group-item-heading">Player Info <span class="heading-rank">{{rank}}</span></h4>
         {{>item_flag_container item_type="player_info"}}
@@ -172,7 +172,7 @@
 </script>
 
 <script id="item_flag_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-   <option selected="true" class="item-flag" value="id">{{item_flag_name.name}}</option>
+   <option selected="true" class="item-flag" value="{{item_flag_name.id}}">{{item_flag_name.name}}</option>
 </script>
 
 
@@ -184,41 +184,47 @@
     Handlebars.registerPartial(id, $(this).html());
   });
 </script>
-
+    
 <script id="player-info-result-template" type="text/x-handlebars-template" class="hidden">
+  
   {{#with player_info}}  
-    {{>player_info_result }}
-    {{>pro_info_result pro_info player_info_id=id}}
+    {{#if ../_created}}<div class="index-created" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">{{/if}}
+      {{>player_info_result }}
+      {{>pro_info_result pro_info player_info_id=id}}
+    {{#if ../_created}}</div>{{/if}}
   {{/with}}
+  
 </script>
 
 <script id="address-result-template" type="text/x-handlebars-template" class="hidden">
   {{#with address}}
-    {{>address_result }}
+    {{#if ../_created}}<div class="index-created" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}">{{/if}}
+      {{>address_result }}
+    {{#if ../_created}}</div>{{/if}}
   {{/with}}
 </script>
 
 <script id="scantron-result-template" type="text/x-handlebars-template" class="hidden">
   {{#with scantron}}
-    {{>scantron_result }}
+    {{#if ../_created}}<div class="index-created" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}">{{/if}}
+      {{>scantron_result }}
+    {{#if ../_created}}</div>{{/if}}
   {{/with}}
 </script>
 
 <script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden">
   {{#with player_contact}}
-    {{>player_contact_result }}
+    {{#if ../_created}}<div class="index-created" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}">{{/if}}
+      {{>player_contact_result }}
+    {{#if ../_created}}</div>{{/if}}
   {{/with}}
 </script>
 
 <script id="tracker-result-template" type="text/x-handlebars-template" class="hidden">
   {{#with tracker}}
-    {{>tracker_result }}
-  {{/with}}
-</script>
-
-<script id="item-flag-result-template" type="text/x-handlebars-template" class="hidden">
-  {{#with tracker}}
-    {{>item_flag_result }}
+    {{#if ../_created}}<tr class="index-created" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">{{/if}}
+      {{>tracker_result }}
+    {{#if ../_created}}</tr>{{/if}}
   {{/with}}
 </script>
 
@@ -280,7 +286,7 @@
                   </div>
                 {{/each}}
 
-                <div class="" id="scantron-{{id}}-" data-subscription="scantron-edit-form-{{id}}-">
+                <div class="new-block" id="scantron-{{id}}-" data-subscription="scantron-edit-form-{{id}}-">
                   {{#unless scantrons}}<h4>No Scantron records</h4>{{/unless}}                
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-remote="true">Create Scantron record</a> </p>
@@ -314,7 +320,7 @@
                     {{>tracker_result master_id=../id}}
                 </tr>              
               {{/each}}
-              <tr id="tracker-{{id}}-" data-subscription="tracker-edit-form-{{id}}-">
+              <tr id="tracker-{{id}}-" data-subscription="tracker-edit-form-{{id}}-" class="new-block">
               {{#is trackers.length 0}}<td colspan="6"><h4>No Tracker Records</h4></td>{{/is}}
               </tr>
               
@@ -328,13 +334,12 @@
             <div class="row">
               <div class="col-md-12">
                 {{#each player_infos}}
-                  <div class="row index-{{@index}}" id="player-info-{{../id}}-{{id}}" data-subscription="player-info-edit-form-{{../id}}-{{id}}">
-                    {{>player_info_result master_id=../id}}
+                  <div class="row" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">
+                    {{>player_info_result }}
                     {{>pro_info_result pro_info player_info_id=id}}
-
-                  </div>  
+                  </div>
                 {{else}}
-                  <div class="row" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">
+                  <div class="row new-block" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">
                     <h4>No player or pro info to show</h4>
                     <p><a href="/masters/{{id}}/player_infos/new" data-remote="true">Create Player Info record</a> </p>
                   </div>
@@ -351,7 +356,7 @@
 
                 {{/each}}
 
-                <div class="" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-">
+                <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-">
                   {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true">Create Address record</a> </p>
@@ -365,7 +370,7 @@
 
                 {{/each}}
 
-                <div class="" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-">
+                <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-">
                   {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true">Create Contact record</a> </p>

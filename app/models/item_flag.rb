@@ -17,9 +17,6 @@ class ItemFlag < ActiveRecord::Base
     options[:include] ||=[]
     options[:include] << :item_flag_name
     options[:done] = true
-#    o[:item_id] = self.item_id
-     
-#    o[:master_id] = self.item.master_id
     super(options)
     
     

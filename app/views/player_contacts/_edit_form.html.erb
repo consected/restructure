@@ -9,7 +9,7 @@
         </li>
         <li class="list-group-item player-contact-rec_type">
             <%= f.label :rec_type %>
-            <%= f.text_field :rec_type %>
+            <%= f.select :rec_type, general_selection(:player_contacts_type) %>
         </li>
         <li class="list-group-item player-contact-data">
             <%= f.label :data %>

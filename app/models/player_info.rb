@@ -10,8 +10,8 @@ class PlayerInfo < ActiveRecord::Base
   
  
   def as_json extras={}
-    extras[:include] ||= []
-    extras[:include] += [:pro_info, :item_flags]
+    extras[:include] ||= {}
+    extras[:include].merge!({pro_info: {}})
     super(extras)
   end
   

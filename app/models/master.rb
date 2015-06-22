@@ -20,11 +20,13 @@ class Master < ActiveRecord::Base
   
   accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses, :trackers
   
+  
+  
   # Build a Master search using the Master and nested attributes passed in
   # Any attributes that are nil will be rejected and will not appear in the query
   # Tables will only be joined if the nested attributes for the association have one or more
   # attributes that are not nil
-  def self.search_on_params params
+  def self.search_on_params params, conditions={}
     
     joins = []
     wheres = {}
@@ -51,6 +53,8 @@ class Master < ActiveRecord::Base
         if vn.length > 0
           wheres[k1s] = vn
           joins << k1.to_sym        
+          
+          conditions[k1.to_sym] = vn
         end
         # Always add the table to the list of joins and select (so we can get the data)
         
@@ -60,7 +64,7 @@ class Master < ActiveRecord::Base
       end
       
     end
-    
+    joins << :player_infos unless joins.include? :player_infos
     Master.select(selects).joins(joins).uniq.where(wheres)
     
   end
@@ -91,22 +95,11 @@ class Master < ActiveRecord::Base
       end
     end
     logger.info "where: #{w}, #{wcond}"
+    joins << :player_infos unless joins.include? :player_infos
     Master.joins(joins).uniq.where(w, wcond)
   end
   
   
-#  def as_json options=nil
-#    
-#    {
-#      id: id, 
-#      player_infos: player_infos.order(rank: :desc),
-#      #pro_infos: pros,
-#      player_contacts: player_contacts.order(rank: :desc), 
-#      manual_investigations: manual_investigations(rank: :desc), 
-#      addresses: addresses.order(rank: :desc)      
-#    }
-#    
-#  end
 
   def current_user= cu
     logger.info "Setting current user: #{cu} in #{self}"

@@ -8,22 +8,33 @@ class MastersController < ApplicationController
     #search_params
     redirect_to '/masters/search/' and return if search_params.nil? || search_params.length == 0
     
+    conditions = {}
+    
     if params[:mode] == 'SIMPLE'
-      @masters = Master.simple_search_on_params search_params[:master] 
+      @masters = Master.simple_search_on_params search_params[:master]
     else
-      @masters = Master.search_on_params search_params[:master] 
+      @masters = Master.search_on_params search_params[:master]
     end
     
-    @masters.take(ResultsLimit)
-    
+    @masters = @masters.take(ResultsLimit).sort {|m,n| n.player_infos.first.rank <=> m.player_infos.first.rank}
+        
     m = {
       masters: @masters.as_json(include: {
-        player_infos: {order: {rank: :desc}, include: {pro_info: {}, item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}}},
-        player_contacts: {order: {rank: :desc}, include: [:item_flags]},
+        player_infos: {order: {rank: :desc}, include: {
+          pro_info: {}, 
+          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}            
+        }},
+        player_contacts: {order: {rank: :desc}, include: {
+          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+        }},
         manual_investigations: {order: {rank: :desc}, include: [:item_flags]},
-        addresses: {order: {rank: :desc}, include: [:item_flags]},
-        trackers: {order: {created_at: :desc}, methods: :protocol_name, include: [:item_flags]},
-        scantrons: {order: {scantron_id: :asc}, include: [:item_flags]}
+        addresses: {order: {rank: :desc}, include: {
+          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+        }},
+        trackers: {order: {created_at: :desc}, methods: :protocol_name},
+        scantrons: {order: {scantron_id: :asc}, include: {
+          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+        }}
       }) 
     }
 

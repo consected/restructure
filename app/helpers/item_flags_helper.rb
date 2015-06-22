@@ -23,7 +23,7 @@ module ItemFlagsHelper
   
 
   def item_flags_array a
-    ItemFlagName.selector_collection.where(item_type: @item_type)
+    ItemFlagName.selector_collection(item_type: @item_type)
   end
   
   def flags_selected

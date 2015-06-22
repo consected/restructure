@@ -20,9 +20,30 @@
 form select {
     width: 100%;
     height: auto;
+    padding: 4px 0px;
+    line-height: 22px;
+}
+
+form.search_master .form-group  select {
+    width: 100%;
+    height: auto;
     padding: 6px 0px;
     line-height: 22px;
 }
+
+form .form-group select {
+    width: inherit;
+    padding: 4px;
+}
+
+
+
+input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"] {
+    &.form-control {
+        line-height: inherit;
+    }
+}
+
 
 li.list-group-item label {
     font-size: 85%;

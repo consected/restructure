@@ -1,0 +1,29 @@
+<%= form_for(@general_selection) do |f| %>
+  <% if @general_selection.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@general_selection.errors.count, "error") %> prohibited this general_selection from being saved:</h2>
+
+      <ul>
+      <% @general_selection.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :value %><br>
+    <%= f.text_field :value %>
+  </div>
+  <div class="field">
+    <%= f.label :item_type %><br>
+    <%= f.select :item_type, GeneralSelection::ItemTypes %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -25,9 +25,11 @@ _fpa = {
     $(block).removeClass('ajax-running');
   },
           
-  view_template: function(block, template_name, data){    
+  view_template: function(block, template_name, data, options){    
     var source = $('#'+template_name).html();
     var template = Handlebars.compile(source);
+    
+    if(!options) options = {};
     
     if(data.code){
       data._code_flag = {};
@@ -36,9 +38,18 @@ _fpa = {
     _fpa.preprocessors.default();
     if(_fpa.preprocessors[template_name])
         _fpa.preprocessors[template_name](block, data);
-        
+    
+    if(options.position)
+        data._created = true;
+      
     var html = template(data);
-    block.html(html);
+    
+    if(options.position === 'before'){        
+        block.before(html);
+        block.html('');
+    }
+    else
+        block.html(html);
     _fpa.postprocessors.default();
     if(_fpa.postprocessors[template_name])
         _fpa.postprocessors[template_name](block, data);
@@ -95,13 +106,18 @@ _fpa = {
         });
         return true;
     }).on("ajax:success", function(e, data, status, xhr) {    
-      var data = xhr.responseJSON;
-      _fpa.clear_flash_notices();
+        var data = xhr.responseJSON;
+        _fpa.clear_flash_notices();
 
         if(xhr.responseJSON){
             var t = $(this).attr('data-result-target');
+            var options = {}
             if(t){
-                _fpa.view_template($(t), $(this).attr('data-template'), xhr.responseJSON);
+                var b = $(t);
+                if(b.hasClass('new-block')){
+                    options.position = 'before';
+                }                    
+                _fpa.view_template(b, $(this).attr('data-template'), xhr.responseJSON, options);
             }else{
                 for(var di in data ){
                     if (data.hasOwnProperty(di)){
@@ -160,6 +176,13 @@ _fpa = {
       a += '</div>';
       
       $('.flash').append(a);
+      _fpa.timed_flash_fadeout();      
+  },
+  
+  timed_flash_fadeout: function(){
+      window.setTimeout(function(){
+          $('.alert-info').fadeOut(1000);
+      }, 2000);
   },
   clear_flash_notices: function(type){
     if(!type)

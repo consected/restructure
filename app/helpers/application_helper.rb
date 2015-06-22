@@ -27,7 +27,7 @@ module ApplicationHelper
     if object_instance.id 
       cancel_href = "/masters/#{object_instance.master_id}/#{controller_name}/#{object_instance.id}"
     else
-      cancel_href = "/masters/#{@master_id}/#{controller_name}/cancel"
+      cancel_href = "/masters/#{object_instance.master_id}/#{controller_name}/cancel"
     end
           
     "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\"></a>".html_safe

@@ -3,7 +3,12 @@ class Tracker < ActiveRecord::Base
 
   belongs_to :protocol
   
-  
+  def initialize presets
+    
+    presets[:event_date] ||= DateTime.now
+    
+    super
+  end
   
   
   def protocol_name
@@ -13,10 +18,8 @@ class Tracker < ActiveRecord::Base
   
   def as_json extras={}
     extras[:methods] ||= []
-    extras[:include] ||= []
-    
     extras[:methods] << :protocol_name
-    extras[:include] << :item_flags
+    
     super(extras)
   end
   

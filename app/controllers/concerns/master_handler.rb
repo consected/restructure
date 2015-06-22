@@ -8,12 +8,22 @@ module MasterHandler
     before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
     before_action :set_instance_from_id, only: [:show]
 
-    PrimaryModel = controller_name.classify.constantize
-    ObjectName = controller_name.singularize
-    ObjectsName = controller_name.to_sym
-    HumanName = controller_name.singularize.humanize
+    
   end
 
+  def primary_model 
+    controller_name.classify.constantize
+  end
+  def object_name 
+    controller_name.singularize
+  end
+  def objects_name 
+    controller_name.to_sym
+  end
+  def human_name 
+    controller_name.singularize.humanize
+  end
+  
   def index
     set_objects_instance @master_objects
     s = @master_objects.as_json
@@ -24,7 +34,7 @@ module MasterHandler
 
   
   def show
-    p = {ObjectName => object_instance.as_json}
+    p = {object_name => object_instance.as_json}
     
     logger.debug "p: #{p} for object_instance"
     render json: p
@@ -46,7 +56,7 @@ module MasterHandler
     if object_instance.save
       show
     else
-      logger.warn "Error creating #{HumanName}: #{object_instance.errors.inspect}"
+      logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
       render json: object_instance.errors, status: :unprocessable_entity     
     end
   end
@@ -55,7 +65,7 @@ module MasterHandler
     if object_instance.update(secure_params)
       show
     else
-      logger.warn "Error updating #{HumanName}: #{object_instance.errors.inspect}"
+      logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
       render json: object_instance.errors, status: :unprocessable_entity 
     end
     
@@ -83,13 +93,13 @@ module MasterHandler
       if UseMasterParam.include? action_name 
         @master = Master.find(params[:master_id])
       else
-        object = PrimaryModel.find(params[:id])
+        object = primary_model.find(params[:id])
         set_object_instance object
         @master = object.master
         @id = object.id
       end
       
-      @master_objects = @master.send(ObjectsName)
+      @master_objects = @master.send(objects_name)
 
       @master.current_user = current_user  
       @master
@@ -99,17 +109,17 @@ module MasterHandler
 
     def set_instance_from_id
       return if params[:id] == 'cancel'
-      set_object_instance PrimaryModel.find(params[:id])            
+      set_object_instance primary_model.find(params[:id])            
       @id = object_instance.id
       
     end
 
     def set_object_instance o
-      instance_variable_set("@#{ObjectName}", o)  
+      instance_variable_set("@#{object_name}", o)  
     end
 
     def set_objects_instance o
-      instance_variable_set("@#{ObjectsName}", o)  
+      instance_variable_set("@#{objects_name}", o)  
     end
 
     # This is not used: def object_instance=(o)
@@ -117,7 +127,7 @@ module MasterHandler
     # therefore more confusing than helpful
 
     def object_instance
-      instance_variable_get("@#{ObjectName}")
+      instance_variable_get("@#{object_name}")
     end
   
     
