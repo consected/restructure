@@ -1,5 +1,9 @@
 _fpa = {
     setup_typeahead: function(element, list, name){
+      
+      if(typeof list === 'string')  
+        list = _fpa.cache(list);  
+        
       var items = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.whitespace,
         queryTokenizer: Bloodhound.tokenizers.whitespace,        

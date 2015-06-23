@@ -7,7 +7,14 @@ _fpa.preprocessors.default = function(block, data){
 };
 _fpa.postprocessors.default = function(block, data){
     
-  $('select[multiple]').chosen({width: '100%'});  
+  $('select[multiple]').chosen({width: '100%'});
+  $('input, select').each(function(){ 
+      if($(this).val() != '') 
+          $(this).addClass('has-value'); 
+      else 
+          $(this).removeClass('has-value'); 
+  });
+  
   
     
 };    

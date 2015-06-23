@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150622144725) do
+ActiveRecord::Schema.define(version: 20150623194212) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,8 +28,8 @@ ActiveRecord::Schema.define(version: 20150622144725) do
     t.integer  "rank"
     t.string   "rec_type"
     t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at", default: "now()"
   end
 
   add_index "addresses", ["master_id"], name: "index_addresses_on_master_id", using: :btree
@@ -125,8 +125,8 @@ ActiveRecord::Schema.define(version: 20150622144725) do
     t.integer  "rank"
     t.boolean  "active"
     t.integer  "user_id"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",  default: "now()"
     t.date     "active_date"
   end
 
@@ -147,8 +147,8 @@ ActiveRecord::Schema.define(version: 20150622144725) do
     t.string   "transaction_status"
     t.string   "transaction_substatus"
     t.integer  "user_id"
-    t.datetime "created_at",                      null: false
-    t.datetime "updated_at",                      null: false
+    t.datetime "created_at",                                        null: false
+    t.datetime "updated_at",                      default: "now()"
     t.string   "contact_pref"
     t.integer  "start_year"
     t.string   "in_survey",             limit: 1
@@ -156,6 +156,7 @@ ActiveRecord::Schema.define(version: 20150622144725) do
     t.string   "notes"
     t.integer  "contact_id"
     t.integer  "pro_info_id"
+    t.string   "college"
   end
 
   add_index "player_infos", ["master_id"], name: "index_player_infos_on_master_id", using: :btree
@@ -170,8 +171,8 @@ ActiveRecord::Schema.define(version: 20150622144725) do
     t.string   "middle_name"
     t.string   "nick_name"
     t.string   "last_name"
-    t.string   "birth_date"
-    t.string   "death_date"
+    t.date     "birth_date"
+    t.date     "death_date"
     t.integer  "start_year"
     t.integer  "end_year"
     t.decimal  "accrued_seasons"
@@ -182,8 +183,8 @@ ActiveRecord::Schema.define(version: 20150622144725) do
     t.string   "career_info"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",      default: "now()"
     t.integer  "rank"
   end
 

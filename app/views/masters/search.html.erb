@@ -2,11 +2,24 @@
 <%= render partial: 'search_form' %>
 
 <% if @master_id %>
+
+  <%= form_for @master, method: :get, remote: true, html: {id: 'msid_search_master', class: 'msid_search_master hidden'} do |f| %>
+
+      <%= hidden_field_tag :mode, "MSID" %>
+      <div class="form-group col-sm-3">
+        <%= f.label :master_id %>
+        <%= f.number_field :id, id: 'simple_master_id', class: 'form-control', min: 0 %>
+      </div>
+  <% end %>
 <script>
   $('#simple_master_id').val('<%=@master_id%>');
-  $('#master_id').val('<%=@master_id%>');
+  
+  window.setTimeout(function(){
+    $('#msid_search_master').submit();
+  }, 10);
+  
 </script>
-  <% @do_search = true %>
+  
 <% end %>
 
 <% if @do_search %>

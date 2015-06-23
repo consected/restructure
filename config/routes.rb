@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   
   
+  resources :colleges
   resources :general_selections
   resources :item_flag_names
   resources :protocols
@@ -39,17 +40,17 @@ Rails.application.routes.draw do
 #  get 'masters/index'
 #  get 'masters/show'
 
+  as :admin do
+    get 'admins/edit' => 'devise/registrations#edit', :as => 'edit_admin_registration'    
+    put 'admins/:id' => 'devise/registrations#update', :as => 'admin_registration'            
+    root to: "pages#index", :as => "authenticated_admin_root"
+  end
   
   
   as :user do
     get 'users/edit' => 'devise/registrations#edit', :as => 'edit_user_registration'    
     put 'users/:id' => 'devise/registrations#update', :as => 'user_registration'            
-    root to: "pages#index", :as => "authenticated_root"
-  end
-  as :admin do
-    get 'admins/edit' => 'devise/registrations#edit', :as => 'edit_admin_registration'    
-    put 'admins/:id' => 'devise/registrations#update', :as => 'admin_registration'            
-    root to: "pages#index", :as => "authenticated_admin_root"
+    root to: "masters#index", :as => "authenticated_root"
   end
   
   

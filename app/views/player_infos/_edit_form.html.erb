@@ -39,11 +39,22 @@
             <%= f.label :rank %>
             <%= f.text_field :rank %>
         </li>
+        <li class="list-group-item player-info-college">
+          <%= f.label :college %>
+          <%= f.text_field :college, class: 'form-control college-input typeahead'  %>
+        </li>
         <li class="list-group-item">
           <%= f.submit class: "btn btn-primary" %>  
         </li>
       </ul>
       <% end %>
     </div>
+    <script>
+      
+      _fpa.setup_typeahead('#player_info_college', 'college_list', "colleges");
+    </script>
+  
   </div>
 </div>
+
+

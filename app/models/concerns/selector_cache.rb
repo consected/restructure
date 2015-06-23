@@ -3,28 +3,43 @@ module SelectorCache
   extend ActiveSupport::Concern
   
 
-  include do
+  included do
     
     before_save :invalidate_cache
+    before_create :invalidate_cache
     
   end
   
   class_methods do
     
-    ArrayCacheKey = "#{self.to_s}_array".freeze
-    ArrayPairCacheKey = "#{self.to_s}_hash".freeze
-    CollectionCacheKey = "#{self.to_s}_collection".freeze
-    NameValuePairCacheKey = "#{self.to_s}_nameval".freeze
+    def gen_cache_key
+      self.to_s
+    end
+    
+    def array_cache_key 
+      logger.debug "Getting #{self.to_s} array cache key"
+      "#{self.to_s}_array"      
+    end
+    def array_pair_cache_key 
+      "#{self.to_s}_hash"
+    end
+    def collection_cache_key
+      logger.debug "Getting #{self.to_s} collection cache key"
+      "#{self.to_s}_collection"
+    end
+    def nv_pair_cache_key 
+      "#{self.to_s}_nameval"
+    end
     
     def selector_array conditions=nil
-      ckey="#{ArrayCacheKey}#{conditions}"
+      ckey="#{array_cache_key}#{conditions}"
       Rails.cache.fetch(ckey){
         where(conditions).collect {|c| c.name }
       }    
     end
     
     def selector_array_pair conditions=nil
-      ckey="#{ArrayPairCacheKey}#{conditions}"
+      ckey="#{array_pair_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
         where(conditions).collect {|c| [c.name, c.id] }
@@ -32,7 +47,7 @@ module SelectorCache
     end
     
     def selector_name_value_pair conditions=nil
-      ckey="#{NameValuePairCacheKey}#{conditions}"
+      ckey="#{nv_pair_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
         where(conditions).collect {|c| [c.name, c.value] }
@@ -41,18 +56,21 @@ module SelectorCache
     
     def selector_collection conditions=nil
       
-      ckey="#{CollectionCacheKey}#{conditions}"
+      ckey="#{collection_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
         where(conditions)
       }
     end
     
-    def invalidate_cache
-      Rails.cache.delete(ArrayCacheKey)
-      Rails.cache.delete(ArrayPairCacheKey)
-      Rails.cache.delete(CollectionCacheKey)
-    end
+
   end
-    
+
+  def invalidate_cache
+
+    logger.info "College added or updated. Invalidating cache."
+    # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
+    Rails.cache.clear
+
+  end
 end

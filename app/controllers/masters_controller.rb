@@ -2,41 +2,48 @@ class MastersController < ApplicationController
   before_action :authenticate_user!
   
   
-  ResultsLimit = 10
+  ResultsLimit = 100
   
   def index
     #search_params
     redirect_to '/masters/search/' and return if search_params.nil? || search_params.length == 0
     
-    conditions = {}
-    
-    if params[:mode] == 'SIMPLE'
+    if params[:mode] == 'MSID'
+      @masters = Master.where id: params[:master][:id]
+    elsif params[:mode] == 'SIMPLE'
       @masters = Master.simple_search_on_params search_params[:master]
     else
       @masters = Master.search_on_params search_params[:master]
     end
+
+    if @masters
     
-    @masters = @masters.take(ResultsLimit).sort {|m,n| n.player_infos.first.rank <=> m.player_infos.first.rank}
-        
-    m = {
-      masters: @masters.as_json(include: {
-        player_infos: {order: {rank: :desc}, include: {
-          pro_info: {}, 
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}            
-        }},
-        player_contacts: {order: {rank: :desc}, include: {
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-        }},
-        manual_investigations: {order: {rank: :desc}, include: [:item_flags]},
-        addresses: {order: {rank: :desc}, include: {
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-        }},
-        trackers: {order: {created_at: :desc}, methods: :protocol_name},
-        scantrons: {order: {scantron_id: :asc}, include: {
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-        }}
-      }) 
-    }
+      @masters = @masters.take(ResultsLimit).sort {|m,n| n.player_infos.first.accuracy_rank <=> m.player_infos.first.accuracy_rank}
+
+      m = {
+        masters: @masters.as_json(include: {
+          player_infos: {order: Master::PlayerInfoRankOrderClause, include: {
+            pro_info: {}, 
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}            
+          }},
+          player_contacts: {order: {rank: :desc}, include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }},
+          manual_investigations: {order: {rank: :desc}, include: [:item_flags]},
+          addresses: {order: {rank: :desc}, include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }},
+          trackers: {order: {created_at: :desc}, methods: :protocol_name},
+          scantrons: {order: {scantron_id: :asc}, include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }}
+        }) 
+      }
+      logger.debug m.as_json
+    else
+      # Return no results
+      m = {message: "no conditions were specified"}
+    end
 
     render json: m
     
@@ -86,7 +93,7 @@ private
     p = params_downcase p
     #p = p.permit(:master_id, player_info_attributes: [:first_name, :middle_name, :last_name, :nick_name, :birth_date, :death_date, :start_year], player_contacts_attributes: [], pro_info_attributes: [], address_attributes: [], manual_investigation_attributes: [])
     p = p.except(:utf8, :controller, :action).permit!
-    
+    logger.debug "Screened params: #{p.inspect}"
     p
   end
   

@@ -9,7 +9,7 @@ a.glyphicon {
 
 a.navbar-brand {
     padding-top: 4px;
-    
+    background-color: white;
     > img {
 
         width:200px;
@@ -77,4 +77,11 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity {
             visibility: visible;
         }
     }
+}
+
+
+li.search-field input.default {width: 100% !important;}
+
+input.form-control.has-value, select.form-control.has-value {
+    background-color: #f2dede !important;
 }

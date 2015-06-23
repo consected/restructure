@@ -8,11 +8,26 @@ class PlayerInfo < ActiveRecord::Base
   # key is on the player_info table, and therefore requires a belongs_to association
   belongs_to :pro_info, inverse_of: :player_info
   
+  before_save :check_college
+
+  def accuracy_rank
+    if rank >= 20  
+      return rank * -1 
+    else 
+      return rank 
+    end
+  end
  
   def as_json extras={}
     extras[:include] ||= {}
     extras[:include].merge!({pro_info: {}})
     super(extras)
+  end
+
+private
+
+  def check_college
+    College.create_if_new college
   end
   
 end

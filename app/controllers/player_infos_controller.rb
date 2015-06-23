@@ -4,6 +4,6 @@ class PlayerInfosController < ApplicationController
   private
     
     def secure_params
-      params.require(:player_info).permit(:master_id, :first_name, :last_name, :middle_name, :nick_name, :birth_date, :death_date, :start_year, :rank, :occupation_category, :company, :company_description, :transaction_status, :transaction_substatus, :user_id)
+      params.require(:player_info).permit(:master_id, :first_name, :last_name, :middle_name, :nick_name, :birth_date, :death_date, :start_year, :rank, :occupation_category, :company, :company_description, :transaction_status, :transaction_substatus, :user_id, :college)
     end
 end

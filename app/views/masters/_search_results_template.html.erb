@@ -8,7 +8,7 @@
         {{>item_flag_container item_type="player_info"}}
       </li>
       {{#each this}}
-      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year" }}
+      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
       <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/in}}
       {{/each}}
@@ -229,6 +229,12 @@
 </script>
 
 
+<script id="item-flag-result-template" type="text/x-handlebars-template" class="hidden">
+  {{#with tracker}}
+    {{>item_flag_result }}
+  {{/with}}
+</script>
+
 <script id="item-flags-result-template" type="text/x-handlebars-template" class="hidden">
   {{#with item_flags}}
     {{>item_flags_result }}
@@ -244,22 +250,40 @@
       
     {{#each masters}}
       <div class="panel-heading" role="tab" id="master-{{id}}">          
-        <h3 class="panel-title">     
+        <h3 class="panel-title">
           <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
-            <span class="msid">{{id}}</span> : 
-            <strong class="player-names">
-            {{capitalize player_infos.0.first_name}} 
-            {{capitalize player_infos.0.middle_name}} 
-            {{capitalize player_infos.0.last_name}}
-            
-            {{#if player_infos.0.nick_name}}
-              ({{capitalize player_infos.0.nick_name}})
-            {{/if}}
-            </strong>
-              <small>DOB</small> {{local_date player_infos.0.birth_date '-'}}
-              <small>DOD</small> {{local_date player_infos.0.death_date '-'}}
-              <small>Rank</small> {{player_infos.0.rank}}
-            
+            <div class="row">
+              <div class="col-md-10 player-info-header">
+                <span class="msid">{{id}}</span> : 
+
+                <strong class="player-names">
+                  {{capitalize player_infos.0.first_name}} 
+                  {{capitalize player_infos.0.middle_name}} 
+                  {{capitalize player_infos.0.last_name}}
+                  {{#if player_infos.0.nick_name}}
+                    ({{capitalize player_infos.0.nick_name}})
+                  {{/if}}
+                </strong>
+                <small>DOB</small> {{local_date player_infos.0.birth_date '-'}}
+                <small>DOD</small> {{local_date player_infos.0.death_date '-'}}
+                <small>Rank</small> {{player_infos.0.rank}}
+              </div>
+              <div class="col-md-10 col-md-offset-2 pro-info-header">
+              {{#with player_infos.0.pro_info}}
+                <strong class="pro-names">
+                  {{capitalize first_name}} 
+                  {{capitalize middle_name}} 
+                  {{capitalize last_name}}
+                  {{#if nick_name}}
+                    ({{capitalize nick_name}})
+                  {{/if}}
+                </strong>
+                <small>DOB</small> {{local_date birth_date '-'}}
+                <small>DOD</small> {{local_date death_date '-'}}
+              {{/with}}  
+              </div>
+          
+            </div>
           </a>
         </h3>
       </div>

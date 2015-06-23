@@ -125,28 +125,6 @@
       return obj;
     });
 
-    Handlebars.registerHelper('pretty_print_object',function(obj){
-        var res = "";
-        res = _re.utils.pretty_print_object(obj);
-        return res;
-    });
-    
-    Handlebars.registerHelper('print_object_row',function(obj){
-        var res = "";
-        res = _re.utils.pretty_print_object_row(obj);
-        return res;
-    });
-    
-    Handlebars.registerHelper('symbolize',function(text){
-      if(text==null) return;
-        return _re.utils.symbolize(text);
-    });
-
-    Handlebars.registerHelper('escape_plaintext',function(text){
-        return _re.utils.escape_plaintext(text);
-    });
-
-
     Handlebars.registerHelper('nl2br', function(text) {
         var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
         return new Handlebars.SafeString(nl2br);
@@ -178,8 +156,13 @@
         if(date_string === null || date_string === '' ) return unknown;
         var startTime = new Date(Date.parse(date_string + 'T00:00:00Z'));
 
-        if((!startTime || startTime == 'Invalid Date') && options.hash.return_string)
-            return date_string;
+        if(!startTime || startTime == 'Invalid Date'){
+            if(options.hash.return_string)
+                return date_string;
+            else
+                return unknown;
+        }
+            
 
         startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
         return startTime.toLocaleDateString();

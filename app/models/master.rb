@@ -64,6 +64,10 @@ class Master < ActiveRecord::Base
       end
       
     end
+    
+    # No conditions were recognized. Exit now.
+    return nil if wheres.length == 0
+    
     joins << :player_infos unless joins.include? :player_infos
     Master.select(selects).joins(joins).uniq.where(wheres)
     
@@ -96,6 +100,10 @@ class Master < ActiveRecord::Base
     end
     logger.info "where: #{w}, #{wcond}"
     joins << :player_infos unless joins.include? :player_infos
+    
+    # No conditions were recognized. Exit now.
+    return nil if wcond.length == 0
+    
     Master.joins(joins).uniq.where(w, wcond)
   end
   
