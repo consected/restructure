@@ -20,6 +20,17 @@ class Master < ActiveRecord::Base
   
   accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses, :trackers
   
+  AltConditions = {
+    player_infos: {
+      first_name: ['player_infos.first_name LIKE ?', :starts_with],
+      nick_name: ['player_infos.nick_name LIKE ?', :starts_with],
+    },
+    pro_infos: {
+      first_name: ['pro_infos.first_name LIKE ?', :starts_with],
+      nick_name: ['pro_infos.nick_name LIKE ?', :starts_with]
+      
+      }    
+  }
   
   
   # Build a Master search using the Master and nested attributes passed in
@@ -28,8 +39,9 @@ class Master < ActiveRecord::Base
   # attributes that are not nil
   def self.search_on_params params, conditions={}
     
-    joins = []
-    wheres = {}
+    joins = [] # list of joined tables
+    wheres = {} # set of equality where clauses
+    wheresalt = [nil, {}] # list of non-equality where clauses (such as LIKE)
     selects = []
     
     params.each do |k,v|
@@ -46,12 +58,26 @@ class Master < ActiveRecord::Base
         k1 = k.to_s.gsub('_attributes','')
         # Generate a pluralized table name for associations that are has_one
         k1s = k1.pluralize
-        # Keep only non-nil attributes
-        vn = v.select {|_,v1| !v1.nil?}
+        # Keep only non-nil attributes for the primary wheres that don't have an alternative condition string
+        vn = v.select{|key1,v1| !v1.nil? && !alt_condition(k1.to_sym, [key1, v1])}
+        
+        # Pull the attributes with an alternative condition string (note that this returns nil values too)
+        valt = v.select{|_,v1| !v1.nil? }.map{|v2| alt_condition(k1.to_sym, v2) }
+        
         # If we have a set of attributes that is not empty 
         # add the equality conditions to the list of wheres
-        if vn.length > 0
-          wheres[k1s] = vn
+        if vn.length > 0 || valt.length > 0
+          if vn.length > 0
+            wheres[k1s] = vn 
+          end
+          if valt.length > 0
+            valt.each do |cond, vals|
+              if cond && !vals.nil?
+                wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{cond}"
+                wheresalt[1].merge! vals
+              end
+            end            
+          end
           joins << k1.to_sym        
           
           conditions[k1.to_sym] = vn
@@ -65,12 +91,16 @@ class Master < ActiveRecord::Base
       
     end
     
+    logger.info "Join: #{joins}\nWhere: #{wheres.inspect} << #{wheresalt.inspect} "
+    
     # No conditions were recognized. Exit now.
-    return nil if wheres.length == 0
+    return nil if wheres.length == 0 && !wheresalt.first
     
     joins << :player_infos unless joins.include? :player_infos
-    Master.select(selects).joins(joins).uniq.where(wheres)
+    res = Master.select(selects).joins(joins).uniq.where(wheres)
+    res = res.where(wheresalt.first, wheresalt.last) if wheresalt.first
     
+    res
   end
   
   
@@ -92,8 +122,14 @@ class Master < ActiveRecord::Base
     p.each do |k,v|
       unless v.nil?
         w << " AND " unless first
-        w << "(player_infos.#{k} = :#{k} OR pro_infos.#{k} = :#{k})"      
-        wcond[k.to_sym] = v
+        if k == 'first_name'  || k == 'nick_name'
+          w << "(player_infos.#{k} LIKE :#{k} OR pro_infos.#{k} LIKE :#{k})"      
+          wcond[k.to_sym] = "#{v}%"
+        else
+          w << "(player_infos.#{k} = :#{k} OR pro_infos.#{k} = :#{k})"      
+          wcond[k.to_sym] = v
+        end  
+        
         joins  = [:player_infos, "left outer join pro_infos on pro_infos.master_id = masters.id"]
         first = false
       end
@@ -105,6 +141,27 @@ class Master < ActiveRecord::Base
     return nil if wcond.length == 0
     
     Master.joins(joins).uniq.where(w, wcond)
+  end
+  
+  def self.alt_condition table_name, condition    
+    ckey = condition.first
+    cval = condition.last
+    
+    return if !table_name || !condition || ckey.nil? || cval.nil?
+    altable = AltConditions[table_name]
+    return unless altable
+    altpair = altable[ckey.to_sym]
+    return unless altpair
+    
+    alt = altpair[0]
+    cop = altpair[1]
+    
+    refname = "#{table_name}_#{ckey}"
+    alt = alt.gsub('?', ":#{refname}")
+    cvaltotal = "#{cval}%" if cop == :starts_with
+    res = [alt, {refname.to_sym => cvaltotal}]
+    logger.debug "Checking for alt_condition:= #{res}"
+    res
   end
   
   

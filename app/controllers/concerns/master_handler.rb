@@ -8,9 +8,14 @@ module MasterHandler
     before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
     before_action :set_instance_from_id, only: [:show]
 
-    
+    after_action :do_log_action
   end
 
+  def do_log_action
+    len = (@master_objects ? @master_objects.length : 0)
+    log_action "#{controller_name}##{action_name}", "AUTO", len
+  end
+  
   def primary_model 
     controller_name.classify.constantize
   end

@@ -90,6 +90,25 @@ _fpa = {
     });
   },
   
+  add_tracking_params: function(submitter){
+      var id = submitter.prop('id');
+        if(submitter.find('input').length > 0){
+            if(submitter.find('input[name="_user_action"]').length === 0)
+                submitter.append('<input type="hidden" name="_user_action" value="form:'+id+'"/>');
+        }else{
+            var p = submitter.prop('href');
+            if(id)
+                var msg = 'link_id:'+id;
+            else
+                var msg = 'link_class:'+submitter.attr('class'); 
+            if(p.indexOf('?')>0)
+                p = p+'&_user_action='+ encodeURIComponent(msg);              
+            else
+                p = p+'?_user_action='+encodeURIComponent(msg);
+            submitter.prop('href', p);
+        }
+  },
+  
   handle_remotes: function(){
     var block = $("form[data-remote='true'], a[data-remote='true']").not('.attached');
     
@@ -108,6 +127,8 @@ _fpa = {
                 $(this).val('');
             }
         });
+        
+        _fpa.add_tracking_params($(this));
         return true;
     }).on("ajax:success", function(e, data, status, xhr) {    
         var data = xhr.responseJSON;

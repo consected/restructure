@@ -2,6 +2,10 @@ module ControllerUtils
   
   extend ActiveSupport::Concern
 
+  def log_action action, sub, results, status="OK"
+    current_user.log_action action, sub, results, request.method_symbol, params, status
+  end
+  
   def params_nil_if_blank p
     p1 = p.dup
     p.each do |k,v|     

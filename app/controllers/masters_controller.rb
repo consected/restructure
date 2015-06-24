@@ -8,9 +8,12 @@ class MastersController < ApplicationController
     #search_params
     redirect_to '/masters/search/' and return if search_params.nil? || search_params.length == 0
     
-    if params[:mode] == 'MSID'
+    search_type = params[:mode] 
+    search_type = 'ADVANCED' if search_type.blank?
+    
+    if search_type == 'MSID'
       @masters = Master.where id: params[:master][:id]
-    elsif params[:mode] == 'SIMPLE'
+    elsif search_type == 'SIMPLE'
       @masters = Master.simple_search_on_params search_params[:master]
     else
       @masters = Master.search_on_params search_params[:master]
@@ -40,9 +43,12 @@ class MastersController < ApplicationController
         }) 
       }
       logger.debug m.as_json
+      
+      log_action "master search", search_type, @masters.length
     else
       # Return no results
       m = {message: "no conditions were specified"}
+      current_user.log_action "master search", search_type, 0, "no conditions specified"
     end
 
     render json: m
