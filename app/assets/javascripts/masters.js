@@ -19,7 +19,7 @@ $(document).ready(function(){
     
     $('.clear-fields').on('click', function(ev){
         ev.preventDefault();
-        forms.find('input, select').not('[type="submit"], [type="hidden"]').val(null);
+        forms.find('input, select').not('[type="submit"], [type="hidden"]').val(null).removeClass('has-value');
     });
     
 });

@@ -7,12 +7,11 @@
         <h4 class="list-group-item-heading">Player Info <span class="heading-rank">{{rank}}</span></h4>
         {{>item_flag_container item_type="player_info"}}
       </li>
-      {{#each this}}
-      {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
+      
+      {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,college" }}
       <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-      {{/in}}
-      {{/each}}
-
+      {{/filter}}
+      
     </ul>
   </div>
 </script>
@@ -27,11 +26,11 @@
               {{>item_flag_container item_type="pro_info"}}
 
             </li>
-            {{#each this }}
-            {{#in this @key "first_name,middle_name,last_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
+            
+            {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
             <li class="list-group-item pro-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-            {{/in}}
-            {{/each}}
+            {{/filter}}
+            
         </ul>
 
       </div>  

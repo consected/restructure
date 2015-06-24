@@ -151,6 +151,20 @@
     });
 
 
+    Handlebars.registerHelper('filter', function(array, items, options) {
+        var item, result, _i, _len;
+        result = '';
+        var ins = items.split(',');
+
+        
+        for (_i = 0, _len = ins.length; _i < _len; _i++) {
+          item = array[ins[_i]];
+          result += options.fn(item, {data: {key: ins[_i]}});
+        }
+
+        return result;
+    });
+
     // Display date in local format, without adjusting the timezone and giving the appearance of changing the day
     Handlebars.registerHelper('local_date', function(date_string, unknown, options) {
         if(date_string === null || date_string === '' ) return unknown;
@@ -173,7 +187,7 @@
         if(stre === null || stre === '' ) return "";
         var startTime;
         var asTimestamp;
-        if(stre.length >= 8){
+        if(stre && stre.length >= 8){
             if(stre.indexOf('t') && stre.indexOf('z')){
                 startTime = new Date(Date.parse(stre ));
                 asTimestamp = true;

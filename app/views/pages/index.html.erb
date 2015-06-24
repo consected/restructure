@@ -1,13 +1,31 @@
-<ul class="nav">    
-    <% if current_admin %> 
-    <li class="nav"><%= link_to "User Management", manage_users_home_path %> </li> 
-    <li class="nav"><%= link_to "Manage Protocols", protocols_path %> </li> 
-    <li class="nav"><%= link_to "Manage Item Flags", item_flag_names_path %> </li> 
-    <li class="nav"><%= link_to "Manage Selections", general_selections_path %> </li> 
-    <li class="nav"><%= link_to "Colleges List", colleges_path %> </li> 
+<div class="container" style="padding-top:40px;">
+<div class="panel panel-primary">
+    <div class="panel-body">
+<% if current_admin %> 
+  <h2>Admin Actions</h2>
+  <ul class="nav">    
     
-    <% end %>
-</ul>
-<div>
+      <li class="nav"><%= link_to "User Management", manage_users_home_path %> </li> 
+      <li class="nav"><%= link_to "Manage Protocols", protocols_path %> </li> 
+      <li class="nav"><%= link_to "Manage Item Flags", item_flag_names_path %> </li> 
+      <li class="nav"><%= link_to "Manage Selections", general_selections_path %> </li> 
+      <li class="nav"><%= link_to "Colleges List", colleges_path %> </li>
+      <li class="nav"><%= link_to "Admin Logout", admin_session_path, method: :destroy %> </li>
+  </ul>      
+<% end %>
+
+<% if current_user %>
+  <h2>User Actions</h2>
+  <ul class="nav">    
+      <li class="nav"><%= link_to "Research", masters_path %> </li>
+      <li class="nav"><%= link_to "Reports", masters_path %> </li>
+      <li class="nav"><%= link_to "Create MSID", new_master_path %> </li>
+      
+      <li class="nav"><%= link_to "User Logout", destroy_user_session_path, method: :delete  %> </li>
+  </ul>
+<% end %>
+
+</div>
     
 </div>
+    </div>
