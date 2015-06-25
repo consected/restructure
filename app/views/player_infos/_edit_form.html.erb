@@ -35,6 +35,10 @@
             <%= f.label :start_year %>
             <%= f.number_field :start_year, in: Settings::StartYearRange %>
         </li>
+        <li class="list-group-item player-info-start_year">
+            <%= f.label :end_year %>
+            <%= f.number_field :end_year, in: Settings::EndYearRange %>
+        </li>
         <li class="list-group-item player-info-rank">
             <%= f.label :rank %>
             <%= f.text_field :rank %>

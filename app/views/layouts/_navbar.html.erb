@@ -30,6 +30,7 @@
         <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
           <div class="form-group">
             <%= text_field_tag :nav_q, params[:nav_q], class: "form-control", placeholder: "MSID Search" %>
+            <%= text_field_tag :nav_q_pro_id, params[:nav_q_pro_id], class: "form-control", placeholder: "Pro ID Search" %>  
           </div>
           <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
 

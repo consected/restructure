@@ -2,6 +2,7 @@ class ItemFlag < ActiveRecord::Base
   belongs_to :item, polymorphic: true
   belongs_to :item_flag_name
   
+  
   def method_id 
     self.item.master_id
   end

@@ -12,6 +12,10 @@ module ControllerUtils
       
       if v.is_a? Hash
         p1[k] = params_nil_if_blank v 
+      elsif v.is_a? Array
+        va = v.reject {|v1| v1.blank?}
+        va = nil if va.length == 0
+        p1[k] = va
       elsif v.blank?
         p1[k] = nil        
       end

@@ -14,11 +14,13 @@ class Master < ActiveRecord::Base
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
   has_many :general_infos, class_name: 'PlayerInfo' 
   
-  # TODO - make this real!
-  has_one :address, -> { order(RankNotNullClause).limit(1)  } 
+  Master.reflect_on_all_associations(:has_many).each do |assoc| 
+    # This association is provided to allow generic search on flagged associated object
+    has_many "#{assoc.plural_name}_item_flags".to_sym, through: assoc.plural_name, source: :item_flags
+  end
+    
   
-  
-  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :address, :addresses, :trackers
+  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :addresses, :trackers
   
   AltConditions = {
     player_infos: {
@@ -55,9 +57,21 @@ class Master < ActiveRecord::Base
         
         # Handle nested attributes
         # Get the key name for the table by removing the _attributes extension from the key
-        k1 = k.to_s.gsub('_attributes','')
-        # Generate a pluralized table name for associations that are has_one
-        k1s = k1.pluralize
+        
+        if k.to_s.include? '_attributes'
+          k1 = k.to_s.gsub('_attributes','')
+          r = Master.reflect_on_association(k1.to_sym)
+          
+          if r.source_reflection
+            k1s =  r.source_reflection.name.to_s
+          else
+            k1s = r.plural_name.to_s
+          end
+          
+        else
+          # Generate a pluralized table name for associations that are has_one
+          k1s = k.to_s.pluralize
+        end
         # Keep only non-nil attributes for the primary wheres that don't have an alternative condition string
         vn = v.select{|key1,v1| !v1.nil? && !alt_condition(k1.to_sym, [key1, v1])}
         
@@ -68,7 +82,13 @@ class Master < ActiveRecord::Base
         # add the equality conditions to the list of wheres
         if vn.length > 0 || valt.length > 0
           if vn.length > 0
-            wheres[k1s] = vn 
+            logger.info "vn(#{vn.first}, #{vn.first.last}): #{vn.inspect} -- #{wheres[k1s]}"
+            if wheres[k1s] && wheres[k1s].first.last.is_a?(Array)
+              logger.info "its an array" 
+              wheres[k1s][vn.first.first] += vn.first.last 
+            else
+              wheres[k1s] = vn 
+            end
           end
           if valt.length > 0
             valt.each do |cond, vals|

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150623194212) do
+ActiveRecord::Schema.define(version: 20150625213040) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -157,6 +157,7 @@ ActiveRecord::Schema.define(version: 20150623194212) do
     t.integer  "contact_id"
     t.integer  "pro_info_id"
     t.string   "college"
+    t.integer  "end_year"
   end
 
   add_index "player_infos", ["master_id"], name: "index_player_infos_on_master_id", using: :btree

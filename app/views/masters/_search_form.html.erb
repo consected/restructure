@@ -13,7 +13,7 @@
 # the params return something like "model_atts" => {"0"=>{...}, "1"=>{...}, "2"=>{...}}
 # The child_index ensure they are merged down into "model_atts" => {"0"=>{..., ..., ...}} 
 %>    
-<%= form_for @master, method: :get, remote: true, html: {id: 'advanced_search_master', class: 'search_master'} do |f| %>
+<%= form_for @master, method: :post, url: '/masters/', include_id: false, remote: true, html: {id: 'advanced_search_master', class: 'search_master'} do |f| %>
 
   <div class="row">
 
@@ -51,7 +51,10 @@
         <%= f.label :start_year %>
         <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control'  %>
       </div>
-
+      <div class="form-group col-sm-2">
+        <%= f.label :end_year %>
+        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control'  %>
+      </div>
     <% end %>
   </div>
     
@@ -90,8 +93,12 @@
         <%= f.label :start_year %>
         <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control after-college-input'  %>
       </div>
+      <div class="form-group col-sm-2">
+        <%= f.label :end_year %>
+        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control'  %>
+      </div>
       <div class="form-group col-sm-3">
-        <%= f.label :pro_id %>
+        <%= f.label :pro_infos, "Pro ID" %>
         <%= f.number_field :pro_id, class: 'form-control', min: 0  %>
       </div>
       
@@ -156,15 +163,29 @@
       </div>
     <% end %>
     </div>
-    <%= f.fields_for :player_infos, child_index: 0 do |f| %>
+    
     <div class="row">
-      <div class="form-group col-sm-18 col-sm-offset-1">
+    <%= f.fields_for :player_infos, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-6 ">
         <%= f.label :notes %>
         <%= f.text_field :notes, class: 'form-control' %>
       </div>
-    </div>
+    
     <% end %>
-  
+    
+    <div class="form-group col-sm-4">
+      <%= label :player_info, "Player Tags" %>
+      <%= collection_select("master[player_infos_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_info), :id, :name, {}, multiple: true) %>
+    </div>
+    <div class="form-group col-sm-4">
+      <%= label :address, "Address Tags" %>
+      <%= collection_select("master[addresses_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:address), :id, :name, {}, multiple: true) %>
+    </div>
+    <div class="form-group col-sm-4">
+      <%= label :address, "Contact Tags" %>
+      <%= collection_select("master[player_contacts_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_contact), :id, :name, {}, multiple: true) %>
+    </div>    
+  </div>
   <div class="form-group actions ">
     <%= f.submit :submit %>
   </div>

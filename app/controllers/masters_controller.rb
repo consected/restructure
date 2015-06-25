@@ -12,7 +12,11 @@ class MastersController < ApplicationController
     search_type = 'ADVANCED' if search_type.blank?
     
     if search_type == 'MSID'
-      @masters = Master.where id: params[:master][:id]
+      if !params[:master][:id].blank?
+      @masters = Master.where id: params[:master][:id] 
+      elsif !params[:master][:pro_infos_attributes]["0"][:pro_id].blank?
+      @masters = Master.where id: params[:master][:pro_id]
+      end
     elsif search_type == 'SIMPLE'
       @masters = Master.simple_search_on_params search_params[:master]
     else
@@ -48,7 +52,7 @@ class MastersController < ApplicationController
     else
       # Return no results
       m = {message: "no conditions were specified"}
-      current_user.log_action "master search", search_type, 0, "no conditions specified"
+      log_action "master search", search_type, 0, "no conditions specified"
     end
 
     render json: m
@@ -65,6 +69,7 @@ class MastersController < ApplicationController
   
   def search
     @master_id ||= params[:nav_q]
+    @master_pro_id ||= params[:nav_q_pro_id]
     
     @master =  Master.new 
     

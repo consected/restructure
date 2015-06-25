@@ -129,12 +129,11 @@
 
   
       
-      {{#each this}}
-      {{#in this @key "event,event_date,c_method,outcome,outcome_date,protocol_name,notes" }}
+      
+      {{#filter this "protocol_name,event,event_date,c_method,outcome,outcome_date,notes" }}
       <td class="tracker-{{@key}}">{{pretty_string this  return_string="true" capitalize="true"}}</td>
-      {{/in}}
-      {{/each}}
-
+      {{/filter}}
+      
   
 </script>
 
@@ -333,10 +332,7 @@
           <div id="trackers-{{id}}" class="collapse tracker-block panel panel-default">
             <table class="table">
               <thead><tr>
-                <th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th>protocol</th></tr></thead>
-              <tfoot><tr><td colspan="6">
-                <a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> 
-              </td></tr></tfoot>
+                <th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> </th></tr></thead>
               <tbody>
               {{#each trackers}}
                 <tr class="index-{{@index}}" id="tracker-{{../id}}-{{id}}" >                  
@@ -344,7 +340,7 @@
                 </tr>              
               {{/each}}
               <tr id="tracker-{{id}}-" data-subscription="tracker-edit-form-{{id}}-" class="new-block">
-              {{#is trackers.length 0}}<td colspan="6"><h4>No Tracker Records</h4></td>{{/is}}
+              {{#is trackers.length 0}}<td colspan="8"><h4>No Tracker Records</h4></td>{{/is}}
               </tr>
               
               </tbody>

@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   
   resources :pages, only: [:show, :index]
   
+  post 'masters/' => 'masters#index'
   get 'masters/search', as: 'msid_search'
   get 'masters/search' => 'masters#search'
   resources :masters, only: [:show, :index, :new, :create] do
@@ -35,6 +36,7 @@ Rails.application.routes.draw do
     post ':item_controller/:item_id/item_flags/:id', to: 'item_flags#create'
 
   end
+  
   
   
 #  get 'masters/index'

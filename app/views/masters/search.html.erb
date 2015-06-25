@@ -1,7 +1,7 @@
 <%= render partial: 'search_form_simple' %>
 <%= render partial: 'search_form' %>
 
-<% if @master_id %>
+<% if @master_id || @master_pro_id %>
 
   <%= form_for @master, method: :get, remote: true, html: {id: 'msid_search_master', class: 'msid_search_master hidden'} do |f| %>
 
@@ -9,11 +9,12 @@
       <div class="form-group col-sm-3">
         <%= f.label :master_id %>
         <%= f.number_field :id, id: 'simple_master_id', class: 'form-control', min: 0 %>
+        <%= number_field "master[pro_infos_attributes][0]", :pro_id, id: 'simple_master_pro_id', class: 'form-control', min: 0 %>
       </div>
   <% end %>
 <script>
   $('#simple_master_id').val('<%=@master_id%>');
-  
+  $('#simple_master_pro_id').val('<%=@master_pro_id%>');
   window.setTimeout(function(){
     $('#msid_search_master').submit();
   }, 10);

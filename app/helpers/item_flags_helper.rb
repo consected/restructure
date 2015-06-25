@@ -22,12 +22,15 @@ module ItemFlagsHelper
   end
   
 
-  def item_flags_array a
-    ItemFlagName.selector_collection(item_type: @item_type)
+  def item_flags_array item_type=nil
+    item_type ||= @item_type
+    
+    ItemFlagName.selector_collection(item_type: item_type)
   end
   
-  def flags_selected
-    s = @item.item_flags.map {|i| i.item_flag_name_id}
+  def flags_selected item=nil
+    item ||= @item
+    s = item.item_flags.map {|i| i.item_flag_name_id}
     logger.info "Selected #{s}"
     s
   end
