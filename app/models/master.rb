@@ -26,6 +26,7 @@ class Master < ActiveRecord::Base
     player_infos: {
       first_name: ['player_infos.first_name LIKE ?', :starts_with],
       nick_name: ['player_infos.nick_name LIKE ?', :starts_with],
+      notes: ['player_infos.notes LIKE ?', :contains]
     },
     pro_infos: {
       first_name: ['pro_infos.first_name LIKE ?', :starts_with],
@@ -179,6 +180,7 @@ class Master < ActiveRecord::Base
     refname = "#{table_name}_#{ckey}"
     alt = alt.gsub('?', ":#{refname}")
     cvaltotal = "#{cval}%" if cop == :starts_with
+    cvaltotal = "%#{cval}%" if cop == :contains
     res = [alt, {refname.to_sym => cvaltotal}]
     logger.debug "Checking for alt_condition:= #{res}"
     res

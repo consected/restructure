@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150625213040) do
+ActiveRecord::Schema.define(version: 20150626190344) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -192,6 +192,17 @@ ActiveRecord::Schema.define(version: 20150625213040) do
   add_index "pro_infos", ["master_id"], name: "index_pro_infos_on_master_id", using: :btree
   add_index "pro_infos", ["user_id"], name: "index_pro_infos_on_user_id", using: :btree
 
+  create_table "protocol_events", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "protocol_id"
+    t.integer  "admin_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "protocol_events", ["admin_id"], name: "index_protocol_events_on_admin_id", using: :btree
+  add_index "protocol_events", ["protocol_id"], name: "index_protocol_events_on_protocol_id", using: :btree
+
   create_table "protocols", force: :cascade do |t|
     t.string   "name"
     t.integer  "user_id"
@@ -268,6 +279,8 @@ ActiveRecord::Schema.define(version: 20150625213040) do
   add_foreign_key "player_infos", "users"
   add_foreign_key "pro_infos", "masters"
   add_foreign_key "pro_infos", "users"
+  add_foreign_key "protocol_events", "admins"
+  add_foreign_key "protocol_events", "protocols"
   add_foreign_key "protocols", "users"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"

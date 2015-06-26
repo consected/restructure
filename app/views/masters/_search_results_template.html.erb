@@ -8,7 +8,7 @@
         {{>item_flag_container item_type="player_info"}}
       </li>
       
-      {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,college" }}
+      {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
       <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/filter}}
       
@@ -189,7 +189,15 @@
     {{#if ../_created}}<div class="index-created" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">{{/if}}
       {{>player_info_result }}
       {{>pro_info_result pro_info player_info_id=id}}
+      <div class="col-md-24  player-info-notes">
+        <div class="panel panel-default panel-body">
+        {{notes}}
+        </div>
+      </div>
+    
     {{#if ../_created}}</div>{{/if}}
+    
+    
   {{/with}}
   
 </script>
@@ -253,7 +261,7 @@
             <div class="row">
               <div class="col-md-10 player-info-header">
                 <span class="msid">{{id}}</span> : 
-
+        
                 <strong class="player-names">
                   {{capitalize player_infos.0.first_name}} 
                   {{capitalize player_infos.0.middle_name}} 
@@ -291,7 +299,7 @@
             <a href="#" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
           </li>
           <li role="presentation">
-            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="collapsed"><span class="caret"></span> tracker ({{trackers.length}})</a>
+            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="{{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker ({{trackers.length}})</a>
           </li>
           <li role="presentation">
             <a href="#" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
@@ -314,22 +322,9 @@
                 <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-remote="true">Create Scantron record</a> </p>
 
             </div>
-            <div class="col-md-6">
-                {{#each manual_investigations}}
-                  <div class="index-{{@index}}" id="manual_investigation-{{../id}}-{{id}}" data-subscription="manual_investigation-edit-form-{{../id}}-{{id}}">
-                    {{>manual_investigation_result master_id=../id}}
-                  </div>
-                {{/each}}
-
-                <div class="" id="manual_investigation-{{id}}-" data-subscription="manual_investigation-edit-form-{{id}}-">
-                  {{#unless manual_investigations}}<h4>No Manual records</h4>{{/unless}}                
-                </div>
-                <p class="text-center"><a href="/masters/{{id}}/manual_investigations/new" data-remote="true">Create Manual record</a> </p>
-
-            </div>
           </div>
   
-          <div id="trackers-{{id}}" class="collapse tracker-block panel panel-default">
+          <div id="trackers-{{id}}" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
             <table class="table">
               <thead><tr>
                 <th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> </th></tr></thead>
@@ -356,6 +351,12 @@
                   <div class="row" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">
                     {{>player_info_result }}
                     {{>pro_info_result pro_info player_info_id=id}}
+                    
+                    <div class="col-md-24  player-info-notes">
+                      <div class="panel panel-default panel-body">
+                      {{notes}}
+                      </div>
+                    </div>
                   </div>
                 {{else}}
                   <div class="row new-block" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">

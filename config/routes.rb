@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   
   
+  resources :protocol_events
   resources :colleges
   resources :general_selections
   resources :item_flag_names

@@ -1,4 +1,4 @@
-$(document).ready(function(){
+_fpa.loaded.default = function(){
     $('.dropdown-toggle').dropdown();
     $('select[multiple]').chosen({width: '100%'});
     $('table').each(function(){
@@ -18,8 +18,7 @@ $(document).ready(function(){
         $('#nav_q').val('');
     });
     
-    $('form').not('.navbar-form').find('input, select').on('keypress', function(){
-        $('.navbar-form input[type="text"]').val('');
-    });
-    
-});
+
+    if(_fpa.loaded[_fpa.status.controller])
+        _fpa.loaded[_fpa.status.controller]();
+};

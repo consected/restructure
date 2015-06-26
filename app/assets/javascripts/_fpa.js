@@ -25,11 +25,23 @@ _fpa = {
 
     $(block).addClass('ajax-running');
   },
-  ajax_done: function(block){
+  ajax_done: function(block){  
     $(block).removeClass('ajax-running');
   },
           
   view_template: function(block, template_name, data, options){    
+    
+    
+    _fpa.ajax_working(block);
+    if(!options || !options.position){        
+        block.html('');
+    }
+    
+    
+    
+    
+    
+    window.setTimeout(function(){  
     var source = $('#'+template_name).html();
     var template = Handlebars.compile(source);
     
@@ -60,7 +72,8 @@ _fpa = {
     
     _fpa.handle_remotes();
     _fpa.reset_page_size();
-    
+    _fpa.ajax_done(block);
+    }, 10);
   },
           
   reset_page_size:function(){
@@ -120,7 +133,10 @@ _fpa = {
       _fpa.clear_flash_notices();
    
     }).on('ajax:before', function(){
-        $(this).find('input[data-only-for]').each(function(){
+        
+        _fpa.ajax_working(block);
+        
+        $(this).find('[data-only-for]').each(function(){
             var dof = $(this).attr('data-only-for');
             var dofv = $(dof).val();
             if(dofv === null || dofv === ''){
@@ -133,7 +149,7 @@ _fpa = {
     }).on("ajax:success", function(e, data, status, xhr) {    
         var data = xhr.responseJSON;
         _fpa.clear_flash_notices();
-
+        _fpa.ajax_done(block);    
         if(xhr.responseJSON){
             var t = $(this).attr('data-result-target');
             var options = {}
@@ -179,9 +195,12 @@ _fpa = {
                 });
 
             });
-        }    
+        }
+        
+        
     }).on("ajax:error", function(e, xhr, status, error){
       _fpa.clear_flash_notices();
+      _fpa.ajax_done(block);
       _fpa.flash_notice("An error occurred.", 'danger');
       
     }).addClass('attached');
@@ -267,6 +286,7 @@ _fpa.callbacks = {
 };
 
 _fpa.preprocessors = {};
+_fpa.loaded = {};
 
 $('html').ready(function(){
   _fpa.reset_page_size();  
@@ -287,4 +307,5 @@ $('html').ready(function(){
   });
   
   _fpa.handle_remotes();
+  _fpa.loaded.default();
 });

@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @protocol_event.name %>
+</p>
+
+<p>
+  <strong>Protocol:</strong>
+  <%= @protocol_event.protocol.name %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @protocol_event.user %>
+</p>
+
+<%= link_to 'Edit', edit_protocol_event_path(@protocol_event) %> |
+<%= link_to 'Back', protocol_events_path %>

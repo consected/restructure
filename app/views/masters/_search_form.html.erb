@@ -130,7 +130,7 @@
     <% end %>
       
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>  
-      <div class="form-group col-sm-2">
+      <div class="form-group col-sm-3">
         <%= f.label :rank %>
         <%= f.number_field :rank, class: 'form-control' %>
       </div>
@@ -142,15 +142,21 @@
         <%= f.text_field :scantron_id, class: 'form-control' %>
       </div>
     <% end %>
-    </div>
-    
-    <div class="row">
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>    
       <div class="form-group col-sm-6 ">
         <%= f.label :notes %>
         <%= f.text_field :notes, class: 'form-control' %>
       </div>
     
+    <% end %>  
+    </div>
+    
+    <div class="row">
+    <%= f.fields_for :trackers, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-2 ">
+        <%= f.label :protocol %>
+        <%= f.select :protocol_id, protocol_array, include_blank: "-select-"%>
+      </div>
     <% end %>
     
     <div class="form-group col-sm-4">

@@ -1,3 +1,9 @@
 <script>
   _fpa.set_cache('college_list', <%= college_array.html_safe %>);
+  
+  _fpa.status = {
+    controller: '<%= controller_name %>',
+    action: '<%= action_name %>'
+  };
+  
 </script>

@@ -85,3 +85,28 @@ li.search-field input.default {width: 100% !important;}
 input.form-control.has-value, select.form-control.has-value {
     background-color: #f2dede !important;
 }
+
+
+@-webkit-keyframes working {
+    0% {background-color: rgba(240,240,255, 0.25);}
+    50% {background-color: rgba(240,240,255, 0.75);}
+    100% {background-color: rgba(240,240,255, 0.45);}
+}
+@-moz-keyframes working {
+    0% {background-color: rgba(240,240,255, 0.25);}
+    50% {background-color: rgba(240,240,255, 0.75);}
+    100% {background-color: rgba(240,240,255, 0.45);}
+}
+@keyframes working {
+    0% {background-color: rgba(240,240,255, 0.25);}
+    50% {background-color: rgba(240,240,255, 0.75);}
+    100% {background-color: rgba(240,240,255, 0.45);}
+}
+
+.ajax-running{
+    -webkit-animation: working 1s ease-in-out infinite;
+    -moz-animation: working 1s ease-in-out infinite;
+    animation: working 1s ease-in-out infinite;
+    
+    min-height: 20px;
+}

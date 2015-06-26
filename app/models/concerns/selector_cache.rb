@@ -30,6 +30,9 @@ module SelectorCache
     def nv_pair_cache_key 
       "#{self.to_s}_nameval"
     end
+    def attributes_cache_key
+      "#{self.to_s}_attributes"      
+    end
     
     def selector_array conditions=nil
       ckey="#{array_cache_key}#{conditions}"
@@ -51,6 +54,14 @@ module SelectorCache
       
       Rails.cache.fetch(ckey){
         where(conditions).collect {|c| [c.name, c.value] }
+      }
+    end
+    
+    def selector_attributes attributes, conditions=nil
+      ckey="#{attributes_cache_key}#{attributes}#{conditions}"
+      
+      Rails.cache.fetch(ckey){
+        where(conditions).collect {|c| [c.send(attributes.first), c.send(attributes.last)] }
       }
     end
     

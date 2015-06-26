@@ -1,0 +1,29 @@
+<%= form_for(@protocol_event) do |f| %>
+  <% if @protocol_event.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@protocol_event.errors.count, "error") %> prohibited this protocol_event from being saved:</h2>
+
+      <ul>
+      <% @protocol_event.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :protocol_id %><br>
+    <%= f.select :protocol_id, protocol_array %>
+  </div>
+  <div class="field">
+    <%= f.label :admin_id %><br>
+    <%= f.text_field :admin_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

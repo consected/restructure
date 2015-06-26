@@ -1,0 +1,31 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Protocol Events</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Protocol</th>
+      <th>User</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @protocol_events.each do |protocol_event| %>
+      <tr>
+        <td><%= protocol_event.name %></td>
+        <td><%= protocol_event.protocol %></td>
+        <td><%= protocol_event.user %></td>
+        <td><%= link_to 'Show', protocol_event %></td>
+        <td><%= link_to 'Edit', edit_protocol_event_path(protocol_event) %></td>
+        <td><%= link_to 'Destroy', protocol_event, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Protocol event', new_protocol_event_path %>
