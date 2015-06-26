@@ -97,10 +97,6 @@
         <%= f.label :end_year %>
         <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control'  %>
       </div>
-      <div class="form-group col-sm-3">
-        <%= f.label :pro_infos, "Pro ID" %>
-        <%= f.number_field :pro_id, class: 'form-control', min: 0  %>
-      </div>
       
     <% end %>
   </div>
@@ -111,10 +107,7 @@
         <%= f.label :street %>
         <%= f.text_field :street, class: 'form-control' %>
       </div>
-      <div class="form-group col-sm-2">
-        <%= f.label :street2 %>
-        <%= f.text_field :street2, class: 'form-control' %>
-      </div>
+      
       <div class="form-group col-sm-2">
         <%= f.label :city %>
         <%= f.text_field :city, class: 'form-control' %>
@@ -127,12 +120,6 @@
         <%= f.label :zip %>
         <%= f.text_field :zip, zip_field_props(class: 'form-control') %>
       </div>
-    <% end %>
-    <%= f.fields_for :player_infos, child_index: 0 do |f| %>
-      <div class="form-group col-sm-2">
-        <%= f.label :contact_pref %>
-        <%= f.text_field :contact_pref, class: 'form-control' %>
-      </div>      
     <% end %>
       
     <%= f.fields_for :player_contacts, child_index: 0 do |f| %>  
