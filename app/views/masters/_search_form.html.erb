@@ -122,20 +122,13 @@
       </div>
     <% end %>
       
-    <%= f.fields_for :player_contacts, child_index: 0 do |f| %>  
-      <div class="form-group col-sm-2">
-          <%= f.label :email %>
-          <%= f.text_field :data, class: 'form-control' %>
-          <%= f.hidden_field :rec_type, value: "EMAIL", "data-only-for": "#master_player_contacts_attributes_0_data" %>
+    <%= f.fields_for :player_contacts, child_index: 0 do |f| %>        
+      <div class="form-group col-sm-3">
+          <%= f.label :phone_or_email %>
+          <%= f.text_field :data, class: 'form-control' %>           
       </div>
     <% end %>
       
-    <%= f.fields_for :manual_investigations, child_index: 0 do |f| %>
-      <div class="form-group col-sm-2">
-        <%= f.label :in_survey %>
-        <%= f.select :in_survey, yes_no_selections, class: 'form-control', include_blank: true  %>
-      </div>
-    <% end %>
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>  
       <div class="form-group col-sm-2">
         <%= f.label :rank %>
