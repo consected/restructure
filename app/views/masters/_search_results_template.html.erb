@@ -133,7 +133,10 @@
       {{#filter this "protocol_name,event,event_date,c_method,outcome,outcome_date,notes" }}
       <td class="tracker-{{@key}}">{{pretty_string this  return_string="true" capitalize="true"}}</td>
       {{/filter}}
-      
+      <td class="tracker-flag">    
+      {{>item_flag_container item_type="tracker"}}
+      </td>
+
   
 </script>
 

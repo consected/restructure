@@ -2,6 +2,7 @@ Rails.application.routes.draw do
 
   
   
+  resources :protocol_outcomes
   resources :protocol_events
   resources :colleges
   resources :general_selections

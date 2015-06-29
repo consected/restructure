@@ -6,12 +6,21 @@ _fpa.app = {
             var f = $(this);
             f.find('input, select').not('.tt-input, .attached-change').on('change', function(e){
                 var dof = $(this).attr('data-only-for');
-                if(dof === null || $(dof).val() !== null && $(dof).val() !== '' ){
+                var all_null = true;
+                if(dof !== null){
+                    // Allow multiple fields, any one of which may be entered                    
+                    $(dof).each(function(){
+                       var el = $(this);
+                       if(el.val() !== null && el.val() !== '') all_null = false;
+                    });
+                }
+                if(dof == null || !all_null){
                     window.setTimeout(function(){
                         console.log(e);
                         f.find('input[type="submit"]').click();  
                     },1);
                 }
+
             }).addClass('attached-change');
             f.find('input.tt-input').not('.attached-change').on('blur', function(e){
                 window.setTimeout(function(){

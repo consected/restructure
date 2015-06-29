@@ -155,21 +155,33 @@
     <%= f.fields_for :trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-2 ">
         <%= f.label :protocol %>
-        <%= f.select :protocol_id, protocol_array, include_blank: "-select-"%>
+        <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-only-for" => "#master_trackers_attributes_0_event", "data-filters-selector" => "#master_trackers_attributes_0_event, #master_trackers_attributes_0_outcome"}%>
       </div>
+      <div class="form-group col-sm-2 tracker-event">
+          <%= f.label :event %>
+          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"} %>
+      </div>
+      <div class="form-group col-sm-2 tracker-event">
+          <%= f.label :outcome %>
+          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"} %>
+      </div>  
     <% end %>
     
-    <div class="form-group col-sm-4">
+    <div class="form-group col-sm-3">
       <%= label :player_info, "Player Tags" %>
       <%= collection_select("master[player_infos_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_info), :id, :name, {}, multiple: true) %>
     </div>
-    <div class="form-group col-sm-4">
+    <div class="form-group col-sm-3">
       <%= label :address, "Address Tags" %>
       <%= collection_select("master[addresses_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:address), :id, :name, {}, multiple: true) %>
     </div>
-    <div class="form-group col-sm-4">
+    <div class="form-group col-sm-3">
       <%= label :address, "Contact Tags" %>
       <%= collection_select("master[player_contacts_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_contact), :id, :name, {}, multiple: true) %>
+    </div>
+    <div class="form-group col-sm-3">
+      <%= label :tracker, "Tracker Tags" %>
+      <%= collection_select("master[trackers_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:tracker), :id, :name, {}, multiple: true) %>
     </div>    
   </div>
   <div class="form-group actions ">

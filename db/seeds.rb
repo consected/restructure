@@ -8,4 +8,7 @@
 
 generated_password = Devise.friendly_token.first(12)
 Admin.create(email: 'initialadmin@hms.harvard.edu', password: generated_password)
-puts "Admin password: #{generated_password}"
+puts "Admin password (initialadmin@hms.harvard.edu): #{generated_password}"
+generated_password = Devise.friendly_token.first(12)
+Admin.create(email: 'initialadmin2@hms.harvard.edu', password: generated_password)
+puts "Admin password (initialadmin2@hms.harvard.edu): #{generated_password}"

@@ -80,6 +80,8 @@ test:
 #
 production:
   <<: *default
-  database: fpa1_production
+  database: fpa_production
   username: fpa1
+  port: 5432
+  host: localhost
   password: <%= ENV['FPA1_DATABASE_PASSWORD'] %>

@@ -18,6 +18,7 @@ _fpa.loaded.default = function(){
         $('#nav_q').val('');
     });
     
+    _fpa.form_utils.filtered_selector();
 
     if(_fpa.loaded[_fpa.status.controller])
         _fpa.loaded[_fpa.status.controller]();

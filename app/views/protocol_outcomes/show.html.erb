@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @protocol_outcome.name %>
+</p>
+
+<p>
+  <strong>Protocol:</strong>
+  <%= @protocol_outcome.protocol %>
+</p>
+
+<p>
+  <strong>Admin:</strong>
+  <%= @protocol_outcome.admin %>
+</p>
+
+<%= link_to 'Edit', edit_protocol_outcome_path(@protocol_outcome) %> |
+<%= link_to 'Back', protocol_outcomes_path %>
