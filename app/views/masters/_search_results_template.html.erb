@@ -129,7 +129,7 @@
 
       <td class="tracker-edit">
       {{#is tracker_history_length '>' 1}}
-      <a title="show history" href="/masters/{{master_id}}/trackers/{{id}}/tracker_histories" data-toggle="collapse" data-target="#trackers-{{master_id}}-{{id}}-history" data-result-target="#trackers-{{master_id}}-{{id}}-history" data-template="tracker-histories-result-template" data-remote="true" class="collapsed glyphicon prevent-on-collapse"><span class="glyphicon glyphicon-time hide-not-collapsed"></span><span class="glyphicon glyphicon-triangle-top hide-collapsed"></span></a>    
+      <a title="show history" href="/masters/{{master_id}}/trackers/{{id}}/tracker_histories?skip_last=true" data-toggle="collapse" data-target="#trackers-{{master_id}}-{{id}}-history" data-result-target="#trackers-{{master_id}}-{{id}}-history" data-template="tracker-histories-result-template" data-remote="true" class="collapsed glyphicon prevent-on-collapse"><span class="glyphicon glyphicon-time hide-not-collapsed"></span><span class="glyphicon glyphicon-triangle-top hide-collapsed"></span></a>    
       {{else}}
       <span class="glyphicon glyphicon-time disabled" title="no history" ></span>
       {{/is}}
@@ -161,7 +161,16 @@
   
 </script>
 
-
+<script id="empty_tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <table class="table">
+    <thead><tr>
+      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  >Create Tracker record</a> </th></tr>
+    <tr id="tracker-{{master_id}}-" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
+    {{#is trackers.length 0}}<td colspan="8"><h4>No Tracker Records</h4></td>{{/is}}
+    </tr>
+    </thead>
+  </table>
+</script>
 <script id="tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <table class="table">
     <thead><tr>
@@ -169,11 +178,9 @@
     <tr id="tracker-{{master_id}}-" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     {{#is trackers.length 0}}<td colspan="8"><h4>No Tracker Records</h4></td>{{/is}}
     </tr>
-      
-          
-      </thead>
-
+    </thead>
     {{#each this}}
+    {{#if id}}
     <tbody>
       <tr class="index-{{@index}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
         {{#with this}}
@@ -181,8 +188,9 @@
         {{/with}}
       </tr>
     </tbody>
-      <tbody class="tracker-history collapsed" id="trackers-{{master_id}}-{{id}}-history" data-subscription="tracker-history-{{master_id}}-{{id}}">
-      </tbody>
+    <tbody class="tracker-history collapsed" id="trackers-{{master_id}}-{{id}}-history" data-subscription="tracker-history-{{master_id}}-{{id}}">
+    </tbody>
+    {{/if}}
     {{/each}}
   </table>
 
@@ -199,14 +207,14 @@
     </thead>
     <tbody>
     {{#each this}}
-    
+      {{#if id}}
       <tr class="index-{{@index}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
         {{#with this}}
-          
           {{>tracker_history_result}}
           
         {{/with}}
-      </tr>    
+      </tr>
+      {{/if}}    
     {{/each}}
     </tbody>
     <tbody>
@@ -321,6 +329,8 @@
 <script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden">
   {{#with results}}
     {{>tracker_tree_results master_id=../master_id}}
+  {{else}}
+      {{>empty_tracker_tree_results master_id=../master_id}}
   {{/with}}
 </script>
 
@@ -433,6 +443,9 @@
           <div id="trackers-{{id}}" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
           {{#with trackers}}
             {{>tracker_tree_results master_id=../id}}
+          {{else}}
+            {{>empty_tracker_tree_results master_id=id}}
+                
           {{/with}}
           </div>
           

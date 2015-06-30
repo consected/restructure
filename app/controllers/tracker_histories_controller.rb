@@ -13,6 +13,13 @@ class TrackerHistoriesController < ApplicationController
       return
     end
     
+    
+    if params[:skip_last]=='true'
+      # Remove a current tracker item from the list.
+      mid = @tracker_histories.max_by {|x| x.id}      
+      @tracker_histories = @tracker_histories.reject {|x| x.id == mid.id}
+    end
+    
     render json: {results: @tracker_histories, master_id: @master.id}
   end
   
