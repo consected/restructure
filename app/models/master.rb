@@ -2,13 +2,15 @@ class Master < ActiveRecord::Base
 
   PlayerInfoRankOrderClause = ' case rank < 20 when true then rank * -1 else rank  end'.freeze
   RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
+  OutcomeEventDatesNotNullClause = 'outcome_date DESC NULLS last, event_date DESC NULLS last'
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
   has_many :manual_investigations  , inverse_of: :master
   has_many :pro_infos , inverse_of: :master  
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
-  has_many :trackers  , inverse_of: :master
+  has_many :trackers, -> { order(OutcomeEventDatesNotNullClause)}, inverse_of: :master
+  has_many :tracker_histories, -> { order(OutcomeEventDatesNotNullClause)}, inverse_of: :master
   has_many :scantrons, -> { order(RankNotNullClause)}  , inverse_of: :master
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 

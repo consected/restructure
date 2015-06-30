@@ -16,4 +16,6 @@
 //= require typeahead
 //= require chosen.jquery
 //= require handlebars-v3.0.3
+//= require jquery-tablesorter
+//= require jquery-scrollto-min
 //= require_tree .

@@ -188,7 +188,8 @@
         var startTime;
         var asTimestamp;
         if(stre && stre.length >= 8){
-            if(stre.indexOf('t') && stre.indexOf('z')){
+            if (!stre.match(/^\d\d\d\d-\d\d-\d\d.*/)){
+            }else if(stre.indexOf('t') && stre.indexOf('z')){
                 startTime = new Date(Date.parse(stre ));
                 asTimestamp = true;
             }

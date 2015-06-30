@@ -33,6 +33,10 @@ _fpa.postprocessors.default = function(block, data){
   });
   
   _fpa.resize_labels(block, data);
+  _fpa.form_utils.filtered_selector();
+  
+  $('.tablesorter').tablesorter( {dateFormat: 'us', headers: {0: {sorter: false}, 8: {sorter: false}}}); 
+
     
 };    
 _fpa.postprocessors['search-results-template'] = function(block, data){

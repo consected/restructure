@@ -1,4 +1,7 @@
 _fpa.app = {
+    
+    max_results: 100,
+    
     set_fields_to_search: function(){
         var forms = $('.search_master');
     
@@ -7,14 +10,14 @@ _fpa.app = {
             f.find('input, select').not('.tt-input, .attached-change').on('change', function(e){
                 var dof = $(this).attr('data-only-for');
                 var all_null = true;
-                if(dof !== null){
+                if(dof){
                     // Allow multiple fields, any one of which may be entered                    
                     $(dof).each(function(){
                        var el = $(this);
                        if(el.val() !== null && el.val() !== '') all_null = false;
                     });
                 }
-                if(dof == null || !all_null){
+                if(!dof || !all_null){
                     window.setTimeout(function(){
                         console.log(e);
                         f.find('input[type="submit"]').click();  

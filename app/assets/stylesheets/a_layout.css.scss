@@ -110,3 +110,17 @@ input.form-control.has-value, select.form-control.has-value {
     
     min-height: 20px;
 }
+
+.hide-collapsed {
+    display: initial;        
+}
+.collapsed .hide-collapsed {
+    display: none;  
+}
+.hide-not-collapsed {
+    display: none;  
+}
+
+.collapsed .hide-not-collapsed {
+    display: initial;  
+}

@@ -40,13 +40,16 @@ class MastersController < ApplicationController
           addresses: {order: {rank: :desc}, include: {
             item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
           }},
-          trackers: {order: {created_at: :desc}, methods: :protocol_name},
+          trackers: {order: Master::OutcomeEventDatesNotNullClause, methods: [:protocol_name, :tracker_history_length], include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }},
           scantrons: {order: {scantron_id: :asc}, include: {
             item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
           }}
         }) 
       }
-      logger.debug m.as_json
+      
+      m[:count] = @masters.length
       
       log_action "master search", search_type, @masters.length
     else

@@ -61,4 +61,9 @@ protected
     def not_authorized
       flash[:danger] = "You are not authorized to perform the requested action"
     end
+    
+    def not_found
+      flash[:danger] = "Requested information not found"
+      raise ActionController::RoutingError.new('Not Found')
+    end
 end

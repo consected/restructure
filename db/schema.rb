@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150629210656) do
+ActiveRecord::Schema.define(version: 20150630202829) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -236,6 +236,26 @@ ActiveRecord::Schema.define(version: 20150629210656) do
   add_index "scantrons", ["master_id"], name: "index_scantrons_on_master_id", using: :btree
   add_index "scantrons", ["user_id"], name: "index_scantrons_on_user_id", using: :btree
 
+  create_table "tracker_history", force: :cascade do |t|
+    t.integer  "master_id"
+    t.integer  "protocol_id"
+    t.integer  "tracker_id"
+    t.string   "event"
+    t.datetime "event_date"
+    t.string   "c_method"
+    t.string   "outcome"
+    t.datetime "outcome_date"
+    t.integer  "user_id"
+    t.string   "notes"
+    t.datetime "created_at",   null: false
+    t.datetime "updated_at",   null: false
+  end
+
+  add_index "tracker_history", ["master_id"], name: "index_tracker_history_on_master_id", using: :btree
+  add_index "tracker_history", ["protocol_id"], name: "index_tracker_history_on_protocol_id", using: :btree
+  add_index "tracker_history", ["tracker_id"], name: "index_tracker_history_on_tracker_id", using: :btree
+  add_index "tracker_history", ["user_id"], name: "index_tracker_history_on_user_id", using: :btree
+
   create_table "trackers", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "protocol_id"
@@ -297,6 +317,10 @@ ActiveRecord::Schema.define(version: 20150629210656) do
   add_foreign_key "protocols", "users"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
+  add_foreign_key "tracker_history", "masters"
+  add_foreign_key "tracker_history", "protocols"
+  add_foreign_key "tracker_history", "trackers"
+  add_foreign_key "tracker_history", "users"
   add_foreign_key "trackers", "masters"
   add_foreign_key "trackers", "protocols"
   add_foreign_key "trackers", "users"

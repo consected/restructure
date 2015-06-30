@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
 
   
-  
   resources :protocol_outcomes
   resources :protocol_events
   resources :colleges
@@ -22,13 +21,16 @@ Rails.application.routes.draw do
   get 'masters/search', as: 'msid_search'
   get 'masters/search' => 'masters#search'
   resources :masters, only: [:show, :index, :new, :create] do
+    resources :tracker_histories
     resources :player_infos    
     resources :player_contacts
     resources :pro_infos
     resources :manual_investigations
     resources :addresses
     resources :scantrons
-    resources :trackers
+    resources :trackers do
+      resources :tracker_histories
+    end
     
     get ':item_controller/:item_id/item_flags/new', to: 'item_flags#new'
     get ':item_controller/:item_id/item_flags/', to: 'item_flags#index'

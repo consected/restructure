@@ -132,9 +132,14 @@ _fpa = {
       
       _fpa.clear_flash_notices();
    
-    }).on('ajax:before', function(){
+    }).on('ajax:before', function(ev){
+        if($(this).hasClass('prevent-on-collapse') && !$(this).hasClass('collapsed')){
+            ev.preventDefault();
+            return false;
+        }
         
         _fpa.ajax_working(block);
+        
         
         $(this).find('[data-only-for]').each(function(){
             var dof = $(this).attr('data-only-for');

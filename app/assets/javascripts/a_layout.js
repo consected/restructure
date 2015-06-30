@@ -18,6 +18,20 @@ _fpa.loaded.default = function(){
         $('#nav_q').val('');
     });
     
+    $(document).on('click', '[data-toggle="clear"]', function(){
+        var a = $(this).attr('data-target');
+        $(a).html('').removeClass('in');
+    });
+    
+    $(document).on('click', '[data-toggle="scrollto-result"]', function(){
+        var a = $(this).attr('data-result-target');
+        if(!a || a=='')
+            a = $(this).attr('data-target');
+        $(window).scrollTo(a, 100);
+    });
+    
+    
+    
     _fpa.form_utils.filtered_selector();
 
     if(_fpa.loaded[_fpa.status.controller])

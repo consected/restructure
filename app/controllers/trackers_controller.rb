@@ -1,5 +1,12 @@
 class TrackersController < ApplicationController
   include MasterHandler
+
+  def index
+    set_objects_instance @master_objects
+    s = @master_objects.order Master::OutcomeEventDatesNotNullClause
+    render json: {results: s, master_id: @master.id}
+  end
+
   
   private
     
