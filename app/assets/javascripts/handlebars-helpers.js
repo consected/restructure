@@ -182,6 +182,10 @@
         return startTime.toLocaleDateString();
     });
 
+    Handlebars.registerHelper('underscore', function(stre, options) {
+        if(!stre) return null;
+        return stre.toLowerCase().replace(' ', '_');
+    });
 
     Handlebars.registerHelper('pretty_string', function(stre, options) {
         if(stre === null || stre === '' ) return "";

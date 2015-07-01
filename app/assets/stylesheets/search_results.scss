@@ -135,3 +135,23 @@ table.table.tablesorter > thead > tr > th {
         cursor: pointer;
     }
 } 
+
+
+.collapsed span.badge {
+  background-color: white;
+  color: #2e6da4;
+}
+
+li.list-group-item.record-meta {
+  color: #aaa;
+  font-size: 95%;
+}
+
+.record-meta {
+  color: #aaa;
+  font-size: 95%;
+}
+
+tr[data-tracker-protocol="alerts"] td {
+    background-color: #F4D9c0;
+}

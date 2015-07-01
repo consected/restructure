@@ -122,6 +122,16 @@ _fpa = {
         }
   },
   
+  prevent_dup_clicks: function(block){
+      var f = block.find('input[type="submit"]');
+      if(f.length > 0){
+          f.prop('disabled', true);          
+          window.setTimeout(function(){
+              f.prop('disabled', false);                            
+          }, 1000);
+      }
+  },
+  
   handle_remotes: function(){
     var block = $("form[data-remote='true'], a[data-remote='true']").not('.attached');
     
@@ -138,15 +148,22 @@ _fpa = {
             return false;
         }
         
+        _fpa.prevent_dup_clicks($(this));
+        
         _fpa.ajax_working(block);
         
         
         $(this).find('[data-only-for]').each(function(){
             var dof = $(this).attr('data-only-for');
-            var dofv = $(dof).val();
-            if(dofv === null || dofv === ''){
+            var all_null = true;
+            $(dof).each(function(){
+                var dofv = $(this).val();
+                if(dofv !== null && dofv !== '') all_null = false;               
+            });
+            
+            if(all_null)
                 $(this).val('');
-            }
+                
         });
         
         _fpa.add_tracking_params($(this));

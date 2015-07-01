@@ -42,11 +42,14 @@
         <%= pif.label :college %>
         <%= pif.text_field :college, class: 'form-control simple-college-input typeahead'  %>
       </div>
-      
+      <div class="form-group col-sm-2 text-right">
+          <p>&nbsp;</p>
+      <%= f.submit :submit, class: "btn btn-default btn-sm" %>
+      </div>
     <% end %>
   </div>
   <div class="form-group form-actions clearfix">
-    <%= f.submit :submit, class: "pull-right" %>
+    
     <span id="search_count_simple" class="search-results-count pull-right" data-subscription="count" data-template="search-count-template" ></span>
   </div>
 <%end%>

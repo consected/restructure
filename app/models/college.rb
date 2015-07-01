@@ -9,7 +9,9 @@ class College < ActiveRecord::Base
   end
   
   def self.exists? name
-    all.include? name    
+    res = all.exists? name: name    
+    logger.debug "College #{name} exists? #{res}"
+    res
   end
   
   def self.create_if_new name

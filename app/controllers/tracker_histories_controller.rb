@@ -5,14 +5,17 @@ class TrackerHistoriesController < ApplicationController
   
   def index
     if @tracker
+      logger.info "Getting tracker item tracker histories"
       @tracker_histories = @tracker.tracker_histories.order Master::OutcomeEventDatesNotNullClause
     elsif @master
+      logger.info "Getting master tracker histories"
       @tracker_histories = @master.tracker_histories.order Master::OutcomeEventDatesNotNullClause
     else
       render code: 404
       return
     end
     
+    logger.info "Tracker histories returned #{@tracker_histories.length} items"
     
     if params[:skip_last]=='true'
       # Remove a current tracker item from the list.

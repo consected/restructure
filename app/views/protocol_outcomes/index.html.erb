@@ -16,7 +16,7 @@
     <% @protocol_outcomes.each do |protocol_outcome| %>
       <tr>
         <td><%= protocol_outcome.name %></td>
-        <td><%= protocol_outcome.protocol %></td>
+        <td><%= protocol_outcome.protocol.name %></td>
         <td><%= protocol_outcome.admin %></td>
         <td><%= link_to 'Show', protocol_outcome %></td>
         <td><%= link_to 'Edit', edit_protocol_outcome_path(protocol_outcome) %></td>

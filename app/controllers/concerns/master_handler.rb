@@ -106,6 +106,7 @@ module MasterHandler
       
       @master_objects = @master.send(objects_name)
 
+      logger.debug "Setting current user in master: #{current_user}"
       @master.current_user = current_user  
       @master
     end

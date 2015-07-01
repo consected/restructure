@@ -19,9 +19,9 @@ class Master < ActiveRecord::Base
   Master.reflect_on_all_associations(:has_many).each do |assoc| 
     # This association is provided to allow generic search on flagged associated object
     has_many "#{assoc.plural_name}_item_flags".to_sym, through: assoc.plural_name, source: :item_flags
+    Rails.logger.debug "Associated master with #{assoc.plural_name}_item_flags through #{assoc.plural_name} with source :item_flags"
   end
     
-  
   accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :addresses, :trackers
   
   AltConditions = {
@@ -196,6 +196,7 @@ class Master < ActiveRecord::Base
   end
   
   def current_user
+    logger.info "Getting current user: #{@user_id} from #{self}"
     @user_id
   end
   

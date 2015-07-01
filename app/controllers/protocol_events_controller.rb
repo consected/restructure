@@ -1,4 +1,6 @@
 class ProtocolEventsController < ApplicationController
+  before_action :authenticate_admin!
+
   before_action :set_protocol_event, only: [:show, :edit, :update, :destroy]
 
   # GET /protocol_events

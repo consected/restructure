@@ -12,7 +12,7 @@
           <div class="col-md-6">
             <div class="form-group tracker-protocol">
                 <%= f.label :protocol %>
-                <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-filters-selector" => "#tracker_event, #tracker_outcome"}%>
+                <%= f.select :protocol_id, protocol_array_without_updates, {include_blank: "-select-"}, {"data-filters-selector" => "#tracker_event, #tracker_outcome"}%>
             </div>                        
             <div class="form-group tracker-c_method">
               <%= f.label :contact_method %>

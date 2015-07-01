@@ -29,23 +29,36 @@ class MastersController < ApplicationController
 
       m = {
         masters: @masters.as_json(include: {
-          player_infos: {order: Master::PlayerInfoRankOrderClause, include: {
-            pro_info: {}, 
-            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}            
-          }},
-          player_contacts: {order: {rank: :desc}, include: {
-            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-          }},
-          manual_investigations: {order: {rank: :desc}, include: [:item_flags]},
-          addresses: {order: {rank: :desc}, include: {
-            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-          }},
-          trackers: {order: Master::OutcomeEventDatesNotNullClause, methods: [:protocol_name, :tracker_history_length], include: {
-            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-          }},
+          player_infos: {order: Master::PlayerInfoRankOrderClause, 
+            include: {
+              pro_info: {}, 
+              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+            },
+            methods: [:user_name]
+          },
+          player_contacts: {order: {rank: :desc}, 
+            include: {
+              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+            },
+            methods: [:user_name]
+          },
+          addresses: {order: {rank: :desc}, 
+            include: {
+              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+            },
+            methods: [:user_name]
+          },
+          trackers: {order: Master::OutcomeEventDatesNotNullClause,  
+            include: {
+              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+            },
+            methods: [:protocol_name, :tracker_history_length, :user_name]
+          },
           scantrons: {order: {scantron_id: :asc}, include: {
-            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-          }}
+              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+            },
+            methods: [:user_name]
+          }
         }) 
       }
       
