@@ -23,9 +23,9 @@ _fpa.preprocessors.default = function(block, data){
     
 };
 _fpa.postprocessors.default = function(block, data){
-    
-  $('select[multiple]').chosen({width: '100%'});
-  $('input, select').each(function(){ 
+  _fpa.form_utils.setup_chosen(block);  
+  
+  block.find('input, select').each(function(){ 
       if($(this).val() != '') 
           $(this).addClass('has-value'); 
       else 
@@ -35,7 +35,7 @@ _fpa.postprocessors.default = function(block, data){
   _fpa.resize_labels(block, data);
   _fpa.form_utils.filtered_selector();
   
-  $('.tablesorter').tablesorter( {dateFormat: 'us', headers: {0: {sorter: false}, 8: {sorter: false}}}); 
+  block.find('.tablesorter').tablesorter( {dateFormat: 'us', headers: {0: {sorter: false}, 8: {sorter: false}}}); 
 
     
 };    

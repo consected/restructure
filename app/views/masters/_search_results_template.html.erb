@@ -278,17 +278,8 @@
     {{#if user_name}} by {{user_name}}{{/if}}    
 </script>
 
-
-<script>
-  $('script.handlebars-partial').each(function(){
-    var id = $(this).attr('id');
     
-    id = id.replace('-partial', '');
-    Handlebars.registerPartial(id, $(this).html());
-  });
-</script>
-    
-<script id="player-info-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="player-info-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   
   {{#with player_info}}  
     {{#if ../_created}}<div class="index-created" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">{{/if}}
@@ -307,7 +298,7 @@
   
 </script>
 
-<script id="address-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="address-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with address}}
     {{#if ../_created}}<div class="index-created" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}">{{/if}}
       {{>address_result }}
@@ -315,7 +306,7 @@
   {{/with}}
 </script>
 
-<script id="scantron-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="scantron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with scantron}}
     {{#if ../_created}}<div class="index-created" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}">{{/if}}
       {{>scantron_result }}
@@ -323,7 +314,7 @@
   {{/with}}
 </script>
 
-<script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with player_contact}}
     {{#if ../_created}}<div class="index-created" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}">{{/if}}
       {{>player_contact_result }}
@@ -331,7 +322,7 @@
   {{/with}}
 </script>
 
-<script id="tracker-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="tracker-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with tracker}}
     {{#if ../_created}}<tr class="index-created" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">{{/if}}
       {{>tracker_result }}
@@ -339,14 +330,14 @@
   {{/with}}
 </script>
 
-<script id="tracker-chron-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="tracker-chron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with results}}
     {{>tracker_chron_results master_id=../master_id}}
   {{else}}
     {{>empty_tracker_chron_results master_id=../master_id}}
   {{/with}}
 </script>
-<script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with results}}
     {{>tracker_tree_results master_id=../master_id}}
   {{else}}
@@ -354,7 +345,7 @@
   {{/with}}
 </script>
 
-<script id="tracker-histories-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="tracker-histories-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   
   {{#each results}}
     <tr class="tracker-history-item" id="tracker-history-{{master_id}}-{{tracker_id}}-{{id}}" >
@@ -365,27 +356,27 @@
 </script>
 
 
-<script id="item-flag-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="item-flag-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with tracker}}
     {{>item_flag_result }}
   {{/with}}
 </script>
 
-<script id="item-flags-result-template" type="text/x-handlebars-template" class="hidden">
+<script id="item-flags-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with item_flags}}
     {{>item_flags_result }}
   {{/with}}
 </script>
 
 
-<script id="search-count-template" type="text/x-handlebars-template" class="hidden">
+<script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   
   {{count}} record{{#is count '!==' 1}}s{{/is}}
   {{#is count '>=' 100}} - refine search to show others{{/is}}
 </script>
 
 
-<script id="search-results-template" type="text/x-handlebars-template" class="hidden">
+<script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#if masters.length}}
   <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
@@ -534,6 +525,5 @@
   
   
 </script>
-  
   
   

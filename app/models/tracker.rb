@@ -38,7 +38,7 @@ class Tracker < ActiveRecord::Base
     t.outcome_date = DateTime.now
     cp = ""
     ignore = %w(created_at updated_at user id)
-    record.changes.reject {|k,v| ignore.include? k}.each {|k,v| cp << "#{k.humanize} #{new_rec ? '' : 'from '}#{v.first} #{new_rec ? '' : 'to '}#{v.last}; " }
+    record.changes.reject {|k,v| ignore.include? k}.each {|k,v| cp << "#{k.humanize} #{new_rec ? '' : "from #{v.first || "-"}"} #{new_rec ? '' : 'to '}#{v.last}; " }
     
     logger.debug "Tracking user update to record with #{cp} in #{rec_type}"
     

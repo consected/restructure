@@ -1,6 +1,6 @@
 _fpa.loaded.default = function(){
     $('.dropdown-toggle').dropdown();
-    $('select[multiple]').chosen({width: '100%'});
+    _fpa.form_utils.setup_chosen();
     $('table').each(function(){
        var c = $(this).attr('class');
        if(c == null || c === '')
@@ -12,10 +12,18 @@ _fpa.loaded.default = function(){
     
     $('#nav_q').on('keypress', function(){
         $('#nav_q_pro_id').val('');
+    }).on('change', function(){
+        var v = $(this).val();
+        if(v && v != '')
+            $('form.navbar-form').submit();
     });
     
     $('#nav_q_pro_id').on('keypress', function(){
         $('#nav_q').val('');
+    }).on('change', function(){
+        var v = $(this).val();
+        if(v && v != '')
+            $('form.navbar-form').submit();
     });
     
     $(document).on('click', '[data-toggle="clear"]', function(){

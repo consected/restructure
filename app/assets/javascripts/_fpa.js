@@ -1,4 +1,7 @@
 _fpa = {
+    
+    templates: {},
+    
     setup_typeahead: function(element, list, name){
       
       if(typeof list === 'string')  
@@ -28,7 +31,25 @@ _fpa = {
   ajax_done: function(block){  
     $(block).removeClass('ajax-running');
   },
-          
+
+    
+  compile_templates: function(){
+    $('script.handlebars-partial').each(function(){
+        var id = $(this).attr('id');
+
+        id = id.replace('-partial', '');
+        Handlebars.registerPartial(id, $(this).html());
+    });
+
+    $('script.handlebars-template').each(function(){
+        var id = $(this).attr('id');
+        var source = $(this).html();
+        _fpa.templates[id] = Handlebars.compile(source);
+
+    });
+
+  },  
+    
   view_template: function(block, template_name, data, options){    
     
     
@@ -36,50 +57,47 @@ _fpa = {
     if(!options || !options.position){        
         block.html('');
     }
-    
-    
-    
-    
-    
     window.setTimeout(function(){  
-    var source = $('#'+template_name).html();
-    var template = Handlebars.compile(source);
     
-    if(!options) options = {};
-    
-    if(data.code){
-      data._code_flag = {};
-      data._code_flag[data.code] = true;
-    }
-    _fpa.preprocessors.default(block, data);
-    if(_fpa.preprocessors[template_name])
-        _fpa.preprocessors[template_name](block, data);
-    
-    if(options.position)
-        data._created = true;
-      
-    var html = template(data);
-    
-    if(options.position === 'before'){        
-        block.before(html);
-        block.html('');
-    }
-    else
-        block.html(html);
-    _fpa.postprocessors.default(block, data);
-    if(_fpa.postprocessors[template_name])
-        _fpa.postprocessors[template_name](block, data);
-    
-    _fpa.handle_remotes();
-    _fpa.reset_page_size();
-    _fpa.ajax_done(block);
-    }, 10);
+        var template =_fpa.templates[template_name];
+
+        if(!options) options = {};
+
+        if(data.code){
+          data._code_flag = {};
+          data._code_flag[data.code] = true;
+        }
+        _fpa.preprocessors.default(block, data);
+        if(_fpa.preprocessors[template_name])
+            _fpa.preprocessors[template_name](block, data);
+
+        if(options.position)
+            data._created = true;
+
+        var html = template(data);
+
+        if(options.position === 'before'){        
+            block.before(html);
+            block.html('');
+        }
+        else
+            block.html(html);
+
+        window.setTimeout(function(){
+            _fpa.postprocessors.default(block, data);
+            if(_fpa.postprocessors[template_name])
+                _fpa.postprocessors[template_name](block, data);
+
+            _fpa.reset_page_size();
+            _fpa.ajax_done(block);
+        },1);
+    }, 1);
   },
           
   reset_page_size:function(){
-    var bh = $('body').height();
-    var hh = $('html').height();
-    if(bh < hh) $('body').height(hh);
+    //var bh = $('body').height();
+    //var hh = $('html').height();
+    //if(bh < hh) $('body').height(hh);
   },
   
   inherit_from: function(original_prototype, new_t){
@@ -133,16 +151,17 @@ _fpa = {
   },
   
   handle_remotes: function(){
-    var block = $("form[data-remote='true'], a[data-remote='true']").not('.attached');
-    
+    //var block = $("form[data-remote='true'], a[data-remote='true']").not('.attached');
+    var sel = "form[data-remote='true'], a[data-remote='true']";
     // data-only-for allows hidden and other inputs to be blanked if the dependent
     // 'only-for' input is blank. This ensures the data is set only for the times when the
     // related data is a real value
-    block.on('click', function(ev){
+    $(document).on('click', sel,  function(ev){
       
       _fpa.clear_flash_notices();
    
-    }).on('ajax:before', function(ev){
+    }).on('ajax:before', sel, function(ev){
+        var block = $(this);
         if($(this).hasClass('prevent-on-collapse') && !$(this).hasClass('collapsed')){
             ev.preventDefault();
             return false;
@@ -168,13 +187,14 @@ _fpa = {
         
         _fpa.add_tracking_params($(this));
         return true;
-    }).on("ajax:success", function(e, data, status, xhr) {    
+    }).on("ajax:success", sel, function(e, data, status, xhr) {    
+        var block = $(this);
         var data = xhr.responseJSON;
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);    
         if(xhr.responseJSON){
             var t = $(this).attr('data-result-target');
-            var options = {}
+            var options = {};
             if(t){
                 var b = $(t);
                 if(b.hasClass('new-block')){
@@ -191,7 +211,7 @@ _fpa = {
                         targets.each(function(){                                                        
                             _fpa.view_template($(this), $(this).attr('data-template'), res);                  
                         });              
-                        window.setTimeout(function(){_fpa.handle_remotes();},1);
+                        
                     }
                 }                
             }
@@ -213,7 +233,7 @@ _fpa = {
                     _fpa.postprocessors.default($(this), data);
                     if(_fpa.postprocessors[pre])
                         _fpa.postprocessors[pre](block, data);
-                    window.setTimeout(function(){_fpa.handle_remotes();},1);
+                    
                 });
 
             });
@@ -225,11 +245,7 @@ _fpa = {
       _fpa.ajax_done(block);
       _fpa.flash_notice("An error occurred.", 'danger');
       
-    }).addClass('attached');
-
-
-    
-      
+    }).addClass('attached');      
     
   },
   
@@ -327,7 +343,7 @@ $('html').ready(function(){
     $('[data-toggle="popover"]').popover();
     $('[data-show-popover="auto"]').popover('show');
   });
-  
+  _fpa.compile_templates();
   _fpa.handle_remotes();
   _fpa.loaded.default();
 });
