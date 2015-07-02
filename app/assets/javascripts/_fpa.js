@@ -67,9 +67,13 @@ _fpa = {
           data._code_flag = {};
           data._code_flag[data.code] = true;
         }
-        _fpa.preprocessors.default(block, data);
-        if(_fpa.preprocessors[template_name])
+        var procfound = false;
+        
+        if(_fpa.preprocessors[template_name]){
             _fpa.preprocessors[template_name](block, data);
+            procfound = true;
+        }
+        _fpa.preprocessors.default(block, data, procfound);
 
         if(options.position)
             data._created = true;
@@ -84,10 +88,14 @@ _fpa = {
             block.html(html);
 
         window.setTimeout(function(){
-            _fpa.postprocessors.default(block, data);
-            if(_fpa.postprocessors[template_name])
+            
+            procfound = false;
+            if(_fpa.postprocessors[template_name]){
                 _fpa.postprocessors[template_name](block, data);
-
+                procfound = true;
+            }
+            _fpa.postprocessors.default(block, data, procfound);
+            
             _fpa.reset_page_size();
             _fpa.ajax_done(block);
         },1);
@@ -226,14 +234,21 @@ _fpa = {
                 res[di] = d;
                 targets.each(function(){
                     var pre = $(this).attr('data-preprocessor');                    
-                    _fpa.preprocessors.default($(this), data);
-                    if(_fpa.preprocessors[pre])
-                        _fpa.preprocessors[pre](block, data);
-                    $(this).html(d);
-                    _fpa.postprocessors.default($(this), data);
-                    if(_fpa.postprocessors[pre])
-                        _fpa.postprocessors[pre](block, data);
+                    var procfound = false;
+                    if(_fpa.preprocessors[pre]){
+                        _fpa.preprocessors[pre](block, data);                        
+                        procfound = true;
+                    }
+                    _fpa.preprocessors.default($(this), data, procfound);
                     
+                    $(this).html(d);
+                    
+                    procfound = false;
+                    if(_fpa.postprocessors[pre]){
+                        _fpa.postprocessors[pre](block, data);
+                        procfound = true;
+                    }
+                    _fpa.postprocessors.default($(this), data, procfound);
                 });
 
             });

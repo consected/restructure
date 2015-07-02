@@ -1,46 +1,29 @@
-_fpa.resize_labels = function(block, data){
-    block.find('.list-group').each(function(){
-        var wmax = 0;
-        var all = $(this).find('.list-group-item').not('.is-heading, .is-combo').find('small, label');
-        all.css({display: 'inline-block', whiteSpace: 'nowrap'});
-        all.each(function(){
-            var wnew = $(this).width();
-            if(wnew > wmax)
-                wmax = wnew;
-        });
-        if(wmax>10)
-          all.css({minWidth: wmax, width: wmax}).addClass('list-small-label');
-    });
-
-};
-
 
 _fpa.preprocessors = {};
 
 _fpa.postprocessors = {};
 
-_fpa.preprocessors.default = function(block, data){
+_fpa.preprocessors.default = function(block, data, has_preprocessor){
     
 };
-_fpa.postprocessors.default = function(block, data){
-  _fpa.form_utils.setup_chosen(block);  
-  
-  block.find('input, select').each(function(){ 
-      if($(this).val() != '') 
-          $(this).addClass('has-value'); 
-      else 
-          $(this).removeClass('has-value'); 
-  });
-  
-  _fpa.resize_labels(block, data);
-  _fpa.form_utils.filtered_selector();
-  
-  block.find('.tablesorter').tablesorter( {dateFormat: 'us', headers: {0: {sorter: false}, 8: {sorter: false}}}); 
-
+_fpa.postprocessors.default = function(block, data, has_postprocessor){
+    
+    // Allow easy default processing where not already performed by the postprocessor
+    if(!has_postprocessor){
+        _fpa.form_utils.format_block(block);
+    }
     
 };    
 _fpa.postprocessors['search-results-template'] = function(block, data){
-
+    // Ensure we format the viewed item on expanding it 
+   
+    if(data.masters && data.masters.length < 5)
+        _fpa.form_utils.format_block(block);
+    
+    $('a.master-expander').click(function(){
+        var id = $(this).attr('href');
+        _fpa.form_utils.format_block($(id));
+    });
    
 };
 
