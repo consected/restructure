@@ -48,3 +48,11 @@ input[type="date"], input[type="time"], input[type="datetime-local"], input[type
 li.list-group-item label {
     font-size: 85%;
 }
+
+.form-inline .row > div {
+    text-align: right;
+    div.form-group {
+        padding-top: 4px;
+        padding-bottom: 4px
+    }
+}

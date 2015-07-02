@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @accuracy_score.name %>
+</p>
+
+<p>
+  <strong>Value:</strong>
+  <%= @accuracy_score.value %>
+</p>
+
+<p>
+  <strong>Admin:</strong>
+  <%= @accuracy_score.admin %>
+</p>
+
+<%= link_to 'Edit', edit_accuracy_score_path(@accuracy_score) %> |
+<%= link_to 'Back', accuracy_scores_path %>

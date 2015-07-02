@@ -11,3 +11,22 @@ _fpa.utils.capitalize = function(str) {
         return str;
     }
 };
+
+String.prototype.capitalize = function(){
+    return _fpa.utils.capitalize(this);
+};
+_fpa.utils.is_blank = function(i){
+  return (i === null || i === '');  
+};
+
+Date.prototype.asYMD = function(){
+  
+    var now = this;
+
+    var day = ("0" + now.getDate()).slice(-2);
+    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+
+    var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+  
+    return today;  
+};

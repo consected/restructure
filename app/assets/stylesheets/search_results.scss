@@ -142,16 +142,65 @@ table.table.tablesorter > thead > tr > th {
   color: #2e6da4;
 }
 
-li.list-group-item.record-meta {
-  color: #aaa;
-  font-size: 95%;
-}
-
 .record-meta {
   color: #aaa;
   font-size: 95%;
 }
 
+li.list-group-item.record-meta {
+  color: #aaa;
+  font-size: 95%;
+}
+
+td .record-meta {
+  color: #aaa;
+  font-size: 95%;
+  white-space: nowrap;
+}
+
 tr[data-tracker-protocol="alerts"] td {
     background-color: #F4D9c0;
+}
+
+.tracker-event, .tracker-protocol, .tracker-outcome,
+.tracker-history-event, .tracker-history-protocol, .tracker-history-outcome {
+    .cell-holder {
+        white-space: nowrap;
+    }
+}
+
+.tracker-event_date, .tracker-outcome_date,
+.tracker-history-event_date, .tracker-history-outcome_date {
+    color: #999;
+    font-size: 95%;
+}
+
+.tracker-notes, .tracker-history-notes {
+    font-size: 95%;
+    .cell-holder {
+        overflow: hidden;
+    }
+}
+
+table.tracker-tree-results {
+    tr[data-tracker-history-items="1"][data-tracker-protocol=""]{
+        display:none;
+    }
+}
+
+table.tracker-tree-results, table.tracker-chron-results {
+
+    tr[data-tracker-protocol=""] {
+        td.tracker-protocol_name:before, td.tracker-history-protocol_name:before {
+            content: '(not selected)';
+            color: #777;
+            font-size: 95%;
+        }
+    }
+    tr[data-tracker-protocol="updates"] {
+        background-color: #f7f7f3;
+        div.cell-holder{
+            color: #999;
+        }
+    }
 }

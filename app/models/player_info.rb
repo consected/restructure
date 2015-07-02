@@ -7,6 +7,9 @@ class PlayerInfo < ActiveRecord::Base
   # Although the player_info does not formally belong to the pro_info, the pro_info_id foreign 
   # key is on the player_info table, and therefore requires a belongs_to association
   belongs_to :pro_info, inverse_of: :player_info
+ 
+  # Allow simple search to function
+  attr_accessor :contact_data
   
   before_save :check_college
 

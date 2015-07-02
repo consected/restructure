@@ -7,7 +7,8 @@ class Tracker < ActiveRecord::Base
   
   def initialize presets={}
     
-    presets[:event_date] ||= DateTime.now
+    # Note: the event date and outcome date are now set dynamically in javascript within the form
+    #presets[:event_date] ||= DateTime.now
     
     super
   end
@@ -37,7 +38,8 @@ class Tracker < ActiveRecord::Base
     t.event_date = DateTime.now
     t.outcome_date = DateTime.now
     cp = ""
-    ignore = %w(created_at updated_at user id)
+    ignore = %w(created_at updated_at user_id user id)
+    
     record.changes.reject {|k,v| ignore.include? k}.each {|k,v| cp << "#{k.humanize} #{new_rec ? '' : "from #{v.first || "-"}"} #{new_rec ? '' : 'to '}#{v.last}; " }
     
     logger.debug "Tracking user update to record with #{cp} in #{rec_type}"

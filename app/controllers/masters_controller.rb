@@ -99,7 +99,8 @@ class MastersController < ApplicationController
     
     # Simple search fields
     @master.general_infos.build
-         
+    
+    
     render :search
   end
   

@@ -22,8 +22,8 @@ protected
       admin_sub = []
       if current_admin
         
-        admin_sub << {label: 'users', url: '/manage_users/', route: 'manage_users#home'}
-        admin_sub << {label: 'protocols', url: '/protocols/', route: 'protocols#home'}
+        admin_sub << {label: 'manage', url: '/', route: '#root'}
+        
         admin_sub << {label: 'password', url: "/admins/edit"}
         admin_sub << {label: 'logout_admin', url: "/admins/sign_out", extras: {method: :delete}}
         

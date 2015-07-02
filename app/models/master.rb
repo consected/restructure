@@ -23,18 +23,30 @@ class Master < ActiveRecord::Base
   end
     
   accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :addresses, :trackers
-  
+
+  # AltConditions allows certain search fields to be handled differently from a plain equality match
+  # Simply define a hash for the table containing the symbolized field names to be handled
+  # Use an array of a single item to define a predefined matching clause:
+  # :starts_with is the equivalent of "?%"
+  # :contains is the equivalent of "%?%" 
+  # any other string will be used as is 
+  # note that ? characters will be replaced by the field search value
+  # A second item in the array can be specified to state the actual query condition
+  # :starts with and :contains both default to "field_name LIKE ?"
   AltConditions = {
     player_infos: {
-      first_name: ['player_infos.first_name LIKE ?', :starts_with],
-      nick_name: ['player_infos.nick_name LIKE ?', :starts_with],
-      notes: ['player_infos.notes LIKE ?', :contains]
+      first_name: [:starts_with],
+      nick_name: [:starts_with],
+      notes: [:contains]
     },
     pro_infos: {
-      first_name: ['pro_infos.first_name LIKE ?', :starts_with],
-      nick_name: ['pro_infos.nick_name LIKE ?', :starts_with]
+      first_name: [:starts_with],
+      nick_name: [:starts_with]
       
-      }    
+    },
+    player_contacts: {
+      data: [:starts_with]
+    }
   }
   
   
@@ -142,10 +154,16 @@ class Master < ActiveRecord::Base
       wcond[:id] =  params[:id].to_i
     end
     
+    joins  = [:player_infos, "left outer join pro_infos on pro_infos.master_id = masters.id"]
     p.each do |k,v|
       unless v.nil?
         w << " AND " unless first
-        if k == 'first_name'  || k == 'nick_name'
+                
+        if k == 'contact_data'
+          w << "player_contacts.data LIKE :#{k}"      
+          wcond[k.to_sym] = "#{v}%"
+          joins << [:player_contacts]
+        elsif k == 'first_name'  || k == 'nick_name' 
           w << "(player_infos.#{k} LIKE :#{k} OR pro_infos.#{k} LIKE :#{k})"      
           wcond[k.to_sym] = "#{v}%"
         else
@@ -153,7 +171,7 @@ class Master < ActiveRecord::Base
           wcond[k.to_sym] = v
         end  
         
-        joins  = [:player_infos, "left outer join pro_infos on pro_infos.master_id = masters.id"]
+        
         first = false
       end
     end
@@ -176,15 +194,23 @@ class Master < ActiveRecord::Base
     altpair = altable[ckey.to_sym]
     return unless altpair
     
-    alt = altpair[0]
-    cop = altpair[1]
     
+    cop = altpair[0]
     refname = "#{table_name}_#{ckey}"
+    
+    if altpair[1]
+      alt  = altpair[1]
+    elsif cop == :starts_with || cop == :contains
+      alt = "#{table_name}.#{ckey} LIKE ?"      
+    end
+    
     alt = alt.gsub('?', ":#{refname}")
+    
     cvaltotal = "#{cval}%" if cop == :starts_with
     cvaltotal = "%#{cval}%" if cop == :contains
+    
     res = [alt, {refname.to_sym => cvaltotal}]
-    logger.debug "Checking for alt_condition:= #{res}"
+      
     res
   end
   

@@ -1,4 +1,4 @@
-_fpa.app = {
+_fpa.masters = {
     
     max_results: 100,
     
@@ -44,9 +44,10 @@ _fpa.app = {
     
 };
 
+// Page specific loaded callback
 _fpa.loaded.masters = function(){
     
-    _fpa.app.set_fields_to_search();
+    _fpa.masters.set_fields_to_search();
     
     $('#master-search-advanced').on('show.bs.collapse', function () {
         $('#master-search-simple').collapse('hide');

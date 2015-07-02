@@ -135,7 +135,9 @@
       {{/is}}
       </td>
       {{#filter this "protocol_name,event,event_date,c_method,outcome,outcome_date,notes" }}
-      <td class="tracker-{{@key}}">{{pretty_string this  return_string="true" capitalize="true"}}</td>
+      <td class="tracker-{{@key}}">
+      <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}</div>
+      </td>
       {{/filter}}
       <td><span class="record-meta">{{>update_metadata}}</span></td>
       <td class="edit-tracker-col">      
@@ -153,7 +155,9 @@
       
       </td>
       {{#filter this "protocol_name,event,event_date,c_method,outcome,outcome_date,notes" }}      
-      <td class="tracker-history-{{@key}}">{{pretty_string this  return_string="true" capitalize="true"}}</td>
+      <td class="tracker-history-{{@key}}">
+      <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}</div>
+      </td>
       {{/filter}}
       <td class="tracker-history">    
       <span class="record-meta">{{>update_metadata}}</span>
@@ -165,25 +169,28 @@
 <script id="empty_tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <table class="table">
     <thead><tr>
-      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  >Create Tracker record</a> </th></tr>
-    <tr id="tracker-{{master_id}}-" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
+      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th>
+      <th colspan="2">notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  >Create Tracker record</a> </th></tr>
+    <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     {{#is trackers.length 0}}<td colspan="9"><h4>No Tracker Records</h4></td>{{/is}}
     </tr>
     </thead>
   </table>
 </script>
 <script id="tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table">
+  <table class="table tracker-tree-results">
     <thead><tr>
-      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right" colspan="2" >Create Tracker record</a> </th></tr>
-    <tr id="tracker-{{master_id}}-" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
+      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
+      <th>protocol</th><th>event</th><th>date</th><th>method</th><th>outcome</th><th>date</th><th>notes</th>
+      <th colspan="2"><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> </th></tr>
+    <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     {{#is trackers.length 0}}<td colspan="9"><h4>No Tracker Records</h4></td>{{/is}}
     </tr>
     </thead>
     {{#each this}}
     {{#if id}}
     <tbody>
-      <tr class="index-{{@index}}" data-tracker-protocol="{{underscore protocol_name}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
+      <tr class="index-{{@index}}" data-tracker-history-items="{{tracker_history_length}}" data-preprocessor="tracker_edit_form" data-tracker-protocol="{{underscore protocol_name}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
         {{#with this}}
           {{>tracker_result}}
         {{/with}}
@@ -201,8 +208,8 @@
 
   <table class="table ">
     <thead><tr>
-      <th><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  >Create Tracker record</a> </th></tr>
-    <tr id="tracker-{{master_id}}-" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
+      <th><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden"  >Create Tracker record</a> </th></tr>
+    <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     <td colspan="8"><h4>No Tracker History Records</h4></td>
     </tr>
     </thead>
@@ -210,17 +217,18 @@
 
 </script>
 <script id="tracker_chron_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table tablesorter">
+  <table class="table tablesorter tracker-chron-results">
     <thead><tr>
-      <th><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  >Create Tracker record</a> </th></tr>
-    <tr id="tracker-{{master_id}}-" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
+      <th class="no-sort"><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th>
+      <th>protocol</th><th>event</th><th>date</th><th>method</th><th>outcome</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden">Create Tracker record</a> </th></tr>
+    <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form"  data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     {{#is trackers.length 0}}<td colspan="8"><h4>No Tracker Records</h4></td>{{/is}}
     </tr>
     </thead>
     <tbody>
     {{#each this}}
       {{#if id}}
-      <tr class="index-{{@index}}" data-tracker-protocol="{{underscore protocol_name}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
+      <tr class="index-{{@index}}" data-tracker-protocol="{{underscore protocol_name}}" data-tracker-protocol="{{underscore protocol_name}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
         {{#with this}}
           {{>tracker_history_result}}
           
@@ -324,7 +332,7 @@
 
 <script id="tracker-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with tracker}}
-    {{#if ../_created}}<tr class="index-created" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">{{/if}}
+    {{#if ../_created}}<tr data-preprocessor="tracker_edit_form" class="index-created" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">{{/if}}
       {{>tracker_result }}
     {{#if ../_created}}</tr>{{/if}}
   {{/with}}
@@ -348,7 +356,7 @@
 <script id="tracker-histories-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   
   {{#each results}}
-    <tr class="tracker-history-item" id="tracker-history-{{master_id}}-{{tracker_id}}-{{id}}" >
+    <tr class="tracker-history-item" data-tracker-protocol="{{underscore protocol_name}}"  id="tracker-history-{{master_id}}-{{tracker_id}}-{{id}}" >
     {{>tracker_history_result}}
     </tr>
   {{/each}}

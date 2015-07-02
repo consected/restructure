@@ -3,7 +3,33 @@ _fpa.form_utils = {
     // convenience calling them individually on an ad-hoc basis around the code base does
     // not make this a good choice.
 
+    // Setup the typeahead prediction for a specific text input element
+    setup_typeahead: function(element, list, name){
+      
+        if(typeof list === 'string')  
+          list = _fpa.cache(list);  
+
+        var items = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,        
+          local: list
+        });
+
+        $(element).typeahead({
+          hint: true,
+          highlight: true,
+          minLength: 1,
+          autoselect: true
+        },
+        {
+          name: name,
+          source: items
+        });
+    },
+
+    // Resize all labels in a block for nice formatting without tables or fixed widths
     resize_labels : function(block, data){
+        if(!block) block = $(document);
         block.find('.list-group').not('.attached-resize-labels').each(function(){
             // Cheap optimization to make the UI feel more responsive in large result sets
             var self = $(this);
@@ -24,18 +50,30 @@ _fpa.form_utils = {
 
     },
 
-
+    // Indicate items that have been entered on a form, making it visually fast to see
+    // when there are many search form inputs
     setup_has_value_inputs: function(block){
-        
-        block.find('input, select').not('.attached-has-value').each(function(){ 
-            if($(this).val() != '') 
-                $(this).addClass('has-value'); 
+        if(!block) block = $(document);
+                
+        var set_has = function(item){          
+            if(item.val() != '') 
+                item.addClass('has-value'); 
             else 
-                $(this).removeClass('has-value'); 
+                item.removeClass('has-value'); 
+        };
+        
+        var items = block.find('input, select').not('.attached-has-value');
+        items.on('change', function(){ 
+            set_has($(this));
+        }).each(function(){
+            set_has($(this));
         }).addClass('attached-has-value');
+        
+        
     },
   
-
+    // Setup the "chosen" tags on multiple select form elements (also used outside forms for 
+    // simple view of tags
     setup_chosen: function(block){
         if(!block) block = $(document);
 
@@ -50,6 +88,10 @@ _fpa.form_utils = {
         });
     },
 
+    // Provide a filtered set of options in a select field, based on the selection of 
+    // another field
+    // This handle both the initial setup and handling changes made to parent and dependent 
+    // select fields
     filtered_selector: function(block){
         if(!block) block = $(document);
         var d = block.find('select[data-filters-selector]').not('.attached-filter');
@@ -66,8 +108,9 @@ _fpa.form_utils = {
             el.each(function(){
                 var ela = $(this).find('option:selected').attr('data-filter-id');
 
-                if(ela != v)
-                    $(this).val(null);
+                if(ela != v){
+                    $(this).val(null).trigger('change');
+                }
             });
 
         };
@@ -79,18 +122,70 @@ _fpa.form_utils = {
         }).addClass('attached-filter');
     },
 
+    // Use the tablesorter on profile blocks.
+    // This has not been generalized at this point and needs attention
     setup_tablesorter: function(block){
-        var ts = block.find('.tablesorter').not('.attached-tablesorter');
-        ts.tablesorter( {dateFormat: 'us', headers: {0: {sorter: false}, 8: {sorter: false}}}).addClass('attached-tablesorter'); 
+        if(!block) block = $(document);
+        var tss = block.find('.tablesorter').not('.attached-tablesorter');
+        
+        tss.each(function(){
+           var ts = $(this);
+           
+           var i = 0;
+           var h = {};
+           ts.find('thead tr:first th').each(function(){
+               if($(this).hasClass('no-sort'))
+                   h[i] = {sorter: false};
+               i++;
+           });
+           
+           //{0: {sorter: false}}
+           ts.tablesorter( {dateFormat: 'us', headers: h}).addClass('attached-tablesorter');  
+        });                
     },
 
+    setup_bootstrap_items: function(block){
+        if(!block) block = $(document);
+        block.find('[data-toggle="tooltip"]').not('.attached_bs').tooltip().addClass('attached_bs');    
+        block.find('[data-toggle="popover"]').not('.attached_bs').popover().addClass('attached_bs');;
+        block.find('[data-show-popover="auto"]').not('.attached_bs').popover('show').addClass('attached_bs');
+        block.find('.dropdown-toggle').not('.attached_bs').dropdown().addClass('attached_bs');
+
+        block.find('table').each(function(){
+            var c = $(this).attr('class');
+            if(c == null || c === '')
+                $(this).addClass('table');
+         });
+   
+
+    },
+
+    setup_data_toggles: function(block){
+        if(!block) block = $(document);
+        block.on('click', '[data-toggle="clear"]', function(){
+            var a = $(this).attr('data-target');
+            $(a).html('').removeClass('in');
+        });
+
+        block.on('click', '[data-toggle="scrollto-result"]', function(){
+            var a = $(this).attr('data-result-target');
+            if(!a || a=='')
+                a = $(this).attr('data-target');
+            $(window).scrollTo(a, 100);
+        });
+
+    },
+
+    // Run through all the general formatters for a new block to show nicely
     format_block: function(block){
+        if(!block) block = $(document);
         _fpa.form_utils.setup_chosen(block);  
         _fpa.form_utils.setup_has_value_inputs(block);
         _fpa.form_utils.resize_labels(block);
         _fpa.form_utils.filtered_selector(block);
         _fpa.form_utils.setup_tablesorter(block);
-
+        _fpa.form_utils.setup_bootstrap_items(block);
+        _fpa.form_utils.setup_data_toggles(block);
     }
 };
 

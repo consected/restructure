@@ -41,7 +41,7 @@
         </li>
         <li class="list-group-item player-info-rank">
             <%= f.label :rank %>
-            <%= f.text_field :rank %>
+            <%= f.select :rank, player_info_rank_array_pair, class: 'form-control' %>
         </li>
         <li class="list-group-item player-info-college">
           <%= f.label :college %>
@@ -59,7 +59,7 @@
     </div>
     <script>
       
-      _fpa.setup_typeahead('#player_info_college', 'college_list', "colleges");
+      _fpa.form_utils.setup_typeahead('#player_info_college', 'college_list', "colleges");
     </script>
   
   </div>

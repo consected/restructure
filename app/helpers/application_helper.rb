@@ -21,7 +21,7 @@ module ApplicationHelper
     init.merge({pattern: "\\d{5,5}"})
   end
   
-  def inline_cancel_button
+  def inline_cancel_button class_extras="pull-right"
     logger.info "Doing inline_cancel_button for #{object_instance}"
     
     if object_instance.id 
@@ -30,7 +30,7 @@ module ApplicationHelper
       cancel_href = "/masters/#{object_instance.master_id}/#{controller_name}/cancel"
     end
           
-    "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\"></a>".html_safe
+    "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\"></a>".html_safe
   end
   
   def edit_form_id
@@ -38,7 +38,12 @@ module ApplicationHelper
   end
   
   def edit_form_hash extras={}
-    extras.merge({remote: true, html: {"data-result-target" => "##{hyphenated_name}-#{@master.id}-#{@id}", "data-template" => "#{hyphenated_name}-result-template"}})
+    res = extras.dup 
+    
+    res[:remote] = true
+    res[:html] ||= {}
+    res[:html].merge!("data-result-target" => "##{hyphenated_name}-#{@master.id}-#{@id}", "data-template" => "#{hyphenated_name}-result-template")
+    res
   end
   
 end

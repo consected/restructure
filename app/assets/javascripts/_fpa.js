@@ -2,28 +2,6 @@ _fpa = {
     
     templates: {},
     
-    setup_typeahead: function(element, list, name){
-      
-      if(typeof list === 'string')  
-        list = _fpa.cache(list);  
-        
-      var items = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.whitespace,
-        queryTokenizer: Bloodhound.tokenizers.whitespace,        
-        local: list
-      });
-
-      $(element).typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 1,
-        autoselect: true
-      },
-      {
-        name: name,
-        source: items
-      });
-  },
   ajax_working: function(block){
 
     $(block).addClass('ajax-running');
@@ -236,7 +214,7 @@ _fpa = {
                     var pre = $(this).attr('data-preprocessor');                    
                     var procfound = false;
                     if(_fpa.preprocessors[pre]){
-                        _fpa.preprocessors[pre](block, data);                        
+                        _fpa.preprocessors[pre]($(this), data);                        
                         procfound = true;
                     }
                     _fpa.preprocessors.default($(this), data, procfound);
@@ -245,7 +223,7 @@ _fpa = {
                     
                     procfound = false;
                     if(_fpa.postprocessors[pre]){
-                        _fpa.postprocessors[pre](block, data);
+                        _fpa.postprocessors[pre]($(this), data);
                         procfound = true;
                     }
                     _fpa.postprocessors.default($(this), data, procfound);
@@ -353,11 +331,6 @@ $('html').ready(function(){
     
   });
   
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip();    
-    $('[data-toggle="popover"]').popover();
-    $('[data-show-popover="auto"]').popover('show');
-  });
   _fpa.compile_templates();
   _fpa.handle_remotes();
   _fpa.loaded.default();

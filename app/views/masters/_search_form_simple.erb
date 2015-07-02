@@ -42,19 +42,21 @@
         <%= pif.label :college %>
         <%= pif.text_field :college, class: 'form-control simple-college-input typeahead'  %>
       </div>
-      <div class="form-group col-sm-2 text-right">
-          <p>&nbsp;</p>
-      <%= f.submit :submit, class: "btn btn-default btn-sm" %>
+      <div class="form-group col-sm-3">
+        <%= pif.label "email / phone" %>
+        <%= pif.text_field :contact_data, class: 'form-control'  %>
       </div>
+      
     <% end %>
   </div>
   <div class="form-group form-actions clearfix">
+    <%= f.submit :submit, class: "btn btn-default btn-sm pull-right" %>
     
     <span id="search_count_simple" class="search-results-count pull-right" data-subscription="count" data-template="search-count-template" ></span>
   </div>
 <%end%>
 <script>
-  _fpa.setup_typeahead('input.simple-college-input', 'college_list', "colleges");
+  _fpa.form_utils.setup_typeahead('input.simple-college-input', 'college_list', "colleges");
 </script>
 
 </div>

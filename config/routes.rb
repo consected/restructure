@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
 
   
+  resources :accuracy_scores
   resources :protocol_outcomes
   resources :protocol_events
   resources :colleges
