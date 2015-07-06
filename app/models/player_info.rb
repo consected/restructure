@@ -20,10 +20,18 @@ class PlayerInfo < ActiveRecord::Base
       return rank 
     end
   end
+  
+  def accuracy_score_name 
+    res = AccuracyScore.find_by_value(self.rank)
+    
+    (res ? res.name : nil)
+  end
  
   def as_json extras={}
     extras[:include] ||= {}
     extras[:include].merge!({pro_info: {}})
+    extras[:methods] ||= []
+    extras[:methods] << :accuracy_score_name
     super(extras)
   end
 

@@ -169,9 +169,10 @@ _fpa.form_utils = {
 
         block.on('click', '[data-toggle="scrollto-result"]', function(){
             var a = $(this).attr('data-result-target');
-            if(!a || a=='')
-                a = $(this).attr('data-target');
-            $(window).scrollTo(a, 100);
+            if(!a || a==''){
+                a = $(this).attr('data-target');                                
+                $(document).scrollTo(a, 100, {offset: -50});
+            }
         });
 
     },

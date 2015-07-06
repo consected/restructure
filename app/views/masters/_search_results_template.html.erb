@@ -4,8 +4,10 @@
       <li class="list-group-item">
 
         <a class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
-        <h4 class="list-group-item-heading">Player Info <span class="heading-rank">{{rank}}</span></h4>
-        {{>item_flag_container item_type="player_info"}}
+        <span class="pull-right label label-info" style="margin-right:1em">{{rank}} - {{accuracy_score_name}}</span>
+          <h4 class="list-group-item-heading">Player</h4>
+        
+        {{>item_flag_container item_type="player_info"}}         
       </li>
       
       {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
@@ -172,11 +174,12 @@
       <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th>
       <th colspan="2">notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  >Create Tracker record</a> </th></tr>
     <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
-    {{#is trackers.length 0}}<td colspan="9"><h4>No Tracker Records</h4></td>{{/is}}
+    <td colspan="9"><h4>No Tracker Records</h4></td>
     </tr>
     </thead>
   </table>
 </script>
+
 <script id="tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <table class="table tracker-tree-results">
     <thead><tr>
@@ -280,6 +283,10 @@
    <option selected="true" class="item-flag" value="{{item_flag_name.id}}">{{item_flag_name.name}}</option>
 </script>
 
+<script id="tracker_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<span class="badge">{{trackers.length}}</span>
+</script>
+
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
     <span class="glyphicon glyphicon-info-sign" title="last updated"></span> 
     {{#if updated_at}}{{pretty_string updated_at}}{{else}}--{{/if}}
@@ -304,6 +311,10 @@
     
   {{/with}}
   
+</script>
+
+<script id="tracker-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{>tracker_badge trackers=results}}
 </script>
 
 <script id="address-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -394,7 +405,7 @@
         <h3 class="panel-title">
           <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
             <div class="row">
-              <div class="col-md-10 player-info-header">
+              <div class="col-md-14 player-info-header">
                 <span class="msid">{{id}}</span> : 
         
                 <strong class="player-names">
@@ -405,11 +416,15 @@
                     ({{capitalize player_infos.0.nick_name}})
                   {{/if}}
                 </strong>
+        {{#if player_infos.0.birth_date}}
                 <small>DOB</small> {{local_date player_infos.0.birth_date '-'}}
-                <small>DOD</small> {{local_date player_infos.0.death_date '-'}}
-                <small>Rank</small> {{player_infos.0.rank}}
+        {{/if}}
+        {{#if player_infos.0.death_date}}
+                  <small>DOD</small> {{local_date player_infos.0.death_date '-'}}
+          {{/if}}
+                <span class="label label-info" title="{{player_infos.0.accuracy_score_name}}">{{player_infos.0.rank}}</span>
               </div>
-              <div class="col-md-10 col-md-offset-2 pro-info-header">
+              <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with player_infos.0.pro_info}}
                 <strong class="pro-names">
                   {{capitalize first_name}} 
@@ -419,8 +434,12 @@
                     ({{capitalize nick_name}})
                   {{/if}}
                 </strong>
+        {{#if birth_date}}
                 <small>DOB</small> {{local_date birth_date '-'}}
+        {{/if}}
+        {{#if death_date}}
                 <small>DOD</small> {{local_date death_date '-'}}
+        {{/if}}
               {{/with}}  
               </div>
           
@@ -431,13 +450,13 @@
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <ul class="nav nav-pills ">
           <li role="presentation">
-            <a href="#" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
+            <a href="#/" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
           </li>
           <li role="presentation">
-            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="{{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker <span class="badge">{{trackers.length}}</span></a>
+            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker <span data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="results" data-template="tracker-badge-template">{{>tracker_badge}}</span></a>
           </li>
           <li role="presentation">
-            <a href="#" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
+            <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
           </li>
         </ul>
 
@@ -459,7 +478,7 @@
             </div>
           </div>
   
-          <div id="trackers-{{id}}" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
+          <div id="trackers-{{id}}" data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="results" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
           {{#with trackers}}
             {{>tracker_tree_results master_id=../id}}
           {{else}}

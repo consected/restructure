@@ -184,7 +184,7 @@
 
     Handlebars.registerHelper('underscore', function(stre, options) {
         if(!stre) return null;
-        return stre.toLowerCase().replace(' ', '_');
+        return stre.toLowerCase().replace(/ /g, '_');
     });
 
     Handlebars.registerHelper('pretty_string', function(stre, options) {
@@ -229,7 +229,7 @@
 
     Handlebars.registerHelper('humanize', function(obj) {
 
-     return obj.replace('_', ' ');
+     return obj.replace(/_/g, ' ');
     });
 
     Handlebars.registerHelper('in', function(context, key, items, options) {

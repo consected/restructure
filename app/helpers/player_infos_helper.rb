@@ -14,7 +14,7 @@ module PlayerInfosHelper
   end
   
   def player_info_rank_array_pair
-    AccuracyScore.selector_array_pair.map {|a| ["#{a.last} - #{a.first}", a.last]}
+    AccuracyScore.selector_name_value_pair.map {|a| ["#{a.last} - #{a.first}", a.last]}
   end
   
 end

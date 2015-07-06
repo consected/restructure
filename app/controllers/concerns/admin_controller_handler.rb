@@ -1,12 +1,9 @@
-module AdminHandler
+module AdminControllerHandler
   extend ActiveSupport::Concern
-  
-  UseMasterParam = %w(new create index) 
   
   included do
     before_action :authenticate_admin!
-    before_action :set_instance_from_id, only: [:show, :edit, :update, :destroy]
-    
+    before_action :set_instance_from_id, only: [:show, :edit, :update, :destroy]    
     
     after_action :do_log_action
   end

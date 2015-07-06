@@ -34,7 +34,7 @@ class MastersController < ApplicationController
               pro_info: {}, 
               item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
             },
-            methods: [:user_name]
+            methods: [:user_name, :accuracy_score_name]
           },
           player_contacts: {order: {rank: :desc}, 
             include: {

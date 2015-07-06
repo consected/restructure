@@ -43,12 +43,17 @@ module UserHandler
     self.user.email
   end
   
+  def update_action
+    @update_action
+  end
   
   def as_json extras={}
     extras[:include] ||= {}
     extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
     extras[:methods] ||= []
     extras[:methods] << :user_name
+    # update_action can be used by requestor to identify whether the record was just updated (saved) or not
+    extras[:methods] << :update_action
     super(extras)    
   end
   
@@ -70,6 +75,7 @@ module UserHandler
     end
 
     def track_record_update
+      @update_action = true
        Tracker.track_record_update self
     end
   

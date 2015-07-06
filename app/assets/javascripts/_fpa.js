@@ -35,7 +35,7 @@ _fpa = {
     if(!options || !options.position){        
         block.html('');
     }
-    window.setTimeout(function(){  
+
     
         var template =_fpa.templates[template_name];
 
@@ -45,39 +45,28 @@ _fpa = {
           data._code_flag = {};
           data._code_flag[data.code] = true;
         }
-        var procfound = false;
         
-        if(_fpa.preprocessors[template_name]){
-            _fpa.preprocessors[template_name](block, data);
-            procfound = true;
-        }
-        _fpa.preprocessors.default(block, data, procfound);
+        _fpa.do_preprocessors(template_name, block, data);                    
 
         if(options.position)
             data._created = true;
 
         var html = template(data);
-
+        
+        var new_block;
+        
         if(options.position === 'before'){        
-            block.before(html);
+            new_block = block.before(html);
             block.html('');
         }
         else
             block.html(html);
 
-        window.setTimeout(function(){
-            
-            procfound = false;
-            if(_fpa.postprocessors[template_name]){
-                _fpa.postprocessors[template_name](block, data);
-                procfound = true;
-            }
-            _fpa.postprocessors.default(block, data, procfound);
-            
+        window.setTimeout(function(){            
+            _fpa.do_postprocessors(template_name, new_block, data);            
             _fpa.reset_page_size();
             _fpa.ajax_done(block);
         },1);
-    }, 1);
   },
           
   reset_page_size:function(){
@@ -136,6 +125,37 @@ _fpa = {
       }
   },
   
+  try_app_callback: function(el){
+    if(el[0].app_callback){
+        el[0].app_callback();
+        el[0].app_callback = null;
+    }    
+  },
+  
+  do_preprocessors: function(pre, block, data){
+    var procfound = false;
+    if(pre){
+        pre = pre.replace(/-/g, '_');
+        if(_fpa.preprocessors[pre]){
+            _fpa.preprocessors[pre](block, data);
+            procfound = true;
+        }
+    }
+    _fpa.preprocessors.default(block, data, procfound);
+  },
+  
+  do_postprocessors: function(pre, block, data){
+    var procfound = false;
+    if(pre){
+        pre = pre.replace(/-/g, '_');
+        if(_fpa.postprocessors[pre]){
+            _fpa.postprocessors[pre](block, data);
+            procfound = true;
+        }
+    }
+    _fpa.postprocessors.default(block, data, procfound);
+  },
+  
   handle_remotes: function(){
     //var block = $("form[data-remote='true'], a[data-remote='true']").not('.attached');
     var sel = "form[data-remote='true'], a[data-remote='true']";
@@ -178,6 +198,9 @@ _fpa = {
         var data = xhr.responseJSON;
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);    
+        
+        _fpa.try_app_callback($(this));
+        
         if(xhr.responseJSON){
             var t = $(this).attr('data-result-target');
             var options = {};
@@ -189,15 +212,29 @@ _fpa = {
                 _fpa.view_template(b, $(this).attr('data-template'), xhr.responseJSON, options);
             }else{
                 for(var di in data ){
-                    if (data.hasOwnProperty(di)){
-                        var d = data[di];
-                        var targets = $('[data-subscription="'+di+'"]');
+                    if (data.hasOwnProperty(di)){                        
                         var res = {};
-                        res[di] = d;
-                        targets.each(function(){                                                        
-                            _fpa.view_template($(this), $(this).attr('data-template'), res);                  
-                        });              
+                        var d = data[di];                        
+                        var targets = $('[data-subscription="'+di+'"]');
                         
+                        var targets_for = $('[data-sub-for="'+di+'"]');
+                        
+                        targets_for.each(function(){
+                            var v = $(this).attr('data-sub-for-value');
+                            if(data[di] == v){
+                                var di_use = $(this).attr('data-sub-for-use');
+                                targets.push($(this));                                
+                                res[di_use] = data[di_use];
+                            }
+                            
+                        });
+                                                
+                        res[di] = d;
+                        targets.each(function(){          
+                            var dt = $(this).attr('data-template');                            
+                            _fpa.view_template($(this), dt, res);                                              
+                        });              
+                                                
                     }
                 }                
             }
@@ -212,21 +249,11 @@ _fpa = {
                 res[di] = d;
                 targets.each(function(){
                     var pre = $(this).attr('data-preprocessor');                    
-                    var procfound = false;
-                    if(_fpa.preprocessors[pre]){
-                        _fpa.preprocessors[pre]($(this), data);                        
-                        procfound = true;
-                    }
-                    _fpa.preprocessors.default($(this), data, procfound);
+  
+                    _fpa.do_preprocessors(pre, $(this), data);
+                    $(this).html(d);                    
+                    _fpa.do_postprocessors(pre, $(this), data);
                     
-                    $(this).html(d);
-                    
-                    procfound = false;
-                    if(_fpa.postprocessors[pre]){
-                        _fpa.postprocessors[pre]($(this), data);
-                        procfound = true;
-                    }
-                    _fpa.postprocessors.default($(this), data, procfound);
                 });
 
             });

@@ -1,9 +1,9 @@
 class AccuracyScoresController < ApplicationController
-  include AdminHandler
+  include AdminControllerHandler
 
 
   private
     def secure_params
-      params.require(:accuracy_score).permit(:name, :value, :admin_id)
+      params.require(:accuracy_score).permit(:name, :value)
     end
 end
