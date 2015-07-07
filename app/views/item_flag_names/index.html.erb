@@ -2,11 +2,12 @@
 
 <h1>Listing Item Flag Names</h1>
 
-<table>
+<table class="table tablesorter">
   <thead>
     <tr>
       <th>Name</th>
-      <th>User</th>
+      <th>Item Type</th>
+      <th>Disabled</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -16,7 +17,7 @@
       <tr>
         <td><%= item_flag_name.name %></td>
         <td><%= item_flag_name.item_type %></td>
-        <td><%= item_flag_name.user %></td>
+        <td><%= item_flag_name.disabled %></td>
         <td><%= link_to 'Show', item_flag_name %></td>
         <td><%= link_to 'Edit', edit_item_flag_name_path(item_flag_name) %></td>
         <td><%= link_to 'Destroy', item_flag_name, method: :delete, data: { confirm: 'Are you sure?' } %></td>

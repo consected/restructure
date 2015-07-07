@@ -56,3 +56,15 @@ li.list-group-item label {
         padding-bottom: 4px
     }
 }
+
+div.chosen-container.chosen-disabled {
+    opacity: 1 !important;
+    li.search-choice {
+        padding-right: 5px;
+        background: white;
+    }
+    a.search-choice-close {
+        display: none !important;
+    }
+    
+}

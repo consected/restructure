@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150702200308) do
+ActiveRecord::Schema.define(version: 20150707222630) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20150702200308) do
     t.integer  "admin_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean  "disabled"
   end
 
   add_index "accuracy_scores", ["admin_id"], name: "index_accuracy_scores_on_admin_id", using: :btree
@@ -63,6 +64,7 @@ ActiveRecord::Schema.define(version: 20150702200308) do
   create_table "colleges", force: :cascade do |t|
     t.string  "name"
     t.integer "synonym_for_id"
+    t.boolean "disabled"
   end
 
   create_table "general_selections", force: :cascade do |t|
@@ -71,17 +73,19 @@ ActiveRecord::Schema.define(version: 20150702200308) do
     t.string   "item_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean  "disabled"
   end
 
   create_table "item_flag_names", force: :cascade do |t|
     t.string   "name"
     t.string   "item_type"
-    t.integer  "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean  "disabled"
+    t.integer  "admin_id"
   end
 
-  add_index "item_flag_names", ["user_id"], name: "index_item_flag_names_on_user_id", using: :btree
+  add_index "item_flag_names", ["admin_id"], name: "index_item_flag_names_on_admin_id", using: :btree
 
   create_table "item_flags", force: :cascade do |t|
     t.integer  "item_id"
@@ -89,9 +93,11 @@ ActiveRecord::Schema.define(version: 20150702200308) do
     t.integer  "item_flag_name_id"
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
+    t.integer  "user_id"
   end
 
   add_index "item_flags", ["item_flag_name_id"], name: "index_item_flags_on_item_flag_name_id", using: :btree
+  add_index "item_flags", ["user_id"], name: "index_item_flags_on_user_id", using: :btree
 
   create_table "manage_users", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -208,6 +214,7 @@ ActiveRecord::Schema.define(version: 20150702200308) do
     t.integer  "admin_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.boolean  "disabled"
   end
 
   add_index "protocol_events", ["admin_id"], name: "index_protocol_events_on_admin_id", using: :btree
@@ -219,6 +226,7 @@ ActiveRecord::Schema.define(version: 20150702200308) do
     t.integer  "admin_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.boolean  "disabled"
   end
 
   add_index "protocol_outcomes", ["admin_id"], name: "index_protocol_outcomes_on_admin_id", using: :btree
@@ -226,12 +234,13 @@ ActiveRecord::Schema.define(version: 20150702200308) do
 
   create_table "protocols", force: :cascade do |t|
     t.string   "name"
-    t.integer  "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean  "disabled"
+    t.integer  "admin_id"
   end
 
-  add_index "protocols", ["user_id"], name: "index_protocols_on_user_id", using: :btree
+  add_index "protocols", ["admin_id"], name: "index_protocols_on_admin_id", using: :btree
 
   create_table "scantrons", force: :cascade do |t|
     t.integer  "master_id"
@@ -309,8 +318,9 @@ ActiveRecord::Schema.define(version: 20150702200308) do
   add_foreign_key "accuracy_scores", "admins"
   add_foreign_key "addresses", "masters"
   add_foreign_key "addresses", "users"
-  add_foreign_key "item_flag_names", "users"
+  add_foreign_key "item_flag_names", "admins"
   add_foreign_key "item_flags", "item_flag_names"
+  add_foreign_key "item_flags", "users"
   add_foreign_key "manual_investigations", "masters"
   add_foreign_key "manual_investigations", "scantrons"
   add_foreign_key "manual_investigations", "users"
@@ -325,7 +335,7 @@ ActiveRecord::Schema.define(version: 20150702200308) do
   add_foreign_key "protocol_events", "protocols"
   add_foreign_key "protocol_outcomes", "admins"
   add_foreign_key "protocol_outcomes", "protocols"
-  add_foreign_key "protocols", "users"
+  add_foreign_key "protocols", "admins"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
   add_foreign_key "tracker_history", "masters"

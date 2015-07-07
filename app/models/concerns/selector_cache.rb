@@ -8,6 +8,7 @@ module SelectorCache
     before_save :invalidate_cache
     before_create :invalidate_cache
     
+    scope :enabled, -> { where "disabled is null OR disabled = FALSE" }
   end
   
   class_methods do
@@ -37,7 +38,7 @@ module SelectorCache
     def selector_array conditions=nil
       ckey="#{array_cache_key}#{conditions}"
       Rails.cache.fetch(ckey){
-        where(conditions).collect {|c| c.name }
+        enabled.where(conditions).collect {|c| c.name }
       }    
     end
     
@@ -45,7 +46,7 @@ module SelectorCache
       ckey="#{array_pair_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        where(conditions).collect {|c| [c.name, c.id] }
+        enabled.where(conditions).collect {|c| [c.name, c.id] }
       }
     end
     
@@ -53,7 +54,7 @@ module SelectorCache
       ckey="#{nv_pair_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        where(conditions).collect {|c| [c.name, c.value] }
+        enabled.where(conditions).collect {|c| [c.name, c.value] }
       }
     end
     
@@ -61,7 +62,7 @@ module SelectorCache
       ckey="#{attributes_cache_key}#{attributes}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        where(conditions).collect {|c| [c.send(attributes.first), c.send(attributes.last)] }
+        enabled.where(conditions).collect {|c| [c.send(attributes.first), c.send(attributes.last)] }
       }
     end
     
@@ -70,7 +71,7 @@ module SelectorCache
       ckey="#{collection_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        where(conditions)
+        enabled.where(conditions)
       }
     end
     

@@ -30,7 +30,7 @@ _fpa.form_utils = {
     // Resize all labels in a block for nice formatting without tables or fixed widths
     resize_labels : function(block, data){
         if(!block) block = $(document);
-        block.find('.list-group').not('.attached-resize-labels').each(function(){
+        block.find('.list-group:visible').not('.attached-resize-labels').each(function(){
             // Cheap optimization to make the UI feel more responsive in large result sets
             var self = $(this);
             window.setTimeout(function(){

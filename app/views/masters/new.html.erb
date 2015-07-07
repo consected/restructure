@@ -1,4 +1,4 @@
 <h2>Create a new Master Record MSID</h2>
-<%= form_for @master do |f| %>
-<%= f.submit %>
+<%= form_for @master, url: url_for(action: :create) do |f| %>
+  <%= f.submit %>
 <% end %>

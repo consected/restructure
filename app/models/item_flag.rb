@@ -3,6 +3,12 @@ class ItemFlag < ActiveRecord::Base
   belongs_to :item_flag_name
   
   
+#  belongs_to :user
+#  before_validation :force_write_user    
+# 
+#  validates :user, presence: true
+#  after_save :track_record_update
+#  
   def method_id 
     self.item.master_id
   end
@@ -22,5 +28,14 @@ class ItemFlag < ActiveRecord::Base
     
     
   end
+
+protected
+  
+  
+  def track_record_update
+    #logger.info "Track record update for item_flag"
+    # Tracker.track_flag_update self
+  end
+  
   
 end

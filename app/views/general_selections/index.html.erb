@@ -8,6 +8,7 @@
       <th>Name</th>
       <th>Value</th>
       <th>Item type</th>
+      <th>Admin</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -18,9 +19,10 @@
         <td><%= general_selection.name %></td>
         <td><%= general_selection.value %></td>
         <td><%= general_selection.item_type %></td>
-        <td><%= link_to 'Show', general_selection %></td>
+        <td><%= general_selection.admin_name %></td>
+        
         <td><%= link_to 'Edit', edit_general_selection_path(general_selection) %></td>
-        <td><%= link_to 'Destroy', general_selection, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        
       </tr>
     <% end %>
   </tbody>

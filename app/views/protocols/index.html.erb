@@ -6,7 +6,8 @@
   <thead>
     <tr>
       <th>Name</th>
-      <th>User</th>
+      <th>Admin</th>
+      <th>Disabled</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -15,15 +16,13 @@
     <% @protocols.each do |protocol| %>
       <tr>
         <td><%= protocol.name %></td>
-        <td><%= protocol.user %></td>
-        <td><%= link_to 'Show', protocol %></td>
-        <td><%= link_to 'Edit', edit_protocol_path(protocol) %></td>
-        <td><%= link_to 'Destroy', protocol, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= protocol.admin_name %></td>
+        <td><%= protocol.disabled %></td>
+        
+        <td><%= link_to 'Edit', url_for(id: protocol, action: :edit) %></td>        
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New Protocol', new_protocol_path %>
+<%=  render partial: 'admin_handler/index_actions'  %>

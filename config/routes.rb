@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
 
   
+  resources :action_logs
+  
   resources :accuracy_scores
   resources :protocol_outcomes
   resources :protocol_events
@@ -18,6 +20,7 @@ Rails.application.routes.draw do
   
   resources :pages, only: [:show, :index]
   
+  post 'masters/create' => 'masters#create'
   post 'masters/' => 'masters#index'
   get 'masters/search', as: 'msid_search'
   get 'masters/search' => 'masters#search'

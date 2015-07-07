@@ -17,12 +17,14 @@ class User < ActiveRecord::Base
   end
   
   def action_logger
-    @@action_logger ||= Logger.new("#{Rails.root}/log/action_log.log")
+    logv = DateTime.now.strftime('%Y-%m-%d')
+    @@action_logger ||= {}
+    @@action_logger[logv] ||= Logger.new("#{Rails.root}/log/action_log-#{logv}.log")
   end
   
   def log_action action, sub, results, method, params, status="OK"
     
-    res = {user: self.id, email: self.email, action: action, sub: sub, method: method, params: params, results: results, status: status}
+    res = {user: self.id, email: self.email, action: action, sub: sub, method: method, params: params, results: results, status: status, action_at: DateTime.now.iso8601}
     action_logger.info(res.to_json)
   end
 

@@ -226,7 +226,11 @@
     Handlebars.registerHelper('pretty_print', function(obj) {
      return JSON.stringify(obj, null, 2);
     });
-
+    
+    Handlebars.registerHelper('pretty_print_html', function(obj) {
+     return JSON.stringify(obj, null, '<div>  ');
+    });
+    
     Handlebars.registerHelper('humanize', function(obj) {
 
      return obj.replace(/_/g, ' ');

@@ -24,10 +24,12 @@ _fpa.postprocessors = {
         $('a.master-expander').click(function(ev){
             ev.preventDefault();
             var id = $(this).attr('href');
-            _fpa.form_utils.format_block($(id));
-
+            
             $(id).on('shown.bs.collapse', function(){
+                _fpa.form_utils.format_block($(this));
+
                 $.scrollTo($(this), 200, {offset:-50} );
+
                 $(this).off('shown.bs.collapse');
             });
         });

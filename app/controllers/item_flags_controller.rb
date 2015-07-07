@@ -32,7 +32,6 @@ class ItemFlagsController < ApplicationController
     
     logger.debug "Flag list: #{secure_params}"
     flag_list = secure_params[:item_flag_name_id]
-    
     @item.item_flags.destroy_all
     flag_list.each do |f|
       unless f.blank?

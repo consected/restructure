@@ -23,6 +23,11 @@
     <%= f.label :item_type %><br>
     <%= f.select :item_type, GeneralSelection::ItemTypes %>
   </div>
+  <div class="field">
+    <%= f.label :disable %><br>
+    <%= f.check_box :disabled %>
+  </div>
+
   <div class="actions">
     <%= f.submit %>
   </div>

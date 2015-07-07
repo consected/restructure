@@ -1,5 +1,5 @@
 class ItemFlagName < ActiveRecord::Base
+  include AdminHandler
   include SelectorCache
-  belongs_to :user
   
 end

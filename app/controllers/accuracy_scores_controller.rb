@@ -4,6 +4,6 @@ class AccuracyScoresController < ApplicationController
 
   private
     def secure_params
-      params.require(:accuracy_score).permit(:name, :value)
+      params.require(:accuracy_score).permit(:name, :value, :disabled)
     end
 end
