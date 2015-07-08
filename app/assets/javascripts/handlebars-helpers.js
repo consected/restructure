@@ -126,8 +126,7 @@
     });
 
     Handlebars.registerHelper('nl2br', function(text) {
-        var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
-        return new Handlebars.SafeString(nl2br);
+        return _fpa.utils.nl2br(text);
     });
 
 
@@ -202,13 +201,22 @@
                 asTimestamp = false;
             }
         }
-        if((!startTime || startTime == 'Invalid Date' ) && options.hash.return_string){
-            if(options.hash.capitalize)
-                return _fpa.utils.capitalize(stre);
-            else
-                return stre;
+        if(typeof startTime === 'undefined' || !startTime || startTime == 'Invalid Date'){
+            if(options.hash.return_string){
+                if(options.hash.capitalize){
+                    if(!stre || stre.length < 30)
+                        return _fpa.utils.capitalize(stre);
+                    else
+                        return _fpa.utils.nl2br(stre);
+                }
+                else{
+                    return _fpa.utils.nl2br(stre);
+                }
+            } else {
+                return null;
+            }
         }
-
+        
         startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
         return startTime.toLocaleDateString();
     });

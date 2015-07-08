@@ -66,4 +66,12 @@ protected
       flash[:danger] = "Requested information not found"
       raise ActionController::RoutingError.new('Not Found')
     end
+    
+    def authenticate_user_or_admin!
+      if !current_user && !current_admin
+        redirect_to new_user_session_path
+      end
+      return true
+    end
+    
 end

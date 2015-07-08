@@ -22,7 +22,7 @@ class Master < ActiveRecord::Base
     Rails.logger.debug "Associated master with #{assoc.plural_name}_item_flags through #{assoc.plural_name} with source :item_flags"
   end
     
-  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :addresses, :trackers
+  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :addresses, :trackers, :tracker_histories
 
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
@@ -76,9 +76,9 @@ class Master < ActiveRecord::Base
         if k.to_s.include? '_attributes'
           k1 = k.to_s.gsub('_attributes','')
           r = Master.reflect_on_association(k1.to_sym)
-          
-          if r.source_reflection
-            k1s =  r.source_reflection.name.to_s
+          logger.debug "Reflection: #{r.klass.table_name}"
+          if r.klass #r.source_reflection
+            k1s =  r.klass.table_name #r.source_reflection.name.to_s
           else
             k1s = r.plural_name.to_s
           end

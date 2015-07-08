@@ -8,6 +8,11 @@ module AdminControllerHandler
     after_action :do_log_action
   end
 
+  def log_action action, sub, results, status="OK"
+    current_admin.log_action action, sub, results, request.method_symbol, params, status
+  end
+  
+  
   def do_log_action
     len = (@master_objects ? @master_objects.length : 0)
     log_action "#{controller_name}##{action_name}", "AUTO", len

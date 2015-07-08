@@ -3,6 +3,14 @@ _fpa.form_utils = {
     // convenience calling them individually on an ad-hoc basis around the code base does
     // not make this a good choice.
 
+    toggle_expandable: function(block){
+        if(block.hasClass('expanded'))
+            block.removeClass('expanded');
+        else
+            block.addClass('expanded');
+    },
+
+
     // Setup the typeahead prediction for a specific text input element
     setup_typeahead: function(element, list, name){
       
@@ -173,6 +181,10 @@ _fpa.form_utils = {
                 a = $(this).attr('data-target');                                
                 $(document).scrollTo(a, 100, {offset: -50});
             }
+        });
+
+        block.on('click', '[data-toggle="expandable"]', function(){
+            _fpa.form_utils.toggle_expandable($(this));
         });
 
     },

@@ -155,18 +155,30 @@
     <%= f.fields_for :trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 ">
         <%= f.label :protocol %>
-        <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-only-for" => "#master_trackers_attributes_0_event, #master_trackers_attributes_0_outcome", "data-filters-selector" => "#master_trackers_attributes_0_event, #master_trackers_attributes_0_outcome", class: 'form-control'}%>
+        <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_event, #master_trackers_attributes_0_outcome,#master_tracker_histories_attributes_0_event, #master_tracker_histories_attributes_0_outcome", class: 'form-control'}%>
       </div>
       <div class="form-group col-sm-3 tracker-event">
-          <%= f.label :event %>
+          <%= f.label :current_event %>
           <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
       <div class="form-group col-sm-3 tracker-event">
-          <%= f.label :outcome %>
+          <%= f.label :current_outcome %>
           <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>  
     <% end %>
-    
+    <%= f.fields_for :tracker_histories, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-3 tracker-event">
+          <%= f.label :any_event %>
+          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+      <div class="form-group col-sm-3 tracker-event">
+          <%= f.label :any_outcome %>
+          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>  
+    <% end %>
+
+    </div>
+    <div class="row">
     <div class="form-group col-sm-3">
       <%= label :player_info, "Player Tags" %>
       <%= collection_select("master[player_infos_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_info), :id, :name, {}, multiple: true) %>

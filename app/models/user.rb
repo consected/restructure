@@ -1,4 +1,7 @@
 class User < ActiveRecord::Base
+  
+  include ActionLogging
+ 
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :trackable, :timeoutable, :lockable
@@ -16,17 +19,6 @@ class User < ActiveRecord::Base
     @new_password
   end
   
-  def action_logger
-    logv = DateTime.now.strftime('%Y-%m-%d')
-    @@action_logger ||= {}
-    @@action_logger[logv] ||= Logger.new("#{Rails.root}/log/action_log-#{logv}.log")
-  end
-  
-  def log_action action, sub, results, method, params, status="OK"
-    
-    res = {user: self.id, email: self.email, action: action, sub: sub, method: method, params: params, results: results, status: status, action_at: DateTime.now.iso8601}
-    action_logger.info(res.to_json)
-  end
 
 protected
 

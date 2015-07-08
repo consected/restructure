@@ -1,8 +1,9 @@
 class ActionLogsController < ApplicationController
-  before_action :authenticate_admin!
-
+#  before_action :authenticate_admin!
+  include AdminControllerHandler
+  
   def index
-    @action_logs = Dir.glob("log/action_log-*.log")
+    @action_logs = Dir.glob("log/*_action_log-*.log")
   end
   
   def show
@@ -24,5 +25,9 @@ class ActionLogsController < ApplicationController
     render json: @action_log
   end
   
+  private
+    def set_instance_from_id
+      
+    end
 end
 

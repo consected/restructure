@@ -1,7 +1,7 @@
 class ProtocolOutcome < ActiveRecord::Base
 
+  include AdminHandler
   include SelectorCache
 
   belongs_to :protocol
-  belongs_to :admin
 end

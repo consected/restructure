@@ -51,7 +51,7 @@ class Tracker < ActiveRecord::Base
     res
   end
   
-  def self.track_flag_update record
+  def self.track_flag_update record, added_flags, removed_flags
   
     logger.debug "Tracking for #{record}"
     return nil if record.is_a?(Tracker) || record.is_a?(TrackerHistory)
@@ -74,14 +74,23 @@ class Tracker < ActiveRecord::Base
     #ev = ProtocolEvent.find_by_name rec_type
     
     t.protocol = Protocol.record_updates_protocol if new_tracker
-    t.event = "record update"
+    t.event = "flags update"
     t.outcome =  rec_type#ev.name
     t.event_date = DateTime.now
     t.outcome_date = DateTime.now
     cp = ""
     ignore = %w(created_at updated_at user_id user id)
     
-    record.changes.reject {|k,v| ignore.include? k}.each {|k,v| cp << "#{k.humanize} #{new_rec ? '' : "from #{v.first || "-"}"} #{new_rec ? '' : 'to '}#{v.last}; " }
+    if added_flags.length > 0
+      cp << "added  flags: "
+      added_flags.each {|k| cp << "#{ItemFlagName.find(k).name}; " }
+    end
+    
+    if removed_flags.length > 0
+      cp << "removed flags: "
+      removed_flags.each {|k| cp << "#{ItemFlagName.find(k).name}; " }
+    end
+    
     
     logger.debug "Tracking user update to record with #{cp} in #{rec_type}"
     

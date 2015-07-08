@@ -96,7 +96,7 @@ class MastersController < ApplicationController
     @master.addresses.build
     @master.player_contacts.build
     @master.trackers.build
-    
+    @master.tracker_histories.build
     # Simple search fields
     @master.general_infos.build
     

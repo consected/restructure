@@ -32,9 +32,9 @@ class ItemFlag < ActiveRecord::Base
 protected
   
   
-  def track_record_update
-    #logger.info "Track record update for item_flag"
-    # Tracker.track_flag_update self
+  def self.track_flag_updates item, added_flags, removed_flags
+    logger.info "Track record update for added item_flags #{added_flags} and removed #{removed_flags}"
+    Tracker.track_flag_update item, added_flags, removed_flags
   end
   
   

@@ -203,4 +203,29 @@ table.tracker-tree-results, table.tracker-chron-results {
             color: #999;
         }
     }
+    
+    td.tracker-notes , td.tracker-history-notes{ 
+        .cell-holder.expandable {
+            max-height: 30px;
+            padding-bottom: 2px;
+            border-bottom: 2px dotted gray;
+            &:hover {
+                cursor: s-resize;
+            }
+
+        }
+
+
+        .cell-holder.expanded {
+            max-height: none;
+            border-bottom: 0;
+            &:hover {
+                cursor: n-resize;
+            }
+        }
+
+    }    
+    
 }
+
+

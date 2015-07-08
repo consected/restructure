@@ -13,7 +13,9 @@ module MasterHandler
 
   def do_log_action
     len = (@master_objects ? @master_objects.length : 0)
-    log_action "#{controller_name}##{action_name}", "AUTO", len
+    extras = {}
+    extras[:master_id] = @master.id if @master
+    log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
   end
   
   def primary_model 

@@ -2,8 +2,8 @@ module ControllerUtils
   
   extend ActiveSupport::Concern
 
-  def log_action action, sub, results, status="OK"
-    current_user.log_action action, sub, results, request.method_symbol, params, status
+  def log_action action, sub, results, status="OK", extras={}
+    current_user.log_action action, sub, results, request.method_symbol, params, status, extras
   end
   
   def params_nil_if_blank p

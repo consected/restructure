@@ -1,6 +1,7 @@
 _fpa = {
     
-    templates: {},
+  templates: {},
+  app: {},
     
   ajax_working: function(block){
 
@@ -53,7 +54,7 @@ _fpa = {
 
         var html = template(data);
         
-        var new_block;
+        var new_block = block;
         
         if(options.position === 'before'){        
             new_block = block.before(html);

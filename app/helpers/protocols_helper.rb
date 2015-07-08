@@ -15,7 +15,7 @@ module ProtocolsHelper
     
     res = res.map {|a| [a.first, a.first.downcase, {"data-filter-id" => a.last}]}
     
-    res = add_all_to_options(res, '(all events)')
+    #res = add_all_to_options(res, '(all events)')
     
     res
   end
@@ -25,7 +25,7 @@ module ProtocolsHelper
     
     res = res.map {|a| [a.first, a.first.downcase, {"data-filter-id" => a.last}]}
     
-    res = add_all_to_options(res, '(all outcomes)')
+    #res = add_all_to_options(res, '(all outcomes)')
     
     res
   end
