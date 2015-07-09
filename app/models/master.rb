@@ -16,37 +16,65 @@ class Master < ActiveRecord::Base
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
   has_many :general_infos, class_name: 'PlayerInfo' 
   
+  # Associations to allow advanced searches for NOT 
+  has_many :not_tracker_histories, -> { order(OutcomeEventDatesNotNullClause)},  class_name: 'TrackerHistory'
+  has_many :not_trackers, -> { order(OutcomeEventDatesNotNullClause)},  class_name: 'Tracker'
+
+  
   Master.reflect_on_all_associations(:has_many).each do |assoc| 
     # This association is provided to allow generic search on flagged associated object
     has_many "#{assoc.plural_name}_item_flags".to_sym, through: assoc.plural_name, source: :item_flags
     Rails.logger.debug "Associated master with #{assoc.plural_name}_item_flags through #{assoc.plural_name} with source :item_flags"
   end
-    
-  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, :player_contacts, :addresses, :trackers, :tracker_histories
+  
+  # Nested attributes for advanced search form
+  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, 
+                                :player_contacts, :addresses, :trackers, :tracker_histories,
+                                :not_trackers, :not_tracker_histories
 
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
   # Use an array of a single item to define a predefined matching clause:
   # :starts_with is the equivalent of "?%"
   # :contains is the equivalent of "%?%" 
+  # :is  and :is_not are the equivalent of "?"
   # any other string will be used as is 
   # note that ? characters will be replaced by the field search value
   # A second item in the array can be specified to state the actual query condition
   # :starts with and :contains both default to "field_name LIKE ?"
+  # :is_not default to "field_name <> ?"
   AltConditions = {
     player_infos: {
       first_name: [:starts_with],
+      middle_name: [:starts_with],
       nick_name: [:starts_with],
-      notes: [:contains]
+      notes: [:contains],
+      younger_than: [:is, "player_infos.birth_date is not null  AND ((current_date - player_infos.birth_date)/365.25) < ?"],
+      older_than: [:is, "player_infos.birth_date is not null  AND ((current_date - player_infos.birth_date)/365.25) > ?"],
+      less_than_career_years: [:is, "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) < ?"],
+      more_than_career_years: [:is, "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) > ?"]
     },
     pro_infos: {
       first_name: [:starts_with],
+      middle_name: [:starts_with],
       nick_name: [:starts_with]
       
     },
     player_contacts: {
       data: [:starts_with]
+    },
+    not_trackers: {
+      event: [:is, "NOT EXISTS (select NULL from trackers t_inner where t_inner.event = ? AND t_inner.master_id = masters.id)"],
+      outcome: [:is, "NOT EXISTS (select NULL from trackers t_inner2 where t_inner2.outcome = ? AND t_inner2.master_id = masters.id)"]
+    },
+    not_tracker_histories: {
+      event: [:is, "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.event = ? AND th_inner.master_id = masters.id)"],
+      outcome: [:is, "NOT EXISTS (select NULL from tracker_history th_inner2 where th_inner2.outcome = ? AND th_inner2.master_id = masters.id)"]
     }
+#    # This was a test. Not working.
+#    not_player_infos_item_flags: {
+#      item_flag_name_id: [:is, "NOT EXISTS (select NULL from item_flags if_inner where if_inner.item_flag_name_id IN (?) AND if_inner.item_id = player_infos.id AND if_inner.item_type = 'PlayerInfo')"]
+#    },
   }
   
   
@@ -202,12 +230,16 @@ class Master < ActiveRecord::Base
       alt  = altpair[1]
     elsif cop == :starts_with || cop == :contains
       alt = "#{table_name}.#{ckey} LIKE ?"      
+    elsif cop == :is_not
+      alt = "#{table_name}.#{ckey} <> ?"
     end
     
     alt = alt.gsub('?', ":#{refname}")
     
     cvaltotal = "#{cval}%" if cop == :starts_with
     cvaltotal = "%#{cval}%" if cop == :contains
+    cvaltotal = cval if cop == :is
+    cvaltotal = "#{cval}" if cop == :is_not
     
     res = [alt, {refname.to_sym => cvaltotal}]
       

@@ -17,7 +17,7 @@
 
   <div class="row">
 
-    <%= f.fields_for :player_infos, child_index: 0 do |f| %>
+    <%= f.fields_for :player_infos, child_index: 0 do |f| %>      
       <div class="form-group col-sm-2">
         <%= f.label :first_name %>
         <%= f.text_field :first_name, class: 'form-control'  %>
@@ -33,7 +33,7 @@
       <div class="form-group col-sm-2">
         <%= f.label :nick_name %>
         <%= f.text_field :nick_name, class: 'form-control'  %>
-      </div>
+      </div>          
       <div class="form-group col-sm-3">
         <%= f.label :birth_date %>
         <%= f.date_field :birth_date, class: 'form-control'  %>
@@ -42,6 +42,7 @@
         <%= f.label :death_date %>
         <%= f.date_field :death_date, class: 'form-control'  %>
       </div>
+      
       <div class="form-group col-sm-3">
         <%= f.label :college %>
         <%= f.text_field :college, class: 'form-control college-input typeahead'  %>
@@ -155,13 +156,13 @@
     <%= f.fields_for :trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 ">
         <%= f.label :protocol %>
-        <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_event, #master_trackers_attributes_0_outcome,#master_tracker_histories_attributes_0_event, #master_tracker_histories_attributes_0_outcome", class: 'form-control'}%>
+        <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_event, #master_trackers_attributes_0_outcome, #master_not_trackers_attributes_0_event, #master_not_trackers_attributes_0_outcome, #master_tracker_histories_attributes_0_event, #master_tracker_histories_attributes_0_outcome,#master_not_tracker_histories_attributes_0_event, #master_not_tracker_histories_attributes_0_outcome", class: 'form-control'}%>
       </div>
       <div class="form-group col-sm-3 tracker-event">
           <%= f.label :current_event %>
           <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
-      </div>
-      <div class="form-group col-sm-3 tracker-event">
+      </div>        
+      <div class="form-group col-sm-3 tracker-outcome hidden">
           <%= f.label :current_outcome %>
           <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>  
@@ -171,27 +172,75 @@
           <%= f.label :any_event %>
           <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
-      <div class="form-group col-sm-3 tracker-event">
+      <div class="form-group col-sm-3 tracker-outcome hidden">
           <%= f.label :any_outcome %>
           <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>  
     <% end %>
-
+        
+        <div class="form-group col-sm-1 tracker-not-info">
+            <p>&nbsp;</p>
+            <p class="text-right">and&nbsp;not:</p>
+        </div>
+    <%= f.fields_for :not_trackers, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-3 tracker-event">
+          <%= f.label :current_event %>
+          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+      <div class="form-group col-sm-3 tracker-outcome hidden">
+          <%= f.label :current_outcome %>
+          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>  
+    <% end %>        
+    <%= f.fields_for :not_tracker_histories, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-3 tracker-event">
+          <%= f.label :any_event %>
+          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>
+      <div class="form-group col-sm-3 tracker-outcome hidden">
+          <%= f.label :any_outcome %>
+          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+      </div>  
+    <% end %>    
     </div>
     <div class="row">
-    <div class="form-group col-sm-3">
-      <%= label :player_info, "Player Tags" %>
-      <%= collection_select("master[player_infos_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_info), :id, :name, {}, multiple: true) %>
+        
+      <div class="form-group col-sm-3">
+        <%= label :player_info, "Player Tags" %>
+        <%= collection_select("master[player_infos_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_info), :id, :name, {}, multiple: true) %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= label :address, "Address Tags" %>
+        <%= collection_select("master[addresses_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:address), :id, :name, {}, multiple: true) %>
+      </div>
+      <div class="form-group col-sm-3">
+        <%= label :address, "Contact Tags" %>
+        <%= collection_select("master[player_contacts_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_contact), :id, :name, {}, multiple: true) %>
+      </div>
+        
+        
+        
+    <%= f.fields_for :player_infos, child_index: 0 do |f| %>          
+      <div class="form-group col-sm-2"> 
+        <%= f.label :younger_than %>
+        <%= f.number_field :younger_than, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2"> 
+        <%= f.label :older_than %>
+        <%= f.number_field :older_than, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2"> 
+        <%= f.label 'Career years <' %>
+        <%= f.number_field :less_than_career_years, class: 'form-control'  %>
+      </div>
+      <div class="form-group col-sm-2"> 
+        <%= f.label 'Career years >'%>
+        <%= f.number_field :more_than_career_years, class: 'form-control'  %>
+      </div>  
+    <% end %>    
+            
     </div>
-    <div class="form-group col-sm-3">
-      <%= label :address, "Address Tags" %>
-      <%= collection_select("master[addresses_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:address), :id, :name, {}, multiple: true) %>
-    </div>
-    <div class="form-group col-sm-3">
-      <%= label :address, "Contact Tags" %>
-      <%= collection_select("master[player_contacts_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_contact), :id, :name, {}, multiple: true) %>
-    </div>
-  </div>
+    
   <div class="form-group form-actions clearfix">
     <%= f.submit :submit, class: "pull-right btn btn-default btn-sm" %>
     <span id="search_count" class="search-results-count pull-right" data-subscription="count" data-template="search-count-template" ></span>

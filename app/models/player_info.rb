@@ -9,12 +9,12 @@ class PlayerInfo < ActiveRecord::Base
   belongs_to :pro_info, inverse_of: :player_info
  
   # Allow simple search to function
-  attr_accessor :contact_data
+  attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
   
   before_save :check_college
 
   def accuracy_rank
-    if rank >= 20  
+    if rank && rank >= 20  
       return rank * -1 
     else 
       return rank 

@@ -25,7 +25,7 @@ class MastersController < ApplicationController
 
     if @masters
     
-      @masters = @masters.take(ResultsLimit).sort {|m,n| n.player_infos.first.accuracy_rank <=> m.player_infos.first.accuracy_rank}
+      @masters = @masters.take(ResultsLimit).sort {|m,n| (n.player_infos.first.accuracy_rank || -2) <=> (m.player_infos.first.accuracy_rank || -2)}
 
       m = {
         masters: @masters.as_json(include: {
@@ -97,6 +97,11 @@ class MastersController < ApplicationController
     @master.player_contacts.build
     @master.trackers.build
     @master.tracker_histories.build
+    
+    # NOT conditions
+    @master.not_trackers.build
+    @master.not_tracker_histories.build
+    
     # Simple search fields
     @master.general_infos.build
     

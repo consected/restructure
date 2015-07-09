@@ -24,11 +24,19 @@ form select {
     line-height: 22px;
 }
 
-form.search_master .form-group  select {
-    width: 100%;
-    height: auto;
-    padding: 6px 0px;
-    line-height: 22px;
+
+
+form.search_master {
+    label {
+        white-space: nowrap;
+    }
+    
+    .form-group  select {
+        width: 100%;
+        height: auto;
+        padding: 6px 0px;
+        line-height: 22px;
+    }
 }
 
 form .form-group select {
