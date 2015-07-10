@@ -50,7 +50,7 @@ module AdminControllerHandler
     set_object_instance primary_model.new(secure_params)
     object_instance.admin = current_admin
     if object_instance.save
-      redirect_to url_for(action: :index), notice: "#{human_name} created successfully"
+      redirect_to index_path, notice: "#{human_name} created successfully"
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
       render :new
@@ -60,7 +60,7 @@ module AdminControllerHandler
   def update
     object_instance.admin = current_admin
     if object_instance.update(secure_params)
-      redirect_to url_for(action: :index), notice: "#{human_name} updated successfully"
+      redirect_to index_path, notice: "#{human_name} updated successfully"
     else
       logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
       render :edit
@@ -76,7 +76,12 @@ module AdminControllerHandler
   
   private
 
-    
+    def index_path
+      redir = {action: :index}
+      redir.merge! @parent_param if @parent_param
+      url_for(redir)
+    end  
+  
     def set_instance_from_id
       return if params[:id] == 'cancel'
       set_object_instance primary_model.find(params[:id])            

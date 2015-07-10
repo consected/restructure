@@ -57,7 +57,8 @@ _fpa = {
         var new_block = block;
         
         if(options.position === 'before'){        
-            new_block = block.before(html);
+            new_block = $(html);
+            block.before(new_block);
             block.html('');
         }
         else

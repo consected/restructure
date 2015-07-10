@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150707222630) do
+ActiveRecord::Schema.define(version: 20150710160215) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -210,15 +210,15 @@ ActiveRecord::Schema.define(version: 20150707222630) do
 
   create_table "protocol_events", force: :cascade do |t|
     t.string   "name"
-    t.integer  "protocol_id"
     t.integer  "admin_id"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
     t.boolean  "disabled"
+    t.integer  "sub_process_id"
   end
 
   add_index "protocol_events", ["admin_id"], name: "index_protocol_events_on_admin_id", using: :btree
-  add_index "protocol_events", ["protocol_id"], name: "index_protocol_events_on_protocol_id", using: :btree
+  add_index "protocol_events", ["sub_process_id"], name: "index_protocol_events_on_sub_process_id", using: :btree
 
   create_table "protocol_outcomes", force: :cascade do |t|
     t.string   "name"
@@ -255,6 +255,18 @@ ActiveRecord::Schema.define(version: 20150707222630) do
   add_index "scantrons", ["master_id"], name: "index_scantrons_on_master_id", using: :btree
   add_index "scantrons", ["user_id"], name: "index_scantrons_on_user_id", using: :btree
 
+  create_table "sub_processes", force: :cascade do |t|
+    t.string   "name"
+    t.boolean  "disabled"
+    t.integer  "protocol_id"
+    t.integer  "admin_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "sub_processes", ["admin_id"], name: "index_sub_processes_on_admin_id", using: :btree
+  add_index "sub_processes", ["protocol_id"], name: "index_sub_processes_on_protocol_id", using: :btree
+
   create_table "tracker_history", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "protocol_id"
@@ -266,12 +278,16 @@ ActiveRecord::Schema.define(version: 20150707222630) do
     t.datetime "outcome_date"
     t.integer  "user_id"
     t.string   "notes"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.integer  "sub_process_id"
+    t.integer  "protocol_event_id"
   end
 
   add_index "tracker_history", ["master_id"], name: "index_tracker_history_on_master_id", using: :btree
+  add_index "tracker_history", ["protocol_event_id"], name: "index_tracker_history_on_protocol_event_id", using: :btree
   add_index "tracker_history", ["protocol_id"], name: "index_tracker_history_on_protocol_id", using: :btree
+  add_index "tracker_history", ["sub_process_id"], name: "index_tracker_history_on_sub_process_id", using: :btree
   add_index "tracker_history", ["tracker_id"], name: "index_tracker_history_on_tracker_id", using: :btree
   add_index "tracker_history", ["user_id"], name: "index_tracker_history_on_user_id", using: :btree
 
@@ -284,13 +300,17 @@ ActiveRecord::Schema.define(version: 20150707222630) do
     t.string   "outcome"
     t.datetime "outcome_date"
     t.integer  "user_id"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
     t.string   "notes"
+    t.integer  "sub_process_id"
+    t.integer  "protocol_event_id"
   end
 
   add_index "trackers", ["master_id"], name: "index_trackers_on_master_id", using: :btree
+  add_index "trackers", ["protocol_event_id"], name: "index_trackers_on_protocol_event_id", using: :btree
   add_index "trackers", ["protocol_id"], name: "index_trackers_on_protocol_id", using: :btree
+  add_index "trackers", ["sub_process_id"], name: "index_trackers_on_sub_process_id", using: :btree
   add_index "trackers", ["user_id"], name: "index_trackers_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
@@ -332,17 +352,23 @@ ActiveRecord::Schema.define(version: 20150707222630) do
   add_foreign_key "pro_infos", "masters"
   add_foreign_key "pro_infos", "users"
   add_foreign_key "protocol_events", "admins"
-  add_foreign_key "protocol_events", "protocols"
+  add_foreign_key "protocol_events", "sub_processes"
   add_foreign_key "protocol_outcomes", "admins"
   add_foreign_key "protocol_outcomes", "protocols"
   add_foreign_key "protocols", "admins"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
+  add_foreign_key "sub_processes", "admins"
+  add_foreign_key "sub_processes", "protocols"
   add_foreign_key "tracker_history", "masters"
+  add_foreign_key "tracker_history", "protocol_events"
   add_foreign_key "tracker_history", "protocols"
+  add_foreign_key "tracker_history", "sub_processes"
   add_foreign_key "tracker_history", "trackers"
   add_foreign_key "tracker_history", "users"
   add_foreign_key "trackers", "masters"
+  add_foreign_key "trackers", "protocol_events"
   add_foreign_key "trackers", "protocols"
+  add_foreign_key "trackers", "sub_processes"
   add_foreign_key "trackers", "users"
 end

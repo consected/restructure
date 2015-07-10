@@ -1,10 +1,10 @@
-<%= form_for(@protocol_outcome) do |f| %>
-  <% if @protocol_outcome.errors.any? %>
+<%= form_for(@sub_process) do |f| %>
+  <% if @sub_process.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@protocol_outcome.errors.count, "error") %> prohibited this protocol_outcome from being saved:</h2>
+      <h2><%= pluralize(@sub_process.errors.count, "error") %> prohibited this sub_process from being saved:</h2>
 
       <ul>
-      <% @protocol_outcome.errors.full_messages.each do |message| %>
+      <% @sub_process.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
       </ul>
@@ -14,6 +14,10 @@
   <div class="field">
     <%= f.label :name %><br>
     <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :disabled %><br>
+    <%= f.check_box :disabled %>
   </div>
   <div class="field">
     <%= f.label :protocol_id %><br>

@@ -16,4 +16,5 @@
 </p>
 
 <%= link_to 'Edit', edit_protocol_event_path(@protocol_event) %> |
-<%= link_to 'Back', protocol_events_path %>
+<%= link_to 'All events', protocol_events_path(all: true) %> |
+<%= link_to 'Sub process events', protocol_sub_process_protocol_events_path(@protocol, @sub_process) %>

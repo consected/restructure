@@ -10,15 +10,20 @@
       </ul>
     </div>
   <% end %>
-
+  <div class="field">
+    <%= f.label :sub_process_id %><br>
+    <%= f.select :sub_process_id, sub_processes_array %>
+  </div>
   <div class="field">
     <%= f.label :name %><br>
     <%= f.text_field :name %>
   </div>
-  <div class="field">
-    <%= f.label :protocol_id %><br>
-    <%= f.select :protocol_id, protocol_array %>
+<div class="field">
+    <%= f.label :disable %><br>
+    <%= f.check_box :disabled %>
   </div>
+
+  
   <div class="actions">
     <%= f.submit %>
   </div>

@@ -64,12 +64,12 @@ class Master < ActiveRecord::Base
       data: [:starts_with]
     },
     not_trackers: {
-      event: [:is, "NOT EXISTS (select NULL from trackers t_inner where t_inner.event = ? AND t_inner.master_id = masters.id)"],
-      outcome: [:is, "NOT EXISTS (select NULL from trackers t_inner2 where t_inner2.outcome = ? AND t_inner2.master_id = masters.id)"]
+      protocol_event_id: [:is, "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)"],
+      sub_process_id: [:is, "NOT EXISTS (select NULL from trackers t_inner2 where t_inner2.sub_process_id = ? AND t_inner2.master_id = masters.id)"]
     },
     not_tracker_histories: {
-      event: [:is, "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.event = ? AND th_inner.master_id = masters.id)"],
-      outcome: [:is, "NOT EXISTS (select NULL from tracker_history th_inner2 where th_inner2.outcome = ? AND th_inner2.master_id = masters.id)"]
+      protocol_event_id: [:is, "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id = ? AND th_inner.master_id = masters.id)"],
+      sub_process_id: [:is, "NOT EXISTS (select NULL from tracker_history th_inner2 where th_inner2.sub_process_id = ? AND th_inner2.master_id = masters.id)"]
     }
 #    # This was a test. Not working.
 #    not_player_infos_item_flags: {

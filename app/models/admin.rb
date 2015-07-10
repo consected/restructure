@@ -5,7 +5,9 @@ class Admin < ActiveRecord::Base
   devise :database_authenticatable, :trackable, :timeoutable, :lockable
   
   def timeout_in
-    5.minutes
+    return 5.minutes if Rails.env.production?
+    
+    30.minutes
   end
   
 end

@@ -206,7 +206,7 @@ table.tracker-tree-results, table.tracker-chron-results {
     
     td.tracker-notes , td.tracker-history-notes{ 
         .cell-holder.expandable {
-            max-height: 30px;
+            max-height: 40px;
             padding-bottom: 2px;
             border-bottom: 2px dotted gray;
             &:hover {

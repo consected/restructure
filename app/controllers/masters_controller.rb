@@ -52,7 +52,7 @@ class MastersController < ApplicationController
             include: {
               item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
             },
-            methods: [:protocol_name, :tracker_history_length, :user_name]
+            methods: [:protocol_name, :sub_process_name, :event_name, :tracker_history_length, :user_name]
           },
           scantrons: {order: {scantron_id: :asc}, include: {
               item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}

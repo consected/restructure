@@ -156,26 +156,27 @@
     <%= f.fields_for :trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 ">
         <%= f.label :protocol %>
-        <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_event, #master_trackers_attributes_0_outcome, #master_not_trackers_attributes_0_event, #master_not_trackers_attributes_0_outcome, #master_tracker_histories_attributes_0_event, #master_tracker_histories_attributes_0_outcome,#master_not_tracker_histories_attributes_0_event, #master_not_tracker_histories_attributes_0_outcome", class: 'form-control'}%>
+        <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_sub_process_id, #master_not_trackers_attributes_0_sub_process_id, #master_tracker_histories_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id", class: 'form-control'}%>
       </div>
+      <div class="form-group col-sm-3 tracker-sub-process">
+          <%= f.label :current_process %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>  
       <div class="form-group col-sm-3 tracker-event">
           <%= f.label :current_event %>
-          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>        
-      <div class="form-group col-sm-3 tracker-outcome hidden">
-          <%= f.label :current_outcome %>
-          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
-      </div>  
+
     <% end %>
     <%= f.fields_for :tracker_histories, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-3 tracker-sub-process">
+          <%= f.label :any_sub_process %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>
       <div class="form-group col-sm-3 tracker-event">
           <%= f.label :any_event %>
-          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
-      <div class="form-group col-sm-3 tracker-outcome hidden">
-          <%= f.label :any_outcome %>
-          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
-      </div>  
     <% end %>
         
         <div class="form-group col-sm-1 tracker-not-info">
@@ -183,24 +184,25 @@
             <p class="text-right">and&nbsp;not:</p>
         </div>
     <%= f.fields_for :not_trackers, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-3 tracker-sub-process">
+          <%= f.label :current_sub_process %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_trackers_attributes_0_protocol_event_id", "data-only-for" => "#master_not_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>
       <div class="form-group col-sm-3 tracker-event">
           <%= f.label :current_event %>
-          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
-      <div class="form-group col-sm-3 tracker-outcome hidden">
-          <%= f.label :current_outcome %>
-          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
-      </div>  
+  
     <% end %>        
     <%= f.fields_for :not_tracker_histories, child_index: 0 do |f| %>    
+      <div class="form-group col-sm-3 tracker-sub-process">
+          <%= f.label :any_sub_process %>
+          <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_tracker_histories_attributes_0_protocol_event_id", "data-only-for" => "#master_not_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
+      </div>  
       <div class="form-group col-sm-3 tracker-event">
           <%= f.label :any_event %>
-          <%= f.select :event, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
-      <div class="form-group col-sm-3 tracker-outcome hidden">
-          <%= f.label :any_outcome %>
-          <%= f.select :outcome, protocol_outcomes_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
-      </div>  
     <% end %>    
     </div>
     <div class="row">

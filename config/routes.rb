@@ -1,15 +1,26 @@
 Rails.application.routes.draw do
 
   
+    
   resources :action_logs
   
   resources :accuracy_scores
-  resources :protocol_outcomes
-  resources :protocol_events
+  
   resources :colleges
   resources :general_selections
   resources :item_flag_names
-  resources :protocols
+  
+  resources :protocols do
+    resources :sub_processes do
+      resources :protocol_events
+    end
+    resources :protocol_outcomes
+  
+  end
+  
+  resources :protocol_events
+  resources :sub_processes
+  
   devise_for :admins, :skip => [:registrations]
   devise_for :users, :skip => [:registrations]                                          
 

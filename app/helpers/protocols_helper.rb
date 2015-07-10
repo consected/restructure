@@ -10,12 +10,33 @@ module ProtocolsHelper
     res
   end
 
+  def sub_processes_array
+    res = SubProcess.selector_attributes [:name, :id, :protocol_name]
+    res  = res.map {|a| ["#{a.last} - #{a.first}", a[1]]}
+    res
+  end
+
+  
+  def sub_processes_array_with_class
+    res = SubProcess.selector_attributes [:name, :id, :protocol_id]
+    
+    res = res.map {|a| [a.first, a[1], {"data-filter-id" => a.last}]}
+    
+    res
+  end
+  
   def protocol_events_array_with_class
-    res = ProtocolEvent.selector_attributes [:name, :protocol_id]
+    res = ProtocolEvent.selector_attributes [:name, :id, :sub_process_id]
+    
+    res = res.map {|a| [a.first, a[1], {"data-filter-id" => a.last}]}
+    
+    res
+  end
+  
+  def protocol_events_name_array_with_class
+    res = ProtocolEvent.selector_attributes [:name, :sub_process_id]
     
     res = res.map {|a| [a.first, a.first.downcase, {"data-filter-id" => a.last}]}
-    
-    #res = add_all_to_options(res, '(all events)')
     
     res
   end

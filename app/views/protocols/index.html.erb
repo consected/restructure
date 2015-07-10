@@ -2,6 +2,10 @@
 
 <h1>Listing Protocols</h1>
 
+<p>
+    <%=link_to "all events", protocol_events_path(all: true)%>
+</p>
+
 <table>
   <thead>
     <tr>
@@ -18,8 +22,10 @@
         <td><%= protocol.name %></td>
         <td><%= protocol.admin_name %></td>
         <td><%= protocol.disabled %></td>
+        <td><%= link_to "edit sub processes", protocol_sub_processes_path(protocol) %> </td>
         
         <td><%= link_to 'Edit', url_for(id: protocol, action: :edit) %></td>        
+        
       </tr>
     <% end %>
   </tbody>

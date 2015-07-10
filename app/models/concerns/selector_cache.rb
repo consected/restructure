@@ -62,7 +62,13 @@ module SelectorCache
       ckey="#{attributes_cache_key}#{attributes}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        enabled.where(conditions).collect {|c| [c.send(attributes.first), c.send(attributes.last)] }
+        enabled.where(conditions).collect do |c|
+          a = [] 
+          attributes.each do |att|
+            a << c.send(att)
+          end
+          a
+        end
       }
     end
     

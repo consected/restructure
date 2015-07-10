@@ -1,5 +1,4 @@
-<script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <div id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">
+<script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
     <ul class="list-group">
       <li class="list-group-item">
 
@@ -21,7 +20,6 @@
               
       <li class="list-group-item record-meta">{{>update_metadata}}</li>
     </ul>
-  </div>
 </script>
 
 <script id="pro_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -142,7 +140,7 @@
       <span class="glyphicon glyphicon-time disabled" title="no history" ></span>
       {{/is}}
       </td>
-      {{#filter this "protocol_name,event,event_date,c_method,outcome,outcome_date,notes" }}
+      {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}
       <td class="tracker-{{@key}}">
       <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}</div>
       </td>
@@ -162,7 +160,7 @@
       <td class="tracker-history">
       
       </td>
-      {{#filter this "protocol_name,event,event_date,c_method,outcome,outcome_date,notes" }}      
+      {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}      
       <td class="tracker-history-{{@key}}">
       <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}</div>
       </td>
@@ -177,7 +175,7 @@
 <script id="empty_tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <table class="table">
     <thead><tr>
-      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th>
+      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th>
       <th colspan="2">notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  >Create Tracker record</a> </th></tr>
     <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     <td colspan="9"><h4>No Tracker Records</h4></td>
@@ -190,7 +188,7 @@
   <table class="table tracker-tree-results">
     <thead><tr>
       <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
-      <th>protocol</th><th>event</th><th>date</th><th>method</th><th>outcome</th><th>date</th><th>notes</th>
+      <th>protocol</th><th>sub-process</th><th>event</th><th>date</th><th>notes</th>
       <th colspan="2"><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right">Create Tracker record</a> </th></tr>
     <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     {{#is trackers.length 0}}<td colspan="9"><h4>No Tracker Records</h4></td>{{/is}}
@@ -217,7 +215,7 @@
 
   <table class="table ">
     <thead><tr>
-      <th><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>outcome</th><th>outcome date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden"  >Create Tracker record</a> </th></tr>
+      <th><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden"  >Create Tracker record</a> </th></tr>
     <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     <td colspan="8"><h4>No Tracker History Records</h4></td>
     </tr>
@@ -229,7 +227,7 @@
   <table class="table tablesorter tracker-chron-results">
     <thead><tr>
       <th class="no-sort"><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th>
-      <th>protocol</th><th>event</th><th>date</th><th>method</th><th>outcome</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden">Create Tracker record</a> </th></tr>
+      <th>protocol</th><th>sub-process</th><th>event</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden">Create Tracker record</a> </th></tr>
     <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form"  data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
     {{#is trackers.length 0}}<td colspan="8"><h4>No Tracker Records</h4></td>{{/is}}
     </tr>
@@ -492,16 +490,25 @@
                 {{#each player_infos}}
                   <div class="row">
                     <div class="col-md-12">
-                    {{>player_info_result }}
+                      <div id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">
+                      {{>player_info_result }}
+                      </div>
                     </div>
                     <div class="col-md-12">
                     {{>pro_info_result pro_info player_info_id=id}}
                     </div>                                        
                   </div>
                 {{else}}
-                  <div class="row new-block" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">
-                    <h4>No player or pro info to show</h4>
-                    <p><a href="/masters/{{id}}/player_infos/new" data-remote="true">Create Player Info record</a> </p>
+                  <div class="row">                    
+                    <div class="col-md-12">
+                      <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
+                        <h4>No player or pro info to show</h4>
+                        <p><a href="/masters/{{id}}/player_infos/new" data-remote="true">Create Player Info record</a> </p>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                    </div>
+                    
                   </div>
                 {{/each}}
               </div>

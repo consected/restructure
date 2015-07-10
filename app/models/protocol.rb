@@ -2,6 +2,8 @@ class Protocol < ActiveRecord::Base
 
   include AdminHandler
   include SelectorCache
+  
+  has_many :sub_processes
 
   RecordUpdatesProtocolName = 'Updates'.freeze
   scope :updates, -> { where name: RecordUpdatesProtocolName}

@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Sub Processes for <%=@protocol.name%></h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Disabled</th>
+      <th>Protocol</th>
+      <th>Admin</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @sub_processes.each do |sub_process| %>
+      <tr>
+        <td><%= sub_process.name %></td>
+        <td><%= sub_process.disabled %></td>
+        <td><%= sub_process.protocol.name %></td>
+        <td><%= sub_process.admin_name %></td>
+        <td><%= link_to "edit events", protocol_sub_process_protocol_events_path(@protocol, sub_process) %> </td>
+        <td><%= link_to 'Edit', edit_protocol_sub_process_path(@protocol, sub_process) %></td>
+        
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Sub process', new_protocol_sub_process_path(@protocol)%>

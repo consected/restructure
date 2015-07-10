@@ -44,7 +44,7 @@ _fpa.postprocessors = {
     
     tracker_notes_handler: function(block){
         $('td.tracker-notes .cell-holder, td.tracker-history-notes .cell-holder').not('attached-expandable').each(function(){
-            if($(this).height() > 30){
+            if($(this).height() > 40){
                 $(this).click(function(){
                     _fpa.form_utils.toggle_expandable($(this));
                 }).addClass('expandable').attr('title', 'click to expand / shrink');
@@ -81,16 +81,22 @@ _fpa.postprocessors = {
         // Handle auto date entry in the tracker edit form
         _fpa.form_utils.format_block(block);
 
-        block.find('#tracker_outcome, #tracker_event').change(function(){
-            var el = block.find('#'+$(this).prop('id')+'_date');
-            if(!_fpa.utils.is_blank($(this).val())){
-
+        var update_date_fields = function(field){
+            var el = block.find('#'+field.prop('id')+'_date');
+            if(!_fpa.utils.is_blank(field.val())){
+                el.parents('div').first().show();
                 var v = (new Date()).asYMD();
                 el.val(v);
             }else{
+                el.parents('div').first().hide();
                 el.val(null);
             }
+        };
 
+        block.find('#tracker_outcome, #tracker_event').change(function(){
+            update_date_fields($(this));
+        }).each(function(){
+            update_date_fields($(this));
         });
 
     },
