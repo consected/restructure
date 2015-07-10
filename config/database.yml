@@ -80,8 +80,8 @@ test:
 #
 production:
   <<: *default
-  database: fpa_production
-  username: fpa1
+  database: <%= ENV['FPHS_POSTGRESQL_DATABASE'] %>
+  username: <%= ENV['FPHS_POSTGRESQL_USERNAME'] %>
   port: 5432
-  host: localhost
-  password: <%= ENV['FPA1_DATABASE_PASSWORD'] %>
+  host: <%= ENV['FPHS_POSTGRESQL_HOSTNAME'] %>
+  password: <%= ENV['FPHS_POSTGRESQL_PASSWORD'] %>

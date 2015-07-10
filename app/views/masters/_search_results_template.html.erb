@@ -1,5 +1,5 @@
 <script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <div class="col-md-12">
+  <div id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">
     <ul class="list-group">
       <li class="list-group-item">
 
@@ -13,6 +13,12 @@
       {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
       <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/filter}}
+      <div class="player-info-notes">
+        <div class="panel panel-default panel-body">
+        {{pretty_string notes return_string="true"}}
+        </div>
+      </div>
+              
       <li class="list-group-item record-meta">{{>update_metadata}}</li>
     </ul>
   </div>
@@ -20,7 +26,7 @@
 
 <script id="pro_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
                             
-      <div class="col-md-12" id="pro-info-{{player_info_id}}-{{id}}">        
+      <div id="pro-info-{{player_info_id}}-{{id}}">        
 
         <ul class="list-group">
             <li class="list-group-item">
@@ -299,13 +305,6 @@
   {{#with player_info}}  
     {{#if ../_created}}<div class="index-created" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">{{/if}}
       {{>player_info_result }}
-      {{>pro_info_result pro_info player_info_id=id}}
-      <div class="col-md-24  player-info-notes">
-        <div class="panel panel-default panel-body">
-        {{notes}}
-        </div>
-      </div>
-    
     {{#if ../_created}}</div>{{/if}}
     
     
@@ -491,15 +490,13 @@
             <div class="row">
               <div class="col-md-12">
                 {{#each player_infos}}
-                  <div class="row" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">
+                  <div class="row">
+                    <div class="col-md-12">
                     {{>player_info_result }}
-                    {{>pro_info_result pro_info player_info_id=id}}
-                    
-                    <div class="col-md-24  player-info-notes">
-                      <div class="panel panel-default panel-body">
-                      {{notes}}
-                      </div>
                     </div>
+                    <div class="col-md-12">
+                    {{>pro_info_result pro_info player_info_id=id}}
+                    </div>                                        
                   </div>
                 {{else}}
                   <div class="row new-block" id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-">
