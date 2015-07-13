@@ -81,20 +81,20 @@ _fpa.postprocessors = {
         // Handle auto date entry in the tracker edit form
         _fpa.form_utils.format_block(block);
 
-        var update_date_fields = function(field){
-            var el = block.find('#'+field.prop('id')+'_date');
+        var update_date_fields = function(field, force){
+            var el = block.find('#tracker_event_date');
             if(!_fpa.utils.is_blank(field.val())){
-                el.parents('div').first().show();
+                el.parents('div').first().show();                
                 var v = (new Date()).asYMD();
-                el.val(v);
+                if(force) el.val(v);
             }else{
                 el.parents('div').first().hide();
                 el.val(null);
             }
         };
 
-        block.find('#tracker_outcome, #tracker_event').change(function(){
-            update_date_fields($(this));
+        block.find('#tracker_protocol_event_id').change(function(){
+            update_date_fields($(this), true);
         }).each(function(){
             update_date_fields($(this));
         });

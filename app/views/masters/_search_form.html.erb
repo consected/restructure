@@ -105,7 +105,7 @@
   <div class="row">
     <%=f.fields_for :addresses, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
-        <%= f.label :street %>
+        <%= f.label :street_address %>
         <%= f.text_field :street, class: 'form-control' %>
       </div>
       
@@ -178,29 +178,31 @@
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>
-        
-        <div class="form-group col-sm-1 tracker-not-info">
-            <p>&nbsp;</p>
+    
+    </div>
+    <div class="row">
+        <div class="form-group col-sm-3 tracker-not-info">
+            
             <p class="text-right">and&nbsp;not:</p>
         </div>
     <%= f.fields_for :not_trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process">
-          <%= f.label :current_sub_process %>
+          <%#= f.label :current_sub_process %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_trackers_attributes_0_protocol_event_id", "data-only-for" => "#master_not_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event">
-          <%= f.label :current_event %>
+          <%#= f.label :current_event %>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
   
     <% end %>        
     <%= f.fields_for :not_tracker_histories, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process">
-          <%= f.label :any_sub_process %>
+          <%#= f.label :any_sub_process %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_tracker_histories_attributes_0_protocol_event_id", "data-only-for" => "#master_not_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>  
       <div class="form-group col-sm-3 tracker-event">
-          <%= f.label :any_event %>
+          <%#= f.label :any_event %>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>    

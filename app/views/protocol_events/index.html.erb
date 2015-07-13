@@ -32,6 +32,9 @@
 <% if @sub_process %>
 <%= link_to 'New Protocol event', new_protocol_sub_process_protocol_event_path(@protocol, @sub_process) %> |
 <%= link_to 'Sub process events', protocol_sub_process_protocol_events_path(@protocol, @sub_process) %> |
+<%= link_to 'Sub processes', protocol_sub_processes_path(@protocol) %> |
+<%= link_to 'Protocols', protocols_path %> |
 <% end %>
 <%= link_to 'All events', protocol_events_path(all: true) %>
+
 

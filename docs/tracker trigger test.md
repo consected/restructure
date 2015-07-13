@@ -6,13 +6,12 @@ Testing a Trigger on Tracker for Chronological Logging
         BEGIN
             INSERT INTO tracker_history 
                 (tracker_id, master_id, protocol_id, 
-                 event, event_date, c_method,
-                 outcome, outcome_date, notes,
+                 protocol_event_id, event_date, sub_process_id, notes,
                  created_at, updated_at, user_id)
                  
             SELECT NEW.id, NEW.master_id, NEW.protocol_id, 
-                   NEW.event, NEW.event_date, NEW.c_method, 
-                   NEW.outcome, NEW.outcome_date, NEW.notes, 
+                   NEW.protocol_event_id, NEW.event_date, 
+                   NEW.sub_process_id, NEW.notes, 
                    NEW.created_at, NEW.updated_at, NEW.user_id  ;
             RETURN NEW;
         END;

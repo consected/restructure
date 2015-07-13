@@ -2,7 +2,7 @@ class Master < ActiveRecord::Base
 
   PlayerInfoRankOrderClause = ' case rank < 20 when true then rank * -1 else rank  end'.freeze
   RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
-  OutcomeEventDatesNotNullClause = 'outcome_date DESC NULLS last, event_date DESC NULLS last'
+  OutcomeEventDatesNotNullClause = 'event_date DESC NULLS last, updated_at DESC NULLS last '
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
   has_many :manual_investigations  , inverse_of: :master
@@ -191,8 +191,8 @@ class Master < ActiveRecord::Base
           w << "player_contacts.data LIKE :#{k}"      
           wcond[k.to_sym] = "#{v}%"
           joins << [:player_contacts]
-        elsif k == 'first_name'  || k == 'nick_name' 
-          w << "(player_infos.#{k} LIKE :#{k} OR pro_infos.#{k} LIKE :#{k})"      
+        elsif k == 'first_name'   
+          w << "(player_infos.#{k} LIKE :#{k} OR pro_infos.#{k} LIKE :#{k} OR player_infos.nick_name LIKE :#{k} OR pro_infos.nick_name LIKE :#{k})"      
           wcond[k.to_sym] = "#{v}%"
         else
           w << "(player_infos.#{k} = :#{k} OR pro_infos.#{k} = :#{k})"      

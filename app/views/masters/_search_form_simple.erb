@@ -10,18 +10,14 @@
     <%= hidden_field_tag :mode, "SIMPLE" %>
 
     <%= f.fields_for :general_infos do |pif| %>
-      <div class="form-group col-sm-2">
-        <%= pif.label :first_name %>
+      <div class="form-group col-sm-3">
+        <%= pif.label :first_or_nick_name %>
         <%= pif.text_field :first_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-3">
         <%= pif.label :last_name %>
         <%= pif.text_field :last_name, class: 'form-control'  %>
       </div>      
-      <div class="form-group col-sm-2">
-        <%= pif.label :nick_name %>
-        <%= pif.text_field :nick_name, class: 'form-control'  %>
-      </div>
       <div class="form-group col-sm-3">
         <%= pif.label :birth_date %>
         <%= pif.date_field :birth_date, class: 'form-control'  %>
