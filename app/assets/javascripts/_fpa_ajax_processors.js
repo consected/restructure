@@ -86,7 +86,10 @@ _fpa.postprocessors = {
             if(!_fpa.utils.is_blank(field.val())){
                 el.parents('div').first().show();                
                 var v = (new Date()).asYMD();
-                if(force) el.val(v);
+                if(force) {
+                    el.val(v);
+                    $('#tracker_notes').val('');
+                }
             }else{
                 el.parents('div').first().hide();
                 el.val(null);
