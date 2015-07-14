@@ -14,7 +14,7 @@ _fpa.masters = {
                     // Allow multiple fields, any one of which may be entered                    
                     $(dof).each(function(){
                        var el = $(this);
-                       if(el.val() !== null && el.val() !== '') all_null = false;
+                       if(el.val() !== null && el.val() !== '' && !el.hasClass('prevent-submit')) all_null = false;
                     });
                 }
                 if(!dof || !all_null){
@@ -23,6 +23,7 @@ _fpa.masters = {
                         f.find('input[type="submit"]').click();  
                     },1);
                 }
+                $('.prevent-submit').removeClass('prevent-submit');
 
             }).addClass('attached-change');
             f.find('input.tt-input').not('.attached-change').on('blur', function(e){

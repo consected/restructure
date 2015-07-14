@@ -15,6 +15,23 @@ class Tracker < ActiveRecord::Base
     super
   end
   
+  def merge_if_exists
+    t = self.master.trackers.where(protocol_id: self.protocol_id, sub_process_id: self.sub_process_id).take(1)
+    if t.first
+      
+      t = t.first
+      logger.info "Updating existing tracker record #{t.id} instead of creating a new one"
+      logger.debug "With: #{self.inspect}"
+      t.protocol_event = self.protocol_event
+      t.event_date = self.event_date
+      t.notes = self.notes
+      t.save
+      
+      return t
+    end
+    nil
+  end
+  
   
   def self.track_record_update record
   

@@ -225,22 +225,24 @@
         
         
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>          
-      <div class="form-group col-sm-2"> 
-        <%= f.label :younger_than %>
-        <%= f.number_field :younger_than, class: 'form-control'  %>
-      </div>
+
       <div class="form-group col-sm-2"> 
         <%= f.label :older_than %>
         <%= f.number_field :older_than, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2"> 
-        <%= f.label 'Career years <' %>
-        <%= f.number_field :less_than_career_years, class: 'form-control'  %>
+        <%= f.label :younger_than %>
+        <%= f.number_field :younger_than, class: 'form-control'  %>
       </div>
+      
       <div class="form-group col-sm-2"> 
         <%= f.label 'Career years >'%>
         <%= f.number_field :more_than_career_years, class: 'form-control'  %>
       </div>  
+      <div class="form-group col-sm-2"> 
+        <%= f.label 'Career years <' %>
+        <%= f.number_field :less_than_career_years, class: 'form-control'  %>
+      </div>        
     <% end %>    
             
     </div>

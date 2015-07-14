@@ -105,19 +105,37 @@ _fpa.form_utils = {
         var d = block.find('select[data-filters-selector]').not('.attached-filter');
 
         var do_filter = function(sel){
-
+            // get the child select fields this should affect
             var a = sel.attr('data-filters-selector');
             var el = $(a);
+            // get the current value of the parent selector
             var v = sel.val();
+            
+            // in all the child select fields hide all possible options
             el.find('option[data-filter-id]').removeClass('filter-option-show').hide();
-
+            // in all the child select fields re-show only those fields matching the parent selector
             el.find('option[data-filter-id="'+v+'"]').addClass('filter-option-show').show();
 
+            // now for each child select field reset it if the current option doesn't match
+            // the new parent selection
             el.each(function(){
+                // get the data-filter-id (which parent option this belongs to) for any selected items
                 var ela = $(this).find('option:selected').attr('data-filter-id');
-
+                // if this option doesn't match the new parent selection
                 if(ela != v){
-                    $(this).val(null).trigger('change');
+                    // reset the field
+                    $(this).val(null).removeClass('has-value');
+                    // previously we were triggering a change (maybe to work with chosen?)
+                    // this breaks the parent selection for data-only-for fields
+                    // and therefore if needed must be reworked                    
+                    //
+                    // Instead, if the parent selector has a value and we are resetting
+                    // the child, add a prevent-submit to prevent the action triggering the
+                    // master submit call
+                    if(v)
+                        $(this).addClass('prevent-submit');
+                    else
+                        $(this).trigger('change'); // it was changed back to blank, therefore the form has changed enough to submit
                 }
             });
 

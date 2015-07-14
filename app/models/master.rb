@@ -65,11 +65,11 @@ class Master < ActiveRecord::Base
     },
     not_trackers: {
       protocol_event_id: [:is, "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)"],
-      sub_process_id: [:is, "NOT EXISTS (select NULL from trackers t_inner2 where t_inner2.sub_process_id = ? AND t_inner2.master_id = masters.id)"]
+      sub_process_id: [:do_nothing]
     },
     not_tracker_histories: {
       protocol_event_id: [:is, "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id = ? AND th_inner.master_id = masters.id)"],
-      sub_process_id: [:is, "NOT EXISTS (select NULL from tracker_history th_inner2 where th_inner2.sub_process_id = ? AND th_inner2.master_id = masters.id)"]
+      sub_process_id: [:do_nothing]
     }
 #    # This was a test. Not working.
 #    not_player_infos_item_flags: {
@@ -224,6 +224,7 @@ class Master < ActiveRecord::Base
     
     
     cop = altpair[0]
+    return if cop == :do_nothing
     refname = "#{table_name}_#{ckey}"
     
     if altpair[1]
