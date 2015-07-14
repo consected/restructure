@@ -49,8 +49,8 @@ class Master < ActiveRecord::Base
       middle_name: [:starts_with],
       nick_name: [:starts_with],
       notes: [:contains],
-      younger_than: [:is, "player_infos.birth_date is not null  AND ((current_date - player_infos.birth_date)/365.25) < ?"],
-      older_than: [:is, "player_infos.birth_date is not null  AND ((current_date - player_infos.birth_date)/365.25) > ?"],
+      younger_than: [:years, "player_infos.birth_date is not null  AND ((current_date - interval ? )) < player_infos.birth_date"],
+      older_than: [:years, "player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date"],
       less_than_career_years: [:is, "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) < ?"],
       more_than_career_years: [:is, "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) > ?"]
     },
@@ -239,6 +239,7 @@ class Master < ActiveRecord::Base
     cvaltotal = "#{cval}%" if cop == :starts_with
     cvaltotal = "%#{cval}%" if cop == :contains
     cvaltotal = cval if cop == :is
+    cvaltotal = "#{cval} years" if cop == :years
     cvaltotal = "#{cval}" if cop == :is_not
     
     res = [alt, {refname.to_sym => cvaltotal}]
