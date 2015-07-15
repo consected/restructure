@@ -2,23 +2,24 @@ class Master < ActiveRecord::Base
 
   PlayerInfoRankOrderClause = ' case rank < 20 when true then rank * -1 else rank  end'.freeze
   RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
-  OutcomeEventDatesNotNullClause = 'event_date DESC NULLS last, updated_at DESC NULLS last '
+  TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
+  TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
   has_many :manual_investigations  , inverse_of: :master
   has_many :pro_infos , inverse_of: :master  
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
-  has_many :trackers, -> { order(OutcomeEventDatesNotNullClause)}, inverse_of: :master
-  has_many :tracker_histories, -> { order(OutcomeEventDatesNotNullClause)}, inverse_of: :master
+  has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
+  has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
   has_many :scantrons, -> { order(RankNotNullClause)}  , inverse_of: :master
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
   has_many :general_infos, class_name: 'PlayerInfo' 
   
   # Associations to allow advanced searches for NOT 
-  has_many :not_tracker_histories, -> { order(OutcomeEventDatesNotNullClause)},  class_name: 'TrackerHistory'
-  has_many :not_trackers, -> { order(OutcomeEventDatesNotNullClause)},  class_name: 'Tracker'
+  has_many :not_tracker_histories, -> { order(TrackerHistoryEventOrderClause)},  class_name: 'TrackerHistory'
+  has_many :not_trackers, -> { order(TrackerEventOrderClause)},  class_name: 'Tracker'
 
   
   Master.reflect_on_all_associations(:has_many).each do |assoc| 
@@ -29,7 +30,7 @@ class Master < ActiveRecord::Base
   
   # Nested attributes for advanced search form
   accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, 
-                                :player_contacts, :addresses, :trackers, :tracker_histories,
+                                :scantrons, :player_contacts, :addresses, :trackers, :tracker_histories,
                                 :not_trackers, :not_tracker_histories
 
   # AltConditions allows certain search fields to be handled differently from a plain equality match

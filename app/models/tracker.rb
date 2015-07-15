@@ -114,6 +114,11 @@ class Tracker < ActiveRecord::Base
     self.protocol.name
   end
   
+  def protocol_position
+    return nil unless self.protocol
+    self.protocol.position
+  end
+  
   def sub_process_name
     return nil unless self.sub_process
     self.sub_process.name
@@ -133,6 +138,7 @@ class Tracker < ActiveRecord::Base
   def as_json extras={}
     extras[:methods] ||= []
     extras[:methods] << :protocol_name
+    extras[:methods] << :protocol_position
     extras[:methods] << :sub_process_name
     extras[:methods] << :event_name
     extras[:methods] << :tracker_history_length

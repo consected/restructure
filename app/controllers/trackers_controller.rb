@@ -5,7 +5,7 @@ class TrackersController < ApplicationController
   
   def index
     set_objects_instance @master_objects
-    s = @master_objects.order Master::OutcomeEventDatesNotNullClause
+    s = @master_objects #.includes(:protocol).order Master::TrackerEventOrderClause
     render json: {results: s, master_id: @master.id}
   end
 
@@ -25,6 +25,6 @@ class TrackersController < ApplicationController
     end
 
     def secure_params
-      params.require(:tracker).permit(:master_id,  :protocol_id, :protocol_event_id, :event_date, :sub_process_id, :outcome, :outcome_date, :user_id, :notes)
+      params.require(:tracker).permit(:master_id,  :protocol_id, :protocol_event_id, :event_date, :sub_process_id, :outcome, :outcome_date, :user_id, :notes, :item_id, :item_type)
     end
 end

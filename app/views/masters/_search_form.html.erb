@@ -19,11 +19,11 @@
 
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>      
       <div class="form-group col-sm-2">
-        <%= f.label :first_name %>
+        <%= f.label :first_name, 'data-add-icon' => 'info-sign', title: 'search for first names starting with this value' %>
         <%= f.text_field :first_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label :middle_name %>
+        <%= f.label :middle, 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
         <%= f.text_field :middle_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-3">
@@ -31,7 +31,7 @@
         <%= f.text_field :last_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label :nick_name %>
+        <%= f.label :nick_name, 'data-add-icon' => 'info-sign', title: 'search for nick names starting with this value' %>
         <%= f.text_field :nick_name, class: 'form-control'  %>
       </div>          
       <div class="form-group col-sm-3">
@@ -62,11 +62,11 @@
   <div class="row" id="pro-info-search" >
     <%= f.fields_for :pro_infos, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
-        <%= f.label :first_name %>
+        <%= f.label :first_name, 'data-add-icon' => 'info-sign', title: 'search for first names starting with this value' %>
         <%= f.text_field :first_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label :middle_name %>
+        <%= f.label :middle, 'data-add-icon' => 'info-sign', title: 'search for middle names starting with this value' %>
         <%= f.text_field :middle_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-3">
@@ -74,7 +74,7 @@
         <%= f.text_field :last_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label :nick_name %>
+        <%= f.label :nick_name, 'data-add-icon' => 'info-sign', title: 'search for nick names starting with this value' %>
         <%= f.text_field :nick_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-3">
@@ -125,7 +125,7 @@
       
     <%= f.fields_for :player_contacts, child_index: 0 do |f| %>        
       <div class="form-group col-sm-3">
-          <%= f.label :phone_or_email %>
+          <%= f.label :phone_or_email, 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value' %>
           <%= f.text_field :data, class: 'form-control' %>           
       </div>
     <% end %>
@@ -145,10 +145,10 @@
     <% end %>
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>    
       <div class="form-group col-sm-6 ">
-        <%= f.label :notes %>
+        <%= f.label :notes, 'data-add-icon' => 'info-sign', title: 'search for notes containing word or phrase' %>
         <%= f.text_field :notes, class: 'form-control' %>
       </div>
-    
+      
     <% end %>  
     </div>
     
@@ -212,14 +212,6 @@
       <div class="form-group col-sm-3">
         <%= label :player_info, "Player Tags" %>
         <%= collection_select("master[player_infos_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_info), :id, :name, {}, multiple: true) %>
-      </div>
-      <div class="form-group col-sm-3">
-        <%= label :address, "Address Tags" %>
-        <%= collection_select("master[addresses_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:address), :id, :name, {}, multiple: true) %>
-      </div>
-      <div class="form-group col-sm-3">
-        <%= label :address, "Contact Tags" %>
-        <%= collection_select("master[player_contacts_item_flags_attributes][0]", :item_flag_name_id, item_flags_array(:player_contact), :id, :name, {}, multiple: true) %>
       </div>
         
         

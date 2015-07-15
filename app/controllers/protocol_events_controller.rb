@@ -40,6 +40,6 @@ class ProtocolEventsController < ApplicationController
     
   private
     def secure_params
-      params.require(:protocol_event).permit(:name, :sub_process_id, :disabled)
+      params.require(:protocol_event).permit(:name, :sub_process_id, :disabled, :milestone, :description)
     end
 end

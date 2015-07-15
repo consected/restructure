@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150710160215) do
+ActiveRecord::Schema.define(version: 20150715181110) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -215,6 +215,8 @@ ActiveRecord::Schema.define(version: 20150710160215) do
     t.datetime "updated_at",     null: false
     t.boolean  "disabled"
     t.integer  "sub_process_id"
+    t.string   "milestone"
+    t.string   "description"
   end
 
   add_index "protocol_events", ["admin_id"], name: "index_protocol_events_on_admin_id", using: :btree
@@ -238,6 +240,7 @@ ActiveRecord::Schema.define(version: 20150710160215) do
     t.datetime "updated_at", null: false
     t.boolean  "disabled"
     t.integer  "admin_id"
+    t.integer  "position"
   end
 
   add_index "protocols", ["admin_id"], name: "index_protocols_on_admin_id", using: :btree
@@ -282,6 +285,8 @@ ActiveRecord::Schema.define(version: 20150710160215) do
     t.datetime "updated_at",        null: false
     t.integer  "sub_process_id"
     t.integer  "protocol_event_id"
+    t.integer  "item_id"
+    t.string   "item_type"
   end
 
   add_index "tracker_history", ["master_id"], name: "index_tracker_history_on_master_id", using: :btree
@@ -305,6 +310,8 @@ ActiveRecord::Schema.define(version: 20150710160215) do
     t.string   "notes"
     t.integer  "sub_process_id"
     t.integer  "protocol_event_id"
+    t.integer  "item_id"
+    t.string   "item_type"
   end
 
   add_index "trackers", ["master_id"], name: "index_trackers_on_master_id", using: :btree

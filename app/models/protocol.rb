@@ -7,7 +7,7 @@ class Protocol < ActiveRecord::Base
 
   RecordUpdatesProtocolName = 'Updates'.freeze
   scope :updates, -> { where name: RecordUpdatesProtocolName}
-
+  default_scope -> { order position: :asc }
   
 
   def self.record_updates_protocol

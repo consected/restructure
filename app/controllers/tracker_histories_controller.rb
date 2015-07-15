@@ -6,10 +6,10 @@ class TrackerHistoriesController < ApplicationController
   def index
     if @tracker
       logger.info "Getting tracker item tracker histories"
-      @tracker_histories = @tracker.tracker_histories.order Master::OutcomeEventDatesNotNullClause
+      @tracker_histories = @tracker.tracker_histories.order Master::TrackerHistoryEventOrderClause
     elsif @master
       logger.info "Getting master tracker histories"
-      @tracker_histories = @master.tracker_histories.order Master::OutcomeEventDatesNotNullClause
+      @tracker_histories = @master.tracker_histories.order Master::TrackerHistoryEventOrderClause
     else
       render code: 404
       return
@@ -41,6 +41,6 @@ class TrackerHistoriesController < ApplicationController
     end
       
     def secure_params
-      params.require(:tracker).permit(:master_id,  :protocol_id, :event, :event_date, :sub_process_id, :outcome, :outcome_date, :user_id, :notes)
+      params.require(:tracker).permit(:master_id,  :protocol_id, :event, :event_date, :sub_process_id, :outcome, :outcome_date, :user_id, :notes, :item_id, :item_type)
     end
 end

@@ -204,6 +204,19 @@ _fpa.form_utils = {
         block.on('click', '[data-toggle="expandable"]', function(){
             _fpa.form_utils.toggle_expandable($(this));
         });
+        
+    },
+    
+    setup_extra_actions: function(block){
+        
+        block.find('[data-add-icon]').not('.attached-add-icon').each(function(){
+            var icon = $(this).attr('data-add-icon');
+            var title = $(this).attr('title');
+            $(this).attr('title', null);
+            var h = $('<a title="'+title+'" class="add-icon glyphicon glyphicon-'+icon+'"></a>');
+            $(this).after(h);
+            h.tooltip({trigger: 'hover click'});
+        }).addClass('attached-add-icon');
 
     },
 
@@ -217,6 +230,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_tablesorter(block);
         _fpa.form_utils.setup_bootstrap_items(block);
         _fpa.form_utils.setup_data_toggles(block);
+        _fpa.form_utils.setup_extra_actions(block);
     }
 };
 

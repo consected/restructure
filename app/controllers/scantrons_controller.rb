@@ -5,6 +5,6 @@ class ScantronsController < ApplicationController
   private
     
     def secure_params
-      params.require(:scantron).permit(:master_id, :scantron_id, :source, :rank, :user_id)
+      params.require(:scantron).permit(:master_id, :scantron_id)
     end
 end

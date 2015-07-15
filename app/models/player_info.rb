@@ -29,6 +29,7 @@ class PlayerInfo < ActiveRecord::Base
  
   def as_json extras={}
     extras[:include] ||= {}
+    extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
     extras[:include].merge!({pro_info: {}})
     extras[:methods] ||= []
     extras[:methods] << :accuracy_score_name

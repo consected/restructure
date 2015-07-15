@@ -4,6 +4,6 @@ class ProtocolsController < ApplicationController
 
   private
     def secure_params
-      params.require(:protocol).permit(:name, :disabled)
+      params.require(:protocol).permit(:name, :disabled, :position)
     end
 end

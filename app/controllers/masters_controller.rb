@@ -36,27 +36,20 @@ class MastersController < ApplicationController
             },
             methods: [:user_name, :accuracy_score_name]
           },
-          player_contacts: {order: {rank: :desc}, 
-            include: {
-              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-            },
+          player_contacts: {
+            order: {rank: :desc},             
             methods: [:user_name]
           },
-          addresses: {order: {rank: :desc}, 
-            include: {
-              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-            },
+          addresses: {
+            order: {rank: :desc},             
             methods: [:user_name]
           },
-          trackers: {order: Master::OutcomeEventDatesNotNullClause,  
-            include: {
-              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-            },
-            methods: [:protocol_name, :sub_process_name, :event_name, :tracker_history_length, :user_name]
+          trackers: {
+            order: "protocol.position #{Master::TrackerEventOrderClause}",  
+            methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :tracker_history_length, :user_name]
           },
-          scantrons: {order: {scantron_id: :asc}, include: {
-              item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-            },
+          scantrons: {
+            order: {scantron_id: :asc},
             methods: [:user_name]
           }
         }) 
@@ -97,6 +90,7 @@ class MastersController < ApplicationController
     @master.player_contacts.build
     @master.trackers.build
     @master.tracker_histories.build
+    @master.scantrons.build
     
     # NOT conditions
     @master.not_trackers.build
