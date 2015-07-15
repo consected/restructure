@@ -609,7 +609,9 @@ CREATE TABLE protocol_events (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     disabled boolean,
-    sub_process_id integer
+    sub_process_id integer,
+    milestone character varying,
+    description character varying
 );
 
 
@@ -684,7 +686,8 @@ CREATE TABLE protocols (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    "position" integer
 );
 
 
@@ -818,7 +821,9 @@ CREATE TABLE tracker_history (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     sub_process_id integer,
-    protocol_event_id integer
+    protocol_event_id integer,
+    item_id integer,
+    item_type character varying
 );
 
 
@@ -863,7 +868,9 @@ CREATE TABLE trackers (
     updated_at timestamp without time zone NOT NULL,
     notes character varying,
     sub_process_id integer,
-    protocol_event_id integer
+    protocol_event_id integer,
+    item_id integer,
+    item_type character varying
 );
 
 
