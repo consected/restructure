@@ -41,7 +41,7 @@
         <% 
           drop = {}
           if nav[:sub]
-            drop = {class: "dropdown-toggle", data_toggle: "dropdown", role: "button", aria_expanded: "false"} 
+            drop = {class: "dropdown-toggle", "data-toggle": "dropdown", role: "button", "aria-expanded": "false"} 
           else
             drop = {}
           end
@@ -49,7 +49,7 @@
           drop.merge! nav[:extras]    
         %>
         <li class="dropdown">
-            <%= link_to nav[:label].html_safe, nav[:url], drop %>            
+            <%= link_to nav[:label].html_safe, nav[:url], drop%>            
           <% if nav[:sub] %>  
           <ul class="dropdown-menu" role="menu">
             <% nav[:sub].each do |nav| %>

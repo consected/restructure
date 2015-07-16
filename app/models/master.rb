@@ -8,7 +8,7 @@ class Master < ActiveRecord::Base
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
   has_many :manual_investigations  , inverse_of: :master
   has_many :pro_infos , inverse_of: :master  
-  has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
+  has_many :player_contacts, -> { order("active desc, #{RankNotNullClause}")}, inverse_of: :master
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
@@ -41,7 +41,10 @@ class Master < ActiveRecord::Base
   # :is  and :is_not are the equivalent of "?"
   # any other string will be used as is 
   # note that ? characters will be replaced by the field search value
-  # A second item in the array can be specified to state the actual query condition
+  # Subsequent symbols in the array can be used to modify the string
+  # :strip_spaces removes all spaces from the string
+  # :upcase makes the whole string uppercase
+  # The final item in the array can be specified to state the actual query condition
   # :starts with and :contains both default to "field_name LIKE ?"
   # :is_not default to "field_name <> ?"
   AltConditions = {
@@ -62,7 +65,7 @@ class Master < ActiveRecord::Base
       
     },
     player_contacts: {
-      data: [:starts_with]
+      data: [:starts_with, :strip_spaces]
     },
     not_trackers: {
       protocol_event_id: [:is, "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)"],
@@ -190,7 +193,7 @@ class Master < ActiveRecord::Base
                 
         if k == 'contact_data'
           w << "player_contacts.data LIKE :#{k}"      
-          wcond[k.to_sym] = "#{v}%"
+          wcond[k.to_sym] = "#{v.gsub(' ','')}%"
           joins << [:player_contacts]
         elsif k == 'first_name'   
           w << "(player_infos.#{k} LIKE :#{k} OR pro_infos.#{k} LIKE :#{k} OR player_infos.nick_name LIKE :#{k} OR pro_infos.nick_name LIKE :#{k})"      
@@ -220,29 +223,41 @@ class Master < ActiveRecord::Base
     return if !table_name || !condition || ckey.nil? || cval.nil?
     altable = AltConditions[table_name]
     return unless altable
-    altpair = altable[ckey.to_sym]
-    return unless altpair
+    altdef = altable[ckey.to_sym]
+    return unless altdef
     
     
-    cop = altpair[0]
-    return if cop == :do_nothing
+    cond_op = altdef[0]
+    return if cond_op == :do_nothing
+    
     refname = "#{table_name}_#{ckey}"
     
-    if altpair[1]
-      alt  = altpair[1]
-    elsif cop == :starts_with || cop == :contains
+    
+    if altdef.last && altdef.last.is_a?(String)
+      alt  = altdef.last
+    elsif cond_op == :starts_with || cond_op == :contains
       alt = "#{table_name}.#{ckey} LIKE ?"      
-    elsif cop == :is_not
+    elsif cond_op == :is_not
       alt = "#{table_name}.#{ckey} <> ?"
+    end
+    
+    if altdef.length > 1
+      altdef[1..-1].each do |d|
+        if d == :strip_spaces
+          cval.gsub!(' ','')
+        elsif d == :upcase
+          cval.upcase!
+        end
+      end
     end
     
     alt = alt.gsub('?', ":#{refname}")
     
-    cvaltotal = "#{cval}%" if cop == :starts_with
-    cvaltotal = "%#{cval}%" if cop == :contains
-    cvaltotal = cval if cop == :is
-    cvaltotal = "#{cval} years" if cop == :years
-    cvaltotal = "#{cval}" if cop == :is_not
+    cvaltotal = "#{cval}%" if cond_op == :starts_with
+    cvaltotal = "%#{cval}%" if cond_op == :contains
+    cvaltotal = cval if cond_op == :is
+    cvaltotal = "#{cval} years" if cond_op == :years
+    cvaltotal = "#{cval}" if cond_op == :is_not
     
     res = [alt, {refname.to_sym => cvaltotal}]
       

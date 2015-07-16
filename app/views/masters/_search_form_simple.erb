@@ -1,9 +1,4 @@
 <div class="container-fluid collapse in" id="master-search-simple">
-<p>
-    <a href="#master-search-advanced" data-toggle="collapse" class="collapsed">Advanced Search</a> &nbsp;&nbsp;
-    <a href="#" class="clear-fields">Clear Fields</a>
-</p>
-    
 <%= form_for @master, method: :get, remote: true, html: {id: 'simple_search_master', class: 'search_master'} do |f| %>
 
   <div class="row">
@@ -42,7 +37,13 @@
         <%= pif.label "email / phone", 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value' %>
         <%= pif.text_field :contact_data, class: 'form-control'  %>
       </div>
-      
+      <div class="col-sm-2 text-right">
+          <br/>
+          <p style="font-size: 18px;">              
+            <a href="#master-search-advanced" data-toggle="collapse" class="collapsed glyphicon glyphicon-list" title="advanced search"></a>&nbsp;
+            <a href="#" class="clear-fields glyphicon glyphicon-erase" title="clear fields"></a>
+          </p>
+      </div>      
     <% end %>
   </div>
   <div class="form-group form-actions clearfix">

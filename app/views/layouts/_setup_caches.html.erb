@@ -3,7 +3,8 @@
   
   _fpa.status = {
     controller: '<%= controller_name %>',
-    action: '<%= action_name %>'
+    action: '<%= action_name %>',
+    session: new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>)
   };
   
 </script>

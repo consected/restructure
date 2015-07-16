@@ -37,7 +37,7 @@ class MastersController < ApplicationController
             methods: [:user_name, :accuracy_score_name]
           },
           player_contacts: {
-            order: {rank: :desc},             
+            order: {active: :desc, rank: :desc},             
             methods: [:user_name]
           },
           addresses: {

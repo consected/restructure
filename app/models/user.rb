@@ -19,7 +19,9 @@ class User < ActiveRecord::Base
     @new_password
   end
   
-
+  def timeout_in  
+    30.minutes
+  end
 protected
 
   def generate_password

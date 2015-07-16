@@ -25,7 +25,7 @@
         </li>
         <li class="list-group-item player-contact-active">
             <%= f.label :active %>
-            <%= f.text_field :active %>
+            <%= f.select :active, active_selections %>
         </li>
         <li class="list-group-item">
           <%= f.submit class: "btn btn-primary" %>  

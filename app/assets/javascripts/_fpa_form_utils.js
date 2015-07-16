@@ -91,7 +91,7 @@ _fpa.form_utils = {
         sels.each(function(){
             var sel = $(this);
             window.setTimeout(function(){               
-                sel.chosen({width: '100%'}).addClass('attached-chosen');
+                sel.chosen({width: '100%', placeholder_text_multiple: 'no tags selected'}).addClass('attached-chosen');
             }, 1);
         });
     },

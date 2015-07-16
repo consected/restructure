@@ -11,7 +11,6 @@ _fpa = {
     $(block).removeClass('ajax-running');
   },
 
-    
   compile_templates: function(){
     $('script.handlebars-partial').each(function(){
         var id = $(this).attr('id');
@@ -196,6 +195,8 @@ _fpa = {
         _fpa.add_tracking_params($(this));
         return true;
     }).on("ajax:success", sel, function(e, data, status, xhr) {    
+        
+        _fpa.status.session.reset_timeout();
         var block = $(this);
         var data = xhr.responseJSON;
         _fpa.clear_flash_notices();

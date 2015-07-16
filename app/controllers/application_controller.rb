@@ -5,11 +5,18 @@ class ApplicationController < ActionController::Base
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
   
+  before_action :prevent_cache
   before_action :setup_navs
   
   
 protected
 
+    def prevent_cache
+      response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
+      response.headers["Pragma"] = "no-cache"
+      response.headers["Expires"] = "Fri, 01 Jan 1990 00:00:00 GMT"
+    end
+  
       # Prevent access to any management page unless the user is an administrator
     def check_admin
       redirect_to '/pages' and return unless current_admin
@@ -37,8 +44,8 @@ protected
         user_sub << {label: 'logout', url: "/users/sign_out", extras: {method: :delete}}
       end
       if current_user  || current_admin
-        @secondary_navs << {label: 'Administration', url: "#", sub: admin_sub, extras: {}}
-        @secondary_navs << {label: '<span class="glyphicon glyphicon-user"></span>', url: "#", sub: user_sub, extras: {title: current_email}}
+        @secondary_navs << {label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>', url: "#", sub: admin_sub, extras: {}}
+        @secondary_navs << {label: '<span class="glyphicon glyphicon-user" ></span>', url: "#", sub: user_sub, extras: {title: current_email}}
       end 
       
       
