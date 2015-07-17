@@ -1,3 +1,0 @@
-module ProtocolEventsHelper
-
-end

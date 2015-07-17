@@ -57,7 +57,14 @@ _fpa = {
         
         if(options.position === 'before'){        
             new_block = $(html);
-            block.before(new_block);
+            var id = new_block.attr('id');
+            var existing = $('#'+id);
+            if(existing.length > 0){
+                existing.replaceWith(new_block);
+            }
+            else{
+                block.before(new_block);
+            }
             block.html('');
         }
         else
@@ -210,7 +217,10 @@ _fpa = {
             if(t){
                 var b = $(t);
                 if(b.hasClass('new-block')){
-                    options.position = 'before';
+                    if(b.hasClass('new-below'))
+                        options.position = 'after';
+                    else    
+                        options.position = 'before';
                 }                    
                 _fpa.view_template(b, $(this).attr('data-template'), xhr.responseJSON, options);
             }else{

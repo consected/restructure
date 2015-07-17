@@ -26,7 +26,6 @@ class TrackerHistoriesController < ApplicationController
     render json: {results: @tracker_histories, master_id: @master.id}
   end
   
-  
 
   private
   

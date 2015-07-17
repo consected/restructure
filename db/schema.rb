@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.integer  "rank"
     t.string   "rec_type"
     t.integer  "user_id"
-    t.datetime "created_at",                   null: false
-    t.datetime "updated_at", default: "now()"
+    t.datetime "created_at",                                 null: false
+    t.datetime "updated_at", default: '2015-07-17 14:00:33'
   end
 
   add_index "addresses", ["master_id"], name: "index_addresses_on_master_id", using: :btree
@@ -141,8 +141,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.integer  "rank"
     t.boolean  "active"
     t.integer  "user_id"
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",  default: "now()"
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",  default: '2015-07-17 14:00:33'
     t.date     "active_date"
   end
 
@@ -163,8 +163,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.string   "transaction_status"
     t.string   "transaction_substatus"
     t.integer  "user_id"
-    t.datetime "created_at",                                        null: false
-    t.datetime "updated_at",                      default: "now()"
+    t.datetime "created_at",                                                      null: false
+    t.datetime "updated_at",                      default: '2015-07-17 14:00:33'
     t.string   "contact_pref"
     t.integer  "start_year"
     t.string   "in_survey",             limit: 1
@@ -200,8 +200,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.string   "career_info"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",                        null: false
-    t.datetime "updated_at",      default: "now()"
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",      default: '2015-07-17 14:00:33'
     t.integer  "rank"
   end
 

@@ -6,6 +6,7 @@ class Tracker < ActiveRecord::Base
   belongs_to :protocol_event
   has_many :tracker_histories, inverse_of: :tracker
 
+  attr_accessor :_merged
   
   def initialize presets={}
     
@@ -23,9 +24,11 @@ class Tracker < ActiveRecord::Base
       t = t.first
       logger.info "Updating existing tracker record #{t.id} instead of creating a new one"
       logger.debug "With: #{self.inspect}"
+      t.sub_process = self.sub_process
       t.protocol_event = self.protocol_event
       t.event_date = self.event_date
       t.notes = self.notes
+      t._merged = true
       t.save
       
       return t
@@ -142,6 +145,7 @@ class Tracker < ActiveRecord::Base
     extras[:methods] << :sub_process_name
     extras[:methods] << :event_name
     extras[:methods] << :tracker_history_length
+    extras[:methods] << :_merged
       
     super(extras)
   end

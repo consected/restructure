@@ -48,6 +48,10 @@ group :development, :test do
   gem 'webrick'
 end
 
+group :test do
+  gem 'capybara'
+end
+
 group :production do
   gem 'passenger'
 end
