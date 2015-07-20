@@ -66,6 +66,17 @@ _fpa = {
                 block.before(new_block);
             }
             block.html('');
+        } else if(options.position === 'after'){        
+            new_block = $(html);
+            var id = new_block.attr('id');
+            var existing = $('#'+id);
+            if(existing.length > 0){
+                existing.replaceWith(new_block);
+            }
+            else{
+                block.after(new_block);
+            }
+            block.html('');
         }
         else
             block.html(html);

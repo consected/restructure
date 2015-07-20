@@ -186,8 +186,8 @@
     
     {{#each this}}
     {{#if id}}
-    <tbody id="tracker-{{master_id}}-{{id}}">
-      <tr class="index-{{@index}}" data-tracker-history-items="{{tracker_history_length}}" data-preprocessor="tracker_edit_form" data-tracker-protocol="{{underscore protocol_name}}"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
+    <tbody id="tracker-{{master_id}}-{{id}}" class="index-{{@index}}" data-tracker-history-items="{{tracker_history_length}}" data-preprocessor="tracker_edit_form" data-tracker-protocol="{{underscore protocol_name}}"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}">
+      <tr >                  
         {{#with this}}
           {{>tracker_result}}
         {{/with}}
