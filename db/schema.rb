@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150715181110) do
+ActiveRecord::Schema.define(version: 20150720141845) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.integer  "rank"
     t.string   "rec_type"
     t.integer  "user_id"
-    t.datetime "created_at",                                 null: false
-    t.datetime "updated_at", default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at", default: "now()"
   end
 
   add_index "addresses", ["master_id"], name: "index_addresses_on_master_id", using: :btree
@@ -74,7 +74,10 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean  "disabled"
+    t.integer  "admin_id"
   end
+
+  add_index "general_selections", ["admin_id"], name: "index_general_selections_on_admin_id", using: :btree
 
   create_table "item_flag_names", force: :cascade do |t|
     t.string   "name"
@@ -141,8 +144,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.integer  "rank"
     t.boolean  "active"
     t.integer  "user_id"
-    t.datetime "created_at",                                  null: false
-    t.datetime "updated_at",  default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",  default: "now()"
     t.date     "active_date"
   end
 
@@ -163,8 +166,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.string   "transaction_status"
     t.string   "transaction_substatus"
     t.integer  "user_id"
-    t.datetime "created_at",                                                      null: false
-    t.datetime "updated_at",                      default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                                        null: false
+    t.datetime "updated_at",                      default: "now()"
     t.string   "contact_pref"
     t.integer  "start_year"
     t.string   "in_survey",             limit: 1
@@ -200,8 +203,8 @@ ActiveRecord::Schema.define(version: 20150715181110) do
     t.string   "career_info"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",                                      null: false
-    t.datetime "updated_at",      default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",      default: "now()"
     t.integer  "rank"
   end
 
@@ -345,6 +348,7 @@ ActiveRecord::Schema.define(version: 20150715181110) do
   add_foreign_key "accuracy_scores", "admins"
   add_foreign_key "addresses", "masters"
   add_foreign_key "addresses", "users"
+  add_foreign_key "general_selections", "admins"
   add_foreign_key "item_flag_names", "admins"
   add_foreign_key "item_flags", "item_flag_names"
   add_foreign_key "item_flags", "users"

@@ -226,7 +226,8 @@ CREATE TABLE general_selections (
     item_type character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    disabled boolean
+    disabled boolean,
+    admin_id integer
 );
 
 
@@ -1281,6 +1282,13 @@ CREATE INDEX index_addresses_on_user_id ON addresses USING btree (user_id);
 
 
 --
+-- Name: index_general_selections_on_admin_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_general_selections_on_admin_id ON general_selections USING btree (admin_id);
+
+
+--
 -- Name: index_item_flag_names_on_admin_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -1831,6 +1839,14 @@ ALTER TABLE ONLY item_flags
 
 ALTER TABLE ONLY manual_investigations
     ADD CONSTRAINT fk_rails_e6e149db7b FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_f62500107f; Type: FK CONSTRAINT; Schema: public; Owner: phil
+--
+
+ALTER TABLE ONLY general_selections
+    ADD CONSTRAINT fk_rails_f62500107f FOREIGN KEY (admin_id) REFERENCES admins(id);
 
 
 --

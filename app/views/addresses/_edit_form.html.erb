@@ -33,12 +33,12 @@
         </li>
         <li class="list-group-item address-source">
             <%= f.label :source %>
-            <%= f.text_field :source %>
+            <%= f.select :source, general_selection(:addresses_source) %>
         </li>
         <li class="list-group-item address-rec_type">
             <%= f.label :rec_type %>
-            <%= f.text_field :rec_type %>
-        </li>
+            <%= f.select :rec_type, general_selection(:addresses_type) %>
+        </li>                
         <li class="list-group-item address-rank">
             <%= f.label :rank %>
             <%= f.number_field :rank %>

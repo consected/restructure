@@ -17,7 +17,7 @@
         </li>  
         <li class="list-group-item player-contact-source">
             <%= f.label :source %>
-            <%= f.text_field :source %>
+            <%= f.select :source, general_selection(:player_contacts_source) %>
         </li>
         <li class="list-group-item player-contact-rank">
             <%= f.label :rank %>
