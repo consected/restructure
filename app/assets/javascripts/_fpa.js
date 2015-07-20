@@ -285,9 +285,23 @@ _fpa = {
         
         
     }).on("ajax:error", function(e, xhr, status, error){
-      _fpa.clear_flash_notices();
-      _fpa.ajax_done(block);
-      _fpa.flash_notice("An error occurred.", 'danger');
+        var block = $(this);
+        _fpa.clear_flash_notices();
+        _fpa.ajax_done(block);
+        var j = xhr.responseJSON;
+        if(xhr.status === 422 && j){
+            var msg = "<p>Could not complete action:</p>";
+            
+            for(var i in j){
+                if(j.hasOwnProperty(i)){
+                 msg += '<p>' + i + ' ' + j[i] + '</p>';
+                }                
+            }
+            
+            _fpa.flash_notice(msg, 'warning');
+        }else{
+            _fpa.flash_notice("An error occurred.", 'danger');
+        }
       
     }).addClass('attached');      
     

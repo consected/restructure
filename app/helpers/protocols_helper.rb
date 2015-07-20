@@ -41,17 +41,7 @@ module ProtocolsHelper
     res
   end
   
-  def protocol_outcomes_array_with_class
-    res = ProtocolOutcome.selector_attributes [:name, :protocol_id]
-    
-    res = res.map {|a| [a.first, a.first.downcase, {"data-filter-id" => a.last}]}
-    
-    #res = add_all_to_options(res, '(all outcomes)')
-    
-    res
-  end
   
-
   protected
   
     # Every filter-id in the filtered select options should gain an extra item with a 

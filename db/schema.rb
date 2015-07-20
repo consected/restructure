@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150720141845) do
+ActiveRecord::Schema.define(version: 20150720175827) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -107,32 +107,6 @@ ActiveRecord::Schema.define(version: 20150720141845) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "manual_investigations", force: :cascade do |t|
-    t.string   "fill_in_addresses",           limit: 1
-    t.string   "in_survey",                   limit: 1
-    t.string   "verify_survey_participation", limit: 1
-    t.string   "verify_player_and_or_match",  limit: 1
-    t.string   "accuracy",                    limit: 15
-    t.integer  "accuracy_score"
-    t.string   "changed_column"
-    t.integer  "verified"
-    t.integer  "pilotq1"
-    t.integer  "mailing"
-    t.integer  "outreach_vfy"
-    t.integer  "insert_audit_key"
-    t.integer  "user_id"
-    t.datetime "created_at",                             null: false
-    t.datetime "updated_at",                             null: false
-    t.integer  "rank"
-    t.integer  "master_id"
-    t.integer  "is_changed"
-    t.integer  "scantron_id"
-  end
-
-  add_index "manual_investigations", ["master_id"], name: "index_manual_investigations_on_master_id", using: :btree
-  add_index "manual_investigations", ["scantron_id"], name: "index_manual_investigations_on_scantron_id", using: :btree
-  add_index "manual_investigations", ["user_id"], name: "index_manual_investigations_on_user_id", using: :btree
-
   create_table "masters", force: :cascade do |t|
   end
 
@@ -224,18 +198,6 @@ ActiveRecord::Schema.define(version: 20150720141845) do
 
   add_index "protocol_events", ["admin_id"], name: "index_protocol_events_on_admin_id", using: :btree
   add_index "protocol_events", ["sub_process_id"], name: "index_protocol_events_on_sub_process_id", using: :btree
-
-  create_table "protocol_outcomes", force: :cascade do |t|
-    t.string   "name"
-    t.integer  "protocol_id"
-    t.integer  "admin_id"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
-    t.boolean  "disabled"
-  end
-
-  add_index "protocol_outcomes", ["admin_id"], name: "index_protocol_outcomes_on_admin_id", using: :btree
-  add_index "protocol_outcomes", ["protocol_id"], name: "index_protocol_outcomes_on_protocol_id", using: :btree
 
   create_table "protocols", force: :cascade do |t|
     t.string   "name"
@@ -352,9 +314,6 @@ ActiveRecord::Schema.define(version: 20150720141845) do
   add_foreign_key "item_flag_names", "admins"
   add_foreign_key "item_flags", "item_flag_names"
   add_foreign_key "item_flags", "users"
-  add_foreign_key "manual_investigations", "masters"
-  add_foreign_key "manual_investigations", "scantrons"
-  add_foreign_key "manual_investigations", "users"
   add_foreign_key "player_contacts", "masters"
   add_foreign_key "player_contacts", "users"
   add_foreign_key "player_infos", "masters"
@@ -364,8 +323,6 @@ ActiveRecord::Schema.define(version: 20150720141845) do
   add_foreign_key "pro_infos", "users"
   add_foreign_key "protocol_events", "admins"
   add_foreign_key "protocol_events", "sub_processes"
-  add_foreign_key "protocol_outcomes", "admins"
-  add_foreign_key "protocol_outcomes", "protocols"
   add_foreign_key "protocols", "admins"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"

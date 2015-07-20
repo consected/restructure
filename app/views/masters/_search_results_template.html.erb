@@ -60,23 +60,6 @@
 </script>
 
 
-<script id="manual_investigation_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-  <ul class="list-group">
-      <li class="list-group-item">
-        <a title="edit" class="edit-entity edit-manual_investigation pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/manual_investigations/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-
-        <h4 class="list-group-item-heading">Manual Investigations</h4>                        
-      </li>
-      {{#each this}}
-      {{#in this @key "in_survey" }}
-      <li class="list-group-item manual_investigation-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-      {{/in}}
-      {{/each}}
-
-  </ul>
-</script>
-
 
 <script id="player_contact_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
@@ -322,7 +305,7 @@
 
 <script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with player_contact}}
-    {{#if ../_created}}<div class="index-created" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}">{{/if}}
+    {{#if ../_created}}<div class="index-created" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}" data-preprocessor="player_contact_edit_form">{{/if}}
       {{>player_contact_result }}
     {{#if ../_created}}</div>{{/if}}
   {{/with}}
@@ -531,13 +514,13 @@
               </div>
               <div class="col-md-6">
                 {{#each player_contacts}}
-                  <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}">
+                  <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}"  data-preprocessor="player_contact_edit_form">
                     {{>player_contact_result master_id=../id}}
                   </div>
 
                 {{/each}}
 
-                <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-">
+                <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-" data-preprocessor="player_contact_edit_form">
                   {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>

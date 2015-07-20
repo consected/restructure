@@ -1,9 +1,16 @@
 require 'rails_helper'
 
 describe "user and admin authentication" do
+  
+  # Prepare a list of URLs to test
+  
   before(:each) do
+
+    # Handle devise URLs explicitly as users and admins
+    # Also handle explicit redirections to home with :redirect_home    
+    special_urls = {"/admins/edit" => :admins, "/users/edit" => :users, "/admins/:id" => :admins, "/users/:id" => :users, "/admins/sign_out" => :redirect_home, "/users/sign_out" => :redirect_home }
     
-    @url_list = Rails.application.routes.routes.map {|r|       
+    @url_list = Rails.application.routes.routes.map do |r|       
       url = r.path.spec.to_s
       method = nil
       rm = r.constraints[:request_method].to_s 
@@ -25,17 +32,26 @@ describe "user and admin authentication" do
         raise "Unrecognized method (#{rm}) for #{url}"
       end
       
-      rcont = r.defaults[:controller]
-      res = url.gsub('(.:format)','').gsub(/:.+?\//,"#{rand(100000)}/").gsub(/:.+?$/,"#{rand(100000)}")      
+      url.gsub!('(.:format)','')      
+      rcont = special_urls[url] || r.defaults[:controller]
+      
+      res = url.gsub(':item_controller', 'player_infos').gsub(/:.+?\//,"#{rand(100000)}/").gsub(/:.+?$/,"#{rand(100000)}")      
       puts "method #{method} / #{r.defaults[:controller]}: #{res}"
-      {url: res, method: method, controller: rcont }
-    }
+      {url: res, method: method, controller: rcont, orig_url: url }
+    end
     
   end
 
+  # Check for appropriate redirects to user or admin sign in pages when not logged in
+  # This scenario tests all available routes, unless they are listed in the skip_urls list
+  # An added benefit to this test is that routes that do not have associated actions (or controllers)
+  # will cause a failure, ensuring that route definitions are appropriately limited to avoid 500 errors
+  # rather than more correct 404 errors
   it "redirects to user login page for all paths when not logged in" do
     
     skip_urls = ["/admins/sign_in", "/users/sign_in"]
+    
+    admin_controllers = %w(accuracy_scores action_logs colleges general_selections item_flag_names manage_users protocol_events protocols sub_processes admins)        
     
     @url_list.each do |url|
       if url[:controller] && !skip_urls.include?(url[:url])
@@ -51,10 +67,17 @@ describe "user and admin authentication" do
           delete url[:url]
         when :post
           post url[:url]
-
-        end
+        end        
+        
         expect(response).to have_http_status(302), "expected a redirect for #{url}. Got #{response.status}"
-        #expect(response).to redirect_to('/users/sign_in') # redirect_to('/admins/sign_in')#, "expected a redirect for #{url}. Got #{response.inspect}"
+        if url[:controller] == :redirect_home
+          expect(response).to redirect_to('http://www.example.com/'), "expected a redirect to home page for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+        elsif admin_controllers.include?(url[:controller].to_s)
+          expect(response).to redirect_to('http://www.example.com/admins/sign_in'), "expected a redirect to admins/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+        else          
+          expect(response).to redirect_to('http://www.example.com/users/sign_in'), "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+        end
+        
       else
         puts "Skipping url #{url[:url]} (#{url[:method]}) - no controller or url skipped"
       end

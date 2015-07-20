@@ -18,4 +18,5 @@
 //= require handlebars-v3.0.3
 //= require jquery-tablesorter
 //= require jquery-scrollto-min
+//= require jquery-mask
 //= require_tree .

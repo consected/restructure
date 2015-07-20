@@ -85,7 +85,6 @@ class MastersController < ApplicationController
     # Advanced search fields
     @master.pro_infos.build
     @master.player_infos.build
-    @master.manual_investigations.build
     @master.addresses.build
     @master.player_contacts.build
     @master.trackers.build

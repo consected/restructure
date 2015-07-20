@@ -5,7 +5,7 @@
     <%= hidden_field_tag :mode, "SIMPLE" %>
 
     <%= f.fields_for :general_infos do |pif| %>
-      <div class="form-group col-sm-3">
+      <div class="form-group col-sm-4">
         <%= pif.label :first_or_nick_name, 'data-add-icon' => 'info-sign', title: 'search for first names or nick names starting with this value' %>
         <%= pif.text_field :first_name, class: 'form-control'  %>
       </div>
@@ -37,7 +37,7 @@
         <%= pif.label "email / phone", 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value' %>
         <%= pif.text_field :contact_data, class: 'form-control'  %>
       </div>
-      <div class="col-sm-2 text-right">
+      <div class="col-sm-1 text-right">
           <br/>
           <p style="font-size: 18px;">              
             <a href="#master-search-advanced" data-toggle="collapse" class="collapsed glyphicon glyphicon-list" title="advanced search"></a>&nbsp;

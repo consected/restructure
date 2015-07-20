@@ -5,8 +5,7 @@ class Master < ActiveRecord::Base
   TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
   TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
   # inverse_of required to ensure the current_user propagates between associated models correctly
-  has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
-  has_many :manual_investigations  , inverse_of: :master
+  has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master  
   has_many :pro_infos , inverse_of: :master  
   has_many :player_contacts, -> { order("active desc, #{RankNotNullClause}")}, inverse_of: :master
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
@@ -29,7 +28,7 @@ class Master < ActiveRecord::Base
   end
   
   # Nested attributes for advanced search form
-  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, :manual_investigations, 
+  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, 
                                 :scantrons, :player_contacts, :addresses, :trackers, :tracker_histories,
                                 :not_trackers, :not_tracker_histories
 

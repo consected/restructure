@@ -12,5 +12,15 @@ describe User do
     expect(new_user.first).to be_a User
   end
   
+  it "allows password change" do
+    @user.password = @good_password + '&&!'
+    expect(@user.save).to be true
+  end
+  
+  it "prevents email address change" do
+    @user.email  = "testuser-change@testing.com"
+    expect(@user.save).to be false
+  end
+  
 end
 

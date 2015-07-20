@@ -5,6 +5,7 @@ class Tracker < ActiveRecord::Base
   belongs_to :sub_process
   belongs_to :protocol_event
   has_many :tracker_histories, inverse_of: :tracker
+  before_validation :prevent_protocol_change,  on: :update
 
   attr_accessor :_merged
   
@@ -137,6 +138,13 @@ class Tracker < ActiveRecord::Base
     r = tracker_histories.length
     r
   end
+
+  def prevent_protocol_change 
+    if protocol_id_changed? && self.persisted?
+      errors.add(:protocol, "change not allowed!")
+    end
+  end
+
   
   def as_json extras={}
     extras[:methods] ||= []
