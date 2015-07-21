@@ -365,57 +365,6 @@ ALTER SEQUENCE manage_users_id_seq OWNED BY manage_users.id;
 
 
 --
--- Name: manual_investigations; Type: TABLE; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE TABLE manual_investigations (
-    id integer NOT NULL,
-    fill_in_addresses character varying(1),
-    in_survey character varying(1),
-    verify_survey_participation character varying(1),
-    verify_player_and_or_match character varying(1),
-    accuracy character varying(15),
-    accuracy_score integer,
-    changed_column character varying,
-    verified integer,
-    pilotq1 integer,
-    mailing integer,
-    outreach_vfy integer,
-    insert_audit_key integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    rank integer,
-    master_id integer,
-    is_changed integer,
-    scantron_id integer
-);
-
-
-ALTER TABLE public.manual_investigations OWNER TO phil;
-
---
--- Name: manual_investigations_id_seq; Type: SEQUENCE; Schema: public; Owner: phil
---
-
-CREATE SEQUENCE manual_investigations_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.manual_investigations_id_seq OWNER TO phil;
-
---
--- Name: manual_investigations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: phil
---
-
-ALTER SEQUENCE manual_investigations_id_seq OWNED BY manual_investigations.id;
-
-
---
 -- Name: masters; Type: TABLE; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -637,44 +586,6 @@ ALTER TABLE public.protocol_events_id_seq OWNER TO phil;
 --
 
 ALTER SEQUENCE protocol_events_id_seq OWNED BY protocol_events.id;
-
-
---
--- Name: protocol_outcomes; Type: TABLE; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE TABLE protocol_outcomes (
-    id integer NOT NULL,
-    name character varying,
-    protocol_id integer,
-    admin_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    disabled boolean
-);
-
-
-ALTER TABLE public.protocol_outcomes OWNER TO phil;
-
---
--- Name: protocol_outcomes_id_seq; Type: SEQUENCE; Schema: public; Owner: phil
---
-
-CREATE SEQUENCE protocol_outcomes_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.protocol_outcomes_id_seq OWNER TO phil;
-
---
--- Name: protocol_outcomes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: phil
---
-
-ALTER SEQUENCE protocol_outcomes_id_seq OWNED BY protocol_outcomes.id;
 
 
 --
@@ -1005,13 +916,6 @@ ALTER TABLE ONLY manage_users ALTER COLUMN id SET DEFAULT nextval('manage_users_
 -- Name: id; Type: DEFAULT; Schema: public; Owner: phil
 --
 
-ALTER TABLE ONLY manual_investigations ALTER COLUMN id SET DEFAULT nextval('manual_investigations_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: phil
---
-
 ALTER TABLE ONLY masters ALTER COLUMN id SET DEFAULT nextval('masters_id_seq'::regclass);
 
 
@@ -1041,13 +945,6 @@ ALTER TABLE ONLY pro_infos ALTER COLUMN id SET DEFAULT nextval('pro_infos_id_seq
 --
 
 ALTER TABLE ONLY protocol_events ALTER COLUMN id SET DEFAULT nextval('protocol_events_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: phil
---
-
-ALTER TABLE ONLY protocol_outcomes ALTER COLUMN id SET DEFAULT nextval('protocol_outcomes_id_seq'::regclass);
 
 
 --
@@ -1157,14 +1054,6 @@ ALTER TABLE ONLY manage_users
 
 
 --
--- Name: manual_investigations_pkey; Type: CONSTRAINT; Schema: public; Owner: phil; Tablespace: 
---
-
-ALTER TABLE ONLY manual_investigations
-    ADD CONSTRAINT manual_investigations_pkey PRIMARY KEY (id);
-
-
---
 -- Name: masters_pkey; Type: CONSTRAINT; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -1202,14 +1091,6 @@ ALTER TABLE ONLY pro_infos
 
 ALTER TABLE ONLY protocol_events
     ADD CONSTRAINT protocol_events_pkey PRIMARY KEY (id);
-
-
---
--- Name: protocol_outcomes_pkey; Type: CONSTRAINT; Schema: public; Owner: phil; Tablespace: 
---
-
-ALTER TABLE ONLY protocol_outcomes
-    ADD CONSTRAINT protocol_outcomes_pkey PRIMARY KEY (id);
 
 
 --
@@ -1310,27 +1191,6 @@ CREATE INDEX index_item_flags_on_user_id ON item_flags USING btree (user_id);
 
 
 --
--- Name: index_manual_investigations_on_master_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE INDEX index_manual_investigations_on_master_id ON manual_investigations USING btree (master_id);
-
-
---
--- Name: index_manual_investigations_on_scantron_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE INDEX index_manual_investigations_on_scantron_id ON manual_investigations USING btree (scantron_id);
-
-
---
--- Name: index_manual_investigations_on_user_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE INDEX index_manual_investigations_on_user_id ON manual_investigations USING btree (user_id);
-
-
---
 -- Name: index_player_contacts_on_master_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -1391,20 +1251,6 @@ CREATE INDEX index_protocol_events_on_admin_id ON protocol_events USING btree (a
 --
 
 CREATE INDEX index_protocol_events_on_sub_process_id ON protocol_events USING btree (sub_process_id);
-
-
---
--- Name: index_protocol_outcomes_on_admin_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE INDEX index_protocol_outcomes_on_admin_id ON protocol_outcomes USING btree (admin_id);
-
-
---
--- Name: index_protocol_outcomes_on_protocol_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE INDEX index_protocol_outcomes_on_protocol_id ON protocol_outcomes USING btree (protocol_id);
 
 
 --
@@ -1666,22 +1512,6 @@ ALTER TABLE ONLY trackers
 
 
 --
--- Name: fk_rails_6506a76379; Type: FK CONSTRAINT; Schema: public; Owner: phil
---
-
-ALTER TABLE ONLY manual_investigations
-    ADD CONSTRAINT fk_rails_6506a76379 FOREIGN KEY (scantron_id) REFERENCES scantrons(id);
-
-
---
--- Name: fk_rails_693969c039; Type: FK CONSTRAINT; Schema: public; Owner: phil
---
-
-ALTER TABLE ONLY protocol_outcomes
-    ADD CONSTRAINT fk_rails_693969c039 FOREIGN KEY (protocol_id) REFERENCES protocols(id);
-
-
---
 -- Name: fk_rails_6de4fd560d; Type: FK CONSTRAINT; Schema: public; Owner: phil
 --
 
@@ -1711,14 +1541,6 @@ ALTER TABLE ONLY accuracy_scores
 
 ALTER TABLE ONLY player_contacts
     ADD CONSTRAINT fk_rails_72b1afe72f FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_rails_7bcfbd30bb; Type: FK CONSTRAINT; Schema: public; Owner: phil
---
-
-ALTER TABLE ONLY protocol_outcomes
-    ADD CONSTRAINT fk_rails_7bcfbd30bb FOREIGN KEY (admin_id) REFERENCES admins(id);
 
 
 --
@@ -1778,14 +1600,6 @@ ALTER TABLE ONLY addresses
 
 
 --
--- Name: fk_rails_a76c5947ea; Type: FK CONSTRAINT; Schema: public; Owner: phil
---
-
-ALTER TABLE ONLY manual_investigations
-    ADD CONSTRAINT fk_rails_a76c5947ea FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
 -- Name: fk_rails_b822840dc1; Type: FK CONSTRAINT; Schema: public; Owner: phil
 --
 
@@ -1831,14 +1645,6 @@ ALTER TABLE ONLY player_contacts
 
 ALTER TABLE ONLY item_flags
     ADD CONSTRAINT fk_rails_dce5169cfd FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_rails_e6e149db7b; Type: FK CONSTRAINT; Schema: public; Owner: phil
---
-
-ALTER TABLE ONLY manual_investigations
-    ADD CONSTRAINT fk_rails_e6e149db7b FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
