@@ -67,6 +67,7 @@ protected
     
     def not_authorized
       flash[:danger] = "You are not authorized to perform the requested action"
+      render text: flash[:danger], status: :unauthorized
     end
     
     def not_found

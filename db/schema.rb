@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150720175827) do
+ActiveRecord::Schema.define(version: 20150721204937) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(version: 20150720175827) do
     t.integer  "rank"
     t.string   "rec_type"
     t.integer  "user_id"
-    t.datetime "created_at",                   null: false
-    t.datetime "updated_at", default: "now()"
+    t.datetime "created_at",                                 null: false
+    t.datetime "updated_at", default: '2015-07-17 14:00:33'
   end
 
   add_index "addresses", ["master_id"], name: "index_addresses_on_master_id", using: :btree
@@ -118,9 +118,8 @@ ActiveRecord::Schema.define(version: 20150720175827) do
     t.integer  "rank"
     t.boolean  "active"
     t.integer  "user_id"
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",  default: "now()"
-    t.date     "active_date"
+    t.datetime "created_at",                                 null: false
+    t.datetime "updated_at", default: '2015-07-17 14:00:33'
   end
 
   add_index "player_contacts", ["master_id"], name: "index_player_contacts_on_master_id", using: :btree
@@ -140,8 +139,8 @@ ActiveRecord::Schema.define(version: 20150720175827) do
     t.string   "transaction_status"
     t.string   "transaction_substatus"
     t.integer  "user_id"
-    t.datetime "created_at",                                        null: false
-    t.datetime "updated_at",                      default: "now()"
+    t.datetime "created_at",                                                      null: false
+    t.datetime "updated_at",                      default: '2015-07-17 14:00:33'
     t.string   "contact_pref"
     t.integer  "start_year"
     t.string   "in_survey",             limit: 1
@@ -177,8 +176,8 @@ ActiveRecord::Schema.define(version: 20150720175827) do
     t.string   "career_info"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",                        null: false
-    t.datetime "updated_at",      default: "now()"
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",      default: '2015-07-17 14:00:33'
     t.integer  "rank"
   end
 

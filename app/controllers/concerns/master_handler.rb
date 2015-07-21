@@ -34,11 +34,9 @@ module MasterHandler
   def index
     set_objects_instance @master_objects
     s = @master_objects.as_json
-    logger.debug "List: #{s}"
+    logger.debug "List: #{s} with objects_instance @#{objects_name}"
     render json: s
   end
-  
-
   
   def show
     p = {object_name => object_instance.as_json}
@@ -46,7 +44,7 @@ module MasterHandler
     logger.debug "p: #{p} for object_instance"
     render json: p
   end
-
+  
   def new
     set_object_instance @master_objects.build
     render partial: 'edit_form'

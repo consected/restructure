@@ -12,6 +12,8 @@ class PlayerInfo < ActiveRecord::Base
   attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
   
   before_save :check_college
+  
+  validate :dates_sensible
 
   def accuracy_rank
     if rank && rank >= 20  
@@ -35,11 +37,26 @@ class PlayerInfo < ActiveRecord::Base
     extras[:methods] << :accuracy_score_name
     super(extras)
   end
+  
+  protected
+    def dates_sensible
 
-private
+      logger.info "Checking #{end_year} and #{start_year}"
+      logger.info "Checking #{birth_date} and #{death_date}"
 
-  def check_college
-    College.create_if_new college
-  end
+      errors.add(:start_year, 'Start and End years are not sensible') if end_year && start_year && start_year > end_year
+      errors.add(:birth_date, 'Birth and Death dates are not sensible') if birth_date && death_date && birth_date > death_date
+      errors.add(:birth_date, 'Birth date is after today') if birth_date && birth_date > DateTime.now
+      errors.add(:death_date, 'Death date is after today') if death_date && death_date > DateTime.now
+
+    end
+
+
+  private
+
+    def check_college
+      College.create_if_new college
+    end
+  
   
 end

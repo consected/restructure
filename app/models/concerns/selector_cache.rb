@@ -54,7 +54,7 @@ module SelectorCache
       ckey="#{nv_pair_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        enabled.where(conditions).collect {|c| [c.name, c.value] }
+        enabled.where(conditions).collect {|c| [c.name, c.value.downcase] }
       }
     end
     

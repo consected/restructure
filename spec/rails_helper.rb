@@ -6,7 +6,7 @@ require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'capybara/rspec'
 require 'devise'
-#require 'support/controller_macros'
+
 
 include Warden::Test::Helpers
 Warden.test_mode!

@@ -1,0 +1,13 @@
+class SourceValidator < ActiveModel::EachValidator
+  def validate_each(record, attribute, value)
+    
+    src = "#{record.class.name.pluralize.underscore}_source"
+    
+    list = GeneralSelection.selector_name_value_pair(item_type: src)
+    matches = (list.select {|a| a.last.downcase == value})
+    unless value.blank? || matches.length > 0
+      Rails.logger.info "Bad source for #{src} in list #{list}. Matches #{matches} with value #{value}"
+      record.errors.add attribute, (options[:message] || "is not a valid Source") 
+    end
+  end
+end

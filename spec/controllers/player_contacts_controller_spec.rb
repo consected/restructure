@@ -1,10 +1,10 @@
 require 'rails_helper'
-RSpec.describe PlayerInfosController, type: :controller do
+RSpec.describe PlayerContactsController, type: :controller do
 
-  include PlayerInfoSupport
-  ObjectClass = PlayerInfo
+  include PlayerContactSupport
+  ObjectClass = PlayerContact
   def item
-    @player_info
+    @player_contact
   end
   
   ObjectsSymbol = ObjectClass.to_s.underscore.pluralize.to_sym

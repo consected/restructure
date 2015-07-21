@@ -5,6 +5,6 @@ class PlayerContactsController < ApplicationController
   private
 
     def secure_params
-      params.require(:player_contact).permit(:master_id, :data, :rec_type, :source, :rank, :pcdate, :active)
+      params.require(:player_contact).permit(:master_id, :data, :rec_type, :source, :rank,  :active)
     end
 end
