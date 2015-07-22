@@ -13,6 +13,14 @@ module SelectorCache
   
   class_methods do
     
+    def downcase_if_string val
+      if val.is_a? String
+        val.downcase
+      else
+        val
+      end
+    end
+    
     def gen_cache_key
       self.to_s
     end
@@ -54,7 +62,7 @@ module SelectorCache
       ckey="#{nv_pair_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        enabled.where(conditions).collect {|c| [c.name, c.value.downcase] }
+        enabled.where(conditions).collect {|c| [c.name, downcase_if_string(c.value)] }
       }
     end
     

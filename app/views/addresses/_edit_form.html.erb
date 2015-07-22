@@ -41,7 +41,7 @@
         </li>                
         <li class="list-group-item address-rank">
             <%= f.label :rank %>
-            <%= f.number_field :rank %>
+            <%= f.select :rank, general_selection(:addresses_rank, present: :hyphenate_name_val, order: :value_number_desc) %>
         </li>
         <li class="list-group-item">
           <%= f.submit class: "btn btn-primary" %>  

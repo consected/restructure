@@ -289,13 +289,17 @@ _fpa = {
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);
         var j = xhr.responseJSON;
-        if(xhr.status === 422 && j){
-            var msg = "<p>Could not complete action:</p>";
-            
-            for(var i in j){
-                if(j.hasOwnProperty(i)){
-                 msg += '<p>' + i + ' ' + j[i] + '</p>';
-                }                
+        if(xhr.status === 422){
+            if(j){
+                var msg = "<p>Could not complete action:</p>";
+
+                for(var i in j){
+                    if(j.hasOwnProperty(i)){
+                     msg += '<p>' + i + ' ' + j[i] + '</p>';
+                    }                
+                }
+            }else{
+                var msg = "<p>Could not complete action. Please <a href=\"#\" onclick=\"window.location.reload(); return false;\">refresh the page</a> and try again.</p>";
             }
             
             _fpa.flash_notice(msg, 'warning');

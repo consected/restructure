@@ -47,7 +47,8 @@
       <li class="list-group-item">
         <a title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
 
-        <h4 class="list-group-item-heading">Addresses <span class="heading-rank">{{rank}}</span></h4>                        
+        <span class="pull-right label label-info" style="margin-right:1em">{{rank}} - {{rank_name}}</span>
+        <h4 class="list-group-item-heading">Addresses</h4>                        
         
       </li>
       {{#each this}}

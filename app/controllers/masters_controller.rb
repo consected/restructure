@@ -42,7 +42,7 @@ class MastersController < ApplicationController
           },
           addresses: {
             order: {rank: :desc},             
-            methods: [:user_name]
+            methods: [:user_name, :rank_name]
           },
           trackers: {
             order: "protocol.position #{Master::TrackerEventOrderClause}",  

@@ -43,6 +43,17 @@ module UserHandler
     self.user.email
   end
   
+  def rank_name
+    return nil unless respond_to? :rank
+    
+    list = GeneralSelection.item_type_name_value_pair(self, :rank)    
+    res = list.select {|a| a.last.to_s == rank.to_s}
+    logger.info "Ranks list: #{list} for rank: #{rank} got #{res}"
+    return nil unless res && res.first
+    return res.first.first
+    
+  end
+  
   def update_action
     @update_action
   end
@@ -57,6 +68,11 @@ module UserHandler
     extras[:methods] << :user_name
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not
     extras[:methods] << :update_action
+    
+    if respond_to? :rank
+      extras[:methods] << :rank_name
+    end
+    
     super(extras)    
   end
   
