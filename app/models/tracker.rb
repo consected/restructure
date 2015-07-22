@@ -144,7 +144,6 @@ class Tracker < ActiveRecord::Base
       errors.add(:protocol, "change not allowed!")
     end
   end
-
   
   def as_json extras={}
     extras[:methods] ||= []

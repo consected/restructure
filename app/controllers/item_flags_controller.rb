@@ -11,7 +11,7 @@ class ItemFlagsController < ApplicationController
     
     k = "item_flags"
     
-    res = {results: s, item_id: @item.id, item_type: @item_type.singularize, item_types_name: @item_type, master_id: @master.id, update_action: @update_action}
+    res = {item_flags: s, item_id: @item.id, item_type: @item_type.singularize, item_types_name: @item_type, master_id: @master.id, update_action: @update_action}
     
     logger.debug "List: #{res}"
     

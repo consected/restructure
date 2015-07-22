@@ -58,6 +58,18 @@ module UserHandler
     @update_action
   end
   
+  def multiple_results
+    @multiple_results ||= []
+  end
+  
+  def has_multiple_results
+    @multiple_results && @multiple_results.length > 0
+  end
+  
+  def item_type
+    self.class.name.singularize.downcase
+  end
+  
   def as_json extras={}
     extras[:include] ||= {}
     # Re-enable the following line if there is a need to incorporate item flags back into all
@@ -68,7 +80,8 @@ module UserHandler
     extras[:methods] << :user_name
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not
     extras[:methods] << :update_action
-    
+    extras[:methods] << :item_type
+
     if respond_to? :rank
       extras[:methods] << :rank_name
     end

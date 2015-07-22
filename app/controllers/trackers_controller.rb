@@ -6,7 +6,7 @@ class TrackersController < ApplicationController
   def index
     set_objects_instance @master_objects
     s = @master_objects #.includes(:protocol).order Master::TrackerEventOrderClause
-    render json: {results: s, master_id: @master.id}
+    render json: {trackers: s, master_id: @master.id}
   end
 
     

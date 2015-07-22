@@ -1,4 +1,5 @@
-module PlayerInfoSupport
+require 'support/master_support'
+module ProInfoSupport
   include MasterSupport
   def list_valid_attribs
     res = []
@@ -23,8 +24,7 @@ module PlayerInfoSupport
         death_date: dd,
         rank: rand(999),
         start_year: start_year,
-        end_year: opt(start_year ? start_year + rand(12) : nil),
-        notes: 'kjsad hfkshfk jskjfhksajdhf sadf js dfjk sdkjf sdkjf\njg fjdhsag fjsahdg jsgadfjgsajdfgsf gsgf sdgj sa fj'
+        end_year: opt(start_year ? start_year + rand(12) : nil)
       }
     end
     
@@ -53,14 +53,13 @@ module PlayerInfoSupport
       death_date: nil,
       rank: rand(10),
       start_year: rand(10)+1980,
-      end_year: rand(10)+1990,
-      notes: 'kjsad hfkshfk jskjfhksajdhf sadf js dfjk sdkjf sdkjf\njg fjdhsag fjsahdg <script>window.location.href="https://google.com";</script>jsgadfjgsajdfgsf gsgf sdgj sa fj'
+      end_year: rand(10)+1990
     }
   end
   
   def create_item att=nil
     att ||= valid_attribs
-    @player_info = create_master.player_infos.create! att
+    @pro_info = create_master.pro_infos.create! att
   end
   
 end

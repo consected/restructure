@@ -35,57 +35,57 @@ _fpa = {
     if(!options || !options.position){        
         block.html('');
     }
-
     
-        var template =_fpa.templates[template_name];
+    
+    var template =_fpa.templates[template_name];
 
-        if(!options) options = {};
+    if(!options) options = {};
 
-        if(data.code){
-          data._code_flag = {};
-          data._code_flag[data.code] = true;
+    if(data.code){
+      data._code_flag = {};
+      data._code_flag[data.code] = true;
+    }
+
+    _fpa.do_preprocessors(template_name, block, data);                    
+
+    if(options.position)
+        data._created = true;
+
+    var html = template(data);
+
+    var new_block = block;
+
+    if(options.position === 'before'){        
+        new_block = $(html);
+        var id = new_block.attr('id');
+        var existing = $('#'+id);
+        if(existing.length > 0){
+            existing.replaceWith(new_block);
         }
-        
-        _fpa.do_preprocessors(template_name, block, data);                    
-
-        if(options.position)
-            data._created = true;
-
-        var html = template(data);
-        
-        var new_block = block;
-        
-        if(options.position === 'before'){        
-            new_block = $(html);
-            var id = new_block.attr('id');
-            var existing = $('#'+id);
-            if(existing.length > 0){
-                existing.replaceWith(new_block);
-            }
-            else{
-                block.before(new_block);
-            }
-            block.html('');
-        } else if(options.position === 'after'){        
-            new_block = $(html);
-            var id = new_block.attr('id');
-            var existing = $('#'+id);
-            if(existing.length > 0){
-                existing.replaceWith(new_block);
-            }
-            else{
-                block.after(new_block);
-            }
-            block.html('');
+        else{
+            block.before(new_block);
         }
-        else
-            block.html(html);
-
-        window.setTimeout(function(){            
-            _fpa.do_postprocessors(template_name, new_block, data);            
-            _fpa.reset_page_size();
-            _fpa.ajax_done(block);
-        },1);
+        block.html('');
+    } else if(options.position === 'after'){        
+        new_block = $(html);
+        var id = new_block.attr('id');
+        var existing = $('#'+id);
+        if(existing.length > 0){
+            existing.replaceWith(new_block);
+        }
+        else{
+            block.after(new_block);
+        }
+        block.html('');
+    }
+    else
+        block.html(html);
+    
+    window.setTimeout(function(){            
+        _fpa.do_postprocessors(template_name, new_block, data);            
+        _fpa.reset_page_size();
+        _fpa.ajax_done(block);
+    },1);
   },
           
   reset_page_size:function(){
@@ -222,9 +222,16 @@ _fpa = {
         
         _fpa.try_app_callback($(this));
         
-        if(xhr.responseJSON){
-            var t = $(this).attr('data-result-target');
-            var options = {};
+        // If the result is JSON process the data
+        // else, process the rendered HTML
+        if(data){
+            // Does the original block have data-result-target specified?
+            // If so, use it, unless the data returned has the special case where multiple results were returned unexpectedly
+            var t;
+            if(!data.multiple_results)
+                t = $(this).attr('data-result-target');            
+            
+            var options = {};                       
             if(t){
                 var b = $(t);
                 if(b.hasClass('new-block')){
@@ -239,10 +246,20 @@ _fpa = {
                     if (data.hasOwnProperty(di)){                        
                         var res = {};
                         var d = data[di];                        
-                        var targets = $('[data-subscription="'+di+'"]');
                         
-                        var targets_for = $('[data-sub-for="'+di+'"]');
+                        // Basic DOM attribute targeting
+                        // just listen for for data having the top level item being equal to data-subscription
+                        // Typically this is used for forms, such as:
+                        // data-subscription="address-edit-form-100001-"
+                        // where the form partial returns 
+                        var targets = $('[data-sub-item="'+di+'"], [data-sub-list="'+di+'"] [data-sub-item]');
                         
+                        
+                        // Target a specific set of results, identified by the sub-for attribute having a value sub-for-value
+                        // for example: data-sub-for="master_id" data-sub-for-value="100001" data-sub-for-use="trackers"
+                        // will match any result having master_id: "100001" at the top level
+                        // and will pass in the data for trackers
+                        var targets_for = $('[data-sub-for="'+di+'"]');                        
                         targets_for.each(function(){
                             var v = $(this).attr('data-sub-for-value');
                             if(data[di] == v){
@@ -254,9 +271,25 @@ _fpa = {
                         });
                                                 
                         res[di] = d;
-                        targets.each(function(){          
-                            var dt = $(this).attr('data-template');                            
-                            _fpa.view_template($(this), dt, res);                                              
+                        targets.each(function(){      
+                            var use_data = res;
+                            var dsid = $(this).attr('data-sub-id');
+                            var dst = $(this).attr('data-sub-item');
+                            if(dsid && dst){
+                                use_data = null;
+                                
+                                for(var g in d){
+                                    var item_data = d[g];
+                                    if(item_data.id == dsid && item_data.item_type == dst){
+                                        use_data = {};
+                                        use_data[dst] = item_data;                    
+                                    }
+                                }
+                            }
+                            if(use_data){
+                                var dt = $(this).attr('data-template');                            
+                                _fpa.view_template($(this), dt, use_data);                                              
+                            }
                         });              
                                                 
                     }

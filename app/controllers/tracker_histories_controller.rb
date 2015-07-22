@@ -23,7 +23,7 @@ class TrackerHistoriesController < ApplicationController
       @tracker_histories = @tracker_histories.reject {|x| x.id == mid.id}
     end
     
-    render json: {results: @tracker_histories, master_id: @master.id}
+    render json: {tracker_histories: @tracker_histories, master_id: @master.id}
   end
   
 

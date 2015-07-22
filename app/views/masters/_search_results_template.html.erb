@@ -43,7 +43,7 @@
 
 <script id="address_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
-  <ul class="list-group">
+  <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item">
         <a title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
 
@@ -64,7 +64,7 @@
 
 <script id="player_contact_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
-  <ul class="list-group">
+  <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item is-heading">
         <a title="edit" class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
         <h4 class="list-group-item-heading">{{rec_type}} <small>({{#if active}}active{{else}}inactive{{/if}})</small> <span class="heading-rank">{{rank}}</span></h4>                        
@@ -234,7 +234,7 @@
 <script id="item_flag_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
   <div id="item-flags-{{master_id}}-{{item_type}}-{{id}}" class="item-flags-block">
   <div class="" id="item-flag-{{master_id}}-{{item_type}}-{{id}}-" data-subscription="item-flag-edit-form-{{master_id}}-{{item_type}}-{{id}}-"   data-preprocessor="item_flags_edit_form">        
-  {{>item_flags_result results=item_flags item_id=id id=""}}
+  {{>item_flags_result item_id=id id=""}}
   </div>
   </div>
 </script>
@@ -245,7 +245,7 @@
   <div class="">
   
   <select multiple="true" disabled="disabled" class="form-control">
-  {{#each results}}
+  {{#each item_flags}}
     {{>item_flag_result}}
   {{else}}
     <span class="no-item-flags">no flags</span>
@@ -285,12 +285,12 @@
 </script>
 
 <script id="tracker-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>tracker_badge trackers=results}}
+  {{>tracker_badge}}
 </script>
 
 <script id="address-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with address}}
-    {{#if ../_created}}<div class="index-created" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}">{{/if}}
+    {{#if ../_created}}<div class="index-created" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}"  data-sub-item="address" data-sub-id="{{id}}" data-template="address-result-template" data-sort-desc="data-item-rank">{{/if}}
       {{>address_result }}
     {{#if ../_created}}</div>{{/if}}
   {{/with}}
@@ -306,7 +306,7 @@
 
 <script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with player_contact}}
-    {{#if ../_created}}<div class="index-created" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}" data-preprocessor="player_contact_edit_form">{{/if}}
+    {{#if ../_created}}<div class="index-created" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}" data-preprocessor="player_contact_edit_form" data-sort-desc="data-item-rank">{{/if}}
       {{>player_contact_result }}
     {{#if ../_created}}</div>{{/if}}
   {{/with}}
@@ -315,7 +315,7 @@
 <script id="tracker-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with tracker}}
     {{#if ../_created}}
-    <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}">
+    <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-tracker-protocol="{{underscore protocol_name}}">
     {{/if}}
 
       <tr >
@@ -331,14 +331,14 @@
 </script>
 
 <script id="tracker-chron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with results}}
+  {{#with tracker_histories}}
     {{>tracker_chron_results master_id=../master_id}}
   {{else}}
     {{>empty_tracker_chron_results master_id=../master_id}}
   {{/with}}
 </script>
 <script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with results}}
+  {{#with trackers}}
     {{>tracker_tree_results master_id=../master_id}}
   {{else}}
       {{>empty_tracker_tree_results master_id=../master_id}}
@@ -347,7 +347,7 @@
 
 <script id="tracker-histories-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   
-  {{#each results}}
+  {{#each tracker_histories}}
     <tr class="tracker-history-item" data-tracker-protocol="{{underscore protocol_name}}"  id="tracker-history-{{master_id}}-{{tracker_id}}-{{id}}" >
     {{>tracker_history_result}}
     </tr>
@@ -434,7 +434,7 @@
             <a href="#/" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
           </li>
           <li role="presentation">
-            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker <span data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="results" data-template="tracker-badge-template">{{>tracker_badge}}</span></a>
+            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker <span data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="trackers" data-template="tracker-badge-template">{{>tracker_badge}}</span></a>
           </li>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
@@ -459,7 +459,7 @@
             </div>
           </div>
   
-          <div id="trackers-{{id}}" data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="results" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
+          <div id="trackers-{{id}}" data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
           {{#with trackers}}
             {{>tracker_tree_results master_id=../id}}
           {{else}}
@@ -499,9 +499,9 @@
 
 
 
-              <div class="col-md-6">
+              <div class="col-md-6" id="addresses-{{../id}}-" data-sub-list="addresses">
                 {{#each addresses}}
-                  <div class="index-{{@index}}" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}">
+                  <div class="index-{{@index}}" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}" data-sub-item="address" data-sub-id="{{id}}" data-template="address-result-template" data-sort-desc="data-item-rank">
                     {{>address_result master_id=../id}}
                   </div>
 
@@ -515,7 +515,7 @@
               </div>
               <div class="col-md-6">
                 {{#each player_contacts}}
-                  <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}"  data-preprocessor="player_contact_edit_form">
+                  <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}"  data-preprocessor="player_contact_edit_form" data-sort-desc="data-item-rank">
                     {{>player_contact_result master_id=../id}}
                   </div>
 

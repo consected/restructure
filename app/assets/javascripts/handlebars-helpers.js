@@ -204,10 +204,12 @@
         if(typeof startTime === 'undefined' || !startTime || startTime == 'Invalid Date'){
             if(options.hash.return_string){
                 if(options.hash.capitalize){
-                    if(!stre || stre.length < 30)
+                    if(!stre || stre.length < 30){
+                        stre = Handlebars.Utils.escapeExpression(stre);
                         return _fpa.utils.capitalize(stre);
-                    else
+                    }else{
                         return _fpa.utils.nl2br(stre);
+                    }
                 }
                 else{
                     return _fpa.utils.nl2br(stre);

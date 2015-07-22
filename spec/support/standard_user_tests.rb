@@ -101,7 +101,7 @@ shared_examples 'a standard user controller' do
         list_invalid_attributes.each do |inv|
           create_master
           post :create, {ObjectSymbol => inv, master_id: @master_id}
-          expect(response).to have_http_status 422
+          expect(response).to have_http_status(422), "expected #{response.status} to be 422 with data #{inv}"
           expect(JSON.parse(response.body)).to have_key inv.keys.first.to_s
         end
       end

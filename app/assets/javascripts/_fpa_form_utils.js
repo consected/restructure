@@ -217,7 +217,24 @@ _fpa.form_utils = {
             $(this).after(h);
             h.tooltip({trigger: 'hover click', placement: 'bottom'});
         }).addClass('attached-add-icon');
-
+        
+        
+        // Sort dom elements within the block's parent,
+        // based on the value of the data attribute specified by data-sort-desc in a child of the current block
+        // For example:
+        // data-sort-desc="data-item-rank" 
+        // will sort all blocks in the parent of this block with the attribute data-sort-desc, using the
+        // value from a child of each block with the data attribute data-item-rank, for example
+        // data-item-rank="10"
+        // The sort will automatically sort on numeric values only
+        var s = block.attr('data-sort-desc');
+        if(s){            
+            var descp = block.parent();
+            descp.find('[data-sort-desc]').sort(function(a,b){
+                return $(b).find('['+s+']').attr(s) - $(a).find('['+s+']').attr(s);
+            }).prependTo(descp);
+        }
+        
     },
 
     // Run through all the general formatters for a new block to show nicely
