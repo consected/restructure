@@ -410,8 +410,7 @@ CREATE TABLE player_contacts (
     active boolean,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now(),
-    active_date date
+    updated_at timestamp without time zone DEFAULT now()
 );
 
 
