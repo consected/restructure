@@ -1,12 +1,11 @@
+require 'support/seeds'
 module MasterSupport
-
+  
   def create_sources
     
-    admin, pw = ControllerMacros.create_admin
-    
     if GeneralSelection.where(item_type: 'addresses_source').length == 0
-      GeneralSelection.create! item_type: 'addresses_source', name: 'NFL', value: 'nfl', admin: admin
-      GeneralSelection.create! item_type: 'addresses_source', name: 'NFLPA', value: 'nflpa', admin: admin
+      GeneralSelection.create! item_type: 'addresses_source', name: 'NFL', value: 'nfl', admin: auto_admin
+      GeneralSelection.create! item_type: 'addresses_source', name: 'NFLPA', value: 'nflpa', admin: auto_admin
       
     end
   end

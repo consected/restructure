@@ -61,12 +61,9 @@ class Tracker < ActiveRecord::Base
   
   def self.track_flag_update record, added_flags, removed_flags
   
-    logger.debug "Tracking for #{record}"
     return nil if record.is_a?(Tracker) || record.is_a?(TrackerHistory)
     
     t = update_tracker :flag, record
-    
-    
     cp = ""
     
     if added_flags.length > 0
@@ -81,7 +78,6 @@ class Tracker < ActiveRecord::Base
     
     t.notes = cp
     res = t.save
-    logger.debug "Tracking result: #{res}"
     res
   end
   
@@ -97,13 +93,10 @@ class Tracker < ActiveRecord::Base
     t ||= record.master.trackers.new 
     
     t.protocol = Protocol.record_updates_protocol if new_tracker
-    #t.event = "flags update"
     
     t.sub_process = t.protocol.sub_processes.where(name: "#{type} updates").first
     
     rec_type = "#{new_rec ? 'created' : 'updated'} #{record.class.name.underscore.humanize.downcase}"
-    
-    #logger.debug "attempting to get rec for #{rec_type}: #{t.sub_process.protocol_events.where(name: rec_type).first.inspect}"
     
     t.protocol_event = t.sub_process.protocol_events.where(name: rec_type).first
     

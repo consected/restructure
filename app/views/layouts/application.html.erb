@@ -4,8 +4,15 @@
   <title>FPHS</title>
   <%= stylesheet_link_tag    'application', media: 'all' %>
   <%= javascript_include_tag 'application' %>
-  <%= csrf_meta_tags %>
-  <%= render partial: "layouts/setup_caches" %>
+  <script>
+  _fpa.status = {
+    controller: '<%= controller_name %>',
+    action: '<%= action_name %>'
+  };
+  </script>
+  <%= render partial: "layouts/setup_caches" if current_email %>
+  <%= csrf_meta_tags %>  
+  
 </head>
 <body <%= body_classes %>>
     <%= render partial: 'layouts/navbar' %>

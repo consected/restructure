@@ -30,7 +30,8 @@ _fpa = {
     
   view_template: function(block, template_name, data, options){    
     
-    
+    if(block.hasClass('view-template-created')) return;
+      
     _fpa.ajax_working(block);
     if(!options || !options.position){        
         block.html('');
@@ -48,15 +49,16 @@ _fpa = {
 
     _fpa.do_preprocessors(template_name, block, data);                    
 
-    if(options.position)
-        data._created = true;
+//    if(options.position)
+//        data._created = true;
 
     var html = template(data);
+    html = $(html).addClass('view-template-created');
 
     var new_block = block;
 
     if(options.position === 'before'){        
-        new_block = $(html);
+        new_block = html;
         var id = new_block.attr('id');
         var existing = $('#'+id);
         if(existing.length > 0){
@@ -67,7 +69,7 @@ _fpa = {
         }
         block.html('');
     } else if(options.position === 'after'){        
-        new_block = $(html);
+        new_block = html;
         var id = new_block.attr('id');
         var existing = $('#'+id);
         if(existing.length > 0){
@@ -225,23 +227,56 @@ _fpa = {
         // If the result is JSON process the data
         // else, process the rendered HTML
         if(data){
-            // Does the original block have data-result-target specified?
-            // If so, use it, unless the data returned has the special case where multiple results were returned unexpectedly
             var t;
-            if(!data.multiple_results)
-                t = $(this).attr('data-result-target');            
+            var use_target = false;
+            // Identify whether to target the results at a single dom element or to handle data subscriptions
+            // Check the first entry in the returned data to see if the record indicates it was created
+            // This will not show if a result set of multiple items is returned 
+            // (whether the result of an index or a create that affected multiple items)
+            // which is the desire effect, as multiple results must not be directed at a single DOM element
+            // Results that were not newly created can be directed at the specified data-result-target if other data-sub-item
+            // markup is not found for returned item.
+            t = $(this).attr('data-result-target');
+            var item_key;            
+            var dataitem;           
+            var target_data;
+            if(data.multiple_results){
+                item_key = data.multiple_results;
+                dataitem = data['original_item'];
+                target_data = {};
+                target_data[dataitem.item_type] = dataitem;
+                
+            }else{                
+                for (item_key in data) break;
+                dataitem = data[item_key];
+                target_data = data;
+                
+            }
             
+            
+            if(dataitem===null || dataitem['_created'] || dataitem['_merged'] ||  $('[data-sub-item="'+item_key+'"], [data-sub-list="'+item_key+'"] [data-sub-item]').length===0 )
+                use_target = true;
+
             var options = {};                       
-            if(t){
+            if(t && use_target){
+                // A specific target was specified an is being used.
+                // Handle class markup that state whether to target this item directly, or add new elements above or below
+                // the targeted element
                 var b = $(t);
                 if(b.hasClass('new-block')){
                     if(b.hasClass('new-below'))
                         options.position = 'after';
                     else    
                         options.position = 'before';
-                }                    
-                _fpa.view_template(b, $(this).attr('data-template'), xhr.responseJSON, options);
-            }else{
+                }                                    
+                _fpa.view_template(b, $(this).attr('data-template'), target_data, options);
+            }
+            
+            {    
+                if(block.hasClass('new-block')){
+                    block.html('');
+                }
+                // Run through the top level of data to pick the keys to look for in element subscriptions
                 for(var di in data ){
                     if (data.hasOwnProperty(di)){                        
                         var res = {};
@@ -253,23 +288,7 @@ _fpa = {
                         // data-subscription="address-edit-form-100001-"
                         // where the form partial returns 
                         var targets = $('[data-sub-item="'+di+'"], [data-sub-list="'+di+'"] [data-sub-item]');
-                        
-                        
-                        // Target a specific set of results, identified by the sub-for attribute having a value sub-for-value
-                        // for example: data-sub-for="master_id" data-sub-for-value="100001" data-sub-for-use="trackers"
-                        // will match any result having master_id: "100001" at the top level
-                        // and will pass in the data for trackers
-                        var targets_for = $('[data-sub-for="'+di+'"]');                        
-                        targets_for.each(function(){
-                            var v = $(this).attr('data-sub-for-value');
-                            if(data[di] == v){
-                                var di_use = $(this).attr('data-sub-for-use');
-                                targets.push($(this));                                
-                                res[di_use] = data[di_use];
-                            }
-                            
-                        });
-                                                
+                                                                        
                         res[di] = d;
                         targets.each(function(){      
                             var use_data = res;
@@ -277,12 +296,37 @@ _fpa = {
                             var dst = $(this).attr('data-sub-item');
                             if(dsid && dst){
                                 use_data = null;
+                                // Optionally use a different ID attribute (such as master_id)
+                                var dsfor = $(this).attr('data-sub-for');
+                                if(!dsfor) dsfor = 'id';
                                 
-                                for(var g in d){
-                                    var item_data = d[g];
-                                    if(item_data.id == dsid && item_data.item_type == dst){
+                                var dsforroot = $(this).attr('data-sub-for-root');
+                                // Check if we should be looking in the root of the data, rather than in the items
+                                if(dsforroot){
+                                    if(data[dsforroot]){
+                                        item_data = data;
+                                        // if the returned data has the specified attribute in its root
+                                        // and also has the specified data-sub-item attribute
+                                        if(item_data[dsforroot] === +dsid && item_data[dst]){
+                                            use_data = {};
+                                            use_data = item_data;                    
+                                        }
+                                    }
+                                }else if(d[dsfor]){
+                                    // We should be looking in the only actual data element
+                                    item_data = d;
+                                    if(item_data[dsfor] === +dsid && item_data.item_type === dst){
                                         use_data = {};
                                         use_data[dst] = item_data;                    
+                                    }
+                                }else{
+                                    // Run through the array of data elements
+                                    for(var g in d){
+                                        var item_data = d[g];
+                                        if(item_data[dsfor] === +dsid && item_data.item_type === dst){
+                                            use_data = {};
+                                            use_data[dst] = item_data;                    
+                                        }
                                     }
                                 }
                             }
@@ -315,6 +359,7 @@ _fpa = {
 
             });
         }
+        $('.view-template-created').removeClass('view-template-created');
         
         
     }).on("ajax:error", function(e, xhr, status, error){
@@ -371,52 +416,6 @@ _fpa = {
 
 };
 
-_fpa.callbacks = {
-  
-  loaded: function(block, data){
-    if(!this.loaded_callbacks) this.loaded_callbacks = [];
-    
-    for(var lc in this.loaded_callbacks){
-      if(this.loaded_callbacks.hasOwnProperty(lc)){
-        var lcs = this.loaded_callbacks[lc];
-        window.setTimeout(function(){
-          lcs(block, data);
-        },1);
-      }      
-    }
-  },
-  
-  add_loaded_callback: function(f){
-    if(!this.loaded_callbacks) this.loaded_callbacks = [];
-    this.loaded_callbacks.push(f);
-  },
-  remove_last_loaded_callback:  function(f){
-    this.loaded_callbacks.pop();
-  },
-  reset_loaded_callbacks:  function(f){
-    this.loaded_callbacks = [];
-  },        
-  
-  do_ajax_request: function (options, cb_success, cb_fail, cb_always) {        
-    $.ajax(options).done(
-      function(data){
-        if(!data || data.code && data.code != 'OK'){
-          if(cb_fail) cb_fail(data);
-          return null;
-        }      
-        if(cb_success) cb_success(data);      
-      }).fail(function(data){
-        if(cb_fail) cb_fail(data);
-      }).always(function(){
-        if(cb_always) cb_always(data);
-      });
-  },
-  
-  get_data: function(url, cb_success, cb_fail, cb_always){        
-    this.do_ajax_request({url: url}, cb_success, cb_fail, cb_always);
-  }
-  
-};
 
 _fpa.preprocessors = {};
 _fpa.loaded = {};

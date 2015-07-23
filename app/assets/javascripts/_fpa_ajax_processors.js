@@ -74,6 +74,12 @@ _fpa.postprocessors = {
     tracker_result_template: function(block, data){
         _fpa.form_utils.format_block(block);
         _fpa.postprocessors.tracker_notes_handler(block);
+        if(data.tracker && data.tracker._created){
+            var t = $('#tracker-count-'+data.tracker.master_id);
+            var v = parseInt(t.html());
+            if(v != null) v++;
+            t.html(v);
+        }
     },
     
     tracker_edit_form: function(block, data){
@@ -136,19 +142,25 @@ _fpa.postprocessors = {
     },
 
     player_info_result_template: function(block, data){
-        _fpa.postprocessors.info_update_handler(block, data.player_info);
+        var d = data;
+        if(data.player_info) d = data.player_info;
+        _fpa.postprocessors.info_update_handler(block, d);
     },
 
     address_result_template: function(block, data){
-        _fpa.postprocessors.info_update_handler(block, data.address);
+        var d = data;
+        if(data.address) d = data.address;
+        _fpa.postprocessors.info_update_handler(block, d);
     }, 
 
     player_contact_result_template: function(block, data){
-        _fpa.postprocessors.info_update_handler(block, data.player_contact);
+        var d = data;
+        if(data.player_contact) d = data.player_contact;
+        _fpa.postprocessors.info_update_handler(block, d);
     },
     
     player_contact_edit_form: function(block,data){
-          
+        _fpa.form_utils.format_block(block);  
         var check_phone = function(rec_type){
           if(rec_type.val()==='phone')
             $('#player_contact_data').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}});

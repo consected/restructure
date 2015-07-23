@@ -20,7 +20,8 @@ module UserHandler
     # It implicitly reinforces security, in that the user must be authenticated for
     # the user to have been set
     validates :user, presence: true
-    
+
+    after_save :check_status
     after_save :track_record_update
   end
     
@@ -67,7 +68,20 @@ module UserHandler
   end
   
   def item_type
-    self.class.name.singularize.downcase
+    self.class.name.singularize.underscore
+  end
+  
+  def check_status
+    @was_created = id_changed? ? 'created' : false
+    @was_updated = updated_at_changed? ? 'updated' : false
+  end
+  
+  def _created
+    @was_created
+  end
+  
+  def _updated
+    @was_updated
   end
   
   def as_json extras={}
@@ -81,7 +95,8 @@ module UserHandler
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not
     extras[:methods] << :update_action
     extras[:methods] << :item_type
-
+    extras[:methods] << :_created
+    extras[:methods] << :_updated
     if respond_to? :rank
       extras[:methods] << :rank_name
     end

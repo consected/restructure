@@ -108,6 +108,14 @@
       return res;
     });
 
+    Handlebars.registerHelper('was', function(obj, options){
+        if(obj || obj === 0)
+            return options.fn(this);
+        else
+            return options.inverse(this);
+    });
+
+
     Handlebars.registerHelper('includes', function(obj, inc){
       if(!obj) return null;
       return (obj.indexOf(inc) >= 0);

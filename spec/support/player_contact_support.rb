@@ -30,6 +30,10 @@ module PlayerContactSupport
       {
         data: '(615)661-898a',
         rec_type: 'phone'
+      },
+      { 
+        data: nil,
+        rec_type: 'phone'
       }
     ]
   end

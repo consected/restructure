@@ -33,9 +33,9 @@ module MasterHandler
   
   def index
     set_objects_instance @master_objects
-    s = {objects_name => @master_objects.as_json, multiple_results: object_name}
+    s = {objects_name => @master_objects.as_json, multiple_results: objects_name}
     if object_instance
-      s[:original_item] = {id: object_instance.id,  item_type: object_name} 
+      s[:original_item] = object_instance
       s[objects_name] <<  object_instance
     end
     logger.debug "List: #{s} with objects_instance @#{objects_name}"
@@ -63,7 +63,12 @@ module MasterHandler
     set_object_instance @master_objects.build(secure_params)
 
     if object_instance.save
-      show
+      if object_instance.has_multiple_results
+        @master_objects = object_instance.multiple_results
+        index
+      else
+        show
+      end
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
       render json: object_instance.errors, status: :unprocessable_entity     

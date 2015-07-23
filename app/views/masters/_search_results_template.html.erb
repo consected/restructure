@@ -1,4 +1,5 @@
 <script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
+  {{#was _created}}<div class="index-{{_created}}" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}" data-template="player-info-result-template" data-sub-item="player_info" data-sub-id="{{id}}" >{{/was}}
     <ul class="list-group">
       <li class="list-group-item">
 
@@ -20,6 +21,7 @@
               
       <li class="list-group-item record-meta">{{>update_metadata}}</li>
     </ul>
+    {{#was _created}}</div>{{/was}}
 </script>
 
 <script id="pro_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -42,7 +44,7 @@
 </script>
 
 <script id="address_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
+  {{#was _created}}<div class="index-{{_created}}" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}"  data-sub-item="address" data-sub-id="{{id}}" data-template="address-result-template" data-sort-desc="data-item-rank">{{/was}}
   <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item">
         <a title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
@@ -58,12 +60,13 @@
       {{/each}}
       <li class="list-group-item record-meta">{{>update_metadata}}</li>
   </ul>
+  {{#was _created}}</div>{{/was}}
 </script>
 
 
 
 <script id="player_contact_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
+  {{#was _created}}<div class="index-{{_created}}" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}" data-preprocessor="player_contact_edit_form"  data-template="player-contact-result-template" data-sub-item="player_contact" data-sub-id="{{id}}" data-sort-desc="data-item-rank">{{/was}}
   <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item is-heading">
         <a title="edit" class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
@@ -84,17 +87,19 @@
       </li>
       <li class="list-group-item record-meta">{{>update_metadata}}</li>
   </ul>
+  {{#was _created}}</div>{{/was}}
 </script>
 
 
 <script id="scantron_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
+  {{#was _created}}<div class="index-{{_created}}" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}" data-template="scantron-result-template" data-sub-item="scantron" data-sub-id="{{id}}" >{{/was}}
   <ul class="list-group">
       <li class="list-group-item scantron-scantron_id">
         <a title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
         <small>Scantron</small> <strong>{{scantron_id}}</strong>
       </li>      
   </ul>
+  {{#was _created}}</div>{{/was}}
 </script>
 
 
@@ -170,7 +175,7 @@
     
     {{#each this}}
     {{#if id}}
-    <tbody id="tracker-{{master_id}}-{{id}}" class="index-{{@index}}" data-tracker-history-items="{{tracker_history_length}}" data-preprocessor="tracker_edit_form" data-tracker-protocol="{{underscore protocol_name}}"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}">
+    <tbody id="tracker-{{master_id}}-{{id}}" class="index-{{@index}}" data-tracker-history-items="{{tracker_history_length}}" data-preprocessor="tracker_edit_form" data-tracker-protocol="{{underscore protocol_name}}"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-template="tracker-result-template" data-sub-item="tracker" data-sub-id="{{id}}">
       <tr >                  
         {{#with this}}
           {{>tracker_result}}
@@ -262,7 +267,11 @@
 </script>
 
 <script id="tracker_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<span class="badge">{{trackers.length}}</span>
+<span class="badge" id="tracker-count-{{master_id}}">{{trackers.length}}</span>
+</script>
+
+<script id="accuracy_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<span class="label label-info" title="{{player_info.accuracy_score_name}}">{{player_info.rank}}</span>
 </script>
 
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -275,10 +284,8 @@
 <script id="player-info-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   
   {{#with player_info}}  
-    {{#if ../_created}}<div class="index-created" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">{{/if}}
-      {{>player_info_result }}
-    {{#if ../_created}}</div>{{/if}}
     
+      {{>player_info_result }}
     
   {{/with}}
   
@@ -288,45 +295,51 @@
   {{>tracker_badge}}
 </script>
 
+<script id="accuracy-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{>accuracy_badge}}
+</script>
+
+
 <script id="address-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with address}}
-    {{#if ../_created}}<div class="index-created" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}"  data-sub-item="address" data-sub-id="{{id}}" data-template="address-result-template" data-sort-desc="data-item-rank">{{/if}}
+    
       {{>address_result }}
-    {{#if ../_created}}</div>{{/if}}
+    
   {{/with}}
 </script>
 
 <script id="scantron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with scantron}}
-    {{#if ../_created}}<div class="index-created" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}">{{/if}}
+    
       {{>scantron_result }}
-    {{#if ../_created}}</div>{{/if}}
+
   {{/with}}
 </script>
 
 <script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with player_contact}}
-    {{#if ../_created}}<div class="index-created" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}" data-preprocessor="player_contact_edit_form" data-sort-desc="data-item-rank">{{/if}}
-      {{>player_contact_result }}
-    {{#if ../_created}}</div>{{/if}}
+      {{>player_contact_result}}    
   {{/with}}
 </script>
 
 <script id="tracker-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with tracker}}
-    {{#if ../_created}}
-    <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-tracker-protocol="{{underscore protocol_name}}">
-    {{/if}}
+    {{#was _created}}
+    <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-tracker-protocol="{{underscore protocol_name}}" data-template="tracker-result-template" data-sub-item="tracker" data-sub-id="{{id}}">    
+    {{else was _merged }}
+    <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-tracker-protocol="{{underscore protocol_name}}" data-template="tracker-result-template" data-sub-item="tracker" data-sub-id="{{id}}">
+    
+    {{/was}}
 
       <tr >
           {{>tracker_result}}
       </tr>
-    {{#if ../_created}}
+    {{#was _created}}
     </tbody>
     <tbody class="tracker-history collapsed" id="trackers-{{master_id}}-{{id}}-history" data-subscription="tracker-history-{{master_id}}-{{id}}">
     </tbody>
                     
-    {{/if}}
+    {{/was}}
   {{/with}}
 </script>
 
@@ -403,7 +416,9 @@
         {{#if player_infos.0.death_date}}
                   <small>DOD</small> {{local_date player_infos.0.death_date '-'}}
           {{/if}}
-                <span class="label label-info" title="{{player_infos.0.accuracy_score_name}}">{{player_infos.0.rank}}</span>
+                <span data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
+                {{>accuracy_badge master_id=id player_info=player_infos.[0]}}
+                </span>
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with player_infos.0.pro_info}}
@@ -434,7 +449,7 @@
             <a href="#/" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
           </li>
           <li role="presentation">
-            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker <span data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="trackers" data-template="tracker-badge-template">{{>tracker_badge}}</span></a>
+            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template">{{>tracker_badge master_id=id}}</span></a>
           </li>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
@@ -446,9 +461,9 @@
           <div id="extras-{{id}}" class="row collapse extras-block">
             <div class="col-md-6">
                 {{#each scantrons}}
-                  <div class="index-{{@index}}" id="scantron-{{../id}}-{{id}}" data-subscription="scantron-edit-form-{{../id}}-{{id}}">
-                    {{>scantron_result master_id=../id}}
-                  </div>
+                  
+                    {{>scantron_result master_id=../id _created=@index}}
+                  
                 {{/each}}
 
                 <div class="new-block" id="scantron-{{id}}-" data-subscription="scantron-edit-form-{{id}}-">
@@ -459,7 +474,7 @@
             </div>
           </div>
   
-          <div id="trackers-{{id}}" data-sub-for="master_id" data-sub-for-value="{{id}}" data-sub-for-use="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
+          <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
           {{#with trackers}}
             {{>tracker_tree_results master_id=../id}}
           {{else}}
@@ -474,9 +489,9 @@
                 {{#each player_infos}}
                   <div class="row">
                     <div class="col-md-12">
-                      <div id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}">
-                      {{>player_info_result }}
-                      </div>
+                      
+                      {{>player_info_result _created=@index}}
+                      
                     </div>
                     <div class="col-md-12">
                     {{>pro_info_result pro_info player_info_id=id}}
@@ -487,7 +502,7 @@
                     <div class="col-md-12">
                       <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
                         <h4>No player or pro info to show</h4>
-                        <p><a href="/masters/{{id}}/player_infos/new" data-remote="true" class="btn btn-sm btn-primary><span class="glyphicon glyphicon-plus"></span> Player Info record</a> </p>
+                        <p><a href="/masters/{{id}}/player_infos/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Player Info record</a> </p>
                       </div>
                     </div>
                     <div class="col-md-12">
@@ -501,9 +516,8 @@
 
               <div class="col-md-6" id="addresses-{{../id}}-" data-sub-list="addresses">
                 {{#each addresses}}
-                  <div class="index-{{@index}}" id="address-{{../id}}-{{id}}" data-subscription="address-edit-form-{{../id}}-{{id}}" data-sub-item="address" data-sub-id="{{id}}" data-template="address-result-template" data-sort-desc="data-item-rank">
-                    {{>address_result master_id=../id}}
-                  </div>
+                  
+                    {{>address_result _created=@index}}
 
                 {{/each}}
 
@@ -515,9 +529,8 @@
               </div>
               <div class="col-md-6">
                 {{#each player_contacts}}
-                  <div class="index-{{@index}}" id="player-contact-{{../id}}-{{id}}" data-subscription="player-contact-edit-form-{{../id}}-{{id}}"  data-preprocessor="player_contact_edit_form" data-sort-desc="data-item-rank">
-                    {{>player_contact_result master_id=../id}}
-                  </div>
+                  
+                  {{>player_contact_result _created=@index}}
 
                 {{/each}}
 
