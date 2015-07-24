@@ -9,7 +9,7 @@
 # the params return something like "model_atts" => {"0"=>{...}, "1"=>{...}, "2"=>{...}}
 # The child_index ensure they are merged down into "model_atts" => {"0"=>{..., ..., ...}} 
 %>    
-<%= form_for @master, method: :post, url: '/masters/', include_id: false, remote: true, html: {id: 'advanced_search_master', class: 'search_master'} do |f| %>
+<%= form_for @master, method: :post, url: '/masters/', include_id: false, remote: true, html: {id: 'advanced_search_master', class: 'search_master form-formatted'} do |f| %>
 
   <div class="row">
 

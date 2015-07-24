@@ -41,11 +41,11 @@
         </li>
         <li class="list-group-item player-info-rank">
             <%= f.label :rank %>
-            <%= f.select :rank, player_info_rank_array_pair, class: 'form-control' %>
+            <%= f.select :rank, player_info_rank_array_pair %>
         </li>
         <li class="list-group-item player-info-college">
           <%= f.label :college %>
-          <%= f.text_field :college, class: 'form-control college-input typeahead'  %>
+          <%= f.text_field :college, class: 'college-input typeahead'  %>
         </li>
         <li class="list-group-item player-info-notes">
           <%= f.label :notes %>

@@ -235,6 +235,11 @@ _fpa.form_utils = {
             }).prependTo(descp);
         }
         
+        block.updatePolyfill();
+        
+        block.find('input,select,checkbox,textarea').not('[type="submit"],.form-control').addClass('form-control input-sm');
+        block.find('.typeahead').css({width: '100%'});        
+        block.find('form').not('.form-formatted').addClass('form-inline');
     },
 
     // Run through all the general formatters for a new block to show nicely

@@ -1,5 +1,5 @@
 <div class="container-fluid collapse in" id="master-search-simple">
-<%= form_for @master, method: :get, remote: true, html: {id: 'simple_search_master', class: 'search_master'} do |f| %>
+<%= form_for @master, method: :get, remote: true, html: {id: 'simple_search_master', class: 'search_master form-formatted'} do |f| %>
 
   <div class="row">
     <%= hidden_field_tag :mode, "SIMPLE" %>
