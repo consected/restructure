@@ -13,8 +13,5 @@ end
 def auto_admin 
   @admin ||= Admin.find_or_create_by email: 'auto-admin'
 end
-def auto_admin admin
-  @admin = admin
-end
 
 Seeds.setup

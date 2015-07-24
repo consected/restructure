@@ -21,11 +21,7 @@
         </li>
         <li class="list-group-item player-contact-rank">
             <%= f.label :rank %>
-            <%= f.number_field :rank %>
-        </li>
-        <li class="list-group-item player-contact-active">
-            <%= f.label :active %>
-            <%= f.select :active, active_selections %>
+            <%= f.select :rank, general_selection(:player_contacts_rank, present: :hyphenate_name_val, order: :value_number_desc) %>
         </li>
         <li class="list-group-item">
           <%= f.submit class: "btn btn-primary" %>  

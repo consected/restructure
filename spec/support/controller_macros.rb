@@ -1,4 +1,4 @@
-require 'support/tracker_support'
+require 'support/seed_support'
 
 module ControllerMacros
   
@@ -28,7 +28,7 @@ module ControllerMacros
  
   def before_each_login_user 
     before(:each) do
-      TrackerSupport.create_tracker_updates      
+      SeedSupport.setup      
       
       user, pw = ControllerMacros.create_user
       @request.env["devise.mapping"] = Devise.mappings[:user]

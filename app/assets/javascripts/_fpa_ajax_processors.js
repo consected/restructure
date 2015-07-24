@@ -158,6 +158,16 @@ _fpa.postprocessors = {
         if(data.player_contact) d = data.player_contact;
         _fpa.postprocessors.info_update_handler(block, d);
     },
+    address_edit_form: function(block, data){
+        _fpa.form_utils.format_block(block);  
+        
+        var check_zip = function(){
+         
+            $('#address_zip').mask("00000-9999", {'translation': {0: {pattern: /\d/}, 0: {pattern: /\d/, optional: true}}});
+        };
+          
+        check_zip();
+    },
     
     player_contact_edit_form: function(block,data){
         _fpa.form_utils.format_block(block);  
@@ -166,13 +176,13 @@ _fpa.postprocessors = {
             $('#player_contact_data').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}});
           else
             $('#player_contact_data').unmask();
-          };
+        };
 
-          var e = $('#player_contact_rec_type').change(function(){
-            check_phone($(this));
-          });
+        var e = $('#player_contact_rec_type').change(function(){
+          check_phone($(this));
+        });
 
-          check_phone(e);
+        check_phone(e);
     }
 
 };

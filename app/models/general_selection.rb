@@ -2,7 +2,7 @@ class GeneralSelection < ActiveRecord::Base
   
   include AdminHandler
   include SelectorCache
-  ItemTypes = [:player_contacts_type, :player_contacts_source, :addresses_type, :addresses_source, :addresses_rank, :tracker_contact_method ]
+  ItemTypes = [:player_contacts_type, :player_contacts_source, :addresses_type, :addresses_source, :addresses_rank, :player_contacts_rank, :tracker_contact_method ]
   
   def self.item_type_source_for record, type=:source
     if record.respond_to? :class

@@ -4,7 +4,7 @@
       <li class="list-group-item">
 
         <a title="edit" class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
-        <span class="pull-right label label-info" style="margin-right:1em">{{rank}} - {{accuracy_score_name}}</span>
+        <span class="pull-right label label-info player-info-{{rank}}" style="margin-right:1em">{{rank}} - {{accuracy_score_name}}</span>
           <h4 class="list-group-item-heading">Player</h4>
         
         {{>item_flag_container item_type="player_info"}}         
@@ -44,12 +44,12 @@
 </script>
 
 <script id="address_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="index-{{_created}}" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}"  data-sub-item="address" data-sub-id="{{id}}" data-template="address-result-template" data-sort-desc="data-item-rank">{{/was}}
+  {{#was _created}}<div class="index-{{_created}}" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}"  data-sub-item="address" data-sub-id="{{id}}" data-preprocessor="address_edit_form" data-template="address-result-template" data-sort-desc="data-item-rank">{{/was}}
   <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item">
         <a title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
 
-        <span class="pull-right label label-info" style="margin-right:1em">{{rank}} - {{rank_name}}</span>
+        <span class="pull-right label label-info address-{{rank}}" style="margin-right:1em">{{rank}} - {{rank_name}}</span>
         <h4 class="list-group-item-heading">Addresses</h4>                        
         
       </li>
@@ -70,7 +70,7 @@
   <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item is-heading">
         <a title="edit" class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-        <h4 class="list-group-item-heading">{{rec_type}} <small>({{#if active}}active{{else}}inactive{{/if}})</small> <span class="heading-rank">{{rank}}</span></h4>                        
+        <span class="pull-right label label-info player-contact-{{rank}}" style="margin-right:1em">{{rank}} - {{rank_name}}</span><h4 class="list-group-item-heading">{{rec_type}}</h4>                        
         
       </li>
       
@@ -271,7 +271,7 @@
 </script>
 
 <script id="accuracy_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<span class="label label-info" title="{{player_info.accuracy_score_name}}">{{player_info.rank}}</span>
+<span class="label label-info player-info-badge-{{player_info.rank}}" title="{{player_info.accuracy_score_name}}">{{player_info.rank}}</span>
 </script>
 
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -514,20 +514,20 @@
 
 
 
-              <div class="col-md-6" id="addresses-{{../id}}-" data-sub-list="addresses">
+              <div class="col-md-6" id="addresses-{{id}}-" data-sub-list="addresses">
                 {{#each addresses}}
                   
                     {{>address_result _created=@index}}
 
                 {{/each}}
 
-                <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-">
+                <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-" data-preprocessor="address_edit_form">
                   {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Address record</a> </p>
 
               </div>
-              <div class="col-md-6">
+              <div class="col-md-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
                 {{#each player_contacts}}
                   
                   {{>player_contact_result _created=@index}}

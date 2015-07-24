@@ -18,7 +18,7 @@ module ApplicationHelper
   end
   
   def zip_field_props init={}
-    init.merge({pattern: "\\d{5,5}"})
+    init.merge({pattern: "\\d{5,5}(-\\d{4,4})?"})
   end
   
   def inline_cancel_button class_extras="pull-right"

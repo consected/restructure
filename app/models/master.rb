@@ -7,7 +7,7 @@ class Master < ActiveRecord::Base
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master  
   has_many :pro_infos , inverse_of: :master  
-  has_many :player_contacts, -> { order("active desc, #{RankNotNullClause}")}, inverse_of: :master
+  has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
