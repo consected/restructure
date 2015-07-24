@@ -407,7 +407,6 @@ CREATE TABLE player_contacts (
     data character varying,
     source character varying,
     rank integer,
-    active boolean,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone DEFAULT now()
