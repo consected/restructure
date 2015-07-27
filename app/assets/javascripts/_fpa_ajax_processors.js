@@ -18,13 +18,11 @@ _fpa.postprocessors = {
     search_results_template: function(block, data){
         // Ensure we format the viewed item on expanding it 
 
-        
-
         if(data.masters && data.masters.length < 5){
             _fpa.form_utils.format_block(block);
             _fpa.postprocessors.tracker_notes_handler(block);            
         }
-
+        
         $('a.master-expander').click(function(ev){
             ev.preventDefault();
             var id = $(this).attr('href');
@@ -39,6 +37,16 @@ _fpa.postprocessors = {
             
             
         });
+        
+        var msid_list = $("#msid_list").html();
+        var name = '';
+        if($('.search_count').first().html()=== '1'){
+            name = ' - ' + $('.master-result .player-names').text();
+        }
+       
+        
+        document.title = 'FHPS MSID: ' + msid_list + name;
+        window.history.pushState({"html": "/masters/search?utf8=✓&nav_q="+msid_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q="+msid_list);
    
     },
     
@@ -106,6 +114,13 @@ _fpa.postprocessors = {
             update_date_fields($(this), true);
         }).each(function(){
             update_date_fields($(this));
+        });
+        
+        block.find('#tracker_protocol_id').change(function(){
+            block.find('#tracker_sub_process_id').focus().click();
+        });
+        block.find('#tracker_sub_process_id').change(function(){
+            block.find('#tracker_protocol_event_id').focus().click();
         });
 
     },

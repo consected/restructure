@@ -124,3 +124,7 @@ input.form-control.has-value, select.form-control.has-value {
 .collapsed .hide-not-collapsed {
     display: initial;  
 }
+
+a[data-toggle="collapse"] {outline: 0; color: inherit;}
+a[data-toggle="collapse"]:hover {color: #770000}
+a[data-toggle="collapse"]:active, a[data-toggle="collapse"]:focus {color:#2b669a;}

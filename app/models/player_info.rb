@@ -6,7 +6,7 @@ class PlayerInfo < ActiveRecord::Base
   # This is here to link the player_info record to the matched pro_info record from the master list
   # Although the player_info does not formally belong to the pro_info, the pro_info_id foreign 
   # key is on the player_info table, and therefore requires a belongs_to association
-  belongs_to :pro_info, inverse_of: :player_info
+  # belongs_to :pro_info, inverse_of: :player_info
  
   # Allow simple search to function
   attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
@@ -31,8 +31,7 @@ class PlayerInfo < ActiveRecord::Base
  
   def as_json extras={}
     extras[:include] ||= {}
-    extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-    extras[:include].merge!({pro_info: {}})
+    extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]}    
     extras[:methods] ||= []
     extras[:methods] << :accuracy_score_name
     super(extras)

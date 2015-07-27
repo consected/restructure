@@ -26,7 +26,7 @@
 
 <script id="pro_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
                             
-      <div id="pro-info-{{player_info_id}}-{{id}}">        
+      <div id="pro-info-{{master_id}}-{{id}}">        
 
         <ul class="list-group">
             <li class="list-group-item">
@@ -383,9 +383,10 @@
 
 
 <script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  
-  {{count}} record{{#is count '!==' 1}}s{{/is}}
+  <span>
+  <span class="search_count">{{count}}</span> record{{#is count '!==' 1}}s{{/is}}
   {{#is count '>=' 100}} - refine search to show others{{/is}}
+  </span>
 </script>
 
 
@@ -395,13 +396,15 @@
     <div class="panel panel-default">
       
     {{#each masters}}
-      <div class="panel-heading" role="tab" id="master-{{id}}">          
+      <div class="panel-heading master-result" role="tab" id="master-{{id}}">          
         <h3 class="panel-title">
-          <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
-            <div class="row">
-              <div class="col-md-14 player-info-header">
-                <span class="msid">{{id}}</span> : 
-        
+          <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid"> </a>
+          <div class="row">
+            <div class="col-md-1 result-refs"><span class="msid">{{msid}}</span></div>
+            <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
+            
+              <div class="col-md-12 player-info-header">
+                
                 <strong class="player-names">
                   {{capitalize player_infos.0.first_name}} 
                   {{capitalize player_infos.0.middle_name}} 
@@ -421,7 +424,7 @@
                 </span>
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
-              {{#with player_infos.0.pro_info}}
+              {{#with pro_infos.[0]}}
                 <strong class="pro-names">
                   {{capitalize first_name}} 
                   {{capitalize middle_name}} 
@@ -437,10 +440,9 @@
                 <small>DOD</small> {{local_date death_date '-'}}
         {{/if}}
               {{/with}}  
-              </div>
-          
-            </div>
-          </a>
+              </div>                      
+            </a>
+          </div>
         </h3>
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
@@ -486,30 +488,40 @@
           <div id="details-{{id}}" class="collapse in details-block">
             <div class="row">
               <div class="col-md-12">
-                {{#each player_infos}}
-                  <div class="row">
+                <div class="row">
+                {{#with player_infos.[0]}}
+                  
                     <div class="col-md-12">
                       
                       {{>player_info_result _created=@index}}
                       
                     </div>
-                    <div class="col-md-12">
-                    {{>pro_info_result pro_info player_info_id=id}}
-                    </div>                                        
-                  </div>
+                    
                 {{else}}
-                  <div class="row">                    
+                  
                     <div class="col-md-12">
                       <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
-                        <h4>No player or pro info to show</h4>
+                        <h4>No player info</h4>
                         <p><a href="/masters/{{id}}/player_infos/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Player Info record</a> </p>
                       </div>
-                    </div>
+                    </div>                    
+                  
+                {{/with}}
+                {{#with pro_infos.[0]}}                    
                     <div class="col-md-12">
-                    </div>
-                    
-                  </div>
-                {{/each}}
+                      {{>pro_info_result _created=@index}}
+                    </div>                                                          
+                {{else}}
+                  
+                    <div class="col-md-12">
+                      <div id="pro-info-{{../id}}-" >
+                        <h4>No pro info </h4>                        
+                      </div>
+                    </div>                    
+                  
+                {{/with}}
+                                    
+                </div>
               </div>
 
 
@@ -547,6 +559,7 @@
     {{/each}}
       
     </div>
+    <div class="hidden" id="msid_list">{{#each masters}}{{msid}} {{/each}}</div>
   {{else}}
       <h2>No Results</h2>
   {{/if}}

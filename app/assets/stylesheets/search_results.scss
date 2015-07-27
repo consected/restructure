@@ -9,6 +9,16 @@ span.disabled, a.disabled {color: #ccc !important;}
     }
 }
 
+#master_results_block .panel-heading{
+
+    .glyphicon-link {visibility: hidden;}
+    &:hover .glyphicon-link {
+        visibility: visible;     
+        color: white;
+        text-shadow: #770000 2px 1px 1px;
+    }
+}
+
 li.list-group-item {
     strong {
         text-transform: capitalize;
@@ -232,9 +242,6 @@ table.tracker-tree-results, table.tracker-chron-results {
 }
 
 
-li.list-group-item.pro-info-pro_id {
-  padding: 5px 15px 6px;
-}
 
 
 .label.player-info-badge-12, .label.player-info-12, .label.player-contact-10, .label.address-10 {background-color: #2e6da4;}
@@ -242,3 +249,17 @@ li.list-group-item.pro-info-pro_id {
 .label.player-info-badge-881, .label.player-info-881, .label.player-info-badge-999, .label.player-info-999, .label.player-info-badge-777, .label.player-info-777, 
 .label.player-info-badge-555, .label.player-info-555, .label.player-info-badge-333, .label.player-info-333, 
 .label.player-info-badge-888, .label.player-info-888, .label.player-contact-0, .label.address-0 {background-color: #aaa;}
+
+li.list-group-item.pro-info-pro_id {
+  padding: 5px 15px 6px;
+  background-color: #EEEEEE;
+}
+
+
+.list-group-item:first-child { 
+    background-color: #EEEEEE;
+    
+}
+
+.master-result span.msid { color: gray;}
+

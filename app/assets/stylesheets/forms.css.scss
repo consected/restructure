@@ -17,6 +17,11 @@
     width: 100%;
 }
 
+
+.form-inline .twitter-typeahead {
+    width: auto;
+}
+
 form select {
     width: 100%;
     height: auto;
@@ -28,7 +33,7 @@ form select {
     select {
         width: initial;
         background-color: white;
-        border-radius: 0;
+        border-radius: 3px;
     }
 }
 

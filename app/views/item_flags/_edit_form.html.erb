@@ -3,7 +3,7 @@
     <div class="">
       
       <%=form_for(:item_flag, flag_edit_form_hash(path: url_for([@master, @item])) ) do |f|%>
-        <div class="form-group item-flags_item_flag_id">
+        <div class=" item-flags_item_flag_id">
             
             <%= collection_select(:item_flag, :item_flag_name_id, item_flags_array, :id, :name, {selected: flags_selected}, multiple: true) %>
         </div>

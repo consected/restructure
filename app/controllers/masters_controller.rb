@@ -5,37 +5,53 @@ class MastersController < ApplicationController
   ResultsLimit = 100
   
   def index
+    
     #search_params
     redirect_to '/masters/search/' and return if search_params.nil? || search_params.length == 0
     
     search_type = params[:mode] 
     search_type = 'ADVANCED' if search_type.blank?
-    
+    msid = nil
     if search_type == 'MSID'
-      if !params[:master][:id].blank?
-      @masters = Master.where id: params[:master][:id] 
-      elsif !params[:master][:pro_infos_attributes]["0"][:pro_id].blank?
-      @masters = Master.where id: params[:master][:pro_id]
+      if !params[:master][:msid].blank?
+        msid = params[:master][:msid] 
+        msid = msid.split(/[,| ]/) if msid.index(/[,| ]/)        
+        @masters = Master.where msid: msid
+      elsif !params[:master][:proid].blank?
+        @masters = Master.where proid: params[:master][:proid]
       end
     elsif search_type == 'SIMPLE'
-      @masters = Master.simple_search_on_params search_params[:master]
+      @masters = Master.search_on_params search_params[:master]
     else
       @masters = Master.search_on_params search_params[:master]
     end
 
     if @masters
-    
-      @masters = @masters.take(ResultsLimit).sort {|m,n| (n.player_infos.first.accuracy_rank || -2) <=> (m.player_infos.first.accuracy_rank || -2)}
-
+      
+      #If the msid is an array of items then return the results in the order of the list
+      if msid.is_a? Array
+        i = 0
+        @masters = @masters.take(ResultsLimit)
+        msid.each do |d|
+          m1 = @masters.select {|n| n.msid.to_s == d}.first
+          m1.force_order = i if m1
+          i += 1
+        end
+        
+        @masters = @masters.sort {|m,n| m.force_order <=> n.force_order}        
+      else
+        # Otherwise return the master list in the order of the calculated player info accuracy rank 
+        @masters = @masters.take(ResultsLimit).sort {|m,n| (n.player_infos.first.accuracy_rank || -2) <=> (m.player_infos.first.accuracy_rank || -2)}
+      end
       m = {
         masters: @masters.as_json(include: {
           player_infos: {order: Master::PlayerInfoRankOrderClause, 
-            include: {
-              pro_info: {}, 
+            include: {              
               item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
             },
             methods: [:user_name, :accuracy_score_name]
           },
+          pro_infos: {}, 
           player_contacts: {
             order: {rank: :desc},             
             methods: [:user_name, :rank_name]
@@ -69,15 +85,23 @@ class MastersController < ApplicationController
   end
 
   def show
-    @master = Master.find(params[:id])
-    @master_id = @master.id
+    if params[:type] == 'msid' && params[:id]
+      @master = Master.find_by_msid(params[:id]) 
+    elsif params[:id]
+      @master = Master.find(params[:id]) 
+    end
     
+    
+    return not_found unless @master
+    
+    @master_id = @master.id
+    @msid = @master.msid
     search
     
   end
   
   def search
-    @master_id ||= params[:nav_q]
+    @msid ||= params[:nav_q]
     @master_pro_id ||= params[:nav_q_pro_id]
     
     @master =  Master.new 

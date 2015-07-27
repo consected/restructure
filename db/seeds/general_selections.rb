@@ -65,11 +65,27 @@ module Seeds
       Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
     end
 
+    def self.create_player_contacts_type
+      
+      item_type = 'addresses_rank'
+      
+      values = [
+        {name: 'Email', value: 'email'},
+        {name: 'Phone', value: 'phone'}                
+      ]
+      
+      add_values values, item_type
+      
+      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+    end
+    
+    
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
       
       create_player_contacts_rank
       create_player_contacts_source
+      create_player_contacts_type
       create_addresses_source
       create_addresses_rank
     end

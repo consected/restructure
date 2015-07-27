@@ -32,54 +32,67 @@ class Master < ActiveRecord::Base
                                 :scantrons, :player_contacts, :addresses, :trackers, :tracker_histories,
                                 :not_trackers, :not_tracker_histories
 
+  
+  DefaultJoins = [:player_infos]
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
-  # Use an array of a single item to define a predefined matching clause:
+  # Use a hash with :value to define a predefined matching clause:
   # :starts_with is the equivalent of "?%"
   # :contains is the equivalent of "%?%" 
   # :is  and :is_not are the equivalent of "?"
-  # any other string will be used as is 
-  # note that ? characters will be replaced by the field search value
+  # :do_nothing forces this attribute to be skipped
   # Subsequent symbols in the array can be used to modify the string
   # :strip_spaces removes all spaces from the string
   # :upcase makes the whole string uppercase
-  # The final item in the array can be specified to state the actual query condition
+  # The :conditioncan be specified to state the actual query condition
   # :starts with and :contains both default to "field_name LIKE ?"
-  # :is_not default to "field_name <> ?"
+  # :is_not default to "field_name <> ?"  
+  # note that ? characters will be replaced by the field search value
+  # Optionally add a value (symbol or array of symbols) for :joins
+  # to specify specific tables to add to the inner join list
+  
   AltConditions = {
     player_infos: {
-      first_name: [:starts_with],
-      middle_name: [:starts_with],
-      nick_name: [:starts_with],
-      notes: [:contains],
-      younger_than: [:years, "player_infos.birth_date is not null  AND ((current_date - interval ? )) < player_infos.birth_date"],
-      older_than: [:years, "player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date"],
-      less_than_career_years: [:is, "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) < ?"],
-      more_than_career_years: [:is, "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) > ?"]
+      first_name: {value: :starts_with},
+      middle_name: {value: :starts_with},
+      nick_name: {value: :starts_with},
+      notes: {value: :contains},
+      younger_than: {value: :years, condition: "player_infos.birth_date is not null  AND ((current_date - interval ? )) < player_infos.birth_date"},
+      older_than: {value: :years, condition: "player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date"},
+      less_than_career_years: {value: :is, condition: "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) < ?"},
+      more_than_career_years: {value: :is, condition: "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) > ?"}
     },
     pro_infos: {
-      first_name: [:starts_with],
-      middle_name: [:starts_with],
-      nick_name: [:starts_with]
+      first_name: {value: :starts_with},
+      middle_name: {value: :starts_with},
+      nick_name: {value: :starts_with}
       
     },
     player_contacts: {
-      data: [:starts_with, :strip_spaces]
+      data: {value: [:starts_with, :strip_spaces]}
     },
     not_trackers: {
-      protocol_event_id: [:is, "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)"],
-      sub_process_id: [:do_nothing]
+      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)"},
+      sub_process_id: {value: :do_nothing}
     },
     not_tracker_histories: {
-      protocol_event_id: [:is, "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id = ? AND th_inner.master_id = masters.id)"],
-      sub_process_id: [:do_nothing]
+      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id = ? AND th_inner.master_id = masters.id)"},
+      sub_process_id: {value: :do_nothing}
+    },
+    general_infos: {
+      first_name: {value: :starts_with, condition: "(player_infos.first_name LIKE ? OR pro_infos.first_name LIKE ? OR player_infos.nick_name LIKE ? OR pro_infos.nick_name LIKE ?)", joins: :pro_infos},
+      last_name: {value: :is, condition: "(player_infos.last_name = ? OR pro_infos.last_name = ?)", joins: :pro_infos},
+      birth_date: {value: :is, condition: "(player_infos.birth_date = ? OR pro_infos.birth_date = ?)", joins: :pro_infos},
+      death_date: {value: :is, condition: "(player_infos.death_date = ? OR pro_infos.death_date = ?)", joins: :pro_infos},
+      start_year: {value: :is, condition: "(player_infos.start_year = ? OR pro_infos.start_year = ?)", joins: :pro_infos},
+      end_year: {value: :is, condition: "(player_infos.end_year = ? OR pro_infos.end_year = ?)", joins: :pro_infos},
+      college: {value: :is, condition: "(player_infos.college = ? OR pro_infos.college = ?)", joins: :pro_infos},
+      contact_data: {value: [:starts_with, :strip_spaces], condition: "player_contacts.data LIKE ?", joins: :player_contacts }
     }
-#    # This was a test. Not working.
-#    not_player_infos_item_flags: {
-#      item_flag_name_id: [:is, "NOT EXISTS (select NULL from item_flags if_inner where if_inner.item_flag_name_id IN (?) AND if_inner.item_id = player_infos.id AND if_inner.item_type = 'PlayerInfo')"]
-#    },
+    
   }
   
+  attr_accessor :force_order
   
   # Build a Master search using the Master and nested attributes passed in
   # Any attributes that are nil will be rejected and will not appear in the query
@@ -87,7 +100,7 @@ class Master < ActiveRecord::Base
   # attributes that are not nil
   def self.search_on_params params, conditions={}
     
-    joins = [] # list of joined tables
+    joins = DefaultJoins # list of joined tables
     wheres = {} # set of equality where clauses
     wheresalt = [nil, {}] # list of non-equality where clauses (such as LIKE)
     selects = []
@@ -136,17 +149,21 @@ class Master < ActiveRecord::Base
               wheres[k1s] = vn 
             end
           end
-          if valt.length > 0
-            valt.each do |cond, vals|
-              if cond && !vals.nil?
-                wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{cond}"
-                wheresalt[1].merge! vals
+          if valt.length > 0          
+            logger.info "Merging alternative conditions"
+            valt.each do |vset|
+              if vset && vset[:condition]
+                logger.info "Condition: #{vset[:condition]}"
+                wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{vset[:condition]}"
+                wheresalt[1].merge! vset[:reference]
+                joins << vset[:joins] if vset[:joins].is_a? Symbol
+                joins += vset[:joins] if vset[:joins].is_a? Array
               end
-            end            
+            end
           end
-          joins << k1.to_sym        
+          joins << k1s.to_sym        
           
-          conditions[k1.to_sym] = vn
+          conditions[k1s.to_sym] = vn
         end
         # Always add the table to the list of joins and select (so we can get the data)
         
@@ -162,7 +179,7 @@ class Master < ActiveRecord::Base
     # No conditions were recognized. Exit now.
     return nil if wheres.length == 0 && !wheresalt.first
     
-    joins << :player_infos unless joins.include? :player_infos
+    
     res = Master.select(selects).joins(joins).uniq.where(wheres)
     res = res.where(wheresalt.first, wheresalt.last) if wheresalt.first
     
@@ -170,50 +187,6 @@ class Master < ActiveRecord::Base
   end
   
   
-  def self.simple_search_on_params params
-    logger.info "Search Simple with #{params}"
-    w = ""
-    wcond = {}
-    joins = []
-    
-    p = params[:general_infos_attributes]['0']
-    first = true
-    
-    if params[:id]
-      first = false
-      w << "masters.id = :id"
-      wcond[:id] =  params[:id].to_i
-    end
-    
-    joins  = [:player_infos, "left outer join pro_infos on pro_infos.master_id = masters.id"]
-    p.each do |k,v|
-      unless v.nil?
-        w << " AND " unless first
-                
-        if k == 'contact_data'
-          w << "player_contacts.data LIKE :#{k}"      
-          wcond[k.to_sym] = "#{v.gsub(' ','')}%"
-          joins << [:player_contacts]
-        elsif k == 'first_name'   
-          w << "(player_infos.#{k} LIKE :#{k} OR pro_infos.#{k} LIKE :#{k} OR player_infos.nick_name LIKE :#{k} OR pro_infos.nick_name LIKE :#{k})"      
-          wcond[k.to_sym] = "#{v}%"
-        else
-          w << "(player_infos.#{k} = :#{k} OR pro_infos.#{k} = :#{k})"      
-          wcond[k.to_sym] = v
-        end  
-        
-        
-        first = false
-      end
-    end
-    logger.info "where: #{w}, #{wcond}"
-    joins << :player_infos unless joins.include? :player_infos
-    
-    # No conditions were recognized. Exit now.
-    return nil if wcond.length == 0
-    
-    Master.joins(joins).uniq.where(w, wcond)
-  end
   
   def self.alt_condition table_name, condition    
     ckey = condition.first
@@ -226,22 +199,22 @@ class Master < ActiveRecord::Base
     return unless altdef
     
     
-    cond_op = altdef[0]
+    cond_op = altdef[:value]
     return if cond_op == :do_nothing
     
     refname = "#{table_name}_#{ckey}"
     
     
-    if altdef.last && altdef.last.is_a?(String)
-      alt  = altdef.last
+    if altdef[:condition]
+      alt  = altdef[:condition]
     elsif cond_op == :starts_with || cond_op == :contains
       alt = "#{table_name}.#{ckey} LIKE ?"      
     elsif cond_op == :is_not
       alt = "#{table_name}.#{ckey} <> ?"
     end
     
-    if altdef.length > 1
-      altdef[1..-1].each do |d|
+    if altdef[:value].is_a? Array
+      altdef[:value].each do |d|
         if d == :strip_spaces
           cval.gsub!(' ','')
         elsif d == :upcase
@@ -258,7 +231,9 @@ class Master < ActiveRecord::Base
     cvaltotal = "#{cval} years" if cond_op == :years
     cvaltotal = "#{cval}" if cond_op == :is_not
     
-    res = [alt, {refname.to_sym => cvaltotal}]
+    joins = altdef[:joins]
+    
+    res = {condition: alt, reference: {refname.to_sym => cvaltotal}, joins: joins}
       
     res
   end
