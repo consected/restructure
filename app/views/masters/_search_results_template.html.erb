@@ -398,30 +398,38 @@
     {{#each masters}}
       <div class="panel-heading master-result" role="tab" id="master-{{id}}">          
         <h3 class="panel-title">
+          {{#if msid}}
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid"> </a>
+          {{else}}
+          <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}"> </a>
+          {{/if}}
           <div class="row">
-            <div class="col-md-1 result-refs"><span class="msid">{{msid}}</span></div>
+            <div class="col-md-1 result-refs"><span class="msid">{{#if msid}}{{msid}}{{else}}-{{/if}}</span></div>
             <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
             
               <div class="col-md-12 player-info-header">
-                
-                <strong class="player-names">
-                  {{capitalize player_infos.0.first_name}} 
-                  {{capitalize player_infos.0.middle_name}} 
-                  {{capitalize player_infos.0.last_name}}
-                  {{#if player_infos.0.nick_name}}
-                    ({{capitalize player_infos.0.nick_name}})
+                {{#with player_infos.[0]}}
+                <strong class="player-names">                
+                  {{capitalize first_name}} 
+                  {{capitalize middle_name}} 
+                  {{capitalize last_name}}
+                  {{#if nick_name}}
+                    ({{capitalize nick_name}})
                   {{/if}}
+                      
                 </strong>
-        {{#if player_infos.0.birth_date}}
-                <small>DOB</small> {{local_date player_infos.0.birth_date '-'}}
-        {{/if}}
-        {{#if player_infos.0.death_date}}
-                  <small>DOD</small> {{local_date player_infos.0.death_date '-'}}
-          {{/if}}
+                {{#if birth_date}}
+                <small>DOB</small> {{local_date birth_date '-'}}
+                {{/if}}
+                {{#if death_date}}
+                  <small>DOD</small> {{local_date death_date '-'}}
+                {{/if}}
                 <span data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
-                {{>accuracy_badge master_id=id player_info=player_infos.[0]}}
+                {{>accuracy_badge master_id=id player_info=this}}
                 </span>
+                {{else}}
+                <strong class="no-player-info">(no player info)</strong>
+                {{/with}}
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with pro_infos.[0]}}
@@ -560,6 +568,7 @@
       
     </div>
     <div class="hidden" id="msid_list">{{#each masters}}{{msid}} {{/each}}</div>
+    <div class="hidden" id="master_id_list">{{#each masters}}{{id}} {{/each}}</div>
   {{else}}
       <h2>No Results</h2>
   {{/if}}

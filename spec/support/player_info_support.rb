@@ -15,10 +15,10 @@ module PlayerInfoSupport
       start_year = opt(rand(10)+1980)
 
       res << {
-        first_name: "Brian",
-        last_name: "Adams-Fuller",
-        middle_name: "Davido",
-        nick_name: "Kendrick",
+        first_name: pick_from(first_names).downcase,
+        last_name: pick_from(last_names).downcase,
+        middle_name: pick_from(first_names).downcase,
+        nick_name: pick_from(other_names).downcase,
         birth_date: bd,
         death_date: dd,
         rank: rand(999),
@@ -45,8 +45,8 @@ module PlayerInfoSupport
     
   def new_attribs
     @new_attribs = {
-      first_name: "Carl",
-      last_name: "Jameson",
+      first_name:  pick_from(first_names).downcase,
+      last_name:  pick_from(last_names).downcase,
       middle_name: nil,
       nick_name: nil,
       birth_date: nil,

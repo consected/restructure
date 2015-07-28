@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150727164955) do
+ActiveRecord::Schema.define(version: 20150728213551) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(version: 20150727164955) do
     t.integer  "rank"
     t.string   "rec_type"
     t.integer  "user_id"
-    t.datetime "created_at",                                 null: false
-    t.datetime "updated_at", default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at", default: "now()"
   end
 
   add_index "addresses", ["master_id"], name: "index_addresses_on_master_id", using: :btree
@@ -109,9 +109,14 @@ ActiveRecord::Schema.define(version: 20150727164955) do
 
   create_table "masters", force: :cascade do |t|
     t.integer "msid"
-    t.integer "proid"
+    t.integer "pro_id"
     t.integer "pro_info_id"
+    t.integer "rank"
   end
+
+  add_index "masters", ["msid"], name: "index_masters_on_msid", using: :btree
+  add_index "masters", ["pro_id"], name: "index_masters_on_proid", using: :btree
+  add_index "masters", ["pro_info_id"], name: "index_masters_on_pro_info_id", using: :btree
 
   create_table "player_contacts", force: :cascade do |t|
     t.integer  "master_id"
@@ -120,8 +125,8 @@ ActiveRecord::Schema.define(version: 20150727164955) do
     t.string   "source"
     t.integer  "rank"
     t.integer  "user_id"
-    t.datetime "created_at",                                 null: false
-    t.datetime "updated_at", default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at", default: "now()"
   end
 
   add_index "player_contacts", ["master_id"], name: "index_player_contacts_on_master_id", using: :btree
@@ -141,8 +146,8 @@ ActiveRecord::Schema.define(version: 20150727164955) do
     t.string   "transaction_status"
     t.string   "transaction_substatus"
     t.integer  "user_id"
-    t.datetime "created_at",                                                      null: false
-    t.datetime "updated_at",                      default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                                        null: false
+    t.datetime "updated_at",                      default: "now()"
     t.string   "contact_pref"
     t.integer  "start_year"
     t.string   "in_survey",             limit: 1
@@ -178,8 +183,8 @@ ActiveRecord::Schema.define(version: 20150727164955) do
     t.string   "career_info"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",                                      null: false
-    t.datetime "updated_at",      default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",      default: "now()"
     t.integer  "rank"
   end
 
@@ -315,6 +320,7 @@ ActiveRecord::Schema.define(version: 20150727164955) do
   add_foreign_key "item_flag_names", "admins"
   add_foreign_key "item_flags", "item_flag_names"
   add_foreign_key "item_flags", "users"
+  add_foreign_key "masters", "pro_infos"
   add_foreign_key "player_contacts", "masters"
   add_foreign_key "player_contacts", "users"
   add_foreign_key "player_infos", "masters"

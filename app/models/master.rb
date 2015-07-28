@@ -1,6 +1,9 @@
 class Master < ActiveRecord::Base
 
-  PlayerInfoRankOrderClause = ' case rank < 20 when true then rank * -1 else rank  end'.freeze
+  ResultsLimit = 100
+
+  MasterRank  = "master_rank desc nulls last, masters.id desc".freeze
+  PlayerInfoRankOrderClause = "case rank is null when true then -1000 else case (rank > #{PlayerInfo::BestAccuracyScore}) when true then rank * -1 else rank end end DESC NULLS last".freeze
   RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
   TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
   TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
@@ -20,7 +23,8 @@ class Master < ActiveRecord::Base
   has_many :not_tracker_histories, -> { order(TrackerHistoryEventOrderClause)},  class_name: 'TrackerHistory'
   has_many :not_trackers, -> { order(TrackerEventOrderClause)},  class_name: 'Tracker'
 
-  
+  before_create :assign_msid
+    
   Master.reflect_on_all_associations(:has_many).each do |assoc| 
     # This association is provided to allow generic search on flagged associated object
     has_many "#{assoc.plural_name}_item_flags".to_sym, through: assoc.plural_name, source: :item_flags
@@ -33,7 +37,7 @@ class Master < ActiveRecord::Base
                                 :not_trackers, :not_tracker_histories
 
   
-  DefaultJoins = [:player_infos]
+  DefaultJoins = []
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
   # Use a hash with :value to define a predefined matching clause:
@@ -103,7 +107,7 @@ class Master < ActiveRecord::Base
     joins = DefaultJoins # list of joined tables
     wheres = {} # set of equality where clauses
     wheresalt = [nil, {}] # list of non-equality where clauses (such as LIKE)
-    selects = []
+    selects = ["masters.id", "masters.pro_info_id", "masters.pro_id", "masters.msid", "masters.rank as master_rank"]
     
     params.each do |k,v|
       
@@ -156,13 +160,19 @@ class Master < ActiveRecord::Base
                 logger.info "Condition: #{vset[:condition]}"
                 wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{vset[:condition]}"
                 wheresalt[1].merge! vset[:reference]
-                joins << vset[:joins] if vset[:joins].is_a? Symbol
-                joins += vset[:joins] if vset[:joins].is_a? Array
+                if vset[:joins].is_a? Symbol
+                  joins << vset[:joins] 
+                  logger.info "Adding alt join #{vset[:joins]}"
+                elsif vset[:joins].is_a? Array
+                  joins += vset[:joins] 
+                  logger.info "Adding alt joins #{vset[:joins]}"
+                end
               end
             end
           end
-          joins << k1s.to_sym        
           
+          joins << k1s.to_sym        
+          logger.info "adding standard join #{k1s.to_sym} when vn = #{vn}"
           conditions[k1s.to_sym] = vn
         end
         # Always add the table to the list of joins and select (so we can get the data)
@@ -178,15 +188,27 @@ class Master < ActiveRecord::Base
     
     # No conditions were recognized. Exit now.
     return nil if wheres.length == 0 && !wheresalt.first
-    
+        
     
     res = Master.select(selects).joins(joins).uniq.where(wheres)
     res = res.where(wheresalt.first, wheresalt.last) if wheresalt.first
     
-    res
+    default_sort res
+    
+  end
+
+  def accuracy_rank
+    pi = player_infos.first
+    return -1000 unless pi
+    pi.accuracy_rank
   end
   
-  
+  def self.default_sort res
+    # Note that this sorts first, based on the Master rank, which is calculated through a trigger from player info accuracy
+    res = res.order(MasterRank).take(ResultsLimit) 
+    logger.info "sorted to #{res.map {|a| [a.id, a.master_rank]}  } "
+    res        
+  end
   
   def self.alt_condition table_name, condition    
     ckey = condition.first
@@ -252,5 +274,11 @@ class Master < ActiveRecord::Base
   
 private
 
+  def assign_msid
+    
+    max_msid = Master.maximum(:msid) || 0
+    self.msid = max_msid + 1
+    
+  end
   
 end

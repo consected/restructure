@@ -7,7 +7,7 @@ class AddMsidProToMaster < ActiveRecord::Migration
     
     ProInfo.all.each do |p|
       m = p.master
-      m.proid = p.pro_id
+      m.pro_id = p.pro_id
       m.pro_info_id = p.id
       
       if m.player_infos.length > 0

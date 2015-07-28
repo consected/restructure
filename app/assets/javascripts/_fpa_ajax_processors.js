@@ -39,14 +39,21 @@ _fpa.postprocessors = {
         });
         
         var msid_list = $("#msid_list").html();
+        var master_id_list = $("#master_id_list").html();
         var name = '';
         if($('.search_count').first().html()=== '1'){
             name = ' - ' + $('.master-result .player-names').text();
         }
        
         
-        document.title = 'FHPS MSID: ' + msid_list + name;
-        window.history.pushState({"html": "/masters/search?utf8=✓&nav_q="+msid_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q="+msid_list);
+        if(msid_list && msid_list.replace(/ /g, '').length > 1){
+            document.title = 'FHPS MSID: ' + msid_list + name;
+            window.history.pushState({"html": "/masters/search?utf8=✓&nav_q="+msid_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q="+msid_list);
+        }
+        else if(master_id_list && master_id_list.replace(/ /g, '').length > 1){
+            document.title = 'FHPS records: ' + master_id_list + name;
+            window.history.pushState({"html": "/masters/search?utf8=✓&nav_q_id="+master_id_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q_id="+master_id_list);
+        }
    
     },
     

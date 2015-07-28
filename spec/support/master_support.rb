@@ -68,4 +68,21 @@ module MasterSupport
      list[r]
    end
    
+   
+   def first_names
+     ['Glenn', 'Mose', 'Leandro', 'Damien', 'Claude', 'Kelvin', 'Rudolf', 'Shad', 'Wm', 'Nathanial', 'Dominick', 'Carlton', 'Arthur', 'Jame', 'Doug', 'Tod', 'Nickolas', 'Israel', 'Domingo', 'Donovan', 'Scott', 'Carol', 'Cesar', 'Ismael', 'Michael', 'Reyes', 'Blake', 'Odis', 'Brant', 'Luther', 'Mauricio', 'Olin', 'Victor', 'Milford', 'Tony', 'Aubrey', 'Dana', 'Berry', 'Salvador', 'Parker', 'Marcelo', 'Ray', 'Gerard', 'Miguel', 'Cornelius', 'Coleman', 'Dwayne', 'Wilbert', 'Leonardo', 'Bud']
+   end
+
+   def last_names
+     ['Basilio', 'Portillo', 'Just', 'Northup', 'Ankrom', 'Seto', 'Dominick', 'Dehn', 'Ramirez', 'Polley', 'Detwiler', 'Mahone', 'Mchenry', 'Fink', 'Keesling', 'Shaikh', 'Mazurek', 'Brashears', 'Arel', 'Perrella', 'Ver', 'Fitzgibbon', 'Tefft', 'Burruel', 'Boulter', 'Klatt', 'Linger', 'Kyser', 'Silversmith', 'Tregre', 'Millett', 'Welk', 'Down', 'Bate', 'Mchaney', 'Pope', 'Wagoner', 'Mcdougal', 'Nolan', 'Melendez', 'Imler', 'Way', 'Crimmins', 'Korando', 'Cohen', 'Keisler', 'Hardman', 'Sallis', 'Pinder', 'Acey']
+   end
+   
+   def other_names
+     ['Dingus', 'Vella', 'Bowland', 'Sackett', 'Arias', 'Pannell', 'Swinehart', 'Bezio', 'Goble', 'Greenley', 'Sides', 'Utz', 'Andres', 'Witt', 'Mraz', 'Cheever', 'Muma', 'Diana', 'Weston', 'Lennox', 'Carasco', 'Stavros', 'Platts', 'Bunyard', 'Bahena', 'Marciano', 'Normandeau', 'Small', 'Sellars', 'Bahr', 'Yard', 'Hankerson', 'Abram', 'Bouffard', 'Arruda', 'Faulkenberry', 'Sirmans', 'Mabon', 'Chavarin', 'Uphoff', 'Billingslea', 'Montandon', 'Neilson', 'Repka', 'Delucia', 'Juarbe', 'Govan', 'Mattern', 'Bendel', 'Flatley']
+   end
+   
+   def colleges
+     ["harvard", "dartmouth", "yale", "ucla", "boston college", "boston university", "northeastern", "mit"]
+   end
+   
 end

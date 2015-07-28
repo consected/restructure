@@ -1,15 +1,24 @@
 require 'support/seed_support'
 module ModelSupport
   
+  UserPrefix = 'ttuser-'
+  UserDomain = 'testing.com'
+  
   def seed_database
     SeedSupport.setup
   end
   
-  def create_user
+  def gen_username r
+    "#{UserPrefix}#{r}@#{UserDomain}"
+  end
+  
+  def create_user r=nil
     a = User.all.last
-    r = 1
-    r = a.id + 10 if a
-    good_email = "testuser-tester-#{r}@testing.com"
+    unless r
+      r = 1
+      r = a.id + 10 if a
+    end
+    good_email = gen_username(r)
     user = User.create! email: good_email        
     good_password = user.password
     @user = user

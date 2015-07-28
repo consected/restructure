@@ -2,7 +2,7 @@ class MastersController < ApplicationController
   before_action :authenticate_user!
   
   
-  ResultsLimit = 100
+  ResultsLimit = Master::ResultsLimit
   
   def index
     
@@ -17,8 +17,10 @@ class MastersController < ApplicationController
         msid = params[:master][:msid] 
         msid = msid.split(/[,| ]/) if msid.index(/[,| ]/)        
         @masters = Master.where msid: msid
-      elsif !params[:master][:proid].blank?
-        @masters = Master.where proid: params[:master][:proid]
+      elsif !params[:master][:pro_id].blank?
+        @masters = Master.where pro_id: params[:master][:pro_id]
+      elsif !params[:master][:id].blank?
+        @masters = Master.where id: params[:master][:id]
       end
     elsif search_type == 'SIMPLE'
       @masters = Master.search_on_params search_params[:master]
@@ -38,10 +40,7 @@ class MastersController < ApplicationController
           i += 1
         end
         
-        @masters = @masters.sort {|m,n| m.force_order <=> n.force_order}        
-      else
-        # Otherwise return the master list in the order of the calculated player info accuracy rank 
-        @masters = @masters.take(ResultsLimit).sort {|m,n| (n.player_infos.first.accuracy_rank || -2) <=> (m.player_infos.first.accuracy_rank || -2)}
+        @masters = @masters.sort {|m,n| m.force_order <=> n.force_order}              
       end
       m = {
         masters: @masters.as_json(include: {
@@ -87,15 +86,14 @@ class MastersController < ApplicationController
   def show
     if params[:type] == 'msid' && params[:id]
       @master = Master.find_by_msid(params[:id]) 
+      return not_found unless @master
+      @msid = @master.msid
     elsif params[:id]
       @master = Master.find(params[:id]) 
-    end
+      return not_found unless @master
+      @master_id = @master.id
+    end        
     
-    
-    return not_found unless @master
-    
-    @master_id = @master.id
-    @msid = @master.msid
     search
     
   end
@@ -103,6 +101,7 @@ class MastersController < ApplicationController
   def search
     @msid ||= params[:nav_q]
     @master_pro_id ||= params[:nav_q_pro_id]
+    @master_id ||= params[:nav_q_id]
     
     @master =  Master.new 
     

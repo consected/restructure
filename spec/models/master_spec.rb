@@ -1,30 +1,185 @@
 require 'rails_helper'
 
+require 'support/pro_info_support'
+
 RSpec.describe Master, type: :model do
   include ModelSupport
+  include MasterDataSupport
   
-  before(:each) do
+  before(:all) do
     seed_database
-    create_user
-    @master = Master.create
+
     
-    @master.current_user = @user
-    
+    create_data_set    
     
   end
   
   it "should create a master successfully" do        
     expect(@master).to be_a Master
     expect(@master.id).to_not be nil
+    expect(@full_master_record.player_infos.length).to eq 1
+    expect(@full_master_record.pro_infos.length).to eq 1
+    
+    pi1 = @full_master_record.player_infos.first
+    expect(first_names).to include pi1.first_name.capitalize
+    expect(pi1.user.email).to eq gen_username(full_master_number+@user_start)
+    expect(pi1.user.email).to_not be nil 
+    
+    pro1 = @full_master_record.pro_infos.first
+    expect(first_names).to include pro1.first_name.capitalize
+    expect(pro1.user.email).to eq gen_username(full_master_number+@user_start)
+    
   end
   
   
   it "should support simple search across player and pro info tables" do
     
-    params = {general_infos_attributes: {'0'=> {first_name: 'phil'}}}
-    Master.simple_search_on_params
+    params = {general_infos_attributes: {'0'=> {first_name: @full_player_info.first_name.downcase}}}
+    res = Master.search_on_params params
+    
+    # We can expect at least two records to be returned
+    expect(res.length).to be >= 2    
+    # Since we forced the reference record to be the only one ranked so it appears first, we can compare against the first item in the results
+    # independent of how many are actually returned
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+    # The user should match that we used to create the item
+    expect(res.first.player_infos.first.user.email).to eq gen_username(full_master_number+@user_start)
+        
   end
   
+
+  it "should support simple search across matching start of first name or nickname" do
+    
+    params = {general_infos_attributes: {'0'=> {first_name: @full_player_info.first_name.downcase[0..2]}}}
+    res = Master.search_on_params params
+        
+    # Since we forced the reference record to be the only one ranked so it appears first, we can compare against the first item in the results
+    # independent of how many are actually returned    
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    
+    params = {general_infos_attributes: {'0'=> {first_name: @full_player_info.nick_name.downcase[0..2]}}}
+    res = Master.search_on_params params
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    
+    params = {general_infos_attributes: {'0'=> {first_name: 'willnotmatch'}}}
+    res = Master.search_on_params params
+    expect(res.length).to eq 0
+    
+    params = {general_infos_attributes: {'0'=> {first_name: @full_pro_info.first_name.downcase[0..3]}}}
+    res = Master.search_on_params params
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+  end
  
+   it "should support simple search across matching last name" do
+    
+    params = {general_infos_attributes: {'0'=> {last_name: 'willnotmatch'}}}
+    res = Master.search_on_params params
+    expect(res.length).to eq 0
+    
+    params = {general_infos_attributes: {'0'=> {last_name: @full_player_info.last_name}}}
+    res = Master.search_on_params params        
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+    params = {general_infos_attributes: {'0'=> {last_name: @full_pro_info.last_name}}}
+    res = Master.search_on_params params       
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+   end
+   
+   it "should support simple search across start and end year" do
+    
+    params = {general_infos_attributes: {'0'=> {start_year: 1800, end_year: 1801}}}
+    res = Master.search_on_params params
+    expect(res.length).to eq 0
+    
+    params = {general_infos_attributes: {'0'=> {start_year: @full_player_info.start_year, end_year: @full_player_info.end_year}}}
+    res = Master.search_on_params params        
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+    params = {general_infos_attributes: {'0'=> {start_year: @full_pro_info.start_year, end_year: @full_pro_info.end_year}}}
+    res = Master.search_on_params params       
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+  end  
+   
+  it "should support simple search for birth and death dates" do
+    
+    params = {general_infos_attributes: {'0'=> {birth_date: Time.now-100.years, death_date: Time.now-100.years}}}
+    res = Master.search_on_params params
+    expect(res.length).to eq 0
+    
+    params = {general_infos_attributes: {'0'=> {birth_date: @full_player_info.birth_date, death_date: @full_player_info.death_date}}}
+    res = Master.search_on_params params        
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+    params = {general_infos_attributes: {'0'=> {birth_date: @full_pro_info.birth_date, death_date: @full_pro_info.death_date}}}
+    res = Master.search_on_params params       
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+  end  
+   
+  it "should support simple search for college" do
+    
+    params = {general_infos_attributes: {'0'=> {college: 'willnotmatch'}}}
+    res = Master.search_on_params params
+    expect(res.length).to eq 0
+    
+    params = {general_infos_attributes: {'0'=> {college: @full_player_info.college}}}
+    res = Master.search_on_params params        
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+    params = {general_infos_attributes: {'0'=> {college: @full_pro_info.college}}}
+    res = Master.search_on_params params       
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    
+  end  
   
+  it "should support simple search for several attributes" do
+    params = {general_infos_attributes: {'0'=> {college: @full_player_info.college, last_name: @full_pro_info.last_name, start_year: @full_player_info.start_year }}}
+    res = Master.search_on_params params        
+    expect(res.first).to eq(@full_master_record), master_error(res, params)
+    expect(res.first.player_infos.first).to eq @full_player_info
+    expect(res.first.pro_infos.first).to eq @full_pro_info
+    expect(res.length).to be >= 2
+    
+    p = params[:general_infos_attributes]["0"]
+    check = true
+    
+    # Check all the search attributes match either player or pro info
+    
+    res.each do |r|
+      pi = r.player_infos.first
+      pro = r.pro_infos.first
+      check ||= (pi.college == p[:college]) || (pro.college == p[:college])
+      check ||= (pi.last_name == p[:last_name]) || (pro.last_name == p[:last_name])
+      check ||= (pi.start_year == p[:start_year]) || (pro.start_year == p[:start_year])
+    end
+    
+    expect(check).to be true
+    
+  end
 end

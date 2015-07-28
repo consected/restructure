@@ -15,9 +15,13 @@ class PlayerInfo < ActiveRecord::Base
   
   validate :dates_sensible
 
-  def accuracy_rank
-    if rank && rank >= 20  
+  BestAccuracyScore = 12
+  
+  def accuracy_rank    
+    if rank && rank > BestAccuracyScore  
       return rank * -1 
+    elsif !rank
+      return -1000
     else 
       return rank 
     end
@@ -39,14 +43,14 @@ class PlayerInfo < ActiveRecord::Base
   
   protected
     def dates_sensible
-
-      logger.info "Checking #{end_year} and #{start_year}"
-      logger.info "Checking #{birth_date} and #{death_date}"
-
-      errors.add(:start_year, 'Start and End years are not sensible') if end_year && start_year && start_year > end_year
-      errors.add(:birth_date, 'Birth and Death dates are not sensible') if birth_date && death_date && birth_date > death_date
-      errors.add(:birth_date, 'Birth date is after today') if birth_date && birth_date > DateTime.now
-      errors.add(:death_date, 'Death date is after today') if death_date && death_date > DateTime.now
+      
+      latest_year = Time.now.year+1
+      errors.add('start year', "Is after #{latest_year}") if start_year && start_year > latest_year
+      errors.add('end year', "Is after  #{latest_year}") if end_year && end_year > latest_year
+      errors.add(:years, 'Start and End years are not sensible') if end_year && start_year && start_year > end_year
+      errors.add(:dates, 'Birth and Death dates are not sensible') if birth_date && death_date && birth_date > death_date
+      errors.add('birth date', 'Birth date is after today') if birth_date && birth_date > DateTime.now
+      errors.add('death date', 'Death date is after today') if death_date && death_date > DateTime.now
 
     end
 
