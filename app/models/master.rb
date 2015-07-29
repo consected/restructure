@@ -3,7 +3,7 @@ class Master < ActiveRecord::Base
   ResultsLimit = 100
 
   MasterRank  = "master_rank desc nulls last, masters.id desc".freeze
-  PlayerInfoRankOrderClause = "case rank is null when true then -1000 else case (rank > #{PlayerInfo::BestAccuracyScore}) when true then rank * -1 else rank end end DESC NULLS last".freeze
+  PlayerInfoRankOrderClause = "case when rank is null then -1000 when rank > #{PlayerInfo::BestAccuracyScore} then rank * -1 else rank end desc nulls last".freeze
   RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
   TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
   TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
@@ -170,7 +170,7 @@ class Master < ActiveRecord::Base
               end
             end
           end
-          
+          #TODO fix this!
           joins << k1s.to_sym        
           logger.info "adding standard join #{k1s.to_sym} when vn = #{vn}"
           conditions[k1s.to_sym] = vn

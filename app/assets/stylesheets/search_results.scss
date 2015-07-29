@@ -14,8 +14,8 @@ span.disabled, a.disabled {color: #ccc !important;}
     .glyphicon-link {visibility: hidden;}
     &:hover .glyphicon-link {
         visibility: visible;     
-        color: white;
-        text-shadow: #770000 2px 1px 1px;
+        color: #B79C0F;
+        text-shadow: #fff 2px 1px 1px;
     }
 }
 
@@ -256,10 +256,18 @@ li.list-group-item.pro-info-pro_id {
 }
 
 
-.list-group-item:first-child { 
+.list-group-item:first-child, .tracker-chron-results thead, .tracker-tree-results thead { 
     background-color: #EEEEEE;
     
 }
 
 .master-result span.msid { color: gray;}
 
+.panel-default > .panel-heading {
+    background-image: -webkit-linear-gradient(top, #f5f5f5 0%, #FFFFFF 100%);
+    background-image: -o-linear-gradient(top, #f5f5f5 0%, #FFFFFF 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#FFFFFF));
+    background-image: linear-gradient(to bottom, #f5f5f5 0%, #FFFFFF 100%);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff5f5f5', endColorstr='#ffFFFFFF', GradientType=0);
+}
