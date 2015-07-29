@@ -17,7 +17,7 @@ RSpec.describe PlayerInfo, type: :model do
       @created_count += 1
     end
     
-    @player_info = @master.player_infos.build first_name: 'phil', last_name: 'good', middle_name: 'andrew', nick_name: 'mitch'
+    @player_info = @master.player_infos.build first_name: 'phil', last_name: 'good', middle_name: 'andrew', nick_name: 'mitch', birth_date: Time.now-60.years
     @created_count += 1
     @player_info.save!
     
@@ -31,7 +31,7 @@ RSpec.describe PlayerInfo, type: :model do
     
   end
   
-  it "should allow changes" do
+  it "should allow changes to player info attributes" do
     res = @player_info.update first_name: "charles"    
     expect(res).to be true
     
@@ -60,7 +60,7 @@ RSpec.describe PlayerInfo, type: :model do
     @player_info.birth_date = DateTime.now - 10.years
     @player_info.death_date = @player_info.birth_date - 1.day
     expect(@player_info.save).to be false
-    expect(@player_info.errors.messages).to have_key(:dates), "Errors should contain dates: #{@player_info.errors.inspect}"
+    expect(@player_info.errors.messages).to have_key(:"birth and death dates"), "Errors should contain dates: #{@player_info.errors.inspect}"
     
   end
   
@@ -68,8 +68,24 @@ RSpec.describe PlayerInfo, type: :model do
     @player_info.start_year = Time.now.year + 2
     expect(@player_info.save).to be false
     expect(@player_info.errors.messages).to have_key(:"start year"), "Errors should contain start year: #{@player_info.errors.inspect}"
-    
   end
+  
+  it "checks whether start year is at least 19 years after and less than 30 years after birth date" do
+    @player_info.birth_date = Time.now - 50.years
+    @player_info.start_year = @player_info.birth_date.year + 19
+    expect(@player_info.save).to be true
+    @player_info.start_year = @player_info.birth_date.year + 29
+    expect(@player_info.save).to be true
+    
+    @player_info.start_year = @player_info.birth_date.year + 30
+    expect(@player_info.save).to be false
+    expect(@player_info.errors.messages).to have_key(:"start year"), "Errors should contain start year: #{@player_info.errors.inspect}"
+    
+    @player_info.start_year = @player_info.birth_date.year + 18
+    expect(@player_info.save).to be false
+    expect(@player_info.errors.messages).to have_key(:"start year"), "Errors should contain start year: #{@player_info.errors.inspect}"
+  end
+  
   it "checks whether end year is after this year" do
     @player_info.end_year = Time.now.year + 2
     expect(@player_info.save).to be false
@@ -81,9 +97,24 @@ RSpec.describe PlayerInfo, type: :model do
     @player_info.start_year = Time.now.year - 20
     @player_info.end_year = @player_info.start_year - 1
     expect(@player_info.save).to be false
-    expect(@player_info.errors.messages).to have_key(:years), "Errors should contain years: #{@player_info.errors.inspect}"
+    expect(@player_info.errors.messages).to have_key(:"start and end years"), "Errors should contain years: #{@player_info.errors.inspect}"
     
   end
   
+  it "presents an error if the birth_date is not set and the rank is not set to 881" do
+    orig = Time.now - 60.years
+    @player_info.birth_date = nil
+    @player_info.rank = 881
+    expect(@player_info.save).to be true
+    
+    @player_info.rank = 888
+    expect(@player_info.save).to be false
+    expect(@player_info.errors.messages).to have_key(:"birth date")
+    
+    @player_info.birth_date = orig
+    expect(@player_info.save).to be true
+    
+    
+  end
   
 end

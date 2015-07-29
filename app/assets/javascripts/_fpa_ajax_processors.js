@@ -189,6 +189,28 @@ _fpa.postprocessors = {
         };
           
         check_zip();
+        
+        var handle_country = function(val){
+         
+            if(!val || val === 'US' || val === ''){
+                block.find('.list-group-item.address-region').slideUp();
+                block.find('.list-group-item.address-postal-code').slideUp();
+                block.find('.list-group-item.address-zip').slideDown();
+                block.find('.list-group-item.address-state').slideDown();
+            }else{
+                block.find('.list-group-item.address-region').slideDown();
+                block.find('.list-group-item.address-postal-code').slideDown();
+                block.find('.list-group-item.address-zip').slideUp();
+                block.find('.list-group-item.address-state').slideUp();
+            }
+                
+        };
+        
+        block.find('#address_country').change(function(){
+            handle_country($(this).val());
+        });
+        
+        handle_country($('#address_country').val());
     },
     
     player_contact_edit_form: function(block,data){

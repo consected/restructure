@@ -24,18 +24,48 @@ RSpec.describe Address, type: :model do
       create_user
       create_master      
     end
+    
 
-    
-    
-    it "requires rank to be entered" do
-      address = @master.addresses.build street: '123 main st', city: 'boston', zip: '01234'
+
+    it "allows country US to save with rank set" do
+      address = @master.addresses.build rank: 5, street: '123 main st', city: 'boston', zip: '01234', country: 'us'
+      expect(address.save).to equal(true), "Failed to save address: #{address.errors.messages.inspect}"
+    end
+    it "prevents non-US country to save with without region or postal_code set" do
+      address = @master.addresses.build rank: 5, street: '123 main st', city: 'boston', country: 'ca'
       expect(address.save).to equal false
-      address.rank  = Address::PrimaryRank
-      expect(address.save).to equal(true), "Something went wrong saving. Errors: #{address.errors.inspect}"
-      
+      expect(address.errors.messages).to have_key(:country)
+    end
+    it "allows non-US country to save with with region or postal_code or both set" do
+      address = @master.addresses.build rank: 5, street: '123 main st', city: 'toronto', region: 'ontario', country: 'ca'
+      expect(address.save).to equal true
+      address = @master.addresses.build rank: 5, street: '123 main st', city: 'toronto', postal_code: 'ON5 2GH', country: 'ca'
+      expect(address.save).to equal true
+      address = @master.addresses.build rank: 5, street: '123 main st', city: 'toronto', region: 'ontario', postal_code: 'ON5 2GH', country: 'ca'
+      expect(address.save).to equal true
     end
     
-    it "validates zip" do
+    it "allows non-US country to save with zip and state set, but clears the data so that zip and state are empty when retrieved" do    
+      address = @master.addresses.build rank: 5, street: '123 main st', city: 'toronto', zip: '12671', state: 'ma', country: 'ca', region: 'ontario', postal_code: 'ON5 2GH'
+      expect(address.save).to equal true
+      address.reload
+      expect(address.state).to be nil
+      expect(address.zip).to be nil
+      expect(address.region).to eq 'ontario'
+    end  
+    
+    it "allows US country to save with region and postal_code set, but clears the data so that region and postal_code are empty when retrieved" do    
+      address = @master.addresses.build rank: 5, street: '123 main st', city: 'toronto', zip: '12671', state: 'ma', country: 'us', region: 'ontario', postal_code: 'ON5 2GH'
+      expect(address.save).to equal true
+      address.reload
+      expect(address.region).to be nil
+      expect(address.postal_code).to be nil
+      expect(address.zip).to eq '12671'
+    end  
+    
+    
+    
+    it "validates zip is 5 digit or 5+4 digit format" do
       address = @master.addresses.build street: '123 main st', city: 'boston', rank: 10, zip: '123AB'
       expect(address.save).to eq false
       expect(address.errors.messages).to have_key(:zip), "Data errors: #{address.errors.messages.inspect}"
@@ -78,8 +108,15 @@ RSpec.describe Address, type: :model do
       expect(address.source).to_not be_nil
     end
 
+    it "requires rank to be entered" do
+      address = @master.addresses.build street: '123 main st', city: 'boston', zip: '01234'
+      expect(address.save).to equal false
+      address.rank  = Address::PrimaryRank
+      expect(address.save).to equal(true), "Something went wrong saving. Errors: #{address.errors.inspect}"
+      
+    end
     
-    it "updates rank update across all records based on primary being set" do
+    it "updates rank update across all records based on primary being set so that only primary record can be set and any existing primary ranks will be changed to secondary" do
       addresses = []
       
       addresses << @master.addresses.create(street: '123 main st', city: 'boston', zip: '01234', rank: Address::SecondaryRank) #0

@@ -27,6 +27,9 @@ gem 'devise'
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 gem 'dalli'
+
+gem 'country_select', github: 'stefanpenner/country_select'
+
 # Use Unicorn as the app server
 # gem 'unicorn'
 

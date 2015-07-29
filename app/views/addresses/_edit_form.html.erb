@@ -7,6 +7,10 @@
           <%= inline_cancel_button %>
           <h4 class="list-group-item-heading">Edit Address</h4>
         </li>
+        <li class="list-group-item address-country">        
+            <%= f.label :country %>            
+            <%= f.country_select :country, priority_countries: ["US", "CA", "DE"], class: "form-control country-select"%>            
+        </li>  
         <li class="list-group-item address-street">
             <%= f.label :street %>
             <%= f.text_field :street %>
@@ -31,6 +35,14 @@
             <%= f.label :zip %>
             <%= f.text_field :zip, zip_field_props %>
         </li>
+        <li class="list-group-item address-region">
+            <%= f.label 'province / county' %>
+            <%= f.text_field :region %>
+        </li>        
+        <li class="list-group-item address-postal-code">
+            <%= f.label :postal_code %>
+            <%= f.text_field :postal_code %>
+        </li>        
         <li class="list-group-item address-source">
             <%= f.label :source %>
             <%= f.select :source, general_selection(:addresses_source) %>

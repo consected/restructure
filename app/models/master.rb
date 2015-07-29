@@ -104,7 +104,7 @@ class Master < ActiveRecord::Base
   # attributes that are not nil
   def self.search_on_params params, conditions={}
     
-    joins = DefaultJoins # list of joined tables
+    joins = DefaultJoins.dup # list of joined tables
     wheres = {} # set of equality where clauses
     wheresalt = [nil, {}] # list of non-equality where clauses (such as LIKE)
     selects = ["masters.id", "masters.pro_info_id", "masters.pro_id", "masters.msid", "masters.rank as master_rank"]
@@ -171,9 +171,9 @@ class Master < ActiveRecord::Base
             end
           end
           #TODO fix this!
-          joins << k1s.to_sym        
+          joins << k1.to_sym        
           logger.info "adding standard join #{k1s.to_sym} when vn = #{vn}"
-          conditions[k1s.to_sym] = vn
+          conditions[k1.to_sym] = vn
         end
         # Always add the table to the list of joins and select (so we can get the data)
         
@@ -215,7 +215,7 @@ class Master < ActiveRecord::Base
     cval = condition.last
     
     return if !table_name || !condition || ckey.nil? || cval.nil?
-    altable = AltConditions[table_name]
+    altable = AltConditions[table_name].dup
     return unless altable
     altdef = altable[ckey.to_sym]
     return unless altdef

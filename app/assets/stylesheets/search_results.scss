@@ -271,3 +271,13 @@ li.list-group-item.pro-info-pro_id {
     background-repeat: repeat-x;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff5f5f5', endColorstr='#ffFFFFFF', GradientType=0);
 }
+
+li.list-group-item.address-postal_code strong {text-transform: uppercase;}
+li.list-group-item.address-country strong {text-transform: uppercase;}
+
+ul[data-address-is-us="true"]{
+    li.list-group-item.address-region, li.list-group-item.address-postal_code {display: none;}    
+}
+ul[data-address-is-us="false"]{ 
+    li.list-group-item.address-state, li.list-group-item.address-zip {display: none;}
+}
