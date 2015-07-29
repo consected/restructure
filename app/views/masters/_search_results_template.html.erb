@@ -424,8 +424,8 @@
                 {{#if death_date}}
                   <small>DOD</small> {{local_date death_date '-'}}
                 {{/if}}
-                <span data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
-                {{>accuracy_badge master_id=id player_info=this}}
+                <span data-sub-for="master_id" data-sub-id="{{master_id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
+                {{>accuracy_badge player_info=this}}
                 </span>
                 {{else}}
                 <strong class="no-player-info">(no player info)</strong>

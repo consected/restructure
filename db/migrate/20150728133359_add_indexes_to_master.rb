@@ -1,7 +1,7 @@
 class AddIndexesToMaster < ActiveRecord::Migration
   def change
     
-    execute "ALTER TABLE masters RENAME column proid TO pro_id;"
+    #execute "ALTER TABLE masters RENAME column proid TO pro_id;"
     
     add_index :masters, :msid
     add_index :masters, :pro_id

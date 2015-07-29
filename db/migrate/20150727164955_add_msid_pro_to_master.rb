@@ -1,7 +1,7 @@
 class AddMsidProToMaster < ActiveRecord::Migration
   def change
     add_column :masters, :msid, :integer
-    add_column :masters, :proid, :integer
+    add_column :masters, :pro_id, :integer
     add_column :masters, :pro_info_id, :integer
     
     
