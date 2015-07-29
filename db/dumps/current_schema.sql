@@ -49,6 +49,50 @@ CREATE FUNCTION log_tracker_update() RETURNS trigger
 
 ALTER FUNCTION public.log_tracker_update() OWNER TO phil;
 
+--
+-- Name: update_master_with_player_info(); Type: FUNCTION; Schema: public; Owner: phil
+--
+
+CREATE FUNCTION update_master_with_player_info() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+        UPDATE masters 
+            set rank = (
+            case when NEW.rank is null then -1000 
+                 when (NEW.rank > 12) then NEW.rank * -1 
+                 else new.rank
+            end
+            )
+
+        WHERE masters.id = NEW.master_id;
+
+        RETURN NEW;
+    END;
+    $$;
+
+
+ALTER FUNCTION public.update_master_with_player_info() OWNER TO phil;
+
+--
+-- Name: update_master_with_pro_info(); Type: FUNCTION; Schema: public; Owner: phil
+--
+
+CREATE FUNCTION update_master_with_pro_info() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            UPDATE masters 
+                set pro_info_id = NEW.id, pro_id = NEW.pro_id             
+            WHERE masters.id = NEW.master_id;
+            
+            RETURN NEW;
+        END;
+    $$;
+
+
+ALTER FUNCTION public.update_master_with_pro_info() OWNER TO phil;
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -369,7 +413,11 @@ ALTER SEQUENCE manage_users_id_seq OWNED BY manage_users.id;
 --
 
 CREATE TABLE masters (
-    id integer NOT NULL
+    id integer NOT NULL,
+    msid integer,
+    pro_id integer,
+    pro_info_id integer,
+    rank integer
 );
 
 
@@ -395,6 +443,20 @@ ALTER TABLE public.masters_id_seq OWNER TO phil;
 
 ALTER SEQUENCE masters_id_seq OWNED BY masters.id;
 
+
+--
+-- Name: msid_seq; Type: SEQUENCE; Schema: public; Owner: phil
+--
+
+CREATE SEQUENCE msid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.msid_seq OWNER TO phil;
 
 --
 -- Name: player_contacts; Type: TABLE; Schema: public; Owner: phil; Tablespace: 
@@ -1189,6 +1251,27 @@ CREATE INDEX index_item_flags_on_user_id ON item_flags USING btree (user_id);
 
 
 --
+-- Name: index_masters_on_msid; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_masters_on_msid ON masters USING btree (msid);
+
+
+--
+-- Name: index_masters_on_pro_info_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_masters_on_pro_info_id ON masters USING btree (pro_info_id);
+
+
+--
+-- Name: index_masters_on_proid; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_masters_on_proid ON masters USING btree (pro_id);
+
+
+--
 -- Name: index_player_contacts_on_master_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -1389,6 +1472,34 @@ CREATE UNIQUE INDEX index_users_on_unlock_token ON users USING btree (unlock_tok
 --
 
 CREATE UNIQUE INDEX unique_schema_migrations ON schema_migrations USING btree (version);
+
+
+--
+-- Name: player_info_insert; Type: TRIGGER; Schema: public; Owner: phil
+--
+
+CREATE TRIGGER player_info_insert AFTER INSERT ON player_infos FOR EACH ROW EXECUTE PROCEDURE update_master_with_player_info();
+
+
+--
+-- Name: player_info_update; Type: TRIGGER; Schema: public; Owner: phil
+--
+
+CREATE TRIGGER player_info_update AFTER UPDATE ON player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE update_master_with_player_info();
+
+
+--
+-- Name: pro_info_insert; Type: TRIGGER; Schema: public; Owner: phil
+--
+
+CREATE TRIGGER pro_info_insert AFTER INSERT ON pro_infos FOR EACH ROW EXECUTE PROCEDURE update_master_with_pro_info();
+
+
+--
+-- Name: pro_info_update; Type: TRIGGER; Schema: public; Owner: phil
+--
+
+CREATE TRIGGER pro_info_update AFTER UPDATE ON pro_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE update_master_with_pro_info();
 
 
 --
@@ -1627,6 +1738,14 @@ ALTER TABLE ONLY item_flags
 
 ALTER TABLE ONLY tracker_history
     ADD CONSTRAINT fk_rails_c55341c576 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_c9d7977c0c; Type: FK CONSTRAINT; Schema: public; Owner: phil
+--
+
+ALTER TABLE ONLY masters
+    ADD CONSTRAINT fk_rails_c9d7977c0c FOREIGN KEY (pro_info_id) REFERENCES pro_infos(id);
 
 
 --
