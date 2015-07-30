@@ -49,9 +49,10 @@ module PlayerContactSupport
     }
   end
     
-  def create_item att=nil
+  def create_item att=nil, master=nil
     att ||= valid_attribs
-    @player_contact = create_master.player_contacts.create! att
+    master ||= create_master
+    @player_contact = master.player_contacts.create! att
   end
   
 end

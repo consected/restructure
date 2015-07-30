@@ -1,23 +1,16 @@
 <%= form_for(@college) do |f| %>
-  <% if @college.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@college.errors.count, "error") %> prohibited this college from being saved:</h2>
-
-      <ul>
-      <% @college.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-
+  
   <div class="field">
     <%= f.label :name %><br>
-    <%= f.text_field :name %>
+    <%= f.text_field :name, disabled: !!@college.id%>
   </div>
   <div class="field">
     <%= f.label :synonym_for_id %><br>
-    <%= f.number_field :synonym_for_id %>
+    <%= f.select :synonym_for_id, College.selector_array_pair %>
+  </div>
+  <div class="field">
+    <%= f.label :disable %><br>
+    <%= f.check_box :disabled %>
   </div>
   <div class="actions">
     <%= f.submit %>

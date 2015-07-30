@@ -45,11 +45,11 @@ module AddressSupport
   
   
   
-  def create_item att=nil
+  def create_item att=nil, master=nil
     att ||= valid_attribs
-    
+    master ||= create_master
     create_sources
-    @address = create_master.addresses.create! att
+    @address = master.addresses.create! att
   end
   
 end

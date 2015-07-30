@@ -22,7 +22,7 @@ class PlayerInfo < ActiveRecord::Base
     if rank && rank > BestAccuracyScore  
       return rank * -1 
     elsif !rank
-      return -1000
+      return nil
     else 
       return rank 
     end
@@ -65,7 +65,7 @@ class PlayerInfo < ActiveRecord::Base
   private
 
     def check_college
-      College.create_if_new college
+      College.create_if_new college, user
     end
   
   

@@ -3,33 +3,54 @@ require 'rails_helper'
 RSpec.describe PlayerInfo, type: :model do
   include ModelSupport
   include PlayerInfoSupport
-  before(:each) do
+  before(:all) do
     seed_database
     create_user
+    
+    create_items
+  end
+  before(:each) do
     @master = Master.create
     
     @master.current_user = @user
     
     @created_count = 0
     
-    list_valid_attribs.each do |v|
-      @master.player_infos.create! v
-      @created_count += 1
-    end
+    lnew = {first_name: 'phil', last_name: 'good', middle_name: 'andrew', nick_name: 'mitch', birth_date: Time.now-60.years}
     
-    @player_info = @master.player_infos.build first_name: 'phil', last_name: 'good', middle_name: 'andrew', nick_name: 'mitch', birth_date: Time.now-60.years
+    @list << lnew
+    
+    @player_info = @master.player_infos.build lnew
     @created_count += 1
-    @player_info.save!
-    
+    res = @player_info.save!
+    @created_items << @player_info if res
   end
   
-  it "should create a pro info for testing" do
-
-    expect(@player_info).to be_a PlayerInfo
-    expect(@player_info.id).to_not be nil
-    expect(@master.player_infos.length).to eq(@created_count)
+  it "should store all information related to a player" do
+    create_items
     
+    expect(@created_count).to eq(@list.length), "Expected #{@list.length} items to be created. Got #{@created_count}. Exceptions: #{@exceptions}"
+    
+    num = 0
+     
+    @list.each do |l|
+      pi = @created_items[num]
+      expect(pi).to be_a PlayerInfo
+      expect(pi.id).to_not be_nil
+      expect(pi.user_id).to eq @user.id
+      expect(pi.master_id).to_not be_nil
+      
+      l.each do |k,v|
+        if v.is_a? Time
+          expect(pi.attributes[k.to_s].to_datetime).to be_within(1.hour).of(v.to_datetime), "Date Attribute #{k} in player info #{pi.id} did not match the expected value #{v}. Got #{pi.attributes[k.to_s]}"
+        else
+          expect(pi.attributes[k.to_s]).to eq(v), "(#{v.class}) Attribute #{k} in player info #{pi.id} did not match the expected value #{v}. Got #{pi.attributes[k.to_s]}"
+        end
+      end
+      num += 1
+    end
   end
+  
   
   it "should allow changes to player info attributes" do
     res = @player_info.update first_name: "charles"    

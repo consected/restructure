@@ -23,15 +23,37 @@ module MasterSupport
     @master = master
   end
 
-  def create_items 
-    if respond_to? :list_valid_attribs
-      list_valid_attribs.each do |l|
-        create_item l
-      end
-    else
-      create_item valid_attribs
-    end
+  def create_items from_list=:list_valid_attribs, master=nil
     
+    @created_count = 0
+    @exceptions = []
+    @list = send(from_list)
+    @created_items = []
+    @list.each do |l|
+      begin
+        res = create_item l, master        
+        if res
+          @created_count+=1 
+          @created_items << res
+        end
+      rescue => e
+        @exceptions << e
+      end
+      
+    end
+
+  end
+  
+  def check_all_records_failed
+    
+    expect(@exceptions.length).to eq(@list.length), "Not every test caused the record creation to fail"
+      
+    @exceptions.each do |e|
+      expect(e).to be_a ActiveRecord::RecordInvalid
+    end
+
+    expect(@created_count).to eq 0
+
   end
   
   def opt(bd)
@@ -43,6 +65,11 @@ module MasterSupport
     pick_from list_invalid_attribs      
   end
 
+  def invalid_update_attribs
+    pick_from list_invalid_update_attribs      
+  end
+
+  
   def valid_attribs
     pick_from list_valid_attribs      
   end

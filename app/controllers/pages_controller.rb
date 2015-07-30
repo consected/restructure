@@ -6,8 +6,5 @@ class PagesController < ApplicationController
     end
   end
 
-  def show
-  end
-
   private
 end

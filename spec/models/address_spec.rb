@@ -5,19 +5,8 @@ RSpec.describe Address, type: :model do
   include ModelSupport
   include AddressSupport
   
-  ObjectClass = Address
-  def item
-    @address
-  end
   
-  ObjectsSymbol = ObjectClass.to_s.underscore.pluralize.to_sym
-  ObjectSymbol = ObjectClass.to_s.underscore.to_sym
-  def item_id
-    item.to_param
-  end
-  
-  
-  describe "Check for appropriate data construction" do
+  describe "Address" do
     
     before :each do
       seed_database

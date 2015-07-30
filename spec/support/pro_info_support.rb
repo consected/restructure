@@ -57,9 +57,10 @@ module ProInfoSupport
     }
   end
   
-  def create_item att=nil
+  def create_item  att=nil, master=nil
     att ||= valid_attribs
-    @pro_info = create_master.pro_infos.create! att
+    master ||= create_master
+    @pro_info = master.pro_infos.create! att
   end
   
 end

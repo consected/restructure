@@ -7,7 +7,7 @@ class AddRankToMaster < ActiveRecord::Migration
     BEGIN
         UPDATE masters 
             set rank = (
-            case when NEW.rank is null then -1000 
+            case when NEW.rank is null then null 
                  when (NEW.rank > 12) then NEW.rank * -1 
                  else new.rank
             end

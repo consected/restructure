@@ -25,7 +25,7 @@ Rails.application.routes.draw do
   resources :manage_users
   
   
-  resources :pages, only: [:show, :index]
+  resources :pages, only: [:index]
   
   post 'masters/create' => 'masters#create'
   post 'masters/' => 'masters#index'

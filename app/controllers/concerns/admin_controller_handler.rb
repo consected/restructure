@@ -53,6 +53,7 @@ module AdminControllerHandler
       redirect_to index_path, notice: "#{human_name} created successfully"
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
+      flash[:warning] = "Error creating #{human_name}: #{error_message}"
       render :new
     end
   end
@@ -63,6 +64,7 @@ module AdminControllerHandler
       redirect_to index_path, notice: "#{human_name} updated successfully"
     else
       logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
+      flash[:warning] = "Error updating #{human_name}: #{error_message}"
       render :edit
     end
     
@@ -75,6 +77,15 @@ module AdminControllerHandler
   
   
   private
+  
+    def error_message
+      res = ""
+      object_instance.errors.full_messages.each do |message|
+        res << "; " unless res.blank?
+        res << "#{message}"
+      end
+      res
+    end
 
     def index_path
       redir = {action: :index}

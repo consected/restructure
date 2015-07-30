@@ -404,10 +404,10 @@
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}"> </a>
           {{/if}}
           <div class="row">
-            <div class="col-md-1 result-refs"><span class="msid">{{#if msid}}{{msid}}{{else}}-{{/if}}</span></div>
+            <div class="col-md-2 col-lg-1 result-refs"><span class="msid">{{#if msid}}{{msid}}{{else}}-{{/if}}</span></div>
             <a class="master-expander" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
             
-              <div class="col-md-12 player-info-header">
+              <div class="col-md-11 col-lg-12 player-info-header">
                 {{#with player_infos.[0]}}
                 <strong class="player-names">                
                   {{capitalize first_name}} 

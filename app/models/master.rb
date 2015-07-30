@@ -2,7 +2,7 @@ class Master < ActiveRecord::Base
 
   ResultsLimit = 100
 
-  MasterRank  = "master_rank desc nulls last, masters.id desc".freeze
+  MasterRank  = "master_rank desc nulls last, masters.id desc nulls last".freeze
   PlayerInfoRankOrderClause = "case when rank is null then -1000 when rank > #{PlayerInfo::BestAccuracyScore} then rank * -1 else rank end desc nulls last".freeze
   RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
   TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '

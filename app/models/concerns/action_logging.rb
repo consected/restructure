@@ -9,7 +9,7 @@ module ActionLogging
   def action_logger
     logv = DateTime.now.strftime('%Y-%m-%d')
     @@action_logger ||= {}
-    @@action_logger[logv] ||= Logger.new("#{Rails.root}/log/#{session_class_name}_action_log-#{logv}.log")
+    @@action_logger[logv] ||= Logger.new("#{Rails.root}/action_logs/#{session_class_name}_action_log-#{logv}.log")
   end
   
   def log_action action, sub, results, method, params, status="OK", extras={}

@@ -1,23 +1,16 @@
 <%= form_for(@accuracy_score) do |f| %>
-  <% if @accuracy_score.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@accuracy_score.errors.count, "error") %> prohibited this accuracy_score from being saved:</h2>
-
-      <ul>
-      <% @accuracy_score.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-
+  
   <div class="field">
     <%= f.label :name %><br>
     <%= f.text_field :name %>
   </div>
   <div class="field">
     <%= f.label :value %><br>
-    <%= f.number_field :value %>
+    <%= f.number_field :value, disabled: !!@college.id %>
+  </div>
+  <div class="field">
+    <%= f.label :disable %><br>
+    <%= f.check_box :disabled %>
   </div>
   <div class="actions">
     <%= f.submit %>

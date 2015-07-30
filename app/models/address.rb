@@ -11,19 +11,6 @@ class Address < ActiveRecord::Base
   
   before_save :handle_country
   after_save :handle_primary_status
-
-  
-  def country
-    c = read_attribute(:country)
-    return nil unless c
-    c.upcase
-  end
-
-  def state
-    c = read_attribute(:state)
-    return nil unless c
-    c.upcase
-  end
   
   protected
   

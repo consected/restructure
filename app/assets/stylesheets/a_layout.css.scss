@@ -86,6 +86,12 @@ input.form-control.has-value, select.form-control.has-value {
     background-color: #f2dede !important;
 }
 
+input.form-control.has-value, select.form-control.has-value {
+    &[disabled]{
+        background-color: #eee;
+    }
+}
+
 
 @-webkit-keyframes working {
     0% {background-color: rgba(240,240,255, 0.25);}
@@ -129,3 +135,18 @@ a[data-toggle="collapse"] {outline: 0; }
 a[data-toggle="collapse"].master-expander {color: inherit;}
 a[data-toggle="collapse"]:hover {color: #770000}
 a[data-toggle="collapse"]:active, a[data-toggle="collapse"]:focus {color:#2b669a;}
+
+
+span.msid {font-size: 90%;}
+
+@media only screen and (max-width: 1024px) {
+
+   .panel-title { font-size: 14px; }
+
+}
+
+@media only screen and (max-width: 1200px) {
+
+   .panel-title { font-size: 15px; }
+
+}

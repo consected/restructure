@@ -4,12 +4,12 @@ module PlayerInfoSupport
     res = []
     
     (1..5).each do |l|
-      bd = (DateTime.now - (rand(50)+30).years)
+      bd = (Date.today - (rand(50)+30).years)
       bd = opt(bd)
 
       dd = nil    
       if bd      
-        dd = opt(DateTime.now - (rand(10).years) )
+        dd = opt(Date.today - (rand(10).years) )
       end
 
       start_year = nil
@@ -37,12 +37,12 @@ module PlayerInfoSupport
   
   def list_invalid_attribs
     [{
-      birth_date:  DateTime.now + 1.day,
-      death_date:  DateTime.now + 1.day
+      birth_date:  Date.today + 1.day,
+      death_date:  Date.today + 1.day
     },    
     {
-      birth_date: DateTime.now - 100.days,
-      death_date: DateTime.now - 101.days
+      birth_date: Date.today - 100.days,
+      death_date: Date.today - 101.days
     }]
   end
 
@@ -62,9 +62,10 @@ module PlayerInfoSupport
     }
   end
   
-  def create_item att=nil
+  def create_item  att=nil, master=nil
     att ||= valid_attribs
-    @player_info = create_master.player_infos.create! att
+    master ||= create_master
+    @player_info = master.player_infos.create! att
   end
   
 end

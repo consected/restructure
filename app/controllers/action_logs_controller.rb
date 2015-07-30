@@ -3,7 +3,7 @@ class ActionLogsController < ApplicationController
   include AdminControllerHandler
   
   def index
-    @action_logs = Dir.glob("log/*_action_log-*.log")
+    @action_logs = Dir.glob("action_logs/*_action_log-*.log")
   end
   
   def show

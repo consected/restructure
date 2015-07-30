@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150729182424) do
+ActiveRecord::Schema.define(version: 20150730202422) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -68,7 +68,12 @@ ActiveRecord::Schema.define(version: 20150729182424) do
     t.string  "name"
     t.integer "synonym_for_id"
     t.boolean "disabled"
+    t.integer "admin_id"
+    t.integer "user_id"
   end
+
+  add_index "colleges", ["admin_id"], name: "index_colleges_on_admin_id", using: :btree
+  add_index "colleges", ["user_id"], name: "index_colleges_on_user_id", using: :btree
 
   create_table "general_selections", force: :cascade do |t|
     t.string   "name"
@@ -143,17 +148,12 @@ ActiveRecord::Schema.define(version: 20150729182424) do
     t.string   "nick_name"
     t.date     "birth_date"
     t.date     "death_date"
-    t.string   "occupation_category"
-    t.string   "company"
-    t.string   "company_description"
-    t.string   "transaction_status"
-    t.string   "transaction_substatus"
     t.integer  "user_id"
-    t.datetime "created_at",                                                      null: false
-    t.datetime "updated_at",                      default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                                             null: false
+    t.datetime "updated_at",             default: '2015-07-17 14:00:33'
     t.string   "contact_pref"
     t.integer  "start_year"
-    t.string   "in_survey",             limit: 1
+    t.string   "in_survey",    limit: 1
     t.integer  "rank"
     t.string   "notes"
     t.integer  "contact_id"
@@ -319,6 +319,8 @@ ActiveRecord::Schema.define(version: 20150729182424) do
   add_foreign_key "accuracy_scores", "admins"
   add_foreign_key "addresses", "masters"
   add_foreign_key "addresses", "users"
+  add_foreign_key "colleges", "admins"
+  add_foreign_key "colleges", "users"
   add_foreign_key "general_selections", "admins"
   add_foreign_key "item_flag_names", "admins"
   add_foreign_key "item_flags", "item_flag_names"

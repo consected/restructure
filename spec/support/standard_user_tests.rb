@@ -26,7 +26,7 @@ shared_examples 'a standard user controller' do
     before_each_login_user
      
     it "assigns all items as @vars" do      
-      create_items
+      create_items # creates a new master for each item
       
       get :index, {master_id: @master_id}      
       expect(assigns(ObjectsSymbol)).to eq([item])
