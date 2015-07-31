@@ -153,7 +153,10 @@ CREATE TABLE addresses (
     rec_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now()
+    updated_at timestamp without time zone DEFAULT now(),
+    country character varying(3),
+    postal_code character varying,
+    region character varying
 );
 
 
@@ -232,7 +235,9 @@ CREATE TABLE colleges (
     id integer NOT NULL,
     name character varying,
     synonym_for_id integer,
-    disabled boolean
+    disabled boolean,
+    admin_id integer,
+    user_id integer
 );
 
 
@@ -511,11 +516,6 @@ CREATE TABLE player_infos (
     nick_name character varying,
     birth_date date,
     death_date date,
-    occupation_category character varying,
-    company character varying,
-    company_description character varying,
-    transaction_status character varying,
-    transaction_substatus character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone DEFAULT now(),
@@ -1223,6 +1223,20 @@ CREATE INDEX index_addresses_on_user_id ON addresses USING btree (user_id);
 
 
 --
+-- Name: index_colleges_on_admin_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_colleges_on_admin_id ON colleges USING btree (admin_id);
+
+
+--
+-- Name: index_colleges_on_user_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_colleges_on_user_id ON colleges USING btree (user_id);
+
+
+--
 -- Name: index_general_selections_on_admin_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -1605,6 +1619,14 @@ ALTER TABLE ONLY addresses
 
 
 --
+-- Name: fk_rails_49306e4f49; Type: FK CONSTRAINT; Schema: public; Owner: phil
+--
+
+ALTER TABLE ONLY colleges
+    ADD CONSTRAINT fk_rails_49306e4f49 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_564af80fb6; Type: FK CONSTRAINT; Schema: public; Owner: phil
 --
 
@@ -1706,6 +1728,14 @@ ALTER TABLE ONLY tracker_history
 
 ALTER TABLE ONLY addresses
     ADD CONSTRAINT fk_rails_a44670b00a FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_b0a6220067; Type: FK CONSTRAINT; Schema: public; Owner: phil
+--
+
+ALTER TABLE ONLY colleges
+    ADD CONSTRAINT fk_rails_b0a6220067 FOREIGN KEY (admin_id) REFERENCES admins(id);
 
 
 --
