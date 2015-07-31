@@ -2,27 +2,27 @@ Rails.application.routes.draw do
 
   
     
-  resources :action_logs
+  resources :action_logs, only: [:show, :index]
   
-  resources :accuracy_scores
+  resources :accuracy_scores, except: [:destroy]
   
-  resources :colleges
-  resources :general_selections
-  resources :item_flag_names
+  resources :colleges, except: [:destroy]
+  resources :general_selections, except: [:destroy]
+  resources :item_flag_names, except: [:destroy]
   
-  resources :protocols do
-    resources :sub_processes do
-      resources :protocol_events
+  resources :protocols, except: [:destroy] do
+    resources :sub_processes, except: [:destroy] do
+      resources :protocol_events, except: [:destroy]
     end
     
   end
   
-  resources :protocol_events
-  resources :sub_processes
+  resources :protocol_events, except: [:destroy]
+  resources :sub_processes, except: [:destroy]
   
   
   get 'manage_users/home'
-  resources :manage_users
+  resources :manage_users, except: [:destroy]
   
   
   resources :pages, only: [:index]
@@ -33,12 +33,12 @@ Rails.application.routes.draw do
   get 'masters/search' => 'masters#search'
   resources :masters, only: [:show, :index, :new, :create] do
     resources :tracker_histories, only: [:index]
-    resources :player_infos    
-    resources :player_contacts
-    resources :pro_infos
-    resources :addresses
-    resources :scantrons
-    resources :trackers do
+    resources :player_infos, except: [:destroy]    
+    resources :player_contacts, except: [:destroy]
+    resources :pro_infos, only: [:show, :index]    
+    resources :addresses, except: [:destroy]
+    resources :scantrons, except: [:destroy]
+    resources :trackers, except: [:destroy] do
       resources :tracker_histories, only: [:index]
     end
     
@@ -67,7 +67,7 @@ Rails.application.routes.draw do
   end
   
   
-  root "home#index", :as=> 'guest_home'
+  root "masters#search", :as=> 'guest_home'
   
   
   

@@ -72,8 +72,11 @@ class Master < ActiveRecord::Base
       nick_name: {value: :starts_with}
       
     },
+    addresses: {
+      zip: {value: :starts_with}
+    },
     player_contacts: {
-      data: {value: [:starts_with, :strip_spaces]}
+      data: {value: [:starts_with, :strip_non_alpha_numeric], condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?"}
     },
     not_trackers: {
       protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)"},
@@ -91,7 +94,7 @@ class Master < ActiveRecord::Base
       start_year: {value: :is, condition: "(player_infos.start_year = ? OR pro_infos.start_year = ?)", joins: :pro_infos},
       end_year: {value: :is, condition: "(player_infos.end_year = ? OR pro_infos.end_year = ?)", joins: :pro_infos},
       college: {value: :is, condition: "(player_infos.college = ? OR pro_infos.college = ?)", joins: :pro_infos},
-      contact_data: {value: [:starts_with, :strip_spaces], condition: "player_contacts.data LIKE ?", joins: :player_contacts }
+      contact_data: {value: [:starts_with, :strip_non_alpha_numeric], condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?", joins: :player_contacts}
     }
     
   }
@@ -215,23 +218,27 @@ class Master < ActiveRecord::Base
     cval = condition.last
     
     return if !table_name || !condition || ckey.nil? || cval.nil?
-    altable = AltConditions[table_name].dup
+    altable = AltConditions[table_name]
     return unless altable
+    altable = altable.dup
     altdef = altable[ckey.to_sym]
     return unless altdef
+    altdef = altdef.dup
     
     
     cond_op = altdef[:value]
     return if cond_op == :do_nothing
+    
+    cond_op = [cond_op] unless cond_op.is_a? Array
     
     refname = "#{table_name}_#{ckey}"
     
     
     if altdef[:condition]
       alt  = altdef[:condition]
-    elsif cond_op == :starts_with || cond_op == :contains
+    elsif cond_op.include?(:starts_with) || cond_op.include?(:contains)
       alt = "#{table_name}.#{ckey} LIKE ?"      
-    elsif cond_op == :is_not
+    elsif cond_op.include?(:is_not)
       alt = "#{table_name}.#{ckey} <> ?"
     end
     
@@ -239,6 +246,8 @@ class Master < ActiveRecord::Base
       altdef[:value].each do |d|
         if d == :strip_spaces
           cval.gsub!(' ','')
+        elsif d == :strip_non_alpha_numeric
+          cval.gsub!(/\W+/,'')
         elsif d == :upcase
           cval.upcase!
         end
@@ -247,11 +256,11 @@ class Master < ActiveRecord::Base
     
     alt = alt.gsub('?', ":#{refname}")
     
-    cvaltotal = "#{cval}%" if cond_op == :starts_with
-    cvaltotal = "%#{cval}%" if cond_op == :contains
-    cvaltotal = cval if cond_op == :is
-    cvaltotal = "#{cval} years" if cond_op == :years
-    cvaltotal = "#{cval}" if cond_op == :is_not
+    cvaltotal = "#{cval}%" if cond_op.include? :starts_with
+    cvaltotal = "%#{cval}%" if cond_op.include? :contains
+    cvaltotal = cval if cond_op.include? :is
+    cvaltotal = "#{cval} years" if cond_op.include? :years
+    cvaltotal = "#{cval}" if cond_op.include? :is_not
     
     joins = altdef[:joins]
     

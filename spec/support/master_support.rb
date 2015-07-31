@@ -1,6 +1,28 @@
 require 'support/seeds'
 module MasterSupport
   
+  
+    
+  def objects_symbol
+    object_class.to_s.underscore.pluralize.to_sym
+  end
+  
+  def object_symbol
+    object_class.to_s.underscore.to_sym
+  end
+  
+  def item_id
+    item.to_param
+  end
+  
+  def edit_form_admin
+    "#{objects_symbol}/edit"
+  end
+  
+  def edit_form_user
+    "#{objects_symbol}/_edit_form"
+  end
+  
   def create_sources
     
     if GeneralSelection.where(item_type: 'addresses_source').length == 0
@@ -11,9 +33,12 @@ module MasterSupport
   end
   
   
-  def create_master user=nil
+  def create_master user=nil, att=nil
     user ||= @user
-    master = Master.create
+    
+    att ||= { msid: rand(10000000), pro_id: rand(1000000) }
+    
+    master = Master.create! att
     master.current_user = user
     master.save!
     

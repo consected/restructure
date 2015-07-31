@@ -38,7 +38,7 @@ shared_examples 'a standard admin controller' do
       create_items
       
       get :index      
-      expect(assigns(ObjectsSymbol)).to eq(@created_items), "Failed to get created items. #{@exceptions}"
+      expect(assigns(objects_symbol)).to eq(@created_items), "Failed to get created items. #{@exceptions}"
     end
   end
 
@@ -50,7 +50,7 @@ shared_examples 'a standard admin controller' do
       create_item
   
       get :show, {:id => item_id}
-      expect(assigns(ObjectSymbol)).to eq(item)
+      expect(assigns(object_symbol)).to eq(item)
     end
   end
 
@@ -60,7 +60,7 @@ shared_examples 'a standard admin controller' do
     it "assigns a new item as @var" do
       
       get :new
-      expect(assigns(ObjectSymbol)).to be_a_new(ObjectClass)
+      expect(assigns(object_symbol)).to be_a_new(object_class)
     end
   end
 
@@ -69,8 +69,8 @@ shared_examples 'a standard admin controller' do
     it "assigns the requested item as @var" do
       create_item
       get :edit, {:id => item_id}
-      expect(assigns(ObjectSymbol)).to eq(item)
-      expect(response).to render_template(edit_form)
+      expect(assigns(object_symbol)).to eq(item)
+      expect(response).to render_template(edit_form_admin)
     end
   end
 
@@ -81,35 +81,35 @@ shared_examples 'a standard admin controller' do
       it "creates a new item" do
         
         expect {
-          post :create, {ObjectSymbol => valid_attributes}
-        }.to change(ObjectClass, :count).by(1)
+          post :create, {object_symbol => valid_attributes}
+        }.to change(object_class, :count).by(1)
       end
 
       it "assigns a newly created item as @var" do
         
-        post :create, {ObjectSymbol => valid_attributes}
-        expect(assigns(ObjectSymbol)).to be_a(ObjectClass)
-        expect(assigns(ObjectSymbol)).to be_persisted
+        post :create, {object_symbol => valid_attributes}
+        expect(assigns(object_symbol)).to be_a(object_class)
+        expect(assigns(object_symbol)).to be_persisted
       end
 
       it "return success" do
         
-        post :create, {ObjectSymbol => valid_attributes}
-        expect(response).to redirect_to "/#{ObjectsSymbol}"
+        post :create, {object_symbol => valid_attributes}
+        expect(response).to redirect_to "/#{objects_symbol}"
       end
     end
 
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
         
-        post :create, {ObjectSymbol => invalid_attributes}
-        expect(assigns(ObjectSymbol)).to be_a_new(ObjectClass)
+        post :create, {object_symbol => invalid_attributes}
+        expect(assigns(object_symbol)).to be_a_new(object_class)
       end
 
       it "re-renders the 'new' template" do
         list_invalid_attributes.each do |inv|
           
-          post :create, {ObjectSymbol => inv}
+          post :create, {object_symbol => inv}
           expect(response).to render_template("new")
         end
       end
@@ -126,7 +126,7 @@ shared_examples 'a standard admin controller' do
       
       it "updates the requested item" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => new_attributes}
+        put :update, {:id => item_id, object_symbol => new_attributes}
         item.reload
         new_attribs_downcase.each do |k, att|
           expect(item.send(k)).to eq att
@@ -135,29 +135,29 @@ shared_examples 'a standard admin controller' do
 
       it "assigns the requested item as @var" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => new_attributes}
-        expect(assigns(ObjectSymbol)).to eq item
+        put :update, {:id => item_id, object_symbol => new_attributes}
+        expect(assigns(object_symbol)).to eq item
       end
 
       it "redirects to the index" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => new_attributes}
+        put :update, {:id => item_id, object_symbol => new_attributes}
         expect(flash[:warning]).to_not be_present
-        expect(response).to redirect_to("/#{ObjectsSymbol}")
+        expect(response).to redirect_to("/#{objects_symbol}")
       end
     end
 
     context "with invalid params" do
       it "assigns the item as @var" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => invalid_update_attributes}
+        put :update, {:id => item_id, object_symbol => invalid_update_attributes}
         expect(flash[:warning]).to be_present
-        expect(assigns(ObjectSymbol)).to eq(item)
+        expect(assigns(object_symbol)).to eq(item)
       end
 
       it "re-renders the 'edit' template" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => invalid_update_attributes}
+        put :update, {:id => item_id, object_symbol => invalid_update_attributes}
         
         expect(response).to render_template(:edit)
       end
@@ -168,8 +168,9 @@ shared_examples 'a standard admin controller' do
     before_each_login_admin
     it "never destroys the requested item" do
       create_item
-      delete :destroy, {:id => item_id}
-      expect(response).to have_http_status(401)
+      expect(:delete => "#{object_symbol}/#{item_id}").not_to be_routable
+#      delete :destroy, {:id => item_id}
+#      expect(response).to have_http_status(401)
     end
 
     

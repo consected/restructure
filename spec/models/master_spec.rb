@@ -158,6 +158,8 @@ RSpec.describe Master, type: :model do
     
   end  
   
+  
+  
   it "should support simple search for several attributes" do
     params = {general_infos_attributes: {'0'=> {college: @full_player_info.college, last_name: @full_pro_info.last_name, start_year: @full_player_info.start_year }}}
     res = Master.search_on_params params        
@@ -180,6 +182,84 @@ RSpec.describe Master, type: :model do
     end
     
     expect(check).to be true
+    
+  end
+  
+  describe "contact search" do
+    
+    before(:all) do
+      create_data_set
+    end
+    
+    before(:each) do
+      @contact_1 = @full_master_record.player_contacts.create!(data: '(617)794-1213', rec_type: 'phone', rank: 10)
+      @contact_2 = @full_master_record.player_contacts.create!(data: '(617)223-1213 ext 1621', rec_type: 'phone', rank: 5)
+      @contact_3 = @full_master_record.player_contacts.create!(data: 'some.email@testdomain.com', rec_type: 'email', rank: 10)
+
+    end
+    
+    it "should search ok" do
+      params = {general_infos_attributes: {'0'=> {college: @full_player_info.college}}}
+      res = Master.search_on_params params        
+      expect(res.first).to eq(@full_master_record), master_error(res, params)
+    end
+    
+    it "should support search for formatted phone number" do
+
+
+      params = {general_infos_attributes: {'0'=> {contact_data: 'willnotmatch'}}}
+      res = Master.search_on_params params
+      expect(res.length).to eq 0
+
+      params = {general_infos_attributes: {'0'=> {contact_data: @contact_1.data}}}
+      res = Master.search_on_params params        
+      expect(res.length).to eq 1
+      expect(res.first).to eq(@full_master_record), master_error(res, params)
+      expect(res.first.player_infos.first).to eq @full_player_info
+      expect(res.first.pro_infos.first).to eq @full_pro_info
+
+    end
+    it "should support search for partial phone" do
+      params = {general_infos_attributes: {'0'=> {contact_data: @contact_1.data[0..6]}}}
+      res = Master.search_on_params params        
+      expect(res.length).to eq 1
+      expect(res.first).to eq(@full_master_record), master_error(res, params)
+      expect(res.first.player_infos.first).to eq @full_player_info
+      expect(res.first.pro_infos.first).to eq @full_pro_info
+    end
+    
+    it "should support search for unformatted phone " do
+      # Check we can search on data without formatting
+      params = {general_infos_attributes: {'0'=> {contact_data: @contact_2.data.gsub(/\W+/,'')[0..9] }}} 
+      res = Master.search_on_params params       
+      expect(res.first).to eq(@full_master_record), master_error(res, params)
+      expect(res.first.player_infos.first).to eq @full_player_info
+      expect(res.first.pro_infos.first).to eq @full_pro_info
+    end
+    it "should support search for unformatted partial phone " do
+      params = {general_infos_attributes: {'0'=> {contact_data: @contact_3.data.gsub(/\W+/,'') }}} 
+      res = Master.search_on_params params       
+      expect(res.first).to eq(@full_master_record), master_error(res, params)
+      expect(res.first.player_infos.first).to eq @full_player_info
+      expect(res.first.pro_infos.first).to eq @full_pro_info
+    end
+    it "should support search for full email" do
+      params = {general_infos_attributes: {'0'=> {contact_data: @contact_3.data}}} 
+      res = Master.search_on_params params       
+      expect(res.first).to eq(@full_master_record), master_error(res, params)
+      expect(res.first.player_infos.first).to eq @full_player_info
+      expect(res.first.pro_infos.first).to eq @full_pro_info
+
+    end  
+    it "should support search for partial email" do
+      params = {general_infos_attributes: {'0'=> {contact_data: @contact_3.data.split('@').first}}} 
+      res = Master.search_on_params params       
+      expect(res.first).to eq(@full_master_record), master_error(res, params)
+      expect(res.first.player_infos.first).to eq @full_player_info
+      expect(res.first.pro_infos.first).to eq @full_pro_info
+
+    end  
+
     
   end
 end

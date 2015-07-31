@@ -123,14 +123,14 @@
         <%= f.collection_select :state, state_hash, :first, :last, {include_blank: true}, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
-        <%= f.label :zip %>
+        <%= f.label :zip , 'data-add-icon' => 'info-sign', title: 'search for 5 digit zip'%>
         <%= f.text_field :zip, zip_field_props(class: 'form-control') %>
       </div>
     <% end %>
       
     <%= f.fields_for :player_contacts, child_index: 0 do |f| %>        
       <div class="form-group col-sm-3">
-          <%= f.label :phone_or_email, 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value' %>
+          <%= f.label :phone_or_email, 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value (ignores non-alphanumeric characters)' %>
           <%= f.text_field :data, class: 'form-control' %>           
       </div>
     <% end %>

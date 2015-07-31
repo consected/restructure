@@ -3,9 +3,7 @@ class ManageUsersController < ApplicationController
   before_action :authenticate_admin!
   before_action :set_manage_user, only: [:show, :edit, :update, :destroy]
 
-  def home
-    render 'home'
-  end
+
   
   # GET /manage_users
   # GET /manage_users.json

@@ -1,5 +1,5 @@
 require 'set'
-shared_examples 'a standard user routing' do
+shared_examples 'a standard admin routing' do
   
   describe "routing" do
 
@@ -12,7 +12,7 @@ shared_examples 'a standard user routing' do
     end
 
     it "routes to #show" do
-      expect(:get => "#{object_path}/1").to route_to("#{object_name}#show", parent_params.merge(:id => "1") )
+      expect(:get => "#{object_path}/1").to route_to("#{object_name}#show", parent_params.merge(:id => "1"))
     end
 
     it "routes to #edit" do

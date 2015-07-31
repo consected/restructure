@@ -2,22 +2,13 @@ require 'rails_helper'
 RSpec.describe ProInfosController, type: :controller do
 
   include ProInfoSupport
-  ObjectClass = ProInfo
+  def object_class
+    ProInfo
+  end
+  
   def item
     @pro_info
-  end
-  
-  ObjectsSymbol = ObjectClass.to_s.underscore.pluralize.to_sym
-  
-  ObjectSymbol = ObjectClass.to_s.underscore.to_sym
-  
-  def item_id
-    item.to_param
-  end
-  
-  def edit_form
-    "#{ObjectsSymbol}/_edit_form"
-  end
+  end 
   
   let(:valid_attributes) {
     valid_attribs

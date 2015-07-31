@@ -29,7 +29,7 @@ shared_examples 'a standard user controller' do
       create_items # creates a new master for each item
       
       get :index, {master_id: @master_id}      
-      expect(assigns(ObjectsSymbol)).to eq([item])
+      expect(assigns(objects_symbol)).to eq([item])
     end
   end
 
@@ -41,7 +41,7 @@ shared_examples 'a standard user controller' do
       create_item
   
       get :show, {:id => item_id, master_id: @master_id}
-      expect(assigns(ObjectSymbol)).to eq(item)
+      expect(assigns(object_symbol)).to eq(item)
     end
   end
 
@@ -51,7 +51,7 @@ shared_examples 'a standard user controller' do
     it "assigns a new item as @var" do
       master_id = create_master.id
       get :new, {master_id: master_id}
-      expect(assigns(ObjectSymbol)).to be_a_new(ObjectClass)
+      expect(assigns(object_symbol)).to be_a_new(object_class)
     end
   end
 
@@ -60,8 +60,8 @@ shared_examples 'a standard user controller' do
     it "assigns the requested item as @var" do
       create_item
       get :edit, {:id => item_id, master_id: @master_id}
-      expect(assigns(ObjectSymbol)).to eq(item)
-      expect(response).to render_template(edit_form)
+      expect(assigns(object_symbol)).to eq(item)
+      expect(response).to render_template(edit_form_user)
     end
   end
 
@@ -72,20 +72,20 @@ shared_examples 'a standard user controller' do
       it "creates a new item" do
         create_master
         expect {
-          post :create, {ObjectSymbol => valid_attributes, master_id: @master_id}
-        }.to change(ObjectClass, :count).by(1)
+          post :create, {object_symbol => valid_attributes, master_id: @master_id}
+        }.to change(object_class, :count).by(1)
       end
 
       it "assigns a newly created item as @var" do
         create_master
-        post :create, {ObjectSymbol => valid_attributes, master_id: @master_id}
-        expect(assigns(ObjectSymbol)).to be_a(ObjectClass)
-        expect(assigns(ObjectSymbol)).to be_persisted
+        post :create, {object_symbol => valid_attributes, master_id: @master_id}
+        expect(assigns(object_symbol)).to be_a(object_class)
+        expect(assigns(object_symbol)).to be_persisted
       end
 
       it "return success" do
         create_master
-        post :create, {ObjectSymbol => valid_attributes, master_id: @master_id}
+        post :create, {object_symbol => valid_attributes, master_id: @master_id}
         expect(response).to have_http_status 200
       end
     end
@@ -93,14 +93,14 @@ shared_examples 'a standard user controller' do
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
         create_master
-        post :create, {ObjectSymbol => invalid_attributes, master_id: @master_id}
-        expect(assigns(ObjectSymbol)).to be_a_new(ObjectClass)
+        post :create, {object_symbol => invalid_attributes, master_id: @master_id}
+        expect(assigns(object_symbol)).to be_a_new(object_class)
       end
 
       it "re-renders the 'new' template" do
         list_invalid_attributes.each do |inv|
           create_master
-          post :create, {ObjectSymbol => inv, master_id: @master_id}
+          post :create, {object_symbol => inv, master_id: @master_id}
           expect(response).to have_http_status(422), "expected #{response.status} to be 422 with data #{inv}"
           expect(JSON.parse(response.body)).to have_key inv.keys.first.to_s
         end
@@ -117,7 +117,7 @@ shared_examples 'a standard user controller' do
 
       it "updates the requested item" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => new_attributes, master_id: @master_id}
+        put :update, {:id => item_id, object_symbol => new_attributes, master_id: @master_id}
         item.reload
         new_attribs_downcase.each do |k, att|
           expect(item.send(k)).to eq att
@@ -126,16 +126,16 @@ shared_examples 'a standard user controller' do
 
       it "assigns the requested item as @var" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => valid_attributes, master_id: @master_id}
-        expect(assigns(ObjectSymbol)).to eq item
+        put :update, {:id => item_id, object_symbol => valid_attributes, master_id: @master_id}
+        expect(assigns(object_symbol)).to eq item
       end
 
       it "return success" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => valid_attributes, master_id: @master_id}
+        put :update, {:id => item_id, object_symbol => valid_attributes, master_id: @master_id}
         expect(response).to have_http_status 200
         expect(resp.length).to be > 0
-        expect(resp).to have_key ObjectSymbol.to_s
+        expect(resp).to have_key object_symbol.to_s
         
       end
     end
@@ -143,13 +143,13 @@ shared_examples 'a standard user controller' do
     context "with invalid params" do
       it "assigns the item as @var" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => invalid_attributes, master_id: @master_id}
-        expect(assigns(ObjectSymbol)).to eq(item)
+        put :update, {:id => item_id, object_symbol => invalid_attributes, master_id: @master_id}
+        expect(assigns(object_symbol)).to eq(item)
       end
 
       it "re-renders the 'edit' template" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => invalid_attributes, master_id: @master_id}
+        put :update, {:id => item_id, object_symbol => invalid_attributes, master_id: @master_id}
         
         expect(resp.length).to be > 0
         expect(resp).to have_key(invalid_attributes.keys.first.to_s), "Expected #{response.body} to have #{invalid_attributes.keys.first.to_s}"
@@ -161,8 +161,9 @@ shared_examples 'a standard user controller' do
     before_each_login_user
     it "never destroys the requested item" do
       create_item
-      delete :destroy, {:id => item_id, master_id: @master_id}
-      expect(response).to have_http_status(401)
+      expect(:delete => "#{object_symbol}/#{item_id}").not_to be_routable
+      #delete :destroy, {:id => item_id, master_id: @master_id}
+      #expect(response).to have_http_status(401)
     end
 
     

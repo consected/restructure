@@ -6,15 +6,19 @@ module PlayerContactSupport
       {
         data: "brian@test.com",
         source: 'nflpa',
-        rank: opt(rand(10)),
-        active: true,
+        rank: (rand(10)),        
         rec_type: 'email'
       },
       {
         data: "(516)262-1289",
         source: 'nfl',
-        rank: opt(rand(10)),
-        active: true,
+        rank: (rand(10)),        
+        rec_type: 'phone'
+      },
+      {
+        data: "(516)262-1289 ext 2342",
+        source: 'nfl',
+        rank: (rand(10)),        
         rec_type: 'phone'
       }
     ]
@@ -34,6 +38,9 @@ module PlayerContactSupport
       { 
         data: nil,
         rec_type: 'phone'
+      },
+      {
+        rank: nil
       }
     ]
   end
@@ -42,8 +49,7 @@ module PlayerContactSupport
   def new_attribs
     @new_attribs = {
       data: '(615)661-8983 ext 1364',
-      rec_type: 'phone',
-      active: false,
+      rec_type: 'phone',      
       rank: -1
       
     }

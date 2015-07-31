@@ -11,7 +11,7 @@ class ActionLogsController < ApplicationController
     logger.info "ID: #{id}"
     f = File.basename(id, '.log')
     logger.info "File: #{f}"
-    fn = "log/#{f}.log"
+    fn = "action_logs/#{f}.log"
     @action_log = []
     File.open(fn).each { |l|
       if l[0].to_s != '#'

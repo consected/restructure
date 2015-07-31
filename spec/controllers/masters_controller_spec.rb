@@ -16,7 +16,7 @@ RSpec.describe MastersController, type: :controller do
     end
     
     it "searches MSID and returns nothing" do
-      get :index, {mode: 'MSID', master: {id: 10000}}
+      get :index, {mode: 'MSID', master: {msid: 10000}}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']).to eq 0
@@ -28,7 +28,7 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
       
-      get :index, {mode: 'MSID', master: {id: m.id}}
+      get :index, {mode: 'MSID', master: {msid: m.msid}}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']).to eq 1
@@ -44,13 +44,34 @@ RSpec.describe MastersController, type: :controller do
       expect(jres['count']).to eq 0
     end
     
-    it "searches MSID and matches a result" do
+    it "searches pro id and matches a result" do
       
       create_master
       m = create_master
       create_master
       
-      get :index, {mode: 'MSID', master: {pro_id: m.id}}
+      get :index, {mode: 'MSID', master: {pro_id: m.pro_id}}
+      jres = JSON.parse response.body
+      expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
+      expect(jres['count']).to eq 1
+      expect(jres['masters'].length).to eq 1
+      expect(jres['masters'].first['id']).to eq m.id
+      
+    end    
+    it "searches record ID and returns nothing" do
+      get :index, {mode: 'MSID', master: {id: 10000}}
+      jres = JSON.parse response.body
+      expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
+      expect(jres['count']).to eq 0
+    end
+    
+    it "searches record ID and matches a result" do
+      
+      create_master
+      m = create_master
+      create_master
+      
+      get :index, {mode: 'MSID', master: {id: m.id}}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']).to eq 1

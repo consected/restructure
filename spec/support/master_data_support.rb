@@ -14,15 +14,21 @@ module MasterDataSupport
     res = []
     
     (1..list_length).each do |l|
-      bd = (DateTime.now - (rand(50)+20).years)
+      bd = (DateTime.now - (rand(60)+20).years)
       bd = opt(bd)
 
       dd = nil    
+      start_year = nil
       if bd      
         dd = opt(DateTime.now - (rand(10).years) )
+        start_year = opt(rand(6)+bd.year+19) 
       end
+      
+      rank = rand(999)
+      rank = 881 unless bd
 
-      start_year = opt(rand(10)+1980)
+      
+      
 
       res << {
         first_name: pick_from(first_names).downcase,
@@ -31,10 +37,10 @@ module MasterDataSupport
         nick_name: pick_from(other_names).downcase,
         birth_date: bd,
         death_date: dd,
-        rank: rand(999),
+        rank: rank,
         start_year: start_year,
         college: pick_from(colleges).downcase,
-        end_year: opt(start_year ? start_year + rand(12) : nil),
+        end_year: opt(start_year ? start_year + rand(2) : nil),
         notes: 'kjsad hfkshfk jskjfhksajdhf sadf js dfjk sdkjf sdkjf\njg fjdhsag fjsahdg jsgadfjgsajdfgsf gsgf sdgj sa fj'
       }
     end
@@ -122,16 +128,16 @@ module MasterDataSupport
         l[:rank] = 12
         
         # Ensure start and end year tests can actually run
-        l[:start_year] ||= rand(10)+1980
-        l[:end_year] ||= rand(10)+2000
-        l[:birth_date] ||= (DateTime.now - (rand(50)+20).years)
+        l[:birth_date] ||= (DateTime.now - (rand(50)+40).years)
         l[:death_date] ||= (DateTime.now - (rand(10).years) )
+        l[:start_year] ||= l[:birth_date].year + rand(9)+ 20
+        l[:end_year] ||= l[:start_year] + rand(2)
         
         
-        p[:start_year] ||= rand(10)+1980
-        p[:end_year] ||= rand(10)+2000
-        p[:birth_date] ||= (DateTime.now - (rand(50)+20).years)  
+        p[:birth_date] ||= (DateTime.now - (rand(50)+40).years)  
         p[:death_date] ||= (DateTime.now - (rand(10).years) )
+        p[:start_year] ||= p[:birth_date].year + rand(9)+ 20
+        p[:end_year] ||= p[:start_year] + rand(2)
         
         
         @full_player_info = create_player_info l, @master
@@ -155,8 +161,8 @@ module MasterDataSupport
     @master = Master.create          
     @master.current_user = @user
     l[:rank] = 10
-    l[:birth_date] = (l[:birth_date] || DateTime.now - 20.years) - 10.years
-    p[:birth_date] = (p[:birth_date] || DateTime.now - 20.years) - 10.years
+    l[:birth_date] = (l[:birth_date] || DateTime.now - 20.years) - 1.years
+    p[:birth_date] = (p[:birth_date] || DateTime.now - 20.years) - 1.years
     create_player_info l, @master
     create_pro_info p, @master
     @master_count += 1 

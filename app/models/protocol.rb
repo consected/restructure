@@ -8,7 +8,7 @@ class Protocol < ActiveRecord::Base
   RecordUpdatesProtocolName = 'Updates'.freeze
   scope :updates, -> { where name: RecordUpdatesProtocolName}
   default_scope -> { order position: :asc }
-  
+  validates :name, presence: true
 
   def self.record_updates_protocol
     Rails.cache.fetch "record_updates_protocol" do
