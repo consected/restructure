@@ -1,29 +1,23 @@
-<%= form_for(@sub_process) do |f| %>
-  <% if @sub_process.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@sub_process.errors.count, "error") %> prohibited this sub_process from being saved:</h2>
+<div class="data-results">
+  <div data-result="admin-edit-form-"  class="admin-edit-form">    
+<%= form_for(object_instance, class: "inline-form", remote: true) do |f| %>
+  <%= render partial: 'admin_handler/form_errors' %>
 
-      <ul>
-      <% @sub_process.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-    <%= f.label :name %><br>
+  <div class="form-group">
+    <%= f.label :name %>
     <%= f.text_field :name %>
   </div>
-  <div class="field">
-    <%= f.label :disabled %><br>
+  <div class="form-group">
+    <%= f.label :disabled %>
     <%= f.check_box :disabled %>
   </div>
-  <div class="field">
-    <%= f.label :protocol_id %><br>
+  <div class="form-group">
+    <%= f.label :protocol_id %>
     <%= f.select :protocol_id, protocol_array %>
   </div>
-  <div class="actions">
-    <%= f.submit %>
+  <div class="form-group">
+    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
   </div>
 <% end %>
+  </div>
+</div>

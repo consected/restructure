@@ -39,7 +39,7 @@ module CollegeSupport
   def list_invalid_update_attribs
     [      
       {
-        name: 'anynewvalue'
+        name: nil
       }
     ]
   end  

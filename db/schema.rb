@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150730202422) do
+ActiveRecord::Schema.define(version: 20150803194551) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,8 +39,8 @@ ActiveRecord::Schema.define(version: 20150730202422) do
     t.integer  "rank"
     t.string   "rec_type"
     t.integer  "user_id"
-    t.datetime "created_at",                                            null: false
-    t.datetime "updated_at",            default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",            default: "now()"
     t.string   "country",     limit: 3
     t.string   "postal_code"
     t.string   "region"
@@ -62,14 +62,17 @@ ActiveRecord::Schema.define(version: 20150730202422) do
     t.datetime "locked_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "disabled"
   end
 
   create_table "colleges", force: :cascade do |t|
-    t.string  "name"
-    t.integer "synonym_for_id"
-    t.boolean "disabled"
-    t.integer "admin_id"
-    t.integer "user_id"
+    t.string   "name"
+    t.integer  "synonym_for_id"
+    t.boolean  "disabled"
+    t.integer  "admin_id"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   add_index "colleges", ["admin_id"], name: "index_colleges_on_admin_id", using: :btree
@@ -123,7 +126,7 @@ ActiveRecord::Schema.define(version: 20150730202422) do
   end
 
   add_index "masters", ["msid"], name: "index_masters_on_msid", using: :btree
-  add_index "masters", ["pro_id"], name: "index_masters_on_pro_id", using: :btree
+  add_index "masters", ["pro_id"], name: "index_masters_on_proid", using: :btree
   add_index "masters", ["pro_info_id"], name: "index_masters_on_pro_info_id", using: :btree
 
   create_table "player_contacts", force: :cascade do |t|
@@ -133,8 +136,8 @@ ActiveRecord::Schema.define(version: 20150730202422) do
     t.string   "source"
     t.integer  "rank"
     t.integer  "user_id"
-    t.datetime "created_at",                                 null: false
-    t.datetime "updated_at", default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at", default: "now()"
   end
 
   add_index "player_contacts", ["master_id"], name: "index_player_contacts_on_master_id", using: :btree
@@ -149,8 +152,8 @@ ActiveRecord::Schema.define(version: 20150730202422) do
     t.date     "birth_date"
     t.date     "death_date"
     t.integer  "user_id"
-    t.datetime "created_at",                                             null: false
-    t.datetime "updated_at",             default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                               null: false
+    t.datetime "updated_at",             default: "now()"
     t.string   "contact_pref"
     t.integer  "start_year"
     t.string   "in_survey",    limit: 1
@@ -186,8 +189,8 @@ ActiveRecord::Schema.define(version: 20150730202422) do
     t.string   "career_info"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",                                      null: false
-    t.datetime "updated_at",      default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",      default: "now()"
     t.integer  "rank"
   end
 
@@ -310,8 +313,11 @@ ActiveRecord::Schema.define(version: 20150730202422) do
     t.integer  "failed_attempts",        default: 0,  null: false
     t.string   "unlock_token"
     t.datetime "locked_at"
+    t.boolean  "disabled"
+    t.integer  "admin_id"
   end
 
+  add_index "users", ["admin_id"], name: "index_users_on_admin_id", using: :btree
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
   add_index "users", ["unlock_token"], name: "index_users_on_unlock_token", unique: true, using: :btree
@@ -351,4 +357,5 @@ ActiveRecord::Schema.define(version: 20150730202422) do
   add_foreign_key "trackers", "protocols"
   add_foreign_key "trackers", "sub_processes"
   add_foreign_key "trackers", "users"
+  add_foreign_key "users", "admins"
 end

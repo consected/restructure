@@ -4,7 +4,7 @@ class College < ActiveRecord::Base
   include SelectorCache
   belongs_to :user
   
-  
+  default_scope -> {order  "colleges.updated_at DESC nulls last"}
   validates :name, presence: true, uniqueness: true
   before_validation :prevent_name_change,  on: :update
   before_validation :check_synonym

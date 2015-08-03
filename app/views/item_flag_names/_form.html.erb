@@ -1,29 +1,22 @@
-<%= form_for(@item_flag_name) do |f| %>
-  <% if @item_flag_name.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@item_flag_name.errors.count, "error") %> prohibited this item_flag_name from being saved:</h2>
-
-      <ul>
-      <% @item_flag_name.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-    <%= f.label :name %><br>
+<div class="data-results">
+  <div data-result="admin-edit-form-"  class="admin-edit-form">    
+<%= form_for(object_instance, class: "inline-form", remote: true) do |f| %>
+  <%= render partial: 'admin_handler/form_errors' %>
+  <div class="form-group">
+    <%= f.label :name %>
     <%= f.text_field :name %>
   </div>
-  <div class="field">
-    <%= f.label :item_type %><br>
-    <%= f.select :item_type, item_types_array %>
+  <div class="form-group">
+    <%= f.label :item_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'item type for existing records can not be changed.' : 'Set item type'}" %>
+    <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
   </div>
-  <div class="field">
-    <%= f.label :disable %><br>
+  <div class="form-group">
+    <%= f.label :disable %>
     <%= f.check_box :disabled %>
   </div>
-  <div class="actions">
-    <%= f.submit %>
+  <div class="form-group">
+    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
   </div>
 <% end %>
+  </div>
+</div>

@@ -8,6 +8,7 @@ class SubProcessesController < ApplicationController
   
   def new
     @sub_process = @protocol.sub_processes.build
+    render partial: 'form'
   end
   
   

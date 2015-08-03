@@ -1,34 +1,37 @@
-<p id="notice"><%= notice %></p>
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">    
+<h1>Processes</h1>
 
-<h1>Sub Processes for <%=@protocol.name%></h1>
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
 
-<table>
+<table class="table tablesorter admin-list">
   <thead>
     <tr>
+      <th></th>
       <th>Name</th>
-      <th>Disabled</th>
       <th>Protocol</th>
+      <th>Disabled</th>
       <th>Admin</th>
-      <th colspan="3"></th>
+      <th></th>
     </tr>
   </thead>
 
   <tbody>
-    <% @sub_processes.each do |sub_process| %>
-      <tr>
-        <td><%= sub_process.name %></td>
-        <td><%= sub_process.disabled %></td>
-        <td><%= sub_process.protocol.name %></td>
-        <td><%= sub_process.admin_name %></td>
-        <td><%= link_to "edit events", protocol_sub_process_protocol_events_path(@protocol, sub_process) %> </td>
-        <td><%= link_to 'Edit', edit_protocol_sub_process_path(@protocol, sub_process) %></td>
+    <% @sub_processes.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td><%= admin_edit_btn list_item.id%> </td>
+      
+        <td><%= list_item.name %></td>        
+        <td><%= list_item.protocol.name%></td>
+        <td><%= list_item.disabled %></td>
+        <td><%= list_item.admin_name %></td>
+        <td><%= link_to "edit events", protocol_sub_process_protocol_events_path(@protocol, list_item) %> </td>
         
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'Protocols', protocols_path %> |
-<%= link_to 'New Sub process', new_protocol_sub_process_path(@protocol)%>
+<%=  render partial: 'admin_handler/index_actions'  %>    
+  </div>
+</div>

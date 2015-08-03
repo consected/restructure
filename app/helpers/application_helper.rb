@@ -1,8 +1,14 @@
 module ApplicationHelper
   
-  def object_instance
-    instance_variable_get("@#{controller_name.singularize}")
+  
+  def object_name    
+    (@object_name || controller_name.singularize)
   end
+  
+  def object_instance
+    instance_variable_get("@#{object_name}")    
+  end
+
   def hyphenated_name
     controller_name.singularize.gsub('_','-')
   end
@@ -44,6 +50,15 @@ module ApplicationHelper
     res[:html] ||= {}
     res[:html].merge!("data-result-target" => "##{hyphenated_name}-#{@master.id}-#{@id}", "data-template" => "#{hyphenated_name}-result-template")
     res
+  end
+  
+  def admin_edit_controls
+    h = "<div class=\"admin-edit-controls\">
+      #{link_to "cancel", url_for(action: :edit)} 
+      #{link_to "admin menu", '/'}
+      </div>
+    ".html_safe
+    
   end
   
 end

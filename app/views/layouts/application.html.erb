@@ -21,7 +21,8 @@
     <%= render partial: 'layouts/navbar' %>
     <div class="flash">  
       <% flash.each do |key, value| 
-          f_class = 'alert-info'
+          key = 'warning' if key == 'alert'
+          f_class = 'alert-info'          
           f_class = "alert-#{key.to_s}" unless key == 'notice'
       %>
       <div class="alert <%= f_class %>" role="alert">
@@ -31,9 +32,10 @@
       <% end %>
     </div>
     <% if current_admin %>
-    <div class="alert alert-warning">
-        <h2>Logged in as Administrator</h2>
-        <p><%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-default' %></p>
+    <div class="alert alert-success">        
+        <h2>Logged in as Administrator: 
+            <%= render partial: 'admin_handler/action_buttons' %>
+        </h2>
     </div>
     <% end %>
 <%= yield %>

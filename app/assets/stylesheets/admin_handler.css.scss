@@ -1,0 +1,22 @@
+table.admin-list tbody {
+    
+    tr:hover {
+        background-color: #ffe;
+    }
+    
+    tr.disabled-result, tr.disabled-result:hover  {
+        background-color: #eee;
+    }
+}
+
+.field_with_errors {
+    display: inline;
+    background-color: #FFF6BF;
+}
+
+.admin-edit-form {
+    background-color: #eee;
+    padding: 1.4em;
+    margin: 1.4em;
+    border-radius: 8px;
+}

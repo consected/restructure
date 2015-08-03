@@ -2,35 +2,13 @@ module AdminControllerHandler
   extend ActiveSupport::Concern
   
   included do
+    
     before_action :authenticate_admin!
     before_action :set_instance_from_id, only: [:show, :edit, :update, :destroy]    
     
     after_action :do_log_action
   end
 
-  def log_action action, sub, results, status="OK"
-    current_admin.log_action action, sub, results, request.method_symbol, params, status
-  end
-  
-  
-  def do_log_action
-    len = (@master_objects ? @master_objects.length : 0)
-    log_action "#{controller_name}##{action_name}", "AUTO", len
-  end
-  
-  def primary_model 
-    controller_name.classify.constantize
-  end
-  def object_name 
-    controller_name.singularize
-  end
-  def objects_name 
-    controller_name.to_sym
-  end
-  def human_name 
-    controller_name.singularize.humanize
-  end
-  
   def index
     set_objects_instance primary_model.all
   end
@@ -38,11 +16,13 @@ module AdminControllerHandler
   def show
   end
 
-  def new
-    set_object_instance primary_model.new
+  def new options = {}
+    set_object_instance primary_model.new unless options[:use_current_object]
+    render partial: 'form'
   end
 
   def edit
+    render partial: 'form'
   end
 
   def create
@@ -53,8 +33,8 @@ module AdminControllerHandler
       redirect_to index_path, notice: "#{human_name} created successfully"
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
-      flash[:warning] = "Error creating #{human_name}: #{error_message}"
-      render :new
+      flash.now[:warning] = "Error creating #{human_name}: #{error_message}"
+      new use_current_object: true
     end
   end
 
@@ -63,9 +43,9 @@ module AdminControllerHandler
     if object_instance.update(secure_params)
       redirect_to index_path, notice: "#{human_name} updated successfully"
     else
-      logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
-      flash[:warning] = "Error updating #{human_name}: #{error_message}"
-      render :edit
+      logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"      
+      flash.now[:warning] = "Error updating #{human_name}: #{error_message}"
+      edit
     end
     
   end
@@ -74,7 +54,31 @@ module AdminControllerHandler
     not_authorized
   end
 
-  
+  protected
+
+    def log_action action, sub, results, status="OK"
+      current_admin.log_action action, sub, results, request.method_symbol, params, status
+    end
+
+
+    def do_log_action
+      len = (@master_objects ? @master_objects.length : 0)
+      log_action "#{controller_name}##{action_name}", "AUTO", len
+    end
+
+    def primary_model 
+      controller_name.classify.constantize
+    end
+    def object_name 
+      controller_name.singularize
+    end
+    def objects_name 
+      controller_name.to_sym
+    end
+    def human_name 
+      controller_name.singularize.humanize
+    end
+
   
   private
   
@@ -92,11 +96,11 @@ module AdminControllerHandler
       redir.merge! @parent_param if @parent_param
       url_for(redir)
     end  
-  
+      
     def set_instance_from_id
       return if params[:id] == 'cancel'
       set_object_instance primary_model.find(params[:id])            
-      @id = object_instance.id      
+      @id = object_instance.id
     end
 
     def set_object_instance o

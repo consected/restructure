@@ -17,5 +17,9 @@ class Admin < ActiveRecord::Base
       errors.add(:email, "change not allowed!")
     end
   end
-    
+
+  def active_for_authentication?    
+    super and self.disabled != true
+  end
+  
 end

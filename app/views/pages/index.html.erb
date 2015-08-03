@@ -1,33 +1,48 @@
 <div class="container" style="padding-top:40px;">
-<div class="panel panel-primary">
-    <div class="panel-body">
+
 <% if current_admin %> 
-  <h2>Admin Actions</h2>
-  <ul class="nav">    
-    
-      <li class="nav"><%= link_to "User Management", manage_users_path %> </li> 
-      <li class="nav"><%= link_to "Manage Protocols / Processes", protocols_path %> </li> 
-      <li class="nav"><%= link_to "Manage Item Flags", item_flag_names_path %> </li> 
-      <li class="nav"><%= link_to "Manage Selections", general_selections_path %> </li> 
-      <li class="nav"><%= link_to "Colleges List", colleges_path %> </li>
-      <li class="nav"><%= link_to "Accuracy Scores", accuracy_scores_path %> </li>
-      <li class="nav"><%= link_to "Action Logs", action_logs_path %> </li>
-      <li class="nav"><%= link_to "Admin Logout", admin_session_path, method: :destroy %> </li>
-  </ul>      
+<div class="panel panel-primary">
+    <div class="panel-body">    
+  <h2 >Admin Actions</h2>
+  <div class="row">
+    <div class="col-sm-12">
+      <ul class="nav">                  
+        <li class="nav"><%= link_to "Accuracy Scores", accuracy_scores_path %> </li>
+        <li class="nav"><%= link_to "Colleges List", colleges_path %> </li>
+        <li class="nav"><%= link_to "General Selections", general_selections_path %> </li> 
+        <li class="nav"><%= link_to "Manage Item Flags", item_flag_names_path %> </li>               
+      </ul>
+    </div>
+    <div class="col-sm-12">
+      <ul class="nav">    
+        <li class="nav"><%= link_to "User Management", manage_users_path %> </li> 
+        <li class="nav"><%= link_to "Manage Protocols / Processes", protocols_path %> </li> 
+        <li class="nav"><%= link_to "Action Logs", action_logs_path %> </li>
+        <li class="nav"><%= link_to "Admin Logout", admin_session_path, method: :destroy %> </li>
+      </ul>      
+    </div>
+  </div>
+  </div>
+</div>
 <% end %>
 
 <% if current_user %>
-  <h2>User Actions</h2>
-  <ul class="nav">    
-      <li class="nav"><%= link_to "Research", masters_path %> </li>
-      
-      <li class="nav"><%= link_to "Create MSID", new_master_path %> </li>
-      
-      <li class="nav"><%= link_to "User Logout", destroy_user_session_path, method: :delete  %> </li>
-  </ul>
+<div class="panel panel-primary">
+    <div class="panel-body">      
+  <h2 >User Actions</h2>
+  
+    
+      <ul class="nav">    
+          <li class="nav"><%= link_to "Research", masters_path %> </li>
+
+          <li class="nav"><%= link_to "Create MSID", new_master_path %> </li>
+
+          <li class="nav"><%= link_to "User Logout", destroy_user_session_path, method: :delete  %> </li>
+      </ul>
+  </div>
+</div>    
+  
 <% end %>
 
-</div>
-    
-</div>
-    </div>
+
+  

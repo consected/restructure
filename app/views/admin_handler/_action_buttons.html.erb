@@ -1,0 +1,19 @@
+<%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-danger' %>
+<% unless controller_name == 'pages' %>
+  <%= link_to "admin menu", "/", class: "btn btn-warning" %>
+
+  <%if @sub_processes || @protocol_events%>
+    <%= link_to "protocols", protocols_path, class: "btn btn-warning" %>
+  <%end%>
+
+  <%if @protocol_events %>
+    <%= link_to "processes", sub_processes_path(@protocol), class: "btn btn-warning" %>
+  <%end%>
+
+  <%if @protocols %>
+    <%= link_to "events for all protocols", protocol_events_path(all: true), class: "btn btn-warning" %>
+  <%end%>
+
+
+  <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new), remote: true, class: "btn btn-primary" if action_name == 'index'%>
+<%end%>

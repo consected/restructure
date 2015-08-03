@@ -1,9 +1,0 @@
-<h1>Create User</h1>
-<%=form_for @user, url: manage_user_path(@user) do |f| %>
-  <%= f.label :email %>
-  <%=f.text_field :email%>
-
-
-<%=check_box_tag :gen_new_pw%> Generate new password
-  <%= f.submit %>
-<% end %>

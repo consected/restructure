@@ -1,30 +1,32 @@
-<p id="notice"><%= notice %></p>
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">    
+<h1>General Selections</h1>
 
-<h1>Listing General Selections</h1>
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
 
-<table>
+<table class="table tablesorter admin-list">
   <thead>
     <tr>
+      <th></th>
       <th>Name</th>
       <th>Value</th>
-      <th>Item type</th>
-      <th>Admin</th>
+      <th>Item type</th>      
       <th>Disabled</th>
-      <th colspan="3"></th>
+      <th>Admin</th>
+      
     </tr>
   </thead>
 
   <tbody>
-    <% @general_selections.each do |general_selection| %>
-      <tr>
-        <td><%= general_selection.name %></td>
-        <td><%= general_selection.value %></td>
-        <td><%= general_selection.item_type %></td>
-        <td><%= general_selection.admin_name %></td>
-        <td><%= general_selection.disabled %></td>
+    <% @general_selections.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td><%= admin_edit_btn list_item.id%> </td>
+        <td><%= list_item.name %></td>
+        <td><%= list_item.value %></td>
+        <td><%= list_item.item_type %></td>
         
-        <td><%= link_to 'Edit', edit_general_selection_path(general_selection) %></td>
-        
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>       
+        <td><%= list_item.admin_name %></td>
       </tr>
     <% end %>
   </tbody>
@@ -32,4 +34,6 @@
 
 <br>
 
-<%= link_to 'New General selection', new_general_selection_path %>
+<%=  render partial: 'admin_handler/index_actions'  %>
+  </div>
+</div>

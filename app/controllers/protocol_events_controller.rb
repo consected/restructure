@@ -15,6 +15,7 @@ class ProtocolEventsController < ApplicationController
   
   def new
     @protocol_event = @sub_process.protocol_events.build
+    render partial: 'form'
   end
   
   

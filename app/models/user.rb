@@ -5,12 +5,14 @@ class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :trackable, :timeoutable, :lockable
+  belongs_to :admin
   validates_uniqueness_of :email, :case_sensitive => false, :allow_blank => true, :if => :email_changed?
   validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => true, :if => :email_changed?
   before_validation :prevent_email_change, on: :update
- 
+  
   before_create :generate_password
   
+  default_scope -> {order email: :asc}
   
   
   def force_password_reset
@@ -24,10 +26,16 @@ class User < ActiveRecord::Base
   def timeout_in  
     30.minutes
   end
+  
+  def admin_name
+    return unless admin
+    admin.email
+  end
 protected
 
+  # Only allow the administrator to change email address
   def prevent_email_change 
-    if email_changed? && self.persisted?
+    if email_changed? && self.persisted? && !admin
       errors.add(:email, "change not allowed!")
     end
   end
@@ -38,5 +46,8 @@ protected
     self.password = generated_password
   end
   
+  def active_for_authentication?    
+    super and self.disabled  != true
+  end
   
 end

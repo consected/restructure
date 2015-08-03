@@ -1,34 +1,28 @@
-<%= form_for(@general_selection) do |f| %>
-  <% if @general_selection.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@general_selection.errors.count, "error") %> prohibited this general_selection from being saved:</h2>
+<div class="data-results">
+  <div data-result="admin-edit-form-"  class="admin-edit-form">    
+<%= form_for(object_instance, class: "inline-form", remote: true) do |f| %>
+  <%= render partial: 'admin_handler/form_errors' %>
 
-      <ul>
-      <% @general_selection.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <div class="field">
-    <%= f.label :name %><br>
+  <div class="form-group">
+    <%= f.label :name %>
     <%= f.text_field :name %>
   </div>
-  <div class="field">
-    <%= f.label :value %><br>
-    <%= f.text_field :value %>
+  <div class="form-group">
+    <%= f.label :value %>
+    <%= f.text_field :value, disabled: !!object_instance.id  %>
   </div>
-  <div class="field">
-    <%= f.label :item_type %><br>
-    <%= f.select :item_type, GeneralSelection::ItemTypes %>
+  <div class="form-group">
+    <%= f.label :item_type %>
+    <%= f.select :item_type, GeneralSelection::ItemTypes, {}, disabled: !!object_instance.id  %>
   </div>
-  <div class="field">
-    <%= f.label :disable %><br>
+  <div class="form-group">
+    <%= f.label :disable %>
     <%= f.check_box :disabled %>
   </div>
 
-  <div class="actions">
-    <%= f.submit %>
+  <div class="form-group">
+    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
   </div>
 <% end %>
+  </div>
+</div>
