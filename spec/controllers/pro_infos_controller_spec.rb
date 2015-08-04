@@ -38,7 +38,7 @@ RSpec.describe ProInfosController, type: :controller do
       create_items
       
       get :index, {master_id: @master_id}      
-      expect(assigns(ObjectsSymbol)).to eq([item])
+      expect(assigns(objects_symbol)).to eq([item])
     end
   end
 
@@ -50,7 +50,7 @@ RSpec.describe ProInfosController, type: :controller do
       create_item
   
       get :show, {:id => item_id, master_id: @master_id}
-      expect(assigns(ObjectSymbol)).to eq(item)
+      expect(assigns(object_symbol)).to eq(item)
     end
   end
 
@@ -59,17 +59,16 @@ RSpec.describe ProInfosController, type: :controller do
     
     it "prevents new" do
       master_id = create_master.id
-      get :new, {master_id: master_id}
-      expect(response).to have_http_status :unauthorized
+      expect(new: {master_id: master_id} ).not_to be_routable
+      
     end
   end
 
   describe "GET #edit" do
     before_each_login_user
     it "prevents editing" do
-      create_item
-      get :edit, {:id => item_id, master_id: @master_id}
-      expect(response).to have_http_status :unauthorized
+      create_item      
+      expect(edit: {:id => item_id, master_id: @master_id}).not_to be_routable
 
     end
   end
@@ -81,21 +80,13 @@ RSpec.describe ProInfosController, type: :controller do
 
       it "prevents create" do
         create_master
-        post :create, {ObjectSymbol => valid_attributes, master_id: @master_id}
-        expect(response).to have_http_status :unauthorized
+        
+        expect(create: {object_symbol => valid_attributes, master_id: @master_id}).not_to be_routable
 
       end      
     end
 
-    context "with invalid params" do
-      it "prevents create" do
-        create_master
-        post :create, {ObjectSymbol => invalid_attributes, master_id: @master_id}
-        expect(response).to have_http_status :unauthorized
-
-      end
-      
-    end
+    
   end
 
   describe "PUT #update" do
@@ -107,30 +98,21 @@ RSpec.describe ProInfosController, type: :controller do
 
       it "prevents updates to the requested item" do
         create_item
-        put :update, {:id => item_id, ObjectSymbol => new_attributes, master_id: @master_id}
-        expect(response).to have_http_status :unauthorized
+        
+        expect(update: {:id => item_id, object_symbol => new_attributes, master_id: @master_id}).not_to be_routable
 
       end
 
     end
 
-    context "with invalid params" do
-      it "prevents updates" do
-        create_item
-        put :update, {:id => item_id, ObjectSymbol => invalid_attributes, master_id: @master_id}
-        expect(response).to have_http_status :unauthorized
-
-      end
-
-    end
+    
   end
 
   describe "DELETE #destroy" do
     before_each_login_user
     it "never destroys the requested item" do
-      create_item
-      delete :destroy, {:id => item_id, master_id: @master_id}
-      expect(response).to have_http_status(401)
+      create_item       
+      expect(destroy: {:id => item_id, master_id: @master_id}).not_to be_routable
     end
 
     

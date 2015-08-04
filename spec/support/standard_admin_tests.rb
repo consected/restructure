@@ -38,7 +38,11 @@ shared_examples 'a standard admin controller' do
       create_items
       
       get :index      
-      expect(assigns(objects_symbol)).to eq(@created_items), "Failed to get created items. #{@exceptions}"
+      
+      # Do this, since we can't guarantee the order of any particular controller response
+      @created_items.each do |ci|
+        expect(assigns(objects_symbol)).to include(ci), "Failed to get created items. #{@exceptions}"
+      end
     end
   end
 
@@ -48,9 +52,8 @@ shared_examples 'a standard admin controller' do
     
     it "assigns the requested item as @var" do
       create_item
-  
-      get :show, {:id => item_id}
-      expect(assigns(object_symbol)).to eq(item)
+        
+      expect(show: {:id => item_id}).not_to be_routable
     end
   end
 
@@ -106,11 +109,11 @@ shared_examples 'a standard admin controller' do
         expect(assigns(object_symbol)).to be_a_new(object_class)
       end
 
-      it "re-renders the 'new' template" do
+      it "re-renders the 'form' template" do
         list_invalid_attributes.each do |inv|
           
           post :create, {object_symbol => inv}
-          expect(response).to render_template("new")
+          expect(response).to render_template("_form")
         end
       end
     end
@@ -150,8 +153,9 @@ shared_examples 'a standard admin controller' do
     context "with invalid params" do
       it "assigns the item as @var" do
         create_item
-        put :update, {:id => item_id, object_symbol => invalid_update_attributes}
-        expect(flash[:warning]).to be_present
+        ia = invalid_update_attributes
+        put :update, {:id => item_id, object_symbol => ia}
+        expect(flash[:warning]).to be_present, "No error was reported when assigning with invalid params: #{ia}"
         expect(assigns(object_symbol)).to eq(item)
       end
 
@@ -159,7 +163,7 @@ shared_examples 'a standard admin controller' do
         create_item
         put :update, {:id => item_id, object_symbol => invalid_update_attributes}
         
-        expect(response).to render_template(:edit)
+        expect(response).to render_template(edit_form_admin)
       end
     end
   end

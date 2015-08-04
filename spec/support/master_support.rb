@@ -16,7 +16,7 @@ module MasterSupport
   end
   
   def edit_form_admin
-    "#{objects_symbol}/edit"
+    "#{objects_symbol}/_form"
   end
   
   def edit_form_user
@@ -38,7 +38,7 @@ module MasterSupport
     
     att ||= { msid: rand(10000000), pro_id: rand(1000000) }
     
-    master = Master.create! att
+    master = Master.new att
     master.current_user = user
     master.save!
     
@@ -48,15 +48,16 @@ module MasterSupport
     @master = master
   end
 
-  def create_items from_list=:list_valid_attribs, master=nil
+  def create_items from_list=:list_valid_attribs, master_or_admin=nil
     
     @created_count = 0
     @exceptions = []
     @list = send(from_list)
     @created_items = []
+    
     @list.each do |l|
       begin
-        res = create_item l, master        
+        res = create_item l, master_or_admin
         if res
           @created_count+=1 
           @created_items << res

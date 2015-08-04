@@ -102,7 +102,10 @@ shared_examples 'a standard user controller' do
           create_master
           post :create, {object_symbol => inv, master_id: @master_id}
           expect(response).to have_http_status(422), "expected #{response.status} to be 422 with data #{inv}"
-          expect(JSON.parse(response.body)).to have_key inv.keys.first.to_s
+          j = JSON.parse(response.body)
+          io = inv.keys.first.to_s
+          i = io.gsub('_', ' ').downcase
+          expect(j[io] || j[i]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{j}"
         end
       end
     end
@@ -118,9 +121,12 @@ shared_examples 'a standard user controller' do
       it "updates the requested item" do
         create_item
         put :update, {:id => item_id, object_symbol => new_attributes, master_id: @master_id}
+        
+        expect(response).to have_http_status(200), "Response was not good: #{response.body}"
+        
         item.reload
         new_attribs_downcase.each do |k, att|
-          expect(item.send(k)).to eq att
+          expect(item.send(k)).to eq(att), "Expected #{item.attributes.inspect} to equal #{new_attribs_downcase}" 
         end
       end
 
@@ -152,7 +158,11 @@ shared_examples 'a standard user controller' do
         put :update, {:id => item_id, object_symbol => invalid_attributes, master_id: @master_id}
         
         expect(resp.length).to be > 0
-        expect(resp).to have_key(invalid_attributes.keys.first.to_s), "Expected #{response.body} to have #{invalid_attributes.keys.first.to_s}"
+        
+        io = invalid_attributes.keys.first.to_s
+        
+        i = io.gsub('_', ' ').downcase
+        expect(resp[i] || resp[io]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
       end
     end
   end

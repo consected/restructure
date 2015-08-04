@@ -1,14 +1,16 @@
 class User < ActiveRecord::Base
   
   include ActionLogging
- 
+  include AdminHandler
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :trackable, :timeoutable, :lockable
   belongs_to :admin
-  validates_uniqueness_of :email, :case_sensitive => false, :allow_blank => true, :if => :email_changed?
-  validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => true, :if => :email_changed?
+  validates_uniqueness_of :email, :case_sensitive => false, :allow_blank => false, :if => :email_changed?
+  validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => false, :if => :email_changed?
   before_validation :prevent_email_change, on: :update
+  before_validation :ensure_admin_for_disabled_change, on: :update
+  validates :admin, presence: true
   
   before_create :generate_password
   
@@ -26,17 +28,28 @@ class User < ActiveRecord::Base
   def timeout_in  
     30.minutes
   end
+
   
-  def admin_name
-    return unless admin
-    admin.email
+  def active_for_authentication?
+    super && !self.disabled
   end
+  
+  def inactive_message
+    !self.disabled  ? super : :account_has_been_disabled    
+  end
+    
 protected
 
   # Only allow the administrator to change email address
   def prevent_email_change 
     if email_changed? && self.persisted? && !admin
       errors.add(:email, "change not allowed!")
+    end
+  end
+
+  def ensure_admin_for_disabled_change
+    if disabled_changed? && self.persisted? && !admin
+      errors.add(:disabled, "change not allowed!")
     end
   end
   
@@ -46,8 +59,5 @@ protected
     self.password = generated_password
   end
   
-  def active_for_authentication?    
-    super and self.disabled  != true
-  end
-  
+
 end

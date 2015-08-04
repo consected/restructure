@@ -16,7 +16,11 @@ class ProInfosController < ApplicationController
   def create
     not_authorized
   end
-  
+
+  def destroy
+    not_authorized
+  end
+    
   private
     
     def secure_params

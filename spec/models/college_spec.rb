@@ -21,16 +21,25 @@ RSpec.describe College, type: :model do
       
     end
     it "should not create a new college if it exists" do
-      prev = College.create_if_new("new college1", @user)
       
-      res = College.create_if_new("new college1", @user)
+      c = College.order(id: :desc).limit(1).first
+      cname = "new college #{c.id+1}"
+      puts "trying college #{cname}"
+      prev = College.create_if_new(cname, @user)
+      expect(prev).to be_a College
+      expect(prev.id).not_to be nil
+      
+      res = College.create_if_new(cname, @user)
       
       expect(res).to be_nil      
     end
     
     it "automatically creates a college if a player info record is created with a new college" do
-      pi_college = 'new college 2'
       
+      c = College.order(id: :desc).first
+      
+      pi_college = "new college #{c.id+2}"
+      puts "trying college #{pi_college}"
       pi = @master.player_infos.create! first_name: "bob", rank: 881, college: pi_college
       
       expect(pi).to be_a PlayerInfo

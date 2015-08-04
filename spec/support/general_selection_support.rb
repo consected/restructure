@@ -65,9 +65,9 @@ module GeneralSelectionSupport
   
   
   
-  def create_item att=nil, master=nil
+  def create_item att=nil, admin=nil
     att ||= valid_attribs    
-    
+    att[:admin] = admin||@admin 
     @general_selection = GeneralSelection.create! att
   end
   

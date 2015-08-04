@@ -7,6 +7,7 @@ RSpec.describe Protocol, type: :model do
     before :each do
       seed_database
       create_user
+      create_admin
       create_master      
       create_items :list_valid_attribs
     end
@@ -18,13 +19,14 @@ RSpec.describe Protocol, type: :model do
       
       Protocol.all.each do |p|
         p.position = rand 100
-        p.save
+        p.admin = @admin
+        p.save!
       end
       
       prev_pos = -1
-      Protocol.all.each do |p|              
-        expect(p.position).to be >= prev_pos        
-        prev_pos  = p.position
+      Protocol.all.each do |p|                      
+        expect(p.position).to be >= prev_pos
+        prev_pos  = p.position if p.position
       end
       
       expect(prev_pos).to be > 0
@@ -36,6 +38,19 @@ RSpec.describe Protocol, type: :model do
       expect(pa.length).to be > 0
       res = pa.select {|p| p.disabled }
       expect(res.length).to eq 0
+    end
+    
+    it "can only have name updated by an admin" do
+      pa = Protocol.active.first
+      pa.name = "new name by me"
+      
+      expect(pa.save).to be false
+      
+      pa.admin = @admin
+      expect(pa.save).to be true
+      
+      pa.reload
+      expect(pa.name).to eq "new name by me"
     end
     
   end

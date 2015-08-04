@@ -6,9 +6,10 @@ RSpec.describe ProInfo, type: :model do
   before(:each) do
     seed_database
     create_user
-    @master = Master.create
-    
+    @master = Master.new    
     @master.current_user = @user
+    @master.save!
+    
     @pro_info = @master.pro_infos.build first_name: 'phil', last_name: 'good', middle_name: 'andrew', nick_name: 'mitch'
     
     @pro_info.save!

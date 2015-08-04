@@ -22,12 +22,32 @@ RSpec.describe Master, type: :model do
     
     pi1 = @full_master_record.player_infos.first
     expect(first_names).to include pi1.first_name.capitalize
-    expect(pi1.user.email).to eq gen_username(full_master_number+@user_start)
+    expect(pi1.user.email).to eq gen_username("#{full_master_number+@user_start}-mds1-")
     expect(pi1.user.email).to_not be nil 
     
     pro1 = @full_master_record.pro_infos.first
     expect(first_names).to include pro1.first_name.capitalize
-    expect(pro1.user.email).to eq gen_username(full_master_number+@user_start)
+    expect(pro1.user.email).to eq gen_username("#{full_master_number+@user_start}-mds1-")
+  end
+
+  it "should see results of database triggers ok" do        
+    pi1 = @full_master_record.player_infos.first
+    pro1 = @full_master_record.pro_infos.first
+    expect(@full_master_record.msid).not_to be nil
+    expect(@full_master_record.pro_id).to eq pro1.pro_id
+    expect(@full_master_record.rank).to eq pi1.rank
+    
+  end
+  
+  it "should ensure users can't change data" do
+    @master.pro_id = rand 1000000
+    expect(@master.save).to be false
+    @master.msid = rand 1000000
+    expect(@master.save).to be false
+    
+    @master.pro_info_id = nil
+    expect(@master.save).to be false
+    
     
   end
   
@@ -46,7 +66,7 @@ RSpec.describe Master, type: :model do
     expect(res.first.pro_infos.first).to eq @full_pro_info
     
     # The user should match that we used to create the item
-    expect(res.first.player_infos.first.user.email).to eq gen_username(full_master_number+@user_start)
+    expect(res.first.player_infos.first.user.email).to eq gen_username("#{full_master_number+@user_start}-mds1-")
         
   end
   

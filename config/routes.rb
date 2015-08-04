@@ -3,26 +3,21 @@ Rails.application.routes.draw do
   
     
   resources :action_logs, only: [:show, :index]
+  resources :accuracy_scores, except: [:show, :destroy]  
+  resources :colleges, except: [:show, :destroy]
+  resources :general_selections, except: [:show, :destroy]
+  resources :item_flag_names, except: [:show, :destroy]
   
-  resources :accuracy_scores, except: [:destroy]
-  
-  resources :colleges, except: [:destroy]
-  resources :general_selections, except: [:destroy]
-  resources :item_flag_names, except: [:destroy]
-  
-  resources :protocols, except: [:destroy] do
-    resources :sub_processes, except: [:destroy] do
-      resources :protocol_events, except: [:destroy]
+  resources :protocols, except: [:show, :destroy] do
+    resources :sub_processes, except: [:show, :destroy] do
+      resources :protocol_events, except: [:show, :destroy]
     end
     
   end
   
-  resources :protocol_events, except: [:destroy]
-  resources :sub_processes, except: [:destroy]
-  
-  
-  get 'manage_users/home'
-  resources :manage_users, except: [:destroy]
+  resources :protocol_events, except: [:show, :destroy]
+  resources :sub_processes, except: [:show, :destroy]  
+  resources :manage_users, except: [:show, :destroy]
   
   
   resources :pages, only: [:index]
@@ -35,7 +30,7 @@ Rails.application.routes.draw do
     resources :tracker_histories, only: [:index]
     resources :player_infos, except: [:destroy]    
     resources :player_contacts, except: [:destroy]
-    resources :pro_infos, only: [:show, :index]    
+    resources :pro_infos, only: [:show, :index], constraints: { id: /\d+/ }    
     resources :addresses, except: [:destroy]
     resources :scantrons, except: [:destroy]
     resources :trackers, except: [:destroy] do

@@ -23,6 +23,20 @@ class ManageUsersController < ApplicationController
     end    
   end
   
+  def create
+  
+    set_object_instance primary_model.new(secure_params)
+    object_instance.admin = current_admin
+    if object_instance.save
+      @users = User.all
+      render partial: 'show'
+    else
+      logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
+      flash.now[:warning] = "Error creating #{human_name}: #{error_message}"
+      new use_current_object: true
+    end
+  end  
+  
   protected
     
     def primary_model 

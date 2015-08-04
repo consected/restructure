@@ -1,21 +1,21 @@
 require 'rails_helper'
 
 RSpec.describe Tracker, type: :model do
-  
+  include ModelSupport
   before(:each) do
     
-    @user = User.create email: 'tracker-user-email@testing.com'
-    @admin = Admin.create email: "tracker-email@testing.com"
+    create_user
+    create_admin
     @p1 = Protocol.create name: 'P1', admin: @admin
     @p2 = Protocol.create name: 'P2', admin: @admin
     
-    @sp1_1 = @p1.sub_processes.create name: 'SP1'
-    @sp1_2 = @p1.sub_processes.create name: 'SP12'
-    @sp2_1 = @p2.sub_processes.create name: 'SP2'
+    @sp1_1 = @p1.sub_processes.create name: 'SP1', admin: @admin
+    @sp1_2 = @p1.sub_processes.create name: 'SP12', admin: @admin
+    @sp2_1 = @p2.sub_processes.create name: 'SP2', admin: @admin
         
-    @master = Master.create
-    
+    @master = Master.new    
     @master.current_user = @user
+    @master.save!
     
     @tracker = @master.trackers.create protocol_id: @p1.id, sub_process_id: @sp1_1.id
   end

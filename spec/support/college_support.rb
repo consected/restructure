@@ -56,8 +56,9 @@ module CollegeSupport
   
   
   
-  def create_item att=nil, master=nil
+  def create_item att=nil, admin=nil
     att ||= valid_attribs    
+    att[:admin] = admin||@admin if admin.is_a? Admin
     
     @college = College.create! att
   end

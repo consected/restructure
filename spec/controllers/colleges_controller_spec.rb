@@ -14,9 +14,11 @@ RSpec.describe CollegesController, type: :controller do
     
   
   before(:all) do
-    College.destroy_all
+    res = College.delete_all
+        
     Rails.cache.clear
   end
+  
   
   it_behaves_like 'a standard admin controller'
   

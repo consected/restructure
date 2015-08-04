@@ -55,11 +55,13 @@ module PlayerInfoSupport
       nick_name: nil,
       birth_date: nil,
       death_date: nil,
-      rank: rand(10),
+      rank: 881,
       start_year: rand(10)+1980,
       end_year: rand(10)+1990,
       notes: 'kjsad hfkshfk jskjfhksajdhf sadf js dfjk sdkjf sdkjf\njg fjdhsag fjsahdg <script>window.location.href="https://google.com";</script>jsgadfjgsajdfgsf gsgf sdgj sa fj'
     }
+
+    @new_attribs
   end
   
   def create_item  att=nil, master=nil

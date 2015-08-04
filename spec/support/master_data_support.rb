@@ -14,7 +14,7 @@ module MasterDataSupport
     res = []
     
     (1..list_length).each do |l|
-      bd = (DateTime.now - (rand(60)+20).years)
+      bd = (DateTime.now - (rand(50)+30).years)
       bd = opt(bd)
 
       dd = nil    
@@ -103,11 +103,12 @@ module MasterDataSupport
     
     player_list.each do |l|
       # Create a user with a specific number embedded
-      create_user(@master_count+@user_start)
+      create_user(@master_count+@user_start, "mds1")
       
       #Create a master and use the created user as the current user
-      @master = Master.create          
+      @master = Master.new 
       @master.current_user = @user
+      @master.save!
       
       # Generate a player_info and pro_info record
       # Player info is the current iteration
@@ -138,11 +139,15 @@ module MasterDataSupport
         p[:death_date] ||= (DateTime.now - (rand(10).years) )
         p[:start_year] ||= p[:birth_date].year + rand(9)+ 20
         p[:end_year] ||= p[:start_year] + rand(2)
+        p[:pro_id] = rand(100000)
+        
         
         
         @full_player_info = create_player_info l, @master
         @full_pro_info = create_pro_info p, @master                
         @full_master_record = @master.reload
+        
+        puts "----------------\n#{@master.inspect}\n#{l.inspect}\n#{p.inspect}\n#{@full_pro_info.attributes.inspect}\n#{Master.find_by_id(@master.id).inspect}\n-----------------"
       else
         # Ensure only the reference record has a rank that is 12
         if l[:rank] == 12
@@ -158,8 +163,9 @@ module MasterDataSupport
     # Create an additional item that can be guaranteed to match the reference item on certain searches, with a lower rank
     l = reference_list_item.dup
     p = reference_pro_item.dup
-    @master = Master.create          
+    @master = Master.new          
     @master.current_user = @user
+    @master.save!
     l[:rank] = 10
     l[:birth_date] = (l[:birth_date] || DateTime.now - 20.years) - 1.years
     p[:birth_date] = (p[:birth_date] || DateTime.now - 20.years) - 1.years
@@ -169,8 +175,9 @@ module MasterDataSupport
     
     # Create master records with player info only
     create_user
-    @master = Master.create    
+    @master = Master.new    
     @master.current_user = @user
+    @master.save!
     player_list.each do |l|
       if l[:rank] == 12
         l[:rank] = 9
@@ -181,8 +188,9 @@ module MasterDataSupport
     
     # Create master records with pro info only
     create_user
-    @master = Master.create    
+    @master = Master.new    
     @master.current_user = @user
+    @master.save!
     pro_list.each do |l|      
       create_pro_info l
       @master_count += 1 

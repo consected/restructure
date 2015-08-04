@@ -3,11 +3,14 @@ require 'support/seed_support'
 module ControllerMacros
   
   def self.create_user
-    a = User.all.last
+    a = User.order(id: :desc).first
     r = 1
-    r = a.id + 10 if a
-    good_email = "testuser-tester-#{r}@testing.com"
-    user = User.create! email: good_email        
+    r = a.id + 1 if a
+    good_email = "ctestuser-tester-#{r}@testing.com"
+    
+    admin, pwa = create_admin
+    
+    user = User.create! email: good_email, admin: admin
     good_password = user.password
     
     [user, good_password]
@@ -15,10 +18,10 @@ module ControllerMacros
   end
 
   def self.create_admin
-    a = Admin.last
+    a = Admin.order(id: :desc).first
     r = 1
-    r = a.id+1 if a
-    good_admin_email = "testadmin-tester#{r}@testing.com"
+    r = a.id + 1 if a
+    good_admin_email = "ctestadmin-tester#{r}@testing.com"
 
     admin = Admin.create! email: good_admin_email
     good_admin_password = admin.password

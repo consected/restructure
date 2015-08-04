@@ -1,6 +1,9 @@
 require 'rails_helper'
 
 describe "admin sign in process" do
+
+  include ModelSupport
+
   before(:all) do
     @good_email = "testuser#{rand(1000000000)}admin@testing.com"
     @good_password = Devise.friendly_token.first(12)
@@ -64,6 +67,29 @@ describe "admin sign in process" do
     expect(page).to have_css ".flash .alert", text: "× Invalid email or password."
 
   end
+  
+  it "should prevent sign in if admin disabled" do
+    
+    admin = Admin.where(email: @good_email).first
+    expect(admin).to be_a Admin
+    expect(admin.id).to equal @admin.id
+    
+    admin.disable!
+    
+    #login_as @user, scope: :user
+    
+    visit "/admins/sign_in"
+    within '#new_admin' do
+      fill_in "Email", with: @good_email
+      fill_in "Password", with: @good_password
+      click_button "Log in"
+    end
+    
+    
+    expect(page).to have_css ".flash .alert", text: "× This account has been disabled."
+
+  end
+  
   
   after(:all) do
     @admin.destroy!

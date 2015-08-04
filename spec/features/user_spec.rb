@@ -1,11 +1,14 @@
 require 'rails_helper'
 
 describe "user sign in process" do
+  
+  include ModelSupport
+  
   before(:all) do
-    @good_email = "test#{rand 100000000}user@testing.com"
-    @good_password = Devise.friendly_token.first(12)
-    @user = User.create email: @good_email
-    @good_password = @user.password
+    
+     
+    @user, @good_password  = create_user
+    @good_email  = @user.email
     
   end
 
@@ -27,8 +30,31 @@ describe "user sign in process" do
     expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
  #   expect(page).to have_content "First or nick name"
   end
+  
+  it "should prevent sign in if user disabled" do
+    
+    user, pw = create_user(rand(1000000000)+100000000)
+    expect(user).to be_a User
+    expect(user.id).to equal @user.id
+    
+    create_admin
+    user.admin = @admin
+    user.disabled = true
+    user.save!
+    expect(user.active_for_authentication?).to be false
+    
+    visit "/users/sign_in"
+    within '#new_user' do
+      fill_in "Email", with: user.email
+      fill_in "Password", with: pw
+      click_button "Log in"
+    end
 
-it "should prevent invalid sign in" do
+    expect(page).to have_css ".flash .alert", text: "× This account has been disabled."
+
+  end
+
+  it "should prevent invalid sign in" do
     
     user = User.where(email: @good_email).first
     expect(user).to be_a User
@@ -67,7 +93,7 @@ it "should prevent invalid sign in" do
     
   
   after(:all) do
-    @user.destroy!
+    
   end
 end
 

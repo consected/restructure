@@ -7,6 +7,9 @@ class Master < ActiveRecord::Base
   RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
   TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
   TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
+  
+  belongs_to :user
+  
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master  
   has_many :pro_infos , inverse_of: :master  
@@ -23,8 +26,12 @@ class Master < ActiveRecord::Base
   has_many :not_tracker_histories, -> { order(TrackerHistoryEventOrderClause)},  class_name: 'TrackerHistory'
   has_many :not_trackers, -> { order(TrackerEventOrderClause)},  class_name: 'Tracker'
 
+  before_validation :prevent_user_updates,  on: :update
+  validates :user, presence: true
   before_create :assign_msid
-    
+
+  
+  
   Master.reflect_on_all_associations(:has_many).each do |assoc| 
     # This association is provided to allow generic search on flagged associated object
     has_many "#{assoc.plural_name}_item_flags".to_sym, through: assoc.plural_name, source: :item_flags
@@ -273,12 +280,21 @@ class Master < ActiveRecord::Base
 
   def current_user= cu
     logger.info "Setting current user: #{cu} in #{self}"
-    @user_id = cu
+    # Set the user association when current_user is set
+    if cu.is_a? User
+      self.user = cu
+    elsif cu.is_a? Number
+      self.user_id = cu
+    end
+    
+    @current_user_id = cu
   end
   
   def current_user
     logger.info "Getting current user: #{@user_id} from #{self}"
-    @user_id
+    # Do not get the user association when requesting the current_user, since we 
+    # do not want the value that has been persisted in the data
+    @current_user_id
   end
   
 private
@@ -288,6 +304,12 @@ private
     max_msid = Master.maximum(:msid) || 0
     self.msid = max_msid + 1
     
+  end
+
+  def prevent_user_updates
+    errors.add :pro_id, "can not be updated by users" if pro_id_changed?
+    errors.add :msid, "can not be updated by users" if msid_changed?
+    errors.add "pro info association", "can not be updated by users" if pro_info_id_changed?
   end
   
 end

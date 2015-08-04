@@ -5,16 +5,11 @@ RSpec.describe PlayerContact, type: :model do
   include ModelSupport
   include PlayerContactSupport
   
-  ObjectClass = PlayerContact
+  
   def item
     @player_contact
   end
   
-  ObjectsSymbol = ObjectClass.to_s.underscore.pluralize.to_sym
-  ObjectSymbol = ObjectClass.to_s.underscore.to_sym
-  def item_id
-    item.to_param
-  end
   
   
   describe "Check for appropriate data construction" do

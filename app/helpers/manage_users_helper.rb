@@ -4,5 +4,8 @@ module ManageUsersHelper
     manage_user_path(user)
   end
   
+  def users_path
+    manage_users_path
+  end
     
 end

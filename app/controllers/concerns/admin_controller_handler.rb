@@ -4,7 +4,7 @@ module AdminControllerHandler
   included do
     
     before_action :authenticate_admin!
-    before_action :set_instance_from_id, only: [:show, :edit, :update, :destroy]    
+    before_action :set_instance_from_id, only: [:edit, :update, :destroy]    
     
     after_action :do_log_action
   end
@@ -13,8 +13,6 @@ module AdminControllerHandler
     set_objects_instance primary_model.all
   end
   
-  def show
-  end
 
   def new options = {}
     set_object_instance primary_model.new unless options[:use_current_object]

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150803194551) do
+ActiveRecord::Schema.define(version: 20150804203710) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -119,15 +119,19 @@ ActiveRecord::Schema.define(version: 20150803194551) do
   end
 
   create_table "masters", force: :cascade do |t|
-    t.integer "msid"
-    t.integer "pro_id"
-    t.integer "pro_info_id"
-    t.integer "rank"
+    t.integer  "msid"
+    t.integer  "pro_id"
+    t.integer  "pro_info_id"
+    t.integer  "rank"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id"
   end
 
   add_index "masters", ["msid"], name: "index_masters_on_msid", using: :btree
   add_index "masters", ["pro_id"], name: "index_masters_on_proid", using: :btree
   add_index "masters", ["pro_info_id"], name: "index_masters_on_pro_info_id", using: :btree
+  add_index "masters", ["user_id"], name: "index_masters_on_user_id", using: :btree
 
   create_table "player_contacts", force: :cascade do |t|
     t.integer  "master_id"
@@ -160,13 +164,11 @@ ActiveRecord::Schema.define(version: 20150803194551) do
     t.integer  "rank"
     t.string   "notes"
     t.integer  "contact_id"
-    t.integer  "pro_info_id"
     t.string   "college"
     t.integer  "end_year"
   end
 
   add_index "player_infos", ["master_id"], name: "index_player_infos_on_master_id", using: :btree
-  add_index "player_infos", ["pro_info_id"], name: "index_player_infos_on_pro_info_id", using: :btree
   add_index "player_infos", ["user_id"], name: "index_player_infos_on_user_id", using: :btree
 
   create_table "pro_infos", force: :cascade do |t|
@@ -332,10 +334,10 @@ ActiveRecord::Schema.define(version: 20150803194551) do
   add_foreign_key "item_flags", "item_flag_names"
   add_foreign_key "item_flags", "users"
   add_foreign_key "masters", "pro_infos"
+  add_foreign_key "masters", "users"
   add_foreign_key "player_contacts", "masters"
   add_foreign_key "player_contacts", "users"
   add_foreign_key "player_infos", "masters"
-  add_foreign_key "player_infos", "pro_infos"
   add_foreign_key "player_infos", "users"
   add_foreign_key "pro_infos", "masters"
   add_foreign_key "pro_infos", "users"

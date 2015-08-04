@@ -3,7 +3,6 @@ class ProInfo < ActiveRecord::Base
   
   before_update :prevent_save
   
-  #has_one :player_info, inverse_of: :pro_info
   attr_accessor :enable_updates
   
   protected

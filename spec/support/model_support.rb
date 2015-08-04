@@ -1,7 +1,7 @@
 require 'support/seed_support'
 module ModelSupport
   
-  UserPrefix = 'ttuser-'
+  UserPrefix = 'f-ttuser-'
   UserDomain = 'testing.com'
   
   def seed_database
@@ -9,28 +9,32 @@ module ModelSupport
   end
   
   def gen_username r
+    
     "#{UserPrefix}#{r}@#{UserDomain}"
   end
   
-  def create_user r=nil
-    a = User.all.last
-    unless r
-      r = 1
-      r = a.id + 10 if a
+  def create_user r=nil, extra=''
+    
+    unless r      
+      r = Time.new.to_f.to_s 
     end
-    good_email = gen_username(r)
-    user = User.create! email: good_email        
+    good_email = gen_username("#{r}-#{extra}-")
+    
+    #puts "Attempting to create user with with name #{good_email}. #{User.find_by_email(good_email).inspect}"
+    admin, pwa = create_admin
+    user = User.create! email: good_email, admin: admin
     good_password = user.password
     @user = user
-    [user, good_password]
-    
+    [user, good_password]    
   end
 
-  def create_admin
-    a = Admin.last
-    r = 1
-    r = a.id+1 if a
-    good_admin_email = "testadmin-tester#{r}@testing.com"
+  def create_admin  r=nil
+    a = Admin.order(id: :desc).first
+    unless r
+      r = 1
+      r = a.id + 1 if a
+    end
+    good_admin_email = "d-testadmin-tester#{r}@testing.com"
 
     admin = Admin.create! email: good_admin_email
     good_admin_password = admin.password

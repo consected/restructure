@@ -12,8 +12,7 @@ module UserHandler
     
     # Ensure the user id is saved
     before_validation :force_write_user    
-#    before_save :user_id_will_change!
-    #before_save :user_will_change!
+
     before_validation :downcase_attributes
     
     # This validation ensures that the user ID has been set in the master object 

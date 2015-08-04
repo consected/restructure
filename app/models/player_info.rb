@@ -3,11 +3,7 @@ class PlayerInfo < ActiveRecord::Base
   include UserHandler
   
   
-  # This is here to link the player_info record to the matched pro_info record from the master list
-  # Although the player_info does not formally belong to the pro_info, the pro_info_id foreign 
-  # key is on the player_info table, and therefore requires a belongs_to association
-  # belongs_to :pro_info, inverse_of: :player_info
- 
+  
   # Allow simple search to function
   attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
   
@@ -52,8 +48,8 @@ class PlayerInfo < ActiveRecord::Base
       latest_year = Time.now.year+1
       errors.add('start year', "is after #{latest_year}") if start_year && start_year > latest_year
       errors.add('end year', "is after  #{latest_year}") if end_year && end_year > latest_year
-      errors.add('start and end years', 'are not sensible') if end_year && start_year && start_year > end_year
-      errors.add('birth and death dates', 'are not sensible') if birth_date && death_date && birth_date > death_date
+      errors.add('start year', 'and end year are not sensible') if end_year && start_year && start_year > end_year
+      errors.add('birth date', 'and death date are not sensible') if birth_date && death_date && birth_date > death_date
       errors.add('birth date', 'is after today') if birth_date && birth_date > DateTime.now
       errors.add('death date', 'is after today') if death_date && death_date > DateTime.now
       errors.add('start year', "is more than 30 years after birth date") if start_year && birth_date && start_year > (birth_date + 29.years).year

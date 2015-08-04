@@ -40,7 +40,7 @@ module ItemFlagNameSupport
     [      
             
       {
-        name: 'any change'        
+        item_type: 'pro_info'        
       }
     ]
   end  
@@ -54,9 +54,9 @@ module ItemFlagNameSupport
   
   
   
-  def create_item att=nil, master=nil
+  def create_item att=nil, admin=nil
     att ||= valid_attribs    
-    
+    att[:admin] = admin||@admin 
     @item_flag_name = ItemFlagName.create! att
   end
   
