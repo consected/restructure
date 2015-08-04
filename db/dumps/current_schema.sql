@@ -200,7 +200,8 @@ CREATE TABLE admins (
     unlock_token character varying,
     locked_at timestamp without time zone,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    disabled boolean
 );
 
 
@@ -237,7 +238,9 @@ CREATE TABLE colleges (
     synonym_for_id integer,
     disabled boolean,
     admin_id integer,
-    user_id integer
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -889,7 +892,9 @@ CREATE TABLE users (
     updated_at timestamp without time zone NOT NULL,
     failed_attempts integer DEFAULT 0 NOT NULL,
     unlock_token character varying,
-    locked_at timestamp without time zone
+    locked_at timestamp without time zone,
+    disabled boolean,
+    admin_id integer
 );
 
 
@@ -1461,6 +1466,13 @@ CREATE INDEX index_trackers_on_user_id ON trackers USING btree (user_id);
 
 
 --
+-- Name: index_users_on_admin_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_users_on_admin_id ON users USING btree (admin_id);
+
+
+--
 -- Name: index_users_on_email; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -1544,6 +1556,14 @@ ALTER TABLE ONLY player_infos
 
 ALTER TABLE ONLY protocol_events
     ADD CONSTRAINT fk_rails_0a64e1160a FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
+-- Name: fk_rails_1694bfe639; Type: FK CONSTRAINT; Schema: public; Owner: phil
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT fk_rails_1694bfe639 FOREIGN KEY (admin_id) REFERENCES admins(id);
 
 
 --
