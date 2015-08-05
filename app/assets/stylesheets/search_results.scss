@@ -281,3 +281,7 @@ ul[data-address-is-us="true"]{
 ul[data-address-is-us="false"]{ 
     li.list-group-item.address-state, li.list-group-item.address-zip {display: none;}
 }
+
+.item-highlight .list-group-item:first-child {
+    background-color: #ffc;
+}

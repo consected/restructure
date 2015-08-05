@@ -167,5 +167,5 @@ RSpec.describe PlayerContact, type: :model do
     
   end
   
-  
+  it_behaves_like 'a standard user model'  
 end

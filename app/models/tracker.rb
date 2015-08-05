@@ -4,6 +4,9 @@ class Tracker < ActiveRecord::Base
   belongs_to :protocol
   belongs_to :sub_process
   belongs_to :protocol_event
+  
+  belongs_to :item, polymorphic: true
+  
   has_many :tracker_histories, inverse_of: :tracker
   before_validation :prevent_protocol_change,  on: :update
 
@@ -102,6 +105,11 @@ class Tracker < ActiveRecord::Base
     
     t.event_date = DateTime.now
     
+    t.item_id = record.id
+    
+    t.set_item_type record.class.name
+    
+    logger.info "Tracking this: #{record.class.name} #{t.item_type}"
     
     return t
   end
@@ -138,6 +146,27 @@ class Tracker < ActiveRecord::Base
     end
   end
   
+
+  def set_item_type it
+    logger.info "Setting it: #{it} in #{self}"
+    @tracker_item_type = it
+  end
+  
+  def item_type=it
+    #self.attributes['item_type'] = it
+    @tracker_item_type = it
+  end
+  
+  def item_type
+    logger.info "Getting item type: #{@tracker_item_type} in #{self}"
+    @tracker_item_type #self.attributes['item_type']
+  end
+  
+  def item_type_us
+    return unless self.item_type && self.item_type
+    self.item_type.underscore
+  end
+  
   def as_json extras={}
     extras[:methods] ||= []
     extras[:methods] << :protocol_name
@@ -145,6 +174,7 @@ class Tracker < ActiveRecord::Base
     extras[:methods] << :sub_process_name
     extras[:methods] << :event_name
     extras[:methods] << :tracker_history_length
+    extras[:methods] << :item_type_us
     extras[:methods] << :_merged
       
     super(extras)

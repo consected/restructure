@@ -46,4 +46,5 @@ RSpec.describe Tracker, type: :model do
     expect(@tracker.save).to be false
   end
   
+
 end

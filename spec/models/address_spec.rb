@@ -151,5 +151,7 @@ RSpec.describe Address, type: :model do
     
   end
   
+  it_behaves_like 'a standard user model'
+  
   
 end

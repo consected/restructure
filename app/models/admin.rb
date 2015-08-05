@@ -2,7 +2,8 @@ class Admin < ActiveRecord::Base
 
   include ActionLogging
 
-  devise :database_authenticatable, :trackable, :timeoutable, :lockable
+  devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
+  
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_reenabling_admin, on: :update
   

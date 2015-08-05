@@ -21,6 +21,7 @@ _fpa.postprocessors = {
         if(data.masters && data.masters.length < 5){
             _fpa.form_utils.format_block(block);
             _fpa.postprocessors.tracker_notes_handler(block);            
+            _fpa.postprocessors.tracker_item_link_hander(block);
         }
         
         $('a.master-expander').click(function(ev){
@@ -30,6 +31,7 @@ _fpa.postprocessors = {
             $(id).on('shown.bs.collapse', function(){
                 _fpa.form_utils.format_block($(this));
                 _fpa.postprocessors.tracker_notes_handler($(this));
+                _fpa.postprocessors.tracker_item_link_hander($(this));
                 $.scrollTo($(this), 200, {offset:-50} );
 
                 $(this).off('shown.bs.collapse');
@@ -48,7 +50,7 @@ _fpa.postprocessors = {
         else if(master_id_list && master_id_list.replace(/ /g, '').length > 1){
             document.title = 'FHPS results';
             window.history.pushState({"html": "/masters/search?utf8=✓&nav_q_id="+master_id_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q_id="+master_id_list);
-        }
+        }                
    
     },
     
@@ -65,25 +67,37 @@ _fpa.postprocessors = {
         
     },
     
+    tracker_item_link_hander: function(block){
+        block.find('a.tracker-link-to-item').not('.link-attached').click(function(){
+            var href = $(this).attr('href');
+            if(!href) return;
+            $(href).addClass('item-highlight');
+        }).addClass('link-attached');  
+    },
+    
     tracker_histories_result_template: function(block, data){
         _fpa.form_utils.format_block(block);
         _fpa.postprocessors.tracker_notes_handler(block);
+        _fpa.postprocessors.tracker_item_link_hander(block);
     },
     
     tracker_chron_result_template: function(block, data){
         _fpa.form_utils.format_block(block);
         _fpa.postprocessors.tracker_notes_handler(block);
+        _fpa.postprocessors.tracker_item_link_hander(block);
     },
     
     tracker_tree_result_template: function(block, data){
         _fpa.form_utils.format_block(block);
         _fpa.postprocessors.tracker_notes_handler(block);
+        _fpa.postprocessors.tracker_item_link_hander(block);
     },
     
 
     tracker_result_template: function(block, data){
         _fpa.form_utils.format_block(block);
         _fpa.postprocessors.tracker_notes_handler(block);
+        _fpa.postprocessors.tracker_item_link_hander(block);
         if(data.tracker && data.tracker._created){
             var t = $('#tracker-count-'+data.tracker.master_id);
             var v = parseInt(t.html());

@@ -35,4 +35,6 @@ RSpec.describe Scantron, type: :model do
   
     
   end
+  
+  it_behaves_like 'a standard user model'
 end

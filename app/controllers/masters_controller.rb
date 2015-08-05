@@ -61,7 +61,7 @@ class MastersController < ApplicationController
           },
           trackers: {
             order: "protocol.position #{Master::TrackerEventOrderClause}",  
-            methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :tracker_history_length, :user_name]
+            methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :tracker_history_length, :user_name, :item_type_us]
           },
           scantrons: {
             order: {scantron_id: :asc},

@@ -138,4 +138,5 @@ RSpec.describe PlayerInfo, type: :model do
     
   end
   
+  it_behaves_like 'a standard user model'  
 end

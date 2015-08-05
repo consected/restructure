@@ -4,12 +4,13 @@ class User < ActiveRecord::Base
   include AdminHandler
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :trackable, :timeoutable, :lockable
+  devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
   belongs_to :admin
   validates_uniqueness_of :email, :case_sensitive => false, :allow_blank => false, :if => :email_changed?
   validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => false, :if => :email_changed?
   before_validation :prevent_email_change, on: :update
   before_validation :ensure_admin_for_disabled_change, on: :update
+  
   validates :admin, presence: true
   
   before_create :generate_password

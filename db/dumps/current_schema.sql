@@ -81,13 +81,13 @@ ALTER FUNCTION public.update_master_with_player_info() OWNER TO phil;
 CREATE FUNCTION update_master_with_pro_info() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            UPDATE masters 
-                set pro_info_id = NEW.id, pro_id = NEW.pro_id             
-            WHERE masters.id = NEW.master_id;
-            
-            RETURN NEW;
-        END;
+    BEGIN
+        UPDATE masters 
+            set pro_info_id = NEW.id, pro_id = NEW.pro_id             
+        WHERE masters.id = NEW.master_id;
+
+        RETURN NEW;
+    END;
     $$;
 
 
@@ -425,7 +425,10 @@ CREATE TABLE masters (
     msid integer,
     pro_id integer,
     pro_info_id integer,
-    rank integer
+    rank integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_id integer
 );
 
 
@@ -528,7 +531,6 @@ CREATE TABLE player_infos (
     rank integer,
     notes character varying,
     contact_id integer,
-    pro_info_id integer,
     college character varying,
     end_year integer
 );
@@ -835,9 +837,6 @@ CREATE TABLE trackers (
     protocol_id integer,
     event character varying,
     event_date timestamp without time zone,
-    c_method character varying,
-    outcome character varying,
-    outcome_date timestamp without time zone,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -1291,6 +1290,13 @@ CREATE INDEX index_masters_on_proid ON masters USING btree (pro_id);
 
 
 --
+-- Name: index_masters_on_user_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
+--
+
+CREATE INDEX index_masters_on_user_id ON masters USING btree (user_id);
+
+
+--
 -- Name: index_player_contacts_on_master_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
 --
 
@@ -1309,13 +1315,6 @@ CREATE INDEX index_player_contacts_on_user_id ON player_contacts USING btree (us
 --
 
 CREATE INDEX index_player_infos_on_master_id ON player_infos USING btree (master_id);
-
-
---
--- Name: index_player_infos_on_pro_info_id; Type: INDEX; Schema: public; Owner: phil; Tablespace: 
---
-
-CREATE INDEX index_player_infos_on_pro_info_id ON player_infos USING btree (pro_info_id);
 
 
 --
@@ -1540,6 +1539,14 @@ CREATE TRIGGER tracker_history_insert AFTER INSERT ON trackers FOR EACH ROW EXEC
 --
 
 CREATE TRIGGER tracker_history_update AFTER UPDATE ON trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_tracker_update();
+
+
+--
+-- Name: fk_rails_00b234154d; Type: FK CONSTRAINT; Schema: public; Owner: phil
+--
+
+ALTER TABLE ONLY masters
+    ADD CONSTRAINT fk_rails_00b234154d FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -1820,14 +1827,6 @@ ALTER TABLE ONLY item_flags
 
 ALTER TABLE ONLY general_selections
     ADD CONSTRAINT fk_rails_f62500107f FOREIGN KEY (admin_id) REFERENCES admins(id);
-
-
---
--- Name: fk_rails_fcdbb68b71; Type: FK CONSTRAINT; Schema: public; Owner: phil
---
-
-ALTER TABLE ONLY player_infos
-    ADD CONSTRAINT fk_rails_fcdbb68b71 FOREIGN KEY (pro_info_id) REFERENCES pro_infos(id);
 
 
 --

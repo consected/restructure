@@ -9,6 +9,7 @@ module UserHandler
     belongs_to :master, inverse_of: self.to_s.underscore.pluralize.to_sym
     belongs_to :user
     has_many :item_flags, as: :item
+    has_many :trackers, as: :item
     
     # Ensure the user id is saved
     before_validation :force_write_user    
