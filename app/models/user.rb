@@ -8,17 +8,15 @@ class User < ActiveRecord::Base
   belongs_to :admin
   validates_uniqueness_of :email, :case_sensitive => false, :allow_blank => false, :if => :email_changed?
   validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => false, :if => :email_changed?
-  before_validation :prevent_email_change, on: :update
-  before_validation :ensure_admin_for_disabled_change, on: :update
+  before_validation :generate_password, on: :create    
   
-  validates :admin, presence: true
   
-  before_create :generate_password
   
   default_scope -> {order email: :asc}
   
   
   def force_password_reset
+    unlock_access!
     generate_password
   end
   
@@ -41,18 +39,6 @@ class User < ActiveRecord::Base
     
 protected
 
-  # Only allow the administrator to change email address
-  def prevent_email_change 
-    if email_changed? && self.persisted? && !admin
-      errors.add(:email, "change not allowed!")
-    end
-  end
-
-  def ensure_admin_for_disabled_change
-    if disabled_changed? && self.persisted? && !admin
-      errors.add(:disabled, "change not allowed!")
-    end
-  end
   
   def generate_password
     generated_password = Devise.friendly_token.first(12)
@@ -60,5 +46,18 @@ protected
     self.password = generated_password
   end
   
+  # Override blanket functionality to limit it to check for changed email and disabled flag change
+  def ensure_admin_set
+    if !admin && !self.persisted?
+      errors.add(:admin, "account must be used to create user")
+    end
+    
+    if email_changed? && self.persisted? && !admin
+      errors.add(:email, "change not allowed!")
+    end
+    if disabled_changed? && self.persisted? && !admin
+      errors.add(:disabled, "change not allowed!")
+    end
+  end
 
 end

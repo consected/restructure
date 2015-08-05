@@ -8,15 +8,15 @@ module AdminSetup
     admins = admins_string.split(';')
     op = ""
     admins.each do |admin|
-      generated_password = Devise.friendly_token.first(12)
+      
       admin_obj = Admin.where(email: admin).first
       if admin_obj
-        admin_obj.password = generated_password
+        #admin_obj.password = generated_password
         admin_obj.save
-        op << "Existing Admin (#{admin}) updated with new password: #{generated_password}\n"
+        op << "Existing Admin (#{admin}) updated with new password: #{admin_obj.new_password}\n"
       else  
-        Admin.create(email: admin, password: generated_password)
-        op << "Admin (#{admin}) password: #{generated_password}\n"
+        admin_obj = Admin.create(email: admin)
+        op << "Admin (#{admin}) password: #{admin_obj.new_password}\n"
       end
     end
 

@@ -68,10 +68,24 @@ _fpa.postprocessors = {
     },
     
     tracker_item_link_hander: function(block){
-        block.find('a.tracker-link-to-item').not('.link-attached').click(function(){
+        
+        $('.item-highlight').removeClass('item-highlight');
+        
+        block.find('a.tracker-link-to-item').not('.link-attached').click(function(ev){
+            ev.preventDefault();
             var href = $(this).attr('href');
-            if(!href) return;
-            $(href).addClass('item-highlight');
+            $('.item-highlight').removeClass('item-highlight');
+            if(!href) return;                        
+            var h = $(href).addClass('item-highlight');
+            
+            
+            
+            // Scroll if necessary
+            var rect = h.get(0).getBoundingClientRect(); 
+            var not_visible = !(rect.top >= 0 && rect.bottom <= $(window).height());
+            if(not_visible)                    
+                $.scrollTo(h, 200, {offset: -50});
+            
         }).addClass('link-attached');  
     },
     

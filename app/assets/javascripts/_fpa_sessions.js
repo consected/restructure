@@ -34,7 +34,7 @@ _fpa.session.prototype = {
       console.log("timeout in: "+ timeout_in +" :: default timeout: " + this.default_timeout);
       if(timeout_in > this.default_timeout){
           console.log("timed out!");
-          window.location.href="/users/sign_in";
+          window.location.href="/";
       }else{
         this.start_counting();
       };

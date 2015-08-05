@@ -116,7 +116,7 @@
       <td class="tracker-{{@key}}">      
       <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
       {{#is @key 'event_name'}}
-      {{#if ../../item_id}} <a href="#{{../../../item_type_us}}-{{../../../master_id}}-{{../../../item_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{../../../item_type_us}}"></a>{{/if}}
+      {{#if ../../record_id}} <a href="#{{hyphenate ../../../record_type_us}}-{{../../../master_id}}-{{../../../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../../record_type_us}}"></a>{{/if}}
       {{/is}}
       </div>
       </td>
@@ -138,7 +138,11 @@
       </td>
       {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}      
       <td class="tracker-history-{{@key}}">
-      <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}</div>
+      <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
+      {{#is @key 'event_name'}}
+      {{#if ../../record_id}} <a href="#{{hyphenate ../../../record_type_us}}-{{../../../master_id}}-{{../../../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../../record_type_us}}"></a>{{/if}}
+      {{/is}}
+      </div>
       </td>
       {{/filter}}
       <td class="tracker-history">    
@@ -494,6 +498,10 @@
           {{else}}
             {{>empty_tracker_tree_results master_id=id}}
                 
+          {{/with}}
+                        
+          {{#with latest_tracker_history.[0]}}
+            <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event="{{event_name}}">Description: {{description}}</div>  
           {{/with}}
           </div>
           

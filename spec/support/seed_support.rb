@@ -5,6 +5,7 @@ module SeedSupport
   include MasterSupport
   
   def self.setup
+    Rails.logger.info "Starting seed setup"
     Seeds.setup
   end
   

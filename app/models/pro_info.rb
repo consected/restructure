@@ -10,4 +10,9 @@ class ProInfo < ActiveRecord::Base
       return false unless @enable_updates
       return true
     end
+    
+    # Override to do not track this
+    def track_record_update
+      return true
+    end
 end

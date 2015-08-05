@@ -1,11 +1,8 @@
 class Tracker < ActiveRecord::Base
   include UserHandler
+  include TrackerHandler
 
-  belongs_to :protocol
-  belongs_to :sub_process
-  belongs_to :protocol_event
-  
-  belongs_to :item, polymorphic: true
+
   
   has_many :tracker_histories, inverse_of: :tracker
   before_validation :prevent_protocol_change,  on: :update
@@ -107,32 +104,13 @@ class Tracker < ActiveRecord::Base
     
     t.item_id = record.id
     
-    t.set_item_type record.class.name
-    
-    logger.info "Tracking this: #{record.class.name} #{t.item_type}"
+    t.item_type = record.class.name
+        
+    raise "Bad update for tracker (#{type}, #{rec_type}): #{t.inspect}" unless t.protocol && t.sub_process && t.protocol_event && t.item
     
     return t
   end
   
-  def protocol_name
-    return nil unless self.protocol
-    self.protocol.name
-  end
-  
-  def protocol_position
-    return nil unless self.protocol
-    self.protocol.position
-  end
-  
-  def sub_process_name
-    return nil unless self.sub_process
-    self.sub_process.name
-  end
-  
-  def event_name
-    return nil unless self.protocol_event
-    self.protocol_event.name
-  end
   
   def tracker_history_length
     
@@ -145,27 +123,7 @@ class Tracker < ActiveRecord::Base
       errors.add(:protocol, "change not allowed!")
     end
   end
-  
-
-  def set_item_type it
-    logger.info "Setting it: #{it} in #{self}"
-    @tracker_item_type = it
-  end
-  
-  def item_type=it
-    #self.attributes['item_type'] = it
-    @tracker_item_type = it
-  end
-  
-  def item_type
-    logger.info "Getting item type: #{@tracker_item_type} in #{self}"
-    @tracker_item_type #self.attributes['item_type']
-  end
-  
-  def item_type_us
-    return unless self.item_type && self.item_type
-    self.item_type.underscore
-  end
+    
   
   def as_json extras={}
     extras[:methods] ||= []
@@ -174,7 +132,9 @@ class Tracker < ActiveRecord::Base
     extras[:methods] << :sub_process_name
     extras[:methods] << :event_name
     extras[:methods] << :tracker_history_length
-    extras[:methods] << :item_type_us
+    extras[:methods] << :record_type_us
+    extras[:methods] << :record_type
+    extras[:methods] << :record_id
     extras[:methods] << :_merged
       
     super(extras)

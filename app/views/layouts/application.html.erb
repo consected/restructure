@@ -31,13 +31,7 @@
       </div>
       <% end %>
     </div>
-    <% if current_admin %>
-    <div class="alert alert-success">        
-        <h2>Logged in as Administrator: 
-            <%= render partial: 'admin_handler/action_buttons' %>
-        </h2>
-    </div>
-    <% end %>
+    <%= render partial: 'admin_handler/status_bar' %>
 <%= yield %>
 
 </body>

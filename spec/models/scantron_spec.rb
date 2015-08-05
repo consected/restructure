@@ -7,7 +7,7 @@ RSpec.describe Scantron, type: :model do
   
   describe "Scantron" do
     
-    before :each do
+    before :each do      
       seed_database
       create_user
       create_master      

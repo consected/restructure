@@ -18,7 +18,7 @@
         <li class="nav"><%= link_to "User Management", manage_users_path %> </li> 
         <li class="nav"><%= link_to "Manage Protocols / Processes", protocols_path %> </li> 
         <li class="nav"><%= link_to "Action Logs", action_logs_path %> </li>
-        <li class="nav"><%= link_to "Admin Logout", admin_session_path, method: :destroy %> </li>
+        <li class="nav"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete %> </li>
       </ul>      
     </div>
   </div>

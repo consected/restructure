@@ -112,3 +112,11 @@ textarea#player_info_notes {
     width: 100%;
     height: 8em;
 }
+
+
+@media only screen and (max-width: 991px) {
+    form.search_master label{
+        font-weight: normal;
+        font-size: 13px;
+    }
+}

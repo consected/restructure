@@ -81,7 +81,7 @@ RSpec.describe PlayerInfo, type: :model do
     @player_info.birth_date = DateTime.now - 10.years
     @player_info.death_date = @player_info.birth_date - 1.day
     expect(@player_info.save).to be false
-    expect(@player_info.errors.messages).to have_key(:"birth and death dates"), "Errors should contain dates: #{@player_info.errors.inspect}"
+    expect(@player_info.errors.messages).to have_key(:"birth date"), "Errors should contain dates: #{@player_info.errors.inspect}"
     
   end
   
@@ -118,7 +118,7 @@ RSpec.describe PlayerInfo, type: :model do
     @player_info.start_year = Time.now.year - 20
     @player_info.end_year = @player_info.start_year - 1
     expect(@player_info.save).to be false
-    expect(@player_info.errors.messages).to have_key(:"start and end years"), "Errors should contain years: #{@player_info.errors.inspect}"
+    expect(@player_info.errors.messages).to have_key(:"start year"), "Errors should contain years: #{@player_info.errors.inspect}"
     
   end
   

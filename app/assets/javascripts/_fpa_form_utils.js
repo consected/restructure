@@ -214,7 +214,7 @@ _fpa.form_utils = {
             var title = $(this).attr('title');
             $(this).attr('title', null);
             var h = $('<a title="'+title+'" class="add-icon glyphicon glyphicon-'+icon+'"></a>');
-            $(this).after(h);
+            $(this).append(h);
             h.tooltip({trigger: 'hover click', placement: 'bottom'});
         }).addClass('attached-add-icon');
         

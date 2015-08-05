@@ -5,6 +5,7 @@ module ModelSupport
   UserDomain = 'testing.com'
   
   def seed_database
+    Rails.logger.info "Starting seed setup"
     SeedSupport.setup
   end
   

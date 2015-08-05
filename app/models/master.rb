@@ -18,6 +18,7 @@ class Master < ActiveRecord::Base
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
   has_many :scantrons, -> { order(RankNotNullClause)}  , inverse_of: :master
+  has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory'
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
   has_many :general_infos, class_name: 'PlayerInfo' 
@@ -283,8 +284,10 @@ class Master < ActiveRecord::Base
     # Set the user association when current_user is set
     if cu.is_a? User
       self.user = cu
-    elsif cu.is_a? Number
+    elsif cu.is_a? Integer
       self.user_id = cu
+    else 
+      raise "Attempting to set current_user with non user: #{cu}"
     end
     
     @current_user_id = cu

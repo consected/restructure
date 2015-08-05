@@ -8,8 +8,9 @@ module UserHandler
     Rails.logger.debug "Associating master as inverse of #{self.to_s.underscore.pluralize.to_sym}"
     belongs_to :master, inverse_of: self.to_s.underscore.pluralize.to_sym
     belongs_to :user
+    
     has_many :item_flags, as: :item
-    has_many :trackers, as: :item
+    has_many :trackers, as: :item if self != Tracker && self != TrackerHistory
     
     # Ensure the user id is saved
     before_validation :force_write_user    
@@ -107,7 +108,10 @@ module UserHandler
   
   protected
     def downcase_attributes    
-      self.attributes.each do |k, v|
+      
+      ignore = ['item_type']
+      
+      self.attributes.reject {|k,v| ignore.include? k}.each do |k, v|
 
         logger.info "Downcasing attribute (#{k})"
         self.send("#{k}=".to_sym, v.downcase) if self.attributes[k].is_a? String

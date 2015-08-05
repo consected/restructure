@@ -146,8 +146,7 @@ module MasterDataSupport
         @full_player_info = create_player_info l, @master
         @full_pro_info = create_pro_info p, @master                
         @full_master_record = @master.reload
-        
-        puts "----------------\n#{@master.inspect}\n#{l.inspect}\n#{p.inspect}\n#{@full_pro_info.attributes.inspect}\n#{Master.find_by_id(@master.id).inspect}\n-----------------"
+                
       else
         # Ensure only the reference record has a rank that is 12
         if l[:rank] == 12

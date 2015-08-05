@@ -236,6 +236,11 @@
       return _fpa.utils.capitalize(str);
     });
 
+    Handlebars.registerHelper('hyphenate', function(str){
+      if(!str) return;
+      return str.replace(/_+/g, '-');
+    });
+
 
     Handlebars.registerHelper('one_decimal', function(num){
       return num.toFixed(1);
@@ -250,7 +255,7 @@
     });
     
     Handlebars.registerHelper('humanize', function(obj) {
-
+     if(!obj) return;
      return obj.replace(/_/g, ' ');
     });
 
