@@ -5,6 +5,9 @@ class SubProcess < ActiveRecord::Base
   belongs_to :protocol
   has_many :protocol_events
 
+  validates :name, presence: true
+  validates :protocol, presence: true
+  
   def protocol_name
     protocol ? protocol.name : ''
   end

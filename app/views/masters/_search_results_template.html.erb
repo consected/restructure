@@ -113,7 +113,7 @@
       {{/is}}
       </td>
       {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}
-      <td class="tracker-{{@key}}">      
+      <td class="tracker-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../../protocol_event_id}}"{{/is}}>      
       <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
       {{#is @key 'event_name'}}
       {{#if ../../record_id}} <a href="#{{hyphenate ../../../record_type_us}}-{{../../../master_id}}-{{../../../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../../record_type_us}}"></a>{{/if}}
@@ -137,7 +137,7 @@
       
       </td>
       {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}      
-      <td class="tracker-history-{{@key}}">
+      <td class="tracker-history-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../../protocol_event_id}}"{{/is}}>
       <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
       {{#is @key 'event_name'}}
       {{#if ../../record_id}} <a href="#{{hyphenate ../../../record_type_us}}-{{../../../master_id}}-{{../../../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../../record_type_us}}"></a>{{/if}}
@@ -501,7 +501,7 @@
           {{/with}}
                         
           {{#with latest_tracker_history.[0]}}
-            <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event="{{event_name}}">Description: {{description}}</div>  
+            <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>  
           {{/with}}
           </div>
           

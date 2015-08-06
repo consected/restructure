@@ -23,6 +23,11 @@ _fpa.postprocessors = {
             _fpa.postprocessors.tracker_notes_handler(block);            
             _fpa.postprocessors.tracker_item_link_hander(block);
         }
+
+        if(data.masters && data.masters.length == 1){
+            _fpa.postprocessors.tracker_events_handler(block);
+        }
+
         
         $('a.master-expander').click(function(ev){
             ev.preventDefault();
@@ -32,8 +37,11 @@ _fpa.postprocessors = {
                 _fpa.form_utils.format_block($(this));
                 _fpa.postprocessors.tracker_notes_handler($(this));
                 _fpa.postprocessors.tracker_item_link_hander($(this));
+                
+                _fpa.postprocessors.tracker_events_handler($(this));
+                
                 $.scrollTo($(this), 200, {offset:-50} );
-
+                
                 $(this).off('shown.bs.collapse');
             });
             
@@ -52,6 +60,27 @@ _fpa.postprocessors = {
             window.history.pushState({"html": "/masters/search?utf8=✓&nav_q_id="+master_id_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q_id="+master_id_list);
         }                
    
+    },
+    
+    tracker_events_handler: function(block){
+        block.find('.latest-tracker-history').each(function(){
+            var t = $(this);
+            var ml = t.attr('data-lth-event-milestone');
+            if(ml && ml.indexOf('notify-user')>=0){
+                var ev = t.attr('data-lth-event');
+                var evid = t.attr('data-lth-event-id');
+                
+                var pe = _fpa.cache('protocol_events');                
+                var p = _fpa.get_item_by('id', pe, evid);
+                
+                if(p){
+                    var prot = t.attr('data-lth-protocol');
+                    var proc = t.attr('data-lth-process');
+                    var title = prot + ' - ' + proc + ': ' + ev;
+                    _fpa.show_modal(p.description, title);
+                }                
+            }
+        });
     },
     
     tracker_notes_handler: function(block){
@@ -87,6 +116,21 @@ _fpa.postprocessors = {
                 $.scrollTo(h, 200, {offset: -50});
             
         }).addClass('link-attached');  
+        
+        block.find('.tracker-event_name[data-event-id], .tracker-history-event_name[data-event-id]').each(function(){
+            var e = $(this);
+            var evid = e.attr('data-event-id');
+            var pe = _fpa.cache('protocol_events');                
+            var p = _fpa.get_item_by('id', pe, evid);
+            if(p && p.description){
+                var title = p.name;
+                var h = '<span class="glyphicon glyphicon-info-sign tracker-event-description" data-toggle="popover" title="'+title+'" data-content="'+p.description+'"></span>';
+                var hj = $(h).appendTo(e.find('.cell-holder'));
+                hj.popover({trigger: 'click hover'});
+            }
+            
+        });
+        
     },
     
     tracker_histories_result_template: function(block, data){
@@ -118,6 +162,24 @@ _fpa.postprocessors = {
             if(v != null) v++;
             t.html(v);
         }
+        if(data.tracker && (data.tracker._created || data.tracker._updated)){
+            
+            var evid = data.tracker.protocol_event_id;
+            var pe = _fpa.cache('protocol_events');                
+            var p = _fpa.get_item_by('id', pe, evid);
+
+            if(p){
+                var ml = p.milestone;
+                if(ml && ml.indexOf('notify-user')>=0){
+                    var prot = data.tracker.protocol_name;
+                    var proc = data.tracker.sub_process_name;
+                    var ev = p.name;
+                    var title = prot + ' - ' + proc + ': ' + ev;
+                    _fpa.show_modal(p.description, title);
+                }
+            }
+        }
+        
     },
     
     tracker_edit_form: function(block, data){

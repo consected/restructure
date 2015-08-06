@@ -28,7 +28,7 @@ module ControllerMacros
     
     [admin, good_admin_password]
   end
- 
+  
   def before_each_login_user 
     before(:each) do
       SeedSupport.setup      

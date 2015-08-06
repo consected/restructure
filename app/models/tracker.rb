@@ -50,7 +50,20 @@ class Tracker < ActiveRecord::Base
     ignore = %w(created_at updated_at user_id user id)
     new_rec = record.id_changed?
 
-    record.changes.reject {|k,v| ignore.include? k}.each {|k,v| cp << "#{k.humanize} #{new_rec ? '' : "from #{v.first || "-"}"} #{new_rec ? '' : 'to '}#{v.last}; " }
+    record.changes.reject {|k,v| ignore.include? k}.each do |k,v| 
+      fromv = v.first
+      tov = v.last
+      
+      kname = ("#{k.to_s}_name").to_sym
+      
+      if record.respond_to? kname      
+        tov = "#{tov} - #{record.class.send("get_#{k}_name".to_s, tov)}" 
+        fromv = "#{fromv} - #{record.class.send("get_#{k}_name".to_s, fromv)}" 
+        
+      end
+      
+      cp << "#{k.humanize} #{new_rec ? '' : "from #{fromv || "-"}"} #{new_rec ? '' : 'to '}#{tov}; " 
+    end
     
    
     t.notes = cp
@@ -131,6 +144,7 @@ class Tracker < ActiveRecord::Base
     extras[:methods] << :protocol_position
     extras[:methods] << :sub_process_name
     extras[:methods] << :event_name
+    extras[:methods] << :event_milestone
     extras[:methods] << :tracker_history_length
     extras[:methods] << :record_type_us
     extras[:methods] << :record_type

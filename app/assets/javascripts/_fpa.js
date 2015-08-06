@@ -2,6 +2,7 @@ _fpa = {
     
   templates: {},
   app: {},
+  version: '0',
     
   ajax_working: function(block){
 
@@ -412,6 +413,32 @@ _fpa = {
     else
         type = '.alert-'+type;
     $('.flash div.alert'+type).remove();
+  },
+
+  show_modal: function(message, title){
+    
+    var pm = $('#primary-modal');  
+    var t = pm.find('.modal-title');
+    var m = pm.find('.modal-body');
+    t.html('');
+    m.html('');
+    
+    if(title) t.html(title);
+    if(message) m.html(message);
+    
+    pm.modal('show');
+  },
+  
+  get_item_by: function(attr, obj, evid){
+    for(var pi in obj){
+        if(obj.hasOwnProperty(pi)){
+            var p = obj[pi];
+            if(p[attr] == evid){
+
+                return p;
+            }
+        }
+    }
   }
 
 };
@@ -422,15 +449,6 @@ _fpa.loaded = {};
 
 $('html').ready(function(){
   _fpa.reset_page_size();  
-  
-  $(document).on('click', 'a.view-image-modal', function(ev){
-    ev.preventDefault;    
-    var v = $('#view-image-modal');
-    v.find('.modal-title').html('View Image');
-    var src = $(this).attr('data-img-src');
-    v.find('.modal-body').html('<img src="'+src+'" class="img img-responsive center center-block"/>');
-    
-  });
   
   _fpa.compile_templates();
   _fpa.handle_remotes();

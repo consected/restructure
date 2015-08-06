@@ -19,7 +19,7 @@ class GeneralSelection < ActiveRecord::Base
   
   
   def self.item_type_source_for record, type=:source
-    if record.respond_to? :class
+    if record.respond_to?(:class) && record.class != Class
       klass = record.class
     else
       klass = record
@@ -29,7 +29,20 @@ class GeneralSelection < ActiveRecord::Base
   
   def self.item_type_name_value_pair record, type=:source
     src = item_type_source_for record, type
+    logger.debug "getting #{src}"
     selector_name_value_pair(item_type: src)       
+  end
+  
+  def self.name_for record, value, type=:source
+    res = item_type_name_value_pair record, type
+    
+    logger.debug "Requesting value #{value} in #{res}"
+    
+    resn = res.select {|l| l.last.to_s == value.to_s}
+    if resn.length == 1
+      return resn.first.first
+    end
+    return        
   end
   
 end

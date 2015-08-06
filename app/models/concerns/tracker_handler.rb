@@ -31,6 +31,16 @@ module TrackerHandler
     self.protocol_event.name
   end
 
+  def event_milestone
+    return nil unless self.protocol_event
+    self.protocol_event.milestone
+  end
+
+  def event_description    
+    return nil unless self.protocol_event    
+    self.protocol_event.description
+  end
+  
   def record_type    
     self.attributes['item_type']
   end

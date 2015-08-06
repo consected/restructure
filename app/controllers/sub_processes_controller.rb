@@ -6,8 +6,8 @@ class SubProcessesController < ApplicationController
     @sub_processes = @protocol.sub_processes
   end
   
-  def new
-    @sub_process = @protocol.sub_processes.build
+  def new options = {}
+    @sub_process = @protocol.sub_processes.build unless options[:use_current_object]
     render partial: 'form'
   end
   

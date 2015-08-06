@@ -14,6 +14,12 @@ class PlayerInfo < ActiveRecord::Base
   BestAccuracyScore = 12
   FollowUpScore = 881
   
+#  def rank_name
+#    return unless rank
+#    rank.name    
+#  end    
+  
+  
   def accuracy_rank    
     if rank && rank > BestAccuracyScore  
       return rank * -1 

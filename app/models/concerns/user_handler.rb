@@ -25,7 +25,13 @@ module UserHandler
     after_save :check_status
     after_save :track_record_update
   end
-    
+  
+  class_methods do
+    def get_rank_name value
+      GeneralSelection.name_for self, value, :rank    
+    end
+
+  end  
   
   def master_user
     
@@ -48,13 +54,16 @@ module UserHandler
   def rank_name
     return nil unless respond_to? :rank
     
-    list = GeneralSelection.item_type_name_value_pair(self, :rank)    
-    res = list.select {|a| a.last.to_s == rank.to_s}
-    logger.info "Ranks list: #{list} for rank: #{rank} got #{res}"
-    return nil unless res && res.first
-    return res.first.first
-    
+#    list = GeneralSelection.item_type_name_value_pair(self, :rank)    
+#    res = list.select {|a| a.last.to_s == rank.to_s}
+#    logger.info "Ranks list: #{list} for rank: #{rank} got #{res}"
+#    return nil unless res && res.first
+#    return res.first.first
+#    
+    self.class.get_rank_name self.rank
   end
+  
+
   
   def update_action
     @update_action

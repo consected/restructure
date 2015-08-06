@@ -16,6 +16,7 @@ class TrackerHistory < ActiveRecord::Base
     extras[:methods] << :record_type_us
     extras[:methods] << :record_type
     extras[:methods] << :record_id
+    extras[:methods] << :event_milestone
 
     super(extras)
   end

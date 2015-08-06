@@ -26,6 +26,9 @@ Rails.application.routes.draw do
   post 'masters/' => 'masters#index'
   get 'masters/search', as: 'msid_search'
   get 'masters/search' => 'masters#search'
+  
+  resources :definitions, only: [:show]
+  
   resources :masters, only: [:show, :index, :new, :create] do
     resources :tracker_histories, only: [:index]
     resources :player_infos, except: [:destroy]    

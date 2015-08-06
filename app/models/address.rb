@@ -12,6 +12,12 @@ class Address < ActiveRecord::Base
   before_save :handle_country
   after_save :handle_primary_status
   
+#  def rank_name
+#    return unless rank
+#    self.class.get_rank_name rank
+#  end    
+  
+  
   protected
   
     def handle_primary_status

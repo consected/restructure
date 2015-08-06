@@ -12,6 +12,12 @@ class PlayerContact < ActiveRecord::Base
   validates :rank, presence: true
   after_save :handle_primary_status
   
+#  def rank_name
+#    return unless rank
+#    rank.name    
+#  end    
+#      
+      
   protected
     def is_email?
       rec_type == 'email'
