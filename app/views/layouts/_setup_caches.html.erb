@@ -1,6 +1,6 @@
 <script>
   
-  _fpa.version = '<%=File.read('./version.txt').gsub("\n",'')%>-<%=Application.server_cache_version%>';
+  _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
   
   _fpa.set_cache('college_list', <%= college_array.html_safe %>);
   

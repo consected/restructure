@@ -54,16 +54,10 @@ module UserHandler
   def rank_name
     return nil unless respond_to? :rank
     
-#    list = GeneralSelection.item_type_name_value_pair(self, :rank)    
-#    res = list.select {|a| a.last.to_s == rank.to_s}
-#    logger.info "Ranks list: #{list} for rank: #{rank} got #{res}"
-#    return nil unless res && res.first
-#    return res.first.first
-#    
     self.class.get_rank_name self.rank
   end
   
-
+  
   
   def update_action
     @update_action
@@ -107,9 +101,10 @@ module UserHandler
     extras[:methods] << :item_type
     extras[:methods] << :_created
     extras[:methods] << :_updated
-    if respond_to? :rank
-      extras[:methods] << :rank_name
-    end
+    
+    extras[:methods] << :rank_name if respond_to? :rank        
+    extras[:methods] << :state_name if respond_to? :state
+    extras[:methods] << :country_name if respond_to? :country
     
     super(extras)    
   end

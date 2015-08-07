@@ -284,9 +284,9 @@ _fpa = {
                         var d = data[di];                        
                         
                         // Basic DOM attribute targeting
-                        // just listen for for data having the top level item being equal to data-subscription
+                        // just listen for for data having the top level item being equal to data-sub-item
                         // Typically this is used for forms, such as:
-                        // data-subscription="address-edit-form-100001-"
+                        // data-sub-item="address-edit-form-100001-"
                         // where the form partial returns 
                         var targets = $('[data-sub-item="'+di+'"], [data-sub-list="'+di+'"] [data-sub-item]');
                                                                         
@@ -374,7 +374,7 @@ _fpa = {
 
                 for(var i in j){
                     if(j.hasOwnProperty(i)){
-                     msg += '<p>' + i + ' ' + j[i] + '</p>';
+                     msg += '<p>' + i.replace(/_/g, ' ') + ' ' + j[i] + '</p>';
                     }                
                 }
             }else{
@@ -385,7 +385,7 @@ _fpa = {
         }else{
             _fpa.flash_notice("An error occurred.", 'danger');
         }
-      
+        $('.ajax-running').removeClass('ajax-running');
     }).addClass('attached');      
     
   },

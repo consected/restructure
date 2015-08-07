@@ -54,7 +54,7 @@
         
       </li>
       
-      {{#filter this "country,street,street2,street3,city,state,zip,region,postal_code,source,rec_type" }}      
+      {{#filter this "country_name,street,street2,street3,city,state_name,zip,region,postal_code,source,rec_type" }}      
       <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/filter}}
       
@@ -76,7 +76,7 @@
       
       <li class="list-group-item player-contact-data"><small>contact</small> <strong class="email">{{data}}</strong></li>
       
-      <li class="list-group-item is-combo player-contact-source_rank_active">      
+      <li class="list-group-item is-combo player-contact-source">      
         <div class="row">
           <div class="col-md-12">
             <small>source</small> <strong>{{pretty_string source return_string="true" capitalize="true"}}</strong>
@@ -153,17 +153,20 @@
 </script>
 
 <script id="empty_tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table">
+  <table class="table tracker-tree-results">
     <thead><tr>
-      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th>
-      <th colspan="2">notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"  ><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th></tr>
+      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
+      <th>protocol</th><th>sub-process</th><th>event</th><th>date</th><th>notes</th>
+      <th colspan="2"><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th>
+      </tr>
     </thead>
+    
     <tbody id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block new-below">
-    <tr>
+    <tr >
     <td colspan="9"><h4>No Tracker Records</h4></td>
     </tr>
     </tbody>
-  </table>
+</table>
 </script>
 
 <script id="tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -198,26 +201,13 @@
 
 </script>            
 
-<script id="empty_tracker_chron_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
-  <table class="table ">
-    <thead><tr>
-      <th><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th><th>protocol</th><th>event</th><th>event date</th><th>contact method</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden"  ><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th></tr>
-    <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
-    <td colspan="8"><h4>No Tracker History Records</h4></td>
-    </tr>
-    </thead>
-  </table>
-
-</script>
 <script id="tracker_chron_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <table class="table tablesorter tracker-chron-results">
     <thead><tr>
       <th class="no-sort"><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th>
-      <th>protocol</th><th>sub-process</th><th>event</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th></tr>
-    <tr id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form"  data-subscription="tracker-edit-form-{{master_id}}-" class="new-block">
-    {{#is trackers.length 0}}<td colspan="8"><h4>No Tracker Records</h4></td>{{/is}}
-    </tr>
+      <th>protocol</th><th>sub-process</th><th>event</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th>
+      </tr>    
     </thead>
     <tbody>
     {{#each this}}
@@ -355,7 +345,7 @@
   {{#with tracker_histories}}
     {{>tracker_chron_results master_id=../master_id}}
   {{else}}
-    {{>empty_tracker_chron_results master_id=../master_id}}
+    {{>empty_tracker_tree_results master_id=../master_id}}
   {{/with}}
 </script>
 <script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -496,8 +486,7 @@
           {{#with trackers}}
             {{>tracker_tree_results master_id=../id}}
           {{else}}
-            {{>empty_tracker_tree_results master_id=id}}
-                
+            {{>empty_tracker_tree_results master_id=id}}                
           {{/with}}
                         
           {{#with latest_tracker_history.[0]}}

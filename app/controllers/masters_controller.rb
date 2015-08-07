@@ -57,7 +57,7 @@ class MastersController < ApplicationController
           },
           addresses: {
             order: {rank: :desc},             
-            methods: [:user_name, :rank_name]
+            methods: [:user_name, :rank_name, :state_name, :country_name]
           },
           trackers: {
             order: "protocol.position #{Master::TrackerEventOrderClause}",  
@@ -77,7 +77,7 @@ class MastersController < ApplicationController
       
       log_action "master search", search_type, @masters.length
     else
-      # Return no results
+      # Return no results      
       m = {message: "no conditions were specified"}
       log_action "master search", search_type, 0, "no conditions specified"
     end
@@ -130,12 +130,16 @@ class MastersController < ApplicationController
   
   def new
     @master = Master.new
+    render :new
   end
   
   def create
-    @master = Master.create
-    
-    redirect_to @master, notice:  "Created Master Record with MSID #{@master.id}"
+    @master = Master.create user: current_user
+    if @master && @master.id
+      redirect_to @master, notice:  "Created Master Record with MSID #{@master.id}"
+    else
+      redirect_to new_master_url, notice: "Error creating Master Record: #{@master.errors.first.join(' ')}" 
+    end
   end
   
 private

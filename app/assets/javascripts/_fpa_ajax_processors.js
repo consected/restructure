@@ -14,6 +14,13 @@ _fpa.postprocessors = {
         }
     
     },    
+   
+    label_changes_handler: function(block){
+        window.setTimeout(function(){
+            $('[data-template="address-result-template"] .address-state_name .list-small-label').each(function(){ $(this).html('state'); });
+            $('[data-template="address-result-template"] .address-country_name .list-small-label').each(function(){ $(this).html('country'); });
+        },1);
+    },
     
     search_results_template: function(block, data){
         // Ensure we format the viewed item on expanding it 
@@ -21,11 +28,12 @@ _fpa.postprocessors = {
         if(data.masters && data.masters.length < 5){
             _fpa.form_utils.format_block(block);
             _fpa.postprocessors.tracker_notes_handler(block);            
-            _fpa.postprocessors.tracker_item_link_hander(block);
+            _fpa.postprocessors.tracker_item_link_hander(block);            
+            _fpa.postprocessors.label_changes_handler(block);
         }
 
         if(data.masters && data.masters.length == 1){
-            _fpa.postprocessors.tracker_events_handler(block);
+            _fpa.postprocessors.tracker_events_handler(block);            
         }
 
         
@@ -39,6 +47,8 @@ _fpa.postprocessors = {
                 _fpa.postprocessors.tracker_item_link_hander($(this));
                 
                 _fpa.postprocessors.tracker_events_handler($(this));
+                
+                _fpa.postprocessors.label_changes_handler($(this));
                 
                 $.scrollTo($(this), 200, {offset:-50} );
                 
@@ -59,6 +69,7 @@ _fpa.postprocessors = {
             document.title = 'FHPS results';
             window.history.pushState({"html": "/masters/search?utf8=✓&nav_q_id="+master_id_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q_id="+master_id_list);
         }                
+   
    
     },
     
@@ -321,6 +332,11 @@ _fpa.postprocessors = {
             ev.preventDefault();
             block.html('');
         });
+    },
+    
+    flash_template: function(block, data){
+         _fpa.timed_flash_fadeout();      
     }
+    
 
 };

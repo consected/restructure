@@ -58,8 +58,8 @@ _fpa.loaded.masters = function(){
     });
     
     
-    $('form').not('.navbar-form').find('input, select').on('keypress', function(){
-        $('.navbar-form input[type="text"]').val('');
+    $('form').not('.navbar-form').find('input, select').on('keypress change', function(){
+        $('.navbar-form input[type="text"]').removeClass('has-value').val('');
     });
 
 };

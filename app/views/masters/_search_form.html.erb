@@ -46,11 +46,11 @@
       
       <div class="form-group col-sm-2">
         <%= f.label :start_year %>
-        <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control'  %>
+        <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control year_field', pattern: Settings::YearFieldPattern   %>
       </div>
       <div class="form-group col-sm-2">
         <%= f.label :end_year %>
-        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control'  %>
+        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control year_field', pattern: Settings::YearFieldPattern  %>
       </div>
     <% end %>
       
@@ -97,11 +97,11 @@
       </div>
       <div class="form-group col-sm-2">
         <%= f.label :start_year %>
-        <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control after-college-input'  %>
+        <%= f.number_field :start_year, in: Settings::StartYearRange, class: 'form-control after-college-input year_field', pattern: Settings::YearFieldPattern   %>
       </div>
       <div class="form-group col-sm-2">
         <%= f.label :end_year %>
-        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control'  %>
+        <%= f.number_field :end_year, in: Settings::EndYearRange, class: 'form-control year_field', pattern: Settings::YearFieldPattern  %>
       </div>
       
     <% end %>

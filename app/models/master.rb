@@ -21,7 +21,7 @@ class Master < ActiveRecord::Base
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory'
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
-  has_many :general_infos, class_name: 'PlayerInfo' 
+  has_many :general_infos, class_name: 'ProInfo' 
   
   # Associations to allow advanced searches for NOT 
   has_many :not_tracker_histories, -> { order(TrackerHistoryEventOrderClause)},  class_name: 'TrackerHistory'
@@ -46,6 +46,8 @@ class Master < ActiveRecord::Base
 
   
   DefaultJoins = []
+  SimplePlayerJoin = "LEFT JOIN player_infos on masters.id = player_infos.master_id".freeze
+  
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
   # Use a hash with :value to define a predefined matching clause:
@@ -95,13 +97,13 @@ class Master < ActiveRecord::Base
       sub_process_id: {value: :do_nothing}
     },
     general_infos: {
-      first_name: {value: :starts_with, condition: "(player_infos.first_name LIKE ? OR pro_infos.first_name LIKE ? OR player_infos.nick_name LIKE ? OR pro_infos.nick_name LIKE ?)", joins: :pro_infos},
-      last_name: {value: :is, condition: "(player_infos.last_name = ? OR pro_infos.last_name = ?)", joins: :pro_infos},
-      birth_date: {value: :is, condition: "(player_infos.birth_date = ? OR pro_infos.birth_date = ?)", joins: :pro_infos},
-      death_date: {value: :is, condition: "(player_infos.death_date = ? OR pro_infos.death_date = ?)", joins: :pro_infos},
-      start_year: {value: :is, condition: "(player_infos.start_year = ? OR pro_infos.start_year = ?)", joins: :pro_infos},
-      end_year: {value: :is, condition: "(player_infos.end_year = ? OR pro_infos.end_year = ?)", joins: :pro_infos},
-      college: {value: :is, condition: "(player_infos.college = ? OR pro_infos.college = ?)", joins: :pro_infos},
+      first_name: {value: :starts_with, condition: "(player_infos.first_name LIKE ? OR pro_infos.first_name LIKE ? OR player_infos.nick_name LIKE ? OR pro_infos.nick_name LIKE ?)", joins: SimplePlayerJoin},
+      last_name: {value: :is, condition: "(player_infos.last_name = ? OR pro_infos.last_name = ?)", joins: SimplePlayerJoin},
+      birth_date: {value: :is, condition: "(player_infos.birth_date = ? OR pro_infos.birth_date = ?)", joins: SimplePlayerJoin},
+      death_date: {value: :is, condition: "(player_infos.death_date = ? OR pro_infos.death_date = ?)", joins: SimplePlayerJoin},
+      start_year: {value: :is, condition: "(player_infos.start_year = ? OR pro_infos.start_year = ?)", joins: SimplePlayerJoin},
+      end_year: {value: :is, condition: "(player_infos.end_year = ? OR pro_infos.end_year = ?)", joins: SimplePlayerJoin},
+      college: {value: :is, condition: "(player_infos.college = ? OR pro_infos.college = ?)", joins: SimplePlayerJoin},
       contact_data: {value: [:starts_with, :strip_non_alpha_numeric], condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?", joins: :player_contacts}
     }
     
@@ -174,6 +176,9 @@ class Master < ActiveRecord::Base
                 if vset[:joins].is_a? Symbol
                   joins << vset[:joins] 
                   logger.info "Adding alt join #{vset[:joins]}"
+                elsif vset[:joins].is_a? String
+                  joins << vset[:joins] 
+                  logger.info "Adding alt joins #{vset[:joins]}"
                 elsif vset[:joins].is_a? Array
                   joins += vset[:joins] 
                   logger.info "Adding alt joins #{vset[:joins]}"

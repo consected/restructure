@@ -4,7 +4,7 @@ class PlayerInfo < ActiveRecord::Base
   
   
   
-  # Allow simple search to function
+  # Allow simple search and compound searches to function
   attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
   
   before_save :check_college

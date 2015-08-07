@@ -102,9 +102,10 @@ a.add-icon{
 
 
 .tracker-search-field {
-    color: #83BD36;
+    color: #2E6DA4;
     select {
-        border-color: #83BD36;
+        border-color: #2E6DA4;
+        color: #2E6DA4;
     }
 }
 
@@ -113,6 +114,9 @@ textarea#player_info_notes {
     height: 8em;
 }
 
+.ws-popover-opener {
+    background-color: transparent;
+}
 
 @media only screen and (max-width: 991px) {
     form.search_master label{

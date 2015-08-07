@@ -3,7 +3,7 @@ class ProInfo < ActiveRecord::Base
   
   before_update :prevent_save
   
-  attr_accessor :enable_updates
+  attr_accessor :enable_updates, :contact_data
   
   protected
     def prevent_save

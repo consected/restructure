@@ -9,7 +9,7 @@
         </li>
         <li class="list-group-item player-info-first_name">
             <%= f.label :scantron_id %>
-            <%= f.number_field :scantron_id %>
+            <%= f.number_field :scantron_id, pattern: Settings::ScantronPattern %>
         </li>  
         
         <li class="list-group-item">

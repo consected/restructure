@@ -6,6 +6,7 @@ class Tracker < ActiveRecord::Base
   
   has_many :tracker_histories, inverse_of: :tracker
   before_validation :prevent_protocol_change,  on: :update
+  validates :protocol, presence: true
 
   attr_accessor :_merged
   

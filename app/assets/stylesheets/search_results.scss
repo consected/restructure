@@ -100,8 +100,15 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
     font-weight: bold;
     margin-right: 2em;
 }
-.search-results-count.ajax-running:before {
-    content: 'loading...';
+.ajax-running .search-results-count {
+    
+    color: silver;
+    
+    &:before {
+        color: #55f;
+        content: 'loading...';
+    }
+    
 } 
 
 .form-actions {
@@ -279,7 +286,7 @@ ul[data-address-is-us="true"]{
     li.list-group-item.address-region, li.list-group-item.address-postal_code {display: none;}    
 }
 ul[data-address-is-us="false"]{ 
-    li.list-group-item.address-state, li.list-group-item.address-zip {display: none;}
+    li.list-group-item.address-state_name, li.list-group-item.address-zip {display: none;}
 }
 
 .item-highlight .list-group-item:first-child {
@@ -293,3 +300,7 @@ strong.email {
 }
 
 span.tracker-event-description {color: silver;}
+
+li.address-source strong, li.player-contact-source strong {
+    text-transform: lowercase;
+}
