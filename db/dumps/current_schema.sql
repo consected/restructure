@@ -36,11 +36,13 @@ CREATE FUNCTION log_tracker_update() RETURNS trigger
             INSERT INTO tracker_history 
                 (tracker_id, master_id, protocol_id, 
                  protocol_event_id, event_date, sub_process_id, notes,
+                 item_id, item_type,
                  created_at, updated_at, user_id)
                  
             SELECT NEW.id, NEW.master_id, NEW.protocol_id, 
                    NEW.protocol_event_id, NEW.event_date, 
                    NEW.sub_process_id, NEW.notes, 
+                   NEW.item_id, NEW.item_type,
                    NEW.created_at, NEW.updated_at, NEW.user_id  ;
             RETURN NEW;
         END;
@@ -790,9 +792,6 @@ CREATE TABLE tracker_history (
     tracker_id integer,
     event character varying,
     event_date timestamp without time zone,
-    c_method character varying,
-    outcome character varying,
-    outcome_date timestamp without time zone,
     user_id integer,
     notes character varying,
     created_at timestamp without time zone NOT NULL,
