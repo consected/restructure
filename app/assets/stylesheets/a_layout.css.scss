@@ -1,6 +1,7 @@
 a.glyphicon {
     &, &:hover, &:active, &:link {
-        text-decoration: none;        
+        text-decoration: none;
+        outline: none;
     }
     &:hover {
         opacity: 0.8;

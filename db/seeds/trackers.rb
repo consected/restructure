@@ -22,7 +22,17 @@ module Seeds
         res.update(admin: auto_admin) unless res.admin
       end
       
+      types.each do |t|
+        res = fu.protocol_events.find_or_initialize_by(name: "updated #{t}")
+        res.update(admin: auto_admin) unless res.admin
+
+        res = fu.protocol_events.find_or_initialize_by(name: "created #{t}")
+        res.update(admin: auto_admin) unless res.admin
+      end
+      
+      
       Rails.logger.info  "Updates > Protocol events = #{sub_process.protocol_events.collect {|k| k.name }.join(",") }"
+      Rails.logger.info  "Flag Updates > Protocol events = #{fu.protocol_events.collect {|k| k.name }.join(",") }"
     end
 
 

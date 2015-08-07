@@ -96,34 +96,54 @@ class Tracker < ActiveRecord::Base
   
   def self.update_tracker type, record
     
-    new_rec = record.id_changed?
-
-    t = record.master.trackers.where(protocol_id: Protocol.record_updates_protocol).first
+    t = get_or_create_record_updates_tracker record
     
-    # If not found, remember this is a new tracker
-    new_tracker = !t
-    
-    t ||= record.master.trackers.new 
-    
-    t.protocol = Protocol.record_updates_protocol if new_tracker
-    
-    t.sub_process = t.protocol.sub_processes.where(name: "#{type} updates").first
-    
-    rec_type = "#{new_rec ? 'created' : 'updated'} #{record.class.name.underscore.humanize.downcase}"
-    
-    t.protocol_event = t.sub_process.protocol_events.where(name: rec_type).first
+    t.set_record_updates_sub_process type
+    t.set_record_updates_event record  
     
     t.event_date = DateTime.now
     
-    t.item_id = record.id
-    
+    t.item_id = record.id    
     t.item_type = record.class.name
-        
-    raise "Bad update for tracker (#{type}, #{rec_type}): #{t.inspect}" unless t.protocol && t.sub_process && t.protocol_event && t.item
+    raise "Bad item for tracker (#{type})" unless t.item
     
     return t
   end
   
+  def set_record_updates_event record
+    new_rec = record.id_changed?    
+    rec_type = "#{new_rec ? 'created' : 'updated'} #{record.class.name.underscore.humanize.downcase}"
+    
+    self.protocol_event = Rails.cache.fetch "record_updates_protocol_events_#{rec_type}" do
+      self.sub_process.protocol_events.where(name: rec_type).first
+    end
+    
+    raise "Bad protocol_event (#{rec_type}) for tracker #{record}" unless self.protocol_event
+    
+  end
+  
+  def set_record_updates_sub_process type
+    
+    self.sub_process = Rails.cache.fetch "record_updates_sub_process_#{type}" do
+      Protocol.record_updates_protocol.sub_processes.where(name: "#{type} updates").first
+    end
+    
+    raise "Bad sub_process for tracker (#{type})" unless self.sub_process
+    
+  end
+  
+  def self.get_or_create_record_updates_tracker record
+    
+    t = record.master.trackers.where(protocol_id: Protocol.record_updates_protocol).first
+    
+    # If not found, remember this is a new tracker
+    #new_tracker = !t
+    
+    t ||= record.master.trackers.new protocol: Protocol.record_updates_protocol
+    #t. if new_tracker    
+    t
+    
+  end
   
   def tracker_history_length
     
