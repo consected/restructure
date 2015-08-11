@@ -52,7 +52,7 @@ module AccuracyScoreSupport
   
   def create_item att=nil, admin=nil
     att ||= valid_attribs    
-    att[:admin] = admin||@admin    
+    att[:current_admin] = admin||@admin    
     @accuracy_score = AccuracyScore.create! att
   end
   

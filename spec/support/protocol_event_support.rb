@@ -1,22 +1,24 @@
-module SubProcessSupport
+module ProtocolEventSupport
   include MasterSupport
   def list_valid_attribs
     res = []
     
     (1..5).each do |l|
       res << {
-        name: "SubProcess #{l}",
+        name: "Protocol Event #{l}",
         
         disabled: false,
-        protocol_id: @protocol_id
+        
+        sub_process_id: @sub_process_id
       }
     end
     (1..5).each do |l|
       res << {
-        name: "Dis SubProcess #{l}",
+        name: "Dis Protocol Event #{l}",
         
         disabled: true,
-        protocol_id: @protocol_id
+        
+        sub_process_id: @sub_process_id
       }
     end
     res
@@ -26,7 +28,8 @@ module SubProcessSupport
     [
       {
         name: nil,
-        protocol_id: @protocol_id
+        
+        sub_process_id: @sub_process_id
       }       
     ]
   end
@@ -35,7 +38,8 @@ module SubProcessSupport
     [            
       {
         name: nil,
-        protocol_id: @protocol_id
+        
+        sub_process_id: @sub_process_id
       }
     ]
   end  
@@ -43,7 +47,8 @@ module SubProcessSupport
   def new_attribs
     @new_attribs = {            
       disabled: true,
-        protocol_id: @protocol_id
+        
+        sub_process_id: @sub_process_id
     }
   end
   
@@ -53,7 +58,7 @@ module SubProcessSupport
     att ||= valid_attribs    
     att[:current_admin] = admin||@admin
     
-    @sub_process = @protocol.sub_processes.create! att
+    @protocol_event = @sub_process.protocol_events.create! att
   end
   
 end

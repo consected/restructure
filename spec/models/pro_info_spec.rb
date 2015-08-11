@@ -33,4 +33,14 @@ RSpec.describe ProInfo, type: :model do
     
   end
   
+  it "should allow updates only for special administrative changes" do
+    res = @pro_info.update first_name: "charles", enable_updates: true
+    expect(res).to be true
+    
+    @pro_info.reload
+    
+    expect(@pro_info.first_name).to eq 'charles'
+    
+  end
+  
 end

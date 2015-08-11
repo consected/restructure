@@ -45,7 +45,7 @@ module ManageUserSupport
   
   def create_item att=nil, admin=nil
     att ||= valid_attribs    
-    att[:admin] = admin||@admin    
+    att[:current_admin] = admin||@admin    
     @manage_user = User.create! att
   end
   

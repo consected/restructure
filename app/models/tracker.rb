@@ -1,51 +1,49 @@
 class Tracker < ActiveRecord::Base
   include UserHandler
   include TrackerHandler
-
-
   
   has_many :tracker_histories, inverse_of: :tracker
+
   before_validation :prevent_protocol_change,  on: :update
   validates :protocol, presence: true
-
+  validates :protocol_event_id, presence: true, if: :event_date?  
+  validates :event_date, presence: true, if: :protocol_event_id?
+  validates :sub_process, presence: true, if: :protocol_event_id?
+  
+  # _merged attribute is used to indicate if a tracker record was merged into an existing
+  # record on creation
   attr_accessor :_merged
   
-  def initialize presets={}
-    
-    # Note: the event date and outcome date are now set dynamically in javascript within the form
-    #presets[:event_date] ||= DateTime.now
-    
-    super
-  end
-  
+  # Check whether a tracker record with the same protocol already exists for this master
+  # If it does then we will update the existing record rather than creating a new one.
+  # From a user perspective this ensures that the current status of the tracker always maintains only one
+  # state for a protocol.
   def merge_if_exists
-    #t = self.master.trackers.where(protocol_id: self.protocol_id, sub_process_id: self.sub_process_id).take(1)
+    
     t = self.master.trackers.where(protocol_id: self.protocol_id).take(1)
     if t.first
       
       t = t.first
       logger.info "Updating existing tracker record #{t.id} instead of creating a new one"
-      logger.debug "With: #{self.inspect}"
+
       t.sub_process = self.sub_process
       t.protocol_event = self.protocol_event
       t.event_date = self.event_date
       t.notes = self.notes
       t._merged = true
       t.save
-      
+
       return t
     end
     nil
   end
   
-  
+  # Called by UserHandler managed records to save the latest update to the tracker
   def self.track_record_update record
   
-    logger.debug "Tracking for #{record}"
     return nil if record.is_a?(Tracker) || record.is_a?(TrackerHistory)
     
     t = update_tracker :record, record
-    
         
     cp = ""
     ignore = %w(created_at updated_at user_id user id)
@@ -68,11 +66,11 @@ class Tracker < ActiveRecord::Base
     
    
     t.notes = cp
-    res = t.save
-    logger.debug "Tracking result: #{res}"
-    res
+    t.save
+   
   end
   
+  # Called by item flag controller to save the aggregate set of item_flag changes to the tracker
   def self.track_flag_update record, added_flags, removed_flags
   
     return nil if record.is_a?(Tracker) || record.is_a?(TrackerHistory)
@@ -135,27 +133,22 @@ class Tracker < ActiveRecord::Base
   
   def self.get_or_create_record_updates_tracker record
     
-    t = record.master.trackers.where(protocol_id: Protocol.record_updates_protocol).first
-    
-    # If not found, remember this is a new tracker
-    #new_tracker = !t
-    
-    t ||= record.master.trackers.new protocol: Protocol.record_updates_protocol
-    #t. if new_tracker    
+    t = record.master.trackers.where(protocol_id: Protocol.record_updates_protocol).first    
+    t ||= record.master.trackers.new protocol: Protocol.record_updates_protocol    
     t
     
   end
   
   def tracker_history_length
     
-    r = tracker_histories.length
-    r
+    tracker_histories.length
+    
   end
 
   def prevent_protocol_change 
-    if protocol_id_changed? && self.persisted?
-      errors.add(:protocol, "change not allowed!")
-    end
+    
+    errors.add(:protocol, "change not allowed!") if protocol_id_changed? && self.persisted?
+    
   end
     
   

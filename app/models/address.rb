@@ -39,6 +39,9 @@ class Address < ActiveRecord::Base
   
   protected
   
+    # Only one address for a master can be set as Primary
+    # If a new item is added, or an existed item is updated with Primary rank
+    # update the existing record(s) with Primary status to be Secondary
     def handle_primary_status
       
       if self.rank.to_i == PrimaryRank
@@ -56,6 +59,7 @@ class Address < ActiveRecord::Base
       
     end
     
+    # Validate state and zip for US country and region / postal code for non-US    
     def handle_country
       if country
         self.country = country.downcase        

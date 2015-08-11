@@ -32,7 +32,7 @@ describe User do
   it "allows email address change by an admin" do
     create_admin
     @user.email  = "testuser-change@testing.com"
-    @user.admin = @admin
+    @user.current_admin = @admin
     expect(@user.save).to be true
   end
   
@@ -40,7 +40,7 @@ describe User do
   it "prevents user disabled from authenticating" do
     create_admin
     @user.disabled = true
-    @user.admin = @admin
+    @user.current_admin = @admin
     @user.save!
     
     expect(@user.active_for_authentication?).to be false

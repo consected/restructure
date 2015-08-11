@@ -12,12 +12,7 @@ class PlayerContact < ActiveRecord::Base
   validates :rank, presence: true
   after_save :handle_primary_status
   
-#  def rank_name
-#    return unless rank
-#    rank.name    
-#  end    
-#      
-      
+     
   protected
     def is_email?
       rec_type == 'email'
@@ -25,7 +20,10 @@ class PlayerContact < ActiveRecord::Base
     def is_phone?
       rec_type == 'phone'
     end
-    
+
+    # A master record can only have one email and one phone with rank set to Primary
+    # If a new player contact record is created or an existing record is updated with Primary rank
+    # then update any other records for the master of that type (email or phone) to Secondary
     def handle_primary_status
       
       if self.rank.to_i == PrimaryRank

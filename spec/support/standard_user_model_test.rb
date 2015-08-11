@@ -19,8 +19,8 @@ shared_examples 'a standard user model' do
       
       t = ts.first
       
-      expect(t.item_type).to eq item.class.name
-      expect(t.item_id).to eq item.id
+      expect(t.record_type).to eq item.class.name
+      expect(t.record_id).to eq item.id
       
       expect(t.protocol_name.downcase).to eq 'updates'
       expect(t.sub_process_name.downcase).to eq 'record updates'
@@ -43,8 +43,8 @@ shared_examples 'a standard user model' do
       
       t = ts.first
       
-      expect(t.item_type).to eq item.class.name
-      expect(t.item_id).to eq item.id
+      expect(t.record_type).to eq item.class.name
+      expect(t.record_id).to eq item.id
       
       expect(t.protocol_name.downcase).to eq 'updates'
       expect(t.sub_process_name.downcase).to eq 'record updates'

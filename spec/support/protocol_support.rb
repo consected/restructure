@@ -48,7 +48,7 @@ module ProtocolSupport
   
   def create_item att=nil, admin=nil
     att ||= valid_attribs    
-    att[:admin] = admin||@admin
+    att[:current_admin] = admin||@admin
     
     @protocol = Protocol.create! att
   end

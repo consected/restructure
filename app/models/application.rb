@@ -9,4 +9,15 @@ class Application
       Time.now.to_f.to_s
     }
   end
+  
+  
+  def self.record_error_message record
+    res = []
+    
+    record.errors.each do |r|
+      res << r.join(' ')
+    end
+    
+    res.join "; "
+  end
 end

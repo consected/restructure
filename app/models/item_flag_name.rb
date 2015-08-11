@@ -2,8 +2,9 @@ class ItemFlagName < ActiveRecord::Base
   include AdminHandler
   include SelectorCache
 
-  validates :name, presence: true, uniqueness: true
   before_validation :prevent_item_type_change,  on: :update
+  validates :name, presence: true, uniqueness: true
+  
   default_scope -> {order  "item_flag_names.updated_at DESC nulls last"}
 
   private

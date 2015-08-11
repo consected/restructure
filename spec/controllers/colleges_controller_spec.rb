@@ -16,7 +16,7 @@ RSpec.describe CollegesController, type: :controller do
   before(:all) do
     res = College.delete_all
         
-    Rails.cache.clear
+    Rails.cache.clear    
   end
   
   

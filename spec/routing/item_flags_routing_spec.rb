@@ -24,7 +24,7 @@ RSpec.describe ItemFlagsController, type: :routing do
     end
 
     it "routes to #create" do
-      expect(:post => "#{object_path}/4").to route_to("#{object_name}#create", parent_params.merge(:id=>'4'))
+      expect(:post => "#{object_path}").to route_to("#{object_name}#create", parent_params)
     end
 
     it "routes to #update" do

@@ -56,7 +56,7 @@ module ItemFlagNameSupport
   
   def create_item att=nil, admin=nil
     att ||= valid_attribs    
-    att[:admin] = admin||@admin 
+    att[:current_admin] = admin||@admin 
     @item_flag_name = ItemFlagName.create! att
   end
   

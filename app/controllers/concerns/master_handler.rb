@@ -112,7 +112,7 @@ module MasterHandler
       # This is the equivalent of e.g.
       # @player_info  = PlayerInfo.find(params[:id])
       # This allows for us to retrieve the @master consistently, so that the master association
-      # is not used repetitively (potentially breaking the current_user functionality)
+      # is not used repetitively (potentially breaking the current_user functionality and poor performance)
       if UseMasterParam.include? action_name 
         @master = Master.find(params[:master_id])
       else

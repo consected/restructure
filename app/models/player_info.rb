@@ -2,22 +2,15 @@ class PlayerInfo < ActiveRecord::Base
   
   include UserHandler
   
+  BestAccuracyScore = 12
+  FollowUpScore = 881
   
   
   # Allow simple search and compound searches to function
   attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
   
-  before_save :check_college
-  
   validate :dates_sensible
-
-  BestAccuracyScore = 12
-  FollowUpScore = 881
-  
-#  def rank_name
-#    return unless rank
-#    rank.name    
-#  end    
+  before_save :check_college
   
   
   def accuracy_rank    
@@ -31,13 +24,11 @@ class PlayerInfo < ActiveRecord::Base
   end
   
   def accuracy_score_name_for rank
-    res = AccuracyScore.find_by_value(self.rank)    
-    (res ? res.name : nil)
+    AccuracyScore.name_for(self.rank)        
   end
   
   def accuracy_score_name 
-    accuracy_score_name_for self.rank
-    
+    accuracy_score_name_for self.rank    
   end
  
   def as_json extras={}
@@ -63,11 +54,8 @@ class PlayerInfo < ActiveRecord::Base
       errors.add('birth date', "must be set unless rank is set to #{FollowUpScore} - #{accuracy_score_name_for FollowUpScore} ") if !birth_date && rank != FollowUpScore
     end
 
-
-  private
-
     def check_college
-      College.create_if_new college, user
+      College.create_if_new college, user unless college.blank?
     end
   
   

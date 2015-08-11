@@ -75,6 +75,11 @@ protected
       raise ActionController::RoutingError.new('Not Found')
     end
     
+    def bad_request
+      flash[:danger] = "The request failed to validate"
+      render text: flash[:danger], status: 422
+    end
+    
     def authenticate_user_or_admin!
       if !current_user && !current_admin
         redirect_to new_user_session_path

@@ -12,7 +12,7 @@ shared_examples 'a standard admin routing' do
     end
 
     it "routes to #show" do
-      expect(:get => "#{object_path}/1").to route_to("#{object_name}#show", parent_params.merge(:id => "1"))
+      expect(:get => "#{object_path}/1").not_to be_routable #route_to("#{object_name}#show", parent_params.merge(:id => "1"))
     end
 
     it "routes to #edit" do

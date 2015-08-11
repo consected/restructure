@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Protocol, type: :model do
+describe Protocol do
   include ModelSupport
   include ProtocolSupport  
   describe "definition" do
@@ -19,7 +19,7 @@ RSpec.describe Protocol, type: :model do
       
       Protocol.all.each do |p|
         p.position = rand 100
-        p.admin = @admin
+        p.current_admin = @admin
         p.save!
       end
       
@@ -46,7 +46,7 @@ RSpec.describe Protocol, type: :model do
       
       expect(pa.save).to be false
       
-      pa.admin = @admin
+      pa.current_admin = @admin
       expect(pa.save).to be true
       
       pa.reload

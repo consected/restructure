@@ -34,7 +34,7 @@ RSpec.describe AccuracyScore, type: :model do
     
     it "can not have value changed" do
       pa = AccuracyScore.active.first
-      pa.admin = @admin
+      pa.current_admin = @admin
       pa.value = 'a new value for value'
       expect(pa.save).to be false
     end
@@ -45,7 +45,7 @@ RSpec.describe AccuracyScore, type: :model do
       
       expect(pa.save).to be false
       
-      pa.admin = @admin
+      pa.current_admin = @admin
       expect(pa.save).to be true
       
       pa.reload

@@ -89,6 +89,13 @@ module SelectorCache
       }
     end
     
+    
+    def name_for value
+      res = selector_name_value_pair.select{|p| p.last == value}    
+      res.length == 1 ? res.first.first : nil
+    end
+    
+    
   end
 
   def invalidate_cache

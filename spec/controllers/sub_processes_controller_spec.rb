@@ -52,9 +52,9 @@ RSpec.describe SubProcessesController, type: :controller do
     admin, pw = ControllerMacros.create_admin    
       @admin = admin
   
-    Protocol.create! name: "Q#{rand 1000}", position: rand(10000), disabled: false, admin: @admin
-    @protocol = Protocol.create! name: "QA#{rand 1000}", position: rand(10000), disabled: false, admin: @admin
-    Protocol.create! name: "QB#{rand 1000}", position: rand(10000), disabled: false, admin: @admin
+    Protocol.create! name: "Q#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
+    @protocol = Protocol.create! name: "QA#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
+    Protocol.create! name: "QB#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
     @protocol_id = @protocol.id
   end
   

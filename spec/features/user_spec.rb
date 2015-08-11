@@ -38,7 +38,7 @@ describe "user sign in process" do
     expect(user.id).to equal @user.id
     
     create_admin
-    user.admin = @admin
+    user.current_admin = @admin
     user.disabled = true
     user.save!
     expect(user.active_for_authentication?).to be false

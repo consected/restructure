@@ -26,10 +26,14 @@ module MasterSupport
   def create_sources
     
     if GeneralSelection.where(item_type: 'addresses_source').length == 0
-      GeneralSelection.create! item_type: 'addresses_source', name: 'NFL', value: 'nfl', admin: auto_admin
-      GeneralSelection.create! item_type: 'addresses_source', name: 'NFLPA', value: 'nflpa', admin: auto_admin
+      GeneralSelection.create! item_type: 'addresses_source', name: 'NFL', value: 'nfl', current_admin: auto_admin
+      GeneralSelection.create! item_type: 'addresses_source', name: 'NFLPA', value: 'nflpa', current_admin: auto_admin
       
     end
+  end
+  
+  def put_valid_attribs
+    valid_attribs
   end
   
   
@@ -48,7 +52,7 @@ module MasterSupport
     @master = master
   end
 
-  def create_items from_list=:list_valid_attribs, master_or_admin=nil
+  def create_items from_list=:list_valid_attribs, master_or_admin=nil, expect_failures=false
     
     @created_count = 0
     @exceptions = []
@@ -64,6 +68,10 @@ module MasterSupport
         end
       rescue => e
         @exceptions << e
+        unless expect_failures        
+          puts "Exceptions in create_items for #{l.inspect}: #{e.inspect} #{e.backtrace.join("\n")}" 
+          raise e 
+        end
       end
       
     end

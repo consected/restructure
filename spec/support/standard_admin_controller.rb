@@ -132,6 +132,7 @@ shared_examples 'a standard admin controller' do
         put :update, {:id => item_id, object_symbol => new_attributes}
         item.reload
         new_attribs_downcase.each do |k, att|
+          puts "Item: #{item} #{k} #{att}"
           expect(item.send(k)).to eq att
         end
       end

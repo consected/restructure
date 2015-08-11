@@ -4,6 +4,8 @@ class ProtocolEvent < ActiveRecord::Base
   include SelectorCache
 
   belongs_to :sub_process
+  validates :name, presence: true
+  validates :sub_process, presence: true
   
   def protocol
     sub_process.protocol if sub_process

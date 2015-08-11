@@ -11,7 +11,9 @@ module AdminSetup
       
       admin_obj = Admin.where(email: admin).first
       if admin_obj
-        #admin_obj.password = generated_password
+        
+        admin_obj.force_password_reset
+
         admin_obj.save
         op << "Existing Admin (#{admin}) updated with new password: #{admin_obj.new_password}\n"
       else  
@@ -30,7 +32,11 @@ module AdminSetup
     admins.each do |admin|
       admin_obj = Admin.where(email: admin).first
       if admin_obj
-        admin_obj.destroy
+        
+        # An admin is not truly removed from the database,
+        # just marked as disabled
+        admin_obj.disable!
+        
         op << "Removed: #{admin}\n"
       else
         op << "Admin not recognized: #{admin}\n"

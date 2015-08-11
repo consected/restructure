@@ -71,30 +71,35 @@ shared_examples 'a standard user controller' do
       
       it "creates a new item" do
         create_master
+        va = valid_attributes
         expect {
-          post :create, {object_symbol => valid_attributes, master_id: @master_id}
-        }.to change(object_class, :count).by(1)
+          
+          post :create, {object_symbol => va, master_id: @master_id}
+        }.to change(object_class, :count).by(1), "Didn't create a new item: #{va.inspect}."
       end
 
       it "assigns a newly created item as @var" do
         create_master
-        post :create, {object_symbol => valid_attributes, master_id: @master_id}
+        va = valid_attributes
+        post :create, {object_symbol => va, master_id: @master_id}
         expect(assigns(object_symbol)).to be_a(object_class)
-        expect(assigns(object_symbol)).to be_persisted
+        expect(assigns(object_symbol)).to be_persisted, "Item was not persisted with atts #{va.inspect}"
       end
 
       it "return success" do
         create_master
-        post :create, {object_symbol => valid_attributes, master_id: @master_id}
-        expect(response).to have_http_status 200
+        va = valid_attributes
+        post :create, {object_symbol => va, master_id: @master_id}
+        expect(response).to have_http_status(200), "Didn't get a 200 response with atts #{va.inspect}"
       end
     end
 
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
         create_master
-        post :create, {object_symbol => invalid_attributes, master_id: @master_id}
-        expect(assigns(object_symbol)).to be_a_new(object_class)
+        ia = invalid_attributes
+        post :create, {object_symbol => ia, master_id: @master_id}
+        expect(assigns(object_symbol)).to be_a_new(object_class), "Create should have item with no id using attribs #{ia.inspect}"
       end
 
       it "re-renders the 'new' template" do
@@ -105,7 +110,8 @@ shared_examples 'a standard user controller' do
           j = JSON.parse(response.body)
           io = inv.keys.first.to_s
           i = io.gsub('_', ' ').downcase
-          expect(j[io] || j[i]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{j}"
+          i_no_id = io.gsub('_id', '').downcase
+          expect(j[io] || j[i] || j[i_no_id]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{j}"
         end
       end
     end
@@ -138,8 +144,10 @@ shared_examples 'a standard user controller' do
 
       it "return success" do
         create_item
-        put :update, {:id => item_id, object_symbol => valid_attributes, master_id: @master_id}
-        expect(response).to have_http_status 200
+        va = put_valid_attribs || valid_attributes
+        
+        put :update, {:id => item_id, object_symbol => va, master_id: @master_id}
+        expect(response).to have_http_status(200), "Expected 200 status with attributes: #{va}"
         expect(resp.length).to be > 0
         expect(resp).to have_key object_symbol.to_s
         
@@ -162,7 +170,8 @@ shared_examples 'a standard user controller' do
         io = invalid_attributes.keys.first.to_s
         
         i = io.gsub('_', ' ').downcase
-        expect(resp[i] || resp[io]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
+        i_no_id = io.gsub('_id', '').downcase
+        expect(resp[io] || resp[i] || resp[i_no_id]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
       end
     end
   end

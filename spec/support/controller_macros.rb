@@ -10,7 +10,7 @@ module ControllerMacros
     
     admin, pwa = create_admin
     
-    user = User.create! email: good_email, admin: admin
+    user = User.create! email: good_email, current_admin: admin
     good_password = user.password
     
     [user, good_password]

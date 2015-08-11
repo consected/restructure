@@ -38,7 +38,7 @@ RSpec.describe ItemFlagName, type: :model do
       
       expect(pa.save).to be false
       
-      pa.admin = @admin
+      pa.current_admin = @admin
       expect(pa.save).to be true
       
       pa.reload

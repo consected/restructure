@@ -4,7 +4,7 @@ module ItemFlagsHelper
   end
   
   def flag_edit_form_hash extras={}
-    extras.merge({remote: true, html: {"data-result-target" => "#item-flag-#{@master.id}-#{@item_type}-#{@item.id}-#{@id}", "data-template" => "item-flags-result-template"}})
+    extras.merge({url: "/masters/#{@master.id}/#{@item.item_type}/#{@item.id}/item_flags", action: :post, remote: true, html: {"data-result-target" => "#item-flag-#{@master.id}-#{@item_type}-#{@item.id}-#{@id}", "data-template" => "item-flags-result-template"}})
   end
   
   def item_flag_path

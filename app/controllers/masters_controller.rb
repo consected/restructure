@@ -138,7 +138,7 @@ class MastersController < ApplicationController
     if @master && @master.id
       redirect_to @master, notice:  "Created Master Record with MSID #{@master.id}"
     else
-      redirect_to new_master_url, notice: "Error creating Master Record: #{@master.errors.first.join(' ')}" 
+      redirect_to new_master_url, notice: "Error creating Master Record: #{Application.record_error_message @master}" 
     end
   end
   

@@ -5,7 +5,7 @@ class TrackersController < ApplicationController
   
   def index
     set_objects_instance @master_objects
-    s = @master_objects #.includes(:protocol).order Master::TrackerEventOrderClause
+    s = @master_objects
     render json: {trackers: s, master_id: @master.id}
   end
 
@@ -17,6 +17,8 @@ class TrackersController < ApplicationController
 
       res = @tracker.merge_if_exists
 
+      # If the tracker record exists with the requested protocol then return the updated record and show the result
+      # Otherwise just follow the default record creation flow
       if res
         @tracker = res
         show

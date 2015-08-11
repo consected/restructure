@@ -1,7 +1,7 @@
 require 'support/seed_support'
 module ModelSupport
   
-  UserPrefix = 'f-ttuser-'
+  UserPrefix = 'g-ttuser-'
   UserDomain = 'testing.com'
   
   def seed_database
@@ -23,7 +23,7 @@ module ModelSupport
     
     #puts "Attempting to create user with with name #{good_email}. #{User.find_by_email(good_email).inspect}"
     admin, pwa = create_admin
-    user = User.create! email: good_email, admin: admin
+    user = User.create! email: good_email, current_admin: admin
     good_password = user.password
     @user = user
     [user, good_password]    

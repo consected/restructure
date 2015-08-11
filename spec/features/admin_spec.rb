@@ -6,9 +6,9 @@ describe "admin sign in process" do
 
   before(:all) do
     @good_email = "testuser#{rand(1000000000)}admin@testing.com"
-    @good_password = Devise.friendly_token.first(12)
-    @admin = Admin.create email: @good_email, password: @good_password
-    @good_password = @admin.password
+    
+    @admin = Admin.create email: @good_email
+    @good_password = @admin.new_password
     
   end
 
@@ -66,17 +66,6 @@ describe "admin sign in process" do
 
     expect(page).to have_css ".flash .alert", text: "× Invalid email or password."
 
-  end
-  
-  it "should prevent sign in if admin disabled" do
-    
-    admin = Admin.where(email: @good_email).first
-    expect(admin).to be_a Admin
-    expect(admin.id).to equal @admin.id
-    
-    admin.disable!
-    
-    #login_as @user, scope: :user
     
     visit "/admins/sign_in"
     within '#new_admin' do
@@ -84,7 +73,30 @@ describe "admin sign in process" do
       fill_in "Password", with: @good_password
       click_button "Log in"
     end
+
+    expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
+
+  end
+  
+  it "should prevent sign in if admin disabled" do
     
+    email = "testuserdis#{rand(1000000000)}admin@testing.com"
+    
+    @admin = Admin.create email: email
+    pw = @admin.new_password
+    puts "Password: #{pw} for #{email}"
+    expect(@admin).to be_persisted
+    expect(@admin.active_for_authentication?).to be true
+    
+    expect(@admin.disable!).to be true
+    expect(@admin.active_for_authentication?).to be false
+    
+    visit "/admins/sign_in"
+    within '#new_admin' do
+      fill_in "Email", with: email
+      fill_in "Password", with: pw
+      click_button "Log in"
+    end
     
     expect(page).to have_css ".flash .alert", text: "× This account has been disabled."
 

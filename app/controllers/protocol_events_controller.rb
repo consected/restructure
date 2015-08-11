@@ -13,8 +13,8 @@ class ProtocolEventsController < ApplicationController
     end
   end
   
-  def new
-    @protocol_event = @sub_process.protocol_events.build
+  def new options = {}
+    @protocol_event = @sub_process.protocol_events.build unless options[:use_current_object]
     render partial: 'form'
   end
   

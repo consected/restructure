@@ -2,15 +2,14 @@ class User < ActiveRecord::Base
   
   include ActionLogging
   include AdminHandler
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable
+  
   devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
+  
   belongs_to :admin
+  
+  before_validation :generate_password, on: :create    
   validates_uniqueness_of :email, :case_sensitive => false, :allow_blank => false, :if => :email_changed?
   validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => false, :if => :email_changed?
-  before_validation :generate_password, on: :create    
-  
-  
   
   default_scope -> {order email: :asc}
   
@@ -24,8 +23,14 @@ class User < ActiveRecord::Base
     @new_password
   end
   
+  def disable!
+    self.disabled = true
+    self.save
+  end
+
+  
   def timeout_in  
-    30.minutes
+    Settings::UserTimeout
   end
 
   
@@ -39,25 +44,36 @@ class User < ActiveRecord::Base
     
 protected
 
-  
+  # Generate a random password for a new user
+  # Return the plain text password in the new_password attribute
   def generate_password
     generated_password = Devise.friendly_token.first(12)
     @new_password = generated_password    
     self.password = generated_password
   end
   
-  # Override blanket functionality to limit it to check for changed email and disabled flag change
+  # Override included functionality that ensures an administrator has been set
+  # Limit it to check for an administrator when email or disabled flag change
+  # This is required since user tracking and password updates are allowed in 
+  # standard operation, but the user can not reset a disabled flag or their email address
   def ensure_admin_set
-    if !admin && !self.persisted?
+    
+    if !admin_set? && !self.persisted?
       errors.add(:admin, "account must be used to create user")
+      return false
     end
     
-    if email_changed? && self.persisted? && !admin
+    if email_changed? && self.persisted? && !admin_set?
       errors.add(:email, "change not allowed!")
+      return false
     end
-    if disabled_changed? && self.persisted? && !admin
+    
+    if disabled_changed? && self.persisted? && !admin_set?
       errors.add(:disabled, "change not allowed!")
+      return false
     end
+    
+    true
   end
 
 end

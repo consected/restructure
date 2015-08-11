@@ -12,7 +12,7 @@ class ManageUsersController < ApplicationController
       flash[:info] = "New password #{@user.new_password}"
     end
    
-    @user.admin = current_admin
+    @user.current_admin = current_admin
     if @user.update(secure_params)
       @users = User.all
       render partial: 'show'
@@ -26,7 +26,7 @@ class ManageUsersController < ApplicationController
   def create
   
     set_object_instance primary_model.new(secure_params)
-    object_instance.admin = current_admin
+    object_instance.current_admin = current_admin
     if object_instance.save
       @users = User.all
       render partial: 'show'
