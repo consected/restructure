@@ -412,6 +412,7 @@ _fpa = {
   cancel_remote: function(){
     if(_fpa.remote_request){
         console.log("Cancel requested");
+        
         _fpa.remote_request.abort();
         
         _fpa.ajax_canceled(_fpa.remote_request_block);

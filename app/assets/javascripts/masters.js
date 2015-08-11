@@ -9,6 +9,7 @@ _fpa.masters = {
             var f = $(this);
             f.find('input, select').not('.tt-input, .attached-change').on('change', function(e){
                 _fpa.cancel_remote();
+                $('#master_results_block').html('<h3>...</h3>');
                 
                 var dof = $(this).attr('data-only-for');
                 var all_null = true;
