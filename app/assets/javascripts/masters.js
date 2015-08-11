@@ -8,6 +8,8 @@ _fpa.masters = {
         forms.each(function(){
             var f = $(this);
             f.find('input, select').not('.tt-input, .attached-change').on('change', function(e){
+                _fpa.cancel_remote();
+                
                 var dof = $(this).attr('data-only-for');
                 var all_null = true;
                 if(dof){
@@ -32,6 +34,8 @@ _fpa.masters = {
                     f.find('input[type="submit"]').click();  
                 },1);
             }).addClass('attached-change');
+        }).on('keypress', function(e){
+            _fpa.cancel_remote();
         });
         $('.clear-fields').on('click', function(ev){
             

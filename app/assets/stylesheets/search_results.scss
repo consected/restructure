@@ -111,6 +111,17 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
     
 } 
 
+.ajax-canceled .search-results-count {
+    
+    color: silver;
+    
+    &:before {
+        color: gray;
+        content: 'canceled';
+    }
+    
+} 
+
 .form-actions {
     border-bottom: 1px solid;
     border-color: #f0f0ff;

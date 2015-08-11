@@ -7,22 +7,36 @@ module AdminSetup
     
     admins = admins_string.split(';')
     op = ""
+    success = true
     admins.each do |admin|
       
       admin_obj = Admin.where(email: admin).first
       if admin_obj
         
         admin_obj.force_password_reset
+        admin_obj.disabled = false
 
-        admin_obj.save
-        op << "Existing Admin (#{admin}) updated with new password: #{admin_obj.new_password}\n"
+        res = admin_obj.save
+        if res
+          op << "Existing Admin (#{admin}) updated with new password: #{admin_obj.new_password}\n" 
+        else
+          success = false
+          op << "Existing Admin (#{admin}) failed to update. #{admin_obj.errors.inspect}\n"
+        end
       else  
         admin_obj = Admin.create(email: admin)
-        op << "Admin (#{admin}) password: #{admin_obj.new_password}\n"
+        if admin_obj
+          op << "Admin (#{admin}) password: #{admin_obj.new_password}\n"
+        else
+          success = false
+          op << "New Admin (#{admin}) failed to be created.\n"
+        end
       end
     end
 
     puts op  
+    
+    return success
   end
   
   def self.remove admins_string

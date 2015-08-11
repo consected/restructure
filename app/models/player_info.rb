@@ -24,7 +24,7 @@ class PlayerInfo < ActiveRecord::Base
   end
   
   def accuracy_score_name_for rank
-    AccuracyScore.name_for(self.rank)        
+    AccuracyScore.name_for(rank)        
   end
   
   def accuracy_score_name 

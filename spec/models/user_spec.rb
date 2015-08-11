@@ -56,6 +56,13 @@ describe User do
     expect(new_user.save).to be false
   end
   
+  it "requires admin to create a user" do
+     e = "atest-#{@good_email}"
+     
+    expect { User.create! email: e }.to raise_error 'Validation failed: Admin account must be used to create user'
+     
+    
+  end
   
 end
 

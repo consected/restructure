@@ -1,4 +1,8 @@
 _fpa.preprocessors = {
+
+    before_all: function(block){
+        //$('#master_results_block').removeClass('search-status-error search-status-abort').addClass('search-status-loading');
+    },
     
     default: function(block, data, has_preprocessor){
             
@@ -336,7 +340,15 @@ _fpa.postprocessors = {
     
     flash_template: function(block, data){
          _fpa.timed_flash_fadeout();      
-    }
+    },
     
-
+    after_error: function(block, status, error){
+        if(status=='abort'){
+            $('#master_results_block').html('<h3>Canceled Request</h3>').addClass('search-status-abort');
+        }else{
+            var e = '';
+            if(status) e = status;
+            $('#master_results_block').addClass('search-status-error');
+        }
+    }
 };

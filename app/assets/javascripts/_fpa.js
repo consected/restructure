@@ -3,15 +3,21 @@ _fpa = {
   templates: {},
   app: {},
   version: '0',
+  remote_request: null,
+  remote_request_block: null,
     
   ajax_working: function(block){
 
-    $(block).addClass('ajax-running');
+    $(block).addClass('ajax-running').removeClass('ajax-canceled');
   },
   ajax_done: function(block){  
-    $(block).removeClass('ajax-running');
+    $(block).removeClass('ajax-running').removeClass('ajax-canceled');
+    _fpa.remote_request = null;
   },
-
+  ajax_canceled: function(block){  
+    $(block).removeClass('ajax-running').addClass('ajax-canceled');
+    _fpa.remote_request = null;
+  },
   compile_templates: function(){
     $('script.handlebars-partial').each(function(){
         var id = $(this).attr('id');
@@ -190,12 +196,14 @@ _fpa = {
    
     }).on('ajax:before', sel, function(ev){
         var block = $(this);
+        _fpa.remote_request = null;
+        _fpa.remote_request_block = block;
         if($(this).hasClass('prevent-on-collapse') && !$(this).hasClass('collapsed')){
             ev.preventDefault();
             return false;
         }
-        
-        _fpa.prevent_dup_clicks($(this));
+        _fpa.preprocessors.before_all(block);
+        //_fpa.prevent_dup_clicks($(this));
         
         _fpa.ajax_working(block);
         
@@ -215,7 +223,11 @@ _fpa = {
         
         _fpa.add_tracking_params($(this));
         return true;
+    }).on('ajax:beforeSend', sel, function(ev, xhr){        
+        _fpa.remote_request = xhr;
+        
     }).on("ajax:success", sel, function(e, data, status, xhr) {    
+                
         
         _fpa.status.session.reset_timeout();
         var block = $(this);
@@ -367,27 +379,45 @@ _fpa = {
         var block = $(this);
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);
-        var j = xhr.responseJSON;
-        if(xhr.status === 422){
-            if(j){
-                var msg = "<p>Could not complete action:</p>";
+        
+        if(status!='abort'){
+        
+            var j = xhr.responseJSON;
+            if(xhr.status === 422){
+                if(j){
+                    var msg = "<p>Could not complete action:</p>";
 
-                for(var i in j){
-                    if(j.hasOwnProperty(i)){
-                     msg += '<p>' + i.replace(/_/g, ' ') + ' ' + j[i] + '</p>';
-                    }                
+                    for(var i in j){
+                        if(j.hasOwnProperty(i)){
+                         msg += '<p>' + i.replace(/_/g, ' ') + ' ' + j[i] + '</p>';
+                        }                
+                    }
+                }else{
+                    var msg = "<p>Could not complete action. Please <a href=\"#\" onclick=\"window.location.reload(); return false;\">refresh the page</a> and try again.</p>";
                 }
+
+                _fpa.flash_notice(msg, 'warning');
             }else{
-                var msg = "<p>Could not complete action. Please <a href=\"#\" onclick=\"window.location.reload(); return false;\">refresh the page</a> and try again.</p>";
+                _fpa.flash_notice("An error occurred.", 'danger');
             }
-            
-            _fpa.flash_notice(msg, 'warning');
-        }else{
-            _fpa.flash_notice("An error occurred.", 'danger');
         }
+        
+        _fpa.postprocessors.after_error(block, status, error);
+        
         $('.ajax-running').removeClass('ajax-running');
     }).addClass('attached');      
     
+  },
+  
+  cancel_remote: function(){
+    if(_fpa.remote_request){
+        console.log("Cancel requested");
+        _fpa.remote_request.abort();
+        
+        _fpa.ajax_canceled(_fpa.remote_request_block);
+        _fpa.remote_request_block = null;
+        _fpa.remote_request = null;
+    }
   },
   
   flash_notice: function(msg, type){

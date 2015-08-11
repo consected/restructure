@@ -9,11 +9,11 @@ describe "admin sign in process" do
     
     @admin = Admin.create email: @good_email
     @good_password = @admin.new_password
-    
+    ENV['FPHS_ADMIN_SETUP']='yes'
   end
 
   it "should sign in" do
-    
+ 
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
     expect(admin.id).to equal @admin.id
@@ -80,15 +80,23 @@ describe "admin sign in process" do
   
   it "should prevent sign in if admin disabled" do
     
+    
     email = "testuserdis#{rand(1000000000)}admin@testing.com"
     
-    @admin = Admin.create email: email
+    # We seem to have to start with the admin disabled for this test to work.
+    # It is possible that the data
+    @admin = Admin.create email: email#, disabled: true
     pw = @admin.new_password
     puts "Password: #{pw} for #{email}"
     expect(@admin).to be_persisted
-    expect(@admin.active_for_authentication?).to be true
+    
+    
+    expect(@admin.active_for_authentication?).to be true    
     
     expect(@admin.disable!).to be true
+    
+    @admin.reload
+    expect(@admin.disabled).to be true
     expect(@admin.active_for_authentication?).to be false
     
     visit "/admins/sign_in"

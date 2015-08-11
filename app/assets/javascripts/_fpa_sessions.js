@@ -17,7 +17,7 @@ _fpa.session.prototype = {
   },
   
   reset_timeout: function(){
-        console.log("reset_timeout to "+this.default_timeout + ' seconds');
+        //console.log("reset_timeout to "+this.default_timeout + ' seconds');
         window.localStorage.setItem('session_last_reset', this.time_now());
   },
   
@@ -31,7 +31,7 @@ _fpa.session.prototype = {
   
   count_down: function(){
       var timeout_in = this.time_passed();
-      console.log("timeout in: "+ timeout_in +" :: default timeout: " + this.default_timeout);
+      //console.log("timeout in: "+ timeout_in +" :: default timeout: " + this.default_timeout);
       if(timeout_in > this.default_timeout){
           console.log("timed out!");
           window.location.href="/";

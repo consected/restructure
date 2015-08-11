@@ -1,5 +1,6 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 ENV['RAILS_ENV'] ||= 'test'
+ENV['FPHS_ADMIN_SETUP']='yes'
 require 'simplecov'
 SimpleCov.start 'rails'
 
