@@ -2,8 +2,7 @@
   
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
   
-  _fpa.set_cache('college_list', <%= college_array.html_safe %>);
-  
+  _fpa.set_definition('colleges');
   _fpa.set_definition('protocol_events');
   
   _fpa.status['session'] = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);

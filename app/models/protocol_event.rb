@@ -7,6 +7,8 @@ class ProtocolEvent < ActiveRecord::Base
   validates :name, presence: true
   validates :sub_process, presence: true
   
+  default_scope -> {order :name }
+  
   def protocol
     sub_process.protocol if sub_process
   end

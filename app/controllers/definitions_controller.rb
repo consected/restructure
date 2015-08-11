@@ -2,7 +2,7 @@ class DefinitionsController < ApplicationController
   before_action :authenticate_user_or_admin!
   
   Available = {"protocol_events" => :selector_collection, "colleges" => :selector_array}.freeze
-  
+   
   def show
     
     id = params[:id]
