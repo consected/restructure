@@ -30,7 +30,9 @@ module UserHandler
     def get_rank_name value
       GeneralSelection.name_for self, value, :rank    
     end
-
+    def get_source_name value
+      GeneralSelection.name_for self, value, :source
+    end
   end  
   
   def master_user
@@ -57,6 +59,11 @@ module UserHandler
     self.class.get_rank_name self.rank
   end
   
+  def source_name
+    return nil unless respond_to? :source
+    
+    self.class.get_source_name self.source
+  end
   
   
   def update_action
@@ -105,6 +112,7 @@ module UserHandler
     extras[:methods] << :rank_name if respond_to? :rank        
     extras[:methods] << :state_name if respond_to? :state
     extras[:methods] << :country_name if respond_to? :country
+    extras[:methods] << :source_name if respond_to? :source
     
     super(extras)    
   end

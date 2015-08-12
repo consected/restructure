@@ -10,7 +10,7 @@
         {{>item_flag_container item_type="player_info"}}         
       </li>
       
-      {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
+      {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college,source_name" }}
       <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/filter}}
       <div class="player-info-notes">
@@ -54,7 +54,7 @@
         
       </li>
       
-      {{#filter this "country_name,street,street2,street3,city,state_name,zip,region,postal_code,source,rec_type" }}      
+      {{#filter this "country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type" }}      
       <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
       {{/filter}}
       
@@ -76,10 +76,10 @@
       
       <li class="list-group-item player-contact-data"><small>contact</small> <strong class="email">{{data}}</strong></li>
       
-      <li class="list-group-item is-combo player-contact-source">      
+      <li class="list-group-item is-combo player-contact-source_name">      
         <div class="row">
           <div class="col-md-12">
-            <small>source</small> <strong>{{pretty_string source return_string="true" capitalize="true"}}</strong>
+            <small>source</small> <strong>{{pretty_string source_name return_string="true" capitalize="false"}}</strong>
           </div>
         </div>
       

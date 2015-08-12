@@ -48,16 +48,16 @@ class MastersController < ApplicationController
             include: {              
               item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
             },
-            methods: [:user_name, :accuracy_score_name]
+            methods: [:user_name, :accuracy_score_name, :source_name]
           },
           pro_infos: {}, 
           player_contacts: {
             order: {rank: :desc},             
-            methods: [:user_name, :rank_name]
+            methods: [:user_name, :rank_name, :source_name]
           },
           addresses: {
             order: {rank: :desc},             
-            methods: [:user_name, :rank_name, :state_name, :country_name]
+            methods: [:user_name, :rank_name, :state_name, :country_name, :source_name]
           },
           trackers: {
             order: "protocol.position #{Master::TrackerEventOrderClause}",  

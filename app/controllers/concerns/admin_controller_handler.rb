@@ -9,8 +9,8 @@ module AdminControllerHandler
     after_action :do_log_action
   end
 
-  def index
-    set_objects_instance primary_model.all
+  def index    
+    set_objects_instance primary_model.order(default_index_order)    
   end
   
 
@@ -76,7 +76,10 @@ module AdminControllerHandler
     def human_name 
       controller_name.singularize.humanize
     end
-
+    
+    def default_index_order
+      nil
+    end
   
   private
   
