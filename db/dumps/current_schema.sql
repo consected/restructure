@@ -534,7 +534,8 @@ CREATE TABLE player_infos (
     notes character varying,
     contact_id integer,
     college character varying,
-    end_year integer
+    end_year integer,
+    source character varying
 );
 
 
