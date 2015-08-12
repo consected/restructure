@@ -3,7 +3,7 @@ FPHS_A=`echo $FPHS_VERSION | grep -oP '([0-9]+)' | tail -n 1`
 FPHS_B=`echo $FPHS_VERSION | grep -oP '([0-9]+).([0-9]+).'`
 FPHS_VERSION=$FPHS_B$((FPHS_A+1))
 echo $FPHS_VERSION
-DEV_DIR=home/phil/NetBeansProjects/fpa1
+DEV_DIR=/home/phil/NetBeansProjects/fpa1
 cd $DEV_DIR
 echo $FPHS_VERSION > version.txt
 svn commit version.txt -m "new version file created"
