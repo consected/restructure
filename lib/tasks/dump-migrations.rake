@@ -18,9 +18,9 @@ namespace :db do
 
           case original_task
           when "db:migrate"
-            filename = "upgrade-#{Time.now.to_formatted_s(:number)}.sql"
+            filename = "db/dumps/upgrade-#{Time.now.to_formatted_s(:number)}.sql"
           when "db:rollback"
-            filename = "rollback-#{Time.now.to_formatted_s(:number)}.sql"
+            filename = "db/dumps/rollback-#{Time.now.to_formatted_s(:number)}.sql"
           else
             raise "unkown migration type #{original_task}"
           end
