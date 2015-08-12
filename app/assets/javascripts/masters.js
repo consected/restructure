@@ -9,7 +9,7 @@ _fpa.masters = {
             var f = $(this);
             f.find('input, select').not('.tt-input, .attached-change').on('change', function(e){
                 _fpa.cancel_remote();
-                $('#master_results_block').html('<h3>...</h3>');
+                
                 
                 var dof = $(this).attr('data-only-for');
                 var all_null = true;
@@ -37,6 +37,8 @@ _fpa.masters = {
             }).addClass('attached-change');
         }).on('keypress', function(e){
             _fpa.cancel_remote();
+        }).on('submit', function(){
+            $('#master_results_block').html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
         });
         $('.clear-fields').on('click', function(ev){
             

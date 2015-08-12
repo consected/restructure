@@ -1,7 +1,6 @@
 _fpa.preprocessors = {
 
     before_all: function(block){
-        //$('#master_results_block').removeClass('search-status-error search-status-abort').addClass('search-status-loading');
     },
     
     default: function(block, data, has_preprocessor){
@@ -344,7 +343,7 @@ _fpa.postprocessors = {
     
     after_error: function(block, status, error){
         if(status=='abort'){
-            $('#master_results_block').html('<h3>Canceled Request</h3>').addClass('search-status-abort');
+            $('#master_results_block').html('<h3  class="text-center"><span class="glyphicon glyphicon-pause search-canceled"></span></h3>').addClass('search-status-abort');
         }else{
             var e = '';
             if(status) e = status;

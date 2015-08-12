@@ -56,8 +56,8 @@ class Tracker < ActiveRecord::Base
       kname = ("#{k.to_s}_name").to_sym
       
       if record.respond_to? kname      
-        tov = "#{tov} - #{record.class.send("get_#{k}_name".to_s, tov)}" 
-        fromv = "#{fromv} - #{record.class.send("get_#{k}_name".to_s, fromv)}" 
+        tov = "(#{tov}) #{record.class.send("get_#{k}_name".to_s, tov)}" 
+        fromv = "(#{fromv}) #{record.class.send("get_#{k}_name".to_s, fromv)}" 
         
       end
       
