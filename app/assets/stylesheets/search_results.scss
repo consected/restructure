@@ -307,11 +307,12 @@ ul[data-address-is-us="false"]{
 strong.email {
     
     word-break: break-word;
+    word-wrap: break-word;
 
 }
 
 span.tracker-event-description {color: silver;}
 
-li.address-source strong, li.player-contact-source strong {
+li.player-info-source_name strong, li.address-source_name strong, li.player-contact-source_name strong {
     text-transform: lowercase;
 }
