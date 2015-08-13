@@ -45,8 +45,8 @@ class Master < ActiveRecord::Base
                                 :not_trackers, :not_tracker_histories
 
   
-  DefaultJoins = []
-  SimplePlayerJoin = "LEFT JOIN player_infos on masters.id = player_infos.master_id".freeze
+  
+  SimplePlayerJoin = "LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id".freeze
   
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
@@ -109,6 +109,10 @@ class Master < ActiveRecord::Base
     
   }
   
+  # Don't automatically generate a join for specific AltConditions
+  # This allows for a :joins definition in AltConditions to define a LEFT OUTER JOIN on the primary table, for example
+  NoDefaultJoinFor = [:general_infos]
+  
   attr_accessor :force_order
   
   # Build a Master search using the Master and nested attributes passed in
@@ -117,7 +121,7 @@ class Master < ActiveRecord::Base
   # attributes that are not nil
   def self.search_on_params params, conditions={}
     
-    joins = DefaultJoins.dup # list of joined tables
+    joins = [] # list of joined tables
     wheres = {} # set of equality where clauses
     wheresalt = [nil, {}] # list of non-equality where clauses (such as LIKE)
     selects = ["masters.id", "masters.pro_info_id", "masters.pro_id", "masters.msid", "masters.rank as master_rank"]
@@ -135,8 +139,8 @@ class Master < ActiveRecord::Base
         # Get the key name for the table by removing the _attributes extension from the key
         
         if k.to_s.include? '_attributes'
-          k1 = k.to_s.gsub('_attributes','')
-          r = Master.reflect_on_association(k1.to_sym)
+          k1 = k.to_s.gsub('_attributes','').to_sym
+          r = Master.reflect_on_association(k1)
           logger.debug "Reflection: #{r.klass.table_name}"
           if r.klass #r.source_reflection
             k1s =  r.klass.table_name #r.source_reflection.name.to_s
@@ -149,18 +153,16 @@ class Master < ActiveRecord::Base
           k1s = k.to_s.pluralize
         end
         # Keep only non-nil attributes for the primary wheres that don't have an alternative condition string
-        vn = v.select{|key1,v1| !v1.nil? && !alt_condition(k1.to_sym, [key1, v1])}
+        vn = v.select{|key1,v1| !v1.nil? && !alt_condition(k1, [key1, v1])}
         
         # Pull the attributes with an alternative condition string (note that this returns nil values too)
-        valt = v.select{|_,v1| !v1.nil? }.map{|v2| alt_condition(k1.to_sym, v2) }
+        valt = v.select{|_,v1| !v1.nil? }.map{|v2| alt_condition(k1, v2) }
         
         # If we have a set of attributes that is not empty 
         # add the equality conditions to the list of wheres
         if vn.length > 0 || valt.length > 0
-          if vn.length > 0
-            logger.info "vn(#{vn.first}, #{vn.first.last}): #{vn.inspect} -- #{wheres[k1s]}"
-            if wheres[k1s] && wheres[k1s].first.last.is_a?(Array)
-              logger.info "its an array" 
+          if vn.length > 0            
+            if wheres[k1s] && wheres[k1s].first.last.is_a?(Array)              
               wheres[k1s][vn.first.first] += vn.first.last 
             else
               wheres[k1s] = vn 
@@ -186,10 +188,10 @@ class Master < ActiveRecord::Base
               end
             end
           end
-          #TODO fix this!
-          joins << k1.to_sym        
+          
+          joins << k1 unless NoDefaultJoinFor.include?(k1)
           logger.info "adding standard join #{k1s.to_sym} when vn = #{vn}"
-          conditions[k1.to_sym] = vn
+          conditions[k1] = vn
         end
         # Always add the table to the list of joins and select (so we can get the data)
         
@@ -199,8 +201,7 @@ class Master < ActiveRecord::Base
       end
       
     end
-    
-    logger.info "Join: #{joins}\nWhere: #{wheres.inspect} << #{wheresalt.inspect} "
+        
     
     # No conditions were recognized. Exit now.
     return nil if wheres.length == 0 && !wheresalt.first

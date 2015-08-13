@@ -19,7 +19,7 @@ describe ProtocolEvent do
       create_items :list_valid_attribs
     end
     
-    it "allows multiple Protocol Events to be created and returned in order based on updated_at" do
+    it "allows multiple Protocol Events to be created and returned in order based on name" do
       
       
       expect(@created_count).to eq @list.length
@@ -30,13 +30,13 @@ describe ProtocolEvent do
         p.save!
       end
       
-      prev_pos = DateTime.now - 1.year
+      prev_pos = nil
       ProtocolEvent.all.each do |p|                      
-        expect(p.updated_at).to be <= prev_pos
-        prev_pos  = p.updated_at if p.updated_at
+        expect(p.name.downcase).to be >= prev_pos if prev_pos
+        prev_pos  = p.name.downcase if p.name
       end
       
-      expect(prev_pos).to be > DateTime.now - 1.year
+      expect(prev_pos).not_to be_nil
       
     end
     

@@ -37,7 +37,8 @@ RSpec.describe MastersController, type: :controller do
     end
     
     it "searches MSID and returns nothing" do
-      get :index, {mode: 'MSID', master: {msid: 10000}}
+      mid = Master.maximum(:msid)+1
+      get :index, {mode: 'MSID', master: {msid: mid}}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
       expect(jres['count']).to eq 0
