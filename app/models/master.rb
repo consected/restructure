@@ -28,7 +28,7 @@ class Master < ActiveRecord::Base
   has_many :not_trackers, -> { order(TrackerEventOrderClause)},  class_name: 'Tracker'
 
   before_validation :prevent_user_updates,  on: :update
-  validates :user, presence: true
+  validates :user, presence: true  
   before_create :assign_msid
 
   
@@ -282,7 +282,14 @@ class Master < ActiveRecord::Base
     res
   end
   
+  # Current admin is not stored, but may be used in validations for administrative level changes
+  def current_admin=ca
+    @current_admin = ca.is_a?(Admin)
+  end
   
+  def is_admin?
+    !!@current_admin
+  end
 
   def current_user= cu
     logger.info "Setting current user: #{cu} in #{self}"
@@ -305,6 +312,16 @@ class Master < ActiveRecord::Base
     @current_user_id
   end
   
+  def self.create_master_records user
+    
+    raise "no user specified" unless user
+    
+    m = Master.create!(current_user: user)
+    m.player_infos.create!
+    return m
+    
+  end
+  
 private
 
   def assign_msid
@@ -319,5 +336,5 @@ private
     errors.add :msid, "can not be updated by users" if msid_changed?
     errors.add "pro info association", "can not be updated by users" if pro_info_id_changed?
   end
-  
+    
 end

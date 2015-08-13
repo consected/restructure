@@ -4,9 +4,30 @@ RSpec.describe MastersController, type: :controller do
   include MasterSupport
   before_each_login_user
   
-  it "sign in through Devise user" do          
-    get :new
-    expect(response).to render_template 'masters/new'    
+  
+  describe "Create master" do
+    it "asks user if they want to create a new record" do          
+      get :new
+      expect(response).to render_template 'masters/new'    
+    end
+
+    it "creates a master record and shows it" do
+      
+      post :create
+      @master = Master.last
+      mid = @master.id
+      
+      expect(response).to redirect_to master_url(mid)
+      
+      expect(@master.player_infos.length).to eq 1
+      
+      pi = @master.player_infos.first
+      
+      expect(pi.birth_date).to be_blank
+      expect(pi.rank).to be_blank
+      
+    end
+    
   end
   
   describe "GET #index" do

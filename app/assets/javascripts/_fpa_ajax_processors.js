@@ -13,7 +13,7 @@ _fpa.postprocessors = {
     
         // Allow easy default processing where not already performed by the postprocessor
         if(!has_postprocessor){
-            _fpa.form_utils.format_block(block);
+            _fpa.form_utils.format_block(block);            
         }
     
     },    
@@ -22,6 +22,9 @@ _fpa.postprocessors = {
         window.setTimeout(function(){
             $('[data-template="address-result-template"] .address-state_name .list-small-label').each(function(){ $(this).html('state'); });
             $('[data-template="address-result-template"] .address-country_name .list-small-label').each(function(){ $(this).html('country'); });
+            $('[data-template="address-result-template"] .address-source_name .list-small-label').each(function(){ $(this).html('source'); });
+            $('[data-template="player-info-result-template"] .player-info-source_name .list-small-label').each(function(){ $(this).html('source'); });
+            
         },1);
     },
     
@@ -125,13 +128,13 @@ _fpa.postprocessors = {
             
             // Scroll if necessary
             var rect = h.get(0).getBoundingClientRect(); 
-            var not_visible = !(rect.top >= 0 && rect.bottom <= $(window).height());
+            var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
             if(not_visible)                    
                 $.scrollTo(h, 200, {offset: -50});
             
         }).addClass('link-attached');  
         
-        block.find('.tracker-event_name[data-event-id], .tracker-history-event_name[data-event-id]').each(function(){
+        block.find('.tracker-event_name[data-event-id], .tracker-history-event_name[data-event-id]').not('.te-desc-attached').each(function(){
             var e = $(this);
             var evid = e.attr('data-event-id');
             var pe = _fpa.cache('protocol_events');                
@@ -143,7 +146,7 @@ _fpa.postprocessors = {
                 hj.popover({trigger: 'click hover'});
             }
             
-        });
+        }).addClass('te-desc-attached');
         
     },
     
@@ -266,12 +269,14 @@ _fpa.postprocessors = {
         var d = data;
         if(data.player_info) d = data.player_info;
         _fpa.postprocessors.info_update_handler(block, d);
+        _fpa.postprocessors.label_changes_handler(block);
     },
 
     address_result_template: function(block, data){
         var d = data;
         if(data.address) d = data.address;
         _fpa.postprocessors.info_update_handler(block, d);
+        _fpa.postprocessors.label_changes_handler(block);
     }, 
 
     player_contact_result_template: function(block, data){
@@ -343,7 +348,8 @@ _fpa.postprocessors = {
     
     after_error: function(block, status, error){
         if(status=='abort'){
-            $('#master_results_block').html('<h3  class="text-center"><span class="glyphicon glyphicon-pause search-canceled"></span></h3>').addClass('search-status-abort');
+            $('#master_results_block').html('<h3  class="text-center"><span class="glyphicon glyphicon-pause search-canceled" data-toggle="popover" data-trigger="click hover" data-content="search paused while new entries are added"></span></h3>').addClass('search-status-abort');
+            $('.search-canceled').popover();
         }else{
             var e = '';
             if(status) e = status;

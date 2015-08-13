@@ -43,7 +43,7 @@ RSpec.describe College, type: :model do
       
       pi_college = "new college b #{DateTime.now}".downcase
       
-      pi = @master.player_infos.create! first_name: "bob", rank: 881, college: pi_college
+      pi = @master.player_infos.create! first_name: "bob", rank: 881, college: pi_college, source: 'nflpa'
       
       expect(pi).to be_a PlayerInfo
       expect(pi.college).to eq pi_college

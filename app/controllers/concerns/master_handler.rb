@@ -125,9 +125,9 @@ module MasterHandler
       # Get the list of objects related to the master, in other words triggering the association
       # off of the master object
       @master_objects = @master.send(objects_name)
-
-      logger.debug "Setting current user in master: #{current_user}"
+      
       @master.current_user = current_user  
+      @master.current_admin = current_admin
       @master
     end
 

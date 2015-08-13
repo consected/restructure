@@ -21,6 +21,9 @@ module UserHandler
     # It implicitly reinforces security, in that the user must be authenticated for
     # the user to have been set
     validates :user, presence: true
+    
+    validate :source_correct
+    validate :rank_correct
 
     after_save :check_status
     after_save :track_record_update
@@ -35,14 +38,20 @@ module UserHandler
     end
   end  
   
+  def is_admin?
+    if respond_to?(:master) && master      
+      master.is_admin?
+    else
+      nil
+    end
+  end
+  
   def master_user
     
     if respond_to?(:master) && master      
-      current_user = master.current_user
-      logger.debug "Getting current user #{current_user} from #{master} in #{self}"
+      current_user = master.current_user      
       current_user 
-    else
-      logger.debug "Getting user_id in #{self} - no master!"
+    else      
       nil
     end
   end
@@ -142,4 +151,16 @@ module UserHandler
        Tracker.track_record_update self
     end
   
+    def source_correct      
+      if respond_to?(:source) && self.source       
+        errors.add :source, "(#{self.source}) not a valid value" unless source_name
+      end      
+    end
+    
+    
+    def rank_correct      
+      if respond_to?(:rank) && self.rank
+        errors.add :rank, "(#{self.rank}) not a valid value" unless rank_name
+      end      
+    end
 end

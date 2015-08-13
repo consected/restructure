@@ -4,6 +4,10 @@ _fpa.loaded.default = function(){
     _fpa.timed_flash_fadeout();
     _fpa.form_utils.format_block();
     
+    _fpa.set_definition('colleges');
+    _fpa.set_definition('protocol_events');
+      
+    
     $('#nav_q').on('keypress', function(){
         $('#nav_q_pro_id').val('');
     }).on('change', function(){

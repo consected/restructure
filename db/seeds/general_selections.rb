@@ -8,6 +8,19 @@ module Seeds
       end
 
     end
+
+    def self.create_player_infos_source
+      item_type = 'player_infos_source'
+      
+      values = [        
+        {name: 'NFLPA', value: 'nflpa'},                
+        {name: 'NFLPA 2', value: 'nflpa2'}                
+      ]
+      
+      add_values values, item_type
+      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+    end
+
     
     def self.create_player_contacts_rank
       
@@ -82,6 +95,8 @@ module Seeds
     
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
+
+      create_player_infos_source
       
       create_player_contacts_rank
       create_player_contacts_source

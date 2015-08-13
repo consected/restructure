@@ -1,5 +1,12 @@
 module PlayerInfoSupport
   include MasterSupport
+  
+  def get_a_rank
+    ranks =  AccuracyScore.all
+    ranks[rand(ranks.length)].value
+  end
+  
+  
   def list_valid_attribs
     res = []
     
@@ -15,7 +22,7 @@ module PlayerInfoSupport
       start_year = nil
       start_year = opt(bd.year + rand(10) + 19 ) if bd
 
-      rank = rand(999)
+      rank = get_a_rank
       rank = PlayerInfo::FollowUpScore if !bd
       
       res << {
@@ -26,6 +33,7 @@ module PlayerInfoSupport
         birth_date: bd,
         death_date: dd,
         rank: rank,
+        source: 'nflpa',
         start_year: start_year,
         end_year: opt(start_year ? start_year + rand(10) : nil),
         notes: 'kjsad hfkshfk jskjfhksa!jdhf sadf js dfjk sdkjf sdkjf\njg fjdhsag fjsa,hdg jsgadfjgsajdf?gsf gsgf sdgj sa fj'
@@ -43,7 +51,13 @@ module PlayerInfoSupport
     {
       birth_date: Date.today - 100.days,
       death_date: Date.today - 101.days
-    }]
+    },
+    {
+      source: nil,
+      rank: 881
+      
+    }
+    ]
   end
 
     

@@ -53,15 +53,20 @@ class Tracker < ActiveRecord::Base
       fromv = v.first
       tov = v.last
       
-      kname = ("#{k.to_s}_name").to_sym
-      
-      if record.respond_to? kname      
-        tov = "(#{tov}) #{record.class.send("get_#{k}_name".to_s, tov)}" 
-        fromv = "(#{fromv}) #{record.class.send("get_#{k}_name".to_s, fromv)}" 
+      # Exclude where both to and from are blank (since a form update will cause a switch of nil and "") which is meaningless
+      unless v.first.blank? && v.last.blank?
+        kname = ("#{k.to_s}_name").to_sym
+
+        if record.respond_to? kname      
+          tov = "(#{tov}) #{record.class.send("get_#{k}_name".to_s, tov)}" 
+          fromv = "(#{fromv}) #{record.class.send("get_#{k}_name".to_s, fromv)}" 
+        end
         
+        fromv = '-' if fromv.blank?
+        tov = '-' if tov.blank?
+
+        cp << "#{k.humanize} #{new_rec ? '' : "from #{fromv}"} #{new_rec ? '' : 'to '}#{tov}; " 
       end
-      
-      cp << "#{k.humanize} #{new_rec ? '' : "from #{fromv || "-"}"} #{new_rec ? '' : 'to '}#{tov}; " 
     end
     
    

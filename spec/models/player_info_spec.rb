@@ -16,7 +16,7 @@ RSpec.describe PlayerInfo, type: :model do
     
     @created_count = 0
     
-    lnew = {first_name: 'phil', last_name: 'good', middle_name: 'andrew', nick_name: 'mitch', birth_date: Time.now-60.years}
+    lnew = {first_name: 'phil', last_name: 'good', middle_name: 'andrew', nick_name: 'mitch', birth_date: Time.now-60.years, source: 'nflpa'}
     
     @list << lnew
     
@@ -118,8 +118,14 @@ RSpec.describe PlayerInfo, type: :model do
     @player_info.start_year = Time.now.year - 20
     @player_info.end_year = @player_info.start_year - 1
     expect(@player_info.save).to be false
-    expect(@player_info.errors.messages).to have_key(:"start year"), "Errors should contain years: #{@player_info.errors.inspect}"
+    expect(@player_info.errors.messages).to have_key(:"start year"), "Errors should contain years: #{@player_info.errors.inspect}"    
+  end
+  
+  it "checks user can't change source" do
+    @player_info.source = 'nflpa2'
     
+    expect(@player_info.save).to be false
+    expect(@player_info.errors.messages).to have_key(:"source"), "Errors should contain source: #{@player_info.errors.inspect}"    
   end
   
   it "presents an error if the birth_date is not set and the rank is not set to 881" do

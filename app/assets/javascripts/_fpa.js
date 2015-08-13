@@ -478,10 +478,4 @@ _fpa = {
 _fpa.preprocessors = {};
 _fpa.loaded = {};
 
-$('html').ready(function(){
-  _fpa.reset_page_size();  
-  
-  _fpa.compile_templates();
-  _fpa.handle_remotes();
-  _fpa.loaded.default();
-});
+

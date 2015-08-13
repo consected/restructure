@@ -21,8 +21,7 @@ module ProInfoSupport
         middle_name: pick_from(first_names).downcase,
         nick_name: pick_from(other_names).downcase,
         birth_date: bd,
-        death_date: dd,
-        rank: rand(999),
+        death_date: dd,        
         start_year: start_year,
         end_year: opt(start_year ? start_year + rand(12) : nil)
       }
@@ -50,8 +49,7 @@ module ProInfoSupport
       middle_name: nil,
       nick_name: nil,
       birth_date: nil,
-      death_date: nil,
-      rank: rand(10),
+      death_date: nil,      
       start_year: rand(10)+1980,
       end_year: rand(10)+1990
     }

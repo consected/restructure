@@ -1,0 +1,1 @@
+<%=@accuracy_scores.as_json(except: [:created_at, :updated_at, :id, :admin_id]).to_s.html_safe%>

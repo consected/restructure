@@ -1,24 +1,31 @@
 module PlayerContactSupport
   include MasterSupport
   
+  def get_a_rank
+    res = GeneralSelection.where(item_type: 'player_contacts_rank').enabled.all    
+    r = res[rand res.length].value
+    
+    r
+  end
+  
   def list_valid_attribs
     [
       {
         data: "brian@test.com",
         source: 'nflpa',
-        rank: (rand(10)),        
+        rank: (get_a_rank),        
         rec_type: 'email'
       },
       {
         data: "(516)262-1289",
         source: 'nfl',
-        rank: (rand(10)),        
+        rank: (get_a_rank),        
         rec_type: 'phone'
       },
       {
         data: "(516)262-1289 ext 2342",
         source: 'nfl',
-        rank: (rand(10)),        
+        rank: (get_a_rank),        
         rec_type: 'phone'
       }
     ]

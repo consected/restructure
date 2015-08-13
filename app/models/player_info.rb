@@ -8,8 +8,10 @@ class PlayerInfo < ActiveRecord::Base
   
   # Allow simple search and compound searches to function
   attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
-  
+
+  before_validation :prevent_user_changes, on: :update
   validate :dates_sensible
+  validates :source, presence: true, if: :rank?
   before_save :check_college
   
   
@@ -23,12 +25,17 @@ class PlayerInfo < ActiveRecord::Base
     end
   end
   
-  def accuracy_score_name_for rank
-    AccuracyScore.name_for(rank)        
+  def accuracy_score_name 
+    rank_name    
   end
   
-  def accuracy_score_name 
-    accuracy_score_name_for self.rank    
+  # Override the standard rank_name, to ensure correct validation, since 
+  # player ranks are a special case and are defined as AccuracyScore instances
+  def rank_name    
+    PlayerInfo.get_rank_name self.rank    
+  end
+  def self.get_rank_name value
+    AccuracyScore.name_for(value)
   end
  
   def as_json extras={}
@@ -52,12 +59,16 @@ class PlayerInfo < ActiveRecord::Base
       errors.add('death date', 'is after today') if death_date && death_date > DateTime.now
       errors.add('start year', "is more than 30 years after birth date") if start_year && birth_date && start_year > (birth_date + 29.years).year
       errors.add('start year', "is less than 19 years after birth date") if start_year && birth_date && start_year < (birth_date + 19.years).year
-      errors.add('birth date', "must be set unless rank is set to #{FollowUpScore} - #{accuracy_score_name_for FollowUpScore} ") if !birth_date && rank != FollowUpScore
+      errors.add('birth date', "must be set unless rank is set to \"#{FollowUpScore} - #{PlayerInfo.get_rank_name FollowUpScore}\"") if !birth_date && rank && rank != FollowUpScore
     end
 
     def check_college
       College.create_if_new college, user unless college.blank?
     end
   
-  
+    def prevent_user_changes
+      
+      errors.add :source, "can not be updated by a user after a record has been created. Contact an administrator to change this field." if source_changed? && !source_was.nil? && !is_admin?
+    end
+    
 end

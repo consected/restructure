@@ -50,7 +50,18 @@ RSpec.describe Master, type: :model do
     
     
   end
+
+  it "should create a master and player like a user" do  
+    m = Master.create_master_records(@user)
+    
+    expect(m).to be_a Master
+    expect(m).to be_persisted
+    expect(m.player_infos.length).to eq 1
+    expect(m.player_infos.first).to be_a PlayerInfo
+    expect(m.player_infos.first).to be_persisted
+  end
   
+
   
   it "should support simple search across player and pro info tables" do
     

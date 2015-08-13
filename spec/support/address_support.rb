@@ -1,5 +1,13 @@
 module AddressSupport
   include MasterSupport
+  
+  def get_a_rank
+    res = GeneralSelection.where(item_type: 'player_contacts_rank').enabled.all    
+    r = res[rand res.length].value
+    
+    r
+  end
+  
   def list_valid_attribs
     res = []
     
@@ -11,7 +19,7 @@ module AddressSupport
         city: "Portland",
         state: "OR",
         zip: "#{rand(99999).to_s.rjust(5, "0")}",
-        rank: 1,
+        rank: 0,
         rec_type: 'home',
         source: 'nflpa'
       }
@@ -38,7 +46,7 @@ module AddressSupport
       city: "Newhaven",
       state: "CT",
       zip: "#{rand(99999).to_s.rjust(5, "0")}",
-      rank: 2,
+      rank: 5,
       rec_type: 'business'
     }
   end

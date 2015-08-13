@@ -78,7 +78,7 @@ class MastersController < ApplicationController
       log_action "master search", search_type, @masters.length
     else
       # Return no results      
-      m = {message: "no conditions were specified"}
+      m = {message: "no conditions were specified", masters: []}
       log_action "master search", search_type, 0, "no conditions specified"
     end
 
@@ -134,7 +134,7 @@ class MastersController < ApplicationController
   end
   
   def create
-    @master = Master.create user: current_user
+    @master = Master.create_master_records current_user
     if @master && @master.id
       redirect_to @master, notice:  "Created Master Record with MSID #{@master.id}"
     else

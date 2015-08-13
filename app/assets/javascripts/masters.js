@@ -45,6 +45,7 @@ _fpa.masters = {
             ev.preventDefault();
             forms.find('input, select').not('[type="submit"], [type="hidden"]').val(null).removeClass('has-value');
             $('select[multiple]').trigger('chosen:updated');
+            $('#master_results_block').html('<h3 class="text-center"></h3>');
         });
     
 

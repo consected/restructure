@@ -273,8 +273,8 @@
 </script>
 
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-    <span class="glyphicon glyphicon-info-sign" title="last updated"></span> 
-    {{#if updated_at}}{{pretty_string updated_at}}{{else}}--{{/if}}
+    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{pretty_string created_at}}"></span> 
+    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated" >{{pretty_string updated_at}}</span>{{else}}--{{/if}}
     {{#if user_name}} by {{user_name}}{{/if}}    
 </script>
 

@@ -32,7 +32,7 @@ describe ProtocolEvent do
       
       prev_pos = DateTime.now - 1.year
       ProtocolEvent.all.each do |p|                      
-        expect(p.updated_at).to be >= prev_pos
+        expect(p.updated_at).to be <= prev_pos
         prev_pos  = p.updated_at if p.updated_at
       end
       

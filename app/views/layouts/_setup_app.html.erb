@@ -1,10 +1,13 @@
 <script>
   
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
-  
-  _fpa.set_definition('colleges');
-  _fpa.set_definition('protocol_events');
-  
   _fpa.status['session'] = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
+  
+  $('html').ready(function(){
+    _fpa.reset_page_size();  
 
+    _fpa.compile_templates();
+    _fpa.handle_remotes();
+    _fpa.loaded.default();
+  });
 </script>

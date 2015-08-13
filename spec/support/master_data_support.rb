@@ -24,7 +24,8 @@ module MasterDataSupport
         start_year = opt(rand(6)+bd.year+19) 
       end
       
-      rank = rand(999)
+      
+      rank = get_a_rank
       rank = 881 unless bd
 
       
@@ -40,6 +41,7 @@ module MasterDataSupport
         rank: rank,
         start_year: start_year,
         college: pick_from(colleges).downcase,
+        source: 'nflpa',
         end_year: opt(start_year ? start_year + rand(2) : nil),
         notes: 'kjsad hfkshfk jskjfhksajdhf sadf js dfjk sdkjf sdkjf\njg fjdhsag fjsahdg jsgadfjgsajdfgsf gsgf sdgj sa fj'
       }
@@ -79,6 +81,10 @@ module MasterDataSupport
     res
   end
   
+  def get_a_rank
+    ranks =  AccuracyScore.all
+    ranks[rand(ranks.length)].value
+  end
   
   def create_player_info att=nil, master=nil     
     master ||= create_master
@@ -100,6 +106,21 @@ module MasterDataSupport
     reference_list_item = nil
     reference_pro_item = nil
     ActiveRecord::Base.connection.execute "update player_infos set rank = 11 where rank = 12;"
+    
+#    (-1..12).each do |v|
+#      att = {name: "name #{v}", value: v}
+#      AccuracyScore.create! att, 
+#    end
+#    
+#    
+#    ['player_infos', 'player_contacts', 'addresses'].each do |v|
+#      att = {item_type: "#{v}_source", name: "name #{v}", value: 'nflpa'}
+#      GeneralSelection.create! att, current_admin: @admin
+#      (-1..10).each do |n|
+#        att = {item_type: "#{v}_rank", name: "rank #{v}", value: n}
+#      end
+#      GeneralSelection.create! att, current_admin: @admin
+#    end
     
     player_list.each do |l|
       # Create a user with a specific number embedded
