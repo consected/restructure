@@ -44,7 +44,7 @@ webshims.formcfg.en = {
 		",": ","
 	},
 	"numberSigns": ".",
-	"dateSigns": "-",
+	"dateSigns": "/",
 	"timeSigns": ":. ",
 	"dFormat": "-",
 	"patterns": {
