@@ -80,24 +80,44 @@ _fpa.postprocessors = {
     },
     
     tracker_events_handler: function(block){
-        block.find('.latest-tracker-history').each(function(){
-            var t = $(this);
-            var ml = t.attr('data-lth-event-milestone');
-            if(ml && ml.indexOf('notify-user')>=0){
-                var ev = t.attr('data-lth-event');
-                var evid = t.attr('data-lth-event-id');
-                
-                var pe = _fpa.cache('protocol_events');                
+        
+        window.setTimeout(function(){
+            var pe = _fpa.cache('protocol_events');
+            var always_notify = true;
+            block.find('.tracker-event_name[data-event-id]').each(function(){
+                var e = $(this);
+                var evid = e.attr('data-event-id');
+
                 var p = _fpa.get_item_by('id', pe, evid);
-                
-                if(p){
-                    var prot = t.attr('data-lth-protocol');
-                    var proc = t.attr('data-lth-process');
-                    var title = prot + ' - ' + proc + ': ' + ev;
-                    _fpa.show_modal(p.description, title);
-                }                
-            }
-        });
+                if(always_notify && p && p.milestone){
+                    if(p.milestone.indexOf('always-notify-user') >= 0){
+                        _fpa.show_modal(p.description, p.name);
+                        always_notify = false;
+                    }
+
+                }
+            });
+
+
+            block.find('.latest-tracker-history').each(function(){            
+                var t = $(this);
+                var ml = t.attr('data-lth-event-milestone');
+                if(ml && ml.indexOf('notify-user')>=0){
+                    var ev = t.attr('data-lth-event');
+                    var evid = t.attr('data-lth-event-id');
+
+
+                    var p = _fpa.get_item_by('id', pe, evid);
+
+                    if(p && always_notify){
+                        var prot = t.attr('data-lth-protocol');
+                        var proc = t.attr('data-lth-process');
+                        var title = prot + ' - ' + proc + ': ' + ev;
+                        _fpa.show_modal(p.description, title);
+                    }                
+                }
+            });
+        }, 500);
     },
     
     tracker_notes_handler: function(block){
@@ -184,7 +204,10 @@ _fpa.postprocessors = {
             var evid = data.tracker.protocol_event_id;
             var pe = _fpa.cache('protocol_events');                
             var p = _fpa.get_item_by('id', pe, evid);
-
+            
+            // Quick fix - disable notifications if they are happening. Otherwise they will continue to fire until next refresh.
+            $('#latest-tracker-history-'+data.tracker.master_id).attr('data-lth-event-milestone','');
+            
             if(p){
                 var ml = p.milestone;
                 if(ml && ml.indexOf('notify-user')>=0){

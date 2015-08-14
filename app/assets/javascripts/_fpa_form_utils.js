@@ -32,6 +32,13 @@ _fpa.form_utils = {
         {
           name: name,
           source: items
+        }).on('keypress', function(ev){
+            if(ev.keyCode != 13) return;
+            var dnf = $(this).attr('data-next-field');
+            if(dnf)
+                $(dnf).focus();
+            var v = $(this).val();
+            if(v && v !='')$(this).addClass('has-value');
         });
     },
 

@@ -27,9 +27,11 @@ class Master < ActiveRecord::Base
   has_many :not_tracker_histories, -> { order(TrackerHistoryEventOrderClause)},  class_name: 'TrackerHistory'
   has_many :not_trackers, -> { order(TrackerEventOrderClause)},  class_name: 'Tracker'
 
+  before_validation :set_user
   before_validation :prevent_user_updates,  on: :update
   validates :user, presence: true  
   before_create :assign_msid
+  
 
   
   
@@ -293,24 +295,30 @@ class Master < ActiveRecord::Base
   end
 
   def current_user= cu
-    logger.info "Setting current user: #{cu} in #{self}"
-    # Set the user association when current_user is set
+    
     if cu.is_a? User
-      self.user = cu
+      @current_user = cu
     elsif cu.is_a? Integer
-      self.user_id = cu
+      @current_user = User.find cu
     else 
       raise "Attempting to set current_user with non user: #{cu}"
-    end
-    
-    @current_user_id = cu
+    end    
   end
   
   def current_user
     logger.info "Getting current user: #{@user_id} from #{self}"
     # Do not get the user association when requesting the current_user, since we 
     # do not want the value that has been persisted in the data
-    @current_user_id
+    @current_user
+  end
+  
+  # Prevent user from being set directly, to avoid accidental or malicious changes to the recorded user in records
+  def user= u
+    raise "can not set user="
+  end
+  
+  def user_id= u
+    raise "can not set user_id="
   end
   
   def self.create_master_records user
@@ -337,5 +345,16 @@ private
     errors.add :msid, "can not be updated by users" if msid_changed?
     errors.add "pro info association", "can not be updated by users" if pro_info_id_changed?
   end
+
+  def set_user
+    cu = @current_user
+    # Set the user association when current_user is set
+    if cu.is_a?(User) && cu.persisted?
+      write_attribute :user_id, cu.id
+    else 
+      raise "Attempting to set user with non user: #{cu}"
+    end
     
+  end
+  
 end

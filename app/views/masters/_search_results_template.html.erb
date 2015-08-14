@@ -1,3 +1,24 @@
+<script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
+  <strong class="player-names">                
+    {{capitalize first_name}} 
+    {{capitalize middle_name}} 
+    {{capitalize last_name}}
+    {{#if nick_name}}
+      ({{capitalize nick_name}})
+    {{/if}}
+
+  </strong>
+  {{#if birth_date}}
+  <small>DOB</small> {{local_date birth_date '-'}}
+  {{/if}}
+  {{#if death_date}}
+    <small>DOD</small> {{local_date death_date '-'}}
+  {{/if}}
+  <span data-sub-for="master_id" data-sub-id="{{master_id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
+    {{>accuracy_badge player_info=this}}
+  </span>
+</script>
+
 <script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
   {{#was _created}}<div class="index-{{_created}}" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}" data-template="player-info-result-template" data-sub-item="player_info" data-sub-id="{{id}}" >{{/was}}
     <ul class="list-group">
@@ -297,6 +318,12 @@
   {{>accuracy_badge}}
 </script>
 
+<script id="player-info-summary-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with player_info}}
+  {{>player_info_summary_result}}
+  {{/with}}
+</script>
+
 
 <script id="address-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with address}}
@@ -405,26 +432,9 @@
             <div class="col-md-2 col-lg-1 result-refs"><span class="msid">{{#if msid}}{{msid}}{{else}}-{{/if}}</span></div>
             <a class="master-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
             
-              <div class="col-md-11 col-lg-12 player-info-header">
+              <div class="col-md-11 col-lg-12 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">              
                 {{#with player_infos.[0]}}
-                <strong class="player-names">                
-                  {{capitalize first_name}} 
-                  {{capitalize middle_name}} 
-                  {{capitalize last_name}}
-                  {{#if nick_name}}
-                    ({{capitalize nick_name}})
-                  {{/if}}
-                      
-                </strong>
-                {{#if birth_date}}
-                <small>DOB</small> {{local_date birth_date '-'}}
-                {{/if}}
-                {{#if death_date}}
-                  <small>DOD</small> {{local_date death_date '-'}}
-                {{/if}}
-                <span data-sub-for="master_id" data-sub-id="{{master_id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
-                {{>accuracy_badge player_info=this}}
-                </span>
+                  {{>player_info_summary_result}}
                 {{else}}
                 <strong class="no-player-info">(no player info)</strong>
                 {{/with}}

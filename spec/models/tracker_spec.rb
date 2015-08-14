@@ -27,8 +27,10 @@ RSpec.describe Tracker, type: :model do
   end
   
   it "prevents trackers to be created outside of a master" do
-    new_tracker = Tracker.create protocol_id: @p1.id, sub_process_id: @sp1_1.id, user_id: @user.id
-    expect(new_tracker.save).to be false
+    
+    expect{
+      Tracker.create protocol_id: @p1.id, sub_process_id: @sp1_1.id, user: @user
+    }.to raise_error "can not set user="
   end
   
   it "allows sub process changes after creation" do    

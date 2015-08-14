@@ -6,6 +6,7 @@ class College < ActiveRecord::Base
   
   default_scope -> {order  "colleges.updated_at DESC nulls last"}
   
+  before_validation :downcase_name
   before_validation :prevent_name_change,  on: :update
   before_validation :check_synonym
   before_validation :either_admin_or_user, on: :create
@@ -14,13 +15,13 @@ class College < ActiveRecord::Base
   # Override standard #all method to pull from cache if available
   def self.all
     Rails.cache.fetch gen_cache_key do
-      super
+      super      
     end
   end
   
   # Check if the college with 'name' exists. If so, return truthy value
   def self.exists? name
-    res = all.exists? name: name    
+    res = all.exists? name: name.downcase    
     res
   end
   
@@ -29,7 +30,7 @@ class College < ActiveRecord::Base
     return if exists? name
     logger.info "Adding new college to list: #{name}"
     c = College.new 
-    c.name = name
+    c.name = name.downcase
     c.current_user = user
     c.save!
     c
@@ -52,7 +53,7 @@ class College < ActiveRecord::Base
   end
   
   # Lookup the name of the record this is a synonym for
-  def synonym_for_name
+  def synonym_name
     return nil unless synonym_for_id
     c = College.find_by_id(synonym_for_id)
     return nil unless c
@@ -90,5 +91,9 @@ class College < ActiveRecord::Base
     
     def either_admin_or_user
       errors.add(:user, "has not been set when not acting as admin") unless user_set? || admin_set?
+    end
+    
+    def downcase_name
+      self.name = self.name.downcase
     end
 end

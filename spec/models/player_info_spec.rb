@@ -10,9 +10,8 @@ RSpec.describe PlayerInfo, type: :model do
     create_items
   end
   before(:each) do
-    @master = Master.create
-    
-    @master.current_user = @user
+    @master = Master.create current_user: @user
+   
     
     @created_count = 0
     

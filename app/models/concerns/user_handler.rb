@@ -62,6 +62,16 @@ module UserHandler
     self.user.email
   end
   
+  # Prevent user from being set directly, to avoid accidental or malicious changes to the recorded user in records
+  def user= u
+    raise "can not set user="
+  end
+  
+  def user_id= u
+    raise "can not set user_id="
+  end
+    
+  
   def rank_name
     return nil unless respond_to? :rank
     
@@ -142,8 +152,11 @@ module UserHandler
 
 
     def force_write_user
-      logger.debug "Forcing self.user = #{master_user}"
-      self.user = master_user
+      logger.debug "Forcing #{self.class.name} user attribute = #{master_user.id}"
+      
+      raise "bad user being pulled from master_user" unless master_user.is_a?(User) && master_user.persisted?
+      
+      write_attribute :user_id, master_user.id
     end
 
     def track_record_update
