@@ -58,8 +58,10 @@ class Tracker < ActiveRecord::Base
         kname = ("#{k.to_s}_name").to_sym
 
         if record.respond_to? kname      
-          tov = "(#{tov}) #{record.class.send("get_#{k}_name".to_s, tov)}" 
-          fromv = "(#{fromv}) #{record.class.send("get_#{k}_name".to_s, fromv)}" 
+          n = record.class.send("get_#{k}_name".to_s, tov)
+          tov = "(#{tov}) #{n}" unless n.is_a?(String) && tov.is_a?(String) && tov.downcase == n.downcase
+          n = record.class.send("get_#{k}_name".to_s, fromv)
+          fromv = "(#{fromv}) #{n}" unless n.is_a?(String) && fromv.is_a?(String) && fromv.downcase == n.downcase
         end
         
         fromv = '-' if fromv.blank?
