@@ -50,15 +50,22 @@ _fpa.form_utils = {
             var self = $(this);
             window.setTimeout(function(){
                 var wmax = 0;
-                var all = self.find('.list-group-item').not('.is-heading, .is-combo').find('small, label');
+                var lgi = self.find('.list-group-item').not('.is-heading, .is-combo');
+                var all = lgi.find('small, label');
                 all.css({display: 'inline-block', whiteSpace: 'nowrap'});
                 all.each(function(){
                     var wnew = $(this).width();
                     if(wnew > wmax)
                         wmax = wnew;
                 });
-                if(wmax>10)
-                  all.css({minWidth: wmax, width: wmax}).addClass('list-small-label');
+                if(wmax>10){
+                    if(lgi.parents('form').length === 0){                      
+                        lgi.css({paddingLeft: wmax+20});                  
+                        all.css({minWidth: wmax, width: wmax, marginLeft: -wmax-4}).addClass('list-small-label');
+                    }else{
+                        all.css({minWidth: wmax, width: wmax}).addClass('list-small-label');
+                    }
+                }
             }, 1);          
             self.addClass('attached-resize-labels');  
         });

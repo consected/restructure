@@ -27,6 +27,7 @@ form select {
     height: auto;
     padding: 4px 0px;
     line-height: 22px;
+    max-width: 100%;
 }
 
 #master_results_block form {
@@ -34,6 +35,9 @@ form select {
         width: initial;
         background-color: white;
         border-radius: 3px;
+        max-width: 100%;
+        padding-left: 0px;
+        padding-right: 0;
     }
 }
 
