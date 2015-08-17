@@ -2,7 +2,7 @@
   <div class="col-sm-8">
       <ul>
           <% @action_logs.each do |l|%>
-          <li><%= link_to l, action_log_path(l), remote: true, data: {"result-target" => "#file-details", template: 'file-detail-template'} %></li>
+          <li style="min-height:20px;"><%= link_to l, action_log_path(l), remote: true, data: {"result-target" => "#file-details", template: 'file-detail-template'} %></li>
           <% end %>
       </ul>
   </div>
