@@ -25,7 +25,7 @@
       <li class="list-group-item">
 
         <a title="edit" class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
-        <span class="pull-right label label-info player-info-{{rank}}" style="margin-right:1em">{{rank}} - {{accuracy_score_name}}</span>
+        <span class="pull-right label label-info player-info-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{accuracy_score_name}}{{else}}(no rank){{/if}}</span>
           <h4 class="list-group-item-heading">Player</h4>
         
         {{>item_flag_container item_type="player_info"}}         
