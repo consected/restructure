@@ -3,12 +3,15 @@ class ActionLogsController < ApplicationController
   include AdminControllerHandler
   
   def index
-    @action_logs = Dir.glob("action_logs/*_action_log-*.log").sort
+    @action_logs = Dir.glob("action_logs/*_action_log-*.log").sort.map {|a| a.gsub('action_logs/','')}
   end
   
   def show
     id = params[:id]
     logger.info "ID: #{id}"
+    
+    raise "Bad file requested" if id.nil? || id.index(/\.\.|\/|\\|~/)
+    
     f = File.basename(id, '.log')
     logger.info "File: #{f}"
     fn = "action_logs/#{f}.log"
