@@ -80,6 +80,11 @@ protected
       render text: flash[:danger], status: 422
     end
     
+    def unexpected_error msg
+      flash[:danger] = "An error occurred: #{msg}"
+      render text: flash[:danger], status: 400
+    end
+    
     def authenticate_user_or_admin!
       if !current_user && !current_admin
         redirect_to new_user_session_path

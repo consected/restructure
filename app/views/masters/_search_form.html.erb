@@ -145,7 +145,7 @@
     <%= f.fields_for :scantrons, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :scantron_id %>
-        <%= f.text_field :scantron_id, class: 'form-control' %>
+        <%= f.number_field :scantron_id, class: 'form-control', in: Settings::ScantronIdRange,  pattern: Settings::ScantronIdPattern %>
       </div>
     <% end %>
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>    
