@@ -5,11 +5,11 @@
       <ul class="list-group">
         <li class="list-group-item">
           <%= inline_cancel_button %>
-          <h4 class="list-group-item-heading">Edit Scantron Info</h4>
+          <h4 class="list-group-item-heading">Edit Scantron ID</h4>
         </li>
         <li class="list-group-item player-info-first_name">
-            <%= f.label :scantron_id %>
-            <%= f.number_field :scantron_id, pattern: Settings::ScantronPattern %>
+            <%= f.label :scantron_id %>            
+            <%= f.number_field :scantron_id, class: 'form-control', in: Settings::ScantronIdRange,  pattern: Settings::ScantronIdPattern %>
         </li>  
         
         <li class="list-group-item">
