@@ -70,7 +70,7 @@
       <li class="list-group-item">
         <a title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
 
-        <span class="pull-right label label-info address-{{rank}}" style="margin-right:1em">{{rank}} - {{rank_name}}</span>
+        <span class="pull-right label label-info address-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span>
         <h4 class="list-group-item-heading">Addresses</h4>                        
         
       </li>
@@ -91,7 +91,7 @@
   <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item is-heading">
         <a title="edit" class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-        <span class="pull-right label label-info player-contact-{{rank}}" style="margin-right:1em">{{rank}} - {{rank_name}}</span><h4 class="list-group-item-heading">{{rec_type}}</h4>                        
+        <span class="pull-right label label-info player-contact-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span><h4 class="list-group-item-heading">{{rec_type}}</h4>                        
         
       </li>
       
