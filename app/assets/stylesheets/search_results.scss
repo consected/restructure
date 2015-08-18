@@ -20,11 +20,17 @@ span.disabled, a.disabled {color: #ccc !important;}
 }
 
 li.list-group-item {
+
+    min-height: 36px;
+
     strong {
-        text-transform: capitalize;
+        text-transform: capitalize;            
+        text-transform: none;        
     }
-    strong {
-        text-transform: none;
+    
+    small {
+        /* Required to prevent a weird spacing issue with long lines in strong results */
+        position: absolute;
     }
 
 }
@@ -36,7 +42,7 @@ li.address-state {
     }
     
     small {
-        display: inline-block;
+        display: inline-block;        
     }
 }
 
@@ -331,7 +337,7 @@ ul[data-address-is-us="false"]{
     background-color: #ffc;
 }
 
-strong.email {
+strong {
     
     word-break: break-word;
     word-wrap: break-word;
