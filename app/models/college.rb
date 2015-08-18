@@ -94,6 +94,7 @@ class College < ActiveRecord::Base
     end
     
     def downcase_name
+      return unless self.name
       self.name = self.name.downcase
     end
 end
