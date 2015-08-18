@@ -1,3 +1,5 @@
+/* Pre and Post processors for Ajax requests */
+/* */
 _fpa.preprocessors = {
 
     before_all: function(block){
@@ -18,15 +20,6 @@ _fpa.postprocessors = {
     
     },    
    
-    label_changes_handler: function(block){        
-        window.setTimeout(function(){
-            block.find('[data-template="address-result-template"] .address-state_name .list-small-label').each(function(){ $(this).html('state'); });
-            block.find('[data-template="address-result-template"] .address-country_name .list-small-label').each(function(){ $(this).html('country'); });
-            block.find('[data-template="address-result-template"] .address-source_name .list-small-label').each(function(){ $(this).html('source'); });
-            block.find('[data-template="player-info-result-template"] .player-info-source_name .list-small-label').each(function(){ $(this).html('source'); });
-            
-        },1);
-    },
     
     search_results_template: function(block, data){
         // Ensure we format the viewed item on expanding it 
@@ -39,9 +32,7 @@ _fpa.postprocessors = {
         }
 
         if(data.masters && data.masters.length == 1){
-            _fpa.postprocessors.tracker_events_handler(block);            
-            _fpa.postprocessors.label_changes_handler(block);
-            
+            _fpa.postprocessors.tracker_events_handler(block);                        
         }
 
         
@@ -55,8 +46,7 @@ _fpa.postprocessors = {
                 _fpa.postprocessors.tracker_notes_handler($(this));
                 _fpa.postprocessors.tracker_item_link_hander($(this));
                 
-                _fpa.postprocessors.tracker_events_handler($(this));
-                _fpa.postprocessors.label_changes_handler($(this));
+                _fpa.postprocessors.tracker_events_handler($(this));                
                 
                 $.scrollTo($(this), 200, {offset:-50} );                
                 
@@ -294,14 +284,12 @@ _fpa.postprocessors = {
         var d = data;
         if(data.player_info) d = data.player_info;
         _fpa.postprocessors.info_update_handler(block, d);
-        _fpa.postprocessors.label_changes_handler(block);        
     },
 
     address_result_template: function(block, data){
         var d = data;
         if(data.address) d = data.address;
         _fpa.postprocessors.info_update_handler(block, d);
-        _fpa.postprocessors.label_changes_handler(block);        
     }, 
 
     player_contact_result_template: function(block, data){
@@ -380,5 +368,17 @@ _fpa.postprocessors = {
             if(status) e = status;
             $('#master_results_block').addClass('search-status-error');
         }
+    }
+};
+
+_fpa.processor_handlers = {
+    label_changes: function(block){        
+        
+            block.find('.address-state_name small').each(function(){ $(this).html('state'); });
+            block.find('.address-country_name small').each(function(){ $(this).html('country'); });
+            block.find('.address-source_name small').each(function(){ $(this).html('source'); });
+            block.find('.player-info-source_name small').each(function(){ $(this).html('source'); });
+            
+        
     }
 };
