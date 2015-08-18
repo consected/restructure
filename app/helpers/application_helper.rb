@@ -36,7 +36,7 @@ module ApplicationHelper
       cancel_href = "/masters/#{object_instance.master_id}/#{controller_name}/cancel"
     end
           
-    "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\"></a>".html_safe
+    "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\" data-toggle=\"scrollto-result\" #{!@id ? "data-target=\"#master-#{@master.id}\"" : ""}></a>".html_safe
   end
   
   def edit_form_id
