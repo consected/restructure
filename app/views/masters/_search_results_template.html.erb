@@ -24,7 +24,7 @@
     <ul class="list-group">
       <li class="list-group-item is-heading">
 
-        <a title="edit" class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
+        <a data-toggle="scrollto-result" data-target="#player-info-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
         <span class="pull-right label label-info player-info-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{accuracy_score_name}}{{else}}(no rank){{/if}}</span>
           <h4 class="list-group-item-heading">Player</h4>
         
@@ -68,7 +68,7 @@
   {{#was _created}}<div class="index-{{_created}}" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}"  data-sub-item="address" data-sub-id="{{id}}" data-preprocessor="address_edit_form" data-template="address-result-template" data-sort-desc="data-item-rank">{{/was}}
   <ul class="list-group" data-item-rank="{{rank}}" data-address-is-us="{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}">
       <li class="list-group-item is-heading">
-        <a title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <a  data-toggle="scrollto-result" data-target="#address-{{master_id}}-{{id}}"title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
 
         <span class="pull-right label label-info address-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span>
         <h4 class="list-group-item-heading">Addresses</h4>                        
@@ -90,7 +90,7 @@
   {{#was _created}}<div class="index-{{_created}}" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}" data-preprocessor="player_contact_edit_form"  data-template="player-contact-result-template" data-sub-item="player_contact" data-sub-id="{{id}}" data-sort-desc="data-item-rank">{{/was}}
   <ul class="list-group" data-item-rank="{{rank}}">
       <li class="list-group-item is-heading">
-        <a title="edit" class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <a data-toggle="scrollto-result" data-target="#player-contact-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
         <span class="pull-right label label-info player-contact-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span><h4 class="list-group-item-heading" style="text-transform: capitalize" >{{rec_type}}</h4>                        
         
       </li>
@@ -113,7 +113,7 @@
   {{#was _created}}<div class="index-{{_created}}" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}" data-template="scantron-result-template" data-sub-item="scantron" data-sub-id="{{id}}" >{{/was}}
   <ul class="list-group">
       <li class="list-group-item scantron-scantron_id is-heading">
-        <a title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <a  data-toggle="scrollto-result" data-target="#scantron-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
         <small>Scantron</small> <strong>{{scantron_id}}</strong>
       </li>      
   </ul>
@@ -292,7 +292,7 @@
 
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
     <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{pretty_string created_at}}"></span> 
-    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated" >{{pretty_string updated_at}}</span>{{else}}--{{/if}}
+    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated" >{{pretty_string updated_at}}</span>{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
     {{#if user_name}} by {{user_name}}{{/if}}    
 </script>
 
@@ -518,7 +518,7 @@
                     <div class="col-md-12">
                       <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
                         <h4>No player info</h4>
-                        <p><a href="/masters/{{id}}/player_infos/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Player Info record</a> </p>
+                        <p><a href="/masters/{{id}}/player_infos/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="#player-info-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Player Info record</a> </p>
                       </div>
                     </div>                    
                   
@@ -552,7 +552,7 @@
                 <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-" data-preprocessor="address_edit_form">
                   {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
                 </div>
-                <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Address record</a> </p>
+                <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="#address-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Address record</a> </p>
 
               </div>
               <div class="col-md-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
@@ -565,7 +565,7 @@
                 <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-" data-preprocessor="player_contact_edit_form">
                   {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
                 </div>
-                <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
+                <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="#player-contact-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
 
               </div>
             </div>
