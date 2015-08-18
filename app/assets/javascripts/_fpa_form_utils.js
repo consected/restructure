@@ -48,6 +48,10 @@ _fpa.form_utils = {
         block.find('.list-group:visible').not('.attached-resize-labels').each(function(){
             // Cheap optimization to make the UI feel more responsive in large result sets
             var self = $(this);
+            
+            if(_fpa.processor_handlers && _fpa.processor_handlers.label_changes)
+                _fpa.processor_handlers.label_changes(self);
+            
             window.setTimeout(function(){
                 var wmax = 0;
                 var lgi = self.find('.list-group-item').not('.is-heading, .is-combo, .record-meta');
@@ -60,10 +64,10 @@ _fpa.form_utils = {
                 });
                 if(wmax>10){
                     if(lgi.parents('form').length === 0){                      
-                        lgi.css({paddingLeft: wmax+20});                  
-                        all.css({minWidth: wmax, width: wmax, marginLeft: -wmax-4}).addClass('list-small-label');
+                        lgi.css({paddingLeft: wmax+30});                  
+                        all.css({minWidth: wmax, width: wmax, marginLeft: -wmax-14}).addClass('list-small-label');
                     }else{
-                        all.css({minWidth: wmax, width: wmax}).addClass('list-small-label');
+                        all.css({minWidth: wmax+6, width: wmax+6}).addClass('list-small-label');
                     }
                 }
             }, 1);          
@@ -202,22 +206,35 @@ _fpa.form_utils = {
 
     setup_data_toggles: function(block){
         if(!block) block = $(document);
-        block.on('click', '[data-toggle="clear"]', function(){
+        block.find('[data-toggle="clear"]').not('.attached-datatoggle').on('click', function(){
             var a = $(this).attr('data-target');
             $(a).html('').removeClass('in');
-        });
+        }).addClass('attached-datatoggle');
 
-        block.on('click', '[data-toggle="scrollto-result"]', function(){
-            var a = $(this).attr('data-result-target');
+        block.find('[data-toggle="scrollto-result"]').not('.attached-datatoggle').on('click', function(){
+            var a = $(this).attr('data-target');                                            
             if(!a || a==''){
-                a = $(this).attr('data-target');                                
-                $(document).scrollTo(a, 100, {offset: -50});
+                a = $(this).attr('data-result-target');
             }
-        });
+            if(a){
+                // Only jump to the target if the current top and bottom of the block are off screen. Usually we
+                // attempt to do this so that users do not have to constantly scroll an edit block into view just to type
+                // some data.
+                // This is approximate, since forms typically make the block larger, but we are trying to avoid unnecessary
+                // scrolling, to keep the page from jumping around for the user where possible.                
+                window.setTimeout(function(){
+                    var rect = $(a).get(0).getBoundingClientRect(); 
+                    var not_visible = !(rect.top >= 0 && rect.bottom < $(window).height());
+                    if(not_visible)                    
+                        $(document).scrollTo(a, 100, {offset: -50});
+                }, 100);
+            }
+            
+        }).addClass('attached-datatoggle');
 
-        block.on('click', '[data-toggle="expandable"]', function(){
+        block.find('[data-toggle="expandable"]').not('.attached-datatoggle').on('click', function(){
             _fpa.form_utils.toggle_expandable($(this));
-        });
+        }).addClass('attached-datatoggle');
         
     },
     
