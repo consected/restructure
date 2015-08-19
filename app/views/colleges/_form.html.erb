@@ -11,8 +11,9 @@
     <%= f.select :synonym_for_id, College.selector_array_pair.sort_by {|n| n.first}, include_blank: '(none)' %>
   </div>
   <div class="form-group">
-    <%= f.label :disable %>
     <%= f.check_box :disabled %>
+    <%= f.label :disable %>
+    
   </div>
   <div class="form-group">
     <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
