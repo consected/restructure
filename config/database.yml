@@ -24,7 +24,7 @@ default: &default
 development:
   <<: *default
   database: fpa_development
-
+  schema_search_path: public
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
   # When left blank, postgres will use the default role. This is
@@ -82,6 +82,7 @@ production:
   <<: *default
   database: <%= ENV['FPHS_POSTGRESQL_DATABASE'] %>
   username: <%= ENV['FPHS_POSTGRESQL_USERNAME'] %>
-  port: 5432
+  port: <%= ENV['FPHS_POSTGRESQL_PORT'] || 5432 %> 
   host: <%= ENV['FPHS_POSTGRESQL_HOSTNAME'] %>
   password: <%= ENV['FPHS_POSTGRESQL_PASSWORD'] %>
+  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'] || 'public'%> 
