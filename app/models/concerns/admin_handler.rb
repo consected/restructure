@@ -7,6 +7,10 @@ module AdminHandler
     
     before_validation :ensure_admin_set
   end
+  
+  def enabled?
+    !disabled
+  end
    
   def admin_name
     return unless admin
