@@ -82,7 +82,7 @@ production:
   <<: *default
   database: <%= ENV['FPHS_POSTGRESQL_DATABASE'] %>
   username: <%= ENV['FPHS_POSTGRESQL_USERNAME'] %>
-  port: <%= ENV['FPHS_POSTGRESQL_PORT'] || 5432 %> 
+  port: <%= ENV['FPHS_POSTGRESQL_PORT'] %> 
   host: <%= ENV['FPHS_POSTGRESQL_HOSTNAME'] %>
   password: <%= ENV['FPHS_POSTGRESQL_PASSWORD'] %>
-  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA'] || 'public'%> 
+  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA']%> 
