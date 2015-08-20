@@ -1,10 +1,15 @@
-<% if object_instance.errors.any? %>
-  
-    <% object_instance.errors.full_messages.each do |message| %>
+<% if object_instance.errors.any? 
+    shown = []
+    object_instance.errors.full_messages.each do |message| 
+      # Prevent annoying duplicate messages appearing 
+      unless shown.include? message
+        shown << message
+    %>
+      
       <div class="alert alert-warning" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <%= message %>
       </div>
-    <% end %>
-    
-<% end %>
+    <% end
+    end
+  end %>
