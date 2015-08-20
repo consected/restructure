@@ -6,7 +6,7 @@
     <%= link_to "protocols", protocols_path, class: "btn btn-warning" %>
   <%end%>
 
-  <%if @protocol_events %>
+  <%if @protocol_events && @protocol%>
     <%= link_to "processes", protocol_sub_processes_path(@protocol), class: "btn btn-warning" %>
   <%end%>
 
