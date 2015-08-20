@@ -11,7 +11,7 @@ class ProInfo < ActiveRecord::Base
       return true
     end
     
-    # Override to do not track this
+    # Override to not track this
     def track_record_update
       return true
     end
