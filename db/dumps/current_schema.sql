@@ -584,7 +584,6 @@ CREATE TABLE pro_infos (
     id integer NOT NULL,
     master_id integer,
     pro_id integer,
-    in_survey character varying,
     first_name character varying,
     middle_name character varying,
     nick_name character varying,
@@ -593,17 +592,11 @@ CREATE TABLE pro_infos (
     death_date date,
     start_year integer,
     end_year integer,
-    accrued_seasons numeric,
     college character varying,
-    first_contract character varying,
-    second_contract character varying,
-    third_contract character varying,
-    career_info character varying,
     birthplace character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now(),
-    rank integer
+    updated_at timestamp without time zone DEFAULT now()
 );
 
 
