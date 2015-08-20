@@ -43,14 +43,14 @@
             <%= f.label :rank %>
             <%= f.select :rank, player_info_rank_array_pair %>
         </li>
-        <li class="list-group-item player-info-college">
-          <%= f.label :college %>
-          <%= f.text_field :college, class: 'college-input typeahead'  %>
-        </li>
         <li class="list-group-item player-info-source">
             <%= f.label :source %>
             <%= f.select :source, general_selection(:player_infos_source) %>
         </li>
+        <li class="list-group-item player-info-college">
+          <%= f.label :college %>
+          <%= f.text_field :college, class: 'college-input typeahead'  %>
+        </li>        
         <li class="list-group-item player-info-notes">
           <%= f.label :notes %>
           <%= f.text_area :notes, class: 'form-control'  %>
