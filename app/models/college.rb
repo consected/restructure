@@ -64,15 +64,13 @@ class College < ActiveRecord::Base
 
   protected
   
-    def prevent_name_change 
-      if name_changed? && self.persisted?
-        errors.add(:name, "change not allowed!")
-      end
+    def prevent_name_change
+        errors.add(:name, "change not allowed!") if name_changed? && self.persisted? && !admin_set?      
     end
 
     def ensure_admin_set
       # Override the standard test for admin being set, since users can create (but not update) colleges
-      errors.add(:admin, "has not been set") unless !self.persisted? || admin_set?
+      errors.add(:admin, "has not been set") if self.persisted? && !admin_set?
     end
     
     
