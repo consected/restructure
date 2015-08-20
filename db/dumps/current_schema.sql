@@ -543,7 +543,6 @@ CREATE TABLE player_infos (
     updated_at timestamp without time zone DEFAULT now(),
     contact_pref character varying,
     start_year integer,
-    in_survey character varying(1),
     rank integer,
     notes character varying,
     contact_id integer,
