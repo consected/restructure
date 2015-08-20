@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150812194032) do
+ActiveRecord::Schema.define(version: 20150820152721) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -175,7 +175,6 @@ ActiveRecord::Schema.define(version: 20150812194032) do
   create_table "pro_infos", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "pro_id"
-    t.string   "in_survey"
     t.string   "first_name"
     t.string   "middle_name"
     t.string   "nick_name"
@@ -184,17 +183,11 @@ ActiveRecord::Schema.define(version: 20150812194032) do
     t.date     "death_date"
     t.integer  "start_year"
     t.integer  "end_year"
-    t.decimal  "accrued_seasons"
     t.string   "college"
-    t.string   "first_contract"
-    t.string   "second_contract"
-    t.string   "third_contract"
-    t.string   "career_info"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",                                      null: false
-    t.datetime "updated_at",      default: '2015-07-17 14:00:33'
-    t.integer  "rank"
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",  default: '2015-07-17 14:00:33'
   end
 
   add_index "pro_infos", ["master_id"], name: "index_pro_infos_on_master_id", using: :btree
