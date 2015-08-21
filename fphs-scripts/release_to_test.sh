@@ -4,7 +4,7 @@ cd /var/opt/passenger
 svn export --username payres https://open.med.harvard.edu/svn/fphs-rails/tags/$FPHS_VERSION
 cd $FPHS_VERSION
 cp --recursive ../fphs/vendor/bundle ./vendor/
-RAILS_ENV=production bundle install --without development test --path vendor/bundle
+RAILS_ENV=production bundle install --without development test --path vendor/bundle --deployment
 cd ..
 mv fphs "fphs-backup-`date --rfc-3339=seconds`"
 mv $FPHS_VERSION fphs
