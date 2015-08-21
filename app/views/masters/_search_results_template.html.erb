@@ -113,7 +113,7 @@
   {{#was _created}}<div class="index-{{_created}}" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}" data-template="scantron-result-template" data-sub-item="scantron" data-sub-id="{{id}}" >{{/was}}
   <ul class="list-group">
       <li class="list-group-item scantron-scantron_id is-heading">
-        <a  data-toggle="scrollto-result" data-target="#scantron-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <a data-toggle="scrollto-result" data-target="#scantron-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
         <small>Scantron</small> <strong>{{scantron_id}}</strong>
       </li>      
   </ul>
@@ -474,7 +474,7 @@
         <div class="panel-body">
           
           <div id="extras-{{id}}" class="row collapse extras-block">
-            <div class="col-md-6">
+            <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons">
                 {{#each scantrons}}
                   
                     {{>scantron_result master_id=../id _created=@index}}
@@ -484,7 +484,7 @@
                 <div class="new-block" id="scantron-{{id}}-" data-subscription="scantron-edit-form-{{id}}-">
                   {{#unless scantrons}}<h4>No Scantron records</h4>{{/unless}}                
                 </div>
-                <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Scantron record</a> </p>
+                <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-target="#scantron-{{id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Scantron record</a> </p>                                    
 
             </div>
           </div>

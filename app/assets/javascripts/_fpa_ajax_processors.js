@@ -345,7 +345,7 @@ _fpa.postprocessors = {
 
         check_phone(e);
     },
-    
+
     admin_edit_form: function(block, data){
         $.scrollTo(block, 200, {offset:-50});
         _fpa.form_utils.format_block(block);

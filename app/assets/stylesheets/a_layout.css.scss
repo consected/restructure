@@ -183,3 +183,19 @@ span.msid {font-size: 90%;}
 
 
 #error_explanation h2 {font-size: 22px;}
+
+.alert button.close {
+    cursor: pointer;
+    background: transparent none repeat scroll 0% 0%;
+    border: 1px solid white;
+    background-color: #aa0000;
+    border-radius: 21px;
+    width: 21px;
+    height: 25px;
+    line-height: 21px;
+    padding: 0;
+    color: white;
+    opacity: 1;
+    display: inline-block;
+    padding-bottom: 6px;
+}
