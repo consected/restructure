@@ -8,9 +8,18 @@ class ApplicationController < ActionController::Base
   before_action :prevent_cache
   before_action :setup_navs
   
+  rescue_from RuntimeError, :with => :runtime_error_handler
   
 protected
 
+    def runtime_error_handler
+      respond_to do |type|
+        type.html { render :text => "A server error occurred. Contact the administrator if this condition persists.", :status => 500 }
+        type.json  { render :json => {message: "A server error occurred. Contact the administrator if this condition persists."}, :status => 500 }
+      end
+      true
+    end
+  
     def prevent_cache
       response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
       response.headers["Pragma"] = "no-cache"

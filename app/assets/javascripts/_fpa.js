@@ -408,7 +408,7 @@ _fpa = {
                 if(j){
                     msg = format_message(j);
                     _fpa.flash_notice(msg, 'danger');
-                }else if(xhr.responseText){
+                }else if(xhr.responseText && xhr.responseText[0] != '<'){
                     _fpa.flash_notice(xhr.responseText, 'danger');
                 }else{
                     _fpa.flash_notice("An error occurred.", 'danger');
