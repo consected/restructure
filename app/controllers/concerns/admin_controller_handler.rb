@@ -10,7 +10,12 @@ module AdminControllerHandler
   end
 
   def index    
-    set_objects_instance primary_model.order(default_index_order)    
+    set_objects_instance primary_model.order(default_index_order)
+    
+    respond_to do |format|      
+      format.html { render :index }
+      format.all { render json: objects_instance.as_json(except: [:created_at, :updated_at, :id, :admin_id, :user_id])}
+    end
   end
   
 
@@ -54,8 +59,10 @@ module AdminControllerHandler
 
   protected
 
-    def log_action action, sub, results, status="OK"
-      current_admin.log_action action, sub, results, request.method_symbol, params, status
+    def log_action action, sub, results, status="OK", extras={}
+      extras[:master_id] ||= nil
+      extras[:msid] ||= nil
+      current_admin.log_action action, sub, results, request.method_symbol, params, status, extras
     end
 
 
@@ -119,6 +126,9 @@ module AdminControllerHandler
     def object_instance
       instance_variable_get("@#{object_name}")
     end
-  
+
+    def objects_instance
+      instance_variable_get("@#{objects_name}")
+    end    
     
 end

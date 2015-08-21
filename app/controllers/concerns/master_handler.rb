@@ -17,6 +17,9 @@ module MasterHandler
     if @master
       extras[:master_id] = @master.id 
       extras[:msid] = @master.msid     
+    else
+      extras[:master_id] = nil
+      extras[:msid] = nil
     end
     log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
   end

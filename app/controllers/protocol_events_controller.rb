@@ -11,6 +11,11 @@ class ProtocolEventsController < ApplicationController
       @protocol_events = @sub_process.protocol_events
       @sub_process_name = @sub_process.name
     end
+    
+    respond_to do |format|      
+      format.html { render :index }
+      format.all { render json: @protocol_events.as_json(except: [:created_at, :updated_at, :id, :admin_id, :user_id])}
+    end
   end
   
   def new options = {}

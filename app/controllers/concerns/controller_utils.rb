@@ -3,6 +3,8 @@ module ControllerUtils
   extend ActiveSupport::Concern
 
   def log_action action, sub, results, status="OK", extras={}
+    extras[:master_id] ||= nil
+    extras[:msid] ||= nil
     current_user.log_action action, sub, results, request.method_symbol, params, status, extras
   end
   
