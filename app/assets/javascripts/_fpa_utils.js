@@ -27,6 +27,22 @@ _fpa.utils.is_blank = function(i){
   return (i === null || i === '');  
 };
 
+
+_fpa.utils.html_entity_map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;'
+};
+
+_fpa.utils.escape_html = function (string) {
+    return String(string).replace(/[&<>"']/g, function (s) {
+      return _fpa.html_entity_map[s];
+    });
+};
+  
+
 Date.prototype.asYMD = function(){
   
     var now = this;

@@ -107,20 +107,7 @@ module MasterDataSupport
     reference_pro_item = nil
     ActiveRecord::Base.connection.execute "update player_infos set rank = 11 where rank = 12;"
     
-#    (-1..12).each do |v|
-#      att = {name: "name #{v}", value: v}
-#      AccuracyScore.create! att, 
-#    end
-#    
-#    
-#    ['player_infos', 'player_contacts', 'addresses'].each do |v|
-#      att = {item_type: "#{v}_source", name: "name #{v}", value: 'nflpa'}
-#      GeneralSelection.create! att, current_admin: @admin
-#      (-1..10).each do |n|
-#        att = {item_type: "#{v}_rank", name: "rank #{v}", value: n}
-#      end
-#      GeneralSelection.create! att, current_admin: @admin
-#    end
+
     
     player_list.each do |l|
       # Create a user with a specific number embedded
@@ -161,12 +148,13 @@ module MasterDataSupport
         p[:start_year] ||= p[:birth_date].year + rand(9)+ 20
         p[:end_year] ||= p[:start_year] + rand(2)
         p[:pro_id] = rand(100000)
-        
-        
+
+        create_trackers @master
         
         @full_player_info = create_player_info l, @master
         @full_pro_info = create_pro_info p, @master                
         @full_master_record = @master.reload
+        @full_trackers = @master.trackers
                 
       else
         # Ensure only the reference record has a rank that is 12
@@ -175,6 +163,8 @@ module MasterDataSupport
         end
         create_player_info l, @master
         create_pro_info p, @master
+        
+        create_trackers @master
       end
       
       @master_count += 1 
@@ -217,6 +207,20 @@ module MasterDataSupport
     end
 
     
+  end
+  
+  def create_trackers master
+    
+    (1..rand(20)).each do 
+      prs = Protocol.enabled
+      pr = prs[rand prs.length]
+      sps = pr.sub_processes.enabled
+      sp = sps[rand sps.length]
+      pes = sp.protocol_events.enabled
+      pe = pes[rand pes.length]
+
+      master.trackers.create protocol: pr, sub_process: sp, protocol_event: pe
+    end
   end
 
   def master_error res, params=nil

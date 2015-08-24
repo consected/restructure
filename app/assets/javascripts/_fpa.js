@@ -34,9 +34,21 @@ _fpa = {
     });
 
   },  
-    
+  
+  // View a handlebars template
+  // block - jQuery element to update
+  // template_name 
+  // data - data context for handlebars
+  // options  - currently options.position  =  null, 'before' or 'after'
+  // before or after will place the result before or after the block (and empty the block)
+  // The exception to the positioning of 'before' and 'after' is that if 
+  // the rendered template html has an id for its root element
+  // that already exists on the page, the result will replace that existing element.
+  // This maintains the integrity of ids in the DOM, and prevents the need to handle specific
+  // replace functionality within preprocessors
   view_template: function(block, template_name, data, options){    
     
+    // Prevent an attempt to render the template in a block that has already been rendered in this request
     if(block.hasClass('view-template-created')) return;
       
     _fpa.ajax_working(block);
@@ -44,11 +56,13 @@ _fpa = {
         block.html('');
     }
     
-    
+    // Pull the template from the pre-compiled templates
     var template =_fpa.templates[template_name];
 
     if(!options) options = {};
 
+    // Special handling for handlebars handling of certain codes.
+    // Can most likely be removed
     if(data.code){
       data._code_flag = {};
       data._code_flag[data.code] = true;
@@ -56,18 +70,19 @@ _fpa = {
 
     _fpa.do_preprocessors(template_name, block, data);                    
 
-//    if(options.position)
-//        data._created = true;
-
+    // Render the result using the template and data
     var html = template(data);
     html = $(html).addClass('view-template-created');
 
     var new_block = block;
 
+    // Position the result before, after or in the current block
     if(options.position === 'before'){        
         new_block = html;
         var id = new_block.attr('id');
         var existing = $('#'+id);
+        // If the results has a root element with an id that exist in the DOM already,
+        // replace it rather than placing the result before the specified block
         if(existing.length > 0){
             existing.replaceWith(new_block);
         }
@@ -79,6 +94,8 @@ _fpa = {
         new_block = html;
         var id = new_block.attr('id');
         var existing = $('#'+id);
+        // If the results has a root element with an id that exist in the DOM already,
+        // replace it rather than placing the result after the specified block
         if(existing.length > 0){
             existing.replaceWith(new_block);
         }
@@ -87,43 +104,38 @@ _fpa = {
         }
         block.html('');
     }
-    else
+    else{
+        // Just replace the content of the specified block
         block.html(html);
+    }
     
+    // We handle the post processing in a timeout to give the UI the opportunity to render the 
+    // template, providing for a more responsive, less jerky experience.
     window.setTimeout(function(){            
         _fpa.do_postprocessors(template_name, new_block, data);            
         _fpa.reset_page_size();
         _fpa.ajax_done(block);
     },1);
   },
-          
+  
+    
+  // For certain layouts with clever fixed positioning requirements, allow the 
+  // page dimensions to be set after major changes to the page
   reset_page_size:function(){
-    //var bh = $('body').height();
-    //var hh = $('html').height();
-    //if(bh < hh) $('body').height(hh);
+    
   },
   
+  // Provide inheritance style functionality of javascript prototypes
   inherit_from: function(original_prototype, new_t){
     function F() {}
     F.prototype = original_prototype;    
     $.extend(F.prototype, new_t);
     return F.prototype;
   },
-          
- html_entity_map: {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': '&quot;',
-    "'": '&#39;'
-  },
-
-  escape_html: function (string) {
-    return String(string).replace(/[&<>"']/g, function (s) {
-      return _fpa.html_entity_map[s];
-    });
-  },
-  
+ 
+ 
+  // In order to better gain feedback into the actual iteractions performed by users, send back some additional
+  // data in a hidden input (for a form) or additional URL parameters (for links)
   add_tracking_params: function(submitter){
       var id = submitter.prop('id');
         if(submitter.find('input').length > 0){
@@ -143,16 +155,8 @@ _fpa = {
         }
   },
   
-  prevent_dup_clicks: function(block){
-      var f = block.find('input[type="submit"]');
-      if(f.length > 0){
-          f.prop('disabled', true);          
-          window.setTimeout(function(){
-              f.prop('disabled', false);                            
-          }, 1000);
-      }
-  },
-  
+  // Sometimes we need a postprocessor to be able to define a callback that will be called on the next successful 
+  // AJAX response. This function attempts to call that callback if it has been set, and then clears it after use.
   try_app_callback: function(el){
     if(el[0].app_callback){
         el[0].app_callback();
@@ -184,30 +188,36 @@ _fpa = {
     _fpa.postprocessors.default(block, data, procfound);
   },
   
+  
+  // Handle AJAX calls made through Rails data-remote="true" functionality  
   handle_remotes: function(){
-    //var block = $("form[data-remote='true'], a[data-remote='true']").not('.attached');
+    
     var sel = "form[data-remote='true'], a[data-remote='true']";
-    // data-only-for allows hidden and other inputs to be blanked if the dependent
-    // 'only-for' input is blank. This ensures the data is set only for the times when the
-    // related data is a real value
+    
     $(document).on('click', sel,  function(ev){
-      
+      // Clear flash notices by clicking an ajax enabled link or form
       _fpa.clear_flash_notices();
    
     }).on('ajax:before', sel, function(ev){
         var block = $(this);
         _fpa.remote_request = null;
         _fpa.remote_request_block = block;
+        
+        // Handle the special case where we don't want the request to continue if the 
+        // triggering element has the class prevent-on-collapse and it is collapsed.
+        // This allows for expanders to only trigger in one direction,
+        // when expanding rather than collapsing
         if($(this).hasClass('prevent-on-collapse') && !$(this).hasClass('collapsed')){
             ev.preventDefault();
             return false;
         }
-        _fpa.preprocessors.before_all(block);
-        //_fpa.prevent_dup_clicks($(this));
         
+        _fpa.preprocessors.before_all(block);
         _fpa.ajax_working(block);
         
-        
+        // data-only-for allows hidden and other inputs to be blanked if the dependent
+        // 'only-for' input is blank. This ensures the data is set only for the times when the
+        // related data is a real value
         $(this).find('[data-only-for]').each(function(){
             var dof = $(this).attr('data-only-for');
             var all_null = true;
@@ -221,20 +231,27 @@ _fpa = {
                 
         });
         
+        // Add some parameters to the request to allow us to understand user interactions better
         _fpa.add_tracking_params($(this));
         return true;
     }).on('ajax:beforeSend', sel, function(ev, xhr){        
+        // Save the current AJAX request so that we have the opportunity to cancel it before it completes
         _fpa.remote_request = xhr;
         
     }).on("ajax:success", sel, function(e, data, status, xhr) {    
-                
-        
+        // Since the result was a success, reset the client-side session timeout counter
+        // This is required, otherwise a user working on a single page application for an extended
+        // period of time could get bounced out of the page because the client thinks they have timed out,
+        // but their session is still valid and active after multiple AJAX requests
         _fpa.status.session.reset_timeout();
         var block = $(this);
         var data = xhr.responseJSON;
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);    
         
+        // Attempt an app-specific callback that a preprocessor may have created.
+        // Typically used by special UI blocks that need to perform additional functions before the response
+        // attempts to process
         _fpa.try_app_callback($(this));
         
         // If the result is JSON process the data
@@ -266,12 +283,17 @@ _fpa = {
                 
             }
             
-            
-            if(dataitem===null || dataitem['_created'] || dataitem['_merged'] ||  $('[data-sub-item="'+item_key+'"], [data-sub-list="'+item_key+'"] [data-sub-item]').length===0 )
+            // If a triggering block has the attribute data-result-target
+            // decide if the rendered template should display where this attribute requests
+            // We use the specified result-target if we get a _created or _merged response (when the request 
+            // is returning a result that is mostly likely different to that we would normally expect, such as an update returning a list of changed elements).
+            // If no data-sub-item or data-sub-list is specified that matches a key in the reponse data, then we really have no other option but to position the result
+            // where requested.
+            if(t && (dataitem===null || dataitem['_created'] || dataitem['_merged'] ||  $('[data-sub-item="'+item_key+'"], [data-sub-list="'+item_key+'"] [data-sub-item]').length===0 ))
                 use_target = true;
 
             var options = {};                       
-            if(t && use_target){
+            if(use_target){
                 // A specific target was specified an is being used.
                 // Handle class markup that state whether to target this item directly, or add new elements above or below
                 // the targeted element
@@ -281,7 +303,11 @@ _fpa = {
                         options.position = 'after';
                     else    
                         options.position = 'before';
-                }                                    
+                }                
+                // Render the template result using the data-template attribute name for the template
+                // It is possible that this request will be canceled within view_template, avoiding double-rendering of items.
+                // That said, if the view_template request completes fully, no subsequent processing will overwrite this block's contents
+                // (which can happen with complex interactions otherwise)
                 _fpa.view_template(b, $(this).attr('data-template'), target_data, options);
             }
             
@@ -295,11 +321,9 @@ _fpa = {
                         var res = {};
                         var d = data[di];                        
                         
-                        // Basic DOM attribute targeting
-                        // just listen for for data having the top level item being equal to data-sub-item
-                        // Typically this is used for forms, such as:
-                        // data-sub-item="address-edit-form-100001-"
-                        // where the form partial returns 
+                        // DOM attribute targeting
+                        // will only use the following targets
+                        // Certain refinements to each of these are identified through additional markup, specified below
                         var targets = $('[data-sub-item="'+di+'"], [data-sub-list="'+di+'"] [data-sub-item]');
                                                                         
                         res[di] = d;
@@ -309,12 +333,22 @@ _fpa = {
                             var dst = $(this).attr('data-sub-item');
                             if(dsid && dst){
                                 use_data = null;
-                                // Optionally use a different ID attribute (such as master_id)
+                                // Optionally use a different ID attribute (such as master_id) for the following listeners
                                 var dsfor = $(this).attr('data-sub-for');
                                 if(!dsfor) dsfor = 'id';
                                 
-                                var dsforroot = $(this).attr('data-sub-for-root');
                                 // Check if we should be looking in the root of the data, rather than in the items
+                                // This special case only kicks in when the triggered block has the attribute data-sub-for-root
+                                // It allows for processing of groups of items with a 'master key' specified by the combo sub-for-root (naming the key) and
+                                // sub-id (specifying the value of that key), rather than just responding to individual items in the data.
+                                // Typical markup is:
+                                // <span data-sub-for-root="master_id" data-sub-id="234" data-sub-item="trackers" ...>{{trackers.length}}</span>
+                                // which responds to a data response like:
+                                // {master_id: 234, trackers: [{},{},{}]}
+                                // Since this will only respond to master_id == 234 and a root element 'trackers', we can be quite specific in the data 
+                                // we respond to, while general enough that we can broadly listen to meaningful results.
+                                // As this sends the full set of data, it is especially for counters and handlers of arrays of elements
+                                var dsforroot = $(this).attr('data-sub-for-root');                                
                                 if(dsforroot){
                                     if(data[dsforroot]){
                                         item_data = data;
@@ -325,15 +359,31 @@ _fpa = {
                                             use_data = item_data;                    
                                         }
                                     }
-                                }else if(d[dsfor]){
-                                    // We should be looking in the only actual data element
+                                }else if(d[dsfor]){                                    
+                                    // Another special case when we are looking just for elements that match the item type 
+                                    // (forced back into the data at the start of response handling) and either the
+                                    // id or the attribute specified by data-sub-for
+                                    // For example:
+                                    // <div data-sub-for="master_id" data-sub-id="789" data-sub-item="player_info">
+                                    // which would respond to the data
+                                    // {master_id:789, player_info:{<this data gets passed>}, player_contact:{} }
+                                    // This listener is looking for individual player_info records with a specific 'master key', and passing just
+                                    // the content of that data to the template.
+                                    // It works nicely for 
                                     item_data = d;
                                     if(item_data[dsfor] === +dsid && item_data.item_type === dst){
                                         use_data = {};
                                         use_data[dst] = item_data;                    
                                     }
                                 }else{
-                                    // Run through the array of data elements
+                                    // The least specific case is to run through the array of data elements, having 
+                                    // id or the attribute specified by data-sub-for, and seeing whether any  
+                                    // match the specified value
+                                    // This is a simple case:                                    
+                                    // <div data-sub-item="player_contact" data-sub-id="456" ...>
+                                    // which will match data like this:
+                                    // {player_contact: {id: 456, <this data>}, player_info: {id: 888, <not this data>} }
+                                    // and will pass just the matched item to the template
                                     for(var g in d){
                                         var item_data = d[g];
                                         if(item_data[dsfor] === +dsid && item_data.item_type === dst){
@@ -343,6 +393,9 @@ _fpa = {
                                     }
                                 }
                             }
+                            
+                            // We got a usable result, so display it (according to the rule that
+                            // we can't overwrite a block previously processed in this request)
                             if(use_data){
                                 var dt = $(this).attr('data-template');                            
                                 _fpa.view_template($(this), dt, use_data);                                              
@@ -353,6 +406,9 @@ _fpa = {
                 }                
             }
         } else {
+            
+            // Since the results was basic HTML rendered by a partial typically, just push it into the 
+            // DOM where specified
             var html = $(xhr.responseText);
             $('.query-error').remove();
             html.find('[data-result]').each(function(){
@@ -423,6 +479,7 @@ _fpa = {
     
   },
   
+  // Enable a long running ajax request to be canceled
   cancel_remote: function(){
     if(_fpa.remote_request){
         console.log("Cancel requested");
@@ -435,6 +492,7 @@ _fpa = {
     }
   },
   
+  // Display Rails style flash notices in response to Ajax events (or any other Javascript that wishes to use this mechanism)
   flash_notice: function(msg, type){
       if(!type) type = 'info';
       
@@ -460,6 +518,8 @@ _fpa = {
     $('.flash div.alert'+type).remove();
   },
 
+
+  // Show a bootstrap style modal dialog
   show_modal: function(message, title){
     
     var pm = $('#primary-modal');  
