@@ -110,7 +110,7 @@
   <div class="row">
     <%=f.fields_for :addresses, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
-        <%= f.label :street_address %>
+        <%= f.label :street_address, 'data-add-icon' => 'info-sign', title: 'search for street address starting with this value' %>
         <%= f.text_field :street, class: 'form-control' %>
       </div>
       

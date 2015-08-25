@@ -86,6 +86,7 @@ class Master < ActiveRecord::Base
       
     },
     addresses: {
+      street: {value: :starts_with},
       zip: {value: :starts_with}
     },
     player_contacts: {
