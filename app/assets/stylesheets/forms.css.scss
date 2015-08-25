@@ -124,9 +124,23 @@ textarea#player_info_notes {
 
 li.player-info-college span.twitter-typeahead {width: 100%;}
 
-@media only screen and (max-width: 991px) {
-    form.search_master label{
+form.search_master label{
         font-weight: normal;
+        font-size: 12px;
+        white-space: normal;
+}
+
+@media only screen and (min-width: 1180px) {
+    form.search_master label{
+        font-weight: bold;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+}
+
+@media only screen and (min-width: 1400px) {
+    form.search_master label{
+        font-weight: bold;
         font-size: 13px;
     }
 }

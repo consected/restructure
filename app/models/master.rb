@@ -49,8 +49,8 @@ class Master < ActiveRecord::Base
   
   
   SimplePlayerJoin = "LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id".freeze
-  NotTrackerJoin = 'INNER JOIN trackers "not_trackers" on masters.id = not_trackers.master_id'
-  NotTrackerHistoryJoin = 'INNER JOIN tracker_history "not_tracker_histories" on masters.id = not_tracker_histories.master_id'
+  NotTrackerJoin = :no_join #'INNER JOIN trackers "not_trackers" on masters.id = not_trackers.master_id'
+  NotTrackerHistoryJoin = :no_join #'INNER JOIN tracker_history "not_tracker_histories" on masters.id = not_tracker_histories.master_id'
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
   # Use a hash with :value to define a predefined matching clause:
@@ -65,7 +65,7 @@ class Master < ActiveRecord::Base
   # :starts with and :contains both default to "field_name LIKE ?"
   # :is_not default to "field_name <> ?"  
   # note that ? characters will be replaced by the field search value
-  # Optionally add a value (symbol or array of symbols) for :joins
+  # Optionally add a value (symbol or array of symbols or string specifying full join clause) for :joins
   # to specify specific tables to add to the inner join list
   
   AltConditions = {
@@ -115,7 +115,7 @@ class Master < ActiveRecord::Base
   
   # Don't automatically generate a join for specific AltConditions
   # This allows for a :joins definition in AltConditions to define a LEFT OUTER JOIN on the primary table, for example
-  NoDefaultJoinFor = [:general_infos]
+  NoDefaultJoinFor = [:general_infos, :not_trackers, :not_tracker_histories ]
   
   attr_accessor :force_order
   
@@ -148,8 +148,8 @@ class Master < ActiveRecord::Base
           logger.debug "condition_key: #{condition_key}"
           logger.debug "Reflection: #{r.klass.table_name}"
           logger.debug "Source Reflection: #{r.source_reflection.name && r.source_reflection.name}"          
-          if r.source_reflection # r.klass #
-            condition_table =  r.source_reflection.name.to_s #r.klass.table_name #
+          if r.klass #r.source_reflection # 
+            condition_table =  r.klass.table_name #r.source_reflection.name.to_s #
           else
             condition_table = r.plural_name.to_s
           end
@@ -160,10 +160,11 @@ class Master < ActiveRecord::Base
         end
         
         # Keep only non-nil attributes for the primary wheres that don't have an alternative condition string
-        # Generates an array of alterative conditions with format: {condition: condition_clause, reference: {reference_name => value}, joins: joins_clauses} 
+        
         basic_condition_attribs = params_val.select{|key1,v1| !v1.nil? && !alt_condition(condition_key, [key1, v1])}
         
         # Pull the attributes with an alternative condition string (note that this returns nil values too)
+        # format: {condition: condition_clause, reference: {reference_name => value}, joins: joins_clauses} 
         alt_condition_attribs = params_val.select{|_,v1| !v1.nil? }.map{|v2| alt_condition(condition_key, v2) }
         
         logger.debug "Param: #{params_key} has condition_table: #{condition_table}"
@@ -194,7 +195,7 @@ class Master < ActiveRecord::Base
                 logger.info "Alt Condition: #{alt_condition_attrib[:condition]}"
                 wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{alt_condition_attrib[:condition]}"
                 wheresalt[1].merge! alt_condition_attrib[:reference]
-                if alt_condition_attrib[:joins].is_a? Symbol
+                if alt_condition_attrib[:joins].is_a?(Symbol) && alt_condition_attrib[:joins] != :no_join
                   joins << alt_condition_attrib[:joins] 
                   logger.info "Adding alt join #{alt_condition_attrib[:joins]}"
                 elsif alt_condition_attrib[:joins].is_a? String
@@ -252,6 +253,9 @@ class Master < ActiveRecord::Base
   end
   
   def self.alt_condition table_name, condition    
+    
+    logger.debug "Getting alt_condition for #{table_name} => #{condition}"
+    
     ckey = condition.first
     cval = condition.last
     
@@ -265,7 +269,7 @@ class Master < ActiveRecord::Base
     
     
     cond_op = altdef[:value]
-    return if cond_op == :do_nothing
+    return {} if cond_op == :do_nothing
     
     cond_op = [cond_op] unless cond_op.is_a? Array
     

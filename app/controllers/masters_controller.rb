@@ -81,7 +81,7 @@ class MastersController < ApplicationController
         log_action "master search", search_type, @masters.length
       else
         # Return no results      
-        m = {message: "no conditions were specified", masters: []}
+        m = {message: "no conditions were specified", masters: [], count: 0}
         log_action "master search", search_type, 0, "no conditions specified"
       end
     rescue => e

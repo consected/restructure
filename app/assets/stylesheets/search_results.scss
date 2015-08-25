@@ -36,7 +36,7 @@ li.list-group-item {
 
 }
 
-li.list-group-item.labels-resized {
+li.list-group-item.labels-resized, li.list-group-item.is-heading {
     strong {
         visibility: visible;
     }

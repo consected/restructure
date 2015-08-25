@@ -30,6 +30,7 @@ _fpa.masters = {
                 // These fields will not automatically submit the form when changed, since they
                 // are typically used to filter the content of a related select field.
                 var dof = $(this).attr('data-only-for');
+                var v = $(this).val();
                 var all_null = true;
                 if(dof){
                     // Allow multiple fields, any one of which may be entered                    
@@ -82,7 +83,10 @@ _fpa.masters = {
             $('#search_count').html('');
         }).addClass('attached-clear-fields');
     
-
+        $('#master_not_trackers_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id').not('.attached-force-notice').on('change', function(ev){            
+            $('#search_count').html('');
+            $('#master_results_block').html('<h3 class="text-center">Select associated event to search protocol / category not in selected process</h3>');
+        }).addClass('attached-force-notice');
     }
     
 };
