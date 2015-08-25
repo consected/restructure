@@ -49,7 +49,8 @@ class Master < ActiveRecord::Base
   
   
   SimplePlayerJoin = "LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id".freeze
-  
+  NotTrackerJoin = 'INNER JOIN trackers "not_trackers" on masters.id = not_trackers.master_id'
+  NotTrackerHistoryJoin = 'INNER JOIN tracker_history "not_tracker_histories" on masters.id = not_tracker_histories.master_id'
   # AltConditions allows certain search fields to be handled differently from a plain equality match
   # Simply define a hash for the table containing the symbolized field names to be handled
   # Use a hash with :value to define a predefined matching clause:
@@ -91,11 +92,11 @@ class Master < ActiveRecord::Base
       data: {value: [:starts_with, :strip_non_alpha_numeric], condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?"}
     },
     not_trackers: {
-      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)"},
-      sub_process_id: {value: :do_nothing}
+      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)", joins: NotTrackerJoin},
+      sub_process_id: {value: :do_nothing}      
     },
     not_tracker_histories: {
-      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id = ? AND th_inner.master_id = masters.id)"},
+      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id = ? AND th_inner.master_id = masters.id)", joins: NotTrackerHistoryJoin},
       sub_process_id: {value: :do_nothing}
     },
     general_infos: {
@@ -128,78 +129,96 @@ class Master < ActiveRecord::Base
     wheresalt = [nil, {}] # list of non-equality where clauses (such as LIKE)
     selects = ["masters.id", "masters.pro_info_id", "masters.pro_id", "masters.msid", "masters.rank as master_rank"]
     
-    params.each do |k,v|
+    params.each do |params_key,params_val|
       
-      if v.is_a? Hash
+      if params_val.is_a? Hash
         
-        if v.first.first == "0"
+        if params_val.first.first == "0"
           # Grab the first array item from the parameters if there is one to reset the context
-          v = v.first.last
+          params_val = params_val.first.last
         end
         
         # Handle nested attributes
         # Get the key name for the table by removing the _attributes extension from the key
         
-        if k.to_s.include? '_attributes'
-          k1 = k.to_s.gsub('_attributes','').to_sym
-          r = Master.reflect_on_association(k1)
+        if params_key.to_s.include? '_attributes'
+          condition_key = params_key.to_s.gsub('_attributes','').to_sym
+          r = Master.reflect_on_association(condition_key)
+          logger.debug "condition_key: #{condition_key}"
           logger.debug "Reflection: #{r.klass.table_name}"
-          if r.klass #r.source_reflection
-            k1s =  r.klass.table_name #r.source_reflection.name.to_s
+          logger.debug "Source Reflection: #{r.source_reflection.name && r.source_reflection.name}"          
+          if r.source_reflection # r.klass #
+            condition_table =  r.source_reflection.name.to_s #r.klass.table_name #
           else
-            k1s = r.plural_name.to_s
+            condition_table = r.plural_name.to_s
           end
           
         else
           # Generate a pluralized table name for associations that are has_one
-          k1s = k.to_s.pluralize
+          condition_table = params_key.to_s.pluralize
         end
+        
         # Keep only non-nil attributes for the primary wheres that don't have an alternative condition string
-        vn = v.select{|key1,v1| !v1.nil? && !alt_condition(k1, [key1, v1])}
+        # Generates an array of alterative conditions with format: {condition: condition_clause, reference: {reference_name => value}, joins: joins_clauses} 
+        basic_condition_attribs = params_val.select{|key1,v1| !v1.nil? && !alt_condition(condition_key, [key1, v1])}
         
         # Pull the attributes with an alternative condition string (note that this returns nil values too)
-        valt = v.select{|_,v1| !v1.nil? }.map{|v2| alt_condition(k1, v2) }
+        alt_condition_attribs = params_val.select{|_,v1| !v1.nil? }.map{|v2| alt_condition(condition_key, v2) }
+        
+        logger.debug "Param: #{params_key} has condition_table: #{condition_table}"
+        logger.debug "basic_condition_attribs #{basic_condition_attribs} -- alt_condition_attribs #{alt_condition_attribs}"
         
         # If we have a set of attributes that is not empty 
         # add the equality conditions to the list of wheres
-        if vn.length > 0 || valt.length > 0
-          if vn.length > 0            
-            if wheres[k1s] && wheres[k1s].first.last.is_a?(Array)              
-              wheres[k1s][vn.first.first] += vn.first.last 
-            else
-              wheres[k1s] = vn 
+        if basic_condition_attribs.length > 0 || alt_condition_attribs.length > 0
+          
+          # When this is a basic condition
+          if basic_condition_attribs.length > 0            
+            logger.debug "This is a basic condition for condition_table #{condition_table}"
+            # When the where for the condition_table is an array of key/values already, just add to it
+            # otherwise store the basic condition attributes directly
+            if wheres[condition_table] && wheres[condition_table].first.last.is_a?(Array)              
+              wheres[condition_table][basic_condition_attribs.first.first] += basic_condition_attribs.first.last 
+            else              
+              wheres[condition_table] = basic_condition_attribs 
             end
           end
-          if valt.length > 0          
-            logger.info "Merging alternative conditions"
-            valt.each do |vset|
-              if vset && vset[:condition]
-                logger.info "Condition: #{vset[:condition]}"
-                wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{vset[:condition]}"
-                wheresalt[1].merge! vset[:reference]
-                if vset[:joins].is_a? Symbol
-                  joins << vset[:joins] 
-                  logger.info "Adding alt join #{vset[:joins]}"
-                elsif vset[:joins].is_a? String
-                  joins << vset[:joins] 
-                  logger.info "Adding alt joins #{vset[:joins]}"
-                elsif vset[:joins].is_a? Array
-                  joins += vset[:joins] 
-                  logger.info "Adding alt joins #{vset[:joins]}"
+          # When there is a defined alternative condition
+          if alt_condition_attribs.length > 0          
+            logger.info "Merging alternative conditions FOR #{alt_condition_attribs}"
+            # For each alternative condition attribute, check if it has a defined condition, then
+            # generate alternative where clauses
+            alt_condition_attribs.each do |alt_condition_attrib|
+              if alt_condition_attrib && alt_condition_attrib[:condition]
+                logger.info "Alt Condition: #{alt_condition_attrib[:condition]}"
+                wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{alt_condition_attrib[:condition]}"
+                wheresalt[1].merge! alt_condition_attrib[:reference]
+                if alt_condition_attrib[:joins].is_a? Symbol
+                  joins << alt_condition_attrib[:joins] 
+                  logger.info "Adding alt join #{alt_condition_attrib[:joins]}"
+                elsif alt_condition_attrib[:joins].is_a? String
+                  joins << alt_condition_attrib[:joins] 
+                  logger.info "Adding alt joins #{alt_condition_attrib[:joins]}"
+                elsif alt_condition_attrib[:joins].is_a? Array
+                  joins += alt_condition_attrib[:joins] 
+                  logger.info "Adding alt joins #{alt_condition_attrib[:joins]}"
+                else
+                  logger.info "Not Adding alt joins"
                 end
               end
             end
           end
           
-          joins << k1 unless NoDefaultJoinFor.include?(k1)
-          logger.info "adding standard join #{k1s.to_sym} when vn = #{vn}"
-          conditions[k1] = vn
+          logger.debug "Adding condition_key to joins: #{condition_key}"
+          joins << condition_key unless NoDefaultJoinFor.include?(condition_key)
+          logger.info "adding standard join params_val=#{condition_table.to_sym} when basic_condition_attribs = #{basic_condition_attribs}"
+          conditions[condition_key] = basic_condition_attribs
         end
         # Always add the table to the list of joins and select (so we can get the data)
         
-      elsif !v.nil?
+      elsif !params_val.nil?
         # Handle Master level attributes
-        wheres[k] = v
+        wheres[params_key] = params_val
       end
       
     end
@@ -208,7 +227,9 @@ class Master < ActiveRecord::Base
     # No conditions were recognized. Exit now.
     return nil if wheres.length == 0 && !wheresalt.first
         
-    
+    logger.debug "joins: #{joins}"
+    logger.debug "Standard wheres: #{wheres}"
+    logger.debug "Alt wheres: #{wheresalt}"
     res = Master.select(selects).joins(joins).uniq.where(wheres)
     res = res.where(wheresalt.first, wheresalt.last) if wheresalt.first
     
@@ -256,6 +277,8 @@ class Master < ActiveRecord::Base
       alt = "#{table_name}.#{ckey} LIKE ?"      
     elsif cond_op.include?(:is_not)
       alt = "#{table_name}.#{ckey} <> ?"
+    else
+      alt = "#{table_name}.#{ckey} = ?"
     end
     
     if altdef[:value].is_a? Array

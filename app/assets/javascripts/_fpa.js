@@ -203,6 +203,9 @@ _fpa = {
         _fpa.remote_request = null;
         _fpa.remote_request_block = block;
         
+        console.log((new Date()).toLocaleString() +' event requested by:');
+        console.log(block);
+        
         // Handle the special case where we don't want the request to continue if the 
         // triggering element has the class prevent-on-collapse and it is collapsed.
         // This allows for expanders to only trigger in one direction,

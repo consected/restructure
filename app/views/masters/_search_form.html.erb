@@ -160,7 +160,7 @@
     <div class="row">
     <%= f.fields_for :trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3  tracker-search-field">
-        <%= f.label :protocol %>
+        <%= f.label "Protocol / Category" %>
         <%= f.select :protocol_id, protocol_array, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_sub_process_id, #master_not_trackers_attributes_0_sub_process_id, #master_tracker_histories_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id", class: 'form-control'}%>
       </div>
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
@@ -175,31 +175,31 @@
     <% end %>
     <%= f.fields_for :tracker_histories, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%= f.label :any_process %>
+          <%= f.label :any_process,  'data-add-icon' => 'info-sign', title: 'any current or previous process' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right">
-          <%= f.label :any_event %>
+          <%= f.label :any_event, 'data-add-icon' => 'info-sign', title: 'any current or previous event' %>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>
     <%= f.fields_for :player_infos, child_index: 0 do |f| %>          
 
       <div class="form-group col-sm-2"> 
-        <%= f.label :older_than %>
+        <%= f.label :older_than, 'data-add-icon' => 'info-sign', title: 'based on player info date of birth' %>
         <%= f.number_field :older_than, in: Settings::AgeRange, class: 'form-control', pattern: Settings::PositiveIntPattern  %>
       </div>
       <div class="form-group col-sm-2"> 
-        <%= f.label :younger_than %>
+        <%= f.label :younger_than, 'data-add-icon' => 'info-sign', title: 'based on player info date of birth' %>
         <%= f.number_field :younger_than, in: Settings::AgeRange, class: 'form-control', pattern: Settings::PositiveIntPattern  %>
       </div>
       
       <div class="form-group col-sm-2"> 
-        <%= f.label 'Career years >'%>
+        <%= f.label 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on player info start and end years'%>
         <%= f.number_field :more_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::PositiveIntPattern   %>
       </div>  
       <div class="form-group col-sm-2"> 
-        <%= f.label 'Career years <' %>
+        <%= f.label 'Career years <', 'data-add-icon' => 'info-sign', title: 'based on player info start and end years'%>
         <%= f.number_field :less_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::PositiveIntPattern   %>
       </div>        
     <% end %>    
@@ -208,7 +208,7 @@
     <div class="row">
         <div class="form-group col-sm-3 tracker-not-info tracker-search-field">
             
-            <p class="text-right">and&nbsp;not:</p>
+            <p class="text-right" data-add-icon="info-sign" title="specify current and / or previous process AND event">and&nbsp;not:</p>
         </div>
     <%= f.fields_for :not_trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">

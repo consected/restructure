@@ -28,7 +28,7 @@ module ProtocolsHelper
   def protocol_events_array_with_class
     res = ProtocolEvent.selector_attributes [:name, :id, :sub_process_id]
     
-    res = res.map {|a| [a.first, a[1], {"data-filter-id" => a.last}]}
+    res = res.select {|a| a.last}.map {|a| [a.first, a[1], {"data-filter-id" => a.last}]}
     
     res
   end

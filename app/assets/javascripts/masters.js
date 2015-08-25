@@ -79,6 +79,7 @@ _fpa.masters = {
             $('#master_results_block').html('<h3 class="text-center"></h3>');
             // Clear the results count 
             $('#search_count_simple').html('');
+            $('#search_count').html('');
         }).addClass('attached-clear-fields');
     
 

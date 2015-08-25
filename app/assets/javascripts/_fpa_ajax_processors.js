@@ -60,11 +60,11 @@ _fpa.postprocessors = {
         var master_id_list = $("#master_id_list").html();
         
         if(msid_list && msid_list.replace(/ /g, '').length > 1){
-            document.title = 'FHPS results';
+            document.title = 'FPHS results';
             window.history.pushState({"html": "/masters/search?utf8=✓&nav_q="+msid_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q="+msid_list);
         }
         else if(master_id_list && master_id_list.replace(/ /g, '').length > 1){
-            document.title = 'FHPS results';
+            document.title = 'FPHS results';
             window.history.pushState({"html": "/masters/search?utf8=✓&nav_q_id="+master_id_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q_id="+master_id_list);
         }                
    

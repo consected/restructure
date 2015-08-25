@@ -26,13 +26,20 @@ li.list-group-item {
     strong {
         text-transform: capitalize;            
         text-transform: none;        
+        visibility: hidden;
     }
-    
+        
     small {
         /* Required to prevent a weird spacing issue with long lines in strong results */
         position: absolute;
     }
 
+}
+
+li.list-group-item.labels-resized {
+    strong {
+        visibility: visible;
+    }
 }
 
 li.address-state {

@@ -64,7 +64,7 @@ _fpa.form_utils = {
                 });
                 if(wmax>10){
                     if(lgi.parents('form').length === 0){                      
-                        lgi.css({paddingLeft: wmax+30});                  
+                        lgi.css({paddingLeft: wmax+30}).addClass('labels-resized');                  
                         all.css({minWidth: wmax, width: wmax, marginLeft: -wmax-14}).addClass('list-small-label');
                     }else{
                         all.css({minWidth: wmax+6, width: wmax+6}).addClass('list-small-label');
@@ -124,39 +124,41 @@ _fpa.form_utils = {
 
         var do_filter = function(sel){
             // get the child select fields this should affect
-            var a = sel.attr('data-filters-selector');
-            var el = $(a);
+            var a = sel.attr('data-filters-selector');            
+            if(!a) return;
+            
+            var children = $(a);
+            if(children.length === 0) return;
+            
             // get the current value of the parent selector
             var v = sel.val();
             
             // in all the child select fields hide all possible options
-            el.find('option[data-filter-id]').removeClass('filter-option-show').hide();
+            children.find('option[data-filter-id]').removeClass('filter-option-show').hide();
             // in all the child select fields re-show only those fields matching the parent selector
-            el.find('option[data-filter-id="'+v+'"]').addClass('filter-option-show').show();
-
+            children.find('option[data-filter-id="'+v+'"]').addClass('filter-option-show').show();
+            
             // now for each child select field reset it if the current option doesn't match
             // the new parent selection
-            el.each(function(){
+            children.each(function(){
                 // get the data-filter-id (which parent option this belongs to) for any selected items
                 var ela = $(this).find('option:selected').attr('data-filter-id');
                 // if this option doesn't match the new parent selection
                 if(ela != v){
                     // reset the field
                     $(this).val(null).removeClass('has-value');
-                    // previously we were triggering a change (maybe to work with chosen?)
-                    // this breaks the parent selection for data-only-for fields
-                    // and therefore if needed must be reworked                    
-                    //
-                    // Instead, if the parent selector has a value and we are resetting
-                    // the child, add a prevent-submit to prevent the action triggering the
-                    // master submit call
+                    
+                    // If the parent selector has a value and we are resetting
+                    // the child, add a prevent-submit to prevent the action triggering another call
                     if(v)
                         $(this).addClass('prevent-submit');
-                    else
-                        $(this).trigger('change'); // it was changed back to blank, therefore the form has changed enough to submit
+                                        
+//                    else                
+  //                      $(this).trigger('change'); // it was changed back to blank, therefore the form has changed enough to submit
                 }
+                do_filter($(this));
             });
-
+            
         };
 
         d.each(function(){
