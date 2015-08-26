@@ -4,7 +4,7 @@ module Seeds
     def self.add_values values, sub_process
       values.each do |v|
         res = sub_process.protocol_events.find_or_initialize_by(v)
-        res.update(current_admin: auto_admin) unless res.admin
+        res.update!(current_admin: auto_admin) unless res.admin
       end
     end
 
@@ -14,7 +14,8 @@ module Seeds
       protocol.current_admin = auto_admin
       protocol.save!
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Scantron')
-      
+      sp.current_admin = auto_admin
+      sp.save!
       j =<<EOF
       [
 {"name":"complete","disabled":false,"sub_process_id":1,"milestone":"complete","description":""},
@@ -37,6 +38,8 @@ EOF
       
       
       sp = protocol.sub_processes.find_or_initialize_by(name: 'REDCap')
+      sp.current_admin = auto_admin
+      sp.save!
       j =<<EOF
       [
 {"name":"bounced email","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
@@ -54,6 +57,8 @@ EOF
       add_values values, sp
       
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Completion')
+      sp.current_admin = auto_admin
+      sp.save!
 
       j =<<EOF      
       [{"name":"complete","disabled":false,"sub_process_id":13,"milestone":null,"description":null},{"name":"opt-out of protocol","disabled":false,"sub_process_id":13,"milestone":null,"description":null}]

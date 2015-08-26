@@ -211,15 +211,16 @@ module MasterDataSupport
   
   def create_trackers master
     
-    (1..rand(20)).each do 
-      prs = Protocol.selectable
-      pr = pick_one_from prs
+    Protocol.selectable.each do |pr|
+      
       sps = pr.sub_processes.enabled
       sp = pick_one_from sps
+      puts sp.inspect
+      
       pes = sp.protocol_events.enabled
       pe = pick_one_from pes
 
-      master.trackers.create protocol: pr, sub_process: sp, protocol_event: pe
+      master.trackers.create! protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now
     end
   end
 

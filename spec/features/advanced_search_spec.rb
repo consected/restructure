@@ -9,9 +9,7 @@ describe "advanced search", js: true do
     seed_database
     create_data_set
     
-    puts "Protocol selectable?"
-    puts Protocol.selectable
-     
+    
     @user, @good_password  = create_user
     @good_email  = @user.email
     
@@ -108,7 +106,7 @@ describe "advanced search", js: true do
     
     expect(page).to have_css "#player-info-#{@full_player_info.master_id}-#{@full_player_info.id} .player-info-first_name", text: "first name #{@full_player_info.first_name.capitalize}"
     
-    
+
     protocol = pick_one_from(@full_trackers.select {|t| t.protocol != Protocol.record_updates_protocol}).protocol
     within '#advanced_search_master' do
       
@@ -129,8 +127,7 @@ describe "advanced search", js: true do
       
       h = el[:href].split('#').last
       
-      expect(page).to have_css "##{h} .tracker-block .tracker-protocol_name", text: protocol.name
-      
+      expect(page).to have_css("##{h} .tracker-block .tracker-protocol_name .cell-holder", text: protocol.name), "Expected: #{@full_master_record.trackers.map {|m| m.protocol_name} }"
     end
     
     page.all(:css, '.master-expander').first.click
@@ -164,9 +161,10 @@ describe "advanced search", js: true do
     
     # wait a while, maybe
     have_css '#advanced_search_master.ajax-running'
-    have_css "#master_results_block", text: ''        
+    have_css "#master_results_block #results-accordion"
     
-    expect(page).to have_css "#search_count", text: /[0-9]+/
+    
+    expect(page).to have_css "#search_count", text: /[0-9]+.*/
     
     items = page.all(:css, '.master-expander')
 
@@ -175,9 +173,16 @@ describe "advanced search", js: true do
     items.each do |el|
           
       el.click      
+      
+      b = page.all('button[data-dismiss="modal"]')
+      b.first.click if b && b.length > 0 
+      
       h = el[:href].split('#').last
       
-      expect(page).to have_css "##{h} .tracker-block .tracker-protocol_name", text: protocol.name
+      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
+      
+      b = page.all('button[data-dismiss="modal"]')
+      b.first.click if b && b.length > 0 
       
     end
     
