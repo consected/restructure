@@ -708,8 +708,6 @@ CREATE TABLE scantrons (
     id integer NOT NULL,
     master_id integer,
     scantron_id integer,
-    source character varying,
-    rank integer,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
