@@ -212,7 +212,7 @@ module MasterDataSupport
   def create_trackers master
     
     (1..rand(20)).each do 
-      prs = Protocol.enabled
+      prs = Protocol.selectable
       pr = pick_one_from prs
       sps = pr.sub_processes.enabled
       sp = pick_one_from sps

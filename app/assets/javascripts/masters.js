@@ -83,9 +83,32 @@ _fpa.masters = {
             $('#search_count').html('');
         }).addClass('attached-clear-fields');
     
-        $('#master_not_trackers_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id').not('.attached-force-notice').on('change', function(ev){            
-            $('#search_count').html('');
-            $('#master_results_block').html('<h3 class="text-center">Select associated event to search protocol / category not in selected process</h3>');
+        $('#master_not_tracker_histories_attributes_0_sub_process_id').not('.attached-force-notice').on('change', function(ev){            
+            var v = $(this).val();
+            if(v && v !== ''){
+                $('#search_count').html('');
+                $('#master_results_block').html('<h3 class="text-center">Select any event to search for a protocol/category never having the selected process</h3>');
+                $('.tsf-any-event-not').addClass('has-warning').one('change', function(){
+                    $(this).removeClass('has-warning');                    
+                }).flash();
+            }else
+            {
+                $(this).parents('form').submit();
+            }
+        }).addClass('attached-force-notice');
+        
+        $('#master_not_trackers_attributes_0_sub_process_id').not('.attached-force-notice').on('change', function(ev){            
+            var v = $(this).val();
+            if(v && v !== ''){
+                $('#search_count').html('');
+                $('#master_results_block').html('<h3 class="text-center">Select current event to search for a protocol/category not currently in the selected process</h3>');
+                $('.tsf-current-event-not').addClass('has-warning').one('change', function(){
+                    $(this).removeClass('has-warning');
+                }).flash();
+            }else
+            {
+                $(this).parents('form').submit();
+            }
         }).addClass('attached-force-notice');
     }
     

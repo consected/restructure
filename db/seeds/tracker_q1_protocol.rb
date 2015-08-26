@@ -10,15 +10,15 @@ module Seeds
 
     def self.create_protocol_events
       
-      protocol = Protocol.find_or_initialize_by(name: 'Q1', disabled: nil)
-      
+      protocol = Protocol.find_or_initialize_by(name: 'Q1')
+      protocol.current_admin = auto_admin
+      protocol.save!
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Scantron')
       
       j =<<EOF
       [
 {"name":"complete","disabled":false,"sub_process_id":1,"milestone":"complete","description":""},
 {"name":"discontinue mailings","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"new test","disabled":true,"sub_process_id":1,"milestone":"","description":""},
 {"name":"opt-out of mailings","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
 {"name":"pre-notification sent","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
 {"name":"questionnaire resent","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
@@ -27,11 +27,12 @@ module Seeds
 {"name":"reminder sent","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
 {"name":"returned to sender","disabled":false,"sub_process_id":1,"milestone":"notify-user","description":"Mail returned to sender. The affected address must be edited to indicate a Bad Address. If alternative secondary addresses are available, consider marking one of these as 'primary'."},
 {"name":"send thank you letter","disabled":false,"sub_process_id":1,"milestone":"notify-user, mailing","description":"Create a thank you letter for mailing. Update tracker for Q1 to Scantron Complete when done."},
-{"name":"using new address","disabled":false,"sub_process_id":1,"milestone":null,"description":null}]
+{"name":"using new address","disabled":false,"sub_process_id":1,"milestone":null,"description":null}
+]
 EOF
       
       values = JSON.parse j
-      
+      puts "Create"
       add_values values, sp
       
       

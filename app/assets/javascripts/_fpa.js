@@ -229,8 +229,10 @@ _fpa = {
                 if(dofv !== null && dofv !== '') all_null = false;               
             });
             
-            if(all_null)
-                $(this).val('');
+            if(all_null){
+                $(this).removeClass('has-value').val('');
+                
+            }
                 
         });
         

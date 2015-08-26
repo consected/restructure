@@ -111,6 +111,13 @@ a.add-icon{
         border-color: #2E6DA4;
         color: #2E6DA4;
     }
+    
+    &.has-warning select {
+        color: #c00;
+        option {
+            color: #2E6DA4;
+        }
+    }
 }
 
 textarea#player_info_notes {

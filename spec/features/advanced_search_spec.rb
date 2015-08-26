@@ -8,6 +8,9 @@ describe "advanced search", js: true do
   before(:all) do
     seed_database
     create_data_set
+    
+    puts "Protocol selectable?"
+    puts Protocol.selectable
      
     @user, @good_password  = create_user
     @good_email  = @user.email
