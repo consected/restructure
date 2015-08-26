@@ -213,11 +213,11 @@ module MasterDataSupport
     
     (1..rand(20)).each do 
       prs = Protocol.enabled
-      pr = prs[rand prs.length]
+      pr = pick_one_from prs
       sps = pr.sub_processes.enabled
-      sp = sps[rand sps.length]
+      sp = pick_one_from sps
       pes = sp.protocol_events.enabled
-      pe = pes[rand pes.length]
+      pe = pick_one_from pes
 
       master.trackers.create protocol: pr, sub_process: sp, protocol_event: pe
     end

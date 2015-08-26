@@ -5,6 +5,8 @@ class Scantron < ActiveRecord::Base
   validates :scantron_id, presence: true,  numericality: { only_integer: true, greater_than: 0, less_than: 1000000 }
   validate :scantron_id_tests
   
+  default_scope ->{}
+  
   protected
     def scantron_id_tests
       

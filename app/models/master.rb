@@ -17,7 +17,7 @@ class Master < ActiveRecord::Base
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
-  has_many :scantrons, -> { order(RankNotNullClause)}  , inverse_of: :master
+  has_many :scantrons,  inverse_of: :master
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory'
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 

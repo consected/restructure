@@ -14,9 +14,8 @@ describe "advanced search", js: true do
     
   end
 
-  it "should test switching to advanced search" do
-    
-    user = User.where(email: @good_email).first
+  before :each do
+        user = User.where(email: @good_email).first
     expect(user).to be_a User
     expect(user.id).to equal @user.id
     
@@ -30,7 +29,16 @@ describe "advanced search", js: true do
     end
     expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
 
+  end
 
+  after :each do
+    find('.navbar-right li:nth-child(2) .dropdown-toggle').click
+    click_link 'logout'
+    
+  end
+  
+  it "should test switching to advanced search and search a player" do
+    
     visit "/masters/search"
     
     within '#simple_search_master' do 
@@ -98,7 +106,7 @@ describe "advanced search", js: true do
     expect(page).to have_css "#player-info-#{@full_player_info.master_id}-#{@full_player_info.id} .player-info-first_name", text: "first name #{@full_player_info.first_name.capitalize}"
     
     
-    protocol = @full_trackers[rand @full_trackers.length].protocol
+    protocol = pick_one_from(@full_trackers.select {|t| t.protocol != Protocol.record_updates_protocol}).protocol
     within '#advanced_search_master' do
       
       select protocol.name, from: "master_trackers_attributes_0_protocol_id"
@@ -126,8 +134,51 @@ describe "advanced search", js: true do
     
     
     
-    find('.navbar-right li:nth-child(2) .dropdown-toggle').click
-    click_link 'logout'
+  end
+
+  it "searches tracker for items not in the tracker" do
+     
+    visit "/masters/search"
+    within '#simple_search_master' do       
+      find('#master_general_infos_attributes_0_first_name').click
+    
+      click_link "advanced search"
+    end
+
+     # Wait for the advance form collapse animation to complete
+    expect(page).to have_css '#master-search-advanced.in'      
+    
+    sprot = Protocol.selectable
+    
+    expect(sprot.length).to be > 0
+    
+    protocol = pick_one_from(sprot)
+    within '#advanced_search_master' do
+      
+      select protocol.name, from: "master_trackers_attributes_0_protocol_id"
+      find("#master_trackers_attributes_0_sub_process_id").click
+    end
+    
+    # wait a while, maybe
+    have_css '#advanced_search_master.ajax-running'
+    have_css "#master_results_block", text: ''        
+    
+    expect(page).to have_css "#search_count", text: /[0-9]+/
+    
+    items = page.all(:css, '.master-expander')
+
+    expect(items.length).to be > 1
+    
+    items.each do |el|
+          
+      el.click      
+      h = el[:href].split('#').last
+      
+      expect(page).to have_css "##{h} .tracker-block .tracker-protocol_name", text: protocol.name
+      
+    end
+    
+    
   end
   
   after(:all) do

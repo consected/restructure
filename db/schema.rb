@@ -11,10 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150820155555) do
+ActiveRecord::Schema.define(version: 20150826145125) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+  enable_extension "pg_trgm"
 
   create_table "accuracy_scores", force: :cascade do |t|
     t.string   "name"
@@ -39,8 +40,8 @@ ActiveRecord::Schema.define(version: 20150820155555) do
     t.integer  "rank"
     t.string   "rec_type"
     t.integer  "user_id"
-    t.datetime "created_at",                                            null: false
-    t.datetime "updated_at",            default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                              null: false
+    t.datetime "updated_at",            default: "now()"
     t.string   "country",     limit: 3
     t.string   "postal_code"
     t.string   "region"
@@ -129,7 +130,7 @@ ActiveRecord::Schema.define(version: 20150820155555) do
   end
 
   add_index "masters", ["msid"], name: "index_masters_on_msid", using: :btree
-  add_index "masters", ["pro_id"], name: "index_masters_on_pro_id", using: :btree
+  add_index "masters", ["pro_id"], name: "index_masters_on_proid", using: :btree
   add_index "masters", ["pro_info_id"], name: "index_masters_on_pro_info_id", using: :btree
   add_index "masters", ["user_id"], name: "index_masters_on_user_id", using: :btree
 
@@ -140,8 +141,8 @@ ActiveRecord::Schema.define(version: 20150820155555) do
     t.string   "source"
     t.integer  "rank"
     t.integer  "user_id"
-    t.datetime "created_at",                                 null: false
-    t.datetime "updated_at", default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                   null: false
+    t.datetime "updated_at", default: "now()"
   end
 
   add_index "player_contacts", ["master_id"], name: "index_player_contacts_on_master_id", using: :btree
@@ -156,8 +157,8 @@ ActiveRecord::Schema.define(version: 20150820155555) do
     t.date     "birth_date"
     t.date     "death_date"
     t.integer  "user_id"
-    t.datetime "created_at",                                   null: false
-    t.datetime "updated_at",   default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",   default: "now()"
     t.string   "contact_pref"
     t.integer  "start_year"
     t.integer  "rank"
@@ -185,8 +186,8 @@ ActiveRecord::Schema.define(version: 20150820155555) do
     t.string   "college"
     t.string   "birthplace"
     t.integer  "user_id"
-    t.datetime "created_at",                                  null: false
-    t.datetime "updated_at",  default: '2015-07-17 14:00:33'
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",  default: "now()"
   end
 
   add_index "pro_infos", ["master_id"], name: "index_pro_infos_on_master_id", using: :btree
@@ -220,8 +221,6 @@ ActiveRecord::Schema.define(version: 20150820155555) do
   create_table "scantrons", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "scantron_id"
-    t.string   "source"
-    t.integer  "rank"
     t.integer  "user_id"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false

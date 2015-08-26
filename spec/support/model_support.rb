@@ -14,6 +14,10 @@ module ModelSupport
     "#{UserPrefix}#{r}@#{UserDomain}"
   end
   
+  def pick_one_from objs
+    objs[rand objs.length]
+  end
+  
   def create_user r=nil, extra=''
     
     unless r      

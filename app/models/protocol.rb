@@ -9,6 +9,7 @@ class Protocol < ActiveRecord::Base
 
   default_scope -> { order position: :asc }
   scope :updates, -> { where name: RecordUpdatesProtocolName}
+  scope :selectable, -> { enabled.where("name <> ?", RecordUpdatesProtocolName)}
   
   validates :name, presence: true
 

@@ -6,6 +6,7 @@ describe ProtocolEvent do
   describe "definition" do
     before :each do
       seed_database
+      ProtocolEvent.delete_all
       create_user
       create_admin
       create_master      
@@ -24,11 +25,11 @@ describe ProtocolEvent do
       
       expect(@created_count).to eq @list.length
       
-      ProtocolEvent.all.each do |p|
-        
-        p.current_admin = @admin
-        p.save!
-      end
+#      ProtocolEvent.all.each do |p|
+#        
+#        p.current_admin = @admin
+#        p.save!
+#      end
       
       prev_pos = nil
       ProtocolEvent.all.each do |p|                      
