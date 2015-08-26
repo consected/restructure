@@ -6,9 +6,16 @@ describe ProtocolEvent do
   describe "definition" do
     before :each do
       seed_database
-      ProtocolEvent.delete_all
       create_user
       create_admin
+      ProtocolEvent.active.each do |p|
+        p.disabled = true
+        p.sub_process ||= SubProcess.enabled.first
+        p.current_admin = @admin
+        p.save!
+        
+      end
+      
       create_master      
       @protocol = Protocol.create! name: "QA#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
       @sub_process = @protocol.sub_processes.create! name: "SP1", disabled: false, current_admin: @admin
@@ -32,7 +39,7 @@ describe ProtocolEvent do
 #      end
       
       prev_pos = nil
-      ProtocolEvent.all.each do |p|                      
+      ProtocolEvent.active.each do |p|                      
         expect(p.name.downcase).to be >= prev_pos if prev_pos
         prev_pos  = p.name.downcase if p.name
       end
@@ -55,7 +62,7 @@ describe ProtocolEvent do
       expect(pa.save).to be false
       
       pa.current_admin = @admin
-      expect(pa.save).to be true
+      expect(pa.save!).to be true
       
       pa.reload
       expect(pa.name).to eq "new name by me"

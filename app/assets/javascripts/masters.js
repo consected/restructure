@@ -90,7 +90,8 @@ _fpa.masters = {
                 $('#master_results_block').html('<h3 class="text-center">Select any event to search for a protocol/category never having the selected process</h3>');
                 $('.tsf-any-event-not').addClass('has-warning').one('change', function(){
                     $(this).removeClass('has-warning');                    
-                }).flash();
+                });
+                $('.tsf-any-event-not select').focus();
             }else
             {
                 $(this).parents('form').submit();
@@ -104,7 +105,8 @@ _fpa.masters = {
                 $('#master_results_block').html('<h3 class="text-center">Select current event to search for a protocol/category not currently in the selected process</h3>');
                 $('.tsf-current-event-not').addClass('has-warning').one('change', function(){
                     $(this).removeClass('has-warning');
-                }).flash();
+                });
+                $('.tsf-current-event-not select').focus();
             }else
             {
                 $(this).parents('form').submit();

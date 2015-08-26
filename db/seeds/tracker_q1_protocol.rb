@@ -33,7 +33,7 @@ module Seeds
 EOF
       
       values = JSON.parse j
-      puts "Create"
+      
       add_values values, sp
       
       

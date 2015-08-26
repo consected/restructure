@@ -16,7 +16,7 @@ describe "advanced search", js: true do
   end
 
   before :each do
-        user = User.where(email: @good_email).first
+    user = User.where(email: @good_email).first
     expect(user).to be_a User
     expect(user.id).to equal @user.id
     
@@ -29,13 +29,13 @@ describe "advanced search", js: true do
       click_button "Log in"
     end
     expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
-
+    
   end
 
-  after :each do
+  def logout 
     find('.navbar-right li:nth-child(2) .dropdown-toggle').click
     click_link 'logout'
-    
+
   end
   
   it "should test switching to advanced search and search a player" do
@@ -75,7 +75,7 @@ describe "advanced search", js: true do
     expect(page).to have_css '#advanced_search_master.ajax-running'
     # wait a while!
     expect(page).to have_css "#master_results_block", text: ''    
-    expect(page).to have_css "#search_count", text: /[0-9]+/
+    expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
     
     page.all(:css, '.master-expander .player-info-header .player-names').each do |el|
       expect(el.text).to match /#{@full_player_info.first_name.capitalize}.*/    
@@ -106,24 +106,34 @@ describe "advanced search", js: true do
     
     expect(page).to have_css "#player-info-#{@full_player_info.master_id}-#{@full_player_info.id} .player-info-first_name", text: "first name #{@full_player_info.first_name.capitalize}"
     
-
-    protocol = pick_one_from(@full_trackers.select {|t| t.protocol != Protocol.record_updates_protocol}).protocol
+    protocol = Protocol.selectable.first
+    
     within '#advanced_search_master' do
       
       select protocol.name, from: "master_trackers_attributes_0_protocol_id"
-      find("#master_trackers_attributes_0_sub_process_id").click
     end
     
     # wait a while, maybe
     have_css '#advanced_search_master.ajax-running'
     
     
-    expect(page).to have_css "#search_count", text: /[0-9]+/
+    find "#master_results_block.search-status-done", wait: 5
     
-    page.all(:css, '.master-expander').each do |el|
+    find ".master-expander", match: :first, wait: 5    
+    
+    expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
+    
+    
+    me = page.all(:css, '.master-expander')
+    
+    me.each do |el|
       expect(el.text).to match /#{@full_player_info.first_name.capitalize}.+#{@full_player_info.last_name.capitalize}.*/
       
-      el.click
+      
+      
+      el.click unless me.length == 1 
+                  
+      find "#master-#{@full_player_info.master_id}-player-infos.collapse.in", wait: 5
       
       h = el[:href].split('#').last
       
@@ -132,7 +142,7 @@ describe "advanced search", js: true do
     
     page.all(:css, '.master-expander').first.click
     
-    
+    logout
     
   end
 
@@ -147,45 +157,57 @@ describe "advanced search", js: true do
 
      # Wait for the advance form collapse animation to complete
     expect(page).to have_css '#master-search-advanced.in'      
-    
+        
     sprot = Protocol.selectable
     
     expect(sprot.length).to be > 0
     
     protocol = pick_one_from(sprot)
+    sp = pick_one_from(protocol.sub_processes)
     within '#advanced_search_master' do
       
       select protocol.name, from: "master_trackers_attributes_0_protocol_id"
-      find("#master_trackers_attributes_0_sub_process_id").click
+      select sp.name, from: "master_trackers_attributes_0_sub_process_id"      
     end
     
     # wait a while, maybe
-    have_css '#advanced_search_master.ajax-running'
-    have_css "#master_results_block #results-accordion"
+    expect(page).to have_css "#search_count", text: ''
+    have_css '#advanced_search_master.ajax-running'    
     
+    find "#master_results_block.search-status-done", wait: 10
     
-    expect(page).to have_css "#search_count", text: /[0-9]+.*/
+    find ".master-expander", match: :first
+    
+    #expect(page).to have_css "#search_count", text: /[0-9]+.*/
     
     items = page.all(:css, '.master-expander')
 
     expect(items.length).to be > 1
     
+    done = 0
+    
     items.each do |el|
           
       el.click      
       
-      b = page.all('button[data-dismiss="modal"]')
+      
+      
+      b = all('button[data-dismiss="modal"]')
       b.first.click if b && b.length > 0 
       
-      h = el[:href].split('#').last
+      h = el[:href].split('#').last      
       
+      find "##{h}.collapse.in", wait: 5
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
+      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name
+
+      done += 1
       
-      b = page.all('button[data-dismiss="modal"]')
-      b.first.click if b && b.length > 0 
-      
+      break if done > 5
     end
     
+
+    expect '.wait.for.me'
     
   end
   

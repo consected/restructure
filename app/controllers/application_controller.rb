@@ -9,13 +9,25 @@ class ApplicationController < ActionController::Base
   before_action :setup_navs
   
   rescue_from RuntimeError, :with => :runtime_error_handler
+  rescue_from ActiveRecord::RecordNotFound, :with => :runtime_record_not_found_handler
   
 protected
 
-    def runtime_error_handler
+    def runtime_error_handler e
+      logger.error e.inspect 
+      logger.error e.backtrace.join("\n") 
       respond_to do |type|
         type.html { render :text => "A server error occurred. Contact the administrator if this condition persists.", :status => 500 }
         type.json  { render :json => {message: "A server error occurred. Contact the administrator if this condition persists."}, :status => 500 }
+      end
+      true
+    end
+    def runtime_record_not_found_handler e
+      logger.error e.inspect 
+      logger.error e.backtrace.join("\n") 
+      respond_to do |type|
+        type.html { render :text => "A database record was not found. Contact the administrator if this condition persists.", :status => 404 }
+        type.json  { render :json => {message: "A database record was not found. Contact the administrator if this condition persists."}, :status => 404 }
       end
       true
     end

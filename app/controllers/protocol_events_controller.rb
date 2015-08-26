@@ -31,7 +31,10 @@ class ProtocolEventsController < ApplicationController
       
       if @protocol_event
         @protocol = @protocol_event.protocol
-        @sub_process = @protocol_event.sub_process
+        @sub_process = @protocol_event.sub_process      
+      elsif params[:protocol_id].blank?
+        @protocol = Protocol.new
+        @sub_process = SubProcess.new
       else
         @protocol = Protocol.find(params[:protocol_id])      
         @sub_process = SubProcess.find(params[:sub_process_id])

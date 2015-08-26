@@ -154,7 +154,9 @@ module MasterDataSupport
         @full_player_info = create_player_info l, @master
         @full_pro_info = create_pro_info p, @master                
         @full_master_record = @master.reload
-        @full_trackers = @master.trackers
+        @full_trackers = @master.trackers.reload
+        
+        puts "Trackers: #{@full_trackers.inspect}"
                 
       else
         # Ensure only the reference record has a rank that is 12
@@ -210,17 +212,20 @@ module MasterDataSupport
   end
   
   def create_trackers master
-    
-    Protocol.selectable.each do |pr|
-      
-      sps = pr.sub_processes.enabled
-      sp = pick_one_from sps
-      puts sp.inspect
-      
-      pes = sp.protocol_events.enabled
-      pe = pick_one_from pes
+    (1..rand(5)).each do
+      Protocol.selectable.each do |pr|
 
-      master.trackers.create! protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now
+        sps = pr.sub_processes.enabled
+        sp = pick_one_from sps
+        puts sp.inspect
+
+        pes = sp.protocol_events.enabled
+        pe = pick_one_from pes
+
+        t = master.trackers.build protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now
+        res = t.merge_if_exists!
+        
+      end
     end
   end
 

@@ -3,6 +3,10 @@
 _fpa.preprocessors = {
 
     before_all: function(block){
+                
+        $('#master_results_block').removeClass('search-status-abort search-status-error search-status-done');
+                
+        
     },
     
     default: function(block, data, has_preprocessor){
@@ -12,7 +16,10 @@ _fpa.preprocessors = {
 
 _fpa.postprocessors = {
     default: function(block, data, has_postprocessor){
-    
+           
+           
+        $('#master_results_block').addClass('search-status-done');  
+        
         // Allow easy default processing where not already performed by the postprocessor
         if(!has_postprocessor){
             _fpa.form_utils.format_block(block);            

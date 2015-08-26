@@ -27,6 +27,6 @@ class TrackersController < ApplicationController
     end
 
     def secure_params
-      params.require(:tracker).permit(:master_id,  :protocol_id, :protocol_event_id, :event_date, :sub_process_id, :outcome, :outcome_date, :user_id, :notes, :item_id, :item_type)
+      params.require(:tracker).permit(:master_id,  :protocol_id, :protocol_event_id, :event_date, :sub_process_id, :user_id, :notes, :item_id, :item_type)
     end
 end

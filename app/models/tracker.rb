@@ -31,11 +31,17 @@ class Tracker < ActiveRecord::Base
       t.event_date = self.event_date
       t.notes = self.notes
       t._merged = true
-      t.save
+      t.save!
 
       return t
     end
     nil
+  end
+  
+  # does a standard merge_if_exists, but always attempts to save the result
+  def merge_if_exists!
+    t = merge_if_exists || self
+    t.save!    
   end
   
   # Called by UserHandler managed records to save the latest update to the tracker
