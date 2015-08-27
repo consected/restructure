@@ -12,7 +12,8 @@ svn rm --force public/assets
 svn commit public/assets -m "clean up assets for deployment"
 fphs-scripts/compile_assets.sh
 fphs-scripts/run_sec_tests.sh 
-svn commit ./security -m "store security test results"
+svn add security/*$FPHS_VERSION*
+svn commit security -m "store security test results"
 pg_dump -d fpa_development -s > db/dumps/current_schema.sql
 svn add public/assets
 svn commit -m "Precompiled assets for release: $FPHS_VERSION"
