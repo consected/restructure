@@ -137,10 +137,11 @@ _fpa.form_utils = {
             children.find('option[data-filter-id]').removeClass('filter-option-show').hide();
             // in all the child select fields re-show only those fields matching the parent selector
             children.find('option[data-filter-id="'+v+'"]').addClass('filter-option-show').show();
-            
+            // set attribute on the children, so we can sense this has changed (useful in features specs)
+            children.attr('data-parent-filter-id', v);
             // now for each child select field reset it if the current option doesn't match
             // the new parent selection
-            children.each(function(){
+            children.each(function(){                
                 // get the data-filter-id (which parent option this belongs to) for any selected items
                 var ela = $(this).find('option:selected').attr('data-filter-id');
                 // if this option doesn't match the new parent selection
