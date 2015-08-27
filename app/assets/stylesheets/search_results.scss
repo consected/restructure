@@ -370,6 +370,11 @@ strong {
 
 }
 
+.player-info-notes {
+    word-break: break-word;
+    word-wrap: break-word;
+}
+
 span.tracker-event-description {color: silver;}
 
 li.player-info-source_name strong, li.address-source_name strong, li.player-contact-source_name strong {
