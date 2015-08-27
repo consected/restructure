@@ -182,13 +182,13 @@ describe "advanced search", js: true do
     
     items = page.all(:css, '.master-expander')
 
-    expect(items.length).to be > 1
+    expect(items.length).to be > 0
     
     done = 0
     
     items.each do |el|
           
-      el.click      
+      el.click      if items.length > 1
       
       
       
@@ -199,7 +199,7 @@ describe "advanced search", js: true do
       
       find "##{h}.collapse.in", wait: 5
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
-      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name
+      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.capitalize
 
       done += 1
       
@@ -207,10 +207,9 @@ describe "advanced search", js: true do
     end
     
 
-    expect '.wait.for.me'
     
   end
-  
+ 
   after(:all) do
     
   end

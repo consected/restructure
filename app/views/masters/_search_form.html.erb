@@ -120,7 +120,7 @@
       </div>
       <div class="form-group col-sm-2">
         <%= f.label :state %>
-        <%= f.collection_select :state, state_hash, :first, :last, {include_blank: true}, class: 'form-control'  %>
+        <%= f.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-2">
         <%= f.label :zip , 'data-add-icon' => 'info-sign', title: 'search for 5 digit zip'%>

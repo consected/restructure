@@ -63,5 +63,11 @@ RSpec.configure do |config|
   config.after :each do
     Warden.test_reset!
   end 
+  config.after(:suite) do
+    `brakeman`
+    `bundle-audit update`
+    `bundle-audit check`
+  end
+
   
 end

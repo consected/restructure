@@ -96,7 +96,7 @@ module MasterDataSupport
   end
   
   
-  def create_data_set
+  def create_data_set options={}
     
     # Count the number of master records created
     @master_count = 0
@@ -149,7 +149,7 @@ module MasterDataSupport
         p[:end_year] ||= p[:start_year] + rand(2)
         p[:pro_id] = rand(100000)
 
-        create_trackers @master
+        create_trackers @master unless options[:no_trackers]
         
         @full_player_info = create_player_info l, @master
         @full_pro_info = create_pro_info p, @master                
@@ -166,7 +166,7 @@ module MasterDataSupport
         create_player_info l, @master
         create_pro_info p, @master
         
-        create_trackers @master
+        create_trackers @master unless options[:no_trackers]
       end
       
       @master_count += 1 
@@ -217,7 +217,7 @@ module MasterDataSupport
 
         sps = pr.sub_processes.enabled
         sp = pick_one_from sps
-        puts sp.inspect
+        
 
         pes = sp.protocol_events.enabled
         pe = pick_one_from pes
