@@ -52,6 +52,8 @@ class ItemFlagsController < ApplicationController
       @item_type = item_controller = params[:item_controller]      
       item_class_name = item_controller.singularize.camelize
       
+      # We will return a 404 if the requested item_class_name is not one of the valid set.
+      # This prevents insecure requests from the user being used to access objects below
       return not_found unless ItemFlag.works_with item_class_name
       
       item_class = item_class_name.constantize

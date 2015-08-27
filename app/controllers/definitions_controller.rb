@@ -5,13 +5,15 @@ class DefinitionsController < ApplicationController
    
   def show
     
-    id = params[:id]
+    def_type = params[:id]
     
-    item_selector = available id
-    
+    item_selector = available def_type
+    # We will return a 404 if either the def_type requested by a user is nil, or
+    # the def_type does not appear in the Available list
+    # This protects against insecure requests
     return not_found unless item_selector
     
-    item = id.classify.constantize
+    item = def_type.classify.constantize
     
     j = item.send(item_selector)
     
@@ -23,8 +25,10 @@ class DefinitionsController < ApplicationController
   
   private
   
-    def available id
-      return nil unless id
-      Available[id]
+    # This both looks up the selector method to use, and protects against insecure 
+    # user-generated requests to access unexpected methods and classes
+    def available def_type
+      return nil unless def_type
+      Available[def_type]
     end
 end

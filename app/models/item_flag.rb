@@ -1,6 +1,6 @@
 class ItemFlag < ActiveRecord::Base
 
-  UseWithClassNames = ['PlayerInfo']
+  UseWithClassNames = ['PlayerInfo'].freeze
   
   belongs_to :item, polymorphic: true, inverse_of: :item_flags
   belongs_to :item_flag_name  

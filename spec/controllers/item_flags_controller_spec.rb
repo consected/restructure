@@ -187,4 +187,21 @@ RSpec.describe ItemFlagsController, type: :controller do
     
   end  
   
+  describe "show that Brakeman security warning is not an issue" do
+    before_each_login_user
+    before_each_login_admin
+    it "attempts to force use of an invalid definition type" do
+      create_item
+      
+      
+      expect { get :index, {master_id: @player_info.master_id, item_controller: 'player_infos', item_id: "item_id"} }
+      expect(response).to be_success
+      expect { get :index, {master_id: @player_info.master_id, item_controller: 'addresses', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
+
+      expect { get :index, {master_id: @player_info.master_id, item_controller: '&addresses', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
+      expect { get :index, {master_id: @player_info.master_id, item_controller: '12312', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
+      expect { get :index, {master_id: @player_info.master_id, item_controller: 'nil_class', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
+    end
+  end
+
 end

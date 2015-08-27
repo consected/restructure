@@ -14,6 +14,8 @@ class Application
   def self.record_error_message record
     res = []
     
+    return "unexpected error" unless record
+    
     record.errors.each do |r|
       res << r.join(' ')
     end

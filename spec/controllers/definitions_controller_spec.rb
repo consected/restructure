@@ -35,5 +35,20 @@ describe DefinitionsController, type: :controller do
       expect{get :show, {id: 'new'}}.to raise_error(ActionController::RoutingError)
     end
   end
+  
+  describe "show that Brakeman security warning is not an issue" do
+    before_each_login_user
+    it "attempts to force use of an invalid definition type" do
+      
+      expect { get :show, {id: 'addresses'} }.to raise_error(ActionController::RoutingError)
+
+      expect { get :show, {id: '&something'} }.to raise_error(ActionController::RoutingError)
+
+      expect { get :show, {id: '123654'} }.to raise_error(ActionController::RoutingError)
+      
+      
+    end
+  end
+  
 end
 

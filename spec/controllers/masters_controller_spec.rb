@@ -103,6 +103,15 @@ RSpec.describe MastersController, type: :controller do
     end    
   end
 
+  describe "show that Brakeman security warning is not an issue" do
+    
+    it "attempts to force a create to fail" do
+      
+      post :create, {testfail: 'testfail'}
+
+      expect(response).to redirect_to "/masters/new"
+    end
+  end
   
 
 end

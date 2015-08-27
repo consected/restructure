@@ -143,7 +143,10 @@ class MastersController < ApplicationController
   end
   
   def create
-    @master = Master.create_master_records current_user
+    # Unfortunately there is no easy way to force the create request to fail for the purposes of testing
+    # Therefore we provide a way to force an apparent failure in the test environment.
+    # This is necessary in order to allow testing of what appears to be a false positive for this action in Brakeman
+    @master = Master.create_master_records current_user unless Rails.env.test? && params[:testfail] == 'testfail'
     if @master && @master.id
       redirect_to @master, notice:  "Created Master Record with MSID #{@master.id}"
     else
