@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.2.1'
+gem 'rails', '4.2.2'
 # Use postgresql as the database for Active Record
 gem 'pg'
 # Use SCSS for stylesheets
@@ -28,7 +28,7 @@ gem 'devise'
 # gem 'bcrypt', '~> 3.1.7'
 gem 'dalli'
 
-gem 'country_select', github: 'stefanpenner/country_select'
+gem 'country_select'
 
 # Use Unicorn as the app server
 # gem 'unicorn'
@@ -49,6 +49,9 @@ group :development, :test do
   gem 'rspec-rails', '~> 3.0'
   
   gem 'webrick'
+  
+  gem "brakeman", :require => false
+  gem "bundler-audit"
 end
 
 group :test do
