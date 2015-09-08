@@ -132,8 +132,7 @@ into temp tracker_hist_only
 from tracker_full tf 
 inner join masters on masters.msid = tf.msid
 inner join trackers on trackers.master_id = masters.id and trackers.protocol_id = tf.protocol_id
-where not exists ( select id from tracker_latest tl where tl.id = tf.id)
-;
+where not exists ( select id from tracker_latest tl where tl.id = tf.id);
 
 insert into ml_app.tracker_history 
 (master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id)
@@ -156,13 +155,25 @@ select count(distinct msid) from ml_copy;
  23189
 */
 
+/* The number of master records we expect */
+select count(*) from (select distinct msid, pro_id from ml_copy where msid is not null and (accuracy_score is null or accuracy_score <> -1 and accuracy_score <> 999)) as t;
+/*-------
+ 21624
+*/
+
+/* The actual number of masters records */
+select count(*) from masters;
+/*-------
+ 21624
+*/
+
 select count(distinct msid) from masters;
 /*-------
  16935
 */
 
 
-
+/* Get counts of msid / accuracy_score categories from ml_copy */
 select case when accuracy_score is null then 'accuracy score null' when msid is null then 'msid null: ' || accuracy_score else 'msid exists: ' || accuracy_score end "rule", count(*) from ml_copy where msid is null or accuracy_score = -1 or accuracy_score = 999 or accuracy_score is null group by accuracy_score, rule;
 /*
         rule         | count 
@@ -201,7 +212,9 @@ select (select count(*) from masters) + (select count(*) from ml_copy where msid
 */
 
 
-/* tracker list validations */
+/* -----------------------------
+ *  tracker list validations 
+ * -----------------------------*/
 
 
 /* check trackers and tracker_latest have corresponding numbers */
@@ -210,10 +223,23 @@ select count(*) from tracker_latest;
  29360
 */
 
+select count(*) from trackers;
+/*-------
+ 29367
+*/
+
+/* They don't match... because of a strange inner join effect ... This is what is happening...*/
+/* the original query that populated tracker_latest returns the expected number of rows */
+select count(*) from (select distinct on (msid, protocol_id) id, msid, new_event_date from tracker_full order by msid, protocol_id, event_date desc, id) as t;
+/*-------
+ 29360
+*/
+/* But when joined with the masters table to allow association with a masters.id, the count jumps by 7 */
 select count(*) from tracker_latest inner join masters on masters.msid = tracker_latest.msid;
 /*-------
  29367
 */
+
 
 /* Find the duplicates, based on the joined masters table */
 select distinct tlo.id, tlo.msid, mo.pro_id from tracker_latest tlo  inner join masters mo on mo.msid = tlo.msid where tlo.id in (select tl.id from tracker_latest tl inner join masters on masters.msid = tl.msid  group by tl.id having count(1) > 1) order by tlo.msid;
@@ -231,6 +257,25 @@ select distinct tlo.id, tlo.msid, mo.pro_id from tracker_latest tlo  inner join 
  47352 | 122502 |   9661
  47352 | 122502 |   9665
  47352 | 122502 |   9753
+(11 rows)
+*/
+
+/* Here we have 11 rows that have an msid that appears duplicated after the join. 4 msids are affected. If the MSIDs were unique 
+   we would expect one record for each of the 4 msids to have made it in to trackers.
+   The remainder are the 7 additional records that we see after the join.
+*/
+
+
+/* to test this, create a temporary list of unique msids in the masters table. The result should be that the temporary
+    tracker_latest and trackers tables should now match. */
+select distinct on(msid) id, msid, pro_id  into temp unique_masters from masters;
+select 
+   (select count(*) from tracker_latest) "latest", 
+   (select count(*) from trackers inner join unique_masters on unique_masters.id = trackers.master_id) "trackers";
+/* 
+ latest | trackers 
+--------+----------
+  29360 |    29360
 */
 
 
@@ -239,26 +284,47 @@ select distinct tlo.id, tlo.msid, mo.pro_id from tracker_latest tlo  inner join 
 + records inserted directly in ml_app.tracker_history
 */
 
-select (select count(*) from trackers) "trackers", '+', (select count(*) from tracker_hist_only), '=', (select count(*) from trackers) + (select count(*) from tracker_hist_only) "total";
+select (select count(*) from ml_app.trackers) "trackers", '+', 
+  (select count(*) from tracker_hist_only) "history only", '=', 
+  (select count(*) from trackers) + (select count(*) from tracker_hist_only) "total", 'matches?', 
+  (select count(*) from ml_app.tracker_history) "tracker history";
 /*
- trackers | ?column? | count | ?column? | total 
-----------+----------+-------+----------+-------
-    29367 | +        | 28429 | =        | 57796
-
+ trackers | ?column? | history only | ?column? | total | ?column? | tracker history 
+----------+----------+--------------+----------+-------+----------+-----------------
+    29367 | +        |        28429 | =        | 57796 | matches? |           57796
 */
 
 
-select count(*) from ml_app.tracker_history;
+/* In a perfect world, tracker_full (the full set of original tracker data with the items missing MSIDs discarded) will match the entries in 
+   ml_app.tracker_history 
+   We are seeing 8 additional records in ml_app.tracker_history after migration.
+
+   We know that 7 additional records appear in trackers than due to duplicate msids, leaving just one unaccounted for.
+
+*/
+select count(*) + 7 from tracker_full;
 /*-------
- 57796
+ 57795
 */
-select count(*) from tracker_full;
-/*-------
- 57788
+
+/* we also have a mismatch between the number of actual records pushed directly into ml_app.tracker_history and the 
+   expected records, due to the dup msids in masters.
+   This accounts for the additional 1 record we're seeing in the full set of tracker records compared to tracker_full.
+
+ */
+select (select count(*) from tracker_hist_only) - (select count(*) from tracker_hist_only tho inner join unique_masters on unique_masters.id = tho.master_id) "diff";
+/* diff 
+------
+    1
 */
+
+
 
 /* Check that original and new tracker(s) tables have the correct number of records 
-> tracker_full represents the union of ml_work tracker and tracker_history tables, with records missing from masters removed */
+> tracker_full represents the union of ml_work tracker and tracker_history tables, with records missing from masters removed 
+  We expect this value to be 0 (although currently it isn't)
+
+*/
 select (select count(*) from ml_app.tracker_history) - (select count(*) from tracker_full) "result";
 
 
@@ -272,5 +338,3 @@ select count(*) from ml_app.tracker_history th  where  not exists (select tracki
 
 select count(*) from tracker_full tf inner join masters on masters.msid = tf.msid where not exists (select id from ml_app.tracker_history th  where masters.id = th.master_id );
 
-
- select count(distinct th.id) from ml_app.tracker_history th inner join masters on th.master_id = masters.id inner join tracker_full tf on masters.msid = tf.msid;
