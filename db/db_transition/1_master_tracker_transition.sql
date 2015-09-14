@@ -1,5 +1,8 @@
 set SEARCH_PATH=ml_app,ml_work;
 
+insert into admins (email) values 'auto-admin';
+
+
 drop table temp tracker_full;
 drop table tracker_migration_lookup;
 drop table tracker_migration_lookup_ids;
@@ -109,7 +112,7 @@ update tracker_full set new_event_date = case when outcome_date is not null then
 
 
 /* pull the latest tracker entry for each msid / protocol pair */
-select distinct on (msid, protocol_id) id, msid, new_event_date into temp tracker_latest from tracker_full order by msid, protocol_id, event_date desc, id;
+select distinct on (msid, protocol_id) id, msid, new_event_date into temp tracker_latest from tracker_full order by msid, protocol_id, new_event_date desc, id;
 
 
 /* now insert the latest records into tracker */
@@ -121,25 +124,34 @@ from tracker_full tf
 inner join tracker_latest on tracker_latest.id = tf.id 
 inner join masters on masters.msid = tracker_latest.msid;
 
+/* clear the tracker_history */
+delete from ml_app.tracker_history;
+
 /* Now go and add the history items that were not in the 'latest' set.
  * Add these, linking the tracker_id back to the matching tracker record created above that has a matching msid and protocol pair
  * We create a temp table to allow comparison of results in the checks below
  */
 
 select masters.id "master_id", tf.protocol_id "protocol_id", tf.event_date "event_date", now() "created_at", now() "updated_at", 
-tf.sub_process_id "sub_process_id", tf.protocol_event_id "protocol_event_id", trackers.id "tracker_id"
+tf.sub_process_id "sub_process_id", tf.protocol_event_id "protocol_event_id", trackers.id "tracker_id", trackid
 into temp tracker_hist_only
 from tracker_full tf 
 inner join masters on masters.msid = tf.msid
 inner join trackers on trackers.master_id = masters.id and trackers.protocol_id = tf.protocol_id
 where not exists ( select id from tracker_latest tl where tl.id = tf.id);
 
+/* Careful ordering of records is required to ensure appropriate retrieval for tracker history
+   Records must be inserted in order so tracker_history.id increments correctly. To ensure chronology, we 
+   order finally by trackid (the original tracker sequence id) to ensure that matching event dates can be appropriately ordered
+   based on the order they were entered originally.
+*/
 insert into ml_app.tracker_history 
 (master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id)
 select master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id
-from tracker_hist_only;
+from tracker_hist_only order by event_date desc, trackid;
 
-
+/* Finally, force the latest tracker items back into the tracker_history */
+update trackers set updated_at = now();
 
 /* Now validate the results */
 
