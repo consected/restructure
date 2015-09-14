@@ -12,23 +12,24 @@ module Seeds
       
       protocol = Protocol.find_or_initialize_by(name: 'Q1')
       protocol.current_admin = auto_admin
+      protocol.position = 20
       protocol.save!
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Scantron')
       sp.current_admin = auto_admin
       sp.save!
       j =<<EOF
       [
-{"name":"complete","disabled":false,"sub_process_id":1,"milestone":"complete","description":""},
-{"name":"discontinue mailings","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"opt-out of mailings","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"pre-notification sent","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"questionnaire resent","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"questionnaire sent","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"received response","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"reminder sent","disabled":false,"sub_process_id":1,"milestone":null,"description":null},
-{"name":"returned to sender","disabled":false,"sub_process_id":1,"milestone":"notify-user","description":"Mail returned to sender. The affected address must be edited to indicate a Bad Address. If alternative secondary addresses are available, consider marking one of these as 'primary'."},
-{"name":"send thank you letter","disabled":false,"sub_process_id":1,"milestone":"notify-user, mailing","description":"Create a thank you letter for mailing. Update tracker for Q1 to Scantron Complete when done."},
-{"name":"using new address","disabled":false,"sub_process_id":1,"milestone":null,"description":null}
+{"name":"complete","disabled":false,"sub_process_id": #{sp.id},"milestone":"complete","description":""},
+{"name":"discontinue mailings","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"opt-out of mailings","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"pre-notification sent","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"questionnaire resent","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"questionnaire sent","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"received response","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"reminder sent","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"returned to sender","disabled":false,"sub_process_id": #{sp.id},"milestone":"notify-user","description":"Mail returned to sender. The affected address must be edited to indicate a Bad Address. If alternative secondary addresses are available, consider marking one of these as 'primary'."},
+{"name":"send thank you letter","disabled":false,"sub_process_id": #{sp.id},"milestone":"notify-user, mailing","description":"Create a thank you letter for mailing. Update tracker for Q1 to Scantron Complete when done."},
+{"name":"using new address","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null}
 ]
 EOF
       
@@ -42,14 +43,14 @@ EOF
       sp.save!
       j =<<EOF
       [
-{"name":"bounced email","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
-{"name":"discontinue emails","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
-{"name":"opt-out of email","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
-{"name":"received response","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
-{"name":"restart emails","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
-{"name":"send thank you email","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
-{"name":"started emails","disabled":false,"sub_process_id":2,"milestone":null,"description":null},
-{"name":"using new email address","disabled":false,"sub_process_id":2,"milestone":null,"description":null}
+{"name":"bounced email","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"discontinue emails","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"opt-out of email","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"received response","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"restart emails","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"send thank you email","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"started emails","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
+{"name":"using new email address","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null}
 ]
       
 EOF
@@ -61,7 +62,7 @@ EOF
       sp.save!
 
       j =<<EOF      
-      [{"name":"complete","disabled":false,"sub_process_id":13,"milestone":null,"description":null},{"name":"opt-out of protocol","disabled":false,"sub_process_id":13,"milestone":null,"description":null}]
+      [{"name":"complete","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},{"name":"opt-out of protocol","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null}]
 EOF
       
       values = JSON.parse j

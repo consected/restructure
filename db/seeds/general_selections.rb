@@ -80,7 +80,7 @@ module Seeds
 
     def self.create_player_contacts_type
       
-      item_type = 'addresses_rank'
+      item_type = 'player_contacts_rec_type'
       
       values = [
         {name: 'Email', value: 'email'},

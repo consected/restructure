@@ -10,22 +10,23 @@ module Seeds
 
     def self.create_protocol_events
       
-      protocol = Protocol.find_or_initialize_by(name: 'Updates', disabled: nil)
+      protocol = Protocol.find_or_initialize_by(name: 'Updates')
       protocol.current_admin = auto_admin
+      protocol.position = 100
       protocol.save!
       sp = protocol.sub_processes.find_or_initialize_by(name: 'record updates')
       sp.current_admin = auto_admin
       sp.save!
       
       values = [
-        {name: "created address", disabled: false, sub_process_id: 10, milestone: nil, description: nil},
-        {name: "created player contact", disabled: nil, sub_process_id: 10, milestone: nil, description: nil},
-        {name: "created player info", disabled: nil, sub_process_id: 10, milestone: nil, description: nil},
-        {name: "created scantron", disabled: nil, sub_process_id: 10, milestone: nil, description: nil},
-        {name: "updated address", disabled: false, sub_process_id: 10, milestone: nil, description: nil},
-        {name: "updated player contact", disabled: false, sub_process_id: 10, milestone: nil, description: nil},
-        {name: "updated player info", disabled: false, sub_process_id: 10, milestone: nil, description: nil},
-        {name: "updated scantron", disabled: nil, sub_process_id: 10, milestone: nil, description: nil}  
+        {name: "created address", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "created player contact", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "created player info", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "created scantron", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "updated address", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "updated player contact", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "updated player info", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "updated scantron", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil}  
       ]
       
       add_values values, sp
@@ -35,8 +36,8 @@ module Seeds
       sp.current_admin = auto_admin
       sp.save!
       values = [        
-        {name: "created player info", disabled: nil, sub_process_id: 10, milestone: nil, description: nil},        
-        {name: "updated player info", disabled: false, sub_process_id: 10, milestone: nil, description: nil}
+        {name: "created player info", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},        
+        {name: "updated player info", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil}
       ]
       
       add_values values, sp
