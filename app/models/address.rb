@@ -50,7 +50,7 @@ class Address < ActiveRecord::Base
         self.master.addresses.where(rank: PrimaryRank).each do |a|
           if a.id != self.id
             logger.info "Address #{a.id} has primary rank currently. Setting it to secondary"
-            a.rank = 5
+            a.rank = SecondaryRank
             a.save
             multiple_results << a
           end
