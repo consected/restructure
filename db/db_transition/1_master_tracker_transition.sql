@@ -14,11 +14,13 @@ delete from ml_app.trackers;
 delete from ml_app.protocol_events;
 delete from ml_app.sub_processes;
 delete from ml_app.protocols;
-delete from masters;
+/*delete from masters;*/
 
 
 /* Create the master list of msids - note this picks only the distinct msid entries,*/
-insert into masters (msid, pro_id) select distinct msid, pro_id from ml_copy where msid is not null and (accuracy_score is null or accuracy_score <> -1 and accuracy_score <> 999);
+/*insert into masters (msid, pro_id) select distinct msid, pro_id from ml_copy where msid is not null and (accuracy_score is null or accuracy_score <> -1 and accuracy_score <> 999);
+*/
+
 
 /* Generate a full set of tracker records */
 select *  into temp tracker_full from ml_work.tracker union select * from ml_work.tracker_history ;
@@ -281,6 +283,7 @@ select distinct tlo.id, tlo.msid, mo.pro_id from tracker_latest tlo  inner join 
 /* to test this, create a temporary list of unique msids in the masters table. The result should be that the temporary
     tracker_latest and trackers tables should now match. */
 select distinct on(msid) id, msid, pro_id  into temp unique_masters from masters;
+
 select 
    (select count(*) from tracker_latest) "latest", 
    (select count(*) from trackers inner join unique_masters on unique_masters.id = trackers.master_id) "trackers";
