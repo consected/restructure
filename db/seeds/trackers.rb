@@ -39,7 +39,7 @@ module Seeds
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
       
-      create_tracker_updates
+      create_tracker_updates unless Rails.env.production?
     end
 
   end

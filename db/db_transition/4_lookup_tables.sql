@@ -3,21 +3,25 @@ set SEARCH_PATH=ml_app;
    records being created during initial database seeding.
    All names can be changed in the app through admin functionality after initial configuration.
 */
+
+delete from ml_app.accuracy_scores;
+delete from ml_app.general_selections;
+
 insert into ml_app.accuracy_scores 
 (name, value, created_at, updated_at) values
-('Current Player', 333, now(), now()),
-('Good Match', 12, now(), now()),
+('Current player', 333, now(), now()),
+('Good match', 12, now(), now()),
 ('Reasonable match', 8, now(), now()),
 ('Minimal match', 2, now(), now()),
 ('OK match', 10, now(), now()),
 ('Deceased', 777, now(), now()),
-('Bad Match - must keep', 888, now(), now()),
+('Bad match - must keep', 888, now(), now()),
 ('Minimal match 4', 4, now(), now()),
-('Bad Match - requires follow up', 881, now(), now()),
-('Bad Match & Duplicate', 999, now(), now()),
-('Better Match', 9, now(), now()),
-('Poor Match', 0, now(), now()),
-('medium match', 7, now(), now()),
+('Bad match - requires follow up', 881, now(), now()),
+('Bad match & duplicate', 999, now(), now()),
+('Better match', 9, now(), now()),
+('Poor match', 0, now(), now()),
+('Medium match', 7, now(), now()),
 ('Ineligible', 555, now(), now());
 
 

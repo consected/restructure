@@ -96,13 +96,15 @@ module Seeds
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
 
-      create_player_infos_source
-      
-      create_player_contacts_rank
-      create_player_contacts_source
-      create_player_contacts_type
-      create_addresses_source
-      create_addresses_rank
+      if Rails.env.production?
+        create_player_infos_source
+
+        create_player_contacts_rank
+        create_player_contacts_source
+        create_player_contacts_type
+        create_addresses_source
+        create_addresses_rank
+      end
     end
 
   end

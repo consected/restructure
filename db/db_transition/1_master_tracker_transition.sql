@@ -3,7 +3,7 @@ set SEARCH_PATH=ml_app,ml_work;
 insert into admins (email) values 'auto-admin';
 
 
-drop table temp tracker_full;
+drop table tracker_full;
 drop table tracker_migration_lookup;
 drop table tracker_migration_lookup_ids;
 drop table tracker_latest;
@@ -40,17 +40,40 @@ alter table tracker_full add column protocol_event_name varchar;
 
 update tracker_full tf set 
     protocol_name = 
-            (case when strpos(tf.event, 'General Awareness') = 1 then 'General Awareness' 
-             when strpos(tf.event, 'R1') = 1 then 'R1' 
-             when strpos(tf.event, 'Inquiry') = 1 then 'Inquiry' 
-             else 'Q1' end ),
-    sub_process_name = trim(c_method),
+        case 
+            when strpos(tf.event, 'General Awareness') = 1 then 'General Awareness' 
+            when strpos(tf.event, 'R1') = 1 then 'Q1' 
+            when strpos(tf.event, 'Inquiry') = 1 then 'Q1' 
+            else 'Q1' 
+        end
+    ,
+    sub_process_name = trim(
+        case 
+            when strpos(event, 'Inquiry') = 1 then 'Inquiry'
+            when strpos(event, 'General Awareness') = 1 then 
+                case 
+                    when c_method is null then 'All Contact Methods'
+                    else c_method
+                end
+            else
+                case 
+                    when strpos(trim(c_method), 'Mail') = 1 then 'Scantron'
+                    when strpos(trim(c_method), 'Email') = 1 then 'REDCap'
+                    when c_method is null then 'All Contact Methods'
+                    else c_method                
+                end
+        end
+    ),
     protocol_event_name = trim(
-        case when strpos(event, 'Q1 Mailing') = 1 then 'Q1 Mailing' 
-        else event end
-        ) || ' ' || outcome
+        case 
+            when strpos(outcome, 'Reject') = 1 then 'Q1 Questionnaire - Error' 
+            when strpos(event, 'Q1 Mailing') = 1 then 'Q1 Questionnaire'  || ' ' || trim(outcome)
+            when strpos(event, 'Inquiry') = 1 AND outcome =  'Staff-message' then  c_method || ' from Staff'
+            when strpos(event, 'Inquiry') = 1 AND outcome =  'Player-message' then  c_method || ' from Player'            
+            else trim(event)  || ' ' || trim(outcome)
+        end
+    )    
 ;
-
 
 
 /* Prepare the protocols / sub_processes / protocol_events */
@@ -61,11 +84,11 @@ select distinct ROW_NUMBER() over () "id",
   2 "sub_process_id", 
   protocol_event_name
 into temporary tracker_migration_lookup
-from tracker_full group by protocol_name, sub_process_name, protocol_event_name, outcome;
+from tracker_full group by protocol_name, sub_process_name, protocol_event_name, trim(outcome);
 
 /* Make a protocol_id number for each protocol name */
 update tracker_migration_lookup set protocol_id = 1 where protocol_name = 'Q1';
-update tracker_migration_lookup set protocol_id = 2 where protocol_name = 'R1';
+/*update tracker_migration_lookup set protocol_id = 2 where protocol_name = 'R1';*/
 update tracker_migration_lookup set protocol_id = 3 where protocol_name = 'General Awareness';
 update tracker_migration_lookup set protocol_id = 4 where protocol_name = 'Inquiry';
  
@@ -87,25 +110,15 @@ SELECT setval('protocol_events_id_seq', (SELECT MAX(id) FROM protocol_events));
 
 /* set the id  for protocol, sub process and protocol event in the temp tracker_full table */
 
-/* get the protocol_id for the calculated protocol name*/
-update tracker_full tf set protocol_id = (
-    select distinct id from protocols 
-        where protocols.name = tf.protocol_name
-);
+/* get the protocol_id for the calculated protocol name */
+
+update tracker_full tf set protocol_id = (select distinct id from protocols where protocols.name = tf.protocol_name );
 
 /* get the sub_process_id for the calculated sub process name */
-update tracker_full tf set sub_process_id = (
-    select distinct id from sub_processes 
-        where sub_processes.name = tf.sub_process_name
-        and tf.protocol_id = sub_processes.protocol_id
-);
+update tracker_full tf set sub_process_id = (select distinct id from sub_processes where sub_processes.name = tf.sub_process_name and tf.protocol_id = sub_processes.protocol_id);
 
 /* get the protocol_event_id for the calculated protocol event name */
-update tracker_full tf set protocol_event_id = (
-    select distinct id from protocol_events 
-    where protocol_events.name = tf.protocol_event_name
-    and tf.sub_process_id =  protocol_events.sub_process_id 
-);
+update tracker_full tf set protocol_event_id = ( select distinct id from protocol_events where protocol_events.name = tf.protocol_event_name and tf.sub_process_id =  protocol_events.sub_process_id);
 
 
 /* generate the event date for the new tracker - use the first one available from the following:  outcome_date, event_date, lastmod */
@@ -197,7 +210,7 @@ select case when accuracy_score is null then 'accuracy score null' when msid is 
  msid null: -1       |  6334
  msid exists: 999    |   700
 */
-
+    
 
 /* Total to reject (not including any null accuracy scores) */
 select count(*) from ml_copy where msid is null or (accuracy_score is not null and (accuracy_score = -1 or accuracy_score = 999)); 

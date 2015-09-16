@@ -38,7 +38,7 @@ module Seeds
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
       
-      create_accuracy_scores
+      create_accuracy_scores unless Rails.env.production?
     end
   end
 end
