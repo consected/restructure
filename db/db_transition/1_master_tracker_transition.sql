@@ -41,38 +41,61 @@ alter table tracker_full add column protocol_event_name varchar;
 update tracker_full tf set 
     protocol_name = 
         case 
-            when strpos(tf.event, 'General Awareness') = 1 then 'General Awareness' 
-            when strpos(tf.event, 'R1') = 1 then 'Q1' 
-            when strpos(tf.event, 'Inquiry') = 1 then 'Q1' 
+            when strpos(tf.event, 'General Awareness') = 1 then 'General Awareness'          
+            when event is NULL then '??????????????????????????????????'
             else 'Q1' 
         end
     ,
-    sub_process_name = trim(
-        case 
-            when strpos(event, 'Inquiry') = 1 then 'Inquiry'
+    sub_process_name = 
+        case             
             when strpos(event, 'General Awareness') = 1 then 
                 case 
-                    when c_method is null then 'All Contact Methods'
-                    else c_method
+                    when outcome is NULL then 'Sent'
+                    when trim(outcome) = 'Active' then 'Sent'
+                    when trim(outcome) = 'Pending' then 'Sent'
+                    when trim(outcome) = 'Opt Out' then 'Opt Out'
+                    when trim(outcome) = 'Bounced' then 'Bounced'
+                    else trim(outcome)
                 end
             else
                 case 
-                    when strpos(trim(c_method), 'Mail') = 1 then 'Scantron'
-                    when strpos(trim(c_method), 'Email') = 1 then 'REDCap'
-                    when c_method is null then 'All Contact Methods'
-                    else c_method                
+                    when trim(event) = 'Inquiry' then 'Inquiry'
+
+                    when trim(outcome) = 'Opt Out' then 'Opt Out'
+                    when trim(outcome) = 'Bounced' then 'Bounced'
+                    when trim(outcome) = 'Complete' then 'Complete'
+                    when trim(outcome) = 'Active' then 'Sent'
+                    when trim(outcome) = 'Pending' then 'Sent'
+                    when outcome IS NULL then 'Sent'
+                    else trim(outcome)
                 end
         end
-    ),
-    protocol_event_name = trim(
+    ,
+    protocol_event_name = 
         case 
-            when strpos(outcome, 'Reject') = 1 then 'Q1 Questionnaire - Error' 
-            when strpos(event, 'Q1 Mailing') = 1 then 'Q1 Questionnaire'  || ' ' || trim(outcome)
-            when strpos(event, 'Inquiry') = 1 AND outcome =  'Staff-message' then  c_method || ' from Staff'
-            when strpos(event, 'Inquiry') = 1 AND outcome =  'Player-message' then  c_method || ' from Player'            
-            else trim(event)  || ' ' || trim(outcome)
+            when strpos(event, 'General Awareness') = 1 then 
+                case 
+                    when outcome IS NULL or trim(outcome) = 'Opt Out' then NULL                    
+                    else trim(c_method)
+                end
+            else
+                case                     
+                    when trim(outcome) = 'Opt Out' then NULL
+                    when trim(event) = 'Inquiry' AND trim(outcome) =  'Staff-message' then  trim(c_method) || ' from Staff'
+                    when trim(event) = 'Inquiry' AND trim(outcome) =  'Player-message' then  trim(c_method) || ' from Player'    
+                    when trim(event) = 'Inquiry' AND trim(outcome) =  'Complete' then  'Inquiry Complete'
+                    when trim(event) = 'Inquiry' then 'Inquiry ' || trim(outcome)
+                    when trim(event) = 'Prenotification' then 'Prenotification' 
+                    when trim(event) = 'R1' then 'Reminder - Mail' 
+                    when trim(event) = 'Thank You' then 'Thank You' 
+                    when trim(c_method) = 'Scantron' OR trim(c_method) = 'Mail' then 'Scantron'
+                    when trim(c_method) = 'REDCap' OR trim(c_method) = 'Email' then 'REDCap'
+                    when outcome IS NULL OR c_method IS NULL then NULL
+                    
+                    else trim(c_method)                    
+            end
         end
-    )    
+    
 ;
 
 
