@@ -213,7 +213,7 @@
             if(options.hash.return_string){
                 if(options.hash.capitalize){
                     if(!stre || stre.length < 30){
-                        stre = Handlebars.Utils.escapeExpression(stre);
+                        //stre = Handlebars.Utils.escapeExpression(stre);
                         return _fpa.utils.capitalize(stre);
                     }else{
                         return _fpa.utils.nl2br(stre);
