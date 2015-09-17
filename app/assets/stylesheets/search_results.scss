@@ -28,7 +28,11 @@ li.list-group-item {
         text-transform: none;        
         visibility: hidden;
     }
-        
+
+    .tt-suggestion  strong{
+        visibility: visible;
+    }
+    
     small {
         /* Required to prevent a weird spacing issue with long lines in strong results */
         position: absolute;
