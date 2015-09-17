@@ -176,9 +176,10 @@ describe "tracker block", js: true do
     
     
     # Search for the player by current Protocol, subprocess and event
-    
+    dismiss_modal
+    click_link 'clear fields'    
     within '#advanced_search_master' do
-      click_link 'clear fields'
+
       fill_in "master_player_infos_attributes_0_first_name", with: @full_player_info.first_name
       fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}\t"
     
@@ -248,7 +249,8 @@ describe "tracker block", js: true do
     
     pe_new = pick_one_from pes_new
     
-    
+    dismiss_modal
+      
     within "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] form" do
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp_new.id}']").select_option
         

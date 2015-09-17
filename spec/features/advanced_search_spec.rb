@@ -37,6 +37,11 @@ describe "advanced search", js: true do
     click_link 'logout'
 
   end
+
+  def dismiss_modal
+    b = all('button[data-dismiss="modal"]')
+    b.first.click if b && b.length > 0 
+  end
   
   it "should test switching to advanced search and search a player" do
     
@@ -187,7 +192,7 @@ describe "advanced search", js: true do
     done = 0
     
     items.each do |el|
-          
+      dismiss_modal    
       el.click      if items.length > 1
       
       

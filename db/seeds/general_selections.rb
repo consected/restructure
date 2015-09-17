@@ -96,7 +96,7 @@ module Seeds
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
 
-      if Rails.env.production?
+      unless Rails.env.production?
         create_player_infos_source
 
         create_player_contacts_rank
