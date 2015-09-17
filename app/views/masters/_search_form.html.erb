@@ -250,7 +250,8 @@
 </div>
 
 <script>
-  _fpa.form_utils.setup_typeahead('input.college-input', 'colleges', "colleges");
-
+  _fpa.set_definition('colleges', function(){
+    _fpa.form_utils.setup_typeahead('input.college-input', 'colleges', "colleges");
+  });
 </script>
 

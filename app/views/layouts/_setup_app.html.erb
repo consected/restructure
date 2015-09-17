@@ -3,10 +3,10 @@
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
   _fpa.status['session'] = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
   
-<% # We have to load these cached definitions here, to avoid other form-based items that rely on them from initializing before they are ready  
+<% # We attempt to load these cached definitions here, to speed up future forms and results that rely on them.
   if current_email %>
-    _fpa.set_definition('colleges');
-    _fpa.set_definition('protocol_events');
+    //_fpa.set_definition('colleges');
+    //_fpa.set_definition('protocol_events');
 <% end %>
   
   $('html').ready(function(){

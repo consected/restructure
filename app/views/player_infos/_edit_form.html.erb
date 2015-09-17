@@ -62,8 +62,9 @@
       <% end %>
     </div>
     <script>
-      
-      _fpa.form_utils.setup_typeahead('#player_info_college', 'colleges', "colleges");
+      _fpa.set_definition('colleges', function(){
+        _fpa.form_utils.setup_typeahead('#player_info_college', 'colleges', "colleges");
+      });
     </script>
   
   </div>

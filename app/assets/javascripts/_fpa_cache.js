@@ -5,12 +5,16 @@ _fpa.cache = function(name){
     return res;    
 };
 
-_fpa.set_definition = function(name){
+_fpa.set_definition = function(name, callback){
+  
+  var from_cache = true;
   
   var get_def = function(name){
     $.ajax('/definitions/'+name).success(function(data){
         var res = data;
         _fpa.set_cache(name, res);
+        from_cache = false;
+        if(callback) callback();
     });
   
   };
@@ -19,10 +23,14 @@ _fpa.set_definition = function(name){
       var res = _fpa.cache(name);
       if(!res)
           get_def(name);
+      else
+          if(callback) callback();
   }
   catch(e){
       get_def(name);
   }
+  
+  console.log("Got cache "+name+" from  cache? " + from_cache);
     
 };
 
