@@ -5,10 +5,15 @@ class Tracker < ActiveRecord::Base
   has_many :tracker_histories, inverse_of: :tracker
 
   before_validation :prevent_protocol_change,  on: :update
+  before_validation :check_protocol_event
+  
   validates :protocol, presence: true
-  validates :protocol_event_id, presence: true, if: :event_date?  
-  validates :event_date, presence: true, if: :protocol_event_id?
-  validates :sub_process, presence: true, if: :protocol_event_id?
+
+  # Expect an event date event if a protocol_event is not registered
+#  validates :protocol_event_id, presence: true, if: :event_date?  
+#  validates :event_date, presence: true, if: :protocol_event_id?
+  validates :event_date, presence: true, if: :sub_process_id?
+  validates :sub_process, presence: true, if: :protocol_id?
   
   # _merged attribute is used to indicate if a tracker record was merged into an existing
   # record on creation
@@ -31,9 +36,17 @@ class Tracker < ActiveRecord::Base
       t.event_date = self.event_date
       t.notes = self.notes
       t._merged = true
-      t.save!
-
-      return t
+      
+      res = t.save
+      
+      if res 
+        return t
+      elsif !errors || errors.empty?
+         errors.add :protocol, "tracker could not be merged"
+      else    
+        return
+      end
+        
     end
     nil
   end
@@ -163,7 +176,11 @@ class Tracker < ActiveRecord::Base
     errors.add(:protocol, "change not allowed!") if protocol_id_changed? && self.persisted?
     
   end
+
+  def check_protocol_event
     
+    errors.add(:method, ' must be selected') if protocol_event_id.nil? && sub_process && sub_process.protocol_events.length > 0
+  end
   
   def as_json extras={}
     extras[:methods] ||= []

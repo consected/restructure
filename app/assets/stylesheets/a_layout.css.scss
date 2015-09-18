@@ -1,3 +1,12 @@
+body.development nav.navbar {
+    background: #B1DBB1;
+}
+
+body.staging nav.navbar {
+    background: #DBB1B1;
+}
+
+
 a.glyphicon {
     &, &:hover, &:active, &:link {
         text-decoration: none;

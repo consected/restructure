@@ -19,8 +19,12 @@ module ApplicationHelper
     (current_user || current_admin).email
   end
   
+  def env_name
+    (ENV['FPHS_ENV_NAME'] || 'unknown').gsub(' ','_').underscore.downcase
+  end
+  
   def body_classes
-    " class=\"#{controller_name} #{action_name}\"".html_safe
+    " class=\"#{controller_name} #{action_name} #{env_name}\"".html_safe
   end
   
   def zip_field_props init={}

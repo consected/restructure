@@ -232,20 +232,20 @@ _fpa.postprocessors = {
 
         var update_date_fields = function(field, force){
             var el = block.find('#tracker_event_date');
-            if(!_fpa.utils.is_blank(field.val())){
+            //if(!_fpa.utils.is_blank(field.val())){
                 el.parents('div').first().show();                
                 var v = (new Date()).asYMD();
                 if(force) {
                     el.val(v);
                     $('#tracker_notes').val('');
                 }
-            }else{
-                el.parents('div').first().hide();
-                el.val(null);
-            }
+            //}else{
+            //    el.parents('div').first().hide();
+            //   el.val(null);
+            //}
         };
 
-        block.find('#tracker_protocol_event_id').change(function(){
+        block.find('#tracker_protocol_event_id, #tracker_sub_process_id').change(function(){
             update_date_fields($(this), true);
         }).each(function(){
             update_date_fields($(this));

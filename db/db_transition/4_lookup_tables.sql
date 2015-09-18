@@ -29,11 +29,11 @@ insert into ml_app.general_selections
 (item_type, name, value, created_at, updated_at) values
 ('addresses_rank', 'primary', '10', now(), now()),
 ('addresses_rank', 'secondary', '5', now(), now()),
-('addresses_rank', 'inactive', '0', now(), now()),
+('addresses_rank', 'do not use', '0', now(), now()),
 ('addresses_rank', 'bad contact', '-1', now(), now()),
 ('player_contacts_rank', 'primary', '10', now(), now()),
 ('player_contacts_rank', 'secondary', '5', now(), now()),
-('player_contacts_rank', 'inactive', '0', now(), now()),
+('player_contacts_rank', 'do not use', '0', now(), now()),
 ('player_contacts_rank', 'bad contact', '-1', now(), now());
 
 

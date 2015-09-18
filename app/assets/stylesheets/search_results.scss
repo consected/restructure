@@ -226,7 +226,9 @@ td .record-meta {
     table-layout: fixed;
 }*/
 
-tbody[data-tracker-protocol="alerts"] td, tr[data-tracker-protocol="alerts"] td {
+tbody[data-tracker-protocol="alerts"] td, tr[data-tracker-protocol="alerts"] td,
+tbody[data-tracker-protocol="study"] td, tr[data-tracker-protocol="study"] td
+{
     background-color: #F4D9c0;
 }
 

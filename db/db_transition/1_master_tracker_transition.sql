@@ -42,18 +42,19 @@ update tracker_full tf set
     protocol_name = 
         case 
             when strpos(tf.event, 'General Awareness') = 1 then 'General Awareness'          
-            when event is NULL then '??????????????????????????????????'
+            when event is NULL then 'Study'
             else 'Q1' 
         end
     ,
     sub_process_name = 
-        case             
+        case
+            when event is NULL then 'Info'
             when strpos(event, 'General Awareness') = 1 then 
                 case 
                     when outcome is NULL then 'Sent'
                     when trim(outcome) = 'Active' then 'Sent'
                     when trim(outcome) = 'Pending' then 'Sent'
-                    when trim(outcome) = 'Opt Out' then 'Opt Out'
+                    when trim(outcome) = 'Opt Out' then 'Unsubscribe'
                     when trim(outcome) = 'Bounced' then 'Bounced'
                     else trim(outcome)
                 end
@@ -73,6 +74,7 @@ update tracker_full tf set
     ,
     protocol_event_name = 
         case 
+            when event is NULL then NULL
             when strpos(event, 'General Awareness') = 1 then 
                 case 
                     when outcome IS NULL or trim(outcome) = 'Opt Out' then NULL                    
@@ -110,10 +112,10 @@ into temporary tracker_migration_lookup
 from tracker_full group by protocol_name, sub_process_name, protocol_event_name, trim(outcome);
 
 /* Make a protocol_id number for each protocol name */
-update tracker_migration_lookup set protocol_id = 1 where protocol_name = 'Q1';
+update tracker_migration_lookup set protocol_id = 2 where protocol_name = 'Q1';
 /*update tracker_migration_lookup set protocol_id = 2 where protocol_name = 'R1';*/
 update tracker_migration_lookup set protocol_id = 3 where protocol_name = 'General Awareness';
-update tracker_migration_lookup set protocol_id = 4 where protocol_name = 'Inquiry';
+/* update tracker_migration_lookup set protocol_id = 4 where protocol_name = 'Inquiry'; */
  
 /* create the remaining ids for sub_process and process_event */
 select protocol_name, protocol_id, sub_process_name, first_value(id) over(partition by protocol_id, sub_process_name) "sub_process_id", protocol_event_name, id "event_id" 

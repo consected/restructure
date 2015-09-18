@@ -3,7 +3,7 @@ module TrackerSupport
   
   def put_valid_attribs
     
-    {event_date: nil, protocol_event_id: nil}
+    {notes: nil}
   end
   
   
@@ -25,16 +25,16 @@ module TrackerSupport
           sp1 = sp.id
            
           # remove some events and sub_processes
-          if e.even?
-            ev = nil
-            evn = nil
-            evid = nil
-            event_date = nil
-            if s.even?
-              sp1 = nil
-                                         
-            end
-          end
+#          if e.even?
+#            ev = nil
+#            evn = nil
+#            evid = nil
+#            event_date = nil
+#            if s.even?
+#              sp1 = nil
+#                                         
+#            end
+#          end
           
           res << {
             protocol_id: protocol.id,
