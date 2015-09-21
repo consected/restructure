@@ -8,6 +8,7 @@ drop table tracker_migration_lookup;
 drop table tracker_migration_lookup_ids;
 drop table tracker_latest;
 drop table tracker_hist_only;
+drop table p_list;
 
 delete from ml_app.tracker_history;
 delete from ml_app.trackers;
@@ -125,7 +126,8 @@ into temp tracker_migration_lookup_ids from tracker_migration_lookup order by pr
 /* make the inserts into the lookup tables */
 insert into protocols (id, name, created_at, updated_at) select distinct protocol_id, protocol_name, now(), now() from tracker_migration_lookup_ids;
 insert into sub_processes(id, name, created_at, updated_at, protocol_id) select distinct sub_process_id, sub_process_name, now(), now(), protocol_id from tracker_migration_lookup_ids group by sub_process_name, sub_process_id, protocol_id;
-insert into protocol_events(id, name, created_at, updated_at, sub_process_id) select  event_id, protocol_event_name, now(), now(), sub_process_id from tracker_migration_lookup_ids ;
+/* take care to handle the null event names and dups in the lookup table */
+insert into protocol_events(id, name, created_at, updated_at, sub_process_id) select  min(event_id), protocol_event_name, now(), now(), sub_process_id from tracker_migration_lookup_ids where protocol_event_name is not null group by protocol_event_name, sub_process_id;
 
 /* force the sequences to update correctly */
 SELECT setval('protocols_id_seq', (SELECT MAX(id) FROM protocols));
@@ -142,8 +144,13 @@ update tracker_full tf set protocol_id = (select distinct id from protocols wher
 /* get the sub_process_id for the calculated sub process name */
 update tracker_full tf set sub_process_id = (select distinct id from sub_processes where sub_processes.name = tf.sub_process_name and tf.protocol_id = sub_processes.protocol_id);
 
+/* Create a unique list of protocol_events */
+select distinct min(pe.id) "protocol_event_id", pe.name "protocol_event_name", pe.sub_process_id  into temp p_list from sub_processes sp inner join protocol_events pe on sp.id = pe.sub_process_id  group by protocol_event_name, sub_process_id;
+
+
 /* get the protocol_event_id for the calculated protocol event name */
-update tracker_full tf set protocol_event_id = ( select distinct id from protocol_events where protocol_events.name = tf.protocol_event_name and tf.sub_process_id =  protocol_events.sub_process_id);
+/*update tracker_full tf set protocol_event_id = ( select distinct id from protocol_events where protocol_events.name = tf.protocol_event_name and tf.sub_process_id =  protocol_events.sub_process_id and tf.protocol_event_name is not null);*/
+update tracker_full tf set protocol_event_id = ( select distinct protocol_event_id from p_list where ((protocol_event_name is null AND tf.protocol_event_name is NULL) OR protocol_event_name = tf.protocol_event_name) and tf.sub_process_id =  p_list.sub_process_id);
 
 
 /* generate the event date for the new tracker - use the first one available from the following:  outcome_date, event_date, lastmod */
@@ -157,9 +164,9 @@ select distinct on (msid, protocol_id) id, msid, new_event_date into temp tracke
 
 /* now insert the latest records into tracker */
 insert into ml_app.trackers 
-(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id)
+(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, notes)
 select 
-masters.id, tf.protocol_id, tf.event_date, now(), now(), tf.sub_process_id, tf.protocol_event_id
+masters.id, tf.protocol_id, tf.new_event_date, now(), now(), tf.sub_process_id, tf.protocol_event_id, tf.notes
 from tracker_full tf
 inner join tracker_latest on tracker_latest.id = tf.id 
 inner join masters on masters.msid = tracker_latest.msid;
@@ -172,8 +179,8 @@ delete from ml_app.tracker_history;
  * We create a temp table to allow comparison of results in the checks below
  */
 
-select masters.id "master_id", tf.protocol_id "protocol_id", tf.event_date "event_date", now() "created_at", now() "updated_at", 
-tf.sub_process_id "sub_process_id", tf.protocol_event_id "protocol_event_id", trackers.id "tracker_id", trackid
+select masters.id "master_id", tf.protocol_id "protocol_id", tf.new_event_date "event_date", now() "created_at", now() "updated_at", 
+tf.sub_process_id "sub_process_id", tf.protocol_event_id "protocol_event_id", trackers.id "tracker_id", trackid, tf.notes
 into temp tracker_hist_only
 from tracker_full tf 
 inner join masters on masters.msid = tf.msid
@@ -186,8 +193,8 @@ where not exists ( select id from tracker_latest tl where tl.id = tf.id);
    based on the order they were entered originally.
 */
 insert into ml_app.tracker_history 
-(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id)
-select master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id
+(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id, notes)
+select master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id, notes
 from tracker_hist_only order by event_date desc, trackid;
 
 /* Finally, force the latest tracker items back into the tracker_history */
@@ -199,29 +206,29 @@ update trackers set updated_at = now();
 /* Initial checks on master list records */
 select count(*) from ml_copy;
 /*-------
- 34902
+ 23806
 */
 
 select count(distinct msid) from ml_copy;
 /*-------
- 23189
+ 23771
 */
 
 /* The number of master records we expect */
 select count(*) from (select distinct msid, pro_id from ml_copy where msid is not null and (accuracy_score is null or accuracy_score <> -1 and accuracy_score <> 999)) as t;
 /*-------
- 21624
+ 16188
 */
 
 /* The actual number of masters records */
 select count(*) from masters;
 /*-------
- 21624
+ 23806
 */
 
 select count(distinct msid) from masters;
 /*-------
- 16935
+ 23771
 */
 
 
@@ -231,22 +238,22 @@ select case when accuracy_score is null then 'accuracy score null' when msid is 
         rule         | count 
 ---------------------+-------
  accuracy score null |     1
- msid exists: -1     |  6244
- msid null: -1       |  6334
- msid exists: 999    |   700
+ msid exists: -1     |  7606
+ msid exists: 999    |    12
+
 */
     
 
 /* Total to reject (not including any null accuracy scores) */
 select count(*) from ml_copy where msid is null or (accuracy_score is not null and (accuracy_score = -1 or accuracy_score = 999)); 
 /*-------
- 13278
+ 7618
 */
 
 /* which means that masters should eventually contain */
 select count(*) from ml_copy where not(msid is null or (accuracy_score is not null and (accuracy_score = -1 or accuracy_score = 999))); 
 /*-------
- 21624
+ 16188
 */
 
 /* masters represents all master list records from the previous query - the numbers should match */
@@ -272,24 +279,24 @@ select (select count(*) from masters) + (select count(*) from ml_copy where msid
 /* check trackers and tracker_latest have corresponding numbers */
 select count(*) from tracker_latest;
 /*-------
- 29360
+ 22384
 */
 
 select count(*) from trackers;
 /*-------
- 29367
+ 22387
 */
 
 /* They don't match... because of a strange inner join effect ... This is what is happening...*/
 /* the original query that populated tracker_latest returns the expected number of rows */
 select count(*) from (select distinct on (msid, protocol_id) id, msid, new_event_date from tracker_full order by msid, protocol_id, event_date desc, id) as t;
 /*-------
- 29360
+ 22384
 */
 /* But when joined with the masters table to allow association with a masters.id, the count jumps by 7 */
 select count(*) from tracker_latest inner join masters on masters.msid = tracker_latest.msid;
 /*-------
- 29367
+ 29387
 */
 
 
@@ -298,23 +305,15 @@ select distinct tlo.id, tlo.msid, mo.pro_id from tracker_latest tlo  inner join 
 /*
   id   |  msid  | pro_id 
 -------+--------+--------
- 57738 | 108973 |    267
- 57738 | 108973 |    268
- 48315 | 114535 |   9267
- 48315 | 114535 |   9268
- 57767 | 119562 |   6662
- 57767 | 119562 |   6663
- 47352 | 122502 |   9659
- 47352 | 122502 |   9660
- 47352 | 122502 |   9661
- 47352 | 122502 |   9665
- 47352 | 122502 |   9753
-(11 rows)
+ 61285 | 108973 |    268
+ 61677 | 110326 |   7663
+ 61944 | 119562 |   6662
+
 */
 
-/* Here we have 11 rows that have an msid that appears duplicated after the join. 4 msids are affected. If the MSIDs were unique 
+/* Here we have 3 rows that have an msid that appears duplicated after the join. 3 msids are affected. If the MSIDs were unique 
    we would expect one record for each of the 4 msids to have made it in to trackers.
-   The remainder are the 7 additional records that we see after the join.
+   The remainder are the 0 additional records that we see after the join.
 */
 
 
@@ -355,9 +354,9 @@ select (select count(*) from ml_app.trackers) "trackers", '+',
    We know that 7 additional records appear in trackers than due to duplicate msids, leaving just one unaccounted for.
 
 */
-select count(*) + 7 from tracker_full;
+select count(*)  from tracker_full;
 /*-------
- 57795
+ 62167
 */
 
 /* we also have a mismatch between the number of actual records pushed directly into ml_app.tracker_history and the 
@@ -368,7 +367,7 @@ select count(*) + 7 from tracker_full;
 select (select count(*) from tracker_hist_only) - (select count(*) from tracker_hist_only tho inner join unique_masters on unique_masters.id = tho.master_id) "diff";
 /* diff 
 ------
-    1
+    4
 */
 
 
@@ -379,11 +378,13 @@ select (select count(*) from tracker_hist_only) - (select count(*) from tracker_
 
 */
 select (select count(*) from ml_app.tracker_history) - (select count(*) from tracker_full) "result";
-
+/*
+7
+*/
 
 /* Check that there are no fields we have not transferred. The result should be 0 */
 select count(*) from tracker where emid is not null or addrid is not null or resent is not null or ty_method is not null or ty_sent is not null;
-
+/* 0 */
 
 
 /* check the results in both directions */

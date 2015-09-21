@@ -29,7 +29,7 @@ module Seeds
       values = [
         {name: 'primary', value: 10},
         {name: 'secondary', value: 5},
-        {name: 'inactive', value: 0},
+        {name: 'do not use', value: 0},
         {name: 'bad contact', value: -1}
       ]
       
@@ -69,7 +69,7 @@ module Seeds
       values = [
         {name: 'primary', value: 10},
         {name: 'secondary', value: 5},
-        {name: 'inactive', value: 0},
+        {name: 'do not use', value: 0},
         {name: 'bad contact', value: -1}
       ]
       
