@@ -175,9 +175,11 @@
     // Display date in local format, without adjusting the timezone and giving the appearance of changing the day
     Handlebars.registerHelper('local_date', function(date_string, unknown, options) {
         if(date_string === null || date_string === '' ) return unknown;
-        var startTime = new Date(Date.parse(date_string + 'T00:00:00Z'));
+        var startTime = date_string; //
+        var testTime = new Date(Date.parse(date_string + 'T00:00:00Z'));
+        
 
-        if(!startTime || startTime == 'Invalid Date'){
+        if(!testTime || testTime == 'Invalid Date'){
             if(options.hash.return_string)
                 return date_string;
             else
@@ -185,8 +187,13 @@
         }
             
 
-        startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-        return startTime.toLocaleDateString();
+       // startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
+        //return startTime.toLocaleDateString();
+        
+        // Using information from https://bugzilla.mozilla.org/show_bug.cgi?id=1139167 to prevent occasional day difference issues
+        return new Date(startTime).toLocaleDateString(undefined, {timeZone: "UTC"});
+        
+        
     });
 
     Handlebars.registerHelper('underscore', function(stre, options) {
@@ -200,7 +207,7 @@
         var asTimestamp;
         if(stre && stre.length >= 8){
             if (!stre.match(/^\d\d\d\d-\d\d-\d\d.*/)){
-            }else if(stre.indexOf('t') && stre.indexOf('z')){
+            }else if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
                 startTime = new Date(Date.parse(stre ));
                 asTimestamp = true;
             }
@@ -226,9 +233,14 @@
                 return null;
             }
         }
+        if(asTimestamp){
+            startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
+            return startTime.toLocaleDateString();
+        } else {
+            return new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
+        }
         
-        startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-        return startTime.toLocaleDateString();
+        return stre;
     });
 
 
