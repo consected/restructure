@@ -1,13 +1,12 @@
 set SEARCH_PATH=ml_app;
 
 
-update addresses set street2 = null where street2 ~* 'null';
 /* UPDATE 511
 */
 
 
 update addresses set rank = -10 where rank is null;
-
+update addresses set rank = 10 where lower(source) = 'cis';
 
 /* Query to handle the following: 
   a1: selects just the addresses belonging to the same master record with the highest rank

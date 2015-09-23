@@ -18,7 +18,9 @@ insert into user_translation (email, orig_username) values
 ('phil_ayres@hms.harvard.edu', '');
 
 
+/* only if the data is not already there... */
 insert into ml_app.users (email, created_at, updated_at) 
   select email, now(), now() from user_translation;
+
 
 update user_translation ut set user_id = (select id from ml_app.users u where u.email = ut.email);

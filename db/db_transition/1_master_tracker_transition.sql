@@ -38,6 +38,7 @@ alter table tracker_full add column protocol_event_id integer;
 alter table tracker_full add column protocol_name varchar;
 alter table tracker_full add column sub_process_name varchar;
 alter table tracker_full add column protocol_event_name varchar;
+alter table tracker_full add column user_id integer;
 
 update tracker_full tf set 
     protocol_name = 
@@ -101,6 +102,9 @@ update tracker_full tf set
     
 ;
 
+/* set the new user id based on the changedby user info */
+update tracker_full tf set user_id = (select user_id from user_translation ut where tf.changedby = ut.orig_username);
+
 
 /* Prepare the protocols / sub_processes / protocol_events */
 select distinct ROW_NUMBER() over () "id", 
@@ -162,11 +166,17 @@ update tracker_full set new_event_date = case when outcome_date is not null then
 select distinct on (msid, protocol_id) id, msid, new_event_date into temp tracker_latest from tracker_full order by msid, protocol_id, new_event_date desc, id;
 
 
-/* now insert the latest records into tracker */
+/* now insert the latest records into tracker 
+    assume that the creation and update date for the record is the lastmod date if set, otherwise use the event date
+*/
+
 insert into ml_app.trackers 
-(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, notes)
+(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, notes, user_id)
 select 
-masters.id, tf.protocol_id, tf.new_event_date, now(), now(), tf.sub_process_id, tf.protocol_event_id, tf.notes
+    masters.id, tf.protocol_id, tf.new_event_date, 
+    case when lastmod is null then event_date else lastmod end "created_at", 
+    case when lastmod is null then event_date else lastmod end "updated_at", 
+    tf.sub_process_id, tf.protocol_event_id, tf.notes, tf.user_id
 from tracker_full tf
 inner join tracker_latest on tracker_latest.id = tf.id 
 inner join masters on masters.msid = tracker_latest.msid;
@@ -179,8 +189,11 @@ delete from ml_app.tracker_history;
  * We create a temp table to allow comparison of results in the checks below
  */
 
-select masters.id "master_id", tf.protocol_id "protocol_id", tf.new_event_date "event_date", now() "created_at", now() "updated_at", 
-tf.sub_process_id "sub_process_id", tf.protocol_event_id "protocol_event_id", trackers.id "tracker_id", trackid, tf.notes
+select 
+    masters.id "master_id", tf.protocol_id "protocol_id", tf.new_event_date "event_date", 
+    case when lastmod is null then event_date else lastmod end "created_at", 
+    case when lastmod is null then event_date else lastmod end "updated_at", 
+    tf.sub_process_id "sub_process_id", tf.protocol_event_id "protocol_event_id", trackers.id "tracker_id", trackid, tf.notes, tf.user_id
 into temp tracker_hist_only
 from tracker_full tf 
 inner join masters on masters.msid = tf.msid
@@ -193,8 +206,8 @@ where not exists ( select id from tracker_latest tl where tl.id = tf.id);
    based on the order they were entered originally.
 */
 insert into ml_app.tracker_history 
-(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id, notes)
-select master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id, notes
+(master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id, notes, user_id)
+select master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id, notes, user_id
 from tracker_hist_only order by event_date desc, trackid;
 
 /* Finally, force the latest tracker items back into the tracker_history */
