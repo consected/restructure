@@ -44,16 +44,16 @@
             <%= f.text_field :postal_code %>
         </li>        
         <li class="list-group-item address-source">
-            <%= f.label :source %>
-            <%= f.select :source, general_selection(:addresses_source) %>
+            <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(:addresses_source), title: 'original sources of data' %>
+            <%= f.select :source, general_selection(:addresses_source, value: object_instance.source) %>
         </li>
         <li class="list-group-item address-rec_type">
             <%= f.label :rec_type %>
-            <%= f.select :rec_type, general_selection(:addresses_type) %>
+            <%= f.select :rec_type, general_selection(:addresses_type, value: object_instance.rec_type) %>
         </li>                
         <li class="list-group-item address-rank">
             <%= f.label :rank %>
-            <%= f.select :rank, general_selection(:addresses_rank, present: :hyphenate_name_val, order: :value_number_desc) %>
+            <%= f.select :rank, general_selection(:addresses_rank, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank) %>
         </li>
         <li class="list-group-item">
           <%= f.submit class: "btn btn-primary" %>  
@@ -61,5 +61,7 @@
       </ul>
       <% end %>
     </div>
+    <%= render partial: 'general_selections/definitions_block', locals: {item_type: :addresses_source, value: object_instance.source} %>
+
   </div>
 </div>

@@ -4,7 +4,9 @@ class GeneralSelection < ActiveRecord::Base
   
   include AdminHandler
   include SelectorCache
-  ItemTypes = [:player_infos_source, :player_contacts_type, :player_contacts_source, :addresses_type, :addresses_source, :addresses_rank, :player_contacts_rank, :tracker_contact_method ]
+  ItemTypes = [:player_infos_source, :player_contacts_type, :player_contacts_source, :addresses_type, :addresses_source, :addresses_rank, :player_contacts_rank]
+  
+  default_scope {order  item_type: :asc, disabled: :asc, position: :asc}
   
   before_validation :prevent_value_change,  on: :update
   validates :name, presence: true

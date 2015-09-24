@@ -247,9 +247,22 @@ _fpa.form_utils = {
             var icon = $(this).attr('data-add-icon');
             var title = $(this).attr('title');
             $(this).attr('title', null);
-            var h = $('<a data-toggle="popover" data-content="'+title+'" class="add-icon glyphicon glyphicon-'+icon+'"></a>');
-            $(this).append(h);
-            h.popover({trigger: 'hover click', placement: 'bottom'});
+            
+            var action= $(this).attr('data-show-modal');
+            
+            if(action){
+                var h = $('<a class="add-icon glyphicon glyphicon-'+icon+'" href="#" data-show-modal="'+action+'"></a>');
+                $(this).append(h);
+                h.click(function(ev){
+                    ev.preventDefault();
+                    var id = $(this).attr('data-show-modal');
+                    _fpa.show_modal($(id).html(), title);
+                });                
+            }else{
+                var h = $('<a data-toggle="popover" data-content="'+title+'" class="add-icon glyphicon glyphicon-'+icon+'"></a>');
+                $(this).append(h);
+                h.popover({trigger: 'hover click', placement: 'bottom'});
+            }
         }).addClass('attached-add-icon');
         
         

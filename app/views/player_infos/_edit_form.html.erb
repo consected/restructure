@@ -44,8 +44,8 @@
             <%= f.select :rank, player_info_rank_array_pair %>
         </li>
         <li class="list-group-item player-info-source">
-            <%= f.label :source %>
-            <%= f.select :source, general_selection(:player_infos_source) %>
+            <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(:player_infos_source), title: 'original sources of data' %>
+            <%= f.select :source, general_selection(:player_infos_source, value: object_instance.source) %>
         </li>
         <li class="list-group-item player-info-college">
           <%= f.label :college %>
@@ -61,6 +61,7 @@
       </ul>
       <% end %>
     </div>
+    <%= render partial: 'general_selections/definitions_block', locals: {item_type: :player_infos_source, value: object_instance.source} %>
     <script>
       _fpa.set_definition('colleges', function(){
         _fpa.form_utils.setup_typeahead('#player_info_college', 'colleges', "colleges");

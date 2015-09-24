@@ -11,7 +11,7 @@ class Settings
   
   
   UserTimeout = 30.minutes.freeze
-  AdminTimeout = 5.minutes.freeze
+  AdminTimeout = 15.minutes.freeze
   
   ScantronIdPattern  = '\\d{0,6}'
   ScantronIdRange = 1..999999

@@ -10,7 +10,9 @@ module AdminControllerHandler
   end
 
   def index    
-    set_objects_instance primary_model.order(default_index_order)
+    pm = primary_model    
+    pm = pm.where filter_params if filter_params
+    set_objects_instance pm.order(default_index_order)
     
     respond_to do |format|      
       format.html { render :index }
@@ -99,9 +101,14 @@ module AdminControllerHandler
       res
     end
 
-    def index_path
+    def index_path opt={}
       redir = {action: :index}
       redir.merge! @parent_param if @parent_param
+      redir.merge! opt
+      
+      f = filter_params
+      redir[:filter] = f if f
+      
       url_for(redir)
     end  
       

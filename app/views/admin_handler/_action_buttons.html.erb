@@ -15,5 +15,5 @@
   <%end%>
 
   
-  <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new), remote: true, class: "btn btn-primary" if action_name == 'index' rescue nil%>
+  <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: params[:filter]), remote: true, class: "btn btn-primary" if action_name == 'index' rescue nil%>
 <%end%>

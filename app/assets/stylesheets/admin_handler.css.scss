@@ -7,6 +7,10 @@ table.admin-list tbody {
     tr.disabled-result, tr.disabled-result:hover  {
         background-color: #eee;
     }
+    
+    td pre {
+        max-width: 70%;
+    }
 }
 
 .field_with_errors {

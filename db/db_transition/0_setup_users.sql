@@ -1,7 +1,6 @@
-/* This is only a temp table at the moment. Update the script to make it permanent in the appropriate schema as require */
+set SEARCH_PATH=ml_app,ml_work;
 
-set SEARCH_PATH=ml_app;
-
+/* This is only a temp table at the moment. Update the script to make it permanent in the appropriate schema as required */
 create temp table user_translation (email varchar, orig_username varchar, user_id integer);
 
 insert into user_translation (email, orig_username) values

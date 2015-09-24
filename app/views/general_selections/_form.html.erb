@@ -13,14 +13,43 @@
   </div>
   <div class="form-group">
     <%= f.label :item_type %>
-    <%= f.select :item_type, GeneralSelection::ItemTypes, {}, disabled: !!object_instance.id  %>
+    <% select_item_type = {}
+       select_item_type[:selected] = params[:filter][:item_type] unless object_instance.id || !params[:filter] %>
+    <%= f.select :item_type, GeneralSelection::ItemTypes, select_item_type, disabled: !!object_instance.id  %>
   </div>
   <div class="form-group">    
     <%= f.check_box :disabled %>
     <%= f.label :disable %>
   </div>
-
+  <div class="form-group">    
+    <%= f.check_box :create_with %>
+    <%= f.label :create_with %>
+  </div>
+  <div class="form-group">    
+    <%= f.check_box :lock %>
+    <%= f.label :lock_value %>
+  </div>
+  <div class="form-group">    
+    <%= f.check_box :edit_if_set%>
+    <%= f.label :edit_if_set %>
+  </div>      
+  <div class="form-group">    
+    <%= f.check_box :edit_always %>
+    <%= f.label :edit_always %>
+  </div>      
   <div class="form-group">
+    <%= f.label :position %>
+    <%= f.number_field :position %>
+  </div>
+  <div class="">
+    <%= f.label :description %>
+    <%= f.text_area :description, style: "width:50%; height:70px;" %>
+  </div>      
+      
+  <div class="form-group">
+    
+    <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
+    
     <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
   </div>
 <% end %>
