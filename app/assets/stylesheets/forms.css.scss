@@ -137,6 +137,14 @@ form.search_master label{
         white-space: normal;
 }
 
+form.search_master label.nowrap{
+    white-space: nowrap;
+}
+a.add-icon{
+    z-index: 5;    
+    position: relative;
+}
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;

@@ -164,22 +164,22 @@
         <%= f.select :protocol_id, protocol_array_without_updates, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_sub_process_id, #master_not_trackers_attributes_0_sub_process_id, #master_tracker_histories_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id", class: 'form-control'}%>
       </div>
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%= f.label :current_process %>
+          <%= f.label 'has current status + method', class: 'nowrap', 'data-add-icon' => 'info-sign', title: 'The status + method is the current tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>  
       <div class="form-group col-sm-3 tracker-event tracker-search-field">
-          <%= f.label :current_event %>
+          <%= f.label 'has method', style: "visibility: hidden;"%> 
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>        
 
     <% end %>
     <%= f.fields_for :tracker_histories, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%= f.label :any_process,  'data-add-icon' => 'info-sign', title: 'any current or previous process' %>
+          <%= f.label 'current or previous status + method', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method appears at any time in the tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right">
-          <%= f.label :any_event, 'data-add-icon' => 'info-sign', title: 'any current or previous event' %>
+          <%= f.label 'had method', style: "visibility: hidden;"%>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>
@@ -206,28 +206,26 @@
     
     </div>
     <div class="row">
-        <div class="form-group col-sm-3 tracker-not-info tracker-search-field">
-            
-            <p class="text-right" data-add-icon="info-sign" title="specify current or previous process AND corresponding event">and&nbsp;not:</p>
+        <div class="form-group col-sm-3 tracker-not-info tracker-search-field">                        
         </div>
     <%= f.fields_for :not_trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%#= f.label :current_sub_process %>
+          <%= f.label 'Not current status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method is not the current tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_trackers_attributes_0_protocol_event_id", "data-only-for" => "#master_not_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field tsf-current-event-not">
-          <%#= f.label :current_event %>
+          <%= f.label 'not method', style: "visibility: hidden;"%>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
   
     <% end %>        
     <%= f.fields_for :not_tracker_histories, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
-          <%#= f.label :any_sub_process %>
+          <%= f.label 'Never had status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method never appeared in the tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_tracker_histories_attributes_0_protocol_event_id", "data-only-for" => "#master_not_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
       </div>  
-      <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right tsf-any-event-not">
-          <%#= f.label :any_event %>
+      <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right tsf-any-event-not">          
+          <%= f.label 'never method', style: "visibility: hidden;"%>
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>    
