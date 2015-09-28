@@ -18,9 +18,6 @@ delete from ml_app.protocols;
 /*delete from masters;*/
 
 
-/* Create the master list of msids - note this picks only the distinct msid entries,*/
-/*insert into masters (msid, pro_id) select distinct msid, pro_id from ml_copy where msid is not null and (accuracy_score is null or accuracy_score <> -1 and accuracy_score <> 999);
-*/
 
 
 /* Generate a full set of tracker records */
