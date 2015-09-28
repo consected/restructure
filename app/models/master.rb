@@ -1,6 +1,5 @@
 class Master < ActiveRecord::Base
 
-  ResultsLimit = 100
 
   MasterRank  = "master_rank desc nulls last, masters.id desc nulls last".freeze
   PlayerInfoRankOrderClause = "case when rank is null then -1000 when rank > #{PlayerInfo::BestAccuracyScore} then rank * -1 else rank end desc nulls last".freeze
@@ -93,12 +92,12 @@ class Master < ActiveRecord::Base
       data: {value: [:starts_with, :strip_non_alpha_numeric], condition: "regexp_replace(player_contacts.data, '\\W+', '', 'g') LIKE ?"}
     },
     not_trackers: {
-      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id = ? AND t_inner.master_id = masters.id)", joins: NotTrackerJoin},
-      sub_process_id: {value: :do_nothing}      
+      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND t_inner.sub_process_id = :not_trackers_sub_process_id  AND t_inner.master_id = masters.id)", joins: NotTrackerJoin},
+      sub_process_id: {value: :is, condition: "TRUE", joins: NotTrackerJoin}    
     },
     not_tracker_histories: {
-      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id = ? AND th_inner.master_id = masters.id)", joins: NotTrackerHistoryJoin},
-      sub_process_id: {value: :do_nothing}
+      protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND th_inner.sub_process_id = :not_tracker_histories_sub_process_id AND th_inner.master_id = masters.id)", joins: NotTrackerHistoryJoin},
+      sub_process_id: {value: :is, condition: "TRUE", joins: NotTrackerHistoryJoin}
     },
     general_infos: {
       first_name: {value: :starts_with, condition: "(player_infos.first_name LIKE ? OR pro_infos.first_name LIKE ? OR player_infos.nick_name LIKE ? OR pro_infos.nick_name LIKE ?)", joins: SimplePlayerJoin},
@@ -118,6 +117,15 @@ class Master < ActiveRecord::Base
   NoDefaultJoinFor = [:general_infos, :not_trackers, :not_tracker_histories ]
   
   attr_accessor :force_order
+  
+  
+  def self.results_limit
+    r = nil
+    e = ENV['FPHS_RESULT_LIMIT']     
+    r = e.to_i if e
+    r = nil if r == 0
+    r    
+  end
   
   # Build a Master search using the Master and nested attributes passed in
   # Any attributes that are nil will be rejected and will not appear in the query
@@ -245,9 +253,13 @@ class Master < ActiveRecord::Base
     pi.accuracy_rank
   end
   
-  def self.default_sort res
+  def self.default_sort res    
     # Note that this sorts first, based on the Master rank, which is calculated through a trigger from player info accuracy
-    res = res.order(MasterRank).take(ResultsLimit) 
+    if results_limit
+      res = res.order(MasterRank).take(results_limit) 
+    else
+      res = res.order(MasterRank).all #
+    end
     logger.info "sorted to #{res.map {|a| [a.id, a.master_rank]}  } "
     res        
   end
@@ -269,13 +281,16 @@ class Master < ActiveRecord::Base
     
     
     cond_op = altdef[:value]
-    return {} if cond_op == :do_nothing
+    
+    if cond_op == :do_nothing || cond_op == :is_not_null && (cval.blank? || cval == '(null)')      
+      return {} 
+    end
     
     cond_op = [cond_op] unless cond_op.is_a? Array
     
     refname = "#{table_name}_#{ckey}"
     
-    
+        
     if altdef[:condition]
       alt  = altdef[:condition]
     elsif cond_op.include?(:starts_with) || cond_op.include?(:contains)
@@ -283,7 +298,7 @@ class Master < ActiveRecord::Base
     elsif cond_op.include?(:is_not)
       alt = "#{table_name}.#{ckey} <> ?"
     else
-      alt = "#{table_name}.#{ckey} = ?"
+      alt = "#{table_name}.#{ckey} = ?"      
     end
     
     if altdef[:value].is_a? Array
@@ -297,6 +312,15 @@ class Master < ActiveRecord::Base
         end
       end
     end
+    
+    cval = nil if cval == '(null)' 
+    
+    if cval.nil?
+      eoin = 'IS'
+    else
+      eoin = '='
+    end    
+    alt = alt.gsub('EQUALS_OR_IS_NULL', eoin )
     
     alt = alt.gsub('?', ":#{refname}")
     

@@ -215,7 +215,7 @@
       </div>
       <div class="form-group col-sm-3 tracker-event tracker-search-field tsf-current-event-not">
           <%= f.label 'not method', style: "visibility: hidden;"%>
-          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class(add_empty: '(search all)'), {include_blank: "-select-"}, class: 'form-control' %>
       </div>
   
     <% end %>        
@@ -226,7 +226,7 @@
       </div>  
       <div class="form-group col-sm-3 tracker-event tracker-search-field tracker-right tsf-any-event-not">          
           <%= f.label 'never method', style: "visibility: hidden;"%>
-          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
+          <%= f.select :protocol_event_id, protocol_events_array_with_class(add_empty: '(search all)'), {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>    
         

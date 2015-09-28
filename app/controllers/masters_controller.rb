@@ -2,7 +2,7 @@ class MastersController < ApplicationController
   before_action :authenticate_user!
   
   
-  ResultsLimit = Master::ResultsLimit
+  ResultsLimit = Master.results_limit
   
   def index
     
@@ -36,7 +36,7 @@ class MastersController < ApplicationController
         #If the msid is an array of items then return the results in the order of the list
         if msid.is_a? Array
           i = 0
-          @masters = @masters.take(ResultsLimit)
+          #@masters = @masters.take(ResultsLimit)
           msid.each do |d|
             m1 = @masters.select {|n| n.msid.to_s == d}.first
             m1.force_order = i if m1
@@ -45,6 +45,10 @@ class MastersController < ApplicationController
 
           @masters = @masters.sort {|m,n| m.force_order <=> n.force_order}              
         end
+        
+        original_length = @masters.length
+        @masters = @masters[0..99]
+        
         m = {
           masters: @masters.as_json(include: {
             player_infos: {order: Master::PlayerInfoRankOrderClause, 
@@ -76,7 +80,8 @@ class MastersController < ApplicationController
           }) 
         }
 
-        m[:count] = @masters.length
+        m[:count] = original_length
+        m[:show_count] = @masters.length
 
         log_action "master search", search_type, @masters.length
       else
