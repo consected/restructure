@@ -92,6 +92,11 @@ module AdminControllerHandler
   
   private
   
+    
+    def filter_params
+      return nil
+    end
+    
     def error_message
       res = ""
       object_instance.errors.full_messages.each do |message|
