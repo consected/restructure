@@ -15,6 +15,12 @@ truncate table ml_app.player_infos cascade;
 alter sequence player_infos_id_seq start with 1;
 alter sequence player_infos_history_id_seq start with 1;
 
+---Set back scantroncs ----------------------
+truncate table ml_app.scantrons cascade;
+alter sequence scantrons_id_seq start with 1;
+alter sequence scantrons_history_id_seq start with 1;
+
+
 ---Set back masters ----------------------
 truncate table ml_app.masters cascade;
 alter sequence masters_id_seq start with 1;
@@ -65,7 +71,7 @@ on a.msid = b.msid
 --Populate scantrons from scantron
 --Needs null fields default....
 insert into ml_app.scantrons ( master_id,scantron_id,created_at,updated_at)
-select a.id,b.scantronid,now(),now()
+select a.id,b.scantronid
 from ml_app.masters a
 inner join ml_work.scantron b 
 on a.msid = b.msid

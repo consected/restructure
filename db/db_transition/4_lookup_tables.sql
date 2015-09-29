@@ -28,43 +28,42 @@ insert into ml_app.accuracy_scores
 
 
 insert into ml_app.general_selections 
-(item_type, name, value, created_at, updated_at) values
-('addresses_rank', 'primary', '10', now(), now()),
-('addresses_rank', 'secondary', '5', now(), now()),
-('addresses_rank', 'do not use', '0', now(), now()),
-('addresses_rank', 'bad contact', '-1', now(), now()),
-('player_contacts_rank', 'primary', '10', now(), now()),
-('player_contacts_rank', 'secondary', '5', now(), now()),
-('player_contacts_rank', 'do not use', '0', now(), now()),
-('player_contacts_rank', 'bad contact', '-1', now(), now());
+(item_type, name, value, created_at, updated_at, create_with, edit_always) values
+('addresses_rank', 'primary', '10', now(), now(), true, true),
+('addresses_rank', 'secondary', '5', now(), now(), true, true),
+('addresses_rank', 'do not use', '0', now(), now(), true, true),
+('addresses_rank', 'bad contact', '-1', now(), now(), true, true),
+('player_contacts_rank', 'primary', '10', now(), now(), true, true),
+('player_contacts_rank', 'secondary', '5', now(), now(), true, true),
+('player_contacts_rank', 'do not use', '0', now(), now(), true, true),
+('player_contacts_rank', 'bad contact', '-1', now(), now(), true, true);
 
 
 insert into ml_app.general_selections 
-(item_type, name, value, created_at, updated_at) 
-  select distinct 'player_infos_source', source, lower(source), now(), now() from player_infos;
+(item_type, name, value, created_at, updated_at, create_with, edit_always) 
+  select distinct 'player_infos_source', source, lower(source), now(), now(), true, true from player_infos;
 
 insert into ml_app.general_selections 
-(item_type, name, value, created_at, updated_at) 
-  select distinct 'player_contacts_source', source, lower(source), now(), now() from player_contacts;
+(item_type, name, value, created_at, updated_at, create_with, edit_always) 
+  select distinct 'player_contacts_source', source, lower(source), now(), now(), true, true from player_contacts;
 
 insert into ml_app.general_selections 
-(item_type, name, value, created_at, updated_at) 
-  select distinct 'player_contacts_type', rec_type, lower(rec_type), now(), now() from player_contacts;
+(item_type, name, value, created_at, updated_at, create_with, edit_always) 
+  select distinct 'player_contacts_type', rec_type, lower(rec_type), now(), now(), true, true from player_contacts;
 
 insert into ml_app.general_selections 
-(item_type, name, value, created_at, updated_at) 
-  select distinct 'addresses_source', source, lower(source), now(), now() from addresses;
+(item_type, name, value, created_at, updated_at, create_with, edit_always) 
+  select distinct 'addresses_source', source, lower(source), now(), now(), true, true from addresses;
 
 insert into ml_app.general_selections 
-(item_type, name, value, created_at, updated_at) 
-  select distinct 'addresses_type', rec_type, lower(rec_type), now(), now() from addresses;
+(item_type, name, value, created_at, updated_at, create_with, edit_always) 
+  select distinct 'addresses_type', rec_type, lower(rec_type), now(), now(), true, true from addresses;
 
-
+/* Lower case everything that needs to be lower case */
 update ml_app.player_infos set source = lower(source), college = lower(college), first_name = lower(first_name), last_name = lower(last_name), middle_name = lower(middle_name), nick_name = lower(nick_name);
 update ml_app.player_contacts set source = lower(source), rec_type = lower(rec_type), data = lower(data);
 update ml_app.addresses set street = lower(street), street2 = lower(street2), street3 = lower(street3), city=lower(city), state=lower(state), country=lower(country), rec_type=lower(rec_type), source=lower(source);
 
 
 insert into colleges (name) (select distinct college from pro_infos where college is not null order by college);
-
 insert into colleges (name) (select distinct player_infos.college from player_infos where player_infos.college is not null and not exists (select distinct pro_infos.college from pro_infos where player_infos.college = pro_infos.college));

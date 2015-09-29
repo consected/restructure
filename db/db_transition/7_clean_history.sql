@@ -3,7 +3,7 @@ set SEARCH_PATH=ml_app;
 /* Ugly but reliable method for resetting the history tables to the original set of data */
 
 delete from player_info_history;
-update player_infos set user_id = (select id from users order id desc limit 1);
+update player_infos set created_at = now();
 delete from player_info_history;
 update player_infos set user_id = null;
 
