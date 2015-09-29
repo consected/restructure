@@ -22,4 +22,12 @@ class Application
     
     res.join "; "
   end
+  
+  def self.hide_messages
+    @@hide_messages ||= [I18n.translate('devise.sessions.signed_in')]
+    Rails.logger.info "Hide messages: #{@@hide_messages}"
+    @@hide_messages
+  end
+  
+  
 end
