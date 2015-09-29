@@ -85,9 +85,11 @@ _fpa.postprocessors = {
         }
     },
     tracker_events_handler: function(block){
+        // Open the tracker if it is currently not open
+        _fpa.postprocessors.tracker_opener(block);
         // Show modal dialogs under certain conditions
         window.setTimeout(function(){
-            _fpa.postprocessors.tracker_opener(block);
+            
             _fpa.set_definition('protocol_events', function(){                                                
                 var pe = _fpa.cache('protocol_events');
                 var always_notify = true;
