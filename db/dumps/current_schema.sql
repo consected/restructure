@@ -40,6 +40,38 @@ COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching
 SET search_path = public, pg_catalog;
 
 --
+-- Name: log_accuracy_score_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_accuracy_score_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO accuracy_score_history
+            (
+                    accuracy_score_id,
+                    name ,
+                    value ,                    
+                    created_at ,
+                    updated_at ,
+                    disabled ,
+                    admin_id                      
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name ,
+                    NEW.value ,                    
+                    NEW.created_at ,
+                    NEW.updated_at ,
+                    NEW.disabled ,
+                    NEW.admin_id                      
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_address_update(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -86,6 +118,197 @@ CREATE FUNCTION log_address_update() RETURNS trigger
                 NEW.postal_code,
                 NEW.region,
                 NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_admin_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_admin_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO admin_history
+            (
+                    admin_id,
+    email,
+    encrypted_password,    
+    sign_in_count,
+    current_sign_in_at,
+    last_sign_in_at,
+    current_sign_in_ip ,
+    last_sign_in_ip ,
+    created_at ,
+    updated_at,
+    failed_attempts,
+    unlock_token,
+    locked_at,
+    disabled 
+
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.email,
+    NEW.encrypted_password,    
+    NEW.sign_in_count,
+    NEW.current_sign_in_at,
+    NEW.last_sign_in_at,
+    NEW.current_sign_in_ip ,
+    NEW.last_sign_in_ip ,
+    NEW.created_at ,
+    NEW.updated_at,
+    NEW.failed_attempts,
+    NEW.unlock_token,
+    NEW.locked_at,
+    NEW.disabled 
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_college_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_college_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO college_history
+            (
+                    college_id,
+                    name ,
+                    synonym_for_id,
+                    created_at ,
+                    updated_at ,
+                    disabled ,
+                    admin_id,
+                    user_id            
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name ,
+                    NEW.synonym_for_id ,                    
+                    NEW.created_at ,
+                    NEW.updated_at ,
+                    NEW.disabled ,
+                    NEW.admin_id,
+                    NEW.user_id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_general_selection_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_general_selection_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO general_selection_history
+            (
+                    general_selection_id,
+                    name ,
+                    value ,
+                    item_type ,
+                    created_at ,
+                    updated_at ,
+                    disabled ,
+                    admin_id ,
+                    create_with ,
+                    edit_if_set ,
+                    edit_always ,
+                    position ,
+                    description ,
+                    lock 
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name ,
+                NEW.value ,
+                NEW.item_type ,
+                NEW.created_at ,
+                NEW.updated_at ,
+                NEW.disabled ,
+                NEW.admin_id ,
+                NEW.create_with ,
+                NEW.edit_if_set ,
+                NEW.edit_always ,
+                NEW.position "position",
+                NEW.description ,
+                NEW.lock
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_item_flag_name_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_item_flag_name_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO item_flag_name_history
+            (
+                    item_flag_name_id,
+                    name ,
+                    item_type,
+                    created_at ,
+                    updated_at ,
+                    disabled ,
+                    admin_id
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name ,
+                    NEW.item_type ,                    
+                    NEW.created_at ,
+                    NEW.updated_at ,
+                    NEW.disabled ,
+                    NEW.admin_id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_item_flag_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_item_flag_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO item_flag_history
+            (
+                    item_flag_id,
+                    item_id ,
+                    item_type,
+                    item_flag_name_id,
+                    created_at ,
+                    updated_at ,
+                    user_id 
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.item_id ,
+                    NEW.item_type,
+                    NEW.item_flag_name_id,
+                    NEW.created_at ,
+                    NEW.updated_at ,
+                    NEW.user_id 
             ;
             RETURN NEW;
         END;
@@ -185,6 +408,75 @@ CREATE FUNCTION log_player_info_update() RETURNS trigger
 
 
 --
+-- Name: log_protocol_event_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_protocol_event_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO protocol_event_history
+            (
+                    protocol_event_id,                    
+    name ,
+    admin_id,
+    created_at,
+    updated_at,
+    disabled ,
+    sub_process_id,
+    milestone ,
+    description
+
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name ,                    
+                    NEW.admin_id,
+    NEW.created_at,
+    NEW.updated_at,
+    NEW.disabled ,
+    NEW.sub_process_id,
+    NEW.milestone ,
+    NEW.description
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_protocol_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_protocol_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO protocol_history
+            (
+                    protocol_id,
+                    name ,                    
+                    created_at ,
+                    updated_at ,
+                    disabled,
+                    admin_id ,
+                    "position"
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name ,                    
+                    NEW.created_at ,
+                    NEW.updated_at ,
+                    NEW.disabled,
+                    NEW.admin_id ,
+                    NEW.position
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_scantron_update(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -215,6 +507,40 @@ CREATE FUNCTION log_scantron_update() RETURNS trigger
 
 
 --
+-- Name: log_sub_process_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_sub_process_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO sub_process_history
+            (
+                    sub_process_id,                    
+    
+    name,
+    disabled,
+    protocol_id,
+    admin_id ,
+    created_at,
+    updated_at
+
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name,
+    NEW.disabled,
+    NEW.protocol_id,
+    NEW.admin_id ,
+    NEW.created_at,
+    NEW.updated_at
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_tracker_update(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -233,6 +559,61 @@ CREATE FUNCTION log_tracker_update() RETURNS trigger
                    NEW.sub_process_id, NEW.notes, 
                    NEW.item_id, NEW.item_type,
                    NEW.created_at, NEW.updated_at, NEW.user_id  ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_user_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_user_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO user_history
+            (
+                    user_id,
+    email,
+    encrypted_password,
+    reset_password_token,
+    reset_password_sent_at,
+    remember_created_at,
+    sign_in_count,
+    current_sign_in_at,
+    last_sign_in_at,
+    current_sign_in_ip ,
+    last_sign_in_ip ,
+    created_at ,
+    updated_at,
+    failed_attempts,
+    unlock_token,
+    locked_at,
+    disabled ,
+    admin_id 
+
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.email,
+    NEW.encrypted_password,
+    NEW.reset_password_token,
+    NEW.reset_password_sent_at,
+    NEW.remember_created_at,
+    NEW.sign_in_count,
+    NEW.current_sign_in_at,
+    NEW.last_sign_in_at,
+    NEW.current_sign_in_ip ,
+    NEW.last_sign_in_ip ,
+    NEW.created_at ,
+    NEW.updated_at,
+    NEW.failed_attempts,
+    NEW.unlock_token,
+    NEW.locked_at,
+    NEW.disabled ,
+    NEW.admin_id  
+            ;
             RETURN NEW;
         END;
     $$;
@@ -281,6 +662,41 @@ CREATE FUNCTION update_master_with_pro_info() RETURNS trigger
 SET default_tablespace = '';
 
 SET default_with_oids = false;
+
+--
+-- Name: accuracy_score_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE accuracy_score_history (
+    id integer NOT NULL,
+    name character varying,
+    value integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean,
+    accuracy_score_id integer
+);
+
+
+--
+-- Name: accuracy_score_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE accuracy_score_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: accuracy_score_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE accuracy_score_history_id_seq OWNED BY accuracy_score_history.id;
+
 
 --
 -- Name: accuracy_scores; Type: TABLE; Schema: public; Owner: -; Tablespace: 
@@ -406,6 +822,48 @@ ALTER SEQUENCE addresses_id_seq OWNED BY addresses.id;
 
 
 --
+-- Name: admin_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE admin_history (
+    id integer NOT NULL,
+    email character varying DEFAULT ''::character varying NOT NULL,
+    encrypted_password character varying DEFAULT ''::character varying NOT NULL,
+    sign_in_count integer DEFAULT 0,
+    current_sign_in_at timestamp without time zone,
+    last_sign_in_at timestamp without time zone,
+    current_sign_in_ip character varying,
+    last_sign_in_ip character varying,
+    failed_attempts integer DEFAULT 0,
+    unlock_token character varying,
+    locked_at timestamp without time zone,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    disabled boolean,
+    admin_id integer
+);
+
+
+--
+-- Name: admin_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE admin_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: admin_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE admin_history_id_seq OWNED BY admin_history.id;
+
+
+--
 -- Name: admins; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -447,6 +905,42 @@ ALTER SEQUENCE admins_id_seq OWNED BY admins.id;
 
 
 --
+-- Name: college_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE college_history (
+    id integer NOT NULL,
+    name character varying,
+    synonym_for_id integer,
+    disabled boolean,
+    admin_id integer,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    college_id integer
+);
+
+
+--
+-- Name: college_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE college_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: college_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE college_history_id_seq OWNED BY college_history.id;
+
+
+--
 -- Name: colleges; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -482,6 +976,48 @@ ALTER SEQUENCE colleges_id_seq OWNED BY colleges.id;
 
 
 --
+-- Name: general_selection_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE general_selection_history (
+    id integer NOT NULL,
+    name character varying,
+    value character varying,
+    item_type character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean,
+    admin_id integer,
+    create_with boolean,
+    edit_if_set boolean,
+    edit_always boolean,
+    "position" integer,
+    description character varying,
+    lock boolean,
+    general_selection_id integer
+);
+
+
+--
+-- Name: general_selection_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE general_selection_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: general_selection_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE general_selection_history_id_seq OWNED BY general_selection_history.id;
+
+
+--
 -- Name: general_selections; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -493,7 +1029,13 @@ CREATE TABLE general_selections (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    create_with boolean,
+    edit_if_set boolean,
+    edit_always boolean,
+    "position" integer,
+    description character varying,
+    lock boolean
 );
 
 
@@ -514,6 +1056,76 @@ CREATE SEQUENCE general_selections_id_seq
 --
 
 ALTER SEQUENCE general_selections_id_seq OWNED BY general_selections.id;
+
+
+--
+-- Name: item_flag_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE item_flag_history (
+    id integer NOT NULL,
+    item_id integer,
+    item_type character varying,
+    item_flag_name_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    user_id integer,
+    item_flag_id integer
+);
+
+
+--
+-- Name: item_flag_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE item_flag_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: item_flag_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE item_flag_history_id_seq OWNED BY item_flag_history.id;
+
+
+--
+-- Name: item_flag_name_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE item_flag_name_history (
+    id integer NOT NULL,
+    name character varying,
+    item_type character varying,
+    disabled boolean,
+    admin_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    item_flag_name_id integer
+);
+
+
+--
+-- Name: item_flag_name_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE item_flag_name_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: item_flag_name_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE item_flag_name_history_id_seq OWNED BY item_flag_name_history.id;
 
 
 --
@@ -871,6 +1483,43 @@ ALTER SEQUENCE pro_infos_id_seq OWNED BY pro_infos.id;
 
 
 --
+-- Name: protocol_event_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE protocol_event_history (
+    id integer NOT NULL,
+    name character varying,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean,
+    sub_process_id integer,
+    milestone character varying,
+    description character varying,
+    protocol_event_id integer
+);
+
+
+--
+-- Name: protocol_event_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE protocol_event_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: protocol_event_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE protocol_event_history_id_seq OWNED BY protocol_event_history.id;
+
+
+--
 -- Name: protocol_events; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -904,6 +1553,41 @@ CREATE SEQUENCE protocol_events_id_seq
 --
 
 ALTER SEQUENCE protocol_events_id_seq OWNED BY protocol_events.id;
+
+
+--
+-- Name: protocol_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE protocol_history (
+    id integer NOT NULL,
+    name character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean,
+    admin_id integer,
+    "position" integer,
+    protocol_id integer
+);
+
+
+--
+-- Name: protocol_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE protocol_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: protocol_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE protocol_history_id_seq OWNED BY protocol_history.id;
 
 
 --
@@ -1014,6 +1698,41 @@ ALTER SEQUENCE scantrons_id_seq OWNED BY scantrons.id;
 CREATE TABLE schema_migrations (
     version character varying NOT NULL
 );
+
+
+--
+-- Name: sub_process_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE sub_process_history (
+    id integer NOT NULL,
+    name character varying,
+    disabled boolean,
+    protocol_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    sub_process_id integer
+);
+
+
+--
+-- Name: sub_process_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE sub_process_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sub_process_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE sub_process_history_id_seq OWNED BY sub_process_history.id;
 
 
 --
@@ -1130,6 +1849,52 @@ ALTER SEQUENCE trackers_id_seq OWNED BY trackers.id;
 
 
 --
+-- Name: user_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE user_history (
+    id integer NOT NULL,
+    email character varying DEFAULT ''::character varying NOT NULL,
+    encrypted_password character varying DEFAULT ''::character varying NOT NULL,
+    reset_password_token character varying,
+    reset_password_sent_at timestamp without time zone,
+    remember_created_at timestamp without time zone,
+    sign_in_count integer DEFAULT 0 NOT NULL,
+    current_sign_in_at timestamp without time zone,
+    last_sign_in_at timestamp without time zone,
+    current_sign_in_ip inet,
+    last_sign_in_ip inet,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    failed_attempts integer DEFAULT 0 NOT NULL,
+    unlock_token character varying,
+    locked_at timestamp without time zone,
+    disabled boolean,
+    admin_id integer,
+    user_id integer
+);
+
+
+--
+-- Name: user_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE user_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE user_history_id_seq OWNED BY user_history.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1178,6 +1943,13 @@ ALTER SEQUENCE users_id_seq OWNED BY users.id;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY accuracy_score_history ALTER COLUMN id SET DEFAULT nextval('accuracy_score_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY accuracy_scores ALTER COLUMN id SET DEFAULT nextval('accuracy_scores_id_seq'::regclass);
 
 
@@ -1199,7 +1971,21 @@ ALTER TABLE ONLY addresses ALTER COLUMN id SET DEFAULT nextval('addresses_id_seq
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY admin_history ALTER COLUMN id SET DEFAULT nextval('admin_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY admins ALTER COLUMN id SET DEFAULT nextval('admins_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY college_history ALTER COLUMN id SET DEFAULT nextval('college_history_id_seq'::regclass);
 
 
 --
@@ -1213,7 +1999,28 @@ ALTER TABLE ONLY colleges ALTER COLUMN id SET DEFAULT nextval('colleges_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY general_selection_history ALTER COLUMN id SET DEFAULT nextval('general_selection_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY general_selections ALTER COLUMN id SET DEFAULT nextval('general_selections_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY item_flag_history ALTER COLUMN id SET DEFAULT nextval('item_flag_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY item_flag_name_history ALTER COLUMN id SET DEFAULT nextval('item_flag_name_history_id_seq'::regclass);
 
 
 --
@@ -1283,7 +2090,21 @@ ALTER TABLE ONLY pro_infos ALTER COLUMN id SET DEFAULT nextval('pro_infos_id_seq
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY protocol_event_history ALTER COLUMN id SET DEFAULT nextval('protocol_event_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY protocol_events ALTER COLUMN id SET DEFAULT nextval('protocol_events_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY protocol_history ALTER COLUMN id SET DEFAULT nextval('protocol_history_id_seq'::regclass);
 
 
 --
@@ -1311,6 +2132,13 @@ ALTER TABLE ONLY scantrons ALTER COLUMN id SET DEFAULT nextval('scantrons_id_seq
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY sub_process_history ALTER COLUMN id SET DEFAULT nextval('sub_process_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY sub_processes ALTER COLUMN id SET DEFAULT nextval('sub_processes_id_seq'::regclass);
 
 
@@ -1332,7 +2160,22 @@ ALTER TABLE ONLY trackers ALTER COLUMN id SET DEFAULT nextval('trackers_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY user_history ALTER COLUMN id SET DEFAULT nextval('user_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- Name: accuracy_score_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY accuracy_score_history
+    ADD CONSTRAINT accuracy_score_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -1360,11 +2203,27 @@ ALTER TABLE ONLY addresses
 
 
 --
+-- Name: admin_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY admin_history
+    ADD CONSTRAINT admin_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: admins_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY admins
     ADD CONSTRAINT admins_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: college_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY college_history
+    ADD CONSTRAINT college_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -1376,11 +2235,35 @@ ALTER TABLE ONLY colleges
 
 
 --
+-- Name: general_selection_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY general_selection_history
+    ADD CONSTRAINT general_selection_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: general_selections_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY general_selections
     ADD CONSTRAINT general_selections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: item_flag_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY item_flag_history
+    ADD CONSTRAINT item_flag_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: item_flag_name_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY item_flag_name_history
+    ADD CONSTRAINT item_flag_name_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -1456,11 +2339,27 @@ ALTER TABLE ONLY pro_infos
 
 
 --
+-- Name: protocol_event_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY protocol_event_history
+    ADD CONSTRAINT protocol_event_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: protocol_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY protocol_events
     ADD CONSTRAINT protocol_events_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: protocol_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY protocol_history
+    ADD CONSTRAINT protocol_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -1488,6 +2387,14 @@ ALTER TABLE ONLY scantrons
 
 
 --
+-- Name: sub_process_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY sub_process_history
+    ADD CONSTRAINT sub_process_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: sub_processes_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1512,11 +2419,26 @@ ALTER TABLE ONLY trackers
 
 
 --
+-- Name: user_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY user_history
+    ADD CONSTRAINT user_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: users_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: index_accuracy_score_history_on_accuracy_score_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_accuracy_score_history_on_accuracy_score_id ON accuracy_score_history USING btree (accuracy_score_id);
 
 
 --
@@ -1562,6 +2484,20 @@ CREATE INDEX index_addresses_on_user_id ON addresses USING btree (user_id);
 
 
 --
+-- Name: index_admin_history_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_admin_history_on_admin_id ON admin_history USING btree (admin_id);
+
+
+--
+-- Name: index_college_history_on_college_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_college_history_on_college_id ON college_history USING btree (college_id);
+
+
+--
 -- Name: index_colleges_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1576,10 +2512,31 @@ CREATE INDEX index_colleges_on_user_id ON colleges USING btree (user_id);
 
 
 --
+-- Name: index_general_selection_history_on_general_selection_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_general_selection_history_on_general_selection_id ON general_selection_history USING btree (general_selection_id);
+
+
+--
 -- Name: index_general_selections_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_general_selections_on_admin_id ON general_selections USING btree (admin_id);
+
+
+--
+-- Name: index_item_flag_history_on_item_flag_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_item_flag_history_on_item_flag_id ON item_flag_history USING btree (item_flag_id);
+
+
+--
+-- Name: index_item_flag_name_history_on_item_flag_name_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_item_flag_name_history_on_item_flag_name_id ON item_flag_name_history USING btree (item_flag_name_id);
 
 
 --
@@ -1716,6 +2673,13 @@ CREATE INDEX index_pro_infos_on_user_id ON pro_infos USING btree (user_id);
 
 
 --
+-- Name: index_protocol_event_history_on_protocol_event_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_protocol_event_history_on_protocol_event_id ON protocol_event_history USING btree (protocol_event_id);
+
+
+--
 -- Name: index_protocol_events_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1727,6 +2691,13 @@ CREATE INDEX index_protocol_events_on_admin_id ON protocol_events USING btree (a
 --
 
 CREATE INDEX index_protocol_events_on_sub_process_id ON protocol_events USING btree (sub_process_id);
+
+
+--
+-- Name: index_protocol_history_on_protocol_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_protocol_history_on_protocol_id ON protocol_history USING btree (protocol_id);
 
 
 --
@@ -1769,6 +2740,13 @@ CREATE INDEX index_scantrons_on_master_id ON scantrons USING btree (master_id);
 --
 
 CREATE INDEX index_scantrons_on_user_id ON scantrons USING btree (user_id);
+
+
+--
+-- Name: index_sub_process_history_on_sub_process_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_sub_process_history_on_sub_process_id ON sub_process_history USING btree (sub_process_id);
 
 
 --
@@ -1863,6 +2841,13 @@ CREATE INDEX index_trackers_on_user_id ON trackers USING btree (user_id);
 
 
 --
+-- Name: index_user_history_on_user_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_history_on_user_id ON user_history USING btree (user_id);
+
+
+--
 -- Name: index_users_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1898,6 +2883,20 @@ CREATE UNIQUE INDEX unique_schema_migrations ON schema_migrations USING btree (v
 
 
 --
+-- Name: accuracy_score_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER accuracy_score_history_insert AFTER INSERT ON accuracy_scores FOR EACH ROW EXECUTE PROCEDURE log_accuracy_score_update();
+
+
+--
+-- Name: accuracy_score_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER accuracy_score_history_update AFTER UPDATE ON accuracy_scores FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_accuracy_score_update();
+
+
+--
 -- Name: address_history_insert; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1909,6 +2908,76 @@ CREATE TRIGGER address_history_insert AFTER INSERT ON addresses FOR EACH ROW EXE
 --
 
 CREATE TRIGGER address_history_update AFTER UPDATE ON addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_address_update();
+
+
+--
+-- Name: admin_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER admin_history_insert AFTER INSERT ON admins FOR EACH ROW EXECUTE PROCEDURE log_admin_update();
+
+
+--
+-- Name: admin_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER admin_history_update AFTER UPDATE ON admins FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_admin_update();
+
+
+--
+-- Name: college_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER college_history_insert AFTER INSERT ON colleges FOR EACH ROW EXECUTE PROCEDURE log_college_update();
+
+
+--
+-- Name: college_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER college_history_update AFTER UPDATE ON colleges FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_college_update();
+
+
+--
+-- Name: general_selection_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER general_selection_history_insert AFTER INSERT ON general_selections FOR EACH ROW EXECUTE PROCEDURE log_general_selection_update();
+
+
+--
+-- Name: general_selection_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER general_selection_history_update AFTER UPDATE ON general_selections FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_general_selection_update();
+
+
+--
+-- Name: item_flag_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER item_flag_history_insert AFTER INSERT ON item_flags FOR EACH ROW EXECUTE PROCEDURE log_item_flag_update();
+
+
+--
+-- Name: item_flag_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER item_flag_history_update AFTER UPDATE ON item_flags FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_item_flag_update();
+
+
+--
+-- Name: item_flag_name_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON item_flag_names FOR EACH ROW EXECUTE PROCEDURE log_item_flag_name_update();
+
+
+--
+-- Name: item_flag_name_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_item_flag_name_update();
 
 
 --
@@ -1968,6 +3037,34 @@ CREATE TRIGGER pro_info_update AFTER UPDATE ON pro_infos FOR EACH ROW WHEN ((old
 
 
 --
+-- Name: protocol_event_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER protocol_event_history_insert AFTER INSERT ON protocol_events FOR EACH ROW EXECUTE PROCEDURE log_protocol_event_update();
+
+
+--
+-- Name: protocol_event_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER protocol_event_history_update AFTER UPDATE ON protocol_events FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_protocol_event_update();
+
+
+--
+-- Name: protocol_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER protocol_history_insert AFTER INSERT ON protocols FOR EACH ROW EXECUTE PROCEDURE log_protocol_update();
+
+
+--
+-- Name: protocol_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER protocol_history_update AFTER UPDATE ON protocols FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_protocol_update();
+
+
+--
 -- Name: scantron_history_insert; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1982,6 +3079,20 @@ CREATE TRIGGER scantron_history_update AFTER UPDATE ON scantrons FOR EACH ROW WH
 
 
 --
+-- Name: sub_process_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sub_process_history_insert AFTER INSERT ON sub_processes FOR EACH ROW EXECUTE PROCEDURE log_sub_process_update();
+
+
+--
+-- Name: sub_process_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sub_process_history_update AFTER UPDATE ON sub_processes FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_sub_process_update();
+
+
+--
 -- Name: tracker_history_insert; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -1993,6 +3104,28 @@ CREATE TRIGGER tracker_history_insert AFTER INSERT ON trackers FOR EACH ROW EXEC
 --
 
 CREATE TRIGGER tracker_history_update AFTER UPDATE ON trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_tracker_update();
+
+
+--
+-- Name: user_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER user_history_insert AFTER INSERT ON users FOR EACH ROW EXECUTE PROCEDURE log_user_update();
+
+
+--
+-- Name: user_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER user_history_update AFTER UPDATE ON users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_user_update();
+
+
+--
+-- Name: fk_accuracy_score_history_accuracy_scores; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY accuracy_score_history
+    ADD CONSTRAINT fk_accuracy_score_history_accuracy_scores FOREIGN KEY (accuracy_score_id) REFERENCES accuracy_scores(id);
 
 
 --
@@ -2017,6 +3150,46 @@ ALTER TABLE ONLY address_history
 
 ALTER TABLE ONLY address_history
     ADD CONSTRAINT fk_address_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_admin_history_admins; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY admin_history
+    ADD CONSTRAINT fk_admin_history_admins FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
+-- Name: fk_college_history_colleges; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY college_history
+    ADD CONSTRAINT fk_college_history_colleges FOREIGN KEY (college_id) REFERENCES colleges(id);
+
+
+--
+-- Name: fk_general_selection_history_general_selections; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY general_selection_history
+    ADD CONSTRAINT fk_general_selection_history_general_selections FOREIGN KEY (general_selection_id) REFERENCES general_selections(id);
+
+
+--
+-- Name: fk_item_flag_history_item_flags; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY item_flag_history
+    ADD CONSTRAINT fk_item_flag_history_item_flags FOREIGN KEY (item_flag_id) REFERENCES item_flags(id);
+
+
+--
+-- Name: fk_item_flag_name_history_item_flag_names; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY item_flag_name_history
+    ADD CONSTRAINT fk_item_flag_name_history_item_flag_names FOREIGN KEY (item_flag_name_id) REFERENCES item_flag_names(id);
 
 
 --
@@ -2065,6 +3238,22 @@ ALTER TABLE ONLY player_info_history
 
 ALTER TABLE ONLY player_info_history
     ADD CONSTRAINT fk_player_info_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_protocol_event_history_protocol_events; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY protocol_event_history
+    ADD CONSTRAINT fk_protocol_event_history_protocol_events FOREIGN KEY (protocol_event_id) REFERENCES protocol_events(id);
+
+
+--
+-- Name: fk_protocol_history_protocols; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY protocol_history
+    ADD CONSTRAINT fk_protocol_history_protocols FOREIGN KEY (protocol_id) REFERENCES protocols(id);
 
 
 --
@@ -2377,6 +3566,22 @@ ALTER TABLE ONLY scantron_history
 
 ALTER TABLE ONLY scantron_history
     ADD CONSTRAINT fk_scantron_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_sub_process_history_sub_processes; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sub_process_history
+    ADD CONSTRAINT fk_sub_process_history_sub_processes FOREIGN KEY (sub_process_id) REFERENCES sub_processes(id);
+
+
+--
+-- Name: fk_user_history_users; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY user_history
+    ADD CONSTRAINT fk_user_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
