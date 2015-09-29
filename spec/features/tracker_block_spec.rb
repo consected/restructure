@@ -113,11 +113,19 @@ describe "tracker block", js: true do
     # Validate that we don't already have a protocol / sub process tracked for this player
     protocol = Protocol.selectable.first
     sps = protocol.sub_processes.enabled
-    sp = pick_one_from sps
-    sp_orig = sp
-    pes = sp.protocol_events.enabled.reload    
-    pe = pes[0]    
-    pe_orig = pe
+    
+    sp = nil
+    pe = nil
+    pe_orig = nil
+    pes = nil
+    sp_orig = nil
+    while pe.nil? do
+      sp = pick_one_from sps
+      sp_orig = sp
+      pes = sp.protocol_events.enabled.reload    
+      pe = pes[0]    
+      pe_orig = pe
+    end
     
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.titleize
@@ -247,7 +255,10 @@ describe "tracker block", js: true do
     sp_new = pick_one_from sps    
     pes_new = sp_new.protocol_events.enabled.reload    
     
-    pe_new = pick_one_from pes_new
+    pe_new = nil
+    while pe_new.nil?
+      pe_new = pick_one_from pes_new
+    end
     
     dismiss_modal
       

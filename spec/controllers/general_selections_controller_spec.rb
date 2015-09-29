@@ -12,6 +12,9 @@ RSpec.describe GeneralSelectionsController, type: :controller do
   end
 
   before(:all){
+    connection = ActiveRecord::Base.connection
+    connection.execute("delete from general_selection_history") 
+    
     GeneralSelection.destroy_all
   }
   it_behaves_like 'a standard admin controller'

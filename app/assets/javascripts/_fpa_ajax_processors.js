@@ -38,8 +38,8 @@ _fpa.postprocessors = {
             _fpa.postprocessors.tracker_item_link_hander(block);                        
         }
 
-        if(data.masters && data.masters.length == 1){
-            _fpa.postprocessors.tracker_events_handler(block);                        
+        if(data.masters && data.masters.length == 1){                        
+            _fpa.postprocessors.tracker_events_handler(block);                                                
         }
 
         
@@ -49,7 +49,7 @@ _fpa.postprocessors = {
             
             $(id).on('shown.bs.collapse', function(){
                 
-                _fpa.form_utils.format_block($(this));
+                _fpa.form_utils.format_block($(this));                
                 _fpa.postprocessors.tracker_notes_handler($(this));
                 _fpa.postprocessors.tracker_item_link_hander($(this));
                 
@@ -77,11 +77,18 @@ _fpa.postprocessors = {
    
    
     },
-    
+    tracker_opener: function(block){
+        var t = block.find('.open-tracker.collapsed');
+        if(t.length === 1){
+            if(t.find('.tracker-count').html() !== '0')
+              t.trigger('click');
+        }
+    },
     tracker_events_handler: function(block){
-        
+        // Show modal dialogs under certain conditions
         window.setTimeout(function(){
-            _fpa.set_definition('protocol_events', function(){
+            _fpa.postprocessors.tracker_opener(block);
+            _fpa.set_definition('protocol_events', function(){                                                
                 var pe = _fpa.cache('protocol_events');
                 var always_notify = true;
                 block.find('.tracker-event_name[data-event-id]').each(function(){
@@ -116,7 +123,7 @@ _fpa.postprocessors = {
                             _fpa.show_modal(p.description, title);
                         }                
                     }
-                });
+                });                                
             });
         }, 500);
     },

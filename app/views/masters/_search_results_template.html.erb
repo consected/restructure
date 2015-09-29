@@ -464,7 +464,7 @@
             <a href="#/" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
           </li>
           <li role="presentation">
-            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template">{{>tracker_badge master_id=id}}</span></a>
+            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
           </li>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>

@@ -47,7 +47,7 @@ class MastersController < ApplicationController
         end
         
         original_length = @masters.length
-        @masters = @masters[0..99]
+        @masters = @masters[0, return_results_limit]
         
         m = {
           masters: @masters.as_json(include: {
@@ -66,10 +66,12 @@ class MastersController < ApplicationController
               order: {rank: :desc},             
               methods: [:user_name, :rank_name, :state_name, :country_name, :source_name]
             },
-            trackers: {
-              order: "protocol.position #{Master::TrackerEventOrderClause}",  
-              methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :tracker_history_length, :user_name, :record_type_us, :record_type, :record_id]
-            },
+#           Loading trackers dynamically provides a significant speed up, and this may become more important as the tracker usage grows
+#           trackers: {
+#              order: "protocol.position #{Master::TrackerEventOrderClause}",                
+#              methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :tracker_history_length, :user_name, :record_type_us, :record_type, :record_id]
+#            },
+
             latest_tracker_history: {            
               methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]
             },
@@ -170,6 +172,14 @@ private
     logger.debug "Screened params: #{p.inspect}"
     p
   end
-  
+
+  def return_results_limit
+    e = 0
+    r = params[:res_limit]
+    e = r.to_i unless r.blank?    
+    e = 100 if e == 0
+    @return_results_limit = e
+    
+  end
   
 end

@@ -222,3 +222,11 @@ span.msid {font-size: 90%;}
 div.popover {
     min-width: 150px;
 }
+
+.invisible {
+    visibility: hidden;
+    height: 1px;
+    overflow: hidden;
+    width: 1px;
+    position: fixed;
+}
