@@ -1770,6 +1770,17 @@ ALTER SEQUENCE sub_processes_id_seq OWNED BY sub_processes.id;
 
 
 --
+-- Name: test_table; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_table (
+    abcid integer,
+    somestring character varying,
+    testing boolean
+);
+
+
+--
 -- Name: tracker_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
