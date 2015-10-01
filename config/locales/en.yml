@@ -20,6 +20,9 @@
 # available at http://guides.rubyonrails.org/i18n.html.
 
 en:
+
+    models:
+        sub_process: status
     
     activerecord:
         errors:

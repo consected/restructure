@@ -111,7 +111,8 @@ shared_examples 'a standard user controller' do
           io = inv.keys.first.to_s
           i = io.gsub('_', ' ').downcase
           i_no_id = io.gsub('_id', '').downcase
-          expect(j[io] || j[i] || j[i_no_id]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{j}"
+          t = I18n.translate("models.#{i_no_id}")
+          expect(j[io] || j[i] || j[i_no_id] || j[t]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{j}"
         end
       end
     end
@@ -171,7 +172,8 @@ shared_examples 'a standard user controller' do
         
         i = io.gsub('_', ' ').downcase
         i_no_id = io.gsub('_id', '').downcase
-        expect(resp[io] || resp[i] || resp[i_no_id]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
+        t = I18n.translate("models.#{i_no_id}")
+        expect(resp[io] || resp[i] || resp[i_no_id] || resp[t]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
       end
     end
   end
