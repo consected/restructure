@@ -1,14 +1,13 @@
 set SEARCH_PATH=ml_app,ml_work;
 
-insert into admins (email) values 'auto-admin';
 
 
-drop table tracker_full;
-drop table tracker_migration_lookup;
-drop table tracker_migration_lookup_ids;
-drop table tracker_latest;
-drop table tracker_hist_only;
-drop table p_list;
+drop table  IF EXISTS tracker_full;
+drop table  IF EXISTS tracker_migration_lookup;
+drop table  IF EXISTS tracker_migration_lookup_ids;
+drop table  IF EXISTS tracker_latest;
+drop table  IF EXISTS tracker_hist_only;
+drop table  IF EXISTS p_list;
 
 delete from ml_app.tracker_history;
 delete from ml_app.trackers;
@@ -19,8 +18,8 @@ delete from ml_app.protocols;
 
 
 
-/* Generate a full set of tracker records */
-select *  into temp tracker_full from ml_work.tracker union select * from ml_work.tracker_history ;
+/* Generate a full set of tracker records, noting which is which to allow for better ordering later */
+select *, 0 "ttype"  into temp tracker_full from ml_work.tracker union select *, 1 "ttype" from ml_work.tracker_history ;
 
 /* Get rid of records not in the masters table) */
 delete from tracker_full tf1 where not exists (select masters.msid from masters where masters.msid = tf1.msid);
@@ -95,7 +94,8 @@ update tracker_full tf set
                     else trim(c_method)                    
             end
         end
-    
+    ,
+    notes = coalesce(notes, '') || E'\n(Migrated data)\nevent: ' || coalesce(event, '(none)') || E'\nc_method: ' || coalesce(c_method, '(none)') || E'\noutcome: ' || coalesce(outcome, '(none)')    
 ;
 
 /* set the new user id based on the changedby user info */
@@ -158,8 +158,9 @@ update tracker_full set new_event_date = case when outcome_date is not null then
 
 
 
-/* pull the latest tracker entry for each msid / protocol pair */
-select distinct on (msid, protocol_id) id, msid, new_event_date into temp tracker_latest from tracker_full order by msid, protocol_id, new_event_date desc, id;
+/* pull the latest tracker entry for each msid / protocol pair, ensuring that the original 
+   tracker records go ahead of the equivalently numbered and dated tracker_history records */
+select distinct on (msid, protocol_id) id, msid, new_event_date into temp tracker_latest from tracker_full order by msid, protocol_id, new_event_date desc, ttype, id;
 
 
 /* now insert the latest records into tracker 
@@ -170,8 +171,8 @@ insert into ml_app.trackers
 (master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, notes, user_id)
 select 
     masters.id, tf.protocol_id, tf.new_event_date, 
-    case when lastmod is null then event_date else lastmod end "created_at", 
-    case when lastmod is null then event_date else lastmod end "updated_at", 
+    case when lastmod is null then tf.event_date else lastmod end "created_at", 
+    case when lastmod is null then tf.event_date else lastmod end "updated_at", 
     tf.sub_process_id, tf.protocol_event_id, tf.notes, tf.user_id
 from tracker_full tf
 inner join tracker_latest on tracker_latest.id = tf.id 
@@ -187,8 +188,8 @@ delete from ml_app.tracker_history;
 
 select 
     masters.id "master_id", tf.protocol_id "protocol_id", tf.new_event_date "event_date", 
-    case when lastmod is null then event_date else lastmod end "created_at", 
-    case when lastmod is null then event_date else lastmod end "updated_at", 
+    case when lastmod is null then tf.event_date else lastmod end "created_at", 
+    case when lastmod is null then tf.event_date else lastmod end "updated_at", 
     tf.sub_process_id "sub_process_id", tf.protocol_event_id "protocol_event_id", trackers.id "tracker_id", trackid, tf.notes, tf.user_id
 into temp tracker_hist_only
 from tracker_full tf 
@@ -206,6 +207,19 @@ insert into ml_app.tracker_history
 select master_id, protocol_id, event_date, created_at, updated_at, sub_process_id, protocol_event_id, tracker_id, notes, user_id
 from tracker_hist_only order by event_date desc, trackid;
 
-/* Finally, force the latest tracker items back into the tracker_history */
-update trackers set updated_at = now();
+/* Finally, force the latest tracker items back into the tracker_history, using same mechanism as the trackers trigger function */
+INSERT INTO tracker_history                              
+  (tracker_id, master_id, protocol_id,                 
+   protocol_event_id, event_date, sub_process_id, notes,
+   item_id, item_type,
+   created_at, updated_at, user_id)
+SELECT NEW.id, NEW.master_id, NEW.protocol_id,            
+NEW.protocol_event_id, NEW.event_date, 
+NEW.sub_process_id, NEW.notes, 
+NEW.item_id, NEW.item_type, 
+NEW.created_at, NEW.updated_at, NEW.user_id  
+from trackers NEW
+;    
+
+update ml_app.sub_processes set name = '(do not use) ' || name where name in ('Player-message', 'Info', 'Reject');
 

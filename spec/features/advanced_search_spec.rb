@@ -124,7 +124,7 @@ describe "advanced search", js: true do
     
     find "#master_results_block.search-status-done", wait: 5
     
-    find ".master-expander", match: :first, wait: 5    
+    have_css ".master-expander"
     
     expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
     
@@ -137,15 +137,19 @@ describe "advanced search", js: true do
       
       
       el.click unless me.length == 1 
-                  
-      find "#master-#{@full_player_info.master_id}-player-infos.collapse.in", wait: 5
+      dismiss_modal
+                        
+      have_css "#master-#{@full_player_info.master_id}-player-infos.collapse.in"
+      
+      have_css "#trackers-#{@full_player_info.master_id}.collapse.in"
       
       h = el[:href].split('#').last
       
       expect(page).to have_css("##{h} .tracker-block .tracker-protocol_name .cell-holder", text: protocol.name), "Expected: #{@full_master_record.trackers.map {|m| m.protocol_name} }"
+      dismiss_modal
     end
     
-    page.all(:css, '.master-expander').first.click
+    #page.all(:css, '.master-expander').first.click
     
     logout
     
@@ -203,11 +207,12 @@ describe "advanced search", js: true do
       h = el[:href].split('#').last      
       
       find "##{h}.collapse.in", wait: 5
-      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
-      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.capitalize
+      have_css "##{h}.tracker-block.collapse.in"
+      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: /#{protocol.name}/i
+      expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: /#{sp.name}/i
 
       done += 1
-      
+      dismiss_modal
       break if done > 5
     end
     

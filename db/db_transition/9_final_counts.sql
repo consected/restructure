@@ -243,6 +243,7 @@ update player_contacts set rank = 5 where rank <> 10 and rank <> 5 and rank <> 0
 
 
 /* create a temp table for unique msids */
+drop table if exists unique_masters;
 select distinct on (msid) msid, id into temp unique_masters from masters order by msid, id;
 
 /* get the original count of player contacts associated with the unique set of msids */

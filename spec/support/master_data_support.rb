@@ -222,7 +222,7 @@ module MasterDataSupport
         pes = sp.protocol_events.enabled
         pe = pick_one_from pes
 
-        t = master.trackers.build protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now
+        t = master.trackers.build protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now - 1.year
         res = t.merge_if_exists!
         
       end

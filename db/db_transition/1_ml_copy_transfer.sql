@@ -1,29 +1,5 @@
 set search_path = ml_app,ml_work,q1;
 
----Set back addresses ----------------------
-truncate table ml_app.addresses cascade;
-alter sequence addresses_id_seq start with 1;
-alter sequence address_history_id_seq start with 1;
-
----Set back player_contacts ----------------------
-truncate table ml_app.player_contacts cascade;
-alter sequence player_contacts_id_seq start with 1;
-alter sequence player_contacts_history_id_seq start with 1;
-
----Set back addresses ----------------------
-truncate table ml_app.player_infos cascade;
-alter sequence player_infos_id_seq start with 1;
-alter sequence player_infos_history_id_seq start with 1;
-
----Set back scantroncs ----------------------
-truncate table ml_app.scantrons cascade;
-alter sequence scantrons_id_seq start with 1;
-alter sequence scantrons_history_id_seq start with 1;
-
-
----Set back masters ----------------------
-truncate table ml_app.masters cascade;
-alter sequence masters_id_seq start with 1;
 
 
 /* Create the master list of msids - note this picks only the distinct msid entries,*/
@@ -40,24 +16,29 @@ on ut.orig_username = b.changedby
 ;
 
 --Populate player_contacts from playercontact
-insert into ml_app.player_contacts ( master_id,rec_type,data,source,rank,created_at,updated_at)
-select a.id,b.pctype,b.pcdata,b.source,b.rank,now(),b.lastmod
+insert into ml_app.player_contacts ( master_id,rec_type,data,source,rank,created_at,updated_at, user_id)
+select a.id,b.pctype,b.pcdata,b.source,b.rank,now(),b.lastmod, ut.user_id
 from ml_app.masters a
 inner join ml_work.playercontact b 
 on a.msid = b.msid
+left outer join user_translation ut
+on ut.orig_username = b.changedby
 ;
 
 --Populate player_infos from ml_copy
 insert into ml_app.player_infos (master_id,first_name,last_name,middle_name,nick_name,
 birth_date,death_date,created_at,updated_at,contact_pref,start_year,rank,notes,contact_id,
-college,source )
+college,source, user_id )
 select a.id,b.first_name,b.last_name,b.middle_name,b.nick_name,
 b.birthdate,b.pro_dod,now(),b.lastmod,b.cprefs,b.startyear,b.accuracy_score,
-b.notes,b.contactid,b.pro_college,b.source
+b.notes,b.contactid,b.pro_college,b.source, ut.user_id
 from ml_app.masters a
 inner join ml_work.ml_copy b 
 on a.msid = b.msid
+left outer join user_translation ut
+on ut.orig_username = b.lastupdateby
 ;
+
 --Populate pro_infos from ml_copy
 --
 insert into ml_app.pro_infos (master_id,pro_id,first_name,last_name,middle_name,nick_name,
@@ -68,11 +49,14 @@ from ml_app.masters a
 inner join ml_work.ml_copy b 
 on a.msid = b.msid
 ;
+
 --Populate scantrons from scantron
 --Needs null fields default....
-insert into ml_app.scantrons ( master_id,scantron_id,created_at,updated_at)
-select a.id,b.scantronid
+insert into ml_app.scantrons ( master_id,scantron_id,created_at,updated_at, user_id )
+select a.id,b.scantronid, now(), coalesce(b.lastmod, now()), ut.user_id
 from ml_app.masters a
 inner join ml_work.scantron b 
 on a.msid = b.msid
+left outer join user_translation ut
+on ut.orig_username = b.changedby
 ;

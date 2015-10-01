@@ -77,7 +77,7 @@ Rails.application.configure do
   config.log_level = :info
   
 
-  config.logger = Logger.new("#{Rails.root}/log/production.log", 'daily')
+  config.logger = Logger::Syslog.new('fphs_rails') 
   
   
   # Do not dump schema after migrations.

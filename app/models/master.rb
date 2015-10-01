@@ -75,8 +75,8 @@ class Master < ActiveRecord::Base
       notes: {value: :contains},
       younger_than: {value: :years, condition: "player_infos.birth_date is not null  AND ((current_date - interval ? )) < player_infos.birth_date"},
       older_than: {value: :years, condition: "player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date"},
-      less_than_career_years: {value: :is, condition: "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) < ?"},
-      more_than_career_years: {value: :is, condition: "player_infos.start_year is not null AND player_infos.end_year IS NOT NULL  AND (player_infos.end_year - player_infos.start_year) > ?"}
+      less_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) < ?"},
+      more_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) > ?"}
     },
     pro_infos: {
       first_name: {value: :starts_with},

@@ -105,10 +105,11 @@ describe "tracker block", js: true do
     
     # Open the tracker panel if there are no items in it and it is collapsed
     t = all('[data-template="tracker-badge-template"]')
-    if t.first.text == '0'
-      t.click
-    end    
-    find '.tracker-block.collapse.in', wait: 5
+#    if t.first.text == '0'
+#      t.click
+#    end    
+    have_css ".tracker-block.collapse.in"
+    
 
     # Validate that we don't already have a protocol / sub process tracked for this player
     protocol = Protocol.selectable.first
@@ -127,6 +128,7 @@ describe "tracker block", js: true do
       pe_orig = pe
     end
     
+    have_css "##{h}.tracker-block.collapse.in"
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
     expect(page).not_to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: sp.name.titleize
 
@@ -203,7 +205,7 @@ describe "tracker block", js: true do
     h = open_player_element items.first, items
     
     # We know the tracker has records, so open it 
-    find '.tracker-block.collapse.in', wait: 5
+    have_css ".tracker-block.collapse.in"
 
     # Validate the current protocol item appears as expected
     expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: protocol.name
@@ -240,6 +242,8 @@ describe "tracker block", js: true do
       find("#master_tracker_histories_attributes_0_protocol_event_id option[value='#{pe_orig.id}']").select_option      
     end
 
+    
+    have_css('.master-expander')
     # The results should show at least this one player
     items = page.all(:css, '.master-expander')
     expect(items.length).to be > 0
@@ -251,12 +255,14 @@ describe "tracker block", js: true do
     end
     
 
-    
-    sp_new = pick_one_from sps    
-    pes_new = sp_new.protocol_events.enabled.reload    
-    
     pe_new = nil
-    while pe_new.nil?
+    sp_new = nil
+    pes_new = nil
+    while pe_new.nil? || sp_new.nil?
+      sp_new = pick_one_from sps    
+      pes_new = sp_new.protocol_events.enabled.reload    
+
+      
       pe_new = pick_one_from pes_new
     end
     
@@ -267,26 +273,27 @@ describe "tracker block", js: true do
         
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option      
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-      find('.tracker-event_date input').set '11/15/2012'
+      find('.tracker-event_date input').set '10/01/2015'
       click_button "Update Tracker"
     end
     
     
-    expect(page).to have_css 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
-    expect(page).to have_css 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "11/15/2012"
+    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
+    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "10/1/2015"
 
     
     
-    within 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"]' do
+    within "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"]' do
       click_link 'show history'
     end    
-    find 'tbody.tracker-history.collapse.in', wait: 5
+    
+    have_css "##{h} " + 'tbody.tracker-history.collapse.in'
         
     # The previous item is there still
-    expect(page).to have_css 'tbody.tracker-history .tracker-history-sub_process_name', text: /#{sp_orig.name}/i
-    expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i
-    expect(page).to have_css 'tbody.tracker-history .tracker-history-sub_process_name', text: /#{sp.name}/i
-    expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: /#{pe.name}/i
+    expect(page).to have_css "##{h} " + 'tbody.tracker-history .tracker-history-sub_process_name', text: /#{sp_orig.name}/i
+    expect(page).to have_css "##{h} " + 'tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i
+    expect(page).to have_css "##{h} " + 'tbody.tracker-history .tracker-history-sub_process_name', text: /#{sp.name}/i
+    expect(page).to have_css "##{h} " + 'tbody.tracker-history .tracker-history-event_name', text: /#{pe.name}/i
     
   end
  

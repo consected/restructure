@@ -4,10 +4,6 @@ set SEARCH_PATH=ml_app;
    All names can be changed in the app through admin functionality after initial configuration.
 */
 
-delete from ml_app.accuracy_scores;
-delete from ml_app.general_selections;
-delete from ml_app.colleges;
-
 
 insert into ml_app.accuracy_scores 
 (name, value, created_at, updated_at) values
@@ -58,6 +54,18 @@ insert into ml_app.general_selections
 insert into ml_app.general_selections 
 (item_type, name, value, created_at, updated_at, create_with, edit_always) 
   select distinct 'addresses_type', rec_type, lower(rec_type), now(), now(), true, true from addresses;
+
+
+update ml_app.general_selections set create_with = true, edit_always = true where value = 'not set';
+update ml_app.general_selections set create_with = false, edit_always = false, lock = true where value in ('nflpa', 'nflpa2', 'integrate1', 'integrate2', 'usps', 'cis-redcap', 'redcap');
+update ml_app.general_selections set create_with = false, edit_always = false, edit_if_set = true, lock = false where value in ('cis', 'contactinfo', 'facebook', 'twitter');
+
+
+----- Item flag names
+
+insert into ml_app.item_flag_names (name, item_type, created_at, updated_at) values ('follow up - ambassador', 'player_info', now(), now()), ('follow up - cis', 'player_info', now(), now()), ('follow up - email', 'player_info', now(), now());
+
+
 
 /* Lower case everything that needs to be lower case */
 update ml_app.player_infos set source = lower(source), college = lower(college), first_name = lower(first_name), last_name = lower(last_name), middle_name = lower(middle_name), nick_name = lower(nick_name);

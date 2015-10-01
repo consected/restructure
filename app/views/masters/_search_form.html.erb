@@ -195,11 +195,11 @@
       </div>
       
       <div class="form-group col-sm-2"> 
-        <%= f.label 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on player info start and end years'%>
+        <%= f.label 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
         <%= f.number_field :more_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::PositiveIntPattern   %>
       </div>  
       <div class="form-group col-sm-2"> 
-        <%= f.label 'Career years <', 'data-add-icon' => 'info-sign', title: 'based on player info start and end years'%>
+        <%= f.label 'Career years <', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
         <%= f.number_field :less_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::PositiveIntPattern   %>
       </div>        
     <% end %>    

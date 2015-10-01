@@ -35,7 +35,7 @@ module PlayerInfoSupport
         rank: rank,
         source: 'nflpa',
         start_year: start_year,
-        end_year: opt(start_year ? start_year + rand(10) : nil),
+        end_year: opt(start_year ? start_year + rand(8) : nil),
         notes: 'kjsad hfkshfk jskjfhksa!jdhf sadf js dfjk sdkjf sdkjf\njg fjdhsag fjsa,hdg jsgadfjgsajdf?gsf gsgf sdgj sa fj'
       }
     end

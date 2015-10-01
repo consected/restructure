@@ -28,7 +28,7 @@ module Seeds
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
       
-      create_item_flag_names
+      create_item_flag_names unless Rails.env.production?
     end
   end
 end
