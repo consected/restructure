@@ -6,6 +6,7 @@ class Tracker < ActiveRecord::Base
 
   before_validation :prevent_protocol_change,  on: :update
   before_validation :check_protocol_event
+  before_validation :check_sub_process
   
   validates :protocol, presence: true
 
@@ -13,7 +14,9 @@ class Tracker < ActiveRecord::Base
 #  validates :protocol_event_id, presence: true, if: :event_date?  
 #  validates :event_date, presence: true, if: :protocol_event_id?
   validates :event_date, presence: true, if: :sub_process_id?
-  validates :sub_process, presence: true, if: :protocol_id?
+  
+  # We can't use this, since the error attribute is not translatable, and therefore we can't get sub_process to appear to users as 'status'  
+  #  validates :sub_process, presence: true, if: :protocol_id?
   
   # _merged attribute is used to indicate if a tracker record was merged into an existing
   # record on creation
@@ -180,6 +183,11 @@ class Tracker < ActiveRecord::Base
   def check_protocol_event
     
     errors.add(:method, ' must be selected') if protocol_event_id.nil? && sub_process && sub_process.protocol_events.length > 0
+  end
+  
+  def check_sub_process
+    
+    errors.add(:status, ' must be selected') if sub_process_id.nil? && protocol
   end
   
   def as_json extras={}
