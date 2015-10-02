@@ -193,7 +193,8 @@
         <%= f.label :younger_than, 'data-add-icon' => 'info-sign', title: 'based on player info date of birth' %>
         <%= f.number_field :younger_than, in: Settings::AgeRange, class: 'form-control', pattern: Settings::PositiveIntPattern  %>
       </div>
-      
+    <% end %>  
+    <%= f.fields_for :pro_infos, child_index: 0 do |f| %>           
       <div class="form-group col-sm-2"> 
         <%= f.label 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
         <%= f.number_field :more_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::PositiveIntPattern   %>

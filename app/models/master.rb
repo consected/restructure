@@ -74,15 +74,14 @@ class Master < ActiveRecord::Base
       nick_name: {value: :starts_with},
       notes: {value: :contains},
       younger_than: {value: :years, condition: "player_infos.birth_date is not null  AND ((current_date - interval ? )) < player_infos.birth_date"},
-      older_than: {value: :years, condition: "player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date"},
-      less_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) < ?"},
-      more_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) > ?"}
+      older_than: {value: :years, condition: "player_infos.birth_date is not null  AND ((current_date - interval ?)) > player_infos.birth_date"}
     },
     pro_infos: {
       first_name: {value: :starts_with},
       middle_name: {value: :starts_with},
-      nick_name: {value: :starts_with}
-      
+      nick_name: {value: :starts_with},
+      less_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) < ?"},
+      more_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) > ?"}            
     },
     addresses: {
       street: {value: :starts_with},

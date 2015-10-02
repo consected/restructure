@@ -3,7 +3,8 @@ class ProInfo < ActiveRecord::Base
   
   before_update :prevent_save
   
-  attr_accessor :enable_updates, :contact_data
+  # Handle special functionality and allow simple search and compound searches to function
+  attr_accessor :enable_updates, :contact_data, :less_than_career_years, :more_than_career_years
   
   protected
     def prevent_save

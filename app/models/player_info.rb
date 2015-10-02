@@ -7,7 +7,7 @@ class PlayerInfo < ActiveRecord::Base
   
   
   # Allow simple search and compound searches to function
-  attr_accessor :contact_data, :younger_than, :older_than, :age, :less_than_career_years, :more_than_career_years
+  attr_accessor :contact_data, :younger_than, :older_than, :age
 
   before_validation :prevent_user_changes, on: :update
   validate :dates_sensible
