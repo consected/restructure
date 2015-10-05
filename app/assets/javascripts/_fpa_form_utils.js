@@ -136,9 +136,15 @@ _fpa.form_utils = {
             // in all the child select fields hide all possible options
             children.find('option[data-filter-id]').removeClass('filter-option-show').hide();
             // in all the child select fields re-show only those fields matching the parent selector
-            children.find('option[data-filter-id="'+v+'"]').addClass('filter-option-show').show();
+            var shown = children.find('option[data-filter-id="'+v+'"]').addClass('filter-option-show').show();
             // set attribute on the children, so we can sense this has changed (useful in features specs)
             children.attr('data-parent-filter-id', v);
+            
+            if (shown.length === 0)
+                children.find('option[value=""]').html('-none-');
+            else
+                children.find('option[value=""]').html('-select-');
+            
             // now for each child select field reset it if the current option doesn't match
             // the new parent selection
             children.each(function(){                
