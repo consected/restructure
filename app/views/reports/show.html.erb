@@ -1,0 +1,36 @@
+<div class="report-criteria">
+  
+</div>
+<% if @results %>
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">    
+<h1>Report Results</h1>
+<h3>Count: <span class="result-count"><%=@results.length%></span></h3>
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+<%=link_to "CSV", reports_path(attributes: params[:attributes], format: :csv) %>
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th class="no-sort"></th>
+      <% @results.first.each do |col| %>
+        <th><%=col.first%></th>
+      <% end %>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @results.each do |list_item| %>
+      <tr class="">
+        <td></td>
+        <% list_item.each do |col| %>
+        <td><%= col.last %></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%=  render partial: 'admin_handler/index_actions'  %>
+  </div>
+</div>
+<% end %>

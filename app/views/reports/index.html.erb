@@ -1,31 +1,45 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">    
-<h1>Report Results</h1>
+<h1>Reports</h1>
 
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
-<%=link_to "CSV", reports_path(attributes: params[:attributes], format: :csv) %>
+
 <table class="table tablesorter admin-list">
   <thead>
     <tr>
       <th class="no-sort"></th>
-      <% @results.first.each do |col| %>
-        <th><%=col.first%></th>
-      <% end %>
+      <th>Name</th>      
+      <th>Primary Table</th>
+      <th>Description</th>
+      <th>SQL</th>
+      <th>Search Attributes</th>
+      <th>Disabled</th>
+      <th>Admin</th>
+      <th class="no-sort"></th>
     </tr>
   </thead>
 
   <tbody>
-    <% @results.each do |list_item| %>
-      <tr class="">
-        <td></td>
-        <% list_item.each do |col| %>
-        <td><%= col.last %></td>
-        <% end %>
+    <% @reports.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td><%= admin_edit_btn list_item.id%> </td>
+      
+        <td><%= link_to  list_item.name, report_path(list_item.id), target: '_blank' %></td>        
+        <td><%= list_item.primary_table %></td>  
+        <td><%= list_item.description %></td>  
+        <td><%= list_item.sql %></td>  
+        
+        <td><%= list_item.search_attrs %></td>  
+        
+        <td><%= list_item.disabled %></td>
+        <td><%= list_item.admin_name %></td>
+        
+        
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%=  render partial: 'admin_handler/index_actions'  %>
+<%=  render partial: 'admin_handler/index_actions'  %>    
   </div>
 </div>
