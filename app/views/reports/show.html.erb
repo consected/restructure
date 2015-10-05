@@ -1,13 +1,34 @@
 <div class="report-criteria">
+  <h1><%=@report.name%></h1>
+  <p><%= @report.description %></p>
   
+  <div>
+      <%= form_tag report_path(@report.id), method: :get, class: 'form' do %>
+      <div class="row">
+        <% @report.search_attributes.each do |name, type| %>
+          <div class="col-md-4">
+          <%= label_tag name %>
+          <%= text_field_tag "search_attrs[#{name}]", @report.search_attr_values[name], type: type, class: 'form-control' %>
+          </div>
+        <%end%>
+      
+        <div class="col-md-4">
+          <%= submit_tag :table, class: "btn btn-primary" %>
+            <%= submit_tag "CSV", name: :format, value: "csv", class: "btn btn-primary" %>
+            <%= submit_tag "JSON", name: :format, value: "json", class: "btn btn-primary" %>
+            
+        </div>
+      </div>
+      <%end%>
+  </div>
 </div>
 <% if @results %>
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">    
 <h1>Report Results</h1>
-<h3>Count: <span class="result-count"><%=@results.length%></span></h3>
+<h3>Count: <span class="result-count"><%=@results.count%></span></h3>
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
-<%=link_to "CSV", reports_path(attributes: params[:attributes], format: :csv) %>
+
 <table class="table tablesorter admin-list">
   <thead>
     <tr>

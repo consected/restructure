@@ -6,17 +6,20 @@
   <h2 >Admin Actions</h2>
   <div class="row">
     <div class="col-sm-12">
+      <h3>Manage Selections</h3>
       <ul class="nav">                  
         <li class="nav"><%= link_to "Accuracy Scores", accuracy_scores_path %> </li>
         <li class="nav"><%= link_to "Colleges List", colleges_path %> </li>
         <li class="nav"><%= link_to "General Selections", general_selections_path %> </li> 
-        <li class="nav"><%= link_to "Manage Item Flags", item_flag_names_path %> </li>               
+        <li class="nav"><%= link_to "Item Flags", item_flag_names_path %> </li>               
+        <li class="nav"><%= link_to "Protocol / Status / Method", protocols_path %> </li>         
       </ul>
     </div>
     <div class="col-sm-12">
+      <h3>Admin Functions</h3>  
       <ul class="nav">    
-        <li class="nav"><%= link_to "User Management", manage_users_path %> </li> 
-        <li class="nav"><%= link_to "Manage Protocols / Processes", protocols_path %> </li>         
+        <li class="nav"><%= link_to "Reports", reports_path %> </li> 
+        <li class="nav"><%= link_to "User Management", manage_users_path %> </li>         
         <li class="nav"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete %> </li>
       </ul>      
     </div>
