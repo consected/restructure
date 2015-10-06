@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
 
   resources :reports
+  namespace :admin do
+    resources :reports, except: [:show, :destroy]
+  end
     
   resources :action_logs, only: [:show, :index]
   resources :accuracy_scores, except: [:show, :destroy]  

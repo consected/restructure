@@ -3,23 +3,14 @@ class Report < ActiveRecord::Base
   include AdminHandler
   include SelectorCache
   
-  
+  scope :enabled, -> {where "disabled <> true"}  
   
   class BadSearchCriteria < Exception
     
   end
   
   validates :name, presence: true
-#  
-#  {
-#      primary_table: 'tracker_history',
-#      sql: "select count(*) from tracker_history where event_date >= :from_event_date and event_date <= :to_event_date; ",
-#      search_attrs: {
-#        from_event_date: :date,
-#        to_event_date: :date
-#      }      
-#    }
-   
+
   def search_attr_values
     @search_attr_values || ''
   end
@@ -47,7 +38,9 @@ class Report < ActiveRecord::Base
     # Note that Postgres is really a requirement for a transaction to protect against DDL. Either way, limiting grants 
     # on DDL to the Rails user is expected.
     self.class.connection.transaction do
-      res = self.class.connection.execute(ActiveRecord::Base.send(:sanitize_sql, [sql, @search_attr_values], primary_table))    
+      clean_sql = ActiveRecord::Base.send(:sanitize_sql, [sql, @search_attr_values], primary_table)
+      logger.info "CLEAN SQL:: #{clean_sql}"
+      res = self.class.connection.execute(clean_sql)    
       raise ActiveRecord::Rollback
     end
     

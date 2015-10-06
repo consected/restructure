@@ -14,6 +14,9 @@
     <%= link_to "events for all protocols", protocol_events_path(all: true), class: "btn btn-warning" %>
   <%end%>
 
+  <%if @report %>
+    <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>
+  <%end%>
   
   <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: params[:filter]), remote: true, class: "btn btn-primary" if action_name == 'index' rescue nil%>
 <%end%>

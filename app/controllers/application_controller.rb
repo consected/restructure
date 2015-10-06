@@ -73,6 +73,7 @@ protected
       if current_user
         @primary_navs << {label: 'Research', url: '/masters/', route: 'masters#index'}
         @primary_navs << {label: 'Create MSID', url: '/masters/new', route: 'masters#new'}        
+        @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'}        
       end
       
       

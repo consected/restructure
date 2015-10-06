@@ -11,17 +11,28 @@
       <th>Name</th>      
       <th>Primary Table</th>
       <th>Description</th>
+      <th>SQL</th>
+      <th>Search Attributes</th>
+      <th>Disabled</th>
+      <th>Admin</th>
+      <th class="no-sort"></th>
     </tr>
   </thead>
 
   <tbody>
     <% @reports.each do |list_item| %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-        <td> </td>
+        <td><%= admin_edit_btn list_item.id%> </td>
       
         <td><%= link_to  list_item.name, report_path(list_item.id), target: '_blank' %></td>        
         <td><%= list_item.primary_table %></td>  
         <td><%= list_item.description %></td>  
+        <td><%= list_item.sql %></td>  
+        
+        <td><%= list_item.search_attrs %></td>  
+        
+        <td><%= list_item.disabled %></td>
+        <td><%= list_item.admin_name %></td>
         
         
       </tr>
@@ -29,5 +40,6 @@
   </tbody>
 </table>
 
+<%=  render partial: 'admin_handler/index_actions'  %>    
   </div>
 </div>
