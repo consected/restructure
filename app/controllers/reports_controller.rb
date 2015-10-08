@@ -2,6 +2,7 @@ class ReportsController < ApplicationController
 
   require 'csv'
   before_action :authenticate_user_or_admin!
+  after_action :clear_results, only: ['run']
 
   def index    
     pm = Report.enabled
@@ -86,4 +87,10 @@ class ReportsController < ApplicationController
     def connection
       @connection ||= ActiveRecord::Base.connection
     end
+    
+  def clear_results
+    # Needed to help control memory usage, according to PG:Result documentation
+    @results.clear if @results
+  end
+    
 end

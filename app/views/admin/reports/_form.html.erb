@@ -11,22 +11,42 @@
     <%= f.label :primary_table %>
     <%= f.text_field :primary_table %>
   </div>
-      
-  <div class="form-group">
-    <%= f.label :description %>
-    <%= f.text_area :description %>
-  </div>      
-      
-  <div class="form-group">
-    <%= f.label :sql %>
-    <%= f.text_area :sql %>
-  </div>
-      
   <div class="form-group">
     <%= f.label :search_attrs%>
     <%= f.text_area  :search_attrs %>
   </div>
-
+    
+  <div class="form-group">
+    <%= f.label :description %>
+    <%= f.text_area :description %>
+  </div>      
+  <div class="row">    
+    <div class="col-sm-12">
+      <div class="">
+        <%= f.label :sql %>
+        <%= f.text_area :sql, style: "width: 99%; height: 270px;" %>
+      </div>
+    </div>
+    <div class="col-sm-6" style="text-align: left">
+      <ul id="protocols-list" style="max-height: 270px; overflow: auto; background-color: white;">
+      <% Protocol.all.each do |p| %>
+          <li style="color: <%= p.disabled ? '#aaa' : 'auto' %>" id="protocol-<%=p.id%>"><%=p.id%> - <%= p.name %></li>
+          <ul>
+          <% p.sub_processes.all.each do |sp| %>
+              <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>"><%=sp.id%> - <%= sp.name %></li>
+              <ul>
+              <% sp.protocol_events.all.each do |pe| %>
+                  <li  style="color: <%= p.disabled || sp.disabled || pe.disabled ? '#aaa' : 'auto' %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>"><%=pe.id%> - <%= pe.name %></li>
+              <% end %>
+              </ul>
+          <% end %>
+          </ul>
+      <% end %>
+      </ul>
+    </div>    
+  </div>
+      
+  
   <div class="form-group">
     <%= f.check_box :disabled %>
     <%= f.label :disable %>

@@ -1,7 +1,13 @@
 class DefinitionsController < ApplicationController
   before_action :authenticate_user_or_admin!
   
-  Available = {"protocol_events" => :selector_collection, "protocols" => :selector_collection, "sub_processes" => :selector_collection, "colleges" => :selector_array}.freeze
+  Available = {
+    "protocol_events" => :selector_collection, 
+    "protocols" => :selector_collection, 
+    "sub_processes" => :selector_collection, 
+    "colleges" => :selector_array, 
+    "accuracy_scores" => :selector_collection
+  }.freeze
    
   def show
     

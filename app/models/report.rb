@@ -2,7 +2,7 @@ class Report < ActiveRecord::Base
   
   include AdminHandler
   include SelectorCache
-  
+    
   scope :enabled, -> {where "disabled <> true"}  
   
   class BadSearchCriteria < Exception
@@ -44,8 +44,36 @@ class Report < ActiveRecord::Base
       raise ActiveRecord::Rollback
     end
     
-    res
+    @results = res
+        
+  end
+  
+  
+  # Get the table names corresponding to each column in the results
+  # Since PG only returns oid values for each
+  def result_tables
+            
+    return unless @results && @results.count > 0
     
+    return @result_tables if @result_tables
+    
+    @result_tables = {}
+    
+    i = 0
+    @results.fields.each do |col|
+      oid = @results.ftable(i).to_i.to_s #make sure it's clean and usable
+      logger.info "OID: #{oid}"
+      unless @result_tables[oid]      
+        clean_sql = "select relname from pg_class where oid=#{oid.to_i}"
+        get_res = self.class.connection.execute(clean_sql)  
+        
+        table_name = get_res.first.first.last unless get_res
+
+        @result_tables[oid] = table_name 
+      end
+      i+=1
+    end
+    @result_tables
   end
   
   def search_attrs_ok 
