@@ -8,8 +8,7 @@
   <thead>
     <tr>
       <th class="no-sort"></th>
-      <th>Name</th>      
-      <th>Primary Table</th>
+      <th>Name</th>            
       <th>Description</th>
       <th>SQL</th>
       <th>Search Attributes</th>
@@ -25,7 +24,7 @@
         <td><%= admin_edit_btn list_item.id%> </td>
       
         <td><%= link_to  list_item.name, report_path(list_item.id), target: '_blank' %></td>        
-        <td><%= list_item.primary_table %></td>  
+        
         <td><%= list_item.description %></td>  
         <td><%= list_item.sql %></td>  
         

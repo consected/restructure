@@ -16,7 +16,12 @@ class Report < ActiveRecord::Base
   end
   
   def search_attributes
-    @search_attrs ||= JSON.parse self.search_attrs
+    begin
+      @search_attrs ||= JSON.parse self.search_attrs
+    rescue
+      @search_attrs ||= YAML.load self.search_attrs
+    end
+      
   end
   
   
@@ -27,7 +32,7 @@ class Report < ActiveRecord::Base
     report_definition = self
 
     sql = report_definition.sql
-    primary_table = report_definition.primary_table
+    primary_table = 'masters'
     
     raise Report::BadSearchCriteria unless search_attrs_ok
     
@@ -58,22 +63,41 @@ class Report < ActiveRecord::Base
     return @result_tables if @result_tables
     
     @result_tables = {}
-    
+    logger.info "Getting the array of result_tables"
     i = 0
     @results.fields.each do |col|
       oid = @results.ftable(i).to_i.to_s #make sure it's clean and usable
       logger.info "OID: #{oid}"
-      unless @result_tables[oid]      
+      unless @result_tables.has_key? oid
         clean_sql = "select relname from pg_class where oid=#{oid.to_i}"
         get_res = self.class.connection.execute(clean_sql)  
         
-        table_name = get_res.first.first.last unless get_res
+        table_name = get_res.first.first.last if get_res && get_res.first
 
         @result_tables[oid] = table_name 
       end
       i+=1
     end
     @result_tables
+  end
+  
+  def result_tables_by_index
+    
+    return unless @results && @results.count > 0
+    
+    return @result_tables_oid if @result_tables_oid
+    
+    l = @results.fields.length
+    
+    logger.info "Setting up oids for tables in #{l} columns"
+    
+    @result_tables_oid = []
+    (0..l-1).each do |i|
+      oid = @results.ftable(i).to_s
+      logger.info "Getting oid: #{oid} for col #{i}"
+      @result_tables_oid[i] = result_tables[oid]
+    end
+    @result_tables_oid
   end
   
   def search_attrs_ok 

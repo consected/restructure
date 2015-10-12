@@ -7,21 +7,18 @@
     <%= f.text_field :name %>
   </div>
 
-  <div class="form-group">
-    <%= f.label :primary_table %>
-    <%= f.text_field :primary_table %>
-  </div>
+  
   <div class="form-group">
     <%= f.label :search_attrs%>
     <%= f.text_area  :search_attrs %>
   </div>
-    
-  <div class="form-group">
-    <%= f.label :description %>
-    <%= f.text_area :description %>
-  </div>      
+            
   <div class="row">    
-    <div class="col-sm-12">
+    <div class="col-sm-12" style="text-align: left">
+      <div class="">
+        <%= f.label :description %>
+        <%= f.text_area :description,  style: "width: 99%; height: 70px;" %>
+      </div>  
       <div class="">
         <%= f.label :sql %>
         <%= f.text_area :sql, style: "width: 99%; height: 270px;" %>

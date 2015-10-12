@@ -181,6 +181,7 @@ _fpa.form_utils = {
         if(!block) block = $(document);
         var tss = block.find('.tablesorter').not('.attached-tablesorter');
         
+        window.setTimeout(function(){
         tss.each(function(){
            var ts = $(this);
            
@@ -195,6 +196,7 @@ _fpa.form_utils = {
            //{0: {sorter: false}}
            ts.tablesorter( {dateFormat: 'us', headers: h}).addClass('attached-tablesorter');  
         });                
+    },100);
     },
 
     setup_bootstrap_items: function(block){
