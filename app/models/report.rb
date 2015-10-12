@@ -34,7 +34,7 @@ class Report < ActiveRecord::Base
     sql = report_definition.sql
     primary_table = 'masters'
     
-    raise Report::BadSearchCriteria unless search_attrs_ok
+    raise Report::BadSearchCriteria unless search_attrs_prep
     
     res=[]
     
@@ -100,11 +100,17 @@ class Report < ActiveRecord::Base
     @result_tables_oid
   end
   
-  def search_attrs_ok 
+  def search_attrs_prep 
     
     search_attr_values.each do |k,v|
       if search_attributes[k.to_s].nil? || v.blank?
         return false
+      end
+      
+      if v.is_a? Hash
+        search_attr_values[k] = v.collect{|k,v| v}
+      elsif v.include? "\n"
+        search_attr_values[k] = v.split("\n").map{|a| a.squish}
       end
     end
     true

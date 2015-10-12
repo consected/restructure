@@ -6,25 +6,20 @@
         <p><%= @report.description.gsub("\n", "<br />").html_safe %></p>
         <p>&nbsp;</p>
         <div>
-            <%= form_tag report_path(@report.id), method: :get, class: 'form form-inline', id: "report_query_form" do %>
+            <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted', id: "report_query_form" do %>
             <div class="row">
               <% @report.search_attributes.each do |name, type| %>
-                <div class="col-md-6">
-                <%= label_tag name %>
-                <% if ['accuracy_score'].include? name %>
-                    <%= select_tag "search_attrs[#{name}]", @report.search_attr_values[name],  AccuracyScore.selector_name_value_pair %>
-                  <%else%>
-                <%= text_field_tag "search_attrs[#{name}]", @report.search_attr_values[name], type: type, class: 'form-control' %>
-                    <%end%>
+                <div class="col-md-6" style="padding-bottom: 1em;">                
+                <%= report_field name, type, @report.search_attr_values[name] %>
                 </div>
               <%end%>
+              
+            </div>
+            <div class="">
+              <%= submit_tag :table, class: "btn btn-primary" %>
+              <%= submit_tag "CSV", name: :format, value: "csv", class: "btn btn-primary" %>
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-primary target_new_window" %>
 
-              <div class="col-md-4">
-                <%= submit_tag :table, class: "btn btn-primary" %>
-                <%= submit_tag "CSV", name: :format, value: "csv", class: "btn btn-primary" %>
-                <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-primary target_new_window" %>
-
-              </div>
             </div>
             <%end%>
         </div>
@@ -32,6 +27,20 @@
     </div>
   </div>
 </div>
+<script>
+          $('a.btn[data-attribute]').click(function(ev){
+          ev.preventDefault();
+          var da = $(this).attr('data-attribute');
+          
+          var v = $('#search_attrs_'+da);
+          var newval = v.val();
+          if(newval.length > 0)newval += "\n";
+          newval += $('#multiple_attrs_'+da).val();
+          v.val(newval);
+          
+          
+        });
+</script>
 <p>&nbsp;</p>
 <% if @results %>
 <% rt = @report.result_tables_by_index || []%>
@@ -130,7 +139,9 @@
             $('#report_query_form').attr('target', '_top');      
           }
 
-        });
+        });        
+
+        
       }, 100);
     </script>
 <% end %>

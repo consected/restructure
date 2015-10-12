@@ -1,0 +1,46 @@
+<div class="row">    
+  <div class="col-sm-12" style="text-align: left;">
+    <%= f.label :add_attribute %>
+    <p>name: <input id="search_attrs_name" /></p>
+    <p>label(optional): <input id="search_attrs_label" /></p>
+    <p>type: 
+        <select id="search_attrs_type">
+            <option value="number">number</option>
+            <option value="text">text</option>
+            <option value="date">date</option>
+            <option value="accuracy_score">accuracy score</option>
+            <option value="general_selection">general selection</option>
+            <option value="protocol">tracker protocol</option>
+            <option value="sub_process">tracker status (sub_process)</option>
+            <option value="protocol_event">tracker method (protocol_event)</option>
+            <option value="item_flag_name">item flag name</option>
+        </select>
+    </p>
+    <p>filter dropdown:
+        <select id="search_attrs_filter">
+            <option value="all">all</option>
+            
+            <% GeneralSelection::ItemTypes.dup.each do |i|%>
+              <option value="item_type: <%=i%>">item_type: <%=i%></option>
+            <% end %>            
+            
+        </select>
+    </p>
+    <p>single or multiple values:
+      <select id="search_attrs_multi">
+            <option value="single">single</option>
+            <option value="between">between (2 values)</option>
+            <option value="multiple">multiple (in)</option>            
+        </select>
+    </p>
+    <p>default:
+        <textarea id="search_attrs_default"></textarea>
+    </p>
+    <p><button id="search_attrs_add">Add</button></p>
+    <div id="search_attr_instruction">(reference in SQL with <strong id="search_attr_ex"></strong>)</div>
+  </div>
+  <div class="col-sm-12" style="text-align: left;">
+    <%= f.label :search_attributes%>
+    <%= f.text_area  :search_attrs,  style: "width: 99%; height: 200px;" %>
+  </div>  
+</div>  

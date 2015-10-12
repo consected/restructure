@@ -1,0 +1,18 @@
+<div class="col-sm-6" style="text-align: left">
+  <%= f.label 'Protocol / status (sub_process) / method (protocol_event)'%>
+  <ul id="protocols-list" style="max-height: 270px; overflow: auto; background-color: white;">
+  <% Protocol.all.each do |p| %>
+      <li style="color: <%= p.disabled ? '#aaa' : 'auto' %>" id="protocol-<%=p.id%>"><%=p.id%> - <%= p.name %></li>
+      <ul>
+      <% p.sub_processes.all.each do |sp| %>
+          <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>"><%=sp.id%> - <%= sp.name %></li>
+          <ul>
+          <% sp.protocol_events.all.each do |pe| %>
+              <li  style="color: <%= p.disabled || sp.disabled || pe.disabled ? '#aaa' : 'auto' %>" data-sub-process-id="<%=sp.id%>" id="protocol_event-<%=sp.id%>"><%=pe.id%> - <%= pe.name %></li>
+          <% end %>
+          </ul>
+      <% end %>
+      </ul>
+  <% end %>
+  </ul>
+</div>    

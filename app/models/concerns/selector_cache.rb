@@ -8,10 +8,14 @@ module SelectorCache
     before_save :invalidate_cache
     before_create :invalidate_cache
     
-    scope :enabled, -> { where "disabled is null OR disabled = FALSE" }
+    scope :enabled, -> { where "disabled is null OR disabled = FALSE" }    
   end
   
   class_methods do
+    
+    def selector_cache?
+      true
+    end
     
     def downcase_if_string val
       if val.is_a? String
@@ -38,6 +42,9 @@ module SelectorCache
     end
     def nv_pair_cache_key 
       "#{self.to_s}_nameval"
+    end
+    def nv_all_cache_key 
+      "#{self.to_s}_namevalall"
     end
     def attributes_cache_key
       "#{self.to_s}_attributes"      
@@ -86,6 +93,24 @@ module SelectorCache
       
       Rails.cache.fetch(ckey){
         enabled.where(conditions)
+      }
+    end
+
+    def all_name_value_enable_flagged conditions=nil
+      ckey="#{nv_all_cache_key}#{conditions}"
+      
+      Rails.cache.fetch(ckey){
+        all.where(conditions).collect {|c| 
+          
+          if c.respond_to?(:parent_name)
+            v = c.id
+            vlabel = "#{v} (#{c.parent_name})"
+            
+          elsif c.respond_to?(:value) 
+            v =  c.value          
+            vlabel = v
+          end
+          ["#{vlabel}- #{c.name} (##{c.id}) #{c.disabled ? '[disabled]' : ''}", downcase_if_string(v)] }.sort
       }
     end
     

@@ -12,4 +12,8 @@ class SubProcess < ActiveRecord::Base
     protocol ? protocol.name : ''
   end
   
+  def parent_name
+    protocol_name
+  end
+  
 end
