@@ -16,6 +16,7 @@
               
             </div>
             <div class="">
+              <%= hidden_field_tag  'search_attrs[_report_id_]', ''%>
               <%= submit_tag :table, class: "btn btn-primary" %>
               <%= submit_tag "CSV", name: :format, value: "csv", class: "btn btn-primary" %>
               <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-primary target_new_window" %>
@@ -28,7 +29,7 @@
   </div>
 </div>
 <script>
-          $('a.btn[data-attribute]').click(function(ev){
+        $('a.btn[data-attribute]').click(function(ev){
           ev.preventDefault();
           var da = $(this).attr('data-attribute');
           
@@ -40,54 +41,66 @@
           
           
         });
+
+<% if !@results && @report.search_attributes.length == 0 %>
+  $('form#report_query_form input[type="submit"][value="table"]').click();
+<%end%>
+        
+        
 </script>
-<p>&nbsp;</p>
+<% if current_admin && @report.clean_sql%>
+<div class="row">
+    <div class="col-md-20 col-md-offset-2">
+      <pre><%=@report.clean_sql.html_safe%>
+      </pre>
+    </div>
+</div>
+<% end %>
 <% if @results %>
 <% rt = @report.result_tables_by_index || []%>
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">    
-    <div class="row">
-      <div class="col-sm-24 ">
+    <div class="row" style="background-color: #eee;">
+      <div class="col-sm-22 col-sm-offset-1 ">
       
-          <h2>Results <span class="result-count"><%=@results.count%></span> over <span class="field-count"><%=@results.nfields%></span> fields</h2>
-    <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
-
-    <table class="table tablesorter admin-list">
-      <thead>
-        <tr>
-          <th class="no-sort"></th>
-          <% i = 0 %>
-          <% @results.fields.each do |col| %>
-            <th><p><%=col%></p>
-              <p class="small"><%=rt[i] %></p>
-            </th>
-          <%  i += 1%>
-          <% end %>
-        </tr>
-      </thead>
-      <tbody>
-        
-        <% @results.each_row do |list_item| %>
-          
-          
-          <tr class="">
-            <td></td>
-            <% i = 0 %>
-            
-            <% list_item.each do |col| %>
-            <td data-col-type="<%=@results.fields[i] %>"  data-col-table="<%=rt[i] %>"><%= col %></td>
-            <%  i += 1%>
-            <% end %>
-
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-
-
-    
+        <h3 class="text-right"><span class="result-count"><%=@results.count%></span> <%=@results.count == 1 ? 'row' : 'rows'%></h3>
+        <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
     </div>
+        <table class="table tablesorter admin-list" style="margin:1em;">
+          <thead>
+            <tr>
+              
+              <% i = 0 %>
+              <% @results.fields.each do |col| %>
+                <th><p><%=col%></p>
+                  <p class="small"><%=rt[i] %></p>
+                </th>
+              <%  i += 1%>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+
+            <% @results.each_row do |list_item| %>
+
+
+              <tr class="">
+               
+                <% i = 0 %>
+
+                <% list_item.each do |col| %>
+                <td data-col-type="<%=@results.fields[i] %>"  data-col-table="<%=rt[i] %>"><%= col %></td>
+                <%  i += 1%>
+                <% end %>
+
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+    
+      
+    
   </div>
 </div>
 
@@ -145,4 +158,3 @@
       }, 100);
     </script>
 <% end %>
-<%=  render partial: 'admin_handler/index_actions'  %>

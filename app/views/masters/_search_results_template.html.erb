@@ -1,3 +1,14 @@
+<%= render partial: 'player_infos/search_results_template' %>
+<%= render partial: 'pro_infos/search_results_template' %>
+<%= render partial: 'addresses/search_results_template' %>
+<%= render partial: 'player_contacts/search_results_template' %>
+<%= render partial: 'scantrons/search_results_template' %>
+<%= render partial: 'trackers/search_results_template' %>
+<%= render partial: 'tracker_histories/search_results_template' %>
+<%= render partial: 'item_flags/search_results_template' %>
+<%= render partial: 'external_links/search_results_template' %>
+
+
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
   <strong class="player-names">                
     {{capitalize first_name}} 
@@ -19,267 +30,21 @@
   </span>
 </script>
 
-<script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
-  {{#was _created}}<div class="index-{{_created}}" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}" data-template="player-info-result-template" data-sub-item="player_info" data-sub-id="{{id}}" >{{/was}}
-    <ul class="list-group">
-      <li class="list-group-item is-heading">
-
-        <a data-toggle="scrollto-result" data-target="#player-info-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
-        <span class="pull-right label label-info player-info-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{accuracy_score_name}}{{else}}(no rank){{/if}}</span>
-          <h4 class="list-group-item-heading">Player</h4>
-        
-        {{>item_flag_container item_type="player_info"}}         
-      </li>
-      
-      {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college,source_name" }}
-      <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-      {{/filter}}
-      <div class="player-info-notes">
-        <div class="panel panel-default panel-body">
-        {{pretty_string notes return_string="true"}}
-        </div>
-      </div>
-              
-      <li class="list-group-item record-meta">{{>update_metadata}}</li>
-    </ul>
-    {{#was _created}}</div>{{/was}}
-</script>
-
-<script id="pro_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-                            
-      <div id="pro-info-{{master_id}}-{{id}}">        
-
-        <ul class="list-group">
-            <li class="list-group-item  is-heading">
-              <h4  class="list-group-item-heading">Pro Info</h4>            
-            </li>
-            
-            {{#filter this "pro_id,first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
-            <li class="list-group-item pro-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-            {{/filter}}
-            
-        </ul>
-
-      </div>  
-    
-</script>
-
-<script id="address_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="index-{{_created}}" id="address-{{master_id}}-{{id}}" data-subscription="address-edit-form-{{master_id}}-{{id}}"  data-sub-item="address" data-sub-id="{{id}}" data-preprocessor="address_edit_form" data-template="address-result-template" data-sort-desc="data-item-rank">{{/was}}
-  <ul class="list-group" data-item-rank="{{rank}}" data-address-is-us="{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}">
-      <li class="list-group-item is-heading">
-        <a  data-toggle="scrollto-result" data-target="#address-{{master_id}}-{{id}}"title="edit" class="edit-entity edit-address pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/addresses/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-
-        <span class="pull-right label label-info address-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span>
-        <h4 class="list-group-item-heading">Addresses</h4>                        
-        
-      </li>
-      
-      {{#filter this "country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type" }}      
-      <li class="list-group-item address-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
-      {{/filter}}
-      
-      <li class="list-group-item record-meta">{{>update_metadata}}</li>
-  </ul>
-  {{#was _created}}</div>{{/was}}
-</script>
-
-
-
-<script id="player_contact_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="index-{{_created}}" id="player-contact-{{master_id}}-{{id}}" data-subscription="player-contact-edit-form-{{master_id}}-{{id}}" data-preprocessor="player_contact_edit_form"  data-template="player-contact-result-template" data-sub-item="player_contact" data-sub-id="{{id}}" data-sort-desc="data-item-rank">{{/was}}
-  <ul class="list-group" data-item-rank="{{rank}}">
-      <li class="list-group-item is-heading">
-        <a data-toggle="scrollto-result" data-target="#player-contact-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-player-contact pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-        <span class="pull-right label label-info player-contact-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span><h4 class="list-group-item-heading" style="text-transform: capitalize" >{{rec_type}}</h4>                        
-        
-      </li>
-      
-      <li class="list-group-item player-contact-data"><small>contact</small> <strong class="email">{{data}}</strong></li>
-      
-      <li class="list-group-item player-contact-source_name">      
-        
-            <small>source</small> <strong>{{pretty_string source_name return_string="true" capitalize="false"}}</strong>
-        
-      
-      </li>
-      <li class="list-group-item record-meta">{{>update_metadata}}</li>
-  </ul>
-  {{#was _created}}</div>{{/was}}
-</script>
-
-
-<script id="scantron_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="index-{{_created}}" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}" data-template="scantron-result-template" data-sub-item="scantron" data-sub-id="{{id}}" >{{/was}}
-  <ul class="list-group">
-      <li class="list-group-item scantron-scantron_id is-heading">
-        <a data-toggle="scrollto-result" data-target="#scantron-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-        <small>Scantron</small> <strong>{{scantron_id}}</strong>
-      </li>      
-  </ul>
-  {{#was _created}}</div>{{/was}}
-</script>
-
-
-<script id="tracker_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-      <td class="tracker-edit">
-      {{#is tracker_history_length '>' 1}}
-      <a title="show history" href="/masters/{{master_id}}/trackers/{{id}}/tracker_histories?skip_last=true" data-toggle="collapse" data-target="#trackers-{{master_id}}-{{id}}-history" data-result-target="#trackers-{{master_id}}-{{id}}-history" data-template="tracker-histories-result-template" data-remote="true" class="collapsed glyphicon prevent-on-collapse"><span class="glyphicon glyphicon-time hide-not-collapsed"></span><span class="glyphicon glyphicon-triangle-top hide-collapsed"></span></a>    
-      {{else}}
-      <span class="glyphicon glyphicon-time disabled" title="no history" ></span>
-      {{/is}}
-      </td>
-      {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}
-      <td class="tracker-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../../protocol_event_id}}"{{/is}}>      
-      <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
-      {{#is @key 'event_name'}}
-      {{#if ../../record_id}} <a href="#{{hyphenate ../../../record_type_us}}-{{../../../master_id}}-{{../../../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../../record_type_us}}"></a>{{/if}}
-      {{/is}}
-      </div>
-      </td>
-      {{/filter}}
-      <td class="tracker-record-meta"><span class="record-meta">{{>update_metadata}}</span></td>
-      <td class="edit-tracker-col">      
-      {{#is protocol_name '!==' 'Updates'}}
-      <a title="edit tracker record" class="edit-entity edit-tracker glyphicon glyphicon-edit" href="/masters/{{master_id}}/trackers/{{this.id}}/edit" data-remote="true" data-tracker-id="{{this.id}}" data-result-target="" data-toggle="clear" data-target="#trackers-{{master_id}}-{{id}}-history" ></a>        
-      {{/is}}
-      </td>
-
-  
-</script>
-
-<script id="tracker_history_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-      <td class="tracker-history">
-      
-      </td>
-      {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}      
-      <td class="tracker-history-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../../protocol_event_id}}"{{/is}}>
-      <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
-      {{#is @key 'event_name'}}
-      {{#if ../../record_id}} <a href="#{{hyphenate ../../../record_type_us}}-{{../../../master_id}}-{{../../../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../../record_type_us}}"></a>{{/if}}
-      {{/is}}
-      </div>
-      </td>
-      {{/filter}}
-      <td class="tracker-history">    
-      <span class="record-meta">{{>update_metadata}}</span>
-      </td>
-
-  
-</script>
-
-<script id="empty_tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table tracker-tree-results">
-    <thead><tr>
-      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
-      <th>protocol</th><th>status</th><th>method</th><th>date</th><th>notes</th>
-      <th colspan="2"><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right add-tracker-record" title="add tracker record"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th>
-      </tr>
-    </thead>
-    
-    <tbody id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block new-below">
-    <tr >
-    <td colspan="9"><h4>No Tracker Records</h4></td>
-    </tr>
-    </tbody>
-</table>
-</script>
-
-<script id="tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table tracker-tree-results">
-    <thead><tr>
-      <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
-      <th>protocol</th><th>status</th><th>method</th><th>date</th><th>notes</th>
-      <th colspan="2"><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right add-tracker-record" title="add tracker record"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th>
-      </tr>
-    </thead>
-    
-    <tbody id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block new-below">
-    <tr >
-    {{#is trackers.length 0}}<td colspan="9"><h4>No Tracker Records</h4></td>{{/is}}
-    </tr>
-    </tbody>
-    
-    {{#each this}}
-    {{#if id}}
-    <tbody id="tracker-{{master_id}}-{{id}}" class="index-{{@index}}" data-tracker-history-items="{{tracker_history_length}}" data-preprocessor="tracker_edit_form" data-tracker-protocol="{{underscore protocol_name}}"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-template="tracker-result-template" data-sub-item="tracker" data-sub-id="{{id}}">
-      <tr >                  
-        {{#with this}}
-          {{>tracker_result}}
-        {{/with}}
-      </tr>
-    </tbody>
-    <tbody class="tracker-history collapsed" id="trackers-{{master_id}}-{{id}}-history" data-subscription="tracker-history-{{master_id}}-{{id}}">
-    </tbody>
-    {{/if}}
-    {{/each}}
-  </table>
-
-</script>            
-
-
-<script id="tracker_chron_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table tablesorter tracker-chron-results">
-    <thead><tr>
-      <th class="no-sort"><a href="/masters/{{master_id}}/trackers" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-tree-result-template" title="view as events"  class="glyphicon glyphicon-list"></a></th>
-      <th>protocol</th><th>status</th><th>method</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden add-tracker-record" title="add tracker record"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th>
-      </tr>    
-    </thead>
-    <tbody>
-    {{#each this}}
-      {{#if id}}
-      <tr class="index-{{@index}}" data-tracker-protocol="{{underscore protocol_name}}" data-tracker-protocol="{{underscore protocol_name}}" id="tracker-{{master_id}}-{{id}}" data-subscription="tracker-edit-form-{{master_id}}-{{id}}">                  
-        {{#with this}}
-          {{>tracker_history_result}}
-          
-        {{/with}}
-      </tr>
-      {{/if}}    
-    {{/each}}
-    </tbody>
-    <tbody>
-
-    </tbody>
-  </table>
-
-</script>            
-
-<script id="item_flag_link-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <span class="pull-left item-flags-count-{{item_flags.length}}">
-  <a class="flag-entity glyphicon glyphicon-tag" href="/masters/{{master_id}}/{{item_type}}/{{this.id}}/item_flags" data-remote="true" data-result-target="#item-flags-{{master_id}}-{{item_type}}-{{this.id}}" data-template="item-flags-result-template"></a>
-  </span>
-</script>                                      
-                                      
-<script id="item_flag_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
-  <div id="item-flags-{{master_id}}-{{item_type}}-{{id}}" class="item-flags-block">
-  <div class="" id="item-flag-{{master_id}}-{{item_type}}-{{id}}-" data-subscription="item-flag-edit-form-{{master_id}}-{{item_type}}-{{id}}-"   data-preprocessor="item_flags_edit_form">        
-  {{>item_flags_result item_id=id id=""}}
-  </div>
-  </div>
-</script>
-
-
-<script id="item_flags_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  
-  <div class="">
-  
-  <select multiple="true" disabled="disabled" class="form-control">
-  {{#each item_flags}}
-    {{>item_flag_result}}
-  {{else}}
-    <span class="no-item-flags">no flags</span>
-  {{/each}}
-  </select>
-  <a href="/masters/{{master_id}}/{{item_type}}/{{item_id}}/item_flags/new" data-remote="true" class="add-flags glyphicon glyphicon-pencil" title="edit tags"></a>
-  </div>
-  
-  
-</script>
-
-<script id="item_flag_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-   <option selected="true" class="item-flag" value="{{item_flag_name.id}}">{{item_flag_name.name}}</option>
+<script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
+        <strong class="pro-names">
+                  {{capitalize first_name}} 
+                  {{capitalize middle_name}} 
+                  {{capitalize last_name}}
+                  {{#if nick_name}}
+                    ({{capitalize nick_name}})
+                  {{/if}}
+        </strong>
+        {{#if birth_date}}
+                <small>DOB</small> {{local_date birth_date '-'}}
+        {{/if}}
+        {{#if death_date}}
+                <small>DOD</small> {{local_date death_date '-'}}
+        {{/if}}
 </script>
 
 <script id="tracker_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -296,16 +61,6 @@
     {{#if user_name}} by {{user_name}}{{/if}}    
 </script>
 
-    
-<script id="player-info-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  
-  {{#with player_info}}  
-    
-      {{>player_info_result }}
-    
-  {{/with}}
-  
-</script>
 
 <script id="tracker-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{>tracker_badge}}
@@ -320,89 +75,6 @@
   {{>player_info_summary_result}}
   {{/with}}
 </script>
-
-
-<script id="address-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with address}}
-    
-      {{>address_result }}
-    
-  {{/with}}
-</script>
-
-<script id="scantron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with scantron}}
-    
-      {{>scantron_result }}
-
-  {{/with}}
-</script>
-
-<script id="player-contact-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with player_contact}}
-      {{>player_contact_result}}    
-  {{/with}}
-</script>
-
-<script id="tracker-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with tracker}}
-    {{#was _created}}
-    <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-tracker-protocol="{{underscore protocol_name}}" data-template="tracker-result-template" data-sub-item="tracker" data-sub-id="{{id}}">    
-    {{else was _merged }}
-    <tbody id="tracker-{{master_id}}-{{id}}" data-preprocessor="tracker_edit_form" class="index-created"  data-subscription="tracker-edit-form-{{master_id}}-{{id}}" data-tracker-protocol="{{underscore protocol_name}}" data-template="tracker-result-template" data-sub-item="tracker" data-sub-id="{{id}}">
-    
-    {{/was}}
-
-      <tr >
-          {{>tracker_result}}
-      </tr>
-    {{#was _created}}
-    </tbody>
-    <tbody class="tracker-history collapsed" id="trackers-{{master_id}}-{{id}}-history" data-subscription="tracker-history-{{master_id}}-{{id}}">
-    </tbody>
-                    
-    {{/was}}
-  {{/with}}
-</script>
-
-<script id="tracker-chron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with tracker_histories}}
-    {{>tracker_chron_results master_id=../master_id}}
-  {{else}}
-    {{>empty_tracker_tree_results master_id=../master_id}}
-  {{/with}}
-</script>
-<script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with trackers}}
-    {{>tracker_tree_results master_id=../master_id}}
-  {{else}}
-      {{>empty_tracker_tree_results master_id=../master_id}}
-  {{/with}}
-</script>
-
-<script id="tracker-histories-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  
-  {{#each tracker_histories}}
-    <tr class="tracker-history-item" data-tracker-protocol="{{underscore protocol_name}}"  id="tracker-history-{{master_id}}-{{tracker_id}}-{{id}}" >
-    {{>tracker_history_result}}
-    </tr>
-  {{/each}}
-  
-</script>
-
-
-<script id="item-flag-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with tracker}}
-    {{>item_flag_result }}
-  {{/with}}
-</script>
-
-<script id="item-flags-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with item_flags}}
-    {{>item_flags_result }}
-  {{/with}}
-</script>
-
 
 <script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <span>
@@ -438,20 +110,7 @@
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with pro_infos.[0]}}
-                <strong class="pro-names">
-                  {{capitalize first_name}} 
-                  {{capitalize middle_name}} 
-                  {{capitalize last_name}}
-                  {{#if nick_name}}
-                    ({{capitalize nick_name}})
-                  {{/if}}
-                </strong>
-        {{#if birth_date}}
-                <small>DOB</small> {{local_date birth_date '-'}}
-        {{/if}}
-        {{#if death_date}}
-                <small>DOD</small> {{local_date death_date '-'}}
-        {{/if}}
+                {{>pro_info_summary_result}}
               {{/with}}  
               </div>                      
             </a>
@@ -469,9 +128,14 @@
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
           </li>
-        </ul>
-
+  
+          <li role="presentation">
+            <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed"><span class="caret"></span> external links</a>
+          </li>
+        </ul>        
         <div class="panel-body">
+          <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}">
+          </div>
           
           <div id="extras-{{id}}" class="row collapse extras-block">
             <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons">

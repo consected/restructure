@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151009191559) do
+ActiveRecord::Schema.define(version: 20151013191910) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -146,6 +146,17 @@ ActiveRecord::Schema.define(version: 20151009191559) do
 
   add_index "colleges", ["admin_id"], name: "index_colleges_on_admin_id", using: :btree
   add_index "colleges", ["user_id"], name: "index_colleges_on_user_id", using: :btree
+
+  create_table "external_links", force: :cascade do |t|
+    t.string   "name"
+    t.string   "value"
+    t.boolean  "disabled"
+    t.integer  "admin_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "external_links", ["admin_id"], name: "index_external_links_on_admin_id", using: :btree
 
   create_table "general_selection_history", force: :cascade do |t|
     t.string   "name"
@@ -641,6 +652,7 @@ ActiveRecord::Schema.define(version: 20151009191559) do
   add_foreign_key "college_history", "colleges", name: "fk_college_history_colleges"
   add_foreign_key "colleges", "admins"
   add_foreign_key "colleges", "users"
+  add_foreign_key "external_links", "admins"
   add_foreign_key "general_selection_history", "general_selections", name: "fk_general_selection_history_general_selections"
   add_foreign_key "general_selections", "admins"
   add_foreign_key "item_flag_history", "item_flags", name: "fk_item_flag_history_item_flags"

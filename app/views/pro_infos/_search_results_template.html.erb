@@ -1,0 +1,18 @@
+<script id="pro_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+                            
+      <div id="pro-info-{{master_id}}-{{id}}">        
+
+        <ul class="list-group">
+            <li class="list-group-item  is-heading">
+              <h4  class="list-group-item-heading">Pro Info</h4>            
+            </li>
+            
+            {{#filter this "pro_id,first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college" }}
+            <li class="list-group-item pro-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+            {{/filter}}
+            
+        </ul>
+
+      </div>  
+    
+</script>

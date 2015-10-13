@@ -32,7 +32,14 @@ class ReportsController < ApplicationController
         @results =  @report.run(search_attrs) 
       rescue Report::BadSearchCriteria
         @results = nil
-        flash[:warning] = "Bad search criteria"
+        flash.now[:warning] = "Bad search criteria"
+        respond_to do |format|
+          format.html
+        end     
+        return
+      rescue ActiveRecord::PreparedStatementInvalid => e
+        @results = nil
+        flash.now[:danger] = "Generated SQL invalid. #{e.to_s}"
         respond_to do |format|
           format.html
         end     

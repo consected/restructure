@@ -73,6 +73,14 @@ module SelectorCache
       }
     end
     
+    def selector_name_value_pair_no_downcase conditions=nil
+      ckey="#{nv_pair_cache_key}-nd-#{conditions}"
+      
+      Rails.cache.fetch(ckey){
+        enabled.where(conditions).collect {|c| [c.name, c.value] }
+      }
+    end    
+    
     def selector_attributes attributes, conditions=nil
       ckey="#{attributes_cache_key}#{attributes}#{conditions}"
       
@@ -106,7 +114,7 @@ module SelectorCache
             v = c.id
             vlabel = "#{v} (#{c.parent_name})"
             
-          elsif c.respond_to?(:value) 
+          elsif c.respond_to?(:value)             
             v =  c.value          
             vlabel = v
           end

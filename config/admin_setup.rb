@@ -3,7 +3,7 @@ module AdminSetup
   
   def self.setup admins_string
     
-    puts "No admin string specified in env FHPS_ADMINS" and return if admins_string.blank?
+    puts "No admin string specified in env FPHS_ADMINS" and return if admins_string.blank?
     
     admins = admins_string.split(';')
     op = ""
@@ -60,25 +60,25 @@ module AdminSetup
   end
 
   def self.run
-    action = ENV['FHPS_ACTION']
-    admins = ENV['FHPS_ADMINS']
+    action = ENV['FPHS_ACTION']
+    admins = ENV['FPHS_ADMINS']
     msg = ""
     if admins.blank? || action.blank?
       msg = <<EOF
 
-Add, update or remove admin users from the FHPS app
+Add, update or remove admin users from the FPHS app
   
 Usage:
 
 Add / update admins:
-RAILS_ENV=production FHPS_ACTION=add FHPS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner config/admin_setup.rb
+RAILS_ENV=production FPHS_ACTION=add FPHS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner config/admin_setup.rb
 
 Will create any specified admins not already existing with a default password
 and update any specified admins that exist, assigning them a new password
   
 Remove admins:
   
-RAILS_ENV=production FHPS_ACTION=remove FHPS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner config/admin_setup.rb
+RAILS_ENV=production FPHS_ACTION=remove FPHS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner config/admin_setup.rb
 
 Will remove any specified admins from the admin list. 
   
@@ -86,14 +86,14 @@ EOF
       puts msg
     end
 
-    action = ENV['FHPS_ACTION']
+    action = ENV['FPHS_ACTION']
 
     if action == 'remove'
       AdminSetup.remove admins
     elsif action == 'add'
       AdminSetup.setup admins
     else
-      puts "FHPS_ACTION not recognized.\n#{msg}"
+      puts "FPHS_ACTION not recognized.\n#{msg}"
     end
   end
   

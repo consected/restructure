@@ -182,21 +182,21 @@ _fpa.form_utils = {
         var tss = block.find('.tablesorter').not('.attached-tablesorter');
         
         window.setTimeout(function(){
-        tss.each(function(){
-           var ts = $(this);
-           
-           var i = 0;
-           var h = {};
-           ts.find('thead tr:first th').each(function(){
-               if($(this).hasClass('no-sort'))
-                   h[i] = {sorter: false};
-               i++;
-           });
-           
-           //{0: {sorter: false}}
-           ts.tablesorter( {dateFormat: 'us', headers: h}).addClass('attached-tablesorter');  
-        });                
-    },100);
+            tss.each(function(){
+               var ts = $(this);
+
+               var i = 0;
+               var h = {};
+               ts.find('thead tr:first th').each(function(){
+                   if($(this).hasClass('no-sort'))
+                       h[i] = {sorter: false};
+                   i++;
+               });
+
+               //{0: {sorter: false}}
+               ts.tablesorter( {dateFormat: 'us', headers: h}).addClass('attached-tablesorter');  
+            });                
+        },100);
     },
 
     setup_bootstrap_items: function(block){

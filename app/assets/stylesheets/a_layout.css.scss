@@ -17,6 +17,23 @@ a.glyphicon {
     }
 }
 
+a.open-in-new-window:after {
+    content: "\e066";
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    margin-left: 0.3em;
+    
+}
+
+
 a.navbar-brand {
     padding-top: 4px;
     background-color: white;

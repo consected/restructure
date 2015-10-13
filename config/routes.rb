@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-
+  
   resources :reports
   namespace :admin do
     resources :reports, except: [:show, :destroy]
@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   resources :colleges, except: [:show, :destroy]
   resources :general_selections, except: [:show, :destroy]
   resources :item_flag_names, except: [:show, :destroy]
+  resources :external_links, except: [:show, :destroy]
   
   resources :protocols, except: [:show, :destroy] do
     resources :sub_processes, except: [:show, :destroy] do

@@ -22,14 +22,9 @@ module ReportsHelper
       else
         type_filter = type_val['filter']
       end  
+            
+      use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value)
       
-      if type_val['multiple'] == 'between'
-        value ||= []
-        use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value['0'])
-        use_dropdown2 = options_for_select(c.all_name_value_enable_flagged(type_filter), value['1'])
-      else
-        use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value)
-      end
     end
     
     if type_val['label']
@@ -39,23 +34,11 @@ module ReportsHelper
     end
     
     
-    
-    if type_val['multiple'] == 'between'
-      
-      if use_dropdown         
-        main_field << select_tag("search_attrs[#{name}][0]", use_dropdown)
-        main_field << select_tag("search_attrs[#{name}][1]", use_dropdown2)
-      else        
-        main_field << text_field_tag("search_attrs[#{name}][0]", value['0'], type: type, class: 'form-control' )
-        main_field << text_field_tag("search_attrs[#{name}][1]", value['1'], type: type, class: 'form-control' )
-       
-      end
-    
-    elsif type_val['multiple'] == 'multiple'
+    if type_val['multiple'] == 'multiple'
       if use_dropdown 
         main_field << select_tag("search_attrs[#{name}]", use_dropdown , multiple: true)
       else
-        main_field << text_field_tag("multiple_attrs[#{name}]", value, type: type, class: 'form-control'  , data: {attribute: name})
+        main_field << text_field_tag("multiple_attrs[#{name}]", value, type: type_string, class: 'form-control'  , data: {attribute: name})
         main_field << link_to( "+", "add_multiple_attrs[#{name}]", data: {attribute: name}, class: 'btn btn-default')
         
         main_field << text_area_tag("search_attrs[#{name}]", value.join("\n"))
@@ -65,7 +48,7 @@ module ReportsHelper
       if use_dropdown 
         main_field << select_tag("search_attrs[#{name}]", use_dropdown )
       else
-        main_field << text_field_tag("search_attrs[#{name}]", value, type: type, class: 'form-control' )
+        main_field << text_field_tag("search_attrs[#{name}]", value, type: type_string, class: 'form-control' )
       end
     end
     

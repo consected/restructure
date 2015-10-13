@@ -400,6 +400,16 @@ td.tracker-notes , td.tracker-history-notes{
 }        
 
 
+div.external-links {
+    
+    margin-bottom: 2em;
+    
+    a {
+        background-color: white;
+        display: inline-block;
+        margin-left: 2em;
+    }
+}
 
 @media only screen and (min-width: 1023px) {
 

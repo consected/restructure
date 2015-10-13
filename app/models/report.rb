@@ -3,7 +3,6 @@ class Report < ActiveRecord::Base
   include AdminHandler
   include SelectorCache
     
-  scope :enabled, -> {where "disabled <> true"}  
   
   class BadSearchCriteria < Exception
     
@@ -11,24 +10,29 @@ class Report < ActiveRecord::Base
   
   validates :name, presence: true
 
+  def clean_sql
+    @clean_sql
+  end
+  
   def search_attr_values
     @search_attr_values || ''
   end
   
   def search_attributes
+    @search_attrs = {} if self.search_attrs.blank?  
     begin
       @search_attrs ||= JSON.parse self.search_attrs
     rescue
       @search_attrs ||= YAML.load self.search_attrs
     end
-      
+    
   end
   
   
   def run  search_attr_values
     
     @search_attr_values = search_attr_values
-    
+    @clean_sql = nil
     report_definition = self
 
     sql = report_definition.sql
@@ -44,11 +48,11 @@ class Report < ActiveRecord::Base
     # on DDL to the Rails user is expected.
     self.class.connection.transaction do
       clean_sql = ActiveRecord::Base.send(:sanitize_sql, [sql, @search_attr_values], primary_table)
-      logger.info "CLEAN SQL:: #{clean_sql}"
-      res = self.class.connection.execute(clean_sql)    
+      @clean_sql = clean_sql
+      res = self.class.connection.execute(clean_sql)                
       raise ActiveRecord::Rollback
     end
-    
+        
     @results = res
         
   end
@@ -58,7 +62,7 @@ class Report < ActiveRecord::Base
   # Since PG only returns oid values for each
   def result_tables
             
-    return unless @results && @results.count > 0
+    return unless @results #&& @results.count > 0
     
     return @result_tables if @result_tables
     
@@ -103,7 +107,7 @@ class Report < ActiveRecord::Base
   def search_attrs_prep 
     
     search_attr_values.each do |k,v|
-      if search_attributes[k.to_s].nil? || v.blank?
+      if k.to_s != '_report_id_' && (search_attributes[k.to_s].nil? || v.blank?)
         return false
       end
       

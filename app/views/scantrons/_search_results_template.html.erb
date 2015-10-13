@@ -1,0 +1,19 @@
+
+<script id="scantron_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#was _created}}<div class="index-{{_created}}" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}" data-template="scantron-result-template" data-sub-item="scantron" data-sub-id="{{id}}" >{{/was}}
+  <ul class="list-group">
+      <li class="list-group-item scantron-scantron_id is-heading">
+        <a data-toggle="scrollto-result" data-target="#scantron-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
+        <small>Scantron</small> <strong>{{scantron_id}}</strong>
+      </li>      
+  </ul>
+  {{#was _created}}</div>{{/was}}
+</script>
+
+<script id="scantron-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with scantron}}
+    
+      {{>scantron_result }}
+
+  {{/with}}
+</script>

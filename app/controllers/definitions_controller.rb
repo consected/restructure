@@ -6,7 +6,8 @@ class DefinitionsController < ApplicationController
     "protocols" => :selector_collection, 
     "sub_processes" => :selector_collection, 
     "colleges" => :selector_array, 
-    "accuracy_scores" => :selector_collection
+    "accuracy_scores" => :selector_collection,
+    "external_links" => :selector_collection
   }.freeze
    
   def show

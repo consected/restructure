@@ -1,0 +1,36 @@
+<script id="player_info_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
+  {{#was _created}}<div class="index-{{_created}}" id="player-info-{{master_id}}-{{id}}" data-subscription="player-info-edit-form-{{master_id}}-{{id}}" data-template="player-info-result-template" data-sub-item="player_info" data-sub-id="{{id}}" >{{/was}}
+    <ul class="list-group">
+      <li class="list-group-item is-heading">
+
+        <a data-toggle="scrollto-result" data-target="#player-info-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-player-info pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_infos/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}" data-result-target=""></a>        
+        <span class="pull-right label label-info player-info-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{accuracy_score_name}}{{else}}(no rank){{/if}}</span>
+          <h4 class="list-group-item-heading">Player</h4>
+        
+        {{>item_flag_container item_type="player_info"}}         
+      </li>
+      
+      {{#filter this "first_name,last_name,middle_name,nick_name,birth_date,death_date,start_year,end_year,college,source_name" }}
+      <li class="list-group-item player-info-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+      {{/filter}}
+      <div class="player-info-notes">
+        <div class="panel panel-default panel-body">
+        {{pretty_string notes return_string="true"}}
+        </div>
+      </div>
+              
+      <li class="list-group-item record-meta">{{>update_metadata}}</li>
+    </ul>
+    {{#was _created}}</div>{{/was}}
+</script>
+
+    
+<script id="player-info-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  
+  {{#with player_info}}  
+    
+      {{>player_info_result }}
+    
+  {{/with}}
+  
+</script>
