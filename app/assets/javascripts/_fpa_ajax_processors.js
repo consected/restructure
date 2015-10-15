@@ -389,6 +389,42 @@ _fpa.postprocessors = {
 
         check_phone(e);
     },
+    
+    reports_form: function(block, data){
+        _fpa.form_utils.format_block(block);            
+        $('#master_results_block').html('');
+        
+        block.find('form input[type="submit"]').click(function(){
+            var v = $(this).val();
+            var dov = false;
+            if(v === 'csv' || v === 'json'){
+                dov = true;
+            }
+            var f = $(this).parents('form').first();            
+            f.attr('data-remote', !dov).attr('target', (dov ? v : null))
+            f.find('input[name="part"]').val(dov ? '' : 'results');
+            
+            
+        });
+        
+        block.find('a.btn[data-attribute]').click(function(ev){
+          ev.preventDefault();
+          var da = $(this).attr('data-attribute');
+          
+          var v = $('#search_attrs_'+da);
+          var newval = v.val();
+          if(newval.length > 0)newval += "\n";
+          newval += $('#multiple_attrs_'+da).val();
+          v.val(newval);
+          
+          
+        });
+    },
+    
+    reports_result: function(block, data){
+        
+  
+    },
 
     
     flash_template: function(block, data){

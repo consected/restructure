@@ -194,6 +194,11 @@ _fpa = {
     
     var sel = "form[data-remote='true'], a[data-remote='true']";
     
+    $(document).on('ajax:beforeSend', "form[data-remote='false']", function(ev, xhr){
+        ev.preventDefault();
+        
+    });
+    
     $(document).on('click', sel,  function(ev){
       // Clear flash notices by clicking an ajax enabled link or form
       _fpa.clear_flash_notices();
@@ -416,6 +421,7 @@ _fpa = {
             // DOM where specified
             var html = $(xhr.responseText);
             $('.query-error').remove();
+            var updated = 0;
             html.find('[data-result]').each(function(){
                 var d = $(this);
                 var di = d.attr('data-result');
@@ -424,14 +430,26 @@ _fpa = {
                 res[di] = d;
                 targets.each(function(){
                     var pre = $(this).attr('data-preprocessor');                    
-  
+
                     _fpa.do_preprocessors(pre, $(this), data);
                     $(this).html(d);                    
                     _fpa.do_postprocessors(pre, $(this), data);
-                    
+                    updated++;
                 });
 
             });
+            
+            if(updated===0){
+                var target = $(this).attr('data-result-target');
+                if(target){
+                    var pre = $(this).attr('data-preprocessor');                    
+
+                    _fpa.do_preprocessors(pre, $(target), data);
+                    $(target).html(html);                    
+                    _fpa.do_postprocessors(pre, $(target), data);
+                }
+            }
+            
         }
         $('.view-template-created').removeClass('view-template-created');
         

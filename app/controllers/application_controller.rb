@@ -106,6 +106,11 @@ protected
       flash[:danger] = "An error occurred: #{msg}"
       render text: flash[:danger], status: 400
     end
+
+    def general_error msg, level=:info
+      flash[level] = "Error: #{msg}"
+      render text: flash[level], status: 400
+    end
     
     def authenticate_user_or_admin!
       if !current_user && !current_admin

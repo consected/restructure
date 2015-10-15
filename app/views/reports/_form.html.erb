@@ -1,0 +1,4 @@
+<div class="report-criteria container-fluid">
+  <p><%= @report.description.gsub("\n", "<br />").html_safe %></p>
+  <%= render partial: 'criteria' %>
+</div>

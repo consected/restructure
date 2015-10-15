@@ -1,52 +1,35 @@
 <div class="container" style="padding-top:40px;">
 
 <% if current_admin %> 
-<div class="panel panel-primary">
-    <div class="panel-body">    
-  <h2 >Admin Actions</h2>
-  <div class="row">
-    <div class="col-sm-12">
-      <h3>Manage Selections</h3>
-      <ul class="nav">                  
-        <li class="nav"><%= link_to "Accuracy Scores", accuracy_scores_path %> </li>
-        <li class="nav"><%= link_to "Colleges List", colleges_path %> </li>
-        <li class="nav"><%= link_to "General Selections", general_selections_path %> </li> 
-        <li class="nav"><%= link_to "Item Flags", item_flag_names_path %> </li>               
-        <li class="nav"><%= link_to "External Links", external_links_path %> </li> 
-        <li class="nav"><%= link_to "Protocol / Status / Method", protocols_path %> </li>         
-      </ul>
-    </div>
-    <div class="col-sm-12">
-      <h3>Admin Functions</h3>  
-      <ul class="nav">    
-        <li class="nav"><%= link_to "Reports", admin_reports_path %> </li> 
-        <li class="nav"><%= link_to "User Management", manage_users_path %> </li>         
-        <li class="nav"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete %> </li>
-      </ul>      
-    </div>
-  </div>
-  </div>
-</div>
+  <%= render partial: 'index_admin' %>
 <% end %>
 
 <div class="panel panel-primary">
-    <div class="panel-body">      
-  <h2 >User Actions</h2>
-  
-    
-      <ul class="nav">    
-          <% if current_user %>
+  <div class="panel-body">  
+    <h2 >User Actions</h2>
+    <div class="row">
+      <div class="col-sm-12">      
+        
 
-          <li class="nav"><%= link_to "Research", masters_path %> </li>
+        <ul class="nav">    
+            <% if current_user %>
 
-          <li class="nav"><%= link_to "Create MSID", new_master_path %> </li>
+            <li class="nav"><%= link_to "Research", masters_path %> </li>
+            <li class="nav"><%= link_to "Reports", reports_path %> </li>
+        </ul>
+      </div>
+      <div class="col-sm-12"> 
+        <ul class="nav">    
+                
+            <li class="nav"><%= link_to "Create MSID", new_master_path %> </li>
 
-          <li class="nav"><%= link_to "User Logout", destroy_user_session_path, method: :delete  %> </li>
-          <% else %>
-          <li class="nav"><%= link_to "User Login", '/users/sign_in'%> </li>
-          <% end %>
+            <li class="nav"><%= link_to "User Logout", destroy_user_session_path, method: :delete  %> </li>
+            <% else %>
+            <li class="nav"><%= link_to "User Login", '/users/sign_in'%> </li>
+            <% end %>
 
-      </ul>
+        </ul>
+      </div>
   </div>
 </div>    
   

@@ -14,7 +14,7 @@ module ReportsHelper
     use_dropdown = nil    
     
     
-    value ||= type_val['default']
+    value ||= Report.calculate_default(type_val['default'], type_string)
     
     if c && c.respond_to?(:selector_cache?) && c.selector_cache?      
       if type_val['filter'] == 'all'
@@ -57,5 +57,5 @@ module ReportsHelper
     
   end
 
-
+    
 end

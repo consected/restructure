@@ -121,6 +121,10 @@ _fpa.loaded.masters = function(){
     
     _fpa.masters.set_fields_to_search();
     
+    $('#expand-adv-form').click(function(){
+        $('#master_results_block').html('');
+    });
+    
     // Handle the switch between the advanced and simple forms
     $('#master-search-advanced').on('show.bs.collapse', function () {
         $('#master-search-simple').collapse('hide');

@@ -1,0 +1,22 @@
+
+  
+        <div>
+            <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted', id: "report_query_form", data: {result_target: '#master_results_block', preprocessor: 'reports_result'}, remote: true do %>
+            <div class="row">
+              <% @report.search_attributes.each do |name, type| %>
+                <div class="col-md-6" style="padding-bottom: 1em;">                
+                <%= report_field name, type, @report.search_attr_values[name] %>
+                </div>
+              <%end%>
+              
+            </div>
+            <div class="">
+              <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
+              <%= hidden_field_tag  "part", ''%>
+              <%= submit_tag :table, name: :format, value: "html", class: "btn btn-primary" %>
+              <%= submit_tag "CSV", name: :format, value: "csv", class: "btn btn-primary" %>
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-primary target_new_window" %>
+                
+            </div>
+            <%end%>
+        </div>

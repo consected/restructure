@@ -2,14 +2,27 @@ class Report < ActiveRecord::Base
   
   include AdminHandler
   include SelectorCache
-    
   
+  validates :report_type, presence: true
+  validates :name, presence: true
+
+  default_scope -> {order auto: :asc, id: :asc }
+  
+  scope :regular, -> {where report_type: 'regular_report'}
+  scope :searchable, -> {where searchable: true}
+  
+  ReportTypes = [:count, :regular_report]
+  ReportIdAttribName = '_report_id_'
+    
   class BadSearchCriteria < Exception
     
   end
   
-  validates :name, presence: true
-
+  
+  def report_identifier
+    name.downcase.gsub(' ', '_')
+  end
+  
   def clean_sql
     @clean_sql
   end
@@ -31,7 +44,7 @@ class Report < ActiveRecord::Base
   
   def run  search_attr_values
     
-    @search_attr_values = search_attr_values
+    @search_attr_values = search_attr_values    
     @clean_sql = nil
     report_definition = self
 
@@ -42,12 +55,18 @@ class Report < ActiveRecord::Base
     
     res=[]
     
+    logger.info "Preparing with #{@search_attr_values}"
+    
     # get arbitrary data from a table
     # Perform this within a transaction to avoid unexpected data or or definition updates
     # Note that Postgres is really a requirement for a transaction to protect against DDL. Either way, limiting grants 
     # on DDL to the Rails user is expected.
     self.class.connection.transaction do
-      clean_sql = ActiveRecord::Base.send(:sanitize_sql, [sql, @search_attr_values], primary_table)
+      begin
+        clean_sql = ActiveRecord::Base.send(:sanitize_sql, [sql, @search_attr_values], primary_table)
+      rescue => e
+        raise Report::BadSearchCriteria
+      end
       @clean_sql = clean_sql
       res = self.class.connection.execute(clean_sql)                
       raise ActiveRecord::Rollback
@@ -104,10 +123,25 @@ class Report < ActiveRecord::Base
     @result_tables_oid
   end
   
+  def use_defaults
+    @search_attr_values = {}
+    
+    search_attributes.each do |k,v|
+      
+      @search_attr_values[k.to_sym] = self.class.calculate_default v.first.last['default'], v.first.first
+    end
+    logger.info "Using defaults as search attributes #{@search_attr_values}"
+    @search_attr_values
+  end
+  
   def search_attrs_prep 
     
+    
+    @search_attr_values = use_defaults if @search_attr_values == '_use_defaults_'
+    
+    
     search_attr_values.each do |k,v|
-      if k.to_s != '_report_id_' && (search_attributes[k.to_s].nil? || v.blank?)
+      if k.to_s != ReportIdAttribName && (search_attributes[k.to_s].nil? || v.blank?)
         return false
       end
       
@@ -120,5 +154,27 @@ class Report < ActiveRecord::Base
     true
   end
   
+
+  def self.calculate_default default, type
+    default ||= ''
+    
+    res = default
+    if default.is_a? String
+      m = default.scan /(-\d+) (days|day|months|month|years|year)/
+      if m.first
+        t = m.first.last      
+        res = DateTime.now + m.first.first.to_i.send(t)
+      elsif default == 'now'  
+        res = DateTime.now
+      end
+    end
+    
+    if type == 'date'
+      res = res.strftime('%Y-%m-%d') rescue nil
+    end
+    
+    res 
+  end
+
   
 end

@@ -92,7 +92,7 @@ class MastersController < ApplicationController
         log_action "master search", search_type, 0, "no conditions specified"
       end
     rescue => e
-      logger.error "Error in MastersController#index: #{e.inspect}\n#{e.backtrace.join("\n")}"
+      logger.error "Error in MastersController#index: #{e.inspect}"
       m = {error: ": unable to search - please check your search criteria"}
       render json: m, status: 400
       return

@@ -7,6 +7,10 @@
     <%= f.text_field :name %>
   </div>
 
+  <div class="form-group">
+    <%= f.label :report_type %>
+    <%= f.select :report_type, Report::ReportTypes, include_blank: '-select-' %>
+  </div>      
   
   
             
@@ -26,12 +30,19 @@
     </div>
     <%= render partial: 'reference_data_info_block', locals: {f: f} %>
   </div>
-      
-  
+      <p>&nbsp;</p>
+  <div class="form-group">
+    <%= f.check_box :auto %>
+    <%= f.label :run_automatically %>
+  </div>      
+  <div class="form-group">
+    <%= f.check_box :searchable %>
+    <%= f.label :searchable %>
+  </div>      
   <div class="form-group">
     <%= f.check_box :disabled %>
     <%= f.label :disable %>
-  </div>
+  </div>     
 
   <div class="form-group">
     <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>

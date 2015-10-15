@@ -8,7 +8,7 @@ class Admin::ReportsController < ApplicationController
 
 
     def secure_params
-      params.require(:report).permit(:id, :name, :primary_table, :sql, :description, :disabled, :search_attrs)
+      params.require(:report).permit(:id, :name, :primary_table, :sql, :description, :disabled, :report_type, :auto, :searchable, :search_attrs)
     end
 
     def connection

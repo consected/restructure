@@ -4,10 +4,11 @@ class ReportsController < ApplicationController
   before_action :authenticate_user_or_admin!
   after_action :clear_results, only: ['run']
 
+  # List of available reports
   def index    
-    pm = Report.enabled
-    
+    pm = Report.enabled    
     pm = pm.where filter_params if filter_params
+    
     @reports = pm.order(:id)
     
     respond_to do |format|      
@@ -32,27 +33,45 @@ class ReportsController < ApplicationController
         @results =  @report.run(search_attrs) 
       rescue Report::BadSearchCriteria
         @results = nil
-        flash.now[:warning] = "Bad search criteria"
+        flash.now[:alert] = "Bad search criteria"
         respond_to do |format|
-          format.html
+          format.html {
+            if params[:part] == 'results'              
+              render text: "bad search criteria", status: 400
+            else
+              render :show
+            end
+          }
         end     
         return
       rescue ActiveRecord::PreparedStatementInvalid => e
+        logger.info "Prepared statement invalid in reports_controller (#{search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
         @results = nil
         flash.now[:danger] = "Generated SQL invalid. #{e.to_s}"
         respond_to do |format|
-          format.html
+          format.html {
+            if params[:part] == 'results'
+              render text: "Generated SQL invalid. #{e.to_s}", status: 400
+            else
+              render :show
+            end
+          }
+          format.json { return bad_request }
         end     
         return
       end
      
     
-      #res.map {|row| row.map {|col,val| res.column_types[col].send(:type_cast, val) } }
-    
       respond_to do |format|
-        format.html
+        format.html {
+          if params[:part] == 'results'
+            render partial: 'results'
+          else
+            render :show
+          end
+        }
         format.json {
-          render json: @results
+          render json: {results: @results, search_attributes: @report.search_attr_values}
         }
         format.csv { 
           res_a = []
@@ -74,7 +93,13 @@ class ReportsController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html
+        format.html { 
+          if params[:part] == 'form'
+            render partial: 'form'
+          else
+            render :show
+          end
+        }        
       end     
     end
     
@@ -88,7 +113,7 @@ class ReportsController < ApplicationController
 
 
     def secure_params
-      params.require(:report).permit(:id, :name, :primary_table, :sql, :description, :disabled, :search_attrs)
+      params.require(:report).permit(:id,  :search_attrs)
     end
     
     def connection

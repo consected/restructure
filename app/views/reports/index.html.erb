@@ -7,21 +7,24 @@
 <table class="table tablesorter admin-list">
   <thead>
     <tr>
-      <th class="no-sort"></th>
-      <th>Name</th>      
-      
+      <th></th>
+      <th>Name</th>            
       <th>Description</th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
 
   <tbody>
     <% @reports.each do |list_item| %>
-      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-        <td> </td>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> report-type-<%= list_item.report_type %> <%= list_item.auto ? 'report-auto' : '' %>" data-report-id="<%=list_item.id %>">
+          <td><span class="hidden"><%= list_item.report_type %></span><span class="glyphicon <%= list_item.report_type == 'count' ? 'glyphicon-record' : 'glyphicon-list-alt' %>" title="<%= list_item.report_type.humanize %>"></span></td>
       
         <td><%= link_to  list_item.name, report_path(list_item.id), target: '_blank' %></td>        
       
         <td><%= list_item.description %></td>  
+        <td class="report-search-attr"></td>
+        <td class="report-measure"></td>
         
         
       </tr>
@@ -31,3 +34,8 @@
 
   </div>
 </div>
+<script>
+  
+  _fpa.reports.run_autos();
+  
+</script>
