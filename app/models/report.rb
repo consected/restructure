@@ -147,7 +147,7 @@ class Report < ActiveRecord::Base
       
       if v.is_a? Hash
         search_attr_values[k] = v.collect{|k,v| v}
-      elsif v.include? "\n"
+      elsif v.is_a?(String) && v.include?("\n")
         search_attr_values[k] = v.split("\n").map{|a| a.squish}
       end
     end

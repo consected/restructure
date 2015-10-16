@@ -54,7 +54,7 @@ _fpa.postprocessors_admin = {
                         var ds = d.split('\n');
                         d = '';
                         for(var id in ds){
-                            d += '\n      -' + ds[id];
+                            d += '\n      - ' + ds[id];
                         }
                     }
                     
