@@ -976,6 +976,40 @@ ALTER SEQUENCE colleges_id_seq OWNED BY colleges.id;
 
 
 --
+-- Name: external_links; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE external_links (
+    id integer NOT NULL,
+    name character varying,
+    value character varying,
+    disabled boolean,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: external_links_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE external_links_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: external_links_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE external_links_id_seq OWNED BY external_links.id;
+
+
+--
 -- Name: general_selection_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1625,6 +1659,46 @@ ALTER SEQUENCE protocols_id_seq OWNED BY protocols.id;
 
 
 --
+-- Name: reports; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE reports (
+    id integer NOT NULL,
+    name character varying,
+    description character varying,
+    sql character varying,
+    search_attrs character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    report_type character varying,
+    auto boolean,
+    searchable boolean,
+    "position" integer
+);
+
+
+--
+-- Name: reports_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE reports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: reports_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE reports_id_seq OWNED BY reports.id;
+
+
+--
 -- Name: scantron_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2010,6 +2084,13 @@ ALTER TABLE ONLY colleges ALTER COLUMN id SET DEFAULT nextval('colleges_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY external_links ALTER COLUMN id SET DEFAULT nextval('external_links_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY general_selection_history ALTER COLUMN id SET DEFAULT nextval('general_selection_history_id_seq'::regclass);
 
 
@@ -2123,6 +2204,13 @@ ALTER TABLE ONLY protocol_history ALTER COLUMN id SET DEFAULT nextval('protocol_
 --
 
 ALTER TABLE ONLY protocols ALTER COLUMN id SET DEFAULT nextval('protocols_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY reports ALTER COLUMN id SET DEFAULT nextval('reports_id_seq'::regclass);
 
 
 --
@@ -2243,6 +2331,14 @@ ALTER TABLE ONLY college_history
 
 ALTER TABLE ONLY colleges
     ADD CONSTRAINT colleges_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: external_links_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY external_links
+    ADD CONSTRAINT external_links_pkey PRIMARY KEY (id);
 
 
 --
@@ -2379,6 +2475,14 @@ ALTER TABLE ONLY protocol_history
 
 ALTER TABLE ONLY protocols
     ADD CONSTRAINT protocols_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: reports_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY reports
+    ADD CONSTRAINT reports_pkey PRIMARY KEY (id);
 
 
 --
@@ -2520,6 +2624,13 @@ CREATE INDEX index_colleges_on_admin_id ON colleges USING btree (admin_id);
 --
 
 CREATE INDEX index_colleges_on_user_id ON colleges USING btree (user_id);
+
+
+--
+-- Name: index_external_links_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_external_links_on_admin_id ON external_links USING btree (admin_id);
 
 
 --
@@ -2716,6 +2827,13 @@ CREATE INDEX index_protocol_history_on_protocol_id ON protocol_history USING btr
 --
 
 CREATE INDEX index_protocols_on_admin_id ON protocols USING btree (admin_id);
+
+
+--
+-- Name: index_reports_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_reports_on_admin_id ON reports USING btree (admin_id);
 
 
 --
@@ -3492,6 +3610,14 @@ ALTER TABLE ONLY colleges
 
 
 --
+-- Name: fk_rails_b138baacff; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY reports
+    ADD CONSTRAINT fk_rails_b138baacff FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
 -- Name: fk_rails_b822840dc1; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3545,6 +3671,14 @@ ALTER TABLE ONLY player_contacts
 
 ALTER TABLE ONLY item_flags
     ADD CONSTRAINT fk_rails_dce5169cfd FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_ebf3863277; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY external_links
+    ADD CONSTRAINT fk_rails_ebf3863277 FOREIGN KEY (admin_id) REFERENCES admins(id);
 
 
 --
