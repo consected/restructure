@@ -98,7 +98,25 @@ class MastersController < ApplicationController
       return
     end
 
-    render json: m
+    respond_to do |format|
+      format.json {render json: m}
+      format.csv {
+        ma = m[:masters].first 
+        
+        return bad_request unless ma
+        
+        res = [(ma.map {|k,v| k} + (ma['player_infos'].first ||{}).map {|k,v| "player.#{k}"} +
+              (ma['pro_infos'].first ||{}).map {|k,v| "pro.#{k}"}).to_csv]
+        
+        m[:masters].each do |ma| 
+          res << (ma.map {|k,v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v }   +  (ma['player_infos'].first || {}).map {|k,v| v} +
+              (ma['pro_infos'].first || {}).map {|k,v| v}).to_csv 
+        end
+        
+        render text: res.join("") 
+        
+      }
+    end
     
   end
 
@@ -121,6 +139,8 @@ class MastersController < ApplicationController
     @msid ||= params[:nav_q]
     @master_pro_id ||= params[:nav_q_pro_id]
     @master_id ||= params[:nav_q_id]
+    
+    @master_req_format = params[:req_format] || 'reg'
     
     @master =  Master.new 
     

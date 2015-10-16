@@ -401,10 +401,10 @@ _fpa.postprocessors = {
                 dov = true;
             }
             var f = $(this).parents('form').first();            
-            f.attr('data-remote', !dov).attr('target', (dov ? v : null))
+            // Must use data('remote') to disable the rails AJAX delegation. Setting the attribute doesn't work.
+            f.data('remote', !dov).attr('target', (dov ? v : null));
             f.find('input[name="part"]').val(dov ? '' : 'results');
-            
-            
+            if(!dov) $('#master_results_block').html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
         });
         
         block.find('a.btn[data-attribute]').click(function(ev){

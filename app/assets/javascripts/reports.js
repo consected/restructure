@@ -1,2 +1,5 @@
-// Place all the behaviors and hooks related to the matching controller here.
-// All this logic will automatically be available in application.js.
+_fpa.loaded.reports = function(){
+    
+    _fpa.postprocessors.reports_form($('.report-criteria'));
+    
+};

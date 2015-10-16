@@ -148,6 +148,22 @@ a.add-icon{
 
 #master-search-accordion .panel-default {border: 0;}
 
+.advanced-form-selections .btn {
+    
+    color: #2e6da4;
+    background: white;
+    &:active {color: #008;}
+    
+    
+    
+    &.collapsed {
+        background: #2e6da4;
+        color: white;
+    }
+    &.collapsed:active {color:white;}
+}
+
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;

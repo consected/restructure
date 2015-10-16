@@ -45,7 +45,7 @@ _fpa.masters = {
                     // We do this within a timeout, to allow any DOM changes and CSS transitions to smoothly work through
                     // otherwise the result is a very jerky experience
                     window.setTimeout(function(){                        
-                        f.find('input[type="submit"]').click();  
+                        f.find('input[type="submit"].auto-submitter').click();  
                     },1);
                 }
                 // Clean up after ourselves
@@ -57,16 +57,33 @@ _fpa.masters = {
             // be a data-only-for field
             f.find('input.tt-input').not('.attached-change').on('blur', function(e){
                 window.setTimeout(function(){                    
-                    f.find('input[type="submit"]').click();  
+                    f.find('input[type="submit"].auto-submitter').click();  
                 },1);
             }).addClass('attached-change');
+            
+            
+            
+            
+            f.find('input[type="submit"]').click(function(){
+                var v = $(this).val();
+                var dov = false;
+                if(v === 'csv' || v === 'json'){
+                    dov = true;
+                }
+                var f = $(this).parents('form').first();            
+                // Must use data('remote') to disable the rails AJAX delegation. Setting the attribute doesn't work.
+                f.data('remote', !dov).attr('target', (dov ? v : null));
+                if(dov)
+                    $('#master_results_block').html('<h3 class="text-center">Exported '+v+'</h3>');
+            });
         }).on('keypress', function(e){
             // On any keypress inside a form, cancel an existing ajax search, since the user is probably doing something else
             _fpa.cancel_remote();
         }).on('submit', function(){
             // When we submit the form, give the user a visual spinner so they know what's going on
             // This also clears existing search results to make it clear when a result is complete
-            $('#master_results_block').html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
+            if($(this).data('remote'))
+                $('#master_results_block').html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
         });
         
         $('.clear-fields').not('.attached-clear-fields').on('click', function(ev){

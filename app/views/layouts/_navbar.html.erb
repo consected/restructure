@@ -33,7 +33,9 @@
             <%= text_field_tag :nav_q_pro_id, params[:nav_q_pro_id], class: "form-control", placeholder: "Pro ID Search" %>  
           </div>
           <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
-
+          <%= submit_tag "CSV", name: :req_format, value: "csv", class: "btn btn-default" %>
+          <%= submit_tag "JSON", name: :req_format, value: "json", class: "btn btn-default target_new_window" %>
+              
         <% end %>
       <% end %>
       <ul class="nav navbar-nav navbar-right">

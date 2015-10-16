@@ -193,12 +193,7 @@ _fpa = {
   handle_remotes: function(){
     
     var sel = "form[data-remote='true'], a[data-remote='true']";
-    
-    $(document).on('ajax:beforeSend', "form[data-remote='false']", function(ev, xhr){
-        ev.preventDefault();
         
-    });
-    
     $(document).on('click', sel,  function(ev){
       // Clear flash notices by clicking an ajax enabled link or form
       _fpa.clear_flash_notices();

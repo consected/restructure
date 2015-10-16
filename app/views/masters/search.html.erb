@@ -4,14 +4,18 @@
 
 <% if @master_id || @msid || @master_pro_id %>
 
-  <%= form_for @master, method: :get, remote: true, html: {id: 'msid_search_master', class: 'form-formatted msid_search_master hidden'} do |f| %>
-
+  <%= form_for @master, method: :get, remote: true, html: {id: 'msid_search_master', class: 'form-formatted msid_search_master hidden search_master'} do |f| %>
+      
       <%= hidden_field_tag :mode, "MSID" %>
       <div class="form-group col-sm-3">
         <%= f.text_field :id, id: 'simple_m_id', class: 'form-control', min: 0 %>
         <%= f.text_field :msid, id: 'simple_master_id', class: 'form-control', min: 0 %>
         <%= f.text_field :pro_id, id: 'simple_master_pro_id', class: 'form-control', min: 0 %>
       </div>
+    <%= f.submit :search, id: 'msid_search_reg', class: "btn btn-default btn-sm pull-right auto-submitter" %>
+    <%= f.submit "CSV", id: 'msid_search_csv', name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " %>
+    <%= f.submit "JSON", id: 'msid_search_json', name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" %>
+    
   <% end %>
 <script>  
   
@@ -19,7 +23,9 @@
   $('#simple_m_id').val('<%=@master_id%>');
   $('#simple_master_pro_id').val('<%=@master_pro_id%>');
   window.setTimeout(function(){
-    $('#msid_search_master').submit();
+    
+    console.log('loading: <%=@master_req_format%>' );
+    $('#msid_search_<%=@master_req_format%>').click();
   }, 10);
   
 </script>

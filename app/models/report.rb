@@ -6,7 +6,7 @@ class Report < ActiveRecord::Base
   validates :report_type, presence: true
   validates :name, presence: true
 
-  default_scope -> {order auto: :asc, id: :asc }
+  default_scope -> {order auto: :desc, position: :asc }
   
   scope :regular, -> {where report_type: 'regular_report'}
   scope :searchable, -> {where searchable: true}
