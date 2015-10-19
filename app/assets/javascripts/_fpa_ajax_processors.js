@@ -394,18 +394,9 @@ _fpa.postprocessors = {
         _fpa.form_utils.format_block(block);            
         $('#master_results_block').html('');
         
-        block.find('form input[type="submit"]').click(function(){
-            var v = $(this).val();
-            var dov = false;
-            if(v === 'csv' || v === 'json'){
-                dov = true;
-            }
-            var f = $(this).parents('form').first();            
-            // Must use data('remote') to disable the rails AJAX delegation. Setting the attribute doesn't work.
-            f.data('remote', !dov).attr('target', (dov ? v : null));
-            f.find('input[name="part"]').val(dov ? '' : 'results');
-            if(!dov) $('#master_results_block').html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
-        });
+
+        _fpa.masters.handle_search_form(block.find('form'));
+        
         
         block.find('a.btn[data-attribute]').click(function(ev){
           ev.preventDefault();
@@ -419,11 +410,17 @@ _fpa.postprocessors = {
           
           
         });
+        
     },
     
     reports_result: function(block, data){
+        // Update the search form results count bar manually
+        var c = $('.result-count').html();
         
-  
+        data.count = c;
+        
+        var h = _fpa.templates['search-count-template'](data);
+        $('.search_count_reports').html(h); 
     },
 
     

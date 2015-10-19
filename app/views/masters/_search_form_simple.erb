@@ -39,8 +39,7 @@
       </div>
       <div class="col-sm-1 text-right">
           <br/>
-          <p style="font-size: 18px;">              
-            <a href="#master-search-advanced" data-toggle="collapse" class="collapsed glyphicon glyphicon-list" title="advanced search"></a>&nbsp;
+          <p style="font-size: 18px;">                          
             <a href="#" class="clear-fields glyphicon glyphicon-erase" title="clear fields"></a>
           </p>
       </div>      
@@ -50,7 +49,7 @@
     <%= f.submit :search, class: "btn btn-default btn-sm pull-right auto-submitter" %>
     <%= f.submit "CSV", name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " %>
     <%= f.submit "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" %>
-              
+          
     <span id="search_count_simple" class="search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
   </div>
 <%end%>

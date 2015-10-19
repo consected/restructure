@@ -1,10 +1,9 @@
-<%= render partial: 'search_form_simple' %>
 <%= render partial: 'search_form' %>
 
 
 <% if @master_id || @msid || @master_pro_id %>
 
-  <%= form_for @master, method: :get, remote: true, html: {id: 'msid_search_master', class: 'form-formatted msid_search_master hidden search_master'} do |f| %>
+  <%= form_for @master, method: :get, remote: true, html: {id: 'msid_search_master', class: 'msid_search_master hidden auto_search_master'} do |f| %>
       
       <%= hidden_field_tag :mode, "MSID" %>
       <div class="form-group col-sm-3">
@@ -18,7 +17,8 @@
     
   <% end %>
 <script>  
-  
+  _fpa.masters.handle_search_form($('form.auto_search_master'));
+
   $('#simple_master_id').val('<%=@msid%>');
   $('#simple_m_id').val('<%=@master_id%>');
   $('#simple_master_pro_id').val('<%=@master_pro_id%>');

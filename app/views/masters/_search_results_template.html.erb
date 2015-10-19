@@ -7,6 +7,7 @@
 <%= render partial: 'tracker_histories/search_results_template' %>
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'external_links/search_results_template' %>
+<%= render partial: 'sage_assignments/search_results_template' %>
 
 
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
@@ -151,6 +152,21 @@
                 <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-target="#scantron-{{id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Scantron record</a> </p>                                    
 
             </div>
+    
+            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="scantrons">
+                {{#each sage_assignments}}
+                  
+                    {{>scantron_result _created=@index}}
+                  
+                {{/each}}
+
+                <div class="new-block" id="sage-assignment-{{id}}-" data-subscription="sage-assignment-edit-form-{{id}}-">
+                  {{#unless scantrons}}<h4>No Sage ID records</h4>{{/unless}}                
+                </div>
+                <p class="text-center"><a href="/masters/{{id}}/sage_assignments/new" data-target="#sage-assignment-{{id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Sage ID record</a> </p>                                    
+
+            </div>
+    
           </div>
   
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">

@@ -7,6 +7,7 @@ _fpa.loaded.default = function(){
     
     $('#nav_q').on('keypress', function(){
         $('#nav_q_pro_id').val('');
+        $('#nav_q_id').val('');
     }).on('change', function(){
         var v = $(this).val();
         if(v && v != '')
@@ -15,6 +16,16 @@ _fpa.loaded.default = function(){
     
     $('#nav_q_pro_id').on('keypress', function(){
         $('#nav_q').val('');
+        $('#nav_q_id').val('');
+    }).on('change', function(){
+        var v = $(this).val();
+        if(v && v != '')
+            $('form.navbar-form').submit();
+    });
+    
+    $('#nav_q_id').on('keypress', function(){
+        $('#nav_q').val('');
+        $('#nav_q_pro_id').val('');
     }).on('change', function(){
         var v = $(this).val();
         if(v && v != '')

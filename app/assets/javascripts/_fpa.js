@@ -417,6 +417,10 @@ _fpa = {
             var html = $(xhr.responseText);
             $('.query-error').remove();
             var updated = 0;
+            
+            // Set up an array that can be used in preprocessor to assign data in postprocessors, etc.
+            if(!data) data = {};
+            
             html.find('[data-result]').each(function(){
                 var d = $(this);
                 var di = d.attr('data-result');

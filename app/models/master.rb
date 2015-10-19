@@ -17,6 +17,7 @@ class Master < ActiveRecord::Base
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
   has_many :scantrons,  inverse_of: :master
+  has_many :sage_assignments,  inverse_of: :master, before_add: Proc.new{|parent_object, child_object| SageAssignment.assign_next_available_id }
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory'
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
@@ -42,7 +43,7 @@ class Master < ActiveRecord::Base
   
   # Nested attributes for advanced search form
   accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, 
-                                :scantrons, :player_contacts, :addresses, :trackers, :tracker_histories,
+                                :scantrons, :sage_assignments, :player_contacts, :addresses, :trackers, :tracker_histories,
                                 :not_trackers, :not_tracker_histories
 
   

@@ -8,9 +8,7 @@ _fpa.masters = {
     
     max_results: 100,
     
-    // Function called when the main search page loads, initializing seach form specific functionality    
-    set_fields_to_search: function(){
-        var forms = $('.search_master');
+    handle_search_form:  function(forms){
         
         // There are currently two search forms available. Step through each of these in turn
         forms.each(function(){
@@ -73,6 +71,9 @@ _fpa.masters = {
                 var f = $(this).parents('form').first();            
                 // Must use data('remote') to disable the rails AJAX delegation. Setting the attribute doesn't work.
                 f.data('remote', !dov).attr('target', (dov ? v : null));
+                // For the report forms, set the 'part' to return appropriate results
+                f.find('input[name="part"]').val(dov ? '' : 'results');
+                
                 if(dov)
                     $('#master_results_block').html('<h3 class="text-center">Exported '+v+'</h3>');
             });
@@ -85,6 +86,14 @@ _fpa.masters = {
             if($(this).data('remote'))
                 $('#master_results_block').html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
         });
+        
+    },
+    
+    // Function called when the main search page loads, initializing seach form specific functionality    
+    set_fields_to_search: function(){
+        var forms = $('.search_master');
+        
+        _fpa.masters.handle_search_form(forms);
         
         $('.clear-fields').not('.attached-clear-fields').on('click', function(ev){
             
@@ -142,13 +151,13 @@ _fpa.loaded.masters = function(){
         $('#master_results_block').html('');
     });
     
-    // Handle the switch between the advanced and simple forms
-    $('#master-search-advanced').on('show.bs.collapse', function () {
-        $('#master-search-simple').collapse('hide');
-      });
-    $('#master-search-simple').on('show.bs.collapse', function () {
-        $('#master-search-advanced').collapse('hide');
-    });
+//    // Handle the switch between the advanced and simple forms
+//    $('#master-search-advanced').on('show.bs.collapse', function () {
+//        $('#master-search-simple').collapse('hide');
+//      });
+//    $('#master-search-simple').on('show.bs.collapse', function () {
+//        $('#master-search-advanced').collapse('hide');
+//    });
     
     // On any entry in a form, clear the entries in the navbar search forms so there is no confusion
     // over what is being used

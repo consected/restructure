@@ -11,7 +11,7 @@ class Report < ActiveRecord::Base
   scope :regular, -> {where report_type: 'regular_report'}
   scope :searchable, -> {where searchable: true}
   
-  ReportTypes = [:count, :regular_report]
+  ReportTypes = [:count, :regular_report, :search]
   ReportIdAttribName = '_report_id_'
     
   class BadSearchCriteria < Exception
@@ -176,5 +176,18 @@ class Report < ActiveRecord::Base
     res 
   end
 
+  def field_index name
+    m_field = nil    
+    i = 0
+    @results.fields.each do |f|           
+      if f == name
+        m_field = i  
+        break
+      end
+      i+=1          
+    end  
+    
+    return m_field
+  end
   
 end

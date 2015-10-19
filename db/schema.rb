@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151016160248) do
+ActiveRecord::Schema.define(version: 20151019204910) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -501,6 +501,18 @@ ActiveRecord::Schema.define(version: 20151016160248) do
 
   add_index "reports", ["admin_id"], name: "index_reports_on_admin_id", using: :btree
 
+  create_table "sage_assignments", force: :cascade do |t|
+    t.integer  "sage_ext_id"
+    t.string   "assigned_by"
+    t.integer  "user_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.integer  "master_id"
+  end
+
+  add_index "sage_assignments", ["master_id"], name: "index_sage_assignments_on_master_id", using: :btree
+  add_index "sage_assignments", ["user_id"], name: "index_sage_assignments_on_user_id", using: :btree
+
   create_table "scantron_history", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "scantron_id"
@@ -684,6 +696,8 @@ ActiveRecord::Schema.define(version: 20151016160248) do
   add_foreign_key "protocol_history", "protocols", name: "fk_protocol_history_protocols"
   add_foreign_key "protocols", "admins"
   add_foreign_key "reports", "admins"
+  add_foreign_key "sage_assignments", "masters"
+  add_foreign_key "sage_assignments", "users"
   add_foreign_key "scantron_history", "masters", name: "fk_scantron_history_masters"
   add_foreign_key "scantron_history", "scantrons", column: "scantron_table_id", name: "fk_scantron_history_scantrons"
   add_foreign_key "scantron_history", "users", name: "fk_scantron_history_users"

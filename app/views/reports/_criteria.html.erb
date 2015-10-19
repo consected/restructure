@@ -1,7 +1,7 @@
-
+<% btn = @report.report_type == 'search' ? "btn btn-default btn-sm pull-right" : "btn btn-primary" %>
   
         <div>
-            <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted', id: "report_query_form", data: {result_target: '#master_results_block', preprocessor: 'reports_result'}, remote: true do %>
+            <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted search_report', id: "report_query_form", data: {result_target: '#master_results_block', preprocessor: 'reports_result'}, remote: true do %>
             <div class="row">
               <% @report.search_attributes.each do |name, type| %>
                 <div class="col-md-6" style="padding-bottom: 1em;">                
@@ -10,13 +10,17 @@
               <%end%>
               
             </div>
-            <div class="">
+            <div class="form-group form-actions clearfix">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
-              <%= submit_tag :table, name: :format, value: "html", class: "btn btn-primary" %>
-              <%= submit_tag "CSV", name: :format, value: "csv", class: "btn btn-primary" %>
-              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-primary target_new_window" %>
-                
+              <%= submit_tag :search, value: :search,class: "#{btn} auto-submitter" if @report.report_type == 'search' %>
+              <%= submit_tag :table, class: "#{btn}"  %>
+              <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" %>
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" %>
+               <% if @report.report_type != 'search'%> <span>&DoubleLeftArrow; click to run report</span><%end%>
+              <% if @report.report_type == 'search' %> 
+                <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>  
+              <%end%>
             </div>
             <%end%>
         </div>
