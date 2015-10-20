@@ -6,6 +6,12 @@ module AdminHandler
     scope :active, -> {where "disabled <> true"}
     
     before_validation :ensure_admin_set
+    before_create :setup_values
+  end
+  
+  def setup_values    
+    disabled = false if disabled.nil?    
+    true
   end
   
   def enabled?

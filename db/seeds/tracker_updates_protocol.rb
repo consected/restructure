@@ -23,10 +23,12 @@ module Seeds
         {name: "created player contact", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
         {name: "created player info", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
         {name: "created scantron", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "created sage assignment", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
         {name: "updated address", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
         {name: "updated player contact", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
         {name: "updated player info", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "updated scantron", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil}  
+        {name: "updated scantron", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
+        {name: "updated sage assignment", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil}  
       ]
       
       add_values values, sp

@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :reports
   namespace :admin do
     resources :reports, except: [:show, :destroy]
+    resources :sage_assignments, except: [:destroy]
   end
     
   resources :action_logs, only: [:show, :index]

@@ -3,7 +3,7 @@ module UserHandler
   extend ActiveSupport::Concern
   
   included do
-
+    attr_accessor :no_track
     # Standard associations
     Rails.logger.debug "Associating master as inverse of #{self.to_s.underscore.pluralize.to_sym}"
     belongs_to :master, inverse_of: self.to_s.underscore.pluralize.to_sym
@@ -20,7 +20,7 @@ module UserHandler
     # This validation ensures that the user ID has been set in the master object 
     # It implicitly reinforces security, in that the user must be authenticated for
     # the user to have been set
-    validates :user, presence: true
+    validate :user_set
     
     validate :source_correct
     validate :rank_correct
@@ -93,6 +93,10 @@ module UserHandler
     @multiple_results ||= []
   end
   
+  def multiple_results=mr
+    @multiple_results = mr
+  end
+  
   def has_multiple_results
     @multiple_results && @multiple_results.length > 0
   end
@@ -138,6 +142,10 @@ module UserHandler
   
   
   protected
+    def creatable_without_user
+      false
+    end
+      
     def downcase_attributes    
       
       ignore = ['item_type']
@@ -150,9 +158,15 @@ module UserHandler
       true
     end
 
+    def user_set 
+      return true if creatable_without_user && !persisted?
 
+      unless self.user
+        errors.add :user, "must be authenticated and set"
+      end
+    end
     def force_write_user
-      logger.debug "Forcing #{self.class.name} user attribute = #{master_user.id}"
+      return true if creatable_without_user && !persisted?
       
       raise "bad user being pulled from master_user" unless master_user.is_a?(User) && master_user.persisted?
       
@@ -160,8 +174,9 @@ module UserHandler
     end
 
     def track_record_update
+      return if no_track
       @update_action = true
-       Tracker.track_record_update self
+      Tracker.track_record_update self 
     end
   
     def source_correct      

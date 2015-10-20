@@ -17,7 +17,11 @@ class Master < ActiveRecord::Base
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
   has_many :scantrons,  inverse_of: :master
-  has_many :sage_assignments,  inverse_of: :master, before_add: Proc.new{|parent_object, child_object| SageAssignment.assign_next_available_id }
+  has_many :sage_assignments,  inverse_of: :master do
+    def build att=nil
+      SageAssignment.master_build proxy_association.owner, att
+    end
+  end
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory'
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 

@@ -1,0 +1,3 @@
+class FphsException < Exception
+  
+end

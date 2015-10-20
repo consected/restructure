@@ -8,16 +8,38 @@ class ApplicationController < ActionController::Base
   before_action :prevent_cache
   before_action :setup_navs
   
+  rescue_from Exception, :with => :unhandled_exception_handler
   rescue_from RuntimeError, :with => :runtime_error_handler
   rescue_from ActiveRecord::RecordNotFound, :with => :runtime_record_not_found_handler
+  rescue_from FphsException, :with => :fphs_app_exception_handler
   
 protected
+
+    def unhandled_exception_handler e
+      logger.error e.inspect 
+      logger.error e.backtrace.join("\n") 
+      respond_to do |type|        
+        type.html { render :text => "A unexpected error occurred. Contact the administrator if this condition persists. #{e.message}", :status => 500 }
+        type.json  { render :json => {message: "A unexpected error occurred. Contact the administrator if this condition persists. #{e.message}"}, :status => 500 }
+      end
+      true
+    end
+      
+    def fphs_app_exception_handler e
+      logger.error e.inspect 
+      logger.error e.backtrace.join("\n") 
+      respond_to do |type|        
+        type.html { render :text => "#{e.message}", :status => 400 }
+        type.json  { render :json => {message: "#{e.message}"}, :status => 500 }        
+      end
+      true
+    end
 
     def runtime_error_handler e
       logger.error e.inspect 
       logger.error e.backtrace.join("\n") 
       respond_to do |type|
-        type.html { render :text => "A server error occurred. Contact the administrator if this condition persists.", :status => 500 }
+        type.html { render :text => "A server error occurred. Contact the administrator if this condition persists. #{e.message}", :status => 500 }
         type.json  { render :json => {message: "A server error occurred. Contact the administrator if this condition persists."}, :status => 500 }
       end
       true
@@ -26,7 +48,7 @@ protected
       logger.error e.inspect 
       logger.error e.backtrace.join("\n") 
       respond_to do |type|
-        type.html { render :text => "A database record was not found. Contact the administrator if this condition persists.", :status => 404 }
+        type.html { render :text => "A database record was not found. Contact the administrator if this condition persists. #{e.message}", :status => 404 }
         type.json  { render :json => {message: "A database record was not found. Contact the administrator if this condition persists."}, :status => 404 }
       end
       true

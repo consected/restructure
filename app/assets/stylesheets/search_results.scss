@@ -211,7 +211,7 @@ li.list-group-item.record-meta {
   font-size: 95%;
 }
 
-li.list-group-item.scantron-scantron_id small {
+li.list-group-item.compact-heading small {
     position: relative;
 }
 
@@ -410,6 +410,12 @@ div.external-links {
         margin-left: 2em;
     }
 }
+
+div.sage-assignment-item {
+    
+}
+
+
 
 @media only screen and (min-width: 1023px) {
 

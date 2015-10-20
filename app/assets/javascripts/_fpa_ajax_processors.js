@@ -39,7 +39,7 @@ _fpa.postprocessors = {
             _fpa.postprocessors.tracker_item_link_hander(block);                        
         }
 
-        if(data.masters && data.masters.length == 1){                        
+        if(data.masters && data.masters.length === 1){                        
             _fpa.postprocessors.tracker_events_handler(block);                                                
         }
 
@@ -271,10 +271,6 @@ _fpa.postprocessors = {
                     el.val(v);
                     $('#tracker_notes').val('');
                 }
-            //}else{
-            //    el.parents('div').first().hide();
-            //   el.val(null);
-            //}
         };
 
         block.find('#tracker_protocol_event_id, #tracker_sub_process_id').change(function(){

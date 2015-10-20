@@ -1,11 +1,12 @@
 
 <script id="sage_assignment_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="index-{{_created}}" id="sage-assignment-{{master_id}}-{{id}}" data-subscription="sage-assignment-edit-form-{{master_id}}-{{id}}" data-template="sage-assignment-result-template" data-sub-item="sage_assignment" data-sub-id="{{id}}" >{{/was}}
-  <ul class="list-group">
-      <li class="list-group-item sage_assignment-sage_assignment_id is-heading">
+  {{#was _created}}<div class="index-{{_created}} sage-assignment-item" id="sage-assignment-{{master_id}}-{{id}}" data-subscription="sage-assignment-edit-form-{{master_id}}-{{id}}" data-template="sage-assignment-result-template" data-sub-item="sage_assignment" data-sub-id="{{id}}" data-sort-desc="data-item-id">{{/was}}
+  <ul class="list-group" data-item-id="{{id}}">
+      <li class="list-group-item sage_assignment-sage_assignment_id is-heading compact-heading">
         <a data-toggle="scrollto-result" data-target="#sage-assignment-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-sage-assignment pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/sage_assignments/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
-        <small>Sage ID</small> <strong>{{sage_assignment_id}}</strong>
-      </li>      
+        <small>Sage ID</small> <strong data-sage-id="{{sage_id}}">{{format_sage_id sage_id}}</strong>
+      </li>
+      <li class="list-group-item record-meta">{{>update_metadata}}</li>      
   </ul>
   {{#was _created}}</div>{{/was}}
 </script>

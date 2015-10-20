@@ -2,10 +2,11 @@
 <script id="scantron_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}<div class="index-{{_created}}" id="scantron-{{master_id}}-{{id}}" data-subscription="scantron-edit-form-{{master_id}}-{{id}}" data-template="scantron-result-template" data-sub-item="scantron" data-sub-id="{{id}}" >{{/was}}
   <ul class="list-group">
-      <li class="list-group-item scantron-scantron_id is-heading">
+      <li class="list-group-item scantron-scantron_id is-heading compact-heading">
         <a data-toggle="scrollto-result" data-target="#scantron-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-scantron pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/scantrons/{{this.id}}/edit" data-remote="true" data-player-id="{{this.id}}"></a>
         <small>Scantron</small> <strong>{{scantron_id}}</strong>
       </li>      
+      <li class="list-group-item record-meta">{{>update_metadata}}</li>
   </ul>
   {{#was _created}}</div>{{/was}}
 </script>

@@ -139,11 +139,23 @@
 
 
     Handlebars.registerHelper('date_time', function(text) {
-      var ds = new Date();
-      var d = ds.toLocaleString();
-        return new Handlebars.SafeString(d);
+        if(text){
+            var ds = new Date(Date.parse(text));
+            var d = ds.toLocaleString();
+            return new Handlebars.SafeString(d);            
+        }else{
+            var ds = new Date();
+            var d = ds.toLocaleString();
+            return new Handlebars.SafeString(d);
+        }
     });
 
+
+    Handlebars.registerHelper('format_sage_id', function(text) {
+        var d = text.substring(0,3) + ' ' + text.substring(3,6) + ' ' + text.substring(6,10)
+        return new Handlebars.SafeString(d);
+    });
+    
     Handlebars.registerHelper('log', function() {
         console.log(['Values:'].concat(
             Array.prototype.slice.call(arguments, 0, -1)

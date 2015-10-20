@@ -94,6 +94,10 @@ module MasterSearch
             scantrons: {
               order: {scantron_id: :asc},
               methods: [:user_name]
+            },
+            sage_assignments: {
+              order: {sage_id: :asc},
+              methods: [:user_name]
             }
           }) 
         }

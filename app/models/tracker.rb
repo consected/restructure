@@ -133,7 +133,7 @@ class Tracker < ActiveRecord::Base
     
     t.item_id = record.id    
     t.item_type = record.class.name
-    raise "Bad item for tracker (#{type})" unless t.item
+    raise "Bad item for tracker (#{type} / #{record.class.name} / #{record.id})" unless t.item
     
     return t
   end

@@ -57,8 +57,8 @@
 </script>
 
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{pretty_string created_at}}"></span> 
-    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated" >{{pretty_string updated_at}}</span>{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
+    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}"></span> 
+    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
     {{#if user_name}} by {{user_name}}{{/if}}    
 </script>
 
@@ -153,15 +153,15 @@
 
             </div>
     
-            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="scantrons">
+            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage-assignments">
                 {{#each sage_assignments}}
                   
-                    {{>scantron_result _created=@index}}
+                    {{>sage_assignment_result _created=@index}}
                   
                 {{/each}}
 
                 <div class="new-block" id="sage-assignment-{{id}}-" data-subscription="sage-assignment-edit-form-{{id}}-">
-                  {{#unless scantrons}}<h4>No Sage ID records</h4>{{/unless}}                
+                  {{#unless sage_assignments}}<h4>No Sage ID records</h4>{{/unless}}                
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/sage_assignments/new" data-target="#sage-assignment-{{id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Sage ID record</a> </p>                                    
 

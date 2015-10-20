@@ -14,8 +14,10 @@ class Report < ActiveRecord::Base
   ReportTypes = [:count, :regular_report, :search]
   ReportIdAttribName = '_report_id_'
     
-  class BadSearchCriteria < Exception
-    
+  class BadSearchCriteria < FphsException
+    def message 
+      "Bad search criteria were entered. Please check entries and try again."
+    end
   end
   
   

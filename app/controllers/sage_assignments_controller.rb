@@ -5,6 +5,8 @@ class SageAssignmentsController < ApplicationController
   private
     
     def secure_params
-      params.require(:sage_assignment).permit(:master_id)
+      res = params.require(:sage_assignment).permit(:master_id, :sage_id)
+      res[:sage_id] = nil
+      res
     end
 end

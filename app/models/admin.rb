@@ -10,6 +10,10 @@ class Admin < ActiveRecord::Base
   before_validation :prevent_not_in_setup_script, on: :create
 
   
+  def enabled?
+    !self.disabled
+  end
+  
   def timeout_in
     return Settings::AdminTimeout
   end

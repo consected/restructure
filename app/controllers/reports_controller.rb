@@ -33,19 +33,6 @@ class ReportsController < ApplicationController
     if search_attrs
       begin
         @results =  @report.run(search_attrs) 
-      rescue Report::BadSearchCriteria
-        @results = nil
-        flash.now[:alert] = "Bad search criteria"
-        respond_to do |format|
-          format.html {
-            if params[:part] == 'results'              
-              render text: "bad search criteria", status: 400
-            else
-              render :show
-            end
-          }
-        end     
-        return
       rescue ActiveRecord::PreparedStatementInvalid => e
         logger.info "Prepared statement invalid in reports_controller (#{search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
         @results = nil

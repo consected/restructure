@@ -1,4 +1,5 @@
 <%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-danger' %>
+<% no_create = false %>
 <% unless controller_name == 'pages' %>
   <%= link_to "admin menu", "/", class: "btn btn-warning" %>
 
@@ -17,6 +18,13 @@
   <%if @report %>
     <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>    
   <%end%>
-  
+
+  <%if @sage_assignment || @sage_assignments %>
+    <%= link_to "Sage IDs", admin_sage_assignments_path, class: "btn btn-warning" %>    
+    <% no_create = true %>
+  <%end%>
+
+  <%unless no_create%>
   <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: params[:filter]), remote: true, class: "btn btn-primary" if action_name == 'index' rescue nil%>
+  <%end%>
 <%end%>
