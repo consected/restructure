@@ -90,15 +90,15 @@ module MasterSearch
 
             latest_tracker_history: {            
               methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]
-            },
-            scantrons: {
-              order: {scantron_id: :asc},
-              methods: [:user_name]
-            },
-            sage_assignments: {
-              order: {sage_id: :asc},
-              methods: [:user_name]
             }
+#            scantrons: {
+#              order: {scantron_id: :asc},
+#              methods: [:user_name]
+#            },
+#            sage_assignments: {
+#              order: {sage_id: :asc},
+#              methods: [:user_name]
+#            }
           }) 
         }
 

@@ -44,6 +44,8 @@ module MasterHandler
       s[:original_item] = object_instance
       s[objects_name] <<  object_instance
     end
+    s[:master_id] = @master.id
+    
     logger.debug "List: #{s} with objects_instance @#{objects_name}"
     render json: s
   end

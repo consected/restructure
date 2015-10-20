@@ -3,12 +3,6 @@ class TrackersController < ApplicationController
 
   before_action :merge_if_exists, only: [:create]
   
-  def index
-    set_objects_instance @master_objects
-    s = @master_objects
-    render json: {trackers: s, master_id: @master.id}
-  end
-
     
   private
   

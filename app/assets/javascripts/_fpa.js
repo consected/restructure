@@ -263,29 +263,32 @@ _fpa = {
         // else, process the rendered HTML
         if(data){
             var t;
+            var t_force;
             var use_target = false;
             // Identify whether to target the results at a single dom element or to handle data subscriptions
             // Check the first entry in the returned data to see if the record indicates it was created
             // This will not show if a result set of multiple items is returned 
             // (whether the result of an index or a create that affected multiple items)
-            // which is the desire effect, as multiple results must not be directed at a single DOM element
+            // which is the desired effect, as multiple results must not be directed at a single DOM element
             // Results that were not newly created can be directed at the specified data-result-target if other data-sub-item
             // markup is not found for returned item.
-            t = $(this).attr('data-result-target');
+            t = $(this).attr('data-result-target');            
             var item_key;            
             var dataitem;           
             var target_data;
-            if(data.multiple_results){
+            if(data.multiple_results && data.original_item){
                 item_key = data.multiple_results;
-                dataitem = data['original_item'];
+                dataitem = data.original_item;
                 target_data = {};
+                
                 target_data[dataitem.item_type] = dataitem;
                 
             }else{                
                 for (item_key in data) break;
                 dataitem = data[item_key];
                 target_data = data;
-                
+                // Ensure we use the target if there are multiple results specified, but no original item from a create or merge
+                t_force = !!data.multiple_results;
             }
             
             // If a triggering block has the attribute data-result-target
@@ -294,7 +297,8 @@ _fpa = {
             // is returning a result that is mostly likely different to that we would normally expect, such as an update returning a list of changed elements).
             // If no data-sub-item or data-sub-list is specified that matches a key in the reponse data, then we really have no other option but to position the result
             // where requested.
-            if(t && (dataitem===null || dataitem['_created'] || dataitem['_merged'] ||  $('[data-sub-item="'+item_key+'"], [data-sub-list="'+item_key+'"] [data-sub-item]').length===0 ))
+            // Finally if the results are 'multiple_results' but there was no original_item specified, then this a pure index. If there is a target, use it.
+            if(t && (t_force || dataitem===null || dataitem['_created'] || dataitem['_merged'] ||  $('[data-sub-item="'+item_key+'"], [data-sub-list="'+item_key+'"] [data-sub-item]').length===0 ))
                 use_target = true;
 
             var options = {};                       

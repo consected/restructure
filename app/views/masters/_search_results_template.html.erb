@@ -2,12 +2,21 @@
 <%= render partial: 'pro_infos/search_results_template' %>
 <%= render partial: 'addresses/search_results_template' %>
 <%= render partial: 'player_contacts/search_results_template' %>
-<%= render partial: 'scantrons/search_results_template' %>
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'scantron', 
+    prevent_edit: false, 
+    item_list: [label: 'Scantron', formatter: '', attribute: 'scantron_id'] 
+  } %>
+
 <%= render partial: 'trackers/search_results_template' %>
 <%= render partial: 'tracker_histories/search_results_template' %>
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'external_links/search_results_template' %>
-<%= render partial: 'sage_assignments/search_results_template' %>
+<%= render partial: 'common_templates/search_results_template', locals: {
+      name: 'sage_assignment', 
+      prevent_edit: true,  
+      item_list: [label: 'Sage ID', formatter: 'format_sage_id', attribute: 'sage_id']
+    } %>
 
 
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
@@ -139,33 +148,12 @@
           </div>
           
           <div id="extras-{{id}}" class="row collapse extras-block">
-            <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons">
-                {{#each scantrons}}
-                  
-                    {{>scantron_result _created=@index}}
-                  
-                {{/each}}
-
-                <div class="new-block" id="scantron-{{id}}-" data-subscription="scantron-edit-form-{{id}}-">
-                  {{#unless scantrons}}<h4>No Scantron records</h4>{{/unless}}                
-                </div>
-                <p class="text-center"><a href="/masters/{{id}}/scantrons/new" data-target="#scantron-{{id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Scantron record</a> </p>                                    
-
+            <div class="on-open-click hidden">
+              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantrons</a>
+              <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignments</a>
             </div>
-    
-            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage-assignments">
-                {{#each sage_assignments}}
-                  
-                    {{>sage_assignment_result _created=@index}}
-                  
-                {{/each}}
-
-                <div class="new-block" id="sage-assignment-{{id}}-" data-subscription="sage-assignment-edit-form-{{id}}-">
-                  {{#unless sage_assignments}}<h4>No Sage ID records</h4>{{/unless}}                
-                </div>
-                <p class="text-center"><a href="/masters/{{id}}/sage_assignments/new" data-target="#sage-assignment-{{id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> Sage ID record</a> </p>                                    
-
-            </div>
+            <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons"></div>            
+            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage_assignments"></div>
     
           </div>
   

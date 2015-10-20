@@ -10,7 +10,7 @@ module ApplicationHelper
   end
 
   def hyphenated_name
-    controller_name.singularize.gsub('_','-')
+    controller_name.singularize.hyphenate
   end
   
   

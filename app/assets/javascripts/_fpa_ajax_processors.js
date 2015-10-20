@@ -40,7 +40,8 @@ _fpa.postprocessors = {
         }
 
         if(data.masters && data.masters.length === 1){                        
-            _fpa.postprocessors.tracker_events_handler(block);                                                
+            _fpa.postprocessors.tracker_events_handler(block);   
+            _fpa.postprocessors.extras_panel_handler(block);
         }
 
         
@@ -58,6 +59,8 @@ _fpa.postprocessors = {
                 _fpa.postprocessors.tracker_item_link_hander($(this));
                 
                 _fpa.postprocessors.tracker_events_handler($(this));                
+                
+                _fpa.postprocessors.extras_panel_handler($(this));
                 
                 $.scrollTo($(this), 200, {offset:-50} );                
                 
@@ -98,6 +101,10 @@ _fpa.postprocessors = {
             
         });
         
+    },
+    
+    extras_panel_handler: function(block){
+        block.find('.on-open-click a[data-remote="true"]').not('.auto-clicked').click().addClass('auto-clicked');
     },
     
     tracker_opener: function(block){
