@@ -1,0 +1,32 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">    
+<h1>Dynamic Models</h1>
+
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th class="no-sort"></th>
+      <% permitted_params.each do |p| %>
+        <th><%= p.to_s.humanize %></th>
+      <% end %>
+      <th class="no-sort"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% objects_instance.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td><%= admin_edit_btn list_item.id%> </td>
+        <% permitted_params.each do |p| %>        
+        <td><%= list_item.send(p) %></td>
+        <% end %>        
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+  <%=  render partial: 'admin_handler/index_actions'  %>    
+  </div>
+</div>

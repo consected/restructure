@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :reports, except: [:show, :destroy]
     resources :sage_assignments, except: [:destroy]
+    resources :dynamic_models, except: [:show, :destroy]
+
   end
     
   resources :action_logs, only: [:show, :index]
@@ -51,6 +53,8 @@ Rails.application.routes.draw do
     get ':item_controller/:item_id/item_flags/:id', to: 'item_flags#show'
     post ':item_controller/:item_id/item_flags', to: 'item_flags#create'
 
+    DynamicModel.routes_load    
+    
   end
   
   devise_for :admins, :skip => [:registrations]
@@ -72,7 +76,6 @@ Rails.application.routes.draw do
   end
   
   root "masters#search", :as=> 'guest_home'
-  
   
   
 end

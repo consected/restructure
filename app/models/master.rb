@@ -17,11 +17,16 @@ class Master < ActiveRecord::Base
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
   has_many :scantrons,  inverse_of: :master
+  
+  # Sage Assignments need a special build, which handles the allocation of an existing item from the table
+  # when an instance is created. Within the structure we have, it is necessary to override the master.sage_assignments.build
+  # method to ensure everything works as expected
   has_many :sage_assignments,  inverse_of: :master do
     def build att=nil
       SageAssignment.master_build proxy_association.owner, att
     end
   end
+  
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory'
   
   # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
@@ -36,7 +41,11 @@ class Master < ActiveRecord::Base
   validates :user, presence: true  
   before_create :assign_msid
   
-
+  
+  DynamicModel.active.each do |dm|
+    has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}"
+    Rails.logger.debug "Associated master with #{dm.model_association_name} with class_name: DynamicModel::#{dm.model_class_name}"
+  end
   
   
   Master.reflect_on_all_associations(:has_many).each do |assoc| 

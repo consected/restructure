@@ -3,7 +3,7 @@ module AdminHandler
   
   included do
     belongs_to :admin
-    scope :active, -> {where "disabled <> true"}
+    scope :active, -> {where "disabled is null or disabled = false"}
     
     before_validation :ensure_admin_set
     before_create :setup_values

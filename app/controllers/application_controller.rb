@@ -13,6 +13,8 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::RecordNotFound, :with => :runtime_record_not_found_handler
   rescue_from FphsException, :with => :fphs_app_exception_handler
   
+  
+  
 protected
 
     def unhandled_exception_handler e

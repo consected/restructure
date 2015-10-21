@@ -21,7 +21,7 @@
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
         {{/filter}}                    
-        <% if defined? :item_blocks 
+        <% if defined? item_blocks 
             item_blocks.each do |item|
         %>
         <div class="<%=name.hyphenate%>-<%=item%>">

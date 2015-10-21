@@ -18,6 +18,21 @@
       item_list: [label: 'Sage ID', formatter: 'format_sage_id', attribute: 'sage_id']
     } %>
 
+<% DynamicModel.active.each do |m| 
+  l = []
+  
+  m.model_def.attribute_names.each do |k|
+    l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s]
+  end
+
+%>
+<%= render partial: 'common_templates/search_results_template', locals: {
+      name: m.model_def_name.to_s, 
+      prevent_edit: true,  
+      item_list: l
+    } %>
+<% end %>
+
 
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
   <strong class="player-names">                
@@ -129,9 +144,7 @@
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <ul class="nav nav-pills ">
-          <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#extras-{{id}}" class="collapsed"><span class="caret"></span> extras</a>
-          </li>
+          
           <li role="presentation">
             <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
           </li>
@@ -140,21 +153,41 @@
           </li>
   
           <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed"><span class="caret"></span> external links</a>
+            <a href="#/" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed"><span class="caret"></span> external ids</a>
           </li>
+    
+          <li role="presentation">
+            <a href="#/" data-toggle="collapse" data-target="#extended-info-{{id}}" class="collapsed"><span class="caret"></span> extended info</a>
+          </li>
+  
+          <li role="presentation">
+            <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed"><span class="caret"></span> web links</a>
+          </li>
+  
         </ul>        
         <div class="panel-body">
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}">
           </div>
           
-          <div id="extras-{{id}}" class="row collapse extras-block">
+          <div id="external-ids-{{id}}" class="row collapse external-ids-block">
             <div class="on-open-click hidden">
-              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantrons</a>
-              <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignments</a>
+              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantron</a>
+              <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignment</a>
             </div>
             <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons"></div>            
             <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage_assignments"></div>
     
+          </div>
+  
+          <div id="extended-info-{{id}}" class="row collapse extended-info-block">
+            <div class="on-open-click hidden">
+              <% DynamicModel.model_name_strings.each do |mn| %>
+              <a href="/masters/{{id}}/dynamic_model/<%=mn.pluralize%>" data-result-target="#<%=mn.pluralize%>-{{id}}-" data-template="<%=mn.pluralize.hyphenate%>-list-template" data-remote="true" class=""><%=mn.humanize%></a>
+              <% end %>
+            </div>
+            <% DynamicModel.model_name_strings.each do |mn| %>
+            <div class="col-md-6" id="<%=mn.pluralize%>-{{id}}-" data-sub-list="<%=mn.pluralize%>"></div>                        
+            <% end %>
           </div>
   
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">

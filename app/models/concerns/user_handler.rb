@@ -6,7 +6,7 @@ module UserHandler
     attr_accessor :no_track
     # Standard associations
     Rails.logger.debug "Associating master as inverse of #{self.to_s.underscore.pluralize.to_sym}"
-    belongs_to :master, inverse_of: self.to_s.underscore.pluralize.to_sym
+    belongs_to :master, inverse_of: assoc_inverse
     belongs_to :user
     
     has_many :item_flags, as: :item
@@ -30,6 +30,11 @@ module UserHandler
   end
   
   class_methods do
+    
+    def assoc_inverse
+      self.to_s.underscore.pluralize.to_sym
+    end
+    
     def get_rank_name value
       GeneralSelection.name_for self, value, :rank    
     end

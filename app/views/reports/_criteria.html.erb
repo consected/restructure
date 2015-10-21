@@ -18,7 +18,7 @@
               <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" %>
               <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" %>
                <% if @report.report_type != 'search'%> <span>&DoubleLeftArrow; click to run report</span><%end%>
-              <% if @report.report_type == 'search' %> 
+              <% if @report.report_type != 'count' %> 
                 <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>  
               <%end%>
             </div>
