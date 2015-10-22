@@ -1,6 +1,4 @@
 class ItemFlag < ActiveRecord::Base
-
-  UseWithClassNames = ['PlayerInfo'].freeze
   
   belongs_to :item, polymorphic: true, inverse_of: :item_flags
   belongs_to :item_flag_name  
@@ -21,11 +19,21 @@ class ItemFlag < ActiveRecord::Base
   validates :item_flag_name_id, presence: true
   validates :item_flag_name, presence: true  
   validates :item, presence: true
-  validates :item_type, inclusion: {in: UseWithClassNames}
+  validate :works_with_class
   
   def self.works_with class_name
-    UseWithClassNames.include? class_name
+    use_with_class_names.include? class_name.underscore
   end
+  
+  def self.use_with_class_names
+    master_classes = Master.reflect_on_all_associations(:has_many).select {|v| v.options[:source] != :item_flags}.collect {|v| v.plural_name.singularize}.sort
+  end
+  
+  def works_with_class
+    self.class.use_with_class_names.include? item_type    
+  end
+
+  
   
   # Create and remove flags for the underlying item.
   # Returns true if flags were added or removed

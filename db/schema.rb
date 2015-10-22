@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151021171534) do
+ActiveRecord::Schema.define(version: 20151022191658) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -147,6 +147,28 @@ ActiveRecord::Schema.define(version: 20151021171534) do
   add_index "colleges", ["admin_id"], name: "index_colleges_on_admin_id", using: :btree
   add_index "colleges", ["user_id"], name: "index_colleges_on_user_id", using: :btree
 
+  create_table "copy_player_infos", id: false, force: :cascade do |t|
+    t.integer  "id"
+    t.integer  "master_id"
+    t.string   "first_name"
+    t.string   "last_name"
+    t.string   "middle_name"
+    t.string   "nick_name"
+    t.date     "birth_date"
+    t.date     "death_date"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "contact_pref"
+    t.integer  "start_year"
+    t.integer  "rank"
+    t.string   "notes"
+    t.integer  "contactid"
+    t.string   "college"
+    t.integer  "end_year"
+    t.string   "source"
+  end
+
   create_table "dynamic_models", force: :cascade do |t|
     t.string   "name"
     t.string   "table_name"
@@ -158,6 +180,9 @@ ActiveRecord::Schema.define(version: 20151021171534) do
     t.boolean  "disabled"
     t.datetime "created_at",       null: false
     t.datetime "updated_at",       null: false
+    t.integer  "position"
+    t.string   "category"
+    t.string   "table_key_name"
   end
 
   add_index "dynamic_models", ["admin_id"], name: "index_dynamic_models_on_admin_id", using: :btree

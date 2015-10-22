@@ -6,7 +6,8 @@ module UserHandler
     attr_accessor :no_track
     # Standard associations
     Rails.logger.debug "Associating master as inverse of #{self.to_s.underscore.pluralize.to_sym}"
-    belongs_to :master, inverse_of: assoc_inverse
+    
+    belongs_to :master, assoc_rules
     belongs_to :user
     
     has_many :item_flags, as: :item
@@ -30,11 +31,30 @@ module UserHandler
   end
   
   class_methods do
-    
-    def assoc_inverse
-      self.to_s.underscore.pluralize.to_sym
+
+    def foreign_key_name
+      @foreign_key_name = :master_id
     end
     
+    def primary_key_name
+      @primary_key_name = :id
+    end
+    
+    def assoc_rules
+      r = {inverse_of: assoc_inverse}      
+      r[:foreign_key] = self.foreign_key_name if self.foreign_key_name && self.foreign_key_name != :master_id
+      r[:primary_key] = self.primary_key_name if self.primary_key_name && self.primary_key_name != :id
+#      r[:primary_key] = self.foreign_key_name if self.foreign_key_name && self.foreign_key_name != :master_id
+#      logger.info "Setting association with rules: #{r}"
+      r
+      
+    end
+    
+    def assoc_inverse
+      # The plural model name
+      self.to_s.underscore.pluralize.to_sym
+    end
+
     def get_rank_name value
       GeneralSelection.name_for self, value, :rank    
     end

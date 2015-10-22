@@ -56,10 +56,24 @@ class ItemFlagsController < ApplicationController
       # This prevents insecure requests from the user being used to access objects below
       return not_found unless ItemFlag.works_with item_class_name
       
-      item_class = item_class_name.constantize
+      if defined? item_class_name.constantize
+        begin
+          item_class = item_class_name.constantize 
+        rescue          
+          item_class = "DynamicModel::#{item_class_name}".constantize rescue nil
+        end
+      end
+      
+      raise "Failed to get #{item_class_name}" unless item_class
       
       @item = item_class.find(params[:item_id])
+      
+      raise "Failed to get @item for #{item_class_name}" unless @item
+      
       @master = @item.master
+      
+      raise "Failed to get @master for #{@item.inspect}" unless @master
+      @master
     end
   
     def secure_params

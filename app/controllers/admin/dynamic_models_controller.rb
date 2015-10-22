@@ -7,7 +7,7 @@ class Admin::DynamicModelsController < ApplicationController
   protected
   
     def permitted_params
-      @permitted_params = [:id, :name, :table_name, :schema_name, :primary_key_name, :foreign_key_name, :description, :disabled]
+      @permitted_params = [:id, :name, :category, :table_name, :table_key_name, :schema_name, :primary_key_name, :foreign_key_name, :position, :description, :disabled]
     end          
 
     def secure_params      

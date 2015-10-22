@@ -114,6 +114,15 @@ _fpa.form_utils = {
         });
     },
 
+    organize_dynamic_models: function(block){
+        $('.dynamic-model-item').each(function(){
+            var p = $(this).parents('.dynamic-model-list');
+            if(p.hasClass('row')){
+                $(this).addClass('col-md-6');
+            }
+        });
+    },
+
     // Provide a filtered set of options in a select field, based on the selection of 
     // another field
     // This handle both the initial setup and handling changes made to parent and dependent 
@@ -222,7 +231,10 @@ _fpa.form_utils = {
             $(a).html('').removeClass('in');
         }).addClass('attached-datatoggle');
 
-        block.find('[data-toggle="scrollto-result"]').not('.attached-datatoggle').on('click', function(){
+        block.find('[data-toggle="scrollto-result"], [data-toggle="collapse"].scroll-to-expanded ').not('.attached-datatoggle').on('click', function(){
+            if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed'))
+              return;
+            
             var a = $(this).attr('data-target');                                            
             if(!a || a==''){
                 a = $(this).attr('data-result-target');
@@ -296,12 +308,14 @@ _fpa.form_utils = {
         block.find('.typeahead').css({width: '100%'});        
         block.find('form').not('.form-formatted').addClass('form-inline');
     },
+        
 
     // Run through all the general formatters for a new block to show nicely
     format_block: function(block){
         if(!block) block = $(document);
         _fpa.form_utils.setup_chosen(block);  
         _fpa.form_utils.setup_has_value_inputs(block);
+        _fpa.form_utils.organize_dynamic_models(block);
         _fpa.form_utils.resize_labels(block);
         _fpa.form_utils.filtered_selector(block);
         _fpa.form_utils.setup_tablesorter(block);

@@ -156,6 +156,10 @@
         return new Handlebars.SafeString(d);
     });
     
+    Handlebars.registerHelper('simple_log', function(t) {
+        console.log(t);        
+    });
+    
     Handlebars.registerHelper('log', function() {
         console.log(['Values:'].concat(
             Array.prototype.slice.call(arguments, 0, -1)

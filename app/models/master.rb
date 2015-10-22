@@ -43,7 +43,7 @@ class Master < ActiveRecord::Base
   
   
   DynamicModel.active.each do |dm|
-    has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}"
+    has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
     Rails.logger.debug "Associated master with #{dm.model_association_name} with class_name: DynamicModel::#{dm.model_class_name}"
   end
   

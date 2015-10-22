@@ -24,6 +24,11 @@ _fpa.postprocessors = {
         if(!has_postprocessor){
             _fpa.form_utils.format_block(block);            
         }
+        
+        $('.format-block-on-expand').not('.attached-expander-format').on('shown.bs.collapse', function(){
+                        
+            _fpa.form_utils.format_block($(this));                
+        }).addClass('attached-expander-format');
     
     },    
    
@@ -66,8 +71,7 @@ _fpa.postprocessors = {
                 
                 $(this).off('shown.bs.collapse');
             });
-            
-            
+                        
         });
         
         var msid_list = $("#msid_list").html();

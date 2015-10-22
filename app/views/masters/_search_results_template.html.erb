@@ -20,9 +20,13 @@
 
 <% DynamicModel.active.each do |m| 
   l = []
-  
-  m.model_def.attribute_names.each do |k|
-    l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s]
+  an = (m.model_def.attribute_names - [:id, :created_at, :updated_at])
+  if an.length > 1
+    l = an
+  else
+    an.each do |k|
+      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s] 
+    end
   end
 
 %>
@@ -146,23 +150,27 @@
         <ul class="nav nav-pills ">
           
           <li role="presentation">
-            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
+            <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
           </li>
           <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class=""><span class="caret"></span> details</a>
+            <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class="scroll-to-expanded "><span class="caret"></span> details</a>
           </li>
   
           <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed"><span class="caret"></span> external ids</a>
+            <a href="#/" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> external ids</a>
           </li>
     
           <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#extended-info-{{id}}" class="collapsed"><span class="caret"></span> extended info</a>
+            <a href="#/" data-toggle="collapse" data-target="#extended-info-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> extended info</a>
+          </li>
+          <li role="presentation">
+            <a href="#/" data-toggle="collapse" data-target="#change-history-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> change history</a>
           </li>
   
           <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed"><span class="caret"></span> web links</a>
+            <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> web links</a>
           </li>
+          
   
         </ul>        
         <div class="panel-body">
@@ -179,14 +187,29 @@
     
           </div>
   
-          <div id="extended-info-{{id}}" class="row collapse extended-info-block">
+          <div id="extended-info-{{id}}" class="row collapse extended-info-block format-block-on-expand">
             <div class="on-open-click hidden">
-              <% DynamicModel.model_name_strings.each do |mn| %>
-              <a href="/masters/{{id}}/dynamic_model/<%=mn.pluralize%>" data-result-target="#<%=mn.pluralize%>-{{id}}-" data-template="<%=mn.pluralize.hyphenate%>-list-template" data-remote="true" class=""><%=mn.humanize%></a>
+              <% dm = DynamicModel.active.where(category: 'extended-info') 
+                 dm.each do |m|               
+              %>
+              <a href="/masters/{{id}}/dynamic_model/<%=m.model_association_name%>" data-result-target="#<%=m.model_association_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
               <% end %>
             </div>
-            <% DynamicModel.model_name_strings.each do |mn| %>
-            <div class="col-md-6" id="<%=mn.pluralize%>-{{id}}-" data-sub-list="<%=mn.pluralize%>"></div>                        
+            <% dm.each do |m| %>
+            <div class="col-md-6" id="<%=m.model_association_name%>-{{id}}-" data-sub-list="<%=m.model_association_name%>"></div>                        
+            <% end %>
+          </div>
+  
+          <div id="change-history-{{id}}" class="row collapse extended-info-block format-block-on-expand">
+            <div class="on-open-click hidden">
+              <% dm = DynamicModel.active.where(category: 'history') 
+                 dm.each do |m|               
+              %>
+              <a href="/masters/{{id}}/dynamic_model/<%=m.model_association_name%>" data-result-target="#<%=m.model_association_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
+              <% end %>
+            </div>
+            <% dm.each do |m| %>
+            <div class="row dynamic-model-list" id="<%=m.model_association_name%>-{{id}}-" data-sub-list="<%=m.model_association_name%>"></div>                        
             <% end %>
           </div>
   

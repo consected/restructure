@@ -7,6 +7,12 @@ class ItemFlagName < ActiveRecord::Base
   
   default_scope -> {order  "item_flag_names.updated_at DESC nulls last"}
 
+  def self.enabled_for? item_type
+    logger.debug "Checking we're enabled for #{item_type}"
+    l = selector_array item_type: item_type
+    l.length > 0
+  end
+  
   private
     def prevent_item_type_change 
       if item_type_changed? && self.persisted?

@@ -1,9 +1,8 @@
 module ItemFlagNamesHelper
 
 
-  def item_types_array
-    Master.reflect_on_all_associations(:has_many).collect {|v| v.plural_name.singularize}
-    
+  def item_types_array    
+    ItemFlag.use_with_class_names.collect {|v| v.singularize.underscore}
   end
   
 end
