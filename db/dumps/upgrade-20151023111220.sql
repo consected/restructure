@@ -28,3 +28,8 @@ FOREIGN KEY ("admin_id")
 ALTER TABLE "dynamic_models" ADD "position" integer;
 ALTER TABLE "dynamic_models" ADD "category" character varying;
 ALTER TABLE "dynamic_models" ADD "table_key_name" character varying;
+
+
+insert into reports (name, sql, report_type, created_at, updated_at, description, disabled)
+values ('Sage Assigned','select id, sage_id from sage_assignments where master_id is not null', 'regular_report', now(),now(), '', false),
+('Sage Unassigned', 'select id, sage_id from sage_assignments where master_id is null', 'regular_report', now(),now(), '', false);
