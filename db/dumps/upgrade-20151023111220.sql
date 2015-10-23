@@ -1,4 +1,7 @@
 -- Script created @ 2015-10-23 11:12:20 -0400
+begin;
+set search_path = ml_app;
+
 CREATE TABLE "sage_assignments" ("id" serial primary key, "sage_id" character varying(10), "assigned_by" character varying, "user_id" integer, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
 CREATE  INDEX  "index_sage_assignments_on_user_id" ON "sage_assignments"  ("user_id");
 ALTER TABLE "sage_assignments" ADD CONSTRAINT "fk_rails_971255ec2c"
@@ -33,3 +36,5 @@ ALTER TABLE "dynamic_models" ADD "table_key_name" character varying;
 insert into reports (name, sql, report_type, created_at, updated_at, description, disabled)
 values ('Sage Assigned','select id, sage_id from sage_assignments where master_id is not null', 'regular_report', now(),now(), '', false),
 ('Sage Unassigned', 'select id, sage_id from sage_assignments where master_id is null', 'regular_report', now(),now(), '', false);
+
+commit;

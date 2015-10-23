@@ -44,10 +44,10 @@
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
   <strong class="player-names">                
     {{capitalize first_name}} 
-    {{capitalize middle_name}} 
+    <span class="middle-name">{{capitalize middle_name}}</span> 
     {{capitalize last_name}}
     {{#if nick_name}}
-      ({{capitalize nick_name}})
+      <span class="nick-name">({{capitalize nick_name}})</span>
     {{/if}}
 
   </strong>
@@ -65,10 +65,10 @@
 <script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
         <strong class="pro-names">
                   {{capitalize first_name}} 
-                  {{capitalize middle_name}} 
+                  <span class="middle-name">{{capitalize middle_name}}</span>
                   {{capitalize last_name}}
                   {{#if nick_name}}
-                    ({{capitalize nick_name}})
+                    <span class="nick-name">({{capitalize nick_name}})</span>
                   {{/if}}
         </strong>
         {{#if birth_date}}

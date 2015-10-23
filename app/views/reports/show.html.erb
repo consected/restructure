@@ -3,7 +3,7 @@
     <div class="col-sm-22 col-sm-offset-1">
       <div class="well">
         <%= link_to "report library", reports_path, class: 'btn btn-info pull-right'%><h1><%=@report.name%></h1>
-        <p><%= @report.description.gsub("\n", "<br />").html_safe %></p>
+        <p><%= (@report.description || '').gsub("\n", "<br />").html_safe %></p>
         <p>&nbsp;</p>      
           <%= render partial: 'criteria' %>
         </div>

@@ -21,12 +21,14 @@ class ItemFlag < ActiveRecord::Base
   validates :item, presence: true
   validate :works_with_class
   
+  default_scope -> {where "disabled is null or disabled = false"}  
+  
   def self.works_with class_name
     use_with_class_names.include? class_name.underscore
   end
   
   def self.use_with_class_names
-    master_classes = Master.reflect_on_all_associations(:has_many).select {|v| v.options[:source] != :item_flags}.collect {|v| v.plural_name.singularize}.sort
+    Master.reflect_on_all_associations(:has_many).select {|v| v.options[:source] != :item_flags}.collect {|v| v.plural_name.singularize}.sort
   end
   
   def works_with_class
@@ -47,7 +49,10 @@ class ItemFlag < ActiveRecord::Base
     logger.info "Removing flags #{removed_flags} from #{item}"
     logger.info "Adding flags #{added_flags} to #{item}"
     
-    item.item_flags.where(item_flag_name_id: removed_flags).destroy_all
+    item.item_flags.where(item_flag_name_id: removed_flags).each do |i|
+        i.disabled = true
+        i.save!
+    end
         
     added_flags.each do |f|
       unless f.blank?

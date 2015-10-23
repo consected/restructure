@@ -11,7 +11,7 @@ class ReportsController < ApplicationController
     pm = Report.enabled    
     pm = pm.where filter_params if filter_params
     
-    @reports = pm.order(:id)
+    @reports = pm
     
     respond_to do |format|      
       format.html { render :index }
