@@ -58,12 +58,15 @@ class DynamicModel < ActiveRecord::Base
   
   def self.define_models
     
-    return unless defined? DynamicModel
+    begin
     
     dma = DynamicModel.active
     logger.info "Generating dynamic models #{DynamicModel.active.length}"
     dma.each do |dm|
       dm.generate_model       
+    end
+    rescue =>e      
+      Rails.logger.warn " Failed to generate dynamic models. Hopefully this is during a migration. #{e.inspect}\n#{e.backtrace.join("\n")}"
     end
     
   end
