@@ -976,6 +976,74 @@ ALTER SEQUENCE colleges_id_seq OWNED BY colleges.id;
 
 
 --
+-- Name: copy_player_infos; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE copy_player_infos (
+    id integer,
+    master_id integer,
+    first_name character varying,
+    last_name character varying,
+    middle_name character varying,
+    nick_name character varying,
+    birth_date date,
+    death_date date,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    contact_pref character varying,
+    start_year integer,
+    rank integer,
+    notes character varying,
+    contactid integer,
+    college character varying,
+    end_year integer,
+    source character varying
+);
+
+
+--
+-- Name: dynamic_models; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE dynamic_models (
+    id integer NOT NULL,
+    name character varying,
+    table_name character varying,
+    schema_name character varying,
+    primary_key_name character varying,
+    foreign_key_name character varying,
+    description character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    "position" integer,
+    category character varying,
+    table_key_name character varying
+);
+
+
+--
+-- Name: dynamic_models_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE dynamic_models_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: dynamic_models_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE dynamic_models_id_seq OWNED BY dynamic_models.id;
+
+
+--
 -- Name: external_links; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1272,7 +1340,8 @@ CREATE TABLE masters (
     rank integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    user_id integer
+    user_id integer,
+    contact_id integer
 );
 
 
@@ -1699,6 +1768,41 @@ ALTER SEQUENCE reports_id_seq OWNED BY reports.id;
 
 
 --
+-- Name: sage_assignments; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE sage_assignments (
+    id integer NOT NULL,
+    sage_id character varying(10),
+    assigned_by character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    master_id integer,
+    admin_id integer
+);
+
+
+--
+-- Name: sage_assignments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE sage_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sage_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE sage_assignments_id_seq OWNED BY sage_assignments.id;
+
+
+--
 -- Name: scantron_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2084,6 +2188,13 @@ ALTER TABLE ONLY colleges ALTER COLUMN id SET DEFAULT nextval('colleges_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY dynamic_models ALTER COLUMN id SET DEFAULT nextval('dynamic_models_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY external_links ALTER COLUMN id SET DEFAULT nextval('external_links_id_seq'::regclass);
 
 
@@ -2217,6 +2328,13 @@ ALTER TABLE ONLY reports ALTER COLUMN id SET DEFAULT nextval('reports_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY sage_assignments ALTER COLUMN id SET DEFAULT nextval('sage_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY scantron_history ALTER COLUMN id SET DEFAULT nextval('scantron_history_id_seq'::regclass);
 
 
@@ -2331,6 +2449,14 @@ ALTER TABLE ONLY college_history
 
 ALTER TABLE ONLY colleges
     ADD CONSTRAINT colleges_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: dynamic_models_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY dynamic_models
+    ADD CONSTRAINT dynamic_models_pkey PRIMARY KEY (id);
 
 
 --
@@ -2486,6 +2612,14 @@ ALTER TABLE ONLY reports
 
 
 --
+-- Name: sage_assignments_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY sage_assignments
+    ADD CONSTRAINT sage_assignments_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: scantron_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2624,6 +2758,13 @@ CREATE INDEX index_colleges_on_admin_id ON colleges USING btree (admin_id);
 --
 
 CREATE INDEX index_colleges_on_user_id ON colleges USING btree (user_id);
+
+
+--
+-- Name: index_dynamic_models_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_dynamic_models_on_admin_id ON dynamic_models USING btree (admin_id);
 
 
 --
@@ -2834,6 +2975,34 @@ CREATE INDEX index_protocols_on_admin_id ON protocols USING btree (admin_id);
 --
 
 CREATE INDEX index_reports_on_admin_id ON reports USING btree (admin_id);
+
+
+--
+-- Name: index_sage_assignments_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_sage_assignments_on_admin_id ON sage_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_sage_assignments_on_master_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_sage_assignments_on_master_id ON sage_assignments USING btree (master_id);
+
+
+--
+-- Name: index_sage_assignments_on_sage_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_sage_assignments_on_sage_id ON sage_assignments USING btree (sage_id);
+
+
+--
+-- Name: index_sage_assignments_on_user_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_sage_assignments_on_user_id ON sage_assignments USING btree (user_id);
 
 
 --
@@ -3578,6 +3747,14 @@ ALTER TABLE ONLY tracker_history
 
 
 --
+-- Name: fk_rails_971255ec2c; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sage_assignments
+    ADD CONSTRAINT fk_rails_971255ec2c FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_9e92bdfe65; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3671,6 +3848,30 @@ ALTER TABLE ONLY player_contacts
 
 ALTER TABLE ONLY item_flags
     ADD CONSTRAINT fk_rails_dce5169cfd FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_deec8fcb38; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY dynamic_models
+    ADD CONSTRAINT fk_rails_deec8fcb38 FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
+-- Name: fk_rails_e3c559b547; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sage_assignments
+    ADD CONSTRAINT fk_rails_e3c559b547 FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
+-- Name: fk_rails_ebab73db27; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY sage_assignments
+    ADD CONSTRAINT fk_rails_ebab73db27 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 --

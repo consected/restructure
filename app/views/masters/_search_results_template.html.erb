@@ -192,11 +192,11 @@
               <% dm = DynamicModel.active.where(category: 'extended-info') 
                  dm.each do |m|               
               %>
-              <a href="/masters/{{id}}/dynamic_model/<%=m.model_association_name%>" data-result-target="#<%=m.model_association_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
+              <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
               <% end %>
             </div>
             <% dm.each do |m| %>
-            <div class="col-md-6" id="<%=m.model_association_name%>-{{id}}-" data-sub-list="<%=m.model_association_name%>"></div>                        
+            <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
             <% end %>
           </div>
   
@@ -205,11 +205,11 @@
               <% dm = DynamicModel.active.where(category: 'history') 
                  dm.each do |m|               
               %>
-              <a href="/masters/{{id}}/dynamic_model/<%=m.model_association_name%>" data-result-target="#<%=m.model_association_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
+              <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
               <% end %>
             </div>
             <% dm.each do |m| %>
-            <div class="row dynamic-model-list" id="<%=m.model_association_name%>-{{id}}-" data-sub-list="<%=m.model_association_name%>"></div>                        
+            <div class="row dynamic-model-list" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
             <% end %>
           </div>
   

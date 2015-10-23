@@ -37,6 +37,10 @@ class DynamicModel < ActiveRecord::Base
   
   def model_association_name
     table_name.pluralize.to_sym
+  end    
+  
+  def model_path_name
+    table_name.pluralize.to_sym
   end
   
   def model_data_template_name
@@ -73,14 +77,17 @@ class DynamicModel < ActiveRecord::Base
         pkn = (self.primary_key_name).to_sym
         fkn = (self.foreign_key_name || 'master_id').to_sym
         tkn = (self.table_key_name || 'id').to_sym
-        
+        man = self.model_association_name
         a_new_class = Class.new(ActiveRecord::Base) do
           def self.is_dynamic_module
             true
           end
           self.table_name = obj.table_name
+          def self.assoc_inverse= man
+            @assoc_inverse = man
+          end
           def self.assoc_inverse
-            self.table_name.to_s.underscore.pluralize.to_sym
+            @assoc_inverse 
           end
           def self.foreign_key_name= fkn
             @foreign_key_name = fkn
@@ -99,6 +106,7 @@ class DynamicModel < ActiveRecord::Base
           self.primary_key = tkn
           self.foreign_key_name = fkn
           self.primary_key_name = pkn
+          self.assoc_inverse = man
           
           def master_id
             master.id
