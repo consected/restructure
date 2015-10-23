@@ -1,3 +1,4 @@
+<%= render partial: 'search_results_parts' %>
 <%= render partial: 'player_infos/search_results_template' %>
 <%= render partial: 'pro_infos/search_results_template' %>
 <%= render partial: 'addresses/search_results_template' %>
@@ -108,12 +109,6 @@
   {{/with}}
 </script>
 
-<script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <span>
-  <span class="search_count">{{count}}</span> record{{#is count '!==' 1}}s{{/is}}
-  {{#is count '>' 100}} - showing 100 results - refine search to show others{{/is}}
-  </span>
-</script>
 
 
 <script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">

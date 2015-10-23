@@ -1,3 +1,7 @@
+<%= render partial: 'masters/search_results_parts' %>
+<% 
+@report_page = true 
+%>
 <div class="report-criteria container-fluid">
     <div class="row">
     <div class="col-sm-22 col-sm-offset-1">
@@ -18,7 +22,7 @@
     </div>
 </div>
 <% end %>
-<div id="master_results_block">
+<div id="master_results_block" >
 <% if @results %>
 <%= render partial: 'results' %>
 

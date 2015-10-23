@@ -68,6 +68,7 @@ class Report < ActiveRecord::Base
       begin
         clean_sql = ActiveRecord::Base.send(:sanitize_sql, [sql, @search_attr_values], primary_table)
       rescue => e
+        logger.info "Unabled to sanitize sql: #{e.inspect}.\n#{e.backtrace.join("\n")}"
         raise Report::BadSearchCriteria
       end
       @clean_sql = clean_sql
@@ -142,18 +143,29 @@ class Report < ActiveRecord::Base
     
     @search_attr_values = use_defaults if @search_attr_values == '_use_defaults_'
     
+    all_blank = true
+    
+    search_attributes.each do |k,v|
+      search_attr_values[k.to_sym] = nil unless search_attr_values.has_key? k.to_sym
+    end
+    
     
     search_attr_values.each do |k,v|
-      if k.to_s != ReportIdAttribName && (search_attributes[k.to_s].nil? || v.blank?)
-        return false
-      end
-      
-      if v.is_a? Hash
+      all_blank &&= (k.to_s != ReportIdAttribName && (search_attributes[k.to_s].nil? || v.blank?))
+    
+      if v.blank?
+        search_attr_values[k] = nil
+      elsif v.is_a? Hash
         search_attr_values[k] = v.collect{|k,v| v}
       elsif v.is_a?(String) && v.include?("\n")
         search_attr_values[k] = v.split("\n").map{|a| a.squish}
       end
     end
+    
+    
+    
+    return false if all_blank
+      
     true
   end
   

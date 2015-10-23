@@ -13,7 +13,7 @@
             <div class="form-group form-actions clearfix">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
-              <%= submit_tag :search, value: :search,class: "#{btn} auto-submitter" if @report.report_type == 'search' %>
+              <%= submit_tag :search, value: :search,class: "#{btn} auto-submitter" if @report.report_type == 'search' && !@report_page %>
               <%= submit_tag :table, class: "#{btn}"  %>
               <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" %>
               <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" %>
