@@ -57,6 +57,9 @@ class DynamicModel < ActiveRecord::Base
   end
   
   def self.define_models
+    
+    return unless defined? DynamicModel
+    
     dma = DynamicModel.active
     logger.info "Generating dynamic models #{DynamicModel.active.length}"
     dma.each do |dm|
