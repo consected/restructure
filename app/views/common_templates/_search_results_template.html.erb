@@ -61,10 +61,11 @@
         {{><%=name%>_result _created=@index}}
 
     {{/each}}
-    <% unless prevent_edit %>
+    
     <div class="new-block" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
       {{#unless <%=name.pluralize%>}}<h4>No <%=name.humanize.titleize%> records</h4>{{/unless}}                
     </div>
+    <% unless prevent_create %>
     <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> <%= name.humanize.titleize %> record</a> </p>                                    
     <% end %>
 </script>

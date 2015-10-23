@@ -17,7 +17,7 @@ class SageAssignment < ActiveRecord::Base
   end 
   
   def return_all
-    self.multiple_results = self.master.sage_assignments.all
+    self.multiple_results = self.master.sage_assignments.all if self.master
   end
   
   # We assign the next available 
