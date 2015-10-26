@@ -1275,7 +1275,8 @@ CREATE TABLE item_flags (
     item_flag_name_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    user_id integer
+    user_id integer,
+    disabled boolean
 );
 
 
