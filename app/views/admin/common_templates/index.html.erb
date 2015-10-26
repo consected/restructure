@@ -1,0 +1,38 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">    
+  <h1><%=human_name%></h1>
+  
+  <p>
+    <%= show_filters %>    
+  </p>
+
+  <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+  <table class="table tablesorter admin-list">
+    <thead>
+      <tr>
+        <th class="no-sort"></th>
+        <% index_params.each do |p| %>
+          <th><%= p.to_s.humanize %></th>
+        <% end %>
+        <th class="no-sort"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% objects_instance.each do |list_item| %>
+        <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+          <td><%= admin_edit_btn list_item.id%> </td>
+          <% index_params.each do |p| 
+              test_assoc = p.to_s.gsub('_id','')                    
+          %>        
+          <td><%= list_item.respond_to?(test_assoc) ? list_item.send(test_assoc).to_s : list_item.send(p) %></td>
+          <% end %>        
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%=  render partial: 'admin_handler/index_actions'  %>    
+  </div>
+</div>

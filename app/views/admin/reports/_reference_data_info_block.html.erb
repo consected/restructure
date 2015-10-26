@@ -1,9 +1,12 @@
 <div class="col-sm-6" style="text-align: left">
+    
   <%= f.label 'Protocol / status (sub_process) / method (protocol_event)'%>
   <ul id="protocols-list" style="max-height: 270px; overflow: auto; background-color: white;">
   <% Protocol.all.each do |p| %>
-      <li style="color: <%= p.disabled ? '#aaa' : 'auto' %>" id="protocol-<%=p.id%>"><%=p.id%> - <%= p.name %></li>
-      <ul>
+      <li  id="protocol-<%=p.id%>">
+          <a href="#pblock-<%=p.id%>" data-toggle="collapse"  class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.id%> - <%= p.name %></a>
+      </li>
+      <ul id="pblock-<%=p.id%>" class="collapse">
       <% p.sub_processes.all.each do |sp| %>
           <li style="color: <%= p.disabled || sp.disabled ? '#aaa' : 'auto' %>" data-protocol-id="<%=p.id%>" id="sub_process-<%=sp.id%>"><%=sp.id%> - <%= sp.name %></li>
           <ul>
@@ -15,4 +18,17 @@
       </ul>
   <% end %>
   </ul>
+
+
+  <%= f.label 'General Selections'%>
+  <ul id="gs-list" style="max-height: 270px; overflow: auto; background-color: white;">
+  
+  <% GeneralSelection::ItemTypes.each do |p| %>
+      <li  id="gs-<%=p%>">
+          <a href="#gsblock-<%=p%>" data-toggle="collapse"  class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
+      </li>      
+  <% end %>
+  </ul>
+
+
 </div>    

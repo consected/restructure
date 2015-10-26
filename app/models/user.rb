@@ -25,10 +25,16 @@ class User < ActiveRecord::Base
     !self.disabled  ? super : :account_has_been_disabled    
   end
   
+  def can? auth
+    UserAuthorization.user_can? self, auth
+  end
+
+  def to_s
+    email
+  end
     
   protected
-
-
+    
     # Override included functionality that ensures an administrator has been set
     # Limit it to check for an administrator when email or disabled flag change
     # This is required since user tracking and password updates are allowed in 

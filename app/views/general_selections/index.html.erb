@@ -2,11 +2,8 @@
   <div data-result="admin-list">    
 <h1>General Selections</h1>
 
-<p>Filter: 
-    <%=link_to "all", general_selections_path, class: "btn btn-default btn-sm" %> 
-    <% GeneralSelection::ItemTypes.dup.each do |i|%>
-      <%=link_to i, general_selections_path(filter: {item_type: i}), class: "btn btn-default btn-sm" %> 
-    <% end %>
+<p>
+    <%= show_filters %>    
 </p>
 
 

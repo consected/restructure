@@ -15,8 +15,8 @@
               <%= hidden_field_tag  "part", ''%>
               <%= submit_tag :search, value: :search,class: "#{btn} auto-submitter" if @report.report_type == 'search' && !@report_page %>
               <%= submit_tag :table, class: "#{btn}"  %>
-              <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" %>
-              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" %>
+              <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_user.can? :export_csv %>
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>
                <% if @report.report_type != 'search'%> <span>&DoubleLeftArrow; click to run report</span><%end%>
               <% if @report.report_type != 'count' %> 
                 <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>  

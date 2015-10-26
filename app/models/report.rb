@@ -3,6 +3,8 @@ class Report < ActiveRecord::Base
   include AdminHandler
   include SelectorCache
   
+  before_validation :check_attr_def
+  
   validates :report_type, presence: true
   validates :name, presence: true
 
@@ -203,6 +205,17 @@ class Report < ActiveRecord::Base
     end  
     
     return m_field
+  end
+
+
+  def check_attr_def
+    errmsg = []
+    begin    
+      s = search_attributes 
+    rescue => e
+      errmsg = e
+    end
+    errors.add :search_attributes, "definition can not be parsed. Check the YAML or JSON is valid. #{errmsg.message}" unless s
   end
   
 end

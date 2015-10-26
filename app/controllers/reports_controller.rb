@@ -2,6 +2,7 @@ class ReportsController < ApplicationController
   include MasterSearch
   require 'csv'
   before_action :authenticate_user_or_admin!
+  before_action :authorized?
   after_action :clear_results, only: ['run']
 
   ResultsLimit = Master.results_limit
@@ -117,9 +118,16 @@ class ReportsController < ApplicationController
       @connection ||= ActiveRecord::Base.connection
     end
     
-  def clear_results
-    # Needed to help control memory usage, according to PG:Result documentation
-    @results.clear if @results
-  end
+    def clear_results
+      # Needed to help control memory usage, according to PG:Result documentation
+      @results.clear if @results
+    end
     
+    def authorized?
+      return true if current_admin
+      return true if current_user.can? :view_reports
+      
+      return not_authorized
+    end
+  
 end

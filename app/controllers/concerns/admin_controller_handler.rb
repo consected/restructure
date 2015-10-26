@@ -7,6 +7,8 @@ module AdminControllerHandler
     before_action :set_instance_from_id, only: [:edit, :update, :destroy]    
     
     after_action :do_log_action
+    
+    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :objects_instance, :human_name
   end
 
   def index    
@@ -15,7 +17,7 @@ module AdminControllerHandler
     set_objects_instance pm.order(default_index_order)
     
     respond_to do |format|      
-      format.html { render :index }
+      format.html { render view_path('index') }
       format.all { render json: objects_instance.as_json(except: [:created_at, :updated_at, :id, :admin_id, :user_id])}
     end
   end
@@ -23,11 +25,11 @@ module AdminControllerHandler
 
   def new options = {}
     set_object_instance primary_model.new unless options[:use_current_object]
-    render partial: 'form'
+    render partial: view_path('form')
   end
 
   def edit
-    render partial: 'form'
+    render partial: view_path('form')
   end
 
   def create
@@ -60,6 +62,23 @@ module AdminControllerHandler
   end
 
   protected
+  
+    def filters
+      
+    end
+    
+    def index_params
+      permitted_params + [:admin_id]
+    end
+  
+    def view_path view
+      return view unless view_folder
+      [view_folder, view].join('/')
+    end
+  
+    def view_folder
+      nil
+    end
 
     def log_action action, sub, results, status="OK", extras={}
       extras[:master_id] ||= nil
@@ -107,12 +126,12 @@ module AdminControllerHandler
     end
 
     def index_path opt={}
-      redir = {action: :index}
+      redir = {controller: controller_name, action: :index}
       redir.merge! @parent_param if @parent_param
       redir.merge! opt
       
       f = filter_params
-      redir[:filter] = f if f
+      redir[:filter] ||= f if f
       
       url_for(redir)
     end  
@@ -142,5 +161,11 @@ module AdminControllerHandler
     def objects_instance
       instance_variable_get("@#{objects_name}")
     end    
+
+    def filter_params
+      return nil if params[:filter].blank?
+      params.require(:filter).permit(filters_on)
+    end
+  
     
 end

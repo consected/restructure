@@ -96,10 +96,13 @@ protected
       
       if current_user
         @primary_navs << {label: 'Research', url: '/masters/', route: 'masters#index'}
-        @primary_navs << {label: 'Create MSID', url: '/masters/new', route: 'masters#new'}        
-        @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'}        
+        @primary_navs << {label: 'Create MSID', url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_msid        
+        
       end
       
+      if current_user || current_admin
+        @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'} if current_admin || current_user.can?(:view_reports)
+      end
       
       res  = @primary_navs.select {|n| n[:route] == "#{controller_name}##{action_name}" }            
       res.first[:active] = true if res && res.first

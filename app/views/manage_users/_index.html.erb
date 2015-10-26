@@ -18,6 +18,8 @@
             <td><%= list_item.email %></td>        
             <td><%= list_item.disabled ? 'disabled' : ''%></td>        
             <td><%= list_item.admin_name %></td>
+            <td><%= link_to "user authorizations", admin_user_authorizations_path(filter: {user_id: list_item.id}) %></td>
+            
           </tr>
         <% end %>
       </tbody>

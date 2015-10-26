@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     resources :reports, except: [:show, :destroy]
     resources :sage_assignments, except: [:destroy]
     resources :dynamic_models, except: [:show, :destroy]
-
+    resources :user_authorizations, except: [:show, :destroy]
   end
     
   resources :action_logs, only: [:show, :index]

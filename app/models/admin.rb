@@ -33,6 +33,9 @@ class Admin < ActiveRecord::Base
     ENV['FPHS_ADMIN_SETUP']=='yes'
   end
   
+  def to_s
+    email
+  end
   
   protected  
   

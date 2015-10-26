@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151023171217) do
+ActiveRecord::Schema.define(version: 20151026181305) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -653,6 +653,15 @@ ActiveRecord::Schema.define(version: 20151023171217) do
   add_index "trackers", ["protocol_id"], name: "index_trackers_on_protocol_id", using: :btree
   add_index "trackers", ["sub_process_id"], name: "index_trackers_on_sub_process_id", using: :btree
   add_index "trackers", ["user_id"], name: "index_trackers_on_user_id", using: :btree
+
+  create_table "user_authorizations", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "has_authorization"
+    t.integer  "admin_id"
+    t.boolean  "disabled"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+  end
 
   create_table "user_history", force: :cascade do |t|
     t.string   "email",                  default: "", null: false

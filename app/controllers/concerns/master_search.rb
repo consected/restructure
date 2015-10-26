@@ -118,8 +118,14 @@ module MasterSearch
     end
 
     respond_to do |format|
-      format.json {render json: m}
+      format.json {
+        # This is standard, not an export
+        render json: m        
+      }
       format.csv {
+        
+        return not_authorized unless current_user.can? :export_csv
+        
         ma = m[:masters].first 
         
         return bad_request unless ma

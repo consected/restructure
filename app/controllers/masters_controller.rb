@@ -1,5 +1,6 @@
 class MastersController < ApplicationController
   before_action :authenticate_user!
+  before_action :authorized?, only: [:new, :create]
   include MasterSearch
   
   
@@ -93,5 +94,9 @@ private
     p
   end
 
+  def authorized?
+    return true if current_user.can? :create_msid
+    return not_authorized
+  end
   
 end
