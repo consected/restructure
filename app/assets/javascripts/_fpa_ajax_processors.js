@@ -424,8 +424,7 @@ _fpa.postprocessors = {
         // Update the search form results count bar manually
         var c = $('.result-count').html();
         
-        data.count = c;
-        
+        data.count = {count: c, show_count: c};
         var h = _fpa.templates['search-count-template'](data);
         $('.search_count_reports').html(h); 
     },
