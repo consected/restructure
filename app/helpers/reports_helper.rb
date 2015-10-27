@@ -46,7 +46,7 @@ module ReportsHelper
       end
     else 
       if use_dropdown 
-        main_field << select_tag("search_attrs[#{name}]", use_dropdown )
+        main_field << select_tag("search_attrs[#{name}]", use_dropdown , include_blank: 'select')
       else
         main_field << text_field_tag("search_attrs[#{name}]", value, type: type_string, class: 'form-control' )
       end

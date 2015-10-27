@@ -50,10 +50,10 @@ module SelectorCache
       "#{self.to_s}_attributes"      
     end
     
-    def selector_array conditions=nil
-      ckey="#{array_cache_key}#{conditions}"
+    def selector_array conditions=nil, attribute=:name
+      ckey="#{array_cache_key}#{conditions}:#{attribute}"
       Rails.cache.fetch(ckey){
-        enabled.where(conditions).collect {|c| c.name }
+        enabled.where(conditions).collect {|c| c.send(attribute) }
       }    
     end
     
@@ -109,16 +109,24 @@ module SelectorCache
       
       Rails.cache.fetch(ckey){
         all.where(conditions).collect {|c| 
-          
+          name = ''
           if c.respond_to?(:parent_name)
             v = c.id
-            vlabel = "#{v} (#{c.parent_name})"
-            
+            vlabel = "(#{c.parent_name}) "
+            name = c.name
           elsif c.respond_to?(:value)             
-            v =  c.value          
-            vlabel = v
+            v =  c.value
+            name = c.name
+          else 
+            v = c.id     
+            name = c.name
           end
-          ["#{vlabel}- #{c.name} (##{c.id}) #{c.disabled ? '[disabled]' : ''}", downcase_if_string(v)] }.sort
+          
+          if c.respond_to?(:full_label)
+            name =  c.full_label              
+          end
+          
+          ["#{vlabel}#{name} #{c.disabled ? '[disabled]' : ''}", downcase_if_string(v)] }.sort
       }
     end
     

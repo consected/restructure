@@ -8,6 +8,11 @@ class AccuracyScore < ActiveRecord::Base
   validates :name, presence: true
   validates :value, presence: true
 
+  
+  def full_label
+    "#{value} - #{name}"
+  end
+  
   protected
     def prevent_value_change 
       if value_changed? && self.persisted?

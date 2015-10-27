@@ -2,13 +2,22 @@
 <% rt = @report.result_tables_by_index || []%>
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">    
+      <% if current_admin && @report.clean_sql%>
+      <div class="row">
+          <div class="col-md-20 col-md-offset-2">
+            <pre><%=@report.clean_sql.html_safe%>
+            </pre>
+          </div>
+      </div>
+      <% end %>
+
     <div class="row" style="background-color: #eee;">
       <div class="col-sm-22 col-sm-offset-1 ">
       
         <h3 class="text-right hidden"><span class="result-count"><%=@results.count%></span> <%=@results.count == 1 ? 'row' : 'rows'%></h3>
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
-    </div>
+    </div>     
         <table class="table tablesorter admin-list" style="margin:1em;">
           <thead>
             <tr>

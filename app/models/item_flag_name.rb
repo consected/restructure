@@ -13,6 +13,10 @@ class ItemFlagName < ActiveRecord::Base
     l.length > 0
   end
   
+  def self.item_types
+    selector_array(nil, :item_type).uniq
+  end
+  
   private
     def prevent_item_type_change 
       if item_type_changed? && self.persisted?

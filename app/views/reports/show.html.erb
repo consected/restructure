@@ -14,14 +14,6 @@
     </div>
   </div>
 </div>
-<% if current_admin && @report.clean_sql%>
-<div class="row">
-    <div class="col-md-20 col-md-offset-2">
-      <pre><%=@report.clean_sql.html_safe%>
-      </pre>
-    </div>
-</div>
-<% end %>
 <div id="master_results_block" >
 <% if @results %>
 <%= render partial: 'results' %>
