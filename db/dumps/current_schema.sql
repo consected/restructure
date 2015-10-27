@@ -2039,6 +2039,40 @@ ALTER SEQUENCE trackers_id_seq OWNED BY trackers.id;
 
 
 --
+-- Name: user_authorizations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE user_authorizations (
+    id integer NOT NULL,
+    user_id integer,
+    has_authorization character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: user_authorizations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE user_authorizations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_authorizations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE user_authorizations_id_seq OWNED BY user_authorizations.id;
+
+
+--
 -- Name: user_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2378,6 +2412,13 @@ ALTER TABLE ONLY trackers ALTER COLUMN id SET DEFAULT nextval('trackers_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY user_authorizations ALTER COLUMN id SET DEFAULT nextval('user_authorizations_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY user_history ALTER COLUMN id SET DEFAULT nextval('user_history_id_seq'::regclass);
 
 
@@ -2666,6 +2707,14 @@ ALTER TABLE ONLY tracker_history
 
 ALTER TABLE ONLY trackers
     ADD CONSTRAINT trackers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_authorizations_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY user_authorizations
+    ADD CONSTRAINT user_authorizations_pkey PRIMARY KEY (id);
 
 
 --
