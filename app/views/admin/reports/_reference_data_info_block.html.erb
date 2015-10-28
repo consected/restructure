@@ -1,4 +1,4 @@
-<div class="col-sm-12" style="text-align: left">
+<div class="col-sm-7" style="text-align: left">
     
   <%= f.label 'Protocol / status (sub_process) / method (protocol_event)'%> <a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a>    
     <div class="help-block collapse" id="p-help">
@@ -116,5 +116,24 @@
       </li>            
   <% end %>
   </ul>
-  
+</div>
+<div class="col-sm-5" style="text-align: left">
+  <%= f.label 'Primary Tables'%> 
+  <ul id="as-list" style="max-height: 700px; overflow: auto; background-color: white;">
+    <%  tables = ActiveRecord::Base.connection.tables
+      #tables +=  DynamicModel.active.unscope(:order).distinct.select {|t| t.table_name}.map {|t| t.table_name}
+    
+      tables.sort.each do |table_name| %>
+      
+      <li  id="t-<%=table_name%>">
+          <a href="#tblock-<%=table_name%>" data-toggle="collapse"  class="collapsed" "><%= table_name  %></a>
+      </li>      
+      <ul id="tblock-<%=table_name%>" class="collapse">
+        <% ActiveRecord::Base.connection.columns(table_name).each  do |c| %>
+          <li id="table-<%=c.name%>"><%=c.name%> - <%=c.type.to_s%> (<%=c.limit.to_s%>)</li>
+        <% end %>
+      </ul>
+      
+    <%  end %>
+  </ul>  
 </div>    
