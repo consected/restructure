@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151026181305) do
+ActiveRecord::Schema.define(version: 20151028155426) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -183,6 +183,8 @@ ActiveRecord::Schema.define(version: 20151026181305) do
     t.integer  "position"
     t.string   "category"
     t.string   "table_key_name"
+    t.string   "field_list"
+    t.string   "result_order"
   end
 
   add_index "dynamic_models", ["admin_id"], name: "index_dynamic_models_on_admin_id", using: :btree

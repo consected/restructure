@@ -1,4 +1,4 @@
-<%= render partial: 'masters/search_results_parts' %>
+<%= render partial: 'masters/search_results_template' %>
 <% 
 @report_page = true 
 %>
@@ -14,7 +14,7 @@
     </div>
   </div>
 </div>
-<div id="master_results_block" >
+<div id="master_results_block" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results">
 <% if @results %>
 <%= render partial: 'results' %>
 

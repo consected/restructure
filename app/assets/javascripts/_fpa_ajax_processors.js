@@ -188,7 +188,11 @@ _fpa.postprocessors = {
             if(!href) return;                        
             var h = $(href).addClass('item-highlight');
             
-            
+            if(!h.is(':visible')){
+                // Open up the block containing this item
+                h.parents('.collapse').first().collapse('show');
+                
+            }
             
             // Scroll if necessary
             var rect = h.get(0).getBoundingClientRect(); 
@@ -378,7 +382,9 @@ _fpa.postprocessors = {
             handle_country($(this).val());
         });
         
-        handle_country($('#address_country').val());
+        window.setTimeout(function(){
+            handle_country($('#address_country').val());
+        },10);
     },
     
     player_contact_edit_form: function(block,data){

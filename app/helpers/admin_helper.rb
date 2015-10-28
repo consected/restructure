@@ -20,7 +20,7 @@ module AdminHelper
     
     if respond_to?(:filters) &&  filters
     
-      res = "Filter: #{link_to("all", index_path, class: "btn btn-default btn-sm" )}"
+      res = "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}"
       filters.each do |k,v|
         res << link_to(v, index_path(filter: {filters_on => k}), class: "btn btn-default btn-sm" )
       end 

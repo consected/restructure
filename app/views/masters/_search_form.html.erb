@@ -8,7 +8,7 @@
     <button id="expand-simple-form" class="btn btn-primary" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="true" aria-controls="master-search-advanced-form">Simple Search</button>
     <button id="expand-adv-form" class="btn btn-primary collapsed" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="false" aria-controls="master-search-advanced-form">Advanced Search</button>
     <% Report.searchable.each do |r|%>
-      <a href="<%= report_path(id: r.id, part: :form, format: :html) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse collapsed" type="button" data-toggle="collapse" data-result-target="#master-report-<%=r.report_identifier%> .searchable-report" data-target="#master-report-<%=r.report_identifier%>" aria-expanded="false" aria-controls="master-report-<%=r.report_identifier%>"><%=r.name.titleize%></a>
+      <a href="<%= report_path(id: r.id, part: :form, format: :html) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse collapsed one-time-only-ajax" type="button" data-toggle="collapse" data-result-target="#master-report-<%=r.report_identifier%> .searchable-report" data-target="#master-report-<%=r.report_identifier%>" aria-expanded="false" aria-controls="master-report-<%=r.report_identifier%>"><%=r.name.titleize%></a>
     <% end %>
   </div>
 

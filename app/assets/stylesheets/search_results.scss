@@ -19,6 +19,22 @@ span.disabled, a.disabled {color: #ccc !important;}
     }
 }
 
+h4.results-divider{
+    background-color: #7DA4C7;
+    color: white;
+    padding: 6px;
+    
+    a, a:active, a:link {
+        color: white;
+        display:block;
+        text-decoration: none;
+        &:hover {
+            color: #EEF;
+            text-decoration: none;
+        };
+    }
+}
+
 li.list-group-item {
 
     min-height: 36px;

@@ -1,5 +1,18 @@
+<% unless defined? caption 
+     caption = nil
+   end
+  (caption || name).humanize.titleize 
+  
+  unless defined? data_sort
+    data_sort_str = nil    
+  else
+    data_sort_str = "data-sort-#{data_sort.first}='#{data_sort.last}'".html_safe
+  end
+
+  
+%>
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="dynamic-model-item index-{{_created}} <%=name.hyphenate%>-item" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" data-sort-desc="data-item-id">{{/was}}
+  {{#was _created}}<div class="dynamic-model-item index-{{_created}} <%=name.hyphenate%>-item" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" <%= data_sort_str %> >{{/was}}
   <ul class="list-group" data-item-id="{{id}}">
       <% if item_list.length == 1 %>
         <% item_list.each do |item| %>
@@ -16,7 +29,7 @@
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/<%=name.pluralize.hyphenate%>/{{this.id}}/edit" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>        
           <% end %>
           <span class="pull-right label label-info <%=name.hyphenate%>-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span>
-            <h4 class="list-group-item-heading"><%=name.humanize.titleize%></h4>
+            <h4 class="list-group-item-heading"><%=caption%></h4>
           <% if ItemFlagName.enabled_for?(name) %> 
           {{>item_flag_container item_type="<%=name%>"}}         
           <% end %>
@@ -63,9 +76,9 @@
     {{/each}}
     
     <div class="new-block" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
-      {{#unless <%=name.pluralize%>}}<h4>No <%=name.humanize.titleize%> records</h4>{{/unless}}                
+      {{#unless <%=name.pluralize%>}}<h4>No <%=caption%> records</h4>{{/unless}}                
     </div>
     <% unless prevent_create %>
-    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> <%= name.humanize.titleize %> record</a> </p>                                    
+    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> <%= caption %> record</a> </p>                                    
     <% end %>
 </script>

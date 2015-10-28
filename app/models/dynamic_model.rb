@@ -7,10 +7,19 @@ class DynamicModel < ActiveRecord::Base
   attr_accessor :editable
   
   after_commit :reload_model
+
+  def self.orientation category
+    return :horizontal if category.to_s.include?('history') 
+    return :vertical
+  end
   
   def reload_model
     generate_model
     self.class.routes_reload
+  end
+  
+  def self.categories
+    active.select(:category).distinct(:category).unscope(:order).map {|s| s.category||'default'}
   end
   
   # This is intentionally a class variable, to capture the model names for all dynamic models
@@ -84,6 +93,7 @@ class DynamicModel < ActiveRecord::Base
         fkn = (self.foreign_key_name || 'master_id').to_sym
         tkn = (self.table_key_name || 'id').to_sym
         man = self.model_association_name
+        ro = self.result_order 
         a_new_class = Class.new(ActiveRecord::Base) do
           def self.is_dynamic_module
             true
@@ -108,11 +118,22 @@ class DynamicModel < ActiveRecord::Base
           def self.primary_key_name
             @primary_key_name
           end
-          
+          def self.result_order= ro
+            @result_order = ro 
+            
+            unless ro.blank?
+              default_scope -> {order ro}
+            end
+            
+          end          
+          def self.result_order
+            @result_order
+          end
           self.primary_key = tkn
           self.foreign_key_name = fkn
           self.primary_key_name = pkn
           self.assoc_inverse = man
+          self.result_order = ro
           
           def master_id
             master.id

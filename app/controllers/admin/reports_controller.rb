@@ -5,6 +5,14 @@ class Admin::ReportsController < ApplicationController
 
   protected
 
+  
+    def filters_on
+      :report_type
+    end
+    
+    def filters
+      Report::ReportTypes.map {|g| [g,g.to_s.humanize]}.to_h
+    end
 
 
     def secure_params

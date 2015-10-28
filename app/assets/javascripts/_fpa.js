@@ -215,6 +215,17 @@ _fpa = {
             return false;
         }
         
+        if($(this).hasClass('one-time-only-ajax')){
+            
+            if($(this).hasClass('one-time-only-fired')){            
+                ev.preventDefault();            
+                return false;
+            }else{
+                $(this).addClass('one-time-only-fired');
+            }
+        }
+        
+        
         _fpa.preprocessors.before_all(block);
         _fpa.ajax_working(block);
         

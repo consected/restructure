@@ -14,7 +14,9 @@
         <%= f.label p %>
       <% elsif respond_to? ("#{p}_options") %>    
         <%= f.label p %>
-        <%= f.select p, send("#{p}_options") %>        
+        <% select_item_type = {}
+           select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first.to_s == p.to_s   %>
+        <%= f.select p, send("#{p}_options"), select_item_type %>        
       <% else %>
         <%= f.label p %>
         <%= f.text_field p %>

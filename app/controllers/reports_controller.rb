@@ -2,8 +2,9 @@ class ReportsController < ApplicationController
   include MasterSearch
   require 'csv'
   before_action :authenticate_user_or_admin!
-  before_action :authorized?
-  after_action :clear_results, only: ['run']
+  before_action :authorized?, only: [:index]
+  after_action :clear_results, only: [:show, :run]
+  helper_method :filters, :filters_on, :index_path
 
   ResultsLimit = Master.results_limit
   
@@ -31,17 +32,19 @@ class ReportsController < ApplicationController
     search_attrs = params[:search_attrs]
     @report = Report.find(id)
     
+    return unless @report.searchable || authorized?
+    
     if search_attrs
       begin
         @results =  @report.run(search_attrs) 
       rescue ActiveRecord::PreparedStatementInvalid => e
         logger.info "Prepared statement invalid in reports_controller (#{search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
         @results = nil
-        flash.now[:danger] = "Generated SQL invalid. #{e.to_s}"
+        flash.now[:danger] = "Generated SQL invalid.\n#{@report.clean_sql}\n#{e.to_s}"
         respond_to do |format|
           format.html {
             if params[:part] == 'results'
-              render text: "Generated SQL invalid. #{e.to_s}", status: 400
+              render text: "Generated SQL invalid.\n#{@report.clean_sql}\n#{e.to_s}", status: 400
             else
               render :show
             end
@@ -65,7 +68,7 @@ class ReportsController < ApplicationController
             render :show
           end
         }
-        format.json {
+        format.json {          
           render json: {results: @results, search_attributes: @report.search_attr_values}
         }
         format.csv { 
@@ -105,8 +108,18 @@ class ReportsController < ApplicationController
   
   protected
   
+    def filters_on
+      :report_type
+    end
+    
+    def filters
+      Report::ReportTypes.map {|g| [g,g.to_s.humanize]}.to_h
+    end
+
+  
     def filter_params
-      nil
+      return nil if params[:filter].blank?
+      params.require(:filter).permit(filters_on)
     end
 
 
@@ -128,6 +141,10 @@ class ReportsController < ApplicationController
       return true if current_user.can? :view_reports
       
       return not_authorized
+    end
+    
+    def index_path p
+      reports_path p
     end
   
 end

@@ -10,13 +10,22 @@ _fpa.reports = {
         var res;
         var sa;
         if(data && data.search_attributes){
-          sa = JSON.stringify(data.search_attributes, null, '<div>  ').replace(/\{/g, '<div>  ').replace(/\}/g, '</div>').replace(/\"|\[|\]|/g, '');
+          sa = "";
+          
+          for(var i in data.search_attributes){
+              if(data.search_attributes.hasOwnProperty(i)){
+                  var d = data.search_attributes[i];
+                  sa += '<div class="report-search-attr"><span class="attr-label">'+i+'</span><span class="attr-val">' + _fpa.utils.pretty_print(d, {return_string: true}) + '</span></div>';
+              }
+          }
+          
+          //sa = JSON.stringify(data.search_attributes, null, '<div>  ').replace(/\{/g, '<div>  ').replace(/\}/g, '</div>').replace(/\"|\[|\]|/g, '').replace(/_/g ,' ');
         }
         if(data && data.results && data.results[0]){
           res = JSON.stringify(data.results, null, '<div>  ').replace(/\{/g, '<div>  ').replace(/\}/g, '</div>').replace(/\"|\[|\]|/g, '');
 
         }else{
-          res = '-'
+          res = '-';
         }      
         t.find('.report-measure').html(res);
         if(sa)

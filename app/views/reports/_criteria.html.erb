@@ -1,4 +1,7 @@
-<% btn = @report.report_type == 'search' ? "btn btn-default btn-sm pull-right" : "btn btn-primary" %>
+<% 
+click_to_search = @report_page #&& @report.report_type  == 'search'
+btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary" 
+%>
   
         <div>
             <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted search_report', id: "report_query_form", data: {result_target: '#master_results_block', preprocessor: 'reports_result'}, remote: true do %>
@@ -13,11 +16,12 @@
             <div class="form-group form-actions clearfix">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
-              <%= submit_tag :search, value: :search,class: "#{btn} auto-submitter" if @report.report_type == 'search' && !@report_page %>
+              <% if click_to_search %> <span>run report: </span><%end%>  
+              <%= submit_tag :search, value: :search,class: "#{btn} #{!@report_page ? 'auto-submitter' : ''}" if @report.report_type == 'search'  %>
               <%= submit_tag :table, class: "#{btn}"  %>
+              <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count'%>
               <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_user.can? :export_csv %>
-              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>
-               <% if @report.report_type != 'search'%> <span>&DoubleLeftArrow; click to run report</span><%end%>
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>               
               <% if @report.report_type != 'count' %> 
                 <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>  
               <%end%>

@@ -3,8 +3,9 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">    
       <% if current_admin && @report.clean_sql%>
-      <div class="row">
-          <div class="col-md-20 col-md-offset-2">
+      <p class="text-center"><a href="#clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
+      <div class="row">          
+          <div class="col-md-20 col-md-offset-2 collapse" id="clean-sql">
             <pre><%=@report.clean_sql.html_safe%>
             </pre>
           </div>
@@ -18,7 +19,7 @@
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
     </div>     
-        <table class="table tablesorter admin-list" style="margin:1em;">
+        <table class="" style="margin:1em;">
           <thead>
             <tr>
               
@@ -58,7 +59,7 @@
 <script>
       
       window.setTimeout(function(){
-      
+        $('table').addClass('table tablesorter');
         var tables = {trackers:
                 {protocols: 'protocol_id', sub_processes: 'sub_process_id', protocol_events: 'protocol_event_id', item_type_names: 'item_type'},
             tracker_history:
@@ -97,5 +98,5 @@
 
         
         
-      }, 100);
+      }, 500);
     </script>

@@ -32,6 +32,10 @@ module UserHandler
   
   class_methods do
 
+    def uses_item_flags?
+      false
+    end
+    
     def foreign_key_name
       @foreign_key_name = :master_id
     end
@@ -145,8 +149,8 @@ module UserHandler
     extras[:include] ||= {}
     # Re-enable the following line if there is a need to incorporate item flags back into all
     # objects attached to a master
-    # Only player_info is using it currently, therefore it is included only within that class
-    #extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+    
+    extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.uses_item_flags?
     extras[:methods] ||= []
     extras[:methods] << :user_name
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not

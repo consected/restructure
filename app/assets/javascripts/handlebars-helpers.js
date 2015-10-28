@@ -218,45 +218,8 @@
     });
 
     Handlebars.registerHelper('pretty_string', function(stre, options) {
-        if(stre === null || stre === '' ) return "";
-        var startTime;
-        var asTimestamp;
-        if(stre && stre.length >= 8){
-            if (!stre.match(/^\d\d\d\d-\d\d-\d\d.*/)){
-            }else if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
-                startTime = new Date(Date.parse(stre ));
-                asTimestamp = true;
-            }
-            else{
-                startTime = new Date(Date.parse(stre + 'T00:00:00Z'));
-                asTimestamp = false;
-            }
-        }
-        if(typeof startTime === 'undefined' || !startTime || startTime == 'Invalid Date'){
-            if(options.hash.return_string){
-                if(options.hash.capitalize){
-                    if(!stre || stre.length < 30){
-                        //stre = Handlebars.Utils.escapeExpression(stre);
-                        return _fpa.utils.capitalize(stre);
-                    }else{
-                        return _fpa.utils.nl2br(stre);
-                    }
-                }
-                else{
-                    return _fpa.utils.nl2br(stre);
-                }
-            } else {
-                return null;
-            }
-        }
-        if(asTimestamp){
-            startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-            return startTime.toLocaleDateString();
-        } else {
-            return new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
-        }
         
-        return stre;
+        _fpa.utils.pretty_print(stre, options.hash);
     });
 
 

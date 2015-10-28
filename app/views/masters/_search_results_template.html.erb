@@ -1,4 +1,4 @@
-<%= render partial: 'search_results_parts' %>
+<%= render partial: 'masters/search_results_parts' %>
 <%= render partial: 'player_infos/search_results_template' %>
 <%= render partial: 'pro_infos/search_results_template' %>
 <%= render partial: 'addresses/search_results_template' %>
@@ -7,7 +7,8 @@
     name: 'scantron', 
     prevent_edit: false, 
     prevent_create: false,
-    item_list: [label: 'Scantron', formatter: '', attribute: 'scantron_id'] 
+    item_list: [label: 'Scantron', formatter: '', attribute: 'scantron_id'] ,
+    data_sort: [:desc, "data-item-id"]
   } %>
 
 <%= render partial: 'trackers/search_results_template' %>
@@ -18,28 +19,13 @@
       name: 'sage_assignment', 
       prevent_edit: true,
       prevent_create: false,
-      item_list: [label: 'Sage ID', formatter: 'format_sage_id', attribute: 'sage_id']
+      item_list: [label: 'Sage ID', formatter: 'format_sage_id', attribute: 'sage_id'],
+      data_sort: [:desc, "data-item-id"]
+      
     } %>
 
-<% DynamicModel.active.each do |m| 
-  l = []
-  an = (m.model_def.attribute_names - [:id, :created_at, :updated_at])
-  if an.length > 1
-    l = an
-  else
-    an.each do |k|
-      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s] 
-    end
-  end
+<%= render partial: 'dynamic_models/search_results_template' %>
 
-%>
-<%= render partial: 'common_templates/search_results_template', locals: {
-      name: m.model_def_name.to_s, 
-      prevent_edit: true,  
-      prevent_create: true,
-      item_list: l
-    } %>
-<% end %>
 
 
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
@@ -157,14 +143,12 @@
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> external ids</a>
           </li>
+          <% DynamicModel.categories.each do |cat| %>
+          <li role="presentation">
+            <a href="#/" data-toggle="collapse" data-target="#<%=cat%>-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> <%= cat.underscore.humanize.downcase %></a>
+          </li>
+          <% end %>
     
-          <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#extended-info-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> extended info</a>
-          </li>
-          <li role="presentation">
-            <a href="#/" data-toggle="collapse" data-target="#change-history-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> change history</a>
-          </li>
-  
           <% if current_user.can? :view_external_links %>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> web links</a>
@@ -185,34 +169,28 @@
             <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage_assignments"></div>
     
           </div>
-  
-          <div id="extended-info-{{id}}" class="row collapse extended-info-block format-block-on-expand">
+          
+          <% DynamicModel.categories.each do |cat| %>
+          <div id="<%=cat%>-{{id}}" class="row collapse <%=cat%>-block format-block-on-expand">
             <div class="on-open-click hidden">
-              <% dm = DynamicModel.active.where(category: 'extended-info') 
+              <% dm = DynamicModel.active.where(category: cat) 
                  dm.each do |m|               
               %>
               <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
               <% end %>
             </div>
+            <h4 class="results-divider"><a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup"><%=cat.underscore.humanize.downcase%> <span class="caret up"></span></a></h4>
             <% dm.each do |m| %>
-            <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
-            <% end %>
-          </div>
-  
-          <div id="change-history-{{id}}" class="row collapse extended-info-block format-block-on-expand">
-            <div class="on-open-click hidden">
-              <% dm = DynamicModel.active.where(category: 'history') 
-                 dm.each do |m|               
-              %>
-              <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
+              <% if DynamicModel.orientation(cat) == :vertical %>  
+              <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
+              <% else %>
+              <div class="row dynamic-model-list" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
               <% end %>
-            </div>
-            <% dm.each do |m| %>
-            <div class="row dynamic-model-list" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
             <% end %>
           </div>
-  
-          <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
+          <% end %>
+          
+          <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">          
           {{#with trackers}}
             {{>tracker_tree_results master_id=../id}}
           {{else}}
