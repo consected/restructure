@@ -7,7 +7,8 @@ class DefinitionsController < ApplicationController
     "sub_processes" => :selector_collection, 
     "colleges" => :selector_array, 
     "accuracy_scores" => :selector_collection,
-    "external_links" => :selector_collection
+    "external_links" => :selector_collection,
+    "users" => :active_id_name_list
   }.freeze
    
   def show
@@ -19,7 +20,7 @@ class DefinitionsController < ApplicationController
     # the def_type does not appear in the Available list
     # This protects against insecure requests
     return not_found unless item_selector
-    
+   
     item = def_type.classify.constantize
     
     j = item.send(item_selector)

@@ -1,45 +1,55 @@
 <div class="row">    
   <div class="col-sm-12" style="text-align: left;">
     <%= f.label :add_attribute %>
-    <p>name: <input id="search_attrs_name" /></p>
-    <p>label(optional): <input id="search_attrs_label" /></p>
-    <p>type: 
-        <select id="search_attrs_type">
-            <option value="number">number</option>
-            <option value="text">text</option>
-            <option value="date">date</option>
-            <option value="accuracy_score">accuracy score</option>
-            <option value="general_selection">general selection</option>
-            <option value="protocol">tracker protocol</option>
-            <option value="sub_process">tracker status (sub_process)</option>
-            <option value="protocol_event">tracker method (protocol_event)</option>
-            <option value="item_flag_name">item flag name</option>
-        </select>
-    </p>
-    <p>filter dropdown:
-        <select id="search_attrs_filter">
-            <option value="all">all</option>
-            
-            <% GeneralSelection::ItemTypes.dup.each do |i|%>
-              <option value="item_type: <%=i%>">item_type: <%=i%></option>
-            <% end %>            
-            
-        </select>
-    </p>
-    <p>single or multiple values:
-      <select id="search_attrs_multi">
-            <option value="single">single</option>
-            <option value="multiple">multiple (in)</option>            
-        </select>
-    </p>
-    <p>default: <a class="glyphicon glyphicon-info-sign" data-toggle="popover" data-content="Set the default value of an attribute to be searched. If no value is entered by the user, or the query is run automatically, then the default value will be used. Use literal values or calculate a date with (-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, 5 months, 2 weeks "></a>
-        <textarea id="search_attrs_default"></textarea>        
-    </p>
-    <p><button id="search_attrs_add">Add</button></p>
+      <table>
+          <tr>
+              <td>name</td><td><input id="search_attrs_name" /></td>
+          </tr><tr>
+              <td>label(optional)</td><td><input id="search_attrs_label" /></td>
+          </tr><tr>
+              <td>type</td><td>
+                  <select id="search_attrs_type">
+                      <option value="number">number</option>
+                      <option value="text">text</option>
+                      <option value="date">date</option>
+                      <option value="accuracy_score">accuracy score</option>
+                      <option value="general_selection">general selection</option>
+                      <option value="protocol">tracker protocol</option>
+                      <option value="sub_process">tracker status (sub_process)</option>
+                      <option value="protocol_event">tracker method (protocol_event)</option>
+                      <option value="item_flag_name">item flag name</option>
+                  </select>
+              </td>
+            </tr><tr>
+              <td>filter dropdown</td><td>
+                  <select id="search_attrs_filter">
+                      <option value="all">all</option>
+
+                      <% GeneralSelection::ItemTypes.dup.each do |i|%>
+                        <option value="item_type: <%=i%>">item_type: <%=i%></option>
+                      <% end %>            
+
+                  </select>
+              </td>
+            </tr><tr>
+              <td>single or multiple values</td><td>
+                <select id="search_attrs_multi">
+                      <option value="single">single</option>
+                      <option value="multiple">multiple (in)</option>            
+                  </select>
+              </td>
+            </tr><tr>
+              <td>default <a class="glyphicon glyphicon-info-sign" data-toggle="popover" data-content="Set the default value of an attribute to be searched. If the query is run automatically then the default value will be used. Enter literal values or calculate a date with (-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, 5 months, 2 weeks. For multiple values, enter each value on a new line."></a>
+                  </td><td><textarea id="search_attrs_default"></textarea>        
+              </td>
+            </tr>
+            <tr><td></td><td><p><button id="search_attrs_add">Add Attribute</button></p></td></tr>
+      </table>
+    
     <div id="search_attr_instruction">(reference in SQL with <strong id="search_attr_ex"></strong>)</div>
   </div>
   <div class="col-sm-12" style="text-align: left;">
     <%= f.label :search_attributes%>
-    <%= f.text_area  :search_attrs,  style: "width: 99%; height: 280px; font-family: monospace;" %>
+    <%= f.text_area  :search_attrs,  style: "width: 99%; height: 340px; font-family: monospace;" %>
   </div>  
 </div>  

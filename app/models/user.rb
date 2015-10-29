@@ -10,6 +10,9 @@ class User < ActiveRecord::Base
     
   default_scope -> {order email: :asc}
   
+  def self.active_id_name_list
+    active.map {|u| {id: u.id, name: u.email} }
+  end
   
   def timeout_in  
     Settings::UserTimeout

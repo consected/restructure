@@ -26,6 +26,7 @@ _fpa.postprocessors_admin = {
           $('#search_attrs_add').click(function(ev){
             ev.preventDefault();
             var n = $('#search_attrs_name').val();
+            n = n.underscore();
             var t = $('#search_attrs_type').val();
             var f = $('#search_attrs_filter').val();
             var m = $('#search_attrs_multi').val();
@@ -33,6 +34,8 @@ _fpa.postprocessors_admin = {
             var d = $('#search_attrs_default').val();
             $('#search_attr_ex').html(":"+n);
             $('#search_attr_instruction').show();
+            
+            
             
             var add = n + ': ';
             {

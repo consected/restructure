@@ -15,12 +15,12 @@ namespace :db do
         desc "Run migration, and generated SQL" if t == :with_sql
         desc "Generate migration SQL" if t == :to_sql
         task t => :environment do |sql_task|
-
+          hostname = ENV['EXTNAME']
           case original_task
           when "db:migrate"
-            filename = "db/dumps/upgrade-#{Time.now.to_formatted_s(:number)}.sql"
+            filename = "db/dumps/upgrade-#{hostname}-#{Time.now.to_formatted_s(:number)}.sql"
           when "db:rollback"
-            filename = "db/dumps/rollback-#{Time.now.to_formatted_s(:number)}.sql"
+            filename = "db/dumps/rollback-#{hostname}-#{Time.now.to_formatted_s(:number)}.sql"
           else
             raise "unkown migration type #{original_task}"
           end

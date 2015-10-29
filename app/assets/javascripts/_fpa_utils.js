@@ -23,6 +23,12 @@ _fpa.utils.nl2br = function(text){
 String.prototype.capitalize = function(){
     return _fpa.utils.capitalize(this);
 };
+
+String.prototype.underscore = function(){
+    return this.replace(/[^a-zA-z0-9]/g,'_');
+};
+
+
 _fpa.utils.is_blank = function(i){
   return (i === null || i === '');  
 };
@@ -72,6 +78,11 @@ _fpa.utils.pretty_print = function(stre, options_hash){
         }
         if(typeof startTime === 'undefined' || !startTime || startTime == 'Invalid Date'){
             if(options_hash.return_string){
+                
+                if(typeof stre == 'object'){
+                    return JSON.stringify(stre, null, '<div>  ');
+                }
+                
                 if(options_hash.capitalize){
                     if(!stre || stre.length < 30){
                         //stre = Handlebars.Utils.escapeExpression(stre);

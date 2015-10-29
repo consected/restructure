@@ -40,8 +40,9 @@ module ReportsHelper
       else
         main_field << text_field_tag("multiple_attrs[#{name}]", value, type: type_string, class: 'form-control'  , data: {attribute: name})
         main_field << link_to( "+", "add_multiple_attrs[#{name}]", data: {attribute: name}, class: 'btn btn-default')
-        
-        main_field << text_area_tag("search_attrs[#{name}]", value.join("\n"))
+        v = value
+        v = value.join("\n") if value.is_a? Array
+        main_field << text_area_tag("search_attrs[#{name}]", v)
         
       end
     else 

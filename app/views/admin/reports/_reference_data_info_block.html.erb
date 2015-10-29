@@ -18,7 +18,7 @@
       </code></p>
           
     </div>
-  <ul id="protocols-list" style="max-height: 270px; overflow: auto; background-color: white;">
+  <ul id="protocols-list" style="max-height: 330px; overflow: auto; background-color: white;">
   <% Protocol.all.sort.each do |p| %>
       <li  id="protocol-<%=p.id%>">
           <a href="#pblock-<%=p.id%>" data-toggle="collapse"  class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.id%> - <%= p.name %></a>
@@ -52,7 +52,7 @@
       </code></p>
           
     </div>
-  <ul id="gs-list" style="max-height: 270px; overflow: auto; background-color: white;">
+  <ul id="gs-list" style="max-height: 330px; overflow: auto; background-color: white;">
   
   <% GeneralSelection::ItemTypes.each do |p| %>
       <li  id="gs-<%=p%>">
@@ -108,7 +108,7 @@
       </code></p>
 
     </div>
-  <ul id="as-list" style="max-height: 120px; overflow: auto; background-color: white;">
+  <ul id="as-list" style="max-height: 140px; overflow: auto; background-color: white;">
   
   <% AccuracyScore.all.each do |p| %>
       <li  id="as-<%=p.value%>">
@@ -119,7 +119,7 @@
 </div>
 <div class="col-sm-5" style="text-align: left">
   <%= f.label 'Primary Tables'%> 
-  <ul id="as-list" style="max-height: 700px; overflow: auto; background-color: white;">
+  <ul id="as-list" style="max-height: 800px; overflow: auto; background-color: white;">
     <%  tables = ActiveRecord::Base.connection.tables
       #tables +=  DynamicModel.active.unscope(:order).distinct.select {|t| t.table_name}.map {|t| t.table_name}
     
@@ -130,7 +130,7 @@
       </li>      
       <ul id="tblock-<%=table_name%>" class="collapse">
         <% ActiveRecord::Base.connection.columns(table_name).each  do |c| %>
-          <li id="table-<%=c.name%>"><%=c.name%> - <%=c.type.to_s%> (<%=c.limit.to_s%>)</li>
+          <li id="table-<%=c.name%>"><%=c.name%> <small style="color: gray"><%=c.type.to_s%></small></li>
         <% end %>
       </ul>
       

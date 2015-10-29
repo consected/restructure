@@ -4,10 +4,9 @@ class Report < ActiveRecord::Base
   include SelectorCache
   
   before_validation :check_attr_def
-  
   validates :report_type, presence: true
-  validates :name, presence: true
-
+  validates :name, presence: true  
+  
   default_scope -> {order auto: :desc, report_type: :asc, position: :asc }
   
   scope :counts, -> {where report_type: 'count'}
@@ -25,7 +24,7 @@ class Report < ActiveRecord::Base
   
   
   def report_identifier
-    name.downcase.gsub(/[^a-zA-z0-9]/,'_')
+    name.id_underscore
   end
   
   def clean_sql
@@ -166,7 +165,7 @@ class Report < ActiveRecord::Base
     
     
     
-    return false if all_blank
+    return false if all_blank && search_attributes.length > 0
       
     true
   end
@@ -217,5 +216,5 @@ class Report < ActiveRecord::Base
     end
     errors.add :search_attributes, "definition can not be parsed. Check the YAML or JSON is valid. #{errmsg.message}" unless s
   end
-  
+
 end

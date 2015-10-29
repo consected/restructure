@@ -229,6 +229,7 @@ class DynamicModel < ActiveRecord::Base
 
   def self.routes_reload
     Rails.application.reload_routes!
+    Rails.application.routes_reloader.reload!
   end
     
 end

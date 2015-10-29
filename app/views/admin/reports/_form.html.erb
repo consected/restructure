@@ -2,52 +2,54 @@
   <div data-result="admin-edit-form-"  class="admin-edit-form admin-report">    
 <%= form_for(@report, url: (@report.id ? admin_report_path(@report) : admin_reports_path ), class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
-  <div class="form-group">
-    <%= f.label :name %>
-    <%= f.text_field :name %>
-  </div>
-
-  <div class="form-group">
-    <%= f.label :report_type %>
-    <%= f.select :report_type, Report::ReportTypes, include_blank: '-select-' %>
-  </div>      
-  
-  
-            
   <div class="row">    
     <div class="col-sm-12" style="text-align: left">
+      <div class="form-group">
+        <%= f.label :name %>
+        <%= f.text_field :name %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :report_type %>
+        <%= f.select :report_type, Report::ReportTypes, include_blank: '-select-' %>
+      </div>      
+
+      <div class="form-group">
+        <%= f.label :position %>
+        <%= f.text_field :position, type: :number%>    
+      </div>          
+        <br/>
+      <div class="form-group">
+        <%= f.check_box :auto %>
+        <%= f.label :run_automatically %>
+      </div>      
+      <div class="form-group">
+        <%= f.check_box :searchable %>
+        <%= f.label :searchable %>
+      </div>      
+      <div class="form-group">
+        <%= f.check_box :disabled %>
+        <%= f.label :disable %>
+      </div>     
+
+            
       <div>
         <%= f.label :description %>
         <%= f.text_area :description,  style: "width: 99%; height: 70px;" %>
       </div>  
-        
-      <%= render partial: 'search_attr_definer', locals: {f: f} %>
-        
       <div class="">
         <%= f.label :sql %>
         <%= f.text_area :sql, style: "width: 99%; height: 270px; font-family: monospace;" %>
       </div>
+        
+        
+      <%= render partial: 'search_attr_definer', locals: {f: f} %>
+        
     </div>
     <%= render partial: 'reference_data_info_block', locals: {f: f} %>
   </div>
       <p>&nbsp;</p>
 
-  <div class="form-group">
-    <%= f.label :position %>
-    <%= f.text_field :position, type: :number%>    
-  </div>          
-  <div class="form-group">
-    <%= f.check_box :auto %>
-    <%= f.label :run_automatically %>
-  </div>      
-  <div class="form-group">
-    <%= f.check_box :searchable %>
-    <%= f.label :searchable %>
-  </div>      
-  <div class="form-group">
-    <%= f.check_box :disabled %>
-    <%= f.label :disable %>
-  </div>     
 
   <div class="form-group">
     <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>

@@ -18,7 +18,8 @@
         <h3 class="text-right hidden"><span class="result-count"><%=@results.count%></span> <%=@results.count == 1 ? 'row' : 'rows'%></h3>
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
-    </div>     
+    </div>           
+    <div  id="report-results-block">
         <table class="" style="margin:1em;">
           <thead>
             <tr>
@@ -50,7 +51,7 @@
             <% end %>
           </tbody>
         </table>
-    
+    </div>
       
     
   </div>
@@ -61,11 +62,13 @@
       window.setTimeout(function(){
         $('table').addClass('table tablesorter');
         var tables = {trackers:
-                {protocols: 'protocol_id', sub_processes: 'sub_process_id', protocol_events: 'protocol_event_id', item_type_names: 'item_type'},
+                {protocols: 'protocol_id', sub_processes: 'sub_process_id', protocol_events: 'protocol_event_id', users: 'user_id'},
             tracker_history:
-                {protocols: 'protocol_id', sub_processes: 'sub_process_id', protocol_events: 'protocol_event_id', item_type_names: 'item_type'},
-                masters:
-                        {accuracy_scores: 'rank'}
+                {protocols: 'protocol_id', sub_processes: 'sub_process_id', protocol_events: 'protocol_event_id', users: 'user_id'},
+            masters:
+                {accuracy_scores: 'rank'},
+            player_infos:
+                {accuracy_scores: 'rank'}
         };
 
         for(var t in tables){
@@ -94,6 +97,8 @@
             }
           }
         }
+        
+        _fpa.form_utils.setup_tablesorter($('#report-results-block'));
 
 
         

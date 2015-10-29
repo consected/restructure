@@ -218,8 +218,8 @@
     });
 
     Handlebars.registerHelper('pretty_string', function(stre, options) {
-        
-        _fpa.utils.pretty_print(stre, options.hash);
+        if(options && !options.hash) options.hash = {};
+        return _fpa.utils.pretty_print(stre, options.hash);
     });
 
 

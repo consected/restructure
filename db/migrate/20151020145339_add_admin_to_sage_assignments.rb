@@ -1,8 +1,18 @@
+require "#{Rails.root}/db/seeds/tracker_updates_protocol.rb"
+  
+def auto_admin 
+  @admin ||= Admin.find_or_create_by email: 'auto-admin@dummy.aaa'
+end
+  
+auto_admin
+
 class AddAdminToSageAssignments < ActiveRecord::Migration
   def change
     add_reference :sage_assignments, :admin, index: true, foreign_key: true
     
-    auto_admin = Admin.find_or_create_by email: 'auto-admin'
+    auto_admin = Admin.find_or_create_by email: 'auto-admin@dummy.aaa'
+    auto_admin.save!
+    Seeds::TrackerUpdatesProtocol.setup 
     
     protocol = Protocol.where(name: 'Updates').enabled.first
     protocol.current_admin = auto_admin
