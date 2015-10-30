@@ -6,7 +6,11 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
         <div>
             <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted search_report', id: "report_query_form", data: {result_target: '#master_results_block', preprocessor: 'reports_result'}, remote: true do %>
             <div class="row">
-              <% @report.search_attributes.each do |name, type| %>
+              <% i = 0  
+                @report.search_attributes.each do |name, type| 
+                  i += 1                                   
+              %>
+                <% if i > 0 && i % 4 == 0 %></div><div class="row"><%end%> 
                 <div class="col-md-6" style="padding-bottom: 1em;">                
                 <%= report_field name, type, @report.search_attr_values[name] %>
                 </div>
@@ -16,7 +20,7 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
             <div class="form-group form-actions clearfix">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
-              <% if click_to_search %> <span>run report: </span><%end%>  
+              <% if click_to_search %> <span></span><%end%>  
               <%= submit_tag :search, value: :search,class: "#{btn} #{!@report_page ? 'auto-submitter' : ''}" if @report.report_type == 'search'  %>
               <%= submit_tag :table, class: "#{btn}"  %>
               <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count'%>

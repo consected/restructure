@@ -74,6 +74,19 @@
         for(var t in tables){
           if(tables.hasOwnProperty(t)){
             var table = tables[t];
+            
+            $('td[data-col-type="master_id"]').on('click', function(){
+              window.open('/masters/'+$(this).html(), "msid");
+              $('.item-selected').removeClass('item-selected');
+              $(this).addClass('item-selected');
+            }).addClass('hover-link');
+            
+            $('td[data-col-type="msid"]').on('click', function(){
+              window.open('/masters/'+$(this).html()+'?type=msid', "msid");
+              $('.item-selected').removeClass('item-selected');
+              $(this).addClass('item-selected');
+            }).addClass('hover-link');
+            
             if($('td[data-col-table="'+t+'"]').length > 0 ){
               for(var i in table){
 

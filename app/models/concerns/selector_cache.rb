@@ -126,7 +126,8 @@ module SelectorCache
             name =  c.full_label              
           end
           
-          ["#{vlabel}#{name} #{c.disabled ? '[disabled]' : ''}", downcase_if_string(v)] }.sort
+          ["#{vlabel}#{name} #{c.disabled ? '[disabled]' : ''}", downcase_if_string(v)] 
+        }.sort
       }
     end
     

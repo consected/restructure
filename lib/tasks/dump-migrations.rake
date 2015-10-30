@@ -34,9 +34,10 @@ namespace :db do
 
             # define our own execute
             def execute(sql, name = nil)
-              # check for some DDL and DML statements
-              if /^(create|alter|drop|insert|delete|update)/i.match sql
-                File.open(SQL_FILENAME, 'a') { |f| f.puts "#{sql};\n" }
+              # check for some DDL and DML statements                  
+              sqlfile = "set search_path=#{ENV['SCHEMA']}; \n begin; \n#{sql}; \n commit; "
+              if /^(create|alter|drop|insert|delete|update)/i.match sql                
+                File.open(SQL_FILENAME, 'a') { |f| f.puts "#{sqlfile};\n" }
                 old_execute sql, name if RUN_SQL
               else
                 # pass everything else to the aliased execute

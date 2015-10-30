@@ -8,3 +8,26 @@ tr.report-auto {background-color: #FFFADF;}
         color: black;         
     }
 }
+
+.hover-link {
+    color: #0063a6 ;
+    &:hover {cursor: pointer; color: #09c; }
+    &:hover:after {
+    content: '\e066';
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';    
+    padding-left:0.4em;
+    margin-right: -1.6em;
+    }
+    
+}
+
+.item-selected {
+    background-color: #FFFADF;
+}
+
+.btn.add-btn {
+    position: absolute;
+    top: 1.8em;
+    right: 0.48em;
+}

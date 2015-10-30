@@ -125,7 +125,7 @@ RSpec.describe ItemFlagsController, type: :controller do
         
         attr = {
           master_id: @player_info.master_id, 
-          item_controller: 'pro_infos', 
+          item_controller: 'masters', 
           item_id: @player_info.id, 
           item_flag: {
             item_flag_name_id: [@item_flag_name]
@@ -196,7 +196,7 @@ RSpec.describe ItemFlagsController, type: :controller do
       
       expect { get :index, {master_id: @player_info.master_id, item_controller: 'player_infos', item_id: "item_id"} }
       expect(response).to be_success
-      expect { get :index, {master_id: @player_info.master_id, item_controller: 'addresses', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
+      expect { get :index, {master_id: @player_info.master_id, item_controller: 'masters', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
 
       expect { get :index, {master_id: @player_info.master_id, item_controller: '&addresses', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
       expect { get :index, {master_id: @player_info.master_id, item_controller: '12312', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)

@@ -11,6 +11,7 @@ class ApplicationController < ActionController::Base
   rescue_from Exception, :with => :unhandled_exception_handler
   rescue_from RuntimeError, :with => :runtime_error_handler
   rescue_from ActiveRecord::RecordNotFound, :with => :runtime_record_not_found_handler
+  rescue_from ActionController::RoutingError, :with => :routing_error_handler 
   rescue_from FphsException, :with => :fphs_app_exception_handler
   
   
@@ -46,6 +47,17 @@ protected
       end
       true
     end
+    
+    def routing_error_handler  e
+      logger.error e.inspect 
+      logger.error e.backtrace.join("\n") 
+      respond_to do |type|
+        type.html { render :text => "The request URL does not exist.", :status => 404 }
+        type.json  { render :json => {message: "The request URL does not exist."}, :status => 404 }
+      end
+      true
+    end
+    
     def runtime_record_not_found_handler e
       logger.error e.inspect 
       logger.error e.backtrace.join("\n") 

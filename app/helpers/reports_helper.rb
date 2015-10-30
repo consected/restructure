@@ -16,13 +16,13 @@ module ReportsHelper
     
     value ||= Report.calculate_default(type_val['default'], type_string)
     
-    if c && c.respond_to?(:selector_cache?) && c.selector_cache?      
-      if type_val['filter'] == 'all'
+    if c && c.respond_to?(:all_name_value_enable_flagged) 
+      if type_val['item_type'] == 'all'
         type_filter = nil     
-      else
-        type_filter = type_val['filter']
+      elsif type_val['item_type']
+        type_filter = {item_type: type_val['item_type']}
       end  
-            
+      logger.info "Use Dropdown for Select: #{type_filter}... #{type_val.inspect}"      
       use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value)
       
     end
@@ -39,7 +39,7 @@ module ReportsHelper
         main_field << select_tag("search_attrs[#{name}]", use_dropdown , multiple: true)
       else
         main_field << text_field_tag("multiple_attrs[#{name}]", value, type: type_string, class: 'form-control'  , data: {attribute: name})
-        main_field << link_to( "+", "add_multiple_attrs[#{name}]", data: {attribute: name}, class: 'btn btn-default')
+        main_field << link_to( "+", "add_multiple_attrs[#{name}]", data: {attribute: name}, class: 'btn btn-default add-btn')
         v = value
         v = value.join("\n") if value.is_a? Array
         main_field << text_area_tag("search_attrs[#{name}]", v)

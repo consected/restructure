@@ -29,22 +29,21 @@ describe DefinitionsController, type: :controller do
       expect(j.length).to eq ProtocolEvent.enabled.length      
     end
     
-    it "show not get an unexpected item" do
-      
-      
-      expect{get :show, {id: 'new'}}.to raise_error(ActionController::RoutingError)
+    it "should not get an unexpected item" do
+      get :show, {id: 'new'}
+      expect(response).to have_http_status(404)
     end
   end
   
   describe "show that Brakeman security warning is not an issue" do
     before_each_login_user
     it "attempts to force use of an invalid definition type" do
-      
-      expect { get :show, {id: 'addresses'} }.to raise_error(ActionController::RoutingError)
-
-      expect { get :show, {id: '&something'} }.to raise_error(ActionController::RoutingError)
-
-      expect { get :show, {id: '123654'} }.to raise_error(ActionController::RoutingError)
+      get :show, {id: 'addresses'}
+      expect(response).to have_http_status(404)
+      get :show, {id: '&something'}
+      expect(response).to have_http_status(404)
+      get :show, {id: '123654'}
+      expect(response).to have_http_status(404)
       
       
     end

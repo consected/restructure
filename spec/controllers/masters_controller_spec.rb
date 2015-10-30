@@ -16,7 +16,7 @@ RSpec.describe MastersController, type: :controller do
       post :create
       @master = Master.last
       mid = @master.id
-      
+      raise "No master ID?" unless mid
       expect(response).to redirect_to master_url(mid)
       
       expect(@master.player_infos.length).to eq 1
