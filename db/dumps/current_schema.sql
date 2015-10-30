@@ -1020,7 +1020,9 @@ CREATE TABLE dynamic_models (
     updated_at timestamp without time zone NOT NULL,
     "position" integer,
     category character varying,
-    table_key_name character varying
+    table_key_name character varying,
+    field_list character varying,
+    result_order character varying
 );
 
 
