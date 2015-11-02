@@ -1,4 +1,44 @@
 -- Script created @ 2015-10-29 14:29:24 -0400
+
+set search_path=ml_app;
+begin
+
+CREATE FUNCTION tracker_upsert() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            if (select EXISTS(
+                    select 1 from trackers where 
+                    protocol_id  = NEW.protocol_id AND 
+                    master_id = NEW.master_id
+                    )
+                ) then
+                UPDATE trackers SET
+                    master_id = NEW.master_id, 
+                    protocol_id = NEW.protocol_id, 
+                    protocol_event_id = NEW.protocol_event_id, 
+                    event_date = NEW.event_date, 
+                    sub_process_id = NEW.sub_process_id, 
+                    notes = NEW.notes, 
+                    item_id = NEW.item_id, 
+                    item_type = NEW.item_type,
+                    -- do not update created_at --
+                    updated_at = NEW.updated_at, 
+                    user_id = NEW.user_id
+                WHERE master_id = NEW.master_id AND 
+                    protocol_id = NEW.protocol_id
+                ;
+                RETURN NULL;
+            end if;
+            RETURN NEW;
+        END;
+    $$;
+
+
+CREATE TRIGGER tracker_upsert BEFORE INSERT ON trackers FOR EACH ROW EXECUTE PROCEDURE tracker_upsert();
+
+
+
 CREATE TABLE "reports" ("id" serial primary key, "name" character varying, "primary_table" character varying, "description" character varying, "sql" character varying, "search_attrs" character varying, "admin_id" integer, "disabled" boolean, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
 CREATE  INDEX  "index_reports_on_admin_id" ON "reports"  ("admin_id");
 ALTER TABLE "reports" ADD CONSTRAINT "fk_rails_b138baacff"
@@ -49,3 +89,5 @@ ALTER TABLE "item_flags" ADD "disabled" boolean;
 CREATE TABLE "user_authorizations" ("id" serial primary key, "user_id" integer, "has_authorization" character varying, "admin_id" integer, "disabled" boolean, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
 ALTER TABLE "dynamic_models" ADD "field_list" character varying;
 ALTER TABLE "dynamic_models" ADD "result_order" character varying;
+
+end;
