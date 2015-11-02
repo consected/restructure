@@ -16,7 +16,7 @@ module MasterSupport
   end
   
   def edit_form_admin
-    "#{objects_symbol}/_form"
+    @edit_form_admin || "#{objects_symbol}/_form"
   end
   
   def edit_form_user

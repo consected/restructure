@@ -1,4 +1,4 @@
-class ExternalLinksController < ApplicationController
+class  Admin::ExternalLinksController < ApplicationController
   include AdminControllerHandler
   
   private

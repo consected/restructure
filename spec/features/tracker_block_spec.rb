@@ -57,7 +57,7 @@ describe "tracker block", js: true do
   end
   
   def open_player_element el, items
-    el.click      if items.length > 1 # it opens automatically if there is only one result    
+    el.find('.player-info-header').click      if items.length > 1 # it opens automatically if there is only one result    
     dismiss_modal        
     h = el[:href].split('#').last          
     find "##{h}.collapse.in", wait: 5
@@ -71,12 +71,13 @@ describe "tracker block", js: true do
     # Switch to advanced search form
     within '#simple_search_master' do       
       find('#master_general_infos_attributes_0_first_name').click
-    
-      click_link "advanced search"
+    end
+     within '.advanced-form-selections' do           
+      click_button "Advanced Search"
     end
     
     # Wait for the advance form collapse animation to complete
-    expect(page).to have_css '#master-search-advanced.in'    
+    expect(page).to have_css '#master-search-advanced-form.in'    
     
     
     # Search for the player
@@ -152,14 +153,20 @@ describe "tracker block", js: true do
     # After a moment the tracker will show the newly created item
     expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
     
+    
+    have_css '.tracker-tree-results tbody.new-block'
+    dismiss_modal
+    sleep 1
+    dismiss_modal
+    sleep 1
     # Now add a new item to be merged within the current protocol
     pe = pes[1]    
     within ".tracker-tree-results" do
       click_link "add tracker record"
     end
     
-    find '.tracker-tree-results #new_tracker', wait: 5
-    
+    have_css ".tracker-tree-results #new_tracker"    
+    have_css ".tracker-tree-results #new_tracker"    
     within ".tracker-tree-results #new_tracker" do
       select protocol.name, from: 'tracker_protocol_id'
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp.id}']").select_option

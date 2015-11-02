@@ -1,6 +1,6 @@
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form">    
-<%= form_for(object_instance, class: "inline-form", remote: true) do |f| %>
+<%= form_for(object_instance, url: (object_instance.id ? admin_external_link_path(object_instance) : admin_external_links_path ), class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :name %>

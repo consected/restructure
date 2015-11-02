@@ -76,6 +76,10 @@ FOREIGN KEY ("admin_id")
   REFERENCES "admins" ("id")
 ;
 ALTER TABLE "masters" ADD "contact_id" integer;
+
+update masters m set contact_id=(select contact_id from player_infos pi where pi.master_id = m.id);
+
+
 CREATE TABLE "dynamic_models" ("id" serial primary key, "name" character varying, "table_name" character varying, "schema_name" character varying, "primary_key_name" character varying, "foreign_key_name" character varying, "description" character varying, "admin_id" integer, "disabled" boolean, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
 CREATE  INDEX  "index_dynamic_models_on_admin_id" ON "dynamic_models"  ("admin_id");
 ALTER TABLE "dynamic_models" ADD CONSTRAINT "fk_rails_deec8fcb38"
@@ -89,5 +93,9 @@ ALTER TABLE "item_flags" ADD "disabled" boolean;
 CREATE TABLE "user_authorizations" ("id" serial primary key, "user_id" integer, "has_authorization" character varying, "admin_id" integer, "disabled" boolean, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
 ALTER TABLE "dynamic_models" ADD "field_list" character varying;
 ALTER TABLE "dynamic_models" ADD "result_order" character varying;
+
+insert into reports (name, sql, report_type, created_at, updated_at, description, disabled)
+values ('Sage Assigned','select id, sage_id from sage_assignments where master_id is not null', 'regular_report', now(),now(), '', false),
+('Sage Unassigned', 'select id, sage_id from sage_assignments where master_id is null', 'regular_report', now(),now(), '', false);
 
 end;

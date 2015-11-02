@@ -131,7 +131,9 @@ RSpec.describe ItemFlagsController, type: :controller do
             item_flag_name_id: [@item_flag_name]
           }         
         }
-        expect { post :create, attr}.to raise_error ActionController::RoutingError
+        #expect { post :create, attr}.to raise_error ActionController::RoutingError
+        post :create, attr
+        expect(response).to have_http_status(404), "Didn't get a 404 response with attr #{attr.inspect}"
       end
       
       
@@ -196,11 +198,15 @@ RSpec.describe ItemFlagsController, type: :controller do
       
       expect { get :index, {master_id: @player_info.master_id, item_controller: 'player_infos', item_id: "item_id"} }
       expect(response).to be_success
-      expect { get :index, {master_id: @player_info.master_id, item_controller: 'masters', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
+      get :index, {master_id: @player_info.master_id, item_controller: 'masters', item_id: "item_id"}
+      expect(response).to have_http_status 404
 
-      expect { get :index, {master_id: @player_info.master_id, item_controller: '&addresses', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
-      expect { get :index, {master_id: @player_info.master_id, item_controller: '12312', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
-      expect { get :index, {master_id: @player_info.master_id, item_controller: 'nil_class', item_id: "item_id"} }.to raise_error(ActionController::RoutingError)
+      get :index, {master_id: @player_info.master_id, item_controller: '&addresses', item_id: "item_id"}
+      expect(response).to have_http_status 404
+      get :index, {master_id: @player_info.master_id, item_controller: '12312', item_id: "item_id"} 
+      expect(response).to have_http_status 404
+      get :index, {master_id: @player_info.master_id, item_controller: 'nil_class', item_id: "item_id"} 
+      expect(response).to have_http_status 404
     end
   end
 

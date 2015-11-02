@@ -3,7 +3,7 @@ require 'support/seed_support'
 module ControllerMacros
   
   def self.create_user
-    a = User.order(id: :desc).first
+    a = User.all.unscope(:where, :order).order(id: :desc).first
     r = 1
     r = a.id + 1 if a
     good_email = "ctestuser-tester-#{r}@testing.com"

@@ -49,7 +49,7 @@ describe "advanced search", js: true do
     
     within '#simple_search_master' do 
       fill_in "Last name", with: 'bad1'
-      click_button "submit"
+      click_button "search"
     end
     
     expect(page).to have_css "#master_results_block", text: "No Results"
@@ -65,11 +65,14 @@ describe "advanced search", js: true do
     within '#simple_search_master' do       
       find('#master_general_infos_attributes_0_first_name').click
     
-      click_link "advanced search"
+    
     end
     
+    within '.advanced-form-selections' do           
+      click_button "Advanced Search"
+    end
     # Wait for the advance form collapse animation to complete
-    expect(page).to have_css '#master-search-advanced.in'    
+    expect(page).to have_css '#master-search-advanced-form.in'    
     
     within '#advanced_search_master' do
       click_link 'clear fields'
@@ -104,14 +107,17 @@ describe "advanced search", js: true do
       expect(el.text).to match /#{@full_player_info.first_name.capitalize}.+#{@full_player_info.last_name.capitalize}.*/
     end
     
-    page.all(:css, '.master-expander').first.click
+    have_css("a.master-expander.attached-me-click")
+    page.all(:css, '.master-expander.collapsed .player-info-header').first.click
     
     # expect the player section to expand
     expect(page).to have_css "#master-#{@full_player_info.master_id}-player-infos.collapse.in"
     
     expect(page).to have_css "#player-info-#{@full_player_info.master_id}-#{@full_player_info.id} .player-info-first_name", text: "first name #{@full_player_info.first_name.capitalize}"
     
-    protocol = Protocol.selectable.first
+    dismiss_modal  
+    
+    protocol = Protocol.selectable.first    
     
     within '#advanced_search_master' do
       
@@ -136,7 +142,7 @@ describe "advanced search", js: true do
       
       
       
-      el.click unless me.length == 1 
+      el.find('.player_info_header').click unless me.length == 1 
       dismiss_modal
                         
       have_css "#master-#{@full_player_info.master_id}-player-infos.collapse.in"
@@ -160,12 +166,15 @@ describe "advanced search", js: true do
     visit "/masters/search"
     within '#simple_search_master' do       
       find('#master_general_infos_attributes_0_first_name').click
-    
-      click_link "advanced search"
+        
     end
 
+     within '.advanced-form-selections' do           
+      click_button "Advanced Search"
+    end
+    
      # Wait for the advance form collapse animation to complete
-    expect(page).to have_css '#master-search-advanced.in'      
+    expect(page).to have_css '#master-search-advanced-form.in'      
         
     sprot = Protocol.selectable
     
@@ -189,7 +198,7 @@ describe "advanced search", js: true do
     
     #expect(page).to have_css "#search_count", text: /[0-9]+.*/
     
-    items = page.all(:css, '.master-expander')
+    items = page.all(:css, '.master-expander.collapsed')
 
     expect(items.length).to be > 0
     
@@ -197,7 +206,9 @@ describe "advanced search", js: true do
     
     items.each do |el|
       dismiss_modal    
-      el.click      if items.length > 1
+      
+      have_css '.player-info-header'
+      el.find('.player-info-header').click      if items.length > 1
       
       
       

@@ -21,7 +21,9 @@ shared_examples 'a standard admin controller' do
   let(:invalid_update_attributes) {
     invalid_update_attribs
   }
-
+  let(:path_prefix){
+    @path_prefix
+  }
   
   describe "Ensure authentication" do
     before_each_login_admin
@@ -98,7 +100,7 @@ shared_examples 'a standard admin controller' do
       it "return success" do
         
         post :create, {object_symbol => valid_attributes}
-        expect(response).to redirect_to "/#{objects_symbol}"
+        expect(response).to redirect_to "#{path_prefix}/#{objects_symbol}"
       end
     end
 
@@ -147,7 +149,7 @@ shared_examples 'a standard admin controller' do
         create_item
         put :update, {:id => item_id, object_symbol => new_attributes}
         expect(flash[:warning]).to_not be_present
-        expect(response).to redirect_to("/#{objects_symbol}")
+        expect(response).to redirect_to("#{path_prefix}/#{objects_symbol}")
       end
     end
 
@@ -164,7 +166,7 @@ shared_examples 'a standard admin controller' do
         create_item
         put :update, {:id => item_id, object_symbol => invalid_update_attributes}
         
-        expect(response).to render_template(edit_form_admin)
+        expect(response).to render_template(edit_form_admin)#, "Rendered incorrect template with invalid_update_attributes: #{invalid_update_attributes.inspect}"
       end
     end
   end
@@ -173,7 +175,7 @@ shared_examples 'a standard admin controller' do
     before_each_login_admin
     it "never destroys the requested item" do
       create_item
-      expect(:delete => "#{object_symbol}/#{item_id}").not_to be_routable
+      expect(:delete => "#{path_prefix}/#{object_symbol}/#{item_id}").not_to be_routable
 #      delete :destroy, {:id => item_id}
 #      expect(response).to have_http_status(401)
     end

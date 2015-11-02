@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     resources :sage_assignments, except: [:destroy]
     resources :dynamic_models, except: [:show, :destroy]
     resources :user_authorizations, except: [:show, :destroy]
+    resources :external_links, except: [:show, :destroy]
   end
     
   resources :action_logs, only: [:show, :index]
@@ -13,7 +14,7 @@ Rails.application.routes.draw do
   resources :colleges, except: [:show, :destroy]
   resources :general_selections, except: [:show, :destroy]
   resources :item_flag_names, except: [:show, :destroy]
-  resources :external_links, except: [:show, :destroy]
+  
   
   resources :protocols, except: [:show, :destroy] do
     resources :sub_processes, except: [:show, :destroy] do

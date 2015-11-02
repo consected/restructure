@@ -19,16 +19,16 @@ module Seeds
       sp.save!
       
       values = [
-        {name: "created address", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "created player contact", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "created player info", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "created scantron", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "created sage assignment", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "updated address", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "updated player contact", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "updated player info", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "updated scantron", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "updated sage assignment", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil}  
+        {name: "created address", sub_process_id: sp.id},
+        {name: "created player contact", sub_process_id: sp.id},
+        {name: "created player info", sub_process_id: sp.id},
+        {name: "created scantron", sub_process_id: sp.id},
+        {name: "created sage assignment", sub_process_id: sp.id},
+        {name: "updated address", sub_process_id: sp.id},
+        {name: "updated player contact", sub_process_id: sp.id},
+        {name: "updated player info", sub_process_id: sp.id},
+        {name: "updated scantron", sub_process_id: sp.id},
+        {name: "updated sage assignment", sub_process_id: sp.id}  
       ]
       
       add_values values, sp
@@ -38,8 +38,8 @@ module Seeds
       sp.current_admin = auto_admin
       sp.save!
       values = [        
-        {name: "created player info", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil},        
-        {name: "updated player info", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil}
+        {name: "created player info", sub_process_id: sp.id},        
+        {name: "updated player info", sub_process_id: sp.id}
       ]
       
       add_values values, sp

@@ -11,15 +11,15 @@ module MasterSearch
 
       if search_type == 'MSID'
         if !params[:master][:msid].blank?
-          msid = params[:master][:msid] 
+          msid = params[:master][:msid].to_s 
           msid = msid.split(/[,| ]/) if msid.index(/[,| ]/)        
           @masters = Master.where msid: msid
         elsif !params[:master][:pro_id].blank?
-          proid = params[:master][:pro_id] 
+          proid = params[:master][:pro_id].to_s
           proid = proid.split(/[,| ]/) if proid.index(/[,| ]/)        
           @masters = Master.where pro_id: proid
         elsif !params[:master][:id].blank?
-          id = params[:master][:id] 
+          id = params[:master][:id].to_s 
           id = id.split(/[,| ]/) if id.index(/[,| ]/)        
           @masters = Master.where id: id
         end
@@ -112,7 +112,7 @@ module MasterSearch
       end
     rescue => e
       logger.error "Error in MastersController#index: #{e.inspect}"
-      m = {error: ": unable to search - please check your search criteria"}
+      m = {error: ": unable to search - please check your search criteria."}
       render json: m, status: 400
       return
     end

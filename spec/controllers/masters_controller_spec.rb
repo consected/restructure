@@ -4,6 +4,10 @@ RSpec.describe MastersController, type: :controller do
   include MasterSupport
   before_each_login_user
   
+  before :each do
+    @admin, pw = ControllerMacros.create_admin
+    UserAuthorization.create has_authorization: :create_msid, user_id: @user.id, current_admin: @admin unless UserAuthorization.user_can? @user, :create_msid
+  end
   
   describe "Create master" do
     it "asks user if they want to create a new record" do          
@@ -38,10 +42,10 @@ RSpec.describe MastersController, type: :controller do
     
     it "searches MSID and returns nothing" do
       mid = Master.maximum(:msid)+1
-      get :index, {mode: 'MSID', master: {msid: mid}}
+      get :index, {mode: 'MSID', master: {msid: mid}, format: :json}
       jres = JSON.parse response.body
-      expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
-      expect(jres['count']).to eq 0
+      expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}."
+      expect(jres['count']['count']).to eq 0
     end
     
     it "searches MSID and matches a result" do
@@ -50,20 +54,20 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
       
-      get :index, {mode: 'MSID', master: {msid: m.msid}}
+      get :index, {mode: 'MSID', master: {msid: m.msid}, format: :json}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
-      expect(jres['count']).to eq 1
+      expect(jres['count']['count']).to eq 1
       expect(jres['masters'].length).to eq 1
       expect(jres['masters'].first['id']).to eq m.id
       
     end
     
     it "searches Pro Id and returns nothing" do
-      get :index, {mode: 'MSID', master: {pro_id: 10000}}
+      get :index, {mode: 'MSID', master: {pro_id: 10000}, format: :json}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
-      expect(jres['count']).to eq 0
+      expect(jres['count']['count']).to eq 0
     end
     
     it "searches pro id and matches a result" do
@@ -72,19 +76,19 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
       
-      get :index, {mode: 'MSID', master: {pro_id: m.pro_id}}
+      get :index, {mode: 'MSID', master: {pro_id: m.pro_id}, format: :json}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
-      expect(jres['count']).to eq 1
+      expect(jres['count']['count']).to eq 1
       expect(jres['masters'].length).to eq 1
       expect(jres['masters'].first['id']).to eq m.id
       
     end    
     it "searches record ID and returns nothing" do
-      get :index, {mode: 'MSID', master: {id: 10000}}
+      get :index, {mode: 'MSID', master: {id: 10000}, format: :json}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
-      expect(jres['count']).to eq 0
+      expect(jres['count']['count']).to eq 0
     end
     
     it "searches record ID and matches a result" do
@@ -93,10 +97,10 @@ RSpec.describe MastersController, type: :controller do
       m = create_master
       create_master
       
-      get :index, {mode: 'MSID', master: {id: m.id}}
+      get :index, {mode: 'MSID', master: {id: m.id}, format: :json}
       jres = JSON.parse response.body
       expect(jres).to have_key('masters'), "Result not correct: #{jres.to_json}"
-      expect(jres['count']).to eq 1
+      expect(jres['count']['count']).to eq 1
       expect(jres['masters'].length).to eq 1
       expect(jres['masters'].first['id']).to eq m.id
       

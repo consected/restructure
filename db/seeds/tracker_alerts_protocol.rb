@@ -39,7 +39,7 @@ module Seeds
     def self.setup
       Rails.logger.info "Calling #{self}.setup"
       
-      create_protocol_events
+      create_protocol_events unless Rails.env.production?
     end
   end
 end

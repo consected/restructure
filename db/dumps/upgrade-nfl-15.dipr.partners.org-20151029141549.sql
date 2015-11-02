@@ -41,4 +41,6 @@ CREATE TRIGGER tracker_upsert BEFORE INSERT ON trackers FOR EACH ROW EXECUTE PRO
 ALTER TABLE "dynamic_models" ADD "field_list" character varying;
 ALTER TABLE "dynamic_models" ADD "result_order" character varying;
 
+
+
 end;

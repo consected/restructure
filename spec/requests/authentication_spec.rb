@@ -51,33 +51,37 @@ describe "user and admin authentication" do
     
     skip_urls = ["/admins/sign_in", "/users/sign_in"]
     
-    admin_controllers = %w(accuracy_scores action_logs colleges general_selections item_flag_names manage_users protocol_events protocols sub_processes admins)        
+    admin_controllers = %w(accuracy_scores action_logs colleges general_selections item_flag_names manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links)
     
     @url_list.each do |url|
       if url[:controller] && !skip_urls.include?(url[:url])
         puts "attempting URL: #{url}"
-        case url[:method] 
-        when :get
-          get url[:url] 
-        when :patch
-          patch url[:url] 
-        when :put
-          put url[:url]
-        when :delete
-          delete url[:url]
-        when :post
-          post url[:url]
-        end        
         
-        expect(response).to have_http_status(302), "expected a redirect for #{url}. Got #{response.status}"
-        if url[:controller] == :redirect_home
-          expect(response).to redirect_to('http://www.example.com/'), "expected a redirect to home page for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
-        elsif admin_controllers.include?(url[:controller].to_s)
-          expect(response).to redirect_to('http://www.example.com/admins/sign_in'), "expected a redirect to admins/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
-        else          
-          expect(response).to redirect_to('http://www.example.com/users/sign_in'), "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+        begin
+          case url[:method] 
+          when :get
+            get url[:url] 
+          when :patch
+            patch url[:url] 
+          when :put
+            put url[:url]
+          when :delete
+            delete url[:url]
+          when :post
+            post url[:url]
+          end        
+        
+          expect(response).to have_http_status(302), "expected a redirect for #{url}. Got #{response.status}"
+          if url[:controller] == :redirect_home
+            expect(response).to redirect_to('http://www.example.com/'), "expected a redirect to home page for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+          elsif admin_controllers.include?(url[:controller].to_s)
+            expect(response).to redirect_to('http://www.example.com/admins/sign_in'), "expected a redirect to admins/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+          else          
+            expect(response).to redirect_to('http://www.example.com/users/sign_in'), "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+          end
+        rescue AbstractController::ActionNotFound
+          Rails.logger.info "Action not defined. Skipping #{url.inspect}"
         end
-        
       else
         puts "Skipping url #{url[:url]} (#{url[:method]}) - no controller or url skipped"
       end

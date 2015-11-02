@@ -72,7 +72,7 @@ _fpa.postprocessors = {
                 $(this).off('shown.bs.collapse');
             });
                         
-        });
+        }).addClass('attached-me-click');
         
         var msid_list = $("#msid_list").html();
         var master_id_list = $("#master_id_list").html();
