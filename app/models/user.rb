@@ -10,8 +10,12 @@ class User < ActiveRecord::Base
     
   default_scope -> {order email: :asc}
   
-  def self.active_id_name_list
-    active.map {|u| {id: u.id, name: u.email} }
+  def self.active_id_name_list filter=nil
+    active.map {|u| {id: u.id, value: u.id, name: u.email} }
+  end
+  
+  def self.all_name_value_enable_flagged type_filter=nil
+    all.map{|u| ["#{u.email} #{u.disabled ? '[disabled]' : ''}", u.id]  }
   end
   
   def timeout_in  

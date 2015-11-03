@@ -10,6 +10,7 @@ class ReportsController < ApplicationController
   
   # List of available reports
   def index    
+    @no_create = true
     pm = Report.enabled    
     pm = pm.where filter_params if filter_params
     

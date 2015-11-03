@@ -19,7 +19,7 @@ _fpa.masters = {
             // We add a class attached-change at the end to indicate that this field has been
             // has been processed and should not have another listener attached. Can avoid hard to debug 
             // issues and provide extra information when looking at what has and hasn't been changed in the DOM
-            f.find('input, select').not('.tt-input, .attached-change').on('change', function(e){
+            f.find('input, select, textarea').not('.no-auto-submit, .tt-input, .attached-change').on('change', function(e){
                 // Cancel any search-related Ajax requests that are still running
                 _fpa.cancel_remote();
                 

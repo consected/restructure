@@ -38,11 +38,11 @@ module ReportsHelper
       if use_dropdown 
         main_field << select_tag("search_attrs[#{name}]", use_dropdown , multiple: true)
       else
-        main_field << text_field_tag("multiple_attrs[#{name}]", value, type: type_string, class: 'form-control'  , data: {attribute: name})
-        main_field << link_to( "+", "add_multiple_attrs[#{name}]", data: {attribute: name}, class: 'btn btn-default add-btn')
+        main_field << text_field_tag("multiple_attrs[#{name}]", '', type: type_string, class: 'form-control no-auto-submit'  , data: {attribute: name})
+        main_field << link_to( "+", "add_multiple_attrs[#{name}]", data: {attribute: name}, class: 'btn btn-default add-btn', title: 'add to search')
         v = value
         v = value.join("\n") if value.is_a? Array
-        main_field << text_area_tag("search_attrs[#{name}]", v)
+        main_field << text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow')
         
       end
     else 

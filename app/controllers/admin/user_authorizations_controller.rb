@@ -14,11 +14,11 @@ class Admin::UserAuthorizationsController < ApplicationController
     end
   
     def has_authorization_options
-      res = UserAuthorization.authorizations.map {|m| [m.to_s.titleize, m]}
+      UserAuthorization.authorizations.map {|m| [m.to_s.titleize, m]}
     end
 
     def user_id_options
-      res = User.active.map {|u| [u.email, u.id]}
+      User.active.map {|u| [u.email, u.id]}
     end
     
     def view_folder

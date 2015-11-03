@@ -18,6 +18,10 @@
   <%if @report %>
     <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>    
   <%end%>
+  <% if @reports 
+       no_create = @no_create
+     end 
+  %>
 
   <%if @sage_assignment || @sage_assignments %>
     <%= link_to "Sage IDs", admin_sage_assignments_path, class: "btn btn-warning" %>    

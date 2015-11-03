@@ -8,7 +8,8 @@ class DefinitionsController < ApplicationController
     "colleges" => :selector_array, 
     "accuracy_scores" => :selector_collection,
     "external_links" => :selector_collection,
-    "users" => :active_id_name_list
+    "users" => :active_id_name_list,
+    "general_selections" => :selector_collection
   }.freeze
    
   def show
@@ -21,9 +22,9 @@ class DefinitionsController < ApplicationController
     # This protects against insecure requests
     return not_found unless item_selector
    
-    item = def_type.classify.constantize
+    item = @def_class.classify.constantize
     
-    j = item.send(item_selector)
+    j = item.send(item_selector, @filter)
     
     render json: j
     
@@ -37,6 +38,14 @@ class DefinitionsController < ApplicationController
     # user-generated requests to access unexpected methods and classes
     def available def_type
       return nil unless def_type
-      Available[def_type]
+      
+      def_type_split = def_type.split('-')
+      filter = def_type_split[1]
+      if filter
+        fs = filter.split('+')
+        @filter = {fs.first => fs.last}
+      end
+      @def_class = def_type_split.first
+      Available[@def_class]
     end
 end

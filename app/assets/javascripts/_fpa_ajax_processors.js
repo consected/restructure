@@ -428,11 +428,13 @@ _fpa.postprocessors = {
           
           var v = $('#search_attrs_'+da);
           var newval = v.val();
-          if(newval.length > 0)newval += "\n";
-          newval += $('#multiple_attrs_'+da).val();
+          if(newval.length > 0) newval += "\n";
+          var from_f = $('#multiple_attrs_'+da);
+          newval += from_f.val();
           v.val(newval);
-          
-          
+          from_f.val('');
+          v.change();
+          from_f.change();
         });
         
     },

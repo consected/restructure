@@ -320,6 +320,15 @@ _fpa.form_utils = {
         block.find('input,select,checkbox,textarea').not('[type="submit"],.form-control').addClass('form-control input-sm');
         block.find('.typeahead').css({width: '100%'});        
         block.find('form').not('.form-formatted').addClass('form-inline');
+        
+        
+        block.find('textarea.auto-grow').not('.attached-auto-grow').each(function(){
+           $(this).on('keypress, change',function(){
+            $(this).get(0).style.height = "5px";
+            $(this).get(0).style.height = ($(this).get(0).scrollHeight+5)+"px";            
+           });
+            
+        }).addClass('attached-auto-grow');
     },
         
 
