@@ -429,10 +429,12 @@ div.external-links {
 }
 
 div.sage-assignment-item {
-    
+    opacity: 0.6;
 }
 
-
+div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
+    opacity: 1;
+}
 
 @media only screen and (min-width: 1023px) {
 

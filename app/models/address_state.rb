@@ -1,7 +1,7 @@
 class AddressState
   
   def self.all_name_value_enable_flagged attr=nil
-    id_value_pairs.map {|k,v| [v,k]}
+    id_value_pairs.map {|k,v| [v,k.downcase]}
   end
   
   def self.id_value_pairs

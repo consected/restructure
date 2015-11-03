@@ -346,6 +346,17 @@ _fpa.postprocessors = {
         if(data.address) d = data.address;
         _fpa.postprocessors.info_update_handler(block, d);
     }, 
+    
+    scantron_result_template: function(block, data){
+        var d = data;
+        if(data.scantron) d = data.scantron;
+        _fpa.postprocessors.info_update_handler(block, d);
+    },
+    sage_assignment_result_template: function(block, data){
+        var d = data;
+        if(data.sage_assignment) d = data.sage_assignment;
+        _fpa.postprocessors.info_update_handler(block, d);
+    },
 
     player_contact_result_template: function(block, data){
         var d = data;

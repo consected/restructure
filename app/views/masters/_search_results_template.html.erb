@@ -160,35 +160,7 @@
           <% if current_user.can? :view_external_links %>
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>
           <% end %>
-          <div id="external-ids-{{id}}" class="row collapse external-ids-block">
-            <div class="on-open-click hidden">
-              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantron</a>
-              <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignment</a>
-            </div>
-            <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons"></div>            
-            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage_assignments"></div>
-    
-          </div>
-          
-          <% DynamicModel.categories.each do |cat| %>
-          <div id="<%=cat%>-{{id}}" class="row collapse <%=cat%>-block format-block-on-expand">
-            <div class="on-open-click hidden">
-              <% dm = DynamicModel.active.where(category: cat) 
-                 dm.each do |m|               
-              %>
-              <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
-              <% end %>
-            </div>
-            <h4 class="results-divider"><a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup"><%=cat.underscore.humanize.downcase%> <span class="caret up"></span></a></h4>
-            <% dm.each do |m| %>
-              <% if DynamicModel.orientation(cat) == :vertical %>  
-              <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
-              <% else %>
-              <div class="row dynamic-model-list" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
-              <% end %>
-            <% end %>
-          </div>
-          <% end %>
+                    
           
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">          
           {{#with trackers}}
@@ -271,6 +243,39 @@
               </div>
             </div>
           </div>
+  
+          <div id="external-ids-{{id}}" class="row collapse external-ids-block">
+            <h4 class="results-divider"><a href="#external-ids-{{id}}" data-toggle="collapse" class="dropup scroll-to-master">external IDs <span class="caret up"></span></a></h4>
+            <div class="on-open-click hidden">
+              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantron</a>
+              <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignment</a>
+            </div>
+            <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons"></div>            
+            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage_assignments"></div>
+    
+          </div>
+          
+          <% DynamicModel.categories.each do |cat| %>
+          <div id="<%=cat%>-{{id}}" class="row collapse <%=cat%>-block format-block-on-expand">
+            <div class="on-open-click hidden">
+              <% dm = DynamicModel.active.where(category: cat) 
+                 dm.each do |m|               
+              %>
+              <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
+              <% end %>
+            </div>
+            <h4 class="results-divider"><a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master"><%=cat.underscore.humanize.downcase%> <span class="caret up"></span></a></h4>
+            <% dm.each do |m| %>
+              <% if DynamicModel.orientation(cat) == :vertical %>  
+              <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
+              <% else %>
+              <div class="row common-template-list dynamic-model-list" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
+              <% end %>
+            <% end %>
+          </div>
+          <% end %>
+          
+  
         </div>
       </div>
     {{/each}}

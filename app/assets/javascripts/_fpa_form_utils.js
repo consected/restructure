@@ -114,9 +114,9 @@ _fpa.form_utils = {
         });
     },
 
-    organize_dynamic_models: function(block){
-        $('.dynamic-model-item').each(function(){
-            var p = $(this).parents('.dynamic-model-list');
+    organize_common_templates: function(block){
+        $('.common-template-item').each(function(){
+            var p = $(this).parents('.common-template-list');
             if(p.hasClass('row')){
                 $(this).addClass('col-md-6');
             }
@@ -231,6 +231,18 @@ _fpa.form_utils = {
             $(a).html('').removeClass('in');
         }).addClass('attached-datatoggle');
 
+        block.find('a.scroll-to-master').not('.attached-datatoggle').on('click', function(){
+            var a;
+            if(block.hasClass('panel-collapse'))
+                a = block;
+            else
+                a = block.parents('.panel-collapse').first();
+            
+            $(document).scrollTo(a, 100, {offset: -60});
+            
+            
+        }).addClass('attached-datatoggle');
+
         block.find('[data-toggle="scrollto-result"], [data-toggle="collapse"].scroll-to-expanded ').not('.attached-datatoggle').on('click', function(){
             if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed'))
               return;
@@ -244,13 +256,14 @@ _fpa.form_utils = {
                 // attempt to do this so that users do not have to constantly scroll an edit block into view just to type
                 // some data.
                 // This is approximate, since forms typically make the block larger, but we are trying to avoid unnecessary
-                // scrolling, to keep the page from jumping around for the user where possible.                
+                // scrolling, to keep the page from jumping around for the user where possible.       
+                // Note that the timeout is set to ensure collapse sections have had time to grow to full height
                 window.setTimeout(function(){
                     var rect = $(a).get(0).getBoundingClientRect(); 
                     var not_visible = !(rect.top >= 0 && rect.bottom < $(window).height());
                     if(not_visible)                    
                         $(document).scrollTo(a, 100, {offset: -50});
-                }, 100);
+                }, 250);
             }
             
         }).addClass('attached-datatoggle');
@@ -315,7 +328,7 @@ _fpa.form_utils = {
         if(!block) block = $(document);
         _fpa.form_utils.setup_chosen(block);  
         _fpa.form_utils.setup_has_value_inputs(block);
-        _fpa.form_utils.organize_dynamic_models(block);
+        _fpa.form_utils.organize_common_templates(block);
         _fpa.form_utils.resize_labels(block);
         _fpa.form_utils.filtered_selector(block);
         _fpa.form_utils.setup_tablesorter(block);
