@@ -46,7 +46,7 @@ class Report < ActiveRecord::Base
   end
   
   
-  def run  search_attr_values
+  def run  search_attr_values, options={}
     
     @search_attr_values = search_attr_values    
     @clean_sql = nil
@@ -55,6 +55,11 @@ class Report < ActiveRecord::Base
     sql = report_definition.sql
     primary_table = 'masters'
     
+    if options[:count_only]
+      sql.strip!
+      sql = sql[0..-2] if sql.last == ';'
+      sql = "select count(*) \"result_count\" from (#{sql}) t"  
+    end
     raise Report::BadSearchCriteria unless search_attrs_prep
     
     res=[]

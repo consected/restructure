@@ -33,11 +33,15 @@ class ReportsController < ApplicationController
     search_attrs = params[:search_attrs]
     @report = Report.find(id)
     
+    options = {}
+    
+    options[:count_only] = true if params[:commit] == 'count'
+    
     return unless @report.searchable || authorized?
     
     if search_attrs
-      begin
-        @results =  @report.run(search_attrs) 
+      begin        
+        @results =  @report.run(search_attrs, options) 
       rescue ActiveRecord::PreparedStatementInvalid => e
         logger.info "Prepared statement invalid in reports_controller (#{search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
         @results = nil
