@@ -108,7 +108,7 @@ _fpa.postprocessors = {
     },
     
     extras_panel_handler: function(block){
-        block.find('.on-open-click a[data-remote="true"]').not('.auto-clicked').click().addClass('auto-clicked');
+        block.find('.on-open-click a[data-remote="true"]').not('.auto-clicked').click().addClass('auto-clicked');        
     },
     
     tracker_opener: function(block){
@@ -330,7 +330,9 @@ _fpa.postprocessors = {
             a[0].app_callback = function(){
                 $(t).collapse('show');
             };
-            a.trigger('click.rails');        
+            a.trigger('click.rails'); 
+            
+            $('#master-'+ master_id + '-player-infos').find('.on-open-click a[data-remote="true"]').click();
         }
     },
 

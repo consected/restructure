@@ -269,7 +269,7 @@
               <% if DynamicModel.orientation(cat) == :vertical %>  
               <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
               <% else %>
-              <div class="row common-template-list dynamic-model-list" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
+              <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
               <% end %>
             <% end %>
           </div>

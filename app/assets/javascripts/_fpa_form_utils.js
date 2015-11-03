@@ -276,6 +276,18 @@ _fpa.form_utils = {
     
     setup_extra_actions: function(block){
         
+        block.find('.resize-children').each(function(){
+           var maxh = 1;
+           var cs = $(this).find('ul');
+           cs.each(function(){
+              var h = $(this).height(); 
+              if(h>maxh) maxh = h;
+           }); 
+           if(maxh>1)
+           cs.height(maxh);
+        });
+        
+        
         block.find('[data-add-icon]').not('.attached-add-icon').each(function(){
             var icon = $(this).attr('data-add-icon');
             var title = $(this).attr('title');
