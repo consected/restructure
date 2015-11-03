@@ -101,7 +101,7 @@
                   console.log("Getting " + i + " for " + idname + ' in ' + t);
                   _fpa.set_definition(i, function(){                                                
                     var pe = _fpa.cache(i);
-                    var cells = $('td[data-col-type="'+idname+'"]');
+                    var cells = $('td[data-col-table="'+t+'"][data-col-type="'+idname+'"]');
                     cells.each(function(){
                       var cell = $(this);
                       var d = cell.html();    
