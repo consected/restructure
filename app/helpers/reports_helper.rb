@@ -22,8 +22,12 @@ module ReportsHelper
       elsif type_val['item_type']
         type_filter = {item_type: type_val['item_type']}
       end  
-      logger.info "Use Dropdown for Select: #{type_filter}... #{type_val.inspect}"      
-      use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value)
+         
+      unless @report_page
+        type_filter ||= {}
+        type_filter[:disabled] = false        
+      end
+      use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value) 
       
     end
     

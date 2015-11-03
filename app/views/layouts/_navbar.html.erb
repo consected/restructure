@@ -34,8 +34,8 @@
             <%= text_field_tag :nav_q_id, params[:nav_q_id], class: "form-control", placeholder: "Master ID" %>  
           </div>
           <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
-          <%= submit_tag "CSV", name: :req_format, value: "csv", class: "btn btn-default" %>
-          <%= submit_tag "JSON", name: :req_format, value: "json", class: "btn btn-default target_new_window" %>
+          <%= submit_tag "CSV", name: :req_format, value: "csv", class: "btn btn-default"  if current_user.can?(:export_csv)%>
+          <%= submit_tag "JSON", name: :req_format, value: "json", class: "btn btn-default target_new_window" if current_user.can?(:export_json) %>
               
         <% end %>
       <% end %>

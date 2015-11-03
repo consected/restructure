@@ -14,8 +14,16 @@ class User < ActiveRecord::Base
     active.map {|u| {id: u.id, value: u.id, name: u.email} }
   end
   
-  def self.all_name_value_enable_flagged type_filter=nil
-    all.map{|u| ["#{u.email} #{u.disabled ? '[disabled]' : ''}", u.id]  }
+  def self.all_name_value_enable_flagged type_filter=nil    
+    
+    if type_filter && type_filter[:disabled] == false
+      res = active
+      type_filter.delete :disabled
+    else
+      res = all
+    end
+    
+    res.map{|u| ["#{u.email} #{u.disabled ? '[disabled]' : ''}", u.id]  }
   end
   
   def timeout_in  

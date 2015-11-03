@@ -108,7 +108,15 @@ module SelectorCache
       ckey="#{nv_all_cache_key}#{conditions}"
       
       Rails.cache.fetch(ckey){
-        all.where(conditions).collect {|c| 
+        if conditions && conditions[:disabled] == false
+          res = active
+          conditions.delete :disabled
+        else
+          res = all
+        end
+
+        
+        res.where(conditions).collect {|c| 
           name = ''
           if c.respond_to?(:parent_name)
             v = c.id
