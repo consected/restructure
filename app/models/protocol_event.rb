@@ -9,6 +9,10 @@ class ProtocolEvent < ActiveRecord::Base
   
   default_scope -> {order :name }
   
+  def value
+    id
+  end
+  
   def protocol
     sub_process.protocol if sub_process
   end

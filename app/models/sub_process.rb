@@ -8,6 +8,10 @@ class SubProcess < ActiveRecord::Base
   validates :name, presence: true
   validates :protocol, presence: true
   
+  def value
+    id
+  end
+  
   def protocol_name
     protocol ? protocol.name : ''
   end
