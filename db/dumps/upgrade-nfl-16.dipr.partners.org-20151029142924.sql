@@ -98,10 +98,7 @@ insert into reports (name, sql, report_type, created_at, updated_at, description
 values ('Sage Assigned','select id, sage_id from sage_assignments where master_id is not null', 'regular_report', now(),now(), '', false),
 ('Sage Unassigned', 'select id, sage_id from sage_assignments where master_id is null', 'regular_report', now(),now(), '', false);
 
-end;
 
-
-begin;
 
 CREATE TABLE report_history (
     "id" integer not null, 

@@ -43,86 +43,8 @@ ALTER TABLE "dynamic_models" ADD "result_order" character varying;
 
 
 
-CREATE TABLE report_history (
-    "id" integer not null, 
-    "name" character varying,     
-    "description" character varying, 
-    "sql" character varying, 
-    "search_attrs" character varying, 
-    "admin_id" integer, 
-    "disabled" boolean, 
-    "report_type" character varying,
-    "auto" boolean,
-    "searchable" boolean,
-    "position" integer,
-    "created_at" timestamp NOT NULL, 
-    "updated_at" timestamp NOT NULL,    
-    report_id integer
-);
-
-CREATE SEQUENCE report_history_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 
-ALTER SEQUENCE report_history_id_seq OWNED BY report_history.id;
-ALTER TABLE ONLY report_history ALTER COLUMN id SET DEFAULT nextval('report_history_id_seq'::regclass);
-ALTER TABLE ONLY report_history ADD CONSTRAINT report_history_pkey PRIMARY KEY (id);
-
-CREATE INDEX index_report_history_on_report_id ON report_history USING btree (report_id);
-
-ALTER TABLE ONLY report_history ADD CONSTRAINT fk_report_history_reports FOREIGN KEY (report_id) REFERENCES reports(id);
-
-CREATE FUNCTION log_report_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-        BEGIN
-            INSERT INTO report_history
-            (
-                    report_id,
-                    name,                    
-                    description,
-                    sql,
-                    search_attrs,
-                    admin_id,
-                    disabled,
-                    report_type,
-                    auto,
-                    searchable,
-                    position,
-                    created_at,
-                    updated_at
-                )                 
-            SELECT                 
-                NEW.id,
-                NEW.name,                
-                NEW.description,
-                NEW.sql,
-                NEW.search_attrs,
-                NEW.admin_id,                
-                NEW.disabled,
-                NEW.report_type,
-                NEW.auto,
-                NEW.searchable,
-                NEW.position,                
-                NEW.created_at,
-                NEW.updated_at
-            ;
-            RETURN NEW;
-        END;
-    $$;
-
-CREATE TRIGGER report_history_insert AFTER INSERT ON reports FOR EACH ROW EXECUTE PROCEDURE log_report_update();
-CREATE TRIGGER report_history_update AFTER UPDATE ON reports FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_report_update();
-
-
-end;
-
-
-begin;
 
 CREATE TABLE report_history (
     "id" integer not null, 
