@@ -206,6 +206,90 @@ CREATE FUNCTION log_college_update() RETURNS trigger
 
 
 --
+-- Name: log_dynamic_model_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_dynamic_model_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO dynamic_model_history
+            (
+                    dynamic_model_id,
+                    name,                    
+                    table_name, 
+                    schema_name,
+                    primary_key_name,
+                    foreign_key_name,
+                    description,
+                    admin_id,
+                    disabled,                    
+                    created_at,
+                    updated_at,
+                    position,
+                    category,
+                    table_key_name,
+                    field_list,
+                    result_order
+                    
+                    
+                )                 
+            SELECT                 
+                NEW.id,
+                                    NEW.name,    
+                    NEW.table_name, 
+                    NEW.schema_name,
+                    NEW.primary_key_name,
+                    NEW.foreign_key_name,
+                    NEW.description,
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.position,
+                    NEW.category,
+                    NEW.table_key_name,
+                    NEW.field_list,
+                    NEW.result_order
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_external_link_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_external_link_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO external_link_history
+            (
+                    external_link_id,                    
+                    name,                    
+                    value,
+                    admin_id,
+                    disabled,                    
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name,    
+                    NEW.value,                     
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_general_selection_update(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -299,7 +383,8 @@ CREATE FUNCTION log_item_flag_update() RETURNS trigger
                     item_flag_name_id,
                     created_at ,
                     updated_at ,
-                    user_id 
+                    user_id ,
+                    disabled
                 )                 
             SELECT                 
                 NEW.id,
@@ -308,7 +393,8 @@ CREATE FUNCTION log_item_flag_update() RETURNS trigger
                     NEW.item_flag_name_id,
                     NEW.created_at ,
                     NEW.updated_at ,
-                    NEW.user_id 
+                    NEW.user_id ,
+                    NEW.disabled
             ;
             RETURN NEW;
         END;
@@ -477,6 +563,50 @@ CREATE FUNCTION log_protocol_update() RETURNS trigger
 
 
 --
+-- Name: log_report_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_report_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO report_history
+            (
+                    report_id,
+                    name,                    
+                    description,
+                    sql,
+                    search_attrs,
+                    admin_id,
+                    disabled,
+                    report_type,
+                    auto,
+                    searchable,
+                    position,
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.name,                
+                NEW.description,
+                NEW.sql,
+                NEW.search_attrs,
+                NEW.admin_id,                
+                NEW.disabled,
+                NEW.report_type,
+                NEW.auto,
+                NEW.searchable,
+                NEW.position,                
+                NEW.created_at,
+                NEW.updated_at
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_scantron_update(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -559,6 +689,38 @@ CREATE FUNCTION log_tracker_update() RETURNS trigger
                    NEW.sub_process_id, NEW.notes, 
                    NEW.item_id, NEW.item_type,
                    NEW.created_at, NEW.updated_at, NEW.user_id  ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_user_authorization_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION log_user_authorization_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO user_authorization_history
+            (
+                    user_authorization_id,
+                    user_id,                    
+                    has_authorization,                    
+                    admin_id,
+                    disabled,                    
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.user_id,                
+                NEW.has_authorization,               
+                NEW.admin_id,                
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at
+            ;
             RETURN NEW;
         END;
     $$;
@@ -1039,6 +1201,50 @@ CREATE TABLE copy_player_infos (
 
 
 --
+-- Name: dynamic_model_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE dynamic_model_history (
+    id integer NOT NULL,
+    name character varying,
+    table_name character varying,
+    schema_name character varying,
+    primary_key_name character varying,
+    foreign_key_name character varying,
+    description character varying,
+    admin_id integer,
+    disabled boolean,
+    "position" integer,
+    category character varying,
+    table_key_name character varying,
+    field_list character varying,
+    result_order character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    dynamic_model_id integer
+);
+
+
+--
+-- Name: dynamic_model_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE dynamic_model_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: dynamic_model_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE dynamic_model_history_id_seq OWNED BY dynamic_model_history.id;
+
+
+--
 -- Name: dynamic_models; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1079,6 +1285,41 @@ CREATE SEQUENCE dynamic_models_id_seq
 --
 
 ALTER SEQUENCE dynamic_models_id_seq OWNED BY dynamic_models.id;
+
+
+--
+-- Name: external_link_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE external_link_history (
+    id integer NOT NULL,
+    name character varying,
+    value character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    external_link_id integer
+);
+
+
+--
+-- Name: external_link_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE external_link_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: external_link_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE external_link_history_id_seq OWNED BY external_link_history.id;
 
 
 --
@@ -1210,7 +1451,8 @@ CREATE TABLE item_flag_history (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     user_id integer,
-    item_flag_id integer
+    item_flag_id integer,
+    disabled boolean
 );
 
 
@@ -1767,6 +2009,47 @@ ALTER SEQUENCE protocols_id_seq OWNED BY protocols.id;
 
 
 --
+-- Name: report_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE report_history (
+    id integer NOT NULL,
+    name character varying,
+    description character varying,
+    sql character varying,
+    search_attrs character varying,
+    admin_id integer,
+    disabled boolean,
+    report_type character varying,
+    auto boolean,
+    searchable boolean,
+    "position" integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    report_id integer
+);
+
+
+--
+-- Name: report_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE report_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: report_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE report_history_id_seq OWNED BY report_history.id;
+
+
+--
 -- Name: reports; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2077,6 +2360,41 @@ ALTER SEQUENCE trackers_id_seq OWNED BY trackers.id;
 
 
 --
+-- Name: user_authorization_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE user_authorization_history (
+    id integer NOT NULL,
+    user_id character varying,
+    has_authorization character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    user_authorization_id integer
+);
+
+
+--
+-- Name: user_authorization_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE user_authorization_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_authorization_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE user_authorization_history_id_seq OWNED BY user_authorization_history.id;
+
+
+--
 -- Name: user_authorizations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2261,7 +2579,21 @@ ALTER TABLE ONLY colleges ALTER COLUMN id SET DEFAULT nextval('colleges_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY dynamic_model_history ALTER COLUMN id SET DEFAULT nextval('dynamic_model_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY dynamic_models ALTER COLUMN id SET DEFAULT nextval('dynamic_models_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY external_link_history ALTER COLUMN id SET DEFAULT nextval('external_link_history_id_seq'::regclass);
 
 
 --
@@ -2394,6 +2726,13 @@ ALTER TABLE ONLY protocols ALTER COLUMN id SET DEFAULT nextval('protocols_id_seq
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY report_history ALTER COLUMN id SET DEFAULT nextval('report_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY reports ALTER COLUMN id SET DEFAULT nextval('reports_id_seq'::regclass);
 
 
@@ -2444,6 +2783,13 @@ ALTER TABLE ONLY tracker_history ALTER COLUMN id SET DEFAULT nextval('tracker_hi
 --
 
 ALTER TABLE ONLY trackers ALTER COLUMN id SET DEFAULT nextval('trackers_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY user_authorization_history ALTER COLUMN id SET DEFAULT nextval('user_authorization_history_id_seq'::regclass);
 
 
 --
@@ -2532,11 +2878,27 @@ ALTER TABLE ONLY colleges
 
 
 --
+-- Name: dynamic_model_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY dynamic_model_history
+    ADD CONSTRAINT dynamic_model_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: dynamic_models_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY dynamic_models
     ADD CONSTRAINT dynamic_models_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: external_link_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY external_link_history
+    ADD CONSTRAINT external_link_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -2684,6 +3046,14 @@ ALTER TABLE ONLY protocols
 
 
 --
+-- Name: report_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY report_history
+    ADD CONSTRAINT report_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: reports_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2745,6 +3115,14 @@ ALTER TABLE ONLY tracker_history
 
 ALTER TABLE ONLY trackers
     ADD CONSTRAINT trackers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_authorization_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY user_authorization_history
+    ADD CONSTRAINT user_authorization_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -2849,10 +3227,24 @@ CREATE INDEX index_colleges_on_user_id ON colleges USING btree (user_id);
 
 
 --
+-- Name: index_dynamic_model_history_on_dynamic_model_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_dynamic_model_history_on_dynamic_model_id ON dynamic_model_history USING btree (dynamic_model_id);
+
+
+--
 -- Name: index_dynamic_models_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_dynamic_models_on_admin_id ON dynamic_models USING btree (admin_id);
+
+
+--
+-- Name: index_external_link_history_on_external_link_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_external_link_history_on_external_link_id ON external_link_history USING btree (external_link_id);
 
 
 --
@@ -3059,6 +3451,13 @@ CREATE INDEX index_protocols_on_admin_id ON protocols USING btree (admin_id);
 
 
 --
+-- Name: index_report_history_on_report_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_report_history_on_report_id ON report_history USING btree (report_id);
+
+
+--
 -- Name: index_reports_on_admin_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -3227,6 +3626,13 @@ CREATE INDEX index_trackers_on_user_id ON trackers USING btree (user_id);
 
 
 --
+-- Name: index_user_authorization_history_on_user_authorization_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_authorization_history_on_user_authorization_id ON user_authorization_history USING btree (user_authorization_id);
+
+
+--
 -- Name: index_user_history_on_user_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -3322,6 +3728,34 @@ CREATE TRIGGER college_history_insert AFTER INSERT ON colleges FOR EACH ROW EXEC
 --
 
 CREATE TRIGGER college_history_update AFTER UPDATE ON colleges FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_college_update();
+
+
+--
+-- Name: dynamic_model_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER dynamic_model_history_insert AFTER INSERT ON dynamic_models FOR EACH ROW EXECUTE PROCEDURE log_dynamic_model_update();
+
+
+--
+-- Name: dynamic_model_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER dynamic_model_history_update AFTER UPDATE ON dynamic_models FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_dynamic_model_update();
+
+
+--
+-- Name: external_link_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER external_link_history_insert AFTER INSERT ON external_links FOR EACH ROW EXECUTE PROCEDURE log_external_link_update();
+
+
+--
+-- Name: external_link_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER external_link_history_update AFTER UPDATE ON external_links FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_external_link_update();
 
 
 --
@@ -3451,6 +3885,20 @@ CREATE TRIGGER protocol_history_update AFTER UPDATE ON protocols FOR EACH ROW WH
 
 
 --
+-- Name: report_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER report_history_insert AFTER INSERT ON reports FOR EACH ROW EXECUTE PROCEDURE log_report_update();
+
+
+--
+-- Name: report_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER report_history_update AFTER UPDATE ON reports FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_report_update();
+
+
+--
 -- Name: scantron_history_insert; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -3497,6 +3945,20 @@ CREATE TRIGGER tracker_history_update AFTER UPDATE ON trackers FOR EACH ROW WHEN
 --
 
 CREATE TRIGGER tracker_upsert BEFORE INSERT ON trackers FOR EACH ROW EXECUTE PROCEDURE tracker_upsert();
+
+
+--
+-- Name: user_authorization_history_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER user_authorization_history_insert AFTER INSERT ON user_authorizations FOR EACH ROW EXECUTE PROCEDURE log_user_authorization_update();
+
+
+--
+-- Name: user_authorization_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER user_authorization_history_update AFTER UPDATE ON user_authorizations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_user_authorization_update();
 
 
 --
@@ -3559,6 +4021,22 @@ ALTER TABLE ONLY admin_history
 
 ALTER TABLE ONLY college_history
     ADD CONSTRAINT fk_college_history_colleges FOREIGN KEY (college_id) REFERENCES colleges(id);
+
+
+--
+-- Name: fk_dynamic_model_history_dynamic_models; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY dynamic_model_history
+    ADD CONSTRAINT fk_dynamic_model_history_dynamic_models FOREIGN KEY (dynamic_model_id) REFERENCES dynamic_models(id);
+
+
+--
+-- Name: fk_external_link_history_external_links; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY external_link_history
+    ADD CONSTRAINT fk_external_link_history_external_links FOREIGN KEY (external_link_id) REFERENCES external_links(id);
 
 
 --
@@ -3986,6 +4464,14 @@ ALTER TABLE ONLY general_selections
 
 
 --
+-- Name: fk_report_history_reports; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY report_history
+    ADD CONSTRAINT fk_report_history_reports FOREIGN KEY (report_id) REFERENCES reports(id);
+
+
+--
 -- Name: fk_scantron_history_masters; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4015,6 +4501,14 @@ ALTER TABLE ONLY scantron_history
 
 ALTER TABLE ONLY sub_process_history
     ADD CONSTRAINT fk_sub_process_history_sub_processes FOREIGN KEY (sub_process_id) REFERENCES sub_processes(id);
+
+
+--
+-- Name: fk_user_authorization_history_user_authorizations; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY user_authorization_history
+    ADD CONSTRAINT fk_user_authorization_history_user_authorizations FOREIGN KEY (user_authorization_id) REFERENCES user_authorizations(id);
 
 
 --
