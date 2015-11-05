@@ -59,7 +59,6 @@ Rails.application.routes.draw do
     get 'dynamic_model/:item_controller/:item_id/item_flags/:id', to: 'item_flags#show'
     post 'dynamic_model/:item_controller/:item_id/item_flags', to: 'item_flags#create'
     
-    DynamicModel.routes_load    
     
   end
   
@@ -82,6 +81,6 @@ Rails.application.routes.draw do
   end
   
   root "masters#search", :as=> 'guest_home'
-  
+  DynamicModel.routes_load    
   
 end

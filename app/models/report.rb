@@ -162,9 +162,13 @@ class Report < ActiveRecord::Base
       if v.blank?
         search_attr_values[k] = nil
       elsif v.is_a? Hash
-        search_attr_values[k] = v.collect{|k,v| v}
+        search_attr_values[k] = v.collect{|k,v| v}      
       elsif v.is_a?(String) && v.include?("\n")
-        search_attr_values[k] = v.split("\n").map{|a| a.squish}
+        if search_attributes[k.to_s].first.last['multiple'] == 'multiple-regex'
+          search_attr_values[k] = "(#{v.split("\n").map{|a| a.squish}.join('|')})"
+        else
+          search_attr_values[k] = v.split("\n").map{|a| a.squish}
+        end
       end
     end
     

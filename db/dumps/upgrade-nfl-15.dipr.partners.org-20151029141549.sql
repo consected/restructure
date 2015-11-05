@@ -1,7 +1,7 @@
 -- Script created @ 2015-10-29 14:15:49 -0400
 
 set search_path=ml_app;
-begin
+begin;
 
 CREATE FUNCTION tracker_upsert() RETURNS trigger
     LANGUAGE plpgsql

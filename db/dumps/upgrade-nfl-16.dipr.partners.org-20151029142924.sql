@@ -1,7 +1,7 @@
 -- Script created @ 2015-10-29 14:29:24 -0400
 
 set search_path=ml_app;
-begin
+begin;
 
 CREATE FUNCTION tracker_upsert() RETURNS trigger
     LANGUAGE plpgsql
@@ -416,4 +416,23 @@ CREATE TRIGGER item_flag_history_insert AFTER INSERT ON item_flags FOR EACH ROW 
 CREATE TRIGGER item_flag_history_update AFTER UPDATE ON item_flags FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_item_flag_update();
 
 
+select * from ml_work.playercareerdata_update into ml_app.player_career_data;
+update player_career_data set draftedbyteam=null where draftedbyteam = 'NULL';
+update player_career_data set teamhistory=null where teamhistory = 'NULL';
+update player_career_data set college=null where college = 'NULL';
+
+select * from ml_work.playertransactions_update into ml_app.player_transactions;
+update player_transactions set transactionhistoricalteamname = null where  transactionhistoricalteamname = 'NULL';
+update player_transactions set transactioncurrentteamname = null where  transactioncurrentteamname = 'NULL';
+
+select * from ml_work.teamhistoryfromcontracts_update into ml_app.team_history;
+select * from ml_work.playerseverancedate_update into ml_app.player_severance;
+
+select * from ml_work.profootball_master into ml_app.pro_football_master;
+
 end;
+
+
+
+
+  

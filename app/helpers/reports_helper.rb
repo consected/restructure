@@ -38,7 +38,7 @@ module ReportsHelper
     end
     
     
-    if type_val['multiple'] == 'multiple'
+    if type_val['multiple'] == 'multiple' || type_val['multiple'] == 'multiple-regex'
       if use_dropdown 
         main_field << select_tag("search_attrs[#{name}]", use_dropdown , multiple: true)
       else

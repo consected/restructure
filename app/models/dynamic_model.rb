@@ -15,6 +15,11 @@ class DynamicModel < ActiveRecord::Base
   
   def reload_model
     generate_model
+    
+    # Now forcibly set the Master association:
+    dm = self
+    Master.has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
+    
     self.class.routes_reload
   end
   

@@ -4,8 +4,11 @@ class ReportsController < ApplicationController
   before_action :authenticate_user_or_admin!
   before_action :authorized?, only: [:index]
   after_action :clear_results, only: [:show, :run]
+  after_action :do_log_action
+
   helper_method :filters, :filters_on, :index_path
 
+  
   ResultsLimit = Master.results_limit
   
   # List of available reports
@@ -150,6 +153,16 @@ class ReportsController < ApplicationController
     
     def index_path p
       reports_path p
+    end
+    
+    def do_log_action
+      len = (@results ? @results.count : 0)
+      extras = {}
+      
+      extras[:master_id] = nil
+      extras[:msid] = nil
+      
+      log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
     end
   
 end
