@@ -29,8 +29,9 @@ class ReportsController < ApplicationController
   
   def show
     
-    id = (params[:id] || 0).to_i
-    
+    id = params[:id]
+    redirect_to :index if id.blank?
+    id = id.to_i
     redirect_to :index unless id > 0
     
     search_attrs = params[:search_attrs]
