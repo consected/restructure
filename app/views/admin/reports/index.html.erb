@@ -26,7 +26,7 @@
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td><%= admin_edit_btn list_item.id%> </td>
       
-        <td><%= link_to  list_item.name, report_path(list_item.id), target: 'report' %></td>        
+        <td><%= link_to  list_item.name, report_path(list_item.id), target: 'report', title: 'opens in a new window' %></td>        
         
         <td><%= list_item.description %></td>  
         

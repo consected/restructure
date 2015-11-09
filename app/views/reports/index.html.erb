@@ -23,7 +23,7 @@
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> report-type-<%= list_item.report_type %> <%= list_item.auto ? 'report-auto' : '' %>" data-report-id="<%=list_item.id %>">
         <td style="width: 5%"><span class="hidden"><%= list_item.report_type %></span><span class="glyphicon <%= list_item.report_type == 'count' ? 'glyphicon-record' : list_item.report_type == 'regular_report' ? 'glyphicon-list-alt' : 'glyphicon-search'  %>" title="<%= list_item.report_type.humanize %>"></span></td>
       
-        <td style="width: 15%"><%= link_to  list_item.name, report_path(list_item.id), target: '_blank' %></td>        
+        <td style="width: 15%"><%= link_to  list_item.name, report_path(list_item.id) %></td>        
       
         <td style="width: 30%"><%= list_item.description %></td>  
         <td style="width: 25%" class="report-search-attr"></td>

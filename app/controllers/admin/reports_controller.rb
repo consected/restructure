@@ -4,7 +4,9 @@ class Admin::ReportsController < ApplicationController
   include AdminControllerHandler
 
   protected
-
+    def default_index_order
+      { updated_at: :desc }
+    end
   
     def filters_on
       :report_type

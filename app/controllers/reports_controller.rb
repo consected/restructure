@@ -17,7 +17,7 @@ class ReportsController < ApplicationController
     pm = Report.enabled    
     pm = pm.where filter_params if filter_params
     
-    @reports = pm
+    @reports = pm.order  auto: :desc, report_type: :asc, position: :asc 
     
     respond_to do |format|      
       format.html { render :index }
@@ -57,7 +57,11 @@ class ReportsController < ApplicationController
               render :show
             end
           }
-          format.json { return bad_request }
+          format.json { 
+          
+            return general_error "invalid query for report. Please check search fields or try to run the report again."
+            
+          }
         end     
         return
       end
@@ -164,5 +168,5 @@ class ReportsController < ApplicationController
       
       log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
     end
-  
+    
 end

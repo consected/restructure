@@ -128,7 +128,12 @@ module MasterSearch
         
         ma = m[:masters].first 
         
-        return bad_request unless ma
+        #return bad_request unless ma
+        unless ma
+          flash[:warning] = "no results to export"
+          redirect_to("/masters/") 
+          return 
+        end
         
         res = [(ma.map {|k,v| k} + (ma['player_infos'].first ||{}).map {|k,v| "player.#{k}"} +
               (ma['pro_infos'].first ||{}).map {|k,v| "pro.#{k}"}).to_csv]
