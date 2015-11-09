@@ -99,7 +99,7 @@ class ReportsController < ApplicationController
 
      
           
-          render text: res_a.join("")
+          send_data res_a.join(""), filename: "report.csv"
         }
       end
     else

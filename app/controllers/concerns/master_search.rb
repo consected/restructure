@@ -143,7 +143,7 @@ module MasterSearch
               (ma['pro_infos'].first || {}).map {|k,v| v}).to_csv 
         end
         
-        render text: res.join("") 
+        send_data res.join(""), filename: "report.csv"
         
       }
     end
