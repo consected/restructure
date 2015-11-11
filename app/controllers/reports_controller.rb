@@ -38,8 +38,10 @@ class ReportsController < ApplicationController
     @report = Report.find(id)
     
     options = {}
-    
+    options[:current_user] = current_user
     options[:count_only] = true if params[:commit] == 'count'
+    
+    options[:filter_previous] = true if search_attrs && search_attrs[:_filter_previous_]=='true'
     
     return unless @report.searchable || authorized?
     

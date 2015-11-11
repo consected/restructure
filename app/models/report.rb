@@ -30,6 +30,15 @@ class Report < ActiveRecord::Base
   def clean_sql
     @clean_sql
   end
+
+  def filtering_on
+    @filtering_on
+  end
+  
+  def filter_previous_clause?
+    sql.include? ':filter_previous'
+  end
+
   
   def search_attr_values
     @search_attr_values || ''
@@ -48,16 +57,38 @@ class Report < ActiveRecord::Base
   
   def run  search_attr_values, options={}
     
+    if options[:current_user]      
+      key = "report-results: #{options[:current_user].id}"
+    end
+    
     @search_attr_values = search_attr_values    
     @clean_sql = nil
     report_definition = self
 
     sql = report_definition.sql
     primary_table = 'masters'
+    sql.strip!
+    sql = sql[0..-2] if sql.last == ';'
     
-    if options[:count_only]
-      sql.strip!
-      sql = sql[0..-2] if sql.last == ';'
+    
+    if key && options[:filter_previous]
+      ids = Rails.cache.read key  
+      logger.info "Trying to get data from cache (#{key} :#{ids}"
+      if ids && sql.include?(":filter_previous")
+        inner_sql = " inner join (select id master_id from masters where id in (:filter_previous_ids)) filter_previous_alias using(master_id) "
+        clean_inner_sql = ActiveRecord::Base.send(:sanitize_sql, [inner_sql, {filter_previous_ids: ids}], primary_table)
+        sql.gsub!(":filter_previous", clean_inner_sql) if clean_inner_sql
+        @filtering_on = ids
+        
+        @search_attr_values[:filter_previous_ids] = @filtering_on
+      end
+    end
+    
+    if sql.include?(":filter_previous")
+      sql.gsub!(":filter_previous", '')
+    end
+    
+    if options[:count_only]      
       sql = "select count(*) \"result_count\" from (#{sql}) t"  
     end
     raise Report::BadSearchCriteria unless search_attrs_prep
@@ -81,8 +112,26 @@ class Report < ActiveRecord::Base
       res = self.class.connection.execute(clean_sql)                
       raise ActiveRecord::Rollback
     end
-        
+    
     @results = res
+        
+    # Store the results to the cache
+    if key
+      begin
+        m_field = field_index('master_id')
+        ids = nil
+        if m_field
+          ids = []
+          res.each_row {|r| ids << r[m_field]}
+        end
+        Rails.cache.write key, ids
+      rescue =>e
+        Rails.cache.write key, nil
+        logger.warn "Failed to write cache for #{key} => #{e.inspect}"
+      end
+    end
+    
+    @results 
         
   end
   

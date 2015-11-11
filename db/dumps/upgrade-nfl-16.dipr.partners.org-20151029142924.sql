@@ -416,19 +416,26 @@ CREATE TRIGGER item_flag_history_insert AFTER INSERT ON item_flags FOR EACH ROW 
 CREATE TRIGGER item_flag_history_update AFTER UPDATE ON item_flags FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_item_flag_update();
 
 
-select * from ml_work.playercareerdata_update into ml_app.player_career_data;
+select * into ml_app.player_career_data from ml_work.playercareerdata_update;
 update player_career_data set draftedbyteam=null where draftedbyteam = 'NULL';
 update player_career_data set teamhistory=null where teamhistory = 'NULL';
 update player_career_data set college=null where college = 'NULL';
 
-select * from ml_work.playertransactions_update into ml_app.player_transactions;
+select *  into ml_app.player_transactions from ml_work.playertransactions_update;
 update player_transactions set transactionhistoricalteamname = null where  transactionhistoricalteamname = 'NULL';
 update player_transactions set transactioncurrentteamname = null where  transactioncurrentteamname = 'NULL';
 
-select * from ml_work.teamhistoryfromcontracts_update into ml_app.team_history;
-select * from ml_work.playerseverancedate_update into ml_app.player_severance;
+select *  into ml_app.team_history from ml_work.teamhistoryfromcontracts_update;
+select * into ml_app.player_severance from ml_work.playerseverancedate_update ;
 
-select * from ml_work.profootball_master into ml_app.pro_football_master;
+select * into ml_app.pro_football_master from ml_work.profootball_master ;
+
+GRANT SELECT, INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ML_APP TO FPHSUSR;
+GRANT SELECT,UPDATE,INSERT,DELETE ON ALL TABLES IN SCHEMA ML_APP TO FPHSADM;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSUSR;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSADM;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSUSR;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSADM;
 
 end;
 

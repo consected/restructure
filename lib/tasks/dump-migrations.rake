@@ -18,9 +18,9 @@ namespace :db do
           hostname = ENV['EXTNAME']
           case original_task
           when "db:migrate"
-            filename = "db/dumps/upgrade-#{hostname}-#{Time.now.to_formatted_s(:number)}.sql"
+            filename = "db/dumps/upgrade-#{hostname}-#{ENV['VER']}.sql"
           when "db:rollback"
-            filename = "db/dumps/rollback-#{hostname}-#{Time.now.to_formatted_s(:number)}.sql"
+            filename = "db/dumps/rollback-#{hostname}-#{ENV['VER']}.sql"
           else
             raise "unkown migration type #{original_task}"
           end
@@ -35,7 +35,7 @@ namespace :db do
             # define our own execute
             def execute(sql, name = nil)
               # check for some DDL and DML statements                  
-              sqlfile = "set search_path=#{ENV['SCHEMA']}; \n begin; \n#{sql}; \n commit; "
+              sqlfile = "set search_path=#{ENV['SCHEMA']}; \n begin; \n#{sql}; \n#{ENV['APPEND_SQL']}\n commit; "
               if /^(create|alter|drop|insert|delete|update)/i.match sql                
                 File.open(SQL_FILENAME, 'a') { |f| f.puts "#{sqlfile};\n" }
                 old_execute sql, name if RUN_SQL

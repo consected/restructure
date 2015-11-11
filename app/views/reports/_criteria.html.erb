@@ -5,7 +5,15 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
   
         <div>
             <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted search_report', id: "report_query_form", data: {result_target: '#master_results_block', preprocessor: 'reports_result'}, remote: true do %>
+            <% if @report.filter_previous_clause? %>  
             <div class="row">
+                <div class="form-group">
+                <%= check_box_tag "search_attrs[_filter_previous_]", 'true', false, style: 'display: inline; width: 2em; vertical-align: bottom;' %>
+                <%= label_tag 'filter previous results' %>
+                </div>              
+            </div>
+             <%end %>
+            <div class="row">              
               <% i = 0 
                 @report.search_attributes.each do |name, type|                   
               %>

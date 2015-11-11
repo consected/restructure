@@ -2,16 +2,18 @@
 <% rt = @report.result_tables_by_index || []%>
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">    
-      <% if current_admin && @report.clean_sql%>
-      <p class="text-center"><a href="#clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
-      <div class="row">          
-          <div class="col-md-20 col-md-offset-2 collapse" id="clean-sql">
-            <pre><%=@report.clean_sql.html_safe%>
-            </pre>
-          </div>
-      </div>
-      <% end %>
-
+    <p class="text-center"><%= link_to "link to report", report_path(id: @report.id, search_attrs: params[:search_attrs]) %> </p>  
+    <% if @report.filtering_on %><p class="text-center">filtering on previous <span><%=@report.filtering_on.length%></span> records<%end%>
+    <% if current_admin && @report.clean_sql%>
+    <p class="text-center"><a href="#clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
+    <div class="row">          
+        <div class="col-md-20 col-md-offset-2 collapse" id="clean-sql">
+          <pre><%=@report.clean_sql.html_safe%>
+          </pre>
+        </div>
+    </div>
+    <% end %>
+      
     <div class="row" style="background-color: #eee;">
       <div class="col-sm-22 col-sm-offset-1 ">
       

@@ -443,6 +443,10 @@ _fpa.postprocessors = {
           from_f.change();
         });
         
+        block.find('form').not('.attached-complete-listener').on('ajax:complete',function(){
+            $('#search_attrs__filter_previous_').attr('checked', false);
+        }).addClass('attached-complete-listener');
+        
     },
     
     reports_result: function(block, data){
