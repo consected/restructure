@@ -1,0 +1,3 @@
+Updating ruby-advisory-db ...
+Already up-to-date.
+ruby-advisory-db: 233 advisories
