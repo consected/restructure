@@ -54,13 +54,15 @@ class ItemFlagsController < ApplicationController
       
       # We will return a 404 if the requested item_class_name is not one of the valid set.
       # This prevents insecure requests from the user being used to access objects below
-      return not_found unless ItemFlag.works_with item_class_name
+      icn = ItemFlag.works_with item_class_name
       
-      if defined? item_class_name.constantize
+      return not_found unless icn
+      
+      if defined? icn.constantize
         begin
-          item_class = item_class_name.constantize 
+          item_class = icn.constantize 
         rescue          
-          item_class = "DynamicModel::#{item_class_name}".constantize rescue nil
+          item_class = "DynamicModel::#{icn}".constantize rescue nil
         end
       end
       

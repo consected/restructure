@@ -24,7 +24,13 @@ class ItemFlag < ActiveRecord::Base
   default_scope -> {where "disabled is null or disabled = false"}  
   
   def self.works_with class_name
-    use_with_class_names.include? class_name.underscore
+    # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
+    pos = use_with_class_names.index(class_name.underscore)
+    if pos      
+      use_with_class_names[pos.to_i].camelize
+    else
+      nil
+    end
   end
   
   def self.use_with_class_names
