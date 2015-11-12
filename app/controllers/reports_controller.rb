@@ -38,10 +38,10 @@ class ReportsController < ApplicationController
     @report = Report.find(id)
     
     options = {}
-    options[:current_user] = current_user
-    options[:count_only] = true if params[:commit] == 'count'
+    @report.current_user = current_user
     
-    options[:filter_previous] = true if search_attrs && search_attrs[:_filter_previous_]=='true'
+    options[:count_only] = true if params[:commit] == 'count'    
+    options[:filter_previous] = true if search_attrs && search_attrs.is_a?(Hash) && search_attrs[:_filter_previous_]=='true'
     
     return unless @report.searchable || authorized?
     
@@ -104,6 +104,8 @@ class ReportsController < ApplicationController
           send_data res_a.join(""), filename: "report.csv"
         }
       end
+    elsif params[:get_filter_previous]
+      render partial: 'filter_on'
     else
       respond_to do |format|
         format.html { 

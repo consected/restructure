@@ -445,7 +445,19 @@ _fpa.postprocessors = {
         
         block.find('form').not('.attached-complete-listener').on('ajax:complete',function(){
             $('#search_attrs__filter_previous_').attr('checked', false);
+            $('#filter_on_block').html('');
         }).addClass('attached-complete-listener');
+        
+        $('#search_attrs__filter_previous_').not('.attached-click-listener').on('change',function(){
+            if(!$('#search_attrs__filter_previous_').is(':checked')){
+               $('#filter_on_block').html('');   
+            }else{
+                window.setTimeout(function(){
+                    $('a#get_filter_previous').click();
+                }, 100);
+            }
+            return false;
+        }).addClass('attached-click-listener');
         
     },
     

@@ -36,12 +36,46 @@ class Report < ActiveRecord::Base
   end
   
   def filter_previous_clause?
-    sql.include? ':filter_previous'
+    sql.include?(':filter_previous') || sql.include?(':ids_filter_previous')
   end
 
+  def current_user= cu
+    @current_user = cu
+  end
+  
+  def current_user
+    @current_user
+  end
   
   def search_attr_values
     @search_attr_values || ''
+  end
+  
+  def filtering_list
+    logger.info "Reading filtering list for #{current_user}"
+    return nil unless current_user
+    key_list = "report-list: #{current_user.id}"
+    Rails.cache.read(key_list)
+  end
+  
+  def filtering_ids
+    return nil unless current_user
+    key = "report-results: #{current_user.id}"      
+    Rails.cache.read key  
+  end
+  
+  def write_filtering_list list
+    logger.info "Writing filtering list for #{current_user}, #{list}"
+    return nil unless current_user
+    key_list = "report-list: #{current_user.id}"        
+    Rails.cache.write(key_list, list)
+  end
+  
+  def write_filtering_ids ids
+    logger.info "Writing filtering ids for #{current_user}, #{ids}"
+    return nil unless current_user
+    key = "report-results: #{current_user.id}"    
+    Rails.cache.write(key, ids)
   end
   
   def search_attributes
@@ -55,34 +89,41 @@ class Report < ActiveRecord::Base
   end
   
   
-  def run  search_attr_values, options={}
-    
-    if options[:current_user]      
-      key = "report-results: #{options[:current_user].id}"
-    end
+  def run  search_attr_values, options={}        
     
     @search_attr_values = search_attr_values    
     @clean_sql = nil
     report_definition = self
-
+    filtering_previous = false
+    using_defaults = (@search_attr_values == '_use_defaults_')
+    raise Report::BadSearchCriteria unless search_attrs_prep
+    
     sql = report_definition.sql
     primary_table = 'masters'
     sql.strip!
     sql = sql[0..-2] if sql.last == ';'
     
-    
-    if key && options[:filter_previous]
-      ids = Rails.cache.read key  
-      logger.info "Trying to get data from cache (#{key} :#{ids}"
+    ids = filtering_ids
+    @search_attr_values[:ids_filter_previous] = nil
+    if current_user && options[:filter_previous] && !using_defaults
+      
+      logger.info "Trying to get data from cache (#{current_user.id} :#{ids}"
       if ids && sql.include?(":filter_previous")
         inner_sql = " inner join (select id master_id from masters where id in (:filter_previous_ids)) filter_previous_alias using(master_id) "
         clean_inner_sql = ActiveRecord::Base.send(:sanitize_sql, [inner_sql, {filter_previous_ids: ids}], primary_table)
         sql.gsub!(":filter_previous", clean_inner_sql) if clean_inner_sql
-        @filtering_on = ids
         
-        @search_attr_values[:filter_previous_ids] = @filtering_on
+        filtering_previous = true
       end
+      
+      filtering_previous = true if sql.include?(':ids_filter_previous')
     end
+    
+    if filtering_previous
+      @filtering_on = ids        
+      @search_attr_values[:ids_filter_previous] = @filtering_on        
+    end
+    
     
     if sql.include?(":filter_previous")
       sql.gsub!(":filter_previous", '')
@@ -91,7 +132,6 @@ class Report < ActiveRecord::Base
     if options[:count_only]      
       sql = "select count(*) \"result_count\" from (#{sql}) t"  
     end
-    raise Report::BadSearchCriteria unless search_attrs_prep
     
     res=[]
     
@@ -116,7 +156,7 @@ class Report < ActiveRecord::Base
     @results = res
         
     # Store the results to the cache
-    if key
+    if current_user && !using_defaults
       begin
         m_field = field_index('master_id')
         ids = nil
@@ -124,10 +164,33 @@ class Report < ActiveRecord::Base
           ids = []
           res.each_row {|r| ids << r[m_field]}
         end
-        Rails.cache.write key, ids
+        write_filtering_ids ids
+        
+        if filtering_previous
+          list = filtering_list || []
+        else
+          list = []
+        end
+        
+        l = nil
+        if @search_attr_values
+          l = @search_attr_values.dup
+          l.delete(:ids_filter_previous)
+          l.delete(:_report_id_)
+          l.delete(:_filter_previous_)
+        end
+        list << {name: name, id: id, search_params: l, results_length: @results.count}        
+        
+        
+        
+        write_filtering_list list
+        
+        
+        
       rescue =>e
-        Rails.cache.write key, nil
-        logger.warn "Failed to write cache for #{key} => #{e.inspect}"
+        write_filtering_ids nil
+        write_filtering_list nil
+        logger.warn "Failed to write cache for #{current_user.id} => #{e.inspect}\n#{e.backtrace.join("\n")}"
       end
     end
     
