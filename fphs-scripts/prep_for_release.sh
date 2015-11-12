@@ -7,7 +7,7 @@ echo $FPHS_VERSION
 export DEV_DIR=`pwd`
 cd $DEV_DIR
 echo $FPHS_VERSION > version.txt
-svn commit version.txt -m "new version file created"
+svn commit version.txt -m "new version file created `cat version.txt`"
 svn rm --force public/assets
 svn commit public/assets -m "clean up assets for deployment"
 fphs-scripts/compile_assets.sh
