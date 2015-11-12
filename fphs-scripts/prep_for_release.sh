@@ -2,9 +2,8 @@ FPHS_VERSION=`svn ls --username payres https://open.med.harvard.edu/svn/fphs-rai
 FPHS_A=`echo $FPHS_VERSION | grep -oP '([0-9]+)' | tail -n 1`
 FPHS_B=2.0.
 #`echo $FPHS_VERSION | grep -oP '([0-9]+).([0-9]+).'`
-FPHS_VERSION=$FPHS_B$((FPHS_A+1))
+export FPHS_VERSION=$FPHS_B$((FPHS_A+1))
 echo $FPHS_VERSION
-export FPHS_VERSION
 DEV_DIR=`pwd`
 cd $DEV_DIR
 echo $FPHS_VERSION > version.txt
