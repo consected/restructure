@@ -11,7 +11,7 @@ class Report < ActiveRecord::Base
   
   scope :counts, -> {where report_type: 'count'}
   scope :regular, -> {where report_type: 'regular_report'}
-  scope :searchable, -> {where searchable: true}
+  scope :searchable, -> {where(searchable: true).order(position: :asc)}
   
   ReportTypes = [:count, :regular_report, :search]
   ReportIdAttribName = '_report_id_'
@@ -49,6 +49,10 @@ class Report < ActiveRecord::Base
   
   def search_attr_values
     @search_attr_values || ''
+  end
+  
+  def search_attr_values= sav
+    @search_attr_values = sav
   end
   
   def filtering_list
@@ -178,6 +182,7 @@ class Report < ActiveRecord::Base
           l.delete(:ids_filter_previous)
           l.delete(:_report_id_)
           l.delete(:_filter_previous_)
+          l.delete(:no_run)
         end
         list << {name: name, id: id, search_params: l, results_length: @results.count}        
         

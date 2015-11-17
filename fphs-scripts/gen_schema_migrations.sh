@@ -17,7 +17,7 @@ export EXTNAME=pandora.catalyst
 export EXTUSER=payres
 #export EXTUSER=pda11
 
-export DEVDIR=~/NetBeansProjects/fpa-phase2
+export DEVDIR=~/NetBeansProjects/fpa-phase3
 
 export SCHEMA=public
 #export SCHEMA=ml_app

@@ -41,11 +41,14 @@ class ReportsController < ApplicationController
     @report.current_user = current_user
     
     options[:count_only] = true if params[:commit] == 'count'    
-    options[:filter_previous] = true if search_attrs && search_attrs.is_a?(Hash) && search_attrs[:_filter_previous_]=='true'
+    if search_attrs && search_attrs.is_a?(Hash) 
+      options[:filter_previous] = true if search_attrs[:_filter_previous_]=='true'
+      no_run = !search_attrs[:no_run].blank?
+    end
     
     return unless @report.searchable || authorized?
     
-    if search_attrs
+    if search_attrs && !no_run
       begin        
         @results =  @report.run(search_attrs, options) 
       rescue ActiveRecord::PreparedStatementInvalid => e
@@ -107,6 +110,7 @@ class ReportsController < ApplicationController
     elsif params[:get_filter_previous]
       render partial: 'filter_on'
     else
+      @report.search_attr_values = search_attrs
       respond_to do |format|
         format.html { 
           if params[:part] == 'form'

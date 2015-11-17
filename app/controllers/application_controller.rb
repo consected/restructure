@@ -12,8 +12,8 @@ class ApplicationController < ActionController::Base
   rescue_from RuntimeError, :with => :runtime_error_handler
   rescue_from ActiveRecord::RecordNotFound, :with => :runtime_record_not_found_handler
   rescue_from ActionController::RoutingError, :with => :routing_error_handler 
-  rescue_from FphsException, :with => :fphs_app_exception_handler
-  
+  rescue_from ActionController::InvalidAuthenticityToken, :with => :bad_auth_token
+  rescue_from FphsException, :with => :fphs_app_exception_handler  
   
   
 protected
@@ -54,6 +54,16 @@ protected
       respond_to do |type|
         type.html { render :text => "The request URL does not exist.", :status => 404 }
         type.json  { render :json => {message: "The request URL does not exist."}, :status => 404 }
+      end
+      true
+    end
+    
+    def bad_auth_token e
+      logger.error e.inspect 
+      logger.error e.backtrace.join("\n") 
+      respond_to do |type|
+        type.html { render :text => "The information could not be submitted. Try returning to the home page to refresh the page.", :status => 401 }
+        type.json  { render :json => {message: "The information could not be submitted. Try returning to the home page to refresh the page."}, :status => 401 }
       end
       true
     end
