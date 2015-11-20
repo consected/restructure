@@ -4,27 +4,31 @@ class UpgradeTrackers < ActiveRecord::Migration
 # Enhance the trackers trigger writing to tracker_history for insert and update
 execute <<EOF
   
-  DROP TRIGGER tracker_history_insert on trackers;
-  DROP TRIGGER tracker_history_update on trackers;
-  DROP FUNCTION log_tracker_update();
+  DROP TRIGGER IF EXISTS tracker_history_insert on trackers;
+  DROP TRIGGER IF EXISTS tracker_history_update on trackers;
+  DROP FUNCTION IF EXISTS log_tracker_update();
   CREATE FUNCTION log_tracker_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
         BEGIN
 
+          -- Check to see if there is an existing record in tracker_history that matches the 
+          -- that inserted or updated in trackers.
+          -- If there is, just skip the insert into tracker_history, otherwise make the insert happen.
+
           PERFORM * from tracker_history 
             WHERE
               master_id = NEW.master_id 
               AND protocol_id = NEW.protocol_id
-              AND protocol_event_id = NEW.protocol_event_id
+              AND coalesce(protocol_event_id,-1) = coalesce(NEW.protocol_event_id,-1)
               AND event_date = NEW.event_date
               AND sub_process_id = NEW.sub_process_id
-              AND notes = NEW.notes
-              AND item_id = NEW.item_id
-              AND item_type = NEW.item_type
+              AND coalesce(notes,'') = coalesce(NEW.notes,'')
+              AND coalesce(item_id,-1) = coalesce(NEW.item_id,-1)
+              AND coalesce(item_type,'') = coalesce(NEW.item_type,'')
               -- do not check created_at --
               AND updated_at = NEW.updated_at
-              AND user_id = NEW.user_id;
+              AND coalesce(user_id,-1) = coalesce(NEW.user_id,-1);
 
             IF NOT FOUND THEN
               INSERT INTO tracker_history 
@@ -50,45 +54,5 @@ execute <<EOF
 
 EOF
 
-# Improve the tracker upsert trigger to ensure the update does not happen if the event date and update date are earlier than the current record
-
-    
-    
-    
-    # Create a trigger on delete to keep tracker_history and trackers in sync
-    
-    execute <<EOF
-
-
-CREATE FUNCTION tracker_history_delete() RETURNS trigger
-  LANGUAGE plpgsql
-  AS $$
-    DECLARE
-      latest_tracker RECORD;
-    BEGIN
-     
-      SELECT ... INTO latest_tracker ...
-    
-
-IF NOT FOUND THEN
-
- RETURN OLD;
- END;
-$$;
-
--- For every row that is deleted by the statement, call the function
-CREATE TRIGGER handle_delete AFTER DELETE
-    ON ml_app.tracker_history
-    FOR EACH ROW 
-    EXECUTE PROCEDURE tracker_history_delete();
-
-
--- reset the foreign keys pointing to tracker.
--- handle the inserts into tracker
--- update the trackers upsert trigger 
-
--- also need constraints
-
-EOF
   end
 end
