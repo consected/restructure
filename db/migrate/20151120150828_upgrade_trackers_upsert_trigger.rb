@@ -3,7 +3,8 @@ class UpgradeTrackersUpsertTrigger < ActiveRecord::Migration
     
     
   # Improve the tracker upsert trigger to ensure the update does not happen if the event date and update date are earlier than the current record
-  
+  reversible do |dir|
+      dir.up do
     execute <<EOF
 
   DROP TRIGGER IF EXISTS tracker_upsert on trackers;
@@ -96,6 +97,17 @@ class UpgradeTrackersUpsertTrigger < ActiveRecord::Migration
 
 
 EOF
-    
+      end
+      dir.down do
+execute <<EOF
+
+  
+  DROP TRIGGER IF EXISTS tracker_upsert on trackers;
+  
+  DROP FUNCTION IF EXISTS tracker_upsert();
+EOF
+          
+      end
+    end    
   end
 end

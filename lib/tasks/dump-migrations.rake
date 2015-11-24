@@ -36,11 +36,14 @@ namespace :db do
             def execute(sql, name = nil)
               # check for some DDL and DML statements                  
               sqlfile = "set search_path=#{ENV['SCHEMA']}; \n begin; \n#{sql}; \n#{ENV['APPEND_SQL']}\n commit; "
-              if /^(create|alter|drop|insert|delete|update)/i.match sql                
+              if /^(create|alter|drop|insert|delete|update)/i.match sql.squish                
                 File.open(SQL_FILENAME, 'a') { |f| f.puts "#{sqlfile};\n" }
                 old_execute sql, name if RUN_SQL
               else
                 # pass everything else to the aliased execute
+                puts "------------- Didn't save to file (#{name}) ---------------"
+                puts sql || ''
+                puts "-------------                        ---------------"
                 old_execute sql, name
               end
             end

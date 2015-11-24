@@ -1,6 +1,8 @@
-class UpgradeTrackers < ActiveRecord::Migration
+class UpgradeTrackersTrigger < ActiveRecord::Migration
   def change
 
+    reversible do |dir|
+      dir.up do
 # Enhance the trackers trigger writing to tracker_history for insert and update
 execute <<EOF
   
@@ -53,6 +55,16 @@ execute <<EOF
     CREATE TRIGGER tracker_history_update AFTER UPDATE ON trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_tracker_update();
 
 EOF
+        end
+        dir.down do
+execute <<EOF
 
+  
+  DROP TRIGGER IF EXISTS tracker_history_insert on trackers;
+  DROP TRIGGER IF EXISTS tracker_history_update on trackers;
+  DROP FUNCTION IF EXISTS log_tracker_update();
+EOF
+      end
+    end
   end
 end

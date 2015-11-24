@@ -1,6 +1,3 @@
-
-
-
 ----
 # Create a local copy of the instance's schema, clean and empty
 # Also get the list of schema migrations that the database believes it has seen completed
@@ -99,6 +96,7 @@ GRANT USAGE ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSUSR;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSADM;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSUSR;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSADM;
+`cat ./db-schema-migrations-local.sql `
 EOF
 "
 
@@ -113,6 +111,9 @@ FPHS_RAILS_SECRET_KEY_BASE=A1111111111111111111111 \
 FPHS_RAILS_DEVISE_SECRET_KEY=B2222222222222222222222 \
 RAILS_ENV=production \
 rake db:migrate:with_sql 
+
+
+
 
 echo "Generated the migration file for $EXTNAME"
 

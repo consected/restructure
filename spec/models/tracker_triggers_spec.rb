@@ -13,6 +13,8 @@ RSpec.describe Tracker, type: :model do
   
   before(:each) do
     
+    @user_2, pw = create_user
+    
     create_user
     create_admin
     @p1 = Protocol.create name: 'P1-trig', current_admin: @admin
@@ -23,12 +25,15 @@ RSpec.describe Tracker, type: :model do
     @sp1_3 = @p1.sub_processes.create name: 'SP13-trig', current_admin: @admin
     @sp2_1 = @p2.sub_processes.create name: 'SP2-trig', current_admin: @admin
     @sp2_2 = @p2.sub_processes.create name: 'SP22-trig', current_admin: @admin
-        
+    
+    @pe2_2_1 = @sp2_2.protocol_events.create name: 'PE221-trig', current_admin: @admin
+    
     @master = Master.new    
     @master.current_user = @user
     @master.save!
      
     @user_id = @user.id
+    @user_id_2 = @user_2.id
   end
   
   
@@ -203,4 +208,102 @@ RSpec.describe Tracker, type: :model do
     
     
   end
+  
+  it "updates an older tracker_history record through a delete and insert, leaving the trackers record in place" do
+    dt = DateTime.now - 2.days
+    dt1 = DateTime.now - 1.days
+    res = execute "
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_1.id}, '#{DateTime.now}', now(), now(), #{@user_id});
+
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{dt1}', now(), now(), #{@user_id}, 'done1 #{dt1.to_i}');
+
+
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{dt}', now(), now(), #{@user_id}, 'done #{dt.to_i}');
+
+      update tracker_history set protocol_event_id = #{@pe2_2_1.id} where notes = 'done #{dt.to_i}';
+
+      select * from trackers where master_id = #{@master.id} and protocol_id = #{@p2.id};
+    " 
+    
+    expect(res.count).to eq 1
+    t = res.first
+    
+    expect(t['sub_process_id']).to eq @sp2_1.id.to_s # the original (but event date more recent) item should remain
+        
+    res = execute "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by id desc;"
+    
+    expect(res.count).to eq 3
+    t = res.first
+    expect(t['sub_process_id']).to eq @sp2_2.id.to_s    
+    expect(t['protocol_event_id']).to eq @pe2_2_1.id.to_s
+    expect(t['notes']).to eq "done #{dt.to_i}"
+    
+  end  
+  
+  
+  it "updates most recent tracker_history record through a delete and insert, updating the trackers record" do
+    dt = DateTime.now - 15.days
+    dt1 = DateTime.now - 10.days
+    dt0 = DateTime.now - 8.days
+    
+    sql = "
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_1.id}, '#{dt0}', now(), now(), #{@user_id}, 'orig #{dt0.to_i}');
+
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{dt1}', now(), now(), #{@user_id}, 'done1 #{dt1.to_i}');
+
+
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{dt}', now(), now(), #{@user_id}, 'done #{dt.to_i}');
+      "
+    res = execute sql
+    
+    puts "\n-----------\n#{sql}\n--------------\n"
+    
+    res2 = execute "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by id desc;"    
+    puts "RES2: #{res2.select {|s| s.inspect} }"    
+    expect(res2.count).to eq 3
+    
+    sql = "      
+      update tracker_history set user_id = #{@user_id_2} where notes = 'orig #{dt0.to_i}';
+
+      select * from trackers where master_id = #{@master.id} and protocol_id = #{@p2.id};
+    "
+    res = execute sql
+    
+    puts "-----------\n#{sql}\n--------------\n"
+    
+    
+    expect(res.count).to eq 1
+    t = res.first
+    
+    expect(t['sub_process_id']).to eq @sp2_1.id.to_s # the original (but event date more recent) item should remain
+        
+    sql =  "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by id desc;"
+    
+    res = execute sql
+    
+    puts "-----------\n#{sql}\n--------------\n"
+    
+    
+    puts "RES: #{res.select {|s| s.inspect} }"
+    
+    expect(res.count).to eq 3
+    t = res.first
+    expect(t['sub_process_id']).to eq @sp2_1.id.to_s    
+    expect(t['protocol_event_id']).to be_nil
+    expect(t['notes']).to eq "orig #{dt0.to_i}"
+    expect(t['user_id']).to eq @user_id_2.to_s
+    
+  end    
 end

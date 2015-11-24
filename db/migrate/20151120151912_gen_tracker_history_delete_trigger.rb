@@ -1,6 +1,7 @@
 class GenTrackerHistoryDeleteTrigger < ActiveRecord::Migration
   def change
-    
+reversible do |dir|
+      dir.up do    
     execute <<EOF
 
   DROP TRIGGER IF EXISTS tracker_record_delete ON tracker_history; 
@@ -59,6 +60,16 @@ class GenTrackerHistoryDeleteTrigger < ActiveRecord::Migration
 
 
 EOF
-    
+        end
+        dir.down do
+execute <<EOF
+
+  
+   DROP TRIGGER IF EXISTS tracker_record_delete ON tracker_history; 
+  DROP FUNCTION IF EXISTS handle_delete();
+
+EOF
+      end
+    end    
   end
 end
