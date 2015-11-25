@@ -28,11 +28,11 @@ execute <<EOF
            NEW.item_id, NEW.item_type,
            NEW.created_at, NEW.updated_at, NEW.user_id  ;
 
-      RETURN NEW;
+      RETURN NULL;
     END;
     $$;
   
-  CREATE TRIGGER tracker_history_update AFTER UPDATE ON tracker_history FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_tracker_history_update();
+  CREATE TRIGGER tracker_history_update BEFORE UPDATE ON tracker_history FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_tracker_history_update();
   
 
 

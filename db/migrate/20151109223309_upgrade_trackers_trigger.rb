@@ -23,15 +23,15 @@ execute <<EOF
               master_id = NEW.master_id 
               AND protocol_id = NEW.protocol_id
               AND coalesce(protocol_event_id,-1) = coalesce(NEW.protocol_event_id,-1)
-              AND event_date = NEW.event_date
+              AND coalesce(event_date, '1900-01-01'::date)::date = coalesce(NEW.event_date, '1900-01-01')::date
               AND sub_process_id = NEW.sub_process_id
               AND coalesce(notes,'') = coalesce(NEW.notes,'')
               AND coalesce(item_id,-1) = coalesce(NEW.item_id,-1)
               AND coalesce(item_type,'') = coalesce(NEW.item_type,'')
               -- do not check created_at --
-              AND updated_at = NEW.updated_at
+              AND updated_at::timestamp = NEW.updated_at::timestamp
               AND coalesce(user_id,-1) = coalesce(NEW.user_id,-1);
-
+              
             IF NOT FOUND THEN
               INSERT INTO tracker_history 
                   (tracker_id, master_id, protocol_id, 
