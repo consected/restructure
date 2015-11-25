@@ -6,41 +6,49 @@
 # get sudo setup to avoid unnecessary logins later
 sudo pwd
 
+
+#### if local shared dev #####
 export EXTNAME=pandora.catalyst
-#export EXTNAME=nfl-15.dipr.partners.org
-#export EXTNAME=nfl-16.dipr.partners.org
-
-
 export EXTUSER=payres
-#export EXTUSER=pda11
-
-export DEVDIR=~/NetBeansProjects/fpa-phase3
-
 export SCHEMA=public
-#export SCHEMA=ml_app
-
-export DBHOST=localhost
 export EXTDB=fphs
 export EXTDBHOST=localhost
-export EXTDBUSER=fphs
+export EXTDBUSER=phil
+##############################
+
+#### if stage #####
+export EXTNAME=nfl-15.dipr.partners.org
+export EXTUSER=pda11
+export SCHEMA=ml_app
+export EXTDB=q1
+export EXTDBHOST=nfl-09.dipr
+export EXTDBUSER=pda11
+###############################
+
+#### if production #####
+export EXTNAME=nfl-16.dipr.partners.org
+export EXTUSER=pda11
+export SCHEMA=ml_app
+export EXTDB=q1
+export EXTDBHOST=nfl-10.dipr
+export EXTDBUSER=pda11
+###############################
+
+
+export DEVDIR=~/NetBeansProjects/fpa-phase3
+export DBHOST=localhost
 export DBUSER=`whoami`
 export VER=`date +%s`
 
 
+
 ssh $EXTUSER@$EXTNAME <<EOF
-
-sudo -u passenger -i
-
 cd /var/opt/passenger/fphs/db/dumps
 mkdir -p migrate-$EXTNAME
 cd migrate-$EXTNAME
-pg_dump -d $EXTDB -h $EXTDBHOST -U fphs --clean --create --schema-only --schema=$SCHEMA > "db-schema.sql"
-# enter password
-pg_dump -d $EXTDB -h $EXTDBHOST -U fphs --data-only --schema=$SCHEMA --table=$SCHEMA.schema_migrations > "db-schema-migrations.sql"
-#enter password
+pg_dump -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER --clean --create --schema-only --schema=$SCHEMA -T $SCHEMA.jd_tmp  -x > "db-schema.sql"
+pg_dump -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER --data-only --schema=$SCHEMA --table=$SCHEMA.schema_migrations -x > "db-schema-migrations.sql"
 exit
-exit
-
 EOF
 
 ----- locally
@@ -89,7 +97,7 @@ read password
 
 UPGRADE_FILE=upgrade-$EXTNAME-$VER.sql
 
-export APPEND_SQL="<<EOF
+export APPEND_SQL="
 GRANT SELECT, INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ML_APP TO FPHSUSR;
 GRANT SELECT,UPDATE,INSERT,DELETE ON ALL TABLES IN SCHEMA ML_APP TO FPHSADM;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSUSR;
@@ -97,7 +105,6 @@ GRANT USAGE ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSADM;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSUSR;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ML_APP TO FPHSADM;
 `cat ./db-schema-migrations-local.sql `
-EOF
 "
 
 FPHS_ADMIN_SETUP=yes \
@@ -124,9 +131,7 @@ rsync ../$UPGRADE_FILE $EXTUSER@$EXTNAME:/var/opt/passenger/fphs/db/dumps/migrat
 ###### Now go to the remote machine and run the updates
 
 ssh $EXTUSER@$EXTNAME <<EOF
-sudo -u passenger -i
 cd /var/opt/passenger/fphs/db/dumps/migrate-$EXTNAME/
-psql -d $EXTDB -h $EXTDBHOST -U fphs < db-schema-migrations-local.sql
-exit
+psql -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER < $UPGRADE_FILE
 exit
 EOF
