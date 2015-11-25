@@ -4,6 +4,7 @@ class PlayerInfo < ActiveRecord::Base
   
   BestAccuracyScore = 12
   FollowUpScore = 881
+  BirthDateRanks = 1..BestAccuracyScore
   
   
   # Allow simple search and compound searches to function
@@ -59,7 +60,9 @@ class PlayerInfo < ActiveRecord::Base
       errors.add('death date', 'is after today') if death_date && death_date > DateTime.now
       errors.add('start year', "is more than 30 years after birth date") if start_year && birth_date && start_year > (birth_date + 29.years).year
       errors.add('start year', "is less than 19 years after birth date") if start_year && birth_date && start_year < (birth_date + 19.years).year
-      errors.add('birth date', "must be set unless rank is set to \"#{FollowUpScore} - #{PlayerInfo.get_rank_name FollowUpScore}\"") if !birth_date && rank && rank != FollowUpScore
+      
+      # Make this restriction less strict... Only prevent birth date for 'real' players.
+      errors.add('birth date', "must be set if rank is set to \"#{BirthDateRanks}\"") if !birth_date && rank && BirthDateRanks.include?(rank)
     end
 
     def check_college

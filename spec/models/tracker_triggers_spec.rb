@@ -331,7 +331,7 @@ RSpec.describe Tracker, type: :model do
     #puts "\n-----------\n#{sql}\n--------------\n"
     
     res2 = execute "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by id desc;"    
-    puts "RES2: #{res2.select {|s| s.inspect} }"    
+    
     expect(res2.count).to eq 3
     
     sql = "      
