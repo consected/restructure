@@ -9,10 +9,10 @@ describe "tracker block", js: true do
     
     create_admin
     
-    sp = SubProcess.first
+    #sp = SubProcess.first
     
     ProtocolEvent.enabled.each do |d|
-      d.update! disabled:true, current_admin: @admin, sub_process: sp
+      d.update! disabled:true, current_admin: @admin#, sub_process: sp
     end
     
     seed_database

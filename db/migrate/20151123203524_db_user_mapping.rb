@@ -5,6 +5,7 @@ class DbUserMapping < ActiveRecord::Migration
       dir.up do
 execute <<EOF
 
+  ALTER table trackers alter column user_id set default null;
   DROP FUNCTION IF EXISTS current_user_id();
   
   CREATE FUNCTION current_user_id() RETURNS integer

@@ -127,21 +127,21 @@ RSpec.describe PlayerInfo, type: :model do
     expect(@player_info.errors.messages).to have_key(:"source"), "Errors should contain source: #{@player_info.errors.inspect}"    
   end
   
-  it "presents an error if the birth_date is not set and the rank is not set to 881" do
-    orig = Time.now - 60.years
-    @player_info.birth_date = nil
-    @player_info.rank = 881
-    expect(@player_info.save).to be true
-    
-    @player_info.rank = 888
-    expect(@player_info.save).to be false
-    expect(@player_info.errors.messages).to have_key(:"birth date")
-    
-    @player_info.birth_date = orig
-    expect(@player_info.save).to be true
-    
-    
-  end
+#  it "presents an error if the birth_date is not set and the rank is not set to 881" do
+#    orig = Time.now - 60.years
+#    @player_info.birth_date = nil
+#    @player_info.rank = 881
+#    expect(@player_info.save).to be true
+#    
+#    @player_info.rank = 888
+#    expect(@player_info.save).to be false
+#    expect(@player_info.errors.messages).to have_key(:"birth date")
+#    
+#    @player_info.birth_date = orig
+#    expect(@player_info.save).to be true
+#    
+#    
+#  end
   
   it_behaves_like 'a standard user model'  
 end

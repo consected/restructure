@@ -198,7 +198,7 @@ describe "advanced search", js: true do
     
     #expect(page).to have_css "#search_count", text: /[0-9]+.*/
     
-    items = page.all(:css, '.master-expander.collapsed')
+    items = page.all(:css, '.master-expander')
 
     expect(items.length).to be > 0
     

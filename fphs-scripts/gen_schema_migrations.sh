@@ -6,7 +6,6 @@
 # get sudo setup to avoid unnecessary logins later
 sudo pwd
 
-
 #### if local shared dev #####
 export EXTNAME=pandora.catalyst
 export EXTUSER=payres
@@ -39,8 +38,11 @@ export DEVDIR=~/NetBeansProjects/fpa-phase3
 export DBHOST=localhost
 export DBUSER=`whoami`
 export VER=`date +%s`
+echo enter database password for $DBUSER
+read password
 
-
+clear
+########
 
 ssh $EXTUSER@$EXTNAME <<EOF
 cd /var/opt/passenger/fphs/db/dumps
@@ -77,7 +79,8 @@ psql -d mig_$VER -c "select * from $SCHEMA.schema_migrations order by version" |
 diff mig_comp.txt ../migration-list.txt |grep -oP '(> [0-9]{10,20})' | grep -oP '([0-9]{10,20})' > to_add.txt
 
 #### Review the migration records to be added to the database to bring the schema_migrations table up to date
-
+nano to_add.txt
+#####
 
 echo 'SET statement_timeout = 0;'  > db-schema-migrations-local.sql
 echo 'SET lock_timeout = 0;' >> db-schema-migrations-local.sql
@@ -89,10 +92,6 @@ echo "SET search_path = $SCHEMA, pg_catalog;"  >> db-schema-migrations-local.sql
 echo 'COPY schema_migrations (version) FROM stdin;' >> db-schema-migrations-local.sql
 cat to_add.txt >> db-schema-migrations-local.sql
 echo '\.' >> db-schema-migrations-local.sql
-
-
-echo enter database password for $DBUSER
-read password
 
 
 UPGRADE_FILE=upgrade-$EXTNAME-$VER.sql
@@ -122,10 +121,10 @@ rake db:migrate:with_sql
 
 
 
-echo "Generated the migration file for $EXTNAME"
+echo "Generated the migration file for $EXTNAME : ../$UPGRADE_FILE"
 
 ###### Send the schema_migrations list back to 
-rsync ./db-schema-migrations-local.sql $EXTUSER@$EXTNAME:/var/opt/passenger/fphs/db/dumps/migrate-$EXTNAME/
+# rsync ./db-schema-migrations-local.sql $EXTUSER@$EXTNAME:/var/opt/passenger/fphs/db/dumps/migrate-$EXTNAME/
 rsync ../$UPGRADE_FILE $EXTUSER@$EXTNAME:/var/opt/passenger/fphs/db/dumps/migrate-$EXTNAME/
 
 ###### Now go to the remote machine and run the updates

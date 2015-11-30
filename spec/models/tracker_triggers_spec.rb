@@ -382,5 +382,60 @@ RSpec.describe Tracker, type: :model do
     
   end    
 
+  it "updates most recent tracker_history record with new event_date, updating the trackers record" do
+    dt = DateTime.now - 15.days
+    dt1 = DateTime.now - 10.days
+    dt0 = DateTime.now - 8.days
+    
+    sql = "
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_1.id}, '#{dt0}', now(), now(), #{@user_id}, 'orig #{dt0.to_i}');
+
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{dt1}', now(), now(), #{@user_id}, 'done1 #{dt1.to_i}');
+
+
+      insert into trackers
+      (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id, notes) 
+      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{dt}', now(), now(), #{@user_id}, 'done #{dt.to_i}');
+      "
+    res = execute sql
+        
+    
+    res2 = execute "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by id desc;"    
+    
+    expect(res2.count).to eq 3
+    
+    dtnew = DateTime.now - 5.days
+    
+    sql = "      
+      update tracker_history set event_date='#{dtnew}' where notes = 'orig #{dt0.to_i}';
+
+      select * from trackers where master_id = #{@master.id} order by event_date desc, updated_at desc;
+    "
+    res = execute sql
+    
+    expect(res.count).to eq 1
+    t = res[0]
+    
+    expect(t['sub_process_id']).to eq @sp2_1.id.to_s # the original (but event date more recent) item should remain
+    expect(t['protocol_id']).to eq @p2.id.to_s
+    
+    
+    sql =  "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by event_date desc, id desc;"
+    
+    res = execute sql
+    
+    expect(res.count).to eq 3
+    t = res[0]
+    expect(t['sub_process_id']).to eq @sp2_1.id.to_s    
+    expect(t['protocol_event_id']).to be_nil
+    expect(t['notes']).to eq "orig #{dt0.to_i}"
+    expect(t['protocol_id']).to eq @p2.id.to_s
+    
+   
+  end      
 
 end

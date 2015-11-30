@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151124151501) do
+ActiveRecord::Schema.define(version: 20151125192206) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -537,6 +537,7 @@ ActiveRecord::Schema.define(version: 20151124151501) do
   end
 
   add_index "protocol_events", ["admin_id"], name: "index_protocol_events_on_admin_id", using: :btree
+  add_index "protocol_events", ["sub_process_id", "id"], name: "unique_sub_process_and_id", unique: true, using: :btree
   add_index "protocol_events", ["sub_process_id"], name: "index_protocol_events_on_sub_process_id", using: :btree
 
   create_table "protocol_history", force: :cascade do |t|
@@ -658,6 +659,7 @@ ActiveRecord::Schema.define(version: 20151124151501) do
   end
 
   add_index "sub_processes", ["admin_id"], name: "index_sub_processes_on_admin_id", using: :btree
+  add_index "sub_processes", ["protocol_id", "id"], name: "unique_protocol_and_id", unique: true, using: :btree
   add_index "sub_processes", ["protocol_id"], name: "index_sub_processes_on_protocol_id", using: :btree
 
   create_table "test_table", id: false, force: :cascade do |t|
@@ -690,18 +692,20 @@ ActiveRecord::Schema.define(version: 20151124151501) do
 
   create_table "trackers", force: :cascade do |t|
     t.integer  "master_id"
-    t.integer  "protocol_id"
+    t.integer  "protocol_id",                                     null: false
     t.datetime "event_date"
     t.integer  "user_id",           default: "current_user_id()"
     t.datetime "created_at",                                      null: false
     t.datetime "updated_at",                                      null: false
     t.string   "notes"
-    t.integer  "sub_process_id"
+    t.integer  "sub_process_id",                                  null: false
     t.integer  "protocol_event_id"
     t.integer  "item_id"
     t.string   "item_type"
   end
 
+  add_index "trackers", ["master_id", "protocol_id", "id"], name: "unique_master_protocol_id", unique: true, using: :btree
+  add_index "trackers", ["master_id", "protocol_id"], name: "unique_master_protocol", unique: true, using: :btree
   add_index "trackers", ["master_id"], name: "index_trackers_on_master_id", using: :btree
   add_index "trackers", ["protocol_event_id"], name: "index_trackers_on_protocol_event_id", using: :btree
   add_index "trackers", ["protocol_id"], name: "index_trackers_on_protocol_id", using: :btree
@@ -833,14 +837,19 @@ ActiveRecord::Schema.define(version: 20151124151501) do
   add_foreign_key "sub_processes", "protocols"
   add_foreign_key "tracker_history", "masters"
   add_foreign_key "tracker_history", "protocol_events"
+  add_foreign_key "tracker_history", "protocol_events", column: "sub_process_id", primary_key: "sub_process_id", name: "valid_sub_process_event"
   add_foreign_key "tracker_history", "protocols"
   add_foreign_key "tracker_history", "sub_processes"
+  add_foreign_key "tracker_history", "sub_processes", column: "protocol_id", primary_key: "protocol_id", name: "valid_protocol_sub_process"
   add_foreign_key "tracker_history", "trackers"
+  add_foreign_key "tracker_history", "trackers", column: "master_id", primary_key: "master_id", name: "unique_master_protocol_tracker_id"
   add_foreign_key "tracker_history", "users"
   add_foreign_key "trackers", "masters"
   add_foreign_key "trackers", "protocol_events"
+  add_foreign_key "trackers", "protocol_events", column: "sub_process_id", primary_key: "sub_process_id", name: "valid_sub_process_event"
   add_foreign_key "trackers", "protocols"
   add_foreign_key "trackers", "sub_processes"
+  add_foreign_key "trackers", "sub_processes", column: "protocol_id", primary_key: "protocol_id", name: "valid_protocol_sub_process"
   add_foreign_key "trackers", "users"
   add_foreign_key "user_authorization_history", "user_authorizations", name: "fk_user_authorization_history_user_authorizations"
   add_foreign_key "user_history", "users", name: "fk_user_history_users"
