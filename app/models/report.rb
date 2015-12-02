@@ -22,6 +22,30 @@ class Report < ActiveRecord::Base
     end
   end
   
+  def editable?
+    !edit_model.blank? 
+  end
+  
+  def edit_model_class
+    
+    model_class_name = edit_model.camelize.classify
+    logger.info "Getting model class name: #{model_class_name}"
+    if Report.const_defined?(model_class_name)    
+      Report.const_get(model_class_name)
+    else
+      obj_table_name = edit_model.downcase
+      a_new_class = Class.new(ActiveRecord::Base) do 
+        self.table_name = obj_table_name
+      end
+      res = Report.const_set(model_class_name, a_new_class)
+    end
+  end
+  
+  def edit_fields
+    res =  edit_field_names.split(/[^a-zA-Z0-9_]/).select {|s| !s.blank?}.collect {|s| s.to_sym}
+    logger.info "Edit fields: #{res.inspect}"
+    res
+  end
   
   def report_identifier
     name.id_underscore

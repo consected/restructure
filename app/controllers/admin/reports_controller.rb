@@ -18,7 +18,7 @@ class Admin::ReportsController < ApplicationController
 
 
     def secure_params
-      params.require(:report).permit(:id, :name, :primary_table, :sql, :description, :disabled, :report_type, :auto, :searchable, :position, :search_attrs)
+      params.require(:report).permit(:id, :name, :primary_table, :sql, :description, :disabled, :report_type, :auto, :searchable, :position, :search_attrs, :edit_model, :edit_field_names)
     end
 
 end

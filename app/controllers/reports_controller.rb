@@ -3,12 +3,11 @@ class ReportsController < ApplicationController
   require 'csv'
   before_action :authenticate_user_or_admin!
   before_action :authorized?, only: [:index]
+  before_action :set_editable_instance_from_id, only: [:edit, :update]
   after_action :clear_results, only: [:show, :run]
   after_action :do_log_action
 
-  helper_method :filters, :filters_on, :index_path
-
-  
+  helper_method :filters, :filters_on, :index_path, :permitted_params
   ResultsLimit = Master.results_limit
   
   # List of available reports
@@ -40,11 +39,18 @@ class ReportsController < ApplicationController
     options = {}
     @report.current_user = current_user
     
-    options[:count_only] = true if params[:commit] == 'count'    
+    if params[:commit] == 'count'    
+      options[:count_only] = true 
+      @count_only = true
+    end
+    
     if search_attrs && search_attrs.is_a?(Hash) 
       options[:filter_previous] = true if search_attrs[:_filter_previous_]=='true'
       no_run = !search_attrs[:no_run].blank?
     end
+    
+    @editable = @report.editable?
+
     
     return unless @report.searchable || authorized?
     
@@ -126,8 +132,41 @@ class ReportsController < ApplicationController
   end
   
   
+  def edit    
+    render partial: 'edit_form'
+  end
+
+  def update    
+    if @report_item.respond_to? :master
+      @master = @report_item.master
+      @master.current_user = current_user if @master      
+    elsif @report_item.respond_to? :user_id
+      @report_item.user_id = current_user.id 
+    end
+    return not_authorized unless @report.editable?
+    
+    if @report_item.update(secure_params)
+      #redirect_to show_path(id: @report.id), notice: "#{@report_item.human_name} updated successfully"
+      #render partial: 'edit_form'
+      render json: {report_item: @report_item}
+    else
+      logger.warn "Error updating #{@report_item}: #{@report_item.errors.inspect}"      
+      flash.now[:warning] = "Error updating #{@report_item}: #{error_message}"
+      edit
+    end
+    
+  end  
   
   protected
+  
+    def error_message
+      res = ""
+      @report_item.errors.full_messages.each do |message|
+        res << "; " unless res.blank?
+        res << "#{message}"
+      end
+      res
+    end
   
     def filters_on
       :report_type
@@ -144,10 +183,10 @@ class ReportsController < ApplicationController
     end
 
 
-    def secure_params
-      params.require(:report).permit(:id,  :search_attrs)
-    end
-    
+#    def secure_params
+#      params.require(:report).permit(:id,  :search_attrs)
+#    end
+     
     def connection
       @connection ||= ActiveRecord::Base.connection
     end
@@ -176,6 +215,35 @@ class ReportsController < ApplicationController
       extras[:msid] = nil
       
       log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
+    end
+
+    
+    ### For editable reports
+
+    def permitted_params
+      @permitted_params = @report.edit_fields
+    end          
+
+    def secure_params      
+      params.require(report_params_holder).permit(*permitted_params)
+    end
+    
+    
+    def set_editable_instance_from_id
+      id = params[:report_id]      
+      id = id.to_i
+      @report = Report.find(id)
+      return if params[:id] == 'cancel'
+      @report_item = report_model.find(params[:id])            
+      @id = @report_item.id
+    end
+    
+    def report_model
+      @report.edit_model_class
+    end
+    
+    def report_params_holder
+      "report_#{@report.edit_model.classify.underscore}"
     end
     
 end

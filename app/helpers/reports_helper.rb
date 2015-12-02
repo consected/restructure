@@ -1,5 +1,9 @@
 module ReportsHelper
 
+  def report_edit_btn id
+     link_to '', edit_report_path(id, report_id: @report.id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
+  end
+  
   def report_field name, type, value
     
     if type.is_a? String    

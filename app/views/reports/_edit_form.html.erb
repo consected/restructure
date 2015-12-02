@@ -1,0 +1,37 @@
+<div class="data-results">
+  <div data-result="report-edit-form-"  class="admin-edit-form">    
+<% object_instance = @report_item %>      
+<%= form_for(object_instance, url: (object_instance.id ? url_for(controller: controller_name, action: :update, report_id: @report.id, id: object_instance.id) : url_for(controller: controller_name, action: :create) ), class: "inline-form", remote: true, html: {'data-result-target' => '#report-edit-results', 'data-template' => "edit-report-result"}) do |f| %>
+  <%= render partial: 'form_errors' %>
+
+  <% (permitted_params - [:id]).each do |p| %>
+      <div class="form-group">
+      
+      <% if p == :description %>    
+        <%= f.label p %>
+        <%= f.text_area p %>
+      <% elsif p == :disabled %>    
+        <%= f.check_box p %>
+        <%= f.label p %>
+      <% elsif respond_to? ("#{p}_options") %>    
+        <%= f.label p %>
+        <% select_item_type = {}
+           select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first.to_s == p.to_s   %>
+        <%= f.select p, send("#{p}_options"), select_item_type %>        
+      <% else %>
+        <%= f.label p %>
+        <%= f.text_field p %>
+      <% end %>
+      </div>
+  <% end %>
+      
+  <div class="form-group">
+    
+    <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
+    
+    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+  </div>
+<% end %>
+      <div id="report-edit-results" data-template="edit-report-result"></div>      
+  </div>
+</div>

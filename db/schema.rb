@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151125192206) do
+ActiveRecord::Schema.define(version: 20151202180745) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -588,12 +588,14 @@ ActiveRecord::Schema.define(version: 20151125192206) do
     t.string   "search_attrs"
     t.integer  "admin_id"
     t.boolean  "disabled"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
     t.string   "report_type"
     t.boolean  "auto"
     t.boolean  "searchable"
     t.integer  "position"
+    t.string   "edit_model"
+    t.string   "edit_field_names"
   end
 
   add_index "reports", ["admin_id"], name: "index_reports_on_admin_id", using: :btree
