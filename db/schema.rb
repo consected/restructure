@@ -563,6 +563,25 @@ ActiveRecord::Schema.define(version: 20151202180745) do
 
   add_index "protocols", ["admin_id"], name: "index_protocols_on_admin_id", using: :btree
 
+  create_table "rc_cis", force: :cascade do |t|
+    t.string   "fname"
+    t.string   "lname"
+    t.string   "status"
+    t.datetime "created_at", default: "now()"
+    t.datetime "updated_at", default: "now()"
+    t.integer  "user_id"
+  end
+
+  create_table "rc_cis2", id: false, force: :cascade do |t|
+    t.integer  "id"
+    t.string   "fname"
+    t.string   "lname"
+    t.string   "status"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "user_id"
+  end
+
   create_table "report_history", force: :cascade do |t|
     t.string   "name"
     t.string   "description"
@@ -638,6 +657,10 @@ ActiveRecord::Schema.define(version: 20151202180745) do
 
   add_index "scantrons", ["master_id"], name: "index_scantrons_on_master_id", using: :btree
   add_index "scantrons", ["user_id"], name: "index_scantrons_on_user_id", using: :btree
+
+  create_table "smback", id: false, force: :cascade do |t|
+    t.string "version"
+  end
 
   create_table "sub_process_history", force: :cascade do |t|
     t.string   "name"

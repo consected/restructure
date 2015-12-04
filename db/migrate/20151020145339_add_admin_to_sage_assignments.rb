@@ -3,7 +3,12 @@ require "#{Rails.root}/db/seeds/tracker_updates_protocol.rb"
 def auto_admin 
   @admin ||= Admin.find_or_create_by email: 'auto-admin@dummy.aaa'
 end
-  
+
+def log txt
+  puts txt
+  Rails.logger.info txt
+end
+
 auto_admin
 
 class AddAdminToSageAssignments < ActiveRecord::Migration

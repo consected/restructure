@@ -37,9 +37,14 @@ module Seeds
 
 
     def self.setup
-      Rails.logger.info "Calling #{self}.setup"
+      log "In #{self}.setup"
+      if Rails.env.test? || Protocol.count == 0
+        create_tracker_updates
+        log "Ran #{self}.setup"
+      else
+        log "Did not run #{self}.setup"
+      end
       
-      create_tracker_updates unless Rails.env.production?
     end
 
   end

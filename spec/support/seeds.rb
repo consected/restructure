@@ -20,3 +20,7 @@ def auto_admin
   @admin, pw = ControllerMacros.create_admin
   @admin
 end
+
+def log txt
+  Rails.logger.info txt
+end

@@ -73,9 +73,14 @@ EOF
     
     
     def self.setup
-      Rails.logger.info "NOT Calling #{self}.setup"      
+      log "In #{self}.setup"
+      if Rails.env.test? || Protocol.count == 0
+        create_protocol_events
+        log "Ran #{self}.setup"
+      else
+        log "Did not run #{self}.setup"
+      end
       
-      create_protocol_events unless Rails.env.production?
     end
   end
 end

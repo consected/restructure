@@ -94,9 +94,9 @@ module Seeds
     
     
     def self.setup
-      Rails.logger.info "Calling #{self}.setup"
+      log "In #{self}.setup"
 
-      unless Rails.env.production?
+      if Rails.env.test? || GeneralSelection.count == 0
         create_player_infos_source
 
         create_player_contacts_rank
@@ -104,6 +104,9 @@ module Seeds
         create_player_contacts_type
         create_addresses_source
         create_addresses_rank
+        log "Ran #{self}.setup"
+      else
+        log "Did not run #{self}.setup"
       end
     end
 

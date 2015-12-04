@@ -301,7 +301,7 @@ set search_path=ml_app;
 
   -- Validate this with:
   -- select id from trackers t where not exists (select * from protocol_events where t.sub_process_id = sub_process_id and t.protocol_event_id = id);
-  -- select id from tracker_history t where not exists (select * from protocol_events where t.sub_process_id = sub_process_id and t.protocol_event_id = id);
+  -- select c, t.sub_process_id, sp.name, t.protocol_event_id, pe.name from  (select count(*) c, protocol_id, sub_process_id, protocol_event_id from tracker_history t where not exists (select * from protocol_events where t.sub_process_id = sub_process_id and t.protocol_event_id = id) AND exists (select * from protocol_events where t.sub_process_id = sub_process_id) group by protocol_id, sub_process_id, protocol_event_id ) t inner join sub_processes sp on sp.id = t.sub_process_id left outer join protocol_events pe on pe.id = coalesce(t.protocol_event_id,0);
 
   ALTER TABLE trackers ALTER COLUMN protocol_id set not null;
   ALTER TABLE trackers ALTER COLUMN sub_process_id set not null;

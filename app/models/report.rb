@@ -22,12 +22,12 @@ class Report < ActiveRecord::Base
     end
   end
   
-  def editable?
+  def editable_data?
     !edit_model.blank? 
   end
   
   def edit_model_class
-    
+    return unless editable_data?
     model_class_name = edit_model.camelize.classify
     logger.info "Getting model class name: #{model_class_name}"
     if Report.const_defined?(model_class_name)    

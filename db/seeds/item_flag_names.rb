@@ -26,9 +26,13 @@ module Seeds
     
     
     def self.setup
-      Rails.logger.info "Calling #{self}.setup"
-      
-      create_item_flag_names unless Rails.env.production?
+      log "In #{self}.setup"
+      if Rails.env.test? || ItemFlagName.count == 0
+        create_item_flag_names 
+        log "Ran #{self}.setup"
+      else
+        log "Did not run #{self}.setup"
+      end
     end
   end
 end

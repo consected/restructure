@@ -22,10 +22,11 @@ namespace :db do
             alias :old_execute :execute
             
             RUN_SQL = sql_task.name.ends_with?("with_sql")
-
+            
             # define our own execute
             def execute(sql, name = nil)
-              # check for some DDL and DML statements                  
+              # check for some DDL and DML statements 
+              puts "Running sql? #{RUN_SQL}"
 
               if /^(create|alter|drop|insert|delete|update)/i.match sql.squish                
                 File.open(SQL_FILENAME, 'a') { |f| f.puts "#{sql};\n" }
@@ -35,7 +36,7 @@ namespace :db do
                 puts "------------- Didn't save to file (#{name}) ---------------"
                 puts sql || ''
                 puts "-------------                        ---------------"
-                old_execute sql, name
+                old_execute sql, name if RUN_SQL
               end
             end
 

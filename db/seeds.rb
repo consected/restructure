@@ -17,7 +17,12 @@ module Seeds
 end
 
 def auto_admin 
-  @admin ||= Admin.find_or_create_by email: 'auto-admin'
+  @admin ||= Admin.find_or_create_by email: 'auto-admin@nodomain.com'
+end
+
+def log txt
+  puts txt
+  Rails.logger.info txt
 end
 
 Seeds.setup

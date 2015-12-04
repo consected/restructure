@@ -49,7 +49,7 @@ class ReportsController < ApplicationController
       no_run = !search_attrs[:no_run].blank?
     end
     
-    @editable = @report.editable?
+    @editable = @report.editable_data?
 
     
     return unless @report.searchable || authorized?
@@ -143,7 +143,7 @@ class ReportsController < ApplicationController
     elsif @report_item.respond_to? :user_id
       @report_item.user_id = current_user.id 
     end
-    return not_authorized unless @report.editable?
+    return not_authorized unless @report.editable_data?
     
     if @report_item.update(secure_params)
       #redirect_to show_path(id: @report.id), notice: "#{@report_item.human_name} updated successfully"

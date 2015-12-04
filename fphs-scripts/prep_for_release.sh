@@ -14,7 +14,9 @@ fphs-scripts/compile_assets.sh
 fphs-scripts/run_sec_tests.sh 
 svn add security/*$FPHS_VERSION*
 svn commit security -m "store security test results"
-pg_dump -O -T ml_copy -d fpa_development -s > db/dumps/current_schema.sql
+echo "begin;" > db/dumps/current_schema.sql
+pg_dump -O -T ml_copy -d fpa_development -s >> db/dumps/current_schema.sql
+echo "commit;" >> db/dumps/current_schema.sql
 svn add public/assets
 svn commit -m "Precompiled assets for release: $FPHS_VERSION"
 svn copy https://open.med.harvard.edu/svn/fphs-rails/branches/phase2/admin_reports/railsapp/ https://open.med.harvard.edu/svn/fphs-rails/tags/$FPHS_VERSION -m "Push release"

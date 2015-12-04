@@ -36,9 +36,13 @@ module Seeds
     
     
     def self.setup
-      Rails.logger.info "Calling #{self}.setup"
-      
-      create_accuracy_scores unless Rails.env.production?
+      log "In #{self}.setup"
+      if Rails.env.test? || AccuracyScore.count == 0
+        create_accuracy_scores 
+        log "Ran #{self}.setup"
+      else
+        log "Did not run #{self}.setup"
+      end
     end
   end
 end
