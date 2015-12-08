@@ -18,9 +18,12 @@
         <% select_item_type = {}
            select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first.to_s == p.to_s   %>
         <%= f.select p, send("#{p}_options"), select_item_type %>        
+      <% elsif GeneralSelection.item_types.include?("report_#{@report.name.id_underscore}_#{p}".to_sym) %>    
+        <%= f.label p %>        
+        <%= f.select p, general_selection("report_#{@report.name.id_underscore}_#{p}".to_sym), { include_blank: true } %>        
       <% else %>
         <%= f.label p %>
-        <%= f.text_field p %>
+        <%= f.text_field p, data: {field_name: p} %>
       <% end %>
       </div>
   <% end %>

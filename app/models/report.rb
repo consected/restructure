@@ -13,6 +13,8 @@ class Report < ActiveRecord::Base
   scope :regular, -> {where report_type: 'regular_report'}
   scope :searchable, -> {where(searchable: true).order(position: :asc)}
   
+  scope :editable_data_reports, -> {where("edit_model IS NOT NULL AND edit_model <> ''") }
+  
   ReportTypes = [:count, :regular_report, :search]
   ReportIdAttribName = '_report_id_'
     
@@ -21,6 +23,18 @@ class Report < ActiveRecord::Base
       "Bad search criteria were entered. Please check entries and try again."
     end
   end
+  
+  def self.item_types
+    res = []
+    editable_data_reports.each do |r|
+      
+      unless r.selection_fields.blank?
+        res += r.selection_fields.split(/[^a-zA-Z0-9_]/).collect {|c| "report_#{r.name.id_underscore}_#{c.downcase}".to_sym}        
+      end      
+    end
+    res
+  end
+  
   
   def editable_data?
     !edit_model.blank? 

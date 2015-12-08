@@ -6,7 +6,7 @@ class GeneralSelectionsController < ApplicationController
   protected
   
     def filters
-      GeneralSelection::ItemTypes.dup.map {|g| [g,g]}.to_h
+      GeneralSelection.item_types.map {|g| [g,g]}.to_h
     end
     
     def filters_on

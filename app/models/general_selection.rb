@@ -4,7 +4,7 @@ class GeneralSelection < ActiveRecord::Base
   
   include AdminHandler
   include SelectorCache
-  ItemTypes = [:player_infos_source, :player_contacts_type, :player_contacts_source, :addresses_type, :addresses_source, :addresses_rank, :player_contacts_rank]
+  BasicItemTypes = [:player_infos_source, :player_contacts_type, :player_contacts_source, :addresses_type, :addresses_source, :addresses_rank, :player_contacts_rank]
   
   default_scope {order  item_type: :asc, disabled: :asc, position: :asc}
   
@@ -12,6 +12,10 @@ class GeneralSelection < ActiveRecord::Base
   validates :name, presence: true
   validates :value, presence: true
   
+
+  def self.item_types
+    BasicItemTypes + Report.item_types
+  end
   
   # Format the item type source string for looking up different selection types from the general_selections table  
   def self.item_type_source_for record, type=:source

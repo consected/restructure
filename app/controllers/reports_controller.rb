@@ -49,7 +49,7 @@ class ReportsController < ApplicationController
       no_run = !search_attrs[:no_run].blank?
     end
     
-    @editable = @report.editable_data?
+    @editable = @report.editable_data? && (current_admin || current_user.can?(:edit_report_data))
 
     
     return unless @report.searchable || authorized?
@@ -148,6 +148,9 @@ class ReportsController < ApplicationController
     if @report_item.update(secure_params)
       #redirect_to show_path(id: @report.id), notice: "#{@report_item.human_name} updated successfully"
       #render partial: 'edit_form'
+      # Need to update the master_id manually, since it could have been set by a trigger
+      res = @report_item.class.find(@report_item.id)
+      @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
       render json: {report_item: @report_item}
     else
       logger.warn "Error updating #{@report_item}: #{@report_item.errors.inspect}"      

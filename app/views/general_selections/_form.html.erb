@@ -15,7 +15,7 @@
     <%= f.label :item_type %>
     <% select_item_type = {}
        select_item_type[:selected] = params[:filter][:item_type] unless object_instance.id || !params[:filter] %>
-    <%= f.select :item_type, GeneralSelection::ItemTypes, select_item_type, disabled: !!object_instance.id  %>
+    <%= f.select :item_type, GeneralSelection.item_types, select_item_type, disabled: !!object_instance.id  %>
   </div>
   <div class="form-group">    
     <%= f.check_box :disabled %>

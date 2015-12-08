@@ -361,7 +361,7 @@ li.list-group-item.pro-info-pro_id {
     
 }
 
-.master-result span.msid { color: gray;}
+
 
 .panel-default > .panel-heading {
     background-image: -webkit-linear-gradient(top, #f5f5f5 0%, #FFFFFF 100%);
@@ -435,6 +435,19 @@ div.sage-assignment-item {
 div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
     opacity: 1;
 }
+
+.master-result span.msid, .master-result span.master_id { color: gray;}
+
+span.msid {
+    font-size: 87%;
+    cursor: help;
+}
+span.master_id {
+    font-size: 87%;
+    cursor: help;
+}
+
+a.switch_id {font-size: 10px; margin-left: -14px;}
 
 @media only screen and (min-width: 1023px) {
 

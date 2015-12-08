@@ -54,7 +54,7 @@
     </div>
   <ul id="gs-list" style="max-height: 330px; overflow: auto; background-color: white;">
   
-  <% GeneralSelection::ItemTypes.each do |p| %>
+  <% GeneralSelection.item_types.each do |p| %>
       <li  id="gs-<%=p%>">
           <a href="#gsblock-<%=p%>" data-toggle="collapse"  class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
       </li>      

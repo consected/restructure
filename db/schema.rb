@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151202180745) do
+ActiveRecord::Schema.define(version: 20151208244918) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -570,6 +570,14 @@ ActiveRecord::Schema.define(version: 20151202180745) do
     t.datetime "created_at", default: "now()"
     t.datetime "updated_at", default: "now()"
     t.integer  "user_id"
+    t.integer  "master_id"
+    t.string   "street"
+    t.string   "street2"
+    t.string   "city"
+    t.string   "state"
+    t.string   "zip"
+    t.string   "phone"
+    t.string   "email"
   end
 
   create_table "rc_cis2", id: false, force: :cascade do |t|
@@ -615,6 +623,7 @@ ActiveRecord::Schema.define(version: 20151202180745) do
     t.integer  "position"
     t.string   "edit_model"
     t.string   "edit_field_names"
+    t.string   "selection_fields"
   end
 
   add_index "reports", ["admin_id"], name: "index_reports_on_admin_id", using: :btree
@@ -847,6 +856,7 @@ ActiveRecord::Schema.define(version: 20151202180745) do
   add_foreign_key "protocol_events", "sub_processes"
   add_foreign_key "protocol_history", "protocols", name: "fk_protocol_history_protocols"
   add_foreign_key "protocols", "admins"
+  add_foreign_key "rc_cis", "masters", name: "rc_cis_master_id_fkey"
   add_foreign_key "report_history", "reports", name: "fk_report_history_reports"
   add_foreign_key "reports", "admins"
   add_foreign_key "sage_assignments", "admins"

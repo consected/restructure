@@ -27,7 +27,7 @@
                   <select id="search_attrs_filter">
                       <option value="all">all</option>
 
-                      <% GeneralSelection::ItemTypes.dup.each do |i|%>
+                      <% GeneralSelection.item_types.dup.each do |i|%>
                         <option value="item_type: <%=i%>">item_type: <%=i%></option>
                       <% end %>            
 
@@ -46,7 +46,7 @@
                   </td><td><textarea id="search_attrs_default"></textarea>        
               </td>
             </tr>
-            <tr><td></td><td><p><button id="search_attrs_add">Add Attribute</button></p></td></tr>
+            <tr><td></td><td><p><a id="search_attrs_add" class="btn btn-default">Add Attribute</a></p></td></tr>
       </table>
     
     <div id="search_attr_instruction">(reference in SQL with <strong id="search_attr_ex"></strong>)</div>

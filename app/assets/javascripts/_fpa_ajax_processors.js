@@ -32,10 +32,28 @@ _fpa.postprocessors = {
     
     },    
    
-    
+    modal_pi_search_results_template: function(block, data){
+        _fpa.form_utils.format_block(block);
+        
+        _fpa.masters.switch_id_on_click(block);
+        $('a.modal-expander').click(function(ev){
+            ev.preventDefault();
+            var id = $(this).attr('href');
+            
+            $(id).on('shown.bs.collapse', function(){
+                
+                _fpa.form_utils.format_block($(this));                
+                                
+                $.scrollTo($(this), 200, {offset:-50} );                
+                
+                $(this).off('shown.bs.collapse');
+            });
+                        
+        }).addClass('attached-me-click');
+    },
     search_results_template: function(block, data){
         // Ensure we format the viewed item on expanding it 
-
+        _fpa.masters.switch_id_on_click(block);
         if(data.masters && data.masters.length < 5){
             
             _fpa.form_utils.format_block(block);
@@ -542,15 +560,15 @@ _fpa.postprocessors = {
                   }
                 }
               }
+              _fpa.reports.results_subsearch(block);
             }
           }
 
           _fpa.form_utils.setup_tablesorter($('#report-results-block'));
 
-        }, 500);        
+        }, 50);        
         
     },
-
     report_edit_form: function(block, data){
         
         $.scrollTo(block, 200, {offset:-50});
@@ -559,6 +577,10 @@ _fpa.postprocessors = {
             ev.preventDefault();
             block.html('');
         });
+        
+        
+        $('input[data-field-name="phone"], input[data-field-name="telephone"]').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}});
+        
         
                 
     },

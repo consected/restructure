@@ -7,6 +7,22 @@
 _fpa.masters = {
     
     max_results: 100,
+    switch_id_on_click: function(block){
+        block.find('.switch_id').not('attached-switch-click').click(function(){
+            var p = $(this).parent();
+            var msid = p.find('span.msid');
+            var master_id = p.find('span.master_id');
+            if(msid.is(':visible')){
+                msid.hide();
+                master_id.show();
+                $(this).attr('title', 'switch to Master ID');
+            }else{
+                master_id.hide();
+                msid.show();
+                $(this).attr('title', 'switch to MSID');
+            }
+        }).addClass('attached-switch-click');
+    },
     
     handle_search_form:  function(forms){
         
