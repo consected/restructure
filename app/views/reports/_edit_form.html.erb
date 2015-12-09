@@ -32,7 +32,7 @@
     
     <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
     
-    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+    <%= f.submit class: "btn btn-primary" %> <%= report_edit_cancel %>
   </div>
 <% end %>
       <div id="report-edit-results" data-template="edit-report-result"></div>      

@@ -18,8 +18,14 @@ execute <<EOF
         BEGIN
 
           IF coalesce(NEW.status,'') <> '' THEN
-            
+
             IF NEW.status = 'create master' THEN
+
+                IF NEW.master_id IS NOT NULL THEN
+                  RAISE EXCEPTION 'Can not create a master when the master ID is already set. Review the linked Master record, or to create a new Master record clear the master_id first and try again.';
+                END IF;
+
+
                 SELECT MAX(msid) + 1 INTO new_msid FROM masters;
                 
                 INSERT INTO masters
@@ -32,15 +38,16 @@ execute <<EOF
                   (master_id, first_name, last_name, source, created_at, updated_at, user_id)
                   VALUES
                   (new_master_id, NEW.fname, NEW.lname, 'cis-redcap', now(), now(), NEW.user_id);
-            ELSE
+            ELSE              
                 SELECT id INTO new_master_id FROM masters WHERE id = NEW.master_id;
             END IF;
   
-            IF new_master_id IS NULL THEN
-              RETURN NULL;
-            END IF;
-
             IF NEW.status = 'update name' OR NEW.status = 'update all' THEN  
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
+
+
                 UPDATE player_infos SET
                   master_id = new_master_id, first_name = NEW.fname, last_name = NEW.lname, 
                   source = 'cis-redcap', created_at = now(), updated_at = now(), user_id = NEW.user_id
@@ -52,6 +59,9 @@ execute <<EOF
             END IF;
 
             IF NEW.status = 'update address' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
 
                 IF NEW.street IS NOT NULL AND trim(NEW.street) <> '' OR
                     NEW.state IS NOT NULL AND trim(NEW.state) <> '' OR
@@ -62,27 +72,39 @@ execute <<EOF
                     VALUES
                     (new_master_id, NEW.street, NEW.street2, NEW.city, NEW.state, NEW.zip, 'cis-redcap', 10, now(), now(), NEW.user_id);
                   
+                  PERFORM update_address_ranks(new_master_id);
                 END IF;
             END IF;
 
             IF NEW.status = 'update email' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
+
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
 
                 IF NEW.email IS NOT NULL AND trim(NEW.email) <> '' THEN   
                   INSERT INTO player_contacts
                     (master_id, data, rec_type, source, rank, created_at, updated_at, user_id)
                     VALUES
                     (new_master_id, NEW.email, 'email', 'cis-redcap', 10, now(), now(), NEW.user_id);
-                END IF;
 
+
+                  PERFORM update_player_contact_ranks(new_master_id, 'email');
+                END IF;                
             END IF;
 
             IF NEW.status = 'update phone' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
 
                 IF NEW.phone IS NOT NULL AND trim(NEW.phone) <> '' THEN   
                   INSERT INTO player_contacts
                     (master_id, data, rec_type, source, rank, created_at, updated_at, user_id)
                     VALUES
                     (new_master_id, NEW.phone, 'phone', 'cis-redcap', 10, now(), now(), NEW.user_id);
+
+                    PERFORM update_player_contact_ranks(new_master_id, 'phone');
                 END IF;
             END IF;
             

@@ -14,12 +14,6 @@ execute <<EOF
     AS $$
         BEGIN
           
-          IF NEW.rank = 10 AND NEW.master_id IS NOT NULL THEN
-            UPDATE addresses SET rank = 5 
-            WHERE master_id = NEW.master_id AND rank = 10;
-
-          END IF;
-
           NEW.street := lower(NEW.street);
           NEW.street2 := lower(NEW.street2);
           NEW.street3 := lower(NEW.street3);
@@ -38,6 +32,40 @@ execute <<EOF
     CREATE TRIGGER address_update BEFORE UPDATE ON addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_address_update();
     CREATE TRIGGER address_insert BEFORE INSERT ON addresses FOR EACH ROW EXECUTE PROCEDURE handle_address_update();
 
+
+  DROP FUNCTION IF EXISTS update_address_ranks(set_master_id INTEGER);
+  CREATE FUNCTION update_address_ranks(set_master_id INTEGER) RETURNS INTEGER
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          latest_primary RECORD;
+        BEGIN
+  
+          SELECT * into latest_primary 
+          FROM addresses
+          WHERE master_id = set_master_id
+          AND rank = 10
+          ORDER BY updated_at DESC
+          LIMIT 1;
+        
+          IF NOT FOUND THEN
+            RETURN NULL;
+          END IF;
+
+          
+          UPDATE addresses SET rank = 5 
+          WHERE 
+            master_id = master_id 
+            AND rank = 10
+            AND id <> latest_primary.id;
+          
+
+          RETURN 1;
+        END;
+    $$;
+
+
+
 EOF
         end
         dir.down do
@@ -48,6 +76,8 @@ execute <<EOF
   DROP TRIGGER IF EXISTS address_insert on addresses;
   DROP FUNCTION IF EXISTS handle_address_update();
 
+
+  DROP FUNCTION IF EXISTS update_address_ranks(set_master_id INTEGER);
 EOF
       end
     end
