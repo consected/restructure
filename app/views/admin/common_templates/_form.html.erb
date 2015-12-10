@@ -1,6 +1,6 @@
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form">    
-<%= form_for(object_instance, url: (object_instance.id ? url_for(controller: controller_name, action: :update, id: object_instance.id) : url_for(controller: controller_name, action: :create) ), class: "inline-form", remote: true) do |f| %>
+<%= form_for([:admin, object_instance], class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
 
   <% (permitted_params - [:id]).each do |p| %>

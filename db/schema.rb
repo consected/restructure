@@ -578,6 +578,7 @@ ActiveRecord::Schema.define(version: 20151208244918) do
     t.string   "zip"
     t.string   "phone"
     t.string   "email"
+    t.datetime "form_date"
   end
 
   create_table "rc_cis2", id: false, force: :cascade do |t|

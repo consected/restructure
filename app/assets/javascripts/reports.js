@@ -1,7 +1,10 @@
 _fpa.loaded.reports = function(){
     
     _fpa.postprocessors.reports_form($('.report-criteria'));
-    
+        
+    // If this an editable data form, automatically submit it if there are no criteria fields to enter    
+    if($('#editable_data').length == 1 && $('.report-criteria-fields').length >= 1)
+        $('input[type="submit"][value="table"]').click();
 };
 
 _fpa.reports = {

@@ -15,7 +15,15 @@ execute <<EOF
           new_master_id integer;
           new_msid integer;
           updated_item_id integer;
+          register_tracker boolean;
+          update_notes VARCHAR;
+          event_date DATE;
         BEGIN
+
+          register_tracker := FALSE;
+          update_notes := '';
+
+          event_date :=  NEW.form_date;
 
           IF coalesce(NEW.status,'') <> '' THEN
 
@@ -38,6 +46,9 @@ execute <<EOF
                   (master_id, first_name, last_name, source, created_at, updated_at, user_id)
                   VALUES
                   (new_master_id, NEW.fname, NEW.lname, 'cis-redcap', now(), now(), NEW.user_id);
+                
+                register_tracker := TRUE;
+                NEW.status := 'created master';
             ELSE              
                 SELECT id INTO new_master_id FROM masters WHERE id = NEW.master_id;
             END IF;
@@ -48,14 +59,23 @@ execute <<EOF
                 END IF;
 
 
+                SELECT format_update_notes('first name', first_name, NEW.fname) ||
+                  format_update_notes('last name', last_name, NEW.lname)
+                INTO update_notes
+                FROM player_infos
+                WHERE master_id = new_master_id;
+
                 UPDATE player_infos SET
                   master_id = new_master_id, first_name = NEW.fname, last_name = NEW.lname, 
                   source = 'cis-redcap', created_at = now(), updated_at = now(), user_id = NEW.user_id
                   WHERE master_id = new_master_id
                   RETURNING id INTO updated_item_id;
+                
 
-                PERFORM add_study_update_entry(new_master_id, 'updated', 'player info', '', NEW.user_id, updated_item_id, 'PlayerInfo');
+                PERFORM add_study_update_entry(new_master_id, 'updated', 'player info', event_date, update_notes, NEW.user_id, updated_item_id, 'PlayerInfo');
 
+                register_tracker := TRUE;                
+                NEW.status := 'updated name';
             END IF;
 
             IF NEW.status = 'update address' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
@@ -73,7 +93,14 @@ execute <<EOF
                     (new_master_id, NEW.street, NEW.street2, NEW.city, NEW.state, NEW.zip, 'cis-redcap', 10, now(), now(), NEW.user_id);
                   
                   PERFORM update_address_ranks(new_master_id);
+
+                  register_tracker := TRUE;
+                  NEW.status := 'updated address';
+                ELSE
+                  NEW.status := 'address not updated - details blank';
                 END IF;
+
+                
             END IF;
 
             IF NEW.status = 'update email' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
@@ -90,6 +117,11 @@ execute <<EOF
 
 
                   PERFORM update_player_contact_ranks(new_master_id, 'email');
+
+                  register_tracker := TRUE;
+                  NEW.status := 'updated email';
+                ELSE
+                  NEW.status := 'email not updated - details blank';
                 END IF;                
             END IF;
 
@@ -105,9 +137,28 @@ execute <<EOF
                     (new_master_id, NEW.phone, 'phone', 'cis-redcap', 10, now(), now(), NEW.user_id);
 
                     PERFORM update_player_contact_ranks(new_master_id, 'phone');
+
+                  register_tracker := TRUE;
+                  NEW.status := 'updated phone';
+                ELSE
+                  NEW.status := 'phone not updated - details blank';
                 END IF;
             END IF;
             
+
+            CASE 
+              WHEN NEW.status = 'create master' THEN 
+                NEW.status := 'created master';
+              WHEN NEW.status = 'update all' THEN 
+                NEW.status := 'updated all';              
+              ELSE
+            END CASE;
+
+            -- the master_id was set and an action performed. Register the tracker event
+            IF OLD.master_id IS NULL AND new_master_id IS NOT NULL AND register_tracker THEN
+              
+            END IF;
+
             NEW.master_id := new_master_id;
 
 

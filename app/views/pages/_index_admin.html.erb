@@ -5,10 +5,10 @@
     <div class="col-sm-12">
       <h3>Manage Selections</h3>
       <ul class="nav">                  
-        <li class="nav"><%= link_to "Accuracy Scores", accuracy_scores_path %> </li>
-        <li class="nav"><%= link_to "Colleges List", colleges_path %> </li>
-        <li class="nav"><%= link_to "General Selections", general_selections_path %> </li> 
-        <li class="nav"><%= link_to "Item Flags", item_flag_names_path %> </li>               
+        <li class="nav"><%= link_to "Accuracy Scores", admin_accuracy_scores_path %> </li>
+        <li class="nav"><%= link_to "Colleges List", admin_colleges_path %> </li>
+        <li class="nav"><%= link_to "General Selections", admin_general_selections_path %> </li> 
+        <li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li>               
         <li class="nav"><%= link_to "External Links", admin_external_links_path %> </li> 
         <li class="nav"><%= link_to "Protocol / Status / Method", protocols_path %> </li>         
       </ul>
@@ -19,7 +19,7 @@
         <li class="nav"><%= link_to "Reports", admin_reports_path %> </li> 
         <li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li> 
         <li class="nav"><%= link_to "Sage Assignments", admin_sage_assignments_path %> </li> 
-        <li class="nav"><%= link_to "User Management", manage_users_path %> </li>         
+        <li class="nav"><%= link_to "User Management", admin_manage_users_path %> </li>         
         <li class="nav"><%= link_to "User Authorizations", admin_user_authorizations_path %> </li>         
         <li class="nav"><%= link_to "Admin Logout", destroy_admin_session_path, method: :delete %> </li>
       </ul>      

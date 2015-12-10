@@ -14,6 +14,7 @@ class ApplicationController < ActionController::Base
   rescue_from ActionController::RoutingError, :with => :routing_error_handler 
   rescue_from ActionController::InvalidAuthenticityToken, :with => :bad_auth_token
   rescue_from FphsException, :with => :fphs_app_exception_handler  
+  rescue_from PG::RaiseException, :with => :fphs_app_exception_handler  
   
   
 protected

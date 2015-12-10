@@ -15,11 +15,8 @@ module AdminControllerHandler
     pm = primary_model    
     pm = pm.where filter_params if filter_params
     set_objects_instance pm.order(default_index_order)
+    response_to_index
     
-    respond_to do |format|      
-      format.html { render view_path('index') }
-      format.all { render json: objects_instance.as_json(except: [:created_at, :updated_at, :id, :admin_id, :user_id])}
-    end
   end
   
 
@@ -37,7 +34,9 @@ module AdminControllerHandler
     set_object_instance primary_model.new(secure_params)
     object_instance.current_admin = current_admin
     if object_instance.save
-      redirect_to index_path, notice: "#{human_name} created successfully"
+      #redirect_to index_path, notice: "#{human_name} created successfully"
+      @updated_with = object_instance      
+      index
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
       flash.now[:warning] = "Error creating #{human_name}: #{error_message}"
@@ -48,7 +47,9 @@ module AdminControllerHandler
   def update
     object_instance.current_admin = current_admin
     if object_instance.update(secure_params)
-      redirect_to index_path, notice: "#{human_name} updated successfully"
+      flash.now[:notice] = "#{human_name} updated successfully"
+      @updated_with = object_instance      
+      index
     else
       logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"      
       flash.now[:warning] = "Error updating #{human_name}: #{error_message}"
@@ -71,15 +72,38 @@ module AdminControllerHandler
       permitted_params + [:admin_id]
     end
   
-    def view_path view
+    def index_partial 
+      view = 'index'
       return view unless view_folder
       [view_folder, view].join('/')
+    end
+    
+    def view_path view            
+      unless view_folder
+        return 'admin_handler/index' if view == 'index'
+        return view 
+      else
+        [view_folder, view].join('/')
+      end
     end
   
     def view_folder
       nil
     end
-
+    
+    def response_to_index  
+      respond_to do |format|      
+        format.html { 
+          if @updated_with
+            render partial: index_partial
+          else
+            render view_path('index') 
+          end        
+        }
+        format.all { render json: objects_instance.as_json(except: [:created_at, :updated_at, :id, :admin_id, :user_id])}
+      end
+    end
+    
     def log_action action, sub, results, status="OK", extras={}
       extras[:master_id] ||= nil
       extras[:msid] ||= nil

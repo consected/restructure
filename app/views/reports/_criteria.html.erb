@@ -21,7 +21,7 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
                 
             </div>
             <%end %>
-            <div class="row">              
+            <div class="row report-criteria-fields">              
               <% i = 0 
                 @report.search_attributes.each do |name, type|                   
               %>
@@ -29,20 +29,22 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
                 <div class="col-md-6" style="padding-bottom: 1em;">                
                 <%= report_field name, type, @report.search_attr_values[name] %>
                 </div>
-              <% i += 1                                   
-              
-                 end%>
-              
+              <% i += 1                                                 
+                 end%>              
             </div>
             <div class="form-group form-actions clearfix">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
               <% if click_to_search %> <span></span><%end%>  
+              <% unless @report.editable_data? %>
               <%= submit_tag :search, value: :search,class: "#{btn} #{!@report_page ? 'auto-submitter' : ''}" if @report.report_type == 'search'  %>
+              <% end %>
               <%= submit_tag :table, class: "#{btn}"  %>
+              <% unless @report.editable_data? %>
               <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count'%>
               <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_user.can? :export_csv %>
-              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>               
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>                             
+              <% end %>
               <% if @report.report_type != 'count' %> 
                 <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>  
               <%end%>

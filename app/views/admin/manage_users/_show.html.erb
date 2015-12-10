@@ -1,0 +1,12 @@
+<div class="data-results">
+  <div data-result="admin-list">    
+    <div class="admin-edit-form alert" role="alert">  
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <p>Email: <%= @user.email %></p>
+      <% if @user.new_password %><p>New password: <%= @user.new_password %> </p><% end %>
+      <p>Disabled:<%=!!@user.disabled%></p>
+    </div>
+    <%= render partial: 'index' %>  
+  </div>
+</div>
+

@@ -7,13 +7,19 @@ Rails.application.routes.draw do
     resources :dynamic_models, except: [:show, :destroy]
     resources :user_authorizations, except: [:show, :destroy]
     resources :external_links, except: [:show, :destroy]
+    resources :colleges, except: [:show, :destroy]
+    resources :general_selections, except: [:show, :destroy]  
+    resources :item_flag_names, except: [:show, :destroy]
+    resources :manage_users, except: [:show, :destroy]
+    resources :accuracy_scores, except: [:show, :destroy]  
+    resources :action_logs, only: [:show, :index]
   end
     
-  resources :action_logs, only: [:show, :index]
-  resources :accuracy_scores, except: [:show, :destroy]  
-  resources :colleges, except: [:show, :destroy]
-  resources :general_selections, except: [:show, :destroy]
-  resources :item_flag_names, except: [:show, :destroy]
+  
+
+
+
+
   
   
   resources :protocols, except: [:show, :destroy] do
@@ -25,7 +31,7 @@ Rails.application.routes.draw do
   
   resources :protocol_events, except: [:show, :destroy]
   resources :sub_processes, except: [:show, :destroy]  
-  resources :manage_users, except: [:show, :destroy]
+
   
   
   resources :pages, only: [:index]

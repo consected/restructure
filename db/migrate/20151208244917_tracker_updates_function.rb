@@ -3,10 +3,26 @@ class TrackerUpdatesFunction < ActiveRecord::Migration
 
     reversible do |dir|
       dir.up do
-# Enhance the trackers trigger writing to tracker_history for insert and update
-execute <<EOF
+
+        execute <<EOF
       
-  DROP FUNCTION IF EXISTS add_study_update_entry(master_id INTEGER, update_type VARCHAR, update_name VARCHAR, update_notes VARCHAR, user_id INTEGER, item_id INTEGER, item_type VARCHAR);
+  DROP FUNCTION IF EXISTS add_study_update_entry(master_id INTEGER, update_type VARCHAR, update_name VARCHAR, event_date DATE, update_notes VARCHAR, user_id INTEGER, item_id INTEGER, item_type VARCHAR);
+  DROP FUNCTION IF EXISTS format_update_notes(field_name VARCHAR, old_val VARCHAR, new_val VARCHAR);
+
+
+  CREATE FUNCTION format_update_notes(field_name VARCHAR, old_val VARCHAR, new_val VARCHAR) returns VARCHAR
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          res VARCHAR;
+        BEGIN
+          res := '';
+          IF coalesce(old_val, '') <> coalesce(new_val, '') THEN 
+            res := field_name || ' from ' || old_val || ' to ' || new_val || '; ';
+          END IF;
+          RETURN res;
+        END;
+      $$;
 
   -- update_type: created | updated
   -- update_name: player info | address | player contact | sage assignment | scantron
@@ -14,15 +30,18 @@ execute <<EOF
   -- item_id: <ID of updated or created object> | NULL
   -- item_type: PlayerInfo | Address | PlayerContact | SageAssignment | Scantron | NULL
 
-  CREATE FUNCTION add_study_update_entry(master_id INTEGER, update_type VARCHAR, update_name VARCHAR, update_notes VARCHAR, user_id INTEGER, item_id INTEGER, item_type VARCHAR) RETURNS integer
+
+
+  CREATE FUNCTION add_study_update_entry(master_id INTEGER, update_type VARCHAR, update_name VARCHAR, event_date DATE, update_notes VARCHAR, user_id INTEGER, item_id INTEGER, item_type VARCHAR) RETURNS integer
     LANGUAGE plpgsql
     AS $$
         DECLARE
           new_tracker_id integer;
           protocol_record RECORD;
         BEGIN
-
-          
+        
+          SELECT add_tracker_entry_by_name(master_id, 'Updates', 'record updates', (update_type || ' ' || update_name), event_date, update_notes, user_id, item_id, item_type) into new_tracker_id;
+          /*
           SELECT p.id protocol_id, sp.id sub_process_id, pe.id protocol_event_id 
           INTO protocol_record           
           FROM protocol_events pe 
@@ -45,7 +64,8 @@ execute <<EOF
 
             RETURN new_tracker_id;
           END IF;
-            
+          */  
+          RETURN new_tracker_id;
         END;   
     $$;
     
@@ -56,7 +76,8 @@ EOF
 execute <<EOF
 
   
-  DROP FUNCTION IF EXISTS add_study_update_entry(master_id INTEGER, update_type VARCHAR, update_name VARCHAR, update_notes VARCHAR, user_id INTEGER, item_id INTEGER, item_type VARCHAR);
+  DROP FUNCTION IF EXISTS add_study_update_entry(master_id INTEGER, update_type VARCHAR, update_name VARCHAR, event_date DATE, update_notes VARCHAR, user_id INTEGER, item_id INTEGER, item_type VARCHAR);
+  DROP FUNCTION IF EXISTS format_update_notes(field_name VARCHAR, old_val VARCHAR, new_val VARCHAR);
 
 EOF
       end

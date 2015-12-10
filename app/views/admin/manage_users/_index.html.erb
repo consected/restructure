@@ -1,0 +1,36 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">    
+    <h1>Users</h1>
+
+    <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+    <table class="table tablesorter admin-list">
+      <thead>
+        <tr>
+          <th class="no-sort"></th>
+          <th>User</th>      
+          <th>Disabled</th>
+          <th>Admin</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @users.each do |list_item| %>
+          <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+
+            <td><%= admin_edit_btn list_item.id%> </td>
+            <td><%= list_item.email %></td>        
+            <td><%= list_item.disabled ? 'disabled' : ''%></td>        
+            <td><%= list_item.admin_name %></td>
+            <td><%= link_to "user authorizations", admin_user_authorizations_path(filter: {user_id: list_item.id}) %></td>
+            
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <%=  render partial: 'admin_handler/index_actions'  %>    
+ 
+
+  </div>
+</div>

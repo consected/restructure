@@ -1,4 +1,4 @@
-class ItemFlagNamesController < ApplicationController
+class Admin::ItemFlagNamesController < ApplicationController
   include AdminControllerHandler
 
   private

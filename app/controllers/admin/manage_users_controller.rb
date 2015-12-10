@@ -1,4 +1,4 @@
-class ManageUsersController < ApplicationController
+class Admin::ManageUsersController < ApplicationController
 
   include AdminControllerHandler
   #before_action :before_update, only: [:update]    
@@ -15,7 +15,7 @@ class ManageUsersController < ApplicationController
     @user.current_admin = current_admin
     if @user.update(secure_params)
       @users = User.all
-      render partial: 'show'
+      render partial: 'index'
     else
       logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"      
       flash.now[:warning] = "Error updating #{human_name}: #{error_message}"
@@ -29,7 +29,7 @@ class ManageUsersController < ApplicationController
     object_instance.current_admin = current_admin
     if object_instance.save
       @users = User.all
-      render partial: 'show'
+      render partial: 'index'
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
       flash.now[:warning] = "Error creating #{human_name}: #{error_message}"

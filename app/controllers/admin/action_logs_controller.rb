@@ -1,4 +1,4 @@
-class ActionLogsController < ApplicationController
+class Admin::ActionLogsController < ApplicationController
 #  before_action :authenticate_admin!
   include AdminControllerHandler
   

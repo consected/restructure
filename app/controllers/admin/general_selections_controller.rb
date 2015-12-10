@@ -1,4 +1,4 @@
-class GeneralSelectionsController < ApplicationController
+class Admin::GeneralSelectionsController < ApplicationController
 
   include AdminControllerHandler
 

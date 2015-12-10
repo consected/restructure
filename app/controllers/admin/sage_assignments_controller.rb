@@ -6,7 +6,7 @@ class Admin::SageAssignmentsController < ApplicationController
     @sage_assignments = []
     @assigned_count = SageAssignment.assigned.length
     @unassigned_count = SageAssignment.unassigned.length
-    
+    render 'admin_handler/index'
   end
   
   def show 

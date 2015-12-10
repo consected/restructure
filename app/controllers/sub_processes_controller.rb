@@ -4,11 +4,7 @@ class SubProcessesController < ApplicationController
   before_action :set_protocol_for_edit, only: [:create, :update]    
   def index
     @sub_processes = @protocol.sub_processes
-    
-    respond_to do |format|      
-      format.html { render :index }
-      format.all { render json: @sub_processes.as_json(except: [:created_at, :updated_at, :id, :admin_id, :user_id])}
-    end
+    response_to_index    
   end
   
   def new options = {}

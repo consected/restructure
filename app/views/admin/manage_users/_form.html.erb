@@ -1,0 +1,24 @@
+<div class="data-results">
+  <div data-result="admin-edit-form-"  class="admin-edit-form">    
+<%= form_for(object_instance, url: [:admin_manage, object_instance], class: "inline-form", remote: true) do |f| %>
+  <%= render partial: 'admin_handler/form_errors' %>
+  <div class="form-group">
+    <%= f.label :email %>
+    <%=f.email_field :email, required: true%>
+  </div>
+  <div class="form-group">
+    <%= f.check_box :disabled %>
+    <%= f.label :disable %>
+  </div>    
+  <% if object_instance.id %>
+  <div class="form-group">
+    <%=check_box_tag :gen_new_pw%>
+    <%= f.label 'generate new password' %>
+  </div>    
+  <%end%>
+  <div class="form-group">
+    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+  </div>
+<% end %>
+  </div>
+</div>

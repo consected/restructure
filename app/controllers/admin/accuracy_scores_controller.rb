@@ -1,4 +1,4 @@
-class AccuracyScoresController < ApplicationController
+class Admin::AccuracyScoresController < ApplicationController
   include AdminControllerHandler
 
 
