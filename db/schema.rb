@@ -591,6 +591,31 @@ ActiveRecord::Schema.define(version: 20151208244918) do
     t.integer  "user_id"
   end
 
+  create_table "rc_stage_cif_copy", force: :cascade do |t|
+    t.integer  "record_id"
+    t.integer  "redcap_survey_identifier"
+    t.datetime "time_stamp"
+    t.string   "first_name"
+    t.string   "middle_name"
+    t.string   "last_name"
+    t.string   "nick_name"
+    t.string   "street"
+    t.string   "street2"
+    t.string   "city"
+    t.string   "state"
+    t.string   "zipcode"
+    t.string   "phone"
+    t.string   "email"
+    t.string   "hearabout"
+    t.integer  "completed"
+    t.string   "status"
+    t.datetime "created_at",               default: "now()"
+    t.integer  "user_id"
+    t.integer  "master_id"
+    t.datetime "updated_at",               default: "now()"
+    t.boolean  "added_tracker"
+  end
+
   create_table "report_history", force: :cascade do |t|
     t.string   "name"
     t.string   "description"

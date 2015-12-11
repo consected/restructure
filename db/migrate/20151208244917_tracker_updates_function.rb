@@ -17,8 +17,14 @@ class TrackerUpdatesFunction < ActiveRecord::Migration
           res VARCHAR;
         BEGIN
           res := '';
-          IF coalesce(old_val, '') <> coalesce(new_val, '') THEN 
-            res := field_name || ' from ' || old_val || ' to ' || new_val || '; ';
+          old_val := lower(coalesce(old_val, '-')::varchar);
+          new_val := lower(coalesce(new_val, '')::varchar);
+          IF old_val <> new_val THEN 
+            res := field_name;
+            IF old_val <> '-' THEN
+              res := res || ' from ' || old_val ;
+            END IF;
+            res := res || ' to ' || new_val || '; ';
           END IF;
           RETURN res;
         END;

@@ -26,9 +26,9 @@ execute <<EOF
           FROM protocol_events pe 
           INNER JOIN sub_processes sp on pe.sub_process_id = sp.id 
           INNER JOIN protocols p on sp.protocol_id = p.id
-          WHERE p.name = protocol_name
-          AND sp.name = sub_process_name 
-          AND pe.name = protocol_event_name
+          WHERE lower(p.name) = lower(protocol_name)
+          AND lower(sp.name) = lower(sub_process_name) 
+          AND lower(pe.name) = lower(protocol_event_name)
           AND (p.disabled IS NULL or p.disabled = FALSE) AND (sp.disabled IS NULL or sp.disabled = FALSE) AND (pe.disabled IS NULL or pe.disabled = FALSE);
 
           IF NOT FOUND THEN
