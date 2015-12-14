@@ -12,19 +12,6 @@ class RcCisTrigger < ActiveRecord::Migration
         
 execute <<EOF
  
-/*
-
----- If the table exists then:
- alter table rc_stage_cif_copy add column id serial;
- alter table rc_stage_cif_copy add constraint primary key (id);
- alter table rc_stage_cif_copy add column status varchar;
- alter table rc_stage_cif_copy add column created_at timestamp default now();
- alter table rc_stage_cif_copy add column user_id integer;
- alter table rc_stage_cif_copy add column master_id integer;
- alter table rc_stage_cif_copy add column updated_at timestamp default now(); 
- alter table rc_stage_cif_copy add column added_tracker boolean;
-*/
-
 
 CREATE TABLE IF NOT EXISTS rc_stage_cif_copy (
     record_id integer,
@@ -51,6 +38,19 @@ CREATE TABLE IF NOT EXISTS rc_stage_cif_copy (
     master_id integer,
     added_tracker boolean
 );
+/*
+
+---- If the table exists then:
+ alter table rc_stage_cif_copy add column id serial;
+ alter table rc_stage_cif_copy add constraint primary key (id);
+ alter table rc_stage_cif_copy add column status varchar;
+ alter table rc_stage_cif_copy add column created_at timestamp default now();
+ alter table rc_stage_cif_copy add column user_id integer;
+ alter table rc_stage_cif_copy add column master_id integer;
+ alter table rc_stage_cif_copy add column updated_at timestamp default now(); 
+ alter table rc_stage_cif_copy add column added_tracker boolean;
+*/
+
 
 
    

@@ -12,7 +12,8 @@ export EXTUSER=payres
 export SCHEMA=public
 export EXTDB=fphs
 export EXTDBHOST=localhost
-export EXTDBUSER=phil
+export EXTDBUSER=fphs
+export EXPORTLOC=$EXTNAME:/var/opt/passenger/fphs/db/dumps
 ##############################
 
 #### if stage #####
@@ -22,6 +23,7 @@ export SCHEMA=ml_app
 export EXTDB=q1
 export EXTDBHOST=nfl-09.dipr
 export EXTDBUSER=pda11
+export EXPORTLOC=nfl-03.dipr:/FPHS/stage/sql
 ###############################
 
 #### if production #####
@@ -31,6 +33,7 @@ export SCHEMA=ml_app
 export EXTDB=q1
 export EXTDBHOST=nfl-10.dipr
 export EXTDBUSER=pda11
+export EXPORTLOC=nfl-03.dipr:/FPHS/stage/sql
 ###############################
 
 
@@ -69,7 +72,6 @@ rsync $EXTUSER@$EXTNAME:/var/opt/passenger/fphs/db/dumps/migrate-$EXTNAME/db-sch
 
 sudo -u postgres dropdb mig_$VER
 sudo -u postgres createdb -O $DBUSER mig_$VER
-##### enter password
 sudo -u postgres psql -d mig_$VER -c "create role fphs; create role fphsadm; create role fphsusr;"
 psql -d mig_$VER < db-schema.sql
 psql -d mig_$VER < db-schema-migrations.sql
@@ -125,7 +127,7 @@ echo "Generated the migration file for $EXTNAME : ../$UPGRADE_FILE"
 
 ###### Send the schema_migrations list back to 
 # rsync ./db-schema-migrations-local.sql $EXTUSER@$EXTNAME:/var/opt/passenger/fphs/db/dumps/migrate-$EXTNAME/
-rsync ../$UPGRADE_FILE $EXTUSER@$EXTNAME:/var/opt/passenger/fphs/db/dumps/migrate-$EXTNAME/
+rsync ../$UPGRADE_FILE $EXTUSER@$EXPORTLOC/migrate-$EXTNAME/
 
 ###### Now go to the remote machine and run the updates
 
