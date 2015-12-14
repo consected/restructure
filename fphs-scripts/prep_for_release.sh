@@ -1,5 +1,6 @@
-export SVN_SOURCE_DIR=phase3/all/railsapp/phase3
+export SVN_SOURCE_DIR=phase3/all/railsapp/fpa-phase3
 export FPHS_VERSION=`svn ls --username payres https://open.med.harvard.edu/svn/fphs-rails/tags | sort -V | tail -n 1`
+chmod 750 ./*
 FPHS_A=`echo $FPHS_VERSION | grep -oP '([0-9]+)' | tail -n 1`
 FPHS_B=3.0
 #`echo $FPHS_VERSION | grep -oP '([0-9]+).([0-9]+).'`
