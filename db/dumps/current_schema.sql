@@ -1,3 +1,4 @@
+begin;
 --
 -- PostgreSQL database dump
 --
@@ -38,6 +39,522 @@ COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching
 
 
 SET search_path = public, pg_catalog;
+
+--
+-- Name: add_study_update_entry(integer, character varying, character varying, date, character varying, integer, integer, character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION add_study_update_entry(master_id integer, update_type character varying, update_name character varying, event_date date, update_notes character varying, user_id integer, item_id integer, item_type character varying) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          new_tracker_id integer;
+          protocol_record RECORD;
+        BEGIN
+        
+          SELECT add_tracker_entry_by_name(master_id, 'Updates', 'record updates', (update_type || ' ' || update_name), event_date, update_notes, user_id, item_id, item_type) into new_tracker_id;
+          /*
+          SELECT p.id protocol_id, sp.id sub_process_id, pe.id protocol_event_id 
+          INTO protocol_record           
+          FROM protocol_events pe 
+          INNER JOIN sub_processes sp on pe.sub_process_id = sp.id 
+          INNER JOIN protocols p on sp.protocol_id = p.id
+          WHERE p.name = 'Updates' 
+          AND sp.name = 'record updates' 
+          AND pe.name = (update_type || ' ' || update_name) 
+          AND (p.disabled IS NULL or p.disabled = FALSE) AND (sp.disabled IS NULL or sp.disabled = FALSE) AND (pe.disabled IS NULL or pe.disabled = FALSE);
+
+          IF NOT FOUND THEN
+            RAISE EXCEPTION 'Nonexistent protocol record --> %', (update_type || ' ' || update_name );
+          ELSE
+
+            INSERT INTO trackers 
+            (master_id, protocol_id, sub_process_id, protocol_event_id, item_type, item_id, user_id, event_date, updated_at, created_at, notes)
+            VALUES
+            (master_id, protocol_record.protocol_id, protocol_record.sub_process_id, protocol_record.protocol_event_id, 
+             item_type, item_id, user_id, now(), now(), now(), update_notes);                        
+
+            RETURN new_tracker_id;
+          END IF;
+          */  
+          RETURN new_tracker_id;
+        END;   
+    $$;
+
+
+--
+-- Name: add_tracker_entry_by_name(integer, character varying, character varying, character varying, character varying, integer, integer, character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, set_notes character varying, user_id integer, item_id integer, item_type character varying) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          new_tracker_id integer;
+          protocol_record RECORD;
+        BEGIN
+
+          
+          SELECT p.id protocol_id, sp.id sub_process_id, pe.id protocol_event_id 
+          INTO protocol_record           
+          FROM protocol_events pe 
+          INNER JOIN sub_processes sp on pe.sub_process_id = sp.id 
+          INNER JOIN protocols p on sp.protocol_id = p.id
+          WHERE p.name = protocol_name
+          AND sp.name = sub_process_name 
+          AND pe.name = protocol_event_name
+          AND (p.disabled IS NULL or p.disabled = FALSE) AND (sp.disabled IS NULL or sp.disabled = FALSE) AND (pe.disabled IS NULL or pe.disabled = FALSE);
+
+          IF NOT FOUND THEN
+            RAISE EXCEPTION 'Nonexistent protocol record --> %', (protocol_name || ' ' || sub_process_name || ' ' || protocol_event_name);
+          ELSE
+
+            INSERT INTO trackers 
+            (master_id, protocol_id, sub_process_id, protocol_event_id, item_type, item_id, user_id, event_date, updated_at, created_at, notes)
+            VALUES
+            (master_id, protocol_record.protocol_id, protocol_record.sub_process_id, protocol_record.protocol_event_id, 
+             item_type, item_id, user_id, now(), now(), now(), set_notes);                        
+
+            RETURN new_tracker_id;
+          END IF;
+            
+        END;   
+    $$;
+
+
+--
+-- Name: add_tracker_entry_by_name(integer, character varying, character varying, character varying, date, character varying, integer, integer, character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, event_date date, set_notes character varying, user_id integer, item_id integer, item_type character varying) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          new_tracker_id integer;
+          protocol_record RECORD;
+        BEGIN
+
+          
+          SELECT p.id protocol_id, sp.id sub_process_id, pe.id protocol_event_id 
+          INTO protocol_record           
+          FROM protocol_events pe 
+          INNER JOIN sub_processes sp on pe.sub_process_id = sp.id 
+          INNER JOIN protocols p on sp.protocol_id = p.id
+          WHERE lower(p.name) = lower(protocol_name)
+          AND lower(sp.name) = lower(sub_process_name) 
+          AND lower(pe.name) = lower(protocol_event_name)
+          AND (p.disabled IS NULL or p.disabled = FALSE) AND (sp.disabled IS NULL or sp.disabled = FALSE) AND (pe.disabled IS NULL or pe.disabled = FALSE);
+
+          IF NOT FOUND THEN
+            RAISE EXCEPTION 'Nonexistent protocol record --> %', (protocol_name || ' ' || sub_process_name || ' ' || protocol_event_name);
+          ELSE
+
+            INSERT INTO trackers 
+            (master_id, protocol_id, sub_process_id, protocol_event_id, item_type, item_id, user_id, event_date, updated_at, created_at, notes)
+            VALUES
+            (master_id, protocol_record.protocol_id, protocol_record.sub_process_id, protocol_record.protocol_event_id, 
+             item_type, item_id, user_id, now(), now(), now(), set_notes);                        
+
+            RETURN new_tracker_id;
+          END IF;
+            
+        END;   
+    $$;
+
+
+--
+-- Name: current_user_id(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION current_user_id() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+      DECLARE
+        user_id integer;
+      BEGIN
+        user_id := (select id from users where email = current_user limit 1);
+
+        return user_id;
+      END;
+    $$;
+
+
+--
+-- Name: format_update_notes(character varying, character varying, character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION format_update_notes(field_name character varying, old_val character varying, new_val character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          res VARCHAR;
+        BEGIN
+          res := '';
+          old_val := lower(coalesce(old_val, '-')::varchar);
+          new_val := lower(coalesce(new_val, '')::varchar);
+          IF old_val <> new_val THEN 
+            res := field_name;
+            IF old_val <> '-' THEN
+              res := res || ' from ' || old_val ;
+            END IF;
+            res := res || ' to ' || new_val || '; ';
+          END IF;
+          RETURN res;
+        END;
+      $$;
+
+
+--
+-- Name: handle_address_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION handle_address_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+          
+          NEW.street := lower(NEW.street);
+          NEW.street2 := lower(NEW.street2);
+          NEW.street3 := lower(NEW.street3);
+          NEW.city := lower(NEW.city);
+          NEW.state := lower(NEW.state);
+          NEW.zip := lower(NEW.zip);
+          NEW.country := lower(NEW.country);
+          NEW.postal_code := lower(NEW.postal_code);
+          NEW.region := lower(NEW.region);
+          NEW.source := lower(NEW.source);
+          RETURN NEW;
+            
+        END;   
+    $$;
+
+
+--
+-- Name: handle_delete(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION handle_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+      DECLARE
+        latest_tracker tracker_history%ROWTYPE;
+      BEGIN
+
+        -- Find the most recent remaining item in tracker_history for the master/protocol pair,
+        -- now that the target record has been deleted.
+        -- tracker_id is the foreign key onto the trackers table master/protocol record.
+
+        SELECT * INTO latest_tracker
+          FROM tracker_history 
+          WHERE tracker_id = OLD.tracker_id 
+          ORDER BY event_date DESC NULLS last, updated_at DESC NULLS last LIMIT 1;
+
+        IF NOT FOUND THEN
+          -- No record was found in tracker_history for the master/protocol pair.
+          -- Therefore there should be no corresponding trackers record either. Delete it.
+          DELETE FROM trackers WHERE trackers.id = OLD.tracker_id;
+
+        ELSE
+          -- A record was found in tracker_history. Since it is the latest one for the master/protocol pair,
+          -- just go ahead and update the corresponding record in trackers.
+          UPDATE trackers 
+            SET 
+              event_date = latest_tracker.event_date, 
+              sub_process_id = latest_tracker.sub_process_id, 
+              protocol_event_id = latest_tracker.protocol_event_id, 
+              item_id = latest_tracker.item_id, 
+              item_type = latest_tracker.item_type, 
+              updated_at = latest_tracker.updated_at, 
+              notes = latest_tracker.notes, 
+              user_id = latest_tracker.user_id
+            WHERE trackers.id = OLD.tracker_id;
+
+        END IF;
+
+
+        RETURN OLD;
+
+      END
+    $$;
+
+
+--
+-- Name: handle_player_contact_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION handle_player_contact_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+         
+
+          NEW.rec_type := lower(NEW.rec_type);
+          NEW.data := lower(NEW.data);
+          NEW.source := lower(NEW.source);
+
+
+          RETURN NEW;
+            
+        END;   
+    $$;
+
+
+--
+-- Name: handle_player_info_before_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION handle_player_info_before_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+          NEW.first_name := lower(NEW.first_name);          
+          NEW.last_name := lower(NEW.last_name);          
+          NEW.middle_name := lower(NEW.middle_name);          
+          NEW.nick_name := lower(NEW.nick_name);          
+          NEW.college := lower(NEW.college);                    
+          NEW.source := lower(NEW.source);
+          RETURN NEW;
+            
+        END;   
+    $$;
+
+
+--
+-- Name: handle_rc_cis_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION handle_rc_cis_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          new_master_id integer;
+          new_msid integer;
+          updated_item_id integer;
+          register_tracker boolean;
+          update_notes VARCHAR;
+          event_date DATE;
+          track_p varchar;
+          track_sp varchar;
+          track_pe varchar;
+          res_status varchar;
+          
+        BEGIN
+
+
+          track_p := 'study';
+          track_sp := 'CIS-received';
+          track_pe := 'REDCap';
+
+          register_tracker := FALSE;
+          update_notes := '';
+          res_status := NEW.status;
+
+          event_date :=  NEW.time_stamp::date;
+
+          IF coalesce(NEW.status,'') <> '' THEN
+
+            IF NEW.status = 'create master' THEN
+
+                IF NEW.master_id IS NOT NULL THEN
+                  RAISE EXCEPTION 'Can not create a master when the master ID is already set. Review the linked Master record, or to create a new Master record clear the master_id first and try again.';
+                END IF;
+
+
+                SELECT MAX(msid) + 1 INTO new_msid FROM masters;
+                
+                INSERT INTO masters
+                  (msid, created_at, updated_at, user_id)
+                  VALUES 
+                  (new_msid, now(), now(), NEW.user_id)
+                  RETURNING id INTO new_master_id;
+
+                INSERT INTO player_infos
+                  (master_id, first_name, last_name, source, created_at, updated_at, user_id)
+                  VALUES
+                  (new_master_id, NEW.first_name, NEW.last_name, 'cis-redcap', now(), now(), NEW.user_id);
+                
+                register_tracker := TRUE;
+                
+            ELSE              
+                SELECT id INTO new_master_id FROM masters WHERE id = NEW.master_id;
+            END IF;
+  
+            IF NEW.status = 'update name' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
+
+
+                SELECT format_update_notes('first name', first_name, NEW.first_name) ||
+                  format_update_notes('last name', last_name, NEW.last_name) ||
+                  format_update_notes('middle name', middle_name, NEW.middle_name) ||
+                  format_update_notes('nick name', nick_name, NEW.nick_name)
+                INTO update_notes
+                FROM player_infos
+                WHERE master_id = new_master_id order by rank desc limit 1;
+
+                UPDATE player_infos SET
+                  master_id = new_master_id, first_name = NEW.first_name, last_name = NEW.last_name, 
+                  middle_name = NEW.middle_name, nick_name = NEW.nick_name, 
+                  source = 'cis-redcap', created_at = now(), updated_at = now(), user_id = NEW.user_id
+                  WHERE master_id = new_master_id
+                  RETURNING id INTO updated_item_id;
+                
+
+                PERFORM add_study_update_entry(new_master_id, 'updated', 'player info', event_date, update_notes, NEW.user_id, updated_item_id, 'PlayerInfo');
+
+                register_tracker := TRUE;                
+                res_status := 'updated name';
+            END IF;
+
+            IF NEW.status = 'update address' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
+
+                IF NEW.street IS NOT NULL AND trim(NEW.street) <> '' OR
+                    NEW.state IS NOT NULL AND trim(NEW.state) <> '' OR
+                    NEW.zipcode IS NOT NULL AND trim(NEW.zipcode) <> '' THEN   
+
+                  SELECT format_update_notes('street', NULL, NEW.street) ||
+                    format_update_notes('street2', NULL, NEW.street2) ||
+                    format_update_notes('city', NULL, NEW.city) ||
+                    format_update_notes('state', NULL, NEW.state) ||
+                    format_update_notes('zip', NULL, NEW.zipcode)                  
+                  INTO update_notes;
+                  -- FROM addresses
+                  -- WHERE master_id = new_master_id;
+
+
+                  
+                  INSERT INTO addresses
+                    (master_id, street, street2, city, state, zip, source, rank, created_at, updated_at, user_id)
+                    VALUES
+                    (new_master_id, NEW.street, NEW.street2, NEW.city, NEW.state, NEW.zipcode, 'cis-redcap', 10, now(), now(), NEW.user_id)
+                    RETURNING id INTO updated_item_id;
+                  
+                  PERFORM update_address_ranks(new_master_id);
+                  PERFORM add_study_update_entry(new_master_id, 'updated', 'address', event_date, update_notes, NEW.user_id, updated_item_id, 'Address');
+
+                  register_tracker := TRUE;
+                  res_status := 'updated address';
+                ELSE
+                  res_status := 'address not updated - details blank';
+                END IF;
+
+                
+            END IF;
+
+            IF NEW.status = 'update email' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
+
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
+
+                IF NEW.email IS NOT NULL AND trim(NEW.email) <> '' THEN   
+
+                  SELECT format_update_notes('data', NULL, NEW.email)           
+                  INTO update_notes;                  
+
+
+                  INSERT INTO player_contacts
+                    (master_id, data, rec_type, source, rank, created_at, updated_at, user_id)
+                    VALUES
+                    (new_master_id, NEW.email, 'email', 'cis-redcap', 10, now(), now(), NEW.user_id)
+                    RETURNING id INTO updated_item_id;
+
+
+                  PERFORM update_player_contact_ranks(new_master_id, 'email');
+                  PERFORM add_study_update_entry(new_master_id, 'updated', 'player contact', event_date, update_notes, NEW.user_id, updated_item_id, 'PlayerContact');
+
+                  register_tracker := TRUE;
+                  res_status := 'updated email';
+                ELSE
+                  res_status := 'email not updated - details blank';
+                END IF;                
+            END IF;
+
+            IF NEW.status = 'update phone' OR NEW.status = 'update all' OR NEW.status = 'create master' THEN  
+                IF new_master_id IS NULL THEN
+                  RAISE EXCEPTION 'Must set a master ID to %', NEW.status;
+                END IF;
+
+                IF NEW.phone IS NOT NULL AND trim(NEW.phone) <> '' THEN   
+
+                  SELECT format_update_notes('data', NULL, NEW.phone)           
+                  INTO update_notes;                  
+
+                  INSERT INTO player_contacts
+                    (master_id, data, rec_type, source, rank, created_at, updated_at, user_id)
+                    VALUES
+                    (new_master_id, NEW.phone, 'phone', 'cis-redcap', 10, now(), now(), NEW.user_id)
+                    RETURNING id INTO updated_item_id;
+
+                  PERFORM update_player_contact_ranks(new_master_id, 'phone');
+                  PERFORM add_study_update_entry(new_master_id, 'updated', 'player contact', event_date, update_notes, NEW.user_id, updated_item_id, 'PlayerContact');
+
+                  register_tracker := TRUE;
+                  res_status := 'updated phone';
+                ELSE
+                  res_status := 'phone not updated - details blank';
+                END IF;
+            END IF;
+            
+
+            CASE 
+              WHEN NEW.status = 'create master' THEN 
+                res_status := 'created master';
+              WHEN NEW.status = 'update all' THEN 
+                res_status := 'updated all';              
+              ELSE
+            END CASE;
+
+            -- the master_id was set and an action performed. Register the tracker event
+            IF coalesce(NEW.added_tracker, FALSE) = FALSE AND new_master_id IS NOT NULL AND register_tracker THEN
+              PERFORM add_tracker_entry_by_name(new_master_id, track_p, track_sp, track_pe, OLD.time_stamp::date, ('Heard about: ' || coalesce(OLD.hearabout, '(not set)') || E'
+Submitted by REDCap ID '|| OLD.redcap_survey_identifier), NEW.user_id, NULL, NULL);
+              NEW.added_tracker = TRUE;
+            END IF;
+
+            NEW.master_id := new_master_id;
+            NEW.updated_at := now();
+            NEW.status := res_status;
+
+          END IF;
+
+          RETURN NEW;
+            
+        END;   
+    $$;
+
+
+--
+-- Name: handle_tracker_history_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION handle_tracker_history_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+      
+      DELETE FROM tracker_history WHERE id = OLD.id;
+  
+      INSERT INTO trackers 
+        (master_id, protocol_id, 
+         protocol_event_id, event_date, sub_process_id, notes,
+         item_id, item_type,
+         created_at, updated_at, user_id)
+
+        SELECT NEW.master_id, NEW.protocol_id, 
+           NEW.protocol_event_id, NEW.event_date, 
+           NEW.sub_process_id, NEW.notes, 
+           NEW.item_id, NEW.item_type,
+           NEW.created_at, NEW.updated_at, NEW.user_id  ;
+
+      RETURN NULL;
+    END;
+    $$;
+
 
 --
 -- Name: log_accuracy_score_update(); Type: FUNCTION; Schema: public; Owner: -
@@ -678,19 +1195,42 @@ CREATE FUNCTION log_tracker_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
         BEGIN
-            INSERT INTO tracker_history 
-                (tracker_id, master_id, protocol_id, 
-                 protocol_event_id, event_date, sub_process_id, notes,
-                 item_id, item_type,
-                 created_at, updated_at, user_id)
-                 
-            SELECT NEW.id, NEW.master_id, NEW.protocol_id, 
-                   NEW.protocol_event_id, NEW.event_date, 
-                   NEW.sub_process_id, NEW.notes, 
-                   NEW.item_id, NEW.item_type,
-                   NEW.created_at, NEW.updated_at, NEW.user_id  ;
+
+          -- Check to see if there is an existing record in tracker_history that matches the 
+          -- that inserted or updated in trackers.
+          -- If there is, just skip the insert into tracker_history, otherwise make the insert happen.
+
+          PERFORM * from tracker_history 
+            WHERE
+              master_id = NEW.master_id 
+              AND protocol_id = NEW.protocol_id
+              AND coalesce(protocol_event_id,-1) = coalesce(NEW.protocol_event_id,-1)
+              AND coalesce(event_date, '1900-01-01'::date)::date = coalesce(NEW.event_date, '1900-01-01')::date
+              AND sub_process_id = NEW.sub_process_id
+              AND coalesce(notes,'') = coalesce(NEW.notes,'')
+              AND coalesce(item_id,-1) = coalesce(NEW.item_id,-1)
+              AND coalesce(item_type,'') = coalesce(NEW.item_type,'')
+              -- do not check created_at --
+              AND updated_at::timestamp = NEW.updated_at::timestamp
+              AND coalesce(user_id,-1) = coalesce(NEW.user_id,-1);
+              
+            IF NOT FOUND THEN
+              INSERT INTO tracker_history 
+                  (tracker_id, master_id, protocol_id, 
+                   protocol_event_id, event_date, sub_process_id, notes,
+                   item_id, item_type,
+                   created_at, updated_at, user_id)
+
+                  SELECT NEW.id, NEW.master_id, NEW.protocol_id, 
+                     NEW.protocol_event_id, NEW.event_date, 
+                     NEW.sub_process_id, NEW.notes, 
+                     NEW.item_id, NEW.item_type,
+                     NEW.created_at, NEW.updated_at, NEW.user_id  ;
+            END IF;
+
             RETURN NEW;
-        END;
+            
+        END;   
     $$;
 
 
@@ -788,31 +1328,117 @@ CREATE FUNCTION log_user_update() RETURNS trigger
 CREATE FUNCTION tracker_upsert() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
+      DECLARE
+        latest_tracker trackers%ROWTYPE;
+      BEGIN
+
+        
+
+        -- Look for a row in trackers for the inserted master / protocol pair
+        SELECT * into latest_tracker 
+          FROM trackers 
+          WHERE
+            master_id = NEW.master_id 
+            AND protocol_id = NEW.protocol_id              
+          ORDER BY
+            event_date DESC NULLS LAST, updated_at DESC NULLS LAST
+          LIMIT 1
+        ;
+
+        IF NOT FOUND THEN
+          -- Nothing was found, so just allow the insert to continue
+          
+          RETURN NEW;
+
+        ELSE   
+          -- A trackers row for the master / protocol pair was found.
+          -- Check if it is more recent, by having an event date either later than the insert, or 
+          -- has an event_date the same as the insert but with later updated_at time (unlikely)
+
+          IF latest_tracker.event_date > NEW.event_date OR 
+              latest_tracker.event_date = NEW.event_date AND latest_tracker.updated_at > NEW.updated_at
+              THEN
+
+            -- The retrieved record was more recent, we should not make a change to the trackers table,
+            -- but instead we need to ensure an insert into the tracker_history table does happen even though there
+            -- is no actual insert or update trigger to fire.
+            -- We use the trackers record ID that was retrieved as the tracker_id in tracker_history
+
+            INSERT INTO tracker_history (
+                tracker_id, master_id, protocol_id, 
+                protocol_event_id, event_date, sub_process_id, notes,
+                item_id, item_type,
+                created_at, updated_at, user_id
+              )                 
+              SELECT 
+                latest_tracker.id, NEW.master_id, NEW.protocol_id, 
+                NEW.protocol_event_id, NEW.event_date, 
+                NEW.sub_process_id, NEW.notes, 
+                NEW.item_id, NEW.item_type,
+                NEW.created_at, NEW.updated_at, NEW.user_id  ;
+            
+            RETURN NULL;
+
+          ELSE
+            -- The tracker record for the master / protocol pair exists and was not more recent, therefore it
+            -- needs to be replaced by the intended NEW record. Complete with an update and allow the cascading 
+            -- trackers update trigger to handle the insert into tracker_history.
+
+            UPDATE trackers SET
+              master_id = NEW.master_id, 
+              protocol_id = NEW.protocol_id, 
+              protocol_event_id = NEW.protocol_event_id, 
+              event_date = NEW.event_date, 
+              sub_process_id = NEW.sub_process_id, 
+              notes = NEW.notes, 
+              item_id = NEW.item_id, 
+              item_type = NEW.item_type,
+              -- do not update created_at --
+              updated_at = NEW.updated_at, 
+              user_id = NEW.user_id
+            WHERE master_id = NEW.master_id AND 
+              protocol_id = NEW.protocol_id
+            ;
+
+            -- Prevent the original insert from actually completing.
+            RETURN NULL;
+          END IF;
+        END IF;      
+      END;
+    $$;
+
+
+--
+-- Name: update_address_ranks(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION update_address_ranks(set_master_id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          latest_primary RECORD;
         BEGIN
-            if (select EXISTS(
-                    select 1 from trackers where 
-                    protocol_id  = NEW.protocol_id AND 
-                    master_id = NEW.master_id
-                    )
-                ) then
-                UPDATE trackers SET
-                    master_id = NEW.master_id, 
-                    protocol_id = NEW.protocol_id, 
-                    protocol_event_id = NEW.protocol_event_id, 
-                    event_date = NEW.event_date, 
-                    sub_process_id = NEW.sub_process_id, 
-                    notes = NEW.notes, 
-                    item_id = NEW.item_id, 
-                    item_type = NEW.item_type,
-                    -- do not update created_at --
-                    updated_at = NEW.updated_at, 
-                    user_id = NEW.user_id
-                WHERE master_id = NEW.master_id AND 
-                    protocol_id = NEW.protocol_id
-                ;
-                RETURN NULL;
-            end if;
-            RETURN NEW;
+  
+          SELECT * into latest_primary 
+          FROM addresses
+          WHERE master_id = set_master_id
+          AND rank = 10
+          ORDER BY updated_at DESC
+          LIMIT 1;
+        
+          IF NOT FOUND THEN
+            RETURN NULL;
+          END IF;
+
+          
+          UPDATE addresses SET rank = 5 
+          WHERE 
+            master_id = master_id 
+            AND rank = 10
+            AND id <> latest_primary.id;
+          
+
+          RETURN 1;
         END;
     $$;
 
@@ -824,20 +1450,20 @@ CREATE FUNCTION tracker_upsert() RETURNS trigger
 CREATE FUNCTION update_master_with_player_info() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-    BEGIN
-        UPDATE masters 
-            set rank = (
-            case when NEW.rank is null then -1000 
-                 when (NEW.rank > 12) then NEW.rank * -1 
-                 else new.rank
-            end
-            )
+      BEGIN
+          UPDATE masters 
+              set rank = (
+              case when NEW.rank is null then null 
+                   when (NEW.rank > 12) then NEW.rank * -1 
+                   else new.rank
+              end
+              )
 
-        WHERE masters.id = NEW.master_id;
+          WHERE masters.id = NEW.master_id;
 
-        RETURN NEW;
-    END;
-    $$;
+          RETURN NEW;
+      END;
+      $$;
 
 
 --
@@ -854,6 +1480,43 @@ CREATE FUNCTION update_master_with_pro_info() RETURNS trigger
 
         RETURN NEW;
     END;
+    $$;
+
+
+--
+-- Name: update_player_contact_ranks(integer, character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION update_player_contact_ranks(set_master_id integer, set_rec_type character varying) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          latest_primary RECORD;
+        BEGIN
+  
+          SELECT * into latest_primary 
+          FROM player_contacts
+          WHERE master_id = set_master_id
+          AND rank = 10
+          AND rec_type = set_rec_type
+          ORDER BY updated_at DESC
+          LIMIT 1;
+        
+          IF NOT FOUND THEN
+            RETURN NULL;
+          END IF;
+
+          
+          UPDATE player_contacts SET rank = 5 
+          WHERE 
+            master_id = master_id 
+            AND rank = 10
+            AND rec_type = set_rec_type
+            AND id <> latest_primary.id;
+          
+
+          RETURN 1;
+        END;
     $$;
 
 
@@ -2009,6 +2672,114 @@ ALTER SEQUENCE protocols_id_seq OWNED BY protocols.id;
 
 
 --
+-- Name: rc_cis; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE rc_cis (
+    id integer NOT NULL,
+    fname character varying,
+    lname character varying,
+    status character varying,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now(),
+    user_id integer,
+    master_id integer,
+    street character varying,
+    street2 character varying,
+    city character varying,
+    state character varying,
+    zip character varying,
+    phone character varying,
+    email character varying,
+    form_date timestamp without time zone
+);
+
+
+--
+-- Name: rc_cis2; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE rc_cis2 (
+    id integer,
+    fname character varying,
+    lname character varying,
+    status character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_id integer
+);
+
+
+--
+-- Name: rc_cis_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE rc_cis_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_cis_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE rc_cis_id_seq OWNED BY rc_cis.id;
+
+
+--
+-- Name: rc_stage_cif_copy; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE rc_stage_cif_copy (
+    record_id integer,
+    redcap_survey_identifier integer,
+    time_stamp timestamp without time zone,
+    first_name character varying,
+    middle_name character varying,
+    last_name character varying,
+    nick_name character varying,
+    street character varying,
+    street2 character varying,
+    city character varying,
+    state character varying,
+    zipcode character varying,
+    phone character varying,
+    email character varying,
+    hearabout character varying,
+    completed integer,
+    id integer NOT NULL,
+    status character varying,
+    created_at timestamp without time zone DEFAULT now(),
+    user_id integer,
+    master_id integer,
+    updated_at timestamp without time zone DEFAULT now(),
+    added_tracker boolean
+);
+
+
+--
+-- Name: rc_stage_cif_copy_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE rc_stage_cif_copy_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: rc_stage_cif_copy_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE rc_stage_cif_copy_id_seq OWNED BY rc_stage_cif_copy.id;
+
+
+--
 -- Name: report_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2066,7 +2837,10 @@ CREATE TABLE reports (
     report_type character varying,
     auto boolean,
     searchable boolean,
-    "position" integer
+    "position" integer,
+    edit_model character varying,
+    edit_field_names character varying,
+    selection_fields character varying
 );
 
 
@@ -2201,6 +2975,15 @@ CREATE TABLE schema_migrations (
 
 
 --
+-- Name: smback; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE smback (
+    version character varying
+);
+
+
+--
 -- Name: sub_process_history; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -2327,13 +3110,13 @@ ALTER SEQUENCE tracker_history_id_seq OWNED BY tracker_history.id;
 CREATE TABLE trackers (
     id integer NOT NULL,
     master_id integer,
-    protocol_id integer,
+    protocol_id integer NOT NULL,
     event_date timestamp without time zone,
-    user_id integer,
+    user_id integer DEFAULT current_user_id(),
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     notes character varying,
-    sub_process_id integer,
+    sub_process_id integer NOT NULL,
     protocol_event_id integer,
     item_id integer,
     item_type character varying
@@ -2726,6 +3509,20 @@ ALTER TABLE ONLY protocols ALTER COLUMN id SET DEFAULT nextval('protocols_id_seq
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY rc_cis ALTER COLUMN id SET DEFAULT nextval('rc_cis_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY rc_stage_cif_copy ALTER COLUMN id SET DEFAULT nextval('rc_stage_cif_copy_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY report_history ALTER COLUMN id SET DEFAULT nextval('report_history_id_seq'::regclass);
 
 
@@ -3046,6 +3843,22 @@ ALTER TABLE ONLY protocols
 
 
 --
+-- Name: rc_cis_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY rc_cis
+    ADD CONSTRAINT rc_cis_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: rc_stage_cif_copy_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY rc_stage_cif_copy
+    ADD CONSTRAINT rc_stage_cif_copy_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: report_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -3115,6 +3928,38 @@ ALTER TABLE ONLY tracker_history
 
 ALTER TABLE ONLY trackers
     ADD CONSTRAINT trackers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: unique_master_protocol; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY trackers
+    ADD CONSTRAINT unique_master_protocol UNIQUE (master_id, protocol_id);
+
+
+--
+-- Name: unique_master_protocol_id; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY trackers
+    ADD CONSTRAINT unique_master_protocol_id UNIQUE (master_id, protocol_id, id);
+
+
+--
+-- Name: unique_protocol_and_id; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY sub_processes
+    ADD CONSTRAINT unique_protocol_and_id UNIQUE (protocol_id, id);
+
+
+--
+-- Name: unique_sub_process_and_id; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY protocol_events
+    ADD CONSTRAINT unique_sub_process_and_id UNIQUE (sub_process_id, id);
 
 
 --
@@ -3703,6 +4548,20 @@ CREATE TRIGGER address_history_update AFTER UPDATE ON addresses FOR EACH ROW WHE
 
 
 --
+-- Name: address_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER address_insert BEFORE INSERT ON addresses FOR EACH ROW EXECUTE PROCEDURE handle_address_update();
+
+
+--
+-- Name: address_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER address_update BEFORE UPDATE ON addresses FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_address_update();
+
+
+--
 -- Name: admin_history_insert; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -3815,6 +4674,27 @@ CREATE TRIGGER player_contact_history_update AFTER UPDATE ON player_contacts FOR
 
 
 --
+-- Name: player_contact_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER player_contact_insert BEFORE INSERT ON player_contacts FOR EACH ROW EXECUTE PROCEDURE handle_player_contact_update();
+
+
+--
+-- Name: player_contact_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER player_contact_update BEFORE UPDATE ON player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_player_contact_update();
+
+
+--
+-- Name: player_info_before_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER player_info_before_update BEFORE UPDATE ON player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_player_info_before_update();
+
+
+--
 -- Name: player_info_history_insert; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -3885,6 +4765,13 @@ CREATE TRIGGER protocol_history_update AFTER UPDATE ON protocols FOR EACH ROW WH
 
 
 --
+-- Name: rc_cis_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER rc_cis_update BEFORE UPDATE ON rc_stage_cif_copy FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_rc_cis_update();
+
+
+--
 -- Name: report_history_insert; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -3938,6 +4825,20 @@ CREATE TRIGGER tracker_history_insert AFTER INSERT ON trackers FOR EACH ROW EXEC
 --
 
 CREATE TRIGGER tracker_history_update AFTER UPDATE ON trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_tracker_update();
+
+
+--
+-- Name: tracker_history_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER tracker_history_update BEFORE UPDATE ON tracker_history FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE handle_tracker_history_update();
+
+
+--
+-- Name: tracker_record_delete; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER tracker_record_delete AFTER DELETE ON tracker_history FOR EACH ROW EXECUTE PROCEDURE handle_delete();
 
 
 --
@@ -4520,6 +5421,54 @@ ALTER TABLE ONLY user_history
 
 
 --
+-- Name: rc_cis_master_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY rc_cis
+    ADD CONSTRAINT rc_cis_master_id_fkey FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: unique_master_protocol_tracker_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY tracker_history
+    ADD CONSTRAINT unique_master_protocol_tracker_id FOREIGN KEY (master_id, protocol_id, tracker_id) REFERENCES trackers(master_id, protocol_id, id);
+
+
+--
+-- Name: valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY trackers
+    ADD CONSTRAINT valid_protocol_sub_process FOREIGN KEY (protocol_id, sub_process_id) REFERENCES sub_processes(protocol_id, id) MATCH FULL;
+
+
+--
+-- Name: valid_protocol_sub_process; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY tracker_history
+    ADD CONSTRAINT valid_protocol_sub_process FOREIGN KEY (protocol_id, sub_process_id) REFERENCES sub_processes(protocol_id, id) MATCH FULL;
+
+
+--
+-- Name: valid_sub_process_event; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY trackers
+    ADD CONSTRAINT valid_sub_process_event FOREIGN KEY (sub_process_id, protocol_event_id) REFERENCES protocol_events(sub_process_id, id);
+
+
+--
+-- Name: valid_sub_process_event; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY tracker_history
+    ADD CONSTRAINT valid_sub_process_event FOREIGN KEY (sub_process_id, protocol_event_id) REFERENCES protocol_events(sub_process_id, id);
+
+
+--
 -- Name: public; Type: ACL; Schema: -; Owner: -
 --
 
@@ -4533,3 +5482,4 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
+commit;
