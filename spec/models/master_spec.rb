@@ -10,6 +10,8 @@ RSpec.describe Master, type: :model do
     seed_database
 
     
+    puts "Master count: #{Master.count}"
+    
     create_data_set    
     
   end

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ItemFlagNamesController, type: :controller do
+RSpec.describe Admin::ItemFlagNamesController, type: :controller do
 
   include ItemFlagNameSupport
   
@@ -10,7 +10,11 @@ RSpec.describe ItemFlagNamesController, type: :controller do
   def item
     @item_flag_name
   end
-
+  
+  before(:all) do    
+    @path_prefix = "/admin"
+  end  
+  
   it_behaves_like 'a standard admin controller'
   
 end

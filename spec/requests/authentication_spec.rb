@@ -51,7 +51,7 @@ describe "user and admin authentication" do
     
     skip_urls = ["/admins/sign_in", "/users/sign_in"]
     
-    admin_controllers = %w(accuracy_scores action_logs colleges general_selections item_flag_names manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links)
+    admin_controllers = %w(admin/accuracy_scores admin/action_logs admin/colleges admin/general_selections admin/item_flag_names admin/manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links)
     
     @url_list.each do |url|
       if url[:controller] && !skip_urls.include?(url[:url])

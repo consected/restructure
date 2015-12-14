@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe GeneralSelectionsController, type: :controller do
+RSpec.describe Admin::GeneralSelectionsController, type: :controller do
 
   include GeneralSelectionSupport
   
@@ -11,10 +11,11 @@ RSpec.describe GeneralSelectionsController, type: :controller do
     @general_selection
   end
 
+  
   before(:all){
     connection = ActiveRecord::Base.connection
     connection.execute("delete from general_selection_history") 
-    
+    @path_prefix = "/admin"
     GeneralSelection.destroy_all
   }
   it_behaves_like 'a standard admin controller'

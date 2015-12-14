@@ -16,15 +16,17 @@ execute <<EOF
 
 ---- If the table exists then:
  alter table rc_stage_cif_copy add column id serial;
+ alter table rc_stage_cif_copy add constraint primary key (id);
  alter table rc_stage_cif_copy add column status varchar;
  alter table rc_stage_cif_copy add column created_at timestamp default now();
  alter table rc_stage_cif_copy add column user_id integer;
  alter table rc_stage_cif_copy add column master_id integer;
- ALTER TABLE rc_stage_cif_copy ADD COLUMN updated_at timestamp default now();
-alter table rc_stage_cif_copy add constraint primary key (id);
+ alter table rc_stage_cif_copy add column updated_at timestamp default now(); 
  alter table rc_stage_cif_copy add column added_tracker boolean;
------- else create it:
-CREATE TABLE rc_stage_cif_copy (
+*/
+
+
+CREATE TABLE IF NOT EXISTS rc_stage_cif_copy (
     record_id integer,
     redcap_survey_identifier integer,
     time_stamp timestamp without time zone,
@@ -50,7 +52,6 @@ CREATE TABLE rc_stage_cif_copy (
     added_tracker boolean
 );
 
-*/
 
    
   DROP TRIGGER IF EXISTS rc_cis_update on rc_stage_cif_copy;
@@ -79,6 +80,7 @@ CREATE TABLE rc_stage_cif_copy (
 
           register_tracker := FALSE;
           update_notes := '';
+          res_status := NEW.status;
 
           event_date :=  NEW.time_stamp::date;
 
@@ -242,7 +244,7 @@ CREATE TABLE rc_stage_cif_copy (
 
             -- the master_id was set and an action performed. Register the tracker event
             IF coalesce(NEW.added_tracker, FALSE) = FALSE AND new_master_id IS NOT NULL AND register_tracker THEN
-              PERFORM add_tracker_entry_by_name(new_master_id, track_p, track_sp, track_pe, OLD.time_stamp::date, ('Heard about: ' || OLD.hearabout|| E'\nSubmitted by REDCap ID '|| OLD.redcap_survey_identifier), NEW.user_id, NULL, NULL);
+              PERFORM add_tracker_entry_by_name(new_master_id, track_p, track_sp, track_pe, OLD.time_stamp::date, ('Heard about: ' || coalesce(OLD.hearabout, '(not set)') || E'\nSubmitted by REDCap ID '|| OLD.redcap_survey_identifier), NEW.user_id, NULL, NULL);
               NEW.added_tracker = TRUE;
             END IF;
 

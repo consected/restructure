@@ -2,7 +2,11 @@
   <div data-result="admin-list">    
     <h1>Users</h1>
 
-    <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+    <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
+      <% if @updated_with %>
+        <%= render partial: 'show'%>
+      <% end %>        
+    </div>
 
     <table class="table tablesorter admin-list">
       <thead>

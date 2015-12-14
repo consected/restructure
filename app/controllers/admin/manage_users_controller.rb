@@ -15,6 +15,7 @@ class Admin::ManageUsersController < ApplicationController
     @user.current_admin = current_admin
     if @user.update(secure_params)
       @users = User.all
+      @updated_with = @user
       render partial: 'index'
     else
       logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"      
@@ -29,6 +30,7 @@ class Admin::ManageUsersController < ApplicationController
     object_instance.current_admin = current_admin
     if object_instance.save
       @users = User.all
+      @updated_with = @user
       render partial: 'index'
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"

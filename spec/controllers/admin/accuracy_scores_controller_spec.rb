@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 
-RSpec.describe AccuracyScoresController, type: :controller do
+RSpec.describe Admin::AccuracyScoresController, type: :controller do
 
   include AccuracyScoreSupport
   
@@ -12,6 +12,10 @@ RSpec.describe AccuracyScoresController, type: :controller do
     @accuracy_score
   end
 
+  before(:all) do    
+    @path_prefix = "/admin"
+  end  
+  
   it_behaves_like 'a standard admin controller'
   
 

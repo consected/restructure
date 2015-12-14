@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe CollegesController, type: :controller do
+RSpec.describe Admin::CollegesController, type: :controller do
 
   include CollegeSupport
   
@@ -12,8 +12,9 @@ RSpec.describe CollegesController, type: :controller do
     @college
   end
     
-  
+    
   before(:all) do
+    @path_prefix = "/admin"
     res = College.delete_all
         
     Rails.cache.clear    

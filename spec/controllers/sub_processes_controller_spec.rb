@@ -135,7 +135,8 @@ RSpec.describe SubProcessesController, type: :controller do
       it "return success" do
         
         post :create, {object_symbol => valid_attributes}
-        expect(response).to redirect_to "/protocols/#{@protocol_id}/#{objects_symbol}"
+        #expect(response).to redirect_to "/protocols/#{@protocol_id}/#{objects_symbol}"
+        expect(response).to render_template('_index')
       end
     end
 
@@ -183,7 +184,8 @@ RSpec.describe SubProcessesController, type: :controller do
         create_item
         put :update, {:id => item_id, object_symbol => new_attributes}
         expect(flash[:warning]).to_not be_present
-        expect(response).to redirect_to("/protocols/#{@protocol_id}/#{objects_symbol}")
+        #expect(response).to redirect_to("/protocols/#{@protocol_id}/#{objects_symbol}")
+        expect(response).to render_template('_index')
       end
     end
 

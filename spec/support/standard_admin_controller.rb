@@ -100,7 +100,7 @@ shared_examples 'a standard admin controller' do
       it "return success" do
         
         post :create, {object_symbol => valid_attributes}
-        expect(response).to redirect_to "#{path_prefix}/#{objects_symbol}"
+        expect(response).to render_template("_index"), "Incorrect response from create #{object_symbol} (#{response}). Expected render template _index  "
       end
     end
 
@@ -145,11 +145,11 @@ shared_examples 'a standard admin controller' do
         expect(assigns(object_symbol)).to eq item
       end
 
-      it "redirects to the index" do
+      it "render the index" do
         create_item
         put :update, {:id => item_id, object_symbol => new_attributes}
         expect(flash[:warning]).to_not be_present
-        expect(response).to redirect_to("#{path_prefix}/#{objects_symbol}")
+        expect(response).to render_template('_index')
       end
     end
 

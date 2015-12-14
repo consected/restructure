@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ManageUsersController, type: :controller do
+RSpec.describe Admin::ManageUsersController, type: :controller do
 
   include ManageUserSupport
   
@@ -119,7 +119,7 @@ RSpec.describe ManageUsersController, type: :controller do
       it "return success" do
         va = valid_attributes
         post :create, {:user => va}
-        expect(response).to render_template '_show'
+        expect(response).to render_template '_index'
         expect(assigns(:user).email).to eq va[:email]
         expect(assigns(:user).new_password).to be_a String
       end
@@ -169,7 +169,7 @@ RSpec.describe ManageUsersController, type: :controller do
         create_item
         put :update, {:id => item_id, :user => new_attributes}
         expect(flash[:warning]).to_not be_present
-        expect(response).to render_template '_show'
+        expect(response).to render_template '_index'
       end
     end
 
@@ -197,7 +197,7 @@ RSpec.describe ManageUsersController, type: :controller do
         expect(assigns(:user)).to eq @manage_user
         expect(assigns(:user).disabled?).to be true
         
-        expect(response).to render_template '_show'
+        expect(response).to render_template '_index'
       end
       
       it "generates a new password for the user" do
@@ -207,7 +207,7 @@ RSpec.describe ManageUsersController, type: :controller do
         expect(assigns(:user)).to eq @manage_user
         expect(assigns(:user).new_password).not_to be nil
         
-        expect(response).to render_template '_show'
+        expect(response).to render_template '_index'
       end
     end
     

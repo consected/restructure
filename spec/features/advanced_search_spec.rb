@@ -108,7 +108,7 @@ describe "advanced search", js: true do
     end
     
     have_css("a.master-expander.attached-me-click")
-    page.all(:css, '.master-expander.collapsed .player-info-header').first.click
+    page.all(:css, "a.master-expander.attached-me-click[href='#master-#{@full_player_info.master_id}-player-infos'].collapsed .player-info-header").first.click
     
     # expect the player section to expand
     expect(page).to have_css "#master-#{@full_player_info.master_id}-player-infos.collapse.in"
@@ -198,7 +198,7 @@ describe "advanced search", js: true do
     
     #expect(page).to have_css "#search_count", text: /[0-9]+.*/
     
-    items = page.all(:css, '.master-expander')
+    items = page.all(:css, '.master-expander.collapsed')
 
     expect(items.length).to be > 0
     
@@ -216,7 +216,7 @@ describe "advanced search", js: true do
       b.first.click if b && b.length > 0 
       
       h = el[:href].split('#').last      
-      
+      puts h
       find "##{h}.collapse.in", wait: 5
       have_css "##{h}.tracker-block.collapse.in"
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: /#{protocol.name}/i
