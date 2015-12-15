@@ -9,6 +9,8 @@ module MasterHandler
     before_action :set_instance_from_id, only: [:show]
 
     after_action :do_log_action
+    
+    helper_method :primary_model
   end
 
   def do_log_action

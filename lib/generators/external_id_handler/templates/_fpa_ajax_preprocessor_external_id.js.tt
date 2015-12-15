@@ -1,0 +1,7 @@
+$.extend(_fpa.postprocessors, {
+  <%=singular_name%>_result_template: function(block, data){
+        var d = data;
+        if(data.<%=singular_name%>) d = data.<%=singular_name%>;
+        _fpa.postprocessors.info_update_handler(block, d);
+  }
+});

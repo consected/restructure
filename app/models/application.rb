@@ -1,5 +1,17 @@
 class Application  
   
+  def self.add_to_app_list list_type, item    
+    l = app_list(list_type)
+    return if l.include?(item)
+    res = l.select {|i| i.name == item.name}
+    l << item unless res.length > 0
+  end
+  
+  def self.app_list(list_type)
+    @@app_list ||= {}
+    @@app_list[list_type] ||= []    
+  end
+  
   def self.version    
     @@version ||= File.read('./version.txt').gsub("\n",'')    
   end

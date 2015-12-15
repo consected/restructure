@@ -50,6 +50,8 @@ Rails.application.routes.draw do
     resources :pro_infos, only: [:show, :index], constraints: { id: /\d+/ }    
     resources :addresses, except: [:destroy]
     resources :scantrons, except: [:destroy]
+    resources :test_things, except: [:destroy]
+
     resources :sage_assignments, except: [:destroy]
     resources :trackers, except: [:destroy] do
       resources :tracker_histories, only: [:index]

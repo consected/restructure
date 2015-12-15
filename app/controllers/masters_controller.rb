@@ -52,7 +52,7 @@ class MastersController < ApplicationController
     @master.trackers.build
     @master.tracker_histories.build
     @master.scantrons.build
-    @master.sage_assignments.build
+    #@master.sage_assignments.build
     
     # NOT conditions
     @master.not_trackers.build

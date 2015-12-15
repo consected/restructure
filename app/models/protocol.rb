@@ -8,7 +8,7 @@ class Protocol < ActiveRecord::Base
   has_many :sub_processes
 
   default_scope -> { order position: :asc }
-  scope :updates, -> { where name: RecordUpdatesProtocolName}
+  scope :updates, -> { where "name = '#{RecordUpdatesProtocolName}' AND (disabled IS NULL OR disabled = FALSE)" }
   scope :selectable, -> { enabled.where("name <> ?", RecordUpdatesProtocolName)}
   
   validates :name, presence: true

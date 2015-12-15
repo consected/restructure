@@ -1,5 +1,6 @@
 class SageAssignment < ActiveRecord::Base
   include UserHandler
+  include ExternalIdHandler
 
   validates :sage_id, presence: true,  length: {is: 10}
   validate :sage_id_tests    
@@ -15,6 +16,23 @@ class SageAssignment < ActiveRecord::Base
       "No available Sage IDs for assignment"
     end
   end 
+
+  def self.prevent_edit?
+    true
+  end
+
+  
+  def self.external_id_attribute
+    :sage_id
+  end
+
+  def self.id_formatter
+    'format_sage_id'
+  end
+  
+  def self.label
+    'Sage ID'
+  end
   
   def return_all
     self.multiple_results = self.master.sage_assignments.all if self.master

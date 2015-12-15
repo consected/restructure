@@ -1,0 +1,26 @@
+class <%=class_name%> < ActiveRecord::Base
+  
+  include UserHandler
+  include ExternalIdHandler
+  
+  validates :external_id, presence: true,  numericality: { only_integer: true, in: Settings::<%=class_name%>ExternalIdRange }
+  validate :external_id_tests
+  
+  default_scope -> {order id: :desc}
+  
+  protected
+    def external_id_tests
+      
+      if external_id_changed? || !persisted? 
+        
+        s = <%=class_name%>.find_by_external_id(self.external_id)
+        if s           
+          errors.add :external_id, "already exists in this master record" if s.master_id == self.master_id
+          errors.add :external_id, "already exists in another master record (#{s.master.msid ? "MSID: #{s.master.msid}" : "master ID: #{s.master_id}"})" if s.master_id != self.master_id
+        end
+        
+      end
+      
+    end
+  
+end

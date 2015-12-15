@@ -1,0 +1,11 @@
+class Settings
+  
+  <%=class_name%>ExternalIdPattern  = '\\d{0,8}'
+  <%=class_name%>ExternalIdRange = 1..99999999
+  
+  <%=class_name%>.add_to_app_list
+
+  
+  add_record_update_entries <%=class_name%>.label
+        
+end

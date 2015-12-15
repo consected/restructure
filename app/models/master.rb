@@ -16,8 +16,7 @@ class Master < ActiveRecord::Base
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
   has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
-  has_many :scantrons,  inverse_of: :master
-  
+    
   # Sage Assignments need a special build, which handles the allocation of an existing item from the table
   # when an instance is created. Within the structure we have, it is necessary to override the master.sage_assignments.build
   # method to ensure everything works as expected
@@ -53,13 +52,14 @@ class Master < ActiveRecord::Base
     has_many "#{assoc.plural_name}_item_flags".to_sym, through: assoc.plural_name, source: :item_flags
     Rails.logger.debug "Associated master with #{assoc.plural_name}_item_flags through #{assoc.plural_name} with source :item_flags"
   end
-  
-  # Nested attributes for advanced search form
-  accepts_nested_attributes_for :general_infos, :player_infos, :pro_infos, 
-                                :scantrons, :sage_assignments, :player_contacts, :addresses, :trackers, :tracker_histories,
-                                :not_trackers, :not_tracker_histories
 
   
+  MasterNestedAttribs = :general_infos, :player_infos, :pro_infos, 
+                                :player_contacts, :addresses, :trackers, :tracker_histories,
+                                :not_trackers, :not_tracker_histories
+  
+  # Nested attributes for advanced search form
+  accepts_nested_attributes_for *MasterNestedAttribs
   
   SimplePlayerJoin = "LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id".freeze
   NotTrackerJoin = :no_join #'INNER JOIN trackers "not_trackers" on masters.id = not_trackers.master_id'
@@ -130,6 +130,13 @@ class Master < ActiveRecord::Base
   NoDefaultJoinFor = [:general_infos, :not_trackers, :not_tracker_histories ]
   
   attr_accessor :force_order
+
+  def self.add_nested_attribute attrib
+    @master_nested_attrib ||= MasterNestedAttribs.dup
+    @master_nested_attrib << attrib
+    
+    Master.accepts_nested_attributes_for *@master_nested_attrib
+  end
   
   
   def self.results_limit

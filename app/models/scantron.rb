@@ -1,11 +1,17 @@
 class Scantron < ActiveRecord::Base
   
   include UserHandler
+  include ExternalIdHandler
   
   validates :scantron_id, presence: true,  numericality: { only_integer: true, greater_than: 0, less_than: 1000000 }
   validate :scantron_id_tests
   
   default_scope ->{}
+
+
+  def self.external_id_attribute
+    :scantron_id
+  end
   
   protected
     def scantron_id_tests

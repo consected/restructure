@@ -3,7 +3,23 @@
 <%= render partial: 'pro_infos/search_results_template' %>
 <%= render partial: 'addresses/search_results_template' %>
 <%= render partial: 'player_contacts/search_results_template' %>
+
+<% 
+    external_id_types = Application.app_list(:external_id)
+    
+    external_id_types.each do |e|
+      
+%>
 <%= render partial: 'common_templates/search_results_template', locals: {
+    name: e.name.underscore, 
+    prevent_edit: e.prevent_edit?, 
+    prevent_create: e.prevent_create?,
+    item_list: [label: e.label, formatter: e.id_formatter, attribute: e.external_id_attribute.to_s] ,
+    data_sort: [:desc, "data-item-id"]
+  } %>
+<% end %>
+
+<%#= render partial: 'common_templates/search_results_template', locals: {
     name: 'scantron', 
     prevent_edit: false, 
     prevent_create: false,
@@ -15,7 +31,7 @@
 <%= render partial: 'tracker_histories/search_results_template' %>
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'external_links/search_results_template' %>
-<%= render partial: 'common_templates/search_results_template', locals: {
+<%#= render partial: 'common_templates/search_results_template', locals: {
       name: 'sage_assignment', 
       prevent_edit: true,
       prevent_create: false,
@@ -247,11 +263,17 @@
           <div id="external-ids-{{id}}" class="row collapse external-ids-block">
             <h4 class="results-divider"><a href="#external-ids-{{id}}" data-toggle="collapse" class="dropup scroll-to-master">external IDs <span class="caret up"></span></a></h4>
             <div class="on-open-click hidden">
-              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantron</a>
-              <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignment</a>
+            <%  external_id_types.each do |e|%>
+              <a href="/masters/{{id}}/<%=e.plural_name%>" data-result-target="#<%=e.hyphenated_plural_name%>-{{id}}-" data-template="<%=e.hyphenated_plural_name%>-list-template" data-remote="true" class=""><%=e.label%></a>
+            <% end %>
+<%#              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantron</a>
+  #            <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignment</a>
+%>
             </div>
-            <div class="col-md-6" id="scantrons-{{id}}-" data-sub-list="scantrons"></div>            
-            <div class="col-md-6" id="sage-assignments-{{id}}-" data-sub-list="sage_assignments"></div>
+            <%  external_id_types.each do |e|%>
+            <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>            
+
+            <% end %>
     
           </div>
           
