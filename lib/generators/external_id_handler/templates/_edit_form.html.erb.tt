@@ -1,22 +1,3 @@
-<div class="data-results">
-  <div data-result="<%%= edit_form_id %>">
-    <div class="">
-      <%%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
-      <ul class="list-group">
-        <li class="list-group-item">
-          <%%= inline_cancel_button %>
-          <h4 class="list-group-item-heading">Edit <%%= primary_model.label %></h4>
-        </li>
-        <li class="list-group-item player-info-first_name">
-            <%%= f.label primary_model.external_id_attribute %>
-            <%%= f.number_field primary_model.external_id_attribute, class: 'form-control', in: Settings::<%=class_name%>ExternalIdRange,  pattern: Settings::<%=class_name%>ExternalIdPattern %>
-        </li>  
-        
-        <li class="list-group-item">
-          <%%= f.submit class: "btn btn-primary" %>  
-        </li>
-      </ul>
-      <%% end %>
-    </div>
-  </div>
-</div>
+<%%# By default the external id edit form is handled through a common template. To provide a customized form, copy the content of
+#   "common_templates/external_id_edit_form.html.erb" here and edit freely %>
+<%%= render partial: 'common_templates/external_id_edit_form' %>

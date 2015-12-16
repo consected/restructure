@@ -52,6 +52,13 @@ Rails.application.routes.draw do
     resources :scantrons, except: [:destroy]
     resources :test_things, except: [:destroy]
 
+    resources :test_things, except: [:destroy]
+
+    resources :test_things, except: [:destroy]
+
+    resources :test_things, except: [:destroy]
+
+
     resources :sage_assignments, except: [:destroy]
     resources :trackers, except: [:destroy] do
       resources :tracker_histories, only: [:index]

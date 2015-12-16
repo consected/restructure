@@ -4,41 +4,23 @@
 <%= render partial: 'addresses/search_results_template' %>
 <%= render partial: 'player_contacts/search_results_template' %>
 
-<% 
-    external_id_types = Application.app_list(:external_id)
-    
-    external_id_types.each do |e|
-      
+<% # Add in all the external ID handlers
+    external_id_types = Application.app_list(:external_id)    
+    external_id_types.each do |e|      
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: e.name.underscore, 
     prevent_edit: e.prevent_edit?, 
     prevent_create: e.prevent_create?,
-    item_list: [label: e.label, formatter: e.id_formatter, attribute: e.external_id_attribute.to_s] ,
+    item_list: [label: e.label, formatter: e.external_id_view_formatter, attribute: e.external_id_attribute.to_s] ,
     data_sort: [:desc, "data-item-id"]
   } %>
 <% end %>
-
-<%#= render partial: 'common_templates/search_results_template', locals: {
-    name: 'scantron', 
-    prevent_edit: false, 
-    prevent_create: false,
-    item_list: [label: 'Scantron', formatter: '', attribute: 'scantron_id'] ,
-    data_sort: [:desc, "data-item-id"]
-  } %>
 
 <%= render partial: 'trackers/search_results_template' %>
 <%= render partial: 'tracker_histories/search_results_template' %>
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'external_links/search_results_template' %>
-<%#= render partial: 'common_templates/search_results_template', locals: {
-      name: 'sage_assignment', 
-      prevent_edit: true,
-      prevent_create: false,
-      item_list: [label: 'Sage ID', formatter: 'format_sage_id', attribute: 'sage_id'],
-      data_sort: [:desc, "data-item-id"]
-      
-    } %>
 
 <%= render partial: 'dynamic_models/search_results_template' %>
 

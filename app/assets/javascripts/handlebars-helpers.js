@@ -151,8 +151,9 @@
     });
 
 
-    Handlebars.registerHelper('format_sage_id', function(text) {
-        var d = text.substring(0,3) + ' ' + text.substring(3,6) + ' ' + text.substring(6,10)
+    Handlebars.registerHelper('format_10_digit_external_id', function(text) {
+        text = "" + text; // force text type
+        var d = text.substring(0,3) + ' ' + text.substring(3,6) + ' ' + text.substring(6,10);
         return new Handlebars.SafeString(d);
     });
     

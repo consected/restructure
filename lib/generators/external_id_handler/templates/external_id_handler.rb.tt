@@ -3,7 +3,7 @@ class <%=class_name%> < ActiveRecord::Base
   include UserHandler
   include ExternalIdHandler
   
-  validates :external_id, presence: true,  numericality: { only_integer: true, in: Settings::<%=class_name%>ExternalIdRange }
+  validates :external_id, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: external_id_range.min, less_than_or_equal_to: external_id_range.max }
   validate :external_id_tests
   
   default_scope -> {order id: :desc}

@@ -1,0 +1,28 @@
+<div class="data-results">
+  <div data-result="<%= edit_form_id %>">
+    <div class="">
+      <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <%= inline_cancel_button %>
+          <h4 class="list-group-item-heading"><%= primary_model.prevent_edit? ? "Assign" : "Edit" %> <%= primary_model.label %></h4>
+        </li>
+        <% unless primary_model.prevent_edit? %>
+        <li class="list-group-item player-info-first_name">
+            <%= f.label primary_model.external_id_attribute %>
+            <%= f.number_field primary_model.external_id_attribute, class: 'form-control', in: primary_model.external_id_range,  pattern: primary_model.external_id_edit_pattern %>
+        </li>  
+        <% else %>
+        <li class="list-group-item player-info-first_name hidden">                    
+            <%= f.hidden_field primary_model.external_id_attribute %>
+        </li>                  
+        <% end %>
+        
+        <li class="list-group-item">
+          <%= f.submit class: "btn btn-primary" %>  
+        </li>
+      </ul>
+      <% end %>
+    </div>
+  </div>
+</div>

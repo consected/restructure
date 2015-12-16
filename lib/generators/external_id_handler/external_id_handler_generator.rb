@@ -23,7 +23,7 @@ class ExternalIdHandlerGenerator < Rails::Generators::NamedBase
   end
 
   def copy_js_file
-    template "_fpa_ajax_preprocessor_external_id.js", "app/assets/javascripts/_fpa_ajax_processors_#{plural_name}.js"
+    template "_fpa_external_id.js", "app/assets/javascripts/external_id_#{plural_name}.js"
   end
     
   def append_to_routes

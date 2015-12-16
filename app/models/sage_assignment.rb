@@ -8,55 +8,26 @@ class SageAssignment < ActiveRecord::Base
   scope :assigned, -> {where "master_id is not null"}
   scope :unassigned, -> {where "master_id is null"}
   after_save :return_all
-  
-  attr_accessor :create_count, :just_assigned
+ 
   
   class NoUnassignedAvailable < FphsException
     def message
       "No available Sage IDs for assignment"
     end
   end 
-
-  def self.prevent_edit?
-    true
-  end
-
-  
-  def self.external_id_attribute
-    :sage_id
-  end
-
-  def self.id_formatter
-    'format_sage_id'
-  end
-  
-  def self.label
-    'Sage ID'
-  end
   
   def return_all
     self.multiple_results = self.master.sage_assignments.all if self.master
   end
   
-  # We assign the next available 
-  def self.assign_next_available_id master
-    
-    sage_assignment = self.next_available
-    raise NoUnassignedAvailable  unless sage_assignment
-    sage_assignment.assigned_by = "fphsapp"
-    sage_assignment.master = master
-    sage_assignment.just_assigned = true
-    sage_assignment
-    
-  end
-  
-  def self.next_available
-    s = SageAssignment.unassigned.unscope(:order).first
-    logger.info "Got next available Sage id #{s.id}"
-    s
-    
-  end
-    
+  # Get the next unassigned ID item from the the sage_assignments table
+  def self.next_available owner
+    item = unassigned.unscope(:order).first
+    raise NoUnassignedAvailable  unless item
+    logger.info "Got next available external id #{item.id}"    
+    item.assigned_by = "fphsapp"      
+    item 
+  end    
   
   def self.generate_ids admin, count=10
     
@@ -67,10 +38,8 @@ class SageAssignment < ActiveRecord::Base
     (1..count).each do |c|      
       
       begin
-        s = SecureRandom.random_number(8_999_999_999) + 1_000_000_000
-        
-        item = SageAssignment.new(sage_id: s.to_s, admin_id: admin.id)
-
+        #s = SecureRandom.random_number(8_999_999_999) + 1_000_000_000        
+        item = SageAssignment.new(sage_id: generate_random_id.to_s, admin_id: admin.id)
         item.no_track = true      
         item.save!
         res << item
@@ -83,13 +52,7 @@ class SageAssignment < ActiveRecord::Base
     res
   end
   
-  def self.master_build owner, att=nil
-    if att
-      SageAssignment.assign_next_available_id owner
-    else
-      SageAssignment.new master: owner
-    end
-  end
+
   
   def check_status
     @was_created = id_changed? || just_assigned ? 'created' : false

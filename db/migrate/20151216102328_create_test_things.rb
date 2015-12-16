@@ -1,18 +1,18 @@
-class Create<%=class_name.pluralize%> < ActiveRecord::Migration
+class CreateTestThings < ActiveRecord::Migration
 
   def change
     reversible do |dir|
       dir.up do
 
 
-        create_table :<%=plural_name%> do |t|
+        create_table :test_things do |t|
           t.references :master, index: true, foreign_key: true
           t.integer :external_id, limit: 8
           t.references :user, index: true, foreign_key: true
           t.timestamps null: false      
         end
 
-        create_table :<%=singular_name%>_history do |t|
+        create_table :test_thing_history do |t|
           t.references :test_thing, index: true, foreign_key: true
           t.references :master, index: true, foreign_key: true
           t.integer :external_id, limit: 8
@@ -22,13 +22,13 @@ class Create<%=class_name.pluralize%> < ActiveRecord::Migration
 
         execute <<EOF
 
-CREATE FUNCTION log_<%=singular_name%>_update() RETURNS trigger
+CREATE FUNCTION log_test_thing_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
         BEGIN
-            INSERT INTO <%=singular_name%>_history
+            INSERT INTO test_thing_history
             (
-                    <%=singular_name%>_id,                    
+                    test_thing_id,                    
                     external_id,
                     user_id,
                     created_at,
@@ -45,20 +45,20 @@ CREATE FUNCTION log_<%=singular_name%>_update() RETURNS trigger
         END;
     $$;
 
-CREATE TRIGGER <%=singular_name%>_history_insert AFTER INSERT ON <%=plural_name%> FOR EACH ROW EXECUTE PROCEDURE log_<%=singular_name%>_update();
-CREATE TRIGGER <%=singular_name%>_history_update AFTER UPDATE ON <%=plural_name%> FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_<%=singular_name%>_update();
+CREATE TRIGGER test_thing_history_insert AFTER INSERT ON test_things FOR EACH ROW EXECUTE PROCEDURE log_test_thing_update();
+CREATE TRIGGER test_thing_history_update AFTER UPDATE ON test_things FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_test_thing_update();
 
 EOF
 
       end
       
       dir.down do
-          drop_table :<%=singular_name%>_history           
-          drop_table :<%=plural_name%> 
+          drop_table :test_thing_history           
+          drop_table :test_things 
           
           execute <<EOF
 
-              DROP FUNCTION IF EXISTS log_<%=singular_name%>_update() CASCADE;
+              DROP FUNCTION IF EXISTS log_test_thing_update() CASCADE;
 EOF
       end
     end
