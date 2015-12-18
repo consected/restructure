@@ -172,11 +172,11 @@ class ReportsController < ApplicationController
     end
   
     def filters_on
-      :report_type
+      :item_type
     end
     
     def filters
-      Report::ReportTypes.map {|g| [g,g.to_s.humanize]}.to_h
+      Report.categories.map {|g| [g,g.to_s.humanize]}.to_h
     end
 
   

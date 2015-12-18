@@ -26,16 +26,24 @@
       <%else%>
         <li class="list-group-item is-heading">
           <% unless prevent_edit %>
-          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/<%=name.pluralize.hyphenate%>/{{this.id}}/edit" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>        
+          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/<%=name.pluralize%>/{{this.id}}/edit" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>        
           <% end %>
-          <span class="pull-right label label-info <%=name.hyphenate%>-{{rank}}" style="margin-right:1em">{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}</span>
+          <span class="pull-right label label-info <%=name.hyphenate%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
             <h4 class="list-group-item-heading"><%=caption%></h4>
           <% if ItemFlagName.enabled_for?(name) %> 
           {{>item_flag_container item_type="<%=name%>"}}         
           <% end %>
         </li>
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this  return_string="true" capitalize="true"}}</strong></li>
+        {{#is @key "notes"}}
+        <div class="player-info-notes">
+          <div class="panel panel-default panel-body">
+          {{#with ..}}{{pretty_string this return_string="true"}}{{/with}}
+          </div>
+        </div>          
+        {{else}}        
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{#with ..}}{{pretty_string this return_string="true" capitalize="true"}}{{/with}}</strong></li>          
+        {{/is}}
         {{/filter}}                    
         <% if defined? item_blocks 
             item_blocks.each do |item|
@@ -48,7 +56,7 @@
         <%  end
           end        
         end %>      
-      <li class="list-group-item record-meta">{{>update_metadata}}</li>      
+      <% unless defined?(exclude_metadata) && exclude_metadata %><li class="list-group-item record-meta">{{>update_metadata}}</li><%end%>
   </ul>
   {{#was _created}}</div>{{/was}}
 </script>

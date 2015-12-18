@@ -1,10 +1,27 @@
 <%= render partial: 'masters/search_results_parts' %>
-<%= render partial: 'player_infos/search_results_template' %>
-<%= render partial: 'pro_infos/search_results_template' %>
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'player_info', 
+    prevent_edit: false, 
+    prevent_create: false,
+    item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes),
+    data_sort: [:desc, "data-item-id"]
+  } %>
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'pro_info', 
+    prevent_edit: true, 
+    prevent_create: true,
+    item_list: %w(pro_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college),
+    data_sort: [:desc, "data-item-id"],
+    exclude_metadata: true
+  } %>
+
+
 <%= render partial: 'addresses/search_results_template' %>
 <%= render partial: 'player_contacts/search_results_template' %>
 
-<% # Add in all the external ID handlers
+<% # Add in all the external ID handlers (Scantron, Sage, etc)
     external_id_types = Application.app_list(:external_id)    
     external_id_types.each do |e|      
 %>
@@ -248,9 +265,7 @@
             <%  external_id_types.each do |e|%>
               <a href="/masters/{{id}}/<%=e.plural_name%>" data-result-target="#<%=e.hyphenated_plural_name%>-{{id}}-" data-template="<%=e.hyphenated_plural_name%>-list-template" data-remote="true" class=""><%=e.label%></a>
             <% end %>
-<%#              <a href="/masters/{{id}}/scantrons" data-result-target="#scantrons-{{id}}-" data-template="scantrons-list-template" data-remote="true" class="">scantron</a>
-  #            <a href="/masters/{{id}}/sage_assignments" data-result-target="#sage-assignments-{{id}}-" data-template="sage-assignments-list-template" data-remote="true" class="">sage assignment</a>
-%>
+
             </div>
             <%  external_id_types.each do |e|%>
             <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>            

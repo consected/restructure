@@ -24,6 +24,11 @@ class Report < ActiveRecord::Base
     end
   end
   
+  def self.categories
+    res = []
+    Report.select("distinct item_type").where('item_type is not null').all.map {|s| s.item_type}
+  end
+  
   def self.item_types
     res = []
     editable_data_reports.each do |r|

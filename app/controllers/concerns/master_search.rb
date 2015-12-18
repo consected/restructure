@@ -71,7 +71,7 @@ module MasterSearch
               include: {              
                 item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
               },
-              methods: [:user_name, :accuracy_score_name, :source_name]
+              methods: [:user_name, :accuracy_score_name, :rank_name, :source_name]
             },
             pro_infos: {}, 
             player_contacts: {

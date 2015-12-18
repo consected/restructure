@@ -15,6 +15,7 @@
     <tr>
       <th class="no-sort"></th>
       <th>Name</th>            
+      <th>Category</th>       
       <th>Description</th>
       
       <th>Report Type</th>
@@ -31,6 +32,7 @@
         <td><%= admin_edit_btn list_item.id%> </td>
       
         <td><%= link_to  list_item.name, report_path(list_item.id), target: 'report', title: 'opens in a new window' %></td>        
+        <td><%= list_item.item_type %></td>  
         
         <td><%= list_item.description %></td>  
         

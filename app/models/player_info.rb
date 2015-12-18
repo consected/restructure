@@ -44,6 +44,7 @@ class PlayerInfo < ActiveRecord::Base
     extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]}    
     extras[:methods] ||= []
     extras[:methods] << :accuracy_score_name
+    extras[:methods] << :rank_name
     extras[:methods] << :source_name
     super(extras)
   end

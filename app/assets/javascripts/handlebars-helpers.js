@@ -115,6 +115,13 @@
             return options.inverse(this);
     });
 
+    Handlebars.registerHelper('has', function(obj, options){
+        if(this.hasOwnProperty(obj))
+            return options.fn(this);
+        else
+            return options.inverse(this);
+    });
+
 
     Handlebars.registerHelper('includes', function(obj, inc){
       if(!obj) return null;
