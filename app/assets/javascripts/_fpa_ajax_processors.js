@@ -390,14 +390,14 @@ _fpa.postprocessors = {
          
             if(!val || val === 'US' || val === ''){
                 block.find('.list-group-item.address-region').slideUp();
-                block.find('.list-group-item.address-postal-code').slideUp();
+                block.find('.list-group-item.address-postal_code').slideUp();
                 block.find('.list-group-item.address-zip').slideDown();
                 block.find('.list-group-item.address-state').slideDown();
                 block.find('#address_region').val('');
                 block.find('#address_postal_code').val('');
             }else{
                 block.find('.list-group-item.address-region').slideDown();
-                block.find('.list-group-item.address-postal-code').slideDown();
+                block.find('.list-group-item.address-postal_code').slideDown();
                 block.find('.list-group-item.address-zip').slideUp();
                 block.find('.list-group-item.address-state').slideUp();
                 block.find('#address_zip').val('');

@@ -14,9 +14,9 @@ class ExternalIdHandlerGenerator < Rails::Generators::NamedBase
     template "migrate_create_external_id_handler.rb", "db/migrate/#{Time.new.to_s(:number)}_create_#{file_name.pluralize}.rb"    
   end
   
-  def copy_view_file
-    template "_edit_form.html.erb", "app/views/#{file_name.pluralize}/_edit_form.html.erb"    
-  end
+#  def copy_view_file
+#    template "_edit_form.html.erb", "app/views/#{file_name.pluralize}/_edit_form.html.erb"    
+#  end
   
   def copy_settings_file
     template "external_id_settings.rb", "config/initializers/external_id_#{singular_name}_settings.rb"

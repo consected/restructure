@@ -341,6 +341,12 @@ _fpa.form_utils = {
            });
             
         }).addClass('attached-auto-grow');
+        
+        block.find('input.college-input.typeahead').not('.attached-college_ta').each(function(){
+            _fpa.set_definition('colleges', function(){
+                _fpa.form_utils.setup_typeahead('input.college-input.typeahead', 'colleges', "colleges");
+            });
+        }).addClass('attached-college_ta');
     },
         
 

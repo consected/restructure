@@ -138,11 +138,34 @@ class Tracker < ActiveRecord::Base
     return t
   end
   
+  def self.add_record_update_entries name, admin, update_type='record'
+    protocol = Protocol.updates.first
+    sp = protocol.sub_processes.find_by_name("#{update_type} updates")
+    values = []
+    
+    name = name.humanize.downcase
+    
+    values << {name: "created #{name.downcase}", sub_process_id: sp.id}
+    values << {name: "updated #{name.downcase}", sub_process_id: sp.id}
+    
+    
+    values.each do |v|
+      res = sp.protocol_events.find_or_initialize_by(v)
+      unless res.admin
+        res.update!(current_admin: admin) 
+        logger.info "Added protocol event #{v} in #{protocol.id} / #{sp.id}"
+      else
+        logger.info "Did not add protocol event #{v} in #{protocol.id} / #{sp.id}"
+      end
+    end
+  end
+  
+  
   def set_record_updates_event record
     new_rec = record.id_changed?    
     rec_type = "#{new_rec ? 'created' : 'updated'} #{record.class.name.underscore.humanize.downcase}"
     
-    self.protocol_event = Rails.cache.fetch "record_updates_protocol_events_#{rec_type}" do
+    self.protocol_event = Rails.cache.fetch "record_updates_protocol_events_#{self.sub_process.id}_#{rec_type}" do
       self.sub_process.protocol_events.where(name: rec_type).first
     end
     

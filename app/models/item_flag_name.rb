@@ -4,6 +4,7 @@ class ItemFlagName < ActiveRecord::Base
 
   before_validation :prevent_item_type_change,  on: :update
   validates :name, presence: true, uniqueness: true
+  after_validation  :update_tracker_events
   
   default_scope -> {order  "item_flag_names.updated_at DESC nulls last"}
 
@@ -22,5 +23,9 @@ class ItemFlagName < ActiveRecord::Base
       if item_type_changed? && self.persisted?
         errors.add(:item_type, "change not allowed!")
       end
+    end
+    
+    def update_tracker_events
+      Tracker.add_record_update_entries item_type, current_admin, 'flag'
     end
 end

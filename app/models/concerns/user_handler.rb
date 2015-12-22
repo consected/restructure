@@ -32,10 +32,10 @@ module UserHandler
   
   class_methods do
 
-    def uses_item_flags?
-      false
-    end
-    
+    def uses_item_flags?      
+      ItemFlagName.enabled_for? self.name.underscore
+    end      
+
     def foreign_key_name
       @foreign_key_name = :master_id
     end
@@ -163,7 +163,7 @@ module UserHandler
     extras[:methods] << :state_name if respond_to? :state
     extras[:methods] << :country_name if respond_to? :country
     extras[:methods] << :source_name if respond_to? :source
-    
+    extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
     super(extras)    
   end
   

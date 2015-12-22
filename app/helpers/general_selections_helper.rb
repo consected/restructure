@@ -5,7 +5,8 @@ module GeneralSelectionsHelper
   end
   
   def general_selection type, options={}
-    raise "Item type not recognized" unless GeneralSelection.item_types.include? type
+    type = type.to_sym if type.is_a? String
+    raise "Item type not recognized: #{type}" unless GeneralSelection.item_types.include? type
     
     cond = {item_type: type}
     attr = [:name, :value, :create_with, :edit_if_set, :edit_always, :lock, :description]

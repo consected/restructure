@@ -1,7 +1,11 @@
+<% # Load partial handlebars templates used by the search results and data blocks%>
 <%= render partial: 'masters/search_results_parts' %>
+<%= render partial: 'item_flags/search_results_template' %>
 
+<% # Set up the handlebars templates for the main data blocks: player_infos, pro_infos, addresses and player_contacts %>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'player_info', 
+    caption: 'person',
     prevent_edit: false, 
     prevent_create: false,
     item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes),
@@ -18,8 +22,26 @@
   } %>
 
 
-<%= render partial: 'addresses/search_results_template' %>
-<%= render partial: 'player_contacts/search_results_template' %>
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'player_contact', 
+    caption: '{{capitalize rec_type}}', # substitute the rec_type attribute (capitalized) as the block caption
+    prevent_edit: false, 
+    prevent_create: false,
+    item_list: %w(data source),
+    data_sort: [:desc, "data-item-rank"]
+  } %>
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'address',     
+    prevent_edit: false, 
+    prevent_create: false,
+    item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type),
+    data_sort: [:desc, "data-item-rank"],
+    # add custom markup data attribute to allow country to be processed in Javascript formatting
+    custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"}
+  } %>
+
+
 
 <% # Add in all the external ID handlers (Scantron, Sage, etc)
     external_id_types = Application.app_list(:external_id)    
@@ -34,83 +56,18 @@
   } %>
 <% end %>
 
+<% # Setup the tracker handlebars templates %>
 <%= render partial: 'trackers/search_results_template' %>
 <%= render partial: 'tracker_histories/search_results_template' %>
-<%= render partial: 'item_flags/search_results_template' %>
+
+<% # Setup the handlebars templates for the external links (web links) %>
 <%= render partial: 'external_links/search_results_template' %>
 
+<% # Setup the handlebars templates for the dynamic models, defined in the admin panel %>
 <%= render partial: 'dynamic_models/search_results_template' %>
 
 
-
-<script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
-  <strong class="player-names">                
-    {{capitalize first_name}} 
-    <span class="middle-name">{{capitalize middle_name}}</span> 
-    {{capitalize last_name}}
-    {{#if nick_name}}
-      <span class="nick-name">({{capitalize nick_name}})</span>
-    {{/if}}
-
-  </strong>
-  {{#if birth_date}}
-  <small>DOB</small> {{local_date birth_date '-'}}
-  {{/if}}
-  {{#if death_date}}
-    <small>DOD</small> {{local_date death_date '-'}}
-  {{/if}}
-  <span data-sub-for="master_id" data-sub-id="{{master_id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
-    {{>accuracy_badge player_info=this}}
-  </span>
-</script>
-
-<script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
-        <strong class="pro-names">
-                  {{capitalize first_name}} 
-                  <span class="middle-name">{{capitalize middle_name}}</span>
-                  {{capitalize last_name}}
-                  {{#if nick_name}}
-                    <span class="nick-name">({{capitalize nick_name}})</span>
-                  {{/if}}
-        </strong>
-        {{#if birth_date}}
-                <small>DOB</small> {{local_date birth_date '-'}}
-        {{/if}}
-        {{#if death_date}}
-                <small>DOD</small> {{local_date death_date '-'}}
-        {{/if}}
-</script>
-
-<script id="tracker_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<span class="badge" id="tracker-count-{{master_id}}">{{trackers.length}}</span>
-</script>
-
-<script id="accuracy_badge-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<span class="label label-info player-info-badge-{{player_info.rank}}" title="{{player_info.accuracy_score_name}}">{{player_info.rank}}</span>
-</script>
-
-<script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}"></span> 
-    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
-    {{#if user_name}} by {{user_name}}{{/if}}    
-</script>
-
-
-<script id="tracker-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>tracker_badge}}
-</script>
-
-<script id="accuracy-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>accuracy_badge}}
-</script>
-
-<script id="player-info-summary-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with player_info}}
-  {{>player_info_summary_result}}
-  {{/with}}
-</script>
-
-
+<% # Display the set of search results in the "master search" format %>
 
 <script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#if masters.length}}

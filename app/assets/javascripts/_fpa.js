@@ -383,7 +383,7 @@ _fpa = {
                                             use_data = item_data;                    
                                         }
                                     }
-                                }else if(d[dsfor]){                                    
+                                }else if(d && d[dsfor]){                                    
                                     // Another special case when we are looking just for elements that match the item type 
                                     // (forced back into the data at the start of response handling) and either the
                                     // id or the attribute specified by data-sub-for
@@ -399,7 +399,7 @@ _fpa = {
                                         use_data = {};
                                         use_data[dst] = item_data;                    
                                     }
-                                }else{
+                                }else if(d){
                                     // The least specific case is to run through the array of data elements, having 
                                     // id or the attribute specified by data-sub-for, and seeing whether any  
                                     // match the specified value

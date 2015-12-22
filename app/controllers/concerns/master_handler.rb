@@ -10,7 +10,7 @@ module MasterHandler
 
     after_action :do_log_action
     
-    helper_method :primary_model
+    helper_method :primary_model, :permitted_params
   end
 
   def do_log_action
@@ -61,11 +61,11 @@ module MasterHandler
   
   def new
     set_object_instance @master_objects.build
-    render partial: 'edit_form'
+    render partial: edit_form
   end
 
   def edit
-    render partial: 'edit_form'
+    render partial: edit_form
   end
 
   def create
@@ -109,7 +109,14 @@ module MasterHandler
   def flags
     
   end
+
+
+  protected
   
+    def edit_form
+      'edit_form'
+    end  
+    
   private
 
     def set_me_and_master

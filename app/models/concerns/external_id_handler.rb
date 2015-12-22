@@ -84,8 +84,7 @@ module ExternalIdHandler
     end
     
     def add_master_association &association_block
-      #puts "Calling: Master.has_many #{plural_name.to_sym},  inverse_of: :master. Association block defined? #{!!association_block}"
-      
+            
       # Define the association
       Master.has_many plural_name.to_sym,  inverse_of: :master, &association_block 
       # Now update the master's nested attributes this model's symbol
