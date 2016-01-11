@@ -28,7 +28,7 @@ module Seeds
     def self.setup
       log "In #{self}.setup"
       if Rails.env.test? || ItemFlagName.count == 0
-        if Protocol.count == 0
+        if Protocol.count == 0 || Protocol.where(name: 'Updates').count == 0
           Seeds::TrackerUpdatesProtocol.create_protocol_events
         end
         create_item_flag_names 
