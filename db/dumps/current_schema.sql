@@ -10,6 +10,7 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+/*
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
 --
@@ -36,7 +37,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA ml_app;
 --
 
 COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
-
+*/
 
 SET search_path = ml_app, pg_catalog;
 
