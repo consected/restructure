@@ -4,11 +4,11 @@ default: &default
   # For details on connection pooling, see rails configuration guide
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: 5
+  schema_search_path: ml_app
 
 development:
   <<: *default
-  database: fpa_development
-  schema_search_path: ml_app
+  database: fpa_development  
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
