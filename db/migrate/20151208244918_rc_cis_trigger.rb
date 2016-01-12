@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS rc_stage_cif_copy (
                     (master_id, street, street2, city, state, zip, source, rank, created_at, updated_at, user_id, rec_type)
                     VALUES
                     (new_master_id, NEW.street, NEW.street2, NEW.city, NEW.state, NEW.zipcode, 'cis-redcap', 10, now(), now(), NEW.user_id, 'home')
-                    RETURNING id INTO updated_item_id;
+                    RETURNING id INTO updated_item_id; 
                   
                   PERFORM update_address_ranks(new_master_id);
                   PERFORM add_study_update_entry(new_master_id, 'updated', 'address', event_date, update_notes, NEW.user_id, updated_item_id, 'Address');
