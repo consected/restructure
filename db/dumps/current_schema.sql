@@ -5677,9 +5677,9 @@ ALTER TABLE ONLY tracker_history
 --
 
 REVOKE ALL ON SCHEMA ml_app FROM PUBLIC;
-REVOKE ALL ON SCHEMA ml_app FROM postgres;
-GRANT ALL ON SCHEMA ml_app TO postgres;
+REVOKE ALL ON SCHEMA ml_app FROM fphs;
 GRANT ALL ON SCHEMA ml_app TO fphs;
+GRANT ALL ON SCHEMA ml_app TO postgres;
 
 
 --
@@ -5923,6 +5923,16 @@ GRANT ALL ON FUNCTION log_protocol_update() TO PUBLIC;
 
 
 --
+-- Name: log_report_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_report_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_report_update() FROM fphs;
+GRANT ALL ON FUNCTION log_report_update() TO fphs;
+GRANT ALL ON FUNCTION log_report_update() TO PUBLIC;
+
+
+--
 -- Name: log_scantron_update(); Type: ACL; Schema: ml_app; Owner: -
 --
 
@@ -5940,6 +5950,16 @@ REVOKE ALL ON FUNCTION log_sub_process_update() FROM PUBLIC;
 REVOKE ALL ON FUNCTION log_sub_process_update() FROM fphs;
 GRANT ALL ON FUNCTION log_sub_process_update() TO fphs;
 GRANT ALL ON FUNCTION log_sub_process_update() TO PUBLIC;
+
+
+--
+-- Name: log_test_thing_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_test_thing_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_test_thing_update() FROM fphs;
+GRANT ALL ON FUNCTION log_test_thing_update() TO fphs;
+GRANT ALL ON FUNCTION log_test_thing_update() TO PUBLIC;
 
 
 --
@@ -6758,6 +6778,42 @@ GRANT ALL ON SEQUENCE sub_processes_id_seq TO fphs;
 REVOKE ALL ON TABLE test_table FROM PUBLIC;
 REVOKE ALL ON TABLE test_table FROM fphs;
 GRANT ALL ON TABLE test_table TO fphs;
+
+
+--
+-- Name: test_thing_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE test_thing_history FROM PUBLIC;
+REVOKE ALL ON TABLE test_thing_history FROM fphs;
+GRANT ALL ON TABLE test_thing_history TO fphs;
+
+
+--
+-- Name: test_thing_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE test_thing_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE test_thing_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE test_thing_history_id_seq TO fphs;
+
+
+--
+-- Name: test_things; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE test_things FROM PUBLIC;
+REVOKE ALL ON TABLE test_things FROM fphs;
+GRANT ALL ON TABLE test_things TO fphs;
+
+
+--
+-- Name: test_things_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE test_things_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE test_things_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE test_things_id_seq TO fphs;
 
 
 --
