@@ -10,6 +10,12 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+--
+-- Name: ml_app; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA ml_app;
+
 
 SET search_path = ml_app, pg_catalog;
 
@@ -1074,7 +1080,10 @@ CREATE FUNCTION log_report_update() RETURNS trigger
                     searchable,
                     position,
                     created_at,
-                    updated_at
+                    updated_at,
+                    edit_field_names,
+                    selection_fields,
+                    item_type
                 )                 
             SELECT                 
                 NEW.id,
@@ -1089,7 +1098,10 @@ CREATE FUNCTION log_report_update() RETURNS trigger
                 NEW.searchable,
                 NEW.position,                
                 NEW.created_at,
-                NEW.updated_at
+                NEW.updated_at,
+                NEW.edit_field_names,
+                NEW.selection_fields,
+                NEW.item_type
             ;
             RETURN NEW;
         END;
@@ -1154,6 +1166,34 @@ CREATE FUNCTION log_sub_process_update() RETURNS trigger
     NEW.admin_id ,
     NEW.created_at,
     NEW.updated_at
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_test_thing_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_test_thing_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO test_thing_history
+            (
+                    test_thing_id,                    
+                    external_id,
+                    user_id,
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.external_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at 
             ;
             RETURN NEW;
         END;
@@ -2770,7 +2810,11 @@ CREATE TABLE report_history (
     "position" integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    report_id integer
+    report_id integer,
+    item_type character varying,
+    edit_model character varying,
+    edit_field_names character varying,
+    selection_fields character varying
 );
 
 
@@ -2813,7 +2857,8 @@ CREATE TABLE reports (
     "position" integer,
     edit_model character varying,
     edit_field_names character varying,
-    selection_fields character varying
+    selection_fields character varying,
+    item_type character varying
 );
 
 
@@ -3034,6 +3079,73 @@ CREATE TABLE test_table (
     somestring character varying,
     testing boolean
 );
+
+
+--
+-- Name: test_thing_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_thing_history (
+    id integer NOT NULL,
+    test_thing_id integer,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_thing_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE test_thing_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_thing_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE test_thing_history_id_seq OWNED BY test_thing_history.id;
+
+
+--
+-- Name: test_things; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_things (
+    id integer NOT NULL,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_things_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE test_things_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_things_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE test_things_id_seq OWNED BY test_things.id;
 
 
 --
@@ -3545,6 +3657,20 @@ ALTER TABLE ONLY sub_processes ALTER COLUMN id SET DEFAULT nextval('sub_processe
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY test_thing_history ALTER COLUMN id SET DEFAULT nextval('test_thing_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_things ALTER COLUMN id SET DEFAULT nextval('test_things_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY tracker_history ALTER COLUMN id SET DEFAULT nextval('tracker_history_id_seq'::regclass);
 
 
@@ -3885,6 +4011,22 @@ ALTER TABLE ONLY sub_process_history
 
 ALTER TABLE ONLY sub_processes
     ADD CONSTRAINT sub_processes_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_thing_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_thing_history
+    ADD CONSTRAINT test_thing_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_things_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_things
+    ADD CONSTRAINT test_things_pkey PRIMARY KEY (id);
 
 
 --
@@ -4367,6 +4509,41 @@ CREATE INDEX index_sub_processes_on_protocol_id ON sub_processes USING btree (pr
 
 
 --
+-- Name: index_test_thing_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_thing_history_on_master_id ON test_thing_history USING btree (master_id);
+
+
+--
+-- Name: index_test_thing_history_on_test_thing_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_thing_history_on_test_thing_id ON test_thing_history USING btree (test_thing_id);
+
+
+--
+-- Name: index_test_thing_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_thing_history_on_user_id ON test_thing_history USING btree (user_id);
+
+
+--
+-- Name: index_test_things_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_things_on_master_id ON test_things USING btree (master_id);
+
+
+--
+-- Name: index_test_things_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_things_on_user_id ON test_things USING btree (user_id);
+
+
+--
 -- Name: index_tracker_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4787,6 +4964,20 @@ CREATE TRIGGER sub_process_history_update AFTER UPDATE ON sub_processes FOR EACH
 
 
 --
+-- Name: test_thing_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_thing_history_insert AFTER INSERT ON test_things FOR EACH ROW EXECUTE PROCEDURE log_test_thing_update();
+
+
+--
+-- Name: test_thing_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_thing_history_update AFTER UPDATE ON test_things FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_test_thing_update();
+
+
+--
 -- Name: tracker_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -5026,6 +5217,22 @@ ALTER TABLE ONLY protocol_events
 
 
 --
+-- Name: fk_rails_1077777559; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_things
+    ADD CONSTRAINT fk_rails_1077777559 FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_1150d75757; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_thing_history
+    ADD CONSTRAINT fk_rails_1150d75757 FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
 -- Name: fk_rails_1694bfe639; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5162,6 +5369,14 @@ ALTER TABLE ONLY player_contacts
 
 
 --
+-- Name: fk_rails_78430eff1e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_things
+    ADD CONSTRAINT fk_rails_78430eff1e FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_7c10a99849; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5242,6 +5457,14 @@ ALTER TABLE ONLY reports
 
 
 --
+-- Name: fk_rails_b39089285c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_thing_history
+    ADD CONSTRAINT fk_rails_b39089285c FOREIGN KEY (test_thing_id) REFERENCES test_things(id);
+
+
+--
 -- Name: fk_rails_b822840dc1; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5263,6 +5486,14 @@ ALTER TABLE ONLY trackers
 
 ALTER TABLE ONLY item_flags
     ADD CONSTRAINT fk_rails_c2d5bb8930 FOREIGN KEY (item_flag_name_id) REFERENCES item_flag_names(id);
+
+
+--
+-- Name: fk_rails_c5026e3ec6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_thing_history
+    ADD CONSTRAINT fk_rails_c5026e3ec6 FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -5445,6 +5676,1196 @@ ALTER TABLE ONLY tracker_history
 -- Name: ml_app; Type: ACL; Schema: -; Owner: -
 --
 
+REVOKE ALL ON SCHEMA ml_app FROM PUBLIC;
+REVOKE ALL ON SCHEMA ml_app FROM postgres;
+GRANT ALL ON SCHEMA ml_app TO postgres;
+GRANT ALL ON SCHEMA ml_app TO fphs;
+
+
+--
+-- Name: add_study_update_entry(integer, character varying, character varying, date, character varying, integer, integer, character varying); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION add_study_update_entry(master_id integer, update_type character varying, update_name character varying, event_date date, update_notes character varying, user_id integer, item_id integer, item_type character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION add_study_update_entry(master_id integer, update_type character varying, update_name character varying, event_date date, update_notes character varying, user_id integer, item_id integer, item_type character varying) FROM fphs;
+GRANT ALL ON FUNCTION add_study_update_entry(master_id integer, update_type character varying, update_name character varying, event_date date, update_notes character varying, user_id integer, item_id integer, item_type character varying) TO fphs;
+GRANT ALL ON FUNCTION add_study_update_entry(master_id integer, update_type character varying, update_name character varying, event_date date, update_notes character varying, user_id integer, item_id integer, item_type character varying) TO PUBLIC;
+
+
+--
+-- Name: add_tracker_entry_by_name(integer, character varying, character varying, character varying, character varying, integer, integer, character varying); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, set_notes character varying, user_id integer, item_id integer, item_type character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, set_notes character varying, user_id integer, item_id integer, item_type character varying) FROM fphs;
+GRANT ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, set_notes character varying, user_id integer, item_id integer, item_type character varying) TO fphs;
+GRANT ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, set_notes character varying, user_id integer, item_id integer, item_type character varying) TO PUBLIC;
+
+
+--
+-- Name: add_tracker_entry_by_name(integer, character varying, character varying, character varying, date, character varying, integer, integer, character varying); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, event_date date, set_notes character varying, user_id integer, item_id integer, item_type character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, event_date date, set_notes character varying, user_id integer, item_id integer, item_type character varying) FROM fphs;
+GRANT ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, event_date date, set_notes character varying, user_id integer, item_id integer, item_type character varying) TO fphs;
+GRANT ALL ON FUNCTION add_tracker_entry_by_name(master_id integer, protocol_name character varying, sub_process_name character varying, protocol_event_name character varying, event_date date, set_notes character varying, user_id integer, item_id integer, item_type character varying) TO PUBLIC;
+
+
+--
+-- Name: current_user_id(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION current_user_id() FROM PUBLIC;
+REVOKE ALL ON FUNCTION current_user_id() FROM fphs;
+GRANT ALL ON FUNCTION current_user_id() TO fphs;
+GRANT ALL ON FUNCTION current_user_id() TO PUBLIC;
+
+
+--
+-- Name: format_update_notes(character varying, character varying, character varying); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION format_update_notes(field_name character varying, old_val character varying, new_val character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION format_update_notes(field_name character varying, old_val character varying, new_val character varying) FROM fphs;
+GRANT ALL ON FUNCTION format_update_notes(field_name character varying, old_val character varying, new_val character varying) TO fphs;
+GRANT ALL ON FUNCTION format_update_notes(field_name character varying, old_val character varying, new_val character varying) TO PUBLIC;
+
+
+--
+-- Name: handle_address_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION handle_address_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION handle_address_update() FROM fphs;
+GRANT ALL ON FUNCTION handle_address_update() TO fphs;
+GRANT ALL ON FUNCTION handle_address_update() TO PUBLIC;
+
+
+--
+-- Name: handle_delete(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION handle_delete() FROM PUBLIC;
+REVOKE ALL ON FUNCTION handle_delete() FROM fphs;
+GRANT ALL ON FUNCTION handle_delete() TO fphs;
+GRANT ALL ON FUNCTION handle_delete() TO PUBLIC;
+
+
+--
+-- Name: handle_player_contact_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION handle_player_contact_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION handle_player_contact_update() FROM fphs;
+GRANT ALL ON FUNCTION handle_player_contact_update() TO fphs;
+GRANT ALL ON FUNCTION handle_player_contact_update() TO PUBLIC;
+
+
+--
+-- Name: handle_player_info_before_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION handle_player_info_before_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION handle_player_info_before_update() FROM fphs;
+GRANT ALL ON FUNCTION handle_player_info_before_update() TO fphs;
+GRANT ALL ON FUNCTION handle_player_info_before_update() TO PUBLIC;
+
+
+--
+-- Name: handle_rc_cis_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION handle_rc_cis_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION handle_rc_cis_update() FROM fphs;
+GRANT ALL ON FUNCTION handle_rc_cis_update() TO fphs;
+GRANT ALL ON FUNCTION handle_rc_cis_update() TO PUBLIC;
+
+
+--
+-- Name: handle_tracker_history_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION handle_tracker_history_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION handle_tracker_history_update() FROM fphs;
+GRANT ALL ON FUNCTION handle_tracker_history_update() TO fphs;
+GRANT ALL ON FUNCTION handle_tracker_history_update() TO PUBLIC;
+
+
+--
+-- Name: log_accuracy_score_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_accuracy_score_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_accuracy_score_update() FROM fphs;
+GRANT ALL ON FUNCTION log_accuracy_score_update() TO fphs;
+GRANT ALL ON FUNCTION log_accuracy_score_update() TO PUBLIC;
+
+
+--
+-- Name: log_address_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_address_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_address_update() FROM fphs;
+GRANT ALL ON FUNCTION log_address_update() TO fphs;
+GRANT ALL ON FUNCTION log_address_update() TO PUBLIC;
+
+
+--
+-- Name: log_admin_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_admin_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_admin_update() FROM fphs;
+GRANT ALL ON FUNCTION log_admin_update() TO fphs;
+GRANT ALL ON FUNCTION log_admin_update() TO PUBLIC;
+
+
+--
+-- Name: log_college_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_college_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_college_update() FROM fphs;
+GRANT ALL ON FUNCTION log_college_update() TO fphs;
+GRANT ALL ON FUNCTION log_college_update() TO PUBLIC;
+
+
+--
+-- Name: log_dynamic_model_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_dynamic_model_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_dynamic_model_update() FROM fphs;
+GRANT ALL ON FUNCTION log_dynamic_model_update() TO fphs;
+GRANT ALL ON FUNCTION log_dynamic_model_update() TO PUBLIC;
+
+
+--
+-- Name: log_external_link_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_external_link_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_external_link_update() FROM fphs;
+GRANT ALL ON FUNCTION log_external_link_update() TO fphs;
+GRANT ALL ON FUNCTION log_external_link_update() TO PUBLIC;
+
+
+--
+-- Name: log_general_selection_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_general_selection_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_general_selection_update() FROM fphs;
+GRANT ALL ON FUNCTION log_general_selection_update() TO fphs;
+GRANT ALL ON FUNCTION log_general_selection_update() TO PUBLIC;
+
+
+--
+-- Name: log_item_flag_name_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_item_flag_name_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_item_flag_name_update() FROM fphs;
+GRANT ALL ON FUNCTION log_item_flag_name_update() TO fphs;
+GRANT ALL ON FUNCTION log_item_flag_name_update() TO PUBLIC;
+
+
+--
+-- Name: log_item_flag_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_item_flag_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_item_flag_update() FROM fphs;
+GRANT ALL ON FUNCTION log_item_flag_update() TO fphs;
+GRANT ALL ON FUNCTION log_item_flag_update() TO PUBLIC;
+
+
+--
+-- Name: log_player_contact_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_player_contact_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_player_contact_update() FROM fphs;
+GRANT ALL ON FUNCTION log_player_contact_update() TO fphs;
+GRANT ALL ON FUNCTION log_player_contact_update() TO PUBLIC;
+
+
+--
+-- Name: log_player_info_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_player_info_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_player_info_update() FROM fphs;
+GRANT ALL ON FUNCTION log_player_info_update() TO fphs;
+GRANT ALL ON FUNCTION log_player_info_update() TO PUBLIC;
+
+
+--
+-- Name: log_protocol_event_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_protocol_event_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_protocol_event_update() FROM fphs;
+GRANT ALL ON FUNCTION log_protocol_event_update() TO fphs;
+GRANT ALL ON FUNCTION log_protocol_event_update() TO PUBLIC;
+
+
+--
+-- Name: log_protocol_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_protocol_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_protocol_update() FROM fphs;
+GRANT ALL ON FUNCTION log_protocol_update() TO fphs;
+GRANT ALL ON FUNCTION log_protocol_update() TO PUBLIC;
+
+
+--
+-- Name: log_scantron_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_scantron_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_scantron_update() FROM fphs;
+GRANT ALL ON FUNCTION log_scantron_update() TO fphs;
+GRANT ALL ON FUNCTION log_scantron_update() TO PUBLIC;
+
+
+--
+-- Name: log_sub_process_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_sub_process_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_sub_process_update() FROM fphs;
+GRANT ALL ON FUNCTION log_sub_process_update() TO fphs;
+GRANT ALL ON FUNCTION log_sub_process_update() TO PUBLIC;
+
+
+--
+-- Name: log_tracker_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_tracker_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_tracker_update() FROM fphs;
+GRANT ALL ON FUNCTION log_tracker_update() TO fphs;
+GRANT ALL ON FUNCTION log_tracker_update() TO PUBLIC;
+
+
+--
+-- Name: log_user_authorization_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_user_authorization_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_user_authorization_update() FROM fphs;
+GRANT ALL ON FUNCTION log_user_authorization_update() TO fphs;
+GRANT ALL ON FUNCTION log_user_authorization_update() TO PUBLIC;
+
+
+--
+-- Name: log_user_update(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION log_user_update() FROM PUBLIC;
+REVOKE ALL ON FUNCTION log_user_update() FROM fphs;
+GRANT ALL ON FUNCTION log_user_update() TO fphs;
+GRANT ALL ON FUNCTION log_user_update() TO PUBLIC;
+
+
+--
+-- Name: tracker_upsert(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION tracker_upsert() FROM PUBLIC;
+REVOKE ALL ON FUNCTION tracker_upsert() FROM fphs;
+GRANT ALL ON FUNCTION tracker_upsert() TO fphs;
+GRANT ALL ON FUNCTION tracker_upsert() TO PUBLIC;
+
+
+--
+-- Name: update_address_ranks(integer); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION update_address_ranks(set_master_id integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_address_ranks(set_master_id integer) FROM fphs;
+GRANT ALL ON FUNCTION update_address_ranks(set_master_id integer) TO fphs;
+GRANT ALL ON FUNCTION update_address_ranks(set_master_id integer) TO PUBLIC;
+
+
+--
+-- Name: update_master_with_player_info(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION update_master_with_player_info() FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_master_with_player_info() FROM fphs;
+GRANT ALL ON FUNCTION update_master_with_player_info() TO fphs;
+GRANT ALL ON FUNCTION update_master_with_player_info() TO PUBLIC;
+
+
+--
+-- Name: update_master_with_pro_info(); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION update_master_with_pro_info() FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_master_with_pro_info() FROM fphs;
+GRANT ALL ON FUNCTION update_master_with_pro_info() TO fphs;
+GRANT ALL ON FUNCTION update_master_with_pro_info() TO PUBLIC;
+
+
+--
+-- Name: update_player_contact_ranks(integer, character varying); Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION update_player_contact_ranks(set_master_id integer, set_rec_type character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_player_contact_ranks(set_master_id integer, set_rec_type character varying) FROM fphs;
+GRANT ALL ON FUNCTION update_player_contact_ranks(set_master_id integer, set_rec_type character varying) TO fphs;
+GRANT ALL ON FUNCTION update_player_contact_ranks(set_master_id integer, set_rec_type character varying) TO PUBLIC;
+
+
+--
+-- Name: accuracy_score_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE accuracy_score_history FROM PUBLIC;
+REVOKE ALL ON TABLE accuracy_score_history FROM fphs;
+GRANT ALL ON TABLE accuracy_score_history TO fphs;
+
+
+--
+-- Name: accuracy_score_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE accuracy_score_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE accuracy_score_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE accuracy_score_history_id_seq TO fphs;
+
+
+--
+-- Name: accuracy_scores; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE accuracy_scores FROM PUBLIC;
+REVOKE ALL ON TABLE accuracy_scores FROM fphs;
+GRANT ALL ON TABLE accuracy_scores TO fphs;
+
+
+--
+-- Name: accuracy_scores_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE accuracy_scores_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE accuracy_scores_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE accuracy_scores_id_seq TO fphs;
+
+
+--
+-- Name: address_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE address_history FROM PUBLIC;
+REVOKE ALL ON TABLE address_history FROM fphs;
+GRANT ALL ON TABLE address_history TO fphs;
+
+
+--
+-- Name: address_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE address_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE address_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE address_history_id_seq TO fphs;
+
+
+--
+-- Name: addresses; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE addresses FROM PUBLIC;
+REVOKE ALL ON TABLE addresses FROM fphs;
+GRANT ALL ON TABLE addresses TO fphs;
+
+
+--
+-- Name: addresses_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE addresses_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE addresses_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE addresses_id_seq TO fphs;
+
+
+--
+-- Name: admin_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE admin_history FROM PUBLIC;
+REVOKE ALL ON TABLE admin_history FROM fphs;
+GRANT ALL ON TABLE admin_history TO fphs;
+
+
+--
+-- Name: admin_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE admin_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE admin_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE admin_history_id_seq TO fphs;
+
+
+--
+-- Name: admins; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE admins FROM PUBLIC;
+REVOKE ALL ON TABLE admins FROM fphs;
+GRANT ALL ON TABLE admins TO fphs;
+
+
+--
+-- Name: admins_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE admins_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE admins_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE admins_id_seq TO fphs;
+
+
+--
+-- Name: college_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE college_history FROM PUBLIC;
+REVOKE ALL ON TABLE college_history FROM fphs;
+GRANT ALL ON TABLE college_history TO fphs;
+
+
+--
+-- Name: college_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE college_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE college_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE college_history_id_seq TO fphs;
+
+
+--
+-- Name: colleges; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE colleges FROM PUBLIC;
+REVOKE ALL ON TABLE colleges FROM fphs;
+GRANT ALL ON TABLE colleges TO fphs;
+
+
+--
+-- Name: colleges_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE colleges_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE colleges_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE colleges_id_seq TO fphs;
+
+
+--
+-- Name: copy_player_infos; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE copy_player_infos FROM PUBLIC;
+REVOKE ALL ON TABLE copy_player_infos FROM fphs;
+GRANT ALL ON TABLE copy_player_infos TO fphs;
+
+
+--
+-- Name: dynamic_model_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE dynamic_model_history FROM PUBLIC;
+REVOKE ALL ON TABLE dynamic_model_history FROM fphs;
+GRANT ALL ON TABLE dynamic_model_history TO fphs;
+
+
+--
+-- Name: dynamic_model_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE dynamic_model_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE dynamic_model_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE dynamic_model_history_id_seq TO fphs;
+
+
+--
+-- Name: dynamic_models; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE dynamic_models FROM PUBLIC;
+REVOKE ALL ON TABLE dynamic_models FROM fphs;
+GRANT ALL ON TABLE dynamic_models TO fphs;
+
+
+--
+-- Name: dynamic_models_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE dynamic_models_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE dynamic_models_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE dynamic_models_id_seq TO fphs;
+
+
+--
+-- Name: external_link_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE external_link_history FROM PUBLIC;
+REVOKE ALL ON TABLE external_link_history FROM fphs;
+GRANT ALL ON TABLE external_link_history TO fphs;
+
+
+--
+-- Name: external_link_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE external_link_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE external_link_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE external_link_history_id_seq TO fphs;
+
+
+--
+-- Name: external_links; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE external_links FROM PUBLIC;
+REVOKE ALL ON TABLE external_links FROM fphs;
+GRANT ALL ON TABLE external_links TO fphs;
+
+
+--
+-- Name: external_links_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE external_links_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE external_links_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE external_links_id_seq TO fphs;
+
+
+--
+-- Name: general_selection_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE general_selection_history FROM PUBLIC;
+REVOKE ALL ON TABLE general_selection_history FROM fphs;
+GRANT ALL ON TABLE general_selection_history TO fphs;
+
+
+--
+-- Name: general_selection_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE general_selection_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE general_selection_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE general_selection_history_id_seq TO fphs;
+
+
+--
+-- Name: general_selections; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE general_selections FROM PUBLIC;
+REVOKE ALL ON TABLE general_selections FROM fphs;
+GRANT ALL ON TABLE general_selections TO fphs;
+
+
+--
+-- Name: general_selections_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE general_selections_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE general_selections_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE general_selections_id_seq TO fphs;
+
+
+--
+-- Name: item_flag_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE item_flag_history FROM PUBLIC;
+REVOKE ALL ON TABLE item_flag_history FROM fphs;
+GRANT ALL ON TABLE item_flag_history TO fphs;
+
+
+--
+-- Name: item_flag_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE item_flag_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE item_flag_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE item_flag_history_id_seq TO fphs;
+
+
+--
+-- Name: item_flag_name_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE item_flag_name_history FROM PUBLIC;
+REVOKE ALL ON TABLE item_flag_name_history FROM fphs;
+GRANT ALL ON TABLE item_flag_name_history TO fphs;
+
+
+--
+-- Name: item_flag_name_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE item_flag_name_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE item_flag_name_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE item_flag_name_history_id_seq TO fphs;
+
+
+--
+-- Name: item_flag_names; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE item_flag_names FROM PUBLIC;
+REVOKE ALL ON TABLE item_flag_names FROM fphs;
+GRANT ALL ON TABLE item_flag_names TO fphs;
+
+
+--
+-- Name: item_flag_names_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE item_flag_names_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE item_flag_names_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE item_flag_names_id_seq TO fphs;
+
+
+--
+-- Name: item_flags; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE item_flags FROM PUBLIC;
+REVOKE ALL ON TABLE item_flags FROM fphs;
+GRANT ALL ON TABLE item_flags TO fphs;
+
+
+--
+-- Name: item_flags_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE item_flags_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE item_flags_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE item_flags_id_seq TO fphs;
+
+
+--
+-- Name: manage_users; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE manage_users FROM PUBLIC;
+REVOKE ALL ON TABLE manage_users FROM fphs;
+GRANT ALL ON TABLE manage_users TO fphs;
+
+
+--
+-- Name: manage_users_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE manage_users_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE manage_users_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE manage_users_id_seq TO fphs;
+
+
+--
+-- Name: masters; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE masters FROM PUBLIC;
+REVOKE ALL ON TABLE masters FROM fphs;
+GRANT ALL ON TABLE masters TO fphs;
+
+
+--
+-- Name: masters_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE masters_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE masters_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE masters_id_seq TO fphs;
+
+
+--
+-- Name: msid_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE msid_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE msid_seq FROM fphs;
+GRANT ALL ON SEQUENCE msid_seq TO fphs;
+
+
+--
+-- Name: player_contact_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE player_contact_history FROM PUBLIC;
+REVOKE ALL ON TABLE player_contact_history FROM fphs;
+GRANT ALL ON TABLE player_contact_history TO fphs;
+
+
+--
+-- Name: player_contact_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE player_contact_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE player_contact_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE player_contact_history_id_seq TO fphs;
+
+
+--
+-- Name: player_contacts; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE player_contacts FROM PUBLIC;
+REVOKE ALL ON TABLE player_contacts FROM fphs;
+GRANT ALL ON TABLE player_contacts TO fphs;
+
+
+--
+-- Name: player_contacts_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE player_contacts_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE player_contacts_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE player_contacts_id_seq TO fphs;
+
+
+--
+-- Name: player_info_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE player_info_history FROM PUBLIC;
+REVOKE ALL ON TABLE player_info_history FROM fphs;
+GRANT ALL ON TABLE player_info_history TO fphs;
+
+
+--
+-- Name: player_info_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE player_info_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE player_info_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE player_info_history_id_seq TO fphs;
+
+
+--
+-- Name: player_infos; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE player_infos FROM PUBLIC;
+REVOKE ALL ON TABLE player_infos FROM fphs;
+GRANT ALL ON TABLE player_infos TO fphs;
+
+
+--
+-- Name: player_infos_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE player_infos_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE player_infos_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE player_infos_id_seq TO fphs;
+
+
+--
+-- Name: pro_infos; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE pro_infos FROM PUBLIC;
+REVOKE ALL ON TABLE pro_infos FROM fphs;
+GRANT ALL ON TABLE pro_infos TO fphs;
+
+
+--
+-- Name: pro_infos_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE pro_infos_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE pro_infos_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE pro_infos_id_seq TO fphs;
+
+
+--
+-- Name: protocol_event_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE protocol_event_history FROM PUBLIC;
+REVOKE ALL ON TABLE protocol_event_history FROM fphs;
+GRANT ALL ON TABLE protocol_event_history TO fphs;
+
+
+--
+-- Name: protocol_event_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE protocol_event_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE protocol_event_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE protocol_event_history_id_seq TO fphs;
+
+
+--
+-- Name: protocol_events; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE protocol_events FROM PUBLIC;
+REVOKE ALL ON TABLE protocol_events FROM fphs;
+GRANT ALL ON TABLE protocol_events TO fphs;
+
+
+--
+-- Name: protocol_events_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE protocol_events_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE protocol_events_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE protocol_events_id_seq TO fphs;
+
+
+--
+-- Name: protocol_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE protocol_history FROM PUBLIC;
+REVOKE ALL ON TABLE protocol_history FROM fphs;
+GRANT ALL ON TABLE protocol_history TO fphs;
+
+
+--
+-- Name: protocol_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE protocol_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE protocol_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE protocol_history_id_seq TO fphs;
+
+
+--
+-- Name: protocols; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE protocols FROM PUBLIC;
+REVOKE ALL ON TABLE protocols FROM fphs;
+GRANT ALL ON TABLE protocols TO fphs;
+
+
+--
+-- Name: protocols_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE protocols_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE protocols_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE protocols_id_seq TO fphs;
+
+
+--
+-- Name: rc_cis; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE rc_cis FROM PUBLIC;
+REVOKE ALL ON TABLE rc_cis FROM fphs;
+GRANT ALL ON TABLE rc_cis TO fphs;
+
+
+--
+-- Name: rc_cis2; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE rc_cis2 FROM PUBLIC;
+REVOKE ALL ON TABLE rc_cis2 FROM fphs;
+GRANT ALL ON TABLE rc_cis2 TO fphs;
+
+
+--
+-- Name: rc_cis_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE rc_cis_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE rc_cis_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE rc_cis_id_seq TO fphs;
+
+
+--
+-- Name: rc_stage_cif_copy; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE rc_stage_cif_copy FROM PUBLIC;
+REVOKE ALL ON TABLE rc_stage_cif_copy FROM fphs;
+GRANT ALL ON TABLE rc_stage_cif_copy TO fphs;
+
+
+--
+-- Name: rc_stage_cif_copy_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE rc_stage_cif_copy_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE rc_stage_cif_copy_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE rc_stage_cif_copy_id_seq TO fphs;
+
+
+--
+-- Name: report_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE report_history FROM PUBLIC;
+REVOKE ALL ON TABLE report_history FROM fphs;
+GRANT ALL ON TABLE report_history TO fphs;
+
+
+--
+-- Name: report_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE report_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE report_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE report_history_id_seq TO fphs;
+
+
+--
+-- Name: reports; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE reports FROM PUBLIC;
+REVOKE ALL ON TABLE reports FROM fphs;
+GRANT ALL ON TABLE reports TO fphs;
+
+
+--
+-- Name: reports_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE reports_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE reports_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE reports_id_seq TO fphs;
+
+
+--
+-- Name: sage_assignments; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE sage_assignments FROM PUBLIC;
+REVOKE ALL ON TABLE sage_assignments FROM fphs;
+GRANT ALL ON TABLE sage_assignments TO fphs;
+
+
+--
+-- Name: sage_assignments_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE sage_assignments_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE sage_assignments_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE sage_assignments_id_seq TO fphs;
+
+
+--
+-- Name: scantron_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE scantron_history FROM PUBLIC;
+REVOKE ALL ON TABLE scantron_history FROM fphs;
+GRANT ALL ON TABLE scantron_history TO fphs;
+
+
+--
+-- Name: scantron_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE scantron_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE scantron_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE scantron_history_id_seq TO fphs;
+
+
+--
+-- Name: scantrons; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE scantrons FROM PUBLIC;
+REVOKE ALL ON TABLE scantrons FROM fphs;
+GRANT ALL ON TABLE scantrons TO fphs;
+
+
+--
+-- Name: scantrons_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE scantrons_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE scantrons_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE scantrons_id_seq TO fphs;
+
+
+--
+-- Name: schema_migrations; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE schema_migrations FROM PUBLIC;
+REVOKE ALL ON TABLE schema_migrations FROM fphs;
+GRANT ALL ON TABLE schema_migrations TO fphs;
+
+
+--
+-- Name: smback; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE smback FROM PUBLIC;
+REVOKE ALL ON TABLE smback FROM fphs;
+GRANT ALL ON TABLE smback TO fphs;
+
+
+--
+-- Name: sub_process_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE sub_process_history FROM PUBLIC;
+REVOKE ALL ON TABLE sub_process_history FROM fphs;
+GRANT ALL ON TABLE sub_process_history TO fphs;
+
+
+--
+-- Name: sub_process_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE sub_process_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE sub_process_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE sub_process_history_id_seq TO fphs;
+
+
+--
+-- Name: sub_processes; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE sub_processes FROM PUBLIC;
+REVOKE ALL ON TABLE sub_processes FROM fphs;
+GRANT ALL ON TABLE sub_processes TO fphs;
+
+
+--
+-- Name: sub_processes_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE sub_processes_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE sub_processes_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE sub_processes_id_seq TO fphs;
+
+
+--
+-- Name: test_table; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE test_table FROM PUBLIC;
+REVOKE ALL ON TABLE test_table FROM fphs;
+GRANT ALL ON TABLE test_table TO fphs;
+
+
+--
+-- Name: tracker_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE tracker_history FROM PUBLIC;
+REVOKE ALL ON TABLE tracker_history FROM fphs;
+GRANT ALL ON TABLE tracker_history TO fphs;
+
+
+--
+-- Name: tracker_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE tracker_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE tracker_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE tracker_history_id_seq TO fphs;
+
+
+--
+-- Name: trackers; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE trackers FROM PUBLIC;
+REVOKE ALL ON TABLE trackers FROM fphs;
+GRANT ALL ON TABLE trackers TO fphs;
+
+
+--
+-- Name: trackers_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE trackers_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE trackers_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE trackers_id_seq TO fphs;
+
+
+--
+-- Name: user_authorization_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE user_authorization_history FROM PUBLIC;
+REVOKE ALL ON TABLE user_authorization_history FROM fphs;
+GRANT ALL ON TABLE user_authorization_history TO fphs;
+
+
+--
+-- Name: user_authorization_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE user_authorization_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE user_authorization_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE user_authorization_history_id_seq TO fphs;
+
+
+--
+-- Name: user_authorizations; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE user_authorizations FROM PUBLIC;
+REVOKE ALL ON TABLE user_authorizations FROM fphs;
+GRANT ALL ON TABLE user_authorizations TO fphs;
+
+
+--
+-- Name: user_authorizations_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE user_authorizations_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE user_authorizations_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE user_authorizations_id_seq TO fphs;
+
+
+--
+-- Name: user_history; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE user_history FROM PUBLIC;
+REVOKE ALL ON TABLE user_history FROM fphs;
+GRANT ALL ON TABLE user_history TO fphs;
+
+
+--
+-- Name: user_history_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE user_history_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE user_history_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE user_history_id_seq TO fphs;
+
+
+--
+-- Name: users; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON TABLE users FROM PUBLIC;
+REVOKE ALL ON TABLE users FROM fphs;
+GRANT ALL ON TABLE users TO fphs;
+
+
+--
+-- Name: users_id_seq; Type: ACL; Schema: ml_app; Owner: -
+--
+
+REVOKE ALL ON SEQUENCE users_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE users_id_seq FROM fphs;
+GRANT ALL ON SEQUENCE users_id_seq TO fphs;
 
 
 --
