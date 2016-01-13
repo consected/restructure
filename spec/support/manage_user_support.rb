@@ -2,7 +2,10 @@ module ManageUserSupport
   include MasterSupport
   def list_valid_attribs
     res = []
-    i = User.order(id: :desc).first.id
+    i = -1
+    if User.count > 0
+      i = User.order(id: :desc).first.id
+    end
     
     
     (1..5).each do |l|
