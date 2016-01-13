@@ -32,7 +32,7 @@ RSpec.describe SageAssignment, type: :model do
         list << s
       end
       
-      #puts "Assigned list of IDs: #{list.map{|s| s.sage_id}}"
+      
       
       num = 0
       # Step through the full set of sage assignments and compare it to those assigned to this master

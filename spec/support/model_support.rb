@@ -25,7 +25,7 @@ module ModelSupport
     end
     good_email = gen_username("#{r}-#{extra}-")
     
-    #puts "Attempting to create user with with name #{good_email}. #{User.find_by_email(good_email).inspect}"
+    
     admin, pwa = create_admin
     user = User.create! email: good_email, current_admin: admin
     good_password = user.password

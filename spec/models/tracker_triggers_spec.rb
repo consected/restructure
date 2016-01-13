@@ -268,10 +268,10 @@ RSpec.describe Tracker, type: :model do
       "
     res = execute sql
     
-    puts "\n-----------\n#{sql}\n--------------\n"
+    
     
     res2 = execute "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by id desc;"    
-    puts "RES2: #{res2.select {|s| s.inspect} }"    
+    
     expect(res2.count).to eq 3
     
     sql = "      
@@ -281,7 +281,7 @@ RSpec.describe Tracker, type: :model do
     "
     res = execute sql
     
-    puts "-----------\n#{sql}\n--------------\n"
+    
     
     
     expect(res.count).to eq 1
@@ -293,10 +293,10 @@ RSpec.describe Tracker, type: :model do
     
     res = execute sql
     
-    puts "-----------\n#{sql}\n--------------\n"
     
     
-    puts "RES: #{res.select {|s| s.inspect} }"
+    
+    
     
     expect(res.count).to eq 3
     t = res.first
@@ -328,7 +328,7 @@ RSpec.describe Tracker, type: :model do
       "
     res = execute sql
     
-    #puts "\n-----------\n#{sql}\n--------------\n"
+    
     
     res2 = execute "select * from tracker_history where master_id = #{@master.id} and protocol_id = #{@p2.id} order by id desc;"    
     
@@ -341,7 +341,7 @@ RSpec.describe Tracker, type: :model do
     "
     res = execute sql
     
-    #puts "-----------\n#{sql}\n--------------\n"
+    
     
     
     expect(res.count).to eq 2

@@ -216,7 +216,7 @@ describe "advanced search", js: true do
       b.first.click if b && b.length > 0 
       
       h = el[:href].split('#').last      
-      puts h
+      
       find "##{h}.collapse.in", wait: 5
       have_css "##{h}.tracker-block.collapse.in"
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: /#{protocol.name}/i

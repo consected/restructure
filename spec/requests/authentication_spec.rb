@@ -36,7 +36,7 @@ describe "user and admin authentication" do
       rcont = special_urls[url] || r.defaults[:controller]
       
       res = url.gsub(':item_controller', 'player_infos').gsub(/:.+?\//,"#{rand(100000)}/").gsub(/:.+?$/,"#{rand(100000)}")      
-      puts "method #{method} / #{r.defaults[:controller]}: #{res}"
+      #puts "method #{method} / #{r.defaults[:controller]}: #{res}"
       {url: res, method: method, controller: rcont, orig_url: url }
     end
     
@@ -55,7 +55,7 @@ describe "user and admin authentication" do
     
     @url_list.each do |url|
       if url[:controller] && !skip_urls.include?(url[:url])
-        puts "attempting URL: #{url}"
+        #puts "attempting URL: #{url}"
         
         begin
           case url[:method] 
@@ -83,7 +83,7 @@ describe "user and admin authentication" do
           Rails.logger.info "Action not defined. Skipping #{url.inspect}"
         end
       else
-        puts "Skipping url #{url[:url]} (#{url[:method]}) - no controller or url skipped"
+        #puts "Skipping url #{url[:url]} (#{url[:method]}) - no controller or url skipped"
       end
     end
     

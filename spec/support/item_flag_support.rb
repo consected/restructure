@@ -14,7 +14,7 @@ module ItemFlagSupport
     @player_info = PlayerInfo.last
     
     unless @player_info
-      PlayerInfoSupport::create_item
+      PlayerInfoSupport.create_item
       @player_info = PlayerInfo.last
     end
     

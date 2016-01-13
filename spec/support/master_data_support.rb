@@ -156,7 +156,7 @@ module MasterDataSupport
         @full_master_record = @master.reload
         @full_trackers = @master.trackers.reload
         
-        puts "Trackers: #{@full_trackers.inspect}"
+        
                 
       else
         # Ensure only the reference record has a rank that is 12

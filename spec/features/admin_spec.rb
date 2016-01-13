@@ -87,7 +87,7 @@ describe "admin sign in process" do
     # It is possible that the data
     @admin = Admin.create email: email#, disabled: true
     pw = @admin.new_password
-    puts "Password: #{pw} for #{email}"
+    
     expect(@admin).to be_persisted
     
     
