@@ -1172,8 +1172,6 @@ CREATE FUNCTION log_sub_process_update() RETURNS trigger
     $$;
 
 
-
-
 --
 -- Name: log_tracker_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
@@ -3044,7 +3042,6 @@ CREATE SEQUENCE sub_processes_id_seq
 ALTER SEQUENCE sub_processes_id_seq OWNED BY sub_processes.id;
 
 
-
 --
 -- Name: tracker_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
@@ -3549,10 +3546,6 @@ ALTER TABLE ONLY sub_process_history ALTER COLUMN id SET DEFAULT nextval('sub_pr
 
 ALTER TABLE ONLY sub_processes ALTER COLUMN id SET DEFAULT nextval('sub_processes_id_seq'::regclass);
 
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
 
 --
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
@@ -4377,7 +4370,6 @@ CREATE INDEX index_sub_processes_on_admin_id ON sub_processes USING btree (admin
 --
 
 CREATE INDEX index_sub_processes_on_protocol_id ON sub_processes USING btree (protocol_id);
-
 
 
 --
