@@ -15,6 +15,7 @@ ActiveRecord::Schema.define(version: 20151218203119) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+  enable_extension "pg_trgm"
 
   create_table "accuracy_score_history", force: :cascade do |t|
     t.string   "name"
@@ -338,6 +339,76 @@ ActiveRecord::Schema.define(version: 20151218203119) do
   add_index "masters", ["pro_id"], name: "index_masters_on_proid", using: :btree
   add_index "masters", ["pro_info_id"], name: "index_masters_on_pro_info_id", using: :btree
   add_index "masters", ["user_id"], name: "index_masters_on_user_id", using: :btree
+
+  create_table "ml_copy", id: false, force: :cascade do |t|
+    t.integer "procontactid"
+    t.string  "fill_in_addresses",           limit: 255
+    t.string  "in_survey",                   limit: 255
+    t.string  "verify_survey_participation", limit: 255
+    t.string  "verify_player_and_or_match",  limit: 255
+    t.string  "accuracy",                    limit: 255
+    t.string  "accuracy_score",              limit: 255
+    t.integer "contactid"
+    t.integer "pro_id"
+    t.text    "separator_a"
+    t.string  "first_name",                  limit: 255
+    t.string  "middle_name",                 limit: 255
+    t.string  "last_name",                   limit: 255
+    t.string  "nick_name",                   limit: 255
+    t.text    "separator_b"
+    t.string  "pro_first_name",              limit: 255
+    t.string  "pro_middle_name",             limit: 255
+    t.string  "pro_last_name",               limit: 255
+    t.string  "pro_nick_name",               limit: 255
+    t.string  "birthdate",                   limit: 255
+    t.string  "pro_dob",                     limit: 255
+    t.string  "pro_dod",                     limit: 255
+    t.string  "startyear",                   limit: 255
+    t.string  "pro_start_year",              limit: 255
+    t.integer "accruedseasons"
+    t.string  "pro_end_year",                limit: 255
+    t.string  "first_contract",              limit: 255
+    t.string  "second_contract",             limit: 255
+    t.string  "third_contract",              limit: 255
+    t.string  "pro_career_info",             limit: 255
+    t.string  "pro_birthplace",              limit: 255
+    t.string  "pro_college",                 limit: 255
+    t.string  "email",                       limit: 255
+    t.string  "homecity",                    limit: 255
+    t.string  "homestate",                   limit: 50
+    t.string  "homezipcode",                 limit: 10
+    t.string  "homestreet",                  limit: 255
+    t.string  "homestreet2",                 limit: 255
+    t.string  "homestreet3",                 limit: 255
+    t.string  "businesscity",                limit: 255
+    t.string  "businessstate",               limit: 50
+    t.string  "businesszipcode",             limit: 10
+    t.string  "businessstreet",              limit: 255
+    t.string  "businessstreet2",             limit: 255
+    t.string  "businessstreet3",             limit: 255
+    t.integer "changed"
+    t.string  "changed_column",              limit: 255
+    t.integer "verified"
+    t.text    "notes"
+    t.string  "email2",                      limit: 255
+    t.string  "email3",                      limit: 255
+    t.string  "updatehomestreet",            limit: 255
+    t.string  "updatehomestreet2",           limit: 255
+    t.string  "updatehomecity",              limit: 255
+    t.string  "updatehomestate",             limit: 50
+    t.string  "updatehomezipcode",           limit: 10
+    t.string  "lastmod",                     limit: 255
+    t.string  "sourc",                       limit: 255
+    t.string  "changed_by",                  limit: 255
+    t.integer "msid"
+    t.string  "mailing",                     limit: 255
+    t.string  "outreach_vfy",                limit: 255
+    t.text    "lastupdate"
+    t.text    "lastupdateby"
+    t.string  "cprefs",                      limit: 255
+    t.integer "scantronid"
+    t.text    "insertauditkey"
+  end
 
   create_table "player_contact_history", force: :cascade do |t|
     t.integer  "master_id"

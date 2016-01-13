@@ -13,7 +13,7 @@ class Create<%=class_name.pluralize%> < ActiveRecord::Migration
         end
 
         create_table :<%=singular_name%>_history do |t|
-          t.references :test_thing, index: true, foreign_key: true
+          t.references :<%=singular_name%>, index: true, foreign_key: true
           t.references :master, index: true, foreign_key: true
           t.integer :external_id, limit: 8
           t.references :user, index: true, foreign_key: true

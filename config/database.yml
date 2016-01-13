@@ -13,8 +13,8 @@ default: &default
 
 development:
   <<: *default
-#  database: fpa_development
-#  schema_search_path: public
+  database: fpa_development
+  schema_search_path: ml_app
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -22,6 +22,7 @@ development:
 test:
   <<: *default
   database: fpa_test
- 
+  schema_search_path: ml_app
+  
 production:
   <<: *default
