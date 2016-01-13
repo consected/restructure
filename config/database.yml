@@ -4,11 +4,17 @@ default: &default
   # For details on connection pooling, see rails configuration guide
   # http://guides.rubyonrails.org/configuring.html#database-pooling
   pool: 5
-  schema_search_path: ml_app
+  database: <%= ENV['FPHS_POSTGRESQL_DATABASE'] %>
+  username: <%= ENV['FPHS_POSTGRESQL_USERNAME'] %>
+  password: <%= ENV['FPHS_POSTGRESQL_PASSWORD'] %>
+  port: <%= ENV['FPHS_POSTGRESQL_PORT'] %>
+  host: <%= ENV['FPHS_POSTGRESQL_HOSTNAME'] %>
+  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA']%>
 
 development:
   <<: *default
-  database: fpa_development  
+#  database: fpa_development
+#  schema_search_path: public
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -16,13 +22,6 @@ development:
 test:
   <<: *default
   database: fpa_test
-
-
+ 
 production:
   <<: *default
-  database: <%= ENV['FPHS_POSTGRESQL_DATABASE'] %>
-  username: <%= ENV['FPHS_POSTGRESQL_USERNAME'] %>
-  password: <%= ENV['FPHS_POSTGRESQL_PASSWORD'] %>
-  port: <%= ENV['FPHS_POSTGRESQL_PORT'] %>
-  host: <%= ENV['FPHS_POSTGRESQL_HOSTNAME'] %>
-  schema_search_path: <%= ENV['FPHS_POSTGRESQL_SCHEMA']%>
