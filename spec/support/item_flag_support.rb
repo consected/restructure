@@ -12,6 +12,12 @@ module ItemFlagSupport
     create_item_flag_name 'PlayerInfo'
     
     @player_info = PlayerInfo.last
+    
+    unless @player_info
+      PlayerInfoSupport::create_item
+      @player_info = PlayerInfo.last
+    end
+    
     [
       {
         item_id: @player_info.id,

@@ -41,6 +41,9 @@ RSpec.describe MastersController, type: :controller do
     end
     
     it "searches MSID and returns nothing" do
+      if Master.count == 0
+        post :create
+      end
       mid = Master.maximum(:msid)+1
       get :index, {mode: 'MSID', master: {msid: mid}, format: :json}
       jres = JSON.parse response.body
