@@ -1172,32 +1172,6 @@ CREATE FUNCTION log_sub_process_update() RETURNS trigger
     $$;
 
 
---
--- Name: log_test_thing_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION log_test_thing_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-        BEGIN
-            INSERT INTO test_thing_history
-            (
-                    test_thing_id,                    
-                    external_id,
-                    user_id,
-                    created_at,
-                    updated_at
-                )                 
-            SELECT                 
-                NEW.id,
-                NEW.external_id,
-                NEW.user_id,
-                NEW.created_at,
-                NEW.updated_at 
-            ;
-            RETURN NEW;
-        END;
-    $$;
 
 
 --
@@ -3070,83 +3044,6 @@ CREATE SEQUENCE sub_processes_id_seq
 ALTER SEQUENCE sub_processes_id_seq OWNED BY sub_processes.id;
 
 
---
--- Name: test_table; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE test_table (
-    abcid integer,
-    somestring character varying,
-    testing boolean
-);
-
-
---
--- Name: test_thing_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE test_thing_history (
-    id integer NOT NULL,
-    test_thing_id integer,
-    master_id integer,
-    external_id bigint,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: test_thing_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE test_thing_history_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: test_thing_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE test_thing_history_id_seq OWNED BY test_thing_history.id;
-
-
---
--- Name: test_things; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE test_things (
-    id integer NOT NULL,
-    master_id integer,
-    external_id bigint,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: test_things_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE test_things_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: test_things_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE test_things_id_seq OWNED BY test_things.id;
-
 
 --
 -- Name: tracker_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
@@ -3657,16 +3554,6 @@ ALTER TABLE ONLY sub_processes ALTER COLUMN id SET DEFAULT nextval('sub_processe
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY test_thing_history ALTER COLUMN id SET DEFAULT nextval('test_thing_history_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_things ALTER COLUMN id SET DEFAULT nextval('test_things_id_seq'::regclass);
-
-
 --
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
@@ -4011,22 +3898,6 @@ ALTER TABLE ONLY sub_process_history
 
 ALTER TABLE ONLY sub_processes
     ADD CONSTRAINT sub_processes_pkey PRIMARY KEY (id);
-
-
---
--- Name: test_thing_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY test_thing_history
-    ADD CONSTRAINT test_thing_history_pkey PRIMARY KEY (id);
-
-
---
--- Name: test_things_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY test_things
-    ADD CONSTRAINT test_things_pkey PRIMARY KEY (id);
 
 
 --
@@ -4508,40 +4379,6 @@ CREATE INDEX index_sub_processes_on_admin_id ON sub_processes USING btree (admin
 CREATE INDEX index_sub_processes_on_protocol_id ON sub_processes USING btree (protocol_id);
 
 
---
--- Name: index_test_thing_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_thing_history_on_master_id ON test_thing_history USING btree (master_id);
-
-
---
--- Name: index_test_thing_history_on_test_thing_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_thing_history_on_test_thing_id ON test_thing_history USING btree (test_thing_id);
-
-
---
--- Name: index_test_thing_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_thing_history_on_user_id ON test_thing_history USING btree (user_id);
-
-
---
--- Name: index_test_things_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_things_on_master_id ON test_things USING btree (master_id);
-
-
---
--- Name: index_test_things_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_things_on_user_id ON test_things USING btree (user_id);
-
 
 --
 -- Name: index_tracker_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
@@ -4964,20 +4801,6 @@ CREATE TRIGGER sub_process_history_update AFTER UPDATE ON sub_processes FOR EACH
 
 
 --
--- Name: test_thing_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER test_thing_history_insert AFTER INSERT ON test_things FOR EACH ROW EXECUTE PROCEDURE log_test_thing_update();
-
-
---
--- Name: test_thing_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER test_thing_history_update AFTER UPDATE ON test_things FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_test_thing_update();
-
-
---
 -- Name: tracker_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -5217,22 +5040,6 @@ ALTER TABLE ONLY protocol_events
 
 
 --
--- Name: fk_rails_1077777559; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_things
-    ADD CONSTRAINT fk_rails_1077777559 FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
--- Name: fk_rails_1150d75757; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_thing_history
-    ADD CONSTRAINT fk_rails_1150d75757 FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
 -- Name: fk_rails_1694bfe639; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5369,14 +5176,6 @@ ALTER TABLE ONLY player_contacts
 
 
 --
--- Name: fk_rails_78430eff1e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_things
-    ADD CONSTRAINT fk_rails_78430eff1e FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
 -- Name: fk_rails_7c10a99849; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5457,14 +5256,6 @@ ALTER TABLE ONLY reports
 
 
 --
--- Name: fk_rails_b39089285c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_thing_history
-    ADD CONSTRAINT fk_rails_b39089285c FOREIGN KEY (test_thing_id) REFERENCES test_things(id);
-
-
---
 -- Name: fk_rails_b822840dc1; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5486,14 +5277,6 @@ ALTER TABLE ONLY trackers
 
 ALTER TABLE ONLY item_flags
     ADD CONSTRAINT fk_rails_c2d5bb8930 FOREIGN KEY (item_flag_name_id) REFERENCES item_flag_names(id);
-
-
---
--- Name: fk_rails_c5026e3ec6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_thing_history
-    ADD CONSTRAINT fk_rails_c5026e3ec6 FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
