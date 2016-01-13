@@ -3,7 +3,7 @@ module AdminSetup
   
   def self.setup admins_string
     
-    puts "No admin string specified in env FPHS_ADMINS" and return if admins_string.blank?
+    puts "No admin string specified in env FPHS_ADMINS" and return if admins_string.blank?  && !Rails.env.test?
     
     admins = admins_string.split(';')
     op = ""
@@ -34,7 +34,7 @@ module AdminSetup
       end
     end
 
-    puts op  
+    puts op  if !Rails.env.test?
     
     return success
   end
@@ -56,7 +56,7 @@ module AdminSetup
         op << "Admin not recognized: #{admin}\n"
       end
     end
-    puts op  
+    puts op  if !Rails.env.test?
   end
 
   def self.run
@@ -83,7 +83,7 @@ RAILS_ENV=production FPHS_ACTION=remove FPHS_ADMINS='admin1@ex.com;admin2@ex.com
 Will remove any specified admins from the admin list. 
   
 EOF
-      puts msg
+      puts msg if !Rails.env.test?
     end
 
     action = ENV['FPHS_ACTION']
@@ -93,7 +93,7 @@ EOF
     elsif action == 'add'
       AdminSetup.setup admins
     else
-      puts "FPHS_ACTION not recognized.\n#{msg}"
+      puts "FPHS_ACTION not recognized.\n#{msg}" if !Rails.env.test?
     end
   end
   

@@ -14,7 +14,17 @@ module ItemFlagSupport
     @player_info = PlayerInfo.last
     
     unless @player_info
-      PlayerInfoSupport.create_item
+      PlayerInfo.create!(
+      {
+        first_name: 'test',
+        last_name: 'test',                
+        birth_date: Date.today - 40.years,
+        
+        rank: 10,
+        source: 'nflpa'        ,
+        master: create_master
+      }
+      )
       @player_info = PlayerInfo.last
     end
     
