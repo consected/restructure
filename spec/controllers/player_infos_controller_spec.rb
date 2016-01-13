@@ -9,6 +9,10 @@ RSpec.describe PlayerInfosController, type: :controller do
   def item
     @player_info
   end
+
+  def edit_form_prefix
+    @edit_form_prefix = "common_templates"
+  end
   
   it_behaves_like 'a standard user controller'
   

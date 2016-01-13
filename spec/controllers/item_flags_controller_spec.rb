@@ -23,6 +23,10 @@ RSpec.describe ItemFlagsController, type: :controller do
     invalid_attribs
   }
   
+  before(:all) do
+    seed_database
+  end
+  
   describe "Ensure authentication" do
     before_each_login_user
     before_each_login_admin

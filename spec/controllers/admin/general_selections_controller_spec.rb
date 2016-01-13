@@ -10,7 +10,10 @@ RSpec.describe Admin::GeneralSelectionsController, type: :controller do
   def item
     @general_selection
   end
-
+  
+  before(:all) do    
+    @path_prefix = "/admin"
+  end  
   
   before(:all){
     connection = ActiveRecord::Base.connection

@@ -11,11 +11,13 @@ RSpec.describe Admin::CollegesController, type: :controller do
   def item
     @college
   end
-    
-    
+  
   before(:all) do
     @path_prefix = "/admin"
-    res = College.delete_all
+    College.connection.execute "
+      delete from college_history;
+      delete from colleges;
+    "
         
     Rails.cache.clear    
   end

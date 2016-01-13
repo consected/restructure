@@ -32,8 +32,8 @@ module AdminControllerHandler
   def create
   
     set_object_instance primary_model.new(secure_params)
-    object_instance.current_admin = current_admin
-    if object_instance.save
+    object_instance.current_admin = current_admin        
+    if object_instance.save    
       #redirect_to index_path, notice: "#{human_name} created successfully"
       @updated_with = object_instance      
       index

@@ -29,9 +29,6 @@ module ItemFlagNameSupport
       },
       {
         item_type: nil 
-      },
-      {
-        item_type: 'unknown'
       }
     ]
   end

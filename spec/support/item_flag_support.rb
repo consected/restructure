@@ -1,15 +1,15 @@
 module ItemFlagSupport
   include MasterSupport
   
-  def create_item_flag_name
-    ifn = ItemFlagName.create! name: "IFN #{Time.new.to_f} #{rand 1000000000}", current_admin: @admin
+  def create_item_flag_name item_type
+    ifn = ItemFlagName.create! name: "IFN #{Time.new.to_f} #{rand 1000000000}", current_admin: @admin, item_type: item_type
     @item_flag_name = ifn
   end
   
   def list_valid_attribs
     res = []
     
-    create_item_flag_name
+    create_item_flag_name 'PlayerInfo'
     
     @player_info = PlayerInfo.last
     [
@@ -26,7 +26,7 @@ module ItemFlagSupport
   def list_invalid_attribs
     create_master
     create_item
-    create_item_flag_name
+    create_item_flag_name 'PlayerInfo'
     [
       {
         master_id: @player_info.master_id, 

@@ -139,11 +139,17 @@ class Tracker < ActiveRecord::Base
   end
   
   def self.add_record_update_entries name, admin, update_type='record'
-    protocol = Protocol.updates.first
-    sp = protocol.sub_processes.find_by_name("#{update_type} updates")
-    values = []
     
-    name = name.humanize.downcase
+    begin
+      protocol = Protocol.updates.first
+      sp = protocol.sub_processes.find_by_name("#{update_type} updates")
+      values = []
+    
+      name = name.humanize.downcase
+    rescue => e
+      logger.error "Error finding protocol or sub process for tracker record update. Protocols #{Protocol.count}"
+      raise e
+    end
     
     values << {name: "created #{name.downcase}", sub_process_id: sp.id}
     values << {name: "updated #{name.downcase}", sub_process_id: sp.id}

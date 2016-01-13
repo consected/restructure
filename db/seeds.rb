@@ -5,7 +5,7 @@ module Seeds
   def self.setup
     Rails.logger.info "Starting seed setup"
     
-    # Reinstate this if needed to set up a new server from scratch
+    
     self.constants.each do |c|
       Seeds.const_get(c).setup
     end

@@ -11,6 +11,11 @@ RSpec.describe AddressesController, type: :controller do
   def object_class
     Address
   end  
+
+  def edit_form_prefix
+    @edit_form_prefix = "common_templates"
+  end
+
   
   it_behaves_like 'a standard user controller'
   

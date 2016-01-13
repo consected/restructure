@@ -38,14 +38,14 @@ RSpec.describe ProtocolEventsController, type: :controller do
   before(:all){
     TrackerHistory.destroy_all
     Tracker.destroy_all
-    Protocol.all.each do |p|
-      p.sub_processes.each do |s|
-        s.protocol_events.destroy_all
-        s.destroy
-      end
-    end
-    Protocol.destroy_all
-    
+    Protocol.connection.execute "
+      delete from protocol_event_history;
+      delete from protocol_events;
+      delete from sub_process_history;
+      delete from sub_processes;
+      delete from protocol_history;
+      delete from protocols;
+    "
   }
   
   before :each do    

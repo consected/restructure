@@ -1,7 +1,17 @@
 require 'support/seeds'
 module MasterSupport
-  
-  
+
+  def seed_database
+    Rails.logger.info "Starting seed setup"
+    SeedSupport.setup
+  end
+    
+  def edit_form_prefix
+    @edit_form_prefix = nil
+  end 
+  def edit_form_name
+    @edit_form_name = nil
+  end
     
   def objects_symbol
     object_class.to_s.underscore.pluralize.to_sym
@@ -20,7 +30,7 @@ module MasterSupport
   end
   
   def edit_form_user
-    "#{objects_symbol}/_edit_form"
+    "#{edit_form_prefix || objects_symbol}/#{edit_form_name || '_edit_form'}"
   end
   
   def create_sources

@@ -12,6 +12,7 @@ RSpec.describe Admin::ItemFlagNamesController, type: :controller do
   end
   
   before(:all) do    
+    seed_database
     @path_prefix = "/admin"
   end  
   
