@@ -19,7 +19,7 @@ class TrackerHistoriesController < ApplicationController
     
     if params[:skip_last]=='true'
       # Remove a current tracker item from the list.
-      mid = @tracker_histories.max_by {|x| x.id}      
+      mid = @tracker_histories.first     
       @tracker_histories = @tracker_histories.reject {|x| x.id == mid.id}
     end
     
