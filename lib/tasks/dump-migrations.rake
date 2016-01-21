@@ -48,9 +48,9 @@ namespace :db do
           filename = nil
           case original_task            
           when "db:migrate"
-            filename = "db/dumps/upgrade-#{hostname}-#{ENV['VER']}.sql"
+            filename = "db/dumps/migrate-#{hostname}-#{ENV['VER']}/upgrade.sql"
           when "db:rollback"
-            filename = "db/dumps/rollback-#{hostname}-#{ENV['VER']}.sql"
+            filename = "db/dumps/migrate-#{hostname}-#{ENV['VER']}/rollback.sql"
           else
             raise "unknown migration type #{original_task}"
           end
