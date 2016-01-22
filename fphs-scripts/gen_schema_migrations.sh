@@ -79,7 +79,8 @@ fi
 
 export DEVDIR="$(dirname $DIR)"
 export DBHOST=localhost
-export DBUSER=`whoami`
+export DBUSER=fphs
+export DBUSERPW=fphs
 export VER=`cat $DEVDIR/version.txt`
 
 echo Storing results to development directory: $DEVDIR
@@ -99,6 +100,7 @@ echo Schema dump completed
 
 cd $DEVDIR/db/dumps
 
+sudo chmod 777 .
 
 mkdir -p migrate-$EXTNAME-$VER
 cd migrate-$EXTNAME-$VER
@@ -115,8 +117,13 @@ CURRDIR=`pwd`
 #avoid scary cd warnings
 cd /tmp
 sudo -u postgres dropdb mig_db
+sudo -u postgres psql < $DEVDIR/fphs-sql/create_roles.sql
 sudo -u postgres createdb -O $DBUSER mig_db
-sudo -u postgres psql -d mig_db < $DEVDIR/fphs-sql/create_roles.sql
+sudo -u postgres psql -c "GRANT CONNECT ON DATABASE fphs to fphs; alter role fphs password '$DBUSERPW'"
+
+touch ~/.pgpass
+echo "localhost:5432:mig_db:$DBUSER:$DBUSERPW" >> ~/.pgpass
+chmod 600 ~/.pgpass
 
 cd $CURRDIR
 
@@ -124,11 +131,11 @@ sed -i 's/CREATE SCHEMA public/-- CREATE SCHEMA public/g' db-schema.sql
 sed -i 's/COMMENT ON SCHEMA public/-- COMMENT ON SCHEMA public/g' db-schema.sql
 
 echo Create the local schema from the remote schema
-psql -d mig_db < db-schema.sql
-psql -d mig_db < db-schema-migrations.sql
+psql -d mig_db -U $DBUSER -h localhost < db-schema.sql
+psql -d mig_db -U $DBUSER -h localhost < db-schema-migrations.sql
 
 
-psql -d mig_db -c "select * from $SCHEMA.schema_migrations order by version" | grep -oP '([0-9]{10,20})' > mig_comp.txt
+psql -d mig_db -U $DBUSER -h localhost -c "select * from $SCHEMA.schema_migrations order by version" | grep -oP '([0-9]{10,20})' > mig_comp.txt
 diff mig_comp.txt migration-list.txt |grep -oP '(> [0-9]{10,20})' | grep -oP '([0-9]{10,20})' > to_add.txt
 
 
@@ -159,10 +166,10 @@ GRANT SELECT ON ALL SEQUENCES IN SCHEMA $SCHEMA TO $EXTADMROLE;
 echo Running the rails migrations and dumping the SQL
 FPHS_ADMIN_SETUP=yes \
 FPHS_POSTGRESQL_DATABASE=mig_db \
-FPHS_POSTGRESQL_PASSWORD= \
+FPHS_POSTGRESQL_PASSWORD=$DBUSERPW \
 FPHS_POSTGRESQL_USERNAME=$DBUSER \
 FPHS_POSTGRESQL_PORT=5432 \
-FPHS_POSTGRESQL_HOSTNAME= \
+FPHS_POSTGRESQL_HOSTNAME=localhost \
 FPHS_POSTGRESQL_SCHEMA=$SCHEMA \
 FPHS_RAILS_SECRET_KEY_BASE=A1111111111111111111111 \
 FPHS_RAILS_DEVISE_SECRET_KEY=B2222222222222222222222 \
