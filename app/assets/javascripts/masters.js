@@ -8,7 +8,8 @@ _fpa.masters = {
     
     max_results: 100,
     switch_id_on_click: function(block){
-        block.find('.switch_id').not('attached-switch-click').click(function(){
+        block.find('.switch_id').not('attached-switch-click').click(function(ev){
+            ev.preventDefault();
             var p = $(this).parent();
             var msid = p.find('span.msid');
             var master_id = p.find('span.master_id');
