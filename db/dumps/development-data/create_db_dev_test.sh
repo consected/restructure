@@ -1,4 +1,4 @@
-#~/bin/bash
+#!/bin/bash
 echo "Enter sudo password to act as postgres to create database"
 
 sudo -u postgres createdb -O `whoami` fpa_development
