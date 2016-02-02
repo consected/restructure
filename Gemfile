@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 gem 'rails', '4.2.5'
 gem 'pg'
 
+# Forcing this version, as rake 10.5 breaks the build
+gem 'rake', '10.4.2'
 gem 'jquery-rails'
 
 gem 'devise'

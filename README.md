@@ -1,12 +1,40 @@
 Rails App for FPHS
 ==================
 
-For detailed information about the app, view the Wiki at: 
+This document provides information about:
+
+* creating a development environment
+* building the application
+* FPHS specific database migration
+
+For detailed information about the app and the requirements driving its functionality, view the Wiki at: 
+
+https://open.med.harvard.edu/wiki/pages/viewpage.action?title=Web+Application+Development&spaceKey=FPHS
+
+Security and Privacy
+---
+
+The FPHS Web Application functions in a highly secure environment and contains data that is considered highly sensitive due 
+to the high profile of some of the people it represents. Although the app is not available on the public Internet, the same 
+level of care must be taken in development and maintenance as for publicly-facing web applications.
+
+In the past, all members of the development and QA team have been required to be complete Citi training. Check with a representative of the
+FPHS team if in doubt.
 
 
-Things you may want to cover:
 
-* Ruby version: 2.2 (via RBENV)
+Development Environment
+---
+
+A development environment can be created in a standalone VirtualBox using the **FPHS Build Box** described below, or in an existing
+environment by running the script `./fphs-scripts/setup_dev.sh`
+
+
+
+
+
+
+* Ruby version: 2.2.x (via RBENV)
 
 * System dependencies: 
     * Postgres Client
