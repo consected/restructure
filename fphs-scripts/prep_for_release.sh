@@ -1,3 +1,10 @@
+#####
+#
+# NOTE: this script is no longer used. The functionality is now performed by the vagrant-fphs-webapp-build-box
+# Ansible playbook, within the iteam Ansible Git / Stash repo.
+#
+####
+
 export SVN_SOURCE_DIR=phase3-1
 export FPHS_VERSION=`svn ls --username payres https://open.med.harvard.edu/svn/fphs-rails/tags | sort -V | tail -n 1`
 chmod 750 ./*
