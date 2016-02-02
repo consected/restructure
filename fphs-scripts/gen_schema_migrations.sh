@@ -17,11 +17,14 @@ echo Select which environment to generate
 echo '1 (pandora.catalyst)'
 echo '2 (nfl-09 Stage)'
 echo '3 (nfl-10 Production)'
+echo '4 (fphs-webapp-dev01)'
+echo '5 (fphs-webapp-prod01)'
+
 read OPT
 
-if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' ]] 
+if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' && $OPT != '4' && $OPT != '5' ]] 
 then
-    echo Only 1, 2 or 3 are valid
+    echo Only 1, 2, 3, 4 or 5 are valid
     exit
 fi
 
@@ -29,7 +32,9 @@ if [ $OPT == '1' ]
 then
 #### if local shared dev #####
 export EXTNAME=pandora.catalyst
-export EXTUSER=payres
+echo Enter your openmed username
+read openmed_user
+export EXTUSER=$openmed_user
 export SCHEMA=public
 export EXTDB=fphs
 export EXTDBHOST=localhost
@@ -46,11 +51,13 @@ if [ $OPT == '2' ]
 then
 #### if stage #####
 export EXTNAME=nfl-15.dipr.partners.org
-export EXTUSER=pda11
+echo Enter your partners username
+read partners_user
+export EXTUSER=$partners_user
 export SCHEMA=ml_app
 export EXTDB=q1
 export EXTDBHOST=nfl-09.dipr
-export EXTDBUSER=pda11
+export EXTDBUSER=$partners_user
 export EXPORTSVR=nfl-03.dipr
 export EXPORTLOC=/FPHS/stage/sql
 export EXTROLE=FPHSUSR
@@ -63,11 +70,13 @@ if [ $OPT == '3' ]
 then
 #### if production #####
 export EXTNAME=nfl-16.dipr.partners.org
-export EXTUSER=pda11
+echo Enter your partners username
+read partners_user
+export EXTUSER=$partners_user
 export SCHEMA=ml_app
 export EXTDB=q1
 export EXTDBHOST=nfl-10.dipr
-export EXTDBUSER=pda11
+export EXTDBUSER=$partners_user
 export EXPORTSVR=nfl-03.dipr
 export EXPORTLOC=/FPHS/stage/sql
 export EXTROLE=FPHSUSR
@@ -76,6 +85,44 @@ export SEND_TO_DB=n
 ###############################
 fi
 
+
+if [ $OPT == '4' ] 
+then
+#### if production #####
+export EXTNAME=fphs-crm-dev01
+echo Enter your ecommons username
+read ecommons_user
+export EXTUSER=$ecommons_user
+export SCHEMA=ml_app
+export EXTDB=fphs
+export EXTDBHOST=fphs-db-dev01
+export EXTDBUSER=$ecommons_user
+export EXPORTSVR=fphs-crm-dev01
+export EXPORTLOC=/FPHS/data/db_migrations
+export EXTROLE=FPHSUSR
+export EXTADMROLE=FPHSADM
+export SEND_TO_DB=n
+###############################
+fi
+
+if [ $OPT == '5' ] 
+then
+#### if production #####
+export EXTNAME=fphs-crm-prod01
+echo Enter your ecommons username
+read ecommons_user
+export EXTUSER=$ecommons_user
+export SCHEMA=ml_app
+export EXTDB=fphs
+export EXTDBHOST=fphs-db-prod01
+export EXTDBUSER=$ecommons_user
+export EXPORTSVR=fphs-crm-prod01
+export EXPORTLOC=/FPHS/data/db_migrations
+export EXTROLE=FPHSUSR
+export EXTADMROLE=FPHSADM
+export SEND_TO_DB=n
+###############################
+fi
 
 export DEVDIR="$(dirname $DIR)"
 export DBHOST=localhost
