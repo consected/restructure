@@ -20,6 +20,46 @@ CREATE SCHEMA ml_app;
 SET search_path = ml_app, pg_catalog;
 
 --
+-- Name: assign_sage_ids_to_players(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION assign_sage_ids_to_players() RETURNS record
+    LANGUAGE plpgsql
+    AS $$
+      DECLARE
+        min_sa integer;
+        max_sa integer;
+        res record;
+      BEGIN
+
+
+        -- update the precreated Sage ID records with the master_id from the player info, based on matching ID. 
+
+        -- apply an offset here if the Sage ID does not start at zero
+
+        -- find the first unassigned Sage ID
+
+        select min(id) into min_sa from sage_assignments where master_id is null;
+
+        -- update the sage assignments in a block starting from the minimum unassigned ID
+
+        update sage_assignments sa set master_id = (select master_id from temp_pit where id = sa.id - min_sa) where sa.master_id is null and sa.id >= min_sa;
+
+        -- get the max value to return the results
+
+        select max(id) into max_sa from sage_assignments where master_id is not null;
+
+        select min_sa, max_sa into res;
+
+        return res;
+
+
+       END;
+
+    $$;
+
+
+--
 -- Name: add_study_update_entry(integer, character varying, character varying, date, character varying, integer, integer, character varying); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 

@@ -15,7 +15,6 @@ ActiveRecord::Schema.define(version: 20151218203119) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-  enable_extension "pg_trgm"
 
   create_table "accuracy_score_history", force: :cascade do |t|
     t.string   "name"
