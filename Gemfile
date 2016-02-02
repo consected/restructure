@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 
-gem 'rails', '4.2.5'
+gem 'rails', '4.2.5.1'
 gem 'pg'
 
 # Forcing this version, as rake 10.5 breaks the build
