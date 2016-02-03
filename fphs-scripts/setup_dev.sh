@@ -94,6 +94,6 @@ chmod 770 ./fphs-scripts/add_admin.sh
 PWRES=`RAILS_ENV=development ./fphs-scripts/add_admin.sh admin@test.com`
 echo To run the app server run 
 echo  bin/rails server
-echo Then browse to http://localhost:3000
+echo Then browse to http://localhost:3000/admins/sign_in
 echo Login to server using credentials for $PWRES
 
