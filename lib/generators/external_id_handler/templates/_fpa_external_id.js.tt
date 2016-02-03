@@ -11,7 +11,7 @@ Handlebars.registerHelper('format_<%=singular_name%>_id', function(text) {
     text = ''+text; // ensure it is a string
     
     // Edit this to provide the variable 'd' with the exact format required to be displayed    
-    var d = text.substring(0,3) + ' ' + text.substring(3,6) + ' ' + text.substring(6,10)
+    var d = text.substring(0,3) + ' ' + text.substring(3,6) + ' ' + text.substring(6,10);
     
     // Do not edit
     return new Handlebars.SafeString(d);
