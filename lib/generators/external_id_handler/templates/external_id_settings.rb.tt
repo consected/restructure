@@ -3,12 +3,15 @@ class Settings
   <%=class_name%>.external_id_edit_pattern = '\\d{0,10}'
   <%=class_name%>.external_id_range = 1..9999999999
   
-  # Default is for 10 digit formatting xxx xxx xxxx
-  # To customize formatting, copy Handlebars.registerHelper('format_10_digit_external_id') function to 
-  # external_id_<%=plural_name%>.js, rename and edit appropriately
+  # Default is for 10 digit formatting xxx xxx xxxx   
   <%=class_name%>.external_id_view_formatter='format_10_digit_external_id'
+  # To customize formatting, 
+  # * edit Handlebars.registerHelper('format_<%=singular_name%>_id') function in external_id_<%=plural_name%>.js
+  # * comment out the line abov
+  # * uncomment the line below
+  # <%=class_name%>.external_id_view_formatter='format_<%=singular_name%>_id'
 
-  # First run - add the protocol / sub_process / protocol_event combos for "record update"
+  # Do not change --- first run - add the protocol / sub_process / protocol_event combos for "record update"
   add_record_update_entries <%=class_name%>.label
 
   
