@@ -12,7 +12,7 @@ RUBYVER=2.2.4
 # postgres 9.4 and postgres client
 # svn client
 # git client
-
+clear
 type pg_dump >/dev/null 2>&1 || { echo >&2 "I require pg_dump but it's not installed.  Aborting."; exit 1; }
 type svn >/dev/null 2>&1 || { echo >&2 "I require svn client but it's not installed.  Aborting."; exit 1; }
 type git >/dev/null 2>&1 || { echo >&2 "I require git client but it's not installed.  Aborting."; exit 1; }
@@ -57,7 +57,8 @@ then
 fi
 
 
-echo Checking out the current HEAD to `pwd`. Enter your openmed username to contine:
+echo Checking out the current HEAD to `pwd`. 
+echo Enter your openmed username to contine:
 read SVNUSR
 svn checkout  --username="$SVNUSR" https://open.med.harvard.edu/svn/fphs-rails/branches/phase3-1 .
 
@@ -92,6 +93,7 @@ rake db:migrate
 RAILS_ENV=test rake db:migrate
 chmod 770 ./fphs-scripts/add_admin.sh
 PWRES=`RAILS_ENV=development ./fphs-scripts/add_admin.sh admin@test.com`
+clear
 echo To run the app server run 
 echo  bin/rails server
 echo Then browse to http://localhost:3000/admins/sign_in
