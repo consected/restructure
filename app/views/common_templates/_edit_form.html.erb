@@ -67,7 +67,11 @@
               <%= f.text_field :zip, zip_field_props %>
             <% elsif p == :notes %>
               <%= f.label :notes %>
-              <%= f.text_area :notes, class: 'form-control'  %>              
+              <%= f.text_area :notes, class: 'form-control'  %>       
+            <% elsif GeneralSelection::BasicItemTypes.include?("#{name.pluralize}_#{p}".to_sym)%>
+              <%# Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down%>
+              <%= f.label p %>
+              <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>              
             <% else %>
               <%= f.label p %>
               <%= f.text_field p %>
