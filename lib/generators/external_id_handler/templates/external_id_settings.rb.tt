@@ -6,8 +6,9 @@ class Settings
   # Default is for 10 digit formatting xxx xxx xxxx   
   <%=class_name%>.external_id_view_formatter='format_10_digit_external_id'
   # To customize formatting, 
-  # * edit Handlebars.registerHelper('format_<%=singular_name%>_id') function in external_id_<%=plural_name%>.js
-  # * comment out the line abov
+  # * edit Handlebars.registerHelper('format_<%=singular_name%>_id') function in 
+  #      assets/javascripts/external_id_<%=plural_name%>.js
+  # * comment out the ...external_id_view_formatter... line above
   # * uncomment the line below
   # <%=class_name%>.external_id_view_formatter='format_<%=singular_name%>_id'
 
