@@ -49,7 +49,7 @@ fi
 
 if [ $OPT == '2' ] 
 then
-#### if stage #####
+#### if partners stage #####
 export EXTNAME=nfl-15.dipr.partners.org
 echo Enter your partners username
 read partners_user
@@ -68,7 +68,7 @@ fi
 
 if [ $OPT == '3' ] 
 then
-#### if production #####
+#### if partners production #####
 export EXTNAME=nfl-16.dipr.partners.org
 echo Enter your partners username
 read partners_user
@@ -88,7 +88,7 @@ fi
 
 if [ $OPT == '4' ] 
 then
-#### if production #####
+#### if HMS IT dev #####
 export EXTNAME=fphs-crm-dev01
 echo Enter your ecommons username
 read ecommons_user
@@ -107,7 +107,7 @@ fi
 
 if [ $OPT == '5' ] 
 then
-#### if production #####
+#### if HMS IT production #####
 export EXTNAME=fphs-crm-prod01
 echo Enter your ecommons username
 read ecommons_user
