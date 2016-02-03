@@ -57,7 +57,7 @@ then
 fi
 
 
-echo Checking out the current HEAD to `pwd`. Enter your ecommons username to contine:
+echo Checking out the current HEAD to `pwd`. Enter your openmed username to contine:
 read SVNUSR
 svn checkout  --username="$SVNUSR" https://open.med.harvard.edu/svn/fphs-rails/branches/phase3-1 .
 
