@@ -1,7 +1,7 @@
 class Settings
 
   <%=class_name%>.external_id_edit_pattern = '\\d{0,10}'
-  <%=class_name%>.external_id_range = 1..9999999999
+  <%=class_name%>.external_id_range = 1111111111..9999999999
   
   # Default is for 10 digit formatting xxx xxx xxxx
   # To customize formatting, copy Handlebars.registerHelper('format_10_digit_external_id') function to 
