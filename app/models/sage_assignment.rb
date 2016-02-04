@@ -5,29 +5,13 @@ class SageAssignment < ActiveRecord::Base
   validates :sage_id, presence: true,  length: {is: 10}
   validate :sage_id_tests    
   default_scope -> {order id: :desc}
-  scope :assigned, -> {where "master_id is not null"}
-  scope :unassigned, -> {where "master_id is null"}
   after_save :return_all
  
-  
-  class NoUnassignedAvailable < FphsException
-    def message
-      "No available Sage IDs for assignment"
-    end
-  end 
   
   def return_all
     self.multiple_results = self.master.sage_assignments.all if self.master
   end
   
-  # Get the next unassigned ID item from the the sage_assignments table
-  def self.next_available owner
-    item = unassigned.unscope(:order).first
-    raise NoUnassignedAvailable  unless item
-    logger.info "Got next available external id #{item.id}"    
-    item.assigned_by = "fphsapp"      
-    item 
-  end    
   
   def self.generate_ids admin, count=10
     
