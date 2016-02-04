@@ -23,7 +23,7 @@ class Settings
   #<%=class_name%>.prevent_edit = true
   #<%=class_name%>.add_to_app_list do
   #  def build att=nil
-  #    self.master_build_with_random_id proxy_association.owner, att
+  #    <%=class_name%>.master_build_with_random_id proxy_association.owner, att
   #  end
   #end
    
@@ -32,7 +32,7 @@ class Settings
   #<%=class_name%>.prevent_edit = true
   #<%=class_name%>.add_to_app_list do
   #  def build att=nil
-  #    self.master_build_with_next_id proxy_association.owner, att
+  #    <%=class_name%>.master_build_with_next_id proxy_association.owner, att
   #  end
   #end
   

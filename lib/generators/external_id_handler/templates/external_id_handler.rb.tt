@@ -7,8 +7,15 @@ class <%=class_name%> < ActiveRecord::Base
   validate :external_id_tests
   
   default_scope -> {order id: :desc}
+
+  after_save :return_all
   
   protected
+  
+    def return_all
+      self.multiple_results = self.master.<%=plural_name%>.all if self.master && @prevent_edit
+    end  
+
     def external_id_tests
       
       if external_id_changed? || !persisted? 

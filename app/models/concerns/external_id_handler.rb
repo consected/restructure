@@ -22,9 +22,9 @@ module ExternalIdHandler
     # Get the next unassigned ID item from the the external id table
     def next_available owner
       item = unassigned.unscope(:order).first
-      raise ExternalIdHandler::NoUnassignedAvailable  unless item
+      raise ::ExternalIdHandler::NoUnassignedAvailable  unless item
       logger.info "Got next available external id #{item.id}"    
-      item.assigned_by = "fphsapp"      
+      item.assigned_by = "fphsapp" if item.respond_to? :assigned_by=      
       item 
     end    
 
@@ -160,6 +160,11 @@ module ExternalIdHandler
     end
         
     
+  end
+  
+  def check_status
+    @was_created = id_changed? || just_assigned ? 'created' : false
+    @was_updated = updated_at_changed? ? 'updated' : false
   end
 end
 

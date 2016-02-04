@@ -38,10 +38,7 @@ class SageAssignment < ActiveRecord::Base
   
 
   
-  def check_status
-    @was_created = id_changed? || just_assigned ? 'created' : false
-    @was_updated = updated_at_changed? ? 'updated' : false
-  end
+
   
   protected
   
