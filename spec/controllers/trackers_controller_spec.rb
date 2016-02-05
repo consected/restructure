@@ -201,7 +201,7 @@ RSpec.describe TrackersController, type: :controller do
 
       it "re-renders the 'edit' template" do
         create_item
-        put :update, {:id => item_id, object_symbol => invalid_attributes, master_id: @master_id}
+        put :update, {:id => item_id, object_symbol => {sub_process_id: nil, event_id: nil}, master_id: @master_id}
         
         expect(resp.length).to be > 0
         
