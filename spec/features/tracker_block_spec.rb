@@ -230,7 +230,10 @@ describe "tracker block", js: true do
       find("#master_trackers_attributes_0_protocol_event_id option[value='#{pe.id}']").select_option      
     end
     
+    have_css '.master-expander'
     items = page.all(:css, '.master-expander')
+    
+    ### Occasionally we fail here, perhaps due to bad test data?????
     expect(items.length).to be > 0
     
     # Open the first person
@@ -305,13 +308,13 @@ describe "tracker block", js: true do
         
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option      
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-      find('.tracker-event_date input').set '10/01/2025'
+      find('.tracker-event_date input').set '10/01/2125'
       click_button "Update Tracker"
     end
     
-    
+    have_css '.master-expander'
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
-    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "10/1/2135"
+    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "10/1/2125"
 
     
     
