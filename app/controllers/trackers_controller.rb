@@ -20,7 +20,7 @@ class TrackersController < ApplicationController
     new_tracker.event_date = object_instance.event_date
     new_tracker.notes = object_instance.notes
     new_tracker.created_at = object_instance.created_at
-    new_tracker.updated_at = object_instance.updated_at
+    new_tracker.updated_at = DateTime.now
     
     # Now update the newly created item with the submitted data from the user
     res = new_tracker.update(secure_params)
