@@ -87,7 +87,7 @@ describe "tracker block", js: true do
       fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}\t"      
     end
     
-    expect(page).to have_css '#advanced_search_master.ajax-running'
+    have_css '#advanced_search_master.ajax-running'
     expect(page).to have_css "#master_results_block", text: ''    
     expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
@@ -167,19 +167,44 @@ describe "tracker block", js: true do
     
     have_css ".tracker-tree-results #new_tracker"    
     have_css ".tracker-tree-results #new_tracker"    
+
     within ".tracker-tree-results #new_tracker" do
       select protocol.name, from: 'tracker_protocol_id'
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp.id}']").select_option
         
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option      
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-      find('.tracker-event_date input').set '01/02/2010'
+
+      find('.tracker-event_date input').set '02/02/2030'
       click_button "Create Tracker"
     end
     
     # Validate the new item was created as the current record of the same protocol
     expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
-    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "1/2/2010"
+    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "2/2/2030"
+    
+    # Now try an earlier item
+    within ".tracker-tree-results" do
+      click_link "add tracker record"
+    end
+    
+    have_css ".tracker-tree-results #new_tracker"    
+    have_css ".tracker-tree-results #new_tracker"    
+
+    within ".tracker-tree-results #new_tracker" do
+      select protocol.name, from: 'tracker_protocol_id'
+      find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp.id}']").select_option
+        
+      find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option      
+      # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
+
+      find('.tracker-event_date input').set '01/02/2010'
+      click_button "Create Tracker"
+    end
+    
+    # Validate the new item was NOT created as the current record of the same protocol
+    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
+    expect(page).not_to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "1/2/2010"
     
     # Click into the history to check the previous record is now visible there
     within 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"]' do
@@ -280,13 +305,13 @@ describe "tracker block", js: true do
         
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option      
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-      find('.tracker-event_date input').set '10/01/2015'
+      find('.tracker-event_date input').set '10/01/2025'
       click_button "Update Tracker"
     end
     
     
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
-    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "10/1/2015"
+    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "10/1/2135"
 
     
     

@@ -10,7 +10,7 @@ module TrackerSupport
   def list_valid_attribs
     res = []
     
-    
+    day = 0
     
     (1..5).each do |l|
       protocol = Protocol.create! name: "Prot #{rand 100000}", current_admin: @admin
@@ -18,8 +18,9 @@ module TrackerSupport
         sp = protocol.sub_processes.create! name: "SP #{rand 100000}", disabled: false, current_admin: @admin      
         
         (1..3).each do |e|
+          day += 1
           ev = sp.protocol_events.create! name: "EV #{rand 100000}", current_admin: @admin      
-          event_date = DateTime.now
+          event_date = DateTime.now + day.days
           evn = ev.name
           evid = ev.id
           sp1 = sp.id

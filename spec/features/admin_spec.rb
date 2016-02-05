@@ -112,6 +112,6 @@ describe "admin sign in process" do
   
   
   after(:all) do
-    @admin.destroy!
+    #@admin.destroy!
   end
 end
