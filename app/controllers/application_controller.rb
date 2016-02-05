@@ -23,8 +23,8 @@ protected
       logger.error e.inspect 
       logger.error e.backtrace.join("\n") 
       respond_to do |type|        
-        type.html { render :text => "A unexpected error occurred. Contact the administrator if this condition persists. #{e.message}", :status => 500 }
-        type.json  { render :json => {message: "A unexpected error occurred. Contact the administrator if this condition persists. #{e.message}"}, :status => 500 }
+        type.html { render :text => "An unexpected error occurred. Contact the administrator if this condition persists. #{e.message}", :status => 500 }
+        type.json  { render :json => {message: "An unexpected error occurred. Contact the administrator if this condition persists. #{e.message}"}, :status => 500 }
       end
       true
     end

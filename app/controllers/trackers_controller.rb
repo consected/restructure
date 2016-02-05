@@ -38,10 +38,10 @@ class TrackersController < ApplicationController
         show
         return
       end    
-    else
-      # Save the error from the failed update to the @tracker to return to the end user
-      @tracker.errors.add new_tracker.errors.first.first
     end
+
+    # Save the error from the failed update to the @tracker to return to the end user
+    @tracker.errors.add new_tracker.errors.first.first
     
     
     logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
