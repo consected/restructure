@@ -23,12 +23,27 @@ class TrackersController < ApplicationController
     new_tracker.updated_at = DateTime.now
     
     # Now update the newly created item with the submitted data from the user
-    res = new_tracker.update(secure_params)
+    # Guard against foreign key constraint errors
+    begin
+      res = new_tracker.update(secure_params) 
+    rescue => e
+      logger.warn "Tracker update error: #{e.inspect}"
+      puts "Tracker update error: #{e.inspect}"
+      new_tracker.errors.add :protocol_id, "Tracker update error: #{e.inspect}"
+    end
     
     # Assuming the update was successful (all validations were met) then go on to 
     # get the latest item in the tracker to return to the user
     if res
-      res = new_tracker.merge_if_exists
+      # Guard against foreign key constraint errors
+      begin
+        res = new_tracker.merge_if_exists
+      rescue => e
+        logger.warn "Tracker update merge error: #{e.inspect}"
+        puts "Tracker update merge error: #{e.inspect}"
+        @tracker.errors.add :protocol_id, "Tracker update error: #{e.inspect}"
+      end
+        
       # If there were no errors getting the latest item then show the result
       # Note: we state _merged as nil, since that is what the UI expects to see 
       # for this update mode
@@ -38,14 +53,12 @@ class TrackersController < ApplicationController
         show
         return
       end    
+    else
+      # Save the error from the failed update to the @tracker to return to the end user
+      object_instance.errors.add new_tracker.errors.first.first
     end
 
-    # Save the error from the failed update to the @tracker to return to the end user
-    @tracker.errors.add new_tracker.errors.first.first
-    
-    
     logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
-    
     render json: object_instance.errors, status: :unprocessable_entity 
     
   end
