@@ -10,12 +10,9 @@ class Tracker < ActiveRecord::Base
   
   validates :protocol, presence: true
 
-  # Expect an event date event if a protocol_event is not registered
-#  validates :protocol_event_id, presence: true, if: :event_date?  
-#  validates :event_date, presence: true, if: :protocol_event_id?
   validates :event_date, presence: true, if: :sub_process_id?
   
-  # We can't use this, since the error attribute is not translatable, and therefore we can't get sub_process to appear to users as 'status'  
+  # We can't use this next validation, since the error attribute is not translatable, and therefore we can't get sub_process to appear to users as 'status'  
   #  validates :sub_process, presence: true, if: :protocol_id?
   
   # _merged attribute is used to indicate if a tracker record was merged into an existing
@@ -23,34 +20,46 @@ class Tracker < ActiveRecord::Base
   attr_accessor :_merged
   
   # Check whether a tracker record with the same protocol already exists for this master
-  # If it does then we will update the existing record rather than creating a new one.
-  # From a user perspective this ensures that the current status of the tracker always maintains only one
-  # state for a protocol.
+  # If it does then a DB trigger will update the existing record rather than creating a new one.    
+  # This following method ensures that the latest tracker entry for this protocol is returned,
+  # whatever action is taken by the DB triggers behind the scenes.
   def merge_if_exists
     
-    t = self.master.trackers.where(protocol_id: self.protocol_id).take(1)
-    if t.first
+    # Get the existing tracker item for the master / protocol pair in the new record (self)
+    # If it exists then we handle saving the new record and getting the appropriate response.
+    # If it doesn't exist, we return nil
+    existing_tracker = self.master.trackers.where(protocol_id: self.protocol_id).take(1)
+    if existing_tracker.first
+      logger.info "An existing master / protocol pair exists when attempting to merge tracker entry"
       
-      t = t.first
-      logger.info "Updating existing tracker record #{t.id} instead of creating a new one"
-
-      t.sub_process = self.sub_process
-      t.protocol_event = self.protocol_event
-      t.event_date = self.event_date
-      t.notes = self.notes
-      t._merged = true
-      
-      res = t.save
-      
+      # Save this (new) tracker to ensure it is created
+      res = self.save
+     
       if res 
-        return t
-      elsif !errors || errors.empty?
-         errors.add :protocol, "tracker could not be merged"
-      else    
-        return
-      end
         
+        # get the latest tracker item after saving to the database, based on triggered results
+        t1 = self.master.trackers.where(protocol_id: self.protocol_id).take(1)      
+        new_top_tracker = t1.first
+
+        # Indicate that the result should be displayed as a merged item
+        new_top_tracker._merged = true 
+
+        return new_top_tracker
+      elsif !errors || errors.empty?
+        # No error was reported. Add one for the user
+        logger.warn "Tracker entry could not be merged"
+        errors.add :protocol, "tracker could not be merged"
+        return nil
+      else    
+        # Errors were already returned. Don't add another one
+        logger.warn "Tracker entry could not be merged - errors reported: #{errors.inspect}"
+        return nil
+      end
+            
     end
+    
+    # No existing master / protocol pair existed. Don't return anything so the caller can handle the response appropriately
+    logger.info "An existing master / protocol pair does not exist when attempting to merge tracker entry"
     nil
   end
   
