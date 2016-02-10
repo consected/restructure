@@ -205,12 +205,7 @@ RSpec.describe TrackersController, type: :controller do
         
         expect(resp.length).to be > 0
         
-        io = invalid_attributes.keys.first.to_s
-        
-        i = io.gsub('_', ' ').downcase
-        i_no_id = io.gsub('_id', '').downcase
-        t = I18n.translate("models.#{i_no_id}")
-        expect(resp[io] || resp[i] || resp[i_no_id] || resp[t]).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
+        expect(resp['protocol']).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
       end
     end
   end
