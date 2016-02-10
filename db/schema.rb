@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151218203119) do
+ActiveRecord::Schema.define(version: 20160210200919) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -726,36 +726,6 @@ ActiveRecord::Schema.define(version: 20151218203119) do
   add_index "sub_processes", ["protocol_id", "id"], name: "unique_protocol_and_id", unique: true, using: :btree
   add_index "sub_processes", ["protocol_id"], name: "index_sub_processes_on_protocol_id", using: :btree
 
-  create_table "test_table", id: false, force: :cascade do |t|
-    t.integer "abcid"
-    t.string  "somestring"
-    t.boolean "testing"
-  end
-
-  create_table "test_thing_history", force: :cascade do |t|
-    t.integer  "test_thing_id"
-    t.integer  "master_id"
-    t.integer  "external_id",   limit: 8
-    t.integer  "user_id"
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
-  end
-
-  add_index "test_thing_history", ["master_id"], name: "index_test_thing_history_on_master_id", using: :btree
-  add_index "test_thing_history", ["test_thing_id"], name: "index_test_thing_history_on_test_thing_id", using: :btree
-  add_index "test_thing_history", ["user_id"], name: "index_test_thing_history_on_user_id", using: :btree
-
-  create_table "test_things", force: :cascade do |t|
-    t.integer  "master_id"
-    t.integer  "external_id", limit: 8
-    t.integer  "user_id"
-    t.datetime "created_at",            null: false
-    t.datetime "updated_at",            null: false
-  end
-
-  add_index "test_things", ["master_id"], name: "index_test_things_on_master_id", using: :btree
-  add_index "test_things", ["user_id"], name: "index_test_things_on_user_id", using: :btree
-
   create_table "tracker_history", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "protocol_id"
@@ -924,11 +894,6 @@ ActiveRecord::Schema.define(version: 20151218203119) do
   add_foreign_key "sub_process_history", "sub_processes", name: "fk_sub_process_history_sub_processes"
   add_foreign_key "sub_processes", "admins"
   add_foreign_key "sub_processes", "protocols"
-  add_foreign_key "test_thing_history", "masters"
-  add_foreign_key "test_thing_history", "test_things"
-  add_foreign_key "test_thing_history", "users"
-  add_foreign_key "test_things", "masters"
-  add_foreign_key "test_things", "users"
   add_foreign_key "tracker_history", "masters"
   add_foreign_key "tracker_history", "protocol_events"
   add_foreign_key "tracker_history", "protocol_events", column: "sub_process_id", primary_key: "sub_process_id", name: "valid_sub_process_event"
