@@ -205,7 +205,7 @@ RSpec.describe TrackersController, type: :controller do
         
         expect(resp.length).to be > 0
         
-        expect(resp['protocol']).not_to be_nil, "Expected key: #{i} or #{io}. Got #{resp}"
+        expect(resp['protocol']).not_to be_nil, "Expected key: protocol error. Got #{resp}"
       end
     end
   end
