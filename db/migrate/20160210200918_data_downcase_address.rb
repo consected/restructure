@@ -55,7 +55,7 @@ execute <<EOF
           
           UPDATE addresses SET rank = 5 
           WHERE 
-            master_id = master_id 
+            master_id = set_master_id 
             AND rank = 10
             AND id <> latest_primary.id;
           
