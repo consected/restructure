@@ -1458,7 +1458,7 @@ CREATE FUNCTION update_address_ranks(set_master_id integer) RETURNS integer
           
           UPDATE addresses SET rank = 5 
           WHERE 
-            master_id = master_id 
+            master_id = set_master_id 
             AND rank = 10
             AND id <> latest_primary.id;
           
@@ -1534,7 +1534,7 @@ CREATE FUNCTION update_player_contact_ranks(set_master_id integer, set_rec_type 
           
           UPDATE player_contacts SET rank = 5 
           WHERE 
-            master_id = master_id 
+            master_id = set_master_id 
             AND rank = 10
             AND rec_type = set_rec_type
             AND id <> latest_primary.id;
