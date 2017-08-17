@@ -36,6 +36,14 @@ describe "tracker block", js: true do
       
   end
 
+
+
+  def expect_tracker_date_to_be_today
+    sleep 0.01
+    f = find('#tracker_event_date')
+    d = DateTime.now
+    expect(f.value).to match(/0?#{d.month}\/0?#{d.day}\/#{d.year}/)
+  end
   
   
   it "should create a new tracker item" do
@@ -121,7 +129,8 @@ describe "tracker block", js: true do
     within ".tracker-tree-results #new_tracker" do
       select protocol.name, from: 'tracker_protocol_id'
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp.id}']").select_option        
-      find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option      
+      find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option
+      expect_tracker_date_to_be_today
       click_button "Create Tracker"
     end
     
@@ -281,7 +290,10 @@ describe "tracker block", js: true do
     within "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] form" do
       find("#tracker_sub_process_id[data-parent-filter-id='#{protocol.id}'] option[value='#{sp_new.id}']").select_option
         
-      find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option      
+      find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option
+
+      expect_tracker_date_to_be_today
+
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
       find('.tracker-event_date input').set '10/01/2125'
       click_button "Update Tracker"

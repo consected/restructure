@@ -305,11 +305,16 @@ _fpa.postprocessors = {
             var el = block.find('#tracker_event_date');
             //if(!_fpa.utils.is_blank(field.val())){
                 el.parents('div').first().show();                
-                var v = (new Date()).asYMD();
+                var v = (new Date()).asLocale();
+                
                 if(force) {
                     el.val(v);
                     $('#tracker_notes').val('');
                 }
+                else{
+                    _fpa.form_utils.setup_datepickers(block);
+                }
+                
         };
 
         block.find('#tracker_protocol_event_id, #tracker_sub_process_id').change(function(){

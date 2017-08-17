@@ -72,6 +72,15 @@ input[type="date"], input[type="time"], input[type="datetime-local"], input[type
 }
 
 
+input[type="date"] {
+  color: rgba(0,0,0,0);
+  
+  &.date-is-local {
+    color: inherit;
+  }
+  
+}
+
 li.list-group-item label {
     font-size: 85%;
 }

@@ -19,7 +19,7 @@ _fpa.form_utils = {
           var v = $(this).val();
           if(v || v != ''){
             var res = (new Date(v)).asYMD();
-            if(res){
+            if(res){              
               $(this).val(res);
             }
             
@@ -292,25 +292,20 @@ _fpa.form_utils = {
     },
     
     setup_datepickers: function(block){
-      
+
+      // start by setting the date fields to show the date using the locale
       block.find('input[type="date"]').not('.date-is-local').each(function(){
         var v = $(this).val();
         
         if(v && v != ''){          
-          var stre = v;
-          if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
-            startTime = new Date(Date.parse(stre));
-            startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-            var d = startTime.toLocaleDateString();  
-          } else {            
-            var d = new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
-          }
+          var d = _fpa.utils.YMDtoLocale(v);
           $(this).val(d);
           $(this).addClass('date-is-local');
         }
         
       });
       
+      // finally, set up datepickers on any fields that don't already have them
       block.find('input[type="date"]').not('.attached-datepicker').each(function(){
         
         $(this).datepicker({

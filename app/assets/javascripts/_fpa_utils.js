@@ -49,6 +49,24 @@ _fpa.utils.escape_html = function (string) {
 };
   
 
+// Typically returns m/d/yyyy
+_fpa.utils.YMDtoLocale = function(stre){
+  
+    // Take special care to avoid issues with timezones and daylight savings time quirks
+    if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
+        startTime = new Date(Date.parse(stre));
+        startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
+        var d = startTime.toLocaleDateString();  
+    } else {            
+        var d = new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
+    }
+    return d;
+};
+
+Date.prototype.asLocale = function(){
+    return this.toLocaleDateString(undefined, {timeZone: "UTC"});
+};
+
 Date.prototype.asYMD = function(){
   
     var now = this;
