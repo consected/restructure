@@ -1,6 +1,9 @@
 module ProtocolEventSupport
   include MasterSupport
   def list_valid_attribs
+
+    instance_var_init :sub_process_id
+    
     res = []
     
     (1..5).each do |l|
@@ -25,6 +28,8 @@ module ProtocolEventSupport
   end
   
   def list_invalid_attribs
+    instance_var_init :sub_process_id
+
     [
       {
         name: nil,
@@ -35,6 +40,8 @@ module ProtocolEventSupport
   end
   
   def list_invalid_update_attribs
+    instance_var_init :sub_process_id
+
     [            
       {
         name: nil,

@@ -26,6 +26,9 @@ module MasterSupport
   end
   
   def edit_form_admin
+    unless defined? @edit_form_admin
+      @edit_form_admin = nil
+    end
     @edit_form_admin || "#{objects_symbol}/_form"
   end
   

@@ -38,7 +38,7 @@ module CollegeSupport
   
   def list_invalid_attribs
     admin1 = create_admin.first
-    dup_college = College.create! name: "dup college", current_admin: admin1
+    College.create! name: "dup college", current_admin: admin1
     admin = create_admin.first
     [
       {

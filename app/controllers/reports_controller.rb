@@ -1,6 +1,7 @@
 class ReportsController < ApplicationController
   include MasterSearch
   require 'csv'
+  before_action :init_vars
   before_action :authenticate_user_or_admin!
   before_action :authorized?, only: [:index]
   before_action :set_editable_instance_from_id, only: [:edit, :update]
@@ -248,5 +249,10 @@ class ReportsController < ApplicationController
     def report_params_holder
       "report_#{@report.edit_model.classify.underscore}"
     end
-    
+
+
+    def init_vars
+      instance_var_init :results
+      instance_var_init :count_only
+    end
 end

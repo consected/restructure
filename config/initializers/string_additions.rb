@@ -4,6 +4,6 @@ class String
   end
   
   def id_underscore
-    self.downcase.gsub(/[^a-zA-z0-9]/,'_')
+    self.downcase.gsub(/[^a-zA-Z0-9]/,'_')
   end
 end

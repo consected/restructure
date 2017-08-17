@@ -190,11 +190,11 @@ module MasterDataSupport
     @master = Master.new    
     @master.current_user = @user
     @master.save!
-    player_list.each do |l|
-      if l[:rank] == 12
-        l[:rank] = 9
+    player_list.each do |li|
+      if li[:rank] == 12
+        li[:rank] = 9
       end
-      create_player_info l
+      create_player_info li
       @master_count += 1 
     end
     
@@ -203,8 +203,8 @@ module MasterDataSupport
     @master = Master.new    
     @master.current_user = @user
     @master.save!
-    pro_list.each do |l|      
-      create_pro_info l
+    pro_list.each do |li|
+      create_pro_info li
       @master_count += 1 
     end
 
@@ -223,7 +223,7 @@ module MasterDataSupport
         pe = pick_one_from pes
 
         t = master.trackers.build protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now - 1.year
-        res = t.merge_if_exists!
+        t.merge_if_exists!
         
       end
     end

@@ -59,7 +59,7 @@ RSpec.describe ProInfosController, type: :controller do
     
     it "prevents new" do
       master_id = create_master.id
-      expect(new: {master_id: master_id} ).not_to be_routable
+      expect(get: "/masters/#{master_id}/pro_infos/new" ).not_to be_routable
       
     end
   end
@@ -68,7 +68,7 @@ RSpec.describe ProInfosController, type: :controller do
     before_each_login_user
     it "prevents editing" do
       create_item      
-      expect(edit: {:id => item_id, master_id: @master_id}).not_to be_routable
+      expect(get: "/masters/#{@master_id}/pro_infos/#{item_id}/edit" ).not_to be_routable
 
     end
   end
@@ -81,7 +81,7 @@ RSpec.describe ProInfosController, type: :controller do
       it "prevents create" do
         create_master
         
-        expect(create: {object_symbol => valid_attributes, master_id: @master_id}).not_to be_routable
+        expect(post: "/masters/#{@master_id}/pro_infos/").not_to be_routable
 
       end      
     end
@@ -99,7 +99,7 @@ RSpec.describe ProInfosController, type: :controller do
       it "prevents updates to the requested item" do
         create_item
         
-        expect(update: {:id => item_id, object_symbol => new_attributes, master_id: @master_id}).not_to be_routable
+        expect(patch: "/masters/#{@master_id}/pro_infos/#{item_id}").not_to be_routable
 
       end
 
@@ -112,7 +112,7 @@ RSpec.describe ProInfosController, type: :controller do
     before_each_login_user
     it "never destroys the requested item" do
       create_item       
-      expect(destroy: {:id => item_id, master_id: @master_id}).not_to be_routable
+      expect(delete: "/masters/#{@master_id}/pro_infos/#{item_id}").not_to be_routable
     end
 
     

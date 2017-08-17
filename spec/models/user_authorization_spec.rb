@@ -9,7 +9,7 @@ RSpec.describe UserAuthorization, type: :model do
     
     create_user
     
-    res = UserAuthorization.create! user: @user, has_authorization: :create_msid, current_admin: @admin
+    UserAuthorization.create! user: @user, has_authorization: :create_msid, current_admin: @admin
     
     
     expect{

@@ -11,14 +11,20 @@ module ExternalIdHandler
   included do
     
     attr_accessor :create_count, :just_assigned
+    after_initialize :init_vars_external_id_handler
+
     scope :assigned, -> {where "master_id is not null"}
     scope :unassigned, -> {where "master_id is null"}
+
+    @prevent_create = nil
+    @prevent_edit = nil
+    @id_formatter = nil
+    @label = nil
     
   end
   
   class_methods do
-    
-    
+        
     # Get the next unassigned ID item from the the external id table
     def next_available owner
       item = unassigned.unscope(:order).first
@@ -54,6 +60,9 @@ module ExternalIdHandler
     end
     
     def label= val
+      unless defined? @label
+        @label = nil
+      end
       @label
     end
     
@@ -75,6 +84,9 @@ module ExternalIdHandler
     end
 
     def external_id_range
+      unless defined? @external_id_range
+        @external_id_range = nil
+      end
       @external_id_range || (1..9999999999)
     end
     
@@ -100,7 +112,7 @@ module ExternalIdHandler
       self.validates external_id_attribute, presence: true,  numericality: { only_integer: true, greater_than_or_equal_to: external_id_range.min, less_than_or_equal_to: external_id_range.max }
       
       Application.add_to_app_list(:external_id, self)
-      add_master_association &association_block
+      add_master_association(&association_block)
     end
     
     def add_master_association &association_block
@@ -166,5 +178,10 @@ module ExternalIdHandler
     @was_created = id_changed? || just_assigned ? 'created' : false
     @was_updated = updated_at_changed? ? 'updated' : false
   end
+
+  def init_vars_external_id_handler
+    instance_var_init :admin_set
+  end
+  
 end
 

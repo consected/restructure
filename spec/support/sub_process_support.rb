@@ -1,6 +1,9 @@
 module SubProcessSupport
   include MasterSupport
   def list_valid_attribs
+
+    instance_var_init :protocol_id
+    
     res = []
     
     (1..5).each do |l|
@@ -23,6 +26,7 @@ module SubProcessSupport
   end
   
   def list_invalid_attribs
+    instance_var_init :protocol_id
     [
       {
         name: nil,
@@ -32,6 +36,7 @@ module SubProcessSupport
   end
   
   def list_invalid_update_attribs
+    instance_var_init :protocol_id
     [            
       {
         name: nil,
@@ -41,6 +46,7 @@ module SubProcessSupport
   end  
   
   def new_attribs
+    instance_var_init :protocol_id
     @new_attribs = {            
       disabled: true,
         protocol_id: @protocol_id

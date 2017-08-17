@@ -18,8 +18,8 @@
         <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %>
           <% if nav[:sub] %>  
           <ul class="dropdown-menu" role="menu">
-            <% nav[:sub].each do |nav| %>
-            <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %></li>
+            <% nav[:sub].each do |nav1| %>
+            <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
             <% end %>
           </ul>
           <% end %>        
@@ -55,8 +55,8 @@
             <%= link_to nav[:label].html_safe, nav[:url], drop%>            
           <% if nav[:sub] %>  
           <ul class="dropdown-menu" role="menu">
-            <% nav[:sub].each do |nav| %>
-            <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %></li>
+            <% nav[:sub].each do |nav1| %>
+            <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
             <% end %>
           </ul>
           <% end %>

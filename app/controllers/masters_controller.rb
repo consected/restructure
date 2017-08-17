@@ -1,4 +1,6 @@
 class MastersController < ApplicationController
+
+  before_action :init_vars
   before_action :authenticate_user!
   before_action :authorized?, only: [:new, :create]
   include MasterSearch
@@ -83,6 +85,12 @@ class MastersController < ApplicationController
   end
   
 private
+
+  def init_vars
+    instance_var_init :master
+    instance_var_init :id
+    instance_var_init :do_search
+  end
 
   def search_params
     

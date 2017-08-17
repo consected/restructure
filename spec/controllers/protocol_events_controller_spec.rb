@@ -49,7 +49,7 @@ RSpec.describe ProtocolEventsController, type: :controller do
   }
   
   before :each do    
-    admin, pw = ControllerMacros.create_admin    
+    admin, _ = ControllerMacros.create_admin
       @admin = admin
   
     p = Protocol.create! name: "Q#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
@@ -96,8 +96,9 @@ RSpec.describe ProtocolEventsController, type: :controller do
     
     it "assigns the requested item as @var" do
       create_item
-        
-      expect(show: {:id => item_id}).not_to be_routable
+
+      u = "/protocols/#{@protocol.id}/sub_processes/#{@sub_process.id}/protocol_events/#{@protocol_event.id}"
+      expect(get: u).not_to be_routable
     end
   end
 

@@ -180,23 +180,24 @@ table.table tbody.tracker-history {
 table.table td.tracker-history {border-top:0;}
 
 table.table.tablesorter > thead > tr > th {
-    &.header {
+    &.tablesorter-header {
         
         border-top: 4px solid transparent !important;
         border-bottom: 4px solid #eee !important;
+        outline: 0;
     }
-    &.header.headerSortUp {
+    &.tablesorter-header.tablesorter-headerDesc {
         border-top: 4px solid #c9e2b3 !important;
 
     }
-    &.header.headerSortDown {
+    &.tablesorter-header.tablesorter-headerAsc {
         border-bottom: 4px solid #c9e2b3 !important;
     }
     &:hover {
         cursor: pointer;
     }
 } 
-table.table.tablesorter > thead > tr > th.header:after {
+table.table.tablesorter > thead > tr > th.tablesorter-header:after {
     content: "\e150";
     position: relative;
     top: 1px;

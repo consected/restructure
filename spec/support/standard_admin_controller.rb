@@ -22,6 +22,7 @@ shared_examples 'a standard admin controller' do
     invalid_update_attribs
   }
   let(:path_prefix){
+    instance_var_init :path_prefix
     @path_prefix
   }
   
@@ -55,7 +56,7 @@ shared_examples 'a standard admin controller' do
     it "assigns the requested item as @var" do
       create_item
         
-      expect(show: {:id => item_id}).not_to be_routable
+      expect(get: "#{path_prefix}/#{object_symbol}/#{item_id}" ).not_to be_routable
     end
   end
 

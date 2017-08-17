@@ -91,6 +91,9 @@ protected
     end
 
     def setup_navs
+
+      return true if request.xhr?
+      
       @primary_navs = []
       @secondary_navs = []
       
@@ -99,8 +102,8 @@ protected
         
         admin_sub << {label: 'manage', url: '/', route: '#root'}
         
-        admin_sub << {label: 'password', url: "/admins/edit"}
-        admin_sub << {label: 'logout_admin', url: "/admins/sign_out", extras: {method: :delete}}
+        admin_sub << {label: 'password', url: "/admins/edit", extras: {'data-do-action' => 'admin-change-password'}}
+        admin_sub << {label: 'logout_admin', url: "/admins/sign_out", extras: {method: :delete, 'data-do-action' => 'admin-logout'}}
         
       else
         admin_sub << {label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in', }
@@ -108,12 +111,12 @@ protected
       
       if current_user 
         user_sub = []
-        user_sub << {label: 'password', url: "/users/edit"}
-        user_sub << {label: 'logout', url: "/users/sign_out", extras: {method: :delete}}
+        user_sub << {label: 'password', url: "/users/edit", extras: {'data-do-action' => 'user-change-password'}}
+        user_sub << {label: 'logout', url: "/users/sign_out", extras: {method: :delete, 'data-do-action' => 'user-logout'}}
       end
       if current_user  || current_admin
-        @secondary_navs << {label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>', url: "#", sub: admin_sub, extras: {}}
-        @secondary_navs << {label: '<span class="glyphicon glyphicon-user" ></span>', url: "#", sub: user_sub, extras: {title: current_email}}
+        @secondary_navs << {label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>', url: "#", sub: admin_sub, extras: {'data-do-action' => 'show-admin-options'}}
+        @secondary_navs << {label: '<span class="glyphicon glyphicon-user" title="user"></span>', url: "#", sub: user_sub, extras: {title: current_email, 'data-do-action' => 'show-user-options'}}
       end 
       
       

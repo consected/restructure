@@ -4,6 +4,8 @@ module MasterHandler
   UseMasterParam = %w(new create index) 
   
   included do
+    
+    before_action :init_vars_master_handler
     before_action :authenticate_user!
     before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
     before_action :set_instance_from_id, only: [:show]
@@ -118,6 +120,15 @@ module MasterHandler
     end  
     
   private
+
+    # In order to clear up a multitude of Ruby warnings
+    def init_vars_master_handler
+      instance_var_init :object_name
+      instance_var_init :id
+      instance_var_init :master
+      instance_var_init :master_objects
+      set_object_instance nil
+    end
 
     def set_me_and_master
 

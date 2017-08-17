@@ -14,11 +14,13 @@ _fpa.set_definition = function(name, callback){
   var from_cache = true;
   
   var get_def = function(name){
-    $.ajax('/definitions/'+name).success(function(data){
+    $.ajax('/definitions/'+name, {
+      success: function(data){
         var res = data;
         _fpa.set_cache(name, res);
         from_cache = false;
         if(callback) callback();
+      }
     });
   
   };

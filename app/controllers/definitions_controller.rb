@@ -1,4 +1,6 @@
 class DefinitionsController < ApplicationController
+
+  before_action :init_vars
   before_action :authenticate_user_or_admin!
   
   Available = {
@@ -13,7 +15,7 @@ class DefinitionsController < ApplicationController
   }.freeze
    
   def show
-    
+
     def_type = params[:id]
     
     item_selector = available def_type
@@ -33,6 +35,10 @@ class DefinitionsController < ApplicationController
   
   
   private
+
+    def init_vars
+      instance_var_init :filter
+    end
   
     # This both looks up the selector method to use, and protects against insecure 
     # user-generated requests to access unexpected methods and classes

@@ -7,7 +7,6 @@ module ItemFlagSupport
   end
   
   def list_valid_attribs
-    res = []
     
     create_item_flag_name 'PlayerInfo'
     

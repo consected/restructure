@@ -29,7 +29,7 @@ class GeneralSelection < ActiveRecord::Base
   
   # Get an array of name value pairs for a particular record, and the type of attribute it corresponds to
   def self.item_type_name_value_pair record, type=:source
-    src = item_type_source_for record, type  
+    src = item_type_source_for record, type
     selector_name_value_pair(item_type: src)       
   end
   

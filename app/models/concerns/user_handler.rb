@@ -6,7 +6,9 @@ module UserHandler
     attr_accessor :no_track
     # Standard associations
     Rails.logger.debug "Associating master as inverse of #{assoc_inverse}"
-    
+
+    after_initialize :init_vars_user_handler
+
     belongs_to :master, assoc_rules
     belongs_to :user
     
@@ -64,7 +66,8 @@ module UserHandler
       GeneralSelection.name_for self, value, :source
     end
   end  
-  
+
+
   def is_admin?
     if respond_to?(:master) && master      
       master.is_admin?
@@ -169,6 +172,15 @@ module UserHandler
   
   
   protected
+
+    def init_vars_user_handler
+      instance_var_init :was_created
+      instance_var_init :updated_with
+      instance_var_init :was_updated
+      instance_var_init :update_action
+      instance_var_init :multiple_results
+    end
+
     def creatable_without_user
       false
     end
@@ -207,8 +219,11 @@ module UserHandler
     end
   
     def source_correct      
-      if respond_to?(:source) && self.source       
-        errors.add :source, "(#{self.source}) not a valid value" unless source_name
+      if respond_to?(:source) && self.source
+        unless source_name
+          logger.info "Requested source of #{self.source}. This is not a valid value."
+          errors.add :source, "(#{self.source}) not a valid value"
+        end
       end      
     end
     

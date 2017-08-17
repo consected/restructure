@@ -27,7 +27,7 @@ class SageAssignment < ActiveRecord::Base
         item.no_track = true      
         item.save!
         res << item
-      rescue PG::UniqueViolation => e
+      rescue PG::UniqueViolation
         logger.info "Failed to create a Sage Assignment record due to an random duplicate"
       end  
       
@@ -59,5 +59,5 @@ class SageAssignment < ActiveRecord::Base
       true
     end
     
-  end
+end
   

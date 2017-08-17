@@ -62,7 +62,7 @@ describe Admin do
   it "only allows scripts outside of passenger to create admins" do
     ENV['FPHS_ADMIN_SETUP']='no'    
     
-    expect {create_admin}.to raise_error /can only create admins in console/
+    expect {create_admin}.to raise_error(/can only create admins in console/)
   end
   
   after :all do

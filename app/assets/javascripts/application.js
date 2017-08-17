@@ -10,12 +10,12 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require jquery
+//= require jquery3
 //= require jquery_ujs
 //= require bootstrap
 //= require typeahead
 //= require chosen.jquery
-//= require handlebars-v3.0.3
+//= require handlebars-v4.0.10
 //= require jquery-tablesorter
 //= require jquery-scrollto-min
 //= require jquery-mask

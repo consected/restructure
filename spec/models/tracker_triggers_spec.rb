@@ -13,7 +13,7 @@ RSpec.describe Tracker, type: :model do
   
   before(:each) do
     
-    @user_2, pw = create_user
+    @user_2, _ = create_user
     
     create_user
     create_admin
@@ -187,7 +187,7 @@ RSpec.describe Tracker, type: :model do
 
       insert into trackers
       (master_id, protocol_id, sub_process_id, event_date, updated_at, created_at, user_id) 
-      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{DateTime.now -1.day}', now(), now(), #{@user_id});
+      values (#{@master.id}, #{@p2.id}, #{@sp2_2.id}, '#{DateTime.now - 1.day}', now(), now(), #{@user_id});
 
       delete from tracker_history where 
       master_id = #{@master.id} and protocol_id = #{@p2.id} and sub_process_id = #{@sp2_1.id};

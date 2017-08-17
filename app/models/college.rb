@@ -49,6 +49,7 @@ class College < ActiveRecord::Base
   end
   
   def user_set?
+    return nil unless defined? @user_set
     !!@user_set
   end
   

@@ -4,10 +4,8 @@
   <title><%= 'FPHS' %></title>
   <%= stylesheet_link_tag    'application', media: 'all' %>
   <%= javascript_include_tag 'application' %>
-  <%= javascript_include_tag '/webshims/polyfiller.js' %>
-  <script>
-    webshim.polyfill('forms-ext');
-    
+
+  <script>    
   _fpa.status = {
     controller: '<%= controller_name %>',
     action: '<%= action_name %>'

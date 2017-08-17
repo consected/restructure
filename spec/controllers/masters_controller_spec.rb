@@ -5,7 +5,7 @@ RSpec.describe MastersController, type: :controller do
   before_each_login_user
   
   before :each do
-    @admin, pw = ControllerMacros.create_admin
+    @admin, _ = ControllerMacros.create_admin
     UserAuthorization.create has_authorization: :create_msid, user_id: @user.id, current_admin: @admin unless UserAuthorization.user_can? @user, :create_msid
   end
   

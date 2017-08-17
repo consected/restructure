@@ -8,7 +8,7 @@ module ControllerMacros
     r = a.id + 1 if a
     good_email = "ctestuser-tester-#{r}@testing.com"
     
-    admin, pwa = create_admin
+    admin, _ = create_admin
     
     user = User.create! email: good_email, current_admin: admin
     good_password = user.password
@@ -46,7 +46,7 @@ module ControllerMacros
   def before_each_login_admin
     before(:each) do
       
-      admin, pw = ControllerMacros.create_admin
+      admin, _ = ControllerMacros.create_admin
 
       @request.env["devise.mapping"] = Devise.mappings[:admin]
       

@@ -2,7 +2,7 @@ module UserAuthorizationSupport
   include MasterSupport
   def list_valid_attribs
     res = []
-    user, pw = ControllerMacros.create_user
+    user, _ = ControllerMacros.create_user
     (1..5).each do |l|
       res << {
         user_id: user.id,

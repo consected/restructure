@@ -21,7 +21,7 @@ module TrackerSupport
           day += 1
           ev = sp.protocol_events.create! name: "EV #{rand 100000}", current_admin: @admin      
           event_date = DateTime.now + day.days
-          evn = ev.name
+          #ev.name
           evid = ev.id
           sp1 = sp.id
            

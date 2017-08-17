@@ -4,6 +4,7 @@ describe "advanced search", js: true do
   
   include ModelSupport
   include MasterDataSupport
+  include FeatureSupport
   
   before(:all) do
     seed_database
@@ -22,26 +23,9 @@ describe "advanced search", js: true do
     
     #login_as @user, scope: :user
     
-    visit "/users/sign_in"
-    within '#new_user' do
-      fill_in "Email", with: @good_email
-      fill_in "Password", with: @good_password
-      click_button "Log in"
-    end
-    expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
-    
+    login
   end
 
-  def logout 
-    find('.navbar-right li:nth-child(2) .dropdown-toggle').click
-    click_link 'logout'
-
-  end
-
-  def dismiss_modal
-    b = all('button[data-dismiss="modal"]')
-    b.first.click if b && b.length > 0 
-  end
   
   it "should test switching to advanced search and search a player" do
     
@@ -86,7 +70,7 @@ describe "advanced search", js: true do
     expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
     
     page.all(:css, '.master-expander .player-info-header .player-names').each do |el|
-      expect(el.text).to match /#{@full_player_info.first_name.capitalize}.*/    
+      expect(el.text).to match(/#{@full_player_info.first_name.capitalize}.*/)
     end
     
     
@@ -104,7 +88,7 @@ describe "advanced search", js: true do
     expect(page).to have_css "#search_count", text: /[0-9]+/
     
     page.all(:css, '.master-expander .player-info-header .player-names').each do |el|
-      expect(el.text).to match /#{@full_player_info.first_name.capitalize}.+#{@full_player_info.last_name.capitalize}.*/
+      expect(el.text).to match(/#{@full_player_info.first_name.capitalize}.+#{@full_player_info.last_name.capitalize}.*/)
     end
     
     have_css("a.master-expander.attached-me-click")
@@ -138,18 +122,19 @@ describe "advanced search", js: true do
     me = page.all(:css, '.master-expander')
     
     me.each do |el|
-      expect(el.text).to match /#{@full_player_info.first_name.capitalize}.+#{@full_player_info.last_name.capitalize}.*/
+      expect(el.text).to match(/#{@full_player_info.first_name.capitalize}.+#{@full_player_info.last_name.capitalize}.*/)
       
       
-      
-      el.find('.player_info_header').click unless me.length == 1 
-      dismiss_modal
+      h = open_player_element el, me
+
+      #el.find('.player_info_header').click unless me.length == 1
+      #dismiss_modal
                         
       have_css "#master-#{@full_player_info.master_id}-player-infos.collapse.in"
       
       have_css "#trackers-#{@full_player_info.master_id}.collapse.in"
       
-      h = el[:href].split('#').last
+      #h = el[:href].split('#').last
       
       expect(page).to have_css("##{h} .tracker-block .tracker-protocol_name .cell-holder", text: protocol.name), "Expected: #{@full_master_record.trackers.map {|m| m.protocol_name} }"
       dismiss_modal
@@ -205,11 +190,12 @@ describe "advanced search", js: true do
     done = 0
     
     items.each do |el|
-      dismiss_modal    
       
       have_css '.player-info-header'
-      el.find('.player-info-header').click      if items.length > 1
-      
+      dismiss_modal
+
+
+      h = open_player_element el, items
       
       
       b = all('button[data-dismiss="modal"]')

@@ -8,6 +8,7 @@ class ProInfo < ActiveRecord::Base
   
   protected
     def prevent_save
+      instance_var_init :enable_updates
       return false unless @enable_updates
       return true
     end

@@ -1,7 +1,7 @@
 module ApplicationHelper
   
   
-  def object_name    
+  def object_name
     (@object_name || controller_name.singularize)
   end
   
@@ -57,7 +57,7 @@ module ApplicationHelper
   end
   
   def admin_edit_controls
-    h = "<div class=\"admin-edit-controls\">
+    "<div class=\"admin-edit-controls\">
       #{link_to "cancel", url_for(action: :edit)} 
       #{link_to "admin menu", '/'}
       </div>

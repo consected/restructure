@@ -26,7 +26,7 @@ module ModelSupport
     good_email = gen_username("#{r}-#{extra}-")
     
     
-    admin, pwa = create_admin
+    admin, _ = create_admin
     user = User.create! email: good_email, current_admin: admin
     good_password = user.password
     @user = user

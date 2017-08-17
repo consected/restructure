@@ -2,11 +2,17 @@ module AdminHandler
   extend ActiveSupport::Concern
   
   included do
+    after_initialize :init_vars_admin_handler
     belongs_to :admin
     scope :active, -> {where "disabled is null or disabled = false"}
     
     before_validation :ensure_admin_set
     before_create :setup_values
+  end
+
+  def init_vars_admin_handler
+    instance_var_init :admin_set
+    instance_var_init :current_admin
   end
   
   def setup_values    

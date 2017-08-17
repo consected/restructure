@@ -5,7 +5,9 @@ _fpa.preprocessors = {
     before_all: function(block){
                 
         $('#master_results_block').removeClass('search-status-abort search-status-error search-status-done');
-                
+
+        _fpa.form_utils.date_inputs_to_iso(block);
+      
         
     },
     
@@ -17,7 +19,7 @@ _fpa.preprocessors = {
 _fpa.postprocessors = {
     default: function(block, data, has_postprocessor){
            
-           
+        _fpa.form_utils.setup_datepickers($('form'));
         $('#master_results_block').addClass('search-status-done');  
         
         // Allow easy default processing where not already performed by the postprocessor
@@ -445,6 +447,7 @@ _fpa.postprocessors = {
             var e = '';
             if(status) e = status;
             $('#master_results_block').addClass('search-status-error');
+            _fpa.form_utils.setup_datepickers(block);
         }
     }
 };

@@ -10,6 +10,23 @@ _fpa.form_utils = {
             block.addClass('expanded');
     },
 
+    date_inputs_to_iso: function(block){
+      
+      var dates = block.find('input[type="date"].date-is-local');
+      if(dates.length > 0){
+
+        dates.each(function(){
+          var v = $(this).val();
+          if(v || v != ''){
+            var res = (new Date(v)).asYMD();
+            if(res){
+              $(this).val(res);
+            }
+            
+          }
+        }).removeClass('date-is-local');
+      }
+    },
 
     // Setup the typeahead prediction for a specific text input element
     setup_typeahead: function(element, list, name){
@@ -203,7 +220,7 @@ _fpa.form_utils = {
                });
 
                //{0: {sorter: false}}
-               ts.tablesorter( {dateFormat: 'us', headers: h}).addClass('attached-tablesorter');  
+               ts.tablesorter( {dateFormat: 'yyyy-mm-dd', headers: h}).addClass('attached-tablesorter');  
             });                
         },100);
     },
@@ -274,6 +291,38 @@ _fpa.form_utils = {
         
     },
     
+    setup_datepickers: function(block){
+      
+      block.find('input[type="date"]').not('.date-is-local').each(function(){
+        var v = $(this).val();
+        
+        if(v && v != ''){          
+          var stre = v;
+          if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
+            startTime = new Date(Date.parse(stre));
+            startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
+            var d = startTime.toLocaleDateString();  
+          } else {            
+            var d = new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
+          }
+          $(this).val(d);
+          $(this).addClass('date-is-local');
+        }
+        
+      });
+      
+      block.find('input[type="date"]').not('.attached-datepicker').each(function(){
+        
+        $(this).datepicker({
+          startView: 2,
+          clearBtn: true,
+          autoclose: true,
+          format: 'm/d/yyyy'
+        });
+      }).addClass('attached-datepicker date-is-local');
+        
+    },
+    
     setup_extra_actions: function(block){
         
         block.find('.resize-children').each(function(){
@@ -327,7 +376,7 @@ _fpa.form_utils = {
             }).prependTo(descp);
         }
         
-        block.updatePolyfill();
+        //block.updatePolyfill();
         
         block.find('input,select,checkbox,textarea').not('[type="submit"],.form-control').addClass('form-control input-sm');
         block.find('.typeahead').css({width: '100%'});        
@@ -362,6 +411,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_bootstrap_items(block);
         _fpa.form_utils.setup_data_toggles(block);
         _fpa.form_utils.setup_extra_actions(block);
+        _fpa.form_utils.setup_datepickers(block);
     }
 };
 

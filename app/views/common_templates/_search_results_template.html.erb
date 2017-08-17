@@ -16,11 +16,15 @@
   unless defined? custom_block_attrs
     custom_block_attrs = {}
   end
+
+  unless defined? extra_class
+    extra_class = ''
+  end
     
   
 %>
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
+  {{#was _created}}<div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
   <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.html_safe}\"" }.join(' ').html_safe%> >
       <% if item_list.length == 1 && item_list.first.is_a?(Hash) %>
         <% item_list.each do |item| %>
@@ -46,11 +50,11 @@
         {{#is @key "notes"}}
         <div class="player-info-notes">
           <div class="panel panel-default panel-body">
-          {{#with ..}}{{pretty_string this return_string="true"}}{{/with}}
+          {{pretty_string this return_string="true"}}
           </div>
         </div>          
         {{else}}        
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{#with ..}}{{pretty_string this return_string="true" capitalize="true"}}{{/with}}</strong></li>          
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>          
         {{/is}}
         {{/filter}}                    
         <% if defined? item_blocks 
@@ -103,6 +107,6 @@
              
     </div>
     <% unless prevent_create %>
-    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus"></span> <%= caption %> record</a> </p>                                    
+    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus add-item-button"></span> <%= caption %> record</a> </p>                                    
     <% end %>
 </script>

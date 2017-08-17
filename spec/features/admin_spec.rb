@@ -46,7 +46,8 @@ describe "admin sign in process" do
       click_button "Log in"
     end
 
-    expect(page).to have_css ".flash .alert", text: "× Invalid email or password."
+    fail_message = "× Invalid Email or password."
+    expect(page).to have_css ".flash .alert", text: fail_message
     
     visit "/admins/sign_in"
     within '#new_admin' do
@@ -55,7 +56,7 @@ describe "admin sign in process" do
       click_button "Log in"
     end
 
-    expect(page).to have_css ".flash .alert", text: "× Invalid email or password."
+    expect(page).to have_css ".flash .alert", text: fail_message
 
     visit "/admins/sign_in"
     within '#new_admin' do
@@ -64,7 +65,7 @@ describe "admin sign in process" do
       click_button "Log in"
     end
 
-    expect(page).to have_css ".flash .alert", text: "× Invalid email or password."
+    expect(page).to have_css ".flash .alert", text: fail_message
 
     
     visit "/admins/sign_in"

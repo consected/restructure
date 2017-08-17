@@ -4,7 +4,7 @@ module SelectorCache
   
 
   included do
-    
+    after_initialize :init_vars_selector_cache
     before_save :invalidate_cache
     before_create :invalidate_cache
     
@@ -67,7 +67,7 @@ module SelectorCache
     
     def selector_name_value_pair conditions=nil
       ckey="#{nv_pair_cache_key}#{conditions}"
-      
+
       Rails.cache.fetch(ckey){
         enabled.where(conditions).collect {|c| [c.name, downcase_if_string(c.value)] }
       }
@@ -155,4 +155,13 @@ module SelectorCache
     Rails.cache.clear    
 
   end
+
+  protected
+
+    def init_vars_selector_cache
+      instance_var_init :prevent_create
+      instance_var_init :prevent_edit
+      instance_var_init :label
+      instance_var_init :id_formatter
+    end
 end

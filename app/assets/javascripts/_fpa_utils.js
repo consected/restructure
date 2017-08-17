@@ -78,9 +78,24 @@ _fpa.utils.pretty_print = function(stre, options_hash){
         }
         if(typeof startTime === 'undefined' || !startTime || startTime == 'Invalid Date'){
             if(options_hash.return_string){
-                
-                if(typeof stre == 'object'){
-                    return JSON.stringify(stre, null, '<div>  ');
+              
+              // This ugly condition checks for the difficult case where Handlebars decides to mangle empty numbers
+              // Rather than returning null as previous, Handlebars now returns an empty object {}
+              // So now, we check for:
+              // is it not Null
+              // is it not a String (typeof doesn't always work, since new String('abc') can return object for typeof)
+              // is it not a Number
+              // and does typeof suggest that this is an object (which we really want to pretty print)
+              // If this appears to be an object and none of the others then
+              // check if the object is not empty so we can pretty print it
+              // otherwise it is empty, so return null, which is what it really should be
+                if(stre !== null && !(stre instanceof String) && !(stre instanceof Number) && (typeof stre == 'object')){
+                    if(Object.keys(stre).length > 0){                      
+                      return JSON.stringify(stre, null, '<div>  ');
+                    } 
+                    else {                      
+                      return null;
+                    }
                 }
                 
                 if(options_hash.capitalize){
@@ -104,6 +119,5 @@ _fpa.utils.pretty_print = function(stre, options_hash){
         } else {
             return new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
         }
-        
         return stre;
 };

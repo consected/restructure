@@ -13,11 +13,11 @@
 # page post, enabling CSV download and JSON data modes to work
 
 %>    
-<%= form_for @master, method: :post, url: '/masters/', include_id: false, remote: true, html: {id: 'advanced_search_master', class: 'search_master form-formatted'} do |f| %>
+<%= form_for @master, method: :post, url: '/masters/', include_id: false, remote: true, html: {id: 'advanced_search_master', class: 'search_master form-formatted'} do |f_main| %>
     <%= tag(:input, :type => "hidden", :name => request_forgery_protection_token.to_s, :value => form_authenticity_token) %>
   <div class="row">
 
-    <%= f.fields_for :player_infos, child_index: 0 do |f| %>      
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>      
       <div class="form-group col-sm-2">
         <%= f.label :first_name, 'data-add-icon' => 'info-sign', title: 'search for first names starting with this value' %>
         <%= f.text_field :first_name, class: 'form-control'  %>
@@ -68,7 +68,7 @@
   </div>
     
   <div class="row" id="pro-info-search" >
-    <%= f.fields_for :pro_infos, child_index: 0 do |f| %>
+    <%= f_main.fields_for :pro_infos, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :first_name, 'data-add-icon' => 'info-sign', title: 'search for first names starting with this value' %>
         <%= f.text_field :first_name, class: 'form-control'  %>
@@ -111,7 +111,7 @@
   </div>
 
   <div class="row">
-    <%=f.fields_for :addresses, child_index: 0 do |f| %>
+    <%= f_main.fields_for :addresses, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :street_address, 'data-add-icon' => 'info-sign', title: 'search for street address starting with this value' %>
         <%= f.text_field :street, class: 'form-control' %>
@@ -131,27 +131,27 @@
       </div>
     <% end %>
       
-    <%= f.fields_for :player_contacts, child_index: 0 do |f| %>        
+    <%= f_main.fields_for :player_contacts, child_index: 0 do |f| %>        
       <div class="form-group col-sm-3">
           <%= f.label :phone_or_email, 'data-add-icon' => 'info-sign', title: 'search for phone or email starting with this value (ignores non-alphanumeric characters)' %>
           <%= f.text_field :data, class: 'form-control' %>           
       </div>
     <% end %>
       
-    <%= f.fields_for :player_infos, child_index: 0 do |f| %>  
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>  
       <div class="form-group col-sm-3">
         <%= f.label :rank %>
         <%= f.select :rank, player_info_rank_array_pair, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>
       
-    <%= f.fields_for :scantrons, child_index: 0 do |f| %>
+    <%= f_main.fields_for :scantrons, child_index: 0 do |f| %>
       <div class="form-group col-sm-2">
         <%= f.label :scantron_id %>
         <%= f.number_field :scantron_id, class: 'form-control', in: Scantron.external_id_range,  pattern: Scantron.external_id_edit_pattern %>
       </div>
     <% end %>
-    <%= f.fields_for :player_infos, child_index: 0 do |f| %>    
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>    
       <div class="form-group col-sm-6 ">
         <%= f.label :notes, 'data-add-icon' => 'info-sign', title: 'search for notes containing word or phrase' %>
         <%= f.text_field :notes, class: 'form-control' %>
@@ -161,7 +161,7 @@
     </div>
     
     <div class="row">
-    <%= f.fields_for :trackers, child_index: 0 do |f| %>    
+    <%= f_main.fields_for :trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3  tracker-search-field">
         <%= f.label "Protocol / Category" %>
         <%= f.select :protocol_id, protocol_array_without_updates, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_sub_process_id, #master_not_trackers_attributes_0_sub_process_id, #master_tracker_histories_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id", class: 'form-control'}%>
@@ -176,7 +176,7 @@
       </div>        
 
     <% end %>
-    <%= f.fields_for :tracker_histories, child_index: 0 do |f| %>    
+    <%= f_main.fields_for :tracker_histories, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
           <%= f.label 'current or previous status + method', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method appears at any time in the tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
@@ -186,7 +186,7 @@
           <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: 'form-control' %>
       </div>
     <% end %>
-    <%= f.fields_for :player_infos, child_index: 0 do |f| %>          
+    <%= f_main.fields_for :player_infos, child_index: 0 do |f| %>          
 
       <div class="form-group col-sm-2"> 
         <%= f.label :older_than, 'data-add-icon' => 'info-sign', title: 'based on player info date of birth' %>
@@ -197,7 +197,7 @@
         <%= f.number_field :younger_than, in: Settings::AgeRange, class: 'form-control', pattern: Settings::PositiveIntPattern  %>
       </div>
     <% end %>  
-    <%= f.fields_for :pro_infos, child_index: 0 do |f| %>           
+    <%= f_main.fields_for :pro_infos, child_index: 0 do |f| %>           
       <div class="form-group col-sm-2"> 
         <%= f.label 'Career years >', 'data-add-icon' => 'info-sign', title: 'based on pro info start and end years'%>
         <%= f.number_field :more_than_career_years, in: Settings::CareerYearsRange, class: 'form-control', pattern: Settings::PositiveIntPattern   %>
@@ -212,7 +212,7 @@
     <div class="row">
         <div class="form-group col-sm-3 tracker-not-info tracker-search-field">                        
         </div>
-    <%= f.fields_for :not_trackers, child_index: 0 do |f| %>    
+    <%= f_main.fields_for :not_trackers, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
           <%= f.label 'Not current status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method is not the current tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_trackers_attributes_0_protocol_event_id", "data-only-for" => "#master_not_trackers_attributes_0_protocol_event_id", class: 'form-control'} %>
@@ -223,7 +223,7 @@
       </div>
   
     <% end %>        
-    <%= f.fields_for :not_tracker_histories, child_index: 0 do |f| %>    
+    <%= f_main.fields_for :not_tracker_histories, child_index: 0 do |f| %>    
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
           <%= f.label 'Never had status + method ', class: 'nowrap',  'data-add-icon' => 'info-sign', title: 'The status + method never appeared in the tracker item in the selected protocol' %>
           <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "#master_not_tracker_histories_attributes_0_protocol_event_id", "data-only-for" => "#master_not_tracker_histories_attributes_0_protocol_event_id", class: 'form-control'} %>
@@ -245,9 +245,9 @@
     </div>
     
   <div class="form-group form-actions clearfix">
-    <%= f.submit :search, class: "btn btn-default btn-sm pull-right auto-submitter" %>
-    <%= f.submit "CSV", name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " if current_user.can? :export_csv%>
-    <%= f.submit "JSON", name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" if current_user.can? :export_json%>
+    <%= f_main.submit :search, class: "btn btn-default btn-sm pull-right auto-submitter" %>
+    <%= f_main.submit "CSV", name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " if current_user.can? :export_csv%>
+    <%= f_main.submit "JSON", name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" if current_user.can? :export_json%>
     
     <span id="search_count" class="search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
   </div>

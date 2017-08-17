@@ -13,8 +13,8 @@ module Seeds
       item_type = 'player_infos_source'
       
       values = [        
-        {name: 'NFLPA', value: 'nflpa'},                
-        {name: 'NFLPA 2', value: 'nflpa2'}                
+        {name: 'NFLPA', value: 'nflpa'},
+        {name: 'NFLPA 2', value: 'nflpa2'}
       ]
       
       add_values values, item_type
@@ -80,7 +80,7 @@ module Seeds
 
     def self.create_player_contacts_type
       
-      item_type = 'player_contacts_rec_type'
+      item_type = 'player_contacts_type'
       
       values = [
         {name: 'Email', value: 'email'},

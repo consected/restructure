@@ -138,9 +138,9 @@ module MasterSearch
         res = [(ma.map {|k,v| k} + (ma['player_infos'].first ||{}).map {|k,v| "player.#{k}"} +
               (ma['pro_infos'].first ||{}).map {|k,v| "pro.#{k}"}).to_csv]
         
-        m[:masters].each do |ma| 
-          res << (ma.map {|k,v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v }   +  (ma['player_infos'].first || {}).map {|k,v| v} +
-              (ma['pro_infos'].first || {}).map {|k,v| v}).to_csv 
+        m[:masters].each do |mae|
+          res << (mae.map {|k,v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v }   +  (mae['player_infos'].first || {}).map {|k,v| v} +
+              (mae['pro_infos'].first || {}).map {|k,v| v}).to_csv
         end
         
         send_data res.join(""), filename: "report.csv"

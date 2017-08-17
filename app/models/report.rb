@@ -2,7 +2,8 @@ class Report < ActiveRecord::Base
   
   include AdminHandler
   include SelectorCache
-  
+
+  after_initialize :init_vars
   before_validation :check_attr_def
   validates :report_type, presence: true
   validates :name, presence: true  
@@ -25,7 +26,6 @@ class Report < ActiveRecord::Base
   end
   
   def self.categories
-    res = []
     Report.select("distinct item_type").where('item_type is not null').all.map {|s| s.item_type}
   end
   
@@ -56,7 +56,7 @@ class Report < ActiveRecord::Base
       a_new_class = Class.new(ActiveRecord::Base) do 
         self.table_name = obj_table_name
       end
-      res = Report.const_set(model_class_name, a_new_class)
+      Report.const_set(model_class_name, a_new_class)
     end
   end
   
@@ -322,7 +322,7 @@ class Report < ActiveRecord::Base
       if v.blank?
         search_attr_values[k] = nil
       elsif v.is_a? Hash
-        search_attr_values[k] = v.collect{|k,v| v}      
+        search_attr_values[k] = v.collect{|_,v1| v1}
       elsif v.is_a?(String) && v.include?("\n")
         if search_attributes[k.to_s].first.last['multiple'] == 'multiple-regex'
           search_attr_values[k] = "(#{v.split("\n").map{|a| a.squish}.join('|')})"
@@ -345,7 +345,7 @@ class Report < ActiveRecord::Base
     
     res = default
     if default.is_a? String
-      m = default.scan /(-\d+) (days|day|months|month|years|year)/
+      m = default.scan(/(-\d+) (days|day|months|month|years|year)/)
       if m.first
         t = m.first.last      
         res = DateTime.now + m.first.first.to_i.send(t)
@@ -386,4 +386,11 @@ class Report < ActiveRecord::Base
     errors.add :search_attributes, "definition can not be parsed. Check the YAML or JSON is valid. #{errmsg.message}" unless s
   end
 
+
+  def init_vars
+    instance_var_init :results
+    instance_var_init :result_tables
+    instance_var_init :result_tables_oid
+    instance_var_init :filtering_on
+  end
 end

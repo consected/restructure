@@ -1,6 +1,7 @@
 class Master < ActiveRecord::Base
   
 
+  after_initialize :init_vars_master
   
   belongs_to :user
   
@@ -76,7 +77,7 @@ class Master < ActiveRecord::Base
   end
   
   def current_user
-    logger.info "Getting current user: #{@user_id} from #{self}"
+    logger.debug "Getting current user: #{@current_user} from #{self}"
     # Do not get the user association when requesting the current_user, since we 
     # do not want the value that has been persisted in the data
     @current_user
@@ -102,6 +103,11 @@ class Master < ActiveRecord::Base
   end
   
 private
+
+  def init_vars_master
+    instance_var_init :current_admin
+    instance_var_init :current_user
+  end
 
   def assign_msid
     

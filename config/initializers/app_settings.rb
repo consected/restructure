@@ -13,7 +13,7 @@ class Settings
   AdminTimeout = 15.minutes.freeze
   
   def self.auto_admin 
-    a = Admin.find_or_create_by email: 'auto-admin@dummy.aaa'    
+    Admin.find_or_create_by email: 'auto-admin@dummy.aaa'    
   end
   
   def self.add_record_update_entries name

@@ -28,7 +28,8 @@
     prevent_edit: false, 
     prevent_create: false,
     item_list: %w(data source),
-    data_sort: [:desc, "data-item-rank"]
+    data_sort: [:desc, "data-item-rank"],
+    extra_class: '{{rec_type}}-type'
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -197,7 +198,7 @@
                 <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-" data-preprocessor="address_edit_form">
                   {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
                 </div>
-                <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="#address-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Address record</a> </p>
+                <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="#address-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Address record</a> </p>
 
               </div>
               <div class="col-md-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
@@ -210,7 +211,7 @@
                 <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-" data-preprocessor="player_contact_edit_form">
                   {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
                 </div>
-                <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="#player-contact-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
+                <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="#player-contact-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
 
               </div>
             </div>

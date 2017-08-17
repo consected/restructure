@@ -3,6 +3,7 @@ module AdminControllerHandler
   
   included do
     
+    before_action :init_vars_admin_controller_handler
     before_action :authenticate_admin!
     before_action :set_instance_from_id, only: [:edit, :update, :destroy]    
     
@@ -135,11 +136,14 @@ module AdminControllerHandler
   
   private
   
-    
-    def filter_params
-      return nil
+    # In order to clear up a multitude of Ruby warnings
+    def init_vars_admin_controller_handler
+      instance_var_init :master_objects
+      instance_var_init :updated_with
+      set_object_instance nil      
     end
     
+
     def error_message
       res = ""
       object_instance.errors.full_messages.each do |message|

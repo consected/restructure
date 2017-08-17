@@ -11,7 +11,7 @@ module GeneralSelectionsHelper
     cond = {item_type: type}
     attr = [:name, :value, :create_with, :edit_if_set, :edit_always, :lock, :description]
     res_attr = GeneralSelection.selector_attributes(attr, cond)
-        
+
     if @id
       # Get results to check if the item is set to lock, and the value is set 
       res = res_attr.select {|a| !!a[5] && a[1] == options[:value]}

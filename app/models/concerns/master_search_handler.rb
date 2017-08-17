@@ -91,7 +91,7 @@ module MasterSearchHandler
                                 :not_trackers, :not_tracker_histories
   
     # Nested attributes for advanced search form. These items will be extended dynamically by the external_id models when they are initially configured
-    accepts_nested_attributes_for *MasterNestedAttribs
+    accepts_nested_attributes_for(*MasterNestedAttribs)
 
     
   end
@@ -103,7 +103,7 @@ module MasterSearchHandler
       @master_nested_attrib ||= MasterNestedAttribs.dup
       @master_nested_attrib << attrib
 
-      Master.accepts_nested_attributes_for *@master_nested_attrib
+      Master.accepts_nested_attributes_for(*@master_nested_attrib)
     end
     
     # Build a Master search using the Master and nested attributes passed in

@@ -14,7 +14,7 @@ RSpec.describe TrackersController, type: :controller do
   end  
   
   before :each do    
-    admin, pw = ControllerMacros.create_admin    
+    admin, _ = ControllerMacros.create_admin
     @admin = admin
   end
   

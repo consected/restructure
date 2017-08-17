@@ -1,5 +1,6 @@
 class ItemFlagsController < ApplicationController
-  
+
+  before_action :init_vars
   before_action :authenticate_user!
   before_action :set_parent_item
   before_action :set_item, only: [:show]
@@ -42,6 +43,12 @@ class ItemFlagsController < ApplicationController
   
 
   private
+    def init_vars
+      instance_var_init :id
+      instance_var_init :item_flags
+      instance_var_init :update_action
+    end
+
     def set_item
       return if params[:id] == 'cancel'
       @item_flag = @item.item_flags.find(params[:id])

@@ -4,6 +4,7 @@ describe "tracker block", js: true do
   
   include ModelSupport
   include MasterDataSupport
+  include FeatureSupport
   
   before(:all) do
     
@@ -31,38 +32,11 @@ describe "tracker block", js: true do
     
     #login_as @user, scope: :user
     
-    login @good_email, @good_password
+    login 
       
   end
-  
-  def login email, pw
-    visit "/users/sign_in"
-    within '#new_user' do
-      fill_in "Email", with: email
-      fill_in "Password", with: pw
-      click_button "Log in"
-    end
-    expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
-    
-  end
 
-  def logout 
-    find('.navbar-right li:nth-child(2) .dropdown-toggle').click
-    click_link 'logout'
-  end
   
-  def dismiss_modal
-    b = all('button[data-dismiss="modal"]')
-    b.first.click if b && b.length > 0 
-  end
-  
-  def open_player_element el, items
-    el.find('.player-info-header').click      if items.length > 1 # it opens automatically if there is only one result    
-    dismiss_modal        
-    h = el[:href].split('#').last          
-    find "##{h}.collapse.in", wait: 5
-    h
-  end
   
   it "should create a new tracker item" do
     
@@ -84,7 +58,8 @@ describe "tracker block", js: true do
     within '#advanced_search_master' do
       click_link 'clear fields'
       fill_in "master_player_infos_attributes_0_first_name", with: @full_player_info.first_name
-      fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}\t"      
+      fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}"
+      find("\#master_player_infos_attributes_0_last_name").send_keys :tab
     end
     
     have_css '#advanced_search_master.ajax-running'
@@ -98,14 +73,14 @@ describe "tracker block", js: true do
     
     # Ensure all the results match what we searched for
     page.all(:css, '.master-expander .player-info-header .player-names').each do |el|
-      expect(el.text).to match /#{@full_player_info.first_name.capitalize}.*/    
+      expect(el.text).to match(/#{@full_player_info.first_name.capitalize}.*/)
     end
     
     # Now jump into the record result    
     h = open_player_element items.first, items
     
     # Open the tracker panel if there are no items in it and it is collapsed
-    t = all('[data-template="tracker-badge-template"]')
+#    t = all('[data-template="tracker-badge-template"]')
 #    if t.first.text == '0'
 #      t.click
 #    end    
@@ -181,8 +156,7 @@ describe "tracker block", js: true do
     
     # Validate the new item was created as the current record of the same protocol
     expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
-    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "2/2/2030"
-    
+    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: /0?2\/0?2\/2030/
     # Now try an earlier item
     within ".tracker-tree-results" do
       click_link "add tracker record"
@@ -223,7 +197,8 @@ describe "tracker block", js: true do
     within '#advanced_search_master' do
 
       fill_in "master_player_infos_attributes_0_first_name", with: @full_player_info.first_name
-      fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}\t"
+      fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}"
+      find("\#master_player_infos_attributes_0_last_name").send_keys :tab
     
       select protocol.name, from: 'master_trackers_attributes_0_protocol_id'
       find("#master_trackers_attributes_0_sub_process_id option[value='#{sp.id}']").select_option      
@@ -314,7 +289,7 @@ describe "tracker block", js: true do
     
     have_css '.master-expander'
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
-    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "10/1/2125"
+    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: /10\/0?1\/2125/
 
     
     

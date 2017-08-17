@@ -8,6 +8,9 @@ RSpec.describe ItemFlagsController, type: :controller do
     ItemFlag
   end
   def item
+    unless defined? @item_flag
+      @item_flag = nil
+    end
     @item_flag
   end
 
@@ -80,8 +83,9 @@ RSpec.describe ItemFlagsController, type: :controller do
     it "prevents editing" do
       create_item      
       attr = {master_id: @player_info.master_id, item_controller: 'player_infos', item_id: @player_info.id,  id: item_id}
-      expect(edit: attr).not_to be_routable
-      expect(edit: {id: item_id}).not_to be_routable
+
+      u = "/masters/#{attr[:master_id]}/#{attr[:item_controller]}/#{attr[:item_id]}/item_flags/#{attr[:id]}/edit"
+      expect(get: u).to_not be_routable
     end
   end
 
@@ -143,9 +147,9 @@ RSpec.describe ItemFlagsController, type: :controller do
       
       it "assigns a newly created but unsaved item as @var" do
         
-        ia = invalid_attributes        
+        #ia = invalid_attributes
                 
-        expect(assigns(:item_flags)).to be_nil, "Create should not return a value: #{@item_flags}"
+        expect(assigns(:item_flags)).to be_nil, "Create should not return a value: #{item}"
       end
 
       it "re-renders the 'new' template" do
@@ -168,9 +172,11 @@ RSpec.describe ItemFlagsController, type: :controller do
       }
 
       it "updates the requested item" do
+        create_item
         
-        expect(update: {item_flag: new_attribs}).not_to be_routable
-        
+        attr = {master_id: @player_info.master_id, item_controller: 'player_infos', item_id: @player_info.id,  id: item_id}
+        u = "/masters/#{attr[:master_id]}/#{attr[:item_controller]}/#{attr[:item_id]}/item_flags/#{attr[:id]}"
+        expect(patch: u).not_to be_routable
         
       end
 
