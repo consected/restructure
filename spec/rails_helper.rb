@@ -11,6 +11,13 @@ require 'rspec/rails'
 require 'capybara/rspec'
 require 'devise'
 
+ENV['LANGUAGE']='en_US:en'
+ENV['LC_TIME']='en_US.UTF-8'
+ENV['LC_NAME']='en_US.UTF-8'
+ENV['LC_LANG']='en_US.UTF-8'
+ENV['LANG']='en_US.UTF-8'
+
+
 
 include Warden::Test::Helpers
 Warden.test_mode!

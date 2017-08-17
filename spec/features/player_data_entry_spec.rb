@@ -98,6 +98,8 @@ describe "advanced search", js: true do
       expect(p).to have_css('.datepicker-days td.day[data-date]')
       day = p.all(".datepicker-days td.day:not(.old)").select {|s| s.text == d.to_s}.first
       day.click
+
+      sleep 0.1
       
       expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
       find('input[type="submit"]').click
@@ -362,11 +364,11 @@ describe "advanced search", js: true do
 
     # test search birth date
     edit_date('#master_general_infos_attributes_0_birth_date', '#master-search-simple', 3,26,2012)
-    f = find('#master_general_infos_attributes_0_birth_date')
-    f.send_keys :tab
+#    f = find('#master_general_infos_attributes_0_birth_date')
+#    f.send_keys :tab
 
     expect(page).to have_css('#master_results_block')
-    t = find('.player-info-header').text
+    t = all('.player-info-header').first.text
     expect(t).to include 'DOB 3/26/2012'
 
   end
