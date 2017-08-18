@@ -87,6 +87,8 @@ Rails.application.routes.draw do
     
     root to: "masters#search", :as => "authenticated_user_root"    
   end
+
+  get "child_error_reporter", to: 'application#child_error_reporter'
   
   root "masters#search", :as=> 'guest_home'
   DynamicModel.routes_load    

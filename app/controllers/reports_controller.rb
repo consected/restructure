@@ -1,6 +1,5 @@
 class ReportsController < ApplicationController
   include MasterSearch
-  require 'csv'
   before_action :init_vars
   before_action :authenticate_user_or_admin!
   before_action :authorized?, only: [:index]

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe "tracker block", js: true do
+describe "tracker block", js: true, driver: :app_firefox_driver do
   
   include ModelSupport
   include MasterDataSupport
@@ -71,7 +71,7 @@ describe "tracker block", js: true do
     end
     
     have_css '#advanced_search_master.ajax-running'
-    expect(page).to have_css "#master_results_block", text: ''    
+    expect(page).to have_css "#master_results_block", text: ''
     expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
     

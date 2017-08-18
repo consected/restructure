@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe "advanced search", js: true do
+describe "advanced search", js: true, driver: :app_firefox_driver do
   
   include ModelSupport
   include MasterDataSupport

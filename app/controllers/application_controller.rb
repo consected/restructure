@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::Base
 
   include ControllerUtils
+  include AppExceptionHandler
+
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
@@ -19,66 +21,7 @@ class ApplicationController < ActionController::Base
   
 protected
 
-    def unhandled_exception_handler e
-      logger.error e.inspect 
-      logger.error e.backtrace.join("\n") 
-      respond_to do |type|        
-        type.html { render :text => "An unexpected error occurred. Contact the administrator if this condition persists. #{e.message}", :status => 500 }
-        type.json  { render :json => {message: "An unexpected error occurred. Contact the administrator if this condition persists. #{e.message}"}, :status => 500 }
-      end
-      true
-    end
-      
-    def fphs_app_exception_handler e
-      logger.error e.inspect 
-      logger.error e.backtrace.join("\n") 
-      respond_to do |type|        
-        type.html { render :text => "#{e.message}", :status => 400 }
-        type.json  { render :json => {message: "#{e.message}"}, :status => 500 }        
-      end
-      true
-    end
 
-    def runtime_error_handler e
-      logger.error e.inspect 
-      logger.error e.backtrace.join("\n") 
-      respond_to do |type|
-        type.html { render :text => "A server error occurred. Contact the administrator if this condition persists. #{e.message}", :status => 500 }
-        type.json  { render :json => {message: "A server error occurred. Contact the administrator if this condition persists."}, :status => 500 }
-      end
-      true
-    end
-    
-    def routing_error_handler  e
-      logger.error e.inspect 
-      logger.error e.backtrace.join("\n") 
-      respond_to do |type|
-        type.html { render :text => "The request URL does not exist.", :status => 404 }
-        type.json  { render :json => {message: "The request URL does not exist."}, :status => 404 }
-      end
-      true
-    end
-    
-    def bad_auth_token e
-      logger.error e.inspect 
-      logger.error e.backtrace.join("\n") 
-      respond_to do |type|
-        type.html { render :text => "The information could not be submitted. Try returning to the home page to refresh the page.", :status => 401 }
-        type.json  { render :json => {message: "The information could not be submitted. Try returning to the home page to refresh the page."}, :status => 401 }
-      end
-      true
-    end
-    
-    def runtime_record_not_found_handler e
-      logger.error e.inspect 
-      logger.error e.backtrace.join("\n") 
-      respond_to do |type|
-        type.html { render :text => "A database record was not found. Contact the administrator if this condition persists. #{e.message}", :status => 404 }
-        type.json  { render :json => {message: "A database record was not found. Contact the administrator if this condition persists."}, :status => 404 }
-      end
-      true
-    end
-  
     def prevent_cache
       response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"
       response.headers["Pragma"] = "no-cache"

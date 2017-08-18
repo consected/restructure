@@ -1,4 +1,5 @@
 module MasterSearch
+
   extend ActiveSupport::Concern
 
   included do
@@ -131,7 +132,7 @@ module MasterSearch
         #return bad_request unless ma
         unless ma
           flash[:warning] = "no results to export"
-          redirect_to("/masters/") 
+          redirect_to(child_error_reporter_path)
           return 
         end
         

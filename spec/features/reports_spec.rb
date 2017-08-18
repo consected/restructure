@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe "reports", js: true do
+describe "reports", js: true, driver: :app_firefox_driver do
 
   include ModelSupport
   include MasterDataSupport
@@ -17,7 +17,7 @@ describe "reports", js: true do
     @good_email  = @user.email
 
     ua = UserAuthorization.create! has_authorization: 'view_reports', user_id: @user.id, current_admin: @admin, disabled: false
-    ua.save!
+    ua = UserAuthorization.create! has_authorization: 'export_csv', user_id: @user.id, current_admin: @admin, disabled: false
 
     expect(@user.can?(:view_reports)).to be_truthy
 
@@ -125,6 +125,20 @@ describe "reports", js: true do
 
 
     end
+
   end
 
+  it "exports a report" do
+    get_list
+    open_report @report.id
+    expect(page).to have_css(".report-criteria")
+
+    within "#report_query_form" do
+      click_button 'csv'
+      sleep 2
+    end
+
+    expect(page).not_to have_css('.alert')
+
+  end
 end

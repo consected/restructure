@@ -49,7 +49,7 @@ describe "user and admin authentication" do
   # rather than more correct 404 errors
   it "redirects to user login page for all paths when not logged in" do
     
-    skip_urls = ["/admins/sign_in", "/users/sign_in"]
+    skip_urls = ["/admins/sign_in", "/users/sign_in", "/child_error_reporter"]
     
     admin_controllers = %w(admin/accuracy_scores admin/action_logs admin/colleges admin/general_selections admin/item_flag_names admin/manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links)
     

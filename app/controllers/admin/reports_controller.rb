@@ -1,6 +1,5 @@
 class Admin::ReportsController < ApplicationController
 
-  require 'csv'
   include AdminControllerHandler
 
   protected

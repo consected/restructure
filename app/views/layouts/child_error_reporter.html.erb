@@ -1,0 +1,17 @@
+<script>
+  if (window.opener != window.top) {
+    
+  <% flash.each do |key, value| 
+      key = 'warning' if key == 'alert'
+      f_class = 'alert-info'          
+      f_class = "alert-#{key.to_s}" unless key == 'notice'
+
+      f_class << " invisible" if !Rails.env.test? && Application.hide_messages.include?(value) 
+  %>
+    window.opener._fpa.flash_notice("<%=escape_javascript value%>", "<%=escape_javascript key%>");  
+  }
+<% end %>
+
+  window.close();
+  
+</script>

@@ -1,0 +1,15 @@
+<div class="flash new-block" data-sub-item="message" data-template="flash_template">  
+  <% flash.each do |key, value| 
+      key = 'warning' if key == 'alert'
+      key = 'danger' if key == 'error'
+      f_class = 'alert-info'          
+      f_class = "alert-#{key.to_s}" unless key == 'notice'
+
+      f_class << " invisible" if !Rails.env.test? && Application.hide_messages.include?(value) 
+  %>
+  <div class="alert <%= f_class %>" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <%= value %>
+  </div>
+  <% end %>
+</div>
