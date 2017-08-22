@@ -6,7 +6,7 @@
 
     <%= f.fields_for :general_infos do |pif| %>
       <div class="form-group col-sm-4">
-        <%= pif.label :first_or_nick_name, 'data-add-icon' => 'info-sign', title: 'search for first names or nick names starting with this value in player or pro info' %>
+        <%= pif.label :first_name, 'First or nick name', 'data-add-icon' => 'info-sign', title: 'search for first names or nick names starting with this value in player or pro info' %>
         <%= pif.text_field :first_name, class: 'form-control'  %>
       </div>
       <div class="form-group col-sm-3">
