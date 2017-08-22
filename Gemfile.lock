@@ -65,7 +65,25 @@ GEM
     country_select (3.1.0)
       countries (~> 2.0)
       sort_alphabetical (~> 1.0)
+    cucumber (2.4.0)
+      builder (>= 2.1.2)
+      cucumber-core (~> 1.5.0)
+      cucumber-wire (~> 0.0.1)
+      diff-lcs (>= 1.1.3)
+      gherkin (~> 4.0)
+      multi_json (>= 1.7.5, < 2.0)
+      multi_test (>= 0.1.2)
+    cucumber-core (1.5.0)
+      gherkin (~> 4.0)
+    cucumber-rails (1.5.0)
+      capybara (>= 1.1.2, < 3)
+      cucumber (>= 1.3.8, < 4)
+      mime-types (>= 1.17, < 4)
+      nokogiri (~> 1.5)
+      railties (>= 4, < 5.2)
+    cucumber-wire (0.0.1)
     dalli (2.7.6)
+    database_cleaner (1.6.1)
     debug_inspector (0.0.3)
     devise (4.3.0)
       bcrypt (~> 3.0)
@@ -78,6 +96,7 @@ GEM
     erubis (2.7.0)
     execjs (2.7.0)
     ffi (1.9.18)
+    gherkin (4.1.3)
     globalid (0.4.0)
       activesupport (>= 4.2.0)
     i18n (0.8.6)
@@ -99,6 +118,8 @@ GEM
     minitest (5.10.3)
     money (6.9.0)
       i18n (>= 0.6.4, < 0.9)
+    multi_json (1.12.1)
+    multi_test (0.1.2)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
     orm_adapter (0.5.0)
@@ -220,7 +241,9 @@ DEPENDENCIES
   byebug
   capybara
   country_select
+  cucumber-rails
   dalli
+  database_cleaner
   devise
   jquery-rails
   pg (~> 0.15)
