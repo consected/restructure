@@ -332,7 +332,10 @@ _fpa = {
                 // It is possible that this request will be canceled within view_template, avoiding double-rendering of items.
                 // That said, if the view_template request completes fully, no subsequent processing will overwrite this block's contents
                 // (which can happen with complex interactions otherwise)
-                _fpa.view_template(b, $(this).attr('data-template'), target_data, options);
+                var tname = $(this).attr('data-template');
+                if(!tname)
+                  console.log("Warning: data-template for this triggering element was not found");
+                _fpa.view_template(b, tname, target_data, options);
             }
             
             if(!t_abs_force){    
