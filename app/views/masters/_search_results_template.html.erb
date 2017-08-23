@@ -67,6 +67,9 @@
 <% # Setup the handlebars templates for the dynamic models, defined in the admin panel %>
 <%= render partial: 'dynamic_models/search_results_template' %>
 
+<% # Setup the activity logs handlebars templates %>
+<%= render partial: 'activity_logs/search_results_template' %>
+
 
 <% # Display the set of search results in the "master search" format %>
 
@@ -134,7 +137,10 @@
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>
           <% end %>
                     
-          
+          <div id="activity-logs-generic-{{id}}" data-template="activity-logs-block-template" class="collapse activity-logs-generic-block panel panel-default">          
+            {{>activity_logs_generic master_id=../id}}
+          </div>
+  
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">          
           {{#with trackers}}
             {{>tracker_tree_results master_id=../id}}
