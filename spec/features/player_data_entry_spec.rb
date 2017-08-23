@@ -82,7 +82,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
 
       year = p.all(".datepicker-years span.year").select {|s| s.text == y.to_s}.first
-      puts "Year: #{y} and old #{oldyear.text} and new #{newyear.text}" unless year
+      #puts "Year: #{y} and old #{oldyear.text} and new #{newyear.text}" unless year
       year.click
       sleep 0.1
       expect(p).to have_css('.datepicker-months')
@@ -100,7 +100,9 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       day.click
 
       sleep 0.1
-      
+      # check that the result is viewing correctly as a local date before attempting to match
+      # search forms seem to get back to this a little slower than edit forms
+      expect(page).to have_css("input#{field}.date-is-local")
       expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
       find('input[type="submit"]').click
     end
@@ -166,6 +168,23 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     t = find("li.list-group-item.player-info-college strong").text
     expect(t).to eq college.titleize
 
+  end
+
+  def search_dob m,d,y
+    # test search birth date
+    edit_date('#master_general_infos_attributes_0_birth_date', '#master-search-simple', m,d,y)
+
+    expect(page).to have_css('#master_results_block .player-info-header')
+    
+    res = all('.player-info-header')
+    t = res.first
+
+    
+    expect(t.text).to include "DOB #{m}/#{d}/#{y}"
+    t.click unless res.length == 1
+
+    expect(page).to have_css('#master_results_block .panel-collapse.collapse.in')
+    have_css(".player-info-item a[title='edit']")
   end
 
   def add_player_msid player
@@ -283,12 +302,15 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     expect(t).to match(/0?3\/26\/2012/)
 
 
+    search_dob 3, 26, 2012
+
     #edit previously entered date 
     b = all ".player-info-item a[title='edit']"
     b.first.click
     expect(find('#player_info_birth_date').value).to match(/0?3\/26\/2012/)
     edit_date('#player_info_birth_date', 'form.edit_player_info', 3, 5, 1976)
 
+    search_dob 3, 5, 1976
 
 
     # Add address
@@ -362,14 +384,6 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     end
 
 
-    # test search birth date
-    edit_date('#master_general_infos_attributes_0_birth_date', '#master-search-simple', 3,26,2012)
-#    f = find('#master_general_infos_attributes_0_birth_date')
-#    f.send_keys :tab
-
-    expect(page).to have_css('#master_results_block')
-    t = all('.player-info-header').first.text
-    expect(t).to include 'DOB 3/26/2012'
 
   end
  

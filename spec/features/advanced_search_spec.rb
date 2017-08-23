@@ -64,7 +64,8 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       find("#master_player_infos_attributes_0_last_name").click
     end
     
-    expect(page).to have_css '#advanced_search_master.ajax-running'
+    # don't do 'expect' on the ajax running symbol, since it might go away too fast
+    have_css '#advanced_search_master.ajax-running'
     # wait a while!
     expect(page).to have_css "#master_results_block", text: ''    
     expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10

@@ -1,4 +1,4 @@
-require 'support/seed_support'
+require "#{::Rails.root}/spec/support/seed_support"
 
 module ControllerMacros
   

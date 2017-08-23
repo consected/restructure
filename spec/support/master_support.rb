@@ -1,4 +1,4 @@
-require 'support/seeds'
+require "#{::Rails.root}/spec/support/seeds"
 module MasterSupport
 
   def seed_database
