@@ -206,24 +206,9 @@ _fpa.postprocessors = {
         $('.item-highlight').removeClass('item-highlight');
         
         block.find('a.tracker-link-to-item').not('.link-attached').click(function(ev){
-            ev.preventDefault();
-            var href = $(this).attr('href');
-            $('.item-highlight').removeClass('item-highlight');
-            if(!href) return;                        
-            var h = $(href).addClass('item-highlight');
-            
-            if(!h.is(':visible')){
-                // Open up the block containing this item
-                h.parents('.collapse').first().collapse('show');
-                
-            }
-            
-            // Scroll if necessary
-            var rect = h.get(0).getBoundingClientRect(); 
-            var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
-            if(not_visible)                    
-                $.scrollTo(h, 200, {offset: -50});
-            
+          ev.preventDefault();
+          var href = $(this).attr('href');
+          _fpa.utils.jump_to_linked_item(href);
         }).addClass('link-attached');  
         
         block.find('.tracker-event_name[data-event-id], .tracker-history-event_name[data-event-id]').not('.te-desc-attached').each(function(){
