@@ -1,8 +1,9 @@
-class ItemFlag < ActiveRecord::Base
+  class ItemFlag < ActiveRecord::Base
+
+  include WorksWithItem
   
   belongs_to :item, polymorphic: true, inverse_of: :item_flags
   belongs_to :item_flag_name  
-  belongs_to :user
   
   before_validation :prevent_item_change,  on: :update
   
@@ -14,33 +15,9 @@ class ItemFlag < ActiveRecord::Base
   # through an item.
   # Since an item_flag entry is only created or deleted (not updated), setting the user explicitly on 
   # create is reasonable.
-  validates :user, presence: true
 
   validates :item_flag_name_id, presence: true
   validates :item_flag_name, presence: true  
-  validates :item, presence: true
-  validate :works_with_class
-  
-  default_scope -> {where "disabled is null or disabled = false"}  
-  
-  def self.works_with class_name
-    # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
-    pos = use_with_class_names.index(class_name.underscore)
-    if pos      
-      use_with_class_names[pos.to_i].camelize
-    else
-      nil
-    end
-  end
-  
-  def self.use_with_class_names
-    Master.reflect_on_all_associations(:has_many).select {|v| v.options[:source] != :item_flags}.collect {|v| v.plural_name.singularize}.sort
-  end
-  
-  def works_with_class
-    self.class.use_with_class_names.include? item_type    
-  end
-
   
   
   # Create and remove flags for the underlying item.
@@ -82,13 +59,6 @@ class ItemFlag < ActiveRecord::Base
   end
   
   
-  def method_id 
-    self.item.master_id
-  end
-  
-  def item_type_us
-    self.item_type.underscore
-  end
   
   
   def as_json options={}
