@@ -1,4 +1,27 @@
 _fpa.utils = {};
+
+_fpa.utils.jump_to_linked_item = function(target) {
+  
+  
+  $('.item-highlight').removeClass('item-highlight');
+  if(!target) return;                        
+  var h = $(target).addClass('item-highlight');
+
+  if(!h.is(':visible')){
+      // Open up the block containing this item
+      h.parents('.collapse').first().collapse('show');
+
+  }
+
+  // Scroll if necessary
+  var rect = h.get(0).getBoundingClientRect(); 
+  var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
+  if(not_visible)                    
+      $.scrollTo(h, 200, {offset: -50});
+
+};
+
+
 _fpa.utils.capitalize = function(str) {
     var res = '';
     if(str != null && str.replace){
