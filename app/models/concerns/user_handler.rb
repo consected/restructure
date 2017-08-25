@@ -13,8 +13,9 @@ module UserHandler
     belongs_to :user
     
     has_many :item_flags, as: :item
+    has_many :activity_logs, as: :item
     has_many :trackers, as: :item if self != Tracker && self != TrackerHistory
-    
+
     # Ensure the user id is saved
     before_validation :force_write_user    
 
