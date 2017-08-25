@@ -363,6 +363,9 @@ li.list-group-item.pro-info-pro_id {
 }
 
 
+a[data-toggle="scrollto-target"]:hover {
+  cursor: pointer;
+}
 
 .panel-default > .panel-heading {
     background-image: -webkit-linear-gradient(top, #f5f5f5 0%, #FFFFFF 100%);

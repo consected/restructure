@@ -1,0 +1,30 @@
+.activity-logs-item-block {
+  
+  padding: 0em;
+  
+}
+
+.activity-logs-header, .activity-log-list {
+  
+  padding: 1em;
+  
+}
+
+.list-group-item:first-child, .tracker-chron-results thead, .tracker-tree-results thead, .activity-logs-header { 
+    background-color: #EEEEEE;
+    
+}
+
+.activity-log-sub-list {
+  
+  padding: 0.27em 1em;
+  
+  .panel .list-group .list-group-item {
+    color: #aaa;
+  }
+  .panel .list-group .list-group-item.sub-list-data {
+    font-weight: bold;
+    color: black;
+  }
+  
+}
