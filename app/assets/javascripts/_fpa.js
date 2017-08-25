@@ -443,10 +443,19 @@ _fpa = {
             // Set up an array that can be used in preprocessor to assign data in postprocessors, etc.
             if(!data) data = {};
             
+            var trigger = $(this);
+            
             html.find('[data-result]').each(function(){
                 var d = $(this);
                 var di = d.attr('data-result');
-                var targets = $('[data-subscription="'+di+'"]');
+                if(trigger.attr('data-target-force') === 'true'){
+                  var t = trigger.attr('data-target');
+                  console.log('Failed due to no data-target attribute being set when data-target-force is true and the result is an HTML block');
+                  var targets = $(t);
+                } 
+                else {  
+                  var targets = $('[data-subscription="'+di+'"]');
+                }
                 var res = {};
                 res[di] = d;
                 targets.each(function(){
