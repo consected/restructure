@@ -1,4 +1,5 @@
 @javascript
+@call_log
 Feature: Register an outgoing call
   As a user
   I want to enter details about an outgoing phone call either I made, or that was made by a rep
@@ -9,15 +10,14 @@ Background:
   Given the user has logged in
   And the user is viewing the contact's record in Zeus
 
-Scenario: I indicate that I'm making a call to a contact
+Scenario: the user indicates that he is making a call to a contact
   Given the contact has one or more phone number records
-  When I indicate that I am calling one of the contact's phone numbers
-  Then I see the call log for the contact
+  When the user indicates he is calling one of the contact's phone numbers
+  Then the user sees the call log for the contact
 
 Scenario: While on a call a user needs to review and edit other information
-  Given I have indicated I am calling one of the contact's phone numbers
-  And I need to edit or review other player information for the contact
-  When I am still in the call log
-  Then I can view all player information and related tracker information
-  Then I can select specific items to edit
-  Then I can easily go back to the call log and player view
+  Given the user has indicated he is calling one of the contact's phone numbers
+  And the user needs to edit or review other player information for the contact
+  When the user views player information and tracker information
+  Then the user selects specific items to edit
+  Then the user can easily go back to the call log
