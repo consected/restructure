@@ -11,7 +11,8 @@ class PlayerContact < ActiveRecord::Base
   validates :source, source: true, allow_blank: true
   validates :rank, presence: true
   after_save :handle_primary_status
-  
+  scope :phone, ->{ where(rec_type: 'phone').order(rank: :desc)}
+  scope :email, ->{ where(rec_type: 'email').order(rank: :desc)}
      
   protected
     def is_email?
