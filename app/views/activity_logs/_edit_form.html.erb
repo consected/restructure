@@ -1,0 +1,92 @@
+<% 
+  name = object_name
+  
+  unless defined? caption 
+    caption = nil
+  end
+
+  unless caption && caption.include?('{{')   
+    caption = (caption || name).humanize.titleize 
+  end
+
+  has_source = false
+%>
+
+<div class="data-results">
+  <div data-result="phone-log-edit-form-<%= @item.master_id %>-entry-block">
+    <div class="">
+      <%=form_for([@item, @activity_log], activity_log_edit_form_hash ) do |f|%>
+      <ul class="list-group">
+        <li class="list-group-item">
+          
+          <h4 class="list-group-item-heading"><%=caption%></h4>
+        </li>
+
+        <% (permitted_params - [:id, :master_id]).each do |p| %>
+          <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
+
+            <% if p == :description %>    
+              <%= f.label p %>
+              <%= f.text_area p %>
+            <% elsif p == :rec_type%>    
+              <%= f.label :rec_type %>
+              <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: object_instance.rec_type) %>
+            <% elsif p == :source %>
+              <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
+              <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>              
+              <% has_source = true %>
+            <% elsif p == :rank %>
+              <%= f.label :rank %>
+              <% if respond_to? "#{name}_rank_array_pair".to_sym %>
+                <%= f.select :rank, self.send("#{name}_rank_array_pair") %>
+              <% else %>
+                <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank) %>
+              <% end %>
+            <% elsif p.to_s.index(/_date$/)  %>            
+              <%= f.label p %>
+              <%= f.date_field p %>              
+            <% elsif p.to_s.index(/_year$/)  %>                          
+              <%= f.label p %>
+              <% 
+                h = {}
+                r = Settings.const_get("#{p.to_s.camelize}Range")
+                h[:in] = r if r
+              %>
+              <%= f.number_field p, h %>
+            <% elsif p == :country %>
+              <%= f.label :country %>            
+              <%= f.country_select :country, priority_countries: ["US", "CA", "DE"], class: "form-control country-select"%>            
+            <% elsif p == :college %>
+              <%= f.label :college %>
+              <%= f.text_field :college, class: 'college-input typeahead'  %>              
+            <% elsif p == :state %>
+              <%= f.label :state %>
+              <%= f.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}  %>
+            <% elsif p == :zip %>
+              <%= f.label :zip %>
+              <%= f.text_field :zip, zip_field_props %>
+            <% elsif p == :notes %>
+              <%= f.label :notes %>
+              <%= f.text_area :notes, class: 'form-control'  %>       
+            <% elsif GeneralSelection::BasicItemTypes.include?("#{name.pluralize}_#{p}".to_sym)%>
+              <%# Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down%>
+              <%= f.label p %>
+              <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>              
+            <% else %>
+              <%= f.label p %>
+              <%= f.text_field p %>
+            <% end %>
+          </li>
+        <% end %>
+
+        <li class="list-group-item">
+          <%= f.submit class: "btn btn-primary" %>  
+        </li>
+      </ul>
+      <% end %>
+    </div>
+      <% if has_source %>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{name.pluralize}_source", value: object_instance.source} %>
+      <% end %>
+  </div>
+</div>

@@ -20,7 +20,14 @@
   unless defined? extra_class
     extra_class = ''
   end
-    
+
+  unless defined? custom_activity_log
+    custom_activity_log = false
+  end
+
+  
+  activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
+  
   
 %>
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -41,6 +48,9 @@
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/<%=name.pluralize%>/{{this.id}}/edit" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>        
           <% end %>
           <span class="pull-right label label-info <%=name.hyphenate%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
+          <% unless custom_activity_log == :none %>                        
+          <a data-toggle="scrollto-result" data-target="#activity-logs-inner-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity activity-log-<%=name.hyphenate%> pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%=name.pluralize%>/{{this.id}}/activity_logs" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#activity-logs-inner-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>        
+          <% end %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
           <% if ItemFlagName.enabled_for?(name) %> 
           {{>item_flag_container item_type="<%=name%>"}}         
