@@ -260,7 +260,13 @@ _fpa.form_utils = {
             
         }).addClass('attached-datatoggle');
 
-        block.find('[data-toggle="scrollto-result"], [data-toggle="collapse"].scroll-to-expanded ').not('.attached-datatoggle').on('click', function(){
+
+        block.find('[data-toggle="scrollto-target"]').not('.attached-datatoggle').on('click', function(){          
+          var a = $(this).attr('data-target');
+          _fpa.utils.jump_to_linked_item(a);
+        });
+        
+        block.find('[data-toggle="scrollto-result"], [data-toggle="scrollto-target"], [data-toggle="collapse"].scroll-to-expanded ').not('.attached-datatoggle').on('click', function(){
             if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed'))
               return;
             
