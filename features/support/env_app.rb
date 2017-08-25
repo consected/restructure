@@ -1,6 +1,9 @@
 ENV['RAILS_ENV'] ||= 'test'
 ENV['FPHS_ADMIN_SETUP']='yes'
 
+Rails.application.load_tasks
+Rake::Task["assets:precompile"].invoke
+
 require "#{::Rails.root}/spec/support/master_support.rb"
 require "#{::Rails.root}/spec/support/master_data_support.rb"
 require "#{::Rails.root}/spec/support/model_support.rb"

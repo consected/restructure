@@ -20,7 +20,7 @@ Background:
 
 Scenario: the user speaks to the contact about the reason for the call  
   When the contact answers a call from a user and they speak about the reason for the call
-  Then the user records that he spoke to the contact successfully about the matter
+  When the user records that he spoke to the contact successfully about the matter
 
 Scenario: the user speaks to the contact but he does not want to talk about the required matter
   When the contact answers the call but he does not want to speak about the matter now or in the future
