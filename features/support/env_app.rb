@@ -11,7 +11,7 @@ require "#{::Rails.root}/spec/support/feature_support.rb"
 require "#{::Rails.root}/spec/support/controller_macros.rb"
 
 
-require "#{::Rails.root}/features/support/setup_support"
+#require "#{::Rails.root}/features/support/setup_support"
 #Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 
 

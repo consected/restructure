@@ -1,6 +1,6 @@
 module PhoneSetup
 
-  def get_a_rank
+  def get_a_phone_rank
     10
   end
 
@@ -15,19 +15,19 @@ module PhoneSetup
       {
         data: "(761)897-8144",
         source: 'nflpa',
-        rank: (get_a_rank),
+        rank: (get_a_phone_rank),
         rec_type: 'phone'
       },
       {
         data: "(516)262-1289",
         source: 'nfl',
-        rank: (get_a_rank),
+        rank: (get_a_phone_rank),
         rec_type: 'phone'
       },
       {
         data: "(516)262-1289 ext 2342",
         source: 'nfl',
-        rank: (get_a_rank),
+        rank: (get_a_phone_rank),
         rec_type: 'phone'
       }
     ]
@@ -35,7 +35,9 @@ module PhoneSetup
 
   def create_player_phone master
     master.current_user = @user
-    master.player_contacts.create! pick_one_from(phone_attribs)
+
+    attr = pick_one_from(phone_attribs)
+    master.player_contacts.create! attr
   end
 
   def top_ranked_phone
