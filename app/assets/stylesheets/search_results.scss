@@ -442,6 +442,10 @@ div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
 
 .master-result span.msid, .master-result span.master_id { color: gray;}
 
+.master-result:hover {
+    background: #deefd3;
+}
+
 span.msid {
     font-size: 87%;
     cursor: help;
