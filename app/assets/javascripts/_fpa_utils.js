@@ -21,6 +21,19 @@ _fpa.utils.jump_to_linked_item = function(target) {
 
 };
 
+// Get the data-some-attr="" name value pairs from a jQuery element, removing data- and
+// underscoring for easy data.some_attr access
+_fpa.utils.get_data_attribs = function(block){
+  
+  var attrs = {};
+  var el = block.get(0);
+  for (var att, i = 0, atts = el.attributes, n = atts.length; i < n; i++){
+      att = atts[i];
+      var name = att.nodeName.replace('data-', '').underscore();
+      attrs[name] = att.value;
+  }
+  return attrs;
+};
 
 _fpa.utils.capitalize = function(str) {
     var res = '';

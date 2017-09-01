@@ -9,6 +9,47 @@ _fpa.form_utils = {
         else
             block.addClass('expanded');
     },
+    
+    toggle_on_click_call: function(block, fn_name){
+      if(!fn_name)
+        fn_name = block.attr('data-on-click-call');
+      
+      var els = fn_name.split('.');
+      
+      var fn = _fpa[els[0]][els[1]];
+      
+      if(fn_name && fn){
+        var attrs = _fpa.utils.get_data_attribs(block);
+        
+        fn(block, attrs);
+      }
+      else {
+        console.log('no data-on-click-call value or function set');
+      }
+        
+    },
+
+    toggle_on_click_show: function(block){
+      
+      var strdata = block.attr('data-on-click-show');
+      
+      var items = strdata.split(',');
+      
+      var attrs = _fpa.utils.get_data_attribs(block);
+      
+      for(var item, i= 0; item = items[i]; i++){        
+        item = item.trim();
+        var name_target = item.split('@');        
+        block = $(name_target[1]);
+        
+        if(block.length == 0)
+          console.log("the target provided to toggle_on_click_show does not exist: " + name_target[1]);
+        _fpa.view_template(block, name_target[0], attrs);
+      }
+      
+    },
+    
+
 
     date_inputs_to_iso: function(block){
       
@@ -294,6 +335,19 @@ _fpa.form_utils = {
         block.find('[data-toggle="expandable"]').not('.attached-datatoggle').on('click', function(){
             _fpa.form_utils.toggle_expandable($(this));
         }).addClass('attached-datatoggle');
+        
+        // call a function on click - name the function 'something' or 'something.other' to call
+        // _fpa.something(block, data) or _fpa.something.other(block, data)
+        block.find('[data-on-click-call]').not('.attached-toggle_on_click_call').on('click', function(){
+            _fpa.form_utils.toggle_on_click_call($(this));
+        }).addClass('attached-toggle_on_click_call');
+        
+        // this will render a template or partial at some location in the dom
+        // comma separate a list of template@domloc to show multiple items for a single click activity
+        // data-on-click-show="phone_record-partial@#domid, another-partial@#activity-log2"
+        block.find('[data-on-click-show]').not('.attached-toggle_on_click_show').on('click', function(){
+            _fpa.form_utils.toggle_on_click_show($(this));
+        }).addClass('attached-toggle_on_click_show');
         
     },
     
