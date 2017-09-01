@@ -121,11 +121,8 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
 
 .tracker-block.panel{
       
-      
-      
-          margin-bottom: 10px;
-      
-      
+    margin-bottom: 10px;
+    position:relative;
       
 }
 
@@ -386,8 +383,10 @@ ul[data-address-is-us="false"]{
     li.list-group-item.address-state_name, li.list-group-item.address-zip {display: none;}
 }
 
-.item-highlight .list-group-item:first-child {
+.item-highlight, .selected-item {
+  .list-group-item:first-child {
     background-color: #ffc;
+  }
 }
 
 strong {

@@ -89,6 +89,12 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity {
     &:active {
         background-color: #770000;
     }
+    
+    &.small {
+      padding: 2px;
+      background-color: #E67171;
+      border-color: #E67171;
+    }
 }
 
 .nav.nav-pills {

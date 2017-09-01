@@ -19,6 +19,10 @@
   
   padding: 0.27em 1em;
   
+  .panel.selected-item {
+    border-color: #aaa;
+  }
+  
   .panel .list-group .list-group-item {
     color: #aaa;
   }
