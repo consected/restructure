@@ -1,6 +1,7 @@
 _fpa = {
     
   templates: {},
+  partials: {},
   app: {},
   version: '0',
   remote_request: null,
@@ -23,7 +24,9 @@ _fpa = {
         var id = $(this).attr('id');
 
         id = id.replace('-partial', '');
-        Handlebars.registerPartial(id, $(this).html());
+        var fnTemplate = Handlebars.compile($(this).html());
+        Handlebars.registerPartial(id, fnTemplate);
+        _fpa.partials[id] = fnTemplate;
     });
 
     $('script.handlebars-template').each(function(){
@@ -551,7 +554,13 @@ _fpa = {
       
       var a = '<div class="alert alert-'+type+'" role="alert">';
       a += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-      a += msg;
+      if(type == 'error' || type == 'danger'){
+        var msg_safe = $('<div/>').text(msg).html();
+        a += msg_safe;
+      }else
+      {
+        a += msg;
+      }
       a += '</div>';
       
       $('.flash').append(a);
