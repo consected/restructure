@@ -7,7 +7,8 @@
   {{/with}}
 </script>
 
-
+<script id="empty-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+</script>
 
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
   <strong class="player-names">                
@@ -75,3 +76,9 @@
   {{>player_info_summary_result}}
   {{/with}}
 </script>
+
+<script id="activity_logs_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div id="activity-logs-inner-{{master_id}}" class="activity-logs-inner-block">
+  </div>
+</script>
+

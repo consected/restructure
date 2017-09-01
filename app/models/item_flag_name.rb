@@ -30,12 +30,7 @@ class ItemFlagName < ActiveRecord::Base
       end
     end
     
-    def prevent_item_type_change 
-      if item_type_changed? && self.persisted?
-        errors.add(:item_type, "change not allowed!")
-      end
-    end
-    
+
     def update_tracker_events
       return unless item_type
       Tracker.add_record_update_entries item_type, current_admin, 'flag'

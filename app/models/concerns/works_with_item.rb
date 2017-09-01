@@ -4,29 +4,23 @@ module WorksWithItem
 
   included do
     belongs_to :user
-    validates :user, presence: true
-    validates :item, presence: true
-    validate :works_with_class
+    # Ensure the user id is saved
+    before_validation :force_write_user
 
+    validates :user, presence: true
+
+    validate :works_with
     default_scope -> {where "disabled is null or disabled = false"}
 
   end
 
   class_methods do
-    def works_with class_name
-      # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
-      pos = use_with_class_names.index(class_name.underscore)
-      if pos
-        use_with_class_names[pos.to_i].camelize
-      else
-        nil
-      end
-    end
+    
 
-    def use_with_class_names
-      Master.reflect_on_all_associations(:has_many).select {|v| v.options[:source] != :item_flags}.collect {|v| v.plural_name.singularize}.sort
-    end
+  end
 
+  def creatable_without_user
+    false
   end
 
   def method_id
@@ -37,8 +31,35 @@ module WorksWithItem
     self.item_type.underscore
   end
 
-  def works_with_class
+  # used for validation to check this activity log type works with the parent item
+  def works_with
     self.class.use_with_class_names.include? item_type
   end
-    
+
+  def item_type
+    self.class.name.singularize.underscore
+  end
+
+  
+
+  protected
+
+    def master_user
+      
+      if respond_to?(:master) && master        
+        current_user = master.current_user
+        current_user
+      else
+        nil
+      end
+    end
+
+    def force_write_user
+      return true if creatable_without_user && !persisted?
+
+      raise "bad user being pulled from master_user" unless master_user.is_a?(User) && master_user.persisted?
+
+      write_attribute :user_id, master_user.id
+    end
+
 end

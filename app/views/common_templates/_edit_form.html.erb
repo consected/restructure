@@ -1,5 +1,5 @@
 <% 
-  name = object_name
+  name = full_object_name
   
   unless defined? caption 
     caption = nil
@@ -35,6 +35,9 @@
               <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
               <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>              
               <% has_source = true %>
+            <% elsif p.to_s.index('activity_log_') == 0 %>
+              <%= f.label p, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_#{p}".to_sym) %>
+              <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>              
             <% elsif p == :rank %>
               <%= f.label :rank %>
               <% if respond_to? "#{name}_rank_array_pair".to_sym %>

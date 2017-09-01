@@ -41,6 +41,8 @@ class Master < ActiveRecord::Base
     Rails.logger.debug "Associated master with #{assoc.plural_name}_item_flags through #{assoc.plural_name} with source :item_flags"
   end
 
+  has_many :activity_log_player_contact_phones, inverse_of: :master, class_name: "ActivityLog::PlayerContactPhone"
+
   attr_accessor :force_order
 
   # Move all the simple and advance search form functionality out of the way, so the data functionality of the model can be clearly seen

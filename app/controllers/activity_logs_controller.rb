@@ -1,104 +1,85 @@
 class ActivityLogsController < ApplicationController
 
-  
-  before_action :init_vars
+  include MasterHandler
   before_action :authenticate_user!
-  before_action :set_parent_item
-  before_action :set_item, only: [:show]
+  before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
 
-  helper_method :permitted_params
 
-  def show
-
-  end
-
-def new
-    @activity_log = @item.activity_logs.build
-    render partial: edit_form
-  end
-
-  def edit
-
-  end
-
-  def update
-
-  end
-
-  def create
-
-  end
+  helper_method :item_type_id
   
-  def index
-
-    @activity_logs = @item.activity_logs
-    s = @activity_logs.as_json
-
-    k = "activity_logs"
-
-
-    phone_nums = @item.master.player_contacts.phone
-
-
-    res = {activity_logs: s, player_contacts: phone_nums,  item_id: @item.id, item_type: @item_type.singularize, item_types_name: @item_type, item_data: @item.data, master_id: @master.id, update_action: @update_action, multiple_results: k}
-
-    render json: {k => res}
-  end
-
 
   private
     def edit_form
       'activity_logs/edit_form'
     end
 
-    def init_vars
 
+    def al_type
+      @al_class.table_name
     end
-    
+
+    def item_data
+      @item.data
+    end
+
+    def item_type_id
+      "#{@item_type.singularize}_id".to_sym
+    end
+
+    def items
+      @master.send(@item_type)
+    end
+
+    def extend_result
+      {
+        al_type: al_type,
+        item_type: @item_type.singularize,
+        item_types_name: @item_type,
+        item_id: @item.id,
+        item_data: item_data,
+        @item_type => items
+
+      }
+    end
+
+    def set_additional_attributes obj
+      obj.item_id = @item.id
+    end
+
+
+
+    # set the parent item for the activity log by getting it from the URL params
+    # and also checking that it is actually valid based on Activity Log config
     def set_item
-      return if params[:id] == 'cancel'
-      @activity_log = @item.activity_logs.find(params[:id])
-      @id = @activity_log
-    end
 
-    def set_parent_item
-      @item_type = item_controller = params[:item_controller]
-      item_class_name = item_controller.singularize.camelize
+      raise "Failed to get @master" unless @master
+      if UseMasterParam.include? action_name
+        @item_type = item_controller = params[:item_controller]
+        item_class_name = item_controller.singularize.camelize
 
-      # We will return a 404 if the requested item_class_name is not one of the valid set.
-      # This prevents insecure requests from the user being used to access objects below
-      icn = ActivityLog.works_with item_class_name
-
-      return not_found unless icn
-
-      if defined? icn.constantize
-        begin
-          item_class = icn.constantize
-        rescue
-          item_class = "DynamicModel::#{icn}".constantize rescue nil
-        end
+        # look up the item using the item_id parameter.
+        @item  = item_class_name.constantize.find(params[:item_id])    
+        raise "Failed to get @item for #{item_class_name}" unless @item
+      else
+        @item = object_instance.item
+        @item_type = @item.class.name
       end
 
-      raise "Failed to get #{item_class_name}" unless item_class
+      #  return if the Activity Log does not work with this item_type / rec_type combo
+      @al_class = ActivityLog.al_class @item
+      return not_found unless @al_class
 
-      @item = item_class.find(params[:item_id])
-
-      raise "Failed to get @item for #{item_class_name}" unless @item
-
-      @master = @item.master
-
-      raise "Failed to get @master for #{@item.inspect}" unless @master
-      @master
     end
 
+    
 
     def permitted_params
-      [:item_id, :item_type ]
+     res =  @al_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id] + [:item_id]
+     res
     end
-  private
 
     def secure_params
-      params.require(object_name.to_sym).permit(*permitted_params)
+      params.require(al_type.singularize.to_sym).permit(*permitted_params)
     end
 
 

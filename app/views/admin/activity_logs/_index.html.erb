@@ -1,0 +1,37 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">    
+<h1>Activity Log Configurations</h1>
+
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th class="no-sort"></th>
+      <th>Name</th>
+      <th>Item Type</th>
+      <th>Record Type</th>
+      <th>Table Name</th>
+      <th>Disabled</th>
+      <th>Admin</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @activity_logs.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td><%= admin_edit_btn list_item.id%> </td>
+        <td><%= list_item.name %></td>
+        <td><%= list_item.item_type %></td>
+        <td><%= list_item.rec_type %></td>
+        <td><%= list_item.table_name %></td>
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>        
+        <td><%= list_item.admin_name %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%=  render partial: 'admin_handler/index_actions'  %>    
+  </div>
+</div>

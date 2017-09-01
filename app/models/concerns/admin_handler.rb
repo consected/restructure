@@ -58,4 +58,11 @@ module AdminHandler
     errors.add(:admin, "has not been set") unless admin_set?
   end
 
+  def prevent_item_type_change
+    if item_type_changed? && self.persisted?
+      errors.add(:item_type, "change not allowed!")
+    end
+  end
+
+
 end

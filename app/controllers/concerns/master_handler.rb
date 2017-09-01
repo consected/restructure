@@ -27,30 +27,48 @@ module MasterHandler
     end
     log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
   end
-  
-  def primary_model 
-    controller_name.classify.constantize
+
+  # return the class for the current item
+  # handles namespace if the item is like an ActivityLog:Something
+  def primary_model
+    if self.class.parent.name != 'Object'
+      "#{self.class.parent.name.underscore}/#{object_name}".constantize
+    else
+      controller_name.classify.constantize
+    end
   end
+
   def object_name 
     controller_name.singularize
   end
-  def objects_name 
-    controller_name.to_sym
+
+  # the association name from master to these objects
+  # for example player_contacts or activity_log_player_contacts_phones
+  def objects_name
+    if self.class.parent.name != 'Object'
+      "#{self.class.parent.name.underscore}_#{controller_name}".to_sym
+    else
+      controller_name.to_sym
+    end
   end
   def human_name 
     controller_name.singularize.humanize
+  end
+
+  def extend_result
+    {}
   end
   
   def index
     set_objects_instance @master_objects
     s = {objects_name => @master_objects.as_json, multiple_results: objects_name}
+    s.merge!(extend_result)
     if object_instance
       s[:original_item] = object_instance
       s[objects_name] <<  object_instance
     end
     s[:master_id] = @master.id
     
-    logger.debug "List: #{s} with objects_instance @#{objects_name}"
     render json: s
   end
   
@@ -73,7 +91,7 @@ module MasterHandler
   def create
   
     set_object_instance @master_objects.build(secure_params)
-
+    set_additional_attributes object_instance
     if object_instance.save
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
@@ -120,6 +138,10 @@ module MasterHandler
     end  
     
   private
+
+    def set_additional_attributes obj
+
+    end
 
     # In order to clear up a multitude of Ruby warnings
     def init_vars_master_handler

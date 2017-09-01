@@ -17,8 +17,10 @@ module LogCallSetup
     expect(page).to have_selector("#activity-logs-#{@master.id}", visible: true)
   end
 
-  def mark_outgoing_call_answered to_who, from='me'
+  def mark_outgoing_call_answered  to_who, from='me'
 
+    click_link 'outgoing call'
+    have_css phone_log_block_css
     within phone_log_block_css do
       select from, from: 'the call is from'
       select to_who, from: 'calling'

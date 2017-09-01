@@ -22,14 +22,37 @@
   end
 
   unless defined? custom_activity_log
-    custom_activity_log = false
+    # check whether the activity log broadly works with this type of item
+    custom_activity_log = ActivityLog.works_with(name) || :none
   end
 
-  
-  activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
-  
+  unless custom_activity_log == :none
+    # get a list of rec_types that an activity log of this type is constrained to use
+    works_with_rec_types_array = ActivityLog.works_with_rec_types(name)
+    works_with_rec_types = works_with_rec_types_array.join(',') || ''
+    activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
+     
+  end
   
 %>
+
+<% unless custom_activity_log == :none 
+  
+    wwrt = works_with_rec_types_array
+    wwrt << '' if wwrt.length == 0
+    wwrt.each do |rec_type|
+      al_name = name.pluralize
+      al_name = "#{name}_#{rec_type.pluralize}" unless wwrt.blank?
+%>
+<script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <a data-toggle="scrollto-result" data-target="#activity-logs-inner-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity activity-log-<%=name.hyphenate%> pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=al_name%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#activity-logs-inner-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>        
+</script>
+<%  
+    end 
+  end 
+%>
+
+
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}<div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
   <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.html_safe}\"" }.join(' ').html_safe%> >
@@ -48,8 +71,14 @@
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/<%=name.pluralize%>/{{this.id}}/edit" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>        
           <% end %>
           <span class="pull-right label label-info <%=name.hyphenate%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
-          <% unless custom_activity_log == :none %>                        
-          <a data-toggle="scrollto-result" data-target="#activity-logs-inner-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity activity-log-<%=name.hyphenate%> pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%=name.pluralize%>/{{this.id}}/activity_logs" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#activity-logs-inner-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>        
+          <% unless custom_activity_log == :none %>            
+            <% if works_with_rec_types.blank? %>              
+              {{> activity_log_<%=name%>_show_button_partial }}
+            <% else %>                
+              {{#is rec_type 'in' '<%= works_with_rec_types %>' }}
+                {{> activity_log_<%=name%>_show_button_partial}}
+              {{/is}}
+            <% end %>
           <% end %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
           <% if ItemFlagName.enabled_for?(name) %> 

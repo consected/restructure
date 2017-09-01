@@ -4,6 +4,16 @@ module ApplicationHelper
   def object_name
     (@object_name || controller_name.singularize)
   end
+
+  def full_object_name
+    
+
+    if controller.class.parent.name != 'Object'
+      "#{controller.class.parent.name.underscore}_#{object_name}"
+    else
+      object_name
+    end
+  end  
   
   def object_instance
     instance_variable_get("@#{object_name}")    

@@ -4,7 +4,9 @@ class PlayerContact < ActiveRecord::Base
   PrimaryRank = 10
   SecondaryRank = 5
   InactiveRank = 0
-  
+
+  has_many :activity_log_player_contact_phones, class_name: ActivityLog::PlayerContactPhone
+
   
   validates :data, email: true, if: :is_email?
   validates :data, phone: true, if: :is_phone?

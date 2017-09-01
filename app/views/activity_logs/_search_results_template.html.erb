@@ -1,95 +1,30 @@
-<%= render partial: 'common_templates/search_results_template', locals: {
-    name: 'activity_log_phone', 
-    caption: 'Phone Call', # substitute the rec_type attribute (capitalized) as the block caption
-    prevent_edit: false, 
-    prevent_create: false,
-    item_list: %w(data source),
-    data_sort: [:desc, "data-activity-date"],
-    custom_activity_log: :none
-  } %>
-
-
-
-<script id="sub_list_phone_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="panel index-{{_created}} phone-sub-list-item phone-type" id="activity-log-phone-sub-list-{{master_id}}-{{id}}" data-template="sub-list-phone-result-template" data-sub-item="player_contact" data-sub-id="{{id}}" data-sort-desc="data-item-rank" data-preprocessor="player_contact_edit_form">{{/was}}
-    
-      <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
-      <li class="list-group-item sub-list-data">
-        {{pretty_string data return_string="true" capitalize="true"}}
-        <a data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-phone-sub-list-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-activity-log-phone pull-right glyphicon glyphicon-edit" href="/masters/{{master_id}}/player_contacts/{{id}}/edit" data-remote="true" data-player-contact-id="{{id}}" data-result-target=""></a>
-        <span class="pull-right label label-info player-contact-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
-      </li>
-      <li class="list-group-item">{{pretty_string source return_string="true" capitalize="true"}}</li>
-      <li class="list-group-item record-meta">{{>update_metadata}}</li>
-      </ul>
-    {{#was _created}}</div>{{/was}}
-</script>
+<% ActivityLog.enabled.each do |m| 
+  l = []
   
-<script id="sub-list-phone-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with player_contact}}
-      {{>sub_list_phone_result }}
-  {{/with}}
-</script>  
-
-<script id="activity-logs-generic-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <div id="generic-activity-logs-{{item_id}}" class="activity-logs-item-block activity-logs-generic-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}">Generic Log Here!</div>
-</script>
-
-
-<script id="activity-logs-player-contact-phone-type-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <div id="player-contact-activity-logs-phone-type-{{item_id}}" class="activity-logs-item-block activity-logs-player-contact-phone-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
- 
-  {{#with activity_logs }}
-    <div class="is-heading activity-logs-header">
-      <span class="pull-right from-item-link">
-      <span>linked from phone record </span>
-      <span class="al-data al-data-phone-num"><a data-toggle="scrollto-target" data-target="#player-contact-{{master_id}}-{{item_id}}">{{item_data}}</a></span>
-      </span>
-      <h4 class="list-group-item-heading al-label-phone-num">phone log</h4>    
-    </div>
-    
-    <div class="row">
-      <div class="col-md-5 activity-log-sub-list" id="activity-log-phones-sub-list-{{master_id}}-" data-sub-list="player_contacts">
-      
-        {{#each player_contacts}}
-          {{#is rec_type '===' 'phone'}}            
-            {{>sub_list_phone_result _created=@index}}
-          {{/is}}             
-        {{/each}}                 
-        
-      </div>
-      
-      <div class="col-md-18 ">
-        <div class="row" id="activity-log-{{master_id}}-entry-block" data-subscription="phone-log-edit-form-{{master_id}}-entry-block" data-preprocessor="phone_log_edit_form">
-          <a href="/masters/{{master_id}}/player_contacts/{{item_id}}/activity_logs/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="#player-contact-{{id}}-">made call to player</a> <a href="">received call from player</a>
-        </div>
-        <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{id}}-" data-sub-list="phone_logs">
-          {{#each activity_logs}}
-
-            {{>activity_log_phone_result _created=@index}}
-          {{else}}
-              <h4>No logged activity</h4>
-          {{/each}}
-        </div> 
-      </div>
-    </div>
-  {{/with}}  
-  </div>
   
-          
-          
-</script>
+  an = m.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
+  
+  if an.length > 1
+    l = an
+  else
+    an.each do |k|
+      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s] 
+    end
+  end
 
-
-
-<script id="activity-logs-player-contact-email-type-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <div id="player-contact-activity-logs-email-type-{{item_id}}" class="activity-logs-item-block activity-logs-player-contact-email-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}">
-  Email Contact Log Here!
-  </div>
-</script>
-
-<script id="activity_logs_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <div id="activity-logs-inner-{{master_id}}" class="activity-logs-inner-block">
-  </div>
-</script>
-
+  template_file = "_#{m.model_def_name}_search_results_template.html.erb"
+  
+  if File.exist?("#{Rails.root.join 'app', 'views', 'activity_logs', template_file}")
+    template_name = "activity_logs/#{m.model_def_name}_search_results_template"
+  else
+    template_name = 'common_templates/search_results_template'
+  end
+%>
+<%= render partial: template_name, locals: {
+      caption: m.name,
+      name: m.item_type_name, 
+      prevent_edit: true,  
+      prevent_create: true,
+      item_list: l
+    } %>
+<% end %>
