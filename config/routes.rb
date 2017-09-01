@@ -11,7 +11,8 @@ Rails.application.routes.draw do
     resources :general_selections, except: [:show, :destroy]  
     resources :item_flag_names, except: [:show, :destroy]
     resources :manage_users, except: [:show, :destroy]
-    resources :accuracy_scores, except: [:show, :destroy]  
+    resources :accuracy_scores, except: [:show, :destroy]
+    resources :activity_logs, except: [:show, :destroy]
     resources :action_logs, only: [:show, :index]
   end
     
@@ -61,15 +62,11 @@ Rails.application.routes.draw do
     get 'dynamic_model/:item_controller/:item_id/item_flags/:id', to: 'item_flags#show'
     post 'dynamic_model/:item_controller/:item_id/item_flags', to: 'item_flags#create'
 
-    get ':item_controller/:item_id/activity_logs/new', to: 'activity_logs#new'
-    get ':item_controller/:item_id/activity_logs/', to: 'activity_logs#index'
-    get ':item_controller/:item_id/activity_logs/:id', to: 'activity_logs#show'
-    post ':item_controller/:item_id/activity_logs', to: 'activity_logs#create'
-    put ':item_controller/:item_id/activity_logs/:id', to: 'activity_logs#edit'
-
-    
   end
-  
+
+
+  ActivityLog.routes_load
+
   devise_for :admins, :skip => [:registrations]
   devise_for :users, :skip => [:registrations]                                          
 
