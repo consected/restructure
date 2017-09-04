@@ -45,21 +45,25 @@ module WorksWithItem
   protected
 
     def master_user
-      
+
       if respond_to?(:master) && master        
         current_user = master.current_user
         current_user
+      elsif item.respond_to?(:master) && item.master
+        current_user = item.master.current_user
+        current_user
       else
+        raise "master is nil and can't be used to get the current user" unless master || item.master
         nil
       end
     end
 
     def force_write_user
       return true if creatable_without_user && !persisted?
+      mu = master_user
+      raise "bad user being pulled from master_user (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '': ' not persisted'})" unless mu.is_a?(User) && mu.persisted?
 
-      raise "bad user being pulled from master_user" unless master_user.is_a?(User) && master_user.persisted?
-
-      write_attribute :user_id, master_user.id
+      write_attribute :user_id, mu.id
     end
 
 end

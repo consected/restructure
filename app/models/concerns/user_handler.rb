@@ -12,9 +12,9 @@ module UserHandler
     belongs_to :master, assoc_rules
     belongs_to :user
     
-    has_many :item_flags, as: :item
-    has_many :activity_logs, as: :item
-    has_many :trackers, as: :item if self != Tracker && self != TrackerHistory
+    has_many :item_flags, as: :item, inverse_of: :item
+    has_many :activity_logs, as: :item, inverse_of: :item
+    has_many :trackers, as: :item, inverse_of: :item if self != Tracker && self != TrackerHistory
 
     # Ensure the user id is saved
     before_validation :force_write_user    
@@ -208,9 +208,10 @@ module UserHandler
     def force_write_user
       return true if creatable_without_user && !persisted?
       
-      raise "bad user being pulled from master_user" unless master_user.is_a?(User) && master_user.persisted?
-      
-      write_attribute :user_id, master_user.id
+      mu = master_user
+      raise "bad user being pulled from master_user (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '': ' not persisted'})" unless mu.is_a?(User) && mu.persisted?
+  
+      write_attribute :user_id, mu.id
     end
 
     def track_record_update
