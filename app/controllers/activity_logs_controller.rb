@@ -54,7 +54,7 @@ class ActivityLogsController < ApplicationController
 
       raise "Failed to get @master" unless @master
       if UseMasterParam.include? action_name
-        @item_type = item_controller = params[:item_controller]
+        @item_type = item_controller
         item_class_name = item_controller.singularize.camelize
 
         # look up the item using the item_id parameter.

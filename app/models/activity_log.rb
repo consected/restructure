@@ -119,6 +119,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
 
+  # set up a route for each available activity log definition
   def self.routes_load
 
     m = self.enabled
@@ -129,14 +130,15 @@ class ActivityLog < ActiveRecord::Base
         
           m.each do |pg|
             mn = pg.model_def_name.to_s.pluralize.to_sym
-            
-            get ":item_controller/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-            get ":item_controller/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-            get ":item_controller/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-            post ":item_controller/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
-            put ":item_controller/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#edit"
+            ic = pg.item_type.pluralize
+            get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
+            get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
+            get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
+            post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
+            get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
+            patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
           end
-        
       end
     end
   end
