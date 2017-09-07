@@ -144,6 +144,13 @@
         return _fpa.utils.nl2br(text);
     });
 
+    Handlebars.registerHelper('timestamp', function(text) {
+      if(text){
+        var ds = new Date(Date.parse(text));
+        return ds.getTime().toFixed(0);
+      }
+        
+    });
 
     Handlebars.registerHelper('date_time', function(text) {
         if(text){
