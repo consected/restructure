@@ -10,6 +10,8 @@
   end
 
   has_source = false
+  
+  select_desc = {}
 %>
 
 <div class="data-results">
@@ -35,9 +37,20 @@
               <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
               <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>              
               <% has_source = true %>
-            <% elsif p.to_s.index('select_') == 0 %>
-              <%= f.label p, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_#{p}".to_sym) %>
-              <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: object_instance.send(p)) %>              
+            <% elsif p.to_s.index('select_') == 0  
+              
+                  desc = general_selection("#{name}_#{p}".to_sym, return_all: true).reduce(false){|r,i| r || !i[6].blank?}                  
+                  v = object_instance.send(p)
+                  if desc.blank?
+                    opt = {}
+                  else
+                    idesc = "#{name}_#{p}".to_sym
+                    opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{p.to_s.humanize} options"}
+                    select_desc["#{name}_#{p}".to_sym] = v
+                  end
+            %>                        
+              <%= f.label p, opt %>
+              <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>              
             <% elsif p == :rank %>
               <%= f.label :rank %>
               <% if respond_to? "#{name}_rank_array_pair".to_sym %>
@@ -91,5 +104,10 @@
       <% if has_source %>
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{name.pluralize}_source", value: object_instance.source} %>
       <% end %>
+    
+      <% select_desc.each do |k,v| %>>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: k, value: v} %>
+      <% end %>
+      
   </div>
 </div>

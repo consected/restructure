@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170907100859) do
+ActiveRecord::Schema.define(version: 20170901152707) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -43,16 +43,16 @@ ActiveRecord::Schema.define(version: 20170907100859) do
     t.string   "select_call_direction"
     t.string   "select_who"
     t.date     "completed_when"
+    t.string   "select_result"
+    t.string   "select_next_step"
+    t.date     "follow_up_when"
+    t.string   "notes"
     t.integer  "user_id"
     t.integer  "player_contact_id"
     t.integer  "master_id"
     t.boolean  "disabled"
-    t.string   "notes"
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false
-    t.string   "select_result"
-    t.string   "select_next_step"
-    t.string   "follow_up_when"
   end
 
   add_index "activity_log_player_contact_phones", ["master_id"], name: "index_activity_log_player_contact_phones_on_master_id", using: :btree

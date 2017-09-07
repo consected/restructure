@@ -99,7 +99,9 @@ class ActivityLog < ActiveRecord::Base
     list = []
 
     al_classes.each do |c|
-      c.attribute_names.each do |a|
+
+      cn = c.attribute_names.select{|a| a.index('select_') == 0}.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
+      cn.each do |a|
         list << "#{c.name.underscore.gsub('/', '_')}_#{a}".to_sym
       end
     end
