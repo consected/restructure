@@ -40,8 +40,6 @@ module WorksWithItem
     self.class.name.singularize.underscore
   end
 
-  
-
   protected
 
     def master_user

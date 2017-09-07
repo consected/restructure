@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ActivityLogsController, type: :controller do
+RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
 
   include ActivityLogSupport
   include ModelSupport
@@ -42,7 +42,7 @@ RSpec.describe ActivityLogsController, type: :controller do
       
       create_item
       
-      get :index, {master_id: @player_contact.master_id, item_controller: 'player_contacts', item_id: @player_contact.id}
+      get :index, {master_id: @player_contact.master_id, item_id: @player_contact.id}
       expect(response).to have_http_status(200)#, "Attempting #{@user}"
     end
   end

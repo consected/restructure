@@ -14,16 +14,20 @@
 %>
 
 <div class="data-results">
-  <div data-result="phone-log-edit-form-<%= @item.master_id %>-entry-block">
+  <div data-result="<%= activity_log_edit_id  %>">
     <div class="">
       <%=form_for([@item, object_instance], activity_log_edit_form_hash ) do |f|%>
       <ul class="list-group">
         <li class="list-group-item">
-          
+          <% if @id %>
+          <%= activity_log_inline_cancel_button %>
+          <% else %>
+          <a class="show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign" title="cancel" data-master-id="<%=@master_id%>" data-item-id="<%=@item_id%>" data-on-click-show="activity_logs_phone_actions-partial@#activity-log-player-contact-phone-<%=@master_id%>-<%=@id%>"></a>
+          <% end %>
           <h4 class="list-group-item-heading"><%=caption%></h4>
         </li>
 
-        <% (permitted_params - [:id, :master_id, :item_id, item_type_id]).each do |p| %>
+        <% (permitted_params - [:id, :master_id, :item_id, item_type_id.to_sym]).each do |p| %>
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
 
             <% if p == :description %>    
@@ -46,7 +50,7 @@
               <% else %>
                 <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank) %>
               <% end %>
-            <% elsif p.to_s.index(/_date$/)  %>            
+            <% elsif p.to_s.index(/(_date|_when)$/)  %>         
               <%= f.label p %>
               <%= f.date_field p %>              
             <% elsif p.to_s.index(/_year$/)  %>                          
@@ -78,6 +82,7 @@
               <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>              
             <% else %>
               <%= f.label p %>
+            <%= item_type_id.inspect %>
               <%= f.text_field p %>
             <% end %>
           </li>

@@ -32,16 +32,24 @@ module MasterHandler
   # handles namespace if the item is like an ActivityLog:Something
   def primary_model
     if self.class.parent.name != 'Object'
-      "#{self.class.parent.name.underscore}/#{object_name}".constantize
+      "#{self.class.parent.name}::#{object_name.camelize}".constantize
     else
       controller_name.classify.constantize
     end
   end
 
-  def object_name 
+  def object_name
     controller_name.singularize
   end
 
+  def full_object_name
+    if self.class.parent.name != 'Object'
+      "#{self.class.parent.name.underscore}_#{controller_name.singularize}"
+    else
+      controller_name.singularize
+    end
+  end
+  
   # the association name from master to these objects
   # for example player_contacts or activity_log_player_contacts_phones
   def objects_name
@@ -73,7 +81,7 @@ module MasterHandler
   end
   
   def show
-    p = {object_name => object_instance.as_json}
+    p = {full_object_name => object_instance.as_json}
     
     logger.debug "p: #{p} for object_instance"
     render json: p

@@ -20,6 +20,11 @@
   validates :item_flag_name_id, presence: true
   validates :item_flag_name, presence: true  
 
+  def user_name
+    logger.debug "Getting username for #{self.user} in WorksWithItem"
+    return nil unless self.user
+    self.user.email
+  end
 
   def self.works_with class_name
     # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)

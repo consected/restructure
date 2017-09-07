@@ -1,0 +1,13 @@
+<script id="rank_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<span class="pull-right label label-info {{name_h}}-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
+</script>
+
+<script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#if show_created_at}}
+    <span class="meta-created-at-shown" data-toggle="popover" data-trigger="click hover" data-content="date/time created">{{date_time created_at}}</span>
+  {{else}}
+    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}"></span> 
+  {{/if}}
+    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
+    {{#if user_name}} by <span class="meta-created-by-shown" data-toggle="popover" data-trigger="click hover" data-content="created by">{{user_name}}</span>{{/if}}    
+</script>

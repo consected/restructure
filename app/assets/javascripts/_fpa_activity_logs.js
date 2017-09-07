@@ -13,7 +13,16 @@ _fpa.activity_logs = {
         el.classList.remove('item-highlight');
         el.classList.remove('selected-item');
       }
-    }    
+    }
+    
+    $('#activity-logs-master-'+attrs.master_id+'- [data-item-id]').removeClass('item-highlight selected-item');
+    $('#activity-logs-master-'+attrs.master_id+'- [data-item-id="'+attrs.item_id+'"]').addClass('item-highlight selected-item');
+    
+    var b = $('.activity-log-actions-holder');
+    
+    // reset the add new item button to use the correct parent item
+    _fpa.view_template(b, 'activity_logs_phone_actions-partial', attrs);  
+    
   }
   
 };

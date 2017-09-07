@@ -1,5 +1,6 @@
 <% # Load partial handlebars templates used by the search results and data blocks%>
 <%= render partial: 'masters/search_results_parts' %>
+<%= render partial: 'common_templates/common_parts' %>
 <%= render partial: 'item_flags/search_results_template' %>
 
 <% # Set up the handlebars templates for the main data blocks: player_infos, pro_infos, addresses and player_contacts %>
@@ -137,8 +138,8 @@
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>
           <% end %>
                     
-          <div id="activity-logs-{{id}}" class="collapse activity-logs-generic-block panel panel-default">          
-            {{>activity_logs_inner master_id=id}}
+          <div id="activity-logs-{{id}}" class="activity-logs-generic-block ">          
+              <div id="activity-logs-inner-{{id}}" class="activity-logs-inner-block"></div>
           </div>
   
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">          

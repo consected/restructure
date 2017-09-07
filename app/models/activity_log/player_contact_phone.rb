@@ -18,5 +18,7 @@ class ActivityLog::PlayerContactPhone < ActiveRecord::Base
 
   belongs_to :master, inverse_of: assoc_inverse
 
+
+  
 end
 

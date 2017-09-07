@@ -1,7 +1,13 @@
 module ActivityLogSupport
   
   include MasterSupport
-  
+
+
+  def gen_activity_log_path master_id, item_id, id=nil
+    res = "/masters/#{master_id}/player_contacts/#{item_id}/activity_log/player_contact_phones"
+    res += "/#{id}" if id
+    res
+  end
   
   def list_valid_attribs
     
@@ -24,8 +30,9 @@ module ActivityLogSupport
     
     [
       {
-        item_id: @player_contact.id,
-        item_type: 'PlayerContact'
+        player_contact_id: @player_contact.id,
+        select_call_direction: 'from player',
+        select_who: 'user'
       }
     ]
     
@@ -59,8 +66,9 @@ module ActivityLogSupport
   def new_attribs
     create_item
     @new_attribs = {
-        item_id: @player_contact.id,
-        item_type: 'PlayerContact'
+        player_contact_id: @player_contact.id,
+        select_call_direction: 'to player',
+        select_who: 'user'
       }
   end
   
@@ -68,9 +76,10 @@ module ActivityLogSupport
   
   def create_item att=nil, item=nil
     att ||= valid_attribs    
-    att[:user] ||= @user
+    master ||= create_master
     item ||= @player_contact
-    @activity_log = item.activity_logs.create! att
+    att[:player_contact] = item
+    @activity_log = master.activity_log_player_contact_phones.create! att
   end
   
 end

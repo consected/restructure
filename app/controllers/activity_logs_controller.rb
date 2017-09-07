@@ -23,7 +23,11 @@ class ActivityLogsController < ApplicationController
     end
 
     def item_type_id
-      "#{@item_type.singularize}_id".to_sym
+      "#{item_type_us}_id".to_sym
+    end
+
+    def item_type_us
+      @item_type.singularize.underscore
     end
 
     def items
@@ -33,7 +37,7 @@ class ActivityLogsController < ApplicationController
     def extend_result
       {
         al_type: al_type,
-        item_type: @item_type.singularize,
+        item_type: item_type_us,
         item_types_name: @item_type,
         item_id: @item.id,
         item_data: item_data,
@@ -65,6 +69,8 @@ class ActivityLogsController < ApplicationController
         @item_type = @item.class.name
       end
 
+      @master_id = @item.master_id
+      @item_id = @item.id
       #  return if the Activity Log does not work with this item_type / rec_type combo
       @al_class = ActivityLog.al_class @item
       return not_found unless @al_class
@@ -74,7 +80,7 @@ class ActivityLogsController < ApplicationController
     
 
     def permitted_params
-     res =  @al_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id] + [:item_id]
+     res =  @al_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym] + [:item_id]
      res
     end
 

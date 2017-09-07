@@ -1,11 +1,13 @@
-module ActivityLogHandler
+module ActivityLogHandler  
 
   extend ActiveSupport::Concern
+  include GeneralDataConcerns
 
   included do
     belongs_to parent_type
+    after_initialize :set_completed_when
     validates parent_type, presence: true
-    
+    after_save :check_status
   end
 
   class_methods do
@@ -26,27 +28,15 @@ module ActivityLogHandler
     end
 
     def view_attribute_list
-      attribute_names + [parent_type] - ['id', 'master_id', 'disabled',"#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source']
+      attribute_names - ['id', 'master_id', 'disabled',parent_type ,"#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source']
     end
 
     def parent_data_names
-      parent_class.attribute_names  - ['id', 'master_id', 'disabled', 'user_id', 'created_at', 'updated_at', 'rank', 'source']
+      parent_class.attribute_names  - ['id', 'master_id', 'disabled', 'user_id', 'created_at', 'updated_at', "rank", "rec_type"]
     end
   end
 
-  def as_json extras={}
-    extras[:include] ||=[]
-    extras[:include] << self.class.parent_type
-    super(extras)
-  end
 
-  def multiple_results
-    nil
-  end
-
-  def has_multiple_results
-    @multiple_results && @multiple_results.length > 0
-  end
 
   def item
     @item ||= send(self.class.parent_type)
@@ -60,7 +50,9 @@ module ActivityLogHandler
     send("#{self.class.parent_type}_id=",i)
   end
 
-
+  def set_completed_when
+    self.completed_when = DateTime.now if self.completed_when.blank?
+  end
 
   
 end

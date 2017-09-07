@@ -56,11 +56,6 @@
 <span class="label label-info player-info-badge-{{player_info.rank}}" title="{{player_info.accuracy_score_name}}">{{player_info.rank}}</span>
 </script>
 
-<script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}"></span> 
-    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
-    {{#if user_name}} by {{user_name}}{{/if}}    
-</script>
 
 
 <script id="tracker-badge-template" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -77,8 +72,4 @@
   {{/with}}
 </script>
 
-<script id="activity_logs_inner-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <div id="activity-logs-inner-{{master_id}}" class="activity-logs-inner-block">
-  </div>
-</script>
 

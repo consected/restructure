@@ -1,11 +1,15 @@
 <%= render partial: 'common_templates/search_results_template', locals: {
-    name: 'activity_log_phone', 
+    name: 'activity_log_player_contact_phone', 
     caption: 'Phone Call', # substitute the rec_type attribute (capitalized) as the block caption
     prevent_edit: false, 
     prevent_create: false,
     item_list: ActivityLog::PlayerContactPhone.view_attribute_list,
-    data_sort: [:desc, "data-activity-date"],
-    custom_activity_log: :none
+    data_sort: [:desc, :data_completed_when],
+    custom_block_attrs: {data_completed_when: '{{timestamp completed_when}}'},
+    custom_activity_log: :none,
+    item_blocks: {player_contact: ActivityLog::PlayerContactPhone.parent_data_names},
+    show_created_at: true,
+    edit_button_href: "/masters/{{master_id}}/player_contacts/{{item_id}}/activity_log/player_contact_phones/{{id}}/edit"
   } %>
 
 
@@ -15,7 +19,7 @@
     
     <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
       <li class="list-group-item sub-list-data">
-        <a data-on-click-call="activity_logs.selected_parent" data-on-click-show="empty-template@#activity-log-{{master_id}}-entry-block, activity_logs_selected_phone_record-partial@#al-selected-parent-record, activity_logs_phone_actions-partial@#activity-log-{{master_id}}-initial-action" data-master-id="{{master_id}}" data-item-id="{{id}}" data-item-data="{{data}}" data-rec-type="{{rec_type}}">{{pretty_string data return_string="true" capitalize="true"}}</a>
+        <a data-on-click-call="activity_logs.selected_parent" data-on-click-show="activity_logs_phone_actions-partial@#activity-log-{{master_id}}-initial-action" data-master-id="{{master_id}}" data-item-id="{{id}}" data-item-data="{{data}}" data-rec-type="{{rec_type}}">{{pretty_string data return_string="true" capitalize="true"}}</a>
         <a data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-phone-sub-list-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-activity-log-phone pull-right glyphicon glyphicon-edit small" href="/masters/{{master_id}}/player_contacts/{{id}}/edit" data-remote="true" data-player-contact-id="{{id}}" data-result-target=""></a>
         <span class="pull-right label label-info player-contact-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
       </li>
@@ -41,17 +45,21 @@
 
 
 <script id="activity_logs_phone_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
-  <span id="activity-logs-phone-actions">
-    <a href="/masters/{{master_id}}/player_contacts/{{item_id}}/activity_log/player_contact_phones/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="#player-contact-{{id}}-">made call to player</a> <a href="">received call from player</a>
-  </span>
+  <div id="activity-log-{{master_id}}-initial-action" class="activity-log-initial-action" data-completed-when="100000000000000" >  
+    {{#unless activity_log_player_contact_phones}}<h4>No logged activity</h4>{{/unless}}
+    <span id="activity-logs-phone-actions">
+      <a href="/masters/{{master_id}}/player_contacts/{{item_id}}/activity_log/player_contact_phones/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="#activity-log-player-contact-phone-{{master_id}}-">log phone call</a> 
+    </span>
+   </div>
 </script>
 
 
 <script id="activity-logs-player-contact-phone-type-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <div id="player-contact-activity-logs-phone-type-{{item_id}}" class="activity-logs-item-block activity-logs-player-contact-phone-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
+  <div id="player-contact-activity-logs-phone-type-{{item_id}}" class="collapse panel panel-default activity-logs-item-block activity-logs-player-contact-phone-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
  
     <div class="is-heading activity-logs-header">
-      {{>activity_logs_selected_phone_record}}
+     <a class="glyphicon glyphicon-remove-sign close-entity pull-right" title="close" data-target="#player-contact-activity-logs-phone-type-{{item_id}}" data-toggle="clear-content" ></a>
+
       <h4 class="list-group-item-heading al-label-phone-num">phone log</h4>    
     </div>
     <div class="row">
@@ -67,18 +75,16 @@
       
       <div class="col-md-18 ">
         
-        <div id="activity-log-{{master_id}}-initial-action">
-          {{> activity_logs_phone_actions}}
-        </div>   
-        <div class="row" id="activity-log-{{master_id}}-entry-block" data-subscription="phone-log-edit-form-{{master_id}}-entry-block" data-preprocessor="phone_log_edit_form">
-        </div>
-        <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{id}}-" data-sub-list="phone_logs">
+           
+        <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="phone_logs">
+          <div class="new-block new-below col-md-6 activity-log-actions-holder" data-sort-desc="data-completed-when" id="activity-log-player-contact-phone-{{master_id}}-" data-subscription="activity-log-player-contact-phone-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
+                            
+              {{> activity_logs_phone_actions}}
+          </div>
           {{#each activity_log_player_contact_phones}}
-
-            {{>activity_log_phone_result _created=@index}}
-          {{else}}
-              <h4>No logged activity</h4>
+            {{>activity_log_player_contact_phone_result _created=@index}}              
           {{/each}}
+            
         </div> 
       </div>
     </div>
@@ -88,14 +94,3 @@
 </script>
 
 
-
-<script id="activity-logs-player-contact-email-type-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <div id="player-contact-activity-logs-email-type-{{item_id}}" class="activity-logs-item-block activity-logs-player-contact-email-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}">
-  Email Contact Log Here!
-  </div>
-</script>
-
-
-<script id="activity-logs-generic-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <div id="generic-activity-logs-{{item_id}}" class="activity-logs-item-block activity-logs-generic-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}">Generic Log Here!</div>
-</script>
