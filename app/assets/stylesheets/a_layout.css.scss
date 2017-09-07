@@ -17,6 +17,10 @@ a.glyphicon {
     }
 }
 
+a:hover {
+  cursor: pointer;
+}
+
 a.open-in-new-window:after {
     content: "\e066";
     position: relative;
@@ -70,8 +74,13 @@ a.add-icon[data-show-modal] {color: #09c;}
 
 .meta-last-updated {cursor: help;}
 
+.glyphicon.ev-ajax-running {
+  
+  color:red;
+  
+}
 
-a.glyphicon.show-entity, a.glyphicon.edit-entity {
+a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
     color: white;
     background-color: #CC0000;
     display: inline-block;
@@ -156,6 +165,7 @@ input.form-control.has-value, select.form-control.has-value {
     animation: working 1s ease-in-out infinite;
     
     min-height: 20px;
+    display: block;
 }
 
 
@@ -255,4 +265,9 @@ div.popover {
 
 .modal-lg {
     min-width:90%;
+}
+
+.form-inline textarea.form-control {
+  width:100%;
+  height: 8em;
 }

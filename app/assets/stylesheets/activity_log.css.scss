@@ -32,3 +32,29 @@
   }
   
 }
+
+.notes-block .panel{
+  
+  min-height: 52px;
+  
+}
+
+.activity-logs-item-block {
+  
+  &.in, &.ajax-loading {
+    margin-bottom: 8px;
+  }
+  
+}
+.activity-log-initial-action {
+  
+  text-align: center;
+  padding: 68px 0;
+  width: auto;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.activity-log-list input[type='date'] {
+  max-width: 7em;
+}
