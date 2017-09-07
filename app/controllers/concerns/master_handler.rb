@@ -89,11 +89,11 @@ module MasterHandler
   
   def new
     set_object_instance @master_objects.build
-    render partial: edit_form
+    render partial: edit_form, locals: edit_form_extras
   end
 
   def edit
-    render partial: edit_form
+    render partial: edit_form, locals: edit_form_extras
   end
 
   def create
@@ -144,6 +144,10 @@ module MasterHandler
     def edit_form
       'edit_form'
     end  
+
+    def edit_form_extras
+      {}
+    end
 
     def edit_form_helper_prefix
       'common'

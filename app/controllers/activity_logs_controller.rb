@@ -13,6 +13,12 @@ class ActivityLogsController < ApplicationController
       'common_templates/edit_form'
     end
 
+    def edit_form_extras
+      {
+        caption: "#{@item.data}"
+      }
+    end
+
     def edit_form_helper_prefix
       'activity_log'
     end

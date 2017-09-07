@@ -292,7 +292,16 @@ _fpa.form_utils = {
         if(!block) block = $(document);
         block.find('[data-toggle="clear"]').not('.attached-datatoggle').on('click', function(){
             var a = $(this).attr('data-target');
-            $(a).html('').removeClass('in');
+            var el = $(a).html('');
+            if(el.hasClass('in'))
+              el.removeClass('in');
+            else
+              el.addClass('hidden');
+        }).addClass('attached-datatoggle');
+
+        block.find('[data-toggle="unhide"]').not('.attached-datatoggle').on('click', function(){
+            var a = $(this).attr('data-target');
+            $(a).removeClass('hidden');
         }).addClass('attached-datatoggle');
 
         block.find('a.scroll-to-master').not('.attached-datatoggle').on('click', function(){

@@ -46,13 +46,15 @@
   }
   
 }
-.activity-log-initial-action {
-  
-  text-align: center;
-  padding: 68px 0;
-  width: auto;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+
+.activity-log-initial-action {  
+  display: none;
+}
+.selected-item {
+  .activity-log-initial-action {  
+    text-align: center;
+    display: block;
+  }
 }
 
 .activity-log-list input[type='date'] {

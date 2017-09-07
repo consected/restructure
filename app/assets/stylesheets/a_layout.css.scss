@@ -84,11 +84,12 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
     color: white;
     background-color: #CC0000;
     display: inline-block;
-    padding: 6px;
+    padding: 2px;
     
     border: 1px solid #ff0000;
-    border-radius: 6px;
+    border-radius: 4px;
     text-decoration: none;
+    font-size: 12px;
     
     &:hover {
         background-color: #ff0000;
