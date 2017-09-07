@@ -54,6 +54,8 @@ _fpa = {
     // Prevent an attempt to render the template in a block that has already been rendered in this request
     if(block.hasClass('view-template-created')) return;
       
+    if(!template_name) console.log("no template_name provided");
+      
     _fpa.ajax_working(block);
     if(!options || !options.position){        
         block.html('');
@@ -61,6 +63,8 @@ _fpa = {
     
     // Pull the template from the pre-compiled templates
     var template =_fpa.templates[template_name];
+
+    if(!template) console.log("template for "+template_name+" was not found");
 
     if(!options) options = {};
 
@@ -399,9 +403,10 @@ _fpa = {
                                     // {master_id:789, player_info:{<this data gets passed>}, player_contact:{} }
                                     // This listener is looking for individual player_info records with a specific 'master key', and passing just
                                     // the content of that data to the template.
-                                    // It works nicely for 
+                                    // Note that we underscore the item_type, since this handles the compounded parent/item_type 
+                                    // results for 'works_with_item' classes
                                     item_data = d;
-                                    if(item_data[dsfor] === +dsid && item_data.item_type === dst){
+                                    if(item_data[dsfor] === +dsid && item_data.item_type.underscore() === dst){
                                         use_data = {};
                                         use_data[dst] = item_data;                    
                                     }
@@ -458,6 +463,8 @@ _fpa = {
                 } 
                 else {  
                   var targets = $('[data-subscription="'+di+'"]');
+                  if(targets.length === 0)
+                    console.log('WARN: [data-subscription="'+di+'"] returns no targets');
                 }
                 var res = {};
                 res[di] = d;
