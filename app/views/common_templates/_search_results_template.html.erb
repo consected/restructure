@@ -99,7 +99,9 @@
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
-        </div>          
+        </div>  
+        {{else is @key "protocol_id"}}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>                    
         {{else}}        
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>          
         {{/is}}

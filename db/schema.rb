@@ -42,7 +42,8 @@ ActiveRecord::Schema.define(version: 20170901152707) do
   create_table "activity_log_player_contact_phones", force: :cascade do |t|
     t.string   "select_call_direction"
     t.string   "select_who"
-    t.date     "completed_when"
+    t.date     "called_when"
+    t.integer  "protocol_id"
     t.string   "select_result"
     t.string   "select_next_step"
     t.date     "follow_up_when"
@@ -57,6 +58,7 @@ ActiveRecord::Schema.define(version: 20170901152707) do
 
   add_index "activity_log_player_contact_phones", ["master_id"], name: "index_activity_log_player_contact_phones_on_master_id", using: :btree
   add_index "activity_log_player_contact_phones", ["player_contact_id"], name: "index_activity_log_player_contact_phones_on_player_contact_id", using: :btree
+  add_index "activity_log_player_contact_phones", ["protocol_id"], name: "index_activity_log_player_contact_phones_on_protocol_id", using: :btree
   add_index "activity_log_player_contact_phones", ["user_id"], name: "index_activity_log_player_contact_phones_on_user_id", using: :btree
 
   create_table "activity_logs", force: :cascade do |t|
@@ -949,6 +951,7 @@ ActiveRecord::Schema.define(version: 20170901152707) do
   add_foreign_key "accuracy_scores", "admins"
   add_foreign_key "activity_log_player_contact_phones", "masters"
   add_foreign_key "activity_log_player_contact_phones", "player_contacts"
+  add_foreign_key "activity_log_player_contact_phones", "protocols"
   add_foreign_key "activity_log_player_contact_phones", "users"
   add_foreign_key "address_history", "addresses", name: "fk_address_history_addresses"
   add_foreign_key "address_history", "masters", name: "fk_address_history_masters"

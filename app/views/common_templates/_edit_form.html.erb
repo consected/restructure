@@ -50,7 +50,14 @@
                   end
             %>                        
               <%= f.label p, opt %>
-              <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>              
+              <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>
+            
+            
+            <% elsif p == :protocol_id %>
+            
+                <%= f.label :protocol, 'data-add-icon' => 'info-sign' %>
+                <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name}_sub_process_id", class: "form-control input-sm"}%>
+            
             <% elsif p == :rank %>
               <%= f.label :rank %>
               <% if respond_to? "#{name}_rank_array_pair".to_sym %>
@@ -105,7 +112,7 @@
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{name.pluralize}_source", value: object_instance.source} %>
       <% end %>
     
-      <% select_desc.each do |k,v| %>>
+      <% select_desc.each do |k,v| %>
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: k, value: v} %>
       <% end %>
       

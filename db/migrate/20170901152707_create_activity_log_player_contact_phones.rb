@@ -3,7 +3,8 @@ class CreateActivityLogPlayerContactPhones < ActiveRecord::Migration
     create_table :activity_log_player_contact_phones do |t|
       t.string :select_call_direction
       t.string :select_who
-      t.date :completed_when
+      t.date :called_when
+      t.references :protocol, index: true, foreign_key: true
       t.string  :select_result
       t.string  :select_next_step
       t.date  :follow_up_when

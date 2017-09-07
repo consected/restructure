@@ -13,6 +13,10 @@ class ActivityLog::PlayerContactPhone < ActiveRecord::Base
     :phone
   end
 
+  def self.action_when_attribute
+    :called_when
+  end
+
   include WorksWithItem
   include ActivityLogHandler
 

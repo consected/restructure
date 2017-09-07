@@ -5,7 +5,8 @@ module ActivityLogHandler
 
   included do
     belongs_to parent_type
-    after_initialize :set_completed_when
+    belongs_to :protocol
+    after_initialize :set_action_when
     validates parent_type, presence: true
     after_save :check_status
   end
@@ -34,6 +35,10 @@ module ActivityLogHandler
     def parent_data_names
       parent_class.attribute_names  - ['id', 'master_id', 'disabled', 'user_id', 'created_at', 'updated_at', "rank", "rec_type"]
     end
+
+    def action_when_attribute
+      :completed_when
+    end
   end
 
   def belongs_directly_to
@@ -53,8 +58,11 @@ module ActivityLogHandler
     send("#{self.class.parent_type}_id=",i)
   end
 
-  def set_completed_when
-    self.completed_when = DateTime.now if self.completed_when.blank?
+  def set_action_when
+    action = self.class.action_when_attribute
+    if self.send(action).blank?
+      self.send("#{action}=", DateTime.now)
+    end
   end
 
   

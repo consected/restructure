@@ -22,7 +22,7 @@ _fpa.postprocessors_activity_logs = {
       // assume if the length is only a single item that it is really the object we are looking for
       d = d0;
     }
-      
+    $('.activity-log-list .new-block.has-records').addClass('has-records');  
     _fpa.activity_logs.selected_parent(block, {item_id: d.item_id, rec_type: d.rec_type, item_data: d.item_data, master_id: d.master_id});
     
   }
