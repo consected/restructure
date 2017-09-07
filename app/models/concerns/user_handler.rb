@@ -69,7 +69,10 @@ module UserHandler
     end
   end  
 
-
+  def belongs_directly_to
+    master
+  end
+  
   def is_admin?
     if respond_to?(:master) && master      
       master.is_admin?

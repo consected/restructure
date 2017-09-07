@@ -12,7 +12,7 @@ module MasterHandler
 
     after_action :do_log_action
     
-    helper_method :primary_model, :permitted_params
+    helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id
   end
 
   def do_log_action
@@ -144,6 +144,14 @@ module MasterHandler
     def edit_form
       'edit_form'
     end  
+
+    def edit_form_helper_prefix
+      'common'
+    end
+
+    def item_type_id
+      "#{item_type_us}_id".to_sym if @item_type
+    end
     
   private
 

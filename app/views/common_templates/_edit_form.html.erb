@@ -15,14 +15,14 @@
 <div class="data-results">
   <div data-result="<%= edit_form_id %>">
     <div class="">
-      <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
+      <%=form_for([object_instance.belongs_directly_to, object_instance], edit_form_hash ) do |f|%>
       <ul class="list-group">
         <li class="list-group-item">
           <%= inline_cancel_button %>
           <h4 class="list-group-item-heading"><%=caption%></h4>
         </li>
 
-        <% (permitted_params - [:id, :master_id]).each do |p| %>
+        <% (permitted_params - [:id, :master_id, :item_id, item_type_id]).each do |p| %>
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
 
             <% if p == :description %>    
@@ -35,9 +35,9 @@
               <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
               <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>              
               <% has_source = true %>
-            <% elsif p.to_s.index('activity_log_') == 0 %>
+            <% elsif p.to_s.index('select_') == 0 %>
               <%= f.label p, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_#{p}".to_sym) %>
-              <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>              
+              <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: object_instance.send(p)) %>              
             <% elsif p == :rank %>
               <%= f.label :rank %>
               <% if respond_to? "#{name}_rank_array_pair".to_sym %>
@@ -45,7 +45,7 @@
               <% else %>
                 <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank) %>
               <% end %>
-            <% elsif p.to_s.index(/(_date|_when)$/)  %>            
+            <% elsif p.to_s.index(/(_date|_when)$/)  %>         
               <%= f.label p %>
               <%= f.date_field p %>              
             <% elsif p.to_s.index(/_year$/)  %>                          

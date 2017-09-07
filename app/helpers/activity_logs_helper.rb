@@ -1,6 +1,6 @@
 module ActivityLogsHelper
 
-  def activity_log_edit_id
+  def activity_log_edit_form_id
     "activity-log-player-contact-phone-edit-form-#{@master_id}-#{@id}"
 
   end
@@ -15,10 +15,11 @@ module ActivityLogsHelper
   end
 
   def activity_log_inline_cancel_button class_extras="pull-right"
-    logger.info "Doing inline_cancel_button for #{object_instance}"
-    
-    cancel_href = "/masters/#{@master_id}/#{@item.item_type.pluralize}/#{@item_id}/#{primary_model.to_s.underscore.pluralize}/#{@id}"
-
-    "<a class=\"show-entity show-#{full_object_name.hyphenate} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{full_object_name.hyphenate}-id=\"#{@id}\" data-result-target=\"##{full_object_name.hyphenate}-#{@master_id}-#{@id}\" data-template=\"#{full_object_name.hyphenate}-result-template\" data-toggle=\"scrollto-result\"}></a>".html_safe
+    if @id
+      cancel_href = "/masters/#{@master_id}/#{@item.item_type.pluralize}/#{@item_id}/#{primary_model.to_s.underscore.pluralize}/#{@id}"
+      "<a class=\"show-entity show-#{full_object_name.hyphenate} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{full_object_name.hyphenate}-id=\"#{@id}\" data-result-target=\"##{full_object_name.hyphenate}-#{@master_id}-#{@id}\" data-template=\"#{full_object_name.hyphenate}-result-template\" data-toggle=\"scrollto-result\"}></a>".html_safe
+    else
+      "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-on-click-show=\"activity_logs_phone_actions-partial@#activity-log-player-contact-phone-#{@master_id}-#{@id}\"></a>".html_safe
+    end
   end
 end

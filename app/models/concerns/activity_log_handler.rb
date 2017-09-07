@@ -36,6 +36,9 @@ module ActivityLogHandler
     end
   end
 
+  def belongs_directly_to
+    item
+  end
 
 
   def item

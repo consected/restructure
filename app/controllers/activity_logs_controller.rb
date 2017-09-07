@@ -5,14 +5,17 @@ class ActivityLogsController < ApplicationController
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
 
 
-  helper_method :item_type_id
   
 
   private
+
     def edit_form
-      'activity_logs/edit_form'
+      'common_templates/edit_form'
     end
 
+    def edit_form_helper_prefix
+      'activity_log'
+    end
 
     def al_type
       @al_class.table_name
