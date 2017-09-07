@@ -3,6 +3,12 @@ _fpa.form_utils = {
     // convenience calling them individually on an ad-hoc basis around the code base does
     // not make this a good choice.
 
+    clear_content:function(block){
+      block.removeClass('in');
+      block.html('');
+      
+    },
+
     toggle_expandable: function(block){
         if(block.hasClass('expanded'))
             block.removeClass('expanded');
@@ -112,7 +118,7 @@ _fpa.form_utils = {
             
             window.setTimeout(function(){
                 var wmax = 0;
-                var lgi = self.find('.list-group-item').not('.is-heading, .is-combo, .record-meta');
+                var lgi = self.find('.list-group-item').not('.is-heading, .is-sub-heading, .is-combo, .record-meta');
                 var all = lgi.find('small, label');
                 all.css({display: 'inline-block', whiteSpace: 'nowrap'});
                 all.each(function(){
@@ -338,6 +344,7 @@ _fpa.form_utils = {
         
         // call a function on click - name the function 'something' or 'something.other' to call
         // _fpa.something(block, data) or _fpa.something.other(block, data)
+        // data is produced by parsing the clicked element's data- attributes
         block.find('[data-on-click-call]').not('.attached-toggle_on_click_call').on('click', function(){
             _fpa.form_utils.toggle_on_click_call($(this));
         }).addClass('attached-toggle_on_click_call');
@@ -348,6 +355,11 @@ _fpa.form_utils = {
         block.find('[data-on-click-show]').not('.attached-toggle_on_click_show').on('click', function(){
             _fpa.form_utils.toggle_on_click_show($(this));
         }).addClass('attached-toggle_on_click_show');
+        
+        block.find('[data-toggle="clear-content"]').not('.attached-datatoggle').on('click', function(){
+            var a = $(this).attr('data-target');    
+            _fpa.form_utils.clear_content($(a));
+        }).addClass('attached-datatoggle');
         
     },
     
