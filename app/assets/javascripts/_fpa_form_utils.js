@@ -181,7 +181,7 @@ _fpa.form_utils = {
     organize_common_templates: function(block){
         $('.common-template-item').each(function(){
             var p = $(this).parents('.common-template-list');
-            if(p.hasClass('row')){
+            if(p.hasClass('row') && !$(this).hasClass('alt-width') ){
                 $(this).addClass('col-md-6');
             }
         });

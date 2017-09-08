@@ -6,7 +6,7 @@ class TrackerHistory < ActiveRecord::Base
   
 
   has_one :tracker, inverse_of: :tracker_histories
-  
+  belongs_to :item, polymorphic: true
   
   def as_json extras={}
     extras[:methods] ||= []

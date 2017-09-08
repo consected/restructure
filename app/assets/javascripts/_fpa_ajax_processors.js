@@ -332,11 +332,12 @@ _fpa.postprocessors = {
         }
     },
 
-    info_update_handler: function(block, d) {
+    info_update_handler: function(block, d, no_scroll) {
         _fpa.form_utils.format_block(block);
         if(d.update_action){
             var master_id = d.master_id;
-            $.scrollTo($('#master-'+ master_id), 250);
+            if(!no_scroll)
+              $.scrollTo($('#master-'+ master_id), 250);
 
             var t = '#trackers-' + master_id;
 

@@ -3,6 +3,7 @@
     caption: 'Phone Call', # substitute the rec_type attribute (capitalized) as the block caption
     prevent_edit: false, 
     prevent_create: false,
+    extra_class: 'alt-width col-md-8',
     item_list: ActivityLog::PlayerContactPhone.view_attribute_list,
     data_sort: [:desc, :data_completed_when],
     custom_block_attrs: {data_completed_when: '{{timestamp completed_when}}'},

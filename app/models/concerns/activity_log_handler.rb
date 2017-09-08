@@ -5,10 +5,12 @@ module ActivityLogHandler
 
   included do
     belongs_to parent_type
-    belongs_to :protocol
+
     after_initialize :set_action_when
     validates parent_type, presence: true
+    after_validation :sync_tracker
     after_save :check_status
+
   end
 
   class_methods do
@@ -65,5 +67,23 @@ module ActivityLogHandler
     end
   end
 
-  
+  def sync_tracker
+
+    return if protocol_id.blank? || sub_process_id.blank?
+
+    m = master if respond_to? :master
+    m ||= item.master if item.respond_to? :master
+
+    t = m.trackers.build(protocol_id: protocol_id, sub_process_id: sub_process_id, protocol_event_id: protocol_event_id,
+                  item_id: item_id, item_type: item.class.name, event_date: called_when)
+    t.save!
+
+    self.tracker_id = t.id  if respond_to? :tracker
+
+  end
+
+
+  def update_action
+    @was_created || @was_updated
+  end
 end

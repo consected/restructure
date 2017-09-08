@@ -76,7 +76,10 @@ module GeneralDataConcerns
     extras[:methods] << :state_name if respond_to? :state
     extras[:methods] << :country_name if respond_to? :country
     extras[:methods] << :source_name if respond_to? :source
-    extras[:methods] << :protocol_name #if respond_to? :protocol
+    extras[:methods] << :protocol_name if respond_to? :protocol
+    extras[:methods] << :sub_process_name if respond_to? :sub_process
+    extras[:methods] << :protocol_event_name if respond_to? :protocol_event
+    extras[:methods] << :tracker_id if respond_to? :tracker_id
     extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
     extras[:methods] << :user_name
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not

@@ -3,6 +3,7 @@ class Tracker < ActiveRecord::Base
   include TrackerHandler
   
   has_many :tracker_histories, inverse_of: :tracker
+  belongs_to :item, polymorphic: true
 
   before_validation :prevent_protocol_change,  on: :update
   before_validation :check_protocol_event

@@ -7,7 +7,7 @@ module TrackerHandler
     belongs_to :sub_process
     belongs_to :protocol_event
 
-    belongs_to :item, polymorphic: true
+
   end
   
   

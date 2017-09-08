@@ -17,6 +17,7 @@ class ActivityLog::PlayerContactPhone < ActiveRecord::Base
     :called_when
   end
 
+  include TrackerHandler
   include WorksWithItem
   include ActivityLogHandler
 
