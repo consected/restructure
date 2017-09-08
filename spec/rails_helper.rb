@@ -16,8 +16,15 @@ ENV['LC_TIME']='en_US.UTF-8'
 ENV['LC_NAME']='en_US.UTF-8'
 ENV['LC_LANG']='en_US.UTF-8'
 ENV['LANG']='en_US.UTF-8'
-ENV['DISPLAY']=':99'
 
+unless ENV['NOT_HEADLESS']
+  ENV['DISPLAY']=':99'
+  if `pgrep Xvfb`.blank?
+    puts "Running new Xvfb headless X server"
+    `Xvfb :99 -screen 0 1600x1200x8 &`
+  end
+  puts "Xvfb headless X server is running"
+end
 
 cb = Capybara
 
@@ -34,11 +41,6 @@ end
 
 cb.current_driver = :app_firefox_driver
 
-if `pgrep Xvfb`.blank?
-  puts "Running new Xvfb headless X server"
-  `Xvfb :99 -screen 0 1600x1200x8 &`
-end
-puts "Xvfb headless X server is running"
 
 include Warden::Test::Helpers
 Warden.test_mode!
