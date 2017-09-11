@@ -60,10 +60,7 @@ module GeneralDataConcerns
     self.class.get_source_name self.source
   end
 
-  def protocol_name
-    return nil unless self.respond_to?(:protocol) && self.protocol
-    self.protocol.name
-  end
+
 
 
   def as_json extras={}
@@ -79,7 +76,7 @@ module GeneralDataConcerns
     extras[:methods] << :protocol_name if respond_to? :protocol
     extras[:methods] << :sub_process_name if respond_to? :sub_process
     extras[:methods] << :protocol_event_name if respond_to? :protocol_event
-    extras[:methods] << :tracker_id if respond_to? :tracker_id
+    extras[:methods] << :tracker_history_id if respond_to? :tracker_history
     extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
     extras[:methods] << :user_name
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not

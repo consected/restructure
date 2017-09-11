@@ -1,6 +1,7 @@
 class CreateActivityLogPlayerContactPhones < ActiveRecord::Migration
   def change
     create_table :activity_log_player_contact_phones do |t|
+      t.string :data
       t.string :select_call_direction
       t.string :select_who
       t.date :called_when      
@@ -10,7 +11,7 @@ class CreateActivityLogPlayerContactPhones < ActiveRecord::Migration
       t.references :protocol, index: true, foreign_key: true
       t.references :sub_process, index: true, foreign_key: true
       t.references :protocol_event, index: true, foreign_key: true
-
+      t.references :tracker_history, index: true, references: :tracker_history
       t.string :notes
 
       t.references :user, index: true, foreign_key: true

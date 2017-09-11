@@ -106,8 +106,8 @@
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>                    
         {{else is @key "protocol_event_id"}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>                    
-        {{else is @key "tracker_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>tracker item</small> <strong><a href="/masters/{{../master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../master_id}}" data-template="tracker-chron-result-template" title="show tracker" class="glyphicon glyphicon-align-justify"></a><strong></li>                    
+        {{else is @key "tracker_history_id"}}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>tracker item</small> <strong><a href="/masters/{{../master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../master_id}}" data-template="tracker-chron-result-template" data-tracker-history-item="#tracker-{{../master_id}}-{{this}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a><strong></li>                    
         {{else}}        
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>          
         {{/is}}

@@ -5,15 +5,21 @@ module ActivityLogHandler
 
   included do
     belongs_to parent_type
-
+    has_one :tracker_history
     after_initialize :set_action_when
     validates parent_type, presence: true
     after_validation :sync_tracker
+    after_validation :sync_item_data
     after_save :check_status
 
   end
 
   class_methods do
+
+    # get the attributes that are common between the parent item and the new logged item
+    def fields_to_sync
+      self.attribute_names & parent_class.attribute_names - ["id", "master_id", "user_id", "created_at", "updated_at", "item_id"]
+    end
 
 
     def use_with_class_names
@@ -69,7 +75,7 @@ module ActivityLogHandler
 
   def sync_tracker
 
-    return if protocol_id.blank? || sub_process_id.blank?
+    return if protocol_id.blank? 
 
     m = master if respond_to? :master
     m ||= item.master if item.respond_to? :master
@@ -78,8 +84,24 @@ module ActivityLogHandler
                   item_id: item_id, item_type: item.class.name, event_date: called_when)
     t.save!
 
-    self.tracker_id = t.id  if respond_to? :tracker
+    th = TrackerHistory.where(tracker_id: t.id).first
 
+    self.tracker_history_id = th.id 
+
+  end
+
+  def fields_to_sync
+    self.class.fields_to_sync
+  end
+
+  # sync the attributes that are common between the parent item and the new logged item,
+  # to ensure that there is a true record of the original data (in case something is changed
+  # in the parent item subsequently)
+  def sync_item_data
+
+    fields_to_sync.each do |f|
+      self.send("#{f}=", item.send(f))
+    end
   end
 
 

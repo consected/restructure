@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170908135702) do
+ActiveRecord::Schema.define(version: 20170908074038) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,6 +40,7 @@ ActiveRecord::Schema.define(version: 20170908135702) do
   add_index "accuracy_scores", ["admin_id"], name: "index_accuracy_scores_on_admin_id", using: :btree
 
   create_table "activity_log_player_contact_phones", force: :cascade do |t|
+    t.string   "data"
     t.string   "select_call_direction"
     t.string   "select_who"
     t.date     "called_when"
@@ -49,6 +50,7 @@ ActiveRecord::Schema.define(version: 20170908135702) do
     t.integer  "protocol_id"
     t.integer  "sub_process_id"
     t.integer  "protocol_event_id"
+    t.integer  "tracker_history_id"
     t.string   "notes"
     t.integer  "user_id"
     t.integer  "player_contact_id"
@@ -56,7 +58,6 @@ ActiveRecord::Schema.define(version: 20170908135702) do
     t.boolean  "disabled"
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false
-    t.integer  "tracker_id"
   end
 
   add_index "activity_log_player_contact_phones", ["master_id"], name: "index_activity_log_player_contact_phones_on_master_id", using: :btree
@@ -64,7 +65,7 @@ ActiveRecord::Schema.define(version: 20170908135702) do
   add_index "activity_log_player_contact_phones", ["protocol_event_id"], name: "index_activity_log_player_contact_phones_on_protocol_event_id", using: :btree
   add_index "activity_log_player_contact_phones", ["protocol_id"], name: "index_activity_log_player_contact_phones_on_protocol_id", using: :btree
   add_index "activity_log_player_contact_phones", ["sub_process_id"], name: "index_activity_log_player_contact_phones_on_sub_process_id", using: :btree
-  add_index "activity_log_player_contact_phones", ["tracker_id"], name: "index_activity_log_player_contact_phones_on_tracker_id", using: :btree
+  add_index "activity_log_player_contact_phones", ["tracker_history_id"], name: "index_activity_log_player_contact_phones_on_tracker_history_id", using: :btree
   add_index "activity_log_player_contact_phones", ["user_id"], name: "index_activity_log_player_contact_phones_on_user_id", using: :btree
 
   create_table "activity_logs", force: :cascade do |t|
@@ -961,7 +962,6 @@ ActiveRecord::Schema.define(version: 20170908135702) do
   add_foreign_key "activity_log_player_contact_phones", "protocol_events"
   add_foreign_key "activity_log_player_contact_phones", "protocols"
   add_foreign_key "activity_log_player_contact_phones", "sub_processes"
-  add_foreign_key "activity_log_player_contact_phones", "trackers"
   add_foreign_key "activity_log_player_contact_phones", "users"
   add_foreign_key "address_history", "addresses", name: "fk_address_history_addresses"
   add_foreign_key "address_history", "masters", name: "fk_address_history_masters"

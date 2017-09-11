@@ -89,7 +89,9 @@ class ActivityLogsController < ApplicationController
     
 
     def permitted_params
-     res =  @al_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym] + [:item_id]
+     fts = @al_class.fields_to_sync.map(&:to_sym)
+     
+     res =  @al_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
      res
     end
 
