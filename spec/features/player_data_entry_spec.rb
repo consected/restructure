@@ -43,11 +43,16 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       end
       click_button 'Create Player contact'
     end
+    
+    expect(page).not_to have_css('form#new_player_contact')
+    
+    # the list may reorganize and this can cause a race
+    sleep 1
     p = ".#{ctype.downcase}-type li.player-contact-data strong"
     expect(page).to have_css(p)
 
     t = page.all(p).first.text
-
+    
     expect(t).to eq(expected)
 
   end
@@ -143,7 +148,8 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       expect(all('.player-info-end_year strong').length).to eq 0
     end
 
-    
+    # ensure that we wait for the results to fully show before returning
+    expect(page).to have_css(".player-info-item a[title='edit']")
 
   end
 
