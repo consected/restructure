@@ -361,6 +361,12 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       add_player_msid p
     end
 
+    # ensure the last player has a testable birth date
+    b = all ".player-info-item a[title='edit']"
+    b.first.click
+
+    edit_date('#player_info_birth_date', 'form.edit_player_info', 3, 26, 2012)
+
 
     # test search birth date
     edit_date('#master_general_infos_attributes_0_birth_date', '#master-search-simple', 3,26,2012)
