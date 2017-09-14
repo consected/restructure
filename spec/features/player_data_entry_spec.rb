@@ -155,11 +155,13 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
   def edit_college college, keyed
 
+    have_css('form.edit_player_info')
     within "form.edit_player_info" do
       f = find('#player_info_college')
       f.click
       f.send_keys(keyed)
-
+      sleep 1
+      
       h = '.tt-suggestion .tt-highlight'
       expect(page).to have_css(h)
       expect(page.all(h).first.text.downcase).to eq(keyed)
