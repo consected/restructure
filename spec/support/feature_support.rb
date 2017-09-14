@@ -3,6 +3,7 @@ module FeatureSupport
 
   def login
     visit "/users/sign_in"
+    have_css('#new_user')
     expect(page).to have_css('#new_user')
     within '#new_user' do
       fill_in "Email", with: @good_email
