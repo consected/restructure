@@ -71,6 +71,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     end
     
     have_css '#advanced_search_master.ajax-running'
+    have_css "#master_results_block"
     expect(page).to have_css "#master_results_block", text: ''
     have_css "#search_count"
     expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10

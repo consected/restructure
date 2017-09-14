@@ -3,6 +3,7 @@ module FeatureSupport
 
   def login
     visit "/users/sign_in"
+    expect(page).to have_css('#new_user')
     within '#new_user' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
@@ -29,6 +30,7 @@ module FeatureSupport
 
   def open_player_element el, items
     dismiss_modal
+    have_css('.player-info-header')
     el.find('.player-info-header').click      if items.length > 1 # it opens automatically if there is only one result
     dismiss_modal
     h = el[:href].split('#').last
