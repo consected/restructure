@@ -104,7 +104,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       day = p.all(".datepicker-days td.day:not(.old)").select {|s| s.text == d.to_s}.first
       day.click
 
-      sleep 0.1
+      sleep 1
       
       expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
       find('input[type="submit"]').click
