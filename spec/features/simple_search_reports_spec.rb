@@ -76,7 +76,9 @@ describe "simple search reports", js: true, driver: :app_firefox_driver do
       
     end
 
-    expect(page).to have_css('.alert'), match: /no results to export/
+    expect(page).to have_css('.alert')
+
+    expect(find('.alert').text).to match(/no results to export/)
 
   end
  

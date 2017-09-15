@@ -194,6 +194,8 @@ module MasterDataSupport
       if li[:rank] == 12
         li[:rank] = 9
       end
+
+      li[:rank] = AccuracyScore.enabled.last unless AccuracyScore.enabled.include?(li[:rank])
       create_player_info li
       @master_count += 1 
     end

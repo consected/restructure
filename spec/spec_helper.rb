@@ -40,7 +40,7 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-  #Run the tests with Ruby warnings enabled
+  # Run the tests with Ruby warnings enabled
   # config.warnings = true
 
 # The settings below are suggested to provide a good initial experience

@@ -2,7 +2,7 @@ module PlayerInfoSupport
   include MasterSupport
   
   def get_a_rank
-    ranks =  AccuracyScore.all
+    ranks =  AccuracyScore.enabled
     ranks[rand(ranks.length)].value
   end
   

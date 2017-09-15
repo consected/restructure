@@ -1,5 +1,4 @@
-require 'support/master_support'
-
+require "#{::Rails.root}/spec/support/master_support"
 
 module SeedSupport
   include MasterSupport
