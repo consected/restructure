@@ -396,7 +396,13 @@ _fpa.form_utils = {
 
     // Run through all the general formatters for a new block to show nicely
     format_block: function(block){
-        if(!block) block = $(document);
+      
+        if(!block){
+          console.log('format_block was provided no block.');
+          block = $(document);
+        }
+        // add an indicator (mostly for testing) that lengthy formatting is happening
+        block.addClass('formatting-block');
         _fpa.form_utils.setup_chosen(block);  
         _fpa.form_utils.setup_has_value_inputs(block);
         _fpa.form_utils.organize_common_templates(block);
@@ -407,6 +413,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_data_toggles(block);
         _fpa.form_utils.setup_extra_actions(block);
         _fpa.form_utils.setup_datepickers(block);
+        block.removeClass('formatting-block');
     }
 };
 

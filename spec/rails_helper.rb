@@ -41,7 +41,7 @@ cb.register_driver :app_firefox_driver do |app|
 end
 
 cb.current_driver = :app_firefox_driver
-cb.default_wait_time = 20
+cb.default_max_wait_time = 25
 
 
 include Warden::Test::Helpers

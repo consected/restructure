@@ -46,8 +46,10 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     
     expect(page).not_to have_css('form#new_player_contact')
     
-    # the list may reorganize and this can cause a race
-    sleep 1
+    # the list may reorganize and this can cause a race. Check the marker
+
+    has_no_css? '.formatting-block'
+    
     p = ".#{ctype.downcase}-type li.player-contact-data strong"
     expect(page).to have_css(p)
 
@@ -57,7 +59,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
   end
 
-  def edit_date field, in_block, m, d, y
+  def edit_date field, in_block, m, d, y, no_submit=false
 
     months = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
 
@@ -107,7 +109,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       sleep 1
       
       expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
-      find('input[type="submit"]').click
+      find('input[type="submit"]').click unless no_submit
     end
 
 
@@ -373,8 +375,13 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     b = all ".player-info-item a[title='edit']"
     b.first.click
 
-    edit_date('#player_info_birth_date', 'form.edit_player_info', 3, 26, 2012)
-
+    edit_date('#player_info_birth_date', 'form.edit_player_info', 3, 26, 2012, true)
+    # have to clear the start and end years to pass the appropriate validations
+    within "form.edit_player_info" do
+      fill_in "Start year", with: ''
+      fill_in "End year", with: ''
+      click_button "Update Player info"
+    end
 
     # test search birth date
     edit_date('#master_general_infos_attributes_0_birth_date', '#master-search-simple', 3,26,2012)
@@ -382,6 +389,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 #    f.send_keys :tab
 
     expect(page).to have_css('#master_results_block')
+    expect(page).to have_css('.player-info-header')
     t = all('.player-info-header').first.text
     expect(t).to include 'DOB 3/26/2012'
 
