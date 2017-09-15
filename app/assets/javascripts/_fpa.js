@@ -539,7 +539,13 @@ _fpa = {
       
       var a = '<div class="alert alert-'+type+'" role="alert">';
       a += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
-      a += msg;
+      if(type == 'error' || type == 'danger'){
+        var msg_safe = $('<div/>').text(msg).html();
+        a += msg_safe;
+      }else
+      {
+        a += msg;
+      }
       a += '</div>';
       
       $('.flash').append(a);

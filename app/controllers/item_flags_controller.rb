@@ -80,7 +80,8 @@ class ItemFlagsController < ApplicationController
       raise "Failed to get @item for #{item_class_name}" unless @item
       
       @master = @item.master
-      
+      @master.current_user = current_user  
+
       raise "Failed to get @master for #{@item.inspect}" unless @master
       @master
     end

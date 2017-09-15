@@ -8,10 +8,10 @@
       {{/is}}
       </td>
       {{#filter this "protocol_name,sub_process_name,event_name,event_date,notes" }}
-      <td class="tracker-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../../protocol_event_id}}"{{/is}}>      
+      <td class="tracker-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../protocol_event_id}}"{{/is}}>      
       <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
       {{#is @key 'event_name'}}
-      {{#if ../../record_id}} <a href="#{{hyphenate ../../../record_type_us}}-{{../../../master_id}}-{{../../../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../../record_type_us}}"></a>{{/if}}
+      {{#if ../record_id}} <a href="#{{hyphenate ../record_type_us}}-{{../master_id}}-{{../record_id}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../../record_type_us}}"></a>{{/if}}
       {{/is}}
       </div>
       </td>

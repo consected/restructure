@@ -3,7 +3,7 @@ class ItemFlag < ActiveRecord::Base
   belongs_to :item, polymorphic: true, inverse_of: :item_flags
   belongs_to :item_flag_name  
   belongs_to :user
-  
+  before_validation :force_write_user
   before_validation :prevent_item_change,  on: :update
   
   # We must have a user set to save a record
@@ -22,17 +22,23 @@ class ItemFlag < ActiveRecord::Base
   validate :works_with_class
   
   default_scope -> {where "disabled is null or disabled = false"}  
-  
+
+  def user_name
+    logger.debug "Getting username for #{self.user} in WorksWithItem"
+    return nil unless self.user
+    self.user.email
+  end
+
   def self.works_with class_name
     # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
     pos = use_with_class_names.index(class_name.underscore)
-    if pos      
+    if pos
       use_with_class_names[pos.to_i].camelize
     else
       nil
     end
   end
-  
+
   def self.use_with_class_names
     Master.reflect_on_all_associations(:has_many).select {|v| v.options[:source] != :item_flags}.collect {|v| v.plural_name.singularize}.sort
   end
@@ -102,6 +108,31 @@ class ItemFlag < ActiveRecord::Base
 
   protected
   
+    def creatable_without_user
+      false
+    end
+
+    def master_user
+
+      if respond_to?(:master) && master        
+        current_user = master.current_user
+        current_user
+      elsif item.respond_to?(:master) && item.master
+        current_user = item.master.current_user
+        current_user
+      else
+        raise "master is nil and can't be used to get the current user" unless master || item.master
+        nil
+      end
+    end
+
+    def force_write_user
+      return true if creatable_without_user && !persisted?
+      mu = master_user
+      raise "bad user being pulled from master_user (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '': ' not persisted'})" unless mu.is_a?(User) && mu.persisted?
+
+      write_attribute :user_id, mu.id
+    end
   
     def self.track_flag_updates item, added_flags, removed_flags
       logger.info "Track record update for added item_flags #{added_flags} and removed #{removed_flags}"

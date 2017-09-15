@@ -31,6 +31,10 @@ module TrackerHandler
     self.protocol_event.name
   end
 
+  def protocol_event_name
+    event_name
+  end
+
   def event_milestone
     return nil unless self.protocol_event
     self.protocol_event.milestone
