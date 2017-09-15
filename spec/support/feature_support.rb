@@ -26,6 +26,8 @@ module FeatureSupport
       have_css('button[data-dismiss="modal"]')
       b = all('button[data-dismiss="modal"]')
       b.first.click if b && b.length > 0
+      #wait for the modal to fade out before continuing
+      has_no_css('.modal.fade.in')
     end
   end
 
