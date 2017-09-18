@@ -251,7 +251,7 @@ DEPENDENCIES
   rspec-rails (~> 3.0)
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
-  selenium-webdriver
+  selenium-webdriver (= 3.4.4)
   simplecov
   spring
   syslog-logger
@@ -260,4 +260,4 @@ DEPENDENCIES
   webrick
 
 BUNDLED WITH
-   1.15.3
+   1.16.0.pre.1

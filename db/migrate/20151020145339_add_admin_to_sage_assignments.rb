@@ -1,4 +1,4 @@
-require "#{Rails.root}/db/seeds/tracker_updates_protocol.rb"
+require "#{Rails.root}/db/seeds/0_tracker_updates_protocol.rb"
   
 def auto_admin 
   @admin ||= Admin.find_or_create_by email: 'auto-admin@dummy.aaa'

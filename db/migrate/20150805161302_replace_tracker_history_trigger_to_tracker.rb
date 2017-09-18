@@ -19,7 +19,7 @@ class ReplaceTrackerHistoryTriggerToTracker < ActiveRecord::Migration
         END;
     $hist_update$ LANGUAGE plpgsql;
     
-    DROP TRIGGER tracker_history_update ON trackers;
+    DROP TRIGGER IF EXISTS tracker_history_update ON trackers;
 
     CREATE TRIGGER tracker_history_update
         AFTER UPDATE ON trackers
@@ -27,7 +27,7 @@ class ReplaceTrackerHistoryTriggerToTracker < ActiveRecord::Migration
         WHEN (OLD.* IS DISTINCT FROM NEW.*)
         EXECUTE PROCEDURE log_tracker_update();
 
-    DROP TRIGGER tracker_history_insert ON trackers;
+    DROP TRIGGER IF EXISTS tracker_history_insert ON trackers;
     CREATE TRIGGER tracker_history_insert
         AFTER INSERT ON trackers
         FOR EACH ROW

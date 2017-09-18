@@ -11,24 +11,32 @@ module ItemFlagSupport
     create_item_flag_name 'PlayerInfo'
     
     @player_info = PlayerInfo.last
-    @player_info.master.current_user = @user
-
-    raise "failed to set master user" unless @player_info.master_user
-
+    
+    if @player_info && @player_info.master
+      @player_info.master.current_user = @user
+    else
+      @player_info = nil
+    end
+    
     unless @player_info
-      PlayerInfo.create!(
+      master = create_master
+      master.current_user = @user
+
+      pi = master.player_infos.create!(
       {
         first_name: 'test',
         last_name: 'test',                
         birth_date: Date.today - 40.years,
         
         rank: 10,
-        source: 'nflpa'        ,
-        master: create_master
+        source: 'nflpa'
       }
       )
-      @player_info = PlayerInfo.last
+      @player_info = pi
     end
+
+    raise "failed to set master user" unless @player_info.master_user
+
     
     [
       {

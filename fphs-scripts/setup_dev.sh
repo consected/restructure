@@ -6,7 +6,7 @@
 #   read -p 'openmed username:' omu;curl -su $omu "https://open.med.harvard.edu/svn/fphs-rails/branches/phase3-1/fphs-scripts/setup_dev.sh" > /tmp/setup_dev.sh;sh /tmp/setup_dev.sh
 
 # Set the required ruby version. 
-RUBYVER=2.2.4
+RUBYVER=2.4.1
 
 # --- setup_dev.sh prerequisites ---
 # postgres 9.4 and postgres client

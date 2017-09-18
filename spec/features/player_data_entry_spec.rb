@@ -43,16 +43,23 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       end
       click_button 'Create Player contact'
     end
+    
+    expect(page).not_to have_css('form#new_player_contact')
+    
+    # the list may reorganize and this can cause a race. Check the marker
+
+    has_no_css? '.formatting-block'
+    
     p = ".#{ctype.downcase}-type li.player-contact-data strong"
     expect(page).to have_css(p)
 
     t = page.all(p).first.text
-
+    
     expect(t).to eq(expected)
 
   end
 
-  def edit_date field, in_block, m, d, y
+  def edit_date field, in_block, m, d, y, no_submit=false
 
     months = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
 
@@ -99,12 +106,12 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       day = p.all(".datepicker-days td.day:not(.old)").select {|s| s.text == d.to_s}.first
       day.click
 
-      sleep 0.1
+      sleep 1
       # check that the result is viewing correctly as a local date before attempting to match
       # search forms seem to get back to this a little slower than edit forms
       expect(page).to have_css("input#{field}.date-is-local")
       expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
-      find('input[type="submit"]').click
+      find('input[type="submit"]').click unless no_submit
     end
 
 
@@ -145,17 +152,20 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       expect(all('.player-info-end_year strong').length).to eq 0
     end
 
-    
+    # ensure that we wait for the results to fully show before returning
+    expect(page).to have_css(".player-info-item a[title='edit']")
 
   end
 
   def edit_college college, keyed
 
+    have_css('form.edit_player_info')
     within "form.edit_player_info" do
       f = find('#player_info_college')
       f.click
       f.send_keys(keyed)
-
+      sleep 1
+      
       h = '.tt-suggestion .tt-highlight'
       expect(page).to have_css(h)
       expect(page.all(h).first.text.downcase).to eq(keyed)

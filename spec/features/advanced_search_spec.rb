@@ -93,6 +93,8 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     end
     
     have_css("a.master-expander.attached-me-click")
+    
+    have_css("a.master-expander.attached-me-click[href='#master-#{@full_player_info.master_id}-player-infos'].collapsed .player-info-header")
     page.all(:css, "a.master-expander.attached-me-click[href='#master-#{@full_player_info.master_id}-player-infos'].collapsed .player-info-header").first.click
     
     # expect the player section to expand
@@ -178,10 +180,12 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     expect(page).to have_css "#search_count", text: ''
     have_css '#advanced_search_master.ajax-running'    
     
-    find "#master_results_block.search-status-done", wait: 10
     
-    find ".master-expander", match: :first
-    
+    have_css "#master_results_block.search-status-done"
+    find ".master-expander", match: :first, wait: 20
+
+    #give slow systems time to catch up with the large result set
+    sleep 2
     #expect(page).to have_css "#search_count", text: /[0-9]+.*/
     
     items = page.all(:css, '.master-expander.collapsed')
@@ -203,7 +207,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       b.first.click if b && b.length > 0 
       
       h = el[:href].split('#').last      
-      
+      have_css("##{h}.collapse.in")
       find "##{h}.collapse.in", wait: 5
       have_css "##{h}.tracker-block.collapse.in"
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: /#{protocol.name}/i

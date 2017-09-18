@@ -3,21 +3,47 @@ class AddItemTypeToReports < ActiveRecord::Migration
 
 
     add_column :reports, :item_type, :string
+
+    # some schemas may not have a report_history table
+    # handle that explicitly
+    if ActiveRecord::Base.connection.table_exists? 'report_history'
     
-    add_column :report_history, :item_type, :string
-    
-        # history table seems to have been left behind. Bring it up to date  then remake the trigger
-    add_column :report_history, :edit_model, :string
-    add_column :report_history, :edit_field_names, :string
-    add_column :report_history, :selection_fields, :string
-    
+
+      add_column :report_history, :item_type, :string
+
+          # history table seems to have been left behind. Bring it up to date  then remake the trigger
+      add_column :report_history, :edit_model, :string
+      add_column :report_history, :edit_field_names, :string
+      add_column :report_history, :selection_fields, :string
+    else
+      create_table "report_history", force: :cascade do |t|
+        t.string   "name"
+        t.string   "description"
+        t.string   "sql"
+        t.string   "search_attrs"
+        t.integer  "admin_id"
+        t.boolean  "disabled"
+        t.string   "report_type"
+        t.boolean  "auto"
+        t.boolean  "searchable"
+        t.integer  "position"
+        t.datetime "created_at",       null: false
+        t.datetime "updated_at",       null: false
+        t.integer  "report_id"
+        t.string   "item_type"
+        t.string   "edit_model"
+        t.string   "edit_field_names"
+        t.string   "selection_fields"
+      end
+    end
+
     reversible do |dir|
       dir.up do    
     execute <<EOF
 
-DROP TRIGGER report_history_insert ON reports;
-DROP TRIGGER report_history_update ON reports;
-DROP FUNCTION log_report_update();
+DROP TRIGGER IF EXISTS report_history_insert ON reports;
+DROP TRIGGER IF EXISTS report_history_update ON reports;
+DROP FUNCTION IF EXISTS log_report_update();
 CREATE FUNCTION log_report_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -76,9 +102,9 @@ EOF
       
 execute <<EOF
 
-DROP TRIGGER report_history_insert ON reports;
-DROP TRIGGER report_history_update ON reports;
-DROP FUNCTION log_report_update();
+DROP TRIGGER IF EXISTS report_history_insert ON reports;
+DROP TRIGGER IF EXISTS report_history_update ON reports;
+DROP FUNCTION IF EXISTS log_report_update();
 CREATE FUNCTION log_report_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$

@@ -27,11 +27,14 @@ class Master < ActiveRecord::Base
   before_validation :prevent_user_updates,  on: :update
   validates :user, presence: true  
   before_create :assign_msid
-  
-  
-  DynamicModel.active.each do |dm|
-    has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
-    Rails.logger.debug "Associated master with #{dm.model_association_name} with class_name: DynamicModel::#{dm.model_class_name}"
+
+  # to ensure that the db migrations can run, check for the existence of the dynamic models table
+  # before attempting to use it. Otherwise Rake tasks fail.
+  if ActiveRecord::Base.connection.table_exists? 'dynamic_models'
+    DynamicModel.active.each do |dm|
+      has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
+      Rails.logger.debug "Associated master with #{dm.model_association_name} with class_name: DynamicModel::#{dm.model_class_name}"
+    end
   end
   
   

@@ -4,6 +4,7 @@
   
   belongs_to :item, polymorphic: true, inverse_of: :item_flags
   belongs_to :item_flag_name  
+  belongs_to :user
   
   before_validation :prevent_item_change,  on: :update
   

@@ -21,7 +21,8 @@ unless ENV['NOT_HEADLESS']
   ENV['DISPLAY']=':99'
   if `pgrep Xvfb`.blank?
     puts "Running new Xvfb headless X server"
-    `Xvfb :99 -screen 0 1600x1200x8 &`
+    `Xvfb +extension RANDR :99 -screen 0 1600x1200x16 &`
+    `sleep 5; x11vnc -display $DISPLAY -bg -nopw -listen localhost -xkb  -rfbport 5901`
   end
   puts "Xvfb headless X server is running"
 end
@@ -40,6 +41,7 @@ cb.register_driver :app_firefox_driver do |app|
 end
 
 cb.current_driver = :app_firefox_driver
+cb.default_max_wait_time = 25
 
 
 include Warden::Test::Helpers
