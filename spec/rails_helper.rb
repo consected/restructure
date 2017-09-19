@@ -17,7 +17,7 @@ ENV['LC_NAME']='en_US.UTF-8'
 ENV['LC_LANG']='en_US.UTF-8'
 ENV['LANG']='en_US.UTF-8'
 
-unless ENV['NOT_HEADLESS']
+unless ENV['NOT_HEADLESS']=='true'
   ENV['DISPLAY']=':99'
   if `pgrep Xvfb`.blank?
     puts "Running new Xvfb headless X server"

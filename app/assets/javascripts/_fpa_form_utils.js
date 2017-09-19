@@ -293,7 +293,7 @@ _fpa.form_utils = {
         block.find('[data-toggle="clear"]').not('.attached-datatoggle').on('click', function(){
             var a = $(this).attr('data-target');
             var el = $(a).html('');
-            if(el.hasClass('in'))
+            if(el.hasClass('collapse'))
               el.removeClass('in');
             else
               el.addClass('hidden');
@@ -322,7 +322,9 @@ _fpa.form_utils = {
           _fpa.utils.jump_to_linked_item(a);
         });
         
-        block.find('[data-toggle="scrollto-result"], [data-toggle="scrollto-target"], [data-toggle="collapse"].scroll-to-expanded ').not('.attached-datatoggle').on('click', function(){
+
+        
+        block.find('[data-toggle="scrollto-result"], [data-toggle="scrollto-target"], [data-toggle="collapse"].scroll-to-expanded ').not('.attached-datatoggle').on('click', function(){         
             if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed'))
               return;
             
@@ -400,7 +402,21 @@ _fpa.form_utils = {
     },
     
     setup_extra_actions: function(block){
-        
+
+        block.find('.collapse').not('.attached-force-collapse').each(function(){          
+          var el = $(this);
+          el.on('show.bs.collapse', function () {            
+            el.removeClass('hidden');
+          });
+          el.on('shown.bs.collapse', function () {            
+            el.removeClass('hidden');
+            //el.css({display: 'block', height: 'auto', overflow: 'hidden'});              
+          });                    
+          el.on('hide.bs.collapse', function () {
+                          
+          });                    
+        }).addClass('.attached-force-collapse');      
+      
         block.find('.resize-children').each(function(){
            var maxh = 1;
            var cs = $(this).find('ul');

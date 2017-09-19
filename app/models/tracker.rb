@@ -5,12 +5,12 @@ class Tracker < ActiveRecord::Base
   has_many :tracker_histories, inverse_of: :tracker
   belongs_to :item, polymorphic: true
 
-  before_validation :prevent_protocol_change,  on: :update
-  before_validation :check_protocol_event
-  before_validation :check_sub_process
+  validate :prevent_protocol_change,  on: :update
+  validate :check_protocol_event
+  validate :check_sub_process
   
   validates :protocol, presence: true
-
+  validates :master, presence: true
   validates :event_date, presence: true, if: :sub_process_id?
   
   # We can't use this next validation, since the error attribute is not translatable, and therefore we can't get sub_process to appear to users as 'status'  

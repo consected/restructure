@@ -108,7 +108,7 @@ module MasterHandler
         show
       end
     else
-      logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
+      logger.warn "Error creating #{human_name}: #{object_instance_errors}"
       render json: object_instance.errors, status: :unprocessable_entity     
     end
   end
@@ -123,7 +123,7 @@ module MasterHandler
       end
       
     else
-      logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
+      logger.warn "Error updating #{human_name}: #{object_instance_errors}"
       render json: object_instance.errors, status: :unprocessable_entity 
     end
     
@@ -161,6 +161,10 @@ module MasterHandler
 
     def set_additional_attributes obj
 
+    end
+
+    def object_instance_errors
+      object_instance.errors.map{|k,av| "#{k}: #{av}"}.join(' | ')
     end
 
     # In order to clear up a multitude of Ruby warnings

@@ -130,7 +130,9 @@ module UserHandler
 
       unless self.user
         errors.add :user, "must be authenticated and set"
+        logger.warn "User is not set. Failed user_set validation in user_handler for #{self.inspect}"
       end
+      self.user
     end
     def force_write_user
       return true if creatable_without_user && !persisted?
@@ -152,14 +154,20 @@ module UserHandler
         unless source_name
           logger.info "Requested source of #{self.source}. This is not a valid value."
           errors.add :source, "(#{self.source}) not a valid value"
+          logger.warn "Source is not a valid value in #{self.inspect}"
+          return false
         end
-      end      
+      end
+      true
     end
     
     
     def rank_correct      
       if respond_to?(:rank) && self.rank
         errors.add :rank, "(#{self.rank}) not a valid value" unless rank_name
-      end      
+        logger.warn "Rank is not a valid value in #{self.inspect}"
+        return false
+      end
+      true
     end
 end

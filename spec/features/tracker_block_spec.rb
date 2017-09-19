@@ -60,7 +60,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     
     # Wait for the advance form collapse animation to complete
     expect(page).to have_css '#master-search-advanced-form.in'    
-    
+    expect(page).to have_no_css '#master-search-advanced-form.in.collapsing'
     
     # Search for the player
     within '#advanced_search_master' do
@@ -74,8 +74,8 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     have_css "#master_results_block"
     expect(page).to have_css "#master_results_block", text: ''
     have_css "#search_count"
-    expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
+    expect(page).to have_css "#search_count", text: /[0-9]+/
     
     # Check we got some results
     items = page.all(:css, '.master-expander')

@@ -503,7 +503,7 @@ _fpa = {
             var msg = '';
             for(var i in j){
                 if(j.hasOwnProperty(i)){                 
-                  msg += '<p>' + i.replace(/_/g, ' ') + ' ' + j[i] + '</p>';
+                  msg += '|' + i.replace(/_/g, ' ') + ' ' + j[i] + '|';
                 }                
             }
             

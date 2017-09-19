@@ -10,8 +10,7 @@ class CreateActivityLogPlayerContactPhones < ActiveRecord::Migration
       t.date  :follow_up_when
       t.references :protocol, index: true, foreign_key: true
       t.references :sub_process, index: true, foreign_key: true
-      t.references :protocol_event, index: true, foreign_key: true
-      t.references :tracker_history, index: true, references: :tracker_history
+      t.references :protocol_event, index: true, foreign_key: true      
       t.string :notes
 
       t.references :user, index: true, foreign_key: true
