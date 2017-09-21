@@ -7,6 +7,7 @@ class ActivityLog < ActiveRecord::Base
   validates :name, presence: true, uniqueness: true
   validates :item_type, presence: true
   validate :rec_type_valid?
+  after_commit :reload_routes
 
 
   
@@ -73,9 +74,9 @@ class ActivityLog < ActiveRecord::Base
   def rec_type_valid?
     return if rec_type.blank?
 
-    if GeneralSelection.selector_attributes([:name], item_type: "#{item_type.pluralize}_rec_type").length == 0
-      errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type")
-    end
+#    if GeneralSelection.selector_attributes([:name], item_type: "#{item_type.pluralize}_rec_type").length == 0
+#      errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type.")
+#    end
 
   end
 
@@ -124,25 +125,34 @@ class ActivityLog < ActiveRecord::Base
   # set up a route for each available activity log definition
   def self.routes_load
 
-    m = self.enabled
-    
+    begin
+      m = self.enabled
+      return if m.length == 0
 
-    Rails.application.routes.draw do
-      resources :masters, only: [:show, :index, :new, :create] do
-        
-          m.each do |pg|
-            mn = pg.model_def_name.to_s.pluralize.to_sym
-            ic = pg.item_type.pluralize
-            get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-            get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-            post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
-            get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
-            patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-            put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-          end
+      Rails.application.routes.draw do
+        resources :masters, only: [:show, :index, :new, :create] do
+
+            m.each do |pg|
+              mn = pg.model_def_name.to_s.pluralize.to_sym
+              ic = pg.item_type.pluralize
+              get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
+              get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
+              get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
+              post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
+              get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
+              patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+              put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+            end
+        end
       end
+      
+    rescue ActiveRecord::StatementInvalid => e
+      logger.warn "Not loading activity log routes. The table has probably not been created yet. #{e.backtrace.join("\n")}"
     end
+  end
+
+  def reload_routes
+    Rails.application.reload_routes!
   end
 
 end

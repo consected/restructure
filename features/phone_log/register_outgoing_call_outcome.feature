@@ -22,20 +22,28 @@ Scenario: the user speaks to the contact about the reason for the call
   When the contact answers a call from a user and they speak about the reason for the call
   When the user records that he spoke to the contact successfully about the matter
 
-Scenario: the user speaks to the contact but he does not want to talk about the required matter
+#Scenario: the user speaks to the contact but he does not want to talk about the required matter
+  Given the user is viewing the contact's record in Zeus
+  And the user has indicated he is calling one of the contact's phone numbers
   When the contact answers the call but he does not want to speak about the matter now or in the future
   Then the user records that he spoke to the contact but he did not want to discuss the matter
 
-Scenario: the user speaks to the contact but they indicate they do not want to be called on any phone number in the future
+#Scenario: the user speaks to the contact but they indicate they do not want to be called on any phone number in the future
+  Given the user is viewing the contact's record in Zeus
+  And the user has indicated he is calling one of the contact's phone numbers
   When the contact answers the call and indicates he does not want to be called again
   Then the user records that he spoke to the contact
-  Then the user records that he does not want to be called again
+  Then the user records that he does not want to be called again on any number
 
-Scenario: the user is requested not to call this number in the future
-  When the user is informed not to call this number in the future
+#Scenario: the user is requested not to call this number in the future
+  Given the user is viewing the contact's record in Zeus
+  And the user has indicated he is calling one of the contact's phone numbers
+  When the call connects and the user is informed not to call this number in the future
   Then the user records this number to not be called in the future
 
-Scenario: the user is given an alternative number to call
+#Scenario: the user is given an alternative number to call
+  Given the user is viewing the contact's record in Zeus
+  And the user has indicated he is calling one of the contact's phone numbers
   When the user is informed of an alternative number to call
   Then the user records this new number to be used as the primary number
   Then if appropriate the user records the current number to not be used in the future

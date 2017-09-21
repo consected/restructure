@@ -9,6 +9,7 @@ require "#{::Rails.root}/spec/support/master_data_support.rb"
 require "#{::Rails.root}/spec/support/model_support.rb"
 require "#{::Rails.root}/spec/support/feature_support.rb"
 require "#{::Rails.root}/spec/support/controller_macros.rb"
+require "#{::Rails.root}/spec/support/phone_log_support.rb"
 
 
 #require "#{::Rails.root}/features/support/setup_support"

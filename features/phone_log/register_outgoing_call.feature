@@ -13,10 +13,10 @@ Background:
 Scenario: the user indicates that he is making a call to a contact
   Given the contact has one or more phone number records
   When the user indicates he is calling one of the contact's phone numbers
-  Then the user sees the call log for the contact
+  Then the user sees the call log entry form for the selected phone number
 
-Scenario: While on a call a user needs to review and edit other information
-  Given the user has indicated he is calling one of the contact's phone numbers
+  Given the user is viewing the contact's record in Zeus 
+  And the user has indicated he is calling one of the contact's phone numbers
   And the user needs to edit or review other player information for the contact
   When the user views player information and tracker information
   Then the user selects specific items to edit

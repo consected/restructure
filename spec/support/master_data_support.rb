@@ -225,7 +225,7 @@ module MasterDataSupport
         pe = pick_one_from pes
 
         t = master.trackers.build protocol: pr, sub_process: sp, protocol_event: pe, event_date: DateTime.now - 1.year
-        t.merge_if_exists!
+        t.merge_if_exists! rescue nil
         
       end
     end

@@ -13,6 +13,9 @@ module PlayerSetup
       click_button 'search'
     end
 
+    dismiss_modal
+    finish_form_formatting
+    dismiss_modal
     player
   end
 
@@ -27,7 +30,7 @@ module PlayerSetup
       expect(page).to have_css('form.edit_player_info')
       click_link 'cancel'
     end
-
+    finish_form_formatting
   end
 end
 World(PlayerSetup)

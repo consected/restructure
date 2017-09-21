@@ -13,7 +13,7 @@ Then the al_phone_log table can be selected as an activity log table
 And a title Phone Log can be added to the configuration
 
 Scenario: verify phone log 
-Given the admin has added the phone log
+Given the admin has added the phone log configuration
 When the admin views the activity log configuration page
 Then the al_phone_log table and title Phone Log can be seen
 
