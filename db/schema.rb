@@ -47,6 +47,9 @@ ActiveRecord::Schema.define(version: 20170908074038) do
     t.string   "select_result"
     t.string   "select_next_step"
     t.date     "follow_up_when"
+    t.boolean  "discussion_successful"
+    t.boolean  "do_not_call_this_phone"
+    t.boolean  "do_not_call_any_phone"
     t.integer  "protocol_id"
     t.integer  "sub_process_id"
     t.integer  "protocol_event_id"
@@ -55,8 +58,8 @@ ActiveRecord::Schema.define(version: 20170908074038) do
     t.integer  "player_contact_id"
     t.integer  "master_id"
     t.boolean  "disabled"
-    t.datetime "created_at",            null: false
-    t.datetime "updated_at",            null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
   add_index "activity_log_player_contact_phones", ["master_id"], name: "index_activity_log_player_contact_phones_on_master_id", using: :btree
@@ -67,16 +70,15 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_index "activity_log_player_contact_phones", ["user_id"], name: "index_activity_log_player_contact_phones_on_user_id", using: :btree
 
   create_table "activity_logs", force: :cascade do |t|
-    t.integer  "item_id"
+    t.string   "name"
     t.string   "item_type"
+    t.string   "rec_type"
+    t.integer  "admin_id"
+    t.boolean  "disabled"
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false
-    t.integer  "user_id"
-    t.boolean  "disabled"
     t.string   "action_when_attribute"
   end
-
-  add_index "activity_logs", ["user_id"], name: "index_activity_logs_on_user_id", using: :btree
 
   create_table "address_history", force: :cascade do |t|
     t.integer  "master_id"
@@ -378,6 +380,76 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_index "masters", ["pro_info_id"], name: "index_masters_on_pro_info_id", using: :btree
   add_index "masters", ["user_id"], name: "index_masters_on_user_id", using: :btree
 
+  create_table "ml_copy", id: false, force: :cascade do |t|
+    t.integer "procontactid"
+    t.string  "fill_in_addresses",           limit: 255
+    t.string  "in_survey",                   limit: 255
+    t.string  "verify_survey_participation", limit: 255
+    t.string  "verify_player_and_or_match",  limit: 255
+    t.string  "accuracy",                    limit: 255
+    t.string  "accuracy_score",              limit: 255
+    t.integer "contactid"
+    t.integer "pro_id"
+    t.text    "separator_a"
+    t.string  "first_name",                  limit: 255
+    t.string  "middle_name",                 limit: 255
+    t.string  "last_name",                   limit: 255
+    t.string  "nick_name",                   limit: 255
+    t.text    "separator_b"
+    t.string  "pro_first_name",              limit: 255
+    t.string  "pro_middle_name",             limit: 255
+    t.string  "pro_last_name",               limit: 255
+    t.string  "pro_nick_name",               limit: 255
+    t.string  "birthdate",                   limit: 255
+    t.string  "pro_dob",                     limit: 255
+    t.string  "pro_dod",                     limit: 255
+    t.string  "startyear",                   limit: 255
+    t.string  "pro_start_year",              limit: 255
+    t.integer "accruedseasons"
+    t.string  "pro_end_year",                limit: 255
+    t.string  "first_contract",              limit: 255
+    t.string  "second_contract",             limit: 255
+    t.string  "third_contract",              limit: 255
+    t.string  "pro_career_info",             limit: 255
+    t.string  "pro_birthplace",              limit: 255
+    t.string  "pro_college",                 limit: 255
+    t.string  "email",                       limit: 255
+    t.string  "homecity",                    limit: 255
+    t.string  "homestate",                   limit: 50
+    t.string  "homezipcode",                 limit: 10
+    t.string  "homestreet",                  limit: 255
+    t.string  "homestreet2",                 limit: 255
+    t.string  "homestreet3",                 limit: 255
+    t.string  "businesscity",                limit: 255
+    t.string  "businessstate",               limit: 50
+    t.string  "businesszipcode",             limit: 10
+    t.string  "businessstreet",              limit: 255
+    t.string  "businessstreet2",             limit: 255
+    t.string  "businessstreet3",             limit: 255
+    t.integer "changed"
+    t.string  "changed_column",              limit: 255
+    t.integer "verified"
+    t.text    "notes"
+    t.string  "email2",                      limit: 255
+    t.string  "email3",                      limit: 255
+    t.string  "updatehomestreet",            limit: 255
+    t.string  "updatehomestreet2",           limit: 255
+    t.string  "updatehomecity",              limit: 255
+    t.string  "updatehomestate",             limit: 50
+    t.string  "updatehomezipcode",           limit: 10
+    t.string  "lastmod",                     limit: 255
+    t.string  "sourc",                       limit: 255
+    t.string  "changed_by",                  limit: 255
+    t.integer "msid"
+    t.string  "mailing",                     limit: 255
+    t.string  "outreach_vfy",                limit: 255
+    t.text    "lastupdate"
+    t.text    "lastupdateby"
+    t.string  "cprefs",                      limit: 255
+    t.integer "scantronid"
+    t.text    "insertauditkey"
+  end
+
   create_table "player_contact_history", force: :cascade do |t|
     t.integer  "master_id"
     t.string   "rec_type"
@@ -428,6 +500,8 @@ ActiveRecord::Schema.define(version: 20170908074038) do
     t.integer  "end_year"
     t.string   "source"
     t.integer  "player_info_id"
+    t.integer  "other_count"
+    t.string   "other_type"
   end
 
   add_index "player_info_history", ["master_id"], name: "index_player_info_history_on_master_id", using: :btree
@@ -453,6 +527,8 @@ ActiveRecord::Schema.define(version: 20170908074038) do
     t.string   "college"
     t.integer  "end_year"
     t.string   "source"
+    t.integer  "other_count"
+    t.string   "other_type"
   end
 
   add_index "player_infos", ["master_id"], name: "index_player_infos_on_master_id", using: :btree
@@ -642,6 +718,30 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_index "sage_assignments", ["sage_id"], name: "index_sage_assignments_on_sage_id", unique: true, using: :btree
   add_index "sage_assignments", ["user_id"], name: "index_sage_assignments_on_user_id", using: :btree
 
+  create_table "sage_two_history", force: :cascade do |t|
+    t.integer  "sage_two_id"
+    t.integer  "master_id"
+    t.integer  "external_id", limit: 8
+    t.integer  "user_id"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "sage_two_history", ["master_id"], name: "index_sage_two_history_on_master_id", using: :btree
+  add_index "sage_two_history", ["sage_two_id"], name: "index_sage_two_history_on_sage_two_id", using: :btree
+  add_index "sage_two_history", ["user_id"], name: "index_sage_two_history_on_user_id", using: :btree
+
+  create_table "sage_twos", force: :cascade do |t|
+    t.integer  "master_id"
+    t.integer  "external_id", limit: 8
+    t.integer  "user_id"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "sage_twos", ["master_id"], name: "index_sage_twos_on_master_id", using: :btree
+  add_index "sage_twos", ["user_id"], name: "index_sage_twos_on_user_id", using: :btree
+
   create_table "scantron_history", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "scantron_id"
@@ -654,6 +754,30 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_index "scantron_history", ["master_id"], name: "index_scantron_history_on_master_id", using: :btree
   add_index "scantron_history", ["scantron_table_id"], name: "index_scantron_history_on_scantron_table_id", using: :btree
   add_index "scantron_history", ["user_id"], name: "index_scantron_history_on_user_id", using: :btree
+
+  create_table "scantron_series_two_history", force: :cascade do |t|
+    t.integer  "scantron_series_two_id"
+    t.integer  "master_id"
+    t.integer  "external_id",            limit: 8
+    t.integer  "user_id"
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+  end
+
+  add_index "scantron_series_two_history", ["master_id"], name: "index_scantron_series_two_history_on_master_id", using: :btree
+  add_index "scantron_series_two_history", ["scantron_series_two_id"], name: "index_scantron_series_two_history_on_scantron_series_two_id", using: :btree
+  add_index "scantron_series_two_history", ["user_id"], name: "index_scantron_series_two_history_on_user_id", using: :btree
+
+  create_table "scantron_series_twos", force: :cascade do |t|
+    t.integer  "master_id"
+    t.integer  "external_id", limit: 8
+    t.integer  "user_id"
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+  end
+
+  add_index "scantron_series_twos", ["master_id"], name: "index_scantron_series_twos_on_master_id", using: :btree
+  add_index "scantron_series_twos", ["user_id"], name: "index_scantron_series_twos_on_user_id", using: :btree
 
   create_table "scantrons", force: :cascade do |t|
     t.integer  "master_id"
@@ -695,26 +819,20 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_index "sub_processes", ["protocol_id", "id"], name: "unique_protocol_and_id", unique: true, using: :btree
   add_index "sub_processes", ["protocol_id"], name: "index_sub_processes_on_protocol_id", using: :btree
 
-  create_table "test_table", id: false, force: :cascade do |t|
-    t.integer "abcid"
-    t.string  "somestring"
-    t.boolean "testing"
-  end
-
-  create_table "test_thing_history", force: :cascade do |t|
-    t.integer  "test_thing_id"
+  create_table "test_item_history", force: :cascade do |t|
+    t.integer  "test_item_id"
     t.integer  "master_id"
-    t.integer  "external_id",   limit: 8
+    t.integer  "external_id",  limit: 8
     t.integer  "user_id"
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
-  add_index "test_thing_history", ["master_id"], name: "index_test_thing_history_on_master_id", using: :btree
-  add_index "test_thing_history", ["test_thing_id"], name: "index_test_thing_history_on_test_thing_id", using: :btree
-  add_index "test_thing_history", ["user_id"], name: "index_test_thing_history_on_user_id", using: :btree
+  add_index "test_item_history", ["master_id"], name: "index_test_item_history_on_master_id", using: :btree
+  add_index "test_item_history", ["test_item_id"], name: "index_test_item_history_on_test_item_id", using: :btree
+  add_index "test_item_history", ["user_id"], name: "index_test_item_history_on_user_id", using: :btree
 
-  create_table "test_things", force: :cascade do |t|
+  create_table "test_items", force: :cascade do |t|
     t.integer  "master_id"
     t.integer  "external_id", limit: 8
     t.integer  "user_id"
@@ -722,8 +840,8 @@ ActiveRecord::Schema.define(version: 20170908074038) do
     t.datetime "updated_at",            null: false
   end
 
-  add_index "test_things", ["master_id"], name: "index_test_things_on_master_id", using: :btree
-  add_index "test_things", ["user_id"], name: "index_test_things_on_user_id", using: :btree
+  add_index "test_items", ["master_id"], name: "index_test_items_on_master_id", using: :btree
+  add_index "test_items", ["user_id"], name: "index_test_items_on_user_id", using: :btree
 
   create_table "tracker_history", force: :cascade do |t|
     t.integer  "master_id"
@@ -846,7 +964,6 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_foreign_key "activity_log_player_contact_phones", "protocols"
   add_foreign_key "activity_log_player_contact_phones", "sub_processes"
   add_foreign_key "activity_log_player_contact_phones", "users"
-  add_foreign_key "activity_logs", "users"
   add_foreign_key "address_history", "addresses", name: "fk_address_history_addresses"
   add_foreign_key "address_history", "masters", name: "fk_address_history_masters"
   add_foreign_key "address_history", "users", name: "fk_address_history_users"
@@ -892,34 +1009,44 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_foreign_key "sage_assignments", "admins"
   add_foreign_key "sage_assignments", "masters"
   add_foreign_key "sage_assignments", "users"
+  add_foreign_key "sage_two_history", "masters"
+  add_foreign_key "sage_two_history", "sage_twos"
+  add_foreign_key "sage_two_history", "users"
+  add_foreign_key "sage_twos", "masters"
+  add_foreign_key "sage_twos", "users"
   add_foreign_key "scantron_history", "masters", name: "fk_scantron_history_masters"
   add_foreign_key "scantron_history", "scantrons", column: "scantron_table_id", name: "fk_scantron_history_scantrons"
   add_foreign_key "scantron_history", "users", name: "fk_scantron_history_users"
+  add_foreign_key "scantron_series_two_history", "masters"
+  add_foreign_key "scantron_series_two_history", "scantron_series_twos"
+  add_foreign_key "scantron_series_two_history", "users"
+  add_foreign_key "scantron_series_twos", "masters"
+  add_foreign_key "scantron_series_twos", "users"
   add_foreign_key "scantrons", "masters"
   add_foreign_key "scantrons", "users"
   add_foreign_key "sub_process_history", "sub_processes", name: "fk_sub_process_history_sub_processes"
   add_foreign_key "sub_processes", "admins"
   add_foreign_key "sub_processes", "protocols"
-  add_foreign_key "test_thing_history", "masters"
-  add_foreign_key "test_thing_history", "test_things"
-  add_foreign_key "test_thing_history", "users"
-  add_foreign_key "test_things", "masters"
-  add_foreign_key "test_things", "users"
+  add_foreign_key "test_item_history", "masters"
+  add_foreign_key "test_item_history", "test_items"
+  add_foreign_key "test_item_history", "users"
+  add_foreign_key "test_items", "masters"
+  add_foreign_key "test_items", "users"
   add_foreign_key "tracker_history", "masters"
   add_foreign_key "tracker_history", "protocol_events"
-  #add_foreign_key "tracker_history", "protocol_events", column: "sub_process_id", primary_key: "sub_process_id", name: "valid_sub_process_event"
+  add_foreign_key "tracker_history", "protocol_events", column: "sub_process_id", primary_key: "sub_process_id", name: "valid_sub_process_event"
   add_foreign_key "tracker_history", "protocols"
   add_foreign_key "tracker_history", "sub_processes"
-  #add_foreign_key "tracker_history", "sub_processes", column: "protocol_id", primary_key: "protocol_id", name: "valid_protocol_sub_process"
+  add_foreign_key "tracker_history", "sub_processes", column: "protocol_id", primary_key: "protocol_id", name: "valid_protocol_sub_process"
   add_foreign_key "tracker_history", "trackers"
-#  add_foreign_key "tracker_history", "trackers", column: "master_id", primary_key: "master_id", name: "unique_master_protocol_tracker_id"
+  add_foreign_key "tracker_history", "trackers", column: "master_id", primary_key: "master_id", name: "unique_master_protocol_tracker_id"
   add_foreign_key "tracker_history", "users"
   add_foreign_key "trackers", "masters"
   add_foreign_key "trackers", "protocol_events"
-#  add_foreign_key "trackers", "protocol_events", column: "sub_process_id", primary_key: "sub_process_id", name: "valid_sub_process_event"
+  add_foreign_key "trackers", "protocol_events", column: "sub_process_id", primary_key: "sub_process_id", name: "valid_sub_process_event"
   add_foreign_key "trackers", "protocols"
   add_foreign_key "trackers", "sub_processes"
-#  add_foreign_key "trackers", "sub_processes", column: "protocol_id", primary_key: "protocol_id", name: "valid_protocol_sub_process"
+  add_foreign_key "trackers", "sub_processes", column: "protocol_id", primary_key: "protocol_id", name: "valid_protocol_sub_process"
   add_foreign_key "trackers", "users"
   add_foreign_key "user_authorization_history", "user_authorizations", name: "fk_user_authorization_history_user_authorizations"
   add_foreign_key "user_history", "users", name: "fk_user_history_users"

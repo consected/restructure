@@ -48,7 +48,7 @@ Scenario: the user speaks to the contact about the reason for the call
   Then the user records this new number to be used as the primary number
   Then if appropriate the user records the current number to not be used in the future
 
-Scenario: the user speaks to the contact and they ask me to call back
+#Scenario: the user speaks to the contact and they ask me to call back
   When the contact answers the call and asks me to call back
   Then the user records that he spoke to the contact
   Then the user records that a call-back was requested for a certain date and time

@@ -26,8 +26,13 @@
 
         <% (permitted_params - [:id, :master_id, :item_id, item_type_id]).each do |p| %>
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
-
-            <% if p == :description %>    
+            <% 
+               col_type = object_instance.class.columns_hash[p.to_s].type
+            %>
+            <% if col_type == :boolean %>    
+              <%= f.label p %>
+              <%= f.check_box p %>
+            <% elsif p == :description %>    
               <%= f.label p %>
               <%= f.text_area p %>
             <% elsif p == :rec_type%>    
