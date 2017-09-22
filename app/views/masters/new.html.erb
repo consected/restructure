@@ -3,5 +3,8 @@
 <%= form_for @master, url: url_for(action: :create) do |f| %>
   <%= link_to "Cancel", "/", class: "btn btn-danger" %>
   <%= f.submit "Create", class: "btn btn-primary" %>
+  <% # The following button only exists in the test environment. 
+     # It is used by spec tests to test a tracker edge case where there are no tracker items and no player info %>
+  <%= f.submit "Create Empty Master", id: "create_empty_master" if Rails.env.test?%>
 <% end %>
 </div>

@@ -58,9 +58,8 @@
               <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>
             
             
-            <% elsif p == :protocol_id %>
-                <h4>Update Tracker</h4>
-                <%= f.label :protocol, 'data-add-icon' => 'info-sign' %><br/>
+            <% elsif p == :protocol_id %>                
+                <%= f.label :protocol, 'data-add-icon' => 'info-sign' %>
                 <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name}_sub_process_id", class: "form-control input-sm"}%>
             
             <% elsif p == :sub_process_id %>

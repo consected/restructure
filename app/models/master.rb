@@ -97,12 +97,12 @@ class Master < ActiveRecord::Base
     raise "can not set user_id="
   end
   
-  def self.create_master_records user
+  def self.create_master_records user, options={}
     
     raise "no user specified" unless user
     
     m = Master.create!(current_user: user)
-    m.player_infos.create!
+    m.player_infos.create! unless options[:empty]
     return m
     
   end

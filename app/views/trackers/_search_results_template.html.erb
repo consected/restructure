@@ -27,7 +27,7 @@
 </script>
 
 <script id="empty_tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table tracker-tree-results">
+  <table class="table tracker-tree-results from-empty-tracker-tree">
     <thead><tr>
       <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
       <th>protocol</th><th>status</th><th>method</th><th>date</th><th>notes</th>
@@ -44,7 +44,7 @@
 </script>
 
 <script id="tracker_tree_results-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <table class="table tracker-tree-results">
+  <table class="table tracker-tree-results from-tracker-tree-results">
     <thead><tr>
       <th><a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" title="view as sortable list" class="glyphicon glyphicon-align-justify"></a></th>
       <th>protocol</th><th>status</th><th>method</th><th>date</th><th>notes</th>
@@ -129,13 +129,13 @@
   {{#with tracker_histories}}
     {{>tracker_chron_results master_id=../master_id}}
   {{else}}
-    {{>empty_tracker_tree_results master_id=../master_id}}
+    {{>empty_tracker_tree_results master_id=master_id}}
   {{/with}}
 </script>
 <script id="tracker-tree-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with trackers}}
     {{>tracker_tree_results master_id=../master_id}}
   {{else}}
-      {{>empty_tracker_tree_results master_id=../master_id}}
+      {{>empty_tracker_tree_results master_id=master_id}}
   {{/with}}
 </script>

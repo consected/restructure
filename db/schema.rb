@@ -47,26 +47,19 @@ ActiveRecord::Schema.define(version: 20170908074038) do
     t.string   "select_result"
     t.string   "select_next_step"
     t.date     "follow_up_when"
-    t.boolean  "discussion_successful"
-    t.boolean  "do_not_call_this_phone"
-    t.boolean  "do_not_call_any_phone"
     t.integer  "protocol_id"
-    t.integer  "sub_process_id"
-    t.integer  "protocol_event_id"
     t.string   "notes"
     t.integer  "user_id"
     t.integer  "player_contact_id"
     t.integer  "master_id"
     t.boolean  "disabled"
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
   end
 
   add_index "activity_log_player_contact_phones", ["master_id"], name: "index_activity_log_player_contact_phones_on_master_id", using: :btree
   add_index "activity_log_player_contact_phones", ["player_contact_id"], name: "index_activity_log_player_contact_phones_on_player_contact_id", using: :btree
-  add_index "activity_log_player_contact_phones", ["protocol_event_id"], name: "index_activity_log_player_contact_phones_on_protocol_event_id", using: :btree
   add_index "activity_log_player_contact_phones", ["protocol_id"], name: "index_activity_log_player_contact_phones_on_protocol_id", using: :btree
-  add_index "activity_log_player_contact_phones", ["sub_process_id"], name: "index_activity_log_player_contact_phones_on_sub_process_id", using: :btree
   add_index "activity_log_player_contact_phones", ["user_id"], name: "index_activity_log_player_contact_phones_on_user_id", using: :btree
 
   create_table "activity_logs", force: :cascade do |t|
@@ -960,9 +953,7 @@ ActiveRecord::Schema.define(version: 20170908074038) do
   add_foreign_key "accuracy_scores", "admins"
   add_foreign_key "activity_log_player_contact_phones", "masters"
   add_foreign_key "activity_log_player_contact_phones", "player_contacts"
-  add_foreign_key "activity_log_player_contact_phones", "protocol_events"
   add_foreign_key "activity_log_player_contact_phones", "protocols"
-  add_foreign_key "activity_log_player_contact_phones", "sub_processes"
   add_foreign_key "activity_log_player_contact_phones", "users"
   add_foreign_key "address_history", "addresses", name: "fk_address_history_addresses"
   add_foreign_key "address_history", "masters", name: "fk_address_history_masters"

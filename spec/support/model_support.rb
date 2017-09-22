@@ -18,7 +18,7 @@ module ModelSupport
     objs[rand objs.length]
   end
   
-  def create_user r=nil, extra=''
+  def create_user r=nil, extra='', opt={}
     
     unless r      
       r = Time.new.to_f.to_s 
@@ -30,6 +30,11 @@ module ModelSupport
     user = User.create! email: good_email, current_admin: admin
     good_password = user.password
     @user = user
+    
+    if opt[:create_msid]
+      UserAuthorization.create! current_admin: @admin, user: user, has_authorization: :create_msid
+    end
+    
     [user, good_password]    
   end
 

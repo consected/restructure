@@ -19,8 +19,11 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     seed_database
     create_data_set no_trackers: true
     
-    
-    @user, @good_password  = create_user
+    # a blank master to test for empty tracker record sets
+    # we have to force a new thread and connection to make this a transaction outside of the normal flow,
+    # otherwise the Selenium session may not see it
+        
+    @user, @good_password  = create_user nil, '', create_msid: true
     @good_email  = @user.email
     
   end
@@ -45,6 +48,31 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     expect(f.value).to match(/0?#{d.month}\/0?#{d.day}\/#{d.year}/)
   end
   
+  
+  it "should create a new tracker item in an empty list" do
+    
+    click_link 'Create MSID'
+      
+    # click a test only hidden button to generate a completely empty master record
+    # Without this, the player info record that is normally created doesn't provide a completely empty set of tracker records
+    # We must test this edge case, since it has broken the UI in development
+    
+    have_css('form#new_master')
+    find('#create_empty_master').click
+    
+    has_css? ".tracker-tree-results"
+    
+    within ".tracker-tree-results" do
+      click_link "add tracker record"
+    end
+    
+   
+    # Wait for the new tracker form to show
+    expect(page).to have_css('#new_tracker')
+    
+    
+    
+  end
   
   it "should create a new tracker item" do
     
