@@ -9,14 +9,7 @@ class CreateActivityLogPlayerContactPhones < ActiveRecord::Migration
       t.string  :select_next_step
       t.date  :follow_up_when
 
-      t.boolean :discussion_successful
-      t.boolean :do_not_call_this_phone
-      t.boolean :do_not_call_any_phone
-
       t.references :protocol, index: true, foreign_key: true
-      t.references :sub_process, index: true, foreign_key: true
-      t.references :protocol_event, index: true, foreign_key: true
-
       t.string :notes
 
       t.references :user, index: true, foreign_key: true
