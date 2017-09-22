@@ -3,9 +3,10 @@ class ItemFlagName < ActiveRecord::Base
   include SelectorCache
 
   before_validation :prevent_item_type_change,  on: :update
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true
   validates :item_type, presence: true
   validate :item_type_valid?
+  validate :name_and_item_type_unique
   after_validation  :update_tracker_events
   
   default_scope -> {order  "item_flag_names.updated_at DESC nulls last"}
@@ -21,6 +22,12 @@ class ItemFlagName < ActiveRecord::Base
   end
   
   private
+
+    def name_and_item_type_unique
+      if ItemFlagName.enabled.where(item_type: self.item_type, name: self.name).length >0
+        errors.add :name, "has already been used for this item type"
+      end
+    end
   
     def item_type_valid?
       return unless item_type
