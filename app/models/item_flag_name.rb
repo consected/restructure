@@ -24,7 +24,7 @@ class ItemFlagName < ActiveRecord::Base
   private
 
     def name_and_item_type_unique
-      if ItemFlagName.enabled.where(item_type: self.item_type, name: self.name).length >0
+      if !self.persisted? && ItemFlagName.enabled.where(item_type: self.item_type, name: self.name).length > 0
         errors.add :name, "has already been used for this item type"
       end
     end
