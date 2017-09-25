@@ -25,6 +25,10 @@
         </li>
 
         <% (permitted_params - [:id, :master_id, :item_id, item_type_id]).each do |p| %>
+          <%
+              set_related_field = handle_set_related_field(p)
+          %>
+        
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
             <% 
                col_type = object_instance.class.columns_hash[p.to_s].type
@@ -76,6 +80,9 @@
               <% else %>
                 <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank) %>
               <% end %>
+            <% elsif set_related_field && p.to_s.end_with?('_rank') %>
+              <%= f.label p %>          
+              <%= f.select p, general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value]) %>                
             <% elsif p.to_s.index(/(_date|_when)$/)  %>         
               <%= f.label p %>
               <%= f.date_field p %>              

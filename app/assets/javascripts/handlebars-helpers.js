@@ -56,7 +56,9 @@
         }
         return right.indexOf(left) !== -1;
     });
-    
+    eR.add('includes', function(left, right) {        
+        return left.indexOf(right) !== -1;
+    });
 
     var isHelper = function() {
         var args = arguments

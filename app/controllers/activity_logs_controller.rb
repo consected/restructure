@@ -57,6 +57,7 @@ class ActivityLogsController < ApplicationController
 
     def set_additional_attributes obj
       obj.item_id = @item.id
+      obj.send("#{item_type_us}=", @item)
     end
 
 

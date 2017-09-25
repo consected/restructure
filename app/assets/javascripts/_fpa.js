@@ -38,6 +38,22 @@ _fpa = {
 
   },  
   
+  send_ajax_request(url, options){
+
+    if(!options) options = {};
+    options['url'] = url;
+    
+    $.rails.ajax(options).done(function(data, status, xhr){   
+      var el = $('.temp-ajax-requester');
+      if(el.length === 0){
+        el = $('<a data-remote="true" class="hidden temp-ajax-requester">background</a>');
+        $('body').append(el);
+      }
+      $.rails.fire(el, 'ajax:success', [data, status, xhr]);
+    });
+    
+  },
+  
   // View a handlebars template
   // block - jQuery element to update
   // template_name 

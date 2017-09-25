@@ -89,6 +89,7 @@ module MasterHandler
   
   def new
     set_object_instance @master_objects.build
+    set_additional_attributes object_instance
     render partial: edit_form, locals: edit_form_extras
   end
 
