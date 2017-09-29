@@ -5,17 +5,17 @@
 
 <% # Set up the handlebars templates for the main data blocks: player_infos, pro_infos, addresses and player_contacts %>
 <%= render partial: 'common_templates/search_results_template', locals: {
-    name: 'player_info', 
+    name: 'player_info',
     caption: 'person',
-    prevent_edit: false, 
+    prevent_edit: false,
     prevent_create: false,
     item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes),
     data_sort: [:desc, "data-item-id"]
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
-    name: 'pro_info', 
-    prevent_edit: true, 
+    name: 'pro_info',
+    prevent_edit: true,
     prevent_create: true,
     item_list: %w(pro_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college),
     data_sort: [:desc, "data-item-id"],
@@ -24,9 +24,9 @@
 
 
 <%= render partial: 'common_templates/search_results_template', locals: {
-    name: 'player_contact', 
+    name: 'player_contact',
     caption: '{{capitalize rec_type}}', # substitute the rec_type attribute (capitalized) as the block caption
-    prevent_edit: false, 
+    prevent_edit: false,
     prevent_create: false,
     item_list: %w(data source),
     data_sort: [:desc, "data-item-rank"],
@@ -34,8 +34,8 @@
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
-    name: 'address',     
-    prevent_edit: false, 
+    name: 'address',
+    prevent_edit: false,
     prevent_create: false,
     item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type),
     data_sort: [:desc, "data-item-rank"],
@@ -46,12 +46,12 @@
 
 
 <% # Add in all the external ID handlers (Scantron, Sage, etc)
-    external_id_types = Application.app_list(:external_id)    
-    external_id_types.each do |e|      
+    external_id_types = Application.app_list(:external_id)
+    external_id_types.each do |e|
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
-    name: e.name.underscore, 
-    prevent_edit: e.prevent_edit?, 
+    name: e.name.underscore,
+    prevent_edit: e.prevent_edit?,
     prevent_create: e.prevent_create?,
     item_list: [label: e.label, formatter: e.external_id_view_formatter, attribute: e.external_id_attribute.to_s] ,
     data_sort: [:desc, "data-item-id"]
@@ -78,9 +78,9 @@
   {{#if masters.length}}
   <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
-      
+
     {{#each masters}}
-      <div class="panel-heading master-result" role="tab" id="master-{{id}}">          
+      <div class="panel-heading master-result" role="tab" id="master-{{id}}">
         <h3 class="panel-title">
           {{#if msid}}
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid" title="link to this record"> </a>
@@ -90,8 +90,8 @@
           <div class="row">
             <div class="col-md-2 col-lg-1 result-refs"><a href="#" class="switch_id glyphicon glyphicon-random" title="switch to MSID"></a> <span class="master_id"  title="Master ID">{{id}}</span><span class="msid" style="display: none"  title="MSID">{{#if msid}}{{msid}}{{else}}no&nbsp;MSID{{/if}}</span></div>
             <a class="master-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
-            
-              <div class="col-md-11 col-lg-12 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">              
+
+              <div class="col-md-11 col-lg-12 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
                 {{#with player_infos.[0]}}
                   {{>player_info_summary_result}}
                 {{else}}
@@ -101,22 +101,22 @@
               <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with pro_infos.[0]}}
                 {{>pro_info_summary_result}}
-              {{/with}}  
-              </div>                      
+              {{/with}}
+              </div>
             </a>
           </div>
         </h3>
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <ul class="nav nav-pills ">
-          
+
           <li role="presentation">
             <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
           </li>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class="scroll-to-expanded "><span class="caret"></span> details</a>
           </li>
-  
+
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> external ids</a>
           </li>
@@ -125,70 +125,78 @@
             <a href="#/" data-toggle="collapse" data-target="#<%=cat%>-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> <%= cat.underscore.humanize.downcase %></a>
           </li>
           <% end %>
-    
+
           <% if current_user.can? :view_external_links %>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> web links</a>
           </li>
           <% end %>
-  
-        </ul>        
+
+          <% ActivityLog.enabled.each do |a| %>
+          <li role="presentation">
+            <a href="/masters/{{id}}/activity_log/player_contact_phones" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.table_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.table_name.hyphenate %>-{{id}}" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"><span class="caret"></span> <%= a.name %></a>
+          </li>
+          <% end %>
+        </ul>
         <div class="panel-body">
           <% if current_user.can? :view_external_links %>
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>
           <% end %>
-                    
-          <div id="activity-logs-{{id}}" class="activity-logs-generic-block ">          
-              <div id="activity-logs-inner-{{id}}" class="activity-logs-inner-block"></div>
+
+          <% ActivityLog.enabled.each do |a| %>
+          <div id="<%= a.table_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <% a.table_name.hyphenate %>-block"    data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.table_name %>" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"  >
+              <div id="<%= a.table_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
           </div>
+          <% end %>
+
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
           {{#with trackers}}
             {{>tracker_tree_results master_id=id}}
           {{else}}
-            {{>empty_tracker_tree_results master_id=id}}              
+            {{>empty_tracker_tree_results master_id=id}}
           {{/with}}
-                        
+
           {{#with latest_tracker_history.[0]}}
-            <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>  
+            <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>
           {{/with}}
           </div>
-          
+
           <div id="details-{{id}}" class="collapse in details-block">
             <div class="row">
               <div class="col-md-12">
                 <div class="row">
                 {{#with player_infos.[0]}}
-                  
+
                     <div class="col-md-12">
-                      
+
                       {{>player_info_result _created=@index}}
-                      
+
                     </div>
-                    
+
                 {{else}}
-                  
+
                     <div class="col-md-12">
                       <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
                         <h4>No player info</h4>
                         <p><a href="/masters/{{id}}/player_infos/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="#player-info-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Player Info record</a> </p>
                       </div>
-                    </div>                    
-                  
+                    </div>
+
                 {{/with}}
-                {{#with pro_infos.[0]}}                    
+                {{#with pro_infos.[0]}}
                     <div class="col-md-12">
                       {{>pro_info_result _created=@index}}
-                    </div>                                                          
+                    </div>
                 {{else}}
-                  
+
                     <div class="col-md-12">
                       <div id="pro-info-{{../id}}-" >
-                        <h4>No pro info </h4>                        
+                        <h4>No pro info </h4>
                       </div>
-                    </div>                    
-                  
+                    </div>
+
                 {{/with}}
-                                    
+
                 </div>
               </div>
 
@@ -196,33 +204,33 @@
 
               <div class="col-md-6" id="addresses-{{id}}-" data-sub-list="addresses">
                 {{#each addresses}}
-                  
+
                     {{>address_result _created=@index}}
 
                 {{/each}}
 
                 <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-" data-preprocessor="address_edit_form">
-                  {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
+                  {{#unless addresses}}<h4>No addresses</h4>{{/unless}}
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/addresses/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="#address-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Address record</a> </p>
 
               </div>
               <div class="col-md-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
                 {{#each player_contacts}}
-                  
+
                   {{>player_contact_result _created=@index}}
 
                 {{/each}}
 
                 <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-" data-preprocessor="player_contact_edit_form">
-                  {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
+                  {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}
                 </div>
                 <p class="text-center"><a href="/masters/{{id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="#player-contact-{{id}}-" aria-label="add contact record"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
 
               </div>
             </div>
           </div>
-  
+
           <div id="external-ids-{{id}}" class="row collapse external-ids-block">
             <h4 class="results-divider"><a href="#external-ids-{{id}}" data-toggle="collapse" class="dropup scroll-to-master">external IDs <span class="caret up"></span></a></h4>
             <div class="on-open-click hidden">
@@ -232,45 +240,43 @@
 
             </div>
             <%  external_id_types.each do |e|%>
-            <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>            
+            <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
 
             <% end %>
-    
+
           </div>
-          
+
           <% DynamicModel.categories.each do |cat| %>
           <div id="<%=cat%>-{{id}}" class="row collapse <%=cat%>-block format-block-on-expand">
             <div class="on-open-click hidden">
-              <% dm = DynamicModel.active.where(category: cat) 
-                 dm.each do |m|               
+              <% dm = DynamicModel.active.where(category: cat)
+                 dm.each do |m|
               %>
               <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
               <% end %>
             </div>
             <h4 class="results-divider"><a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master"><%=cat.underscore.humanize.downcase%> <span class="caret up"></span></a></h4>
             <% dm.each do |m| %>
-              <% if DynamicModel.orientation(cat) == :vertical %>  
-              <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
+              <% if DynamicModel.orientation(cat) == :vertical %>
+              <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>
               <% else %>
-              <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>                        
+              <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>
               <% end %>
             <% end %>
           </div>
           <% end %>
-          
-  
+
+
         </div>
       </div>
     {{/each}}
-      
+
     </div>
     <div class="hidden" id="msid_list">{{#each masters}}{{msid}} {{/each}}</div>
     <div class="hidden" id="master_id_list">{{#each masters}}{{id}} {{/each}}</div>
   {{else}}
       <h2>No Results</h2>
   {{/if}}
-  
-  
+
+
 </script>
-  
-  

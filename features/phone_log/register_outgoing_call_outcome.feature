@@ -49,39 +49,49 @@ Scenario: the user speaks to the contact about the reason for the call
   Then if appropriate the user records the current number to not be used in the future
 
 #Scenario: the user speaks to the contact and they ask me to call back
-  When the contact answers the call and asks me to call back
+  When the contact answers the call and asks the user to call back
   Then the user records that he spoke to the contact
   Then the user records that a call-back was requested for a certain date and time
 
-Scenario: the user speaks to the contact and he opts-out of the study
-  When the user speaks to the contact he tells me that he wants to opt of the study
+#Scenario: the user speaks to the contact and he opts-out of the study
+  When the user speaks to the contact he tells the user that he wants to opt of the study
   Then the user records that the contact has opted-out of the study
   Then the user sees that the tracker record for the call and the opt-out are linked
 
-Scenario: he leaves a message
+#Scenario: the user leaves a message
   When the call connects to a voicemail service or the user speaks to somebody else and he leaves a message
-  Then the user records that I left a message
+  Then the user records that he left a message
 
-Scenario: he leaves a message and am asked to call back later
+#Scenario: the user leaves a message and is asked to call back later
   When the user speaks to the contact’s wife, he leaves a message and they ask me to call back later
-  Then the user records that I left a message 
+  Then the user records that he left a message 
   Then the user records that a call-back was requested for a certain date and time
 
-Scenario: There is no answer
+#Scenario: There is no answer
+  Given the user is viewing the contact's record in Zeus
   When there is no answer and no option to leave a voicemail or message
   Then the user records that there was no answer (and no message was left)
 
-Scenario: The call did not connect due to a bad number
+#Scenario: The call did not connect due to a bad number
   When the call did not connect due to a bad number (does not exist, or does not belong to the contact)
   Then the user records that the number was a bad number
 
-Scenario: There was some other issue connecting
+#Scenario: There was some other issue connecting
+  Given the user is viewing the contact's record in Zeus
   When the call did not connect successfully (or did, but the line was bad and retrying was unsuccessful) 
   Then the user records that the call connected unsuccessfully
 
-Scenario: Capture free text notes
+#Scenario: Capture free text notes
   When the user has notes to enter related to the call
   Then the user records these notes in a free text field related to the call
+
+#Scenario: While on a call a user needs to review and edit other information
+  When the user needs to edit or review other player information
+  And the user is still in the call log
+  Then the user can view all player information and related tracker information
+  Then the user can select specific items to edit
+  Then the user can easily go back to the call log
+
 
 Scenario: A rep has taken notes to track a call and a user is entering them
   Given that a rep has taken notes to track a call similar to the way a user would
@@ -89,9 +99,3 @@ Scenario: A rep has taken notes to track a call and a user is entering them
   When the user enters the call details
   Then the user can select the rep’s name as the person making the call
 
-Scenario: While on a call a user needs to review and edit other information
-  And the user needs to edit or review other player information
-  When the user is still in the call log
-  Then the user can view all player information and related tracker information
-  Then the user can select specific items to edit
-  Then the user can easily go back to the call log

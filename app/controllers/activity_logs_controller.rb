@@ -5,7 +5,7 @@ class ActivityLogsController < ApplicationController
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
 
 
-  
+
 
   private
 
@@ -15,8 +15,18 @@ class ActivityLogsController < ApplicationController
 
     def edit_form_extras
       {
-        caption: "#{@item.data}"
+        caption: "#{@item.data}",
+        caption_before: {
+          select_call_direction: "Enter details about the #{activity_log_name}",
+          protocol_id: "Select the protocol this  #{activity_log_name} is related to. A tracker event will be recorded under this protocol.",
+          set_related_player_contact_rank: "To change the rank of the related #{@item.class.human_name}, select it:",
+          submit: 'To add specific protocol status and method records, save this form first.'
+        }
       }
+    end
+
+    def activity_log_name
+      object_instance.class.activity_log_name
     end
 
     def edit_form_helper_prefix
@@ -28,7 +38,7 @@ class ActivityLogsController < ApplicationController
     end
 
     def item_data
-      @item.data
+      @item.data if @item
     end
 
     def item_type_id
@@ -44,11 +54,12 @@ class ActivityLogsController < ApplicationController
     end
 
     def extend_result
+      item_id = @item.id if @item
       {
         al_type: al_type,
         item_type: item_type_us,
         item_types_name: @item_type,
-        item_id: @item.id,
+        item_id: item_id,
         item_data: item_data,
         @item_type => items
 
@@ -65,14 +76,21 @@ class ActivityLogsController < ApplicationController
     # set the parent item for the activity log by getting it from the URL params
     # and also checking that it is actually valid based on Activity Log config
     def set_item
-
       raise "Failed to get @master" unless @master
-      if UseMasterParam.include? action_name
+
+      if params[:item_id].blank?
+        @item_type = item_controller
+        item_class_name = item_controller.singularize.camelize
+        @al_class = ActivityLog::PlayerContactPhone
+        return
+      end
+
+      if UseMasterParam.include?(action_name)
         @item_type = item_controller
         item_class_name = item_controller.singularize.camelize
 
         # look up the item using the item_id parameter.
-        @item  = item_class_name.constantize.find(params[:item_id])    
+        @item  = item_class_name.constantize.find(params[:item_id])
         raise "Failed to get @item for #{item_class_name}" unless @item
       else
         @item = object_instance.item
@@ -87,11 +105,11 @@ class ActivityLogsController < ApplicationController
 
     end
 
-    
+
 
     def permitted_params
      fts = @al_class.fields_to_sync.map(&:to_sym)
-     
+
      res =  @al_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
      res
     end

@@ -4,7 +4,7 @@ if [ -z "$1" ]
 then
   echo Usage:
   echo "fphs_scripts/add_admin.sh <semicolon separated list of admin users to add or reset passwords>" 
-  echo The default environment '$RAILS_ENV' will be used, unless you set RAILS_ENV=yyy
+  echo The default environment "$RAILS_ENV" or production will be used, unless you set RAILS_ENV=yyy
 else
   if [ -z "$RAILS_ENV" ]
   then

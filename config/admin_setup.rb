@@ -34,7 +34,7 @@ module AdminSetup
       end
     end
 
-    puts op  if !Rails.env.test?
+    puts op  if !Rails.env.test? || ENV['SHOW_RESULT']=='true'
     
     return success
   end

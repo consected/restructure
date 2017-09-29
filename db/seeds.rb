@@ -16,8 +16,14 @@ module Seeds
   
 end
 
-def auto_admin 
+def auto_admin
+  # in order to potentially setup or change an admin, it is necessary to set this environment variable
+  # since this is only available from command line scripts, not within the server process
+  ENV['FPHS_ADMIN_SETUP']='yes'
   @admin ||= Admin.find_or_create_by email: 'auto-admin@nodomain.com'
+  @admin.update(disabled: false) if @admin.disabled
+  puts "Admin: #{@admin.inspect}"
+  @admin
 end
 
 def log txt

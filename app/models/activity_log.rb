@@ -1,30 +1,34 @@
 class ActivityLog < ActiveRecord::Base
 
+  SubProcessName = 'Activity'
+
+
   include AdminHandler
   include SelectorCache
 
   before_validation :prevent_item_type_change,  on: :update
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
   validate :rec_type_valid?
   after_commit :reload_routes
 
 
-  
+
   # checks if this activity log works with the specified item_type and optionally rec_type
   # if no rec_type is specified, then just the item_type will be used to match broadly,
   # even if the configuration specifies a rec_type as a requirement
+  # Returns
   def self.works_with item_type, rec_type=nil
     item_type = item_type.downcase
     cond = {item_type: item_type}
     cond[:rec_type] = rec_type if rec_type
     res = self.enabled.where(cond).first
     return unless res
-    res.table_name
+    res.item_type_name
   end
 
   def self.works_with_rec_types item_type
-    self.enabled.where(item_type: item_type).all.map {|i| i.rec_type }    
+    self.enabled.where(item_type: item_type).all.map {|i| i.rec_type }
   end
 
 
@@ -60,7 +64,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def table_name
-    item_type_name
+    "activity_log_#{item_type_name}".pluralize
   end
 
   def item_type_name
@@ -86,13 +90,23 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def model_def_name
-    table_name.singularize.to_sym
+    item_type_name.singularize.to_sym
   end
 
 
   def self.al_classes
-    @al_classes = [ActivityLog::PlayerContactPhone]
+    @al_classes = ActivityLog.enabled.map{|a| "ActivityLog::#{[a.item_type, a.rec_type].join('_').classify}".constantize }
   end
+
+
+  # The selection of possible class names that activity logs could be used with
+  # This list is the full list of possible items, and only those configured and read by #works_with are actually available
+  # for activity logging
+  def self.use_with_class_names
+    Master.reflect_on_all_associations(:has_many).map{|a| a.name.to_s}.reject{|a| a.include?('_item_flag') }
+  end
+
+
 
   # list of item types that can be used to define GeneralSelection drop downs
   def self.item_types
@@ -137,6 +151,9 @@ class ActivityLog < ActiveRecord::Base
               ic = pg.item_type.pluralize
               get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
               get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
+
+              get "activity_log/#{mn}/", to: "activity_log/#{mn}#index"
+
               get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
               post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
               get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
@@ -145,7 +162,7 @@ class ActivityLog < ActiveRecord::Base
             end
         end
       end
-      
+
     rescue ActiveRecord::StatementInvalid => e
       logger.warn "Not loading activity log routes. The table has probably not been created yet. #{e.backtrace.join("\n")}"
     end

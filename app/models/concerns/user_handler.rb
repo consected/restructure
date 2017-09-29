@@ -67,6 +67,10 @@ module UserHandler
     def get_source_name value
       GeneralSelection.name_for self, value, :source
     end
+
+    def human_name
+      name.underscore.humanize.titleize 
+    end
   end  
 
   def belongs_directly_to

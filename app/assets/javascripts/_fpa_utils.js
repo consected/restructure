@@ -1,30 +1,32 @@
 _fpa.utils = {};
 
 _fpa.utils.jump_to_linked_item = function(target) {
-  
-  
-  $('.item-highlight').removeClass('item-highlight');
-  if(!target) return;                        
-  var h = $(target).addClass('item-highlight');
+
+
+  $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
+  if(!target) return;
+  var h = $(target).addClass('item-highlight linked-item-highlight');
+  if(!h || h.length == 0)
+    return;
 
   if(!h.is(':visible')){
       // Open up the block containing this item
-      h.parents('.collapse').first().collapse('show');
+      h.parents('.collapse').collapse('show');
 
   }
-
   // Scroll if necessary
-  var rect = h.get(0).getBoundingClientRect(); 
+  var rect = h.get(0).getBoundingClientRect();
   var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
-  if(not_visible)                    
+  if(not_visible)
       $.scrollTo(h, 200, {offset: -50});
 
+  return true;
 };
 
 // Get the data-some-attr="" name value pairs from a jQuery element, removing data- and
 // underscoring for easy data.some_attr access
 _fpa.utils.get_data_attribs = function(block){
-  
+
   var attrs = {};
   var el = block.get(0);
   for (var att, i = 0, atts = el.attributes, n = atts.length; i < n; i++){
@@ -39,13 +41,13 @@ _fpa.utils.capitalize = function(str) {
     var res = '';
     if(str != null && str.replace){
         var email_address_test = /.+@.+\..+/;
-        var email_address = email_address_test.test(str);        
+        var email_address = email_address_test.test(str);
         if(!email_address)
             res = str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
         else
             res = str;
-    }else{ 
-        res =  str;        
+    }else{
+        res =  str;
     }
     return res;
 };
@@ -66,7 +68,7 @@ String.prototype.underscore = function(){
 
 
 _fpa.utils.is_blank = function(i){
-  return (i === null || i === '');  
+  return (i === null || i === '');
 };
 
 
@@ -83,17 +85,17 @@ _fpa.utils.escape_html = function (string) {
       return _fpa.html_entity_map[s];
     });
 };
-  
+
 
 // Typically returns m/d/yyyy
 _fpa.utils.YMDtoLocale = function(stre){
-  
+
     // Take special care to avoid issues with timezones and daylight savings time quirks
     if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
         startTime = new Date(Date.parse(stre));
         startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-        var d = startTime.toLocaleDateString();  
-    } else {            
+        var d = startTime.toLocaleDateString();
+    } else {
         var d = new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
     }
     return d;
@@ -104,15 +106,15 @@ Date.prototype.asLocale = function(){
 };
 
 Date.prototype.asYMD = function(){
-  
+
     var now = this;
 
     var day = ("0" + now.getDate()).slice(-2);
     var month = ("0" + (now.getMonth() + 1)).slice(-2);
 
     var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
-  
-    return today;  
+
+    return today;
 };
 
 _fpa.utils.pretty_print = function(stre, options_hash){
@@ -132,7 +134,7 @@ _fpa.utils.pretty_print = function(stre, options_hash){
         }
         if(typeof startTime === 'undefined' || !startTime || startTime == 'Invalid Date'){
             if(options_hash.return_string){
-              
+
               // This ugly condition checks for the difficult case where Handlebars decides to mangle empty numbers
               // Rather than returning null as previous, Handlebars now returns an empty object {}
               // So now, we check for:
@@ -144,14 +146,14 @@ _fpa.utils.pretty_print = function(stre, options_hash){
               // check if the object is not empty so we can pretty print it
               // otherwise it is empty, so return null, which is what it really should be
                 if(stre !== null && !(stre instanceof String) && !(stre instanceof Number) && (typeof stre == 'object')){
-                    if(Object.keys(stre).length > 0){                      
+                    if(Object.keys(stre).length > 0){
                       return JSON.stringify(stre, null, '<div>  ');
-                    } 
-                    else {                      
+                    }
+                    else {
                       return null;
                     }
                 }
-                
+
                 if(options_hash.capitalize){
                     if(!stre || stre.length < 30){
                         //stre = Handlebars.Utils.escapeExpression(stre);

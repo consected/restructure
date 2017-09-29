@@ -7,7 +7,8 @@ module ActivityLogHandler
     belongs_to parent_type
     
     after_initialize :set_action_when
-    before_save :set_related_fields_save
+#    before_create :set_related_fields_edit
+    before_save :set_related_fields
 
     validates parent_type, presence: true
     
@@ -27,13 +28,14 @@ module ActivityLogHandler
     end
 
 
+    # gets the class names that this activity log model can be used with, from the admin definition
     def use_with_class_names
-      [parent_type.to_s]
+      ActivityLog.use_with_class_names
     end
 
     def assoc_inverse
       # The plural model name
-      name.gsub('::','_').underscore.pluralize.to_sym      
+      name.gsub('::','_').underscore.pluralize.to_sym
     end
 
 
@@ -41,28 +43,35 @@ module ActivityLogHandler
       parent_type.to_s.camelize.constantize
     end
 
+    # List of attributes to be used in common template views
     def view_attribute_list
       attribute_names - ['id', 'master_id', 'disabled',parent_type ,"#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
     end
 
+    # The user relevant data attributes in the parent class
     def parent_data_names
       parent_class.attribute_names  - ['id', 'master_id', 'disabled', 'user_id', 'created_at', 'updated_at', "rank", "rec_type"]
     end
 
+    # Default attribute name for the 'completed when' field
     def action_when_attribute
       :completed_when
     end
   end
 
+  # default record updates tracking is not performed, since we sync tracker separately
   def no_track
     true
   end
 
+
+  # these models belong to an item from the perspective of user interaction, rather than master
+  # although equally there is a master association 
   def belongs_directly_to
     item
   end
 
-
+  # simple way of getting the item from the actual parent association
   def item
     @item ||= send(self.class.parent_type)
   end
@@ -71,10 +80,12 @@ module ActivityLogHandler
     item.id
   end
 
+  # set the association 
   def item_id= i
     send("#{self.class.parent_type}_id=",i)
   end
 
+  # set the action_when attribute to the current date time, if it is not already set
   def set_action_when    
     if self.action_when.blank?
       self.action_when = DateTime.now
@@ -82,6 +93,7 @@ module ActivityLogHandler
     self.action_when
   end
 
+  # the action_when attribute may vary from one activity log model to another. Get the value
   def action_when
     action = self.class.action_when_attribute
     self.send(action)
@@ -91,33 +103,49 @@ module ActivityLogHandler
     action = self.class.action_when_attribute
     self.send("#{action}=", d)
   end
-
+  
+  
+  # Sync the tracker by adding a record to the protocol if it is set
   def sync_tracker
 
-    return if !self.respond_to?(:protocol_id) || !self.respond_to?(:sub_process_id) || protocol_id.blank?
+    return unless self.respond_to?(:protocol_id) && self.protocol_id
 
+    protocol = Protocol.find(protocol_id)
+    
+    # if we are not already passing through sub_process based on a user selection then
+    # look up what the Activity name is for protocol sub processes
+    unless self.attribute_names.include? 'sub_process_id'
+      sub_process = protocol.sub_processes.where(name: ActivityLog::SubProcessName).first
+    end
+    # if we are not already passing through protocol_event based on a user selection then
+    # then use the protocol event name matching the admin activity log definition for this model
+    unless self.attribute_names.include? 'protocol_event'
+      protocol_event = sub_process.protocol_events.enabled.where(name: self.class.activity_log_name).first
+    end
+
+    # be sure about the user being set, to avoid hidden errors
     raise "no user set when syncing tracker" unless self.master.current_user
 
-    t = self.master.trackers.create(protocol_id: protocol_id, sub_process_id: sub_process_id, protocol_event_id: protocol_event_id,
+    t = self.master.trackers.create(protocol_id: protocol_id, sub_process_id: sub_process.id, protocol_event_id: protocol_event.id,
                   item_id: self.id, item_type: self.class.name, event_date: self.action_when)
     
+    # check and raise error that is usable by a user if there was a problem (for example, a required field not set)
     unless t && t.valid?
       raise FphsException.new("could not create tracker record: #{t.errors.full_messages.join('; ')}")
     end
     t
   end
 
+
+  # look up the tracker_history item that corresponds to the latest tracker entry linked to this item
   def tracker_history
     TrackerHistory.where(item_id: self.id, item_type: self.class.name).order(id: :desc).first
   end
 
   def tracker_history_id
     th = tracker_history
-
-    #raise "tracker_history record not found" unless th && th.id
     return unless th && th.id
     th.id
-
   end
 
   def fields_to_sync
@@ -141,13 +169,13 @@ module ActivityLogHandler
   end
 
 
-  def set_related_fields_edit
-    @set_related_fields ||= setup_set_related_fields(false)
-  end
+#  def set_related_fields_edit
+#    @set_related_fields ||= setup_set_related_fields(false)
+#  end
 
 
-  def set_related_fields_save
-    @set_related_fields ||= setup_set_related_fields(true)
+  def set_related_fields
+    @set_related_fields ||= setup_set_related_fields
   end
 
 
@@ -156,10 +184,7 @@ module ActivityLogHandler
   # for example, this allows a rank in a phone number to be set when displaying
   # a form for a phone activity log
   # the full field name in this case would be set_related_player_contact_rank
-  # The saving attribute indicates that the model should not retrieve the related value
-  # and prevent storing it in this model's set_related... field, which would overwrite
-  # any entries just made by a user
-  def setup_set_related_fields saving
+  def setup_set_related_fields
 
     srfs = {}
 
@@ -188,7 +213,11 @@ module ActivityLogHandler
         relitem = self.send(relitem_name)
         relitem_field_val = relitem.send(relitem_field)
 
-        self.send("#{field_name}=", relitem_field_val) unless saving
+
+        curr_val = self.send(field_name)
+        # don't set the value if it is already set, since this indicates we have
+        # already configured the model
+        self.send("#{field_name}=", relitem_field_val) unless curr_val
 
         srfs[field_name.to_sym] = {
           item: relitem,
@@ -204,10 +233,13 @@ module ActivityLogHandler
   end
 
 
+
+  # set the fields that are marked as set_related in the current model, back
+  # into the related model
   def sync_set_related_fields
-    return true unless set_related_fields_save
+    return true unless set_related_fields
     
-    set_related_fields_save.each do |k,s|
+    set_related_fields.each do |k,s|
       new_val = self.send(k)
       
       curr_val = s[:item].send(s[:field])
@@ -217,7 +249,7 @@ module ActivityLogHandler
         s[:item].master = self.master
         res = s[:item].save
 
-        raise "failed to save related item" unless res
+        raise "Failed to save related item. #{s[:item].errors.full_messages.join("; ")}" unless res
       end
     end
     return true

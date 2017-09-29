@@ -19,6 +19,8 @@ class TrackersController < ApplicationController
     new_tracker.protocol_event = object_instance.protocol_event
     new_tracker.event_date = object_instance.event_date
     new_tracker.notes = object_instance.notes
+    new_tracker.item_type = object_instance.item_type
+    new_tracker.item_id = object_instance.item_id
     new_tracker.created_at = object_instance.created_at
     new_tracker.updated_at = DateTime.now
     
@@ -65,12 +67,29 @@ class TrackersController < ApplicationController
   
     
   private
+
+    def set_additional_attributes obj
+
+      return true if params[:record_type].blank? || params[:record_id].blank?
+      item_class_name = params[:record_type].singularize.camelize
+
+      # look up the item using the item_id parameter.
+      @item  = item_class_name.constantize.find(params[:record_id])
+
+      if @item
+        obj.item_id = @item.id
+        obj.item_type = @item.class.name
+      end
+      true
+    end
+  
   
     def merge_entry_if_exists
       @tracker = @master_objects.build(secure_params)
-
+      set_additional_attributes @tracker
+      logger.info "===>#{@tracker.inspect}"
       res = @tracker.merge_if_exists
-
+      logger.info "==+++=>#{res.inspect}"
       # If the tracker record exists with the requested protocol then return the updated record and show the result
       # Otherwise just follow the default record creation flow
       if res

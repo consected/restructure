@@ -1,18 +1,22 @@
-<% 
-  unless defined? caption 
+<%
+  unless defined? caption
     caption = nil
   end
 
-  unless caption && caption.include?('{{')   
-    caption = (caption || name).humanize.titleize 
+  unless defined? caption_before
+    caption_before = {}
   end
-  
+
+  unless caption && caption.include?('{{')
+    caption = (caption || name).humanize.titleize
+  end
+
   unless defined? data_sort
-    data_sort_str = nil    
+    data_sort_str = nil
   else
     data_sort_str = "data-sort-#{data_sort.first}='#{data_sort.last.to_s.hyphenate}'".html_safe
   end
-  
+
   unless defined? custom_block_attrs
     custom_block_attrs = {}
   end
@@ -31,7 +35,7 @@
     works_with_rec_types_array = ActivityLog.works_with_rec_types(name)
     works_with_rec_types = works_with_rec_types_array.join(',') || ''
     activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
-     
+
   end
 
   unless defined? show_created_at
@@ -42,10 +46,20 @@
     edit_button_href = "/masters/{{master_id}}/#{name.pluralize}/{{this.id}}/edit"
   end
 
-%>
+  # with_data provides an alternatively named set of data for a template to use, rather than just the name
+  # this is useful when providing multiple templates that should use the same set of data on a single page
+  unless defined? with_data
+    with_data = nil
+  end
 
-<% unless custom_activity_log == :none 
-  
+%>
+<script>
+  _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
+</script>
+
+
+<% unless custom_activity_log == :none
+
     wwrt = works_with_rec_types_array
     wwrt << '' if wwrt.length == 0
     wwrt.each do |rec_type|
@@ -53,11 +67,11 @@
       al_name = "#{name}_#{rec_type.pluralize}" unless wwrt.blank?
 %>
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <a data-toggle="scrollto-result" data-target="#activity-logs-inner-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity activity-log-<%=name.hyphenate%> pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=al_name%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#activity-logs-inner-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>        
+  <a data-toggle="scrollto-result" data-target="#activity-log-player-contact-phones-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity activity-log-<%=name.hyphenate%> pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=al_name%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#activity-log-player-contact-phones-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>
 </script>
-<%  
-    end 
-  end 
+<%
+    end
+  end
 %>
 
 
@@ -76,46 +90,59 @@
       <%else%>
         <li class="list-group-item is-heading">
           <% unless prevent_edit %>
-          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="<%= edit_button_href %>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>        
+          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="<%= edit_button_href %>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>
           <% end %>
           {{> rank_button name_h="<%= name.hyphenate %>"}}
-          <% unless custom_activity_log == :none %>            
-            <% if works_with_rec_types.blank? %>              
+          <% unless custom_activity_log == :none %>
+            <% if works_with_rec_types.blank? %>
               {{> activity_log_<%=name%>_show_button_partial }}
-            <% else %>                
+            <% else %>
               {{#is rec_type 'in' '<%= works_with_rec_types %>' }}
                 {{> activity_log_<%=name%>_show_button_partial}}
               {{/is}}
             <% end %>
           <% end %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
-          <% if ItemFlagName.enabled_for?(name) %> 
-          {{>item_flag_container item_type="<%=name%>"}}         
+          <% if ItemFlagName.enabled_for?(name) %>
+          {{>item_flag_container item_type="<%=name%>"}}
           <% end %>
         </li>
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
+
+        {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
+        <div class="results-caption-before <%=name.hyphenate%>-caption-before-{{@key}}">
+          <div class="panel panel-default panel-body">
+          <small>{{fpa_state_item 'caption_before_<%=name.underscore%>' @key}}</small>
+          </div>
+        </div>
+        {{/is}}
+
         {{#is @key "notes"}}
         <div class="notes-block <%=name.hyphenate%>-notes">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
-        </div>  
+        </div>
         {{else is @key 'includes' '_rank' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>                    
-        
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
+
         {{else is @key "protocol_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>                    
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "sub_process_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>                    
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "protocol_event_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>                    
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "tracker_history_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>tracker item</small> <strong><a href="/masters/{{../master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../master_id}}" data-template="tracker-chron-result-template" data-tracker-history-item="#tracker-{{../master_id}}-{{this}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a></strong></li>                    
-        {{else}}        
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>          
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>tracker item</small>
+          {{#if ../tracker_history_id}}
+            <strong><a href="/masters/{{../master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{../master_id}}-{{this}}" data-toggle="scrollto-target" data-target="#trackers-{{../master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a></strong>
+          {{/if}}
+          </li>
+        {{else}}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}
-        {{/filter}}                    
-        <% if defined? item_blocks           
+        {{/filter}}
+        <% if defined? item_blocks
             item_blocks.each do |item_name_sym, item_attrs|
               item_name = item_name_sym.to_s
         %>
@@ -125,25 +152,32 @@
           <li class="list-group-item is-sub-heading <%=name.hyphenate%>-<%=item_name.hyphenate%>">
             <%=item_name.humanize%> {{rec_type}}
             {{> rank_button name_h="<%= item_name.hyphenate %>"}}
-          </li>            
+          </li>
           {{#filter this "<%= item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs  %>" }}
             {{#is @key "notes"}}
             <div class="notes-block <%=name.hyphenate%>-<%=item_name.hyphenate%>-notes">
               <div class="panel panel-default panel-body">
               {{pretty_string this return_string="true"}}
               </div>
-            </div>          
-            {{else}}        
-              <li class="list-group-item <%=name.hyphenate%>-<%=item_name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>          
+            </div>
+            {{else}}
+              <li class="list-group-item <%=name.hyphenate%>-<%=item_name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
             {{/is}}
           {{/filter}}
           {{/with}}
-          
+
           </div>
         </div>
         <%  end
-          end        
-        end %>      
+          end
+        end %>
+      <% if caption_before[:metadata]%>
+      <div class="results-caption-before <%=name.hyphenate%>-caption-before-metadata">
+        <div class="panel panel-default panel-body">
+          <%= caption_before[:metadata].html_safe %>
+        </div>
+      </div>
+      <% end %>
       <% unless defined?(exclude_metadata) && exclude_metadata %><li class="list-group-item record-meta">{{>update_metadata <% if show_created_at %>show_created_at=true<%end%> }}</li><%end%>
   </ul>
   {{#was _created}}</div>{{/was}}
@@ -151,26 +185,26 @@
 
 
 <script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with <%=name%>}}
-    
+  {{#with <%=with_data || name%>}}
+
       {{><%=name%>_result }}
 
   {{/with}}
 </script>
 
-<script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">    
+<script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{><%=name.pluralize%>_list }}
 </script>
 
 <script id="<%=name.pluralize%>_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
- 
+
 
     {{#each <%=name.pluralize%>}}
 
         {{><%=name%>_result _created=@index}}
 
     {{/each}}
-    
+
     <div class="col-md-24 new-block" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
       {{#unless <%=name.pluralize%>}}
       <ul class="list-group">
@@ -178,11 +212,11 @@
           <h4>No <%=caption%> records</h4>
         </li>
       </ul>
-      {{/unless}}      
-        
-             
+      {{/unless}}
+
+
     </div>
     <% unless prevent_create %>
-    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus add-item-button"></span> <%= caption %> record</a> </p>                                    
+    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus add-item-button"></span> <%= caption %> record</a> </p>
     <% end %>
 </script>

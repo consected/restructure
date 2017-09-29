@@ -8,8 +8,8 @@
         <h4 class="form-group-heading">Edit Tracker Record</h4>
       </div>
       
-      <%=form_for([@master, object_instance], edit_form_hash(html: {class: 'form-inline'}) ) do |f|%>
-
+      <%=form_for([@master, object_instance], edit_form_hash(html: {class: 'form-inline'}) ) do |f|%>      
+        <%= hidden_field_tag :record_type, object_instance.record_type.to_s.underscore %><%= hidden_field_tag :record_id, object_instance.record_id %>
         <div class="row">
           <div class="col-md-6">
             <div class="form-group tracker-protocol">

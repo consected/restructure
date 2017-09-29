@@ -44,18 +44,22 @@ module TrackerHandler
     return nil unless self.protocol_event    
     self.protocol_event.description
   end
-  
+
+  # get the underlying item_type related to the polymorphic association
+  # this accessor was overridden elsewhere
   def record_type    
     self.attributes['item_type']
   end
-  
+
+  # get the underlying item_id related to the polymorphic association
+  # this accessor was overridden elsewhere
   def record_id
     self.attributes['item_id']
   end
   
   def record_type_us
     return unless self.record_type
-    self.record_type.underscore
+    self.record_type.underscore.gsub('/', '_')
   end
 
     

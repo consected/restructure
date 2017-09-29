@@ -60,6 +60,9 @@ module PhoneSetup
         res << pc
       end
     end
+
+    raise "phone does not have a rank!" unless phone_ranks.include?(res.last.rank.to_s)
+
     res
   end
 
@@ -70,9 +73,10 @@ module PhoneSetup
     top_ranked = nil
     phone_ranks.each do |rank|
       phone_block_css = player_contact_phone_block_css(rank)
-      scroll_to phone_block_css, check_it: false      
-      if have_css(phone_block_css)
-        top_ranked = all(phone_block_css).first
+      scroll_to phone_block_css, check_it: false
+      sleep 1
+      top_ranked = all(phone_block_css).first
+      if top_ranked        
         break
       end
     end

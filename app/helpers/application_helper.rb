@@ -61,7 +61,7 @@ module ApplicationHelper
     
     res[:remote] = true
     res[:html] ||= {}
-    res[:html].merge!("data-result-target" => "##{hyphenated_name}-#{@master.id}-#{@id}", "data-template" => "#{hyphenated_name}-result-template")
+    res[:html].merge!("data-result-target" => "##{hyphenated_name}-#{@master.id}-#{@id}, [form-res-id='#{hyphenated_name}-#{@master.id}-#{@id}']", "data-template" => "#{hyphenated_name}-result-template")
     res
   end
 

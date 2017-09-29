@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170922182052) do
+ActiveRecord::Schema.define(version: 0) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,41 +38,6 @@ ActiveRecord::Schema.define(version: 20170922182052) do
   end
 
   add_index "accuracy_scores", ["admin_id"], name: "index_accuracy_scores_on_admin_id", using: :btree
-
-  create_table "activity_log_player_contact_phones", force: :cascade do |t|
-    t.string   "data"
-    t.string   "select_call_direction"
-    t.string   "select_who"
-    t.date     "called_when"
-    t.string   "select_result"
-    t.string   "select_next_step"
-    t.date     "follow_up_when"
-    t.integer  "protocol_id"
-    t.string   "notes"
-    t.integer  "user_id"
-    t.integer  "player_contact_id"
-    t.integer  "master_id"
-    t.boolean  "disabled"
-    t.datetime "created_at",                      null: false
-    t.datetime "updated_at",                      null: false
-    t.string   "set_related_player_contact_rank"
-  end
-
-  add_index "activity_log_player_contact_phones", ["master_id"], name: "index_activity_log_player_contact_phones_on_master_id", using: :btree
-  add_index "activity_log_player_contact_phones", ["player_contact_id"], name: "index_activity_log_player_contact_phones_on_player_contact_id", using: :btree
-  add_index "activity_log_player_contact_phones", ["protocol_id"], name: "index_activity_log_player_contact_phones_on_protocol_id", using: :btree
-  add_index "activity_log_player_contact_phones", ["user_id"], name: "index_activity_log_player_contact_phones_on_user_id", using: :btree
-
-  create_table "activity_logs", force: :cascade do |t|
-    t.string   "name"
-    t.string   "item_type"
-    t.string   "rec_type"
-    t.integer  "admin_id"
-    t.boolean  "disabled"
-    t.datetime "created_at",            null: false
-    t.datetime "updated_at",            null: false
-    t.string   "action_when_attribute"
-  end
 
   create_table "address_history", force: :cascade do |t|
     t.integer  "master_id"
@@ -806,10 +771,6 @@ ActiveRecord::Schema.define(version: 20170922182052) do
 
   add_foreign_key "accuracy_score_history", "accuracy_scores", name: "fk_accuracy_score_history_accuracy_scores"
   add_foreign_key "accuracy_scores", "admins"
-  add_foreign_key "activity_log_player_contact_phones", "masters"
-  add_foreign_key "activity_log_player_contact_phones", "player_contacts"
-  add_foreign_key "activity_log_player_contact_phones", "protocols"
-  add_foreign_key "activity_log_player_contact_phones", "users"
   add_foreign_key "address_history", "addresses", name: "fk_address_history_addresses"
   add_foreign_key "address_history", "masters", name: "fk_address_history_masters"
   add_foreign_key "address_history", "users", name: "fk_address_history_users"

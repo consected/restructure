@@ -47,6 +47,12 @@ module LogCallSetup
   end
 
 
+  def add_free_text_notes text
+    within phone_log_block_css do
+      fill_in 'Notes', with: text
+    end
+  end
+
 
   def phone_log_block_css    
     PhoneList::NewPhoneLogFormCss

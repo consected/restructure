@@ -172,6 +172,13 @@
         var d = text.substring(0,3) + ' ' + text.substring(3,6) + ' ' + text.substring(6,10);
         return new Handlebars.SafeString(d);
     });
+
+    Handlebars.registerHelper('fpa_state_item', function(name, key) {
+        var res = _fpa.state[name];
+        if(res && key)
+          res = res[key];
+        return res;
+    });
     
     Handlebars.registerHelper('simple_log', function(t) {
         console.log(t);        

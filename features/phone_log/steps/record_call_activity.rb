@@ -14,7 +14,8 @@ end
 
 When "the user records that he spoke to the contact but he did not want to discuss the matter" do
   mark_call_status 'Call Connected'
-  mark_next_step_status 'Complete (Unsuccessful)'
+  mark_next_step_status 'Complete'
+  add_free_text_notes 'The player did not want to discuss the matter'
 end
 
 
@@ -66,4 +67,14 @@ end
 Then "the user records that a call-back was requested for a certain date and time" do
   mark_next_step_status 'Call Back', when: DateTime.now + 7.days
 
+end
+
+When "the call did not connect due to a bad number (does not exist, or does not belong to the contact)" do
+  mark_outgoing_call 'To Player'
+
+  mark_call_status 'Call Connected'
+  mark_next_step_status 'Complete'  
+end
+Then "the user records that the number was a bad number" do
+  
 end

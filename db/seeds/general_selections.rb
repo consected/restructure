@@ -13,8 +13,8 @@ module Seeds
       item_type = 'player_infos_source'
       
       values = [        
-        {name: 'NFLPA', value: 'nflpa'},
-        {name: 'NFLPA 2', value: 'nflpa2'}
+        {name: 'NFLPA', value: 'nflpa', create_with: true, lock: true},
+        {name: 'NFLPA 2', value: 'nflpa2', create_with: true, lock: true}
       ]
       
       add_values values, item_type
@@ -27,10 +27,10 @@ module Seeds
       item_type = 'player_contacts_rank'
       
       values = [
-        {name: 'primary', value: 10},
-        {name: 'secondary', value: 5},
-        {name: 'do not use', value: 0},
-        {name: 'bad contact', value: -1}
+        {name: 'primary', value: 10, create_with: true, edit_always: true},
+        {name: 'secondary', value: 5, create_with: true, edit_always: true},
+        {name: 'do not use', value: 0, create_with: true, edit_always: true},
+        {name: 'bad contact', value: -1, create_with: true, edit_always: true}
       ]
       
       add_values values, item_type
@@ -42,8 +42,8 @@ module Seeds
       item_type = 'player_contacts_source'
       
       values = [
-        {name: 'NFL', value: 'nfl'},
-        {name: 'NFLPA', value: 'nflpa'}                
+        {name: 'NFL', value: 'nfl', create_with: true, lock: true},
+        {name: 'NFLPA', value: 'nflpa', create_with: true, lock: true}
       ]
       
       add_values values, item_type
@@ -54,8 +54,8 @@ module Seeds
       item_type = 'addresses_source'
       
       values = [
-        {name: 'NFL', value: 'nfl'},
-        {name: 'NFLPA', value: 'nflpa'}                
+        {name: 'NFL', value: 'nfl', create_with: true, lock: true},
+        {name: 'NFLPA', value: 'nflpa', create_with: true, lock: true}
       ]
       
       add_values values, item_type
@@ -67,10 +67,10 @@ module Seeds
       item_type = 'addresses_rank'
       
       values = [
-        {name: 'primary', value: 10},
-        {name: 'secondary', value: 5},
-        {name: 'do not use', value: 0},
-        {name: 'bad contact', value: -1}
+        {name: 'primary', value: 10, create_with: true, edit_always: true},
+        {name: 'secondary', value: 5, create_with: true, edit_always: true},
+        {name: 'do not use', value: 0, create_with: true, edit_always: true},
+        {name: 'bad contact', value: -1, create_with: true, edit_always: true}
       ]
       
       add_values values, item_type
@@ -83,8 +83,8 @@ module Seeds
       item_type = 'player_contacts_type'
       
       values = [
-        {name: 'Email', value: 'email'},
-        {name: 'Phone', value: 'phone'}                
+        {name: 'Email', value: 'email', create_with: true, lock: true},
+        {name: 'Phone', value: 'phone', create_with: true, lock: true}
       ]
       
       add_values values, item_type
@@ -96,7 +96,7 @@ module Seeds
     def self.setup
       log "In #{self}.setup"
 
-      if Rails.env.test? || GeneralSelection.count == 0
+      if Rails.env.test? || GeneralSelection.where(item_type: 'player_infos_source').length == 0
         create_player_infos_source
 
         create_player_contacts_rank

@@ -3,6 +3,7 @@ ENV['FPHS_ADMIN_SETUP']='yes'
 
 Rails.application.load_tasks
 Rake::Task["assets:precompile"].invoke
+Rake::Task["db:seed"].invoke
 
 require "#{::Rails.root}/spec/support/master_support.rb"
 require "#{::Rails.root}/spec/support/master_data_support.rb"

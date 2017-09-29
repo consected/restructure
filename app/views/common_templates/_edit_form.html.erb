@@ -5,6 +5,10 @@
     caption = nil
   end
 
+  unless defined? caption_before
+    caption_before = {}
+  end
+
   unless caption && caption.include?('{{')   
     caption = (caption || name).humanize.titleize 
   end
@@ -27,7 +31,12 @@
         <% (permitted_params - [:id, :master_id, :item_id, item_type_id]).each do |p| %>
           <%
               set_related_field = handle_set_related_field(p)
-          %>
+          %>          
+          <% if caption_before[p] %>
+            <li class="list-group-item <%=name.hyphenate%>-caption-after-<%=p%>">
+              <%= caption_before[p].html_safe %>
+            </li>
+          <% end %>
         
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
             <% 
@@ -63,7 +72,7 @@
             
             
             <% elsif p == :protocol_id %>                
-                <%= f.label :protocol, 'data-add-icon' => 'info-sign' %>
+                <%= f.label :protocol, 'data-add-icon' => 'info-sign', title: 'protocol this is related to' %>
                 <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name}_sub_process_id", class: "form-control input-sm"}%>
             
             <% elsif p == :sub_process_id %>
@@ -117,9 +126,14 @@
               <%= f.label p %>
               <%= f.text_field p %>
             <% end %>
-          </li>
+          </li>          
         <% end %>
 
+        <% if caption_before[:submit] %>
+          <li class="list-group-item <%=name.hyphenate%>-caption-after-<%=p%>">
+            <%= caption_before[:submit].html_safe %>
+          </li>
+        <% end %>
         <li class="list-group-item">
           <%= f.submit class: "btn btn-primary" %>  
         </li>
