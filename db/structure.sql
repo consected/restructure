@@ -595,6 +595,40 @@ CREATE FUNCTION log_accuracy_score_update() RETURNS trigger
 
 
 --
+-- Name: log_activity_log_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_activity_log_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+                BEGIN
+                    INSERT INTO activity_log_history
+                    (
+                        name,
+                        activity_log_id,
+                        admin_id,
+                        created_at,
+                        updated_at,
+                        item_type,
+                        rec_type,
+                        disabled
+                        )
+                    SELECT
+                        NEW.name,
+                        NEW.id,
+                        NEW.admin_id,
+                        NEW.created_at,
+                        NEW.updated_at,
+                        NEW.item_type,
+                        NEW.rec_type,
+                        NEW.disabled
+                    ;
+                    RETURN NEW;
+                END;
+            $$;
+
+
+--
 -- Name: log_address_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1691,6 +1725,42 @@ CREATE SEQUENCE accuracy_scores_id_seq
 --
 
 ALTER SEQUENCE accuracy_scores_id_seq OWNED BY accuracy_scores.id;
+
+
+--
+-- Name: activity_log_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE activity_log_history (
+    id integer NOT NULL,
+    activity_log_id integer,
+    name character varying,
+    item_type character varying,
+    rec_type character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE activity_log_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE activity_log_history_id_seq OWNED BY activity_log_history.id;
 
 
 --
@@ -3774,6 +3844,13 @@ ALTER TABLE ONLY accuracy_scores ALTER COLUMN id SET DEFAULT nextval('accuracy_s
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY activity_log_history ALTER COLUMN id SET DEFAULT nextval('activity_log_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY activity_log_player_contact_phones ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_phones_id_seq'::regclass);
 
 
@@ -4134,6 +4211,14 @@ ALTER TABLE ONLY accuracy_score_history
 
 ALTER TABLE ONLY accuracy_scores
     ADD CONSTRAINT accuracy_scores_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY activity_log_history
+    ADD CONSTRAINT activity_log_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -4548,6 +4633,13 @@ CREATE INDEX index_accuracy_score_history_on_accuracy_score_id ON accuracy_score
 --
 
 CREATE INDEX index_accuracy_scores_on_admin_id ON accuracy_scores USING btree (admin_id);
+
+
+--
+-- Name: index_activity_log_history_on_activity_log_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_history_on_activity_log_id ON activity_log_history USING btree (activity_log_id);
 
 
 --
@@ -5237,6 +5329,20 @@ CREATE TRIGGER accuracy_score_history_update AFTER UPDATE ON accuracy_scores FOR
 
 
 --
+-- Name: activity_log_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_history_insert AFTER INSERT ON activity_logs FOR EACH ROW EXECUTE PROCEDURE log_activity_log_update();
+
+
+--
+-- Name: activity_log_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_history_update AFTER UPDATE ON activity_logs FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_update();
+
+
+--
 -- Name: address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -5761,6 +5867,14 @@ ALTER TABLE ONLY protocol_events
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT fk_rails_1694bfe639 FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
+-- Name: fk_rails_16d57266f7; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_history
+    ADD CONSTRAINT fk_rails_16d57266f7 FOREIGN KEY (activity_log_id) REFERENCES activity_logs(id);
 
 
 --
@@ -6458,4 +6572,6 @@ INSERT INTO schema_migrations (version) VALUES ('20170908074038');
 INSERT INTO schema_migrations (version) VALUES ('20170922182052');
 
 INSERT INTO schema_migrations (version) VALUES ('20170926144234');
+
+INSERT INTO schema_migrations (version) VALUES ('20171002120537');
 

@@ -2,22 +2,22 @@ class ActivityLog < ActiveRecord::Base
 
   SubProcessName = 'Activity'
 
-
   include AdminHandler
   include SelectorCache
 
   before_validation :prevent_item_type_change,  on: :update
   validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
-  validate :rec_type_valid?
+  validate :check_item_type_and_rec_type
   after_commit :reload_routes
+  after_commit :generate_protocol_entries
 
 
-
-  # checks if this activity log works with the specified item_type and optionally rec_type
+  # checks if this activity log works with the specified item_type and optionally rec_type based on admin activity log record configuration
   # if no rec_type is specified, then just the item_type will be used to match broadly,
   # even if the configuration specifies a rec_type as a requirement
-  # Returns
+  # Only enabled admin activity log records are used, excluding other possible options that are not configured.
+  # Returns the item_type_name if true
   def self.works_with item_type, rec_type=nil
     item_type = item_type.downcase
     cond = {item_type: item_type}
@@ -32,13 +32,14 @@ class ActivityLog < ActiveRecord::Base
   end
 
 
-  # return the class that corresponds to this item (item_type / rec_type)
+  # return the activity log implementation class that corresponds to
+  # this item (item_type / rec_type in an enabled admin activity log record)
   def self.al_class item
 
     item_type = item.item_type
 
     return @al_class if @al_class
-        # To start, see if the Activity Log works with this item
+    # To start, see if the Activity Log works with this item
     al_cn = ActivityLog.works_with item_type
 
     # If Activity Log broadly works with this item
@@ -51,7 +52,7 @@ class ActivityLog < ActiveRecord::Base
     #  return if the Activity Log does not work with this item_type / rec_type combo
     return nil unless al_cn
 
-    # attempt to get the class based on class name
+    # attempt to get the activity log implementation class based on class name
     al_cn = al_cn.camelize
     begin
       fcn = "ActivityLog::#{al_cn}"
@@ -63,8 +64,14 @@ class ActivityLog < ActiveRecord::Base
     return @al_class
   end
 
+  # The table name for the activity log implementation
   def table_name
     "activity_log_#{item_type_name}".pluralize
+  end
+
+  # The class that an activity log implementation belongs to
+  def item_class
+    self.item_type.singularize.classify.constantize
   end
 
   def item_type_name
@@ -76,14 +83,16 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def rec_type_valid?
-    return if rec_type.blank?
-
-#    if GeneralSelection.selector_attributes([:name], item_type: "#{item_type.pluralize}_rec_type").length == 0
-#      errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type.")
-#    end
-
+    return true if self.rec_type.blank?
+    rcs = item_class.valid_rec_types
+    # it is valid if there are no rec types in the list || the current rec type is included
+    return !rcs || rcs.include?(rec_type)
   end
 
+  def item_type_valid?
+    return true if self.class.use_with_class_names.include?(self.item_type.pluralize)
+    false
+  end
 
   def model_def
     self.class.models[model_def_name]
@@ -93,7 +102,7 @@ class ActivityLog < ActiveRecord::Base
     item_type_name.singularize.to_sym
   end
 
-
+  # the list of defined activity log implementation classes
   def self.al_classes
     @al_classes = ActivityLog.enabled.map{|a| "ActivityLog::#{[a.item_type, a.rec_type].join('_').classify}".constantize }
   end
@@ -103,12 +112,14 @@ class ActivityLog < ActiveRecord::Base
   # This list is the full list of possible items, and only those configured and read by #works_with are actually available
   # for activity logging
   def self.use_with_class_names
-    Master.reflect_on_all_associations(:has_many).map{|a| a.name.to_s}.reject{|a| a.include?('_item_flag') }
+    Master::PrimaryAssociations
   end
 
 
 
-  # list of item types that can be used to define GeneralSelection drop downs
+  # List of item types that can be used to define GeneralSelection drop downs
+  # This does not represent the actual item types that are valid for selection when defining a new admin activity log record, which
+  # is in fact provided by self.use_with_class_names
   def self.item_types
 
     list = []
@@ -170,6 +181,27 @@ class ActivityLog < ActiveRecord::Base
 
   def reload_routes
     Rails.application.reload_routes!
+  end
+
+  def generate_protocol_entries
+
+    admin = self.current_admin
+    Protocol.enabled.each do |p|
+      sp = p.sub_processes.create! name: ActivityLog::SubProcessName, current_admin: admin
+      sp.protocol_events.create! name: self.name, current_admin: admin
+    end
+
+  end
+
+  def check_item_type_and_rec_type
+    unless item_type_valid?
+      errors.add(:item_type, "#{self.item_type} is invalid. It must be one of (#{self.class.use_with_class_names.join(",")})")
+      return
+    end
+    unless rec_type_valid?
+      errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
+      return
+    end
   end
 
 end

@@ -4,7 +4,7 @@ shared_examples 'a standard admin controller' do
   let(:valid_attributes) {
     valid_attribs
   }
-  
+
   let(:list_invalid_attributes){
     list_invalid_attribs
   }
@@ -13,7 +13,7 @@ shared_examples 'a standard admin controller' do
     list_invalid__update_attribs
   }
 
-  
+
   let(:invalid_attributes) {
     invalid_attribs
   }
@@ -25,23 +25,23 @@ shared_examples 'a standard admin controller' do
     instance_var_init :path_prefix
     @path_prefix
   }
-  
+
   describe "Ensure authentication" do
     before_each_login_admin
-    it "returns a result" do            
+    it "returns a result" do
       get :index
       expect(response).to have_http_status(200), "Attempting #{@admin}"
     end
   end
-  
+
   describe "GET #index" do
     before_each_login_admin
-     
-    it "assigns all items as @vars" do      
+
+    it "assigns all items as @vars" do
       create_items
-      
-      get :index      
-      
+
+      get :index
+
       # Do this, since we can't guarantee the order of any particular controller response
       @created_items.each do |ci|
         expect(assigns(objects_symbol)).to include(ci), "Failed to get created items. #{@exceptions}"
@@ -51,20 +51,20 @@ shared_examples 'a standard admin controller' do
 
   describe "GET #show" do
     before_each_login_admin
-    
-    
+
+
     it "assigns the requested item as @var" do
       create_item
-        
+
       expect(get: "#{path_prefix}/#{object_symbol}/#{item_id}" ).not_to be_routable
     end
   end
 
   describe "GET #new" do
     before_each_login_admin
-    
+
     it "assigns a new item as @var" do
-      
+
       get :new
       expect(assigns(object_symbol)).to be_a_new(object_class)
     end
@@ -82,24 +82,24 @@ shared_examples 'a standard admin controller' do
 
   describe "POST #create" do
     before_each_login_admin
-    context "with valid params" do            
-      
+    context "with valid params" do
+
       it "creates a new item" do
-        
+
         expect {
           post :create, {object_symbol => valid_attributes}
         }.to change(object_class, :count).by(1)
       end
 
       it "assigns a newly created item as @var" do
-        
+
         post :create, {object_symbol => valid_attributes}
         expect(assigns(object_symbol)).to be_a(object_class)
         expect(assigns(object_symbol)).to be_persisted
       end
 
       it "return success" do
-        
+
         post :create, {object_symbol => valid_attributes}
         expect(response).to render_template("_index"), "Incorrect response from create #{object_symbol} (#{response}). Expected render template _index  "
       end
@@ -107,7 +107,7 @@ shared_examples 'a standard admin controller' do
 
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
-        
+
         post :create, {object_symbol => invalid_attributes}
         expect(assigns(object_symbol)).to be_a_new(object_class)
       end
@@ -129,13 +129,13 @@ shared_examples 'a standard admin controller' do
         new_attribs
       }
 
-      
+
       it "updates the requested item" do
         create_item
         put :update, {:id => item_id, object_symbol => new_attributes}
         item.reload
         new_attribs_downcase.each do |k, att|
-         
+
           expect(item.send(k)).to eq att
         end
       end
@@ -166,7 +166,7 @@ shared_examples 'a standard admin controller' do
       it "re-renders the 'edit' template" do
         create_item
         put :update, {:id => item_id, object_symbol => invalid_update_attributes}
-        
+
         expect(response).to render_template(edit_form_admin)#, "Rendered incorrect template with invalid_update_attributes: #{invalid_update_attributes.inspect}"
       end
     end
@@ -181,7 +181,7 @@ shared_examples 'a standard admin controller' do
 #      expect(response).to have_http_status(401)
     end
 
-    
-  end  
-  
+
+  end
+
 end
