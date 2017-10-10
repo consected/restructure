@@ -128,6 +128,7 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
     margin-bottom: 10px;
     position:relative;
     overflow: hidden;
+    height: auto;
 }
 
 .search-results-count{
@@ -405,6 +406,7 @@ ul[data-address-is-us="false"]{
 tr.item-highlight {
 
   border: solid 1px gray;
+  background: #deffae;
 
 }
 
@@ -412,6 +414,15 @@ tr.item-highlight {
   .list-group-item:first-child {
     &:not(.is-sub-heading){
     border-color: #ffee35;
+    }
+  }
+}
+
+.activity-log-list .linked-item-highlight {
+  .list-group-item:first-child {
+    &:not(.is-sub-heading){
+    border-color: #abcc8c;
+    background: #deffae;
     }
   }
 }

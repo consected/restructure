@@ -134,7 +134,7 @@
 
           <% ActivityLog.enabled.each do |a| %>
           <li role="presentation">
-            <a href="/masters/{{id}}/activity_log/player_contact_phones" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.table_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.table_name.hyphenate %>-{{id}}" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"><span class="caret"></span> <%= a.name %></a>
+            <a href="/masters/{{id}}/activity_log/player_contact_phones" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.table_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.table_name.hyphenate %>-{{id}}" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
           </li>
           <% end %>
         </ul>

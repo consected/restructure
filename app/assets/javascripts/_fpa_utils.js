@@ -1,7 +1,12 @@
 _fpa.utils = {};
 
+// Jump to the linked item, based on the target ID
+// If necessary expand the block containing this item by uncollapsing and showing it
+// Finally scroll it onto the viewport if necessary
+// Returns the block that was linked if successful
 _fpa.utils.jump_to_linked_item = function(target) {
 
+  var block = h;
 
   $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
   if(!target) return;
@@ -20,7 +25,7 @@ _fpa.utils.jump_to_linked_item = function(target) {
   if(not_visible)
       $.scrollTo(h, 200, {offset: -50});
 
-  return true;
+  return block;
 };
 
 // Get the data-some-attr="" name value pairs from a jQuery element, removing data- and

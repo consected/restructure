@@ -72,7 +72,10 @@ _fpa.postprocessors_trackers = {
             // handling the success of the ajax call, but since we are relying on a subscription to get fired that this has no control over,
             // just put in a delay to allow the templates time to render.
             // this will probably be sufficient in most cases.
-            window.setTimeout(function(){_fpa.utils.jump_to_linked_item(href);}, 1000)
+            window.setTimeout(function(){
+              var target_block = _fpa.utils.jump_to_linked_item(href);
+              _fpa.activity_logs.unselect_all(target_block, master_id)
+            }, 1000)
           }
       });
 
@@ -148,7 +151,16 @@ _fpa.postprocessors_trackers = {
             if(v != null) v++;
             t.html(v);
         }
-        if(data.tracker && (data.tracker._created || data.tracker._updated)){
+
+        // if we are viewing in chronological mode when an item is added,
+        //force a refresh of the list
+        var chronres = $('table.tracker-chron-results');
+        if(chronres.length === 1){
+          chronres.find('a[data-template="tracker-tree-result-template"]').click();
+          return;
+        }
+
+        if(data.tracker && (data.tracker._created || data.tracker._updated)) {
             _fpa.set_definition('protocol_events', function(){
                 var evid = data.tracker.protocol_event_id;
                 var pe = _fpa.cache('protocol_events');

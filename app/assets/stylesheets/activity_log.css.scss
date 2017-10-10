@@ -1,28 +1,32 @@
 .activity-logs-item-block {
-  
+
   padding: 0em;
-  
+
+}
+
+.activity-logs-generic-block {
+  margin-bottom: 1.4em;
 }
 
 .activity-logs-header, .activity-log-list {
-  
+
   padding: 1em;
-  
+
 }
 
-.list-group-item:first-child, .tracker-chron-results thead, .tracker-tree-results thead, .activity-logs-header { 
+.list-group-item:first-child, .tracker-chron-results thead, .tracker-tree-results thead, .activity-logs-header {
     background-color: #EEEEEE;
-    
+
 }
 
 .activity-log-sub-list {
-  
-  padding: 0.27em 1em;
-  
+
+  padding: 14px 1em;
+
   .panel.selected-item {
     border-color: #aaa;
   }
-  
+
   .panel .list-group .list-group-item {
     color: #aaa;
   }
@@ -30,28 +34,28 @@
     font-weight: bold;
     color: black;
   }
-  
+
 }
 
 .notes-block .panel{
-  
+
   min-height: 52px;
-  
+
 }
 
 .activity-logs-item-block {
-  
+
   &.in, &.ajax-loading {
     margin-bottom: 8px;
   }
-  
+
 }
 
-.activity-log-initial-action {  
+.activity-log-initial-action {
   display: none;
 }
 .selected-item {
-  .activity-log-initial-action {  
+  .activity-log-initial-action {
     text-align: center;
     display: block;
   }

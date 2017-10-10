@@ -7,3 +7,5 @@ module CommonTemplatesHelper
   end
 
 end
+
+

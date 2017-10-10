@@ -1,5 +1,5 @@
-<div class="row">    
-  <div class="col-sm-12" style="text-align: left;">
+<div class="row" id="search_attr_definer">
+  <div class="col-sm-14" style="text-align: left;">
     <%= f.label :add_attribute %>
       <table>
           <tr>
@@ -29,7 +29,7 @@
 
                       <% GeneralSelection.item_types.dup.each do |i|%>
                         <option value="item_type: <%=i%>">item_type: <%=i%></option>
-                      <% end %>            
+                      <% end %>
 
                   </select>
               </td>
@@ -37,22 +37,26 @@
               <td>single or multiple values</td><td>
                 <select id="search_attrs_multi">
                       <option value="single">single</option>
-                      <option value="multiple">multiple (in)</option>            
+                      <option value="multiple">multiple (in)</option>
                       <option value="multiple-regex">multiple (regex)</option>
                   </select>
               </td>
             </tr><tr>
-              <td>default <a class="glyphicon glyphicon-info-sign" data-toggle="popover" data-content="Set the default value of an attribute to be searched. If the query is run automatically then the default value will be used. Enter literal values or calculate a date with (-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, 5 months, 2 weeks. For multiple values, enter each value on a new line."></a>
-                  </td><td><textarea id="search_attrs_default"></textarea>        
+              <td>default</td>
+              <td><textarea id="search_attrs_default"></textarea>
+                <p class="help-block">Set the default value of an attribute to be searched. If the query is run automatically then the default value will be used.</p>
+                <p class="help-block">Enter literal values; 'current_user' for the current user; 'now' for today; or calculate a date with (-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, 5 months, 2 weeks.</p>
+                <p class="help-block">For multiple values, enter each value on a new line.</p>
+
               </td>
             </tr>
             <tr><td></td><td><p><a id="search_attrs_add" class="btn btn-default">Add Attribute</a></p></td></tr>
       </table>
-    
+
     <div id="search_attr_instruction">(reference in SQL with <strong id="search_attr_ex"></strong>)</div>
   </div>
-  <div class="col-sm-12" style="text-align: left;">
+  <div class="col-sm-10" style="text-align: left;">
     <%= f.label :search_attributes%>
     <%= f.text_area  :search_attrs,  style: "width: 99%; height: 340px; font-family: monospace;" %>
-  </div>  
-</div>  
+  </div>
+</div>

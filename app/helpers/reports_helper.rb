@@ -4,48 +4,48 @@ module ReportsHelper
      link_to '', edit_report_path(id, report_id: @report.id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
   end
   def report_edit_cancel
-     link_to 'cancel', "#", id: "report-edit-cancel", class: "btn btn-danger" 
-  end  
+     link_to 'cancel', "#", id: "report-edit-cancel", class: "btn btn-danger"
+  end
   def report_field name, type, value
-    
-    if type.is_a? String    
+
+    if type.is_a? String
       type_string = type
       return nil
     elsif type.is_a? Hash
       type_string = type.first.first
-      type_val = type.first.last      
+      type_val = type.first.last
       c = type_string.to_s.classify.constantize rescue nil
     end
-      
-    use_dropdown = nil    
-    
-    
-    value ||= Report.calculate_default(type_val['default'], type_string)
-    
-    if c && c.respond_to?(:all_name_value_enable_flagged) 
+
+    use_dropdown = nil
+
+
+    value ||= @report.calculate_default(type_val['default'], type_string)
+
+    if c && c.respond_to?(:all_name_value_enable_flagged)
       if type_val['item_type'] == 'all'
-        type_filter = nil     
+        type_filter = nil
       elsif type_val['item_type']
         type_filter = {item_type: type_val['item_type']}
-      end  
-         
+      end
+
       unless @report_page
         type_filter ||= {}
-        type_filter[:disabled] = false        
+        type_filter[:disabled] = false
       end
-      use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value) 
-      
+      use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value)
+
     end
-    
+
     if type_val['label']
       main_field = label_tag type_val['label']
     else
-      main_field = label_tag name 
+      main_field = label_tag name
     end
-    
-    
+
+
     if type_val['multiple'] == 'multiple' || type_val['multiple'] == 'multiple-regex'
-      if use_dropdown 
+      if use_dropdown
         main_field << select_tag("search_attrs[#{name}]", use_dropdown , multiple: true)
       else
         main_field << text_field_tag("multiple_attrs[#{name}]", '', type: type_string, class: 'form-control no-auto-submit'  , data: {attribute: name})
@@ -53,20 +53,20 @@ module ReportsHelper
         v = value
         v = value.join("\n") if value.is_a? Array
         main_field << text_area_tag("search_attrs[#{name}]", v, class: 'auto-grow')
-        
+
       end
-    else 
-      if use_dropdown 
+    else
+      if use_dropdown
         main_field << select_tag("search_attrs[#{name}]", use_dropdown , include_blank: 'select')
       else
         main_field << text_field_tag("search_attrs[#{name}]", value, type: type_string, class: 'form-control' )
       end
     end
-    
-    
-    
-    
+
+
+
+
   end
 
-    
+
 end

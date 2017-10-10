@@ -83,6 +83,12 @@
       <th>protocol</th><th>status</th><th>method</th><th>date</th><th>notes</th><th><a href="/masters/{{master_id}}/trackers/new" data-remote="true" class="btn btn-sm btn-primary pull-right hidden add-tracker-record" title="add tracker record"><span class="glyphicon glyphicon-plus"></span> Tracker record</a> </th>
       </tr>
     </thead>
+    <tbody id="tracker-{{master_id}}-" data-preprocessor="tracker_edit_form" data-subscription="tracker-edit-form-{{master_id}}-" class="new-block new-below">
+    <tr >
+    {{#is trackers.length 0}}<td colspan="9"><h4>No Tracker Records</h4></td>{{/is}}
+    </tr>
+    </tbody>
+
     <tbody>
     {{#each this}}
       {{#if id}}
@@ -94,9 +100,6 @@
       </tr>
       {{/if}}
     {{/each}}
-    </tbody>
-    <tbody>
-
     </tbody>
   </table>
 

@@ -12,7 +12,7 @@
     show_created_at: true,
     edit_button_href: "/masters/{{master_id}}/player_contacts/{{item_id}}/activity_log/player_contact_phones/{{id}}/edit",
     caption_before:{
-      metadata: '<div><p>To add a specific tracker status record related to this item, click here:</p><p class="text-center"></p><a href="/masters/{{master_id}}/trackers/new?record_type=activity_log/player_contact_phones&record_id={{id}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a></p></div>'
+      metadata: '<div><p>To add a specific tracker status record related to this item, click here:</p><p class="text-center"></p><a href="/masters/{{master_id}}/trackers/new?record_type=activity_log/player_contact_phones&record_id={{id}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a></p></div>'
     }
   } %>
 
@@ -73,6 +73,7 @@
         <div class="new-block" form-res-id="player-contact-{{master_id}}-" form-res-template="sub-list-phone-result-template" id="activity-log-player-contact-phone-edit-form-{{master_id}}-" data-subscription="player-contact-edit-form-{{master_id}}-" data-preprocessor="player_contact_edit_form">
 
         </div>
+        <br />
         <p class="text-center"><a href="/masters/{{master_id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-player-contact-phone-edit-form-{{master_id}}-" aria-label="add contact record"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
       </div>
 
