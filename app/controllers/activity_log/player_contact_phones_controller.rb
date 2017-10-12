@@ -1,4 +1,4 @@
-class ActivityLog::PlayerContactPhonesController < ActivityLogsController
+class ActivityLog::PlayerContactPhonesController < ActivityLog::ActivityLogsController
 
   def item_controller
     "player_contacts"

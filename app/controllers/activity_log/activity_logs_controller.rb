@@ -1,4 +1,4 @@
-class ActivityLogsController < ApplicationController
+class ActivityLog::ActivityLogsController < ApplicationController
 
   include MasterHandler
   include ParentHandler
