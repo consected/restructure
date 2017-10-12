@@ -1,20 +1,20 @@
-module ActivityLogHandler  
+module ActivityLogHandler
 
   extend ActiveSupport::Concern
   include GeneralDataConcerns
 
   included do
     belongs_to parent_type
-    
+
     after_initialize :set_action_when
 #    before_create :set_related_fields_edit
     before_save :set_related_fields
 
     validates parent_type, presence: true
-    
+
     after_validation :sync_item_data
     after_validation :sync_set_related_fields
-    
+
     after_save :sync_tracker
 
     after_save :check_status
@@ -35,7 +35,7 @@ module ActivityLogHandler
 
     def assoc_inverse
       # The plural model name
-      name.gsub('::','_').underscore.pluralize.to_sym
+      name.ns_underscore.pluralize.to_sym
     end
 
 
@@ -66,7 +66,7 @@ module ActivityLogHandler
 
 
   # these models belong to an item from the perspective of user interaction, rather than master
-  # although equally there is a master association 
+  # although equally there is a master association
   def belongs_directly_to
     item
   end
@@ -77,16 +77,16 @@ module ActivityLogHandler
   end
 
   def item_id
-    item.id
+    item.id if item
   end
 
-  # set the association 
+  # set the association
   def item_id= i
     send("#{self.class.parent_type}_id=",i)
   end
 
   # set the action_when attribute to the current date time, if it is not already set
-  def set_action_when    
+  def set_action_when
     if self.action_when.blank?
       self.action_when = DateTime.now
     end
@@ -103,15 +103,15 @@ module ActivityLogHandler
     action = self.class.action_when_attribute
     self.send("#{action}=", d)
   end
-  
-  
+
+
   # Sync the tracker by adding a record to the protocol if it is set
   def sync_tracker
 
     return unless self.respond_to?(:protocol_id) && self.protocol_id
 
     protocol = Protocol.find(protocol_id)
-    
+
     # if we are not already passing through sub_process based on a user selection then
     # look up what the Activity name is for protocol sub processes
     unless self.attribute_names.include? 'sub_process_id'
@@ -128,12 +128,17 @@ module ActivityLogHandler
 
     t = self.master.trackers.create(protocol_id: protocol_id, sub_process_id: sub_process.id, protocol_event_id: protocol_event.id,
                   item_id: self.id, item_type: self.class.name, event_date: self.action_when)
-    
+
     # check and raise error that is usable by a user if there was a problem (for example, a required field not set)
     unless t && t.valid?
       raise FphsException.new("could not create tracker record: #{t.errors.full_messages.join('; ')}")
     end
     t
+  end
+
+  # look up the tracker_history items that corresponds
+  def tracker_histories
+    TrackerHistory.where(item_id: self.id, item_type: self.class.name)
   end
 
 
@@ -238,12 +243,12 @@ module ActivityLogHandler
   # into the related model
   def sync_set_related_fields
     return true unless set_related_fields
-    
+
     set_related_fields.each do |k,s|
       new_val = self.send(k)
-      
+
       curr_val = s[:item].send(s[:field])
-      
+
       if curr_val != new_val
         s[:item].send("#{s[:field]}=", new_val)
         s[:item].master = self.master

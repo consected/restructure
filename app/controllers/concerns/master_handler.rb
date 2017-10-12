@@ -42,19 +42,22 @@ module MasterHandler
     controller_name.singularize
   end
 
+  # notice the double underscore for namespaced models to indicate the delimiter
+  # to remain consistent with the associations
   def full_object_name
     if self.class.parent.name != 'Object'
-      "#{self.class.parent.name.underscore}_#{controller_name.singularize}"
+      "#{self.class.parent.name.underscore}__#{controller_name.singularize}"
     else
       controller_name.singularize
     end
   end
 
   # the association name from master to these objects
-  # for example player_contacts or activity_log_player_contacts_phones
+  # for example player_contacts or activity_log__player_contacts_phones
+  # notice the double underscore for namespaced models to indicate the delimiter
   def objects_name
     if self.class.parent.name != 'Object'
-      "#{self.class.parent.name.underscore}_#{controller_name}".to_sym
+      "#{self.class.parent.name.underscore}__#{controller_name}".to_sym
     else
       controller_name.to_sym
     end
@@ -88,7 +91,8 @@ module MasterHandler
   end
 
   def new
-    set_object_instance @master_objects.build
+    build_with = secure_params rescue nil
+    set_object_instance @master_objects.build(build_with)
     logger.info "-------------->#{object_instance.inspect}"
     set_additional_attributes object_instance
     render partial: edit_form, locals: edit_form_extras

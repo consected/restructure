@@ -1,19 +1,19 @@
-<% ActivityLog.enabled.each do |m| 
+<% ActivityLog.enabled.each do |m|
   l = []
-  
-  
+
+
   an = m.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
-  
+
   if an.length > 1
     l = an
   else
     an.each do |k|
-      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s] 
+      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s]
     end
   end
 
   template_file = "_#{m.model_def_name}_search_results_template.html.erb"
-  
+
   if File.exist?("#{Rails.root.join 'app', 'views', 'activity_logs', template_file}")
     template_name = "activity_logs/#{m.model_def_name}_search_results_template"
   else
@@ -22,8 +22,8 @@
 %>
 <%= render partial: template_name, locals: {
       caption: m.name,
-      name: m.item_type_name, 
-      prevent_edit: true,  
+      name: m.item_type_name,
+      prevent_edit: true,
       prevent_create: true,
       item_list: l
     } %>

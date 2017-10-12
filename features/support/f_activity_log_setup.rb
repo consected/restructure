@@ -6,14 +6,14 @@ module ActivityLogSetup
   # test specific items to be added
   def create_phone_log_config
     admin, _ = create_admin
-    
-    if GeneralSelection.enabled.where(item_type: 'activity_log_player_contact_phone_select_who').length >= 5
+
+    if GeneralSelection.enabled.where(item_type: 'activity_log__player_contact_phone_select_who').length >= 5
 
       gs = [
-        ["Rob Standish", "rob standish", "activity_log_player_contact_phone_select_who"],
-        ["Chris", "chris", "activity_log_player_contact_phone_select_who"],
-        ["P Smith", "p smith", "activity_log_player_contact_phone_select_who"],
-        ["Andy Morehouse", "andy morehouse", "activity_log_player_contact_phone_select_who"]
+        ["Rob Standish", "rob standish", "activity_log__player_contact_phone_select_who"],
+        ["Chris", "chris", "activity_log__player_contact_phone_select_who"],
+        ["P Smith", "p smith", "activity_log__player_contact_phone_select_who"],
+        ["Andy Morehouse", "andy morehouse", "activity_log__player_contact_phone_select_who"]
       ]
       gs.each do |g|
         GeneralSelection.create!(name: g[0], value: g[2], item_type: g[2], current_admin: admin, disabled: false, create_with: true, edit_always: false, lock: true )

@@ -65,7 +65,7 @@ _fpa.postprocessors_trackers = {
 
     },
 
-    open_activity_log_player_contact_phone: function(link, block, href){
+    open_activity_log__player_contact_phone: function(link, block, href){
       var master_id = link.attr('data-master-id');
       _fpa.send_ajax_request('/masters/'+master_id+'/activity_log/player_contact_phones', {
           try_app_callback: function(){
@@ -158,6 +158,14 @@ _fpa.postprocessors_trackers = {
         if(chronres.length === 1){
           chronres.find('a[data-template="tracker-tree-result-template"]').click();
           return;
+        }
+
+        // If the new tracker item is linked to an activity log item
+        // trigger a click on the link icon to refresh the activity log item and
+        // scroll back to it
+        if(data.tracker && (data.tracker._created || data.tracker._merged) && data.tracker.record_type.indexOf('ActivityLog::')==0) {
+          var newlink = $('#tracker-'+data.tracker.master_id+'-'+data.tracker.id+' a[data-master-id="'+data.tracker.master_id+'"][data-record-id="'+data.tracker.record_id+'"]');
+          newlink.click();
         }
 
         if(data.tracker && (data.tracker._created || data.tracker._updated)) {

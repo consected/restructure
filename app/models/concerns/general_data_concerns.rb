@@ -11,7 +11,7 @@ module GeneralDataConcerns
   def user_id= u
     raise "can not set user_id="
   end
-    
+
 
   def check_status
     @was_created = id_changed? ? 'created' : false
@@ -47,7 +47,7 @@ module GeneralDataConcerns
     return nil unless self.user
     self.user.email
   end
-  
+
   def rank_name
     return nil unless respond_to? :rank
 
@@ -69,6 +69,7 @@ module GeneralDataConcerns
     extras[:methods] ||= []
     extras[:methods] << :item_id
     extras[:methods] << :item_type
+    extras[:methods] << :full_item_type
     extras[:methods] << :rank_name if respond_to? :rank
     extras[:methods] << :state_name if respond_to? :state
     extras[:methods] << :country_name if respond_to? :country
@@ -76,7 +77,10 @@ module GeneralDataConcerns
     extras[:methods] << :protocol_name if respond_to? :protocol
     extras[:methods] << :sub_process_name if respond_to? :sub_process
     extras[:methods] << :protocol_event_name if respond_to? :protocol_event
-    extras[:methods] << :tracker_history_id if respond_to?(:tracker_history_id) || respond_to?(:tracker_history)
+    if respond_to?(:tracker_history_id) || respond_to?(:tracker_history)
+      extras[:methods] << :tracker_history_id
+      extras[:methods] << :tracker_histories if respond_to? :tracker_histories
+    end
     extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
     extras[:methods] << :user_name
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not

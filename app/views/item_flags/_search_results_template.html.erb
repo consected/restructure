@@ -3,11 +3,11 @@
   <span class="pull-left item-flags-count-{{item_flags.length}}">
   <a class="flag-entity glyphicon glyphicon-tag" href="/masters/{{master_id}}/{{item_type}}/{{this.id}}/item_flags" data-remote="true" data-result-target="#item-flags-{{master_id}}-{{item_type}}-{{this.id}}" data-template="item-flags-result-template"></a>
   </span>
-</script>                                      
-                                      
-<script id="item_flag_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
+</script>
+
+<script id="item_flag_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <div id="item-flags-{{master_id}}-{{item_type}}-{{id}}" class="item-flags-block">
-  <div class="" id="item-flag-{{master_id}}-{{item_type}}-{{id}}-" data-subscription="item-flag-edit-form-{{master_id}}-{{item_type}}-{{id}}-"   data-preprocessor="item_flags_edit_form">        
+  <div class="" id="item-flag-{{master_id}}-{{item_type}}-{{id}}-" data-subscription="item-flag-edit-form-{{master_id}}-{{item_type}}-{{id}}-"   data-preprocessor="item_flags_edit_form">
   {{>item_flags_result item_id=id id=""}}
   </div>
   </div>
@@ -15,20 +15,20 @@
 
 
 <script id="item_flags_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  
+
   <div class="">
-  
+
   <select multiple="true" disabled="disabled" class="form-control">
   {{#each item_flags}}
     {{>item_flag_result}}
   {{else}}
     <span class="no-item-flags">no flags</span>
   {{/each}}
-  </select>
+  </select>  
   <a href="/masters/{{master_id}}/{{item_type}}/{{item_id}}/item_flags/new" data-remote="true" class="add-flags glyphicon glyphicon-pencil" title="edit tags"></a>
   </div>
-  
-  
+
+
 </script>
 
 <script id="item_flag_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -47,4 +47,3 @@
     {{>item_flags_result }}
   {{/with}}
 </script>
-

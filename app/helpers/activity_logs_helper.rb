@@ -1,7 +1,7 @@
 module ActivityLogsHelper
 
   def activity_log_edit_form_id
-    "activity-log-player-contact-phone-edit-form-#{@master_id}-#{@id}"
+    "activity-log--player-contact-phone-edit-form-#{@master_id}-#{@id}"
 
   end
   def activity_log_edit_form_hash extras={}
@@ -9,8 +9,11 @@ module ActivityLogsHelper
 
     res[:remote] = true
     res[:html] ||= {}
-    res.merge!({url: "/masters/#{@master_id}/#{@item.item_type.pluralize}/#{@item_id}/#{object_instance.item_type.pluralize}/#{object_instance.id}", action: :post, remote: true, html: {"data-result-target" => "#activity-log-player-contact-phone-#{@master_id}-#{@id}", "data-template" => "activity-log-player-contact-phone-result-template"}})
-
+    if @item
+      res.merge!({url: "/masters/#{@master_id}/#{@item.item_type_path.pluralize}/#{@item_id}/#{object_instance.item_type_path}/#{object_instance.id}", action: :post, remote: true, html: {"data-result-target" => "#activity-log--player-contact-phone-#{@master_id}-#{@id}", "data-template" => "activity-log--player-contact-phone-result-template"}})
+    else
+      res.merge!({url: "/masters/#{@master_id}/#{object_instance.item_type_path}/#{object_instance.id}", action: :post, remote: true, html: {"data-result-target" => "#activity-log--player-contact-phone-#{@master_id}-#{@id}", "data-template" => "activity-log--player-contact-phone-result-template"}})
+    end
     res
   end
 

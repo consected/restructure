@@ -4,7 +4,7 @@ Before do
 end
 
 When "the user indicates he wants to view the player's call log" do
-  raise "player does not have any call log items to view" if @master.activity_log_player_contact_phones.length == 0
+  raise "player does not have any call log items to view" if @master.activity_log__player_contact_phones.length == 0
   show_top_ranked_phone_log
   expect_phone_log_to_show_contact_number
 end

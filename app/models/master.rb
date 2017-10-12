@@ -30,6 +30,9 @@ class Master < ActiveRecord::Base
 
   # to ensure that the db migrations can run, check for the existence of the dynamic models table
   # before attempting to use it. Otherwise Rake tasks fail.
+  # DynamicModel associations take the form:
+  #     master.player_contact_histories
+  # i.e. the pluralized table name
   if ActiveRecord::Base.connection.table_exists? 'dynamic_models'
     DynamicModel.active.each do |dm|
       has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
@@ -42,11 +45,15 @@ class Master < ActiveRecord::Base
 
   Master.reflect_on_all_associations(:has_many).each do |assoc|
     # This association is provided to allow generic search on flagged associated object
-    has_many "#{assoc.plural_name}_item_flags".to_sym, through: assoc.plural_name, source: :item_flags
-    Rails.logger.debug "Associated master with #{assoc.plural_name}_item_flags through #{assoc.plural_name} with source :item_flags"
+    has_many "#{assoc.class_name.ns_underscore}_item_flags".to_sym, through: assoc.class_name.underscore, source: :item_flags
+    Rails.logger.debug "Associated master with #{assoc.class_name.ns_underscore}_item_flags through #{assoc.class_name.underscore} with source :item_flags"
   end
 
-  has_many :activity_log_player_contact_phones,  -> { order(called_when: :desc, id: :desc)}, inverse_of: :master, class_name: "ActivityLog::PlayerContactPhone"
+  # The associations with master are generated dynamically
+  # Activity log associations follow the form:
+  #   master.activity_log__player_contact_phones
+  # Notice the double underscore which represents the Module::Class delimiter
+  ActivityLog.add_all_to_app_list
 
   attr_accessor :force_order
 

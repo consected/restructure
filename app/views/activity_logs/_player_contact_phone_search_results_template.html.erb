@@ -1,5 +1,9 @@
+<%
+  full_name = 'activity_log__player_contact_phone'
+  full_name_hyphenated = full_name.hyphenate
+%>
 <%= render partial: 'common_templates/search_results_template', locals: {
-    name: 'activity_log_player_contact_phone',
+    name: full_name,
     caption: 'Phone Call', # substitute the rec_type attribute (capitalized) as the block caption
     prevent_edit: false,
     prevent_create: false,
@@ -12,7 +16,6 @@
     show_created_at: true,
     edit_button_href: "/masters/{{master_id}}/player_contacts/{{item_id}}/activity_log/player_contact_phones/{{id}}/edit",
     caption_before:{
-      metadata: '<div><p>To add a specific tracker status record related to this item, click here:</p><p class="text-center"></p><a href="/masters/{{master_id}}/trackers/new?record_type=activity_log/player_contact_phones&record_id={{id}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a></p></div>'
     }
   } %>
 
@@ -48,7 +51,7 @@
 <script id="activity_logs_phone_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
   <span id="activity-log-{{master_id}}-initial-action" class="" >
     <span id="activity-logs-phone-actions">
-      <a href="/masters/{{master_id}}/player_contacts/{{item_id}}/activity_log/player_contact_phones/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide" data-target="#activity-log-player-contact-phone-{{master_id}}-">log phone call</a>
+      <a href="/masters/{{master_id}}/player_contacts/{{item_id}}/activity_log/player_contact_phones/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide" data-target="#activity-log--player-contact-phone-{{master_id}}-">log phone call</a>
     </span>
    </span>
 </script>
@@ -58,9 +61,7 @@
   <div id="player-contact-activity-logs-phone-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-player-contact-phone-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
 
     <div class="is-heading activity-logs-header">
-     <a class="glyphicon glyphicon-remove-sign close-entity pull-right" title="close" data-target="#player-contact-activity-logs-phone-type-{{item_id}}" data-toggle="clear-content" ></a>
-
-      <h4 class="list-group-item-heading al-label-phone-num">phone log</h4>
+       <h4 class="list-group-item-heading al-label-phone-num">phone log</h4>
     </div>
     <div class="row">
       <div class="col-md-5 activity-log-sub-list" data-selected-id="{{item_id}}" id="activity-log-phones-sub-list-{{master_id}}-" data-sub-list="player_contacts">
@@ -70,22 +71,22 @@
             {{>sub_list_phone_result _created=@index}}
           {{/is}}
         {{/each}}
-        <div class="new-block" form-res-id="player-contact-{{master_id}}-" form-res-template="sub-list-phone-result-template" id="activity-log-player-contact-phone-edit-form-{{master_id}}-" data-subscription="player-contact-edit-form-{{master_id}}-" data-preprocessor="player_contact_edit_form">
+        <div class="new-block" form-res-id="player-contact-{{master_id}}-" form-res-template="sub-list-phone-result-template" id="activity-log--player-contact-phone-edit-form-{{master_id}}-" data-subscription="player-contact-edit-form-{{master_id}}-" data-preprocessor="player_contact_edit_form">
 
         </div>
         <br />
-        <p class="text-center"><a href="/masters/{{master_id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-player-contact-phone-edit-form-{{master_id}}-" aria-label="add contact record"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
+        <p class="text-center"><a href="/masters/{{master_id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--player-contact-phone-edit-form-{{master_id}}-" aria-label="add contact record"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
       </div>
 
       <div class="col-md-19 ">
 
 
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="phone_logs">
-          <div class="new-block new-below col-md-8 {{#if activity_log_player_contact_phones}}has-records{{/if}}" data-sort-desc="data-completed-when" id="activity-log-player-contact-phone-{{master_id}}-" data-subscription="activity-log-player-contact-phone-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
-              {{#unless activity_log_player_contact_phones}}<h4>No logged activity</h4>{{/unless}}
+          <div class="new-block new-below col-md-8 {{#if <%= full_name.pluralize %>}}has-records{{/if}}" data-sort-desc="data-completed-when" id="activity-log--player-contact-phone-{{master_id}}-" data-subscription="activity-log--player-contact-phone-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
+              {{#unless <%= full_name.pluralize %>}}<h4>No logged activity</h4>{{/unless}}
           </div>
-          {{#each activity_log_player_contact_phones}}
-            {{>activity_log_player_contact_phone_result _created=@index}}
+          {{#each activity_log__player_contact_phones}}
+            {{><%= full_name %>_result _created=@index}}
           {{/each}}
         </div>
       </div>

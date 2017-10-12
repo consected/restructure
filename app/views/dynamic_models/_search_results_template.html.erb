@@ -1,6 +1,6 @@
-<% DynamicModel.active.each do |m| 
+<% DynamicModel.active.each do |m|
   l = []
-  field_list = m.field_list 
+  field_list = m.field_list
   if field_list.blank?
     field_list = m.model_def.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
   else
@@ -12,15 +12,16 @@
     l = an
   else
     an.each do |k|
-      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s] 
+      l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s]
     end
   end
 
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
       caption: m.name,
-      name: m.model_def_name.to_s, 
-      prevent_edit: true,  
+      name: m.model_def_name.to_s,
+      full_name: "dynamic_model__#{m.model_def_name.to_s}",
+      prevent_edit: true,
       prevent_create: true,
       item_list: l
     } %>

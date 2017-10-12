@@ -134,7 +134,7 @@
 
           <% ActivityLog.enabled.each do |a| %>
           <li role="presentation">
-            <a href="/masters/{{id}}/activity_log/player_contact_phones" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.table_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.table_name.hyphenate %>-{{id}}" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
+            <a href="/masters/{{id}}/activity_log/player_contact_phones" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
           </li>
           <% end %>
         </ul>
@@ -144,8 +144,8 @@
           <% end %>
 
           <% ActivityLog.enabled.each do |a| %>
-          <div id="<%= a.table_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <% a.table_name.hyphenate %>-block"    data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.table_name %>" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"  >
-              <div id="<%= a.table_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
+          <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <% a.full_item_types_name.hyphenate %>-block"    data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="activity-logs-<%= a.item_type_name.hyphenate %>-type-result-template"  >
+              <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
           </div>
           <% end %>
 

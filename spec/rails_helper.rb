@@ -38,6 +38,10 @@ Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 # If you are not using ActiveRecord, you can remove this line.
 ActiveRecord::Migration.maintain_test_schema!
 
+# Do some setup that could impact all tests through the availability of master associations
+Seeds::ActivityLogPlayerContactPhone.setup
+
+
 RSpec.configure do |config|
 
   config.before(:suite) do
@@ -66,7 +70,7 @@ RSpec.configure do |config|
   # The different available types are documented in the features, such as in
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
-  
+
 
   # removed Devise::TestHelpers from the following line, since it is now deprecated.
   # Using Devise::Test::ControllerHelpers as advised
@@ -74,12 +78,12 @@ RSpec.configure do |config|
   config.extend ControllerMacros, :type => :controller
   config.after :each do
     Warden.test_reset!
-  end 
+  end
 #  config.after(:suite) do
 #    `brakeman`
 #    `bundle-audit update`
 #    `bundle-audit check`
 #  end
 
-  
+
 end

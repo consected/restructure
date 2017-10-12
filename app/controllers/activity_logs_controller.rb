@@ -1,6 +1,7 @@
 class ActivityLogsController < ApplicationController
 
   include MasterHandler
+  include ParentHandler
   before_action :authenticate_user!
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
 
@@ -14,13 +15,22 @@ class ActivityLogsController < ApplicationController
     end
 
     def edit_form_extras
+      if @item
+        caption = @item.data
+        item_name = @item.class.human_name
+      else
+        caption = 'log item'
+        item_name = ''
+      end
       {
-        caption: "#{@item.data}",
+        caption: caption,
         caption_before: {
           select_call_direction: "Enter details about the #{activity_log_name}",
           protocol_id: "Select the protocol this  #{activity_log_name} is related to. A tracker event will be recorded under this protocol.",
-          set_related_player_contact_rank: "To change the rank of the related #{@item.class.human_name}, select it:",
-          submit: 'To add specific protocol status and method records, save this form first.'
+          set_related_player_contact_rank: "To change the rank of the related #{item_name}, select it:",
+          submit: 'To add specific protocol status and method records, save this form first.',
+          notes: "Reminder: do not enter personal health information into the notes."
+
         }
       }
     end
@@ -46,7 +56,7 @@ class ActivityLogsController < ApplicationController
     end
 
     def item_type_us
-      @item_type.singularize.underscore
+      @item_type.singularize.ns_underscore
     end
 
     def items
@@ -67,8 +77,10 @@ class ActivityLogsController < ApplicationController
     end
 
     def set_additional_attributes obj
-      obj.item_id = @item.id
-      obj.send("#{item_type_us}=", @item)
+      if @item
+        obj.item_id = @item.id
+        obj.send("#{item_type_us}=", @item)
+      end
     end
 
 
@@ -80,29 +92,33 @@ class ActivityLogsController < ApplicationController
 
       if params[:item_id].blank?
         @item_type = item_controller
-        item_class_name = item_controller.singularize.camelize
-        @al_class = ActivityLog::PlayerContactPhone
+        @al_class = activity_log_class
         return
       end
 
       if UseMasterParam.include?(action_name)
         @item_type = item_controller
-        item_class_name = item_controller.singularize.camelize
 
         # look up the item using the item_id parameter.
-        @item  = item_class_name.constantize.find(params[:item_id])
-        raise "Failed to get @item for #{item_class_name}" unless @item
+        param_item_id = params[:item_id]
+        unless param_item_id == 'ignore'
+          @item  = item_class.find(param_item_id)
+          raise "Failed to get @item for #{item_class_name}" unless @item
+        end
       else
         @item = object_instance.item
         @item_type = @item.class.name
       end
 
-      @master_id = @item.master_id
-      @item_id = @item.id
-      #  return if the Activity Log does not work with this item_type / rec_type combo
-      @al_class = ActivityLog.al_class @item
-      return not_found unless @al_class
-
+      if @item
+        @master_id = @item.master_id
+        @item_id = @item.id
+        #  return if the Activity Log does not work with this item_type / rec_type combo
+        @al_class = ActivityLog.al_class_for @item
+        return not_found unless @al_class
+      else
+        @al_class = ActivityLog::BlankItem
+      end
     end
 
 
@@ -118,5 +134,10 @@ class ActivityLogsController < ApplicationController
       params.require(al_type.singularize.to_sym).permit(*permitted_params)
     end
 
+    def activity_log_class
+      cn = "#{item_controller.singularize}_#{item_rec_type}".camelize
+      cnf = "ActivityLog::#{cn}"
+      cnf.constantize
+    end
 
 end

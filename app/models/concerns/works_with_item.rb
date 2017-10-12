@@ -15,7 +15,7 @@ module WorksWithItem
   end
 
   class_methods do
-    
+
 
   end
 
@@ -28,7 +28,7 @@ module WorksWithItem
   end
 
   def item_type_us
-    self.item_type.underscore
+    self.item_type.ns_underscore
   end
 
   # used for validation to check this activity log type works with the parent item
@@ -36,15 +36,24 @@ module WorksWithItem
     self.class.use_with_class_names.include? item_type
   end
 
+  # Returns the full model name, namespaced like 'module__class' if there is a namespace.
+  # otherwise it returns just the basic name
   def item_type
-    self.class.name.singularize.underscore
+    self.class.name.singularize.ns_underscore
+  end
+
+  # Returns the full model name pluralized, namespaced like 'module/class' if there is a namespace.
+  # otherwise it returns just the basic name
+  # works great for generating routes
+  def item_type_path
+    self.class.name.pluralize.underscore
   end
 
   protected
 
     def master_user
 
-      if respond_to?(:master) && master        
+      if respond_to?(:master) && master
         current_user = master.current_user
         current_user
       elsif item.respond_to?(:master) && item.master

@@ -56,7 +56,7 @@
         }
         return right.indexOf(left) !== -1;
     });
-    eR.add('includes', function(left, right) {        
+    eR.add('includes', function(left, right) {
         return left.indexOf(right) !== -1;
     });
 
@@ -86,8 +86,8 @@
         }
         return options.inverse(this);
     };
-    
-    
+
+
     var containsHelper = function (str, pattern, options) {
       if (str && str.indexOf(pattern) !== -1) {
         return options.fn(this);
@@ -105,7 +105,7 @@
       var res = '';
       if(!obj) return res;
       for(var i in obj){
-        res += '<'+el+'>'+obj[i]+'</'+el+'>'; 
+        res += '<'+el+'>'+obj[i]+'</'+el+'>';
       }
       return res;
     });
@@ -151,14 +151,14 @@
         var ds = new Date(Date.parse(text));
         return ds.getTime().toFixed(0);
       }
-        
+
     });
 
     Handlebars.registerHelper('date_time', function(text) {
         if(text){
             var ds = new Date(Date.parse(text));
             var d = ds.toLocaleString();
-            return new Handlebars.SafeString(d);            
+            return new Handlebars.SafeString(d);
         }else{
             var ds = new Date();
             var d = ds.toLocaleString();
@@ -179,11 +179,11 @@
           res = res[key];
         return res;
     });
-    
+
     Handlebars.registerHelper('simple_log', function(t) {
-        console.log(t);        
+        console.log(t);
     });
-    
+
     Handlebars.registerHelper('log', function() {
         console.log(['Values:'].concat(
             Array.prototype.slice.call(arguments, 0, -1)
@@ -203,7 +203,7 @@
         result = '';
         var ins = items.split(',');
 
-        
+
         for (_i = 0, _len = ins.length; _i < _len; _i++) {
           item = array[ins[_i]];
           result += options.fn(item, {data: {key: ins[_i]}});
@@ -217,7 +217,7 @@
         if(date_string === null || date_string === '' ) return unknown;
         var startTime = date_string; //
         var testTime = new Date(Date.parse(date_string + 'T00:00:00Z'));
-        
+
 
         if(!testTime || testTime == 'Invalid Date'){
             if(options.hash.return_string)
@@ -225,15 +225,15 @@
             else
                 return unknown;
         }
-            
+
 
        // startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
         //return startTime.toLocaleDateString();
-        
+
         // Using information from https://bugzilla.mozilla.org/show_bug.cgi?id=1139167 to prevent occasional day difference issues
         return new Date(startTime).toLocaleDateString(undefined, {timeZone: "UTC"});
-        
-        
+
+
     });
 
     Handlebars.registerHelper('underscore', function(stre, options) {
@@ -253,7 +253,7 @@
 
     Handlebars.registerHelper('hyphenate', function(str){
       if(!str) return;
-      return str.replace(/_+/g, '-');
+      return str.replace(/_/g, '-');
     });
 
 
@@ -264,11 +264,11 @@
     Handlebars.registerHelper('pretty_print', function(obj) {
      return JSON.stringify(obj, null, 2);
     });
-    
+
     Handlebars.registerHelper('pretty_print_html', function(obj) {
      return JSON.stringify(obj, null, '<div>  ');
     });
-    
+
     Handlebars.registerHelper('humanize', function(obj) {
      if(!obj) return;
      return obj.replace(/_/g, ' ');
@@ -297,7 +297,3 @@
     return eR;
 
 }));
-
-
-
-

@@ -17,6 +17,11 @@ module UserHandler
     has_many :activity_logs, as: :item, inverse_of: :item
     has_many :trackers, as: :item, inverse_of: :item if self != Tracker && self != TrackerHistory
 
+    # Generate the set of activity log associations, for each record type for this item type
+    ActivityLog.active.where(item_type: self.name.ns_underscore).each do |al|
+      has_many al.model_assocation_name.to_sym, class_name: al.activity_log_class_name
+    end
+
     # Ensure the user id is saved
     before_validation :force_write_user
 
@@ -37,7 +42,7 @@ module UserHandler
   class_methods do
 
     def uses_item_flags?
-      ItemFlagName.enabled_for? self.name.underscore
+      ItemFlagName.enabled_for? self.name.ns_underscore
     end
 
     def foreign_key_name
@@ -58,7 +63,7 @@ module UserHandler
 
     def assoc_inverse
       # The plural model name
-      self.to_s.underscore.pluralize.to_sym
+      self.to_s.ns_underscore.pluralize.to_sym
     end
 
     def get_rank_name value
@@ -101,13 +106,18 @@ module UserHandler
     end
   end
 
+  # Returns the full model name, namespaced like 'module__class' (double underscore) if there is a namespace.
+  # otherwise it returns just the basic name
   def item_type
-    self.class.name.singularize.underscore
+    self.class.name.singularize.ns_underscore
   end
 
-
-
-
+  # Returns the full model name pluralized, namespaced like 'module/class' if there is a namespace.
+  # otherwise it returns just the basic name
+  # works great for generating routes
+  def item_type_path
+    self.class.name.pluralize.underscore
+  end
 
   protected
 

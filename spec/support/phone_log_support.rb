@@ -1,6 +1,6 @@
 module PhoneLogSupport
   include MasterSupport
-  
+
   def list_valid_attribs
     [
       {
@@ -38,11 +38,11 @@ module PhoneLogSupport
     att[:data] = player_contact.data
     att[:master] = player_contact.master
 
-    @log_item = player_contact.activity_log_player_contact_phones.create! att
+    @log_item = player_contact.activity_log__player_contact_phones.create! att
   end
 
   def create_phone_logs player_contact, num=1
-    num.times do      
+    num.times do
       res = create_item nil, player_contact
       raise "failed to create log item" unless res
     end

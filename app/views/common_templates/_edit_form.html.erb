@@ -1,7 +1,7 @@
-<% 
+<%
   name = full_object_name
-  
-  unless defined? caption 
+
+  unless defined? caption
     caption = nil
   end
 
@@ -9,12 +9,12 @@
     caption_before = {}
   end
 
-  unless caption && caption.include?('{{')   
-    caption = (caption || name).humanize.titleize 
+  unless caption && caption.include?('{{')
+    caption = (caption || name).humanize.titleize
   end
 
   has_source = false
-  
+
   select_desc = {}
 %>
 
@@ -31,33 +31,33 @@
         <% (permitted_params - [:id, :master_id, :item_id, item_type_id]).each do |p| %>
           <%
               set_related_field = handle_set_related_field(p)
-          %>          
-          <% if caption_before[p] %>
+          %>
+          <% if caption_before[p] && p != :notes %>
             <li class="list-group-item <%=name.hyphenate%>-caption-after-<%=p%>">
               <%= caption_before[p].html_safe %>
             </li>
           <% end %>
-        
+
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
-            <% 
+            <%
                col_type = object_instance.class.columns_hash[p.to_s].type
             %>
-            <% if col_type == :boolean %>    
+            <% if col_type == :boolean %>
               <%= f.label p %>
               <%= f.check_box p %>
-            <% elsif p == :description %>    
+            <% elsif p == :description %>
               <%= f.label p %>
               <%= f.text_area p %>
-            <% elsif p == :rec_type%>    
+            <% elsif p == :rec_type%>
               <%= f.label :rec_type %>
               <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: object_instance.rec_type) %>
             <% elsif p == :source %>
               <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
-              <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>              
+              <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>
               <% has_source = true %>
-            <% elsif p.to_s.index('select_') == 0  
-              
-                  desc = general_selection("#{name}_#{p}".to_sym, return_all: true).reduce(false){|r,i| r || !i[6].blank?}                  
+            <% elsif p.to_s.index('select_') == 0
+
+                  desc = general_selection("#{name}_#{p}".to_sym, return_all: true).reduce(false){|r,i| r || !i[6].blank?}
                   v = object_instance.send(p)
                   if desc.blank?
                     opt = {}
@@ -66,20 +66,20 @@
                     opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{p.to_s.humanize} options"}
                     select_desc["#{name}_#{p}".to_sym] = v
                   end
-            %>                        
+            %>
               <%= f.label p, opt %>
               <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>
-            
-            
-            <% elsif p == :protocol_id %>                
+
+
+            <% elsif p == :protocol_id %>
                 <%= f.label :protocol, 'data-add-icon' => 'info-sign', title: 'protocol this is related to' %>
                 <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name}_sub_process_id", class: "form-control input-sm"}%>
-            
+
             <% elsif p == :sub_process_id %>
               <%= f.label 'status' %><br/>
               <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "##{name}_protocol_event_id", class: "form-control input-sm"} %>
-              
-            <% elsif p == :protocol_event_id %>            
+
+            <% elsif p == :protocol_event_id %>
                 <%= f.label 'method' %><br/>
                 <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: "form-control input-sm" %>
             <% elsif p == :rank %>
@@ -90,25 +90,25 @@
                 <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank) %>
               <% end %>
             <% elsif set_related_field && p.to_s.end_with?('_rank') %>
-              <%= f.label p %>          
-              <%= f.select p, general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value]) %>                
-            <% elsif p.to_s.index(/(_date|_when)$/)  %>         
               <%= f.label p %>
-              <%= f.date_field p %>              
-            <% elsif p.to_s.index(/_year$/)  %>                          
+              <%= f.select p, general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value]) %>
+            <% elsif p.to_s.index(/(_date|_when)$/)  %>
               <%= f.label p %>
-              <% 
+              <%= f.date_field p %>
+            <% elsif p.to_s.index(/_year$/)  %>
+              <%= f.label p %>
+              <%
                 h = {}
                 r = Settings.const_get("#{p.to_s.camelize}Range")
                 h[:in] = r if r
               %>
               <%= f.number_field p, h %>
             <% elsif p == :country %>
-              <%= f.label :country %>            
-              <%= f.country_select :country, priority_countries: ["US", "CA", "DE"], class: "form-control country-select"%>            
+              <%= f.label :country %>
+              <%= f.country_select :country, priority_countries: ["US", "CA", "DE"], class: "form-control country-select"%>
             <% elsif p == :college %>
               <%= f.label :college %>
-              <%= f.text_field :college, class: 'college-input typeahead'  %>              
+              <%= f.text_field :college, class: 'college-input typeahead'  %>
             <% elsif p == :state %>
               <%= f.label :state %>
               <%= f.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}  %>
@@ -117,16 +117,22 @@
               <%= f.text_field :zip, zip_field_props %>
             <% elsif p == :notes %>
               <%= f.label :notes %>
-              <%= f.text_area :notes, class: 'form-control'  %>       
+              <% if caption_before[p]  %>
+                  <p class="caption_before_notes">
+                    <%= caption_before[p].html_safe %>
+                  </p>
+              <% end %>
+
+              <%= f.text_area :notes, class: 'form-control'  %>
             <% elsif GeneralSelection::BasicItemTypes.include?("#{name.pluralize}_#{p}".to_sym)%>
               <%# Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down%>
               <%= f.label p %>
-              <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>              
+              <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>
             <% else %>
               <%= f.label p %>
               <%= f.text_field p %>
             <% end %>
-          </li>          
+          </li>
         <% end %>
 
         <% if caption_before[:submit] %>
@@ -135,7 +141,7 @@
           </li>
         <% end %>
         <li class="list-group-item">
-          <%= f.submit class: "btn btn-primary" %>  
+          <%= f.submit class: "btn btn-primary" %>
         </li>
       </ul>
       <% end %>
@@ -143,10 +149,10 @@
       <% if has_source %>
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{name.pluralize}_source", value: object_instance.source} %>
       <% end %>
-    
+
       <% select_desc.each do |k,v| %>
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: k, value: v} %>
       <% end %>
-      
+
   </div>
 </div>

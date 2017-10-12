@@ -25,17 +25,13 @@
     extra_class = ''
   end
 
+  unless defined? full_name
+    full_name = name
+  end
+
   unless defined? custom_activity_log
     # check whether the activity log broadly works with this type of item
     custom_activity_log = ActivityLog.works_with(name) || :none
-  end
-
-  unless custom_activity_log == :none
-    # get a list of rec_types that an activity log of this type is constrained to use
-    works_with_rec_types_array = ActivityLog.works_with_rec_types(name)
-    works_with_rec_types = works_with_rec_types_array.join(',') || ''
-    activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
-
   end
 
   unless defined? show_created_at
@@ -60,14 +56,21 @@
 
 <% unless custom_activity_log == :none
 
-    wwrt = works_with_rec_types_array
-    wwrt << '' if wwrt.length == 0
-    wwrt.each do |rec_type|
+    # get a list of rec_types that an activity log of this type is constrained to use
+    works_with_rec_types_array = ActivityLog.works_with_rec_types(name)
+    works_with_rec_types = works_with_rec_types_array.join(',') || ''
+    activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
+
+
+    works_with_rec_types_array << '' if works_with_rec_types_array.length == 0
+    works_with_rec_types_array.each do |rec_type|
       al_name = name.pluralize
-      al_name = "#{name}_#{rec_type.pluralize}" unless wwrt.blank?
+      al_name = "#{name}_#{rec_type.pluralize}" unless rec_type.blank?
+      hyphenated_full_name = "activity-log--#{al_name.hyphenate}"
 %>
+
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <a data-toggle="scrollto-result" data-target="#activity-log-player-contact-phones-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity activity-log-<%=name.hyphenate%> pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=al_name%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#activity-log-player-contact-phones-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>
+  <a data-toggle="scrollto-result" data-target="#<%= hyphenated_full_name %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= hyphenated_full_name %>-link pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=al_name%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= hyphenated_full_name %>-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>
 </script>
 <%
     end
@@ -104,7 +107,7 @@
           <% end %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
           <% if ItemFlagName.enabled_for?(name) %>
-          {{>item_flag_container item_type="<%=name%>"}}
+          {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
@@ -112,7 +115,7 @@
         {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
         <div class="results-caption-before <%=name.hyphenate%>-caption-before-{{@key}}">
           <div class="panel panel-default panel-body">
-          <small>{{fpa_state_item 'caption_before_<%=name.underscore%>' @key}}</small>
+          <small>{{{fpa_state_item 'caption_before_<%=name.underscore%>' @key}}}</small>
           </div>
         </div>
         {{/is}}
@@ -133,11 +136,29 @@
         {{else is @key "protocol_event_id"}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "tracker_history_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>tracker item</small>
-          {{#if ../tracker_history_id}}
-            <strong><a href="/masters/{{../master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{../master_id}}-{{this}}" data-toggle="scrollto-target" data-target="#trackers-{{../master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a></strong>
+          {{#if ../tracker_histories}}
+          <li class="list-group-item <%=name.hyphenate%>-tracker-histories-caption is-minor-heading">Related tracker items</li>
           {{/if}}
-          </li>
+
+          {{#each ../tracker_histories}}
+            <li class="list-group-item <%=name.hyphenate%>-tracker-histories">
+              <small>tracker event: {{pretty_string event_date}}</small>
+              <strong>
+                 <a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
+                 {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
+              </strong>
+            </li>
+          {{/each}}
+
+          <div class="results-caption-before <%=name.hyphenate%>-add-linked-tracker">
+            <div class="panel panel-default panel-body">
+              <p>Add a specific tracker status record related to this item:</p>
+              <p class="text-center">
+              <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/player_contact_phones&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
+              </p>
+            </div>
+          </div>
+
         {{else}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}

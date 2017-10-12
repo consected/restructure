@@ -7,7 +7,7 @@ _fpa.postprocessors_activity_logs = {
     _fpa.activity_logs.selected_parent(block, {item_id: data.item_id, rec_type: data.rec_type, item_data: data.item_data, master_id: data.master_id});
 
   },
-  activity_log_player_contact_phone_result_template: function(block, data){
+  activity_log__player_contact_phone_result_template: function(block, data){
     _fpa.form_utils.format_block(block);
     var d = data;
     var d0;

@@ -1,5 +1,6 @@
 require 'rails_helper'
 
+
 RSpec.describe Admin::ActivityLogsController, type: :controller do
 
   include AdminActivityLogSupport
@@ -7,14 +8,13 @@ RSpec.describe Admin::ActivityLogsController, type: :controller do
   def object_class
     ActivityLog
   end
-
   def item
     @activity_log
   end
 
   before(:all) do
-    seed_database
     @path_prefix = "/admin"
+    seed_database
 
     ActivityLog.connection.execute "
       delete from activity_log_history;

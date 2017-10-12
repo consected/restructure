@@ -362,9 +362,13 @@ li.list-group-item.pro-info-pro_id {
 }
 
 
-.list-group-item:first-child, .tracker-chron-results thead, .tracker-tree-results thead {
+.list-group-item:first-child, .tracker-chron-results thead, .tracker-tree-results thead, .list-group-item.is-minor-heading {
     background-color: #EEEEEE;
 
+}
+
+.list-group-item.not-header:first-child {
+  background-color: inherit;
 }
 
 

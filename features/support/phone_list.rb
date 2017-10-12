@@ -6,7 +6,7 @@ module PhoneList
   PhoneItemNumberCss = 'a[data-rec-type="phone"]'
   SelectedPhoneNumberCss = "#{SelectedPhoneItemCss} #{PhoneItemNumberCss}"
   LogPhoneCallButtonCss = '.activity-log-initial-action a.btn'
-  NewPhoneLogFormCss = 'form#new_activity_log_player_contact_phone'
+  NewPhoneLogFormCss = 'form#new_activity_log__player_contact_phone'
   PhoneLogBlockCss ='.activity-logs-player-contact-phone-type-block.in'
 
   def expect_phone_log_to_show_contact_number
@@ -38,18 +38,18 @@ module PhoneList
   end
 
   def select_phone_to_call
-    within phone_item(0) do 
+    within phone_item(0) do
       find(PhoneItemNumberCss).click
     end
     finish_form_formatting
 
     expect(page).to have_css(SelectedPhoneItemCss)
-    
+
     within phone_item(0) do
       expect(page).to have_css(LogPhoneCallButtonCss)
       click_link 'log phone call'
     end
-    
+
     expect(page).to have_css(NewPhoneLogFormCss)
   end
 
