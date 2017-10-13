@@ -18,20 +18,23 @@ class ActivityLog::ActivityLogsController < ApplicationController
       if @item
         caption = @item.data
         item_name = @item.class.human_name
+        item_list = ActivityLog::PlayerContactPhone.view_attribute_list
       else
         caption = 'log item'
         item_name = ''
+        item_list = ActivityLog::PlayerContactPhone.view_blank_log_attribute_list
       end
       {
         caption: caption,
         caption_before: {
           select_call_direction: "Enter details about the #{activity_log_name}",
           protocol_id: "Select the protocol this  #{activity_log_name} is related to. A tracker event will be recorded under this protocol.",
-          set_related_player_contact_rank: "To change the rank of the related #{item_name}, select it:",
+          "set_related_#{item_type_us}_rank".to_sym => "To change the rank of the related #{item_name}, select it:",
           submit: 'To add specific protocol status and method records, save this form first.',
           notes: "Reminder: do not enter personal health information into the notes."
 
-        }
+        },
+        item_list: item_list
       }
     end
 
@@ -92,6 +95,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
       if params[:item_id].blank?
         @item_type = item_controller
+        @master_id = params[:master_id]
         @al_class = activity_log_class
         return
       end

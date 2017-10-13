@@ -13,6 +13,10 @@
     caption = (caption || name).humanize.titleize
   end
 
+  unless defined? item_list
+    item_list = permitted_params - [:id, :master_id, :item_id, item_type_id]
+  end
+
   has_source = false
 
   select_desc = {}
@@ -28,7 +32,7 @@
           <h4 class="list-group-item-heading"><%=caption%></h4>
         </li>
 
-        <% (permitted_params - [:id, :master_id, :item_id, item_type_id]).each do |p| %>
+        <% item_list.each do |p| %>
           <%
               set_related_field = handle_set_related_field(p)
           %>

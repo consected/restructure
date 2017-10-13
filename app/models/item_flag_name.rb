@@ -7,7 +7,8 @@ class ItemFlagName < ActiveRecord::Base
   validates :item_type, presence: true
   validate :item_type_valid?
   validate :name_and_item_type_unique
-  after_validation  :update_tracker_events
+  after_save :enable_configuration
+  after_save :update_tracker_events
 
   default_scope -> {order  "item_flag_names.updated_at DESC nulls last"}
 
@@ -34,16 +35,21 @@ class ItemFlagName < ActiveRecord::Base
     end
 
     def item_type_valid?
-      return unless item_type
+      return unless item_type && !disabled
       cns = ItemFlag.use_with_class_names
       unless  cns.include? item_type.ns_underscore
           errors.add(:item_type, "is attempting to use invalid item type #{item_type}. Valid items are #{cns}")
       end
     end
 
+    def enable_configuration
+      ifc = item_type
+      return if self.disabled
+      ItemFlag.add_master_association ifc
+    end
 
     def update_tracker_events
-      return unless item_type
+      return unless item_type && !disabled
       Tracker.add_record_update_entries item_type, current_admin, 'flag'
     end
 end

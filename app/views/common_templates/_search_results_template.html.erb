@@ -7,6 +7,10 @@
     caption_before = {}
   end
 
+  unless defined? item_flags_after
+    item_flags_after = nil
+  end
+
   unless caption && caption.include?('{{')
     caption = (caption || name).humanize.titleize
   end
@@ -106,7 +110,7 @@
             <% end %>
           <% end %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
-          <% if ItemFlagName.enabled_for?(name) %>
+          <% if ItemFlagName.enabled_for?(name) && !item_flags_after %>
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
@@ -121,7 +125,7 @@
         {{/is}}
 
         {{#is @key "notes"}}
-        <div class="notes-block <%=name.hyphenate%>-notes">
+        <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
@@ -162,8 +166,19 @@
         {{else}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}
+
+        <% if ItemFlagName.enabled_for?(name) && item_flags_after %>
+        {{#is @key '<%=item_flags_after%>'}}
+          <li class="list-group-item is-full-width <%=name.hyphenate%>-item-flags">
+          {{#with ..}}
+            {{>item_flag_container item_type="<%=full_name%>"}}
+          {{/with}}
+          </li>
+        {{/is}}
+        <% end %>
+
         {{/filter}}
-        <% if defined? item_blocks
+        <% if defined?(item_blocks)
             item_blocks.each do |item_name_sym, item_attrs|
               item_name = item_name_sym.to_s
         %>
@@ -176,7 +191,7 @@
           </li>
           {{#filter this "<%= item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs  %>" }}
             {{#is @key "notes"}}
-            <div class="notes-block <%=name.hyphenate%>-<%=item_name.hyphenate%>-notes">
+            <div class="notes-block <%=name.hyphenate%>-<%=item_name.hyphenate%>-notes {{#is this ''}}notes-empty{{/is}}">
               <div class="panel panel-default panel-body">
               {{pretty_string this return_string="true"}}
               </div>

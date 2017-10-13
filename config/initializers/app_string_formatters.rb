@@ -19,4 +19,10 @@ class String
     self.gsub('__', '::').constantize
   end
 
+  # Camelize the string, but
+  # treat double underscores as a namespace delimiter.
+  def ns_camelize
+    self.gsub('__', '/').camelize
+  end
+
 end

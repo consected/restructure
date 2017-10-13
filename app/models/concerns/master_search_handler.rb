@@ -1,6 +1,6 @@
 module MasterSearchHandler
   # Move the main supporting functionality for the Simple and Advanced Search forms here, allowing the Master model data functionality to remain obvious
-  
+
   extend ActiveSupport::Concern
 
   included do
@@ -9,15 +9,15 @@ module MasterSearchHandler
     RankNotNullClause = ' case rank when null then -1 else rank * -1 end'.freeze
     TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
     TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
-    
-    # This association is provided to allow 'simple' search on names in player_infos OR pro_infos 
-    has_many :general_infos, class_name: 'ProInfo' 
 
-    # Associations to allow advanced searches for NOT 
+    # This association is provided to allow 'simple' search on names in player_infos OR pro_infos
+    has_many :general_infos, class_name: 'ProInfo'
+
+    # Associations to allow advanced searches for NOT
     has_many :not_tracker_histories, -> { order(TrackerHistoryEventOrderClause)},  class_name: 'TrackerHistory'
     has_many :not_trackers, -> { order(TrackerEventOrderClause)},  class_name: 'Tracker'
 
-    
+
     SimplePlayerJoin = "LEFT JOIN player_infos on masters.id = player_infos.master_id LEFT JOIN pro_infos as pro_infos on masters.id = pro_infos.master_id".freeze
     NotTrackerJoin = :no_join #'INNER JOIN trackers "not_trackers" on masters.id = not_trackers.master_id'
     NotTrackerHistoryJoin = :no_join #'INNER JOIN tracker_history "not_tracker_histories" on masters.id = not_tracker_histories.master_id'
@@ -25,7 +25,7 @@ module MasterSearchHandler
     # Simply define a hash for the table containing the symbolized field names to be handled
     # Use a hash with :value to define a predefined matching clause:
     # :starts_with is the equivalent of "?%"
-    # :contains is the equivalent of "%?%" 
+    # :contains is the equivalent of "%?%"
     # :is  and :is_not are the equivalent of "?"
     # :do_nothing forces this attribute to be skipped
     # Subsequent symbols in the array can be used to modify the string
@@ -33,7 +33,7 @@ module MasterSearchHandler
     # :upcase makes the whole string uppercase
     # The :conditioncan be specified to state the actual query condition
     # :starts with and :contains both default to "field_name LIKE ?"
-    # :is_not default to "field_name <> ?"  
+    # :is_not default to "field_name <> ?"
     # note that ? characters will be replaced by the field search value
     # Optionally add a value (symbol or array of symbols or string specifying full join clause) for :joins
     # to specify specific tables to add to the inner join list
@@ -52,7 +52,7 @@ module MasterSearchHandler
         middle_name: {value: :starts_with},
         nick_name: {value: :starts_with},
         less_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) < ?"},
-        more_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) > ?"}            
+        more_than_career_years: {value: :is, condition: "pro_infos.start_year is not null AND pro_infos.end_year IS NOT NULL  AND (pro_infos.end_year - pro_infos.start_year) > ?"}
       },
       addresses: {
         street: {value: :starts_with},
@@ -63,7 +63,7 @@ module MasterSearchHandler
       },
       not_trackers: {
         protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from trackers t_inner where t_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND t_inner.sub_process_id = :not_trackers_sub_process_id  AND t_inner.master_id = masters.id)", joins: NotTrackerJoin},
-        sub_process_id: {value: :is, condition: "TRUE", joins: NotTrackerJoin}    
+        sub_process_id: {value: :is, condition: "TRUE", joins: NotTrackerJoin}
       },
       not_tracker_histories: {
         protocol_event_id: {value: :is, condition: "NOT EXISTS (select NULL from tracker_history th_inner where th_inner.protocol_event_id EQUALS_OR_IS_NULL ? AND th_inner.sub_process_id = :not_tracker_histories_sub_process_id AND th_inner.master_id = masters.id)", joins: NotTrackerHistoryJoin},
@@ -86,18 +86,18 @@ module MasterSearchHandler
     # This allows for a :joins definition in AltConditions to define a LEFT OUTER JOIN on the primary table, for example
     NoDefaultJoinFor = [:general_infos, :not_trackers, :not_tracker_histories ]
 
-    MasterNestedAttribs = :general_infos, :player_infos, :pro_infos, 
+    MasterNestedAttribs = :general_infos, :player_infos, :pro_infos,
                                 :player_contacts, :addresses, :trackers, :tracker_histories,
                                 :not_trackers, :not_tracker_histories
-  
+
     # Nested attributes for advanced search form. These items will be extended dynamically by the external_id models when they are initially configured
     accepts_nested_attributes_for(*MasterNestedAttribs)
 
-    
+
   end
-  
+
   class_methods do
-    
+
     # Allow new models to be added to the nested attributes dynamically by models as they are configured
     def add_nested_attribute attrib
       @master_nested_attrib ||= MasterNestedAttribs.dup
@@ -105,7 +105,7 @@ module MasterSearchHandler
 
       Master.accepts_nested_attributes_for(*@master_nested_attrib)
     end
-    
+
     # Build a Master search using the Master and nested attributes passed in
     # Any attributes that are nil will be rejected and will not appear in the query
     # Tables will only be joined if the nested attributes for the association have one or more
@@ -132,15 +132,16 @@ module MasterSearchHandler
           if params_key.to_s.include? '_attributes'
             condition_key = params_key.to_s.gsub('_attributes','').to_sym
             r = Master.reflect_on_association(condition_key)
+            logger.debug "checking master association #{condition_key}"
+            logger.debug "r: #{r}"
             logger.debug "condition_key: #{condition_key}"
             logger.debug "Reflection: #{r.klass.table_name}"
-            logger.debug "Source Reflection: #{r.source_reflection.name && r.source_reflection.name}"          
-            if r.klass #r.source_reflection # 
+            logger.debug "Source Reflection: #{r.source_reflection.name && r.source_reflection.name}"
+            if r.klass #r.source_reflection #
               condition_table =  r.klass.table_name #r.source_reflection.name.to_s #
             else
               condition_table = r.plural_name.to_s
             end
-
           else
             # Generate a pluralized table name for associations that are has_one
             condition_table = params_key.to_s.pluralize
@@ -151,29 +152,29 @@ module MasterSearchHandler
           basic_condition_attribs = params_val.select{|key1,v1| !v1.nil? && !alt_condition(condition_key, [key1, v1])}
 
           # Pull the attributes with an alternative condition string (note that this returns nil values too)
-          # format: {condition: condition_clause, reference: {reference_name => value}, joins: joins_clauses} 
+          # format: {condition: condition_clause, reference: {reference_name => value}, joins: joins_clauses}
           alt_condition_attribs = params_val.select{|_,v1| !v1.nil? }.map{|v2| alt_condition(condition_key, v2) }
 
           logger.debug "Param: #{params_key} has condition_table: #{condition_table}"
           logger.debug "basic_condition_attribs #{basic_condition_attribs} -- alt_condition_attribs #{alt_condition_attribs}"
 
-          # If we have a set of attributes that is not empty 
+          # If we have a set of attributes that is not empty
           # add the equality conditions to the list of wheres
           if basic_condition_attribs.length > 0 || alt_condition_attribs.length > 0
 
             # When this is a basic condition
-            if basic_condition_attribs.length > 0            
+            if basic_condition_attribs.length > 0
               logger.debug "This is a basic condition for condition_table #{condition_table}"
               # When the where for the condition_table is an array of key/values already, just add to it
               # otherwise store the basic condition attributes directly
-              if wheres[condition_table] && wheres[condition_table].first.last.is_a?(Array)              
-                wheres[condition_table][basic_condition_attribs.first.first] += basic_condition_attribs.first.last 
-              else              
-                wheres[condition_table] = basic_condition_attribs 
+              if wheres[condition_table] && wheres[condition_table].first.last.is_a?(Array)
+                wheres[condition_table][basic_condition_attribs.first.first] += basic_condition_attribs.first.last
+              else
+                wheres[condition_table] = basic_condition_attribs
               end
             end
             # When there is a defined alternative condition
-            if alt_condition_attribs.length > 0          
+            if alt_condition_attribs.length > 0
               logger.info "Merging alternative conditions FOR #{alt_condition_attribs}"
               # For each alternative condition attribute, check if it has a defined condition, then
               # generate alternative where clauses
@@ -183,13 +184,13 @@ module MasterSearchHandler
                   wheresalt[0] = "#{wheresalt[0]}#{wheresalt[0] ? " AND " : ''}#{alt_condition_attrib[:condition]}"
                   wheresalt[1].merge! alt_condition_attrib[:reference]
                   if alt_condition_attrib[:joins].is_a?(Symbol) && alt_condition_attrib[:joins] != :no_join
-                    joins << alt_condition_attrib[:joins] 
+                    joins << alt_condition_attrib[:joins]
                     logger.info "Adding alt join #{alt_condition_attrib[:joins]}"
                   elsif alt_condition_attrib[:joins].is_a? String
-                    joins << alt_condition_attrib[:joins] 
+                    joins << alt_condition_attrib[:joins]
                     logger.info "Adding alt joins #{alt_condition_attrib[:joins]}"
                   elsif alt_condition_attrib[:joins].is_a? Array
-                    joins += alt_condition_attrib[:joins] 
+                    joins += alt_condition_attrib[:joins]
                     logger.info "Adding alt joins #{alt_condition_attrib[:joins]}"
                   else
                     logger.info "Not Adding alt joins"
@@ -225,9 +226,9 @@ module MasterSearchHandler
       default_sort res
 
     end
-    
-    
-    def alt_condition table_name, condition    
+
+
+    def alt_condition table_name, condition
 
       logger.debug "Getting alt_condition for #{table_name} => #{condition}"
 
@@ -245,8 +246,8 @@ module MasterSearchHandler
 
       cond_op = altdef[:value]
 
-      if cond_op == :do_nothing || cond_op == :is_not_null && (cval.blank? || cval == '(null)')      
-        return {} 
+      if cond_op == :do_nothing || cond_op == :is_not_null && (cval.blank? || cval == '(null)')
+        return {}
       end
 
       cond_op = [cond_op] unless cond_op.is_a? Array
@@ -257,11 +258,11 @@ module MasterSearchHandler
       if altdef[:condition]
         alt  = altdef[:condition]
       elsif cond_op.include?(:starts_with) || cond_op.include?(:contains)
-        alt = "#{table_name}.#{ckey} LIKE ?"      
+        alt = "#{table_name}.#{ckey} LIKE ?"
       elsif cond_op.include?(:is_not)
         alt = "#{table_name}.#{ckey} <> ?"
       else
-        alt = "#{table_name}.#{ckey} = ?"      
+        alt = "#{table_name}.#{ckey} = ?"
       end
 
       if altdef[:value].is_a? Array
@@ -276,13 +277,13 @@ module MasterSearchHandler
         end
       end
 
-      cval = nil if cval == '(null)' 
+      cval = nil if cval == '(null)'
 
       if cval.nil?
         eoin = 'IS'
       else
         eoin = '='
-      end    
+      end
       alt = alt.gsub('EQUALS_OR_IS_NULL', eoin )
 
       alt = alt.gsub('?', ":#{refname}")
@@ -299,27 +300,27 @@ module MasterSearchHandler
 
       res
     end
-        
-    
-    def default_sort res    
+
+
+    def default_sort res
       # Note that this sorts first, based on the Master rank, which is calculated through a trigger from player info accuracy
       if results_limit
-        res = res.order(MasterRank).take(results_limit) 
+        res = res.order(MasterRank).take(results_limit)
       else
         res = res.order(MasterRank).all #
       end
       logger.info "sorted to #{res.map {|a| [a.id, a.master_rank]}  } "
-      res        
+      res
     end
-    
+
     def results_limit
       r = nil
-      e = ENV['FPHS_RESULT_LIMIT']     
+      e = ENV['FPHS_RESULT_LIMIT']
       r = e.to_i if e
       r = nil if r == 0
-      r    
+      r
     end
-  
-    
-  end  
+
+
+  end
 end

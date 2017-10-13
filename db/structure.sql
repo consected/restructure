@@ -1820,7 +1820,9 @@ CREATE TABLE activity_logs (
     disabled boolean,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    action_when_attribute character varying
+    action_when_attribute character varying,
+    field_list character varying,
+    blank_log_field_list character varying
 );
 
 
@@ -6574,4 +6576,6 @@ INSERT INTO schema_migrations (version) VALUES ('20170922182052');
 INSERT INTO schema_migrations (version) VALUES ('20170926144234');
 
 INSERT INTO schema_migrations (version) VALUES ('20171002120537');
+
+INSERT INTO schema_migrations (version) VALUES ('20171013141835');
 

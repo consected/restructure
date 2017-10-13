@@ -32,6 +32,11 @@ class ActivityLog < ActiveRecord::Base
     self.enabled.where(item_type: item_type).all.map {|i| i.rec_type }
   end
 
+  def blank_log_enabled?
+    !blank_log_field_list.blank?
+  end
+
+
 
   # return the activity log implementation class that corresponds to
   # this item (item_type / rec_type in an enabled admin activity log record)
@@ -69,6 +74,22 @@ class ActivityLog < ActiveRecord::Base
     "activity_log_#{item_type_name}".pluralize
   end
 
+  # List of attributes to be used in common template views
+  # Use the defined field_list if it is not blank
+  # Otherwise use attribute names from the model, removing common junk
+  def view_attribute_list
+    unless self.field_list.blank?
+      self.field_list.split(',').map {|f| f.strip}.compact
+    else
+      self.attribute_names - ['id', 'master_id', 'disabled',parent_type ,"#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
+    end
+  end
+
+  def view_blank_log_attribute_list
+    unless self.blank_log_field_list.blank?
+      self.blank_log_field_list.split(',').map {|f| f.strip}.compact
+    end
+  end
 
   # The class that an activity log implementation belongs to
   def item_class
@@ -174,7 +195,7 @@ class ActivityLog < ActiveRecord::Base
   def add_master_association &association_block
 
     # Add the association
-    logger.info "******** Associated master: has_many #{self.model_assocation_name} with class_name: #{self.activity_log_class_name}"
+    logger.info "Associated master: has_many #{self.model_assocation_name} with class_name: #{self.activity_log_class_name}"
     Master.has_many self.model_assocation_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.activity_log_class_name, &association_block
 
     # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
@@ -197,14 +218,21 @@ class ActivityLog < ActiveRecord::Base
               ic = pg.item_type.pluralize
               get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
               get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-
-              get "activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-
               get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
               post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
               get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
               patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
               put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+
+              # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
+              get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
+              get "activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
+              get "activity_log/#{mn}/", to: "activity_log/#{mn}#index"
+              get "activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
+              post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
+              # used by item flags to generate appropriate URLs
+              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.model_def_name.to_s}"
+
             end
         end
       end

@@ -1,5 +1,5 @@
 <div class="data-results" data-subscription="admin-list" >
-  <div data-result="admin-list">    
+  <div data-result="admin-list">
 <h1>Activity Log Configurations</h1>
 
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
@@ -13,6 +13,8 @@
       <th>Record Type</th>
       <th>Table Name</th>
       <th>Action When Attribute</th>
+      <th>Field List</th>
+      <th>Blank Log Field List</th>
       <th>Disabled</th>
       <th>Admin</th>
     </tr>
@@ -27,13 +29,15 @@
         <td><%= list_item.rec_type %></td>
         <td><%= list_item.table_name %></td>
         <td><%= list_item.action_when_attribute %></td>
-        <td><%= list_item.disabled ? 'disabled' : ''%></td>        
+        <td><%= list_item.field_list %></td>
+        <td><%= list_item.blank_log_field_list %></td>
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>
         <td><%= list_item.admin_name %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%=  render partial: 'admin_handler/index_actions'  %>    
+<%=  render partial: 'admin_handler/index_actions'  %>
   </div>
 </div>

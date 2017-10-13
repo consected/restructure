@@ -49,21 +49,22 @@ module WorksWithItem
     self.class.name.pluralize.underscore
   end
 
-  protected
 
-    def master_user
+  def master_user
 
-      if respond_to?(:master) && master
-        current_user = master.current_user
-        current_user
-      elsif item.respond_to?(:master) && item.master
-        current_user = item.master.current_user
-        current_user
-      else
-        raise "master is nil and can't be used to get the current user" unless master || item.master
-        nil
-      end
+    if respond_to?(:master) && master
+      current_user = master.current_user
+      current_user
+    elsif item.respond_to?(:master) && item.master
+      current_user = item.master.current_user
+      current_user
+    else
+      raise "master is nil and can't be used to get the current user" unless master || item.master
+      nil
     end
+  end
+
+  protected
 
     def force_write_user
       return true if creatable_without_user && !persisted?

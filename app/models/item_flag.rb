@@ -31,17 +31,13 @@
     # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
     pos = use_with_class_names.index(class_name.ns_underscore)
     if pos
-      use_with_class_names[pos.to_i].camelize
+      use_with_class_names[pos.to_i].ns_camelize
     else
-      logger.warn "Expected #{class_name_us} to match an item in #{use_with_class_names}"
+      logger.warn "Expected #{class_name.ns_underscore} to match an item in #{use_with_class_names}"
       nil
     end
   end
 
-  # Namespaced lower cased class name safe to use in IDs, URLs and HTML
-  def class_name_us
-    class_name.ns_underscore
-  end
 
   # The full list of model names that ItemFlag can work with.
   # The result is simply downcased for simple models and fully module/class qualified
@@ -52,6 +48,12 @@
     filtered_assocs = all_assocs.select {|v| v.options[:source] != :item_flags}
     # Return a sorted list
     filtered_assocs.collect {|v| v.class_name.ns_underscore}.sort
+  end
+
+  # Get only the list of active class names (based on admin item flag name configurations) that
+  # are also genuine class names that ItemFlag reports as working with
+  def self.active_class_names
+    ItemFlagName.active.map(&:item_type).uniq & self.use_with_class_names
   end
 
   # Create and remove flags for the underlying item.
@@ -92,9 +94,6 @@
     return update_action
   end
 
-
-
-
   def as_json options={}
     options[:methods] ||= []
     options[:methods] += [:method_id, :item_type_us]
@@ -102,6 +101,20 @@
     options[:include] << :item_flag_name
     options[:done] = true
     super(options)
+  end
+
+  def self.enable_active_configurations
+    active_class_names.each do |ifc|
+      add_master_association ifc
+    end
+  end
+
+  def self.add_master_association ifc
+    raise "Invalid item flag type. No class exists for #{ifc}" unless self.active_class_names.include? ifc
+    ifcs = ifc.pluralize
+    # This association is provided to allow generic search on flagged associated object
+    Master.has_many "#{ifcs}_item_flags".to_sym, through: ifcs, source: :item_flags
+    logger.debug "Associated master with #{ifcs}_item_flags through #{ifcs} with source :item_flags"
   end
 
   protected

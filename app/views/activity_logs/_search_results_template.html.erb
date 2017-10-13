@@ -2,7 +2,7 @@
   l = []
 
 
-  an = m.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
+  an = m.view_attribute_list #m.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
 
   if an.length > 1
     l = an
@@ -26,5 +26,5 @@
       prevent_edit: true,
       prevent_create: true,
       item_list: l
-    } %>
+    } %>    
 <% end %>

@@ -2,7 +2,7 @@ module ParentHandler
   extend ActiveSupport::Concern
 
   def item_class_name
-    item_controller.singularize.camelize
+    item_controller.singularize.ns_camelize
   end
 
   def item_class

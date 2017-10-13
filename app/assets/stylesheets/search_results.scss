@@ -104,6 +104,11 @@ li.list-group-item.is-combo small {
 
 .item-flags-block {
     margin-top:8px;
+
+    a[title="cancel"] {
+      margin-top: 0.5em;
+      margin-left: 1.3em;
+    }
 }
 
 .tracker-flag .item-flags-block {

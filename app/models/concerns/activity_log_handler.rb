@@ -5,12 +5,15 @@ module ActivityLogHandler
 
   included do
     belongs_to parent_type
+    has_many :item_flags, as: :item, inverse_of: :item
 
     after_initialize :set_action_when
 #    before_create :set_related_fields_edit
     before_save :set_related_fields
 
-    validates parent_type, presence: true
+    # don't validate the association with the parent item_data
+    # blank activity logs do not have one
+    # validates parent_type, presence: true
 
     after_validation :sync_item_data
     after_validation :sync_set_related_fields
@@ -43,9 +46,19 @@ module ActivityLogHandler
       parent_type.to_s.camelize.constantize
     end
 
-    # List of attributes to be used in common template views
+    # Find the record in the admin activity log that defines this activity log
+    def admin_activity_log
+      res = ActivityLog.active.select{|s| s.table_name == self.table_name}
+      raise "Found incorrect number of admin activity logs. #{res.length}" if res.length != 1
+      res.first
+    end
+
     def view_attribute_list
-      attribute_names - ['id', 'master_id', 'disabled',parent_type ,"#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
+      admin_activity_log.view_attribute_list.map(&:to_sym)
+    end
+
+    def view_blank_log_attribute_list
+      admin_activity_log.view_blank_log_attribute_list.map(&:to_sym)
     end
 
     # The user relevant data attributes in the parent class
@@ -160,8 +173,9 @@ module ActivityLogHandler
   # sync the attributes that are common between the parent item and the new logged item,
   # to ensure that there is a true record of the original data (in case something is changed
   # in the parent item subsequently)
+  # Skip this if the item is not set (for a blank activity log)
   def sync_item_data
-
+    return true unless item
     fields_to_sync.each do |f|
       self.send("#{f}=", item.send(f))
     end
@@ -216,21 +230,24 @@ module ActivityLogHandler
 
         # get the underlying related item and the value of the field
         relitem = self.send(relitem_name)
-        relitem_field_val = relitem.send(relitem_field)
 
+        # handle the situation where a blank item is not using the related items
+        if relitem
 
-        curr_val = self.send(field_name)
-        # don't set the value if it is already set, since this indicates we have
-        # already configured the model
-        self.send("#{field_name}=", relitem_field_val) unless curr_val
+          relitem_field_val = relitem.send(relitem_field)
 
-        srfs[field_name.to_sym] = {
-          item: relitem,
-          name_and_field: relitem_name_and_field.to_sym,
-          field: relitem_field.to_sym,
-          value: relitem_field_val
-        }
+          curr_val = self.send(field_name)
+          # don't set the value if it is already set, since this indicates we have
+          # already configured the model
+          self.send("#{field_name}=", relitem_field_val) unless curr_val
 
+          srfs[field_name.to_sym] = {
+            item: relitem,
+            name_and_field: relitem_name_and_field.to_sym,
+            field: relitem_field.to_sym,
+            value: relitem_field_val
+          }
+        end
 
       end
     end

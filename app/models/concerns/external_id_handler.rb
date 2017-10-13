@@ -108,7 +108,7 @@ module ExternalIdHandler
     # Optionally accept an association_block, allowing the association related methods such as #build to be overridden
     # in the master record association. Just passes this through to the add_master_assocation
     def add_to_app_list &association_block
-      
+
       self.validates external_id_attribute, presence: true,  numericality: { only_integer: true, greater_than_or_equal_to: external_id_range.min, less_than_or_equal_to: external_id_range.max }
 
       Application.add_to_app_list(:external_id, self)
@@ -116,7 +116,7 @@ module ExternalIdHandler
     end
 
     def add_master_association &association_block
-
+      logger.debug "Add master association for #{self}"
       # Define the association
       Master.has_many plural_name.to_sym,  inverse_of: :master, &association_block
       # Now update the master's nested attributes this model's symbol

@@ -28,29 +28,20 @@ class Master < ActiveRecord::Base
   validates :user, presence: true
   before_create :assign_msid
 
-  # to ensure that the db migrations can run, check for the existence of the dynamic models table
-  # before attempting to use it. Otherwise Rake tasks fail.
   # DynamicModel associations take the form:
   #     master.player_contact_histories
   # i.e. the pluralized table name
-  if ActiveRecord::Base.connection.table_exists? 'dynamic_models'
-    DynamicModel.active.each do |dm|
-      has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
-      Rails.logger.debug "Associated master with #{dm.model_association_name} with class_name: DynamicModel::#{dm.model_class_name}"
-    end
-  end
+  DynamicModel.enable_active_configurations
+
 
   # The main set of has_many associations that represents the primary data objects that can belong to a master record
   PrimaryAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
 
-  Master.reflect_on_all_associations(:has_many).each do |assoc|
-    # This association is provided to allow generic search on flagged associated object
-    has_many "#{assoc.class_name.ns_underscore}_item_flags".to_sym, through: assoc.class_name.underscore, source: :item_flags
-    Rails.logger.debug "Associated master with #{assoc.class_name.ns_underscore}_item_flags through #{assoc.class_name.underscore} with source :item_flags"
-  end
+  # ItemFlag associations with master are generated dynamically, following the form:
+  #   master.player_infos_item_flags
+  ItemFlag.enable_active_configurations
 
-  # The associations with master are generated dynamically
-  # Activity log associations follow the form:
+  # Activity log associations with master are generated dynamically, following the form:
   #   master.activity_log__player_contact_phones
   # Notice the double underscore which represents the Module::Class delimiter
   ActivityLog.add_all_to_app_list
