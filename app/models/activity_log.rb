@@ -81,12 +81,17 @@ class ActivityLog < ActiveRecord::Base
     unless self.field_list.blank?
       self.field_list.split(',').map {|f| f.strip}.compact
     else
-      self.attribute_names - ['id', 'master_id', 'disabled',parent_type ,"#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
+      self.attribute_names - ['id', 'master_id', 'disabled', item_type ,"#{item_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
     end
   end
 
+  # List of attributes to be used in blank log template views
+  # Use the defined blank_log_field_list if it is not blank
+  # Otherwise use the view_attribute_list
   def view_blank_log_attribute_list
-    unless self.blank_log_field_list.blank?
+    if self.blank_log_field_list.blank?
+      self.view_attribute_list.clone
+    else
       self.blank_log_field_list.split(',').map {|f| f.strip}.compact
     end
   end

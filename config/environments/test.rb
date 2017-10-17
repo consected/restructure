@@ -36,7 +36,8 @@ Rails.application.configure do
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
-  config.logger = Logger::Syslog.new('fphs_rails') 
+  # simplify review of the logs by keeping them local in the test environment
+  # config.logger = Logger::Syslog.new('fphs_rails')
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 end

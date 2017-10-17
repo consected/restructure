@@ -330,16 +330,35 @@ _fpa = {
             var item_key;
             var dataitem;
             var target_data;
-            if(data.multiple_results && data.original_item){
+
+            // Handle the requirement that data in the response may not have an exact matching key to the template.
+            // For example, activity log blank items have this, where the template name is "activity_log__player_contact_phone_blank_log"
+            // but the data comes back from a standard ActivityLog::PlayerContactPhone object and therefore has a JSON response
+            // keyed by "activity_log__player_contact_phone"
+            // The block markup (the form) can use data-use-alt-result-key="activity_log__player_contact_phone_blank_log" to force
+            // the use data into the key the template is expecting
+            var alt_data_key = block.attr('data-use-alt-result-key')
+
+            if(data.multiple_results && data.original_item) {
                 item_key = data.multiple_results;
                 dataitem = data.original_item;
                 target_data = {};
 
                 target_data[dataitem.item_type] = dataitem;
 
-            }else{
+            }
+            else {
                 for (item_key in data) break;
-                dataitem = data[item_key];
+
+                if(alt_data_key){
+                  data[alt_data_key] = data[item_key];
+                  dataitem = data[alt_data_key];
+                  // delete the original key, so we don't use it mistakenly elsewhere
+                  delete data[item_key];
+                }
+                else {
+                  dataitem = data[item_key];
+                }
                 target_data = data;
                 // Ensure we use the target if there are multiple results specified, but no original item from a create or merge
                 t_force = !!data.multiple_results;

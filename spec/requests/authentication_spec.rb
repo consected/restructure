@@ -1,20 +1,20 @@
 require 'rails_helper'
 
 describe "user and admin authentication" do
-  
+
   # Prepare a list of URLs to test
-  
+
   before(:each) do
 
     # Handle devise URLs explicitly as users and admins
-    # Also handle explicit redirections to home with :redirect_home    
+    # Also handle explicit redirections to home with :redirect_home
     special_urls = {"/admins/edit" => :admins, "/users/edit" => :users, "/admins/:id" => :admins, "/users/:id" => :users, "/admins/sign_out" => :redirect_home, "/users/sign_out" => :redirect_home }
-    
-    @url_list = Rails.application.routes.routes.map do |r|       
+
+    @url_list = Rails.application.routes.routes.map do |r|
       url = r.path.spec.to_s
       method = nil
-      rm = r.constraints[:request_method].to_s 
-      
+      rm = r.constraints[:request_method].to_s
+
       case rm
       when '(?-mix:^POST$)'
         method = :post
@@ -31,15 +31,15 @@ describe "user and admin authentication" do
       else
         raise "Unrecognized method (#{rm}) for #{url}"
       end
-      
-      url.gsub!('(.:format)','')      
+
+      url.gsub!('(.:format)','')
       rcont = special_urls[url] || r.defaults[:controller]
-      
-      res = url.gsub(':item_controller', 'player_infos').gsub(/:.+?\//,"#{rand(100000)}/").gsub(/:.+?$/,"#{rand(100000)}")      
+
+      res = url.gsub(':item_controller', 'player_infos').gsub(/:.+?\//,"#{rand(100000)}/").gsub(/:.+?$/,"#{rand(100000)}")
       #puts "method #{method} / #{r.defaults[:controller]}: #{res}"
       {url: res, method: method, controller: rcont, orig_url: url }
     end
-    
+
   end
 
   # Check for appropriate redirects to user or admin sign in pages when not logged in
@@ -48,35 +48,35 @@ describe "user and admin authentication" do
   # will cause a failure, ensuring that route definitions are appropriately limited to avoid 500 errors
   # rather than more correct 404 errors
   it "redirects to user login page for all paths when not logged in" do
-    
+
     skip_urls = ["/admins/sign_in", "/users/sign_in", "/child_error_reporter"]
-    
+
     admin_controllers = %w(admin/accuracy_scores admin/action_logs admin/colleges admin/general_selections admin/item_flag_names admin/manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links admin/activity_logs)
-    
+
     @url_list.each do |url|
       if url[:controller] && !skip_urls.include?(url[:url])
-        #puts "attempting URL: #{url}"
-        
+        puts "attempting URL: #{url}"
+
         begin
-          case url[:method] 
+          case url[:method]
           when :get
-            get url[:url] 
+            get url[:url]
           when :patch
-            patch url[:url] 
+            patch url[:url]
           when :put
             put url[:url]
           when :delete
             delete url[:url]
           when :post
             post url[:url]
-          end        
-        
+          end
+
           expect(response).to have_http_status(302), "expected a redirect for #{url}. Got #{response.status}"
           if url[:controller] == :redirect_home
             expect(response).to redirect_to('http://www.example.com/'), "expected a redirect to home page for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
           elsif admin_controllers.include?(url[:controller].to_s)
             expect(response).to redirect_to('http://www.example.com/admins/sign_in'), "expected a redirect to admins/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
-          else          
+          else
             expect(response).to redirect_to('http://www.example.com/users/sign_in'), "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
           end
         rescue AbstractController::ActionNotFound
@@ -86,7 +86,6 @@ describe "user and admin authentication" do
         #puts "Skipping url #{url[:url]} (#{url[:method]}) - no controller or url skipped"
       end
     end
-    
+
   end
 end
-

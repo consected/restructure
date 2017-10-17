@@ -30,7 +30,11 @@ _fpa.postprocessors_activity_logs = {
     _fpa.send_ajax_request(url);
 
     _fpa.postprocessors.info_update_handler(block, d);
+  },
+  activity_log__player_contact_phone_blank_log_result_template: function(block, data){
+    _fpa.postprocessors_activity_logs.activity_log__player_contact_phone_result_template(block, data);
   }
+
 };
 
 $.extend(_fpa.postprocessors, _fpa.postprocessors_activity_logs);

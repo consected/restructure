@@ -94,9 +94,14 @@
 
         </div>
         <br />
-        <a href="/masters/{{master_id}}/activity_log/player_contact_phones/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide" data-target="#activity-log--player-contact-phone-{{master_id}}-">add blank log</a>
+        <p class="help-block small">
+          Select a player contact phone above to log an activity against it. Or click <b>+ General Log</b> to add an activity not tied to a specific item (such as indicating that a follow up is no longer required.)
+        </p>
         <br />
-        <p class="text-center"><a href="/masters/{{master_id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--player-contact-phone-edit-form-{{master_id}}-" aria-label="add contact record"><span class="glyphicon glyphicon-plus"></span> Contact record</a> </p>
+        <p class="text-center">
+          <a href="/masters/{{master_id}}/player_contacts/new" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--player-contact-phone-edit-form-{{master_id}}-" aria-label="add contact record"><span class="glyphicon glyphicon-plus"></span> Contact record</a>
+          <a href="/masters/{{master_id}}/activity_log/player_contact_phones/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide" data-target="#activity-log--player-contact-phone-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> General log</a>
+        </p>
       </div>
 
       <div class="col-md-19 ">
@@ -106,6 +111,7 @@
           <div class="new-block new-below col-md-8 {{#if <%= full_name.pluralize %>}}has-records{{/if}}" data-sort-desc="data-completed-when" id="activity-log--player-contact-phone-{{master_id}}-" data-subscription="activity-log--player-contact-phone-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
               {{#unless <%= full_name.pluralize %>}}<h4>No logged activity</h4>{{/unless}}
           </div>
+          <div class="new-block new-below col-md-8 hidden" data-sort-desc="data-completed-when" id="activity-log--player-contact-phone-blank-log-{{master_id}}-" data-subscription="activity-log--player-contact-phone-blank-log-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
           {{#each activity_log__player_contact_phones}}
             {{#if item_id}}
             {{><%= full_name %>_result _created=@index}}

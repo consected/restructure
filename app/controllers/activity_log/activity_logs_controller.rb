@@ -68,6 +68,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
     def extend_result
       item_id = @item.id if @item
+
       {
         al_type: al_type,
         item_type: item_type_us,
@@ -75,7 +76,6 @@ class ActivityLog::ActivityLogsController < ApplicationController
         item_id: item_id,
         item_data: item_data,
         @item_type => items
-
       }
     end
 
