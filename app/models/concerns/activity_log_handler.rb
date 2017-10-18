@@ -4,6 +4,8 @@ module ActivityLogHandler
   include GeneralDataConcerns
 
   included do
+    belongs_to :master, inverse_of: assoc_inverse
+
     belongs_to parent_type
     has_many :item_flags, as: :item, inverse_of: :item
 
@@ -49,7 +51,7 @@ module ActivityLogHandler
     # Find the record in the admin activity log that defines this activity log
     def admin_activity_log
       res = ActivityLog.active.select{|s| s.table_name == self.table_name}
-      raise "Found incorrect number of admin activity logs. #{res.length}" if res.length != 1
+      raise "Found incorrect number (#{res.length}) of admin activity logs for table name #{self.table_name} from possible list of #{ActivityLog.active.length}" if res.length != 1
       res.first
     end
 

@@ -120,8 +120,6 @@ class ActivityLog::ActivityLogsController < ApplicationController
         #  return if the Activity Log does not work with this item_type / rec_type combo
         @al_class = ActivityLog.al_class_for @item
         return not_found unless @al_class
-      else
-        @al_class = ActivityLog::BlankItem
       end
     end
 

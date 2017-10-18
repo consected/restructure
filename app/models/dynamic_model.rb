@@ -1,5 +1,6 @@
 class DynamicModel < ActiveRecord::Base
 
+  include DynamicModelHandler
   include AdminHandler
 
   default_scope -> {order disabled: :asc, category: :asc, position: :asc,  updated_at: :desc }
@@ -27,23 +28,6 @@ class DynamicModel < ActiveRecord::Base
     active.select(:category).distinct(:category).unscope(:order).map {|s| s.category||'default'}
   end
 
-  # This is intentionally a class variable, to capture the model names for all dynamic models
-  def self.model_names
-    @model_names ||= []
-  end
-
-  def self.model_names= m
-    @model_names = m
-  end
-
-  def self.model_name_strings
-    model_names.map {|m| m.to_s}
-  end
-
-
-  def self.models
-    @models ||= {}
-  end
 
   def model_def_name
     table_name.singularize.to_sym
@@ -65,10 +49,7 @@ class DynamicModel < ActiveRecord::Base
     table_name.singularize.camelcase
   end
 
-  def model_def
 
-    self.class.models[model_def_name]
-  end
 
   def self.enable_active_configurations
     # to ensure that the db migrations can run, check for the existence of the dynamic models table
@@ -81,20 +62,7 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
-  def self.define_models
 
-    begin
-
-    dma = DynamicModel.active
-    logger.info "Generating dynamic models #{DynamicModel.active.length}"
-    dma.each do |dm|
-      dm.generate_model
-    end
-    rescue =>e
-      Rails.logger.warn " Failed to generate dynamic models. Hopefully this is during a migration. #{e.inspect}\n#{e.backtrace.join("\n")}"
-    end
-
-  end
 
   def generate_model
 
@@ -243,10 +211,6 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
-  def self.routes_reload
-    Rails.application.reload_routes!
-    Rails.application.routes_reloader.reload!
-  end
 
 end
 

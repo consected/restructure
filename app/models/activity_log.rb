@@ -2,6 +2,7 @@ class ActivityLog < ActiveRecord::Base
 
   SubProcessName = 'Activity'
 
+  include DynamicModelHandler
   include AdminHandler
   include SelectorCache
 
@@ -119,6 +120,10 @@ class ActivityLog < ActiveRecord::Base
     "activity_log__#{item_type_name}".pluralize
   end
 
+  def model_class_name
+    item_type_name.ns_camelize
+  end
+
   def rec_type_valid?
     return true if self.rec_type.blank?
     rcs = item_class.valid_rec_types
@@ -129,10 +134,6 @@ class ActivityLog < ActiveRecord::Base
   def item_type_valid?
     return true if self.class.use_with_class_names.include?(self.item_type.pluralize)
     false
-  end
-
-  def model_def
-    self.class.models[model_def_name]
   end
 
   def model_def_name
@@ -200,7 +201,7 @@ class ActivityLog < ActiveRecord::Base
   def add_master_association &association_block
 
     # Add the association
-    logger.info "Associated master: has_many #{self.model_assocation_name} with class_name: #{self.activity_log_class_name}"
+    puts "-------------------------------------->Associated master: has_many #{self.model_assocation_name} with class_name: #{self.activity_log_class_name}"
     Master.has_many self.model_assocation_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.activity_log_class_name, &association_block
 
     # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
@@ -247,9 +248,6 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
-  def reload_routes
-    Rails.application.reload_routes!
-  end
 
   def generate_protocol_entries
 
@@ -272,4 +270,134 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
+  def generate_model
+
+    obj = self
+    failed = false
+
+    logger.info "Generating ActivityLog model #{name}"
+    puts "Generating ActivityLog model #{name}"
+
+    if enabled? && !failed
+      begin
+
+        parent_type = (self.item_type).to_sym
+        parent_rec_type = (self.rec_type).to_sym
+        action_when_attribute = (self.action_when_attribute).to_sym
+        activity_log_name = self.name
+
+        # Main implementation class
+        a_new_class = Class.new(ActiveRecord::Base) do
+
+          def self.parent_type= parent_type
+            @parent_type = parent_type
+          end
+          def self.parent_type
+            @parent_type
+          end
+
+          def self.parent_rec_type= parent_rec_type
+            @parent_rec_type = parent_rec_type
+          end
+          def self.parent_rec_type
+            @parent_rec_type
+          end
+
+          def self.action_when_attribute= action_when_attribute
+            @action_when_attribute = action_when_attribute
+          end
+          def self.action_when_attribute
+            @action_when_attribute
+          end
+
+          def self.activity_log_name= activity_log_name
+            @activity_log_name = activity_log_name
+          end
+          def self.activity_log_name
+            @activity_log_name
+          end
+
+          self.parent_type = parent_type
+          self.parent_rec_type = parent_rec_type
+          self.action_when_attribute = action_when_attribute
+          self.activity_log_name = activity_log_name
+
+        end
+
+        a_new_controller = Class.new(ActivityLog::ActivityLogsController) do
+
+          # Annoyingly this needs to be forced, since const_set below does not
+          # appear to set the parent class correctly, unlike for models
+          # Possibly this is a Rails specific override, but the parent is set correctly
+          # when a controller is created as a file in a namespaced folder, so rather
+          # than fighting it, just force the known parent here.
+          def self.parent
+            ::ActivityLog
+          end
+
+          def self.item_controller
+            @parent_type
+          end
+          def item_controller
+            self.class.item_controller
+          end
+          def self.item_controller= parent_type
+            @parent_type = parent_type
+          end
+
+          def self.item_rec_type
+            @parent_rec_type
+          end
+          def item_rec_type
+            self.class.item_rec_type
+          end
+          def self.item_rec_type= parent_rec_type
+            @parent_rec_type = parent_rec_type
+          end
+          self.item_controller = parent_type.to_s.pluralize
+          self.item_rec_type = parent_rec_type.to_s
+
+        end
+
+        m_name = model_class_name
+
+        klass = ::ActivityLog
+        res = klass.const_set(model_class_name, a_new_class)
+        # Do the include after naming, to ensure the correct names are used during initialization
+        res.include TrackerHandler
+        res.include WorksWithItem
+        res.include ActivityLogHandler
+
+        c_name = "#{model_class_name.pluralize}Controller"
+        res2 = klass.const_set(c_name, a_new_controller)
+
+        logger.info "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
+        puts "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
+        tn = model_def_name
+
+        self.class.models[tn] = res
+
+        unless self.class.model_names.include? tn
+          self.class.model_names << tn
+        end
+      rescue=>e
+        failed = true
+        logger.info "Failure creating a activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        puts "Failure creating a activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+      end
+    end
+    if failed || !enabled?
+      logger.info "Removed disabled model #{tn}"
+      self.class.models.delete(tn)
+      self.class.model_names -= [tn]
+    end
+
+    res
+  end
+
+
 end
+
+
+# Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
+::ActivityLog.define_models

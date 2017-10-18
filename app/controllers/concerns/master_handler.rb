@@ -56,12 +56,14 @@ module MasterHandler
   # for example player_contacts or activity_log__player_contacts_phones
   # notice the double underscore for namespaced models to indicate the delimiter
   def objects_name
+    puts "#{self.class.parent.name} -------------------- #{self.class.name}"
     if self.class.parent.name != 'Object'
       "#{self.class.parent.name.underscore}__#{controller_name}".to_sym
     else
       controller_name.to_sym
     end
   end
+
   def human_name
     controller_name.singularize.humanize
   end
