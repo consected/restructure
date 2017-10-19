@@ -442,7 +442,7 @@ _fpa.form_utils = {
           el.on('hide.bs.collapse', function () {
 
           });
-        }).addClass('.attached-force-collapse');
+        }).addClass('attached-force-collapse');
 
         block.find('.resize-children').each(function(){
            var maxh = 1;

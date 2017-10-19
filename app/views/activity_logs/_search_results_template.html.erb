@@ -16,15 +16,38 @@
 
   if File.exist?("#{Rails.root.join 'app', 'views', 'activity_logs', template_file}")
     template_name = "activity_logs/#{m.model_def_name}_search_results_template"
+    %>
+    <%= render partial: template_name, locals: {
+          caption: m.name,
+          name: m.item_type_name,
+          prevent_edit: true,
+          prevent_create: true,
+          item_list: l
+        } %>
+
+    <%
   else
-    template_name = 'common_templates/search_results_template'
+    template_name = 'activity_logs/common_search_results_template'
+    %>
+    <%= render partial: template_name, locals: {
+          caption: m.name,
+          name: m.item_type_name,
+          prevent_edit: true,
+          prevent_create: true,
+          item_list: l,
+          al_class: m.activity_log_class,
+          al_class_name: m.item_type_name,
+          al_name: m.name,
+          rec_type: m.rec_type,
+          item_type: m.item_type,
+
+          item_type_name: m.item_type_name,
+          full_name: m.full_item_type_name,
+          blank_log_full_name: "#{m.full_item_type_name}_blank_log"
+
+        } %>
+
+    <%
   end
+end
 %>
-<%= render partial: template_name, locals: {
-      caption: m.name,
-      name: m.item_type_name,
-      prevent_edit: true,
-      prevent_create: true,
-      item_list: l
-    } %>    
-<% end %>

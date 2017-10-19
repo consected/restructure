@@ -55,12 +55,30 @@ module ActivityLogHandler
       res.first
     end
 
+    # List of attributes to be used in common template views
+    # Use the defined field_list if it is not blank
+    # Otherwise use attribute names from the model, removing common junk
     def view_attribute_list
-      admin_activity_log.view_attribute_list.map(&:to_sym)
+      al = admin_activity_log
+      unless al.field_list.blank?
+        res = al.view_attribute_list + ['tracker_history_id']
+      else
+        res = self.attribute_names - ['id', 'master_id', 'disabled', parent_type ,"#{parent_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
+      end
+      res = res.map(&:to_sym)
+      return res
     end
 
+    # List of attributes to be used in blank log template views
+    # Use the defined blank_log_field_list if it is not blank
+    # Otherwise use the view_attribute_list
     def view_blank_log_attribute_list
-      admin_activity_log.view_blank_log_attribute_list.map(&:to_sym)
+      al = admin_activity_log
+      if al.blank_log_field_list.blank?
+        self.view_attribute_list.clone
+      else
+        admin_activity_log.view_blank_log_attribute_list.map(&:to_sym)
+      end
     end
 
     # The user relevant data attributes in the parent class

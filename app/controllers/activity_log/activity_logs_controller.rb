@@ -18,11 +18,11 @@ class ActivityLog::ActivityLogsController < ApplicationController
       if @item
         caption = @item.data
         item_name = @item.class.human_name
-        item_list = ActivityLog::PlayerContactPhone.view_attribute_list
+        item_list = @al_class.view_attribute_list - @al_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
       else
         caption = 'log item'
         item_name = ''
-        item_list = ActivityLog::PlayerContactPhone.view_blank_log_attribute_list
+        item_list = @al_class.view_blank_log_attribute_list - [:tracker_history_id]
       end
       {
         caption: caption,

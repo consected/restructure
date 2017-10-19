@@ -10,6 +10,7 @@ class ActivityLog < ActiveRecord::Base
   validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
   validate :check_item_type_and_rec_type
+  after_commit :generate_model
   after_commit :reload_routes
   after_commit :generate_protocol_entries
   after_commit :add_to_app_list
@@ -75,24 +76,14 @@ class ActivityLog < ActiveRecord::Base
     "activity_log_#{item_type_name}".pluralize
   end
 
-  # List of attributes to be used in common template views
-  # Use the defined field_list if it is not blank
-  # Otherwise use attribute names from the model, removing common junk
   def view_attribute_list
     unless self.field_list.blank?
       self.field_list.split(',').map {|f| f.strip}.compact
-    else
-      self.attribute_names - ['id', 'master_id', 'disabled', item_type ,"#{item_type}_id", 'user_id', 'created_at', 'updated_at', 'rank', 'source'] + ['tracker_history_id']
     end
   end
 
-  # List of attributes to be used in blank log template views
-  # Use the defined blank_log_field_list if it is not blank
-  # Otherwise use the view_attribute_list
   def view_blank_log_attribute_list
-    if self.blank_log_field_list.blank?
-      self.view_attribute_list.clone
-    else
+    unless self.blank_log_field_list.blank?
       self.blank_log_field_list.split(',').map {|f| f.strip}.compact
     end
   end
@@ -251,12 +242,28 @@ class ActivityLog < ActiveRecord::Base
 
   def generate_protocol_entries
 
+    logger.info "Generating protocol entries"
     admin = self.current_admin
     Protocol.enabled.each do |p|
-      sp = p.sub_processes.create! name: ActivityLog::SubProcessName, current_admin: admin
-      sp.protocol_events.create! name: self.name, current_admin: admin
-    end
+      logger.info "For protocol: #{p.id} #{p.name}"
+      sps = p.sub_processes.where(name: ActivityLog::SubProcessName)
+      if sps.length == 0
+        sp = p.sub_processes.create!(name: ActivityLog::SubProcessName, current_admin: admin, disabled: true)
+        logger.info "Adding a new Activity sub process #{sp.id}"
+      else
+        sp = sps.first
+        logger.info "Using the existing Activity sub process #{sp.id}"
+      end
 
+      pes = sp.protocol_events.where name: self.name
+      if pes.length == 0
+        pe = sp.protocol_events.create! name: self.name, current_admin: admin
+        logger.info "Adding a new Activity protocol event #{pe.id}"
+      else
+        logger.info "Using the existing Activity protocol event #{pes.first.id}"
+      end
+    end
+    return true
   end
 
   def check_item_type_and_rec_type
@@ -272,7 +279,6 @@ class ActivityLog < ActiveRecord::Base
 
   def generate_model
 
-    obj = self
     failed = false
 
     logger.info "Generating ActivityLog model #{name}"

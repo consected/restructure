@@ -113,7 +113,12 @@ _fpa = {
     var new_block = block;
 
     // Position the result before, after or in the current block
-    if(options.position === 'before'){
+    if(options.position && options.position.indexOf('before') === 0){
+        var beforeBlock = block;
+        if(options.position.indexOf('parent') > 0){
+          beforeBlock = block.parent();
+        }
+
         new_block = html;
         var id = new_block.attr('id');
         var existing = $('#'+id);
@@ -123,20 +128,26 @@ _fpa = {
             existing.replaceWith(new_block);
         }
         else{
-            block.before(new_block);
+            beforeBlock.before(new_block);
         }
         block.html('');
-    } else if(options.position === 'after'){
+    } else if(options.position && options.position.indexOf('after') === 0){
+
+        var afterBlock = block;
+        if(options.position.indexOf('parent') > 0){
+          afterBlock = block.parent();
+        }
+
         new_block = html;
         var id = new_block.attr('id');
         var existing = $('#'+id);
         // If the results has a root element with an id that exist in the DOM already,
         // replace it rather than placing the result after the specified block
         if(existing.length > 0){
-            existing.replaceWith(new_block);
+          existing.replaceWith(new_block);
         }
         else{
-            block.after(new_block);
+          afterBlock.after(new_block);
         }
         block.html('');
     }
@@ -385,10 +396,14 @@ _fpa = {
                 // the targeted element
                 var b = $(t);
                 if(b.hasClass('new-block')){
-                    if(b.hasClass('new-below'))
-                        options.position = 'after';
+                    if(b.hasClass('new-after-parent'))
+                        options.position = 'after parent';
+                    else if(b.hasClass('new-before-parent'))
+                      options.position = 'before parent';
+                    else if(b.hasClass('new-below'))
+                      options.position = 'after';
                     else
-                        options.position = 'before';
+                      options.position = 'before';
                 }
                 // Since we may have specified multiple items to match the target, run through each in turn
                 // making sure to use any specific templates they specify

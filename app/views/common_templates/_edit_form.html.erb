@@ -44,7 +44,8 @@
 
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
             <%
-               col_type = object_instance.class.columns_hash[p.to_s].type
+               col = object_instance.class.columns_hash[p.to_s]
+               col_type = col.type
             %>
             <% if col_type == :boolean %>
               <%= f.label p %>

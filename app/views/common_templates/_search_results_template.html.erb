@@ -52,6 +52,13 @@
     with_data = nil
   end
 
+  unless defined? activity_log_class_name
+    activity_log_class_name = nil
+  end
+
+  al_full_name = "activity_log__#{full_name.underscore}"
+  al_full_names = "activity_log__#{full_name.underscore}".pluralize
+
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -61,10 +68,13 @@
 <% unless custom_activity_log == :none
 
     # get a list of rec_types that an activity log of this type is constrained to use
+    # create a button for each item type / rec type combo, or one for the item type if
+    # there is no constraint on rec type
+    # the handlebars templates will select the appropriate button based on the rec type of an
+    # individual item
     works_with_rec_types_array = ActivityLog.works_with_rec_types(name)
     works_with_rec_types = works_with_rec_types_array.join(',') || ''
     activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
-
 
     works_with_rec_types_array << '' if works_with_rec_types_array.length == 0
     works_with_rec_types_array.each do |rec_type|
@@ -73,14 +83,17 @@
       hyphenated_full_name = "activity-log--#{al_name.hyphenate}"
 %>
 
-<script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <a data-toggle="scrollto-result" data-target="#<%= hyphenated_full_name %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= hyphenated_full_name %>-link pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=al_name%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= hyphenated_full_name %>-{{master_id}}" data-template="activity-logs-<%= activity_log_template_name %><%=extra_class.blank? ? '' : "-#{extra_class}" %>-result-template"></a>
-</script>
 <%
     end
   end
 %>
-
+<script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#if rec_type}}
+  <a data-toggle="scrollto-result" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-{{rec_type}}-main-result-template"></a>
+  {{else}}
+  <a data-toggle="scrollto-result" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-main-result-template"></a>
+  {{/if}}
+</script>
 
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}<div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
@@ -103,9 +116,9 @@
           <% unless custom_activity_log == :none %>
             <% if works_with_rec_types.blank? %>
               {{> activity_log_<%=name%>_show_button_partial }}
-            <% else %>
+            <% elsif %>
               {{#is rec_type 'in' '<%= works_with_rec_types %>' }}
-                {{> activity_log_<%=name%>_show_button_partial}}
+                {{> activity_log_<%=name%>_show_button_partial rec_type=rec_type}}
               {{/is}}
             <% end %>
           <% end %>
@@ -158,7 +171,7 @@
             <div class="panel panel-default panel-body">
               <p>Add a specific tracker status record related to this item:</p>
               <p class="text-center">
-              <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/player_contact_phones&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
+              <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/<%=activity_log_class_name%>&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
               </p>
             </div>
           </div>

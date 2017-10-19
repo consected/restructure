@@ -35,15 +35,23 @@ module DynamicModelHandler
       end
 
     end
+
+    def routes_reload
+      Rails.application.reload_routes!
+      Rails.application.routes_reloader.reload!
+    end
+
   end
+
+
 
   def model_def
     self.class.models[model_def_name]
   end
 
-  def self.routes_reload
-    Rails.application.reload_routes!
-    Rails.application.routes_reloader.reload!
+  def reload_routes
+    self.class.routes_reload
   end
+
 
 end
