@@ -449,17 +449,6 @@ _fpa.form_utils = {
           });
         }).addClass('attached-force-collapse');
 
-        block.find('.resize-children').each(function(){
-           var maxh = 1;
-           var cs = $(this).find('ul');
-           cs.each(function(){
-              var h = $(this).height();
-              if(h>maxh) maxh = h;
-           });
-           if(maxh>1)
-           cs.height(maxh);
-        });
-
 
         block.find('[data-add-icon]').not('.attached-add-icon').each(function(){
             var icon = $(this).attr('data-add-icon');
@@ -522,6 +511,42 @@ _fpa.form_utils = {
         }).addClass('attached-college_ta');
     },
 
+    resize_children: function(block){
+
+      window.setTimeout(function(){
+
+        var curr_top = -1;
+        var maxh = -1;
+        block.find('.resize-children').each(function(){
+
+          // run through all the candidate items
+          var cs = $(this).find('ul.list-group');
+          cs.each(function(){
+              var el = $(this).parent();
+
+              // attempt to resize row by row if there is overflow
+              // so, if the top of this item is lower, resize the height of
+              // the recent items that are marked ready to resize,
+              // then reset the maxh variable to start again.
+              if(el.offset().top > curr_top){
+                curr_top = el.offset().top
+                if(maxh>1)
+                  block.find('.ready-to-resize').removeClass('ready-to-resize').height(maxh);
+                maxh = 1;
+              }
+
+              // get the height of this item and see if it is larger
+              // also set a class ready-to-resize that keeps this group of items
+              // together when resizing just a row
+              var h = el.addClass('ready-to-resize').height();
+              if(h>maxh) maxh = h;
+          });
+          // finally, handle the remaining items
+          if(maxh>1)
+            block.find('.ready-to-resize').removeClass('ready-to-resize').height(maxh);
+        });
+      }, 100);
+    },
 
     // Run through all the general formatters for a new block to show nicely
     format_block: function(block){
@@ -543,6 +568,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_data_toggles(block);
         _fpa.form_utils.setup_extra_actions(block);
         _fpa.form_utils.setup_datepickers(block);
+        _fpa.form_utils.resize_children(block);
         block.removeClass('formatting-block');
     }
 };

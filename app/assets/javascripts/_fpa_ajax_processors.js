@@ -170,16 +170,17 @@ _fpa.postprocessors = {
             // automatically open the trackers planel
             var t = '#trackers-' + master_id;
 
-            var a = $('a.open-tracker[data-target="' + t + '"]');
-            a[0].app_callback = function(){
-                $(t).collapse('show');
-            };
-            a.trigger('click.rails');
-
+            window.setTimeout(function(){
+              var a = $('a.open-tracker[data-target="' + t + '"]');
+              a[0].app_callback = function(){
+                  $(t).collapse('show');
+              };
+              a.trigger('click.rails');
+            }, 10);
             // After a short delay, trigger the background loading of items for this master
             window.setTimeout(function(){
               $('#master-'+ master_id + '-player-infos').find('.on-open-click a[data-remote="true"]').click();
-            },500);
+            }, 500);
         }
     },
 
