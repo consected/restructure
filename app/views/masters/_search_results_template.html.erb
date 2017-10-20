@@ -147,6 +147,9 @@
           <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="activity-log--<%= a.item_type_name.hyphenate %>-main-result-template"  >
               <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
           </div>
+          <span class="on-open-click hidden">
+            <a href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>" data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="activity-log--<%= a.item_type_name.hyphenate %>-main-result-template" data-remote="true" class=""><%=a.name%></a>            
+          </span>
           <% end %>
 
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">

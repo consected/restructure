@@ -34,7 +34,7 @@ a.open-in-new-window:after {
     margin-top: 5px;
     margin-bottom: 10px;
     margin-left: 0.3em;
-    
+
 }
 
 
@@ -60,10 +60,10 @@ a.navbar-brand {
 
 
 body.sessions.new {
-    .flash { 
+    .flash {
         position: relative;
         width: auto;
-    }    
+    }
 }
 
 .version-info {font-size: 12px; color: gray;}
@@ -75,9 +75,9 @@ a.add-icon[data-show-modal] {color: #09c;}
 .meta-last-updated {cursor: help;}
 
 .glyphicon.ev-ajax-running {
-  
+
   color:red;
-  
+
 }
 
 a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
@@ -85,21 +85,21 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
     background-color: #CC0000;
     display: inline-block;
     padding: 2px;
-    
+
     border: 1px solid #ff0000;
     border-radius: 4px;
     text-decoration: none;
     font-size: 12px;
-    
+
     &:hover {
         background-color: #ff0000;
         text-decoration: none;
     }
-    
+
     &:active {
         background-color: #770000;
     }
-    
+
     &.small {
       padding: 2px;
       background-color: #E67171;
@@ -110,7 +110,7 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
 .nav.nav-pills {
     li {
         > a {
-            
+
             background-color: white;
             color: #2e6da4;
             border: 1px solid #2e6da4;
@@ -118,8 +118,8 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
         > a.collapsed {
             background-color: #2e6da4;
             color: white;
-            
-            
+
+
         }
         > a > .caret {
             visibility: hidden;
@@ -164,9 +164,7 @@ input.form-control.has-value, select.form-control.has-value {
     -webkit-animation: working 1s ease-in-out infinite;
     -moz-animation: working 1s ease-in-out infinite;
     animation: working 1s ease-in-out infinite;
-    
-    min-height: 20px;
-    display: block;
+
 }
 
 
@@ -186,17 +184,17 @@ input.form-control.has-value, select.form-control.has-value {
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
 .hide-collapsed {
-    display: initial;        
+    display: initial;
 }
 .collapsed .hide-collapsed {
-    display: none;  
+    display: none;
 }
 .hide-not-collapsed {
-    display: none;  
+    display: none;
 }
 
 .collapsed .hide-not-collapsed {
-    display: initial;  
+    display: initial;
 }
 
 a[data-toggle="collapse"] {outline: 0; }
@@ -242,12 +240,12 @@ a[data-toggle="collapse"].master-expander.collapsed {color: #333;}
     color: white;
     opacity: 1;
     display: inline-block;
-    
+
     font-size: 18px;
-    
-    
+
+
     &::-moz-focus-inner {
-        
+
         padding-bottom: 6px;
     }
 }

@@ -76,12 +76,16 @@ class ActivityLog < ActiveRecord::Base
     "activity_log_#{item_type_name}".pluralize
   end
 
+  # The attribute list defined in the admin record. If blank, the activity_log_class
+  # equivalent of this method returns a set of fields based on the actual implementation table
   def view_attribute_list
     unless self.field_list.blank?
       self.field_list.split(',').map {|f| f.strip}.compact
     end
   end
 
+  # The attribute list defined in the admin record. If blank, the activity_log_class
+  # equivalent of this method returns a set of fields based on the actual implementation table
   def view_blank_log_attribute_list
     unless self.blank_log_field_list.blank?
       self.blank_log_field_list.split(',').map {|f| f.strip}.compact
@@ -227,6 +231,7 @@ class ActivityLog < ActiveRecord::Base
               get "activity_log/#{mn}/", to: "activity_log/#{mn}#index"
               get "activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
               post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
+              patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
               # used by item flags to generate appropriate URLs
               get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.model_def_name.to_s}"
 
@@ -388,7 +393,7 @@ class ActivityLog < ActiveRecord::Base
       rescue=>e
         failed = true
         logger.info "Failure creating a activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
-        
+
       end
     end
     if failed || !enabled?

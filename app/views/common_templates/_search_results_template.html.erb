@@ -76,30 +76,21 @@
 <% unless custom_activity_log == :none
 
     # get a list of rec_types that an activity log of this type is constrained to use
-    # create a button for each item type / rec type combo, or one for the item type if
-    # there is no constraint on rec type
+    # create a button for all item type / rec type combos
     # the handlebars templates will select the appropriate button based on the rec type of an
     # individual item
     works_with_rec_types_array = ActivityLog.works_with_rec_types(name)
     works_with_rec_types = works_with_rec_types_array.join(',') || ''
     activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
-
     works_with_rec_types_array << '' if works_with_rec_types_array.length == 0
-    works_with_rec_types_array.each do |rec_type|
-      al_name = name.pluralize
-      al_name = "#{name}_#{rec_type.pluralize}" unless rec_type.blank?
-      hyphenated_full_name = "activity-log--#{al_name.hyphenate}"
-%>
 
-<%
-    end
   end
 %>
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#if rec_type}}
-  <a data-toggle="scrollto-result" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-{{rec_type}}-main-result-template"></a>
+  <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-{{rec_type}}-main-result-template"></a>
   {{else}}
-  <a data-toggle="scrollto-result" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-main-result-template"></a>
+  <a data-toggle="uncollapse" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-main-result-template"></a>
   {{/if}}
 </script>
 

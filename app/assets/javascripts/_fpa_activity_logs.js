@@ -30,7 +30,7 @@ _fpa.activity_logs = {
 
   show_main_block: (block, data) => {
 
-    if(block.not('.collapsing') && block.not('.in')) block.collapse('show');
+  //  if(block.not('.collapsing') && block.not('.in')) block.collapse('show');
 
     _fpa.form_utils.format_block(block);
     _fpa.activity_logs.selected_parent(block, {item_id: data.item_id, rec_type: data.rec_type, item_data: data.item_data, master_id: data.master_id});

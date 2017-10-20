@@ -53,10 +53,10 @@ module MasterHandler
 
   def create
 
-    set_object_instance @master_objects.build(secure_params)
-    handle_updated_item_flags
+    set_object_instance @master_objects.build(secure_params)    
     set_additional_attributes object_instance
     if object_instance.save
+      handle_updated_item_flags
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
         index
@@ -204,7 +204,9 @@ module MasterHandler
 
       def handle_updated_item_flags
         @flag_item_type = object_instance.item_type
-        if ItemFlag.works_with @flag_item_type
+        # Check for blank item_flag param to cover testing scenarios that do not return
+        # the item_flag set. Which is reasonable and conceivable in a real form too
+        if ItemFlag.is_active_for?(@flag_item_type) && params[:item_flag]
           secure_item_flag_params = params.require(:item_flag).permit(item_flag_name_id: [])
           flag_list = secure_item_flag_params[:item_flag_name_id].select {|f| !f.blank?}.map {|f| f.to_i}
           ItemFlag.set_flags flag_list, object_instance, current_user

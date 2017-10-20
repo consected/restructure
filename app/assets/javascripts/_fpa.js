@@ -489,7 +489,9 @@ _fpa = {
                                     // Note that we underscore the item_type, since this handles the compounded parent/item_type
                                     // results for 'works_with_item' classes
                                     item_data = d;
-                                    if(item_data[dsfor] === +dsid && item_data.item_type.underscore() === dst){
+                                    var matching_data_sub_item = alt_data_key;
+                                    if(!matching_data_sub_item) matching_data_sub_item = item_data.item_type.underscore();
+                                    if(item_data[dsfor] === +dsid && matching_data_sub_item === dst){
                                         use_data = {};
                                         use_data[dst] = item_data;
                                     }

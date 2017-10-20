@@ -159,9 +159,15 @@ _fpa.postprocessors = {
         _fpa.form_utils.format_block(block);
         if(d.update_action){
             var master_id = d.master_id;
-            if(!no_scroll)
-              $.scrollTo($('#master-'+ master_id), 250);
 
+            // previously this was in here to handle scolling to updated data
+            // this now has a strange effect given that there are a lot of other
+            // panels showing in a master, before the player infos.
+            // Don't force this scroll to the top anymore
+            // if(!no_scroll)
+            //   $.scrollTo($('#master-'+ master_id), 250);
+
+            // automatically open the trackers planel
             var t = '#trackers-' + master_id;
 
             var a = $('a.open-tracker[data-target="' + t + '"]');
@@ -170,7 +176,10 @@ _fpa.postprocessors = {
             };
             a.trigger('click.rails');
 
-            $('#master-'+ master_id + '-player-infos').find('.on-open-click a[data-remote="true"]').click();
+            // After a short delay, trigger the background loading of items for this master
+            window.setTimeout(function(){
+              $('#master-'+ master_id + '-player-infos').find('.on-open-click a[data-remote="true"]').click();
+            },500);
         }
     },
 
