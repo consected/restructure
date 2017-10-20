@@ -1,4 +1,4 @@
-  class ItemFlag < ActiveRecord::Base
+class ItemFlag < ActiveRecord::Base
 
   include WorksWithItem
 
@@ -27,6 +27,9 @@
     self.user.email
   end
 
+
+  # Is this class_name one of the possible classes ItemFlag can work with, independent of whether
+  # the admin configuration is actually created or enabled for it
   def self.works_with class_name
     # Get the value from the array and return it, so we can return a value that is not the original passed in (failing Brakeman test otherwise)
     pos = use_with_class_names.index(class_name.ns_underscore)
@@ -54,6 +57,16 @@
   # are also genuine class names that ItemFlag reports as working with
   def self.active_class_names
     ItemFlagName.active.map(&:item_type).uniq & self.use_with_class_names
+  end
+
+  def self.is_active_for? class_or_class_name
+    return unless class_or_class_name
+    if class_or_class_name.is_a? Class
+      class_name = class_or_class_name.name.ns_underscore
+    else
+      class_name = class_or_class_name
+    end
+    self.active_class_names.include? class_name.ns_underscore
   end
 
   # Create and remove flags for the underlying item.

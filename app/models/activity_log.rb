@@ -192,7 +192,7 @@ class ActivityLog < ActiveRecord::Base
   def add_master_association &association_block
 
     # Add the association
-    puts "-------------------------------------->Associated master: has_many #{self.model_assocation_name} with class_name: #{self.activity_log_class_name}"
+    logger.debug "Associated master: has_many #{self.model_assocation_name} with class_name: #{self.activity_log_class_name}"
     Master.has_many self.model_assocation_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.activity_log_class_name, &association_block
 
     # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
@@ -282,7 +282,6 @@ class ActivityLog < ActiveRecord::Base
     failed = false
 
     logger.info "Generating ActivityLog model #{name}"
-    puts "Generating ActivityLog model #{name}"
 
     if enabled? && !failed
       begin
@@ -377,8 +376,8 @@ class ActivityLog < ActiveRecord::Base
         c_name = "#{model_class_name.pluralize}Controller"
         res2 = klass.const_set(c_name, a_new_controller)
 
-        logger.info "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
-        puts "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
+        logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
+
         tn = model_def_name
 
         self.class.models[tn] = res
@@ -389,7 +388,7 @@ class ActivityLog < ActiveRecord::Base
       rescue=>e
         failed = true
         logger.info "Failure creating a activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
-        puts "Failure creating a activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        
       end
     end
     if failed || !enabled?

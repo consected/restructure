@@ -5,7 +5,6 @@ module ActivityLogHandler
 
   included do
     belongs_to :master, inverse_of: assoc_inverse
-
     belongs_to parent_type
     has_many :item_flags, as: :item, inverse_of: :item
 
@@ -90,6 +89,11 @@ module ActivityLogHandler
     def action_when_attribute
       :completed_when
     end
+
+    def uses_item_flags?
+      ItemFlagName.enabled_for? self.name.ns_underscore
+    end
+
   end
 
   # default record updates tracking is not performed, since we sync tracker separately

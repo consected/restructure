@@ -19,11 +19,13 @@
     show_created_at: true,
     edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
     caption_before:{},
-    item_flags_after: 'protocol_id'
+    item_flags_after: 'notes',
+    item_flags_readonly: true
   } %>
 
   <%= render partial: 'common_templates/search_results_template', locals: {
       name: blank_log_full_name,
+      item_class_name: full_name,
       caption: 'General Log', # substitute the rec_type attribute (capitalized) as the block caption
       prevent_edit: false,
       prevent_create: false,
@@ -37,7 +39,8 @@
       show_created_at: true,
       edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
       caption_before:{},
-      item_flags_after: 'protocol_id'
+      item_flags_after: 'notes',
+      item_flags_readonly: true
     } %>
 
 

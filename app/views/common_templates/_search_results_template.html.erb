@@ -33,6 +33,10 @@
     full_name = name
   end
 
+  unless defined? item_class_name
+    item_class_name = full_name
+  end
+
   unless defined? custom_activity_log
     # check whether the activity log broadly works with this type of item
     custom_activity_log = ActivityLog.works_with(name) || :none
@@ -54,6 +58,10 @@
 
   unless defined? activity_log_class_name
     activity_log_class_name = nil
+  end
+
+  unless defined? item_flags_readonly
+    item_flags_readonly = false
   end
 
   al_full_name = "activity_log__#{full_name.underscore}"
@@ -180,11 +188,11 @@
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}
 
-        <% if ItemFlagName.enabled_for?(name) && item_flags_after %>
+        <% if ItemFlagName.enabled_for?(item_class_name) && item_flags_after %>
         {{#is @key '<%=item_flags_after%>'}}
           <li class="list-group-item is-full-width <%=name.hyphenate%>-item-flags">
           {{#with ..}}
-            {{>item_flag_container item_type="<%=full_name%>"}}
+            {{>item_flag_container item_type="<%=full_name%>" readonlyview=<%= item_flags_readonly %> }}
           {{/with}}
           </li>
         {{/is}}

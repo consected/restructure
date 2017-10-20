@@ -34,7 +34,8 @@ class ActivityLog::ActivityLogsController < ApplicationController
           notes: "Reminder: do not enter personal health information into the notes."
 
         },
-        item_list: item_list
+        item_list: item_list,
+        item_flags_after: :notes
       }
     end
 
@@ -80,7 +81,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
     end
 
     def set_additional_attributes obj
-      if @item
+      if @item && obj.class != @item.class
         obj.item_id = @item.id
         obj.send("#{item_type_us}=", @item)
       end

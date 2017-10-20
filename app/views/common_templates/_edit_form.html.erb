@@ -17,6 +17,10 @@
     item_list = permitted_params - [:id, :master_id, :item_id, item_type_id]
   end
 
+  unless defined? item_flags_after
+    item_flags_after = nil
+  end
+
   has_source = false
 
   select_desc = {}
@@ -30,6 +34,7 @@
         <li class="list-group-item">
           <%= inline_cancel_button %>
           <h4 class="list-group-item-heading"><%=caption%></h4>
+          <%= render partial: 'common_templates/item_flags_block', locals: {f: f} unless item_flags_after %>
         </li>
 
         <% item_list.each do |p| %>
@@ -138,6 +143,11 @@
               <%= f.text_field p %>
             <% end %>
           </li>
+          <%  if item_flags_after == p %>
+          <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
+            <%= render partial: 'common_templates/item_flags_block', locals: {f: f} %>
+          </li>
+          <% end %>
         <% end %>
 
         <% if caption_before[:submit] %>

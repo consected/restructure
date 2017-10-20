@@ -25,7 +25,7 @@ module DynamicModelHandler
       begin
         dma = self.active
         logger.info "Generating models #{self.name} #{self.active.length}"
-        puts "Generating models for #{self.name} #{self.active.length}"
+        
         dma.each do |dm|
           dm.generate_model
         end

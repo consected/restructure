@@ -40,10 +40,11 @@
 .notes-block {
   .panel {
     min-height: 52px;
+    border-radius: 0;
   }
   &.notes-empty .panel:before {
-    content: '(no notes entered)';
-    color: silver;
+    content: 'no notes entered';
+    color: #999;
   }
 
 }

@@ -41,7 +41,7 @@ class TrackersController < ApplicationController
         res = new_tracker.merge_if_exists
       rescue => e
         logger.warn "Tracker update merge error: #{e.inspect}"
-        puts "Tracker update merge error: #{e.inspect}"
+        
         @tracker.errors.add :protocol_id, "Tracker update error: #{e.inspect}"
       end
 
