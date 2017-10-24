@@ -60,6 +60,21 @@ module GeneralDataConcerns
     self.class.get_source_name self.source
   end
 
+  # look up the tracker_history items that corresponds
+  def tracker_histories
+    TrackerHistory.where(item_id: self.id, item_type: self.class.name)
+  end
+
+  # look up the tracker_history item that corresponds to the latest tracker entry linked to this item
+  def tracker_history
+    TrackerHistory.where(item_id: self.id, item_type: self.class.name).order(id: :desc).first
+  end
+
+  def tracker_history_id
+    th = tracker_history
+    return unless th && th.id
+    th.id
+  end
 
 
 

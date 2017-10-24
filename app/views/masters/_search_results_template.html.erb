@@ -9,7 +9,7 @@
     caption: 'person',
     prevent_edit: false,
     prevent_create: false,
-    item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes),
+    item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes tracker_history_id),
     data_sort: [:desc, "data-item-id"]
   } %>
 
@@ -28,7 +28,7 @@
     caption: '{{capitalize rec_type}}', # substitute the rec_type attribute (capitalized) as the block caption
     prevent_edit: false,
     prevent_create: false,
-    item_list: %w(data source),
+    item_list: %w(data source tracker_history_id),
     data_sort: [:desc, "data-item-rank"],
     extra_class: '{{rec_type}}-type'
   } %>
@@ -37,7 +37,7 @@
     name: 'address',
     prevent_edit: false,
     prevent_create: false,
-    item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type),
+    item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type tracker_history_id),
     data_sort: [:desc, "data-item-rank"],
     # add custom markup data attribute to allow country to be processed in Javascript formatting
     custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"}

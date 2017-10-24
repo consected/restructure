@@ -11,7 +11,7 @@ module ActivityLogHandler
     after_initialize :set_action_when
 #    before_create :set_related_fields_edit
     before_save :set_related_fields
-
+    before_save :set_allow_tracker_sync
     # don't validate the association with the parent item_data
     # blank activity logs do not have one
     # validates parent_type, presence: true
@@ -143,9 +143,13 @@ module ActivityLogHandler
 
 
   # Sync the tracker by adding a record to the protocol if it is set
+  # This should only happen one time, since in the case of edit / update, a duplicate
+  # item could be created otherwise.
   def sync_tracker
 
     return unless self.respond_to?(:protocol_id) && self.protocol_id
+
+    return unless @allow_tracker_sync
 
     protocol = Protocol.find(protocol_id)
 
@@ -173,22 +177,6 @@ module ActivityLogHandler
     t
   end
 
-  # look up the tracker_history items that corresponds
-  def tracker_histories
-    TrackerHistory.where(item_id: self.id, item_type: self.class.name)
-  end
-
-
-  # look up the tracker_history item that corresponds to the latest tracker entry linked to this item
-  def tracker_history
-    TrackerHistory.where(item_id: self.id, item_type: self.class.name).order(id: :desc).first
-  end
-
-  def tracker_history_id
-    th = tracker_history
-    return unless th && th.id
-    th.id
-  end
 
   def fields_to_sync
     self.class.fields_to_sync
@@ -299,6 +287,12 @@ module ActivityLogHandler
       end
     end
     return true
+  end
+
+  # Store the result of allowing a tracker sync to happen before save, when we
+  # would lose access to the required change information.
+  def set_allow_tracker_sync
+    @allow_tracker_sync = true if !self.persisted? || self.protocol_id_changed?
   end
 
 end

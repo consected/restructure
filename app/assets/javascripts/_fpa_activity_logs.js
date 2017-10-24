@@ -56,10 +56,12 @@ _fpa.activity_logs = {
     $('.activity-log-list .new-block').addClass('has-records');
     _fpa.activity_logs.selected_parent(block, {item_id: d.item_id, rec_type: d.rec_type, item_data: d.item_data, master_id: d.master_id});
 
-    // var url = '/masters/'+d.master_id+'/player_contacts.js';
-    //
-    // _fpa.send_ajax_request(url);
+    var itype = block.parents('.activity-logs-item-block').first().find('.activity-log-sub-list').attr('data-sub-list');
 
+    if(d._updated){
+      var url = '/masters/'+d.master_id+'/'+itype+'.js';
+      _fpa.send_ajax_request(url);
+    }
     _fpa.postprocessors.info_update_handler(block, d);
   }
 

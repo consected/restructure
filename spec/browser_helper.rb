@@ -5,7 +5,7 @@ module BrowserHelper
   def setup_browser
 
     return if @@running
-    
+
     @@running = true
 
     ENV['LANGUAGE']='en_US:en'

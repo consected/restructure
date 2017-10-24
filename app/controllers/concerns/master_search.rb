@@ -72,16 +72,16 @@ module MasterSearch
               include: {
                 item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
               },
-              methods: [:user_name, :accuracy_score_name, :rank_name, :source_name]
+              methods: [:user_name, :accuracy_score_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
             },
             pro_infos: {},
             player_contacts: {
               order: {rank: :desc},
-              methods: [:user_name, :rank_name, :source_name]
+              methods: [:user_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
             },
             addresses: {
               order: {rank: :desc},
-              methods: [:user_name, :rank_name, :state_name, :country_name, :source_name]
+              methods: [:user_name, :rank_name, :state_name, :country_name, :source_name, :tracker_history_id, :tracker_histories]
             },
 #           Loading trackers dynamically provides a significant speed up, and this may become more important as the tracker usage grows
 #           trackers: {

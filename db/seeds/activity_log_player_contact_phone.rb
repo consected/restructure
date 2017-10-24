@@ -41,7 +41,7 @@ module Seeds
 
       item_type = "activity_log__player_contact_phone_select_result"
       values = [
-        {name: "Call Connected", value: "connected", create_with: true, lock: true},
+        {name: "Connected", value: "connected", create_with: true, lock: true},
         {name: "Left Voicemail", value: "voicemail", create_with: true, lock: true},
         {name: "Not Connected", value: "not connected", create_with: true, lock: true},
         {name: "Bad Number", value: "bad number", create_with: true, lock: true}

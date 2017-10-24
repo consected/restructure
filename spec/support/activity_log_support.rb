@@ -30,7 +30,7 @@ module ActivityLogSupport
     [
       {
         player_contact_id: @player_contact.id,
-        select_call_direction: 'from player',
+        select_call_direction: 'to staff',
         select_who: 'user'
       }
     ]

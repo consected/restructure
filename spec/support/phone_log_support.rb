@@ -11,7 +11,7 @@ module PhoneLogSupport
         select_next_step: 'complete'
       },
       {
-        select_call_direction: 'from player',
+        select_call_direction: 'to staff',
         select_who: 'user',
         called_when: DateTime.now - rand(100).days,
         select_result: 'connected',

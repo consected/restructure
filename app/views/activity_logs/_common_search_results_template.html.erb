@@ -45,7 +45,7 @@
 
 
 <script id="sub_list_<%=item_type_name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="panel index-{{_created}} sub-list-item <%=item_type_name_hyphenated%>-type" id="activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" data-template="sub-list-<%=item_type_name_hyphenated%>-result-template" data-sub-item="<%=item_type%>" data-sub-id="{{id}}" data-sort-desc="data-item-rank" data-preprocessor="<%=item_type%>_edit_form">{{/was}}
+  {{#was _created}}<div class="panel index-{{_created}} sub-list-item activity-log--<%=item_type_name_hyphenated%>-type" id="activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" data-template="sub-list-<%=item_type_name_hyphenated%>-result-template" data-sub-item="<%=item_type%>" data-sub-id="{{id}}" data-sort-desc="data-item-rank" data-preprocessor="<%=item_type%>_edit_form">{{/was}}
 
     <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
       <li class="list-group-item sub-list-data">
@@ -73,7 +73,7 @@
 
 <script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
   <span id="activity-log-{{master_id}}-initial-action" class="" >
-    <span id="activity-logs-<%=item_type_name_hyphenated%>-actions">
+    <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
       <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-">add log</a>
     </span>
    </span>

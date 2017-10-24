@@ -157,15 +157,15 @@
           {{/if}}
 
           {{#each ../tracker_histories}}
-            <li class="list-group-item <%=name.hyphenate%>-tracker-histories">
-              <small>tracker event: {{pretty_string event_date}}</small>
+            <li class="list-group-item <%=name.hyphenate%>-tracker-histories in-item-tracker-histories">
+              <small>on {{pretty_string event_date}}</small>
               <strong>
                  <a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
                  {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
               </strong>
             </li>
           {{/each}}
-
+          <% if activity_log_class_name %>
           <div class="results-caption-before <%=name.hyphenate%>-add-linked-tracker">
             <div class="panel panel-default panel-body">
               <p>Add a specific tracker status record related to this item:</p>
@@ -174,6 +174,7 @@
               </p>
             </div>
           </div>
+          <% end %>
 
         {{else}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>

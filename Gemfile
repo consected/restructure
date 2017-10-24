@@ -14,9 +14,10 @@ gem 'country_select'
 
 gem 'syslog-logger'
 
-group :doc do
-  gem 'sdoc', '~> 0.4.0', group: :doc
-end
+#  explicitly remove sdoc since it is holding back JSON, which needs to be upgraded due to a CVE
+# group :doc do
+#   gem 'sdoc', '~> 0.4.0', group: :doc
+# end
 
 group :development do
 
@@ -28,29 +29,27 @@ end
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
-  
+
   gem 'rspec-rails', '~> 3.0'
-  
+
   gem 'webrick'
-  
+
   gem "brakeman", :require => false
   gem "bundler-audit"
-  
-  
+
+
   gem 'sass-rails', '~> 5.0'
   gem 'uglifier', '>= 1.3.0'
 
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-  gem "spring-commands-cucumber"
-  
+
 end
 
 group :test do
   gem 'capybara'
   gem 'selenium-webdriver', '3.4.4'
-  gem 'cucumber-rails', :require => false
   gem 'database_cleaner'
   gem 'simplecov', :require => false
 end

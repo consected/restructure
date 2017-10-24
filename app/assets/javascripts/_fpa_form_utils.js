@@ -531,7 +531,7 @@ _fpa.form_utils = {
               if(el.offset().top > curr_top){
                 curr_top = el.offset().top
                 if(maxh>1)
-                  block.find('.ready-to-resize').removeClass('ready-to-resize').height(maxh);
+                  block.find('.ready-to-resize').removeClass('ready-to-resize').css({minHeight: maxh});
                 maxh = 1;
               }
 
