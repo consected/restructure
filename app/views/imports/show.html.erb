@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Primary table:</strong>
+  <%= @import.primary_table %>
+</p>
+
+<p>
+  <strong>Item count:</strong>
+  <%= @import.item_count %>
+</p>
+
+<p>
+  <strong>Filename:</strong>
+  <%= @import.filename %>
+</p>
+
+<p>
+  <strong>Items:</strong>
+  <%= @import.imported_items %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @import.user %>
+</p>
+
+<%= link_to 'Edit', edit_import_path(@import) %> |
+<%= link_to 'Back', imports_path %>

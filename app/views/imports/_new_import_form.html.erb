@@ -1,0 +1,102 @@
+    <%= form_for(@import, class: "inline-form", remote: false, html: {'data-result-target' => '#import-edit-results', 'data-template' => "edit-edit-result"}) do |form| %>
+      <div class="data-results import-edit-container">
+        <div data-result="import-edit-form-"  class="import-edit-form">
+
+          <div class="grid-form-block">
+            <table class="import-grid">
+              <thead>
+                <tr>
+                  <% fields.each do |p| %>
+                  <th>
+                    <%= form.label p %>
+                  </th>
+                  <% end %>
+                </tr>
+              </thead>
+              <tbody>
+              <% begin %>
+
+                <%= form.fields_for @primary_table.to_sym, @import.items do |f| %>
+                <tr>
+                  <% fields.each do |p| %>
+                    <td class="">
+
+                      <%
+                        item = @import.items[f.index]
+                         col = item.class.columns_hash[p.to_s]
+                         col_type = col.type
+
+
+                      %>
+                      <% if col_type == :boolean %>
+                        <%= f.check_box p %>
+                      <% elsif p == :description %>
+                        <%= f.text_area p %>
+                      <% elsif p == :rec_type%>
+                        <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: item.rec_type) %>
+                      <% elsif p == :source %>
+                        <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: item.source) %>
+                        <% has_source = true %>
+                      <% elsif p.to_s.index('select_') == 0
+                          v = item.send(p)
+                      %>
+                        <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>
+                      <% elsif p.to_s.start_with?('set_related_') && p.to_s.end_with?('_rank') %>
+                          <%= f.select p, general_selection("#{p.to_s.gsub('set_related_', '').gsub('_rank', '').pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc), {include_blank: true} %>
+                      <% elsif p == :protocol_id %>
+                          <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name}_sub_process_id", class: ""}%>
+                      <% elsif p == :sub_process_id %>
+                        <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "##{name}_protocol_event_id", class: ""} %>
+                      <% elsif p == :protocol_event_id %>
+                          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: "" %>
+                      <% elsif p == :rank %>
+                        <% if respond_to? "#{name}_rank_array_pair".to_sym %>
+                          <%= f.select :rank, self.send("#{name}_rank_array_pair") %>
+                        <% else %>
+                          <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: item.rank) %>
+                        <% end %>
+                      <% elsif p.to_s.index(/(_date|_when)$/)  %>
+                        <%= f.date_field p %>
+                      <% elsif p.to_s.index(/_year$/)  %>
+                        <%
+                          h = {}
+                          r = Settings.const_get("#{p.to_s.camelize}Range")
+                          h[:in] = r if r
+                        %>
+                        <%= f.number_field p, h %>
+                      <% elsif p == :country %>
+                        <%= f.country_select :country, priority_countries: ["US", "CA", "DE"], class: " country-select"%>
+                      <% elsif p == :college %>
+                        <%= f.text_field :college, class: 'college-input typeahead'  %>
+                      <% elsif p == :state %>
+                        <%= f.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}  %>
+                      <% elsif p == :zip %>
+                        <%= f.text_field :zip, zip_field_props %>
+                      <% elsif p == :notes %>
+                        <%= f.text_area :notes, class: ''  %>
+                      <% elsif GeneralSelection::BasicItemTypes.include?("#{name.pluralize}_#{p}".to_sym)%>
+                        <%# Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down%>
+                        <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: item.send(p)) %>
+                      <% else %>
+                        <%= f.text_field p %>
+                      <% end %>
+
+
+                    </td>
+                  <% end %>
+                  </tr>
+                <% end %>
+
+              <% end %>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+      <div class="import-form-actions">
+        <div class="form-group">
+          <%= form.submit class: "btn btn-primary" %>
+        </div>
+      </div>
+    <% end %>

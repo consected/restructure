@@ -16,13 +16,13 @@
       <ul class="nav navbar-nav">
         <% @primary_navs.each do |nav| %>  
         <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %>
-          <% if nav[:sub] %>  
+          <% if nav[:sub] %>
           <ul class="dropdown-menu" role="menu">
             <% nav[:sub].each do |nav1| %>
             <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>
             <% end %>
           </ul>
-          <% end %>        
+          <% end %>
         </li>
         <% end %>
       </ul>
@@ -30,30 +30,30 @@
         <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
           <div class="form-group">
             <%= text_field_tag :nav_q, params[:nav_q], class: "form-control", placeholder: "MSID Search" %>
-            <%= text_field_tag :nav_q_pro_id, params[:nav_q_pro_id], class: "form-control", placeholder: "Pro ID Search" %>  
-            <%= text_field_tag :nav_q_id, params[:nav_q_id], class: "form-control", placeholder: "Master ID" %>  
+            <%= text_field_tag :nav_q_pro_id, params[:nav_q_pro_id], class: "form-control", placeholder: "Pro ID Search" %>
+            <%= text_field_tag :nav_q_id, params[:nav_q_id], class: "form-control", placeholder: "Master ID" %>
           </div>
           <%= button_tag '<span class="glyphicon glyphicon-search"></span>'.html_safe, class:"btn btn-default"  %>
           <%= submit_tag "CSV", name: :req_format, value: "csv", class: "btn btn-default"  if current_user.can?(:export_csv)%>
           <%= submit_tag "JSON", name: :req_format, value: "json", class: "btn btn-default target_new_window" if current_user.can?(:export_json) %>
-              
+
         <% end %>
       <% end %>
       <ul class="nav navbar-nav navbar-right">
-      <% @secondary_navs.each do |nav| %>  
-        <% 
+      <% @secondary_navs.each do |nav| %>
+        <%
           drop = {}
           if nav[:sub]
-            drop = {class: "dropdown-toggle", "data-toggle": "dropdown", role: "button", "aria-expanded": "false"} 
+            drop = {class: "dropdown-toggle", "data-toggle": "dropdown", role: "button", "aria-expanded": "false"}
           else
             drop = {}
           end
-        
-          drop.merge! nav[:extras]    
+
+          drop.merge! nav[:extras]
         %>
         <li class="dropdown">
-            <%= link_to nav[:label].html_safe, nav[:url], drop%>            
-          <% if nav[:sub] %>  
+            <%= link_to nav[:label].html_safe, nav[:url], drop%>
+          <% if nav[:sub] %>
           <ul class="dropdown-menu" role="menu">
             <% nav[:sub].each do |nav1| %>
             <li <% if nav1[:active] %>class="active"<% end %> ><%= link_to nav1[:label].html_safe, nav1[:url], nav1[:extras] %></li>

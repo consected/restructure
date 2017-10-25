@@ -1,11 +1,11 @@
-<% 
+<%
 click_to_search = @report_page #&& @report.report_type  == 'search'
-btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary" 
+btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
 %>
-  
+
         <div>
             <%= form_tag report_path(@report.id), method: :get, class: 'form-formatted search_report', id: "report_query_form", data: {result_target: '#master_results_block', preprocessor: 'reports_result'}, remote: true do %>
-            <% if @report.filter_previous_clause? && @report_page && @report.filtering_list%>  
+            <% if @report.filter_previous_clause? && @report_page && @report.filtering_list%>
             <div class="row">
                 <div class="form-group">
                 <%
@@ -15,27 +15,27 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
                   end
                 %>
                 <%= check_box_tag "search_attrs[_filter_previous_]", 'true', fp, style: 'display: inline; width: 2em; vertical-align: bottom;' %>
-                <%= label_tag 'filter previous results' %>                
-                </div> 
+                <%= label_tag 'filter previous results' %>
+                </div>
                 <div id="filter_on_block"></div>
-                
+
             </div>
             <%end %>
-            <div class="row report-criteria-fields">              
-              <% i = 0 
-                @report.search_attributes.each do |name, type|                   
+            <div class="row report-criteria-fields">
+              <% i = 0
+                @report.search_attributes.each do |name, type|
               %>
-                <% if i > 0 && i % 4 == 0 %></div><div class="row"><%end%> 
-                <div class="col-md-6" style="padding-bottom: 1em;">                
+                <% if i > 0 && i % 4 == 0 %></div><div class="row"><%end%>
+                <div class="col-md-6" style="padding-bottom: 1em;">
                 <%= report_field name, type, @report.search_attr_values[name] %>
                 </div>
-              <% i += 1                                                 
-                 end%>              
+              <% i += 1
+                 end%>
             </div>
             <div class="form-group form-actions clearfix">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
-              <% if click_to_search %> <span></span><%end%>  
+              <% if click_to_search %> <span></span><%end%>
               <% unless @report.editable_data? %>
               <%= submit_tag :search, value: :search,class: "#{btn} #{!@report_page ? 'auto-submitter' : ''}" if @report.report_type == 'search'  %>
               <% end %>
@@ -43,12 +43,18 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
               <% unless @report.editable_data? %>
               <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count'%>
               <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_user.can? :export_csv %>
-              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>                             
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>
               <% end %>
-              <% if @report.report_type != 'count' %> 
-                <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>  
+              <% if @report.report_type != 'count' %>
+                <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
               <%end%>
             </div>
             <%end%>
+
+            <% if @report.allow_imports %>
+              <%= render partial: 'imports/upload_form' %>
+            <% end %>
+
+
             <%=link_to 'get_filter_previous', report_path(id: @report.id, get_filter_previous: 'true', format: :html), id: 'get_filter_previous', remote: true, data: {result_target: '#filter_on_block'}, class: 'hidden' %>
         </div>

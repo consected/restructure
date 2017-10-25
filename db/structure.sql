@@ -1764,6 +1764,50 @@ ALTER SEQUENCE activity_log_history_id_seq OWNED BY activity_log_history.id;
 
 
 --
+-- Name: activity_log_player_contact_emails; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE activity_log_player_contact_emails (
+    id integer NOT NULL,
+    data character varying,
+    select_email_direction character varying,
+    select_who character varying,
+    emailed_when date,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    protocol_id integer,
+    notes character varying,
+    user_id integer,
+    player_contact_id integer,
+    master_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    set_related_player_contact_rank character varying
+);
+
+
+--
+-- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE activity_log_player_contact_emails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE activity_log_player_contact_emails_id_seq OWNED BY activity_log_player_contact_emails.id;
+
+
+--
 -- Name: activity_log_player_contact_phones; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -2352,6 +2396,41 @@ CREATE SEQUENCE general_selections_id_seq
 --
 
 ALTER SEQUENCE general_selections_id_seq OWNED BY general_selections.id;
+
+
+--
+-- Name: imports; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE imports (
+    id integer NOT NULL,
+    primary_table character varying,
+    item_count integer,
+    filename character varying,
+    imported_items integer[],
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: imports_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE imports_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: imports_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE imports_id_seq OWNED BY imports.id;
 
 
 --
@@ -3853,6 +3932,13 @@ ALTER TABLE ONLY activity_log_history ALTER COLUMN id SET DEFAULT nextval('activ
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY activity_log_player_contact_emails ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_emails_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY activity_log_player_contact_phones ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_phones_id_seq'::regclass);
 
 
@@ -3945,6 +4031,13 @@ ALTER TABLE ONLY general_selection_history ALTER COLUMN id SET DEFAULT nextval('
 --
 
 ALTER TABLE ONLY general_selections ALTER COLUMN id SET DEFAULT nextval('general_selections_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY imports ALTER COLUMN id SET DEFAULT nextval('imports_id_seq'::regclass);
 
 
 --
@@ -4224,6 +4317,14 @@ ALTER TABLE ONLY activity_log_history
 
 
 --
+-- Name: activity_log_player_contact_emails_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY activity_log_player_contact_emails
+    ADD CONSTRAINT activity_log_player_contact_emails_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_player_contact_phones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4333,6 +4434,14 @@ ALTER TABLE ONLY general_selection_history
 
 ALTER TABLE ONLY general_selections
     ADD CONSTRAINT general_selections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY imports
+    ADD CONSTRAINT imports_pkey PRIMARY KEY (id);
 
 
 --
@@ -4645,6 +4754,34 @@ CREATE INDEX index_activity_log_history_on_activity_log_id ON activity_log_histo
 
 
 --
+-- Name: index_activity_log_player_contact_emails_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_master_id ON activity_log_player_contact_emails USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_player_contact_id ON activity_log_player_contact_emails USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_protocol_id ON activity_log_player_contact_emails USING btree (protocol_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_user_id ON activity_log_player_contact_emails USING btree (user_id);
+
+
+--
 -- Name: index_activity_log_player_contact_phones_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4775,6 +4912,13 @@ CREATE INDEX index_general_selection_history_on_general_selection_id ON general_
 --
 
 CREATE INDEX index_general_selections_on_admin_id ON general_selections USING btree (admin_id);
+
+
+--
+-- Name: index_imports_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_imports_on_user_id ON imports USING btree (user_id);
 
 
 --
@@ -6088,6 +6232,14 @@ ALTER TABLE ONLY reports
 
 
 --
+-- Name: fk_rails_b1e2154c26; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY imports
+    ADD CONSTRAINT fk_rails_b1e2154c26 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_b822840dc1; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6578,4 +6730,6 @@ INSERT INTO schema_migrations (version) VALUES ('20170926144234');
 INSERT INTO schema_migrations (version) VALUES ('20171002120537');
 
 INSERT INTO schema_migrations (version) VALUES ('20171013141835');
+
+INSERT INTO schema_migrations (version) VALUES ('20171025095942');
 

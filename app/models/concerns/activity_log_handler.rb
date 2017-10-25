@@ -200,11 +200,6 @@ module ActivityLogHandler
   end
 
 
-#  def set_related_fields_edit
-#    @set_related_fields ||= setup_set_related_fields(false)
-#  end
-
-
   def set_related_fields
     @set_related_fields ||= setup_set_related_fields
   end

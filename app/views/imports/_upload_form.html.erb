@@ -1,0 +1,10 @@
+<h3>Upload data to this table</h3>
+<%= form_tag @import, multipart: true, method: :post, id: 'new_import' do |f| %>
+  <%= select_tag :primary_table, options_for_select(@primary_tables) %>
+  <%= file_field_tag :import_file %>
+<% end %>
+<script>
+  $('#import_file').on('change', function(){
+    $('#new_import').trigger('submit.rails');
+  })
+</script>

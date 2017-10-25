@@ -1,0 +1,79 @@
+.import-edit-container{
+  margin: 30px 30px 0 30px;
+}
+.import-edit-form {
+  width: auto;
+  height: auto;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  background-color: white;
+}
+
+.import-form-actions {
+  margin: 12px 30px;
+}
+
+table.import-grid {
+
+  th {
+    padding: 6px 8px 0 8px;
+    border: 1px solid silver;
+    background-color: #eee;
+  }
+
+  td {
+    padding: 0 0 0 4px;
+    border: 1px solid silver;
+    background-color: white;
+    input.form-control, select.form-control {
+
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      width: 100%;
+      padding-right: 4px;
+      background-image: none;
+      -moz-appearance: none;
+    }
+    textarea.form-control {
+      height: 2em !important;
+      margin: 0;
+      border: 0;
+      box-shadow: none;
+      font-size: 12px;
+      padding: 5px 4px;
+    }
+    input[type='checkbox'] {
+      border: 1px solid silver;
+      -moz-appearance: checkbox;
+      box-sizing: border-box;
+
+      padding: 0;
+      line-height: normal;
+      display: inline-block;
+
+      width: 1em;
+      height: 1em;
+
+      vertical-align: middle;
+      color: #444;
+    }
+
+  }
+
+
+  select, input {
+    &.form-control.has-value {
+      background-color: white !important;
+      background-image: none;
+    }
+  }
+
+  select {
+    &.form-control.has-value {
+      -moz-appearance: none;
+    }
+  }
+
+
+}
