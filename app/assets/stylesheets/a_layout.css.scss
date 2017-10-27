@@ -21,6 +21,9 @@ a:hover {
   cursor: pointer;
 }
 
+a.open-in-new-window{
+  white-space: nowrap;
+}
 a.open-in-new-window:after {
     content: "\e066";
     position: relative;

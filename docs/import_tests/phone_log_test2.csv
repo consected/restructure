@@ -1,0 +1,7 @@
+data,select_call_direction,select_who,called_when,select_result,select_next_step,follow_up_when,protocol_id,notes
+(453)453-4353,to player,user,2017-10-20,connected,complete,2017-09-25,,
+(617)794-2330,to staff,user,2017-10-23,connected,complete,,,
+(356)447-5744,to player,user,2017-10-23,connected,complete,,,
+(453)453-4353,to player,user,2017-10-23,connected,complete,,1,
+(324)234-2312,to player,user,2017-10-24,connected,complete,,5,
+(324)234-2312a,to player,user,2017-10-24,connected,complete,,1,

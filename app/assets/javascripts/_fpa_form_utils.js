@@ -491,7 +491,7 @@ _fpa.form_utils = {
 
         //block.updatePolyfill();
 
-        block.find('input,select,checkbox,textarea').not('[type="submit"],.form-control').addClass('form-control input-sm');
+        block.find('input,select,checkbox,textarea').not('[type="submit"],.form-control,.ff').addClass('form-control input-sm ff');
         block.find('.typeahead').css({width: '100%'});
         block.find('form').not('.form-formatted').addClass('form-inline');
 
@@ -509,6 +509,15 @@ _fpa.form_utils = {
                 _fpa.form_utils.setup_typeahead('input.college-input.typeahead', 'colleges', "colleges");
             });
         }).addClass('attached-college_ta');
+
+
+        block.find('[data-format-date-local="true"]').not('.formatted-date-local').each(function(){
+          var text = $(this).html();
+          text = text.replace(' UTC', 'Z');
+          var ds = new Date(Date.parse(text));
+          var d = ds.toLocaleString();
+          $(this).html(d);
+        }).addClass('formatted-date-local')
     },
 
     resize_children: function(block){

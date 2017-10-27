@@ -51,10 +51,5 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
             </div>
             <%end%>
 
-            <% if @report.allow_imports %>
-              <%= render partial: 'imports/upload_form' %>
-            <% end %>
-
-
             <%=link_to 'get_filter_previous', report_path(id: @report.id, get_filter_previous: 'true', format: :html), id: 'get_filter_previous', remote: true, data: {result_target: '#filter_on_block'}, class: 'hidden' %>
         </div>

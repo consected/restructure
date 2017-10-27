@@ -1,10 +1,24 @@
-<h3>Upload data to this table</h3>
-<%= form_tag @import, multipart: true, method: :post, id: 'new_import' do |f| %>
-  <%= select_tag :primary_table, options_for_select(@primary_tables) %>
-  <%= file_field_tag :import_file %>
-<% end %>
+<div class="import-action-container well">
+  <h3 id="upload-message">Upload data</h3>
+  <%= form_tag @import, multipart: true, method: :post, id: 'new_import', class: "form form-formatted" do |f| %>
+
+    <div class="form-group">
+      <label for="primary_table">Select the table to import into</label>
+      <%= select_tag :primary_table, options_for_select(@primary_tables), include_blank: true %>
+    </div>
+    <div class="form-group" id="browse-block">
+      <label for="import_file">Pick the file to upload<br/>Import will start immediately after selection</label>
+      <%= file_field_tag :import_file, class: 'ff' %>
+    </div>
+  <% end %>
+  <br/>
+  <%= link_to 'Cancel', imports_path, class: 'btn btn-danger' %>
+</div>
+
 <script>
-  $('#import_file').on('change', function(){
-    $('#new_import').trigger('submit.rails');
-  })
+$('#import_file').on('change', function(){
+  $('#upload-message').html('Uploading file');
+  $('#import_file').hide();
+  $('#new_import').trigger('submit.rails');
+})
 </script>

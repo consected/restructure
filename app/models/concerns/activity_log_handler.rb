@@ -16,8 +16,10 @@ module ActivityLogHandler
     # blank activity logs do not have one
     # validates parent_type, presence: true
 
-    after_validation :sync_item_data
-    after_validation :sync_set_related_fields
+    validates :master_id, presence: true
+
+    after_save :sync_item_data
+    after_save :sync_set_related_fields
 
     after_save :sync_tracker
 
@@ -273,11 +275,13 @@ module ActivityLogHandler
 
       curr_val = s[:item].send(s[:field])
 
-      if curr_val != new_val
+      if !new_val.blank? && curr_val != new_val
         s[:item].send("#{s[:field]}=", new_val)
-        s[:item].master = self.master
-        res = s[:item].save
 
+        # Do not set master - this should already be set, and setting it again breaks
+        # secondary_key matched saves
+        #s[:item].master = self.master
+        res = s[:item].save
         raise "Failed to save related item. #{s[:item].errors.full_messages.join("; ")}" unless res
       end
     end

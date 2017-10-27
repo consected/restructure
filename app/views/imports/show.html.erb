@@ -1,29 +1,13 @@
-<p id="notice"><%= notice %></p>
+<div class="import-action-container well">
+  <h3>Import Details</h3>
+  <p>Table: <strong><%= @import.primary_table %></strong></p>
+  <p>Filename: <strong><%= @import.filename %></strong></p>
+  <p>Number of rows: <strong><%=@import.items.count%></strong></p>
+  <% if @import.items.first.attribute_names.include? 'master_id' %>
+  <br/>
+  <p class="help-block">Master ID cells have links to the full master data.</p>
+  <%end%>
+</div>
 
-<p>
-  <strong>Primary table:</strong>
-  <%= @import.primary_table %>
-</p>
 
-<p>
-  <strong>Item count:</strong>
-  <%= @import.item_count %>
-</p>
-
-<p>
-  <strong>Filename:</strong>
-  <%= @import.filename %>
-</p>
-
-<p>
-  <strong>Items:</strong>
-  <%= @import.imported_items %>
-</p>
-
-<p>
-  <strong>User:</strong>
-  <%= @import.user %>
-</p>
-
-<%= link_to 'Edit', edit_import_path(@import) %> |
-<%= link_to 'Back', imports_path %>
+<%= render partial: 'new_import_form' %>

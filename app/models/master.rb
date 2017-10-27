@@ -25,7 +25,7 @@ class Master < ActiveRecord::Base
 
   before_validation :set_user
   before_validation :prevent_user_updates,  on: :update
-  validates :user, presence: true
+  validates :user, presence: true,  unless: :validating?
   before_create :assign_msid
 
   # DynamicModel associations take the form:
@@ -45,6 +45,8 @@ class Master < ActiveRecord::Base
   #   master.activity_log__player_contact_phones
   # Notice the double underscore which represents the Module::Class delimiter
   ActivityLog.add_all_to_app_list
+
+  AllAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
 
   attr_accessor :force_order
 

@@ -14,6 +14,12 @@ class PlayerContact < ActiveRecord::Base
   scope :phone, ->{ where(rec_type: 'phone').order(rank: :desc)}
   scope :email, ->{ where(rec_type: 'email').order(rank: :desc)}
 
+  # an informal key onto the table is the :data field
+  def self.secondary_key
+    :data
+  end
+
+
   protected
     def is_email?
       rec_type == 'email'

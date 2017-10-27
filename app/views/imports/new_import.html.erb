@@ -1,4 +1,10 @@
-<h3>Importing to <%=@primary_table%></h3>
-<p>Import ID <%=@import.id%></p>
-<p>Import ID <%=@import.items.count%></p>
+<div class="import-action-container well">
+  <h3>Check, edit data or cancel before submitting import</h3>
+  <p>Filename: <strong><%= @import.filename %></strong></p>
+  <p>Number of rows: <strong><%=@import.items.count%></strong></p>
+  <% if @import.items.first.attribute_names.include? 'master_id' %>
+  <br/>
+  <p class="help-block">Master ID cells have links to the full master data.</p>
+  <%end%>
+</div>
 <%= render 'new_import_form' %>

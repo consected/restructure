@@ -1,37 +1,35 @@
-<p id="notice"><%= notice %></p>
-
-
-<%= link_to 'New Import', new_import_path %>
-
-<% if current_admin %>
-<h1>All Imports</h1>
-
-<table>
-  <thead>
-    <tr>
-      <th>Primary table</th>
-      <th>Item count</th>
-      <th>Filename</th>
-      <th>Items</th>
-      <th>User</th>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @imports.each do |import| %>
+<div class="import-action-container well">
+  <% if current_admin %>
+  <h1>All Imports</h1>
+  <% elsif current_user %>
+  <h1>Your most recent imports</h1>
+  <% end %>
+  <%= link_to 'New Import', new_import_path, class: 'btn btn-primary' %>
+</div>
+<div class="import-table-container">
+  <table id="imports-index">
+    <thead>
       <tr>
-        <td><%= import.primary_table %></td>
-        <td><%= import.item_count %></td>
-        <td><%= import.filename %></td>
-        <td><%= import.items %></td>
-        <td><%= import.user %></td>
-        <td><%= link_to 'Show', import %></td>
-        <td><%= link_to 'Edit', edit_import_path(import) %></td>
-        <td><%= link_to 'Destroy', import, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <th>Primary table</th>
+        <th>Item count</th>
+        <th>Filename</th>
+        <th>User</th>
+        <th>Date</th>
+        <th colspan="3"></th>
       </tr>
-    <% end %>
-  </tbody>
+    </thead>
+
+    <tbody>
+      <% @imports.each do |import| %>
+        <tr>
+          <td><%= import.primary_table %></td>
+          <td><%= import.item_count %></td>
+          <td><%= import.filename %></td>
+          <td><%= import.user || 'upload not completed' %></td>
+          <td data-format-date-local="true"><%= import.created_at %></td>
+          <td><%= link_to 'Show', import %></td>
+        </tr>
+      <% end %>
+    </tbody>
 </table>
-<% end %>
-<br>
+</div>

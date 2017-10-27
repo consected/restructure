@@ -30,8 +30,12 @@ class Application
 
     return "unexpected error" unless record
 
-    record.errors.each do |r|
-      res << r.join(' ')
+    record.errors.each do |r,v|
+      if v
+        res << "#{r} #{v}"
+      else
+        res << r.join(' ')
+      end
     end
 
     res.join "; "

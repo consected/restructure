@@ -1,6 +1,11 @@
-.import-edit-container{
+.import-edit-container, .import-table-container{
   margin: 30px 30px 0 30px;
 }
+
+.import-action-container{
+  margin: 30px 30px 0 30px;
+}
+
 .import-edit-form {
   width: auto;
   height: auto;
@@ -75,5 +80,19 @@ table.import-grid {
     }
   }
 
+  .import-link-item {
+    position: relative;
+    margin-bottom: -2em;
+    margin-top: 0.4em;
+  }
 
+  tr.item-invalid {
+    .form-control { color: red !important;}
+
+  }
+}
+
+fieldset[disabled] .form-control {
+  background-color: inherit;
+  cursor: default;
 }

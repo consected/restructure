@@ -77,7 +77,6 @@ module GeneralDataConcerns
   end
 
 
-
   def as_json extras={}
 
     extras[:include] ||= {}
