@@ -1,4 +1,4 @@
-class ItemFlag < ActiveRecord::Base
+class ItemFlag < UserBase
 
   include WorksWithItem
 

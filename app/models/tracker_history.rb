@@ -1,13 +1,13 @@
-class TrackerHistory < ActiveRecord::Base
+class TrackerHistory < UserBase
 
   self.table_name = 'tracker_history'
   include UserHandler
   include TrackerHandler
-  
+
 
   has_one :tracker, inverse_of: :tracker_histories
   belongs_to :item, polymorphic: true
-  
+
   def as_json extras={}
     extras[:methods] ||= []
     extras[:methods] << :protocol_name
@@ -20,5 +20,5 @@ class TrackerHistory < ActiveRecord::Base
 
     super(extras)
   end
-  
+
 end

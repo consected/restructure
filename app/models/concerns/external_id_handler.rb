@@ -34,7 +34,9 @@ module ExternalIdHandler
       item
     end
 
-
+    def allow_to_generate_ids?
+      true
+    end
 
     def prevent_edit= val
       @prevent_edit = val
@@ -169,6 +171,29 @@ module ExternalIdHandler
       item.master = master
       item
 
+    end
+
+
+    def generate_ids admin, count=10
+
+      raise "Only admins can perform this function" unless admin && admin.enabled? && allow_to_generate_ids?
+
+      res = []
+
+      (1..count).each do |c|
+
+        begin
+          item = self.new(external_id_attribute => generate_random_id.to_s, admin_id: admin.id)
+          item.no_track = true
+          item.save!
+          res << item
+        rescue PG::UniqueViolation
+          logger.info "Failed to create a #{self.name.humanize} record due to an random duplicate"
+        end
+
+      end
+
+      res
     end
 
 

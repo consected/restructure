@@ -71,9 +71,7 @@ class ImportsController < ApplicationController
       r = item_class.new c
       @import.attempt_match_on_secondary_key r
       r.master.current_user = current_user if r.master && !r.master_user
-      r.validating = true
-      if r.valid?
-        r.validating = false
+      if r.check_valid?        
         begin
           r.save!
         rescue => e
@@ -105,7 +103,7 @@ class ImportsController < ApplicationController
     end
 
     if failed
-      @import.items = items      
+      @import.items = items
       render 'new_import'
     end
   end

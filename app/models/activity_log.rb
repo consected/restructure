@@ -297,7 +297,7 @@ class ActivityLog < ActiveRecord::Base
         activity_log_name = self.name
 
         # Main implementation class
-        a_new_class = Class.new(ActiveRecord::Base) do
+        a_new_class = Class.new(UserBase) do
 
           def self.parent_type= parent_type
             @parent_type = parent_type

@@ -11,7 +11,6 @@ module UserHandler
     after_initialize :init_vars_user_handler
 
     belongs_to :master, assoc_rules
-    belongs_to :user
 
     has_many :item_flags, as: :item, inverse_of: :item
     has_many :activity_logs, as: :item, inverse_of: :item
@@ -22,18 +21,6 @@ module UserHandler
       has_many al.model_assocation_name.to_sym, class_name: al.activity_log_class_name
     end
 
-    before_validation :check_master
-
-    # Ensure the user id is saved
-    before_validation :force_write_user
-
-    before_validation :downcase_attributes
-
-    validates :master_id, presence: true
-    # This validation ensures that the user ID has been set in the master object
-    # It implicitly reinforces security, in that the user must be authenticated for
-    # the user to have been set
-    validate :user_set
 
     validate :source_correct
     validate :rank_correct
@@ -139,36 +126,6 @@ module UserHandler
     end
   end
 
-  def master_user
-
-    if respond_to?(:master) && master
-      current_user = master.current_user
-      current_user
-    else
-      nil
-    end
-  end
-
-  # Returns the full model name, namespaced like 'module__class' (double underscore) if there is a namespace.
-  # otherwise it returns just the basic name
-  def item_type
-    self.class.name.singularize.ns_underscore
-  end
-
-  # Returns the full model name pluralized, namespaced like 'module/class' if there is a namespace.
-  # otherwise it returns just the basic name
-  # works great for generating routes
-  def item_type_path
-    self.class.name.pluralize.underscore
-  end
-  
-  def validating= v
-    @validating = v
-  end
-
-  def validating?
-    @validating
-  end
 
   protected
 
@@ -180,45 +137,7 @@ module UserHandler
       instance_var_init :multiple_results
     end
 
-    def creatable_without_user
-      false
-    end
 
-    def downcase_attributes
-
-      ignore = ['item_type']
-
-      self.attributes.reject {|k,v| ignore.include? k}.each do |k, v|
-
-        logger.info "Downcasing attribute (#{k})"
-        self.send("#{k}=".to_sym, v.downcase) if self.attributes[k].is_a? String
-      end
-      true
-    end
-
-    def user_set
-      return true if creatable_without_user && !persisted?
-
-      unless self.user
-        errors.add :user, "must be authenticated and set"
-        logger.warn "User is not set. Failed user_set validation in user_handler for #{self.inspect}"
-      end
-      self.user
-    end
-
-    def check_master
-      raise "master not set in #{self}" unless !!(self.master_id && self.master)
-    end
-
-    def force_write_user
-      return true if creatable_without_user && !persisted? || validating?
-      logger.debug "Forcing save of user in #{self}"
-      return unless self.master
-      mu = master_user
-      raise "bad user (for master #{master}) being pulled from master_user (#{mu.is_a?(User) ? '' : 'not a user'}#{mu && mu.persisted? ? '': ' not persisted'})" unless mu.is_a?(User) && mu.persisted?
-
-      write_attribute :user_id, mu.id
-    end
 
     def track_record_update
       return if no_track

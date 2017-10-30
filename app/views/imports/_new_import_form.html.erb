@@ -21,10 +21,8 @@
                   item = @import.items[f.index]
                   item.send :write_attribute, :user_id, current_user.id
                   valid_item =  true
-                  unless @readonly
-                    item.validating = true
-                    valid_item = item.valid?
-                    item.validating = false
+                  unless @readonly                    
+                    valid_item = item.check_valid?
                     invalid_items += 1 unless valid_item
                   end
                 %>

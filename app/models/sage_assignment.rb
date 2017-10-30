@@ -1,63 +1,40 @@
-class SageAssignment < ActiveRecord::Base
+class SageAssignment < UserBase
   include UserHandler
   include ExternalIdHandler
 
   validates :sage_id, presence: true,  length: {is: 10}
-  validate :sage_id_tests    
+  validate :sage_id_tests
   default_scope -> {order id: :desc}
   after_save :return_all
- 
-  
+
+
+  def allows_nil_master?
+    true
+  end
+
+
   def return_all
     self.multiple_results = self.master.sage_assignments.all if self.master
   end
-  
-  
-  def self.generate_ids admin, count=10
-    
-    raise "Only admins can perform this function" unless admin && admin.enabled?
-    
-    res = []
-    
-    (1..count).each do |c|      
-      
-      begin
-        #s = SecureRandom.random_number(8_999_999_999) + 1_000_000_000        
-        item = SageAssignment.new(sage_id: generate_random_id.to_s, admin_id: admin.id)
-        item.no_track = true      
-        item.save!
-        res << item
-      rescue PG::UniqueViolation
-        logger.info "Failed to create a Sage Assignment record due to an random duplicate"
-      end  
-      
-    end
-    
-    res
-  end
-  
 
-  
 
-  
   protected
-  
-  
+
+
     def sage_id_tests
-      
-      if persisted? && sage_id_changed? 
-        errors.add :sage_id, "can not be changed" 
+
+      if persisted? && sage_id_changed?
+        errors.add :sage_id, "can not be changed"
       end
-      
+
       if persisted? && master_id_changed? && !master_id_was.nil?
-        errors.add :master, "record this sage ID is associated with can not be changed" 
+        errors.add :master, "record this sage ID is associated with can not be changed"
       end
-      
+
     end
-    
+
     def creatable_without_user
       true
     end
-    
+
 end
-  

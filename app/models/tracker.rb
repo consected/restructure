@@ -1,4 +1,4 @@
-class Tracker < ActiveRecord::Base
+class Tracker < UserBase
   include UserHandler
   include TrackerHandler
 
@@ -180,7 +180,7 @@ class Tracker < ActiveRecord::Base
   def set_record_updates_event record
     new_rec = record.id_changed?
     rec_type = "#{new_rec ? 'created' : 'updated'} #{record.class.name.ns_underscore.humanize.downcase}"
-    
+
     self.protocol_event = Rails.cache.fetch "record_updates_protocol_events_#{self.sub_process.id}_#{rec_type}" do
       self.sub_process.protocol_events.where(name: rec_type).first
     end

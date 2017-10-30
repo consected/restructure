@@ -78,7 +78,7 @@ class DynamicModel < ActiveRecord::Base
         tkn = (self.table_key_name || 'id').to_sym
         man = self.model_association_name
         ro = self.result_order
-        a_new_class = Class.new(ActiveRecord::Base) do
+        a_new_class = Class.new(UserBase) do
           def self.is_dynamic_module
             true
           end

@@ -1,4 +1,4 @@
-class PlayerContact < ActiveRecord::Base
+class PlayerContact < UserBase
   include UserHandler
 
   PrimaryRank = 10
