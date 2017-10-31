@@ -128,11 +128,18 @@ _fpa.form_utils = {
                 var lgi = self.find('.list-group-item').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta');
                 var all = lgi.find('small, label');
                 all.css({display: 'inline-block', whiteSpace: 'nowrap'});
+
+                var block_width = lgi.first().width();
+
                 all.each(function(){
                     var wnew = $(this).width();
                     if(wnew > wmax)
                         wmax = wnew;
                 });
+
+                if(wmax > block_width * 0.5)
+                  wmax = block_width * 0.5;
+
                 if(wmax>10){
                     if(lgi.parents('form').length === 0){
                         lgi.css({paddingLeft: wmax+30}).addClass('labels-resized');

@@ -9,6 +9,10 @@ class DynamicModel < ActiveRecord::Base
 
   after_commit :reload_model
 
+  def model_name
+    table_name.singularize
+  end
+
   def self.orientation category
     return :horizontal if category.to_s.include?('history')
     return :vertical
@@ -17,11 +21,13 @@ class DynamicModel < ActiveRecord::Base
   def reload_model
     generate_model
 
-    # Now forcibly set the Master association:
-    dm = self
-    Master.has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
-
+    add_master_association
     self.class.routes_reload
+  end
+
+  def add_master_association &association_block
+    # Now forcibly set the Master association:
+    Master.has_many self.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{self.model_class_name}", foreign_key: self.foreign_key_name, primary_key: self.primary_key_name
   end
 
   def self.categories
@@ -29,38 +35,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
 
-  def model_def_name
-    table_name.singularize.to_sym
-  end
 
-  def model_association_name
-    table_name.pluralize.to_sym
-  end
-
-  def model_path_name
-    table_name.pluralize.to_sym
-  end
-
-  def model_data_template_name
-    model_association_name.to_s.hyphenate
-  end
-
-  def model_class_name
-    table_name.singularize.camelcase
-  end
-
-
-
-  def self.enable_active_configurations
-    # to ensure that the db migrations can run, check for the existence of the dynamic models table
-    # before attempting to use it. Otherwise Rake tasks fail.
-    if ActiveRecord::Base.connection.table_exists? 'dynamic_models'
-      DynamicModel.active.each do |dm|
-        Master.has_many dm.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{dm.model_class_name}", foreign_key: dm.foreign_key_name, primary_key: dm.primary_key_name
-        Rails.logger.debug "Associated master with #{dm.model_association_name} with class_name: DynamicModel::#{dm.model_class_name}"
-      end
-    end
-  end
 
 
 

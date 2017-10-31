@@ -2,9 +2,9 @@ module ActivityLogsHelper
 
   def activity_log_edit_form_id
     if @item
-      "#{@al_class.name.ns_hyphenate}-edit-form-#{@master_id}-#{@id}"
+      "#{@implementation_class.name.ns_hyphenate}-edit-form-#{@master_id}-#{@id}"
     else
-      "#{@al_class.name.ns_hyphenate}-blank-log-edit-form-#{@master_id}-#{@id}"
+      "#{@implementation_class.name.ns_hyphenate}-blank-log-edit-form-#{@master_id}-#{@id}"
     end
 
   end
@@ -14,9 +14,9 @@ module ActivityLogsHelper
     res[:remote] = true
     res[:html] ||= {}
     if @item
-      res.merge!({url: "/masters/#{@master_id}/#{@item.item_type_path.pluralize}/#{@item_id}/#{object_instance.item_type_path}/#{object_instance.id}", action: :post, remote: true, html: {"data-result-target" => "##{@al_class.name.ns_hyphenate}-#{@master_id}-#{@id}", "data-template" => "#{@al_class.name.ns_hyphenate}-result-template"}})
+      res.merge!({url: "/masters/#{@master_id}/#{@item.item_type_path.pluralize}/#{@item_id}/#{object_instance.item_type_path}/#{object_instance.id}", action: :post, remote: true, html: {"data-result-target" => "##{@implementation_class.name.ns_hyphenate}-#{@master_id}-#{@id}", "data-template" => "#{@implementation_class.name.ns_hyphenate}-result-template"}})
     else
-      res.merge!({url: "/masters/#{@master_id}/#{object_instance.item_type_path}/#{object_instance.id}", action: :post, remote: true, html: {"data-result-target" => "##{@al_class.name.ns_hyphenate}-blank-log-#{@master_id}-#{@id}", "data-template" => "#{@al_class.name.ns_hyphenate}-blank-log-result-template", "data-use-alt-result-key" => "#{@al_class.name.ns_underscore}_blank_log" }})
+      res.merge!({url: "/masters/#{@master_id}/#{object_instance.item_type_path}/#{object_instance.id}", action: :post, remote: true, html: {"data-result-target" => "##{@implementation_class.name.ns_hyphenate}-blank-log-#{@master_id}-#{@id}", "data-template" => "#{@implementation_class.name.ns_hyphenate}-blank-log-result-template", "data-use-alt-result-key" => "#{@implementation_class.name.ns_underscore}_blank_log" }})
     end
     res
   end

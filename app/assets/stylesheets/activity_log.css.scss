@@ -19,6 +19,10 @@
 
 }
 
+span.related-tracker-collapser .list-group-item:first-child {
+  background-color: white;
+}
+
 .activity-log-sub-list {
 
   padding: 14px 1em;
@@ -71,4 +75,18 @@
 
 .activity-log-list input[type='date'] {
   max-width: 7em;
+}
+
+a.related-tracker-histories-link {
+
+  .caret {
+    display: none;
+  }
+
+  &.collapsed {
+    .caret {
+      display: inline-block;
+    }
+  }
+
 }

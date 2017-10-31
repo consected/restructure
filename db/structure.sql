@@ -2247,6 +2247,46 @@ ALTER SEQUENCE dynamic_models_id_seq OWNED BY dynamic_models.id;
 
 
 --
+-- Name: external_identifiers; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE external_identifiers (
+    id integer NOT NULL,
+    name character varying,
+    label character varying,
+    external_id_attribute character varying,
+    external_id_view_formatter character varying,
+    prevent_edit boolean,
+    pregenerate_ids boolean,
+    min_id bigint,
+    max_id bigint,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: external_identifiers_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE external_identifiers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: external_identifiers_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE external_identifiers_id_seq OWNED BY external_identifiers.id;
+
+
+--
 -- Name: external_link_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4009,6 +4049,13 @@ ALTER TABLE ONLY dynamic_models ALTER COLUMN id SET DEFAULT nextval('dynamic_mod
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY external_identifiers ALTER COLUMN id SET DEFAULT nextval('external_identifiers_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY external_link_history ALTER COLUMN id SET DEFAULT nextval('external_link_history_id_seq'::regclass);
 
 
@@ -4402,6 +4449,14 @@ ALTER TABLE ONLY dynamic_model_history
 
 ALTER TABLE ONLY dynamic_models
     ADD CONSTRAINT dynamic_models_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: external_identifiers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY external_identifiers
+    ADD CONSTRAINT external_identifiers_pkey PRIMARY KEY (id);
 
 
 --
@@ -4884,6 +4939,13 @@ CREATE INDEX index_dynamic_model_history_on_dynamic_model_id ON dynamic_model_hi
 --
 
 CREATE INDEX index_dynamic_models_on_admin_id ON dynamic_models USING btree (admin_id);
+
+
+--
+-- Name: index_external_identifiers_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_external_identifiers_on_admin_id ON external_identifiers USING btree (admin_id);
 
 
 --
@@ -6144,6 +6206,14 @@ ALTER TABLE ONLY accuracy_scores
 
 
 --
+-- Name: fk_rails_7218113eac; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY external_identifiers
+    ADD CONSTRAINT fk_rails_7218113eac FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
 -- Name: fk_rails_72b1afe72f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6732,4 +6802,6 @@ INSERT INTO schema_migrations (version) VALUES ('20171002120537');
 INSERT INTO schema_migrations (version) VALUES ('20171013141835');
 
 INSERT INTO schema_migrations (version) VALUES ('20171025095942');
+
+INSERT INTO schema_migrations (version) VALUES ('20171031145807');
 

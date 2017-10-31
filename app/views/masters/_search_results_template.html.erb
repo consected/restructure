@@ -134,7 +134,7 @@
 
           <% ActivityLog.enabled.each do |a| %>
           <li role="presentation">
-            <a href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="activity-log--<%= a.item_type_name.hyphenate %>-main-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
+            <a href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_data_template_name %>-main-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
           </li>
           <% end %>
         </ul>
@@ -144,7 +144,7 @@
           <% end %>
 
           <% ActivityLog.enabled.each do |a| %>
-          <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="activity-log--<%= a.item_type_name.hyphenate %>-main-result-template"  >
+          <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_data_template_name %>-main-result-template"  >
               <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
           </div>
           <% end %>
@@ -252,15 +252,15 @@
               <% dm = DynamicModel.active.where(category: cat)
                  dm.each do |m|
               %>
-              <a href="/masters/{{id}}/dynamic_model/<%=m.model_path_name%>" data-result-target="#<%=m.model_path_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
+              <a href="/masters/{{id}}/dynamic_model/<%=m.full_item_types_name%>" data-result-target="#<%=m.full_item_types_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
               <% end %>
             </div>
             <h4 class="results-divider"><a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master"><%=cat.underscore.humanize.downcase%> <span class="caret up"></span></a></h4>
             <% dm.each do |m| %>
               <% if DynamicModel.orientation(cat) == :vertical %>
-              <div class="col-md-6" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>
+              <div class="col-md-6" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
               <% else %>
-              <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.model_path_name%>-{{id}}-" data-sub-list="<%=m.model_path_name%>"></div>
+              <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
               <% end %>
             <% end %>
           </div>

@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 
+  resources :external_identifiers
   resources :reports
   resources :imports
   

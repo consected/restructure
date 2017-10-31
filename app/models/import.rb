@@ -1,6 +1,7 @@
 class Import < ActiveRecord::Base
   belongs_to :user
 
+  validate :accepted_model
   validate :check_csv_columns
 
   attr_accessor :items, :csv_rows
@@ -22,6 +23,7 @@ class Import < ActiveRecord::Base
     import.item_count = csv_rows.length
     import.csv_rows = csv_rows
     import.filename = filename
+    return import unless import.check_csv_columns
     import.build_objects_from_data
     import.save
     return import
@@ -29,7 +31,12 @@ class Import < ActiveRecord::Base
   end
 
   def self.item_class_for primary_table
-    primary_table.singularize.ns_camelize.ns_constantize
+    begin
+      primary_table.singularize.ns_camelize.ns_constantize
+    rescue NameError => e
+      logger.debug "No class defined for primary table: #{primary_table}"
+      return nil
+    end
   end
 
   def item_class
@@ -37,7 +44,12 @@ class Import < ActiveRecord::Base
   end
 
   def self.permitted_params_for primary_table
-    item_class_for(primary_table).attribute_names - ['id', 'user_id', 'created_at', 'updated_at']
+    pt = item_class_for(primary_table)
+    return unless pt
+    res = pt.attribute_names - ['id', 'user_id', 'created_at', 'updated_at']
+    res += Master.alternative_id_fields.map(&:to_s) if res.include?('master_id')
+    res.uniq!
+    res
   end
 
   def permitted_params_for_primary_table
@@ -68,16 +80,23 @@ class Import < ActiveRecord::Base
     end
   end
 
+  def check_csv_columns
+    return true unless self.csv_rows
+    keys = self.csv_rows.first.to_h.keys
+    res = keys - self.permitted_params_for_primary_table.map(&:to_sym)
+    if res.length > 0
+      errors.add "some columns", "in the CSV file do not match the table columns. The acceptable columns are: #{permitted_params_for_primary_table.join(', ')}. Unexpected columns in the CSV file are: #{res.join(', ')}"
+      return false
+    end
+    return true
+  end
+
+  def self.accepted_model primary_table
+    Import.accepts_models.include?(primary_table)
+  end
+
   private
 
-    def check_csv_columns
-      return true unless self.csv_rows
-      keys = self.csv_rows.first.to_h.keys
-      res = keys - self.permitted_params_for_primary_table.map(&:to_sym)
-      if res.length > 0
-        errors.add "some columns", "in the CSV file do not match the table columns. The acceptable columns are: #{permitted_params_for_primary_table.join(', ')}. Unexpected columns in the CSV file are: #{res.join(', ')}"
-      end
-    end
 
     def self.setup_accepted_models
       self.accepts_models.each do |m|
@@ -85,6 +104,14 @@ class Import < ActiveRecord::Base
         end
       end
     end
+
+    # Only allow creation and update for models that are accepted, to avoid
+    # either leakage of data structures or import into tables that are
+    # not acceptable
+    def accepted_model
+      Import.accepted_model(self.primary_table)
+    end
+
 
   # Do the setup!
   self.setup_accepted_models

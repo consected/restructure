@@ -63,7 +63,7 @@ class UserBase < ActiveRecord::Base
       current_user = item.master.current_user
       current_user
     else
-      raise "master is nil and can't be used to get the current user"
+      raise "master is nil and can't be used to get the current user" unless validating?
       nil
     end
   end
@@ -85,10 +85,31 @@ class UserBase < ActiveRecord::Base
     self.item_type.ns_underscore
   end
 
+  # add the alternative_id_fields from the master as attributes, so we can use them for matching
+  Master.alternative_id_fields.each do |f|
+    define_method :"#{f}=" do |val|
+      instance_variable_set("@#{f}", val)
+
+    end
+
+    define_method :"#{f}" do
+      instance_variable_get("@#{f}")
+    end
+  end
+
+
   protected
 
     def check_master
-      raise "master not set in #{self}" if self.respond_to?(:master) && !(self.master_id && self.master)
+      if msid && !master_id
+        m = Master.where(msid: msid).first
+        raise "MSID set, but it does not match a master record" unless m
+        self.master_id = m.id
+      elsif msid && master_id
+        raise "MSID and master_id set, but they do not correspond to the same record" unless self.master.msid == msid
+      end
+
+      raise "master not set in #{self}" if self.respond_to?(:master) && !(self.master_id && self.master) && !validating?
     end
 
 
@@ -103,7 +124,7 @@ class UserBase < ActiveRecord::Base
     end
 
     def user_set
-      return true if creatable_without_user && !persisted?
+      return true if (creatable_without_user && !persisted?) || validating?
 
       unless self.user
         errors.add :user, "must be authenticated and set"

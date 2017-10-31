@@ -12,10 +12,36 @@ class ImportsController < ApplicationController
 
   # Show previous uploads
   def index
-    if current_admin
-      @imports = Import.all
-    elsif current_user
-      @imports = Import.where(user_id: current_user.id).order(created_at: :desc).limit(10)
+    if params[:get_template_for].blank?
+      respond_to do |format|
+        format.csv {
+          raise FphsException.new('Select a table to export')
+        }
+        format.html {
+          @primary_tables = Import.accepts_models
+
+          setup_table_rules
+
+          if current_admin
+            @imports = Import.all
+          elsif current_user
+            @imports = Import.where("user_id=? AND imported_items is not NULL", current_user.id).order(created_at: :desc).limit(10)
+          end
+        }
+      end
+    else
+      respond_to do |format|
+        format.csv {
+          m = params[:get_template_for]
+          raise "Invalid table selection" unless Import.accepted_model(m)
+          @primary_table = m
+          # Get an empty list for the model
+          res = permitted_params.dup
+
+          send_data res.to_csv, filename: "template_#{m}.csv"
+
+        }
+      end
     end
   end
 
@@ -34,13 +60,15 @@ class ImportsController < ApplicationController
   # Select a model and file to upload
   def new
     @primary_tables = Import.accepts_models
+    @primary_table = params[:primary_table]  if @primary_tables.include? params[:primary_table]
     @import = Import.new
   end
 
   # Accepts an uploaded file and parses the CSV
   def create
     if params[:import_file] && params[:primary_table]
-      @primary_table = params[:primary_table]
+      @primary_tables = Import.accepts_models
+      @primary_table = params[:primary_table] if @primary_tables.include? params[:primary_table]
       uploaded_io = params[:import_file]
       csv = uploaded_io.read
       filename = uploaded_io.original_filename
@@ -71,7 +99,7 @@ class ImportsController < ApplicationController
       r = item_class.new c
       @import.attempt_match_on_secondary_key r
       r.master.current_user = current_user if r.master && !r.master_user
-      if r.check_valid?        
+      if r.check_valid?
         begin
           r.save!
         rescue => e
@@ -132,6 +160,42 @@ class ImportsController < ApplicationController
       name.ns_camelize.ns_constantize
     end
 
+    def setup_table_rules
+      @table_rules = {}
+      @primary_tables.each do |tn|
+        @primary_table = tn
+        @table_rules[tn] = {}
+        t = @table_rules[tn]
+
+        pp = permitted_params
+        if pp
+          pp.each do |p|
+            t[p] = p
+            col = item_class.columns_hash[p]
+            if col
+              t[col.type] ||= []
+              t[col.type] << p
+
+              if p.start_with?('set_related_')
+                t['set_related_field'] ||= []
+                t['set_related_field'] << p
+              end
+            end
+          end
+
+          sk= nil
+          sk = item_class.parent_secondary_key if item_class.respond_to? :parent_secondary_key
+          if sk
+            t['secondary_key'] = sk
+          end
+          if item_class.attribute_names.include?('rec_type')
+            t['rec_type'] = 'data'
+          end
+        end
+      end
+
+    end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_import
@@ -146,7 +210,7 @@ class ImportsController < ApplicationController
 
     def authorized?
       return true if current_admin
-      return true if current_user.can? :view_reports
+      return true if current_user.can? :import_csv
 
       return not_authorized
     end

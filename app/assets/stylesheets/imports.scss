@@ -92,7 +92,16 @@ table.import-grid {
   }
 }
 
-fieldset[disabled] .form-control {
-  background-color: inherit;
-  cursor: default;
+fieldset[disabled] {
+  .form-control {
+    background-color: inherit;
+    cursor: default;
+  }
+  h3, h4 { color: gray; }
+}
+
+p.field-names {
+  font-weight: bold;
+  margin-bottom: 4px;
+  margin-top: 16px;
 }

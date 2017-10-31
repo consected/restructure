@@ -56,8 +56,8 @@
     with_data = nil
   end
 
-  unless defined? activity_log_class_name
-    activity_log_class_name = nil
+  unless defined? implementation_class_name
+    implementation_class_name = nil
   end
 
   unless defined? item_flags_readonly
@@ -153,24 +153,27 @@
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "tracker_history_id"}}
           {{#if ../tracker_histories}}
-          <li class="list-group-item <%=name.hyphenate%>-tracker-histories-caption is-minor-heading">Related tracker items</li>
+          <li class="list-group-item <%=name.hyphenate%>-tracker-histories-caption is-minor-heading">
+            <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" aria-expanded="false">Related tracker items <span class="caret"></span></a>
+          </li>
           {{/if}}
-
+          <span id="<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" class="collapse related-tracker-collapser">
           {{#each ../tracker_histories}}
-            <li class="list-group-item <%=name.hyphenate%>-tracker-histories in-item-tracker-histories">
-              <small>on {{pretty_string event_date}}</small>
-              <strong>
+            <li class="list-group-item <%=name.hyphenate%>-tracker-histories in-item-tracker-histories is-full-width">
+              <span class="small">
                  <a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
+                 {{pretty_string event_date}}
                  {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
-              </strong>
+              </span>
             </li>
           {{/each}}
-          <% if activity_log_class_name %>
+          </span>
+          <% if implementation_class_name %>
           <div class="results-caption-before <%=name.hyphenate%>-add-linked-tracker">
             <div class="panel panel-default panel-body">
               <p>Add a specific tracker status record related to this item:</p>
               <p class="text-center">
-              <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/<%=activity_log_class_name%>&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
+              <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/<%=implementation_class_name%>&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
               </p>
             </div>
           </div>

@@ -28,6 +28,7 @@ class Master < ActiveRecord::Base
   validates :user, presence: true
   before_create :assign_msid
 
+
   # DynamicModel associations take the form:
   #     master.player_contact_histories
   # i.e. the pluralized table name
@@ -44,15 +45,20 @@ class Master < ActiveRecord::Base
   # Activity log associations with master are generated dynamically, following the form:
   #   master.activity_log__player_contact_phones
   # Notice the double underscore which represents the Module::Class delimiter
-  ActivityLog.add_all_to_app_list
+  ActivityLog.enable_active_configurations
 
   AllAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
-
-  attr_accessor :force_order
 
   # Move all the simple and advance search form functionality out of the way, so the data functionality of the model can be clearly seen
   include MasterSearchHandler
 
+  # ExternalIdentifier associations take the form:
+  #    master.scantrons
+  # i.e. the underscored pluralized name
+  # This is placed here, since there is a dependence on MasterSearchHandler
+  ExternalIdentifier.enable_active_configurations
+
+  attr_accessor :force_order
 
 
   def accuracy_rank
@@ -106,6 +112,26 @@ class Master < ActiveRecord::Base
     m = Master.create!(current_user: user)
     m.player_infos.create! unless options[:empty]
     return m
+
+  end
+
+  def self.external_id_matching_fields
+    Application.app_list(:external_id).map{|f| "#{f.name.ns_underscore}_id".to_sym}
+  end
+
+  def self.alternative_id_fields
+    [:msid, :pro_id] + external_id_matching_fields
+  end
+
+  def self.find_with_alternative_id field_name, value
+    field_name = field_name.to_sym
+    raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}" unless alternative_id_fields.include?(field_name)
+    return self.where(field_name => value).first if self.attribute_names.include?(field_name.to_s)
+
+    if external_id_matching_fields.include?(field_name)
+
+      ExternalIdentifier.class_for(field_name).find_by_external_id(value)
+    end
 
   end
 

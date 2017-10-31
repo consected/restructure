@@ -10,12 +10,12 @@
     prevent_edit: false,
     prevent_create: false,
     extra_class: 'alt-width col-md-8',
-    item_list: al_class.view_attribute_list,
+    item_list: implementation_class.view_attribute_list,
     data_sort: [:desc, :data_completed_when],
     custom_block_attrs: {data_completed_when: '{{timestamp completed_when}}'},
     custom_activity_log: :none,
-    activity_log_class_name: al_class_name,
-    item_blocks: {item_type.to_sym => al_class.parent_data_names},
+    implementation_class_name: implementation_class_name,
+    item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
     show_created_at: true,
     edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
     caption_before:{},
@@ -30,12 +30,12 @@
       prevent_edit: false,
       prevent_create: false,
       extra_class: 'alt-width col-md-8',
-      item_list: al_class.view_blank_log_attribute_list,
+      item_list: implementation_class.view_blank_log_attribute_list,
       data_sort: [:desc, :data_completed_when],
       custom_block_attrs: {data_completed_when: '{{timestamp completed_when}}'},
       custom_activity_log: :none,
-      activity_log_class_name: al_class_name,
-      item_blocks: {item_type.to_sym => al_class.parent_data_names},
+      implementation_class_name: implementation_class_name,
+      item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
       show_created_at: true,
       edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
       caption_before:{},
@@ -80,7 +80,7 @@
 </script>
 
 
-<script id="activity-log--<%=item_type_name_hyphenated%>-main-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+<script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-main-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
 
     <div class="is-heading activity-logs-header">

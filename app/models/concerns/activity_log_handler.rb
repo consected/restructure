@@ -45,9 +45,6 @@ module ActivityLogHandler
     end
 
 
-    def parent_class
-      parent_type.to_s.camelize.constantize
-    end
 
     # Find the record in the admin activity log that defines this activity log
     def admin_activity_log
@@ -280,7 +277,8 @@ module ActivityLogHandler
 
         # Do not set master - this should already be set, and setting it again breaks
         # secondary_key matched saves
-        #s[:item].master = self.master
+        s[:item].master = self.master unless s[:item].master
+        s[:item].master.current_user = self.user unless s[:item].master_user
         res = s[:item].save
         raise "Failed to save related item. #{s[:item].errors.full_messages.join("; ")}" unless res
       end

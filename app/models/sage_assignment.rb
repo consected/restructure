@@ -1,4 +1,5 @@
 class SageAssignment < UserBase
+
   include UserHandler
   include ExternalIdHandler
 

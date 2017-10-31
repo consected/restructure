@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing External Identifiers</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Label</th>
+      <th>External id attribute</th>
+      <th>External id view formatter</th>
+      <th>Prevent edit</th>
+      <th>Pregenerate ids</th>
+      <th>Admin</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @external_identifiers.each do |external_identifier| %>
+      <tr>
+        <td><%= external_identifier.name %></td>
+        <td><%= external_identifier.label %></td>
+        <td><%= external_identifier.external_id_attribute %></td>
+        <td><%= external_identifier.external_id_view_formatter %></td>
+        <td><%= external_identifier.prevent_edit %></td>
+        <td><%= external_identifier.pregenerate_ids %></td>
+        <td><%= external_identifier.admin %></td>
+        <td><%= link_to 'Show', external_identifier %></td>
+        <td><%= link_to 'Edit', edit_external_identifier_path(external_identifier) %></td>
+        <td><%= link_to 'Destroy', external_identifier, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New External identifier', new_external_identifier_path %>

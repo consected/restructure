@@ -16,7 +16,13 @@ module WorksWithItem
 
   class_methods do
 
-    # None!
+    def parent_class
+      parent_type.to_s.camelize.constantize
+    end
+
+    def parent_secondary_key
+      parent_class.secondary_key
+    end
 
   end
 

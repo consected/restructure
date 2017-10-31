@@ -18,7 +18,7 @@ module UserHandler
 
     # Generate the set of activity log associations, for each record type for this item type
     ActivityLog.active.where(item_type: self.name.ns_underscore).each do |al|
-      has_many al.model_assocation_name.to_sym, class_name: al.activity_log_class_name
+      has_many al.model_association_name.to_sym, class_name: al.full_implementation_class_name
     end
 
 

@@ -18,11 +18,11 @@ class ActivityLog::ActivityLogsController < ApplicationController
       if @item
         caption = @item.data
         item_name = @item.class.human_name
-        item_list = @al_class.view_attribute_list - @al_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
+        item_list = @implementation_class.view_attribute_list - @implementation_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
       else
         caption = 'log item'
         item_name = ''
-        item_list = @al_class.view_blank_log_attribute_list - [:tracker_history_id]
+        item_list = @implementation_class.view_blank_log_attribute_list - [:tracker_history_id]
       end
       {
         caption: caption,
@@ -48,7 +48,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
     end
 
     def al_type
-      @al_class.table_name
+      @implementation_class.table_name
     end
 
     def item_data
@@ -97,7 +97,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
       if params[:item_id].blank?
         @item_type = item_controller
         @master_id = params[:master_id]
-        @al_class = activity_log_class
+        @implementation_class = implementation_class
         return
       end
 
@@ -119,17 +119,17 @@ class ActivityLog::ActivityLogsController < ApplicationController
         @master_id = @item.master_id
         @item_id = @item.id
         #  return if the Activity Log does not work with this item_type / rec_type combo
-        @al_class = ActivityLog.al_class_for @item
-        return not_found unless @al_class
+        @implementation_class = ActivityLog.implementation_class_for @item
+        return not_found unless @implementation_class
       end
     end
 
 
 
     def permitted_params
-     fts = @al_class.fields_to_sync.map(&:to_sym)
+     fts = @implementation_class.fields_to_sync.map(&:to_sym)
 
-     res =  @al_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
+     res =  @implementation_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
      res
     end
 
@@ -137,7 +137,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
       params.require(al_type.singularize.to_sym).permit(*permitted_params)
     end
 
-    def activity_log_class
+    def implementation_class
       cn = "#{item_controller.singularize}_#{item_rec_type}".camelize
       cnf = "ActivityLog::#{cn}"
       cnf.constantize

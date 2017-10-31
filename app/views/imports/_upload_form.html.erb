@@ -4,7 +4,7 @@
 
     <div class="form-group">
       <label for="primary_table">Select the table to import into</label>
-      <%= select_tag :primary_table, options_for_select(@primary_tables), include_blank: true %>
+      <%= select_tag :primary_table, options_for_select(@primary_tables, @primary_table), include_blank: true %>
     </div>
     <div class="form-group" id="browse-block">
       <label for="import_file">Pick the file to upload<br/>Import will start immediately after selection</label>

@@ -16,6 +16,15 @@ class ActivityLog < ActiveRecord::Base
   after_commit :add_to_app_list
 
 
+  def model_name
+    item_type_name
+  end
+
+  def self.implementation_prefix
+    "ActivityLog"
+  end
+
+
   # checks if this activity log works with the specified item_type and optionally rec_type based on admin activity log record configuration
   # if no rec_type is specified, then just the item_type will be used to match broadly,
   # even if the configuration specifies a rec_type as a requirement
@@ -42,7 +51,7 @@ class ActivityLog < ActiveRecord::Base
 
   # return the activity log implementation class that corresponds to
   # this item (item_type / rec_type in an enabled admin activity log record)
-  def self.al_class_for item
+  def self.implementation_class_for item
 
     item_type = item.item_type
 
@@ -63,12 +72,12 @@ class ActivityLog < ActiveRecord::Base
     al_cn = al_cn.camelize
     begin
       fcn = "ActivityLog::#{al_cn}"
-      al_class = fcn.constantize
+      implementation_class = fcn.constantize
     rescue => e
       logger.warn "Failed to get #{fcn} => \n#{e.backtrace[0..10].join("\n")}"
     end
-    raise "Failed to get #{al_cn} " unless al_class
-    return al_class
+    raise "Failed to get #{al_cn} " unless implementation_class
+    return implementation_class
   end
 
   # The table name for the activity log implementation
@@ -76,7 +85,7 @@ class ActivityLog < ActiveRecord::Base
     "activity_log_#{item_type_name}".pluralize
   end
 
-  # The attribute list defined in the admin record. If blank, the activity_log_class
+  # The attribute list defined in the admin record. If blank, the implementation_class
   # equivalent of this method returns a set of fields based on the actual implementation table
   def view_attribute_list
     unless self.field_list.blank?
@@ -84,7 +93,7 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
-  # The attribute list defined in the admin record. If blank, the activity_log_class
+  # The attribute list defined in the admin record. If blank, the implementation_class
   # equivalent of this method returns a set of fields based on the actual implementation table
   def view_blank_log_attribute_list
     unless self.blank_log_field_list.blank?
@@ -105,19 +114,8 @@ class ActivityLog < ActiveRecord::Base
     @item_type_name = tn.join('_')
   end
 
-  # Full namespaced item type name, underscored with double underscores
-  def full_item_type_name
-    "activity_log__#{item_type_name}".singularize
-  end
 
-  # Full namespaced item types (pluralized) name, underscored with double underscores
-  def full_item_types_name
-    "activity_log__#{item_type_name}".pluralize
-  end
 
-  def model_class_name
-    item_type_name.ns_camelize
-  end
 
   def rec_type_valid?
     return true if self.rec_type.blank?
@@ -131,25 +129,9 @@ class ActivityLog < ActiveRecord::Base
     false
   end
 
-  def model_def_name
-    item_type_name.singularize.to_sym
-  end
-
-  def activity_log_class_name
-    "ActivityLog::#{item_type.classify}#{rec_type.classify}"
-  end
-
-  def activity_log_class
-    activity_log_class_name.constantize
-  end
-
-  def model_assocation_name
-    activity_log_class_name.pluralize.ns_underscore.to_sym
-  end
-
   # the list of defined activity log implementation classes
-  def self.al_classes
-    @al_classes = ActivityLog.enabled.map{|a| "ActivityLog::#{[a.item_type, a.rec_type].join('_').classify}".constantize }
+  def self.implementation_classes
+    @implementation_classes = ActivityLog.enabled.map{|a| "ActivityLog::#{[a.item_type, a.rec_type].join('_').classify}".constantize }
   end
 
 
@@ -169,7 +151,7 @@ class ActivityLog < ActiveRecord::Base
 
     list = []
 
-    al_classes.each do |c|
+    implementation_classes.each do |c|
 
       cn = c.attribute_names.select{|a| a.index('select_') == 0}.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
       cn.each do |a|
@@ -180,25 +162,13 @@ class ActivityLog < ActiveRecord::Base
     list
   end
 
-  def self.add_all_to_app_list
-    self.active.each do |al|
-      al.add_to_app_list
-    end
-  end
 
-  # Optionally accept an association_block, allowing the association related methods such as #build to be overridden
-  # in the master record association. Just passes this through to the add_master_assocation
-  def add_to_app_list &association_block
-    Application.add_to_app_list(:activity_log, self)
-    add_master_association(&association_block)
-  end
 
   def add_master_association &association_block
 
     # Add the association
-    logger.debug "Associated master: has_many #{self.model_assocation_name} with class_name: #{self.activity_log_class_name}"
-    Master.has_many self.model_assocation_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.activity_log_class_name, &association_block
-
+    logger.debug "Associated master: has_many #{self.model_association_name} with class_name: #{self.full_implementation_class_name}"
+    Master.has_many self.model_association_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.full_implementation_class_name, &association_block
     # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
     # since there is no link to advanced search
   end
