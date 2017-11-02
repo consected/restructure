@@ -1,10 +1,11 @@
 Rails.application.routes.draw do
 
-  resources :external_identifiers
+
   resources :reports
   resources :imports
-  
+
   namespace :admin do
+    resources :external_identifiers
     resources :reports, except: [:show, :destroy]
     resources :sage_assignments, except: [:destroy]
     resources :dynamic_models, except: [:show, :destroy]

@@ -46,7 +46,7 @@
 
 
 <% # Add in all the external ID handlers (Scantron, Sage, etc)
-    external_id_types = Application.app_list(:external_id)
+    external_id_types = ExternalIdentifier.active.map(&:implementation_class)
     external_id_types.each do |e|
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {

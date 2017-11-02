@@ -9,7 +9,7 @@ class DynamicModel < ActiveRecord::Base
 
   after_commit :reload_model
 
-  def model_name
+  def implementation_model_name
     table_name.singularize
   end
 
@@ -45,7 +45,7 @@ class DynamicModel < ActiveRecord::Base
     failed = false
 
 
-    if enabled? && !failed # !DynamicModel.const_defined?(model_class_name)
+    if enabled? && !failed
       begin
 
         pkn = (self.primary_key_name).to_sym
@@ -152,20 +152,14 @@ class DynamicModel < ActiveRecord::Base
 
         tn = model_def_name
 
-        self.class.models[tn] = res
-
-        unless self.class.model_names.include? tn
-          self.class.model_names << tn
-        end
+        add_model_to_list res
       rescue=>e
         failed = true
         logger.info "Failure creating a dynamic model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
       end
     end
     if failed || !enabled?
-      logger.info "Removed disabled model #{tn}"
-      self.class.models.delete(tn)
-      self.class.model_names -= [tn]
+      remove_model_from_list
     end
 
     res

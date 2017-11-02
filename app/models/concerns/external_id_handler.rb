@@ -12,19 +12,29 @@ module ExternalIdHandler
 
     attr_accessor :create_count, :just_assigned
     after_initialize :init_vars_external_id_handler
+    after_save :return_all
 
     scope :assigned, -> {where "master_id is not null"}
     scope :unassigned, -> {where "master_id is null"}
+    default_scope -> {order id: :desc}
 
-    @prevent_create = nil
-    @prevent_edit = nil
-    @id_formatter = nil
-    @label = nil
+    # @prevent_create = nil
+    # @prevent_edit = nil
+    # @id_formatter = nil
+    # @label = nil
 
-    validates external_id_attribute, presence: true,  numericality: { only_integer: true, greater_than_or_equal_to: external_id_range.min, less_than_or_equal_to: external_id_range.max }
+    validates self.external_id_attribute, presence: true,  numericality: { only_integer: true, greater_than_or_equal_to: external_id_range.min, less_than_or_equal_to: external_id_range.max }
+    validate :external_id_tests
+
   end
 
   class_methods do
+
+    def find_by_external_id value
+      self.where(external_id_attribute => value).first
+    end
+
+
 
     # Get the next unassigned ID item from the the external id table
     def next_available owner
@@ -42,6 +52,7 @@ module ExternalIdHandler
     def prevent_edit= val
       @prevent_edit = val
     end
+
     def prevent_create= val
       @prevent_create = val
     end
@@ -59,7 +70,7 @@ module ExternalIdHandler
     end
 
     def external_id_edit_pattern= val
-      @external_id_pattern = val
+      @external_edit_id_pattern = val
     end
 
     def label= val
@@ -73,13 +84,14 @@ module ExternalIdHandler
       return @prevent_edit unless @prevent_edit.nil?
       false
     end
+
     def prevent_create?
       return @prevent_create unless @prevent_create.nil?
       false
     end
 
     def external_id_attribute
-      @external_id_attribute || :external_id
+      @external_id_attribute
     end
 
     def external_id_view_formatter
@@ -94,7 +106,7 @@ module ExternalIdHandler
     end
 
     def external_id_edit_pattern
-      @external_id_pattern || '\\d{0,10}'
+      @external_id_edit_pattern || '\\d{0,10}'
     end
 
     def plural_name
@@ -147,6 +159,7 @@ module ExternalIdHandler
         self.new master: owner
       end
     end
+
     def assign_next_available_id master
 
       item = self.next_available master
@@ -182,13 +195,61 @@ module ExternalIdHandler
 
   end
 
+  def allows_nil_master?
+    self.class.allow_to_generate_ids?
+  end
+
+  def creatable_without_user
+    self.class.allow_to_generate_ids?
+  end
+
+  def external_id
+    send(self.class.external_id_attribute)
+  end
+
+  def external_id_changed?
+    send("#{self.class.external_id_attribute}_changed?")
+  end
+
   def check_status
     @was_created = id_changed? || just_assigned ? 'created' : false
     @was_updated = updated_at_changed? ? 'updated' : false
   end
 
+  def return_all
+    self.multiple_results = self.master.send(assoc_inverse_name).all if self.master
+  end
+
+
   def init_vars_external_id_handler
     instance_var_init :admin_set
   end
+
+  def external_id_tests
+
+    if self.external_id.blank?
+      errors.add self.class.external_id_attribute, "can not be blank"
+    end
+
+    if persisted? && external_id_changed? && !@prevent_edit
+      errors.add self.class.external_id_attribute, "can not be changed"
+    end
+
+    if persisted? && master_id_changed? && !master_id_was.nil?
+      errors.add :master, "record this #{self.class.label} is associated with can not be changed"
+    end
+
+    if external_id_changed? || !persisted?
+
+      s = self.class.find_by_external_id(external_id)
+      if s
+        errors.add self.class.external_id_attribute, "already exists in this master record" if s.master_id == self.master_id
+        errors.add self.class.external_id_attribute, "already exists in another master record (#{s.master.msid ? "MSID: #{s.master.msid}" : "master ID: #{s.master_id}"})" if s.master_id != self.master_id
+      end
+
+    end
+
+  end
+
 
 end

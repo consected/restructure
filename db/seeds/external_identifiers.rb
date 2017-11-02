@@ -13,8 +13,8 @@ module Seeds
 
 
       values = [
-        {"name"=>"scantrons", "label"=>'Scantron ID', "external_id_attribute"=>"scantron_id", "external_id_view_formatter"=>"", "prevent_edit"=> false, "pregenerate_ids"=>false, "min_id"=>0, "max_id"=>9999999999, "disabled"=>nil},
-        {"name"=>"sage_assignments", "label"=>'Sage ID', "external_id_attribute"=>"sage_id", "external_id_view_formatter"=>"format_sage_id", "prevent_edit"=>true, "pregenerate_ids"=>true, "min_id"=>1, "max_id"=>999999, "disabled"=>nil}
+        {"name"=>"scantrons", "label"=>'Scantron ID', "external_id_attribute"=>"scantron_id", "external_id_view_formatter"=>"", "external_id_edit_pattern" => '\\d{0,6}', "prevent_edit"=> false, "pregenerate_ids"=>false, "min_id"=>1, "max_id"=>999999, "disabled"=>nil},
+        {"name"=>"sage_assignments", "label"=>'Sage ID', "external_id_attribute"=>"sage_id", "external_id_view_formatter"=>"format_sage_id", "external_id_edit_pattern" => nil,"prevent_edit"=>true, "pregenerate_ids"=>true, "min_id"=>1000000000, "max_id"=>9999999999, "disabled"=>nil}
       ]
 
       add_values values

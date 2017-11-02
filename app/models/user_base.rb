@@ -85,16 +85,29 @@ class UserBase < ActiveRecord::Base
     self.item_type.ns_underscore
   end
 
+  def assoc_inverse_name
+    self.class.name.ns_underscore.pluralize
+  end
+
   # add the alternative_id_fields from the master as attributes, so we can use them for matching
   Master.alternative_id_fields.each do |f|
-    define_method :"#{f}=" do |val|
-      instance_variable_set("@#{f}", val)
 
+    define_method :"#{f}=" do |value|
+      if self.attribute_names.include? f.to_s
+        write_attribute(f, value)
+      else
+        instance_variable_set("@#{f}", value)
+      end
     end
 
     define_method :"#{f}" do
-      instance_variable_get("@#{f}")
+      if self.attribute_names.include? f.to_s
+        read_attribute(f)
+      else
+        instance_variable_get("@#{f}")
+      end
     end
+
   end
 
 

@@ -2,6 +2,10 @@ module DynamicModelHandler
 
   extend ActiveSupport::Concern
 
+  included do
+      after_commit :add_master_association
+  end
+
   class_methods do
 
     def implementation_prefix
@@ -29,7 +33,7 @@ module DynamicModelHandler
 
       begin
         dma = self.active
-        puts "--------------------> Generating models #{self.name} #{self.active.length} <-----------------------"
+
         logger.info "Generating models #{self.name} #{self.active.length}"
 
         dma.each do |dm|
@@ -54,24 +58,26 @@ module DynamicModelHandler
       # before attempting to use it. Otherwise Rake tasks fail.
       if ActiveRecord::Base.connection.table_exists? self.table_name
         self.active.each do |dm|
-          dm.add_to_app_list
+          dm.add_master_association
         end
+      else
+        puts "Table doesn't exist yet: #{self.table_name}"
       end
     end
 
   end
 
   # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
-  def model_name
+  def implementation_model_name
     nil
   end
 
   def model_class_name
-    model_name.ns_camelize
+    implementation_model_name.ns_camelize
   end
 
   def model_def_name
-    model_name.to_sym
+    implementation_model_name.to_sym
   end
 
   def model_def
@@ -95,7 +101,7 @@ module DynamicModelHandler
       prefix = "#{self.class.implementation_prefix.ns_underscore}__"
     end
 
-    "#{prefix}#{model_name}"
+    "#{prefix}#{implementation_model_name}"
   end
 
   # Full namespaced item types (pluralized) name, underscored with double underscores
@@ -113,13 +119,24 @@ module DynamicModelHandler
     full_implementation_class_name.ns_constantize
   end
 
-  # Optionally accept an association_block, allowing the association related methods such as #build to be overridden
-  # in the master record association. Just passes this through to the add_master_assocation
-  def add_to_app_list &association_block
-    Application.add_to_app_list(self.name.ns_underscore.to_sym, self)
-    add_master_association(&association_block)
+
+
+  def add_model_to_list m
+    tn = model_def_name
+    self.class.models[tn] = m
+    logger.info "Added new model #{tn}"
+    puts "Added new model #{tn}"
+    unless self.class.model_names.include? tn
+      self.class.model_names << tn
+    end
   end
 
+  def remove_model_from_list
+    tn = model_def_name
+    logger.info "Removed disabled model #{tn}"
+    self.class.models.delete(tn)
+    self.class.model_names -= [tn]
+  end
 
   def reload_routes
     self.class.routes_reload

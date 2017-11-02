@@ -5,10 +5,12 @@ class CreateExternalIdentifiers < ActiveRecord::Migration
       t.string :label
       t.string :external_id_attribute
       t.string :external_id_view_formatter
+      t.string :external_id_edit_pattern
       t.boolean :prevent_edit
       t.boolean :pregenerate_ids
       t.integer :min_id, limit: 8
       t.integer :max_id, limit: 8
+
       t.belongs_to :admin, index: true, foreign_key: true
       t.boolean :disabled
       t.timestamps null: false

@@ -2256,6 +2256,7 @@ CREATE TABLE external_identifiers (
     label character varying,
     external_id_attribute character varying,
     external_id_view_formatter character varying,
+    external_id_edit_pattern character varying,
     prevent_edit boolean,
     pregenerate_ids boolean,
     min_id bigint,

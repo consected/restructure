@@ -13,10 +13,10 @@ class ActivityLog < ActiveRecord::Base
   after_commit :generate_model
   after_commit :reload_routes
   after_commit :generate_protocol_entries
-  after_commit :add_to_app_list
 
 
-  def model_name
+
+  def implementation_model_name
     item_type_name
   end
 
@@ -353,13 +353,7 @@ class ActivityLog < ActiveRecord::Base
 
         logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
-        tn = model_def_name
-
-        self.class.models[tn] = res
-
-        unless self.class.model_names.include? tn
-          self.class.model_names << tn
-        end
+        add_model_to_list res
       rescue=>e
         failed = true
         logger.info "Failure creating a activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
@@ -367,9 +361,7 @@ class ActivityLog < ActiveRecord::Base
       end
     end
     if failed || !enabled?
-      logger.info "Removed disabled model #{tn}"
-      self.class.models.delete(tn)
-      self.class.model_names -= [tn]
+      remove_model_from_list
     end
 
     res

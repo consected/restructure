@@ -116,7 +116,7 @@ class Master < ActiveRecord::Base
   end
 
   def self.external_id_matching_fields
-    Application.app_list(:external_id).map{|f| "#{f.name.ns_underscore}_id".to_sym}
+    ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}
   end
 
   def self.alternative_id_fields
