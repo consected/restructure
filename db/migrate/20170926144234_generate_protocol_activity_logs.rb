@@ -8,7 +8,7 @@ class GenerateProtocolActivityLogs < ActiveRecord::Migration
 
     Protocol.enabled.each do |p|
 
-      sp = p.sub_processes.create! name: ActivityLog::SubProcessName, current_admin: admin
+      sp = p.sub_processes.create! name: ActivityLog.sub_process_name, current_admin: admin
 
       pe = sp.protocol_events.create! name: ProtocolEventName, current_admin: admin
 
@@ -23,8 +23,8 @@ class GenerateProtocolActivityLogs < ActiveRecord::Migration
 execute <<EOF
     delete from protocol_event_history where name = '#{ProtocolEventName}';
     delete from protocol_events where name = '#{ProtocolEventName}';
-    delete from sub_process_history where name = '#{ActivityLog::SubProcessName}';
-    delete from sub_processes where name = '#{ActivityLog::SubProcessName}';
+    delete from sub_process_history where name = '#{ActivityLog.sub_process_name}';
+    delete from sub_processes where name = '#{ActivityLog.sub_process_name}';
 
 EOF
 

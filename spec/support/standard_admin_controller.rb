@@ -114,9 +114,8 @@ shared_examples 'a standard admin controller' do
 
       it "re-renders the 'form' template" do
         list_invalid_attributes.each do |inv|
-          
           post :create, {object_symbol => inv}
-          expect(response).to render_template("_form")
+          expect(response).to render_template(edit_form_admin)
         end
       end
     end

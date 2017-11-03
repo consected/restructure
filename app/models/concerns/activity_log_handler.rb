@@ -155,7 +155,7 @@ module ActivityLogHandler
     # if we are not already passing through sub_process based on a user selection then
     # look up what the Activity name is for protocol sub processes
     unless self.attribute_names.include? 'sub_process_id'
-      sub_process = protocol.sub_processes.where(name: ActivityLog::SubProcessName).first
+      sub_process = protocol.sub_processes.where(name: ActivityLog.sub_process_name).first
     end
     # if we are not already passing through protocol_event based on a user selection then
     # then use the protocol event name matching the admin activity log definition for this model

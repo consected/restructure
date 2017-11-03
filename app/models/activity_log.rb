@@ -1,6 +1,5 @@
 class ActivityLog < ActiveRecord::Base
 
-  SubProcessName = 'Activity'
 
   include DynamicModelHandler
   include AdminHandler
@@ -10,9 +9,7 @@ class ActivityLog < ActiveRecord::Base
   validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
   validate :check_item_type_and_rec_type
-  after_commit :generate_model
-  after_commit :reload_routes
-  after_commit :generate_protocol_entries
+
 
 
 
@@ -22,6 +19,11 @@ class ActivityLog < ActiveRecord::Base
 
   def self.implementation_prefix
     "ActivityLog"
+  end
+
+  # Name used in the protocol updates setup for tracker
+  def self.sub_process_name
+    'Activity'
   end
 
 
@@ -125,7 +127,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def item_type_valid?
-    return true if self.class.use_with_class_names.include?(self.item_type.pluralize)
+    return true if self.class.use_with_class_names.include?(self.item_type)
     false
   end
 
@@ -139,7 +141,7 @@ class ActivityLog < ActiveRecord::Base
   # This list is the full list of possible items, and only those configured and read by #works_with are actually available
   # for activity logging
   def self.use_with_class_names
-    Master::PrimaryAssociations
+    (DynamicModel.model_names + ExternalIdentifier.model_names).map{|m| m.to_s.singularize} + Master::PrimaryAssociations
   end
 
 
@@ -214,16 +216,18 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
-
-  def generate_protocol_entries
+  # Generate the protocol / sub process  / protocol event entries that will be
+  # used by implementations when updating and creating records, and subsequently tracking
+  # those changes in the tracker history.
+  def update_tracker_events
 
     logger.info "Generating protocol entries"
     admin = self.current_admin
     Protocol.enabled.each do |p|
       logger.info "For protocol: #{p.id} #{p.name}"
-      sps = p.sub_processes.where(name: ActivityLog::SubProcessName)
+      sps = p.sub_processes.where(name: self.class.sub_process_name)
       if sps.length == 0
-        sp = p.sub_processes.create!(name: ActivityLog::SubProcessName, current_admin: admin, disabled: true)
+        sp = p.sub_processes.create!(name: self.class.sub_process_name, current_admin: admin, disabled: true)
         logger.info "Adding a new Activity sub process #{sp.id}"
       else
         sp = sps.first
@@ -243,7 +247,7 @@ class ActivityLog < ActiveRecord::Base
 
   def check_item_type_and_rec_type
     unless item_type_valid?
-      errors.add(:item_type, "#{self.item_type} is invalid. It must be one of (#{self.class.use_with_class_names.join(",")})")
+      errors.add(:item_type, "#{self.item_type} is invalid. It must be one of (#{self.class.use_with_class_names.join(", ")})")
       return
     end
     unless rec_type_valid?
@@ -365,6 +369,19 @@ class ActivityLog < ActiveRecord::Base
     end
 
     res
+  end
+
+  def check_implementation_class
+    puts "checking implementation class for #{full_implementation_class_name}"
+
+    if !disabled
+      puts "checking ACTIVE implementation class for #{full_implementation_class_name}"
+      res = implementation_class.new rescue nil
+      raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
+        ruby -e \"require './db/table_generators/activity_logs_table.rb'; TableGenerators.activity_logs_table('#{table_name}', false, #{view_attribute_list.map{|f| "'#{f}'"}.join(', ')})\"
+        to generate the SQL for this table.
+      " unless res
+    end
   end
 
 

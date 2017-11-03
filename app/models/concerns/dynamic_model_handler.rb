@@ -3,7 +3,11 @@ module DynamicModelHandler
   extend ActiveSupport::Concern
 
   included do
-      after_commit :add_master_association
+    after_save :generate_model
+    after_save :reload_routes
+    after_save :add_master_association
+    after_save :check_implementation_class
+    after_save :update_tracker_events
   end
 
   class_methods do
@@ -119,7 +123,9 @@ module DynamicModelHandler
     full_implementation_class_name.ns_constantize
   end
 
-
+  def update_tracker_events
+    raise "DynamicModel configuration implementation must define update_tracker_events"
+  end
 
   def add_model_to_list m
     tn = model_def_name
@@ -139,8 +145,17 @@ module DynamicModelHandler
   end
 
   def reload_routes
+    puts "reload_routes requested"
     self.class.routes_reload
   end
 
+  def check_implementation_class
+    puts "checking implementation class for #{full_implementation_class_name}"
 
+    if !disabled
+      puts "checking ACTIVE implementation class for #{full_implementation_class_name}"
+      res = implementation_class.new rescue nil
+      raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created." unless res
+    end
+  end
 end

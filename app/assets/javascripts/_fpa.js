@@ -649,10 +649,10 @@ _fpa = {
       a += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
       if(type == 'error' || type == 'danger'){
         var msg_safe = $('<div/>').text(msg).html();
-        a += msg_safe;
+        a += msg_safe.replace(/\n/g,'<br/>');
       }else
       {
-        a += msg;
+        a += msg.replace(/\n/g,'<br/>');
       }
       a += '</div>';
 

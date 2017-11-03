@@ -48,10 +48,7 @@ Rails.application.routes.draw do
     resources :player_contacts, except: [:destroy]
     resources :pro_infos, only: [:show, :index], constraints: { id: /\d+/ }
     resources :addresses, except: [:destroy]
-    resources :scantrons, except: [:destroy]
 
-
-    resources :sage_assignments, except: [:destroy]
     resources :trackers, except: [:destroy] do
       resources :tracker_histories, only: [:index]
     end
@@ -68,7 +65,7 @@ Rails.application.routes.draw do
 
   end
 
-
+  ExternalIdentifier.routes_load
   ActivityLog.routes_load
 
   devise_for :admins, :skip => [:registrations]

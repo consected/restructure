@@ -26,7 +26,7 @@ module AdminControllerHandler
     render partial: view_path('form')
   end
 
-  def edit    
+  def edit
     render partial: view_path('form')
   end
 
@@ -34,7 +34,19 @@ module AdminControllerHandler
 
     set_object_instance primary_model.new(secure_params)
     object_instance.current_admin = current_admin
-    if object_instance.save
+
+    # Putting save into a rescue block enables us to raise FphsException in
+    # after_save callbacks, providing an extra level of validation where it
+    # is needed after records are persisted to the DB.
+    # Without this, spec tests fail with incredibly hard to understand results,
+    # where at least there would have been a visible exception in real life
+    begin
+      res = object_instance.save
+    rescue FphsException => e
+      res = nil
+      flash.now[:warning] = e.message
+    end
+    if res
       #redirect_to index_path, notice: "#{human_name} created successfully"
       @updated_with = object_instance
       index

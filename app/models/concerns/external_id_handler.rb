@@ -38,7 +38,11 @@ module ExternalIdHandler
 
     # Get the next unassigned ID item from the the external id table
     def next_available owner
-      item = unassigned.unscope(:order).first
+      # Have to use #unscoped to ensure that the scope of the association does not interfere with
+      # the unassigned query (or any queries from the class in fact), which seems to incorporate
+      # a master_id = ? condition automatically, based on the underlying association.
+      # Not sure when this requirement was introduced, but it is necessary.
+      item = unscoped.unassigned.first
       raise ::ExternalIdHandler::NoUnassignedAvailable  unless item
       logger.info "Got next available external id #{item.id}"
       item.assigned_by = "fphsapp" if item.respond_to? :assigned_by=
@@ -95,7 +99,7 @@ module ExternalIdHandler
     end
 
     def external_id_view_formatter
-      @id_formatter || ''
+      @external_id_view_formatter
     end
 
     def external_id_range
@@ -106,7 +110,7 @@ module ExternalIdHandler
     end
 
     def external_id_edit_pattern
-      @external_id_edit_pattern || '\\d{0,10}'
+      @external_id_edit_pattern# || '\\d{0,10}'
     end
 
     def plural_name
@@ -119,9 +123,6 @@ module ExternalIdHandler
     def label
       @label || self.name.underscore.humanize.titleize
     end
-
-
-
 
     # For external ID models that require an auto-generated or auto-assigned (from an existing list) ID,
     # the master association build method will use this method.
@@ -193,6 +194,11 @@ module ExternalIdHandler
     end
 
 
+  end
+
+
+  def data
+    self.external_id
   end
 
   def allows_nil_master?

@@ -7,7 +7,7 @@ class DynamicModel < ActiveRecord::Base
 
   attr_accessor :editable
 
-  after_commit :reload_model
+
 
   def implementation_model_name
     table_name.singularize
@@ -18,12 +18,6 @@ class DynamicModel < ActiveRecord::Base
     return :vertical
   end
 
-  def reload_model
-    generate_model
-
-    add_master_association
-    self.class.routes_reload
-  end
 
   def add_master_association &association_block
     # Now forcibly set the Master association:
@@ -36,7 +30,10 @@ class DynamicModel < ActiveRecord::Base
 
 
 
-
+  def update_tracker_events
+    return unless self.name && !disabled
+    Tracker.add_record_update_entries self.name, current_admin, 'flag'
+  end
 
 
   def generate_model

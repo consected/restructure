@@ -3,6 +3,16 @@ class ExternalIdentifier < ActiveRecord::Base
   include DynamicModelHandler
   include AdminHandler
 
+  validates :name, presence: true
+  validates :label, presence: true
+  validates :external_id_attribute, presence: true
+  validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}
+  validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}
+  validate :name_format_correct
+  validate :id_range_correct
+  after_validation :implementation_table_tests
+
+
 
   def self.class_for field_name
     field_name.sub(/_id$/, '').ns_camelize.ns_constantize
@@ -16,6 +26,26 @@ class ExternalIdentifier < ActiveRecord::Base
 
 
   def self.routes_load
+    puts "Loading routes for external identifiers"
+    begin
+      m = self.active
+      return if m.length == 0
+
+      Rails.application.routes.draw do
+        resources :masters, only: [:show, :index, :new, :create] do
+
+            m.each do |pg|
+              puts "Adding resources for #{pg.model_association_name}"
+              resources pg.model_association_name, except: [:destroy]
+            end
+        end
+      end
+
+    rescue ActiveRecord::StatementInvalid => e
+      logger.warn "Not loading activity log routes. The table has probably not been created yet. #{e.backtrace.join("\n")}"
+    end
+
+
   end
 
   def external_id_range
@@ -55,7 +85,7 @@ class ExternalIdentifier < ActiveRecord::Base
     failed = false
 
     logger.info "Generating ExternalIdentifier model #{name}"
-    puts  "*****************Generating ExternalIdentifier model #{name}"
+    puts  "*****************Generating ExternalIdentifier model #{name} **** #{self.external_id_view_formatter}"
     external_id_attribute = self.external_id_attribute
     external_id_edit_pattern = self.external_id_edit_pattern
     external_id_view_formatter = self.external_id_view_formatter
@@ -113,9 +143,50 @@ class ExternalIdentifier < ActiveRecord::Base
 
         end
 
-        # a_new_controller = Class.new(ActivityLog::ActivityLogsController) do
-        #
-        # end
+        a_new_controller = Class.new(ApplicationController) do
+
+            protected
+              # By default the external id edit form is handled through a common template. To provide a customized form, copy the content of
+              # "common_templates/external_id_edit_form.html.erb" to views/<name>/_edit_form.html.erb
+              def edit_form
+                'common_templates/external_id_edit_form'
+              end
+
+            private
+
+              def secure_params
+                res = params.require(self.class.name.singularize.to_sym).permit(:master_id, self.class.external_id_attribute.to_sym)
+                # Extra protection to avoid possible injection of an alternative value
+                # when we should be using a generated ID
+                res[self.class.external_id_attribute.to_sym] = nil if self.class.allow_to_generate_ids
+                res
+              end
+
+              def self.external_id_attribute
+                @external_id_attribute
+              end
+              def self.name
+                @name
+              end
+
+              def self.external_id_attribute=v
+                @external_id_attribute = v
+              end
+              def self.name=v
+                @name = v
+              end
+
+              def self.allow_to_generate_ids= v
+                @allow_to_generate_ids = v
+              end
+              def self.allow_to_generate_ids
+                @allow_to_generate_ids
+              end
+
+              self.allow_to_generate_ids = allow_to_generate_ids
+              self.external_id_attribute = external_id_attribute
+              self.name = name
+        end
 
         m_name = model_class_name
 
@@ -126,9 +197,9 @@ class ExternalIdentifier < ActiveRecord::Base
         res.include ExternalIdHandler
 
         c_name = "#{model_class_name.pluralize}Controller"
-        # res2 = klass.const_set(c_name, a_new_controller)
-
-    #    logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
+        res2 = Object.const_set(c_name, a_new_controller)
+        res2.include MasterHandler
+        puts "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
         add_model_to_list res
       rescue=>e
@@ -144,6 +215,58 @@ class ExternalIdentifier < ActiveRecord::Base
     res
   end
 
+  def update_tracker_events
+    puts "Attempting to update tracker events to allow tracking of creates and updates"
+
+    return unless self.label && !disabled
+    Tracker.add_record_update_entries self.name.singularize, current_admin, 'record'
+  end
+
+  def implementation_class_defined?
+     Object.const_get(model_class_name) rescue nil
+   end
+
+  def implementation_table_tests
+    if ActiveRecord::Base.connection.table_exists? self.name
+      # Check for the actual database columns, since the class has not been created yet, and will not be until after_commit
+      unless ActiveRecord::Base.connection.columns(self.name).map(&:name).include?(self.external_id_attribute.to_s)
+#        puts "external_id_attribute does not exist as an attribute (named #{self.external_id_attribute}) in the table #{self.name}"
+        raise FphsException.new("external_id_attribute does not exist as an attribute (named #{self.external_id_attribute}) in the table #{self.name}")
+      end
+
+    else
+      # Can't enable the configuration until the table exists
+      unless self.disabled
+#        puts "name: #{name} does not exist as a table in the database"
+        raise FphsException.new("name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created. Run:
+        ruby -e \"require './db/table_generators/external_identifiers_table.rb'; TableGenerators.external_identifiers_table('#{name}', '#{external_id_attribute}')\"
+        to generate the SQL for this table.
+         ")
+      end
+    end
+
+  end
+
+  def id_range_correct
+    errors.add :max_id, "must be greater than min_id"  unless max_id > min_id
+  end
+
+  def name_format_correct
+    errors.add :name, "must be a lowercase, underscored, DB table name" unless name.downcase.ns_underscore == name
+  end
+
+  def check_implementation_class
+    puts "checking implementation class for #{full_implementation_class_name}"
+
+    if !disabled
+      puts "checking ACTIVE implementation class for #{full_implementation_class_name}"
+      res = implementation_class.new rescue nil
+      raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{name} has been created. Run:
+      ruby -e \"require './db/table_generators/external_identifiers_table.rb'; TableGenerators.external_identifiers_table('#{name}', '#{external_id_attribute}')\"
+      to generate the SQL for this table.
+       " unless res
+    end
+  end
 
 end
 

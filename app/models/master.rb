@@ -28,15 +28,14 @@ class Master < ActiveRecord::Base
   validates :user, presence: true
   before_create :assign_msid
 
+  # The main set of has_many associations that represents the primary data objects that can belong to a master record
+  PrimaryAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
+
 
   # DynamicModel associations take the form:
   #     master.player_contact_histories
   # i.e. the pluralized table name
   DynamicModel.enable_active_configurations
-
-
-  # The main set of has_many associations that represents the primary data objects that can belong to a master record
-  PrimaryAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
 
   # ItemFlag associations with master are generated dynamically, following the form:
   #   master.player_infos_item_flags
@@ -47,7 +46,6 @@ class Master < ActiveRecord::Base
   # Notice the double underscore which represents the Module::Class delimiter
   ActivityLog.enable_active_configurations
 
-  AllAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
 
   # Move all the simple and advance search form functionality out of the way, so the data functionality of the model can be clearly seen
   include MasterSearchHandler
@@ -58,6 +56,7 @@ class Master < ActiveRecord::Base
   # This is placed here, since there is a dependence on MasterSearchHandler
   ExternalIdentifier.enable_active_configurations
 
+
   attr_accessor :force_order
 
 
@@ -67,7 +66,9 @@ class Master < ActiveRecord::Base
     pi.accuracy_rank
   end
 
-
+  def self.get_all_associations
+    reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
+  end
 
   # Current admin is not stored, but may be used in validations for administrative level changes
   def current_admin=ca

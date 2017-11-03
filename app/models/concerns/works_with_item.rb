@@ -10,7 +10,6 @@ module WorksWithItem
   included do
 
     validate :works_with
-    default_scope -> {where "disabled is null or disabled = false"}
 
   end
 

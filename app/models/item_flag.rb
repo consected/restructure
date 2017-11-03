@@ -21,6 +21,8 @@ class ItemFlag < UserBase
   validates :item_flag_name_id, presence: true
   validates :item_flag_name, presence: true
 
+  default_scope -> {where "disabled is null or disabled = false"}
+
   def user_name
     logger.debug "Getting username for #{self.user} in WorksWithItem"
     return nil unless self.user

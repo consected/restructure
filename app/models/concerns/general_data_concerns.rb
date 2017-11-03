@@ -84,6 +84,7 @@ module GeneralDataConcerns
     extras[:methods] << :item_id
     extras[:methods] << :item_type
     extras[:methods] << :full_item_type
+    extras[:methods] << :data if respond_to? :data
     extras[:methods] << :rank_name if respond_to? :rank
     extras[:methods] << :state_name if respond_to? :state
     extras[:methods] << :country_name if respond_to? :country
@@ -101,8 +102,8 @@ module GeneralDataConcerns
     extras[:methods] << :update_action
     extras[:methods] << :_created
     extras[:methods] << :_updated
-
-    extras[:include][self.class.parent_type] = {methods: [:rank_name]} if self.class.respond_to? :parent_type
+byebug
+    extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
     extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?
 
     super(extras)

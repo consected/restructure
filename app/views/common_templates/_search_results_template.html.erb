@@ -104,6 +104,11 @@
             <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="<%= edit_button_href %>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}"></a>
           <% end %>
           <small><%= item[:label] %></small> <strong>{{<%= item[:formatter] || 'pretty_string' %> <%= item[:attribute] %>}}</strong>
+          <% unless custom_activity_log == :none %>
+            <% if works_with_rec_types.blank? %>
+              {{> activity_log_<%=name%>_show_button_partial }}
+            <% end %>
+          <% end %>
         </li>
         <%end%>
       <%else%>

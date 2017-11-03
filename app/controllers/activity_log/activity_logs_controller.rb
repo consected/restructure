@@ -52,7 +52,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
     end
 
     def item_data
-      @item.data if @item
+      @item.data if @item 
     end
 
     def item_type_id

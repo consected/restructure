@@ -8,7 +8,7 @@ class Import < ActiveRecord::Base
 
 
   def self.accepts_models
-    Master::AllAssociations
+    Master.get_all_associations
   end
 
 
