@@ -1,3 +1,5 @@
+require './db/table_generators/activity_logs_table.rb'
+
 module AdminActivityLogSupport
 
   include MasterSupport
@@ -6,7 +8,7 @@ module AdminActivityLogSupport
 
     [
       {
-        name: "Test Log",
+        name: "test_log",
         item_type: 'player_contacts',
         rec_type: 'phone',
         action_when_attribute: 'called_when',
@@ -56,7 +58,7 @@ module AdminActivityLogSupport
   def new_attribs
 
     @new_attribs = {
-      name: "test log",
+      name: "test_log",
       item_type: 'player_contacts',
       rec_type: 'phone',
       action_when_attribute: 'called_when',
@@ -68,6 +70,9 @@ module AdminActivityLogSupport
     att ||= valid_attribs
     att[:current_admin] ||= admin  if admin.is_a? Admin
     raise "No admin set" unless att[:current_admin]
+    unless ActiveRecord::Base.connection.table_exists? 'activity_log_test_log'
+      TableGenerators.activity_logs_table('test_log', true)
+    end
     @activity_log = ActivityLog.create! att
   end
 

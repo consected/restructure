@@ -13,14 +13,23 @@ module UserHandler
     belongs_to :master, assoc_rules
 
     has_many :item_flags, as: :item, inverse_of: :item
-    has_many :activity_logs, as: :item, inverse_of: :item
+
+
+
     has_many :trackers, as: :item, inverse_of: :item if self != Tracker && self != TrackerHistory
 
     # Generate the set of activity log associations, for each record type for this item type
+    # Ensure the master is set on the activity log when building through the association block
+    # build method being called
     ActivityLog.active.where(item_type: self.name.ns_underscore).each do |al|
-      has_many al.model_association_name.to_sym, class_name: al.full_implementation_class_name
+      has_many al.model_association_name.to_sym, class_name: al.full_implementation_class_name do
+        def build att=nil
+          att[:master] = proxy_association.owner.master
+          super(att)
+        end
+      end
     end
-
+#    has_many :activity_logs, as: :item, inverse_of: :item
 
     validate :source_correct
     validate :rank_correct

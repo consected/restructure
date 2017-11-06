@@ -1,11 +1,13 @@
 require 'rails_helper'
 
+RSpec.configure {|c| c.before { seed_database ; expect(controller).not_to be_nil }}
+
 RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
 
   include ActivityLogSupport
   include ModelSupport
   include MasterSupport
-  
+
   def object_class
     ActivityLog
   end
@@ -19,7 +21,7 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
   let(:valid_attributes) {
     valid_attribs
   }
-  
+
   let(:list_invalid_attributes){
     list_invalid_attribs
   }
@@ -27,33 +29,40 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
   let(:invalid_attributes) {
     invalid_attribs
   }
-  
+
   before(:all) do
+
     seed_database
+
     create_admin
     create_user
     create_master @user
   end
-  
+
+  before :each do
+    seed_database
+  end
+
   describe "Ensure authentication" do
     before_each_login_user
     before_each_login_admin
-    it "returns a result" do      
-      
+    it "returns a result" do
+
       create_item
-      
+
       get :index, {master_id: @player_contact.master_id, item_id: @player_contact.id}
       expect(response).to have_http_status(200)#, "Attempting #{@user}"
     end
   end
-  
+
   describe "GET #index" do
     before_each_login_user
-    before_each_login_admin 
-    it "assigns all items as @vars" do      
-      create_items
+    before_each_login_admin
+    it "assigns all items as @vars" do
       
-      get :index, {master_id: @player_contact.master_id, item_controller: 'player_contacts', item_id: @player_contact.id}
+      create_items
+
+      get :index, {master_id: @player_contact.master_id, item_id: @player_contact.id}
       expect(assigns(objects_symbol)).to eq([item])
     end
   end
@@ -61,11 +70,11 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
   describe "GET #show" do
     before_each_login_user
     before_each_login_admin
-    
+
     it "assigns the requested item as @var" do
       create_item
-  
-      get :show, {master_id: @player_contact.master_id, item_controller: 'player_contacts', item_id: @player_contact.id,  id: item_id}
+
+      get :show, {master_id: @player_contact.master_id, item_id: @player_contact.id,  id: item_id}
       expect(assigns(object_symbol)).to eq(item)
     end
   end
@@ -201,8 +210,8 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
       #expect(response).to have_http_status(401)
     end
 
-    
-  end  
-  
+
+  end
+
 
 end

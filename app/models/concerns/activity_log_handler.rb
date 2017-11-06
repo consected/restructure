@@ -9,7 +9,8 @@ module ActivityLogHandler
     has_many :item_flags, as: :item, inverse_of: :item
 
     after_initialize :set_action_when
-#    before_create :set_related_fields_edit
+
+    before_save :sync_item_data
     before_save :set_related_fields
     before_save :set_allow_tracker_sync
     # don't validate the association with the parent item_data
@@ -18,7 +19,6 @@ module ActivityLogHandler
 
     validates :master_id, presence: true
 
-    after_save :sync_item_data
     after_save :sync_set_related_fields
 
     after_save :sync_tracker

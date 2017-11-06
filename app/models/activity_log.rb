@@ -141,7 +141,7 @@ class ActivityLog < ActiveRecord::Base
   # This list is the full list of possible items, and only those configured and read by #works_with are actually available
   # for activity logging
   def self.use_with_class_names
-    (DynamicModel.model_names + ExternalIdentifier.model_names).map{|m| m.to_s.singularize} + Master::PrimaryAssociations
+    (DynamicModel.model_names + ExternalIdentifier.model_names + Master::PrimaryAssociations).map{|m| m.to_s.singularize}
   end
 
 
@@ -376,11 +376,24 @@ class ActivityLog < ActiveRecord::Base
 
     if !disabled
       puts "checking ACTIVE implementation class for #{full_implementation_class_name}"
+      val = view_attribute_list || []
+      unless ready?
+        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
+          db/table_generators/generate.sh activity_logs_table #{table_name} false #{val.map{|f| "'#{f}'"}.join(', ')}\"
+        Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
+        "
+        errors.add :name, err
+        # Force exit of callbacks
+        raise  FphsException.new err
+      end
+
       res = implementation_class.new rescue nil
-      raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created.
-        ruby -e \"require './db/table_generators/activity_logs_table.rb'; TableGenerators.activity_logs_table('#{table_name}', false, #{view_attribute_list.map{|f| "'#{f}'"}.join(', ')})\"
-        to generate the SQL for this table.
-      " unless res
+      unless res
+        err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
+        errors.add :name, err
+        # Force exit of callbacks
+        raise FphsException.new err
+      end
     end
   end
 

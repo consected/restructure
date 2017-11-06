@@ -9,8 +9,8 @@
     caption_before = {}
   end
 
-  unless caption && caption.include?('{{')
-    caption = (caption || name).humanize.titleize
+  unless caption && caption.to_s.include?('{{')
+    caption = (caption.to_s || name).humanize.titleize
   end
 
   unless defined? item_list
@@ -34,7 +34,7 @@
         <li class="list-group-item">
           <%= inline_cancel_button %>
           <h4 class="list-group-item-heading"><%=caption%></h4>
-          <%= render partial: 'common_templates/item_flags_block', locals: {f: f} unless item_flags_after %>
+          <%= render partial: 'common_templates/item_flags_block', locals: {f: f} unless item_flags_after || item_flags_array.length == 0 %>
         </li>
 
         <% item_list.each do |p| %>
@@ -143,7 +143,7 @@
               <%= f.text_field p %>
             <% end %>
           </li>
-          <%  if item_flags_after == p %>
+          <%  if item_flags_after == p && item_flags_array.length > 0 %>
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
             <%= render partial: 'common_templates/item_flags_block', locals: {f: f} %>
           </li>

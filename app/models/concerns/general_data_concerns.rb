@@ -102,7 +102,7 @@ module GeneralDataConcerns
     extras[:methods] << :update_action
     extras[:methods] << :_created
     extras[:methods] << :_updated
-byebug
+
     extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
     extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?
 

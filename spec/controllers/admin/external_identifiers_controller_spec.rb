@@ -25,7 +25,7 @@ RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
       @implementation_table_name = "test_external_#{r}_identifiers"
       @implementation_attr_name = "test_#{r}_id"
       unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
-        TableGenerators.external_identifiers_table(@implementation_table_name, @implementation_attr_name, true)
+        TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
       end
 
     end

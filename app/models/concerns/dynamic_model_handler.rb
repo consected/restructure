@@ -56,7 +56,6 @@ module DynamicModelHandler
     end
 
 
-
     def enable_active_configurations
       # to ensure that the db migrations can run, check for the existence of the admin table
       # before attempting to use it. Otherwise Rake tasks fail.
@@ -69,6 +68,11 @@ module DynamicModelHandler
       end
     end
 
+  end
+
+
+  def ready?
+    return !self.disabled && ActiveRecord::Base.connection.table_exists?(self.table_name)
   end
 
   # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
@@ -153,9 +157,10 @@ module DynamicModelHandler
     puts "checking implementation class for #{full_implementation_class_name}"
 
     if !disabled
+      raise FphsException.new "The implementation of #{table_name} is enabled but the table is not ready to use" unless ready?
       puts "checking ACTIVE implementation class for #{full_implementation_class_name}"
       res = implementation_class.new rescue nil
-      raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created." unless res
+      raise FphsException.new "The implementation of #{table_name} was not completed. Ensure the DB table #{table_name} has been created." unless res
     end
   end
 end

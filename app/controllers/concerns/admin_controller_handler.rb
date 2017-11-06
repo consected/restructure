@@ -40,19 +40,20 @@ module AdminControllerHandler
     # is needed after records are persisted to the DB.
     # Without this, spec tests fail with incredibly hard to understand results,
     # where at least there would have been a visible exception in real life
+
     begin
       res = object_instance.save
     rescue FphsException => e
+
       res = nil
       flash.now[:warning] = e.message
     end
     if res
-      #redirect_to index_path, notice: "#{human_name} created successfully"
       @updated_with = object_instance
       index
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
-      flash.now[:warning] = "Error creating #{human_name}: #{error_message}"
+      flash.now[:warning] ||= "Error creating #{human_name}: #{error_message}"
       new use_current_object: true
     end
   end
