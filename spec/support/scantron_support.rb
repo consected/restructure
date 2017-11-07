@@ -41,8 +41,17 @@ module ScantronSupport
 
 
 
-  def create_item att=nil, master=nil
+  def create_item att=nil, master=nil, allow_dup=false
+
     att ||= valid_attribs
+    unless allow_dup
+      ActiveRecord::Base.connection.execute "delete from scantron_history where scantron_id = '#{att[:scantron_id]}';
+      delete from scantrons where scantron_id = '#{att[:scantron_id]}';
+      "
+
+    end
+
+
     master ||= create_master
     @scantron = master.scantrons.create! att
   end

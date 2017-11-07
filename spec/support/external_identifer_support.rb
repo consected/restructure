@@ -79,8 +79,14 @@ module ExternalIdentifierSupport
 
 
 
-  def create_item att=nil, admin=nil
+  def create_item att=nil, admin=nil, allow_dup=false
     att ||= valid_attribs
+
+    
+    unless allow_dup
+      ExternalIdentifier.where("name=? or external_id_attribute=?", att[:name], att[:external_id_attribute]).update_all(disabled: true)
+    end
+
     att[:current_admin] = admin||@admin
     @external_identifier = ExternalIdentifier.create! att
   end

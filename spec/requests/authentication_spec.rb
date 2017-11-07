@@ -2,6 +2,13 @@ require 'rails_helper'
 
 describe "user and admin authentication" do
 
+  include MasterSupport
+
+  before :all do
+    seed_database
+    expect( ActivityLog.active.length ).to be > 0
+  end
+
   # Prepare a list of URLs to test
 
   before(:each) do
@@ -51,7 +58,7 @@ describe "user and admin authentication" do
 
     skip_urls = ["/admins/sign_in", "/users/sign_in", "/child_error_reporter"]
 
-    admin_controllers = %w(admin/accuracy_scores admin/action_logs admin/colleges admin/general_selections admin/item_flag_names admin/manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links admin/activity_logs)
+    admin_controllers = %w(admin/accuracy_scores admin/action_logs admin/colleges admin/general_selections admin/item_flag_names admin/manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links admin/activity_logs admin/external_identifiers)
 
     @url_list.each do |url|
       if url[:controller] && !skip_urls.include?(url[:url])
@@ -83,7 +90,7 @@ describe "user and admin authentication" do
           Rails.logger.info "Action not defined. Skipping #{url.inspect}"
         end
       else
-      
+
       end
     end
 

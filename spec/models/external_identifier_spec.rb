@@ -16,7 +16,40 @@ RSpec.describe ExternalIdentifier, type: :model do
     end
 
   end
-  
+
+  it "validates new configurations" do
+    # Check if a configured item does actually exist as a usable model
+    vals = list_valid_attribs.first
+
+    vals[:name] = @implementation_table_name
+    vals[:external_id_attribute] = @implementation_attr_name
+    e = create_item vals
+    expect(e.disabled).to be false
+
+    # No duplicate names
+    new_vals = list_valid_attribs.last.dup
+    new_vals[:name] = vals[:name]
+    new_vals[:disabled] = false
+
+    expect {
+      create_item new_vals, nil, true
+    }.to raise_error(ActiveRecord::RecordInvalid)
+
+    # No duplicate external_id_attribute
+    new_vals = list_valid_attribs.last.dup
+
+    unless ActiveRecord::Base.connection.table_exists? new_vals[:name]
+      TableGenerators.external_identifiers_table(new_vals[:name], @implementation_attr_name, true)
+    end
+
+    new_vals[:external_id_attribute] = vals[:external_id_attribute]
+    new_vals[:disabled] = false
+    expect {
+      create_item new_vals, nil, true
+    }.to raise_error(ActiveRecord::RecordInvalid)
+
+  end
+
   it "has an implementation class for a created external model" do
     # Check if a configured item does actually exist as a usable model
     vals = list_valid_attribs.first
@@ -42,9 +75,36 @@ RSpec.describe ExternalIdentifier, type: :model do
     expect(res.id).not_to be nil
     expect(res.attributes[c.external_id_attribute]).to eq eid
 
+    # Ensure it fails if trying to add a bad ID
     res = c.new(c.external_id_attribute => -1, master: m)
 
     expect(res.save).to be false
 
   end
+
+  it "allows player records to referenced using the external ID" do
+
+    # Create an external identifier implementation
+    vals = list_valid_attribs.first
+    e = create_item vals
+
+    # Create some master records to allow fair testing
+    create_master
+    m = create_master
+    create_master
+
+    # Create an external identifier ID record
+    c = e.implementation_class
+    eid = rand(9999999)
+    res = c.create(c.external_id_attribute => eid, master: m)
+    expect(res.id).not_to be nil
+
+    # Attempt to find the master
+    found = Master.find_with_alternative_id(@implementation_attr_name, eid)
+    expect(found).to eq m
+
+
+
+  end
+
 end

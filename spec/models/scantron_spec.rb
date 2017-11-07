@@ -11,6 +11,7 @@ RSpec.describe Scantron, type: :model do
       seed_database
       create_user
       create_master
+      
     end
 
     it "allows multiple Scantron records to be created, with just a scantron ID" do

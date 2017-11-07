@@ -95,7 +95,8 @@ module MasterSupport
     expect(@exceptions.length).to eq(@list.length), "Not every test caused the record creation to fail"
 
     @exceptions.each do |e|
-      expect(e).to be_a ActiveRecord::RecordInvalid
+
+      expect(e).to be_a(ActiveRecord::StatementInvalid) | be_a(ActiveRecord::RecordInvalid)
     end
 
     expect(@created_count).to eq 0

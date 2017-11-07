@@ -97,6 +97,7 @@ class UserBase < ActiveRecord::Base
         write_attribute(f, value)
       else
         instance_variable_set("@#{f}", value)
+        self.master = Master.find_with_alternative_id(f, value)
       end
     end
 

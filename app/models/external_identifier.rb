@@ -3,9 +3,9 @@ class ExternalIdentifier < ActiveRecord::Base
   include DynamicModelHandler
   include AdminHandler
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: true, unless: :disabled
   validates :label, presence: true
-  validates :external_id_attribute, presence: true
+  validates :external_id_attribute, presence: true, uniqueness: true, unless: :disabled
   validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}
   validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}
   validate :name_format_correct
@@ -15,7 +15,9 @@ class ExternalIdentifier < ActiveRecord::Base
 
 
   def self.class_for field_name
-    field_name.sub(/_id$/, '').ns_camelize.ns_constantize
+    e = self.active.where(external_id_attribute: field_name).first
+    return nil unless e
+    return e.implementation_class
   end
 
 

@@ -74,6 +74,7 @@ module WorksWithItem
     if value && parent_class.secondary_key_unique?(value, fail_if_non_existent: true)
       # We can match. So find the underlying item and set the real foreign key appropriately
       self.item_id = parent_class.find_by_secondary_key(value).id
+      self.master = item.master if respond_to?(:master) && !self.master
       item.master.current_user = options[:current_user] if options[:current_user]
       return self.item
     end

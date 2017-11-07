@@ -125,13 +125,22 @@ class Master < ActiveRecord::Base
   end
 
   def self.find_with_alternative_id field_name, value
+
     field_name = field_name.to_sym
+    # Start by attempting to match on a field in the master record
     raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}" unless alternative_id_fields.include?(field_name)
     return self.where(field_name => value).first if self.attribute_names.include?(field_name.to_s)
 
-    if external_id_matching_fields.include?(field_name)
-
-      ExternalIdentifier.class_for(field_name).find_by_external_id(value)
+    # No master record field was found. So try an external ID instead
+    if external_id_matching_fields.include?(field_name.to_sym)
+      ei = ExternalIdentifier.class_for(field_name).find_by_external_id(value)
+      if ei
+        return ei.master
+      else
+        return nil
+      end
+    else
+      raise "The field specified is not valid for external identifier matching"
     end
 
   end
