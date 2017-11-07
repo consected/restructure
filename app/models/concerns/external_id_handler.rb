@@ -237,7 +237,7 @@ module ExternalIdHandler
       errors.add self.class.external_id_attribute, "can not be blank"
     end
 
-    if persisted? && external_id_changed? && !@prevent_edit
+    if persisted? && external_id_changed? && self.class.prevent_edit?
       errors.add self.class.external_id_attribute, "can not be changed"
     end
 

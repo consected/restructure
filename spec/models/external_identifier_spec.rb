@@ -16,6 +16,7 @@ RSpec.describe ExternalIdentifier, type: :model do
     end
 
   end
+  
   it "has an implementation class for a created external model" do
     # Check if a configured item does actually exist as a usable model
     vals = list_valid_attribs.first

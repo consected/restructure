@@ -1,39 +1,39 @@
 require 'rails_helper'
 
 describe "tracker record update", js: true, driver: :app_firefox_driver do
-  
+
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport
-  
+
   before(:all) do
-    
+
     create_admin
-    
+
     #sp = SubProcess.first
-    
+
     ProtocolEvent.enabled.each do |d|
       d.update! disabled:true, current_admin: @admin#, sub_process: sp
     end
-    
+
     seed_database
     create_data_set no_trackers: true
-    
-    
+
+
     @user, @good_password  = create_user
     @good_email  = @user.email
-    
+
   end
 
   before :each do
     user = User.where(email: @good_email).first
     expect(user).to be_a User
     expect(user.id).to equal @user.id
-    
+
     #login_as @user, scope: :user
-    
-    login 
-      
+
+    login
+
   end
 
 
@@ -44,24 +44,24 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     d = DateTime.now
     expect(f.value).to match(/0?#{d.month}\/0?#{d.day}\/#{d.year}/)
   end
-  
-  
+
+
   it "should create a new tracker item when a player record is added or updated" do
-    
+
     visit "/masters/search"
 
     # Switch to advanced search form
-    within '#simple_search_master' do       
+    within '#simple_search_master' do
       find('#master_general_infos_attributes_0_first_name').click
     end
-     within '.advanced-form-selections' do           
+     within '.advanced-form-selections' do
       click_button "Advanced Search"
     end
-    
+
     # Wait for the advance form collapse animation to complete
-    expect(page).to have_css '#master-search-advanced-form.in'    
-    
-    
+    expect(page).to have_css '#master-search-advanced-form.in'
+
+
     # Search for the player
     within '#advanced_search_master' do
       click_link 'clear fields'
@@ -69,16 +69,17 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
       fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}"
       find("\#master_player_infos_attributes_0_last_name").send_keys :tab
     end
-    
+
     have_css '#advanced_search_master.ajax-running'
     expect(page).to have_css "#master_results_block", text: ''
-    expect(page).to have_css "#search_count", text: /[0-9]+/, wait: 10
+    has_css? "#search_count .search_count"
+    expect(page).to have_css "#search_count .search_count", text: /[0-9]+/
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
-    
+
     # Check we got some results
     items = page.all(:css, '.master-expander')
     expect(items.length).to be > 0
-    
+
     # Ensure all the results match what we searched for
     page.all(:css, '.master-expander .player-info-header .player-names').each do |el|
       expect(el.text).to match(/#{@full_player_info.first_name.capitalize}.*/)
@@ -89,9 +90,9 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     @master = Master.find(@master_id)
 
 
-    # Now jump into the record result    
+    # Now jump into the record result
     h = open_player_element items.first, items
-    
+
 
     # add a player contact phone record
 
@@ -115,7 +116,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     # After a moment the tracker will show the newly created item
     expect(page).to have_css 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"]'
     within 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"]' do |t|
-      have_css('span.record-meta', text: "by #{@user.email}")      
+      have_css('span.record-meta', text: "by #{@user.email}")
       paperclip = all("a.tracker-link-to-item[href='#player-contact-#{@master_id}-#{pc_rec.id}']").first
       expect(paperclip).not_to be nil
     end
@@ -124,12 +125,11 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
 
 
     expect(page).to have_css("#player-contact-#{@master_id}-#{pc_rec.id}.item-highlight")
-    
+
 
   end
- 
+
   after(:all) do
-    
+
   end
 end
-

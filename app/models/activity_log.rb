@@ -372,10 +372,8 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def check_implementation_class
-    puts "checking implementation class for #{full_implementation_class_name}"
 
     if !disabled
-      puts "checking ACTIVE implementation class for #{full_implementation_class_name}"
       val = view_attribute_list || []
       unless ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:

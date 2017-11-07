@@ -135,7 +135,7 @@ module DynamicModelHandler
     tn = model_def_name
     self.class.models[tn] = m
     logger.info "Added new model #{tn}"
-    puts "Added new model #{tn}"
+
     unless self.class.model_names.include? tn
       self.class.model_names << tn
     end
@@ -149,16 +149,14 @@ module DynamicModelHandler
   end
 
   def reload_routes
-    puts "reload_routes requested"
+
     self.class.routes_reload
   end
 
   def check_implementation_class
-    puts "checking implementation class for #{full_implementation_class_name}"
 
     if !disabled
       raise FphsException.new "The implementation of #{table_name} is enabled but the table is not ready to use" unless ready?
-      puts "checking ACTIVE implementation class for #{full_implementation_class_name}"
       res = implementation_class.new rescue nil
       raise FphsException.new "The implementation of #{table_name} was not completed. Ensure the DB table #{table_name} has been created." unless res
     end

@@ -121,7 +121,7 @@ class ImportsController < ApplicationController
         @import.item_count = item_count
         @import.imported_items = items.map(&:id)
         @import.update(import_params)
-        puts "------------------------->Saved @import #{@import.inspect}"
+
         redirect_to @import
         return
       end

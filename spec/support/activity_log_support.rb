@@ -80,10 +80,10 @@ module ActivityLogSupport
 
   def create_item att=nil, item=nil
     att ||= valid_attribs
-    master ||= create_master
+    master ||= @player_contact.master
     item ||= @player_contact
     att[:player_contact] = item
-    @activity_log = master.activity_log__player_contact_phones.create! att
+    @activity_log = @player_contact.activity_log__player_contact_phones.create! att
 
   end
 

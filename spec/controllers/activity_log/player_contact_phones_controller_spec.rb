@@ -1,5 +1,6 @@
 require 'rails_helper'
 
+# Ensure that we seed the database, otherwise the PlayerContactPhonesController class does not exist
 RSpec.configure {|c| c.before { seed_database ; expect(controller).not_to be_nil }}
 
 RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
@@ -59,25 +60,25 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
     before_each_login_user
     before_each_login_admin
     it "assigns all items as @vars" do
-      
+
       create_items
 
-      get :index, {master_id: @player_contact.master_id, item_id: @player_contact.id}
-      expect(assigns(objects_symbol)).to eq([item])
+      get :index, {master_id: item.master_id, item_id: @player_contact.id}
+
+      expect(assigns(:activity_log__player_contact_phones)).to eq([item])
     end
   end
 
-  describe "GET #show" do
-    before_each_login_user
-    before_each_login_admin
-
-    it "assigns the requested item as @var" do
-      create_item
-
-      get :show, {master_id: @player_contact.master_id, item_id: @player_contact.id,  id: item_id}
-      expect(assigns(object_symbol)).to eq(item)
-    end
-  end
+#   describe "GET #show" do
+#     before_each_login_user
+#     before_each_login_admin
+#
+#     it "assigns the requested item as @var" do
+#       create_item
+#       get :show, {master_id: @player_contact.master_id, item_id: @player_contact.id,  id: item_id}
+#       expect(assigns(:item)).to eq(item)
+#     end
+#   end
 
 #  describe "GET #new" do
 #    before_each_login_user

@@ -62,7 +62,13 @@ module GeneralDataConcerns
 
   # look up the tracker_history items that corresponds
   def tracker_histories
-    TrackerHistory.where(item_id: self.id, item_type: self.class.name)
+    # Check for the existence of tracker_histories in the super class. If it
+    # already exists, it is an association that we should not be overriding
+    if defined?(super) 
+      super
+    else
+      TrackerHistory.where(item_id: self.id, item_type: self.class.name)
+    end
   end
 
   # look up the tracker_history item that corresponds to the latest tracker entry linked to this item

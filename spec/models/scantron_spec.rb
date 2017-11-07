@@ -19,7 +19,7 @@ RSpec.describe Scantron, type: :model do
       expect(@created_count).to be  > 0
 
       num = 0
-      @master.scantrons.order(:id).each do |s|
+      @master.scantrons.unscope(:order).order(:id).each do |s|
         expect(s.scantron_id).to eq @list[num][:scantron_id]
         num += 1
       end
@@ -32,7 +32,6 @@ RSpec.describe Scantron, type: :model do
     end
 
     it "only allows scantron IDs that are positive integers (greater than 0) with up to 6 digits" do
-
       create_items :list_invalid_attribs, @master, true
 
       check_all_records_failed

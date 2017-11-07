@@ -1,5 +1,7 @@
+require './spec/support/feature_helper.rb'
 module FeatureSupport
 
+  include FeatureHelper
 
   def login
     visit "/users/sign_in"
