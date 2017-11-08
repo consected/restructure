@@ -39,9 +39,8 @@ RSpec.describe ExternalIdentifier, type: :model do
     new_vals = list_valid_attribs.last.dup
 
     unless ActiveRecord::Base.connection.table_exists? new_vals[:name]
-      TableGenerators.external_identifiers_table(new_vals[:name], @implementation_attr_name, true)
+      TableGenerators.external_identifiers_table(new_vals[:name], true, @implementation_attr_name)
     end
-
     new_vals[:external_id_attribute] = vals[:external_id_attribute]
     new_vals[:disabled] = false
     expect {
@@ -51,6 +50,11 @@ RSpec.describe ExternalIdentifier, type: :model do
   end
 
   it "has an implementation class for a created external model" do
+    ExternalIdentifier.active.each do |e|
+      e.disabled = true
+      e.current_admin = @admin
+      e.save!
+    end
     # Check if a configured item does actually exist as a usable model
     vals = list_valid_attribs.first
 
@@ -83,7 +87,11 @@ RSpec.describe ExternalIdentifier, type: :model do
   end
 
   it "allows player records to referenced using the external ID" do
-
+    ExternalIdentifier.active.each do |e|
+      e.disabled = true
+      e.current_admin = @admin
+      e.save!
+    end
     # Create an external identifier implementation
     vals = list_valid_attribs.first
     e = create_item vals

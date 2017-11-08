@@ -3,10 +3,12 @@ require 'rails_helper'
 describe "user and admin authentication" do
 
   include MasterSupport
+  include ModelSupport
 
-  before :all do
+  before :each do
     seed_database
     expect( ActivityLog.active.length ).to be > 0
+    expect(defined?(ActivityLog::PlayerContactPhone) && ActivityLog::PlayerContactPhone.is_a?(Class)).to be true
   end
 
   # Prepare a list of URLs to test

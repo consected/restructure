@@ -1,8 +1,9 @@
 class ActivityLog::ActivityLogsController < ApplicationController
 
+  before_action :authenticate_user!
+
   include MasterHandler
   include ParentHandler
-  before_action :authenticate_user!
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
 
 

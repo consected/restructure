@@ -3,12 +3,13 @@ class ExternalIdentifier < ActiveRecord::Base
   include DynamicModelHandler
   include AdminHandler
 
-  validates :name, presence: true, uniqueness: true, unless: :disabled
+  validates :name, presence: true
   validates :label, presence: true
-  validates :external_id_attribute, presence: true, uniqueness: true, unless: :disabled
+  validates :external_id_attribute, presence: true
   validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}
   validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}
   validate :name_format_correct
+  validate :config_uniqueness
   validate :id_range_correct
   after_validation :implementation_table_tests
 
@@ -248,6 +249,11 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def name_format_correct
     errors.add :name, "must be a lowercase, underscored, DB table name" unless name.downcase.ns_underscore == name
+  end
+
+  def config_uniqueness
+    errors.add :name, "must be unique" if !self.disabled && self.class.active.where(name: self.name.downcase).length > 0
+    errors.add :external_id_attribute, "must be unique" if !self.disabled && self.class.active.where(external_id_attribute: self.external_id_attribute.downcase).length > 0
   end
 
   def check_implementation_class

@@ -19,7 +19,7 @@ module ExternalIdentifierSupport
         disabled: false
       },
       {
-        name: 'not_ready',
+        name: 'not_ready_tests',
         label: "test id",
         external_id_attribute: @implementation_attr_name,
         min_id: 1,
@@ -82,7 +82,7 @@ module ExternalIdentifierSupport
   def create_item att=nil, admin=nil, allow_dup=false
     att ||= valid_attribs
 
-    
+
     unless allow_dup
       ExternalIdentifier.where("name=? or external_id_attribute=?", att[:name], att[:external_id_attribute]).update_all(disabled: true)
     end

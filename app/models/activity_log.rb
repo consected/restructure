@@ -225,7 +225,7 @@ class ActivityLog < ActiveRecord::Base
     admin = self.current_admin
     Protocol.enabled.each do |p|
       logger.info "For protocol: #{p.id} #{p.name}"
-      
+
       # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
       sps = p.sub_processes.where(name: self.class.sub_process_name)
       if sps.length == 0
@@ -358,7 +358,7 @@ class ActivityLog < ActiveRecord::Base
 
         c_name = full_implementation_controller_name
         klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
-        res2 = klass.const_set(c_name, a_new_controller)
+        res2 = klass.const_set(c_name, a_new_controller)        
 
         logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
