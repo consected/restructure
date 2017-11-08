@@ -225,6 +225,8 @@ class ActivityLog < ActiveRecord::Base
     admin = self.current_admin
     Protocol.enabled.each do |p|
       logger.info "For protocol: #{p.id} #{p.name}"
+      
+      # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
       sps = p.sub_processes.where(name: self.class.sub_process_name)
       if sps.length == 0
         sp = p.sub_processes.create!(name: self.class.sub_process_name, current_admin: admin, disabled: true)
@@ -234,6 +236,7 @@ class ActivityLog < ActiveRecord::Base
         logger.info "Using the existing Activity sub process #{sp.id}"
       end
 
+      # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
       pes = sp.protocol_events.where name: self.name
       if pes.length == 0
         pe = sp.protocol_events.create! name: self.name, current_admin: admin
@@ -346,13 +349,15 @@ class ActivityLog < ActiveRecord::Base
         m_name = model_class_name
 
         klass = ::ActivityLog
+        klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include TrackerHandler
         res.include WorksWithItem
         res.include ActivityLogHandler
 
-        c_name = "#{model_class_name.pluralize}Controller"
+        c_name = full_implementation_controller_name
+        klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         res2 = klass.const_set(c_name, a_new_controller)
 
         logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
@@ -360,7 +365,8 @@ class ActivityLog < ActiveRecord::Base
         add_model_to_list res
       rescue=>e
         failed = true
-        logger.info "Failure creating a activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        puts "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
 
       end
     end
@@ -377,7 +383,7 @@ class ActivityLog < ActiveRecord::Base
       val = view_attribute_list || []
       unless ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
-          db/table_generators/generate.sh activity_logs_table #{table_name} false #{val.map{|f| "'#{f}'"}.join(', ')}\"
+          db/table_generators/generate.sh activity_logs_table #{table_name} create #{val.join(' ')}
         Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
         "
         errors.add :name, err
@@ -385,9 +391,18 @@ class ActivityLog < ActiveRecord::Base
         raise  FphsException.new err
       end
 
-      res = implementation_class.new rescue nil
+      begin
+        res =  implementation_class_defined?
+      rescue Exception => e
+        err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
+        logger.warn err
+        errors.add :name, err
+        # Force exit of callbacks
+        raise FphsException.new err
+      end
       unless res
         err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
+        logger.warn err
         errors.add :name, err
         # Force exit of callbacks
         raise FphsException.new err

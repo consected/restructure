@@ -190,14 +190,16 @@ class ExternalIdentifier < ActiveRecord::Base
 
         m_name = model_class_name
 
-        klass = ExternalIdentifier
-        res = Object.const_set(model_class_name, a_new_class)
+        klass = Object
+        klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
+        res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include ExternalIdHandler
 
-        c_name = "#{model_class_name.pluralize}Controller"
-        res2 = Object.const_set(c_name, a_new_controller)
+        c_name = full_implementation_controller_name
+        klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+        res2 = klass.const_set(c_name, a_new_controller)
         res2.include MasterHandler
 
         add_model_to_list res
@@ -220,9 +222,6 @@ class ExternalIdentifier < ActiveRecord::Base
     Tracker.add_record_update_entries self.name.singularize, current_admin, 'record'
   end
 
-  def implementation_class_defined?
-     Object.const_get(model_class_name) rescue nil
-   end
 
   def implementation_table_tests
     if ActiveRecord::Base.connection.table_exists? self.name

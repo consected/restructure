@@ -4,7 +4,7 @@ shared_examples 'a standard user controller' do
   let(:valid_attributes) {
     valid_attribs
   }
-  
+
   let(:list_invalid_attributes){
     list_invalid_attribs
   }
@@ -12,34 +12,34 @@ shared_examples 'a standard user controller' do
   let(:invalid_attributes) {
     invalid_attribs
   }
-  
+
   describe "Ensure authentication" do
     before_each_login_user
-    it "returns a result" do      
+    it "returns a result" do
       res = create_master
       get :index, {master_id: res.id}
       expect(response).to have_http_status(200), "Attempting #{@user}"
     end
   end
-  
+
   describe "GET #index" do
     before_each_login_user
-     
-    it "assigns all items as @vars" do      
+
+    it "assigns all items as @vars" do
       create_items # creates a new master for each item
-      
-      get :index, {master_id: @master_id}      
+
+      get :index, {master_id: @master_id}
       expect(assigns(objects_symbol)).to eq([item])
     end
   end
 
   describe "GET #show" do
     before_each_login_user
-    
-    
+
+
     it "assigns the requested item as @var" do
       create_item
-  
+
       get :show, {:id => item_id, master_id: @master_id}
       expect(assigns(object_symbol)).to eq(item)
     end
@@ -47,7 +47,7 @@ shared_examples 'a standard user controller' do
 
   describe "GET #new" do
     before_each_login_user
-    
+
     it "assigns a new item as @var" do
       master_id = create_master.id
       get :new, {master_id: master_id}
@@ -67,13 +67,13 @@ shared_examples 'a standard user controller' do
 
   describe "POST #create" do
     before_each_login_user
-    context "with valid params" do            
-      
+    context "with valid params" do
+
       it "creates a new item" do
         create_master
         va = valid_attributes
         expect {
-          
+
           post :create, {object_symbol => va, master_id: @master_id}
         }.to change(object_class, :count).by(1), "Didn't create a new item: #{va.inspect}."
       end
@@ -90,7 +90,7 @@ shared_examples 'a standard user controller' do
         create_master
         va = valid_attributes
         post :create, {object_symbol => va, master_id: @master_id}
-        expect(response).to have_http_status(200), "Didn't get a 200 response with atts #{va.inspect}"
+        expect(response).to have_http_status(200), "Didn't get a 200 response with atts #{va.inspect}. Got #{response.status}"
       end
     end
 
@@ -128,12 +128,12 @@ shared_examples 'a standard user controller' do
       it "updates the requested item" do
         create_item
         put :update, {:id => item_id, object_symbol => new_attributes, master_id: @master_id}
-        
+
         expect(response).to have_http_status(200), "Response was not good: #{response.body}"
-        
+
         item.reload
         new_attribs_downcase.each do |k, att|
-          expect(item.send(k)).to eq(att), "Expected #{item.attributes.inspect} to equal #{new_attribs_downcase}" 
+          expect(item.send(k)).to eq(att), "Expected #{item.attributes.inspect} to equal #{new_attribs_downcase}"
         end
       end
 
@@ -146,12 +146,12 @@ shared_examples 'a standard user controller' do
       it "return success" do
         create_item
         va = put_valid_attribs || valid_attributes
-        
+
         put :update, {:id => item_id, object_symbol => va, master_id: @master_id}
-        expect(response).to have_http_status(200), "Expected 200 status with attributes: #{va}"
+        expect(response).to have_http_status(200), "Expected 200 status with attributes: #{va}. Got #{response.status}"
         expect(resp.length).to be > 0
         expect(resp).to have_key object_symbol.to_s
-        
+
       end
     end
 
@@ -165,11 +165,11 @@ shared_examples 'a standard user controller' do
       it "re-renders the 'edit' template" do
         create_item
         put :update, {:id => item_id, object_symbol => invalid_attributes, master_id: @master_id}
-        
+
         expect(resp.length).to be > 0
-        
+
         io = invalid_attributes.keys.first.to_s
-        
+
         i = io.gsub('_', ' ').downcase
         i_no_id = io.gsub('_id', '').downcase
         t = I18n.translate("models.#{i_no_id}")
@@ -187,7 +187,7 @@ shared_examples 'a standard user controller' do
       #expect(response).to have_http_status(401)
     end
 
-    
-  end  
-  
+
+  end
+
 end

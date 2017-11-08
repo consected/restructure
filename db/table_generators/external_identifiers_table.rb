@@ -5,7 +5,7 @@ module TableGenerators
       puts "Usage:
       db/table_generators/generate.sh external_identifiers_table <pluralized_table_name> create|drop 'identifier_field_id'
       "
-      exit
+      return
     end
 
     @implementation_table_name = name
@@ -15,12 +15,12 @@ module TableGenerators
       singular_name = name[0..-2]
     else
       puts "The provided table name does not appear to be pluralized"
-      exit
+      return
     end
 
     unless generate_table == :drop || attrib.end_with?('_id')
       puts "The identifier field must end with '_id'"
-      exit
+      return
     end
 
     if generate_table == :drop

@@ -135,13 +135,16 @@ class DynamicModel < ActiveRecord::Base
 
         m_name = model_class_name
 
-        res = DynamicModel.const_set(model_class_name, a_new_class)
+        klass = DynamicModel
+        klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
+        res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
 
 
         c_name = "#{table_name.pluralize.camelcase}Controller"
-        res2 = DynamicModel.const_set(c_name, a_new_controller)
+        klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+        res2 = klass.const_set(c_name, a_new_controller)
         # Do the include after naming, to ensure the correct names are used during initialization
         res2.include MasterHandler
 

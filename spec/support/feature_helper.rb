@@ -4,9 +4,7 @@ module FeatureHelper
 
     options[:check_it] = true if options[:check_it].nil?
 
-    if all(el_selector).length == 0
-      puts "The page does not have this selector to scroll to: #{el_selector}"
-    else
+    if all(el_selector).length > 0
 
       run_script = "document.querySelectorAll('#{el_selector.gsub("'", '"') }')[0].scrollTop += 100;"
       begin

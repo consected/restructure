@@ -154,19 +154,33 @@ module ActivityLogHandler
 
     # if we are not already passing through sub_process based on a user selection then
     # look up what the Activity name is for protocol sub processes
-    unless self.attribute_names.include? 'sub_process_id'
+    if self.attribute_names.include? 'sub_process_id'
+      sub_process_id = self.sub_process_id
+      sub_process = SubProcess.find(sub_process_id)
+    else
+      # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
       sub_process = protocol.sub_processes.where(name: ActivityLog.sub_process_name).first
+      sub_process_id = sub_process.id
     end
     # if we are not already passing through protocol_event based on a user selection then
     # then use the protocol event name matching the admin activity log definition for this model
-    unless self.attribute_names.include? 'protocol_event'
-      protocol_event = sub_process.protocol_events.enabled.where(name: self.class.activity_log_name).first
+    if self.attribute_names.include? 'protocol_event_id'
+      protocol_event_id = self.protocol_event_id
+    elsif sub_process
+      raise "activity_log_name not set for #{self.class}. Can't get the protocol event without it" unless self.class.activity_log_name
+      # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
+      pe = sub_process.protocol_events.where(name: self.class.activity_log_name).first
+      if pe
+        protocol_event_id = pe.id
+      else
+        raise "Could not find a protocol event for sub process #{sub_process_id} in sync_tracker (#{self.class}). There are these: #{sub_process.protocol_events.map(&:name).join(', ')}."
+      end
     end
 
     # be sure about the user being set, to avoid hidden errors
     raise "no user set when syncing tracker" unless self.master.current_user
 
-    t = self.master.trackers.create(protocol_id: protocol_id, sub_process_id: sub_process.id, protocol_event_id: protocol_event.id,
+    t = self.master.trackers.create(protocol_id: protocol_id, sub_process_id: sub_process_id, protocol_event_id: protocol_event_id,
                   item_id: self.id, item_type: self.class.name, event_date: self.action_when)
 
     # check and raise error that is usable by a user if there was a problem (for example, a required field not set)

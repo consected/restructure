@@ -9,7 +9,7 @@ module TableGenerators
       db/table_generators/generate.sh activity_logs_table <pluralized_table_name>, false, 'field1', 'field2', ...)\"
       Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
       "
-      exit
+      return
     end
 
     unless name.start_with? 'activity_log_'
@@ -23,7 +23,7 @@ module TableGenerators
       singular_name = name[0..-2]
     else
       puts "The provided table name does not appear to be pluralized"
-      exit
+      return
     end
 
 
@@ -44,6 +44,19 @@ EOF
     else
 
       @implementation_attr_name = attrib
+
+      attrib_pair = {}
+      attrib.each do |a|
+        f = '<field-type>'
+        f = 'date' if a.end_with?('_when')
+        f = 'varchar' if a == 'data'
+        f = 'varchar' if a.end_with?('_name')
+        f = 'varchar' if a == 'notes'
+        f = 'varchar' if a.start_with?('select_')
+        f += ','
+        attrib_pair[a] = f
+      end
+
       sql = <<EOF
       BEGIN;
 
@@ -52,7 +65,7 @@ EOF
           id integer NOT NULL,
           master_id integer,
           #{item_type_id} integer,
-          #{attrib.join(" <field-type>,\n            ")} #{attrib.length > 0 ? "<field-type>," : ""}
+          #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -62,7 +75,7 @@ EOF
           id integer NOT NULL,
           master_id integer,
           #{item_type_id} integer,
-          #{attrib.join(" <field-type>,\n            ")}  #{attrib.length > 0 ? "<field-type>," : ""}
+          #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
@@ -76,7 +89,7 @@ EOF
                   (
                       master_id,
                       #{item_type_id},
-                      #{attrib.join(",\n")}#{attrib.length > 0 ? "," : ""}
+                      #{attrib.join(",\n                      ")}#{attrib.length > 0 ? "," : ""}
                       user_id,
                       created_at,
                       updated_at,
@@ -164,7 +177,7 @@ EOF
     end
 
     if generate_table == true
-      ActiveRecord::Base.connection.execute sql
+      ActivityLog.connection.execute sql
     else
       puts sql
     end

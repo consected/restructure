@@ -1,8 +1,8 @@
 module LogExpectations
 
   LogItemsCss = ".activity-log--player-contact-phone-item"
-  LogTrackerHistoriesCss = ".activity-log--player-contact-phone-tracker-histories"
-
+  LogTrackerHistoriesCss = ".related-tracker-collapser.in .activity-log--player-contact-phone-tracker-histories"
+  LogTrackerHistoriesCaptionCss = ".activity-log--player-contact-phone-tracker-histories-caption"
   ActivityLogListBlockCss = ".activity-log--player-contact-phones-block .activity-log-list"
   LoggedPhoneCallCss = "#{ActivityLogListBlockCss} .activity-log--player-contact-phone-item"
   PhoneNumberInItemCss = ".activity-log--player-contact-phone-data strong"
@@ -51,7 +51,7 @@ module LogExpectations
         else
           el = ".activity-log--player-contact-phone-#{k} strong"
         end
-        expect(find(el).text).to eq v
+        expect(find(el).text.downcase).to eq v.downcase
       end
     end
   end
@@ -69,16 +69,19 @@ module LogExpectations
   def expect_tracker_event_to_include date, protocol, sp, pe = nil, index = 0
     items = [protocol, sp]
     items << pe if pe
-    etext = items.join(' / ')
+    etext = "#{date.strftime("%-m/%-d/%Y")} #{items.join(' / ')}"
 
-    hists = all("#{LogTrackerHistoriesCss}")[index]
+    # Click the histories caption to expand
+    histscap = all(LogTrackerHistoriesCaptionCss)[index]
+    histscap.click
 
-    res = hists.find('strong')
+    has_css?(LogTrackerHistoriesCss)
+
+    hists = all(LogTrackerHistoriesCss)[index]
+
+    res = hists.find('.small')
     expect(res.text).to eq etext
 
-    ltext = "tracker event: #{date.strftime("%-m/%-d/%Y")}"
-    res = hists.find('small')
-    expect(res.text).to eq ltext
 
   end
 

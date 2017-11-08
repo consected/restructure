@@ -86,11 +86,14 @@
 
   end
 %>
+
+<script id="activity_log_<%=name%>_data_template_name_partial"  type="text/x-handlebars-template" class="hidden handlebars-partial"><%= al_full_name.hyphenate %>{{#if rec_type}}-{{rec_type}}{{/if}}s-main-result-template</script>
+
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#if rec_type}}
-  <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-{{rec_type}}-main-result-template"></a>
+  <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_<%=name%>_data_template_name_partial}}"></a>
   {{else}}
-  <a data-toggle="uncollapse" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="<%= al_full_name.hyphenate %>-main-result-template"></a>
+  <a data-toggle="uncollapse" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="{{> activity_log_<%=name%>_data_template_name_partial}}"></a>
   {{/if}}
 </script>
 

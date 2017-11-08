@@ -71,6 +71,39 @@ module DynamicModelHandler
   end
 
 
+  def implementation_controller_defined? parent_class=Module
+    return false unless full_implementation_controller_name
+
+    # Check that the class is defined
+    klass = parent_class.const_get(full_implementation_controller_name)
+    res = klass.is_a?(Class)
+    return res
+  rescue NameError
+    return false
+  end
+
+  def implementation_class_defined? parent_class=Module
+      return false unless full_implementation_class_name
+      # Check that the class is defined
+      klass = parent_class.const_get(full_implementation_class_name)
+      res = klass.is_a?(Class)
+
+      return false unless res
+
+      begin
+        # Check if it can be instantiated correctly - if it can't, allow it to raise an exception
+        # since this is seriously unexpected
+        klass.new
+      rescue Exception => e
+        err  = "Failed to instantiate the class #{full_implementation_class_name} in parent #{parent_class}: #{e}"
+        raise FphsException.new err
+      end
+
+    rescue NameError
+      return false
+  end
+
+
   def ready?
     return !self.disabled && ActiveRecord::Base.connection.table_exists?(self.table_name)
   end
@@ -120,6 +153,10 @@ module DynamicModelHandler
 
   def full_implementation_class_name
     full_item_type_name.ns_camelize
+  end
+
+  def full_implementation_controller_name
+    "#{model_class_name.pluralize}Controller"
   end
 
 

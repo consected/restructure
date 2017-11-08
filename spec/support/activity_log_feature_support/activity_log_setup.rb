@@ -22,7 +22,7 @@ module ActivityLogSetup
 
     ActivityLog.enabled.each do |a|
       a.current_admin = admin
-      a.generate_protocol_entries
+      a.update_tracker_events
     end
 
   end

@@ -9,9 +9,9 @@ module AdminActivityLogSupport
     [
       {
         name: "test_log",
-        item_type: 'player_contacts',
-        rec_type: 'phone',
-        action_when_attribute: 'called_when',
+        item_type: 'player_contact',
+        rec_type: 'email',
+        action_when_attribute: 'emailed_when',
         current_admin: @admin
       }
     ]
@@ -24,22 +24,22 @@ module AdminActivityLogSupport
       {
         name: "",
         item_type: 'player_contacts',
-        rec_type: 'phone',
-        action_when_attribute: 'called_when',
+        rec_type: 'email',
+        action_when_attribute: 'emailed_when',
         current_admin: @admin
       },
       {
         name: "Test Log",
         item_type: 'player_contacts_not_exist',
-        rec_type: 'phone',
-        action_when_attribute: 'called_when',
+        rec_type: 'email',
+        action_when_attribute: 'emailed_when',
         current_admin: @admin
       },
       {
         name: "Test Log",
         item_type: 'player_contacts',
         rec_type: 'bad',
-        action_when_attribute: 'called_when',
+        action_when_attribute: 'emailed_when',
         current_admin: @admin
       }
     ]
@@ -59,9 +59,9 @@ module AdminActivityLogSupport
 
     @new_attribs = {
       name: "test_log",
-      item_type: 'player_contacts',
-      rec_type: 'phone',
-      action_when_attribute: 'called_when',
+      item_type: 'player_contact',
+      rec_type: 'email',
+      action_when_attribute: 'emailed_when',
       current_admin: @admin
     }
   end
@@ -70,8 +70,12 @@ module AdminActivityLogSupport
     att ||= valid_attribs
     att[:current_admin] ||= admin  if admin.is_a? Admin
     raise "No admin set" unless att[:current_admin]
-    unless ActiveRecord::Base.connection.table_exists? 'activity_log_test_log'
-      TableGenerators.activity_logs_table('test_log', true)
+
+    tn = [att[:item_type]]
+    tn << att[:rec_type] if att[:rec_type]
+    tn = tn.join('_').pluralize
+    unless ActivityLog.connection.table_exists? "activity_log_#{tn}"
+      TableGenerators.activity_logs_table(tn, true, 'emailed_when')
     end
     @activity_log = ActivityLog.create! att
   end
