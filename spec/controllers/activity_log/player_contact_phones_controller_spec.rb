@@ -2,8 +2,7 @@ require 'rails_helper'
 
 # Ensure that we seed the database, otherwise the PlayerContactPhonesController class does not exist
 RSpec.configure {|c| c.before {
-  SeedSupport.setup ;
-  expect(controller).not_to be_nil
+  SeedSupport.setup  
   }}
 
 RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
