@@ -223,9 +223,8 @@ module ExternalIdHandler
   end
 
   def return_all
-    self.multiple_results = self.master.send(assoc_inverse_name).all if self.master
+    self.multiple_results = self.master.send(assoc_inverse_name).all if self.master && self.class.prevent_edit?
   end
-
 
   def init_vars_external_id_handler
     instance_var_init :admin_set

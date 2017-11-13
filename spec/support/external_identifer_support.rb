@@ -35,7 +35,7 @@ module ExternalIdentifierSupport
     r = 'junk'
     [
       {
-        name: nil,
+        name: "",
         label: "test id #{r}",
         external_id_attribute: "test_#{r}_id",
         min_id: 1,
@@ -53,7 +53,7 @@ module ExternalIdentifierSupport
       {
         name: @implementation_table_name,
         label: 'abc',
-        external_id_attribute: 'attrib_does_not_exist',
+        external_id_attribute: '',
         min_id: 1,
         max_id: 9999,
         disabled: false
@@ -73,8 +73,28 @@ module ExternalIdentifierSupport
 
   def new_attribs
     @new_attribs = {
-        label: "test id"
+        label: "test id",
+        disabled: true
       }
+  end
+
+
+  def disable_existing_records name, opt={}
+
+    ext=opt[:external_id_attribute]
+    admin=opt[:current_admin]
+
+    if name != :all
+      r = ExternalIdentifier.where("name=? or external_id_attribute=?", name, ext)
+    else
+      r = ExternalIdentifier.active
+    end
+    r.each do |a|
+      a.disabled = true
+      a.current_admin = admin
+      a.save!
+    end
+
   end
 
 
@@ -82,12 +102,11 @@ module ExternalIdentifierSupport
   def create_item att=nil, admin=nil, allow_dup=false
     att ||= valid_attribs
 
-
-    unless allow_dup
-      ExternalIdentifier.where("name=? or external_id_attribute=?", att[:name], att[:external_id_attribute]).update_all(disabled: true)
-    end
-
     att[:current_admin] = admin||@admin
+
+    disable_existing_records att[:name], att unless allow_dup
+
+
     @external_identifier = ExternalIdentifier.create! att
   end
 

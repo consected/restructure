@@ -3,7 +3,7 @@ require './db/table_generators/external_identifiers_table.rb'
 
 RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
 
-
+    include MasterSupport
     include ExternalIdentifierSupport
 
     def object_class
@@ -28,6 +28,13 @@ RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
         TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
       end
 
+    end
+
+    before_each_login_admin
+
+    before :each do
+    
+      disable_existing_records :all, current_admin: @admin
     end
 
     it_behaves_like 'a standard admin controller'

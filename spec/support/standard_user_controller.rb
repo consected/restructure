@@ -150,7 +150,7 @@ shared_examples 'a standard user controller' do
         put :update, {:id => item_id, object_symbol => va, master_id: @master_id}
         expect(response).to have_http_status(200), "Expected 200 status with attributes: #{va}. Got #{response.status}"
         expect(resp.length).to be > 0
-        expect(resp).to have_key object_symbol.to_s
+        expect(resp).to have_key(object_symbol.to_s), "Expected response to have key #{object_symbol}. Response #{response.body}"
 
       end
     end

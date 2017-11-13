@@ -18,6 +18,7 @@ module Seeds
       ]
 
       add_values values
+      ExternalIdentifier.routes_reload
 
       Rails.logger.info "#{self.name} = #{ExternalIdentifier.all.length}"
     end

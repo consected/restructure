@@ -41,11 +41,10 @@ module AdminControllerHandler
     # Without this, spec tests fail with incredibly hard to understand results,
     # where at least there would have been a visible exception in real life
 
+    res = nil
     begin
       res = object_instance.save
     rescue FphsException => e
-
-      res = nil
       flash.now[:warning] = e.message
     end
     if res

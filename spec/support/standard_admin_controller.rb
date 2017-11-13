@@ -85,23 +85,24 @@ shared_examples 'a standard admin controller' do
     context "with valid params" do
 
       it "creates a new item" do
-
+        va = valid_attributes
+        os = object_symbol
         expect {
-          post :create, {object_symbol => valid_attributes}
-        }.to change(object_class, :count).by(1)
+          post :create, {os => va}
+        }.to change(object_class, :count).by(1), "#{os} was not created with valid attributes #{va}. "
       end
 
       it "assigns a newly created item as @var" do
 
         post :create, {object_symbol => valid_attributes}
         expect(assigns(object_symbol)).to be_a(object_class)
-        expect(assigns(object_symbol)).to be_persisted
+        expect(assigns(object_symbol)).to be_persisted, "#{object_symbol} was not persisted. #{assigns(object_symbol).errors.to_a.join(" ")}"
       end
 
       it "return success" do
-
-        post :create, {object_symbol => valid_attributes}
-        expect(response).to render_template("_index"), "Incorrect response from create #{object_symbol} (#{response}). Expected render template _index  "
+        va = valid_attributes
+        post :create, {object_symbol => va }
+        expect(response).to render_template("_index"), "Incorrect response from create #{object_symbol} with #{va} (#{response}). Expected render template _index.  #{assigns(object_symbol).errors.to_a.join("\n")}"
       end
     end
 
