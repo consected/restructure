@@ -97,6 +97,9 @@ class UserBase < ActiveRecord::Base
         write_attribute(f, value)
       else
         instance_variable_set("@#{f}", value)
+        if self.master
+          return self.master
+        end
         self.master = Master.find_with_alternative_id(f, value)
       end
     end
@@ -115,6 +118,7 @@ class UserBase < ActiveRecord::Base
   protected
 
     def check_master
+      msid = nil if msid.blank? && !msid.nil?
       if msid && !master_id
         m = Master.where(msid: msid).first
         raise "MSID set, but it does not match a master record" unless m

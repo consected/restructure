@@ -94,8 +94,7 @@ class ImportsController < ApplicationController
     errors = []
     failed = false
 
-    import_params["#{@primary_table}_attributes".to_sym].each do |k,c|
-
+    import_params["#{@primary_table}_attributes".to_sym].each do |k,c|      
       r = item_class.new c
       @import.attempt_match_on_secondary_key r
       r.master.current_user = current_user if r.master && !r.master_user

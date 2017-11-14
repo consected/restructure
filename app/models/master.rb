@@ -125,7 +125,7 @@ class Master < ActiveRecord::Base
   end
 
   def self.find_with_alternative_id field_name, value
-
+    return if value.blank?
     field_name = field_name.to_sym
     # Start by attempting to match on a field in the master record
     raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}" unless alternative_id_fields.include?(field_name)

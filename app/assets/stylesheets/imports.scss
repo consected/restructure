@@ -46,7 +46,12 @@ table.import-grid {
       border: 0;
       box-shadow: none;
       font-size: 12px;
-      padding: 5px 4px;
+      padding: 2px 2px;
+      min-width: 200px;
+
+      &:focus {
+        height: auto !important;
+      }
     }
     input[type='checkbox'] {
       border: 1px solid silver;

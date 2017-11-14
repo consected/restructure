@@ -21,7 +21,7 @@
                   item = @import.items[f.index]
                   item.send :write_attribute, :user_id, current_user.id
                   valid_item =  true
-                  unless @readonly                    
+                  unless @readonly
                     valid_item = item.check_valid?
                     invalid_items += 1 unless valid_item
                   end
@@ -34,10 +34,10 @@
 
                       <%
                          col = item.class.columns_hash[p.to_s]
-                         col_type = col.type
+                         col_type = col.type if col
                       %>
                       <% if p == :master_id && item.master_id %>
-                      <%= link_to "", masters_search_path(nav_q: item.master_id), class: "glyphicon glyphicon-share pull-right import-link-item", target: 'importmasteritem', title: 'open in new window' %>
+                      <%= link_to "", masters_search_path(nav_q_id: item.master_id), class: "glyphicon glyphicon-share pull-right import-link-item", target: 'importmasteritem', title: 'open in new window' %>
                       <% end %>
                       <% if col_type == :boolean %>
                         <%= f.check_box p %>

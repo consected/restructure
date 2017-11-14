@@ -17,6 +17,7 @@ module FeatureSupport
 
   def logout
     dismiss_modal
+    sleep 1
     have_css('.navbar-right a[data-do-action="show-user-options"]')
     find('.navbar-right a[data-do-action="show-user-options"]').click
     have_css('.navbar-right li.dropdown.open .dropdown-menu')
