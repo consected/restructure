@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   resources :imports
 
   namespace :admin do
-    resources :external_identifiers
+    resources :external_identifiers, except: [:show, :destroy]
     resources :reports, except: [:show, :destroy]
     resources :sage_assignments, except: [:destroy]
     resources :dynamic_models, except: [:show, :destroy]
@@ -89,6 +89,9 @@ Rails.application.routes.draw do
   get "child_error_reporter", to: 'application#child_error_reporter'
 
   root "masters#search", :as=> 'guest_home'
+
+  # Dynamic model goes at the end to avoid any issues with accidental clash of naming. The
+  # dynamic model will only be applied if another item is not matched first
   DynamicModel.routes_load
 
 end

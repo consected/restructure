@@ -19,7 +19,8 @@ module FeatureSupport
     dismiss_modal
     have_css('.navbar-right a[data-do-action="show-user-options"]')
     find('.navbar-right a[data-do-action="show-user-options"]').click
-    expect(page).to have_css('a[data-do-action="user-logout"]')
+    have_css('.navbar-right li.dropdown.open .dropdown-menu')
+    expect(page).to have_css('.dropdown-menu a[data-do-action="user-logout"]')
     click_link 'logout'
 
   end

@@ -25,16 +25,36 @@ require 'rails_helper'
 
 RSpec.describe ImportsController, type: :controller do
 
+  include ModelSupport
+
+
   # This should return the minimal set of attributes required to create a valid
   # Import. As you add validations to Import, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+
   }
+
+  before :all do
+    seed_database
+    @admin, _ = create_admin
+    @user, _ = create_user
+
+  end
+
+  def allow_import
+    @user.user_authorizations.create(has_authorization: 'import_csv', current_admin: @admin) unless @user.can?(:import_csv)
+  end
+
+  def prevent_import
+    @user.user_authorizations.where(has_authorization: 'import_csv').each do |a|
+      a.delete! unless @user.can?(:import_csv)
+    end
+  end
 
   # This should return the minimal set of values that should be in the session
   # in order to pass any filters (e.g. authentication) defined in
@@ -42,100 +62,31 @@ RSpec.describe ImportsController, type: :controller do
   let(:valid_session) { {} }
 
   describe "GET #index" do
+    before_each_login_user
     it "returns a success response" do
-      import = Import.create! valid_attributes
+      # Before the user has been allowed to import CSV, ensure they fail
+      prevent_import
+      expect(@user.can? :import_csv).to be nil
+
+      get :index, {}, valid_session
+      expect(response).not_to be_success
+
+      allow_import
       get :index, {}, valid_session
       expect(response).to be_success
     end
   end
 
-  describe "GET #show" do
-    it "returns a success response" do
-      import = Import.create! valid_attributes
-      get :show, {:id => import.to_param}, valid_session
-      expect(response).to be_success
-    end
-  end
 
   describe "GET #new" do
+    before_each_login_user
     it "returns a success response" do
+      allow_import
       get :new, {}, valid_session
       expect(response).to be_success
     end
   end
 
-  describe "GET #edit" do
-    it "returns a success response" do
-      import = Import.create! valid_attributes
-      get :edit, {:id => import.to_param}, valid_session
-      expect(response).to be_success
-    end
-  end
 
-  describe "POST #create" do
-    context "with valid params" do
-      it "creates a new Import" do
-        expect {
-          post :create, {:import => valid_attributes}, valid_session
-        }.to change(Import, :count).by(1)
-      end
-
-      it "redirects to the created import" do
-        post :create, {:import => valid_attributes}, valid_session
-        expect(response).to redirect_to(Import.last)
-      end
-    end
-
-    context "with invalid params" do
-      it "returns a success response (i.e. to display the 'new' template)" do
-        post :create, {:import => invalid_attributes}, valid_session
-        expect(response).to be_success
-      end
-    end
-  end
-
-  describe "PUT #update" do
-    context "with valid params" do
-      let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
-      }
-
-      it "updates the requested import" do
-        import = Import.create! valid_attributes
-        put :update, {:id => import.to_param, :import => new_attributes}, valid_session
-        import.reload
-        skip("Add assertions for updated state")
-      end
-
-      it "redirects to the import" do
-        import = Import.create! valid_attributes
-        put :update, {:id => import.to_param, :import => valid_attributes}, valid_session
-        expect(response).to redirect_to(import)
-      end
-    end
-
-    context "with invalid params" do
-      it "returns a success response (i.e. to display the 'edit' template)" do
-        import = Import.create! valid_attributes
-        put :update, {:id => import.to_param, :import => invalid_attributes}, valid_session
-        expect(response).to be_success
-      end
-    end
-  end
-
-  describe "DELETE #destroy" do
-    it "destroys the requested import" do
-      import = Import.create! valid_attributes
-      expect {
-        delete :destroy, {:id => import.to_param}, valid_session
-      }.to change(Import, :count).by(-1)
-    end
-
-    it "redirects to the imports list" do
-      import = Import.create! valid_attributes
-      delete :destroy, {:id => import.to_param}, valid_session
-      expect(response).to redirect_to(imports_url)
-    end
-  end
 
 end

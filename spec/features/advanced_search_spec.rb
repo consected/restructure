@@ -169,7 +169,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     expect(sprot.length).to be > 0
 
     protocol = pick_one_from(sprot)
-    sp = pick_one_from(protocol.sub_processes)
+    sp = pick_one_from(protocol.sub_processes.active)
     has_css? "#master_trackers_attributes_0_sub_process_id"
 
     within '#advanced_search_master' do

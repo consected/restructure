@@ -21,6 +21,9 @@ RSpec.describe ScantronsController, type: :controller do
 
   before(:all) do
     seed_database
+    # Handle a strange issue during full test runs
+    ExternalIdentifier.routes_reload
+
     delete_previous_records
   end
 
