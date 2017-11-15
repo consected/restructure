@@ -92,8 +92,11 @@ module UserHandler
     end
 
     # Check if a value is unique for the defined secondary_key field
-    # The option fail_if_non_existent: true (default is nil) indicates that false should be returned
+    # Returns true if exactly one item is found, false if more than one item is found.
+    # The option fail_if_non_existent: true (default is nil) indicates that nil should be returned
     # if the value does not already exist in the table
+    # By returning nil, rather than false for non-existent values, the caller can evaluate the result
+    # appropriately.
     def secondary_key_unique? value, options={}
       raise "No secondary_key field defined" unless secondary_key
       l = self.where(secondary_key => value).length
@@ -101,7 +104,7 @@ module UserHandler
       return true if l == 1
       # the length is 0
       # handle the result based on the option
-      return !options[:fail_if_non_existent]
+      return (options[:fail_if_non_existent] ? nil : true)
     end
 
     def secondary_key_dups

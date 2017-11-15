@@ -9,6 +9,7 @@ module ActivityLogHandler
     has_many :item_flags, as: :item, inverse_of: :item
 
     after_initialize :set_action_when
+    after_initialize :format_sync_fields
 
     before_save :sync_item_data
     before_save :set_related_fields
@@ -193,6 +194,21 @@ module ActivityLogHandler
 
   def fields_to_sync
     self.class.fields_to_sync
+  end
+
+
+  def format_sync_fields
+    return unless parent_class
+    fields_to_sync.each do |f|
+      formatter = "format_#{f}"
+      if parent_class.respond_to? formatter
+        if self.respond_to? :rec_type
+          self[f] = parent_class.send("format_#{f}", self[f], self.rec_type)
+        else
+          self[f] = parent_class.send("format_#{f}", self[f])
+        end
+      end
+    end
   end
 
   # sync the attributes that are common between the parent item and the new logged item,

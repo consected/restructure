@@ -6,13 +6,22 @@
       <label for="primary_table">Select the table to import into</label>
       <%= select_tag :primary_table, options_for_select(@primary_tables, @primary_table), include_blank: true %>
     </div>
-    <div class="form-group" id="browse-block">
-      <label for="import_file">Pick the file to upload<br/>Import will start immediately after selection</label>
-      <%= file_field_tag :import_file, class: 'ff' %>
+    <div class="row">
+      <div class="form-group col-md-6" id="browse-block">
+        <label for="import_file">Pick the file to upload<br/>Import will start immediately after selection</label>
+        <%= file_field_tag :import_file, class: 'ff' %>
+      </div>
+      <div class="form-group col-md-1"><h4>or</h4></div>
+      <div class="form-group col-md-6" id="empty-import-block">
+        <label for="no_file">Enter data manually<br/>Get a blank form for data entry into this table</label>
+        <%= submit_tag "Continue Without File", id: 'no_file' %>
+      </div>
+      <br><br>
+      <div class="form-group col-md-2"><%= link_to 'Cancel', imports_path, class: 'btn btn-danger' %></div>
     </div>
   <% end %>
   <br/>
-  <%= link_to 'Cancel', imports_path, class: 'btn btn-danger' %>
+
 </div>
 
 <script>

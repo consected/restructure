@@ -60,24 +60,50 @@ module WorksWithItem
   # through the standard foreign key (e.g. player_contact_id). Instead we allow matching
   # through the secondary_key (if defined on the parent class), enabling a likely match to
   # be made.
+  # In the player_contact / activity_log/player_contact_phone example, the secondary key would be
+  # the data field.
   # If the optional current_user is set, then this will be passed the master when found, in preparation
   # for saving the result. If not, it is the caller's responsibility to set the current user in master subsequently.
-  # Return: the parent item if a match was made, nil otherwise
+  # Return: the parent item if a match was made, nil if the value was blank
+  # Raise an exception if the secondary key was not found, or was a duplicate
   def match_with_parent_secondary_key options={}
-    return if self.master || self.item
+    value = matching_secondary_key_value
+    return if value.blank?
     # Do we work with parent type? And does the parent_type association return nothing?
-    raise "match_with_parent_secondary_key does not work with classes that don't have parent_type" unless self.class.respond_to?(:parent_type) && !self.send(self.class.parent_type)
+    raise "match_with_parent_secondary_key does not work with classes that don't have parent_type (#{self.class.name})" unless self.class.respond_to?(:parent_type)
     # Does the parent class have a defined secondary_key field? And does this current model have a matching field to join on?
     raise "match_with_parent_secondary_key must use a parent class with a matching secondary_key field" unless parent_secondary_key && has_matching_secondary_key_field?
     # Is the value of the matching field in this model set? And is that value unique in the parent class's table (it must exist too)?
-    value = matching_secondary_key_value
-    if value && parent_class.secondary_key_unique?(value, fail_if_non_existent: true)
+    self.mark_invalid = true
+    unique = parent_class.secondary_key_unique?(value, fail_if_non_existent: true)
+    secondary_key = parent_class.secondary_key
+    if unique
+      matched_item = parent_class.find_by_secondary_key(value)
+      matched_item_id = matched_item.id
+      # if the item is already set, validate the result matches.
+      # if there is already an item set and we have matched with an item with a different master we have a problem
+      # otherwise if there is already a master set and the matched item belongs to a different master we have a problem
+      if self.item_id && matched_item_id != self.item_id
+        raise FphsException.new "Value for #{secondary_key} = \"#{value}\" belongs to a different #{parent_class.human_name} than the value already set"
+      elsif respond_to?(:master) && self.master_id && matched_item.master_id != self.master_id
+        raise FphsException.new "Value for #{secondary_key} = \"#{value}\" belongs to a #{parent_class.human_name} within a different master record than the value already set"
+      end
+
       # We can match. So find the underlying item and set the real foreign key appropriately
-      self.item_id = parent_class.find_by_secondary_key(value).id
+      self.item_id = matched_item_id
       self.master = item.master if respond_to?(:master) && !self.master
       item.master.current_user = options[:current_user] if options[:current_user]
+      self.mark_invalid = false
       return self.item
+    elsif unique.nil?
+      logger.debug "#{secondary_key} for matching was not found: #{value}"
+      raise FphsException.new "Value for #{secondary_key} could not be found in #{parent_class.human_name}: #{value}"
+    else
+      logger.debug "#{secondary_key} for matching is not unique: #{value}"
+      raise FphsException.new "Value for #{secondary_key} = \"#{value}\" has been found in more than one #{parent_class.human_name} record. Update one of these records before continuing."
     end
+
+    self.mark_invalid = false
     return nil
   end
 

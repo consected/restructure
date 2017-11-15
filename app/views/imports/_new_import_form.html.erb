@@ -1,4 +1,8 @@
-<% invalid_items = 0 %>
+<%
+invalid_items = 0
+filled_items = 0
+%>
+  <div id="import-container" class="hide-blank-rows">
     <%= form_for(@import, class: "inline-form", remote: false, html: {'data-result-target' => '#import-edit-results', 'data-template' => "edit-edit-result"}) do |form| %>
       <div class="data-results import-edit-container">
         <div data-result="import-edit-form-"  class="import-edit-form">
@@ -8,6 +12,8 @@
             <table class="import-grid">
               <thead>
                 <tr>
+                  <th>&nbsp;
+                  </th>
                   <% fields.each do |p| %>
                   <th>
                     <%= form.label p %>
@@ -16,20 +22,25 @@
                 </tr>
               </thead>
               <tbody>
+                <% row_num = 1 %>
                 <%= form.fields_for @primary_table.to_sym, @import.items do |f| %>
                 <%
                   item = @import.items[f.index]
                   item.send :write_attribute, :user_id, current_user.id
                   valid_item =  true
+                  filled_row = row_num <= @import.item_count
                   unless @readonly
                     valid_item = item.check_valid?
-                    invalid_items += 1 unless valid_item
+                    invalid_items += 1 unless valid_item || !filled_row
+                    filled_items +=1 if filled_row
                   end
                 %>
-                <tr class="<%= valid_item ?  'item-valid' : 'item-invalid'%>" data-error-items="<%= item.errors.keys.join(",")%>" >
 
+                <tr class="<%= valid_item ?  'item-valid' : 'item-invalid'%> <%= filled_row ? 'filled-row' : 'blank-row'%>  <%= row_num == @import.item_count+1 ? 'next-blank-row' : ''%>" data-error-items="<%= item.errors.keys.join(",")%>" >
+                  <td class="row-num">
+                    <%= row_num %>
+                  </td>
                   <% fields.each do |p| %>
-
                     <td data-col-type="<%=p%>">
 
                       <%
@@ -44,27 +55,27 @@
                       <% elsif p == :description %>
                         <%= f.text_area p %>
                       <% elsif p == :rec_type%>
-                        <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: item.rec_type) %>
+                        <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: item.rec_type), {prompt: ''} %>
                       <% elsif p == :source %>
-                        <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: item.source) %>
+                        <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: item.source), {prompt: ''} %>
                         <% has_source = true %>
                       <% elsif p.to_s.index('select_') == 0
                           v = item.send(p)
                       %>
-                        <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>
+                        <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v), {prompt: ''}%>
                       <% elsif p.to_s.start_with?('set_related_') && p.to_s.end_with?('_rank') %>
                           <%= f.select p, general_selection("#{p.to_s.gsub('set_related_', '').gsub('_rank', '').pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc), {include_blank: true} %>
                       <% elsif p == :protocol_id %>
-                          <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "#{@readonly ? '' : '-pick one-'}"}, {"data-filters-selector" => "##{name}_sub_process_id", class: ""}%>
+                          <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "#{@readonly ? '' : ''}"}, {"data-filters-selector" => "##{name}_sub_process_id", class: ""}%>
                       <% elsif p == :sub_process_id %>
-                        <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "#{@readonly ? '' : '-select-'}"}, {"data-filters-selector" => "##{name}_protocol_event_id", class: ""} %>
+                        <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "#{@readonly ? '' : ''}"}, {"data-filters-selector" => "##{name}_protocol_event_id", class: ""} %>
                       <% elsif p == :protocol_event_id %>
-                          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "#{@readonly ? '' : '-select-'}"}, class: "" %>
+                          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "#{@readonly ? '' : ''}"}, class: "" %>
                       <% elsif p == :rank %>
                         <% if respond_to? "#{name}_rank_array_pair".to_sym %>
-                          <%= f.select :rank, self.send("#{name}_rank_array_pair") %>
+                          <%= f.select :rank, self.send("#{name}_rank_array_pair"), {prompt: ''} %>
                         <% else %>
-                          <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: item.rank) %>
+                          <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: item.rank), {prompt: ''} %>
                         <% end %>
                       <% elsif p.to_s.index(/(_date|_when)$/)  %>
                         <%= f.date_field p %>
@@ -96,6 +107,7 @@
                     </td>
                   <% end %>
                   </tr>
+                  <% row_num += 1  %>
                 <% end %>
 
               </tbody>
@@ -106,24 +118,49 @@
         </div>
       </div>
       <% unless @readonly %>
+      <%= hidden_field_tag :invalid_items, invalid_items.to_s %>
       <div class="import-form-actions well">
         <% if invalid_items > 0 %>
           <div class="">
             <p>Uploaded data has <%= invalid_items %> invalid <%= "rows".pluralize(invalid_items) %>. Either correct the data by editing it above (and click Re-Test when done), or cancel and upload a corrected CSV file.</p>
+            <p>After submitting, you will be presented the opportunity to review the newly validated data before completing the import.</p>
+          </div>
+        <% elsif filled_items == 0 %>
+          <div class="">
+            <p>Enter the required data by editing it above. When complete, click Check Entries, or cancel and upload a CSV file.</p>
+            <p>After submitting, you will be presented the opportunity to review the newly validated data before completing the import.</p>
           </div>
         <% end %>
+          <%
+            if filled_items > 0
+              if invalid_items == 0
+                submit_label = "Submit Import"
+                disable_submit = true
+              else
+                submit_label = "Re-Test"
+                disable_submit = false
+              end
+            else
+              submit_label = "Check Entries"
+              disable_submit = false
+            end
+
+          %>
+          <% if disable_submit %>
+          <div class="">
+            <p>Check box to confirm data is to be imported to table <strong><%=@primary_table%></strong>
+              <%= check_box_tag :confirm_upload %>
+            </p>
+          </div>
+          <% end %>
         <div class="">
-          <p>Check box to confirm data is to be imported to table <strong><%=@primary_table%></strong>
-            <%= check_box_tag :confirm_upload %>
-          </p>
-        </div>
-        <div class="">
-          <%= link_to 'Cancel', imports_path, class: 'btn btn-danger' %> <%= form.submit value: "Submit Import",class: "btn btn-primary", id: "submit_import", disabled: true %>
+          <%= link_to 'Cancel', imports_path, class: 'btn btn-danger' %>
+          <%= form.submit value: submit_label, class: "btn btn-primary", id: "submit_import", disabled: disable_submit %>
         </div>
       </div>
       <% end %>
     <% end %>
-
+  </div>
 <script>
   $('#confirm_upload').on('change', function(){
     if($(this).is(':checked')){
@@ -131,7 +168,17 @@
     }else {
       $('#submit_import').prop('disabled', true);
     }
-
   })
+
+  window.setTimeout(function(){
+    $(document).on('change', 'tr.next-blank-row td input, select, textarea', function(){
+      var v = $(this).val();
+      if(!v || v == '')
+        return;
+      var row = $(this).parents('tr');
+      row.removeClass('next-blank-row').addClass('filled-row').removeClass('blank-row');
+      row.next().addClass('next-blank-row');
+    });
+  }, 1000);
 
 </script>

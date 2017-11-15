@@ -8,8 +8,8 @@
           <%= select_tag :get_template_for, options_for_select(@primary_tables), prompt: '- select table -' %>
         </div>
         <%= field_set_tag '', disabled: true do %>
-        <h4>Need a template CSV for this table?</h4>
-        <%= submit_tag 'Download Template', class: 'btn btn-primary' %>
+        <p><br>Need a template CSV for this table?</p>
+        <%= submit_tag 'Download Template', class: 'btn btn-default' %>
         <% end %>
       <% end %>
       <p><br/></p>

@@ -37,9 +37,23 @@ class UserBase < ActiveRecord::Base
   # the time we actually need them to run (save and create).
   def check_valid?
     self.validating = true
-    res = self.valid?
+    
+    begin
+      res = !marked_invalid? && self.valid?
+    rescue => e
+      self.errors.add "unexpected error", e.message
+      res = false
+    end
     self.validating = false
     res
+  end
+
+  def marked_invalid?
+    @marked_invalid
+  end
+
+  def mark_invalid= val
+    @marked_invalid = val
   end
 
   def validating?

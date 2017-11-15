@@ -66,15 +66,34 @@ class ImportsController < ApplicationController
 
   # Accepts an uploaded file and parses the CSV
   def create
-    if params[:import_file] && params[:primary_table]
+    if params[:primary_table]
       @primary_tables = Import.accepts_models
       @primary_table = params[:primary_table] if @primary_tables.include? params[:primary_table]
-      uploaded_io = params[:import_file]
-      csv = uploaded_io.read
-      filename = uploaded_io.original_filename
-      @import = Import.import_csv(csv, @primary_table, current_user, filename)
+      filename = ''
+      if params[:import_file]
+        uploaded_io = params[:import_file]
+        csv = uploaded_io.read
+        filename = uploaded_io.original_filename
+      end
+      @import = Import.setup_import(@primary_table, current_user, filename)
+
+      if params[:import_file]
+        @import.import_csv csv
+      else
+        @import.item_count = 0
+      end
+
+      @blanks = 100 - @import.item_count
+      if @blanks > 0
+        @import.generate_blank_items @blanks
+      else
+        @blanks = 0
+      end
 
       if @import.persisted?
+        unless @import.errors.empty?
+          flash.now[:warning] = @import.errors.to_a.join("\n")
+        end
         render 'new_import'
       else
         redirect_to new_import_path, alert: "Error preparing the import: #{Application.record_error_message @import}"
@@ -87,6 +106,8 @@ class ImportsController < ApplicationController
   # PATCH/PUT /imports/1
   def update
 
+    prev_invalid_items = params[:invalid_items].to_i
+
     @primary_table = @import.primary_table
 
     item_count = 0
@@ -94,45 +115,89 @@ class ImportsController < ApplicationController
     errors = []
     failed = false
 
-    import_params["#{@primary_table}_attributes".to_sym].each do |k,c|      
-      r = item_class.new c
-      @import.attempt_match_on_secondary_key r
-      r.master.current_user = current_user if r.master && !r.master_user
-      if r.check_valid?
+    item_class.transaction do
+
+      import_params["#{@primary_table}_attributes".to_sym].each do |k,c|
+        r = item_class.new c
         begin
-          r.save!
-        rescue => e
+          @import.attempt_match_on_secondary_key r
+
+        rescue FphsException => e
+          errors << e.message
           failed = true
-          logger.debug "------------------------>Failed to add item to import when saving: #{e}"
         end
-      else
+
+        r.master.current_user = current_user if r.master && !r.master_user
+
+        non_blank = false
+        r.attribute_names.each do |a|
+          non_blank ||= !c[a.to_sym].blank?
+        end
+
+
+        if non_blank
+          item_count += 1
+
+          if r.check_valid?
+            begin
+              r.save!
+            rescue => e
+              failed = true
+              logger.debug "------------------------>Failed to add item to import when saving: #{e}"
+            end
+          else
+            failed = true
+            errors << r.errors.first
+            logger.debug "------------------------>Failed to add item to import during validation: #{errors.last}"
+          end
+        else
+          # Ensure the blank items are truly blanked out
+          r.attribute_names.each do |a|
+            r[a] = nil
+          end
+        end
+
+
+        items << r
+
+      end
+
+
+      begin
+        # No validations failed and previously none had, plus the number of rows is still the same, so finally submit the import
+        if !failed && prev_invalid_items == 0 && item_count == @import.item_count
+          @import.item_count = item_count
+          @import.imported_items = items.select{|i| !!i.id }.map(&:id)
+          @import.update(import_params)
+          @complete = true
+          redirect_to @import
+          return
+        end
+      rescue => e
         failed = true
-        errors << r.errors.first
-        logger.debug "------------------------>Failed to add item to import during validation: #{errors.last}"
+        logger.debug "Error in import update: #{e}\n#{ e.backtrace.join("\n")}"
       end
-      items << r
-      item_count += 1
+
+      # Either validations failed, rows were added, or previously some validations had failed
+      # so we get a chance to review the correct data
+
+      raise ActiveRecord::Rollback, "Don't save incomplete data"
+
     end
-
-
-    begin
-      unless failed
-        @import.item_count = item_count
-        @import.imported_items = items.map(&:id)
-        @import.update(import_params)
-
-        redirect_to @import
-        return
-      end
     rescue => e
-      failed = true
-      logger.debug "Error in import update: #{e}\n#{ e.backtrace.join("\n")}"
-    end
+      logger.info "Rollback the transaction in imports update based on #{e.message}"
+    ensure
+      return if @complete
+      if errors.empty? && (prev_invalid_items != 0 || @import.item_count.nil?)
+        flash.now[:notice] = "Newly entered data has been validated and matched. Check the data is correct and submit again."
+      else
+        flash.now[:warning] = errors.uniq.join("\n")
+      end
 
-    if failed
       @import.items = items
+      @import.item_count = item_count
+      @import.save
       render 'new_import'
-    end
   end
 
 
@@ -143,12 +208,16 @@ class ImportsController < ApplicationController
       item
     end
 
-    def permitted_params
-      Import.permitted_params_for @primary_table
+    def permitted_params include_alt_ids=true
+      Import.permitted_params_for @primary_table, include_alt_ids
     end
 
     def fields
-      (permitted_params ).map(&:to_sym)
+      if @readonly
+        (permitted_params false).map(&:to_sym)
+      else
+        (permitted_params).map(&:to_sym)
+      end
     end
 
     def name

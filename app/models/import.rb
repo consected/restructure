@@ -11,23 +11,45 @@ class Import < ActiveRecord::Base
     Master.get_all_associations
   end
 
-
-  def self.import_csv csv, primary_table, current_user, filename
+  def self.setup_import primary_table, current_user, filename
     import = Import.new
-    csv_rows = CSV.parse(csv, headers: true, header_converters: :symbol)
     import.primary_table = primary_table
+    import.user = current_user
+    import.filename = filename
+    import.save
+    return import
+  end
+
+  def import_csv csv
+    csv_rows = CSV.parse(csv, headers: true, header_converters: :symbol)
     # The user attribute is allowed to be set on Import
     # This has the required side-effect that the models being created form the CSV data
     # will get their user at creation time  based on this
-    import.user = current_user
-    import.item_count = csv_rows.length
-    import.csv_rows = csv_rows
-    import.filename = filename
-    return import unless import.check_csv_columns
-    import.build_objects_from_data
-    import.save
-    return import
+    self.item_count = csv_rows.length
+    self.csv_rows = csv_rows
+    return self unless self.check_csv_columns
+    self.build_objects_from_data
+    # force retaining of errors, since save will clear them
+    duperrors = self.errors.dup
+    self.save
+    unless duperrors.empty?
+      duperrors.to_h.each do |k,e|
+        self.errors.add k, e
+      end
+    end
+    self
+  end
 
+
+  def generate_blank_items num
+    self.items ||= []
+    num.times do
+      item = self.item_class.new
+      item.attribute_names.each do |a|
+        item[a] = nil
+      end
+      self.items << item
+    end
   end
 
   def self.item_class_for primary_table
@@ -43,28 +65,32 @@ class Import < ActiveRecord::Base
     self.primary_table.singularize.ns_camelize.ns_constantize
   end
 
-  def self.permitted_params_for primary_table
+  def self.permitted_params_for primary_table, include_alt_ids=true
     pt = item_class_for(primary_table)
     return unless pt
-    res = pt.attribute_names - ['id', 'user_id', 'created_at', 'updated_at']
-    res += Master.alternative_id_fields.map(&:to_s) if res.include?('master_id')
+    res = pt.attribute_names - ['id', 'user_id', 'created_at', 'updated_at', 'disabled']
+    res += Master.alternative_id_fields.map(&:to_s) if include_alt_ids && res.include?('master_id')
     res.uniq!
     res
   end
 
-  def permitted_params_for_primary_table
-    self.class.permitted_params_for primary_table
+  def permitted_params_for_primary_table include_alt_ids=true
+    self.class.permitted_params_for primary_table, include_alt_ids
   end
 
   def build_objects_from_data
     objects = []
     return true unless self.csv_rows
     csv_rows.each do |row|
-      byebug
-      new_obj = self.item_class.new(row.to_h)
-
-      attempt_match_on_secondary_key new_obj
-
+      begin
+        new_obj = self.item_class.new(row.to_h)
+        attempt_match_on_secondary_key new_obj
+        byebug
+      rescue FphsException => e
+        self.errors.add 'import error', e.message
+      rescue => e
+        self.errors.add 'unexpected error', e.message
+      end
       objects << new_obj
     end
     self.items = objects
@@ -72,13 +98,15 @@ class Import < ActiveRecord::Base
 
   # If necessary, match on secondary key field.
   def attempt_match_on_secondary_key new_obj
-    return if new_obj.respond_to?(:master_id) && new_obj.master
+    return false unless new_obj.respond_to?(:item)
+    #return new_obj.item if new_obj.item
     new_obj.match_with_parent_secondary_key current_user: self.user
     if new_obj.item
       new_obj.item.master.current_user = self.user
       if new_obj.respond_to?('master_id=') && !new_obj.master_id
         new_obj.master = new_obj.item.master
       end
+      return new_obj.item
     end
   end
 
