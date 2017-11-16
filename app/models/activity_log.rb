@@ -223,6 +223,9 @@ class ActivityLog < ActiveRecord::Base
 
     logger.info "Generating protocol entries"
     admin = self.current_admin
+
+    # generate the basics
+
     Protocol.enabled.each do |p|
       logger.info "For protocol: #{p.id} #{p.name}"
 
@@ -358,8 +361,8 @@ class ActivityLog < ActiveRecord::Base
 
         c_name = full_implementation_controller_name
         klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
-        res2 = klass.const_set(c_name, a_new_controller)        
-
+        res2 = klass.const_set(c_name, a_new_controller)
+        
         logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
         add_model_to_list res

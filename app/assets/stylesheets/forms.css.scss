@@ -71,6 +71,9 @@ input[type="date"], input[type="time"], input[type="datetime-local"], input[type
     }
 }
 
+input[type="date"] {
+  min-width: 10em;
+}
 
 input[type="date"].attached-datepicker {
   color: rgba(0,0,0,0);

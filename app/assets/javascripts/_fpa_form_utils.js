@@ -439,7 +439,7 @@ _fpa.form_utils = {
           clearBtn: true,
           autoclose: true,
           format: 'm/d/yyyy'
-        }).addClass('attached-datepicker date-is-local');        
+        }).addClass('attached-datepicker date-is-local');
       });
 
     },
@@ -563,7 +563,7 @@ _fpa.form_utils = {
           });
           // finally, handle the remaining items
           if(maxh>1)
-            block.find('.ready-to-resize').removeClass('ready-to-resize').height(maxh);
+            block.find('.ready-to-resize').removeClass('ready-to-resize').css({minHeight: maxh});
         });
       }, 100);
     },

@@ -130,7 +130,7 @@
             <% end %>
           <% end %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
-          <% if ItemFlagName.enabled_for?(name) && !item_flags_after %>
+          <% if ItemFlagName.enabled_for?(item_class_name) && !item_flags_after %>
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
@@ -259,14 +259,14 @@
 <script id="<%=name.pluralize%>_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
 
-    {{#each <%=name.pluralize%>}}
+    {{#each <%=full_name.pluralize%>}}
 
         {{><%=name%>_result _created=@index}}
 
     {{/each}}
 
     <div class="col-md-24 new-block" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
-      {{#unless <%=name.pluralize%>}}
+      {{#unless <%=full_name.pluralize%>}}
       <ul class="list-group">
         <li class="list-group-item is-heading">
           <h4>No <%=caption%> records</h4>

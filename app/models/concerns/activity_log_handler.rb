@@ -25,6 +25,7 @@ module ActivityLogHandler
     after_save :sync_tracker
 
     after_save :check_status
+    after_save :track_record_update
   end
 
   class_methods do
@@ -98,7 +99,7 @@ module ActivityLogHandler
 
   # default record updates tracking is not performed, since we sync tracker separately
   def no_track
-    true
+    false
   end
 
 
@@ -319,7 +320,16 @@ module ActivityLogHandler
   # Store the result of allowing a tracker sync to happen before save, when we
   # would lose access to the required change information.
   def set_allow_tracker_sync
-    @allow_tracker_sync = true if !self.persisted? || self.protocol_id_changed?
+    @allow_tracker_sync = true if !self.persisted? || (self.respond_to?(:protocol_id) && self.protocol_id_changed?)
+  end
+
+
+  def track_record_update
+    # Don't do this if we have the configuration set to avoid tracking, or
+    # if the record was not created or updated
+    return if no_track || !(@was_updated || @was_created)
+    @update_action = true
+    Tracker.track_record_update self
   end
 
 end

@@ -15,6 +15,9 @@ class PlayerInfo < UserBase
   validates :source, presence: true, if: :rank?
   before_save :check_college
 
+  def self.human_name
+    'Person'
+  end
 
   def accuracy_rank
     if rank && rank > BestAccuracyScore

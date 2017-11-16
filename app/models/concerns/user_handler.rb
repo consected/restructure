@@ -126,17 +126,28 @@ module UserHandler
 
   end
 
-  def belongs_directly_to
-    master
-  end
 
-  def is_admin?
-    if respond_to?(:master) && master
-      master.is_admin?
-    else
-      nil
+  public
+
+    def human_name
+      if respond_to?(:rec_type) && self.rec_type
+        rec_type.underscore.humanize.titleize
+      else
+        self.class.name.underscore.humanize.titleize
+      end
     end
-  end
+
+    def belongs_directly_to
+      master
+    end
+
+    def is_admin?
+      if respond_to?(:master) && master
+        master.is_admin?
+      else
+        nil
+      end
+    end
 
 
   protected
@@ -152,7 +163,9 @@ module UserHandler
 
 
     def track_record_update
-      return if no_track
+      # Don't do this if we have the configuration set to avoid tracking, or
+      # if the record was not created or updated
+      return if no_track || !(@was_updated || @was_created)
       @update_action = true
       Tracker.track_record_update self
     end

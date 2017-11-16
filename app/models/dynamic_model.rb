@@ -7,6 +7,9 @@ class DynamicModel < ActiveRecord::Base
 
   attr_accessor :editable
 
+  def self.implementation_prefix
+    "DynamicModel"
+  end
 
 
   def implementation_model_name
@@ -31,8 +34,8 @@ class DynamicModel < ActiveRecord::Base
 
 
   def update_tracker_events
-    return unless self.name && !disabled
-    Tracker.add_record_update_entries self.name, current_admin, 'flag'
+    # Can only add flags to dynamic models, and that is handled by item flags admin page
+    return true
   end
 
 
@@ -46,8 +49,8 @@ class DynamicModel < ActiveRecord::Base
       begin
 
         pkn = (self.primary_key_name).to_sym
-        fkn = (self.foreign_key_name || 'master_id').to_sym
-        tkn = (self.table_key_name || 'id').to_sym
+        fkn = self.foreign_key_name.blank? ? 'master_id': self.foreign_key_name.to_sym
+        tkn = self.table_key_name.blank? ? 'id' : self.table_key_name.to_sym
         man = self.model_association_name
         ro = self.result_order
         a_new_class = Class.new(UserBase) do
@@ -105,37 +108,22 @@ class DynamicModel < ActiveRecord::Base
 
         end
 
-        a_new_controller = Class.new(ApplicationController) do
+        a_new_controller = Class.new(DynamicModel::DynamicModelsController) do
 
-          def edit
-            not_authorized
+          # Annoyingly this needs to be forced, since const_set below does not
+          # appear to set the parent class correctly, unlike for models
+          # Possibly this is a Rails specific override, but the parent is set correctly
+          # when a controller is created as a file in a namespaced folder, so rather
+          # than fighting it, just force the known parent here.
+          def self.parent
+            ::DynamicModel
           end
 
-          def update
-            not_authorized
-          end
-
-          def new
-            not_authorized
-          end
-
-          def create
-            not_authorized
-          end
-
-          def destroy
-            not_authorized
-          end
-
-          private
-
-            def secure_params
-            end
         end
 
         m_name = model_class_name
 
-        klass = DynamicModel
+        klass = ::DynamicModel
         klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization

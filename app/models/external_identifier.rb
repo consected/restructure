@@ -221,6 +221,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
     return unless self.label && !disabled
     Tracker.add_record_update_entries self.name.singularize, current_admin, 'record'
+    Tracker.add_record_update_entries self.name.singularize, current_admin, 'flag'
   end
 
 

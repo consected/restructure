@@ -252,7 +252,7 @@
               <% dm = DynamicModel.active.where(category: cat)
                  dm.each do |m|
               %>
-              <a href="/masters/{{id}}/dynamic_model/<%=m.full_item_types_name%>" data-result-target="#<%=m.full_item_types_name%>-{{id}}-" data-template="<%=m.model_data_template_name%>-list-template" data-remote="true" class=""><%=m.name%></a>
+              <a href="/masters/{{id}}/dynamic_model/<%=m.implementation_model_name.pluralize%>" data-result-target="#<%=m.full_item_types_name%>-{{id}}-" data-template="<%=m.implementation_model_name.hyphenate.pluralize%>-list-template" data-remote="true" class=""><%=m.name%></a>
               <% end %>
             </div>
             <h4 class="results-divider"><a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master"><%=cat.underscore.humanize.downcase%> <span class="caret up"></span></a></h4>

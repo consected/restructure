@@ -151,7 +151,7 @@ module DynamicModelHandler
   end
 
 
-  def full_implementation_class_name
+  def full_implementation_class_name    
     full_item_type_name.ns_camelize
   end
 
@@ -194,8 +194,11 @@ module DynamicModelHandler
 
     if !disabled
       raise FphsException.new "The implementation of #{table_name} is enabled but the table is not ready to use" unless ready?
-      res = implementation_class.new rescue nil
-      raise FphsException.new "The implementation of #{table_name} was not completed. Ensure the DB table #{table_name} has been created." unless res
+      begin
+        res = implementation_class.new
+      rescue => e
+        raise FphsException.new "The implementation of #{table_name} was not completed. Ensure the DB table #{table_name} has been created. #{e}" unless res
+      end
     end
   end
 end

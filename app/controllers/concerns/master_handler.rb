@@ -53,7 +53,7 @@ module MasterHandler
 
   def create
 
-    set_object_instance @master_objects.build(secure_params)    
+    set_object_instance @master_objects.build(secure_params)
     set_additional_attributes object_instance
     if object_instance.save
       handle_updated_item_flags
@@ -103,7 +103,9 @@ module MasterHandler
     end
 
     def edit_form_extras
-      {}
+      {
+        caption: object_instance.human_name
+      }
     end
 
     def edit_form_helper_prefix
@@ -144,7 +146,6 @@ module MasterHandler
       end
 
       def set_me_and_master
-
         # Generically retrieve the current object referenced by parameter :id
         # Store it into the @singlular_name instance variable
         # This is the equivalent of e.g.

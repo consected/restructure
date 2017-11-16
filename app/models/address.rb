@@ -12,6 +12,10 @@ class Address < UserBase
   before_save :handle_country
   after_save :handle_primary_status
 
+  def human_name
+    'Address'
+  end
+
   def self.states
     AddressState.id_value_pairs
   end

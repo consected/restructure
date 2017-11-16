@@ -74,14 +74,24 @@ module MasterSearch
               },
               methods: [:user_name, :accuracy_score_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
             },
-            pro_infos: {},
+            pro_infos: {
+              include: {
+                item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+              }
+            },
             player_contacts: {
               order: {rank: :desc},
-              methods: [:user_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
+              methods: [:user_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories],
+              include: {
+                item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+              }
             },
             addresses: {
               order: {rank: :desc},
-              methods: [:user_name, :rank_name, :state_name, :country_name, :source_name, :tracker_history_id, :tracker_histories]
+              methods: [:user_name, :rank_name, :state_name, :country_name, :source_name, :tracker_history_id, :tracker_histories],
+              include: {
+                item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+              }
             },
 #           Loading trackers dynamically provides a significant speed up, and this may become more important as the tracker usage grows
 #           trackers: {

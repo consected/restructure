@@ -104,8 +104,13 @@ class Tracker < UserBase
     end
 
 
-    t.notes = cp
-    t.save
+    # If there were no changes, discard this item. Otherwise, save it.
+    if cp.blank?
+      return nil
+    else
+      t.notes = cp
+      t.save
+    end
 
   end
 
@@ -127,9 +132,13 @@ class Tracker < UserBase
       removed_flags.each {|k| cp << "#{ItemFlagName.find(k).name}; " }
     end
 
-    t.notes = cp
-    res = t.save
-    res
+    # If there were no changes, discard this item. Otherwise, save it.
+    if cp.blank?
+      return nil
+    else
+      t.notes = cp
+      t.save
+    end
   end
 
   def self.update_tracker type, record

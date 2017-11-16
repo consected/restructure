@@ -93,7 +93,8 @@ _fpa = {
     // Pull the template from the pre-compiled templates
     var template =_fpa.templates[template_name];
 
-    if(!template) console.log("template for "+template_name+" was not found");
+    if(!template)
+      console.log("template for "+template_name+" was not found");
 
     if(!options) options = {};
 

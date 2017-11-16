@@ -64,7 +64,7 @@ module GeneralDataConcerns
   def tracker_histories
     # Check for the existence of tracker_histories in the super class. If it
     # already exists, it is an association that we should not be overriding
-    if defined?(super) 
+    if defined?(super)
       super
     else
       TrackerHistory.where(item_id: self.id, item_type: self.class.name)
