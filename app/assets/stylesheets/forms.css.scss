@@ -46,7 +46,7 @@ form.search_master {
     label {
         white-space: nowrap;
     }
-    
+
     .form-group  select {
         width: 100%;
         height: auto;
@@ -63,22 +63,22 @@ form .form-group select {
 
 
 input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"] {
-    
+
     line-height: inherit;
-    
+
     &.form-control {
         line-height: inherit;
     }
 }
 
 
-input[type="date"] {
+input[type="date"].attached-datepicker {
   color: rgba(0,0,0,0);
-  
+
   &.date-is-local {
     color: inherit;
   }
-  
+
 }
 
 li.list-group-item label {
@@ -102,7 +102,7 @@ div.chosen-container.chosen-disabled {
     a.search-choice-close {
         display: none !important;
     }
-    
+
 }
 
 
@@ -120,7 +120,7 @@ a.add-icon{
         border-color: #2E6DA4;
         color: #2E6DA4;
     }
-    
+
     &.has-warning select {
         color: #c00;
         option {
@@ -150,7 +150,7 @@ form.search_master label.nowrap{
     white-space: nowrap;
 }
 a.add-icon{
-    z-index: 5;    
+    z-index: 5;
     position: relative;
 }
 
@@ -158,13 +158,13 @@ a.add-icon{
 #master-search-accordion .panel-default {border: 0;}
 
 .advanced-form-selections .btn {
-    
+
     color: #2e6da4;
     background: white;
     &:active {color: #008;}
-    
-    
-    
+
+
+
     &.collapsed {
         background: #2e6da4;
         color: white;

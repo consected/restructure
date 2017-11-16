@@ -417,6 +417,8 @@ _fpa.form_utils = {
 
       // start by setting the date fields to show the date using the locale
       block.find('input[type="date"]').not('.date-is-local').each(function(){
+        if($(this).prop('type') == 'date') return;
+
         var v = $(this).val();
 
         if(v && v != ''){
@@ -430,13 +432,15 @@ _fpa.form_utils = {
       // finally, set up datepickers on any fields that don't already have them
       block.find('input[type="date"]').not('.attached-datepicker').each(function(){
 
+        if($(this).prop('type') == 'date') return;
+
         $(this).datepicker({
           startView: 2,
           clearBtn: true,
           autoclose: true,
           format: 'm/d/yyyy'
-        });
-      }).addClass('attached-datepicker date-is-local');
+        }).addClass('attached-datepicker date-is-local');        
+      });
 
     },
 
