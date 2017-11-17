@@ -40,4 +40,14 @@ Rails.application.configure do
   # config.logger = Logger::Syslog.new('fphs_rails')
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+
+  if ENV['FPHS_USE_LOGGER']=='TRUE'
+    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!"
+    config.log_level = :info
+  else
+    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
+    config.logger = DoNothingLogger.new
+  end
+  
 end

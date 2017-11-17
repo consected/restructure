@@ -1,10 +1,12 @@
+require File.expand_path('../../initializers/logging_disabler', __FILE__)
+
 Rails.application.configure do
 
 
 # initialadmin@hms.harvard.edu-not
 # Admin user password: NsePVLdQQq_E
 
-
+  config.log_level = :debug
   # Settings specified here will take precedence over those in config/application.rb.
 
   # In the development environment your application's code is reloaded on
@@ -33,9 +35,9 @@ Rails.application.configure do
   # number of complex assets.
   config.assets.debug = true
 
-  
+
   config.cache_store = :mem_cache_store
-  
+
   # Asset digests allow you to set far-future HTTP expiration dates on all assets,
   # yet still be able to expire them through the digest params.
   config.assets.digest = true
@@ -45,8 +47,7 @@ Rails.application.configure do
   # Raises helpful error messages.
   config.assets.raise_runtime_errors = true
 
-  config.logger = Logger::Syslog.new('fphs_rails') 
-  
+
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 end

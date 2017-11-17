@@ -1,3 +1,4 @@
+require File.expand_path('../../initializers/logging_disabler', __FILE__)
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -44,9 +45,6 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
 
-  # Use the lowest log level to ensure availability of diagnostic information
-  # when problems arise.
-  config.log_level = :debug
 
   # Prepend all log lines with the following tags.
   # config.log_tags = [ :subdomain, :uuid ]
@@ -71,15 +69,14 @@ Rails.application.configure do
   # Send deprecation notices to registered listeners.
   config.active_support.deprecation = :notify
 
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
+  if ENV['FPHS_USE_LOGGER']=='TRUE'
+    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!"
+    config.log_level = :info
+  else
+    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
+    config.logger = DoNothingLogger.new
+  end
 
-  config.log_level = :info
-  
-
-  config.logger = Logger::Syslog.new('fphs_rails') 
-  
-  
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 end
