@@ -33,7 +33,12 @@ module DynamicModelHandler
       @models ||= {}
     end
 
+    def preload
+      nil
+    end
+
     def define_models
+      self.preload
 
       begin
         dma = self.active
@@ -151,7 +156,7 @@ module DynamicModelHandler
   end
 
 
-  def full_implementation_class_name    
+  def full_implementation_class_name
     full_item_type_name.ns_camelize
   end
 

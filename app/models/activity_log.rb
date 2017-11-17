@@ -10,9 +10,6 @@ class ActivityLog < ActiveRecord::Base
   validates :item_type, presence: true
   validate :check_item_type_and_rec_type
 
-
-
-
   def implementation_model_name
     item_type_name
   end
@@ -224,7 +221,15 @@ class ActivityLog < ActiveRecord::Base
     logger.info "Generating protocol entries"
     admin = self.current_admin
 
-    # generate the basics
+    if disabled
+      logger.info "Not creating protocol entries - activity log implementation is disabled"
+      return
+    end
+
+    # generate the basic activity log create / update records
+    track_name = full_item_type_name.singularize.humanize.downcase
+
+    Tracker.add_record_update_entries track_name, admin, 'record'
 
     Protocol.enabled.each do |p|
       logger.info "For protocol: #{p.id} #{p.name}"
@@ -262,6 +267,15 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
+  # Ensure that other dynamic implementations have been loaded before we attempt to create
+  # activity logs that rely on them
+  def self.preload
+    DynamicModel.define_models    
+    ExternalIdentifier.define_models
+  end
+
+
+  # Dynamically generate the model and controller for this activity log implementation
   def generate_model
 
     failed = false
@@ -352,7 +366,15 @@ class ActivityLog < ActiveRecord::Base
         m_name = model_class_name
 
         klass = ::ActivityLog
-        klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
+        if implementation_class_defined?(klass)
+          begin
+            # This may fail if an underlying dependent class (parent class) has been redefined by
+            # another dynamic implementation, such as external identifier
+            klass.send(:remove_const, model_class_name)
+          rescue => e
+            logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
+          end
+        end
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include TrackerHandler
@@ -360,9 +382,19 @@ class ActivityLog < ActiveRecord::Base
         res.include ActivityLogHandler
 
         c_name = full_implementation_controller_name
-        klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+
+        if implementation_class_defined?(klass)
+          begin
+            # This may fail if an underlying dependent class (parent class) has been redefined by
+            # another dynamic implementation, such as external identifier
+            klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+          rescue => e
+            logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
+          end
+        end
+
         res2 = klass.const_set(c_name, a_new_controller)
-        
+
         logger.debug "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
         add_model_to_list res
@@ -415,7 +447,6 @@ class ActivityLog < ActiveRecord::Base
 
 
 end
-
 
 # Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
 ::ActivityLog.define_models

@@ -5,7 +5,10 @@ module ActivityLogHandler
 
   included do
     belongs_to :master, inverse_of: assoc_inverse
-    belongs_to parent_type
+    # It is necessary to force the class name of the parent, since
+    # the association will attempt to use the class within the ActivityLog module otherwise
+    # which effectively refers the implementation back to itself
+    belongs_to parent_type, class_name: "::#{parent_class.name}"
     has_many :item_flags, as: :item, inverse_of: :item
 
     after_initialize :set_action_when
