@@ -1,10 +1,9 @@
 class ActivityLog < ActiveRecord::Base
 
-puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AL Loading"
   include DynamicModelHandler
   include AdminHandler
   include SelectorCache
-puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AL Included"
+
   before_validation :prevent_item_type_change,  on: :update
   validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
@@ -466,7 +465,5 @@ puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AL Included"
 
 end
 
-puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Requiring tracker"
 # Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
-puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Define Models"
 ::ActivityLog.define_models

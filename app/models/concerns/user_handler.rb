@@ -1,9 +1,7 @@
 module UserHandler
 
   extend ActiveSupport::Concern
-  puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!UserHandler Includes"
   include GeneralDataConcerns
-  puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!UserHandler Included"
 
   included do
     attr_accessor :no_track
@@ -184,4 +182,3 @@ module UserHandler
       true
     end
 end
-puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!UserHandler Done"
