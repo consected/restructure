@@ -30,7 +30,7 @@ class PlayerContact < UserBase
       if res
         value = res
       else
-        self.marked_invalid = true
+        self.mark_invalid = true
       end
     end
     super(value)

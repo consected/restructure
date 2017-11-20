@@ -34,7 +34,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     al.reload
     # We expect data to match, based on an automatic sync of related fields
 
-    expect(al.data).to eq data
+    expect(al.data).to eq PlayerContact.format_data(data)
     expect(al.select_call_direction).to eq 'from player'
     expect(al.select_who).to eq 'user'
     expect(al.user_id).to eq user.id

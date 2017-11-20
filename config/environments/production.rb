@@ -70,10 +70,10 @@ Rails.application.configure do
   config.active_support.deprecation = :notify
 
   if ENV['FPHS_USE_LOGGER']=='TRUE'
-    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!"
+    puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!"
     config.log_level = :info
   else
-    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
+    puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
     config.logger = DoNothingLogger.new
   end
 

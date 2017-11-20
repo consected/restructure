@@ -47,6 +47,11 @@ module DynamicModelHandler
 
         dma.each do |dm|
           dm.generate_model
+          # Force the admin for cases that this is run outside of the admin console
+          # It is expected that this is mostly when originally seeding the database
+          dm.current_admin ||= dm.admin
+          
+          dm.update_tracker_events
         end
       rescue =>e
         Rails.logger.warn "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}\n#{e.backtrace.join("\n")}"

@@ -194,8 +194,9 @@ class Tracker < UserBase
       self.sub_process.protocol_events.where(name: rec_type).first
     end
 
-    raise "Bad protocol_event (#{rec_type}) for tracker #{record}" unless self.protocol_event
-
+    unless self.protocol_event
+      raise "Bad protocol_event (#{rec_type}) for tracker #{record}"
+    end
   end
 
   def set_record_updates_sub_process type
