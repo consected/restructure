@@ -42,7 +42,7 @@ class ReportsController < ApplicationController
       no_run = !search_attrs[:no_run].blank?
     end
 
-    @editable = @report.editable_data? && (current_admin || current_user.can?(:edit_report_data))
+    @editable = @report.editable_data? && (current_admin || current_user && current_user.can?(:edit_report_data))
 
 
     return unless @report.searchable || authorized?
@@ -221,7 +221,7 @@ class ReportsController < ApplicationController
       extras[:master_id] = nil
       extras[:msid] = nil
 
-      log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
+      # log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
     end
 
 

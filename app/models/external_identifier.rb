@@ -3,15 +3,15 @@ class ExternalIdentifier < ActiveRecord::Base
   include DynamicModelHandler
   include AdminHandler
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :label, presence: true
-  validates :external_id_attribute, presence: true
+  validates :external_id_attribute, presence: true, uniqueness: {scope: :disabled}
   validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}
   validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}
   validate :name_format_correct
-  validate :config_uniqueness
   validate :id_range_correct
   after_validation :implementation_table_tests
+  after_validation :generate_usage_reports
 
 
 
@@ -52,6 +52,14 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def external_id_range
     self.min_id..self.max_id
+  end
+
+  def usage_report rep_type
+    r = Report.active.where(name: usage_report_name(rep_type)).first
+  end
+
+  def usage_report_name rep_type
+    "#{self.name.humanize.titleize} #{rep_type}"
   end
 
 
@@ -254,10 +262,6 @@ class ExternalIdentifier < ActiveRecord::Base
     errors.add :name, "must be a lowercase, underscored, DB table name" unless name.downcase.ns_underscore == name
   end
 
-  def config_uniqueness
-    errors.add :name, "must be unique" if !self.disabled && self.class.active.where(name: self.name.downcase).length > 0
-    errors.add :external_id_attribute, "must be unique" if !self.disabled && self.class.active.where(external_id_attribute: self.external_id_attribute.downcase).length > 0
-  end
 
   def check_implementation_class
 
@@ -267,6 +271,35 @@ class ExternalIdentifier < ActiveRecord::Base
       ruby -e \"require './db/table_generators/external_identifiers_table.rb'; TableGenerators.external_identifiers_table('#{name}', '#{external_id_attribute}')\"
       to generate the SQL for this table.
        " unless res
+    end
+  end
+
+  def generate_usage_reports
+    if !disabled
+      r = usage_report('Assigned')
+      unless r
+        Report.create! name: usage_report_name('Assigned'),
+                    item_type: "External ID Usage",
+                    report_type: 'regular_report',
+                    auto: false,
+                    searchable: false,
+                    current_admin: self.admin,
+                    position: 100,
+                    sql: "select id, #{self.external_id_attribute} from #{self.name} where master_id is not null"
+      end
+      if self.pregenerate_ids?
+        r = usage_report('Unassigned')
+        unless r
+          Report.create! name: usage_report_name('Unassigned'),
+                      item_type: "External ID Usage",
+                      report_type: 'regular_report',
+                      auto: false,
+                      searchable: false,
+                      current_admin: self.admin,
+                      position: 100,
+                      sql: "select id, #{self.external_id_attribute} from #{self.name} where master_id is null"
+        end
+      end
     end
   end
 

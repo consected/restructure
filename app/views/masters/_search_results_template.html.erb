@@ -126,7 +126,7 @@
           </li>
           <% end %>
 
-          <% if current_user.can? :view_external_links %>
+          <% if current_user && current_user.can?(:view_external_links) %>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> web links</a>
           </li>
@@ -139,7 +139,7 @@
           <% end %>
         </ul>
         <div class="panel-body">
-          <% if current_user.can? :view_external_links %>
+          <% if current_user && current_user.can?(:view_external_links) %>
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>
           <% end %>
 

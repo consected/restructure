@@ -1,0 +1,7 @@
+<%
+  ExternalIdentifier.active.each do |e|
+%>
+
+<li class="nav"><%= link_to (e.pregenerate_ids ? "Pre-generate #{e.name.humanize}" : "Review #{e.name.humanize}"), admin_external_identifier_detail_path(e.id) %>  </li>
+
+<% end %>

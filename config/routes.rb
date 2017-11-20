@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :external_identifiers, except: [:show, :destroy]
     resources :reports, except: [:show, :destroy]
-    resources :sage_assignments, except: [:destroy]
+    resources :external_identifier_details, except: [:destroy]
     resources :dynamic_models, except: [:show, :destroy]
     resources :user_authorizations, except: [:show, :destroy]
     resources :external_links, except: [:show, :destroy]

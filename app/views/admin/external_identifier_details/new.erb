@@ -1,0 +1,9 @@
+<div class="container">
+    <h2>Create <%= @external_identifier.name.humanize.titleize %> IDs</h2>
+<%= form_for @external_identifier_implementation_class, url: admin_external_identifier_details_path(id: @external_identifier.id) do |f|%>
+  <%= f.label :create_count %>
+  <%= f.number_field :create_count %>
+
+    <%= f.submit "Create Pregenerated IDs" %>
+<%  end %>
+</div>

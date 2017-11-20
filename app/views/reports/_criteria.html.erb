@@ -42,8 +42,8 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
               <%= submit_tag :table, class: "#{btn}"  %>
               <% unless @report.editable_data? %>
               <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count'%>
-              <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_user.can? :export_csv %>
-              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_user.can? :export_json %>
+              <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_admin || current_user && current_user.can?(:export_csv) %>
+              <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_admin || current_user && current_user.can?(:export_json) %>
               <% end %>
               <% if @report.report_type != 'count' %>
                 <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>

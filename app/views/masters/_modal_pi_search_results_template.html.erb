@@ -4,9 +4,9 @@
   {{#if masters.length}}
   <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
-      
+
     {{#each masters}}
-      <div class="panel-heading master-result" role="tab" id="master-{{id}}">          
+      <div class="panel-heading master-result" role="tab" id="master-{{id}}">
         <h3 class="panel-title">
           {{#if msid}}
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid" title="link to this record"> </a>
@@ -16,8 +16,8 @@
           <div class="row">
             <div class="col-md-2 col-lg-1 result-refs"><a href="#" class="switch_id glyphicon glyphicon-random"  title="switch to MSID"></a> <span class="master_id"  title="Master ID">{{id}}</span><span class="msid"  style="display: none" title="MSID">{{#if msid}}{{msid}}{{else}}no&nbsp;MSID{{/if}}</span></div>
             <a class="modal-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
-            
-              <div class="col-md-11 col-lg-12 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">              
+
+              <div class="col-md-11 col-lg-12 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
                 {{#with player_infos.[0]}}
                   {{>player_info_summary_result}}
                 {{else}}
@@ -27,54 +27,54 @@
               <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with pro_infos.[0]}}
                 {{>pro_info_summary_result}}
-              {{/with}}  
-              </div>                      
+              {{/with}}
+              </div>
             </a>
           </div>
         </h3>
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <div class="panel-body">
-          <% if current_user.can? :view_external_links %>
+          <% if current_user && current_user.can?(:view_external_links) %>
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>
           <% end %>
-                    
-                   
+
+
           <div id="details-{{id}}" class="collapse in details-block">
             <div class="row">
               <div class="col-md-12">
                 <div class="row">
                 {{#with player_infos.[0]}}
-                  
+
                     <div class="col-md-12">
-                      
+
                       {{>player_info_result _created=@index}}
-                      
+
                     </div>
-                    
+
                 {{else}}
-                  
+
                     <div class="col-md-12">
                       <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
                         <h4>No player info</h4>
                       </div>
-                    </div>                    
-                  
+                    </div>
+
                 {{/with}}
-                {{#with pro_infos.[0]}}                    
+                {{#with pro_infos.[0]}}
                     <div class="col-md-12">
                       {{>pro_info_result _created=@index}}
-                    </div>                                                          
+                    </div>
                 {{else}}
-                  
+
                     <div class="col-md-12">
                       <div id="pro-info-{{../id}}-" >
-                        <h4>No pro info </h4>                        
+                        <h4>No pro info </h4>
                       </div>
-                    </div>                    
-                  
+                    </div>
+
                 {{/with}}
-                                    
+
                 </div>
               </div>
 
@@ -82,40 +82,38 @@
 
               <div class="col-md-6" id="addresses-{{id}}-" data-sub-list="addresses">
                 {{#each addresses}}
-                  
+
                     {{>address_result _created=@index}}
 
                 {{/each}}
 
                 <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-" data-preprocessor="address_edit_form">
-                  {{#unless addresses}}<h4>No addresses</h4>{{/unless}}                
+                  {{#unless addresses}}<h4>No addresses</h4>{{/unless}}
                 </div>
 
               </div>
               <div class="col-md-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
                 {{#each player_contacts}}
-                  
+
                   {{>player_contact_result _created=@index}}
 
                 {{/each}}
 
                 <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-" data-preprocessor="player_contact_edit_form">
-                  {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}                
+                  {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}
                 </div>
 
               </div>
             </div>
-          </div>  
+          </div>
         </div>
       </div>
     {{/each}}
-      
+
     </div>
   {{else}}
       <h2>No Results</h2>
   {{/if}}
-  
-  
+
+
 </script>
-  
-  
