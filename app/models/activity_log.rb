@@ -1,10 +1,10 @@
 class ActivityLog < ActiveRecord::Base
 
-
+puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AL Loading"
   include DynamicModelHandler
   include AdminHandler
   include SelectorCache
-
+puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!AL Included"
   before_validation :prevent_item_type_change,  on: :update
   validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
@@ -170,8 +170,26 @@ class ActivityLog < ActiveRecord::Base
     Master.has_many self.model_association_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.full_implementation_class_name, &association_block
     # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
     # since there is no link to advanced search
+    add_parent_item_association
+
   end
 
+
+  def add_parent_item_association
+    # Generate the set of activity log associations, for this item type
+    # Ensure the master is set on the activity log when building through the association block
+    # build method being called
+    puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
+    #    has_many :activity_logs, as: :item, inverse_of: :item ????
+    implementation_class.parent_class.has_many self.model_association_name.to_sym, class_name: self.full_implementation_class_name do
+      def build att=nil
+        att[:master] = proxy_association.owner.master
+        super(att)
+      end
+    end
+
+
+  end
 
   # set up a route for each available activity log definition
   def self.routes_load
@@ -270,7 +288,7 @@ class ActivityLog < ActiveRecord::Base
   # Ensure that other dynamic implementations have been loaded before we attempt to create
   # activity logs that rely on them
   def self.preload
-    DynamicModel.define_models    
+    DynamicModel.define_models
     ExternalIdentifier.define_models
   end
 
@@ -448,5 +466,7 @@ class ActivityLog < ActiveRecord::Base
 
 end
 
+puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Requiring tracker"
 # Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
+puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Define Models"
 ::ActivityLog.define_models

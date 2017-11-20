@@ -5,6 +5,10 @@ module SpecSetup
     puts 'setup database'
     seed_database
 
+    ActivityLog.enable_active_configurations
+
+    ::ActivityLog::PlayerContactPhone
+
     puts 'create data set'
     create_data_set
 
