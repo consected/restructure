@@ -1,3 +1,4 @@
+require File.expand_path('../../../lib/logger/do_nothing_logger', __FILE__)
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -47,7 +48,6 @@ Rails.application.configure do
     config.log_level = :info
   else
     puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
-    require Rails.root.join('lib/logger/do_nothing_logger')
     config.logger = DoNothingLogger.new
   end
 
