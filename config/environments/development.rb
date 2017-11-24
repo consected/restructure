@@ -1,4 +1,4 @@
-require File.expand_path('../../initializers/logging_disabler', __FILE__)
+require Rails.root.join('lib/logger/do_nothing_logger')
 
 Rails.application.configure do
 
