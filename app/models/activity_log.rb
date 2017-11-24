@@ -67,12 +67,14 @@ class ActivityLog < ActiveRecord::Base
     return nil unless al_cn
 
     # attempt to get the activity log implementation class based on class name
-    al_cn = al_cn.camelize
+    # al_cn = al_cn.camelize
     begin
-      fcn = "ActivityLog::#{al_cn}"
-      implementation_class = fcn.constantize
+      # Make sure we get this through checking the model names to avoid security weakness of using model attribute directly
+      fc_model_name = self.model_names.select {|c| c == al_cn.to_sym}.first
+      fc = ::ActivityLog.const_get(fc_model_name.to_s.camelize)
+      implementation_class = fc
     rescue => e
-      logger.warn "Failed to get #{fcn} => \n#{e.backtrace[0..10].join("\n")}"
+      logger.warn "Failed to get constant #{al_cn} => \n#{e.backtrace[0..10].join("\n")}"
     end
     raise "Failed to get #{al_cn} " unless implementation_class
     return implementation_class

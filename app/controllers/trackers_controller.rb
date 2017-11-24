@@ -73,8 +73,13 @@ class TrackersController < ApplicationController
       return true if params[:record_type].blank? || params[:record_id].blank?
       item_class_name = params[:record_type].singularize.camelize
 
+      # Find the matching UserBase subclass that has this name, avoiding using the supplied param
+      # in a way that could be risky by allowing code injection
+      ic = UserBase.subclasses.select {|s| s.name == item_class_name}.first
+
       # look up the item using the item_id parameter.
-      @item  = item_class_name.constantize.find(params[:record_id])
+      rid = params[:record_id].to_i
+      @item  = ic.find(rid)
 
       if @item
         obj.item_id = @item.id

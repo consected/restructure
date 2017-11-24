@@ -2,27 +2,27 @@
 <% rt = @report.result_tables_by_index || []%>
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list" class="<%= @count_only ? 'count-only' : '' %>">
-    <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below"></div>  
-      
-    <p class="text-center"><%= link_to "link to report", report_path(id: @report.id, search_attrs: params[:search_attrs].merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>      
+    <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below"></div>
+
+    <p class="text-center"><%= link_to "link to report", report_path(id: @report.id, search_attrs: params[:search_attrs].merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>
     <%= render partial: 'filter_on'  if @report.filtering_on %>
     <% if current_admin && @report.clean_sql%>
     <p class="text-center"><a href="#clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
-    <div class="row">          
+    <div class="row">
         <div class="col-md-20 col-md-offset-2 collapse" id="clean-sql">
-          <pre><%=@report.clean_sql.html_safe%>
+          <pre><%=@report.clean_sql%>
           </pre>
         </div>
     </div>
     <% end %>
-      
+
     <div class="row" style="background-color: #eee;">
       <div class="col-sm-22 col-sm-offset-1 ">
-      
+
         <h3 class="text-right hidden"><span class="result-count"><%=@results.count%></span> <%=@results.count == 1 ? 'row' : 'rows'%></h3>
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
-    </div>           
+    </div>
     <div  id="report-results-block" class="<%= @count_only ? 'hidden' : '' %>">
         <table class="" style="margin:1em;">
           <thead>
@@ -43,7 +43,7 @@
 
 
               <tr class="" id="report-item-<%=list_item[0]%>">
-               <% if @editable %>   
+               <% if @editable %>
                <td><%= report_edit_btn list_item[0]%> </td>
                <% end %>
                 <% i = 0 %>
@@ -58,7 +58,7 @@
           </tbody>
         </table>
     </div>
-      
-    
+
+
   </div>
 </div>

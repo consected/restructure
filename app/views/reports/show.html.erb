@@ -1,7 +1,7 @@
 <%= render partial: 'masters/search_results_template' %>
 <%= render partial: 'masters/modal_pi_search_results_template' %>
-<% 
-@report_page = true 
+<%
+@report_page = true
 %>
 
 <script id="edit-report-result" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -18,8 +18,10 @@
     <div class="col-sm-22 col-sm-offset-1">
       <div class="well">
         <%= link_to "report library", reports_path, class: 'btn btn-info pull-right'%><h1><%=@report.name%></h1>
-        <p><%= (@report.description || '').gsub("\n", "<br />").html_safe %></p>
-        <p>&nbsp;</p>      
+        <%= @report.description.split("\n").each do |l| %>
+        <p><%= l %></p>
+        <% end %>
+        <p>&nbsp;</p>
           <%= render partial: 'criteria' %>
         </div>
     </div>

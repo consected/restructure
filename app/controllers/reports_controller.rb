@@ -57,7 +57,7 @@ class ReportsController < ApplicationController
         respond_to do |format|
           format.html {
             if params[:part] == 'results'
-              render text: "Generated SQL invalid.\n#{@report.clean_sql}\n#{e.to_s}", status: 400
+              render plain: "Generated SQL invalid.\n#{@report.clean_sql}\n#{e.to_s}", status: 400
             else
               render :show
             end

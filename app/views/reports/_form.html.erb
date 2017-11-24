@@ -1,4 +1,6 @@
 <div class="report-criteria container-fluid">
-  <p><%= @report.description.gsub("\n", "<br />").html_safe %></p>
+  <%= @report.description.split("\n").each do |l| %>
+  <p><%= l %></p>
+  <% end %>
   <%= render partial: 'criteria' %>
 </div>

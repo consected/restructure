@@ -18,7 +18,9 @@
   <div class="import-rules" data-import-rule-type="master_id">
     <p class="field-names"></p>
     <p>The <i>master_id</i> field must be entered, unless an alternative column such as msid or another external ID (like Scantron) is used instead.</p>
-    <p>The template CSV file includes columns for <i>msid</i>, <%= Master.external_id_matching_fields.map{|f| "<i>#{f}</i>"}.join(', ').html_safe %></p>
+    <p>The template CSV file includes columns for <i>msid</i>, <%= Master.external_id_matching_fields.each do |f| %>
+       <i><%= f %></i>
+     <% end %></p>
     <p>Any one of these fields can be used to uniquely identify a master record, rather than entering the <i>master_id</i>. If unused, any of these columns (including <i>master_id</i>) may be removed from the CSV file to avoid confusion.</p>
   </div>
   <div class="import-rules indented" data-import-rule-type="secondary_key">
@@ -29,7 +31,12 @@
   </div>
   <div class="import-rules" data-import-rule-type="protocol_id">
     <p class="field-names"></p>
-    <p>The protocol_id can be one of the following numbers:</p><p><%= Protocol.enabled.map{|p| "<b>#{p.id}</b>&nbsp;-&nbsp;#{p.name}" }.sort.join("; ").html_safe %></p>
+    <p>The protocol_id can be one of the following numbers:</p>
+    <p>
+      <%= Protocol.enabled.order(:id).each do |p| %> 
+      <b><%=p.id%></b>&nbsp;-&nbsp;<%=p.name%>
+      <% end %>
+    </p>
     <p>Only the number must be entered.</p>
   </div>
 
