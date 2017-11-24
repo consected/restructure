@@ -43,11 +43,12 @@ Rails.application.configure do
 
 
   if ENV['FPHS_USE_LOGGER']=='TRUE'
-    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!"
+    puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger disabled !!!!!!!!!!!!!!!!!!!!!!"
     config.log_level = :info
   else
-    puts "!!!!!!!!!!!!!!!!!!!!!! DonNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
+    puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
+    require Rails.root.join('lib/logger/do_nothing_logger')
     config.logger = DoNothingLogger.new
   end
-  
+
 end

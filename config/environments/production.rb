@@ -76,6 +76,7 @@ Rails.application.configure do
     config.log_level = :info
   else
     puts "!!!!!!!!!!!!!!!!!!!!!! DoNothingLogger enabled !!!!!!!!!!!!!!!!!!!!!!"
+    require Rails.root.join('lib/logger/do_nothing_logger')
     config.logger = DoNothingLogger.new
   end
 

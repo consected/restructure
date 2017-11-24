@@ -595,6 +595,38 @@ CREATE FUNCTION log_accuracy_score_update() RETURNS trigger
 
 
 --
+-- Name: log_activity_log_player_contact_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_activity_log_player_contact_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_player_contact_history
+                  (
+                      master_id,
+                      player_contact_id,
+                      
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_player_contact_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.player_contact_id,
+                      
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_activity_log_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -959,6 +991,36 @@ CREATE FUNCTION log_item_flag_update() RETURNS trigger
 
 
 --
+-- Name: log_not_ready_test_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_not_ready_test_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO not_ready_test_history
+                  (
+                      master_id,
+                      test_test7_id,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      not_ready_test_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.test_test7_id,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_player_contact_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1291,6 +1353,36 @@ CREATE FUNCTION log_sub_process_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_test_external_test7_identifier_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_test_external_test7_identifier_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                INSERT INTO test_external_test7_identifier_history
+                (
+                    master_id,
+                    test_test7_id,
+                    user_id,
+                    created_at,
+                    updated_at,
+                    test_external_test7_identifier_table_id
+                    )
+                SELECT
+                    NEW.master_id,
+                    NEW.test_test7_id,
+                    NEW.user_id,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
 
 
 --
@@ -1808,6 +1900,40 @@ ALTER SEQUENCE activity_log_player_contact_emails_id_seq OWNED BY activity_log_p
 
 
 --
+-- Name: activity_log_player_contact_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE activity_log_player_contact_history (
+    id integer NOT NULL,
+    master_id integer,
+    player_contact_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_player_contact_id integer
+);
+
+
+--
+-- Name: activity_log_player_contact_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE activity_log_player_contact_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_contact_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE activity_log_player_contact_history_id_seq OWNED BY activity_log_player_contact_history.id;
+
+
+--
 -- Name: activity_log_player_contact_phones; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -1849,6 +1975,39 @@ CREATE SEQUENCE activity_log_player_contact_phones_id_seq
 --
 
 ALTER SEQUENCE activity_log_player_contact_phones_id_seq OWNED BY activity_log_player_contact_phones.id;
+
+
+--
+-- Name: activity_log_player_contacts; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE activity_log_player_contacts (
+    id integer NOT NULL,
+    master_id integer,
+    player_contact_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_player_contacts_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE activity_log_player_contacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_contacts_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE activity_log_player_contacts_id_seq OWNED BY activity_log_player_contacts.id;
 
 
 --
@@ -2768,6 +2927,73 @@ CREATE SEQUENCE msid_seq
 
 
 --
+-- Name: not_ready_test_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE not_ready_test_history (
+    id integer NOT NULL,
+    master_id integer,
+    test_test7_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    not_ready_test_table_id integer
+);
+
+
+--
+-- Name: not_ready_test_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE not_ready_test_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: not_ready_test_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE not_ready_test_history_id_seq OWNED BY not_ready_test_history.id;
+
+
+--
+-- Name: not_ready_tests; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE not_ready_tests (
+    id integer NOT NULL,
+    master_id integer,
+    test_test7_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: not_ready_tests_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE not_ready_tests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: not_ready_tests_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE not_ready_tests_id_seq OWNED BY not_ready_tests.id;
+
+
+--
 -- Name: player_contact_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -3643,6 +3869,73 @@ ALTER SEQUENCE sub_processes_id_seq OWNED BY sub_processes.id;
 
 
 --
+-- Name: test_external_test7_identifier_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_external_test7_identifier_history (
+    id integer NOT NULL,
+    master_id integer,
+    test_test7_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_external_test7_identifier_table_id integer
+);
+
+
+--
+-- Name: test_external_test7_identifier_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE test_external_test7_identifier_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_external_test7_identifier_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE test_external_test7_identifier_history_id_seq OWNED BY test_external_test7_identifier_history.id;
+
+
+--
+-- Name: test_external_test7_identifiers; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE test_external_test7_identifiers (
+    id integer NOT NULL,
+    master_id integer,
+    test_test7_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_external_test7_identifiers_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE test_external_test7_identifiers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_external_test7_identifiers_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE test_external_test7_identifiers_id_seq OWNED BY test_external_test7_identifiers.id;
+
+
+--
 -- Name: test_item_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -3980,7 +4273,21 @@ ALTER TABLE ONLY activity_log_player_contact_emails ALTER COLUMN id SET DEFAULT 
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY activity_log_player_contact_history ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY activity_log_player_contact_phones ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_phones_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contacts ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contacts_id_seq'::regclass);
 
 
 --
@@ -4128,6 +4435,20 @@ ALTER TABLE ONLY manage_users ALTER COLUMN id SET DEFAULT nextval('manage_users_
 --
 
 ALTER TABLE ONLY masters ALTER COLUMN id SET DEFAULT nextval('masters_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY not_ready_test_history ALTER COLUMN id SET DEFAULT nextval('not_ready_test_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY not_ready_tests ALTER COLUMN id SET DEFAULT nextval('not_ready_tests_id_seq'::regclass);
 
 
 --
@@ -4288,6 +4609,20 @@ ALTER TABLE ONLY sub_processes ALTER COLUMN id SET DEFAULT nextval('sub_processe
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY test_external_test7_identifier_history ALTER COLUMN id SET DEFAULT nextval('test_external_test7_identifier_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_external_test7_identifiers ALTER COLUMN id SET DEFAULT nextval('test_external_test7_identifiers_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY test_item_history ALTER COLUMN id SET DEFAULT nextval('test_item_history_id_seq'::regclass);
 
 
@@ -4373,11 +4708,27 @@ ALTER TABLE ONLY activity_log_player_contact_emails
 
 
 --
+-- Name: activity_log_player_contact_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY activity_log_player_contact_history
+    ADD CONSTRAINT activity_log_player_contact_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_player_contact_phones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY activity_log_player_contact_phones
     ADD CONSTRAINT activity_log_player_contact_phones_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_player_contacts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY activity_log_player_contacts
+    ADD CONSTRAINT activity_log_player_contacts_pkey PRIMARY KEY (id);
 
 
 --
@@ -4546,6 +4897,22 @@ ALTER TABLE ONLY manage_users
 
 ALTER TABLE ONLY masters
     ADD CONSTRAINT masters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: not_ready_test_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY not_ready_test_history
+    ADD CONSTRAINT not_ready_test_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: not_ready_tests_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY not_ready_tests
+    ADD CONSTRAINT not_ready_tests_pkey PRIMARY KEY (id);
 
 
 --
@@ -4725,6 +5092,22 @@ ALTER TABLE ONLY sub_processes
 
 
 --
+-- Name: test_external_test7_identifier_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_external_test7_identifier_history
+    ADD CONSTRAINT test_external_test7_identifier_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_external_test7_identifiers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY test_external_test7_identifiers
+    ADD CONSTRAINT test_external_test7_identifiers_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: test_item_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4838,6 +5221,34 @@ CREATE INDEX index_activity_log_player_contact_emails_on_user_id ON activity_log
 
 
 --
+-- Name: index_activity_log_player_contact_history_on_activity_log_playe; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_history_on_activity_log_playe ON activity_log_player_contact_history USING btree (activity_log_player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_history_on_master_id ON activity_log_player_contact_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_contact_history_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_history_on_player_contact_id ON activity_log_player_contact_history USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_history_on_user_id ON activity_log_player_contact_history USING btree (user_id);
+
+
+--
 -- Name: index_activity_log_player_contact_phones_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4863,6 +5274,27 @@ CREATE INDEX index_activity_log_player_contact_phones_on_protocol_id ON activity
 --
 
 CREATE INDEX index_activity_log_player_contact_phones_on_user_id ON activity_log_player_contact_phones USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_player_contacts_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contacts_on_master_id ON activity_log_player_contacts USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_contacts_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contacts_on_player_contact_id ON activity_log_player_contacts USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contacts_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contacts_on_user_id ON activity_log_player_contacts USING btree (user_id);
 
 
 --
@@ -5045,6 +5477,41 @@ CREATE INDEX index_masters_on_proid ON masters USING btree (pro_id);
 --
 
 CREATE INDEX index_masters_on_user_id ON masters USING btree (user_id);
+
+
+--
+-- Name: index_not_ready_test_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_not_ready_test_history_on_master_id ON not_ready_test_history USING btree (master_id);
+
+
+--
+-- Name: index_not_ready_test_history_on_not_ready_test_table_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_not_ready_test_history_on_not_ready_test_table_id ON not_ready_test_history USING btree (not_ready_test_table_id);
+
+
+--
+-- Name: index_not_ready_test_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_not_ready_test_history_on_user_id ON not_ready_test_history USING btree (user_id);
+
+
+--
+-- Name: index_not_ready_tests_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_not_ready_tests_on_master_id ON not_ready_tests USING btree (master_id);
+
+
+--
+-- Name: index_not_ready_tests_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_not_ready_tests_on_user_id ON not_ready_tests USING btree (user_id);
 
 
 --
@@ -5335,6 +5802,41 @@ CREATE INDEX index_sub_processes_on_protocol_id ON sub_processes USING btree (pr
 
 
 --
+-- Name: index_test_external_test7_identifier_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_external_test7_identifier_history_on_master_id ON test_external_test7_identifier_history USING btree (master_id);
+
+
+--
+-- Name: index_test_external_test7_identifier_history_on_test_external_t; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_external_test7_identifier_history_on_test_external_t ON test_external_test7_identifier_history USING btree (test_external_test7_identifier_table_id);
+
+
+--
+-- Name: index_test_external_test7_identifier_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_external_test7_identifier_history_on_user_id ON test_external_test7_identifier_history USING btree (user_id);
+
+
+--
+-- Name: index_test_external_test7_identifiers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_external_test7_identifiers_on_master_id ON test_external_test7_identifiers USING btree (master_id);
+
+
+--
+-- Name: index_test_external_test7_identifiers_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_test_external_test7_identifiers_on_user_id ON test_external_test7_identifiers USING btree (user_id);
+
+
+--
 -- Name: index_test_item_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -5552,6 +6054,20 @@ CREATE TRIGGER activity_log_history_update AFTER UPDATE ON activity_logs FOR EAC
 
 
 --
+-- Name: activity_log_player_contact_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_history_insert AFTER INSERT ON activity_log_player_contacts FOR EACH ROW EXECUTE PROCEDURE log_activity_log_player_contact_update();
+
+
+--
+-- Name: activity_log_player_contact_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_history_update AFTER UPDATE ON activity_log_player_contacts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_player_contact_update();
+
+
+--
 -- Name: address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -5675,6 +6191,20 @@ CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON item_flag_names FOR
 --
 
 CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_item_flag_name_update();
+
+
+--
+-- Name: not_ready_test_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER not_ready_test_history_insert AFTER INSERT ON not_ready_tests FOR EACH ROW EXECUTE PROCEDURE log_not_ready_test_update();
+
+
+--
+-- Name: not_ready_test_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER not_ready_test_history_update AFTER UPDATE ON not_ready_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_not_ready_test_update();
 
 
 --
@@ -5832,6 +6362,20 @@ CREATE TRIGGER sub_process_history_update AFTER UPDATE ON sub_processes FOR EACH
 
 
 --
+-- Name: test_external_test7_identifier_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_external_test7_identifier_history_insert AFTER INSERT ON test_external_test7_identifiers FOR EACH ROW EXECUTE PROCEDURE log_test_external_test7_identifier_update();
+
+
+--
+-- Name: test_external_test7_identifier_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_external_test7_identifier_history_update AFTER UPDATE ON test_external_test7_identifiers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_test_external_test7_identifier_update();
+
+
+--
 -- Name: tracker_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -5900,6 +6444,38 @@ CREATE TRIGGER user_history_update AFTER UPDATE ON users FOR EACH ROW WHEN ((old
 
 ALTER TABLE ONLY accuracy_score_history
     ADD CONSTRAINT fk_accuracy_score_history_accuracy_scores FOREIGN KEY (accuracy_score_id) REFERENCES accuracy_scores(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_history_activity_log_player_cont; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_history
+    ADD CONSTRAINT fk_activity_log_player_contact_history_activity_log_player_cont FOREIGN KEY (activity_log_player_contact_id) REFERENCES activity_log_player_contacts(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_history
+    ADD CONSTRAINT fk_activity_log_player_contact_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_history_player_contact_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_history
+    ADD CONSTRAINT fk_activity_log_player_contact_history_player_contact_id FOREIGN KEY (player_contact_id) REFERENCES player_contacts(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_history
+    ADD CONSTRAINT fk_activity_log_player_contact_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -5980,6 +6556,30 @@ ALTER TABLE ONLY item_flag_history
 
 ALTER TABLE ONLY item_flag_name_history
     ADD CONSTRAINT fk_item_flag_name_history_item_flag_names FOREIGN KEY (item_flag_name_id) REFERENCES item_flag_names(id);
+
+
+--
+-- Name: fk_not_ready_test_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY not_ready_test_history
+    ADD CONSTRAINT fk_not_ready_test_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_not_ready_test_history_not_ready_tests; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY not_ready_test_history
+    ADD CONSTRAINT fk_not_ready_test_history_not_ready_tests FOREIGN KEY (not_ready_test_table_id) REFERENCES not_ready_tests(id);
+
+
+--
+-- Name: fk_not_ready_test_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY not_ready_test_history
+    ADD CONSTRAINT fk_not_ready_test_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -6095,6 +6695,30 @@ ALTER TABLE ONLY scantrons
 
 
 --
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_external_test7_identifiers
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contacts
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY not_ready_tests
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_1fc7475261; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6139,6 +6763,30 @@ ALTER TABLE ONLY trackers
 --
 
 ALTER TABLE ONLY scantrons
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_external_test7_identifiers
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contacts
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY not_ready_tests
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
@@ -6220,6 +6868,14 @@ ALTER TABLE ONLY external_identifiers
 
 ALTER TABLE ONLY player_contacts
     ADD CONSTRAINT fk_rails_72b1afe72f FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contacts
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (player_contact_id) REFERENCES player_contacts(id);
 
 
 --
@@ -6444,6 +7100,30 @@ ALTER TABLE ONLY scantron_history
 
 ALTER TABLE ONLY sub_process_history
     ADD CONSTRAINT fk_sub_process_history_sub_processes FOREIGN KEY (sub_process_id) REFERENCES sub_processes(id);
+
+
+--
+-- Name: fk_test_external_test7_identifier_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_external_test7_identifier_history
+    ADD CONSTRAINT fk_test_external_test7_identifier_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_test_external_test7_identifier_history_test_external_test7_i; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_external_test7_identifier_history
+    ADD CONSTRAINT fk_test_external_test7_identifier_history_test_external_test7_i FOREIGN KEY (test_external_test7_identifier_table_id) REFERENCES test_external_test7_identifiers(id);
+
+
+--
+-- Name: fk_test_external_test7_identifier_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY test_external_test7_identifier_history
+    ADD CONSTRAINT fk_test_external_test7_identifier_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
