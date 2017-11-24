@@ -39,26 +39,29 @@ _fpa = {
 
   },
 
-  send_ajax_request(url, options){
+  send_ajax_request: function(url, options){
 
-    if(!options) options = {};
-    options['url'] = url;
+    if(!options)
+      options = {};
+
+    options.url = url;
 
     $.rails.ajax(options).done(function(data, status, xhr){
       var el = $('.temp-ajax-requester');
-      if(el.length === 0){
+      if(el.length === 0) {
         el = $('a.temp-ajax-requester');
-        if(el.length == 0){
+
+        if(el.length === 0) {
           el = $('<a data-remote="true" class="hidden temp-ajax-requester">background</a>');
           $('body').append(el);
         }
       }
 
-      var tac = options['try_app_callback'];
+      var tac = options.try_app_callback;
       if(tac)
         el[0].app_callback = tac;
 
-      tac = options['try_app_post_callback'];
+      tac = options.try_app_post_callback;
       if(tac)
         el[0].app_post_callback = tac;
 
@@ -163,13 +166,13 @@ _fpa = {
         _fpa.do_postprocessors(template_name, new_block, data);
         _fpa.reset_page_size();
         _fpa.ajax_done(block);
-    },1);
+    }, 1);
   },
 
 
   // For certain layouts with clever fixed positioning requirements, allow the
   // page dimensions to be set after major changes to the page
-  reset_page_size:function(){
+  reset_page_size: function(){
 
   },
 
@@ -185,22 +188,22 @@ _fpa = {
   // In order to better gain feedback into the actual iteractions performed by users, send back some additional
   // data in a hidden input (for a form) or additional URL parameters (for links)
   add_tracking_params: function(submitter){
-      var id = submitter.prop('id');
-        if(submitter.find('input').length > 0){
-            if(submitter.find('input[name="_user_action"]').length === 0)
-                submitter.append('<input type="hidden" name="_user_action" value="form:'+id+'"/>');
-        }else{
-            var p = submitter.prop('href');
-            if(id)
-                var msg = 'link_id:'+id;
-            else
-                var msg = 'link_class:'+submitter.attr('class');
-            if(p.indexOf('?')>0)
-                p = p+'&_user_action='+ encodeURIComponent(msg);
-            else
-                p = p+'?_user_action='+encodeURIComponent(msg);
-            submitter.prop('href', p);
-        }
+      // var id = submitter.prop('id');
+      //   if(submitter.find('input').length > 0){
+      //       if(submitter.find('input[name="_user_action"]').length === 0)
+      //           submitter.append('<input type="hidden" name="_user_action" value="form:'+id+'"/>');
+      //   }else{
+      //       var p = submitter.prop('href');
+      //       if(id)
+      //           var msg = 'link_id:'+id;
+      //       else
+      //           var msg = 'link_class:'+submitter.attr('class');
+      //       if(p.indexOf('?')>0)
+      //           p = p+'&_user_action='+ encodeURIComponent(msg);
+      //       else
+      //           p = p+'?_user_action='+encodeURIComponent(msg);
+      //       submitter.prop('href', p);
+      //   }
   },
 
   // Sometimes we need a preprocessor or postprocessor to be able to define a callback that will be called on the next successful
@@ -349,7 +352,7 @@ _fpa = {
             // keyed by "activity_log__player_contact_phone"
             // The block markup (the form) can use data-use-alt-result-key="activity_log__player_contact_phone_blank_log" to force
             // the use data into the key the template is expecting
-            var alt_data_key = block.attr('data-use-alt-result-key')
+            var alt_data_key = block.attr('data-use-alt-result-key');
 
             if(data.multiple_results && data.original_item) {
                 item_key = data.multiple_results;
@@ -601,22 +604,25 @@ _fpa = {
 
             var j = xhr.responseJSON;
             if(xhr.status === 422){
-                if(j){
+                if(j) {
                     var msg = "<p>Could not complete action:</p>";
                     msg += format_message(j);
-                }else{
+                }
+                else {
                     var msg = "<p>Could not complete action. Please <a href=\"#\" onclick=\"window.location.reload(); return false;\">refresh the page</a> and try again.</p>";
                 }
 
                 _fpa.flash_notice(msg, 'warning');
-            }else{
-
-                if(j){
+            }
+            else {
+                if(j) {
                     msg = format_message(j);
                     _fpa.flash_notice(msg, 'danger');
-                }else if(xhr.responseText && xhr.responseText[0] != '<'){
+                }
+                else if(xhr.responseText && xhr.responseText[0] != '<') {
                     _fpa.flash_notice(xhr.responseText, 'danger');
-                }else{
+                }
+                else {
                     _fpa.flash_notice("An error occurred.", 'danger');
                 }
             }
@@ -641,6 +647,8 @@ _fpa = {
         _fpa.remote_request = null;
     }
   },
+
+
 
   // Display Rails style flash notices in response to Ajax events (or any other Javascript that wishes to use this mechanism)
   flash_notice: function(msg, type){

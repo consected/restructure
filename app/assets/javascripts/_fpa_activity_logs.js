@@ -1,7 +1,7 @@
 _fpa.activity_logs = {
 
   // when the sub list parent item (e.g. a phone number) is selected style appropriately
-  selected_parent: (block, attrs) => {
+  selected_parent: function (block, attrs) {
     var items = document.querySelectorAll('.activity-log-sub-list .sub-list-item .list-group');
     for(var item, i = 0; item = items[i]; i++){
       var el = item.parentNode;
@@ -24,11 +24,11 @@ _fpa.activity_logs = {
     $('.activity-log-list .new-block.has-records').addClass('hidden');
 
   },
-  unselect_all: (block, master_id) => {
+  unselect_all: function (block, master_id) {
     _fpa.activity_logs.selected_parent(block, { master_id: master_id })
   },
 
-  show_main_block: (block, data) => {
+  show_main_block: function(block, data) {
 
   //  if(block.not('.collapsing') && block.not('.in')) block.collapse('show');
 
@@ -38,7 +38,7 @@ _fpa.activity_logs = {
 
   },
 
-  show_log_block: (block, data) => {
+  show_log_block: function(block, data) {
     _fpa.form_utils.format_block(block);
     var d = data;
     var d0;

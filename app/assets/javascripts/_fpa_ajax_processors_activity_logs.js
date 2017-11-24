@@ -1,4 +1,4 @@
-_fpa.activity_logs.generate_postprocessors = (item_type_name) => {
+_fpa.activity_logs.generate_postprocessors = function (item_type_name)  {
 
   _fpa.postprocessors_activity_logs = {};
 
