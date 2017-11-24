@@ -1,4 +1,4 @@
-require File.expand_path('../../../lib/logger/do_nothing_logger', __FILE__)
+require File.expand_path('../../../lib/logger/do_nothing_logger.rb', __FILE__)
 Rails.application.configure do
 
 
