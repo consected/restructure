@@ -8,7 +8,7 @@ module AdminActivityLogSupport
 
     [
       {
-        name: "test_log",
+        name: "activity_log_player_contact_emails",
         item_type: 'player_contact',
         rec_type: 'email',
         action_when_attribute: 'emailed_when',
@@ -75,7 +75,7 @@ module AdminActivityLogSupport
     tn << att[:rec_type] if att[:rec_type]
     tn = tn.join('_').pluralize
     unless ActivityLog.connection.table_exists? "activity_log_#{tn}"
-      TableGenerators.activity_logs_table(tn, true, 'emailed_when')
+      TableGenerators.activity_logs_table(tn, att[:item_type].pluralize, true, 'emailed_when')
     end
     @activity_log = ActivityLog.create! att
   end

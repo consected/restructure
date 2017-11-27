@@ -165,7 +165,7 @@ class ActivityLog < ActiveRecord::Base
 
 
   def add_master_association &association_block
-
+    return if disabled
     # Add the association
     logger.debug "Associated master: has_many #{self.model_association_name} with class_name: #{self.full_implementation_class_name}"
     Master.has_many self.model_association_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.full_implementation_class_name, &association_block
@@ -385,15 +385,15 @@ class ActivityLog < ActiveRecord::Base
         m_name = model_class_name
 
         klass = ::ActivityLog
-        if implementation_class_defined?(klass)
-          begin
-            # This may fail if an underlying dependent class (parent class) has been redefined by
-            # another dynamic implementation, such as external identifier
-            klass.send(:remove_const, model_class_name)
-          rescue => e
-            logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
-          end
+
+        begin
+          # This may fail if an underlying dependent class (parent class) has been redefined by
+          # another dynamic implementation, such as external identifier
+          klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass, fail_without_exception: true)
+        rescue => e
+          logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
         end
+
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include TrackerHandler
@@ -402,14 +402,12 @@ class ActivityLog < ActiveRecord::Base
 
         c_name = full_implementation_controller_name
 
-        if implementation_class_defined?(klass)
-          begin
-            # This may fail if an underlying dependent class (parent class) has been redefined by
-            # another dynamic implementation, such as external identifier
-            klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
-          rescue => e
-            logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
-          end
+        begin
+          # This may fail if an underlying dependent class (parent class) has been redefined by
+          # another dynamic implementation, such as external identifier
+          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+        rescue => e
+          logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
         end
 
         res2 = klass.const_set(c_name, a_new_controller)
@@ -437,7 +435,7 @@ class ActivityLog < ActiveRecord::Base
       val = view_attribute_list || []
       unless ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
-          db/table_generators/generate.sh activity_logs_table #{table_name} create #{val.join(' ')}
+          db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{val.join(' ')}
         Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
         "
         errors.add :name, err

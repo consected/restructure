@@ -50,7 +50,7 @@ module DynamicModelHandler
           # Force the admin for cases that this is run outside of the admin console
           # It is expected that this is mostly when originally seeding the database
           dm.current_admin ||= dm.admin
-          
+
           dm.update_tracker_events
         end
       rescue =>e
@@ -71,7 +71,7 @@ module DynamicModelHandler
       # before attempting to use it. Otherwise Rake tasks fail.
       if ActiveRecord::Base.connection.table_exists? self.table_name
         self.active.each do |dm|
-          dm.add_master_association
+          dm.add_master_association if dm.ready?
         end
       else
         puts "Table doesn't exist yet: #{self.table_name}"
@@ -92,7 +92,7 @@ module DynamicModelHandler
     return false
   end
 
-  def implementation_class_defined? parent_class=Module
+  def implementation_class_defined? parent_class=Module, opt={}
       return false unless full_implementation_class_name
       # Check that the class is defined
       klass = parent_class.const_get(full_implementation_class_name)
@@ -106,7 +106,11 @@ module DynamicModelHandler
         klass.new
       rescue Exception => e
         err  = "Failed to instantiate the class #{full_implementation_class_name} in parent #{parent_class}: #{e}"
-        raise FphsException.new err
+        if opt[:fail_without_exception]
+          return false
+        else
+          raise FphsException.new err
+        end
       end
 
     rescue NameError

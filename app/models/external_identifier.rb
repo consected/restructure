@@ -23,6 +23,9 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
 
+  def table_name
+    name
+  end
 
   def implementation_model_name
     name.ns_underscore.singularize
@@ -245,7 +248,7 @@ class ExternalIdentifier < ActiveRecord::Base
       # Can't enable the configuration until the table exists
       unless self.disabled
         raise FphsException.new("name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created. Run:
-        ruby -e \"require './db/table_generators/external_identifiers_table.rb'; TableGenerators.external_identifiers_table('#{name}', '#{external_id_attribute}')\"
+        db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}
         to generate the SQL for this table.
          ")
       end
