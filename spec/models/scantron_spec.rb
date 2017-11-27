@@ -1,6 +1,10 @@
 require 'rails_helper'
 
-RSpec.describe Scantron, type: :model do
+RSpec.configure {|c| c.before {
+  SeedSupport.setup
+  }}
+
+RSpec.describe 'Scantron', type: :model do
 
   include ModelSupport
   include ScantronSupport
@@ -11,7 +15,7 @@ RSpec.describe Scantron, type: :model do
       seed_database
       create_user
       create_master
-      
+
     end
 
     it "allows multiple Scantron records to be created, with just a scantron ID" do

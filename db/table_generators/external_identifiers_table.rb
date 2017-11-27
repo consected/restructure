@@ -18,20 +18,18 @@ module TableGenerators
       return
     end
 
-    unless generate_table == :drop || attrib.end_with?('_id')
+    unless generate_table == :drop || generate_table == :drop_do || attrib.end_with?('_id')
       puts "The identifier field must end with '_id'"
       return
     end
 
-    if generate_table == :drop
+    if generate_table == :drop || generate_table == :drop_do
       sql = <<EOF
 
-      BEGIN;
-      DROP TABLE #{singular_name}_history CASCADE;
-      DROP TABLE #{name} CASCADE;
-      DROP FUNCTION log_#{singular_name}_update();
+      DROP TABLE if exists #{singular_name}_history CASCADE;
+      DROP TABLE if exists #{name} CASCADE;
+      DROP FUNCTION if exists log_#{singular_name}_update();
 
-      COMMIT;
 EOF
 
     else
@@ -40,8 +38,6 @@ EOF
       @implementation_attr_name = attrib
 
       sql = <<EOF
-
-      BEGIN;
 
       CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
           LANGUAGE plpgsql
@@ -139,15 +135,18 @@ EOF
       ALTER TABLE ONLY #{singular_name}_history
           ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_table_id) REFERENCES #{name}(id);
 
-
-      COMMIT;
 EOF
     end
 
-    if generate_table == true
-      ActiveRecord::Base.connection.execute sql
+    if generate_table == true || generate_table == :drop_do
+        ActiveRecord::Base.connection.execute sql
     else
+      sql = "
+      BEGIN;
+#{sql}
+      COMMIT;"
       puts sql
+      return sql
     end
   end
 

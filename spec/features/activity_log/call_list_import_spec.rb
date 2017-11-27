@@ -15,7 +15,7 @@ describe "Import list of calls to log", driver: :app_firefox_driver do
   include ActivityLogMain
 
   before :all do
-    setup_database
+    setup_database    
     user_logs_in
   end
 

@@ -73,6 +73,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     have_css '#advanced_search_master.ajax-running'
     expect(page).to have_css "#master_results_block", text: ''
     has_css? "#search_count .search_count"
+    sleep 1
     expect(page).to have_css "#search_count .search_count", text: /[0-9]+/
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
 

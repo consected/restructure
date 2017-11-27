@@ -56,9 +56,9 @@ module TableGenerators
     if generate_table == :drop || generate_table == :drop_do
       sql = <<EOF
 
-      DROP TABLE #{singular_name}_history CASCADE;
-      DROP TABLE #{name} CASCADE;
-      DROP FUNCTION log_#{singular_name}_update();
+      DROP TABLE if exists #{singular_name}_history CASCADE;
+      DROP TABLE if exists #{name} CASCADE;
+      DROP FUNCTION if exists log_#{singular_name}_update();
 
 
 EOF
@@ -69,8 +69,10 @@ EOF
 
       attrib_pair = {}
       attrib.each do |a|
-        f = '<field-type>'
+        f = 'varchar'
+        f = 'integer' if a.end_with?('_id')
         f = 'date' if a.end_with?('_when')
+        f = 'date' if a.end_with?('_date')
         f = 'varchar' if a == 'data'
         f = 'varchar' if a.end_with?('_name')
         f = 'varchar' if a == 'notes'
