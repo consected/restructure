@@ -105,10 +105,11 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
       fill_in 'Data', with: phone
       click_button 'Create Player contact'
     end
-
+    sleep 1
+    have_css ".tracker-block.collapse.in"
+    
     pc_rec = @master.player_contacts.where(data: phone).first
 
-    have_css ".tracker-block.collapse.in"
 
     protocol = Protocol.active.where(name: 'Updates').first
 

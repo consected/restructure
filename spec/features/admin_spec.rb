@@ -6,7 +6,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
   before(:all) do
     @good_email = "testuser#{rand(1000000000)}admin@testing.com"
-    
+
     @admin = Admin.create email: @good_email
     @good_password = @admin.new_password
     ENV['FPHS_ADMIN_SETUP']='yes'
@@ -30,13 +30,13 @@ describe "admin sign in process", driver: :app_firefox_driver do
   end
 
   it "should sign in" do
- 
+
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
     expect(admin.id).to equal @admin.id
-    
+
     #login_as @user, scope: :user
-    
+
     visit "/admins/sign_in"
     within '#new_admin' do
       fill_in "Email", with: @good_email
@@ -47,15 +47,15 @@ describe "admin sign in process", driver: :app_firefox_driver do
     expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
 
   end
-  
+
   it "should prevent invalid sign in" do
-    
+
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
     expect(admin.id).to equal @admin.id
-    
+
     #login_as @user, scope: :user
-    
+
     visit "/admins/sign_in"
     within '#new_admin' do
       fill_in "Email", with: @good_email
@@ -64,7 +64,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     end
 
     expect(page).to have_css "input:invalid"
-    
+
     visit "/admins/sign_in"
     within '#new_admin' do
       fill_in "Email", with: @good_email
@@ -85,7 +85,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     expect(page).to have_css ".flash .alert", text: fail_message
 
-    
+
     visit "/admins/sign_in"
     within '#new_admin' do
       fill_in "Email", with: @good_email
@@ -96,10 +96,10 @@ describe "admin sign in process", driver: :app_firefox_driver do
     expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
 
   end
-  
+
   it "should prevent sign in if admin disabled" do
-    
-    
+
+
 
     visit "/admins/sign_in"
     within '#new_admin' do
@@ -107,12 +107,12 @@ describe "admin sign in process", driver: :app_firefox_driver do
       fill_in "Password", with: @d_pw
       click_button "Log in"
     end
-    
+
     expect(page).to have_css ".flash .alert", text: "× This account has been disabled."
 
   end
-  
-  
+
+
   after(:all) do
     #@admin.destroy!
   end

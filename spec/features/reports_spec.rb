@@ -10,7 +10,7 @@ describe "reports", js: true, driver: :app_firefox_driver do
     @admin, _ = create_admin
 
     seed_database
-    
+
     create_data_set
 
     @user, @good_password  = create_user
@@ -67,7 +67,7 @@ describe "reports", js: true, driver: :app_firefox_driver do
   end
 
   it "allows user to view a list of available reports" do
-    
+
     get_list
   end
 
@@ -91,33 +91,36 @@ describe "reports", js: true, driver: :app_firefox_driver do
       ifn_id = all('th.tablesorter-header')[0]
 
       ifn_id.click
+      sleep 0.5
       expect(ifn_id['class']).to include 'tablesorter-headerAsc'
-      
+
       table = find('table.tablesorter')
       vals = get_column_values 'id', table, 'item_flags'
       vals.map! {|e| e.to_i}
       expect(vals).to eq vals.sort
 
-      ifn_id.click      
+      ifn_id.click
+      sleep 0.5
       expect(ifn_id['class']).to include 'tablesorter-headerDesc'
-      
+
       vals = get_column_values 'id', table, 'item_flags'
       vals.map! {|e| e.to_i}
       expect(vals).to eq vals.sort.reverse
 
-
+      sleep 0.5
       # sort the item_type column
       itc = all('th.tablesorter-header')[9]
 
       itc.click
-      
+      sleep 0.5
+
       expect(itc['class']).to include 'tablesorter-headerAsc'
 
       vals = get_column_values 'item_type', table, 'item_flag_names'
       expect(vals).to eq vals.sort
 
       itc.click
-      
+      sleep 0.5
       expect(itc['class']).to include 'tablesorter-headerDesc'
 
       vals = get_column_values 'item_type', table, 'item_flag_names'

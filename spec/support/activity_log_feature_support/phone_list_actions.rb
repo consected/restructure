@@ -39,13 +39,17 @@ module PhoneListActions
   end
 
   def select_phone_to_call
+    # allow build server to catch up
+    sleep 1
+    finish_form_formatting
+    sleep 1
+    finish_form_formatting
     within phone_item(0) do
       find(PhoneItemNumberCss).click
     end
     finish_form_formatting
 
     expect(page).to have_css(SelectedPhoneItemCss)
-
     within phone_item(0) do
       expect(page).to have_css(LogPhoneCallButtonCss)
       click_link 'add log'

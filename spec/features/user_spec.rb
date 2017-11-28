@@ -1,12 +1,12 @@
 require 'rails_helper'
 
 describe "user sign in process", js: true, driver: :app_firefox_driver do
-  
+
   include ModelSupport
-  
+
   before(:all) do
-    
-     
+
+
 
 
     #create a user, then disable it
@@ -26,13 +26,13 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
   end
 
   it "should sign in" do
-    
+
     user = User.where(email: @good_email).first
     expect(user).to be_a User
     expect(user.id).to equal @user.id
-    
+
     #login_as @user, scope: :user
-    
+
     visit "/users/sign_in"
     within '#new_user' do
       fill_in "Email", with: @good_email
@@ -41,11 +41,11 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     end
 
     expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
- 
+
   end
-  
+
   it "should prevent sign in if user disabled" do
-    
+
 
     visit "/users/sign_in"
     within '#new_user' do
@@ -59,13 +59,13 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
   end
 
   it "should prevent invalid sign in" do
-    
+
     user = User.where(email: @good_email).first
     expect(user).to be_a User
     expect(user.id).to equal @user.id
-    
+
     #login_as @user, scope: :user
-    
+
     visit "/admins/sign_in"
     within '#new_admin' do
       fill_in "Email", with: @good_email
@@ -76,7 +76,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     fail_message = "× Invalid Email or password."
 
     expect(page).to have_css "input:invalid"
-    
+
     visit "/admins/sign_in"
     within '#new_admin' do
       fill_in "Email", with: @good_email
@@ -96,10 +96,9 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     expect(page).to have_css ".flash .alert", text: fail_message
 
   end
-    
-  
+
+
   after(:all) do
-    
+
   end
 end
-

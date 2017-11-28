@@ -15,6 +15,7 @@ module BrowserHelper
     ENV['LANG']='en_US.UTF-8'
 
     unless ENV['NOT_HEADLESS']=='true'
+      puts "To disable headless mode, run rspec with environment variable `NOT_HEADLESS=true rspec`"
       ENV['DISPLAY']=':99'
       if `pgrep Xvfb`.blank?
         puts "Running new Xvfb headless X server"
