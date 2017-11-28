@@ -76,7 +76,7 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
 
       get :index, {master_id: item.master_id, item_id: @player_contact.id}
 
-      expect(assigns(:activity_log__player_contact_phones)).to eq([item])
+      expect(assigns(:activity_log__player_contact_phones).map(&:id)).to include(item.id)
     end
   end
 
