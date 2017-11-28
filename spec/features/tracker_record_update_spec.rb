@@ -92,7 +92,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
 
 
     # Now jump into the record result
-    h = open_player_element items.first, items
+    open_player_element items.first, items
 
 
     # add a player contact phone record
@@ -107,7 +107,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     end
     sleep 1
     have_css ".tracker-block.collapse.in"
-    
+
     pc_rec = @master.player_contacts.where(data: phone).first
 
 
