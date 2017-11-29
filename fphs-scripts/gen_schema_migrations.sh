@@ -3,38 +3,60 @@
 # Create a local copy of the instance's schema, clean and empty
 # Also get the list of schema migrations that the database believes it has seen completed
 
+# Requires that the user on the remote server has .pgpass created for the OS user to access the
+# appropriate DB user
+
+
 # Make sure we are running in the fphs-scripts directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
 
 
 # get sudo setup to avoid unnecessary logins later
-echo Enter your sudo password
+echo Enter your sudo password to allow us access to the local database postgres user
 sudo pwd
 clear
 
-echo Select which environment to generate
-echo '1 (pandora.catalyst)'
-echo '2 (nfl-09 Stage)'
-echo '3 (nfl-10 Production)'
-echo '4 (fphs-webapp-dev01)'
-echo '5 (fphs-webapp-prod01)'
+if [ -z "$1" ]
+then
 
-read OPT
+  echo Select which environment to generate
+  echo '1 (pandora.catalyst)'
+  echo '2 (vagrant-fphs-webapp-box)'
+  echo '3 (not used)'
+  echo '4 (fphs-webapp-dev01)'
+  echo '5 (fphs-webapp-prod01)'
 
-if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' && $OPT != '4' && $OPT != '5' ]] 
+  read OPT
+
+else
+  OPT=$1
+
+fi
+
+if [ -z "$2" ]
+then
+  echo 'Enter your server username (openmed, vagrant or ecommons)'
+  read ext_user
+else
+  ext_user=$2
+fi
+
+
+
+if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' && $OPT != '4' && $OPT != '5' ]]
 then
     echo Only 1, 2, 3, 4 or 5 are valid
     exit
 fi
 
-if [ $OPT == '1' ] 
+export BECOME_USER=''
+
+if [ $OPT == '1' ]
 then
 #### if local shared dev #####
 export EXTNAME=pandora.catalyst
-echo Enter your openmed username
-read openmed_user
-export EXTUSER=$openmed_user
+export EXTUSER=$ext_user
 export SCHEMA=public
 export EXTDB=fphs
 export EXTDBHOST=localhost
@@ -47,36 +69,33 @@ export SEND_TO_DB=y
 ##############################
 fi
 
-if [ $OPT == '2' ] 
+if [ $OPT == '2' ]
 then
-#### if partners stage #####
-export EXTNAME=nfl-15.dipr.partners.org
-echo Enter your partners username
-read partners_user
-export EXTUSER=$partners_user
+#### if local vagrant test #####
+export EXTNAME=vagrant-fphs-webapp-box
+export EXTUSER=$ext_user
+export BECOME_USER=postgres
 export SCHEMA=ml_app
-export EXTDB=q1
-export EXTDBHOST=nfl-09.dipr
-export EXTDBUSER=$partners_user
-export EXPORTSVR=nfl-03.dipr
-export EXPORTLOC=/FPHS/stage/sql
-export EXTROLE=FPHSUSR
-export EXTADMROLE=FPHSADM
-export SEND_TO_DB=n
+export EXTDB=fphs
+export EXTDBHOST=localhost
+export EXTDBUSER=postgres
+export EXPORTSVR=$EXTNAME
+export EXPORTLOC=/tmp
+export EXTROLE=fphs
+export EXTADMROLE=fphs
+export SEND_TO_DB=y
 ###############################
 fi
 
-if [ $OPT == '3' ] 
+if [ $OPT == '3' ]
 then
 #### if partners production #####
 export EXTNAME=nfl-16.dipr.partners.org
-echo Enter your partners username
-read partners_user
-export EXTUSER=$partners_user
+export EXTUSER=$ext_user
 export SCHEMA=ml_app
 export EXTDB=q1
 export EXTDBHOST=nfl-10.dipr
-export EXTDBUSER=$partners_user
+export EXTDBUSER=$ext_user
 export EXPORTSVR=nfl-03.dipr
 export EXPORTLOC=/FPHS/stage/sql
 export EXTROLE=FPHSUSR
@@ -86,17 +105,15 @@ export SEND_TO_DB=n
 fi
 
 
-if [ $OPT == '4' ] 
+if [ $OPT == '4' ]
 then
 #### if HMS IT dev #####
 export EXTNAME=fphs-crm-dev01
-echo Enter your ecommons username
-read ecommons_user
-export EXTUSER=$ecommons_user
+export EXTUSER=$ext_user
 export SCHEMA=ml_app
 export EXTDB=fphs
 export EXTDBHOST=fphs-db-dev01
-export EXTDBUSER=$ecommons_user
+export EXTDBUSER=$ext_user
 export EXPORTSVR=fphs-crm-dev01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
@@ -105,17 +122,15 @@ export SEND_TO_DB=n
 ###############################
 fi
 
-if [ $OPT == '5' ] 
+if [ $OPT == '5' ]
 then
 #### if HMS IT production #####
 export EXTNAME=fphs-crm-prod01
-echo Enter your ecommons username
-read ecommons_user
-export EXTUSER=$ecommons_user
+export EXTUSER=$ext_user
 export SCHEMA=ml_app
 export EXTDB=fphs
 export EXTDBHOST=fphs-db-prod01
-export EXTDBUSER=$ecommons_user
+export EXTDBUSER=$ext_user
 export EXPORTSVR=fphs-crm-prod01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
@@ -130,15 +145,25 @@ export DBUSER=fphs
 export DBUSERPW=fphs
 export VER=`cat $DEVDIR/version.txt`
 
+if [ -z "$BECOME_USER" ]
+then
+  export BECOME_USER_CMD=""
+else
+  export BECOME_USER_CMD="sudo -u $BECOME_USER -i"
+fi
+
 echo Storing results to development directory: $DEVDIR
 
 echo Prepare dump of current schema from the remote server $EXTNAME
 ssh -T $EXTUSER@$EXTNAME <<EOF
+$BECOME_USER_CMD
 cd /tmp
 mkdir -p migrate-$EXTNAME
 cd migrate-$EXTNAME
 pg_dump -O -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER --clean --create --schema-only --schema=$SCHEMA -T $SCHEMA.jd_tmp  -x > "db-schema.sql"
 pg_dump -O -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER --data-only --schema=$SCHEMA --table=$SCHEMA.schema_migrations -x > "db-schema-migrations.sql"
+chmod 777 .
+chmod 755 *
 echo Done dumping files to `pwd`
 exit
 EOF
@@ -159,7 +184,7 @@ echo `wc -l migration-list.txt` files available as Rails migrations
 echo Pull the db-schema files back locally using rsync
 rsync $EXTUSER@$EXTNAME:/tmp/migrate-$EXTNAME/db-schema* .
 
-echo Create the local database 
+echo Create the local database
 CURRDIR=`pwd`
 #avoid scary cd warnings
 cd /tmp
@@ -221,7 +246,7 @@ FPHS_POSTGRESQL_SCHEMA=$SCHEMA \
 FPHS_RAILS_SECRET_KEY_BASE=A1111111111111111111111 \
 FPHS_RAILS_DEVISE_SECRET_KEY=B2222222222222222222222 \
 RAILS_ENV=production \
-rake db:migrate:with_sql 
+bundle exec rake db:migrate:to_sql
 
 
 
@@ -229,18 +254,26 @@ rake db:migrate:with_sql
 echo "Generated the migration file for $EXTNAME : $UPGRADE_FILE"
 
 echo Push results to $EXPORTSVR:$EXPORTLOC/migrate-$EXTNAME/
-rsync $UPGRADE_FILE $EXTUSER@$EXPORTSVR:$EXPORTLOC/migrate-$EXTNAME/upgrade-$VER.sql
+export REMOTE_UPGRADE_FILE_PATH=$EXPORTLOC/migrate-$EXTNAME/upgrade-$VER.sql
+rsync $UPGRADE_FILE $EXTUSER@$EXPORTSVR:$REMOTE_UPGRADE_FILE_PATH
 
 
 if [ "$SEND_TO_DB" == 'y' ]
 then
-###### Send the schema_migrations list back to 
+###### Send the schema_migrations list back to
 
 ###### Now go to the remote machine and run the updates
 
 ssh -T  $EXTUSER@$EXTNAME <<EOF
+chmod 777 $EXPORTLOC/migrate-$EXTNAME/upgrade-$VER.sql
+$BECOME_USER_CMD
 cd $EXPORTLOC/migrate-$EXTNAME/
-psql -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER < $UPGRADE_FILE
+if [ "$EXTDBUSER"="$BECOME_USER" ]
+then
+  psql -d $EXTDB < $REMOTE_UPGRADE_FILE_PATH
+else
+  psql -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER < $REMOTE_UPGRADE_FILE_PATH
+fi
 exit
 EOF
 

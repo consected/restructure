@@ -54,8 +54,8 @@ module DynamicModelHandler
           dm.update_tracker_events
         end
       rescue =>e
-        Rails.logger.warn "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}\n#{e.backtrace.join("\n")}"
-        puts "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        Rails.logger.warn "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
+        puts "Failed to generate models. Hopefully this is only during a migration. #{e.inspect}"
       end
 
     end
