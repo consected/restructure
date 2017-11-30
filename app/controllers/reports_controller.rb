@@ -6,7 +6,6 @@ class ReportsController < ApplicationController
   before_action :set_report, only: [:show]
   before_action :set_editable_instance_from_id, only: [:edit, :update]
   after_action :clear_results, only: [:show, :run]
-  after_action :do_log_action
 
   helper_method :filters, :filters_on, :index_path, :permitted_params
   ResultsLimit = Master.results_limit
@@ -212,16 +211,6 @@ class ReportsController < ApplicationController
 
     def index_path p
       reports_path p
-    end
-
-    def do_log_action
-      len = (@results ? @results.count : 0)
-      extras = {}
-
-      extras[:master_id] = nil
-      extras[:msid] = nil
-
-      # log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
     end
 
 

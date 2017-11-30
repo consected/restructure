@@ -115,11 +115,9 @@ module MasterSearch
 
         m[:count] = {count: original_length,  show_count: @masters.length}
 
-        log_action "master search", search_type, @masters.length
       else
         # Return no results
         m = {message: "no conditions were specified", masters: [], count: {count: 0, show_count: 0} }
-        log_action "master search", search_type, 0, "no conditions specified"
       end
     rescue => e
       logger.error "Error in MastersController#index: #{e.inspect}\n#{e.backtrace.join("\n")}"

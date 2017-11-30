@@ -14,11 +14,11 @@
 <% end %>
 
 <div class="report-criteria container-fluid">
-    <div class="row">
+  <div class="row">
     <div class="col-sm-22 col-sm-offset-1">
       <div class="well">
         <%= link_to "report library", reports_path, class: 'btn btn-info pull-right'%><h1><%=@report.name%></h1>
-        <%= @report.description.split("\n").each do |l| %>
+        <% (@report.description || "").split("\n").each do |l| %>
         <p><%= l %></p>
         <% end %>
         <p>&nbsp;</p>

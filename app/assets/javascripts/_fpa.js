@@ -185,27 +185,6 @@ _fpa = {
   },
 
 
-  // In order to better gain feedback into the actual iteractions performed by users, send back some additional
-  // data in a hidden input (for a form) or additional URL parameters (for links)
-  add_tracking_params: function(submitter){
-      // var id = submitter.prop('id');
-      //   if(submitter.find('input').length > 0){
-      //       if(submitter.find('input[name="_user_action"]').length === 0)
-      //           submitter.append('<input type="hidden" name="_user_action" value="form:'+id+'"/>');
-      //   }else{
-      //       var p = submitter.prop('href');
-      //       if(id)
-      //           var msg = 'link_id:'+id;
-      //       else
-      //           var msg = 'link_class:'+submitter.attr('class');
-      //       if(p.indexOf('?')>0)
-      //           p = p+'&_user_action='+ encodeURIComponent(msg);
-      //       else
-      //           p = p+'?_user_action='+encodeURIComponent(msg);
-      //       submitter.prop('href', p);
-      //   }
-  },
-
   // Sometimes we need a preprocessor or postprocessor to be able to define a callback that will be called on the next successful
   // AJAX response. This function attempts to call that callback if it has been set, and then clears it after use.
   try_app_callback: function(el){
@@ -305,8 +284,6 @@ _fpa = {
 
         });
 
-        // Add some parameters to the request to allow us to understand user interactions better
-        _fpa.add_tracking_params($(this));
         return true;
     }).on('ajax:beforeSend', sel, function(ev, xhr){
         // Save the current AJAX request so that we have the opportunity to cancel it before it completes

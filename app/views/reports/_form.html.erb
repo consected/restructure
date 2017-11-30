@@ -1,5 +1,5 @@
 <div class="report-criteria container-fluid">
-  <%= @report.description.split("\n").each do |l| %>
+  <% (@report.description || "").split("\n").each do |l| %>
   <p><%= l %></p>
   <% end %>
   <%= render partial: 'criteria' %>

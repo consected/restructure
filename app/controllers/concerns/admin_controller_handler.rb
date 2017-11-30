@@ -7,7 +7,6 @@ module AdminControllerHandler
     before_action :authenticate_admin!
     before_action :set_instance_from_id, only: [:edit, :update, :destroy]
 
-    after_action :do_log_action
 
     helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :objects_instance, :human_name
   end
@@ -117,17 +116,6 @@ module AdminControllerHandler
       end
     end
 
-    def log_action action, sub, results, status="OK", extras={}
-      extras[:master_id] ||= nil
-      extras[:msid] ||= nil
-      current_admin.log_action action, sub, results, request.method_symbol, params, status, extras
-    end
-
-
-    def do_log_action
-      len = (@master_objects ? @master_objects.length : 0)
-      log_action "#{controller_name}##{action_name}", "AUTO", len
-    end
 
     def primary_model
       controller_name.classify.constantize

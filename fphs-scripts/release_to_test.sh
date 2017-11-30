@@ -14,8 +14,6 @@ cd ..
 mv fphs "fphs-backup-`date --rfc-3339=seconds`"
 mv $FPHS_VERSION fphs
 cd fphs
-mkdir -p /var/opt/passenger/action_logs
 ln -s /var/opt/passenger/logs ./log
-ln -s /var/opt/passenger/action_logs ./action_logs
 mkdir tmp
 touch tmp/restart.txt

@@ -10,8 +10,6 @@ module MasterHandler
     before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
     before_action :set_instance_from_id, only: [:show]
 
-    after_action :do_log_action
-
     helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id
   end
 
@@ -214,19 +212,6 @@ module MasterHandler
         end
       end
 
-
-      def do_log_action
-        len = (@master_objects ? @master_objects.length : 0)
-        extras = {}
-        if @master
-          extras[:master_id] = @master.id
-          extras[:msid] = @master.msid
-        else
-          extras[:master_id] = nil
-          extras[:msid] = nil
-        end
-        log_action "#{controller_name}##{action_name}", "AUTO", len, "OK", extras
-      end
 
       # return the class for the current item
       # handles namespace if the item is like an ActivityLog:Something

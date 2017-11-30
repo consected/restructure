@@ -1,6 +1,5 @@
 class User < ActiveRecord::Base
 
-  include ActionLogging
   include AdminHandler
   include StandardAuthentication
 
