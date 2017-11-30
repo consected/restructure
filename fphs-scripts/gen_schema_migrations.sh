@@ -22,8 +22,8 @@ then
 
   echo Select which environment to generate
   echo '1 (pandora.catalyst)'
-  echo '2 (vagrant-fphs-webapp-box)'
-  echo '3 (not used)'
+  echo '2 (vagrant-fphs-webapp-box - update vagrant test box from host)'
+  echo '3 (test DBs fphs against fpa_development within vagrant dev box guest)'
   echo '4 (fphs-webapp-dev01)'
   echo '5 (fphs-webapp-prod01)'
 
@@ -90,17 +90,18 @@ fi
 if [ $OPT == '3' ]
 then
 #### if partners production #####
-export EXTNAME=nfl-16.dipr.partners.org
+export EXTNAME=localhost
 export EXTUSER=$ext_user
+export BECOME_USER=postgres
 export SCHEMA=ml_app
-export EXTDB=q1
-export EXTDBHOST=nfl-10.dipr
-export EXTDBUSER=$ext_user
-export EXPORTSVR=nfl-03.dipr
-export EXPORTLOC=/FPHS/stage/sql
-export EXTROLE=FPHSUSR
-export EXTADMROLE=FPHSADM
-export SEND_TO_DB=n
+export EXTDB=fphs
+export EXTDBHOST=localhost
+export EXTDBUSER=postgres
+export EXPORTSVR=$EXTNAME
+export EXPORTLOC=/tmp
+export EXTROLE=fphs
+export EXTADMROLE=fphs
+export SEND_TO_DB=y
 ###############################
 fi
 
@@ -148,9 +149,12 @@ export VER=`cat $DEVDIR/version.txt`
 if [ -z "$BECOME_USER" ]
 then
   export BECOME_USER_CMD=""
+  export EXTDBCONN="-h $EXTDBHOST -U $EXTDBUSER"
 else
   export BECOME_USER_CMD="sudo -u $BECOME_USER -i"
+  export EXTDBCONN=''
 fi
+
 
 echo Storing results to development directory: $DEVDIR
 
@@ -160,8 +164,8 @@ $BECOME_USER_CMD
 cd /tmp
 mkdir -p migrate-$EXTNAME
 cd migrate-$EXTNAME
-pg_dump -O -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER --clean --create --schema-only --schema=$SCHEMA -T $SCHEMA.jd_tmp  -x > "db-schema.sql"
-pg_dump -O -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER --data-only --schema=$SCHEMA --table=$SCHEMA.schema_migrations -x > "db-schema-migrations.sql"
+pg_dump -O -d $EXTDB $EXTDBCONN --clean --create --schema-only --schema=$SCHEMA -T $SCHEMA.jd_tmp  -x > "db-schema.sql"
+pg_dump -O -d $EXTDB $EXTDBCONN --data-only --schema=$SCHEMA --table=$SCHEMA.schema_migrations -x > "db-schema-migrations.sql"
 chmod 777 .
 chmod 755 *
 echo Done dumping files to `pwd`
@@ -253,7 +257,7 @@ bundle exec rake db:migrate:to_sql
 
 echo "Generated the migration file for $EXTNAME : $UPGRADE_FILE"
 
-echo Push results to $EXPORTSVR:$EXPORTLOC/migrate-$EXTNAME/
+echo Pushing results to $EXPORTSVR:$EXPORTLOC/migrate-$EXTNAME/
 export REMOTE_UPGRADE_FILE_PATH=$EXPORTLOC/migrate-$EXTNAME/upgrade-$VER.sql
 rsync $UPGRADE_FILE $EXTUSER@$EXPORTSVR:$REMOTE_UPGRADE_FILE_PATH
 
@@ -268,14 +272,11 @@ ssh -T  $EXTUSER@$EXTNAME <<EOF
 chmod 777 $EXPORTLOC/migrate-$EXTNAME/upgrade-$VER.sql
 $BECOME_USER_CMD
 cd $EXPORTLOC/migrate-$EXTNAME/
-if [ "$EXTDBUSER"="$BECOME_USER" ]
-then
-  psql -d $EXTDB < $REMOTE_UPGRADE_FILE_PATH
-else
-  psql -d $EXTDB -h $EXTDBHOST -U $EXTDBUSER < $REMOTE_UPGRADE_FILE_PATH
-fi
+psql -d $EXTDB $EXTDBCONN < $REMOTE_UPGRADE_FILE_PATH
 exit
 EOF
-
+echo ===============
+echo Pushed results to $EXPORTSVR:$EXPORTLOC/migrate-$EXTNAME/
+echo ===============
 touch 'complete'
 fi
