@@ -78,10 +78,11 @@ module ActivityLogHandler
     def view_blank_log_attribute_list
       al = admin_activity_log
       if al.blank_log_field_list.blank?
-        self.view_attribute_list.clone
+        res = self.view_attribute_list.clone
       else
-        admin_activity_log.view_blank_log_attribute_list.map(&:to_sym)
+        res = admin_activity_log.view_blank_log_attribute_list.map(&:to_s) + ['tracker_history_id']
       end
+      res.map(&:to_sym)
     end
 
     # The user relevant data attributes in the parent class
