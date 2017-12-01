@@ -5,15 +5,8 @@ Handlebars.registerHelper('format_sage_id', function(text) {
 
 Handlebars.registerHelper('pattern_mask', function(pattern, text) {
   var h = $('<span class="dynamic-span-mask">'+text+'</span>');
-  console.log('-------' + h.html());
   var m = _fpa.masker.mask_from_pattern(pattern);
-
   h.mask(m.mask, {translation: m.translation, reverse: m.reverse});
   var d = h.html();
-  console.log('-------' + pattern);
-  console.log('-------' + m.mask);
-  console.log('-------' + text);
-  console.log('-------' + d);
-  console.log(m);
   return new Handlebars.SafeString(d);
 });

@@ -6,6 +6,7 @@
         <li class="list-group-item">
           <%= inline_cancel_button %>
           <h4 class="list-group-item-heading"><%= primary_model.prevent_edit? ? "Assign" : "Edit" %> <%= primary_model.label %></h4>
+          <%= render partial: 'common_templates/item_flags_block', locals: {f: f} unless item_flags_array.length == 0 %>
         </li>
         <% unless primary_model.prevent_edit? %>
         <li class="list-group-item player-info-first_name">

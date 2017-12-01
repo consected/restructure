@@ -112,6 +112,9 @@
               {{> activity_log_<%=name%>_show_button_partial }}
             <% end %>
           <% end %>
+          <% if ItemFlagName.enabled_for?(item_class_name) && !item_flags_after %>
+          {{>item_flag_container item_type="<%=full_name%>"}}
+          <% end %>
         </li>
         <%end%>
       <%else%>

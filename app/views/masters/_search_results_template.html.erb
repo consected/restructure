@@ -52,7 +52,7 @@
       formatter = e.external_id_view_formatter
       pattern = e.external_id_edit_pattern
       if formatter.blank? && !pattern.blank?
-        formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"';        
+        formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"';
       end
 
 %>
