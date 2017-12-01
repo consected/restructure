@@ -48,12 +48,19 @@
 <% # Add in all the external ID handlers (Scantron, Sage, etc)
     external_id_types = ExternalIdentifier.active.map(&:implementation_class)
     external_id_types.each do |e|
+
+      formatter = e.external_id_view_formatter
+      pattern = e.external_id_edit_pattern
+      if formatter.blank? && !pattern.blank?
+        formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"';        
+      end
+
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: e.name.underscore,
     prevent_edit: e.prevent_edit?,
     prevent_create: e.prevent_create?,
-    item_list: [label: e.label, formatter: e.external_id_view_formatter, attribute: e.external_id_attribute.to_s] ,
+    item_list: [label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s],
     data_sort: [:desc, "data-item-id"]
   } %>
 <% end %>

@@ -266,8 +266,10 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def config_uniqueness
-    errors.add :name, "must be unique" if !self.disabled && self.class.active.where(name: self.name.downcase).length > 0
-    errors.add :external_id_attribute, "must be unique" if !self.disabled && self.class.active.where(external_id_attribute: self.external_id_attribute.downcase).length > 0
+    res =  self.class.active.where(name: self.name.downcase).where.not(id: self.id)
+    errors.add :name, "must be unique" if !self.disabled && res.length > 0
+    res = self.class.active.where(external_id_attribute: self.external_id_attribute.downcase).where.not(id: self.id)
+    errors.add :external_id_attribute, "must be unique" if !self.disabled && res.length > 0
   end
 
   def check_implementation_class

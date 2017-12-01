@@ -8,7 +8,7 @@ _fpa.preprocessors = {
 
         _fpa.form_utils.date_inputs_to_iso(block);
 
-
+        _fpa.form_utils.unmask_inputs(block);
     },
 
     default: function(block, data, has_preprocessor){

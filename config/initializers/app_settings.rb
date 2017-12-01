@@ -5,7 +5,7 @@ class Settings
   CareerYearsRange = 0..50
 
   PositiveIntPattern = '\\d+'.freeze
-
+  AgePattern = '\\d{1,3}'.freeze
   YearFieldPattern = '\\d{4,4}'.freeze
 
 

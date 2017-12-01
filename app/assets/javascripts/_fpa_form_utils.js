@@ -62,7 +62,13 @@ _fpa.form_utils = {
 
     },
 
+    unmask_inputs: function(block){
 
+      var inputs = block.find("input[data-unmask='number'].is-masked");
+      inputs.each(function(){
+        $(this).unmask();
+      }).removeClass('is-masked');
+    },
 
     date_inputs_to_iso: function(block){
 
@@ -411,6 +417,25 @@ _fpa.form_utils = {
             _fpa.form_utils.clear_content($(a));
         }).addClass('attached-datatoggle-cc');
 
+        block.find('[pattern]').not('.attached-datatoggle-pattern, .is-masked').each(function(){
+            var p = $(this).attr('pattern');
+            var t = $(this).attr('type');
+            var d = $(this).attr('data-mask');
+            var m;
+            if((!d || d === '') && (p && p !== '') ){
+              if(t != 'text') {
+                $(this).attr('type', 'text');
+                $(this).attr('data-unmask', t);
+              }
+              m = _fpa.masker.mask_from_pattern(p);
+
+            }
+
+
+            $(this).attr('data-mask', m.mask);
+            $(this).mask(m.mask, {translation: m.translation, reverse: m.reverse});
+            $(this).addClass('is-masked');
+        }).addClass('attached-datatoggle-pattern');
     },
 
     setup_datepickers: function(block){
