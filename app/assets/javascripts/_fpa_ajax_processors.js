@@ -18,9 +18,7 @@ _fpa.preprocessors = {
 
 _fpa.postprocessors = {
     default: function(block, data, has_postprocessor){
-
-        _fpa.form_utils.setup_datepickers($('form'));
-        _fpa.form_utils.mask_inputs($('form'));
+        _fpa.processor_handlers.form_setup($('form'));
 
         $('#master_results_block').addClass('search-status-done');
 
@@ -273,18 +271,24 @@ _fpa.postprocessors = {
             var e = '';
             if(status) e = status;
             $('#master_results_block').addClass('search-status-error');
-            _fpa.form_utils.setup_datepickers(block);
+            _fpa.processor_handlers.form_setup(block);
+
         }
     }
 };
 
 _fpa.processor_handlers = {
+    form_setup: function(block) {
+      _fpa.form_utils.setup_datepickers(block);
+      _fpa.form_utils.mask_inputs(block);
+    },
+
     label_changes: function(block){
 
-            block.find('.address-state_name small').each(function(){ $(this).html('state'); });
-            block.find('.address-country_name small').each(function(){ $(this).html('country'); });
-            block.find('.address-source_name small').each(function(){ $(this).html('source'); });
-            block.find('.player-info-source_name small').each(function(){ $(this).html('source'); });
+      block.find('.address-state_name small').each(function(){ $(this).html('state'); });
+      block.find('.address-country_name small').each(function(){ $(this).html('country'); });
+      block.find('.address-source_name small').each(function(){ $(this).html('source'); });
+      block.find('.player-info-source_name small').each(function(){ $(this).html('source'); });
 
 
     }

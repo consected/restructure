@@ -435,12 +435,11 @@ _fpa.form_utils = {
             }
             m = _fpa.masker.mask_from_pattern(p);
 
+            $(this).attr('data-mask', m.mask);
+            $(this).mask(m.mask, {translation: m.translation, reverse: m.reverse});
+            $(this).addClass('is-masked');
           }
 
-
-          $(this).attr('data-mask', m.mask);
-          $(this).mask(m.mask, {translation: m.translation, reverse: m.reverse});
-          $(this).addClass('is-masked');
       }).addClass('attached-datatoggle-pattern');
 
 

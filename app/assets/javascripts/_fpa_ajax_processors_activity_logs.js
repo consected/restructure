@@ -1,6 +1,5 @@
+_fpa.postprocessors_activity_logs = {};
 _fpa.activity_logs.generate_postprocessors = function (item_type_name)  {
-
-  _fpa.postprocessors_activity_logs = {};
 
   var item_type_name_plural = '';
   var l = item_type_name.length;
@@ -19,6 +18,26 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name)  {
     },
     _fpa.postprocessors_activity_logs['activity_log__' + item_type_name + '_blank_log_result_template'] = function(block, data){
       _fpa.activity_logs.show_log_block(block, data);
+    },
+
+    _fpa.postprocessors_activity_logs['open_activity_log__' + item_type_name] = function(link, block, href){
+      var master_id = link.attr('data-master-id');
+      _fpa.send_ajax_request('/masters/'+master_id+'/activity_log/'+item_type_name_plural, {
+          try_app_callback: function(){
+            if($(href).length === 0) {
+              var n = item_type_name.replace('_', '-');
+              href = href.replace(n, n + '-blank-log');
+            }
+
+            // handling the success of the ajax call, but since we are relying on a subscription to get fired that this has no control over,
+            // just put in a delay to allow the templates time to render.
+            // this will probably be sufficient in most cases.
+            window.setTimeout(function(){
+              var target_block = _fpa.utils.jump_to_linked_item(href);
+              _fpa.activity_logs.unselect_all(target_block, master_id)
+            }, 1000)
+          }
+      });
     }
 
   $.extend(_fpa.postprocessors, _fpa.postprocessors_activity_logs);

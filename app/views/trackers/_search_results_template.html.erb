@@ -11,7 +11,7 @@
       <td class="tracker-{{@key}}" {{#is @key 'event_name'}}data-event-id="{{../protocol_event_id}}"{{/is}}>
       <div class="cell-holder">{{pretty_string this  return_string="true" capitalize="true"}}
       {{#is @key 'event_name'}}
-      {{#if ../record_id}} <a href="#{{hyphenate ../record_type_us}}-{{../master_id}}-{{../record_id}}" data-record-type="{{../record_type_us}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../record_type_us}}" data-master-id="{{../master_id}}" data-record-id="{{../record_id}}" data-call-if-needed="postprocessors_trackers.open_{{../record_type_us}}"></a>{{/if}}
+      {{#if ../record_id}} <a href="#{{hyphenate ../record_type_us}}-{{../master_id}}-{{../record_id}}" data-record-type="{{../record_type_us}}" class="glyphicon glyphicon-paperclip tracker-link-to-item" title="jump to this {{humanize ../record_type_us}}" data-master-id="{{../master_id}}" data-record-id="{{../record_id}}" data-call-if-needed="postprocessors_activity_logs.open_{{../record_type_us}}"></a>{{/if}}
       {{/is}}
       </div>
       </td>

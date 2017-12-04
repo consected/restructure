@@ -65,21 +65,7 @@ _fpa.postprocessors_trackers = {
 
     },
 
-    open_activity_log__player_contact_phone: function(link, block, href){
-      var master_id = link.attr('data-master-id');
-      _fpa.send_ajax_request('/masters/'+master_id+'/activity_log/player_contact_phones', {
-          try_app_callback: function(){
-            // handling the success of the ajax call, but since we are relying on a subscription to get fired that this has no control over,
-            // just put in a delay to allow the templates time to render.
-            // this will probably be sufficient in most cases.
-            window.setTimeout(function(){
-              var target_block = _fpa.utils.jump_to_linked_item(href);
-              _fpa.activity_logs.unselect_all(target_block, master_id)
-            }, 1000)
-          }
-      });
 
-    },
 
     tracker_item_link_hander: function(block){
 
@@ -94,10 +80,16 @@ _fpa.postprocessors_trackers = {
             var call_if_needed = $(this).attr('data-call-if-needed');
             if(call_if_needed) {
                 var cb = call_if_needed.split('.');
-                if(cb[1])
-                  _fpa[cb[0]][cb[1]]($(this), block, href);
-                else
+                if(cb[1]){
+                  if (_fpa[cb[0]] && _fpa[cb[0]][cb[1]])
+                    _fpa[cb[0]][cb[1]]($(this), block, href);
+                  else
+                    console.log("call_if_needed not found: " + cb);
+                }
+                else if(_fpa[cb[0]])
                   _fpa[cb[0]]($(this), block, href);
+                else
+                  console.log("call_if_needed not found: " + cb);
             }
           }
 
