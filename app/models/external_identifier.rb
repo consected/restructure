@@ -238,6 +238,10 @@ class ExternalIdentifier < ActiveRecord::Base
 
 
   def implementation_table_tests
+
+    if self.name.blank? || self.external_id_attribute.blank?      
+      return
+    end
     if ActiveRecord::Base.connection.table_exists? self.name
       # Check for the actual database columns, since the class has not been created yet, and will not be until after_commit
       unless ActiveRecord::Base.connection.columns(self.name).map(&:name).include?(self.external_id_attribute.to_s)

@@ -45,7 +45,7 @@ module AdminControllerHandler
       res = object_instance.save
     rescue FphsException => e
       flash.now[:warning] = e.message
-      raise
+      object_instance.errors.add "error", e.message
     end
     if res
       @updated_with = object_instance

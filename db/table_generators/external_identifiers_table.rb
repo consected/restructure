@@ -129,7 +129,7 @@ EOF
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
 
       ALTER TABLE ONLY #{name}
-          ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (admin_id) REFERENCES admins(id);
+          ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES admins(id);
 
       ALTER TABLE ONLY #{name}
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
