@@ -253,7 +253,7 @@ class ExternalIdentifier < ActiveRecord::Base
       # Can't enable the configuration until the table exists
       unless self.disabled
         raise FphsException.new("name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created. Run:
-        db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}
+        \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
         to generate the SQL for this table.
          ")
       end
@@ -282,7 +282,7 @@ class ExternalIdentifier < ActiveRecord::Base
     if !disabled
       res = implementation_class.new rescue nil
       raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{name} has been created. Run:
-      ruby -e \"require './db/table_generators/external_identifiers_table.rb'; TableGenerators.external_identifiers_table('#{name}', '#{external_id_attribute}')\"
+      \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
       to generate the SQL for this table.
        " unless res
     end

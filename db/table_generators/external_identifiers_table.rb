@@ -68,7 +68,7 @@ EOF
       CREATE TABLE #{singular_name}_history (
           id integer NOT NULL,
           master_id integer,
-          #{attrib} integer,
+          #{attrib} bigint,
           user_id integer,
           admin_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -88,7 +88,7 @@ EOF
       CREATE TABLE #{name} (
           id integer NOT NULL,
           master_id integer,
-          #{attrib} integer,
+          #{attrib} bigint,
           user_id integer,
           admin_id integer,
           created_at timestamp without time zone NOT NULL,
