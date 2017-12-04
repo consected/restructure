@@ -66,7 +66,10 @@ _fpa.form_utils = {
 
       var inputs = block.find("input[data-unmask='number'].is-masked");
       inputs.each(function(){
-        $(this).unmask();
+        var res = $(this).cleanVal();
+        if(res){
+          $(this).val(res);
+        }
       }).removeClass('is-masked');
     },
 
@@ -417,25 +420,36 @@ _fpa.form_utils = {
             _fpa.form_utils.clear_content($(a));
         }).addClass('attached-datatoggle-cc');
 
-        block.find('[pattern]').not('.attached-datatoggle-pattern, .is-masked').each(function(){
-            var p = $(this).attr('pattern');
-            var t = $(this).attr('type');
-            var d = $(this).attr('data-mask');
-            var m;
-            if((!d || d === '') && (p && p !== '') ){
-              if(t != 'text') {
-                $(this).attr('type', 'text');
-                $(this).attr('data-unmask', t);
-              }
-              m = _fpa.masker.mask_from_pattern(p);
+    },
 
+    mask_inputs: function(block) {
+      block.find('[pattern]').not('.attached-datatoggle-pattern').each(function(){
+          var p = $(this).attr('pattern');
+          var t = $(this).attr('type');
+          var d = $(this).attr('data-mask');
+          var m;
+          if((!d || d === '') && (p && p !== '') ){
+            if(t != 'text') {
+              $(this).attr('type', 'text');
+              $(this).attr('data-unmask', t);
             }
+            m = _fpa.masker.mask_from_pattern(p);
+
+          }
 
 
-            $(this).attr('data-mask', m.mask);
-            $(this).mask(m.mask, {translation: m.translation, reverse: m.reverse});
-            $(this).addClass('is-masked');
-        }).addClass('attached-datatoggle-pattern');
+          $(this).attr('data-mask', m.mask);
+          $(this).mask(m.mask, {translation: m.translation, reverse: m.reverse});
+          $(this).addClass('is-masked');
+      }).addClass('attached-datatoggle-pattern');
+
+
+      block.find('[pattern].attached-datatoggle-pattern').not('.is-masked').each(function(){
+        var el = $(this);
+        var res = el.masked(el.val());
+        console.log(res);
+        el.val(res);
+      }).addClass('is-masked');
     },
 
     setup_datepickers: function(block){
@@ -613,6 +627,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_data_toggles(block);
         _fpa.form_utils.setup_extra_actions(block);
         _fpa.form_utils.setup_datepickers(block);
+        _fpa.form_utils.mask_inputs(block);
         _fpa.form_utils.resize_children(block);
         block.removeClass('formatting-block');
     }

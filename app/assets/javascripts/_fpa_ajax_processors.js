@@ -20,6 +20,8 @@ _fpa.postprocessors = {
     default: function(block, data, has_postprocessor){
 
         _fpa.form_utils.setup_datepickers($('form'));
+        _fpa.form_utils.mask_inputs($('form'));
+
         $('#master_results_block').addClass('search-status-done');
 
         // Allow easy default processing where not already performed by the postprocessor

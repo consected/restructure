@@ -6,7 +6,7 @@ module ReportsHelper
   def report_edit_cancel
      link_to 'cancel', "#", id: "report-edit-cancel", class: "btn btn-danger"
   end
-  def report_field name, type, value
+  def report_field name, type, value, options={}
 
     if type.is_a? String
       type_string = type
@@ -46,9 +46,11 @@ module ReportsHelper
 
     if type_val['multiple'] == 'multiple' || type_val['multiple'] == 'multiple-regex'
       if use_dropdown
-        main_field << select_tag("search_attrs[#{name}]", use_dropdown , multiple: true)
+        options.merge!(multiple: true)
+        main_field << select_tag("search_attrs[#{name}]", use_dropdown , options)
       else
-        main_field << text_field_tag("multiple_attrs[#{name}]", '', type: type_string, class: 'form-control no-auto-submit'  , data: {attribute: name})
+        options.merge!(type: type_string, class: 'form-control no-auto-submit'  , data: {attribute: name})
+        main_field << text_field_tag("multiple_attrs[#{name}]", '', options)
         main_field << link_to( "+", "add_multiple_attrs[#{name}]", data: {attribute: name}, class: 'btn btn-default add-btn', title: 'add to search')
         v = value
         v = value.join("\n") if value.is_a? Array
@@ -57,9 +59,11 @@ module ReportsHelper
       end
     else
       if use_dropdown
-        main_field << select_tag("search_attrs[#{name}]", use_dropdown , include_blank: 'select')
+        options.merge!(include_blank: 'select')
+        main_field << select_tag("search_attrs[#{name}]", use_dropdown , options)
       else
-        main_field << text_field_tag("search_attrs[#{name}]", value, type: type_string, class: 'form-control' )
+        options.merge!(type: type_string, class: 'form-control')
+        main_field << text_field_tag("search_attrs[#{name}]", value, options )
       end
     end
 
