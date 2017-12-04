@@ -301,6 +301,25 @@ class ExternalIdentifier < ActiveRecord::Base
                     position: 100,
                     sql: "select id, #{self.external_id_attribute} from #{self.name} where master_id is not null"
       end
+
+      r = usage_report('Search')
+      unless r
+        Report.create! name: usage_report_name('Search'),
+                    item_type: "External ID Search",
+                    report_type: 'search',
+                    auto: false,
+                    searchable: true,
+                    current_admin: self.admin,
+                    position: 100,
+                    sql: "select * from #{self.name} where #{self.external_id_attribute} = :#{self.external_id_attribute}",
+                    search_attrs: "
+#{self.external_id_attribute}:
+  number:
+    all: true
+    multiple: single
+"
+      end
+
       if self.pregenerate_ids?
         r = usage_report('Unassigned')
         unless r
