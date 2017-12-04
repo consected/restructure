@@ -25,7 +25,7 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name)  {
       _fpa.send_ajax_request('/masters/'+master_id+'/activity_log/'+item_type_name_plural, {
           try_app_callback: function(){
             if($(href).length === 0) {
-              var n = item_type_name.replace('_', '-');
+              var n = item_type_name.replace(/_/g, '-');
               href = href.replace(n, n + '-blank-log');
             }
 
