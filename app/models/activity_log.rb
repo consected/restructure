@@ -166,6 +166,9 @@ class ActivityLog < ActiveRecord::Base
 
   def add_master_association &association_block
     return if disabled
+
+    remove_assoc_class 'Master'
+
     # Add the association
     logger.debug "Associated master: has_many #{self.model_association_name} with class_name: #{self.full_implementation_class_name}"
     Master.has_many self.model_association_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.full_implementation_class_name, &association_block
@@ -180,7 +183,8 @@ class ActivityLog < ActiveRecord::Base
     # Generate the set of activity log associations, for this item type
     # Ensure the master is set on the activity log when building through the association block
     # build method being called
-    puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
+    # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
+    remove_assoc_class "#{implementation_class.parent_class.to_s}ActivityLog"
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
     implementation_class.parent_class.has_many self.model_association_name.to_sym, class_name: self.full_implementation_class_name do
       def build att=nil

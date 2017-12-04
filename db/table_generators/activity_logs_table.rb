@@ -19,7 +19,6 @@ module TableGenerators
     generate_table=args[2]
     attrib = args[3..-1]
 
-    puts "Called with #{args}"
 
     if name.nil?
       puts "Usage:

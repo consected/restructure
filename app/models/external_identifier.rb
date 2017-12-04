@@ -71,6 +71,8 @@ class ExternalIdentifier < ActiveRecord::Base
   def add_master_association &association_block
     logger.debug "Add master association for #{self}"
 
+    remove_assoc_class('Master')
+
     # Define the association
 
     if self.pregenerate_ids
@@ -201,7 +203,6 @@ class ExternalIdentifier < ActiveRecord::Base
               self.name = name
         end
 
-
         klass = Object
         klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
         res = klass.const_set(model_class_name, a_new_class)
@@ -239,7 +240,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def implementation_table_tests
 
-    if self.name.blank? || self.external_id_attribute.blank?      
+    if self.name.blank? || self.external_id_attribute.blank?
       return
     end
     if ActiveRecord::Base.connection.table_exists? self.name

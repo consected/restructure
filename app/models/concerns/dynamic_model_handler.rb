@@ -186,7 +186,7 @@ module DynamicModelHandler
     tn = model_def_name
     self.class.models[tn] = m
     logger.info "Added new model #{tn}"
-
+    
     unless self.class.model_names.include? tn
       self.class.model_names << tn
     end
@@ -198,6 +198,18 @@ module DynamicModelHandler
     self.class.models.delete(tn)
     self.class.model_names -= [tn]
   end
+
+  def remove_assoc_class in_class_name
+    # Dump the old association
+    begin
+      assoc_ext_name = "#{in_class_name}#{model_class_name.pluralize}AssociationExtension"
+      Object.send(:remove_const, assoc_ext_name) if implementation_class_defined?(Object)
+    rescue => e
+      logger.debug "Failed to remove #{assoc_ext_name} : #{e}"
+      # puts "Failed to remove #{assoc_ext_name} : #{e}"
+    end
+  end
+
 
   def reload_routes
 
