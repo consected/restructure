@@ -16,6 +16,10 @@ class Address < UserBase
     'Address'
   end
 
+  def data
+    self.street
+  end
+
   def self.states
     AddressState.id_value_pairs
   end

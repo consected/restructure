@@ -137,6 +137,13 @@ module UserHandler
       end
     end
 
+    # A fallback data attribute to act as the human identifier for an item
+    # for quick review.
+    # Most items will override this definition.
+    def data
+      a_list = %w(id master_id user_id admin_id rank source rec_type notes)
+      (self.attributes[(self.attribute_names - a_list).first] || "").to_s
+    end
 
   protected
 

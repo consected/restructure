@@ -33,7 +33,7 @@
     <p class="field-names"></p>
     <p>The protocol_id can be one of the following numbers:</p>
     <p>
-      <%= Protocol.enabled.order(:id).each do |p| %> 
+      <% Protocol.enabled.order(:id).each do |p| %> 
       <b><%=p.id%></b>&nbsp;-&nbsp;<%=p.name%>
       <% end %>
     </p>

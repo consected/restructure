@@ -119,7 +119,12 @@ module DynamicModelHandler
 
 
   def ready?
-    return !self.disabled && ActiveRecord::Base.connection.table_exists?(self.table_name)
+    begin
+      return !self.disabled && ActiveRecord::Base.connection.table_exists?(self.table_name)
+    rescue => e
+      puts e
+      return false
+    end
   end
 
   # This needs to be overridden in each provider to allow consistency of calculating model names for implementations
@@ -186,7 +191,7 @@ module DynamicModelHandler
     tn = model_def_name
     self.class.models[tn] = m
     logger.info "Added new model #{tn}"
-    
+
     unless self.class.model_names.include? tn
       self.class.model_names << tn
     end

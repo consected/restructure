@@ -19,6 +19,10 @@ class PlayerInfo < UserBase
     'Person'
   end
 
+  def data
+    "#{first_name} #{last_name}"
+  end
+
   def accuracy_rank
     if rank && rank > BestAccuracyScore
       return rank * -1

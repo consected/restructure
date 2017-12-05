@@ -7,6 +7,7 @@ class ActivityLog < ActiveRecord::Base
   before_validation :prevent_item_type_change,  on: :update
   validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
+  validate :item_type_exists
   validate :check_item_type_and_rec_type
 
   def implementation_model_name
@@ -165,17 +166,20 @@ class ActivityLog < ActiveRecord::Base
 
 
   def add_master_association &association_block
-    return if disabled
 
-    remove_assoc_class 'Master'
+    return if disabled || !errors.empty?
+    begin
+      remove_assoc_class 'Master'
 
-    # Add the association
-    logger.debug "Associated master: has_many #{self.model_association_name} with class_name: #{self.full_implementation_class_name}"
-    Master.has_many self.model_association_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.full_implementation_class_name, &association_block
-    # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
-    # since there is no link to advanced search
-    add_parent_item_association
-
+      # Add the association
+      logger.debug "Associated master: has_many #{self.model_association_name} with class_name: #{self.full_implementation_class_name}"
+      Master.has_many self.model_association_name, -> { order(self.action_when_attribute.to_sym => :desc, id: :desc)}, inverse_of: :master, class_name: self.full_implementation_class_name, &association_block
+      # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
+      # since there is no link to advanced search
+      add_parent_item_association
+    rescue FphsException => e
+      puts e
+    end
   end
 
 
@@ -184,7 +188,9 @@ class ActivityLog < ActiveRecord::Base
     # Ensure the master is set on the activity log when building through the association block
     # build method being called
     # puts "Adding implementation class association: #{implementation_class.parent_class}.has_many #{self.model_association_name.to_sym} #{self.full_implementation_class_name}"
-    remove_assoc_class "#{implementation_class.parent_class.to_s}ActivityLog"
+
+
+    remove_assoc_class "#{implementation_class.parent_class.to_s}ActivityLog" if item_type_exists
     #    has_many :activity_logs, as: :item, inverse_of: :item ????
     implementation_class.parent_class.has_many self.model_association_name.to_sym, class_name: self.full_implementation_class_name do
       def build att=nil
@@ -435,7 +441,7 @@ class ActivityLog < ActiveRecord::Base
 
   def check_implementation_class
 
-    if !disabled
+    if !disabled && errors.empty?
       val = view_attribute_list || []
       unless ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
@@ -466,6 +472,24 @@ class ActivityLog < ActiveRecord::Base
     end
   end
 
+  def item_type_exists
+    return true if !errors.empty?
+    begin
+      implementation_class
+    rescue => e
+      puts e
+      return false
+    end
+
+    begin
+      return implementation_class.parent_class
+    rescue => e
+      puts "----------------------------------"
+      puts e
+      errors.add :item_type, "It seems that the model that this activity log definition is associated with does not exist. Check that the #{item_type.pluralize} table exists, and if this is a dynamic model or external ID, check it is enabled"
+    end
+
+  end
 
 end
 
