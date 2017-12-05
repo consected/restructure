@@ -12,7 +12,7 @@ class ExternalIdentifier < ActiveRecord::Base
   validate :config_uniqueness
   validate :id_range_correct
   after_validation :implementation_table_tests
-  after_validation :generate_usage_reports
+  after_save :generate_usage_reports
 
 
 
@@ -268,6 +268,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def name_format_correct
     errors.add :name, "must be a lowercase, underscored, DB table name" unless name.downcase.ns_underscore == name
+    errors.add :name, "not acceptable - must be plural and avoid numbers after underscores in names" unless name.to_sym == model_association_name
   end
 
   def config_uniqueness
