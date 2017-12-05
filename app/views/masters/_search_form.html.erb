@@ -1,18 +1,18 @@
 <div class="container-fluid" id="master-search-advanced">
-    
-    
-    
-    
+
+
+
+
 <div class="panel-group" id="master-search-accordion" role="tablist" aria-multiselectable="true">
-  <div class="advanced-form-selections">  
+  <div class="advanced-form-selections">
     <button id="expand-simple-form" class="btn btn-primary" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="true" aria-controls="master-search-advanced-form">Simple Search</button>
     <button id="expand-adv-form" class="btn btn-primary collapsed" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="false" aria-controls="master-search-advanced-form">Advanced Search</button>
-    <% Report.searchable.each do |r|%>
+    <% Report.active.searchable.each do |r|%>
       <a href="<%= report_path(id: r.id, part: :form, format: :html) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse collapsed one-time-only-ajax" type="button" data-toggle="collapse" data-result-target="#master-report-<%=r.report_identifier%> .searchable-report" data-target="#master-report-<%=r.report_identifier%>" aria-expanded="false" aria-controls="master-report-<%=r.report_identifier%>"><%=r.name.titleize%></a>
     <% end %>
   </div>
 
-  
+
   <div class="panel panel-default">
     <div id="master-search-simple-form" class="panel-collapse collapse in" role="tabpanel">
       <div class="panel-body searchable-report">
@@ -20,23 +20,22 @@
       </div>
     </div>
   </div>
-    
+
   <div class="panel panel-default">
     <div id="master-search-advanced-form" class="panel-collapse collapse" role="tabpanel">
       <div class="panel-body searchable-report">
         <%= render partial: 'search_form_advanced' %>
       </div>
     </div>
-  </div>            
-  
-  <% Report.searchable.each do |r|%>
+  </div>
+
+  <% Report.active.searchable.each do |r|%>
     <div class="panel panel-default">
       <div id="master-report-<%=r.report_identifier%>" class="panel-collapse collapse " role="tabpanel">
         <div class="panel-body searchable-report"  data-report-id="<%=r.id%>">
         </div>
       </div>
-    </div>              
+    </div>
   <% end %>
-  </div>    
+  </div>
 </div>
-
