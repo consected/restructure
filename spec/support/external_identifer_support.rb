@@ -43,14 +43,6 @@ module ExternalIdentifierSupport
         disabled: false
       },
       {
-        name: "table_doesnt_exist",
-        label: "test id #{r}",
-        external_id_attribute: "test_#{r}_id",
-        min_id: 1,
-        max_id: 99999999,
-        disabled: false
-      },
-      {
         name: @implementation_table_name,
         label: 'abc',
         external_id_attribute: '',

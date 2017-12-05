@@ -40,4 +40,19 @@ RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
 
     it_behaves_like 'a standard admin controller'
 
+
+    it "returns an error when the table does not exist" do
+      r = '7'
+      inv = {
+        name: "table_doesnt_exist",
+        label: "test id #{r}",
+        external_id_attribute: "test_#{r}_id",
+        min_id: 1,
+        max_id: 99999999,
+        disabled: false
+      }
+      post :create, {object_symbol => inv}
+      expect(assigns(object_symbol).errors.empty?).not_to be true
+
+    end
 end

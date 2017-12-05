@@ -289,7 +289,7 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def generate_usage_reports
-    if !disabled
+    if !disabled && errors.empty?
       r = usage_report('Assigned')
       unless r
         Report.create! name: usage_report_name('Assigned'),
