@@ -178,7 +178,7 @@ class ActivityLog < ActiveRecord::Base
       # since there is no link to advanced search
       add_parent_item_association
     rescue FphsException => e
-      puts e
+      logger.debug e
     end
   end
 
@@ -477,15 +477,14 @@ class ActivityLog < ActiveRecord::Base
     begin
       implementation_class
     rescue => e
-      puts e
+      logger.debug e
       return false
     end
 
     begin
       return implementation_class.parent_class
     rescue => e
-      puts "----------------------------------"
-      puts e
+      logger.debug e
       errors.add :item_type, "It seems that the model that this activity log definition is associated with does not exist. Check that the #{item_type.pluralize} table exists, and if this is a dynamic model or external ID, check it is enabled"
     end
 
