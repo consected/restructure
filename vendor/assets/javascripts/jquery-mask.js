@@ -1,6 +1,6 @@
 /**
  * jquery.mask.js
- * @version: v1.14.12
+ * @version: v1.14.12 (patched by Phil Ayres - see https://github.com/philayres/jQuery-Mask-Plugin/commit/5fc2cd5723acab64ef214f4089a88747766d8708 )
  * @author: Igor Escobar
  *
  * Created by Igor Escobar on 2012-03-10. Please report any bug at http://blog.igorescobar.com
@@ -265,7 +265,9 @@
                     }, 10);
 
                     p.val(newVal);
-                    p.setCaret(caretPos);
+                    /* Do not set the caret position here, since it incorrectly records
+                       the position of the caret before the timeout callback */
+                    //p.setCaret(caretPos);
                     return p.callbacks(e);
                 }
             },
