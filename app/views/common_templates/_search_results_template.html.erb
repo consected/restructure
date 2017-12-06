@@ -280,6 +280,6 @@
 
     </div>
     <% unless prevent_create %>
-    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus add-item-button"></span> <%= caption %> record</a> </p>
+    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus add-item-button"></span> <%= caption %> record</a> </p>
     <% end %>
 </script>

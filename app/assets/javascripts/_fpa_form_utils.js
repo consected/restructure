@@ -360,7 +360,7 @@ _fpa.form_utils = {
 
 
         block.find('[data-toggle~="scrollto-result"], [data-toggle~="scrollto-target"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded ').not('.attached-datatoggle-str').on('click', function(){
-            if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed'))
+            if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed') || $(this).hasClass('no-scroll-on-collapse'))
               return;
 
             var a = $(this).attr('data-target');

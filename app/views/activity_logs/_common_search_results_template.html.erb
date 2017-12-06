@@ -74,7 +74,7 @@
 <script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
   <span id="activity-log-{{master_id}}-initial-action" class="" >
     <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
-      <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-">add log</a>
+      <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-">add log</a>
     </span>
    </span>
 </script>
@@ -84,7 +84,7 @@
   <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
 
     <div class="is-heading activity-logs-header">
-      <a href="#" data-target="#activity-log--<%=item_type_name_hyphenated.pluralize%>-{{master_id}}" data-toggle="collapse" class="show-entity pull-right glyphicon glyphicon-remove-sign" title="close panel"></a>
+      <a data-target="#activity-log--<%=item_type_name_hyphenated.pluralize%>-{{master_id}}" data-toggle="collapse" class="show-entity pull-right glyphicon glyphicon-remove-sign no-scroll-on-collapse" title="close panel"></a>
       <h4 class="list-group-item-heading al-label-<%=item_type_name_hyphenated%>-item"><%=al_name.downcase%></h4>
     </div>
     <div class="row">
@@ -108,8 +108,8 @@
         </p>
         <br />
         <p class="text-center">
-          <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/new" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" aria-label="add <%=item_type.humanize%> record"><span class="glyphicon glyphicon-plus"></span> <%= item_type.humanize%> record</a>
-          <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> General log</a>
+          <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/new<%= rec_type.blank? ? '' : "?#{item_type}[rec_type]=#{rec_type}"  %>" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" aria-label="add <%=item_type.humanize%> record"><span class="glyphicon glyphicon-plus"></span> <%= item_type.humanize%> record</a>
+          <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> General log</a>
         </p>
       </div>
 

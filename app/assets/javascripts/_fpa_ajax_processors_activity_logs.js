@@ -38,7 +38,20 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name)  {
             }, 1000)
           }
       });
+    },
+    _fpa.postprocessors_activity_logs['sub_list_' + item_type_name + '_result_template'] = function(block, data){
+      var el = null;
+      for(el in data){
+        break;
+      }
+      if(data[el].rec_type){
+          if(item_type_name != data[el].item_type + "_" + data[el].rec_type){
+            block.hide();
+          }
+      }
+      _fpa.form_utils.format_block(block);
     }
+
 
   $.extend(_fpa.postprocessors, _fpa.postprocessors_activity_logs);
 
