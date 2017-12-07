@@ -48,7 +48,7 @@ filled_items = 0
                          col_type = col.type if col
                       %>
                       <% if p == :master_id && item.master_id %>
-                      <%= link_to "", masters_search_path(nav_q_id: item.master_id), class: "glyphicon glyphicon-share pull-right import-link-item", target: 'importmasteritem', title: 'open in new window' %>
+                      <%= link_to "", masters_path(format: 'json', mode: 'MSID', master: {id: item.master_id}),  class: "glyphicon glyphicon-share pull-right import-link-item",  title: 'open in new window', data: {remote: true, result_target: "#modal_results_block", result_target_force: "true", template: "modal-pi-search-results-template", on_click_call: 'utils.show_modal_results'} %>
                       <% end %>
                       <% if col_type == :boolean %>
                         <%= f.check_box p %>
@@ -178,6 +178,11 @@ filled_items = 0
       var row = $(this).parents('tr');
       row.removeClass('next-blank-row').addClass('filled-row').removeClass('blank-row');
       row.next().addClass('next-blank-row');
+    });
+
+    $('fieldset[disabled] a[data-remote]').on('click', function(ev){
+      ev.preventDefault();
+      $.rails.handleRemote($(this));
     });
   }, 1000);
 

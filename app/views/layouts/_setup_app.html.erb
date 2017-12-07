@@ -1,18 +1,18 @@
 <script>
-  
+
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
   _fpa.status['session'] = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
-  
+
 <% # We attempt to load these cached definitions here, to speed up future forms and results that rely on them.
   if current_email %>
     //_fpa.set_definition('colleges');
     //_fpa.set_definition('protocol_events');
 <% end %>
-  
-  $('html').ready(function(){
-    _fpa.reset_page_size();  
 
+  $('html').ready(function(){
     _fpa.compile_templates();
+    _fpa.reset_page_size();
+
     _fpa.handle_remotes();
     _fpa.loaded.default();
   });

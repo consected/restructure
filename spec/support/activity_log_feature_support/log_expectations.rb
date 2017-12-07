@@ -46,7 +46,7 @@ module LogExpectations
     finish_form_formatting
     sleep 1
     finish_form_formatting
-    
+
     have_css(LogItemsCss)
     log = all(LogItemsCss).first
     within log do

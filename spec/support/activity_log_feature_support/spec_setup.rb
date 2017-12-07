@@ -10,7 +10,7 @@ module SpecSetup
     end
 
     TableGenerators.activity_logs_table('activity_log_player_contact_phones', 'player_contacts', true, 'select_result', 'select_next_step', 'follow_up_when', 'protocol_id', 'select_call_direction', 'select_who', 'called_when', 'notes', 'data', 'set_related_player_contact_rank')
-    
+
 
     ActivityLog.enable_active_configurations
 
@@ -30,7 +30,9 @@ module SpecSetup
     ActiveRecord::Base.connection.execute("delete from player_contact_history;
                            -- delete from activity_log_player_contact_phone_history;
                            delete from activity_log_player_contact_phones;
-                           delete from player_contacts;")
+                           delete from player_contacts;
+                           delete from tracker_history where item_type = 'ActivityLog::PlayerContactPhone';
+                           delete from trackers where item_type = 'ActivityLog::PlayerContactPhone';")
 
 
     puts "create contacts and logs"

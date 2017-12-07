@@ -28,6 +28,11 @@ _fpa.utils.jump_to_linked_item = function(target) {
   return block;
 };
 
+_fpa.utils.show_modal_results = function(){
+  var h = '<div id="modal_results_block" class=""></div>';
+
+  _fpa.show_modal(h, "", true);
+}
 // Get the data-some-attr="" name value pairs from a jQuery element, removing data- and
 // underscoring for easy data.some_attr access
 _fpa.utils.get_data_attribs = function(block){
