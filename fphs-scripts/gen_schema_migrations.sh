@@ -6,6 +6,8 @@
 # Requires that the user on the remote server has .pgpass created for the OS user to access the
 # appropriate DB user
 
+# Optionally automatically push results to the target database by setting environment variable
+# SEND_TO_DB=y ./gen_schema_migrations.sh
 
 # Make sure we are running in the fphs-scripts directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -16,6 +18,9 @@ cd $DIR
 echo Enter your sudo password to allow us access to the local database postgres user
 sudo pwd
 clear
+
+ext_user=$2
+
 
 if [ -z "$1" ]
 then
@@ -31,15 +36,23 @@ then
 
 else
   OPT=$1
-
 fi
 
-if [ -z "$2" ]
+if [ $OPT == '2' ]
+then
+  ext_user='vagrant'
+fi
+
+if [ $OPT == '3' ]
+then
+  ext_user='vagrant'
+fi
+
+
+if [ -z "$ext_user" ]
 then
   echo 'Enter your server username (openmed, vagrant or ecommons)'
   read ext_user
-else
-  ext_user=$2
 fi
 
 
@@ -51,6 +64,11 @@ then
 fi
 
 export BECOME_USER=''
+
+if [ -z "$SEND_TO_DB" ]
+then
+  export SEND_TO_DB=n
+fi
 
 if [ $OPT == '1' ]
 then
@@ -65,7 +83,6 @@ export EXPORTSVR=$EXTNAME
 export EXPORTLOC=/tmp
 export EXTROLE=fphs
 export EXTADMROLE=fphs
-export SEND_TO_DB=y
 ##############################
 fi
 
@@ -83,13 +100,12 @@ export EXPORTSVR=$EXTNAME
 export EXPORTLOC=/tmp
 export EXTROLE=fphs
 export EXTADMROLE=fphs
-export SEND_TO_DB=y
 ###############################
 fi
 
 if [ $OPT == '3' ]
 then
-#### if partners production #####
+#### if test DBs fphs against fpa_development within vagrant dev box guest #####
 export EXTNAME=localhost
 export EXTUSER=$ext_user
 export BECOME_USER=postgres
@@ -101,7 +117,6 @@ export EXPORTSVR=$EXTNAME
 export EXPORTLOC=/tmp
 export EXTROLE=fphs
 export EXTADMROLE=fphs
-export SEND_TO_DB=y
 ###############################
 fi
 
@@ -119,7 +134,6 @@ export EXPORTSVR=fphs-crm-dev01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
 export EXTADMROLE=FPHSADM
-export SEND_TO_DB=n
 ###############################
 fi
 
@@ -136,7 +150,6 @@ export EXPORTSVR=fphs-crm-prod01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
 export EXTADMROLE=FPHSADM
-export SEND_TO_DB=n
 ###############################
 fi
 

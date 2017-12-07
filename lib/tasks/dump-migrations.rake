@@ -34,7 +34,7 @@ namespace :db do
                 old_execute sql, name if RUN_SQL
               else
                 # pass everything else to the aliased execute
-                puts "------------- Didn't save to file (#{name}) ---------------"
+                puts "------------- (#{name}) ---------------"
                 puts sql || ''
                 puts "-------------                        ---------------"
                 old_execute sql, name if RUN_SQL

@@ -17,6 +17,9 @@
       <th>Blank Log Field List</th>
       <th>Disabled</th>
       <th>Admin</th>
+      <th>
+        Generator Script
+      </th>
     </tr>
   </thead>
 
@@ -33,6 +36,7 @@
         <td><%= list_item.blank_log_field_list %></td>
         <td><%= list_item.disabled ? 'disabled' : ''%></td>
         <td><%= list_item.admin_name %></td>
+        <td>db/table_generators/generate.sh activity_logs_table create <%=list_item.table_name%> <%=list_item.item_type.pluralize%> <%=(list_item.view_attribute_list || []).join(' ')%></td>
       </tr>
     <% end %>
   </tbody>
