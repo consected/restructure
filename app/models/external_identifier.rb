@@ -251,7 +251,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
     else
       # Can't enable the configuration until the table exists
-      unless self.disabled
+      unless self.disabled || !self.errors.empty?
         raise FphsException.new("name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created. Run:
         \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
         to generate the SQL for this table.
@@ -267,8 +267,11 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def name_format_correct
+    errors.add :name, "must not be #{name}" if name.downcase == 'externals' || name.downcase == 'exts'
     errors.add :name, "must be a lowercase, underscored, DB table name" unless name.downcase.ns_underscore == name
     errors.add :name, "not acceptable - must be plural and avoid numbers after underscores in names" unless name.to_sym == model_association_name
+    errors.add :external_id_attribute, "must not be named #{external_id_attribute} or external_id. Consider using the name '#{name.singularize}_ext_id'" if "#{name.singularize}_id" == external_id_attribute || external_id_attribute == 'external_id'
+    errors.add :external_id_attribute, "must end in '_id'. Consider using the name '#{name.singularize}_ext_id'" unless external_id_attribute.end_with? 'id'
   end
 
   def config_uniqueness
@@ -280,7 +283,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def check_implementation_class
 
-    if !disabled
+    if !disabled && errors.empty?
       res = implementation_class.new rescue nil
       raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{name} has been created. Run:
       \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
