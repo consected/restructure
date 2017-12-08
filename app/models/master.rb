@@ -117,11 +117,19 @@ class Master < ActiveRecord::Base
   end
 
   def self.external_id_matching_fields
-    ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}
+    @external_id_matching_fields ||= ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}
+  end
+
+  def self.external_id? attr_name
+    external_id_matching_fields.include? attr_name
   end
 
   def self.alternative_id_fields
-    [:msid, :pro_id] + external_id_matching_fields
+    @alternative_id_fields ||= [:msid, :pro_id] + external_id_matching_fields
+  end
+
+  def self.external_id_definition attr_name
+    ExternalIdentifier.active.where(external_id_attribute: attr_name).first
   end
 
   def self.find_with_alternative_id field_name, value

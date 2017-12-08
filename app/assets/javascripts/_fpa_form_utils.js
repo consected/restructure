@@ -445,9 +445,12 @@ _fpa.form_utils = {
 
       block.find('[pattern].attached-datatoggle-pattern').not('.is-masked').each(function(){
         var el = $(this);
-        var res = el.masked(el.val());
-        console.log(res);
-        el.val(res);
+        var v = el.val();
+        if(v && v !== '') {
+          var res = el.masked(v);
+          console.log(res);
+          el.val(res);
+        }
       }).addClass('is-masked');
     },
 

@@ -143,11 +143,14 @@ class ImportsController < ApplicationController
               r.save!
             rescue => e
               failed = true
+              em = r.errors.first || e.to_s
+              errors << em
               logger.debug "------------------------>Failed to add item to import when saving: #{e}"
             end
           else
             failed = true
-            errors << r.errors.first
+            em = r.errors.first || e.to_s
+            errors << em
             logger.debug "------------------------>Failed to add item to import during validation: #{errors.last}"
           end
         else

@@ -40,11 +40,15 @@ _fpa.postprocessors = {
             _fpa.form_utils.format_block(block);
 
             _fpa.masters.switch_id_on_click(block);
+            
+            block.find('.on-open-click a[data-remote="true"]').click();
+
         }, 30);
 
         $('a.modal-expander').click(function(ev){
             ev.preventDefault();
             var id = $(this).attr('href');
+
 
             $(id).on('shown.bs.collapse', function(){
 

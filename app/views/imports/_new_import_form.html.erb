@@ -52,6 +52,10 @@ filled_items = 0
                       <% end %>
                       <% if col_type == :boolean %>
                         <%= f.check_box p %>
+                      <% elsif Master.external_id? p
+                            primary_model = Master.external_id_definition p
+                      %>
+                        <%= f.number_field primary_model.external_id_attribute, class: 'form-control', in: primary_model.external_id_range,  pattern: primary_model.external_id_edit_pattern %>
                       <% elsif p == :description %>
                         <%= f.text_area p %>
                       <% elsif p == :rec_type%>
@@ -169,6 +173,10 @@ filled_items = 0
       $('#submit_import').prop('disabled', true);
     }
   })
+
+  $('#import-container form').on('submit', function(){
+    _fpa.form_utils.unmask_inputs($(this));
+  });
 
   window.setTimeout(function(){
     $(document).on('change', 'tr.next-blank-row td input, select, textarea', function(){

@@ -244,6 +244,10 @@ module ExternalIdHandler
       errors.add :master, "record this #{self.class.label} is associated with can not be changed"
     end
 
+    if master_id.nil? && (!respond_to?(:admin_id) || admin_id.nil?)
+      errors.add :master_id, "must be set when adding #{self.class.external_id_attribute}"
+    end
+
     if external_id_changed? || !persisted?
 
       s = self.class.find_by_external_id(external_id)

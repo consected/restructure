@@ -1,10 +1,11 @@
-
+<%
+external_id_types = ExternalIdentifier.active.map(&:implementation_class)
+%>
 
 <script id="modal-pi-search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#if masters.length}}
-  <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel-group" id="results-accordion modal-pi-search-results" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default">
-
     {{#each masters}}
       <div class="panel-heading master-result" role="tab" id="master-{{id}}">
         <h3 class="panel-title">
@@ -107,6 +108,21 @@
             </div>
           </div>
         </div>
+
+
+        <div id="external-ids-{{id}}" class="row modal-external-ids-block">
+          <div class="on-open-click hidden">
+          <%  external_id_types.each do |e|%>
+            <a href="/masters/{{id}}/<%=e.plural_name%>" data-result-target="#<%=e.hyphenated_plural_name%>-{{id}}-" data-template="<%=e.hyphenated_plural_name%>-compact-list-template" data-remote="true" class=""><%=e.label%></a>
+          <% end %>
+          </div>
+          <%  external_id_types.each do |e|%>
+          <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+
+          <% end %>
+
+        </div>
+
       </div>
     {{/each}}
 

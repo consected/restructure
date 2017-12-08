@@ -259,12 +259,16 @@
   {{><%=name.pluralize%>_list }}
 </script>
 
+<script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{><%=name.pluralize%>_list compact=true prevent_create=true }}
+</script>
+
 <script id="<%=name.pluralize%>_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
 
     {{#each <%=full_name.pluralize%>}}
 
-        {{><%=name%>_result _created=@index}}
+        {{><%=name%>_result _created=@index compact=compact}}
 
     {{/each}}
 
@@ -276,10 +280,11 @@
         </li>
       </ul>
       {{/unless}}
-
-
     </div>
+
     <% unless prevent_create %>
+    {{#unless prevent_create}}
     <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus add-item-button"></span> <%= caption %> record</a> </p>
+    {{/unless}}
     <% end %>
 </script>
