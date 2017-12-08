@@ -1,3 +1,26 @@
+<% if @external_identifier_implementation_class.assign_all_request %>
+
+<div class="container">
+    <h2>Create <%= @external_identifier.name.humanize.titleize %> IDs for All <%= @master_count%> Master Records</h2>
+<%= form_for @external_identifier_implementation_class, url: admin_external_identifier_details_path(id: @external_identifier.id) do |f|%>
+
+  <p>This will create a <%= @external_identifier.name.humanize.titleize %> record assigned to every master record that is does not have an assignment.</p>
+  <p>There are <b><%= @master_count %></b> master records currently unassigned.</p>
+  <% if @master_count > 0 %>
+    <p><%=f.check_box :assign_all, {}, "true", "false"  %> <%=label :assign_all, "check to confirm" %> </p>
+    <%= f.hidden_field :assign_all_request %>
+    <%= f.submit "Create Pregenerated IDs for #{@master_count} records" %>
+    <p><br />
+    <p>or go back to <%= link_to "summary page", admin_external_identifier_detail_path(id: @external_identifier.id) %></p>
+  <%else%>
+    <p>Go back to <%= link_to "summary page", admin_external_identifier_detail_path(id: @external_identifier.id) %></p>
+  <%end%>
+<%  end %>
+</div>
+
+
+<% else %>
+
 <div class="container">
     <h2>Create <%= @external_identifier.name.humanize.titleize %> IDs</h2>
 <%= form_for @external_identifier_implementation_class, url: admin_external_identifier_details_path(id: @external_identifier.id) do |f|%>
@@ -5,5 +28,16 @@
   <%= f.number_field :create_count %>
 
     <%= f.submit "Create Pregenerated IDs" %>
+    <p><br />
+    <p>or go back to <%= link_to "summary page", admin_external_identifier_detail_path(id: @external_identifier.id) %></p>
 <%  end %>
 </div>
+
+<% end %>
+
+<script>
+  $('form').on('submit',function(){
+      _fpa.ajax_working($(this));
+      $(this).find('input[type="submit"]').hide();
+  });
+</script>

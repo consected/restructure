@@ -10,6 +10,9 @@
   <% if @external_identifier.pregenerate_ids %>
     <p><%=link_to "Unassigned IDs", admin_external_identifier_detail_path(id: @external_identifier.id, do: :report, rep_type: 'Unassigned') %>
     <h3>Actions</h3>
-    <p><%=link_to "Generate More IDs", new_admin_external_identifier_detail_path(id: @external_identifier.id) %>
+    <p><%=link_to "Generate More Unassigned IDs", new_admin_external_identifier_detail_path(id: @external_identifier.id) %>
+
+    <p><%=link_to "Generate IDs and assign them to all Master Records without an existing assignment", new_admin_external_identifier_detail_path(id: @external_identifier.id, all_master_records: true) %>
+    
   <% end %>
 </div>

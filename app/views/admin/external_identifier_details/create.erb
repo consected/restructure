@@ -1,5 +1,4 @@
 <div class="container">
-    <h2>Created <span><%=@external_identifier_items.length%></span> Sage IDs</h2>
-    <p>Primary key (<%= @external_identifier.name%>.id) range: <%= @external_identifier_items.first.id%> to <%= @external_identifier_items.last.id%></p>
+    <h2>Created <span><%=@external_identifier_items.length%></span> External IDs</h2>    
     <p><%=link_to "Done", admin_external_identifier_detail_path(id: @external_identifier.id) %></p>
 </div>

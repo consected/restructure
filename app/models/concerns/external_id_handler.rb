@@ -10,7 +10,7 @@ module ExternalIdHandler
 
   included do
 
-    attr_accessor :create_count, :just_assigned
+    attr_accessor :create_count, :just_assigned, :assign_all, :assign_all_request
     after_initialize :init_vars_external_id_handler
     after_save :return_all
 
@@ -170,6 +170,39 @@ module ExternalIdHandler
 
     end
 
+    def masters_without_assignment
+      all_assigned = self.where('master_id is not null').map(&:master_id)
+
+      Master.where("id not in (?)", all_assigned)
+    end
+
+    def generate_ids_for_all_masters admin
+      raise "Only admins can perform this function" unless admin && admin.enabled? && allow_to_generate_ids?
+      res = []
+      errors = []
+
+      raise FphsException.new "No master records without an assignment" if masters_without_assignment.count == 0
+
+      begin
+        items = []
+        value_items = []
+        tnow = DateTime.now.iso8601
+        self.transaction do
+          sql = "INSERT into #{self.table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES "
+          masters_without_assignment.each do |m|
+            item = m.id
+            value_items << "('#{generate_random_id.to_s}', #{admin.id}, #{m.id}, '#{tnow}', '#{tnow}')"
+            items << item
+          end
+          sql << value_items.join(',')
+          self.connection.execute sql
+        end
+        res = items
+      rescue PG::UniqueViolation
+        logger.info "Failed to create a #{self.name.humanize} record due to an random duplicate."
+      end
+      res
+    end
 
     def generate_ids admin, count=10
 
@@ -177,19 +210,29 @@ module ExternalIdHandler
 
       res = []
 
-      (1..count).each do |c|
+      begin
+        items = []
+        value_items = []
+        tnow = DateTime.now.iso8601
 
-        begin
-          item = self.new(external_id_attribute => generate_random_id.to_s, admin_id: admin.id)
-          item.no_track = true
-          item.save!
-          res << item
-        rescue PG::UniqueViolation
-          logger.info "Failed to create a #{self.name.humanize} record due to an random duplicate"
+        self.transaction do
+          sql = "INSERT into #{self.table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES "
+          (1..count).each do |c|
+            item = c
+            value_items << "('#{generate_random_id.to_s}', #{admin.id}, NULL, '#{tnow}', '#{tnow}')"
+            items << item
+          end
+          sql << value_items.join(',')
+          self.connection.execute sql
         end
 
+        res = items
+
+      rescue PG::UniqueViolation
+        logger.info "Failed to create a #{self.name.humanize} record due to an random duplicate"
       end
 
+      
       res
     end
 

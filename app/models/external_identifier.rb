@@ -303,7 +303,7 @@ class ExternalIdentifier < ActiveRecord::Base
                     searchable: false,
                     current_admin: self.admin,
                     position: 100,
-                    sql: "select id, #{self.external_id_attribute} from #{self.name} where master_id is not null"
+                    sql: "select id, #{self.external_id_attribute}, master_id, user_id from #{self.name} where master_id is not null"
       end
 
       r = usage_report('Search')
