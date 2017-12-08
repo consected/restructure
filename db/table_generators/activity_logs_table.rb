@@ -69,7 +69,7 @@ EOF
       attrib_pair = {}
       attrib.each do |a|
         f = 'varchar'
-        f = 'integer' if a.end_with?('_id')
+        f = 'bigint' if a.end_with?('_id')
         f = 'date' if a.end_with?('_when')
         f = 'date' if a.end_with?('_date')
         f = 'varchar' if a == 'data'

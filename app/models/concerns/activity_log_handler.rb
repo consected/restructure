@@ -87,7 +87,7 @@ module ActivityLogHandler
 
     # The user relevant data attributes in the parent class
     def parent_data_names
-      parent_class.attribute_names  - ['id', 'master_id', 'disabled', 'user_id', 'created_at', 'updated_at', "rank", "rec_type"]
+      parent_class.attribute_names  - ['id', 'master_id', 'disabled', 'user_id', 'admin_id', 'created_at', 'updated_at', "rank", "rec_type"]
     end
 
     # Default attribute name for the 'completed when' field
