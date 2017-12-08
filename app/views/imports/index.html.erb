@@ -69,7 +69,7 @@
     </thead>
 
     <tbody>
-      <% @imports.each do |import| %>
+      <% @imports.order(id: :desc).each do |import| %>
         <tr>
           <td><%= import.primary_table %></td>
           <td><%= import.item_count %></td>

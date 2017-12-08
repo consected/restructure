@@ -9,9 +9,9 @@
       <div class="panel-heading master-result" role="tab" id="master-{{id}}">
         <h3 class="panel-title">
           {{#if msid}}
-          <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid" title="link to this record"> </a>
+          <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid" title="open in new tab" target="openmaster"> </a>
           {{else}}
-          <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="link to this record"> </a>
+          <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="open in new tab" target="openmaster"> </a>
           {{/if}}
           <div class="row">
             <div class="col-md-2 col-lg-1 result-refs"><a href="#" class="switch_id glyphicon glyphicon-random"  title="switch to MSID"></a> <span class="master_id"  title="Master ID">{{id}}</span><span class="msid"  style="display: none" title="MSID">{{#if msid}}{{msid}}{{else}}no&nbsp;MSID{{/if}}</span></div>
