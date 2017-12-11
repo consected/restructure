@@ -117,7 +117,7 @@ class Master < ActiveRecord::Base
   end
 
   def self.external_id_matching_fields
-    @external_id_matching_fields ||= ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}
+    ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}
   end
 
   def self.external_id? attr_name
@@ -125,7 +125,7 @@ class Master < ActiveRecord::Base
   end
 
   def self.alternative_id_fields
-    @alternative_id_fields ||= [:msid, :pro_id] + external_id_matching_fields
+    [:msid, :pro_id] + external_id_matching_fields
   end
 
   def self.external_id_definition attr_name

@@ -1,4 +1,10 @@
 require 'rails_helper'
+
+RSpec.configure {|c| c.before {
+  SeedSupport.setup
+}}
+
+
 RSpec.describe ScantronsController, type: :controller do
 
   include ScantronSupport
@@ -27,6 +33,9 @@ RSpec.describe ScantronsController, type: :controller do
     delete_previous_records
   end
 
+  before :each do
+    seed_database
+  end
 
   it_behaves_like 'a standard user controller'
 

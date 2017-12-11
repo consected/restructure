@@ -270,7 +270,8 @@ class ExternalIdentifier < ActiveRecord::Base
     errors.add :name, "must not be #{name}" if name.downcase == 'externals' || name.downcase == 'exts'
     errors.add :name, "must be a lowercase, underscored, DB table name" unless name.downcase.ns_underscore == name
     errors.add :name, "not acceptable - must be plural and avoid numbers after underscores in names" unless name.to_sym == model_association_name
-    errors.add :external_id_attribute, "must not be named #{external_id_attribute} or external_id. Consider using the name '#{name.singularize}_ext_id'" if "#{name.singularize}_id" == external_id_attribute || external_id_attribute == 'external_id'
+    # Unfortunately we have clash in the existing scantrons naming. Ignore this case and work around as necessary.
+    errors.add :external_id_attribute, "must not be named #{external_id_attribute} or external_id. Consider using the name '#{name.singularize}_ext_id'" if ("#{name.singularize}_id" == external_id_attribute || external_id_attribute == 'external_id') && name.downcase != 'scantrons'
     errors.add :external_id_attribute, "must end in '_id'. Consider using the name '#{name.singularize}_ext_id'" unless external_id_attribute.end_with? 'id'
   end
 

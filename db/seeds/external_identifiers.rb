@@ -4,10 +4,12 @@ module Seeds
     def self.add_values values
       updated = false
       values.each do |v|
-        res = ExternalIdentifier.find_or_initialize_by(v)
-        unless res.admin
-          res.update(current_admin: auto_admin)
-          updated = true
+        res = ExternalIdentifier.where(name: v['name']).first
+        unless res
+          v[:current_admin] = auto_admin
+          res = ExternalIdentifier.new(v)
+
+          updated = res.save!
         end
       end
       return updated
@@ -29,7 +31,7 @@ module Seeds
 
     def self.setup
       log "In #{self}.setup"
-      if Rails.env.test? || ExternalIdentifier.count == 0
+      if Rails.env.test? || ExternalIdentifier.count < 2
         create_external_identifiers
         log "Ran #{self}.setup"
       else
