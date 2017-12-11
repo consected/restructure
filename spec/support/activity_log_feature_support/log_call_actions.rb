@@ -55,9 +55,12 @@ module LogCallActions
       select as, from: 'Select next step'
       if opt[:when]
         if opt[:when].is_a? Date
-          opt[:when] = opt[:when].strftime('%m/%d/%Y')
+          opt[:when] = opt[:when].strftime('%Y-%m-%d')
         end
-        fill_in "Follow up when", with: opt[:when]
+        # fill_in "Follow up when", with: opt[:when]
+        # We have to cheat to get Firefox 57 to accept dates
+        f = find('#activity_log_player_contact_phone_follow_up_when')
+        f.send_keys opt[:when]
       end
     end
   end

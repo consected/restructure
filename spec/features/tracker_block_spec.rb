@@ -40,10 +40,10 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
   end
 
   def tracker_field_event_date match_date=nil
-    sleep 0.01
+    sleep 0.1
     f = find('#tracker_event_date')
     d = match_date || DateTime.now
-    f.value.match(/0?#{d.month}\/0?#{d.day}\/#{d.year}/)
+    f.value.match(/#{d.year}-0?#{d.month}-0?#{d.day}/)
   end
 
 
@@ -106,6 +106,14 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     expect(page).to have_css "#master_results_block", text: ''
     have_css "#search_count"
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
+
+    has_css? "#search_count .search_count"
+    sleep 2
+    v = find("#search_count").text
+    unless v && v.match(/[0-9]+/)
+      puts "About to fail"
+      puts @full_player_info.inspect
+    end
     expect(page).to have_css "#search_count", text: /[0-9]+/
 
     # Check we got some results
@@ -192,7 +200,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
 
-      find('.tracker-event_date input').set '02/02/2030'
+      find('.tracker-event_date input').send_keys '2030-02-02'
       click_button "Create Tracker"
     end
 
@@ -251,6 +259,11 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     items = page.all(:css, '.master-expander')
 
     ### Occasionally we fail here, perhaps due to bad test data?????
+    if items.length == 0
+      puts "About to fail with a bad result"
+      puts @full_player_info.inspect
+      puts protocol.name, sp.id, pe.id
+    end
     expect(items.length).to be > 0
 
     # Open the first person
@@ -325,11 +338,11 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
 
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp_new.id}'] option[value='#{pe_new.id}']").select_option
 
-      # Avoid a failure when we don't need to 
+      # Avoid a failure when we don't need to
       expect_tracker_date_to_be_today unless tracker_field_event_date(Date.parse('2030-02-02'))
 
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-      find('.tracker-event_date input').set '10/01/2125'
+      find('.tracker-event_date input').set '2125-10-01'
       click_button "Update Tracker"
 
     end

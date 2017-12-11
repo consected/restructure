@@ -10,7 +10,7 @@ module PlayerContactActions
     @master = @player.master
 
     expect(page).to have_css("#master-#{@player.master_id}")
-    expect(find("#master-#{@player.master_id} .player-names").text).to eq("#{@player.first_name.capitalize} #{"#{@player.middle_name.capitalize} " if @player.middle_name.capitalize}#{@player.last_name.capitalize}#{" (#{@player.nick_name.capitalize})" if @player.nick_name.capitalize}")
+    expect(find("#master-#{@player.master_id} .player-names").text).to eq("#{@player.first_name.capitalize} #{"#{@player.middle_name.capitalize} " unless @player.middle_name.blank?}#{@player.last_name.capitalize}#{" (#{@player.nick_name.capitalize})" unless @player.nick_name.blank?}")
 
 
     # click the result, if necessary

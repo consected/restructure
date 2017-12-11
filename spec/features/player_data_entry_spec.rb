@@ -1,11 +1,11 @@
 require 'rails_helper'
 
 describe "advanced search", js: true, driver: :app_firefox_driver do
-  
+
   include ModelSupport
   include MasterDataSupport
   include FeatureSupport
-  
+
   before(:all) do
     @admin, _ = create_admin
 
@@ -14,7 +14,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     gs.each {|g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save!}
 
     create_data_set
-    
+
     @user, @good_password  = create_user
     @good_email  = @user.email
 
@@ -43,75 +43,85 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       end
       click_button 'Create Player contact'
     end
-    
+
     expect(page).not_to have_css('form#new_player_contact')
-    
+
     # the list may reorganize and this can cause a race. Check the marker
 
     has_no_css? '.formatting-block'
-    
+
     p = ".#{ctype.downcase}-type li.player-contact-data strong"
     expect(page).to have_css(p)
 
     t = page.all(p).first.text
-    
+
     expect(t).to eq(expected)
 
   end
 
   def edit_date field, in_block, m, d, y, no_submit=false
 
-    months = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
-
-    expect(page).to have_css(in_block)
     within in_block do
-      f = find("input#{field}")
-      f.click
-
-      p = Capybara.find(:xpath, '//body').find('.datepicker')
-      
-      
-      expect(p).to have_css('.datepicker-years')
-
-      oldyear = p.find(".datepicker-years span.year.old")
-
-      while oldyear.text.to_i > y do
-        p.find(".datepicker-years th.prev").click        
-        oldyear = p.find(".datepicker-years span.year.old")
-      end
-
-      newyear = p.find(".datepicker-years span.year.new")
-
-      while newyear.text.to_i < y do
-        p.find(".datepicker-years th.next").click
-        oldyear = p.find(".datepicker-years span.year.new")
-      end
+       f = find("input#{field}")
+       k = "#{y}-#{'%02i' % m}-#{'%02i' % d}"
+       f.send_keys k
 
 
-      year = p.all(".datepicker-years span.year").select {|s| s.text == y.to_s}.first
-      #puts "Year: #{y} and old #{oldyear.text} and new #{newyear.text}" unless year
-      year.click
-      sleep 0.1
-      expect(p).to have_css('.datepicker-months')
-      month = p.all(".datepicker-months span.month").select {|s| s.text == months[m-1]}.first
-      month.click
-
-      t = p.find('.datepicker-switch').text
-      expect(t[0..2]).to eq(months[m-1])
-      
-      sleep 0.1
-
-      expect(p).to have_css('.datepicker-days')
-      expect(p).to have_css('.datepicker-days td.day[data-date]')
-      day = p.all(".datepicker-days td.day:not(.old)").select {|s| s.text == d.to_s}.first
-      day.click
-
-      sleep 1
+    # months = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
+    #
+    # expect(page).to have_css(in_block)
+    # within in_block do
+    #   f = find("input#{field}")
+    #   f.click
+    #
+    #   p = Capybara.find(:xpath, '//body').find('.datepicker')
+    #
+    #
+    #   expect(p).to have_css('.datepicker-years')
+    #
+    #   oldyear = p.find(".datepicker-years span.year.old")
+    #
+    #   while oldyear.text.to_i > y do
+    #     p.find(".datepicker-years th.prev").click
+    #     oldyear = p.find(".datepicker-years span.year.old")
+    #   end
+    #
+    #   newyear = p.find(".datepicker-years span.year.new")
+    #
+    #   while newyear.text.to_i < y do
+    #     p.find(".datepicker-years th.next").click
+    #     oldyear = p.find(".datepicker-years span.year.new")
+    #   end
+    #
+    #
+    #   year = p.all(".datepicker-years span.year").select {|s| s.text == y.to_s}.first
+    #   #puts "Year: #{y} and old #{oldyear.text} and new #{newyear.text}" unless year
+    #   year.click
+    #   sleep 0.1
+    #   expect(p).to have_css('.datepicker-months')
+    #   month = p.all(".datepicker-months span.month").select {|s| s.text == months[m-1]}.first
+    #   month.click
+    #
+    #   t = p.find('.datepicker-switch').text
+    #   expect(t[0..2]).to eq(months[m-1])
+    #
+    #   sleep 0.1
+    #
+    #   expect(p).to have_css('.datepicker-days')
+    #   expect(p).to have_css('.datepicker-days td.day[data-date]')
+    #   day = p.all(".datepicker-days td.day:not(.old)").select {|s| s.text == d.to_s}.first
+    #   day.click
+    #
+    #   sleep 1
       # check that the result is viewing correctly as a local date before attempting to match
       # search forms seem to get back to this a little slower than edit forms
-      expect(page).to have_css("input#{field}.date-is-local")
-      expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
+      # expect(page).to have_css("input#{field}.date-is-local")
+      # expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
+      expect(page).to have_css("input#{field}")
+      expect(f.value).to match(k)
+      sleep 1
       find('input[type="submit"]').click unless no_submit
+      sleep 1
     end
 
 
@@ -143,7 +153,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     else
       expect(all('.player-info-start_year strong').length).to eq 0
     end
-    
+
     if endyear!=''
       expect(page).to have_css('.player-info-item .list-group')
       t = find('.player-info-end_year strong').text
@@ -165,7 +175,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       f.click
       f.send_keys(keyed)
       sleep 1
-      
+
       h = '.tt-suggestion .tt-highlight'
       expect(page).to have_css(h)
       expect(page.all(h).first.text.downcase).to eq(keyed)
@@ -182,18 +192,20 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
   def search_dob m,d,y
     # test search birth date
-    edit_date('#master_general_infos_attributes_0_birth_date', '#master-search-simple', m,d,y)
+    edit_date('#master_general_infos_attributes_0_birth_date', '#master-search-simple', m,d,y, true)
 
+    have_css('#master_results_block')
+    sleep 1
     expect(page).to have_css('#master_results_block .player-info-header')
-    
+
+    expect(page).to have_css('.player-info-header')
     res = all('.player-info-header')
     t = res.first
-
-    
     expect(t.text).to include "DOB #{m}/#{d}/#{y}"
-    t.click unless res.length == 1
 
-    expect(page).to have_css('#master_results_block .panel-collapse.collapse.in')
+    me = all('a.master-expander')
+    el = me.first
+    open_player_element el, me
     have_css(".player-info-item a[title='edit']")
   end
 
@@ -242,7 +254,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     dd = player[:death_date]
     if dd
       b = all ".player-info-item a[title='edit']"
-      b.first.click      
+      b.first.click
       edit_date('#player_info_death_date', 'form.edit_player_info', dd.month, dd.day, dd.year)
 
       expect(page).to have_css("li.list-group-item.player-info-death_date")
@@ -253,20 +265,20 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
   before :each do
     user = User.where(email: @good_email).first
-    
+
     expect(user).to be_a User
     expect(user.id).to equal @user.id
-    
+
     #login_as @user, scope: :user
-    
+
     login
 
   end
 
 
-  
+
   it "should allow a new MSID and player information to be added" do
-    
+
     visit "/masters/search"
 
     # create MSID
@@ -290,7 +302,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     item_type = 'player_infos_source'
     sources = GeneralSelection.where(item_type: item_type)
-    
+
     edit_player_info 'Robert', 'Andrew-Yamel', nil, nil, sources.first.name
 
     # edit college
@@ -299,7 +311,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     edit_college 'Harvard', 'har'
 
-    # edit birth date with one know to cause issues (daylight savings)
+    # edit birth date with one known to cause issues (daylight savings)
 
     b = all ".player-info-item a[title='edit']"
     b.first.click
@@ -314,19 +326,20 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     search_dob 3, 26, 2012
 
-    #edit previously entered date 
+    #edit previously entered date
     b = all ".player-info-item a[title='edit']"
     b.first.click
-    expect(find('#player_info_birth_date').value).to match(/0?3\/26\/2012/)
+    # expect(find('#player_info_birth_date').value).to match(/0?3\/26\/2012/)
+    expect(find('#player_info_birth_date').value).to match("2012-03-26")
     edit_date('#player_info_birth_date', 'form.edit_player_info', 3, 5, 1976)
 
+    sleep 1
     search_dob 3, 5, 1976
-
-
+    sleep 1
     # Add address
-
     expect(page).to have_css('[data-sub-list="addresses"]')
-    find('[data-sub-list="addresses"] a.add-item-button').click 
+
+    find('[data-sub-list="addresses"] a.add-item-button').click
     expect(page).to have_css("form#new_address")
 
     within "form#new_address" do
@@ -342,7 +355,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     add_contact('Phone', '6171239876', '(617)123-9876')
     add_contact('Phone', '6171239876 ext 132', '(617)123-9876 Ext 132')
     add_contact('Phone', 'abc6171239000', '(617)123-9000')
-    
+
 
     # add player info tags
 
@@ -350,7 +363,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     i = 'ul.chosen-choices .search-field input.default'
     expect(page).to have_css(i)
-    
+
     f = find(i)
     f.click
     f.send_keys('f')
@@ -396,9 +409,8 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
 
   end
- 
+
   after(:all) do
-    
+
   end
 end
-
