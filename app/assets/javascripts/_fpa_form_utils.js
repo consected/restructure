@@ -466,7 +466,7 @@ _fpa.form_utils = {
       });
 
       // start by setting the date fields to show the date using the locale
-      block.find('input[type="date"], input[type="datepicker"]').not('.date-is-local').each(function(){
+      block.find('input[type="date"], input.force-datepicker, input[type="datepicker"]').not('.date-is-local').each(function(){
         var v = $(this).val();
 
         if(v && v != ''){
@@ -495,8 +495,8 @@ _fpa.form_utils = {
           $(this).datepicker('hide');
         });
 
-        // use a mask to improve experience
         $(this).mask('09\/09\/0000', {translation: _fpa.masker.translation, placeholder: "__/__/____"});
+
       }).addClass('attached-datepicker date-is-local');
 
     },

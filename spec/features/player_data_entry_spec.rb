@@ -75,7 +75,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
        else
         f.click
-
+        sleep 0.5
         p = Capybara.find(:xpath, '//body').find('.datepicker')
 
 
