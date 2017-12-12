@@ -460,13 +460,14 @@ _fpa.form_utils = {
       block.find('input[type="date"]').each(function(){
         if($(this).prop('type') == 'date') {
           $(this).prop('type', 'datepicker');
-          $(this).attr('type', 'datepicker');
           $(this).addClass('force-datepicker');
-        };
+        }
+        $(this).attr('type', 'datepicker');
       });
 
       // start by setting the date fields to show the date using the locale
-      block.find('input[type="date"], input.force-datepicker, input[type="datepicker"]').not('.date-is-local').each(function(){
+      // only for the
+      block.find('input[type="datepicker"]').not('.date-is-local').each(function(){
         var v = $(this).val();
 
         if(v && v != ''){
