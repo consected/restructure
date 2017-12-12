@@ -456,14 +456,17 @@ _fpa.form_utils = {
 
     setup_datepickers: function(block){
 
-      // start by setting the date fields to show the date using the locale
-      block.find('input[type="date"], input[type="datepicker"]').not('.date-is-local').each(function(){
+      // force date type fields to use the date picker by making them fall back to text
+      block.find('input[type="date"]').each(function(){
         if($(this).prop('type') == 'date') {
           $(this).prop('type', 'datepicker');
           $(this).attr('type', 'datepicker');
           $(this).addClass('force-datepicker');
         };
+      });
 
+      // start by setting the date fields to show the date using the locale
+      block.find('input[type="date"], input[type="datepicker"]').not('.date-is-local').each(function(){
         var v = $(this).val();
 
         if(v && v != ''){
@@ -492,6 +495,7 @@ _fpa.form_utils = {
           $(this).datepicker('hide');
         });
 
+        // use a mask to improve experience
         $(this).mask('09\/09\/0000', {translation: _fpa.masker.translation, placeholder: "__/__/____"});
       }).addClass('attached-datepicker date-is-local');
 
