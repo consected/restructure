@@ -58,7 +58,6 @@ module LogCallActions
         if opt[:when].is_a? Date
           if f[:type] == 'date'
             opt[:when] = opt[:when].strftime('%Y-%m-%d')
-            # fill_in "Follow up when", with: opt[:when]
             # We have to cheat to get Firefox 57 to accept dates
             f.send_keys opt[:when]
           else
