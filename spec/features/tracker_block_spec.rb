@@ -41,9 +41,15 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
 
   def tracker_field_event_date match_date=nil
     sleep 0.1
-    f = find('#tracker_event_date')
+
+    dd = find('.tracker-event_date input')
+    
     d = match_date || DateTime.now
-    f.value.match(/#{d.year}-0?#{d.month}-0?#{d.day}/)
+    if dd[:type == 'date']
+      dd.value.match(/#{d.year}-0?#{d.month}-0?#{d.day}/)
+    else
+      dd.value.match(/0?#{d.month}\/0?#{d.day}\/#{d.year}/)
+    end
   end
 
 
@@ -201,7 +207,12 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
       find("#tracker_protocol_event_id[data-parent-filter-id='#{sp.id}'] option[value='#{pe.id}']").select_option
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
 
-      find('.tracker-event_date input').send_keys '2030-02-02'
+      dd = find('.tracker-event_date input')
+      if dd[:type == 'date']
+        dd.send_keys '2030-02-02'
+      else
+        dd.set '02/02/2030'
+      end
       click_button "Create Tracker"
     end
 
@@ -344,7 +355,12 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
       expect_tracker_date_to_be_today unless tracker_field_event_date(Date.parse('2030-02-02'))
 
       # We have to set this explicitly rather than use fill_in, since the shim for date fields in Firefox creates a separate input
-      find('.tracker-event_date input').set '2125-10-01'
+      dd = find('.tracker-event_date input')
+      if dd[:type == 'date']
+        dd.set '2125-10-01'
+      else
+        dd.set '10/01/2125'
+      end
       click_button "Update Tracker"
 
     end

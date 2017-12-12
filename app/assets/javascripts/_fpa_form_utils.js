@@ -75,7 +75,7 @@ _fpa.form_utils = {
 
     date_inputs_to_iso: function(block){
 
-      var dates = block.find('input[type="date"].date-is-local');
+      var dates = block.find('input.date-is-local');
       if(dates.length > 0){
 
         dates.each(function(){
@@ -423,13 +423,13 @@ _fpa.form_utils = {
     },
 
     mask_inputs: function(block) {
-      block.find('[pattern]').not('.attached-datatoggle-pattern, [type="password"], [type="date"]').each(function(){
+      block.find('[pattern]').not('.attached-datatoggle-pattern, [type="password"]').each(function(){
           var p = $(this).attr('pattern');
           var t = $(this).attr('type');
           var d = $(this).attr('data-mask');
           var m;
           if((!d || d === '') && (p && p !== '') ){
-            if(t != 'text') {
+            if(t != 'text' && t != 'datepicker' && t != 'date') {
               $(this).attr('type', 'text');
               $(this).attr('data-unmask', t);
             }
@@ -457,8 +457,12 @@ _fpa.form_utils = {
     setup_datepickers: function(block){
 
       // start by setting the date fields to show the date using the locale
-      block.find('input[type="date"]').not('.date-is-local').each(function(){
-        if($(this).prop('type') == 'date') return;
+      block.find('input[type="date"], input[type="datepicker"]').not('.date-is-local').each(function(){
+        if($(this).prop('type') == 'date') {
+          $(this).prop('type', 'datepicker');
+          $(this).attr('type', 'datepicker');
+          $(this).addClass('force-datepicker');
+        };
 
         var v = $(this).val();
 
@@ -471,17 +475,25 @@ _fpa.form_utils = {
       });
 
       // finally, set up datepickers on any fields that don't already have them
-      block.find('input[type="date"]').not('.attached-datepicker').each(function(){
-
-        if($(this).prop('type') == 'date') return;
+      block.find('input.force-datepicker, input[type="datepicker"]').not('.attached-datepicker').each(function(){
 
         $(this).datepicker({
           startView: 2,
           clearBtn: true,
           autoclose: true,
           format: 'm/d/yyyy'
-        }).addClass('attached-datepicker date-is-local');
-      });
+        });
+
+        $(this).on('click', function(){
+          $(this).datepicker('show');
+        });
+
+        $(this).on('keypress', function(){
+          $(this).datepicker('hide');
+        });
+
+        $(this).mask('09\/09\/0000', {translation: _fpa.masker.translation, placeholder: "__/__/____"});
+      }).addClass('attached-datepicker date-is-local');
 
     },
 

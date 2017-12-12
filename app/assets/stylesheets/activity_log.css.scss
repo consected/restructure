@@ -73,7 +73,7 @@ span.related-tracker-collapser .list-group-item:first-child {
   }
 }
 
-.activity-log-list input[type='date'] {
+.activity-log-list input[type='date'], .activity-log-list input[type='datepicker'] {
   max-width: 7em;
 }
 

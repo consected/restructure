@@ -61,65 +61,66 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
   def edit_date field, in_block, m, d, y, no_submit=false
 
+    months = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
+
+    expect(page).to have_css(in_block)
     within in_block do
        f = find("input#{field}")
-       k = "#{y}-#{'%02i' % m}-#{'%02i' % d}"
-       f.send_keys k
+       if f[:type] == 'date'
+         k = "#{y}-#{'%02i' % m}-#{'%02i' % d}"
+         f.send_keys k
+         expect(page).to have_css("input#{field}")
+         expect(f.value).to match(k)
+         sleep 1
+
+       else
+        f.click
+
+        p = Capybara.find(:xpath, '//body').find('.datepicker')
 
 
-    # months = %w(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec)
-    #
-    # expect(page).to have_css(in_block)
-    # within in_block do
-    #   f = find("input#{field}")
-    #   f.click
-    #
-    #   p = Capybara.find(:xpath, '//body').find('.datepicker')
-    #
-    #
-    #   expect(p).to have_css('.datepicker-years')
-    #
-    #   oldyear = p.find(".datepicker-years span.year.old")
-    #
-    #   while oldyear.text.to_i > y do
-    #     p.find(".datepicker-years th.prev").click
-    #     oldyear = p.find(".datepicker-years span.year.old")
-    #   end
-    #
-    #   newyear = p.find(".datepicker-years span.year.new")
-    #
-    #   while newyear.text.to_i < y do
-    #     p.find(".datepicker-years th.next").click
-    #     oldyear = p.find(".datepicker-years span.year.new")
-    #   end
-    #
-    #
-    #   year = p.all(".datepicker-years span.year").select {|s| s.text == y.to_s}.first
-    #   #puts "Year: #{y} and old #{oldyear.text} and new #{newyear.text}" unless year
-    #   year.click
-    #   sleep 0.1
-    #   expect(p).to have_css('.datepicker-months')
-    #   month = p.all(".datepicker-months span.month").select {|s| s.text == months[m-1]}.first
-    #   month.click
-    #
-    #   t = p.find('.datepicker-switch').text
-    #   expect(t[0..2]).to eq(months[m-1])
-    #
-    #   sleep 0.1
-    #
-    #   expect(p).to have_css('.datepicker-days')
-    #   expect(p).to have_css('.datepicker-days td.day[data-date]')
-    #   day = p.all(".datepicker-days td.day:not(.old)").select {|s| s.text == d.to_s}.first
-    #   day.click
-    #
-    #   sleep 1
-      # check that the result is viewing correctly as a local date before attempting to match
-      # search forms seem to get back to this a little slower than edit forms
-      # expect(page).to have_css("input#{field}.date-is-local")
-      # expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
-      expect(page).to have_css("input#{field}")
-      expect(f.value).to match(k)
-      sleep 1
+        expect(p).to have_css('.datepicker-years')
+
+        oldyear = p.find(".datepicker-years span.year.old")
+
+        while oldyear.text.to_i > y do
+          p.find(".datepicker-years th.prev").click
+          oldyear = p.find(".datepicker-years span.year.old")
+        end
+
+        newyear = p.find(".datepicker-years span.year.new")
+
+        while newyear.text.to_i < y do
+          p.find(".datepicker-years th.next").click
+          oldyear = p.find(".datepicker-years span.year.new")
+        end
+
+
+        year = p.all(".datepicker-years span.year").select {|s| s.text == y.to_s}.first
+        #puts "Year: #{y} and old #{oldyear.text} and new #{newyear.text}" unless year
+        year.click
+        sleep 0.1
+        expect(p).to have_css('.datepicker-months')
+        month = p.all(".datepicker-months span.month").select {|s| s.text == months[m-1]}.first
+        month.click
+
+        t = p.find('.datepicker-switch').text
+        expect(t[0..2]).to eq(months[m-1])
+
+        sleep 0.1
+
+        expect(p).to have_css('.datepicker-days')
+        expect(p).to have_css('.datepicker-days td.day[data-date]')
+        day = p.all(".datepicker-days td.day:not(.old)").select {|s| s.text == d.to_s}.first
+        day.click
+
+        sleep 1
+        # check that the result is viewing correctly as a local date before attempting to match
+        # search forms seem to get back to this a little slower than edit forms
+         expect(page).to have_css("input#{field}.date-is-local")
+         expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
+      end
+
       find('input[type="submit"]').click unless no_submit
       sleep 1
     end
@@ -320,6 +321,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     edit_date('#player_info_birth_date', 'form.edit_player_info', 3,26,2012)
 
     expect(page).to have_css("li.list-group-item.player-info-birth_date")
+    expect(page).to have_css("li.list-group-item.player-info-birth_date strong")
     t = find("li.list-group-item.player-info-birth_date strong").text
     expect(t).to match(/0?3\/26\/2012/)
 
@@ -329,18 +331,17 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     #edit previously entered date
     b = all ".player-info-item a[title='edit']"
     b.first.click
-    # expect(find('#player_info_birth_date').value).to match(/0?3\/26\/2012/)
-    expect(find('#player_info_birth_date').value).to match("2012-03-26")
+    dd = find('#player_info_birth_date')
+    if dd[:type] == 'date'
+      expect(find('#player_info_birth_date').value).to match("2012-03-26")
+    else
+      expect(dd.value).to match(/0?3\/26\/2012/)
+    end
     edit_date('#player_info_birth_date', 'form.edit_player_info', 3, 5, 1976)
 
     sleep 1
     search_dob 3, 5, 1976
     sleep 1
-
-    if all('[data-sub-list="addresses"]').length == 0
-      b.first.click
-    end
-
     # Add address
     expect(page).to have_css('[data-sub-list="addresses"]')
 
