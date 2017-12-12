@@ -423,7 +423,7 @@ _fpa.form_utils = {
     },
 
     mask_inputs: function(block) {
-      block.find('[pattern]').not('.attached-datatoggle-pattern').each(function(){
+      block.find('[pattern]').not('.attached-datatoggle-pattern, [type="password"], [type="date"]').each(function(){
           var p = $(this).attr('pattern');
           var t = $(this).attr('type');
           var d = $(this).attr('data-mask');

@@ -193,6 +193,7 @@ _fpa.postprocessors_trackers = {
             var el = block.find('#tracker_event_date');
             //if(!_fpa.utils.is_blank(field.val())){
                 el.parents('div').first().show();
+
                 // var v = (new Date()).asLocale();
                 var v = (new Date()).asYMD();
                 if(force) {

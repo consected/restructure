@@ -7,6 +7,8 @@ _fpa.masker.mask_from_pattern = function(p) {
   var s = '';
   var v = '';
   var vopt = '';
+  var vrec = '';
+  var reverse = false;
   var opt_block = false;
   var opt_follow = false;
   var re_curl = /^\{(\d+),?(\d*)?\}/
@@ -14,7 +16,13 @@ _fpa.masker.mask_from_pattern = function(p) {
   for(var i = 0; i < p.length ; i++){
     var c = p[i];
     if(s !== 'escape') {
-      if(c === '\\') {
+      if(c === '.') {
+        s = 'char';
+        v = 'W';
+        vopt = 'X';
+        vrec = 'Y';
+      }
+      else if(c === '\\') {
         s = 'escape';
       }
       else if(c === '(') {
@@ -64,16 +72,14 @@ _fpa.masker.mask_from_pattern = function(p) {
         s = 'char';
         v = '0';
         vopt = '9';
-      }
-      else if(c === '.') {
-        s = 'char';
-        v = 'A';
-        vopt = 'B';
+        vrec = '*';
+        reverse = true;
       }
       else if(c === 'D') {
         s = 'char';
         v = 'S';
         vopt = 'T';
+        vrec = 'R';
       }
       else {
         s = 'char';
@@ -87,11 +93,17 @@ _fpa.masker.mask_from_pattern = function(p) {
     if(s === 'char') {
       times = 1;
       opttimes = 0;
+      recursive = 0;
       if (r) {
         r1 = r[1];
         r2 = r[2];
         if(r1 && r[0].indexOf(',') < 0){
           times = parseInt(r1);
+        }
+        else if(r1 && !r2){
+          // Have a comma indicating no max limit
+          times = parseInt(r1);
+          recursive = 1;
         }
 
         if(r1 === '0' && r2){
@@ -102,17 +114,38 @@ _fpa.masker.mask_from_pattern = function(p) {
           times = parseInt(r1);
           opttimes = parseInt(r2) - parseInt(r1);
         }
+
         i += r[0].length;
       }
 
-      for(var j = 0; j < opttimes; j++) {
-        m += vopt;
-      }
-      for(var j = 0; j < times; j++) {
-        if(!opt_block)
-          m += v;
-        else
+      if(!reverse){
+        for(var j = 0; j < times; j++) {
+          if(!opt_block)
+            m += v;
+          else
+            m += vopt;
+        }
+
+        for(var j = 0; j < opttimes; j++) {
           m += vopt;
+        }
+
+        if(recursive)
+          m += vrec;
+      }
+      else {
+        if(recursive)
+          m += vrec;
+
+        for(var j = 0; j < opttimes; j++) {
+          m += vopt;
+        }
+        for(var j = 0; j < times; j++) {
+          if(!opt_block)
+            m += v;
+          else
+            m += vopt;
+        }
       }
       prev_s = s;
       prev_v = v;
@@ -140,4 +173,9 @@ _fpa.masker.translation = {
   'T': {pattern: /[a-zA-Z]/, optional: true},
   'R': {pattern: /[a-zA-Z]/, optional: true, recursive: true},
   'U': {pattern: /[a-zA-Z]/, recursive: true},
+  'W': {pattern: /./},
+  'X': {pattern: /./, optional: true},
+  'Y': {pattern: /./, optional: true, recursive: true},
+  'Z': {pattern: /./, recursive: true},
+
 };
