@@ -336,6 +336,11 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     sleep 1
     search_dob 3, 5, 1976
     sleep 1
+
+    if all('[data-sub-list="addresses"]').length == 0
+      b.first.click
+    end
+
     # Add address
     expect(page).to have_css('[data-sub-list="addresses"]')
 

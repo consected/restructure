@@ -78,6 +78,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     unless v && v.match(/[0-9]+/)
       puts "About to fail"
       puts @full_player_info.inspect
+      sleep 10
     end
 
     expect(page).to have_css "#search_count .search_count", text: /[0-9]+/

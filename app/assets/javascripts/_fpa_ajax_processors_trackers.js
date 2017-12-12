@@ -155,7 +155,7 @@ _fpa.postprocessors_trackers = {
         // If the new tracker item is linked to an activity log item
         // trigger a click on the link icon to refresh the activity log item and
         // scroll back to it
-        if(data.tracker && (data.tracker._created || data.tracker._merged) && data.tracker.record_type.indexOf('ActivityLog::')==0) {
+        if(data.tracker && (data.tracker._created || data.tracker._merged) && data.tracker.record_type && data.tracker.record_type.indexOf('ActivityLog::')==0) {
           var newlink = $('#tracker-'+data.tracker.master_id+'-'+data.tracker.id+' a[data-master-id="'+data.tracker.master_id+'"][data-record-id="'+data.tracker.record_id+'"]');
           newlink.click();
         }
