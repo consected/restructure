@@ -173,6 +173,9 @@ module ExternalIdHandler
     def masters_without_assignment
       all_assigned = self.where('master_id is not null').map(&:master_id)
 
+      # Add a dummy item that prevents the query returning no items if
+      # the all_assigned array is empty
+      all_assigned << -1
       Master.where("id not in (?)", all_assigned)
     end
 
@@ -189,9 +192,9 @@ module ExternalIdHandler
         tnow = DateTime.now.iso8601
         self.transaction do
           sql = "INSERT into #{self.table_name} (#{external_id_attribute}, admin_id, master_id, created_at, updated_at) VALUES "
-          masters_without_assignment.each do |m|
-            item = m.id
-            value_items << "('#{generate_random_id.to_s}', #{admin.id}, #{m.id}, '#{tnow}', '#{tnow}')"
+          masters_without_assignment.pluck(:id).each do |m|
+            item = m
+            value_items << "('#{generate_random_id.to_s}', #{admin.id}, #{m}, '#{tnow}', '#{tnow}')"
             items << item
           end
           sql << value_items.join(',')
@@ -232,7 +235,7 @@ module ExternalIdHandler
         logger.info "Failed to create a #{self.name.humanize} record due to an random duplicate"
       end
 
-      
+
       res
     end
 
