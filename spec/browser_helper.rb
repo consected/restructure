@@ -20,9 +20,12 @@ module BrowserHelper
       if `pgrep Xvfb`.blank?
         puts "Running new Xvfb headless X server"
         `Xvfb +extension RANDR :99 -screen 0 1600x1200x16 &`
+      end
+      if `pgrep x11vnc`.blank?
+        puts "New x11vnc server will start on port 5901 with display #{ENV['DISPLAY']} in 5 seconds"
         `sleep 5; x11vnc -display $DISPLAY -bg -nopw -listen localhost -xkb  -rfbport 5901`
       end
-      puts "Xvfb headless X server is running"
+      puts "Xvfb headless X server and x11vnc have been started"
     end
 
     cb = Capybara
