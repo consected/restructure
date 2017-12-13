@@ -147,6 +147,10 @@ EOF
       ALTER TABLE ONLY #{singular_name}_history
           ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_table_id) REFERENCES #{name}(id);
 
+
+      GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
+      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
+      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 EOF
     end
 
