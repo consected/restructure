@@ -608,6 +608,56 @@ CREATE FUNCTION log_accuracy_score_update() RETURNS trigger
 
 
 --
+-- Name: log_activity_log_player_contact_phone_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_activity_log_player_contact_phone_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                INSERT INTO activity_log_player_contact_phone_history
+                (
+                    master_id,
+                    player_contact_id,
+                    data,
+                    select_call_direction,
+                    select_who,
+                    called_when,
+                    select_result,
+                    select_next_step,
+                    follow_up_when,
+                    notes,
+                    protocol_id,
+                    set_related_player_contact_rank,
+                    user_id,
+                    created_at,
+                    updated_at,
+                    activity_log_player_contact_phone_id
+                    )
+                SELECT
+                    NEW.master_id,
+                    NEW.player_contact_id,
+                    NEW.data,
+                    NEW.select_call_direction,
+                    NEW.select_who,
+                    NEW.called_when,
+                    NEW.select_result,
+                    NEW.select_next_step,
+                    NEW.follow_up_when,
+                    NEW.notes,
+                    NEW.protocol_id,
+                    NEW.set_related_player_contact_rank,
+                    NEW.user_id,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
+
+
+--
 -- Name: log_activity_log_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -624,7 +674,10 @@ CREATE FUNCTION log_activity_log_update() RETURNS trigger
                         updated_at,
                         item_type,
                         rec_type,
-                        disabled
+                        disabled,
+                        action_when_attribute,
+                        field_list,
+                        blank_log_field_list
                         )
                     SELECT
                         NEW.name,
@@ -634,7 +687,10 @@ CREATE FUNCTION log_activity_log_update() RETURNS trigger
                         NEW.updated_at,
                         NEW.item_type,
                         NEW.rec_type,
-                        NEW.disabled
+                        NEW.disabled,
+                        NEW.action_when_attribute,
+                        NEW.field_list,
+                        NEW.blank_log_field_list
                     ;
                     RETURN NEW;
                 END;
@@ -825,6 +881,52 @@ CREATE FUNCTION log_dynamic_model_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_external_identifier_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_external_identifier_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+                BEGIN
+                    INSERT INTO external_identifier_history
+                    (
+                        name,
+                        external_identifier_id,
+                        label,
+                        external_id_attribute,
+                        external_id_view_formatter,
+                        external_id_edit_pattern,
+                        prevent_edit,
+                        pregenerate_ids,
+                        min_id,
+                        max_id,
+                        admin_id,
+                        created_at,
+                        updated_at,
+                        disabled
+                        )
+                    SELECT
+                        NEW.name,
+                        NEW.id,
+                        NEW.label,
+                        NEW.external_id_attribute,
+                        NEW.external_id_view_formatter,
+                        NEW.external_id_edit_pattern,
+                        NEW.prevent_edit,
+                        NEW.pregenerate_ids,
+                        NEW.min_id,
+                        NEW.max_id,
+                        NEW.admin_id,
+                        NEW.created_at,
+                        NEW.updated_at,
+                        NEW.disabled
+                    ;
+                    RETURN NEW;
+                END;
+            $$;
 
 
 --
@@ -1665,7 +1767,10 @@ CREATE TABLE activity_log_history (
     admin_id integer,
     disabled boolean,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    action_when_attribute character varying,
+    field_list character varying,
+    blank_log_field_list character varying
 );
 
 
@@ -1686,6 +1791,50 @@ CREATE SEQUENCE activity_log_history_id_seq
 --
 
 ALTER SEQUENCE activity_log_history_id_seq OWNED BY activity_log_history.id;
+
+
+--
+-- Name: activity_log_player_contact_phone_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE activity_log_player_contact_phone_history (
+    id integer NOT NULL,
+    master_id integer,
+    player_contact_id integer,
+    data character varying,
+    select_call_direction character varying,
+    select_who character varying,
+    called_when date,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    notes character varying,
+    protocol_id integer,
+    set_related_player_contact_rank character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_player_contact_phone_id integer
+);
+
+
+--
+-- Name: activity_log_player_contact_phone_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE activity_log_player_contact_phone_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_contact_phone_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE activity_log_player_contact_phone_history_id_seq OWNED BY activity_log_player_contact_phone_history.id;
 
 
 --
@@ -2125,6 +2274,48 @@ CREATE SEQUENCE dynamic_models_id_seq
 --
 
 ALTER SEQUENCE dynamic_models_id_seq OWNED BY dynamic_models.id;
+
+
+--
+-- Name: external_identifier_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE external_identifier_history (
+    id integer NOT NULL,
+    name character varying,
+    label character varying,
+    external_id_attribute character varying,
+    external_id_view_formatter character varying,
+    external_id_edit_pattern character varying,
+    prevent_edit boolean,
+    pregenerate_ids boolean,
+    min_id bigint,
+    max_id bigint,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    external_identifier_id integer
+);
+
+
+--
+-- Name: external_identifier_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE external_identifier_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: external_identifier_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE external_identifier_history_id_seq OWNED BY external_identifier_history.id;
 
 
 --
@@ -3574,6 +3765,13 @@ ALTER TABLE ONLY activity_log_history ALTER COLUMN id SET DEFAULT nextval('activ
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY activity_log_player_contact_phone_history ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_phone_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY activity_log_player_contact_phones ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_phones_id_seq'::regclass);
 
 
@@ -3638,6 +3836,13 @@ ALTER TABLE ONLY dynamic_model_history ALTER COLUMN id SET DEFAULT nextval('dyna
 --
 
 ALTER TABLE ONLY dynamic_models ALTER COLUMN id SET DEFAULT nextval('dynamic_models_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY external_identifier_history ALTER COLUMN id SET DEFAULT nextval('external_identifier_history_id_seq'::regclass);
 
 
 --
@@ -3917,6 +4122,14 @@ ALTER TABLE ONLY activity_log_history
 
 
 --
+-- Name: activity_log_player_contact_phone_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY activity_log_player_contact_phone_history
+    ADD CONSTRAINT activity_log_player_contact_phone_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_player_contact_phones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -3994,6 +4207,14 @@ ALTER TABLE ONLY dynamic_model_history
 
 ALTER TABLE ONLY dynamic_models
     ADD CONSTRAINT dynamic_models_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: external_identifier_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY external_identifier_history
+    ADD CONSTRAINT external_identifier_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -4338,6 +4559,34 @@ CREATE INDEX index_activity_log_history_on_activity_log_id ON activity_log_histo
 
 
 --
+-- Name: index_activity_log_player_contact_phone_history_on_activity_log; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_phone_history_on_activity_log ON activity_log_player_contact_phone_history USING btree (activity_log_player_contact_phone_id);
+
+
+--
+-- Name: index_activity_log_player_contact_phone_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_phone_history_on_master_id ON activity_log_player_contact_phone_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_contact_phone_history_on_player_conta; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_phone_history_on_player_conta ON activity_log_player_contact_phone_history USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_phone_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_phone_history_on_user_id ON activity_log_player_contact_phone_history USING btree (user_id);
+
+
+--
 -- Name: index_activity_log_player_contact_phones_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4440,6 +4689,20 @@ CREATE INDEX index_dynamic_model_history_on_dynamic_model_id ON dynamic_model_hi
 --
 
 CREATE INDEX index_dynamic_models_on_admin_id ON dynamic_models USING btree (admin_id);
+
+
+--
+-- Name: index_external_identifier_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_external_identifier_history_on_admin_id ON external_identifier_history USING btree (admin_id);
+
+
+--
+-- Name: index_external_identifier_history_on_external_identifier_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_external_identifier_history_on_external_identifier_id ON external_identifier_history USING btree (external_identifier_id);
 
 
 --
@@ -4919,6 +5182,20 @@ CREATE TRIGGER activity_log_history_update AFTER UPDATE ON activity_logs FOR EAC
 
 
 --
+-- Name: activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_phone_history_insert AFTER INSERT ON activity_log_player_contact_phones FOR EACH ROW EXECUTE PROCEDURE log_activity_log_player_contact_phone_update();
+
+
+--
+-- Name: activity_log_player_contact_phone_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_contact_phone_history_update AFTER UPDATE ON activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_player_contact_phone_update();
+
+
+--
 -- Name: address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -4986,6 +5263,20 @@ CREATE TRIGGER dynamic_model_history_insert AFTER INSERT ON dynamic_models FOR E
 --
 
 CREATE TRIGGER dynamic_model_history_update AFTER UPDATE ON dynamic_models FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_dynamic_model_update();
+
+
+--
+-- Name: external_identifier_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER external_identifier_history_insert AFTER INSERT ON external_identifiers FOR EACH ROW EXECUTE PROCEDURE log_external_identifier_update();
+
+
+--
+-- Name: external_identifier_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER external_identifier_history_update AFTER UPDATE ON external_identifiers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_external_identifier_update();
 
 
 --
@@ -5270,6 +5561,38 @@ ALTER TABLE ONLY accuracy_score_history
 
 
 --
+-- Name: fk_activity_log_player_contact_phone_history_activity_log_playe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_activity_log_playe FOREIGN KEY (activity_log_player_contact_phone_id) REFERENCES activity_log_player_contact_phones(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_phone_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_phone_history_player_contact_pho; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_player_contact_pho FOREIGN KEY (player_contact_id) REFERENCES player_contacts(id);
+
+
+--
+-- Name: fk_activity_log_player_contact_phone_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_player_contact_phone_history
+    ADD CONSTRAINT fk_activity_log_player_contact_phone_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_address_history_addresses; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5422,6 +5745,14 @@ ALTER TABLE ONLY masters
 
 
 --
+-- Name: fk_rails_0210618434; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY external_identifier_history
+    ADD CONSTRAINT fk_rails_0210618434 FOREIGN KEY (external_identifier_id) REFERENCES external_identifiers(id);
+
+
+--
 -- Name: fk_rails_08e7f66647; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -5555,6 +5886,14 @@ ALTER TABLE ONLY colleges
 
 ALTER TABLE ONLY protocol_events
     ADD CONSTRAINT fk_rails_564af80fb6 FOREIGN KEY (sub_process_id) REFERENCES sub_processes(id);
+
+
+--
+-- Name: fk_rails_5b0628cf42; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY external_identifier_history
+    ADD CONSTRAINT fk_rails_5b0628cf42 FOREIGN KEY (admin_id) REFERENCES admins(id);
 
 
 --
