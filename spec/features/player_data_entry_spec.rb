@@ -117,8 +117,14 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
         sleep 1
         # check that the result is viewing correctly as a local date before attempting to match
         # search forms seem to get back to this a little slower than edit forms
-         expect(page).to have_css("input#{field}.date-is-local")
-         expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
+         expect(page).to have_css("input#{field}")
+         sleep 1
+         f = find("input#{field}")
+         if f[:class].include?('date-is-local')
+           expect(f.value).to match(/0?#{m}\/0?#{d}\/#{y}/)
+         else
+           expect(f.value).to match(/#{y}-0?#{m}-0?#{d}/)
+         end
       end
 
       find('input[type="submit"]').click unless no_submit

@@ -497,8 +497,8 @@ _fpa.form_utils = {
         });
 
         $(this).mask('09\/09\/0000', {translation: _fpa.masker.translation, placeholder: "__/__/____"});
-
-      }).addClass('attached-datepicker date-is-local');
+        $(this).addClass('attached-datepicker date-is-local');
+      });
 
     },
 
