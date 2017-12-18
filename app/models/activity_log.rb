@@ -447,6 +447,7 @@ class ActivityLog < ActiveRecord::Base
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
           db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{val.join(' ')}
         Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
+        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "
         errors.add :name, err
         # Force exit of callbacks

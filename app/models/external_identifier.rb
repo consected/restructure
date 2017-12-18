@@ -255,6 +255,7 @@ class ExternalIdentifier < ActiveRecord::Base
         raise FphsException.new("name: #{name} does not exist as a table in the database. Ensure the DB table #{name} has been created. Run:
         \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
         to generate the SQL for this table.
+        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
          ")
       end
     end
@@ -289,6 +290,7 @@ class ExternalIdentifier < ActiveRecord::Base
       raise FphsException.new "The implementation of #{model_class_name} was not completed. Ensure the DB table #{name} has been created. Run:
       \`db/table_generators/generate.sh external_identifiers_table create #{name} #{external_id_attribute}\`
       to generate the SQL for this table.
+      IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
        " unless res
     end
   end
