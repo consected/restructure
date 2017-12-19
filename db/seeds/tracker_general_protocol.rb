@@ -9,34 +9,34 @@ module Seeds
     end
 
     def self.create_protocol_events
-      
-      protocol = Protocol.find_or_initialize_by(name: 'General')
+
+      protocol = Protocol.active.find_or_initialize_by(name: 'General')
       protocol.current_admin = auto_admin
       protocol.position = 50
       protocol.save!
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Communications')
       sp.current_admin = auto_admin
       sp.save!
-      
+
       values = [
         {name: "communication (incoming)", disabled: false, sub_process_id: sp.id, milestone: nil, description: nil},
-        {name: "communication (outgoing)", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil}        
+        {name: "communication (outgoing)", disabled: nil, sub_process_id: sp.id, milestone: nil, description: nil}
       ]
-      
+
       add_values values, sp
-      
+
     end
-    
-    
+
+
     def self.setup
       log "In #{self}.setup"
-      if Rails.env.test? || Protocol.count == 0
+      if Rails.env.test? || Protocol.active.count == 0
         create_protocol_events
         log "Ran #{self}.setup"
       else
         log "Did not run #{self}.setup"
       end
-      
+
     end
   end
 end

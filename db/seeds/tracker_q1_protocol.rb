@@ -9,8 +9,8 @@ module Seeds
     end
 
     def self.create_protocol_events
-      
-      protocol = Protocol.find_or_initialize_by(name: 'Q1')
+
+      protocol = Protocol.active.find_or_initialize_by(name: 'Q1')
       protocol.current_admin = auto_admin
       protocol.position = 20
       protocol.save!
@@ -32,12 +32,12 @@ module Seeds
 {"name":"using new address","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null}
 ]
 EOF
-      
+
       values = JSON.parse j
-      
+
       add_values values, sp
-      
-      
+
+
       sp = protocol.sub_processes.find_or_initialize_by(name: 'REDCap')
       sp.current_admin = auto_admin
       sp.save!
@@ -52,35 +52,35 @@ EOF
 {"name":"started emails","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},
 {"name":"using new email address","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null}
 ]
-      
+
 EOF
       values = JSON.parse j
       add_values values, sp
-      
+
       sp = protocol.sub_processes.find_or_initialize_by(name: 'Completion')
       sp.current_admin = auto_admin
       sp.save!
 
-      j =<<EOF      
+      j =<<EOF
       [{"name":"complete","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null},{"name":"opt-out of protocol","disabled":false,"sub_process_id": #{sp.id},"milestone":null,"description":null}]
 EOF
-      
+
       values = JSON.parse j
       add_values values, sp
-      
-      
+
+
     end
-    
-    
+
+
     def self.setup
       log "In #{self}.setup"
-      if Rails.env.test? || Protocol.count == 0
+      if Rails.env.test? || Protocol.active.count == 0
         create_protocol_events
         log "Ran #{self}.setup"
       else
         log "Did not run #{self}.setup"
       end
-      
+
     end
   end
 end
