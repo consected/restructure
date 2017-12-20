@@ -485,6 +485,7 @@ _fpa.form_utils = {
           startView: 2,
           clearBtn: true,
           autoclose: true,
+          todayHighlight: true,
           format: 'm/d/yyyy'
         });
 
