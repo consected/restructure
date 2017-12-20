@@ -43,7 +43,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     sleep 0.1
 
     dd = find('.tracker-event_date input')
-    
+
     d = match_date || DateTime.now
     if dd[:type == 'date']
       dd.value.match(/#{d.year}-0?#{d.month}-0?#{d.day}/)
@@ -113,6 +113,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     have_css "#search_count"
     expect(page).not_to have_css '#advanced_search_master.ajax-running'
 
+    dismiss_modal
     has_css? "#search_count .search_count"
     sleep 2
     v = find("#search_count").text
@@ -267,6 +268,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
       find("#master_trackers_attributes_0_protocol_event_id option[value='#{pe.id}']").select_option
     end
 
+    dismiss_modal
     have_css '.master-expander'
     items = page.all(:css, '.master-expander')
 
@@ -320,7 +322,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
       find("#master_tracker_histories_attributes_0_protocol_event_id option[value='#{pe_orig.id}']").select_option
     end
 
-
+    dismiss_modal
     have_css('.master-expander')
     # The results should show at least this one player
     items = page.all(:css, '.master-expander')
