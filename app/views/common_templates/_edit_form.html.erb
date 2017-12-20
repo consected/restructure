@@ -83,11 +83,11 @@
 
             <% elsif p == :protocol_id %>
                 <%= f.label :protocol_id, 'data-add-icon' => 'info-sign', title: 'protocol this is related to' %>
-                <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name}_sub_process_id", class: "form-control input-sm"}%>
+                <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name.gsub('__',"_")}_sub_process_id", class: "form-control input-sm"}%>
 
             <% elsif p == :sub_process_id %>
               <%= f.label 'status' %><br/>
-              <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "##{name}_protocol_event_id", class: "form-control input-sm"} %>
+              <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "##{name.gsub('__',"_")}_protocol_event_id", class: "form-control input-sm"} %>
 
             <% elsif p == :protocol_event_id %>
                 <%= f.label 'method' %><br/>
