@@ -21,7 +21,7 @@ module LogCallActions
 
   def mark_call_activity to_who, opt={}
 
-    opt[:from] ||= 'Me'
+    opt[:from] ||= 'User'
     opt[:called_when] ||= DateTime.now
 
     if opt[:called_when].is_a? Date
