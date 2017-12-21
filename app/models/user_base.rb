@@ -37,7 +37,7 @@ class UserBase < ActiveRecord::Base
   # the time we actually need them to run (save and create).
   def check_valid?
     self.validating = true
-    
+
     begin
       res = !marked_invalid? && self.valid?
     rescue => e
@@ -103,31 +103,34 @@ class UserBase < ActiveRecord::Base
     self.class.name.ns_underscore.pluralize
   end
 
-  # add the alternative_id_fields from the master as attributes, so we can use them for matching
-  Master.alternative_id_fields.each do |f|
+  if Master.respond_to? :alternative_id_fields
+    # add the alternative_id_fields from the master as attributes, so we can use them for matching
+    Master.alternative_id_fields.each do |f|
 
-    define_method :"#{f}=" do |value|
-      if self.attribute_names.include? f.to_s
-        write_attribute(f, value)
-      else
-        instance_variable_set("@#{f}", value)
-        if self.master
-          return self.master
+      define_method :"#{f}=" do |value|
+        if self.attribute_names.include? f.to_s
+          write_attribute(f, value)
+        else
+          instance_variable_set("@#{f}", value)
+          if self.master
+            return self.master
+          end
+          self.master = Master.find_with_alternative_id(f, value)
         end
-        self.master = Master.find_with_alternative_id(f, value)
       end
-    end
 
-    define_method :"#{f}" do
-      if self.attribute_names.include? f.to_s
-        read_attribute(f)
-      else
-        instance_variable_get("@#{f}")
+      define_method :"#{f}" do
+        if self.attribute_names.include? f.to_s
+          read_attribute(f)
+        else
+          instance_variable_get("@#{f}")
+        end
       end
-    end
 
+    end
+  else
+    puts "Master does not respond to alternative_id_fields. Hopefully this is just during seeding"
   end
-
 
   protected
 
