@@ -264,7 +264,7 @@ class ImportsController < ApplicationController
                 t[i] = i
               end
               if altn
-                i = "#{altn.singularize}_#{p}"                
+                i = "#{altn.singularize}_#{p}"
                 if gsit.include?(i)
                   t[i] = p
                 end

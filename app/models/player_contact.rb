@@ -30,6 +30,7 @@ class PlayerContact < UserBase
       if res
         value = res
       else
+        self.errors.add "phone", "cannot be formatted. Check it is at least 10 digits and does not contain incorrect characters"
         self.mark_invalid = true
       end
     end
@@ -84,10 +85,12 @@ class PlayerContact < UserBase
   private
 
     def format_phone
+      return "" if self.data.blank?
       res = self.class.format_phone(self.data, self.rec_type)
       if res
         self.data = res
       else
+        self.errors.add "phone", "cannot be formatted. Check it is at least 10 digits and does not contain incorrect characters"
         self.mark_invalid = true
       end
     end
