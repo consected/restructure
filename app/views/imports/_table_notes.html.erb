@@ -33,7 +33,7 @@
     <p class="field-names"></p>
     <p>The protocol_id can be one of the following numbers:</p>
     <p>
-      <% Protocol.enabled.order(:id).each do |p| %> 
+      <% Protocol.enabled.order(:id).each do |p| %>
       <b><%=p.id%></b>&nbsp;-&nbsp;<%=p.name%>
       <% end %>
     </p>
@@ -48,6 +48,15 @@
     </p>
     <p>Leaving this value blank means that no change will be made to the parent table, and is the safest option if unsure.</p>
   </div>
+
+
+  <% GeneralSelection.enabled.pluck(:item_type).uniq.each do |i| %>
+  <div class="import-rules" data-import-rule-type="<%=i%>">
+    <p class="field-names"></p>
+    <p>Value must match one of the following: <b><%= GeneralSelection.enabled.where(item_type: i).pluck(:value).uniq.join(', ')  %></b></p>
+
+  </div>
+  <% end %>
 </div>
 
 
@@ -65,7 +74,7 @@
     for(var k in t) {
       if(t.hasOwnProperty(k)) {
         var el  = $('div.import-rules[data-import-rule-type="'+k+'"]');
-        var fn = el.find('>.field-names')
+        var fn = el.find('>.field-names');
         var f = t[k];
         if(typeof f == 'object')
           f = f.join(', ')

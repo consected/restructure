@@ -583,7 +583,7 @@ _fpa.form_utils = {
 
         block.find('[data-format-date-local="true"]').not('.formatted-date-local').each(function(){
           var text = $(this).html();
-          text = text.replace(' UTC', 'Z');
+          text = text.replace(' UTC', 'Z').replace(' ', 'T');
           var ds = new Date(Date.parse(text));
           var d = ds.toLocaleString();
           $(this).html(d);

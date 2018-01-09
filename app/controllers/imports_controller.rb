@@ -233,8 +233,15 @@ class ImportsController < ApplicationController
 
     def setup_table_rules
       @table_rules = {}
+      gsit = GeneralSelection.enabled.pluck(:item_type).uniq
       @primary_tables.each do |tn|
         @primary_table = tn
+        if tn.start_with?('activity_log__')
+          altn = tn
+        else
+          altn = nil
+        end
+
         @table_rules[tn] = {}
         t = @table_rules[tn]
 
@@ -250,6 +257,17 @@ class ImportsController < ApplicationController
               if p.start_with?('set_related_')
                 t['set_related_field'] ||= []
                 t['set_related_field'] << p
+              end
+
+              i = "#{tn}_#{p}"
+              if gsit.include?(i)
+                t[i] = i
+              end
+              if altn
+                i = "#{altn.singularize}_#{p}"                
+                if gsit.include?(i)
+                  t[i] = p
+                end
               end
             end
           end
