@@ -55,7 +55,7 @@ class Import < ActiveRecord::Base
   def self.item_class_for primary_table
     begin
       primary_table.singularize.ns_camelize.ns_constantize
-    rescue NameError => e
+    rescue NameError
       logger.debug "No class defined for primary table: #{primary_table}"
       return nil
     end
@@ -85,7 +85,7 @@ class Import < ActiveRecord::Base
       begin
         new_obj = self.item_class.new(row.to_h)
         attempt_match_on_secondary_key new_obj
-        
+
       rescue FphsException => e
         self.errors.add 'import error', e.message
       rescue => e

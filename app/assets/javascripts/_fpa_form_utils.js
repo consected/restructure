@@ -553,9 +553,16 @@ _fpa.form_utils = {
         // value from a child of each block with the data attribute data-item-rank, for example
         // data-item-rank="10"
         // The sort will automatically sort on numeric values only
-        var s = block.attr('data-sort-desc');
+        var sort_block = block;
+        var s = sort_block.attr('data-sort-desc');
+        if(!s) {
+          sort_block = sort_block.children().first();
+          if (sort_block)
+            s = sort_block.attr('data-sort-desc');
+        }
+
         if(s){
-            var descp = block.parent();
+            var descp = sort_block.parent();
             descp.find('[data-sort-desc]').sort(function(a,b){
                 return $(b).find('['+s+']').attr(s) - $(a).find('['+s+']').attr(s);
             }).prependTo(descp);

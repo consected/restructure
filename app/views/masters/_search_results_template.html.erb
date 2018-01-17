@@ -29,7 +29,7 @@
     prevent_edit: false,
     prevent_create: false,
     item_list: %w(data source tracker_history_id),
-    data_sort: [:desc, "data-item-rank"],
+    data_sort: [:desc, "data-rank"],
     extra_class: '{{rec_type}}-type'
   } %>
 
@@ -61,7 +61,7 @@
     prevent_edit: e.prevent_edit?,
     prevent_create: e.prevent_create?,
     item_list: [label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s],
-    data_sort: [:desc, "data-item-id"]
+    data_sort: [:desc, "data-updated-at-ts"]
   } %>
 <% end %>
 

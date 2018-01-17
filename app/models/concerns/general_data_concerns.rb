@@ -82,6 +82,13 @@ module GeneralDataConcerns
     th.id
   end
 
+  def updated_at_ts
+    self.updated_at.to_i if self.updated_at
+  end
+
+  def created_at_ts
+    self.created_at.to_i if self.created_at
+  end
 
   def as_json extras={}
 
@@ -90,6 +97,8 @@ module GeneralDataConcerns
     extras[:methods] << :item_id
     extras[:methods] << :item_type
     extras[:methods] << :full_item_type
+    extras[:methods] << :updated_at_ts
+    extras[:methods] << :created_at_ts
     extras[:methods] << :data if respond_to? :data
     extras[:methods] << :rank_name if respond_to? :rank
     extras[:methods] << :state_name if respond_to? :state

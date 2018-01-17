@@ -16,7 +16,8 @@ module ExternalIdHandler
 
     scope :assigned, -> {where "master_id is not null"}
     scope :unassigned, -> {where "master_id is null"}
-    default_scope -> {order id: :desc}
+    #default_scope -> {order id: :desc}
+    default_scope -> {order updated_at: :desc, id: :desc}
 
     # @prevent_create = nil
     # @prevent_edit = nil

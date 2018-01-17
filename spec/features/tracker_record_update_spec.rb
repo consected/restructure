@@ -67,9 +67,10 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
       click_link 'clear fields'
       fill_in "master_player_infos_attributes_0_first_name", with: @full_player_info.first_name
       fill_in "master_player_infos_attributes_0_last_name", with: "#{@full_player_info.last_name}"
+      sleep 1
       find("\#master_player_infos_attributes_0_last_name").send_keys :tab
     end
-
+    
     have_css '#advanced_search_master.ajax-running'
     expect(page).to have_css "#master_results_block", text: ''
     has_css? "#search_count .search_count"
