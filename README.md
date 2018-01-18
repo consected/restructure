@@ -1,11 +1,11 @@
 Rails App for FPHS (Zeus)
 ==================
 
-For detailed information about the app and the requirements driving its functionality, view the Wiki at: 
+The **Zeus** App provides CRM and activity tracking functionality for the
+Football Players Health Study (FPHS) team.
 
-https://open.med.harvard.edu/wiki/pages/viewpage.action?title=Web+Application+Development&spaceKey=FPHS
+Build, test and deployment is by Ansible, with full details here:
+https://github.com/hmsrc/ansible-playbooks-fphs-webapp
 
-The full development and deployment README and associated documents can be found here:
-
-https://open.med.harvard.edu/wiki/pages/viewpage.action?pageId=34374487
-
+The same Ansible roles can be used to create a self-contained Vagrant server for
+development, avoiding the need to get all the prerequisites satisfied locally.
