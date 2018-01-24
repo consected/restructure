@@ -564,8 +564,22 @@ _fpa.form_utils = {
         if(s){
             var descp = sort_block.parent();
             descp.find('[data-sort-desc]').sort(function(a,b){
-                return $(b).find('['+s+']').attr(s) - $(a).find('['+s+']').attr(s);
+              var bres = $(b).find('['+s+']').attr(s);
+              var ares = $(a).find('['+s+']').attr(s);
+              ares = _fpa.utils.ISOdatetoTimestamp(ares);
+              bres = _fpa.utils.ISOdatetoTimestamp(bres);
+              if(ares == null || ares == '') return -1;
+              if(bres == null || bres == '') return 1;
+              if(bres > ares) {
+                return 1;
+              }
+              if(bres < ares) {
+                return -1;
+              }
+              return 0;
+
             }).prependTo(descp);
+            console.log('sorted!');
         }
 
         //block.updatePolyfill();
