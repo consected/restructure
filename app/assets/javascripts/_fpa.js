@@ -649,7 +649,7 @@ _fpa = {
   timed_flash_fadeout: function(){
       window.setTimeout(function(){
           $('.alert-info').fadeOut(1000);
-      }, 2000);
+      }, 6000);
   },
   clear_flash_notices: function(type){
     if(!type)

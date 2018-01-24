@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     resources :manage_users, except: [:show, :destroy]
     resources :accuracy_scores, except: [:show, :destroy]
     resources :activity_logs, except: [:show, :destroy]
+    resources :app_configurations, except: [:show, :destroy]
   end
 
 

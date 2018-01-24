@@ -14,12 +14,12 @@
       <th>Table Name</th>
       <th>Action When Attribute</th>
       <th>Field List</th>
+      <th>Main Log Name</th>
       <th>Blank Log Field List</th>
+      <th>Blank Log Name</th>
+      <th>Hide Item List Panel</th>
       <th>Disabled</th>
       <th>Admin</th>
-      <th>
-        Generator Script
-      </th>
     </tr>
   </thead>
 
@@ -33,10 +33,17 @@
         <td><%= list_item.table_name %></td>
         <td><%= list_item.action_when_attribute %></td>
         <td><%= list_item.field_list %></td>
+        <td><%= list_item.main_log_name %></td>
         <td><%= list_item.blank_log_field_list %></td>
+        <td><%= list_item.blank_log_name %></td>
+        <td><%= list_item.hide_item_list_panel ? 'hidden' : 'shown' %></td>
         <td><%= list_item.disabled ? 'disabled' : ''%></td>
         <td><%= list_item.admin_name %></td>
-        <td>db/table_generators/generate.sh activity_logs_table create <%=list_item.table_name%> <%=list_item.item_type.pluralize%> <%=(list_item.view_attribute_list || []).join(' ')%></td>
+      </tr>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td>&nbsp;</td>
+        <td colspan="5"><strong>Extra log types:</strong> <p><%= list_item.extra_log_types %></p></td>
+        <td colspan="6"><strong>Generator script:</strong> <p>db/table_generators/generate.sh activity_logs_table create <%=list_item.table_name%> <%=list_item.item_type.pluralize%> <%=(list_item.view_attribute_list || []).join(' ')%></p></td>
       </tr>
     <% end %>
   </tbody>

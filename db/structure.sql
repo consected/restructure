@@ -640,10 +640,10 @@ CREATE FUNCTION log_activity_log_ipa_assignment_update() RETURNS trigger
                   (
                       master_id,
                       ipa_assignment_id,
-                      do_when,
-                      notes,
-                      follow_up_when,
-                      select_result,
+                      return_call_availability_notes,
+                      questions_from_call_notes,
+                      results_link,
+                      pi_notes_from_return_call,
                       user_id,
                       created_at,
                       updated_at,
@@ -652,10 +652,10 @@ CREATE FUNCTION log_activity_log_ipa_assignment_update() RETURNS trigger
                   SELECT
                       NEW.master_id,
                       NEW.ipa_assignment_id,
-                      NEW.do_when,
-                      NEW.notes,
-                      NEW.follow_up_when,
-                      NEW.select_result,
+                      NEW.return_call_availability_notes,
+                      NEW.questions_from_call_notes,
+                      NEW.results_link,
+                      NEW.pi_notes_from_return_call,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -2377,10 +2377,10 @@ CREATE TABLE activity_log_ipa_assignment_history (
     id integer NOT NULL,
     master_id integer,
     ipa_assignment_id integer,
-    do_when date,
-    notes character varying,
-    follow_up_when date,
-    select_result character varying,
+    return_call_availability_notes character varying,
+    questions_from_call_notes character varying,
+    results_link character varying,
+    pi_notes_from_return_call character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -2415,13 +2415,14 @@ CREATE TABLE activity_log_ipa_assignments (
     id integer NOT NULL,
     master_id integer,
     ipa_assignment_id integer,
-    do_when date,
-    notes character varying,
-    follow_up_when date,
-    select_result character varying,
+    return_call_availability_notes character varying,
+    questions_from_call_notes character varying,
+    results_link character varying,
+    pi_notes_from_return_call character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    select_record_from_player_contact_phones character varying
 );
 
 
@@ -2742,7 +2743,11 @@ CREATE TABLE activity_logs (
     updated_at timestamp without time zone NOT NULL,
     action_when_attribute character varying,
     field_list character varying,
-    blank_log_field_list character varying
+    blank_log_field_list character varying,
+    blank_log_name character varying,
+    extra_log_types character varying,
+    hide_item_list_panel boolean,
+    main_log_name character varying
 );
 
 
@@ -2935,6 +2940,38 @@ CREATE SEQUENCE admins_id_seq
 --
 
 ALTER SEQUENCE admins_id_seq OWNED BY admins.id;
+
+
+--
+-- Name: app_configurations; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE app_configurations (
+    id integer NOT NULL,
+    name character varying,
+    value character varying,
+    disabled boolean,
+    admin_id integer
+);
+
+
+--
+-- Name: app_configurations_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE app_configurations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: app_configurations_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE app_configurations_id_seq OWNED BY app_configurations.id;
 
 
 --
@@ -5618,6 +5655,13 @@ ALTER TABLE ONLY admins ALTER COLUMN id SET DEFAULT nextval('admins_id_seq'::reg
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY app_configurations ALTER COLUMN id SET DEFAULT nextval('app_configurations_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY college_history ALTER COLUMN id SET DEFAULT nextval('college_history_id_seq'::regclass);
 
 
@@ -6219,6 +6263,14 @@ ALTER TABLE ONLY admin_history
 
 ALTER TABLE ONLY admins
     ADD CONSTRAINT admins_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: app_configurations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY app_configurations
+    ADD CONSTRAINT app_configurations_pkey PRIMARY KEY (id);
 
 
 --
@@ -7082,6 +7134,13 @@ CREATE INDEX index_addresses_on_user_id ON addresses USING btree (user_id);
 --
 
 CREATE INDEX index_admin_history_on_admin_id ON admin_history USING btree (admin_id);
+
+
+--
+-- Name: index_app_configurations_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_configurations_on_admin_id ON app_configurations USING btree (admin_id);
 
 
 --
@@ -9775,6 +9834,14 @@ ALTER TABLE ONLY external_links
 
 
 --
+-- Name: fk_rails_f0ac516fff; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY app_configurations
+    ADD CONSTRAINT fk_rails_f0ac516fff FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
 -- Name: fk_rails_f62500107f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -10331,4 +10398,10 @@ INSERT INTO schema_migrations (version) VALUES ('20171031145807');
 INSERT INTO schema_migrations (version) VALUES ('20171207163040');
 
 INSERT INTO schema_migrations (version) VALUES ('20171207170748');
+
+INSERT INTO schema_migrations (version) VALUES ('20180119173411');
+
+INSERT INTO schema_migrations (version) VALUES ('20180123111956');
+
+INSERT INTO schema_migrations (version) VALUES ('20180123154108');
 

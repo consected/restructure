@@ -30,8 +30,6 @@ _fpa.activity_logs = {
 
   show_main_block: function(block, data) {
 
-  //  if(block.not('.collapsing') && block.not('.in')) block.collapse('show');
-
     _fpa.form_utils.format_block(block);
     _fpa.activity_logs.selected_parent(block, {item_id: data.item_id, rec_type: data.rec_type, item_data: data.item_data, master_id: data.master_id});
 
@@ -53,6 +51,12 @@ _fpa.activity_logs = {
       // assume if the length is only a single item that it is really the object we are looking for
       d = d0;
     }
+
+    block.parents('.activity-log-list').find('.common-template-item').not('[data-sub-id='+d.id+']').each(function(){
+      $(this).find('a.edit-entity').remove();
+    });
+
+
     $('.activity-log-list .new-block').addClass('has-records');
     _fpa.activity_logs.selected_parent(block, {item_id: d.item_id, rec_type: d.rec_type, item_data: d.item_data, master_id: d.master_id});
 

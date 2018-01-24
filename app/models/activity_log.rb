@@ -23,6 +23,11 @@ class ActivityLog < ActiveRecord::Base
     'Activity'
   end
 
+  # List of record types across all item types that are valid for use
+  def self.all_valid_item_and_rec_types
+    GeneralSelection.selector_collection(['item_type like ?', "%_type"]).map{|i| [i.item_type.sub(/(_rec)?_type$/ ,'').singularize, i.value].join('_')} + self.use_with_class_names
+  end
+
 
   # checks if this activity log works with the specified item_type and optionally rec_type based on admin activity log record configuration
   # if no rec_type is specified, then just the item_type will be used to match broadly,
@@ -100,6 +105,13 @@ class ActivityLog < ActiveRecord::Base
     unless self.blank_log_field_list.blank?
       self.blank_log_field_list.split(',').map {|f| f.strip}.compact
     end
+  end
+
+  # Get a complete list of all fields required to generate a table.
+  # The individual field lists may overlap or be distinct. This gets us a usable list
+  def all_implementation_fields
+    res = (view_attribute_list || []) + (view_blank_log_attribute_list || [])
+    res.uniq
   end
 
   # The class that an activity log implementation belongs to
@@ -442,7 +454,7 @@ class ActivityLog < ActiveRecord::Base
   def check_implementation_class
 
     if !disabled && errors.empty?
-      val = view_attribute_list || []
+      val = all_implementation_fields
       unless ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
           db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{val.join(' ')}

@@ -31,6 +31,13 @@ class ReportsController < ApplicationController
     options = {}
     search_attrs = params[:search_attrs]
 
+    @view_context = params[:view_context]
+    if @view_context.blank?
+      @view_context = nil
+    else
+      @view_context = @view_context.to_sym
+    end
+
     if params[:commit] == 'count'
       options[:count_only] = true
       @count_only = true

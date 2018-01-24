@@ -40,10 +40,13 @@
           al_name: m.name,
           rec_type: m.rec_type,
           item_type: m.item_type,
-
+          action_when_attribute: m.action_when_attribute,
           item_type_name: m.item_type_name,
           full_name: m.full_item_type_name,
-          blank_log_full_name: "#{m.full_item_type_name}_blank_log"
+          blank_log_full_name: "#{m.full_item_type_name}_blank_log",
+          blank_log_label: (m.blank_log_name.blank? ? 'General Log' : m.blank_log_name ),
+          main_log_label: (m.main_log_name.blank? ? 'Add Log' : m.main_log_name ),
+          hide_item_list_panel: !!m.hide_item_list_panel
 
         } %>
 

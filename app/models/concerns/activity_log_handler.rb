@@ -336,4 +336,12 @@ module ActivityLogHandler
     Tracker.track_record_update self
   end
 
+  def can_edit?
+
+    latest_item = master.send(self.class.assoc_inverse).order(id: :desc).limit(1).first
+
+    (self.user_id == master.current_user.id && latest_item.id == self.id)
+  end
+
+
 end

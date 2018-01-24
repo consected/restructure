@@ -26,7 +26,7 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
                 @report.search_attributes.each do |name, type|
 
                   pattern = nil
-                  e = ExternalIdentifier.active.where(external_id_attribute: name).first                  
+                  e = ExternalIdentifier.active.where(external_id_attribute: name).first
                   pattern = e.external_id_edit_pattern if e && !e.blank?
               %>
                 <% if i > 0 && i % 4 == 0 %></div><div class="row"><%end%>
@@ -36,16 +36,16 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
               <% i += 1
                  end%>
             </div>
-            <div class="form-group form-actions clearfix">
+            <div class="form-group form-actions clearfix" style="border-color: transparent;">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
               <% if click_to_search %> <span></span><%end%>
               <% unless @report.editable_data? %>
-              <%= submit_tag :search, value: :search,class: "#{btn} #{!@report_page ? 'auto-submitter' : ''}" if @report.report_type == 'search'  %>
+              <%= submit_tag :search, value: :search,class: "#{btn} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" if @report.report_type == 'search'  %>
               <% end %>
-              <%= submit_tag :table, class: "#{btn}"  %>
+              <%= submit_tag :table, class: "#{btn}"  unless @view_context==:search %>
               <% unless @report.editable_data? %>
-              <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count'%>
+              <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count' || @view_context==:search%>
               <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_admin || current_user && current_user.can?(:export_csv) %>
               <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_admin || current_user && current_user.can?(:export_json) %>
               <% end %>

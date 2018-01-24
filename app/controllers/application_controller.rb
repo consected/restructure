@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
 
   include ControllerUtils
   include AppExceptionHandler
+  include AppConfigurationsHelper
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -64,8 +65,8 @@ protected
 
 
       if current_user
-        @primary_navs << {label: 'Research', url: '/masters/', route: 'masters#index'}
-        @primary_navs << {label: 'Create MSID', url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_msid
+        @primary_navs << {label: app_config_title(:menu_research_label), url: '/masters/', route: 'masters#index'}
+        @primary_navs << {label: app_config_title(:menu_create_master_record_label), url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_msid
       end
 
       if current_user || current_admin
@@ -87,6 +88,11 @@ protected
     def not_authorized
       flash[:danger] = "You are not authorized to perform the requested action"
       render text: flash[:danger], status: :unauthorized
+    end
+
+    def not_editable
+      flash[:danger] = "This item can't be edited"
+      render text: flash[:danger], status: :not_editable
     end
 
     def not_found

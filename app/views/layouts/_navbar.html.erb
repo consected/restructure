@@ -14,7 +14,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <% @primary_navs.each do |nav| %>  
+        <% @primary_navs.reject{|a| a[:label].blank? }.each do |nav| %>
         <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %>
           <% if nav[:sub] %>
           <ul class="dropdown-menu" role="menu">
@@ -26,7 +26,7 @@
         </li>
         <% end %>
       </ul>
-      <% if current_user %>
+      <% if current_user && !app_config_set(:hide_navbar_search) %>
         <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
           <div class="form-group">
             <%= text_field_tag :nav_q, params[:nav_q], class: "form-control", placeholder: "MSID Search" %>

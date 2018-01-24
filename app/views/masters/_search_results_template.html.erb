@@ -105,21 +105,25 @@
                 <strong class="no-player-info">(no player info)</strong>
                 {{/with}}
               </div>
+              <% unless app_config_set(:hide_pro_info) %>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with pro_infos.[0]}}
                 {{>pro_info_summary_result}}
               {{/with}}
               </div>
+              <% end %>
             </a>
           </div>
         </h3>
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
-        <ul class="nav nav-pills ">
+        <ul class="nav nav-pills <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %>">
 
+          <% unless app_config_set(:hide_tracker_panel) %>
           <li role="presentation">
             <a href="/masters/{{id}}/trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
           </li>
+          <% end %>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class="scroll-to-expanded "><span class="caret"></span> details</a>
           </li>
@@ -140,8 +144,8 @@
           <% end %>
 
           <% ActivityLog.enabled.each do |a| %>
-          <li role="presentation">
-            <a href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_data_template_name %>-main-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
+          <li role="presentation" class="<%= app_config_text(:show_activity_log_panel)==a.item_type_name ? 'on-open-click' : '' %>">
+            <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_data_template_name %>-main-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
           </li>
           <% end %>
         </ul>
@@ -156,6 +160,7 @@
           </div>
           <% end %>
 
+          <% unless app_config_set(:hide_tracker_panel) %>
           <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
           {{#with trackers}}
             {{>tracker_tree_results master_id=id}}
@@ -167,14 +172,19 @@
             <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>
           {{/with}}
           </div>
+          <% end %>
 
-          <div id="details-{{id}}" class="collapse in details-block">
+          <div id="details-{{id}}" class="collapse in details-block  panel panel-default">
+           <div class="is-header default-header">
+             <h4>Details</h4>
+           </div>
+           <div class="panel-body">
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-<%= app_config_set(:hide_pro_info) ? '6' : '12' %>">
                 <div class="row">
                 {{#with player_infos.[0]}}
 
-                    <div class="col-md-12">
+                    <div class="col-md-<%= app_config_set(:hide_pro_info) ? '24' : '12' %>">
 
                       {{>player_info_result _created=@index}}
 
@@ -182,7 +192,7 @@
 
                 {{else}}
 
-                    <div class="col-md-12">
+                    <div class="col-md-<%= app_config_set(:hide_pro_info) ? '24' : '12' %>">
                       <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
                         <h4>No player info</h4>
                         <p><a href="/masters/{{id}}/player_infos/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="#player-info-{{id}}-"><span class="glyphicon glyphicon-plus"></span> Player Info record</a> </p>
@@ -190,6 +200,7 @@
                     </div>
 
                 {{/with}}
+                <% unless app_config_set(:hide_pro_info) %>
                 {{#with pro_infos.[0]}}
                     <div class="col-md-12">
                       {{>pro_info_result _created=@index}}
@@ -203,6 +214,7 @@
                     </div>
 
                 {{/with}}
+                <% end %>
 
                 </div>
               </div>
@@ -236,6 +248,7 @@
 
               </div>
             </div>
+           </div>
           </div>
 
           <div id="external-ids-{{id}}" class="row collapse external-ids-block">

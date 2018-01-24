@@ -110,6 +110,21 @@
       return res;
     });
 
+
+    // Replace instance(s) of replace_str in orig_str, with with_str.
+    // re_options represents zero or more standard regex options
+    //   g: replace all
+    //   i: case insensitive
+    //   etc
+    Handlebars.registerHelper('replace', function(orig_str, replace_str, with_str, re_options, context){
+      var reo;
+      // Avoid using the context object if the last option was excluded from the call
+      if(!re_options.hasOwnProperty('name'))
+        reo = re_options;
+      var re = new RegExp(replace_str, reo);
+      return orig_str.replace(re, with_str);
+    });
+
     Handlebars.registerHelper('was', function(obj, options){
         if(obj || obj === 0)
             return options.fn(this);
@@ -148,10 +163,8 @@
 
     Handlebars.registerHelper('timestamp', function(text) {
       if(text){
-        var ds = new Date(Date.parse(text));
-        return ds.getTime().toFixed(0);
+        return _fpa.utils.ISOdatetoTimestamp(text);
       }
-
     });
 
     Handlebars.registerHelper('date_time', function(text) {
@@ -225,10 +238,6 @@
             else
                 return unknown;
         }
-
-
-       // startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-        //return startTime.toLocaleDateString();
 
         // Using information from https://bugzilla.mozilla.org/show_bug.cgi?id=1139167 to prevent occasional day difference issues
         return new Date(startTime).toLocaleDateString(undefined, {timeZone: "UTC"});

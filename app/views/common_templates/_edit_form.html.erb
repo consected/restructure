@@ -65,6 +65,34 @@
               <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
               <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>
               <% has_source = true %>
+            <% elsif p.to_s.index('select_record_from_') == 0
+                  # Allow a 'data' selection to be made from an item
+
+                  rlit = p.to_s.sub('select_record_from_', '').singularize
+                  
+                  if ActivityLog.use_with_class_names.include? rlit
+                    rl = rlit
+                    cn = ActivityLog.use_with_class_names.select{|s| s == rl}.first
+                    reslist = cn.camelize.constantize.where(master_id: object_instance.master_id).map{|i| [i.data, i.data]}
+                  elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? rlit
+                    ActivityLog.use_with_class_names.each do |ucn|
+                      if rlit.start_with?(ucn)
+                        rl = rlit
+                        cn = ActivityLog.use_with_class_names.select{|s| s == ucn}.first
+                        reslist = cn.camelize.constantize.where(master_id: object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, '')).map{|i| [i.data, i.data]}
+                      end
+                    end
+                  end
+                  unless rl
+                    logger.warn "Failed to find valid class name for #{p}"
+                  end
+
+              %>
+                <%= f.label rl %>
+                <%= f.select p, reslist%>
+
+
+
             <% elsif p.to_s.index('select_') == 0
 
                   desc = general_selection("#{name}_#{p}".to_sym, return_all: true).reduce(false){|r,i| r || !i[6].blank?}
@@ -125,15 +153,15 @@
             <% elsif p == :zip %>
               <%= f.label :zip %>
               <%= f.text_field :zip, zip_field_props %>
-            <% elsif p == :notes %>
-              <%= f.label :notes %>
+            <% elsif p == :notes || p.to_s.include?('_notes') %>
+              <%= f.label p %>
               <% if caption_before[p]  %>
                   <p class="caption_before_notes">
                     <%= caption_before[p].html_safe %>
                   </p>
               <% end %>
 
-              <%= f.text_area :notes, class: 'form-control'  %>
+              <%= f.text_area p, class: 'form-control'  %>
             <% elsif GeneralSelection::BasicItemTypes.include?("#{name.pluralize}_#{p}".to_sym)%>
               <%# Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down%>
               <%= f.label p %>

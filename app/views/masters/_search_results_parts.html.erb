@@ -7,13 +7,18 @@
   {{/with}}
 </script>
 
+<script id="search-action-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  <span id="search-action" class="hidden search-action">{{search_action}}</span>
+</script>
+
+
 <script id="empty-template" type="text/x-handlebars-template" class="hidden handlebars-template">
 </script>
 
-<script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
-  <strong class="player-names">                
-    {{capitalize first_name}} 
-    <span class="middle-name">{{capitalize middle_name}}</span> 
+<script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <strong class="player-names">
+    {{capitalize first_name}}
+    <span class="middle-name">{{capitalize middle_name}}</span>
     {{capitalize last_name}}
     {{#if nick_name}}
       <span class="nick-name">({{capitalize nick_name}})</span>
@@ -26,14 +31,16 @@
   {{#if death_date}}
     <small>DOD</small> {{local_date death_date '-'}}
   {{/if}}
+  <% unless app_config_set(:hide_player_accuracy) %>
   <span data-sub-for="master_id" data-sub-id="{{master_id}}" data-sub-item="player_info" data-template="accuracy-badge-template">
     {{>accuracy_badge player_info=this}}
   </span>
+  <% end %>
 </script>
 
-<script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">  
+<script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
         <strong class="pro-names">
-                  {{capitalize first_name}} 
+                  {{capitalize first_name}}
                   <span class="middle-name">{{capitalize middle_name}}</span>
                   {{capitalize last_name}}
                   {{#if nick_name}}
@@ -71,5 +78,3 @@
   {{>player_info_summary_result}}
   {{/with}}
 </script>
-
-

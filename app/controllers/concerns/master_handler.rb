@@ -44,6 +44,11 @@ module MasterHandler
 
   def edit
 
+    unless can_edit?
+      not_editable
+      return
+    end
+
     prep_item_flags
 
     render partial: edit_form, locals: edit_form_extras
@@ -95,6 +100,10 @@ module MasterHandler
 
 
   protected
+
+    def can_edit?
+      true
+    end
 
     def edit_form
       'edit_form'

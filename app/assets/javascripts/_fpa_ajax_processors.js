@@ -18,6 +18,7 @@ _fpa.preprocessors = {
 
 _fpa.postprocessors = {
     default: function(block, data, has_postprocessor){
+
         _fpa.processor_handlers.form_setup($('form'));
 
         $('#master_results_block').addClass('search-status-done');
@@ -40,8 +41,8 @@ _fpa.postprocessors = {
             _fpa.form_utils.format_block(block);
 
             _fpa.masters.switch_id_on_click(block);
-            
-            block.find('.on-open-click a[data-remote="true"]').click();
+
+            block.find('.on-open-click a[data-remote="true"]').not('.auto-clicked').click().addClass('auto-clicked');
 
         }, 30);
 
@@ -60,6 +61,21 @@ _fpa.postprocessors = {
             });
 
         }).addClass('attached-me-click');
+    },
+    search_action_template: function(block, data){
+
+      if(data.search_action == 'MSID') {
+        var dtte = $('.advanced-form-selections a[data-toggle="collapse"]').not('.collapsed')
+        var dtt = dtte.attr('data-target');
+        if(dtt && dtt != '')
+          var dt = $(dtt);
+        else
+          return;
+        if(dt && dt.length == 1) {
+          $(dt).removeClass('in').attr('aria-expanded', 'false');
+          $(dtte).addClass('collapsed').attr('aria-expanded', 'false');
+        }
+      }
     },
     search_results_template: function(block, data){
         // Ensure we format the viewed item on expanding it
@@ -108,14 +124,15 @@ _fpa.postprocessors = {
         var msid_list = $("#msid_list").html();
         var master_id_list = $("#master_id_list").html();
 
-        if(msid_list && msid_list.replace(/ /g, '').length > 1){
-            document.title = 'FPHS results';
-            window.history.pushState({"html": "/masters/search?utf8=✓&nav_q="+msid_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q="+msid_list);
-        }
-        else if(master_id_list && master_id_list.replace(/ /g, '').length > 1){
+        if(master_id_list && master_id_list.replace(/ /g, '').length > 1){
             document.title = 'FPHS results';
             window.history.pushState({"html": "/masters/search?utf8=✓&nav_q_id="+master_id_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q_id="+master_id_list);
         }
+        else if(msid_list && msid_list.replace(/ /g, '').length > 1){
+            document.title = 'FPHS results';
+            window.history.pushState({"html": "/masters/search?utf8=✓&nav_q="+msid_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q="+msid_list);
+        }
+
 
 
     },
@@ -176,14 +193,18 @@ _fpa.postprocessors = {
 
             window.setTimeout(function(){
               var a = $('a.open-tracker[data-target="' + t + '"]');
-              a[0].app_callback = function(){
+              if(a && a[0]) {
+                a[0].app_callback = function(){
                   $(t).collapse('show');
-              };
-              a.trigger('click.rails');
+                };
+                a.trigger('click.rails');
+              }
             }, 10);
             // After a short delay, trigger the background loading of items for this master
             window.setTimeout(function(){
-              $('#master-'+ master_id + '-player-infos').find('.on-open-click a[data-remote="true"]').click();
+              // This on-open-click is always handled to force a refresh. It only works with hidden blocks,
+              // avoiding accidental refresh of visible items
+              $('#master-'+ master_id + '-player-infos').find('.on-open-click.hidden a[data-remote="true"]').click();
             }, 500);
         }
     },

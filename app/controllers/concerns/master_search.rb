@@ -14,16 +14,21 @@ module MasterSearch
         if !params[:master][:msid].blank?
           msid = params[:master][:msid].to_s
           msid = msid.split(/[,| ]/) if msid.index(/[,| ]/)
+          n = msid.length
           @masters = Master.where msid: msid
         elsif !params[:master][:pro_id].blank?
           proid = params[:master][:pro_id].to_s
           proid = proid.split(/[,| ]/) if proid.index(/[,| ]/)
+          n = proid.length
           @masters = Master.where pro_id: proid
         elsif !params[:master][:id].blank?
           id = params[:master][:id].to_s
           id = id.split(/[,| ]/) if id.index(/[,| ]/)
+          n = id.length
           @masters = Master.where id: id
         end
+        @result_message = "Displaying results for a list of #{n} record #{'ID'.pluralize(n)}."
+
       elsif search_type == 'SIMPLE'
         @masters = Master.search_on_params search_params[:master]
       elsif search_type == 'REPORT'
@@ -32,7 +37,11 @@ module MasterSearch
 
         m_field = @report.field_index('master_id')
 
-        render text: "query must return a master_id field to function as a search" and return  unless m_field
+        unless m_field
+          render text: "<b>query must return a master_id field to function as a search</b>".html_safe
+          flash.now[:warning] = "query must return a master_id field to function as a search"
+          return
+        end
 
         ids = []
         @results.each_row {|r| ids << r[m_field]}
@@ -114,6 +123,8 @@ module MasterSearch
         }
 
         m[:count] = {count: original_length,  show_count: @masters.length}
+        m[:message] = @result_message if @result_message
+        m[:search_action] = search_type
 
       else
         # Return no results

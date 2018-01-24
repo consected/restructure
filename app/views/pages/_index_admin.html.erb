@@ -11,6 +11,7 @@
         <li class="nav"><%= link_to "Item Flags", admin_item_flag_names_path %> </li>
         <li class="nav"><%= link_to "External Links", admin_external_links_path %> </li>
         <li class="nav"><%= link_to "Protocol / Status / Method", protocols_path %> </li>
+        <li class="nav"><%= link_to "App Configurations", admin_app_configurations_path %> </li>
       </ul>
     </div>
     <div class="col-sm-8">
@@ -27,7 +28,7 @@
       <h3>External ID Functions</h3>
       <ul class="nav">
         <li class="nav"><%= link_to "Configure External Identifiers", admin_external_identifiers_path %> </li>
-        <%= render partial: 'pages/index_admin_external_identifiers' %>        
+        <%= render partial: 'pages/index_admin_external_identifiers' %>
       </ul>
     </div>
   </div>

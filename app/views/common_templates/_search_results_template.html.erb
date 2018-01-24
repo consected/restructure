@@ -12,7 +12,10 @@
   end
 
   unless caption && caption.include?('{{')
-    caption = (caption || name).humanize.titleize
+    caption = (caption || name)
+    if caption.include?('_') || caption.downcase == caption
+      caption = caption.humanize.titleize
+    end
   end
 
   unless defined? data_sort
@@ -106,7 +109,9 @@
         <% item_list.each do |item| %>
         <li class="list-group-item <%=name%>-<%=name%>_id is-heading compact-heading">
           <% unless prevent_edit %>
+          {{#unless prevent_edit }}
             <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="<%= edit_button_href %>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}"></a>
+          {{/unless}}
           <% end %>
           <small><%= item[:label] %></small> <strong>{{<%= item[:formatter].html_safe || 'pretty_string' %> <%= item[:attribute] %>}}</strong>
           <% unless custom_activity_log == :none %>
@@ -122,7 +127,10 @@
       <%else%>
         <li class="list-group-item is-heading">
           <% unless prevent_edit %>
+
+          {{#unless prevent_edit }}
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="<%= edit_button_href %>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>
+          {{/unless}}
           <% end %>
           {{> rank_button name_h="<%= name.hyphenate %>"}}
           <% unless custom_activity_log == :none %>
@@ -165,6 +173,7 @@
         {{else is @key "protocol_event_id"}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "tracker_history_id"}}
+        <% unless app_config_set(:hide_tracker_panel) %>
           {{#if ../tracker_histories}}
           <li class="list-group-item <%=name.hyphenate%>-tracker-histories-caption is-minor-heading">
             <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" aria-expanded="false">Related tracker items <span class="caret"></span></a>
@@ -191,7 +200,11 @@
             </div>
           </div>
           <% end %>
-
+        <% end %>
+        {{else is @key 'includes' 'select_record_from_' }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_notes' }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}
@@ -210,15 +223,17 @@
         <% if defined?(item_blocks)
             item_blocks.each do |item_name_sym, item_attrs|
               item_name = item_name_sym.to_s
+              item_list = item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs
         %>
         <div class="<%=name.hyphenate%>-<%=item_name%>">
           <div class="">
           {{#with <%= item_name %>}}
+          <% if item_list.include?(',') %>
           <li class="list-group-item is-sub-heading <%=name.hyphenate%>-<%=item_name.hyphenate%>">
             <%=item_name.humanize%> {{rec_type}}
             {{> rank_button name_h="<%= item_name.hyphenate %>"}}
           </li>
-          {{#filter this "<%= item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs  %>" }}
+          {{#filter this "<%= item_list %>" }}
             {{#is @key "notes"}}
             <div class="notes-block <%=name.hyphenate%>-<%=item_name.hyphenate%>-notes {{#is this ''}}notes-empty{{/is}}">
               <div class="panel panel-default panel-body">
@@ -229,6 +244,13 @@
               <li class="list-group-item <%=name.hyphenate%>-<%=item_name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
             {{/is}}
           {{/filter}}
+          <% else %>
+          <li class="list-group-item  <%=name.hyphenate%>-<%=item_name.hyphenate%>">
+            {{#filter this "<%= item_list %>" }}
+            <small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong>
+            {{/filter}}
+          </li>
+          <% end %>
           {{/with}}
 
           </div>
