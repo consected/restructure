@@ -53,16 +53,8 @@ _fpa.postprocessors_trackers = {
     },
 
     tracker_notes_handler: function(block){
-        $('td.tracker-notes .cell-holder, td.tracker-history-notes .cell-holder').not('attached-expandable').each(function(){
-            if($(this).height() > 40){
-                $(this).click(function(){
-                    _fpa.form_utils.toggle_expandable($(this));
-                }).addClass('expandable').attr('title', 'click to expand / shrink');
-            }else{
-                $(this).addClass('not-expandable');
-            };
-        }).addClass('attached-expandable');
-
+        var b = $('td.tracker-notes .cell-holder, td.tracker-history-notes .cell-holder');
+        _fpa.utils.make_readable_notes_expandable(b);
     },
 
 
