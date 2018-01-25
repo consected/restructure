@@ -27,7 +27,12 @@ class User < ActiveRecord::Base
   end
 
   def timeout_in
-    Settings::UserTimeout
+    ust = AppConfiguration.value_for(:user_session_timeout)
+    if ust.blank?
+       Settings::UserTimeout
+    else
+      ust.to_i.minutes
+    end
   end
 
   # Standard Devise callback to allow accounts to be disabled
