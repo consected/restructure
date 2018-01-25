@@ -18,6 +18,10 @@ module GeneralDataConcerns
     @was_updated = updated_at_changed? ? 'updated' : false
   end
 
+  def can_edit?
+    true
+  end
+
   def _created
     @was_created
   end
@@ -117,6 +121,7 @@ module GeneralDataConcerns
     extras[:methods] << :update_action
     extras[:methods] << :_created
     extras[:methods] << :_updated
+    extras[:methods] << :can_edit?  
 
     extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
     extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?
