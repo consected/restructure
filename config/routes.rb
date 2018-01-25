@@ -33,7 +33,7 @@ Rails.application.routes.draw do
 
 
 
-  resources :pages, only: [:index]
+  resources :pages, only: [:index, :show]
 
   post 'masters/create' => 'masters#create'
   post 'masters/' => 'masters#index'

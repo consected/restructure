@@ -6,7 +6,10 @@ class PagesController < ApplicationController
     end
   end
 
-  
-  
+  # Simple action to refresh the session timeout
+  def show
+    render json: {version: Application.version}
+  end
+
   private
 end
