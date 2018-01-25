@@ -619,6 +619,16 @@ _fpa.form_utils = {
 
         var curr_top = -1;
         var maxh = -1;
+
+        var ob = block.parents('.resize-children').parent();
+        if(ob.length > 0) {
+          block = ob;
+        }
+
+        block.find('.resize-children ul.list-group').each(function(){
+          $(this).parent().css({minHeight: '1px'});
+        });
+
         block.find('.resize-children').each(function(){
 
           // run through all the candidate items
