@@ -613,6 +613,23 @@ _fpa.form_utils = {
         }).addClass('formatted-date-local')
     },
 
+    setup_textarea_autogrow: function(block) {
+
+      block.find('textarea').each(function(){
+        var textarea = $(this)[0];
+        var growingTextarea = new Autogrow(textarea);
+        textarea.style.resize = 'none';
+	      textarea.style.boxSizing = 'content-box';
+      });
+
+      setTimeout(function(){
+        var notes = block.find('.list-group-item strong, .panel-body')
+        _fpa.utils.make_readable_notes_expandable(notes, 100, _fpa.form_utils.resize_children);
+
+      }, 10);
+
+    },
+
     resize_children: function(block){
 
       window.setTimeout(function(){
@@ -681,6 +698,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_extra_actions(block);
         _fpa.form_utils.setup_datepickers(block);
         _fpa.form_utils.mask_inputs(block);
+        _fpa.form_utils.setup_textarea_autogrow(block);
         _fpa.form_utils.resize_children(block);
         block.removeClass('formatting-block');
     }

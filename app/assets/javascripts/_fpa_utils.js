@@ -28,6 +28,24 @@ _fpa.utils.jump_to_linked_item = function(target) {
   return block;
 };
 
+_fpa.utils.make_readable_notes_expandable = function(block, max_height, click_callback) {
+  if(!max_height) max_height = 40;
+
+  block.not('attached-expandable').each(function(){
+      if($(this).height() > max_height){
+          $(this).click(function(){
+            // don't do it if there is a selection
+            if(window.getSelection().toString()) return;
+            _fpa.form_utils.toggle_expandable($(this));
+            if(click_callback)
+              click_callback(block, $(this));
+          }).addClass('expandable').attr('title', 'click to expand / shrink');
+      }else{
+          $(this).addClass('not-expandable');
+      };
+  }).addClass('attached-expandable');
+};
+
 _fpa.utils.show_modal_results = function(){
   var h = '<div id="modal_results_block" class=""></div>';
 

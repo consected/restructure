@@ -19,4 +19,5 @@
 //= require jquery-tablesorter
 //= require jquery-scrollto-min
 //= require jquery-mask
+//= require textarea-autogrow
 //= require_tree .
