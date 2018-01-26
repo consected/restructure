@@ -76,55 +76,16 @@ module MasterSearch
         @masters = @masters[0, return_results_limit]
 
         m = {
-          masters: @masters.as_json(include: {
-            player_infos: {order: Master::PlayerInfoRankOrderClause,
-              include: {
-                item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-              },
-              methods: [:user_name, :accuracy_score_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
-            },
-            pro_infos: {
-              include: {
-                item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-              }
-            },
-            player_contacts: {
-              order: {rank: :desc},
-              methods: [:user_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories],
-              include: {
-                item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-              }
-            },
-            addresses: {
-              order: {rank: :desc},
-              methods: [:user_name, :rank_name, :state_name, :country_name, :source_name, :tracker_history_id, :tracker_histories],
-              include: {
-                item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-              }
-            },
-#           Loading trackers dynamically provides a significant speed up, and this may become more important as the tracker usage grows
-#           trackers: {
-#              order: "protocol.position #{Master::TrackerEventOrderClause}",
-#              methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :tracker_history_length, :user_name, :record_type_us, :record_type, :record_id]
-#            },
-
-            latest_tracker_history: {
-              methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]
-            }
-#            scantrons: {
-#              order: {scantron_id: :asc},
-#              methods: [:user_name]
-#            },
-#            sage_assignments: {
-#              order: {sage_id: :asc},
-#              methods: [:user_name]
-#            }
-          })
+          masters: @masters.as_json,
+          count: {
+            count: original_length,
+            show_count: @masters.length
+          },
+          search_action: search_type,
+          message: @result_message
         }
 
-        m[:count] = {count: original_length,  show_count: @masters.length}
-        m[:message] = @result_message if @result_message
-        m[:search_action] = search_type
+
 
       else
         # Return no results
@@ -155,11 +116,15 @@ module MasterSearch
           return
         end
 
-        res = [(ma.map {|k,v| k} + (ma['player_infos'].first ||{}).map {|k,v| "player.#{k}"} +
-              (ma['pro_infos'].first ||{}).map {|k,v| "pro.#{k}"}).to_csv]
+        res = [(
+                ma.map {|k,v| k} +
+                (ma['player_infos'].first ||{}).map {|k,v| "player.#{k}"} +
+                (ma['pro_infos'].first ||{}).map {|k,v| "pro.#{k}"}
+                ).to_csv]
 
         m[:masters].each do |mae|
-          res << (mae.map {|k,v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v }   +  (mae['player_infos'].first || {}).map {|k,v| v} +
+          res << (mae.map {|k,v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v } +  
+              (mae['player_infos'].first || {}).map {|k,v| v} +
               (mae['pro_infos'].first || {}).map {|k,v| v}).to_csv
         end
 

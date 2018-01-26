@@ -153,35 +153,72 @@ class Master < ActiveRecord::Base
 
   end
 
-private
 
-  def init_vars_master
-    instance_var_init :current_admin
-    instance_var_init :current_user
+  def as_json extras={}
+    extras.merge!({
+      include: {
+        player_infos: {order: Master::PlayerInfoRankOrderClause,
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          },
+          methods: [:user_name, :accuracy_score_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
+        },
+        pro_infos: {
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }
+        },
+        player_contacts: {
+          order: {rank: :desc},
+          methods: [:user_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories],
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }
+        },
+        addresses: {
+          order: {rank: :desc},
+          methods: [:user_name, :rank_name, :state_name, :country_name, :source_name, :tracker_history_id, :tracker_histories],
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }
+        },
+        latest_tracker_history: {
+          methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]
+        }
+      }
+    })
+    super(extras)
   end
 
-  def assign_msid
+  private
 
-    max_msid = Master.maximum(:msid) || 0
-    self.msid = max_msid + 1
-
-  end
-
-  def prevent_user_updates
-    errors.add :pro_id, "can not be updated by users" if pro_id_changed?
-    errors.add :msid, "can not be updated by users" if msid_changed?
-    errors.add "pro info association", "can not be updated by users" if pro_info_id_changed?
-  end
-
-  def set_user
-    cu = @current_user
-    # Set the user association when current_user is set
-    if cu.is_a?(User) && cu.persisted?
-      write_attribute :user_id, cu.id
-    else
-      raise "Attempting to set user with non user: #{cu}"
+    def init_vars_master
+      instance_var_init :current_admin
+      instance_var_init :current_user
     end
 
-  end
+    def assign_msid
+
+      max_msid = Master.maximum(:msid) || 0
+      self.msid = max_msid + 1
+
+    end
+
+    def prevent_user_updates
+      errors.add :pro_id, "can not be updated by users" if pro_id_changed?
+      errors.add :msid, "can not be updated by users" if msid_changed?
+      errors.add "pro info association", "can not be updated by users" if pro_info_id_changed?
+    end
+
+    def set_user
+      cu = @current_user
+      # Set the user association when current_user is set
+      if cu.is_a?(User) && cu.persisted?
+        write_attribute :user_id, cu.id
+      else
+        raise "Attempting to set user with non user: #{cu}"
+      end
+
+    end
 
 end
