@@ -1,6 +1,6 @@
 <div class="container-fluid" id="master-search-advanced">
 <%
-  default_search_form = app_config_text(:default_search_form, 'simple search form')
+  default_search_form = app_config_text(:default_search_form, 'simple search')
   hide_searchable_reports = app_config_set(:hide_search_form_searchable_reports)
 %>
 
@@ -27,7 +27,7 @@
 
 
   <div class="panel panel-default">
-    <div id="master-search-simple-form" class="panel-collapse collapse <%= default_search_form == 'simple search form' ? 'in' : '' %>" role="tabpanel">
+    <div id="master-search-simple-form" class="panel-collapse collapse <%= default_search_form == 'simple search' ? 'in' : '' %>" role="tabpanel">
       <div class="panel-body searchable-report">
         <%= render partial: 'search_form_simple' %>
       </div>
@@ -35,7 +35,7 @@
   </div>
 
   <div class="panel panel-default">
-    <div id="master-search-advanced-form" class="panel-collapse collapse <%= default_search_form == 'advanced search form' ? 'in' : '' %>" role="tabpanel">
+    <div id="master-search-advanced-form" class="panel-collapse collapse <%= default_search_form == 'advanced search' ? 'in' : '' %>" role="tabpanel">
       <div class="panel-body searchable-report">
         <%= render partial: 'search_form_advanced' %>
       </div>
