@@ -38,6 +38,7 @@ module LogCallActions
       select to_who, from: 'Select call direction'
       select opt[:from], from: 'Select who'
       fill_in 'Called when', with: opt[:called_when]
+      sleep 0.5
     end
 
   end

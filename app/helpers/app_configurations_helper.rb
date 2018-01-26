@@ -6,9 +6,6 @@ module AppConfigurationsHelper
     res
   end
 
-  def app_config_title item
-    (AppConfiguration.value_for(item, current_user) || '').titleize
-  end
 
   def app_config_set item
     val = AppConfiguration.value_for(item, current_user)

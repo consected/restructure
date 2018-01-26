@@ -52,7 +52,7 @@ module PhoneListActions
     expect(page).to have_css(SelectedPhoneItemCss)
     within phone_item(0) do
       expect(page).to have_css(LogPhoneCallButtonCss)
-      click_link 'add log'
+      click_link 'Add Log'
     end
 
     expect(page).to have_css(NewPhoneLogFormCss)
