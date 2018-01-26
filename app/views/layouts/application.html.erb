@@ -5,15 +5,15 @@
   <%= stylesheet_link_tag    'application', media: 'all' %>
   <%= javascript_include_tag 'application' %>
 
-  <script>    
+  <script>
   _fpa.status = {
     controller: '<%= controller_name %>',
     action: '<%= action_name %>'
   };
   </script>
   <%= render partial: "layouts/setup_app" if current_email %>
-  <%= csrf_meta_tags %>  
-  
+  <%= csrf_meta_tags %>
+
 </head>
 <body <%= body_classes %>>
     <%= render partial: 'layouts/navbar' %>
@@ -22,10 +22,12 @@
 <%= yield %>
     <%= render partial: 'layouts/bootstrap_modal' %>
     <script id="flash_template" type="text/x-handlebars-template" class="handlebars-template">
+      {{#if message}}
       <div class="alert alert-info" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         {{message}}
       </div>
+      {{/if}}
     </script>
 
 

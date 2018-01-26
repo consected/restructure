@@ -2951,7 +2951,8 @@ CREATE TABLE app_configurations (
     name character varying,
     value character varying,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    user_id integer
 );
 
 
@@ -7144,6 +7145,13 @@ CREATE INDEX index_app_configurations_on_admin_id ON app_configurations USING bt
 
 
 --
+-- Name: index_app_configurations_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_configurations_on_user_id ON app_configurations USING btree (user_id);
+
+
+--
 -- Name: index_college_history_on_college_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -9194,6 +9202,14 @@ ALTER TABLE ONLY masters
 
 
 --
+-- Name: fk_rails_00f31a00c4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY app_configurations
+    ADD CONSTRAINT fk_rails_00f31a00c4 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_0210618434; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -10404,4 +10420,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180119173411');
 INSERT INTO schema_migrations (version) VALUES ('20180123111956');
 
 INSERT INTO schema_migrations (version) VALUES ('20180123154108');
+
+INSERT INTO schema_migrations (version) VALUES ('20180126120818');
 

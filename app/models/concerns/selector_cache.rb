@@ -43,6 +43,10 @@ module SelectorCache
     def nv_pair_cache_key
       "#{self.to_s}_nameval"
     end
+    def nv_user_id_cache_key
+      "#{self.to_s}_namevaluserid"
+    end
+
     def nv_all_cache_key
       "#{self.to_s}_namevalall"
     end
@@ -139,6 +143,13 @@ module SelectorCache
       }
     end
 
+    def name_user_id_value conditions=nil
+      ckey="#{nv_user_id_cache_key}-nd-#{conditions}"
+
+      Rails.cache.fetch(ckey){
+        enabled.where(conditions).collect {|c| [c.name, c.user_id, c.value] }
+      }
+    end
 
     def name_for value
       res = selector_name_value_pair.select{|p| p.last == value}
@@ -148,6 +159,12 @@ module SelectorCache
     def value_for name
       res = selector_name_value_pair.select{|p| p.first == name}
       res.length == 1 ? res.first.last : nil
+    end
+
+    def user_value_for name, user_id=nil
+      res = name_user_id_value.select{|p| p.first == name && (p[1] == user_id ) }
+      # be sure to return a blank string for a result if one was received, or nil otherwise
+      res.length == 1 ? (res.first.last || '') : nil
     end
 
   end

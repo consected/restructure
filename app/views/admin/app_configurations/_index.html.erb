@@ -10,6 +10,7 @@
       <th class="no-sort"></th>
       <th>Name</th>
       <th>Value</th>
+      <th>User Override</th>
       <th>Disabled</th>
       <th>Last Admin Update</th>
     </tr>
@@ -21,6 +22,7 @@
         <td><%= admin_edit_btn list_item.id%> </td>
         <td><%= list_item.name %></td>
         <td><%= list_item.value %></td>
+        <td><%= list_item.user.email if list_item.user %></td>
         <td><%= list_item.disabled ? 'disabled' : ''%></td>
 
         <td><%= list_item.admin_name %></td>
