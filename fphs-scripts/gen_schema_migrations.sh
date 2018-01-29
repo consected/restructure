@@ -208,7 +208,7 @@ cd /tmp
 sudo -u postgres dropdb mig_db
 sudo -u postgres psql < $DEVDIR/fphs-sql/create_roles.sql
 sudo -u postgres createdb -O $DBUSER mig_db
-sudo -u postgres psql -c "GRANT CONNECT ON DATABASE fphs to fphs; alter role fphs password '$DBUSERPW'"
+sudo -u postgres psql -c "GRANT CONNECT ON DATABASE mig_db to fphs; alter role fphs password '$DBUSERPW'"
 
 touch ~/.pgpass
 echo "localhost:5432:mig_db:$DBUSER:$DBUSERPW" >> ~/.pgpass
