@@ -43,7 +43,6 @@ module GeneralDataConcerns
   end
 
   def user_name
-    logger.debug "Getting username for #{self.user}"
     return nil unless self.user
     self.user.email
   end
@@ -94,11 +93,11 @@ module GeneralDataConcerns
 
     extras[:include] ||= {}
     extras[:methods] ||= []
-    extras[:methods] << :item_id
-    extras[:methods] << :item_type
-    extras[:methods] << :full_item_type
-    extras[:methods] << :updated_at_ts
-    extras[:methods] << :created_at_ts
+    extras[:methods] << :item_id if respond_to? :item_id
+    extras[:methods] << :item_type if respond_to? :item_type
+    extras[:methods] << :full_item_type if respond_to? :full_item_type
+    extras[:methods] << :updated_at_ts if respond_to? :updated_at
+    extras[:methods] << :created_at_ts  if respond_to? :created_at
     extras[:methods] << :data if respond_to? :data
     extras[:methods] << :rank_name if respond_to? :rank
     extras[:methods] << :state_name if respond_to? :state
@@ -107,16 +106,16 @@ module GeneralDataConcerns
     extras[:methods] << :protocol_name if respond_to? :protocol
     extras[:methods] << :sub_process_name if respond_to? :sub_process
     extras[:methods] << :protocol_event_name if respond_to? :protocol_event
-    if respond_to?(:tracker_history_id) || respond_to?(:tracker_history)
+    if !self.is_a?(Tracker) && !self.is_a?(TrackerHistory) && (respond_to?(:tracker_history_id) || respond_to?(:tracker_history))
       extras[:methods] << :tracker_history_id
       extras[:methods] << :tracker_histories if respond_to? :tracker_histories
     end
     extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
-    extras[:methods] << :user_name
+    extras[:methods] << :user_name if respond_to? :user_name
     # update_action can be used by requestor to identify whether the record was just updated (saved) or not
-    extras[:methods] << :update_action
-    extras[:methods] << :_created
-    extras[:methods] << :_updated
+    extras[:methods] << :update_action if respond_to? :update_action
+    extras[:methods] << :_created if respond_to? :_created
+    extras[:methods] << :_updated if respond_to? :_updated
 
     extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
     extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?

@@ -3,6 +3,8 @@
   full_name_hyphenated = full_name.hyphenate
   item_type_hyphenated = item_type.hyphenate
   blank_log_full_name_hyphenated = blank_log_full_name.hyphenate
+
+  data_action_when =  "data_#{action_when_attribute}".to_sym
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: full_name,
@@ -11,8 +13,9 @@
     prevent_create: false,
     extra_class: 'alt-width col-md-8',
     item_list: implementation_class.view_attribute_list,
-    data_sort: [:desc, :data_completed_when],
-    custom_block_attrs: {data_completed_when: '{{timestamp completed_when}}'},
+    data_sort: [:desc, data_action_when],
+    subsort_id: true,
+    # custom_block_attrs: {data_action_when => "{{timestamp #{action_when_attribute}}}"},
     custom_activity_log: :none,
     implementation_class_name: implementation_class_name,
     item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
@@ -31,8 +34,9 @@
       prevent_create: false,
       extra_class: 'alt-width col-md-8',
       item_list: implementation_class.view_blank_log_attribute_list,
-      data_sort: [:desc, :data_completed_when],
-      custom_block_attrs: {data_completed_when: '{{timestamp completed_when}}'},
+      data_sort: [:desc, data_action_when],
+      subsort_id: true,
+      # custom_block_attrs: {data_action_when => "{{timestamp #{action_when_attribute}}}"},
       custom_activity_log: :none,
       implementation_class_name: implementation_class_name,
       item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
@@ -117,7 +121,7 @@
 
 
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
-          <div data-sort-desc="data-completed-when" >
+          <div data-sort-desc="<%= data_action_when %>" <%= data_action_when %>="">
             <div class="new-block new-after-parent col-md-8 {{#if <%= full_name.pluralize %>}}has-records has-records hidden{{/if}}" id="activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
                 {{#unless <%= full_name.pluralize %>}}<h4>No logged activity</h4>{{/unless}}
             </div>
@@ -125,9 +129,9 @@
           </div>
           {{#each <%=full_name.pluralize%>}}
             {{#if item_id}}
-            {{><%= full_name %>_result _created=@index}}
+            {{><%= full_name %>_result _created=@index prevent_edit=@index}}
             {{else}}
-            {{><%= blank_log_full_name %>_result _created=@index}}
+            {{><%= blank_log_full_name %>_result _created=@index prevent_edit=@index}}
             {{/if}}
           {{/each}}
         </div>

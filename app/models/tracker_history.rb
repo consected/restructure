@@ -8,6 +8,12 @@ class TrackerHistory < UserBase
   has_one :tracker, inverse_of: :tracker_histories
   belongs_to :item, polymorphic: true
 
+  # Avoids a lot of unnecessary database lookups
+  def self.uses_item_flags?
+    false
+  end
+
+
   def as_json extras={}
     extras[:methods] ||= []
     extras[:methods] << :protocol_name

@@ -1,13 +1,13 @@
 table.admin-list tbody {
-    
+
     tr:hover {
         background-color: #ffe;
     }
-    
+
     tr.disabled-result, tr.disabled-result:hover  {
         background-color: #eee;
     }
-    
+
     td pre {
         max-width: 70%;
     }
@@ -23,7 +23,14 @@ table.admin-list tbody {
     padding: 1.4em;
     margin: 1.4em;
     border-radius: 8px;
-    
+
     .form-group {margin-left: 10px; margin-right: 10px; }
 }
 
+.wide-field {
+  min-width: 500px;
+}
+
+#admin-edit- .form-inline .form-group {
+  margin-bottom: 1em;
+}

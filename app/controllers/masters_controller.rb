@@ -16,6 +16,7 @@ class MastersController < ApplicationController
     search_type = params[:mode]
     search_type = 'ADVANCED' if search_type.blank?
 
+    @search_type = search_type
 
     run search_type
 

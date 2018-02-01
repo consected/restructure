@@ -1,21 +1,22 @@
 <div class="container" style="padding-top:40px;">
 
-<% if current_admin %> 
+<% if current_admin %>
   <%= render partial: 'index_admin' %>
 <% end %>
 
 <div class="panel panel-primary">
-  <div class="panel-body">  
+  <div class="panel-body">
     <h2 >User Actions</h2>
     <div class="row">
-      <div class="col-sm-12">      
-        
+      <div class="col-sm-12">
 
-        <ul class="nav">    
+
+        <ul class="nav">
             <% if current_user %>
 
             <li class="nav"><%= link_to "Research", masters_path %> </li>
             <li class="nav"><%= link_to "Reports", reports_path %> </li>
+            <li class="nav"><%= link_to "Import CSV", imports_path %> </li>
         </ul>
       </div>
       <div class="col-sm-12"> 
@@ -31,8 +32,4 @@
         </ul>
       </div>
   </div>
-</div>    
-  
-
-
-  
+</div>

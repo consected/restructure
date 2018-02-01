@@ -97,6 +97,22 @@ _fpa.utils.escape_html = function (string) {
 };
 
 
+// This always returns the original if the date is not processable
+_fpa.utils.ISOdatetoTimestamp = function(stre){
+
+  if(stre == null) return null;
+
+  if(typeof stre == 'number') return stre;
+
+  if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
+    var ds = new Date(Date.parse(stre));
+    if(!ds) return stre;
+    var res = ds.getTime().toFixed(0);
+    return res;
+  } else {
+    return stre;
+  }
+};
 // Typically returns m/d/yyyy
 _fpa.utils.YMDtoLocale = function(stre){
 

@@ -36,8 +36,8 @@ module AppExceptionHandler
     end
 
     def bad_auth_token e
-      msg = "The information could not be submitted. Try returning to the home page to refresh the page."
-      code = 401
+      msg = "The information could not be submitted. Try returning to the home page to refresh the session."
+      code = 422
       return_and_log_error e, msg, code
     end
 

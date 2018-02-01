@@ -630,7 +630,7 @@ _fpa = {
   // Display Rails style flash notices in response to Ajax events (or any other Javascript that wishes to use this mechanism)
   flash_notice: function(msg, type){
       if(!type) type = 'info';
-
+      if(!msg || msg == '') return;
       var a = '<div class="alert alert-'+type+'" role="alert">';
       a += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
       if(type == 'error' || type == 'danger'){
@@ -649,7 +649,7 @@ _fpa = {
   timed_flash_fadeout: function(){
       window.setTimeout(function(){
           $('.alert-info').fadeOut(1000);
-      }, 2000);
+      }, 6000);
   },
   clear_flash_notices: function(type){
     if(!type)

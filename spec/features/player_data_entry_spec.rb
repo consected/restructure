@@ -55,6 +55,11 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     t = page.all(p).first.text
 
+    if t != expected
+      puts "failed to sort correctly"
+    end
+
+
     expect(t).to eq(expected)
 
   end

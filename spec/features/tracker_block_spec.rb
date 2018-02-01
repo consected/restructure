@@ -107,8 +107,9 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
       sleep 1
       find("\#master_player_infos_attributes_0_last_name").send_keys :tab
     end
-
+    dismiss_modal
     have_css '#advanced_search_master.ajax-running'
+    dismiss_modal
     have_css "#master_results_block"
     expect(page).to have_css "#master_results_block", text: ''
     have_css "#search_count"
@@ -183,11 +184,11 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
       expect_tracker_date_to_be_today
       click_button "Create Tracker"
     end
-
+    dismiss_modal
     # After a moment the tracker will show the newly created item
     expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
 
-
+    sleep 1
     have_css '.tracker-tree-results tbody.new-block'
     dismiss_modal
     sleep 1
