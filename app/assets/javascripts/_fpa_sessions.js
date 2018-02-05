@@ -2,9 +2,7 @@ _fpa.session = function(timeout) {
     if(!timeout) return;
     this.default_timeout = timeout + this.tick/1000;
     this.start_counting(true);
-
-    console.log(this);
-
+    
     return this;
 };
 

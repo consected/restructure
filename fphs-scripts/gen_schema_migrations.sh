@@ -26,16 +26,22 @@ if [ -z "$1" ]
 then
 
   echo Select which environment to generate
-  echo '1 (pandora.catalyst)'
+  echo '1 (localhost - using exported scripts to create a reference database)'
   echo '2 (vagrant-fphs-webapp-box - update vagrant test box from host)'
   echo '3 (test DBs fphs against fpa_development within vagrant dev box guest)'
   echo '4 (fphs-webapp-dev01)'
-  echo '5 (fphs-webapp-prod01)'
+  echo '5 (fphs-webapp-dev01)'
+  echo '6 (fphs-webapp-prod01)'
 
   read OPT
 
 else
   OPT=$1
+fi
+
+if [ $OPT == '1' ]
+then
+  ext_user=`whoami`
 fi
 
 if [ $OPT == '2' ]
@@ -51,15 +57,15 @@ fi
 
 if [ -z "$ext_user" ]
 then
-  echo 'Enter your server username (openmed, vagrant or ecommons)'
+  echo 'Enter your server username (ecommons name)'
   read ext_user
 fi
 
 
 
-if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' && $OPT != '4' && $OPT != '5' ]]
+if [[ $OPT != '1' && $OPT != '2' && $OPT != '3' && $OPT != '4' && $OPT != '5' && $OPT != '6' ]]
 then
-    echo Only 1, 2, 3, 4 or 5 are valid
+    echo Only 1, 2, 3, 4, 5 or 6 are valid
     exit
 fi
 
@@ -73,16 +79,27 @@ fi
 if [ $OPT == '1' ]
 then
 #### if local shared dev #####
-export EXTNAME=pandora.catalyst
+export NOSSH=yes
+export MAKEREFDB=yes
+export EXTNAME=localhost
 export EXTUSER=$ext_user
-export SCHEMA=public
-export EXTDB=fphs
+export BECOME_USER=postgres
+export SCHEMA=ml_app
+export EXTDB=fphs_offline_ref
 export EXTDBHOST=localhost
 export EXTDBUSER=fphs
 export EXPORTSVR=$EXTNAME
 export EXPORTLOC=/tmp
-export EXTROLE=fphs
-export EXTADMROLE=fphs
+export EXTROLE=FPHSUSR
+export EXTADMROLE=FPHSADM
+
+echo This option creates a local reference database from a schema SQL definition previously exported from a remote database.
+echo In addition, an export of the data from the table 'schema_migrations' is required.
+echo To create these:
+echo   pg_dump -O -s -d db_name > "schema.sql"
+echo   pg_dump -O -d db_name --data-only --schema=ml_app --table=ml_app.schema_migrations -x > "db-schema-migrations.sql"
+echo When ready to continue, press Enter
+read _ready
 ##############################
 fi
 
@@ -137,7 +154,25 @@ export EXTADMROLE=FPHSADM
 ###############################
 fi
 
+
+
 if [ $OPT == '5' ]
+then
+#### if HMS IT dev #####
+export EXTNAME=fphs-crm-dev02
+export EXTUSER=$ext_user
+export SCHEMA=ml_app
+export EXTDB=fphs
+export EXTDBHOST=fphs-crm-dev02
+export EXTDBUSER=$ext_user
+export EXPORTSVR=fphs-crm-dev02
+export EXPORTLOC=/FPHS/data/db_migrations
+export EXTROLE=FPHSUSR
+export EXTADMROLE=FPHSADM
+###############################
+fi
+
+if [ $OPT == '6' ]
 then
 #### if HMS IT production #####
 export EXTNAME=fphs-crm-prod01
@@ -168,11 +203,41 @@ else
   export EXTDBCONN=''
 fi
 
+if [ -z "$NOSSH" ]
+then
+  export RUNSCRIPT="ssh -T $EXTUSER@$EXTNAME"
+else
+  export RUNSCRIPT="bash"
+fi
 
 echo Storing results to development directory: $DEVDIR
 
-echo Prepare dump of current schema from the remote server $EXTNAME
-ssh -T $EXTUSER@$EXTNAME <<EOF
+if [ $MAKEREFDB == 'yes' ]
+then
+  echo Create the local reference database
+  CURRDIR=`pwd`
+  #avoid scary cd warnings
+  cd /tmp
+  sudo -u postgres dropdb $EXTDB
+  sudo -u postgres psql < $DEVDIR/fphs-sql/create_roles.sql
+  sudo -u postgres createdb -O $DBUSER $EXTDB
+  sudo -u postgres psql -c "GRANT CONNECT ON DATABASE $EXTDB to fphs; alter role fphs password '$DBUSERPW'"
+
+  touch ~/.pgpass
+  echo "localhost:5432:$EXTDB:$DBUSER:$DBUSERPW" >> ~/.pgpass
+  chmod 600 ~/.pgpass
+
+  echo "Use '\i schema.sql' to import the database and migration files"
+  sudo -u postgres psql
+
+  cd $CURRDIR
+
+fi
+
+
+
+echo Prepare dump of current schema from the server $EXTNAME
+$RUNSCRIPT <<EOF
 $BECOME_USER_CMD
 cd /tmp
 mkdir -p migrate-$EXTNAME
@@ -281,7 +346,7 @@ then
 
 ###### Now go to the remote machine and run the updates
 
-ssh -T  $EXTUSER@$EXTNAME <<EOF
+$RUNSCRIPT <<EOF
 chmod 777 $EXPORTLOC/migrate-$EXTNAME/upgrade-$VER.sql
 $BECOME_USER_CMD
 cd $EXPORTLOC/migrate-$EXTNAME/

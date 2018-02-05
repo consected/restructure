@@ -30,7 +30,8 @@ module MasterSearch
         @result_message = "Displaying results for a list of #{n} record #{'ID'.pluralize(n)}."
 
       elsif search_type == 'SIMPLE'
-        @masters = Master.search_on_params search_params[:master]
+        @masters = Master.search_on_params(search_params[:master])
+        @masters = @masters.limit(return_results_limit) if @masters
       elsif search_type == 'REPORT'
 
         search_type = "REPORT: #{@report.name}"
@@ -54,7 +55,8 @@ module MasterSearch
 
 
       else
-        @masters = Master.search_on_params search_params[:master]
+        @masters = Master.search_on_params(search_params[:master])
+        @masters = @masters.limit(return_results_limit) if @masters
       end
 
       if @masters
@@ -123,7 +125,7 @@ module MasterSearch
                 ).to_csv]
 
         m[:masters].each do |mae|
-          res << (mae.map {|k,v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v } +  
+          res << (mae.map {|k,v| v.is_a?(Hash) || v.is_a?(Array) ? '' : v } +
               (mae['player_infos'].first || {}).map {|k,v| v} +
               (mae['pro_infos'].first || {}).map {|k,v| v}).to_csv
         end

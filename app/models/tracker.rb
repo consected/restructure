@@ -21,6 +21,12 @@ class Tracker < UserBase
   # record on creation
   attr_accessor :_merged
 
+  # Avoids a lot of unnecessary database lookups
+  def self.uses_item_flags?
+    false
+  end
+
+
   # Check whether a tracker record with the same protocol already exists for this master
   # If it does then a DB trigger will update the existing record rather than creating a new one.
   # This following method ensures that the latest tracker entry for this protocol is returned,
@@ -219,9 +225,7 @@ class Tracker < UserBase
   end
 
   def tracker_history_length
-
-    tracker_histories.length
-
+    tracker_histories.count
   end
 
   def prevent_protocol_change

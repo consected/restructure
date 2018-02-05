@@ -26,6 +26,10 @@
     data_sort_attr = "#{data_sort.last.to_s.hyphenate.sub('data-','')}"
   end
 
+  unless defined? subsort_id
+    subsort_id = false
+  end
+
   unless defined? custom_block_attrs
     custom_block_attrs = {}
   end
@@ -103,8 +107,8 @@
 </script>
 
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}<div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
-  <ul class="list-group" data-item-id="{{id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.to_s.html_safe}\"" }.join(' ').html_safe%> >
+  {{#was _created}}<div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
+  <ul class="list-group" data-item-id="{{id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.to_s.html_safe}\"" }.join(' ').html_safe%> >
       <% if item_list.length == 1 && item_list.first.is_a?(Hash) %>
         <% item_list.each do |item| %>
         <li class="list-group-item <%=name%>-<%=name%>_id is-heading compact-heading">

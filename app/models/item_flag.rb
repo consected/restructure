@@ -24,7 +24,6 @@ class ItemFlag < UserBase
   default_scope -> {where "disabled is null or disabled = false"}
 
   def user_name
-    logger.debug "Getting username for #{self.user} in WorksWithItem"
     return nil unless self.user
     self.user.email
   end

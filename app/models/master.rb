@@ -10,8 +10,8 @@ class Master < ActiveRecord::Base
   has_many :pro_infos , inverse_of: :master
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
-  has_many :trackers, -> { includes(:protocol).order(TrackerEventOrderClause)}, inverse_of: :master
-  has_many :tracker_histories, -> { order(TrackerHistoryEventOrderClause)}, inverse_of: :master
+  has_many :trackers, -> { includes(:protocol).preload(:protocol, :sub_process, :protocol_event, :user).order(TrackerEventOrderClause)}, inverse_of: :master
+  has_many :tracker_histories, -> { preload(:protocol, :sub_process, :protocol_event, :user).order(TrackerHistoryEventOrderClause) }, inverse_of: :master
 
 
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory'
@@ -189,6 +189,7 @@ class Master < ActiveRecord::Base
     })
     super(extras)
   end
+
 
   private
 

@@ -568,8 +568,17 @@ _fpa.form_utils = {
               var ares = $(a).find('['+s+']').attr(s);
               ares = _fpa.utils.ISOdatetoTimestamp(ares);
               bres = _fpa.utils.ISOdatetoTimestamp(bres);
+
               if(ares == null || ares == '') return -1;
               if(bres == null || bres == '') return 1;
+              // Force to a number if it is equivalent to the original string
+              var n = parseFloat(ares);
+              if(ares == n)
+                ares = n;
+              n = parseFloat(bres);
+              if(bres == n)
+                  bres = n;
+
               if(bres > ares) {
                 return 1;
               }

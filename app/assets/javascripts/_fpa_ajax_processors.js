@@ -18,7 +18,6 @@ _fpa.preprocessors = {
 
 _fpa.postprocessors = {
     default: function(block, data, has_postprocessor){
-
         _fpa.processor_handlers.form_setup($('form'));
 
         $('#master_results_block').addClass('search-status-done');

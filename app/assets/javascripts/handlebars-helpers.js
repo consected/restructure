@@ -193,6 +193,12 @@
         return res;
     });
 
+    Handlebars.registerHelper('pad_start', function(value, num, padstr) {
+        return String(value).padStart(num, padstr);
+    });
+
+
+
     Handlebars.registerHelper('simple_log', function(t) {
         console.log(t);
     });

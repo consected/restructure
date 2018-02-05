@@ -12,7 +12,7 @@ module UserHandler
 
     belongs_to :master, assoc_rules
 
-    has_many :item_flags, as: :item, inverse_of: :item
+    has_many :item_flags,  -> { preload(:item_flag_name) }, as: :item, inverse_of: :item
 
 
 
@@ -140,7 +140,11 @@ module UserHandler
     # A fallback data attribute to act as the human identifier for an item
     # for quick review.
     # Most items will override this definition.
+    # Even if they don't directly, but have an attribute, we'll catch it
     def data
+      if defined? super
+        return super()
+      end
       a_list = %w(id master_id user_id admin_id rank source rec_type notes)
       (self.attributes[(self.attribute_names - a_list).first] || "").to_s
     end
