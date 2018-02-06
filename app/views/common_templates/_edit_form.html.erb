@@ -30,6 +30,9 @@
   <div data-result="<%= edit_form_id %>">
     <div class="">
       <%=form_for([object_instance.belongs_directly_to, object_instance], edit_form_hash ) do |f|%>
+      <% if @extra_log_type %>
+        <%= f.hidden_field :extra_log_type, value: @extra_log_type_name %>
+      <% end %>
       <ul class="list-group">
         <li class="list-group-item">
           <%= inline_cancel_button %>
@@ -69,7 +72,7 @@
                   # Allow a 'data' selection to be made from an item
 
                   rlit = p.to_s.sub('select_record_from_', '').singularize
-                  
+
                   if ActivityLog.use_with_class_names.include? rlit
                     rl = rlit
                     cn = ActivityLog.use_with_class_names.select{|s| s == rl}.first

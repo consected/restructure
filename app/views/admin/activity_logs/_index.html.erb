@@ -43,7 +43,7 @@
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td>&nbsp;</td>
         <td colspan="5"><strong>Extra log types:</strong> <p><%= list_item.extra_log_types %></p></td>
-        <td colspan="6"><strong>Generator script:</strong> <p>db/table_generators/generate.sh activity_logs_table create <%=list_item.table_name%> <%=list_item.item_type.pluralize%> <%=(list_item.view_attribute_list || []).join(' ')%></p></td>
+        <td colspan="6"><strong>Generator script:</strong> <p><%= list_item.generator_script %></p></td>
       </tr>
     <% end %>
   </tbody>

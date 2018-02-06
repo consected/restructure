@@ -51,7 +51,9 @@ class ActivityLog < ActiveRecord::Base
     !blank_log_field_list.blank?
   end
 
-
+  def extra_log_type_configs
+    @extra_log_type_configs ||= ExtraLogType.parse_config(self)
+  end
 
   # return the activity log implementation class that corresponds to
   # this item (item_type / rec_type in an enabled admin activity log record)
@@ -110,7 +112,7 @@ class ActivityLog < ActiveRecord::Base
   # Get a complete list of all fields required to generate a table.
   # The individual field lists may overlap or be distinct. This gets us a usable list
   def all_implementation_fields
-    res = (view_attribute_list || []) + (view_blank_log_attribute_list || [])
+    res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + ExtraLogType.fields_for_all_in(self)
     res.uniq
   end
 
@@ -451,13 +453,18 @@ class ActivityLog < ActiveRecord::Base
     res
   end
 
+  def generator_script
+    "db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{all_implementation_fields.join(' ')}"
+  end
+
+
   def check_implementation_class
 
     if !disabled && errors.empty?
-      val = all_implementation_fields
+
       unless ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
-          db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{val.join(' ')}
+          '#{generator_script}'
         Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "

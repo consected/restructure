@@ -5,6 +5,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
   include MasterHandler
   include ParentHandler
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
+  before_action :handle_extra_log_type, only: [:edit, :new]
 
 
 
@@ -20,14 +21,18 @@ class ActivityLog::ActivityLogsController < ApplicationController
     end
 
     def edit_form_extras
+      if @extra_log_type
+        caption = @extra_log_type.label
+        item_list = @extra_log_type.fields - @implementation_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
+      end
       if @item
-        caption = @item.data
+        caption ||= @item.data
         item_name = @item.class.human_name
-        item_list = @implementation_class.view_attribute_list - @implementation_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
+        item_list ||= @implementation_class.view_attribute_list - @implementation_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
       else
-        caption = 'log item'
+        caption ||= 'log item'
         item_name = ''
-        item_list = @implementation_class.view_blank_log_attribute_list - [:tracker_history_id]
+        item_list ||= @implementation_class.view_blank_log_attribute_list - [:tracker_history_id]
       end
       cb = {
         select_call_direction: "Enter details about the #{activity_log_name}",
@@ -148,6 +153,16 @@ class ActivityLog::ActivityLogsController < ApplicationController
       cn = "#{item_controller.singularize}_#{item_rec_type}".camelize
       cnf = "ActivityLog::#{cn}"
       cnf.constantize
+    end
+
+    def handle_extra_log_type
+      extra_type = nil
+      etp = params[:extra_type]
+      if etp.present? && @implementation_class.extra_log_type_config_names.include?(etp.underscore)
+        @extra_log_type_name = etp.underscore
+        @extra_log_type = @implementation_class.extra_log_type_config_for(etp.underscore)
+      end
+
     end
 
 end

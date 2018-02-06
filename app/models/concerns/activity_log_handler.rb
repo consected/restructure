@@ -99,6 +99,17 @@ module ActivityLogHandler
       ItemFlagName.enabled_for? self.name.ns_underscore
     end
 
+    def extra_log_type_config_names
+      admin_activity_log.extra_log_type_configs.map(&:name)
+    end
+
+    def extra_log_type_configs
+      admin_activity_log.extra_log_type_configs
+    end
+
+    def extra_log_type_config_for name
+      extra_log_type_configs.select{|s| s.name == name}.first
+    end
   end
 
   # default record updates tracking is not performed, since we sync tracker separately
