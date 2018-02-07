@@ -103,6 +103,19 @@ class UserBase < ActiveRecord::Base
     self.class.name.ns_underscore.pluralize
   end
 
+  def allows_current_user_access_to? perform, with_options=nil
+    raise FphsException.new "no master user in allows_current_user_access_to?" unless master_user
+    self.class.allows_user_access_to? master_user, perform, with_options=nil
+  end
+
+  def self.allows_user_access_to? user, perform, with_options=nil
+    raise FphsException.new "no user in allows_user_access_to?" unless user
+    resource_type = :table
+    named = self.name.ns_underscore.pluralize
+    !!user.has_access_to?( perform, resource_type, named, with_options)
+  end
+
+
   if Master.respond_to? :alternative_id_fields
     # add the alternative_id_fields from the master as attributes, so we can use them for matching
     Master.alternative_id_fields.each do |f|

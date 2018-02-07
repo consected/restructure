@@ -2307,7 +2307,11 @@ CREATE TABLE activity_log_ext_assignments (
     notes character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    select_call_direction character varying,
+    select_who character varying,
+    extra_text character varying,
+    extra_log_type character varying
 );
 
 
@@ -5360,6 +5364,41 @@ ALTER SEQUENCE trackers_id_seq OWNED BY trackers.id;
 
 
 --
+-- Name: user_access_controls; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE user_access_controls (
+    id integer NOT NULL,
+    user_id integer,
+    resource_type character varying,
+    resource_name character varying,
+    options character varying,
+    access character varying,
+    disabled boolean,
+    admin_id integer
+);
+
+
+--
+-- Name: user_access_controls_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE user_access_controls_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_access_controls_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE user_access_controls_id_seq OWNED BY user_access_controls.id;
+
+
+--
 -- Name: user_authorization_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6090,6 +6129,13 @@ ALTER TABLE ONLY trackers ALTER COLUMN id SET DEFAULT nextval('trackers_id_seq':
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY user_access_controls ALTER COLUMN id SET DEFAULT nextval('user_access_controls_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY user_authorization_history ALTER COLUMN id SET DEFAULT nextval('user_authorization_history_id_seq'::regclass);
 
 
@@ -6760,6 +6806,14 @@ ALTER TABLE ONLY tracker_history
 
 ALTER TABLE ONLY trackers
     ADD CONSTRAINT trackers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_access_controls_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY user_access_controls
+    ADD CONSTRAINT user_access_controls_pkey PRIMARY KEY (id);
 
 
 --
@@ -10422,4 +10476,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180123111956');
 INSERT INTO schema_migrations (version) VALUES ('20180123154108');
 
 INSERT INTO schema_migrations (version) VALUES ('20180126120818');
+
+INSERT INTO schema_migrations (version) VALUES ('20180206173516');
 

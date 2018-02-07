@@ -78,7 +78,7 @@ module MasterSearch
         @masters = @masters[0, return_results_limit]
 
         m = {
-          masters: @masters.as_json,
+          masters: @masters.as_json(current_user: current_user),
           count: {
             count: original_length,
             show_count: @masters.length

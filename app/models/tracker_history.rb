@@ -13,6 +13,11 @@ class TrackerHistory < UserBase
     false
   end
 
+  # Override for latest_tracker_history, where we have no way of getting at the master_user
+  # Master is responsible for excluding these items
+  def allows_current_user_access_to? perform, with_options=nil
+    return true unless master_user
+  end
 
   def as_json extras={}
     extras[:methods] ||= []

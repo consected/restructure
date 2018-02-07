@@ -7,8 +7,11 @@ class User < ActiveRecord::Base
 
   belongs_to :admin
   has_many :user_authorizations
+  has_many :user_access_controls, autosave: true
 
   default_scope -> {order email: :asc}
+
+  before_create :set_access_levels
 
   def self.active_id_name_list filter=nil
     active.map {|u| {id: u.id, value: u.id, name: u.email} }
@@ -49,6 +52,10 @@ class User < ActiveRecord::Base
     UserAuthorization.user_can? self, auth
   end
 
+  def has_access_to? perform, resource_type, named, with_options=nil
+    UserAccessControl.access_for? self.id, perform, resource_type, named, with_options
+  end
+
   def to_s
     email
   end
@@ -77,6 +84,16 @@ class User < ActiveRecord::Base
       end
 
       true
+    end
+
+
+    # Ensure that access controls are appropriately created and disabled
+    def set_access_levels
+      if persisted? && self.disabled
+        user.access_controls.each {|uac| uac.disable! }
+      elsif !persisted?
+        UserAccessControl.create_all_for self, current_admin
+      end
     end
 
 end

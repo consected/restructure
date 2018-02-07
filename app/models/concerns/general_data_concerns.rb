@@ -95,6 +95,10 @@ module GeneralDataConcerns
 
   def as_json extras={}
 
+    # byebug if self.is_a?(TrackerHistory)
+
+    return {} unless self.allows_current_user_access_to?(:access)
+
     extras[:include] ||= {}
     extras[:methods] ||= []
     extras[:methods] << :item_id if respond_to? :item_id

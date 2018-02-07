@@ -76,13 +76,27 @@
                   if ActivityLog.use_with_class_names.include? rlit
                     rl = rlit
                     cn = ActivityLog.use_with_class_names.select{|s| s == rl}.first
-                    reslist = cn.camelize.constantize.where(master_id: object_instance.master_id).map{|i| [i.data, i.data]}
+                    reslist = cn.camelize.constantize.where(master_id: object_instance.master_id)
+                    if cn.camelize.constantize.attribute_names.include?('rank')
+                      reslist = reslist.order(rank: :desc)
+                      reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
+                    else
+                      reslist = reslist.order(data: :asc)
+                      reslist = reslist.all.map{|i| [i.data, i.data]}
+                    end
                   elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? rlit
                     ActivityLog.use_with_class_names.each do |ucn|
                       if rlit.start_with?(ucn)
                         rl = rlit
                         cn = ActivityLog.use_with_class_names.select{|s| s == ucn}.first
-                        reslist = cn.camelize.constantize.where(master_id: object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, '')).map{|i| [i.data, i.data]}
+                        reslist = cn.camelize.constantize.where(master_id: object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
+                        if cn.camelize.constantize.attribute_names.include?('rank')
+                          reslist = reslist.order(rank: :desc)
+                          reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
+                        else
+                          reslist = reslist.order(data: :asc)
+                          reslist = reslist.all.map{|i| [i.data, i.data]}
+                        end
                       end
                     end
                   end
