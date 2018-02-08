@@ -318,3 +318,9 @@
     {{/unless}}
     <% end %>
 </script>
+
+<script id="<%=name%>_create_button-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <% unless prevent_create %>
+  <a href="/masters/{{id}}/<%=name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="<%=name.hyphenate%>-{{id}}-"><span class="glyphicon glyphicon-plus"></span> {{#if label}}{{label}}{{else}}<%= name.titleize %>{{/if}} record</a>
+  <% end %>
+</script>

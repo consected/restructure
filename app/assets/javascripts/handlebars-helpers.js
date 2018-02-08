@@ -271,6 +271,13 @@
       return str.replace(/_/g, '-');
     });
 
+    Handlebars.registerHelper('pluralize', function(str){
+      if(!str) return;
+      if(str[str.length - 1] == 'y')
+        return str.substring(0, str.length - 1) + 'ies';
+      return str + 's';
+    });
+
 
     Handlebars.registerHelper('one_decimal', function(num){
       return num.toFixed(1);

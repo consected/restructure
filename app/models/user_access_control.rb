@@ -30,7 +30,7 @@ class UserAccessControl < ActiveRecord::Base
     {
       table: {
         access: [:read, :update, :create],
-        edit: [:update, :create]
+        edit: [:update, :create],
       }
     }
   end
@@ -91,10 +91,18 @@ class UserAccessControl < ActiveRecord::Base
     end
   end
 
+  def self.view_tables? user
+    view = {}
+    resource_names.each do |r|
+      view[r.to_sym] = !!access_for?(user.id, :access, :table, r)
+    end
+
+    view
+  end
 
   private
     def correct_access
-
+      self.access = nil if self.access.blank?
       if self.user.nil? || self.user.id.nil?
         errors.add :user, "must be set"
       elsif self.user.disabled != self.disabled

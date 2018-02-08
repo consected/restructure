@@ -12,9 +12,6 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
   private
 
-    def can_edit?
-      object_instance.can_edit?
-    end
 
     def edit_form
       'common_templates/edit_form'

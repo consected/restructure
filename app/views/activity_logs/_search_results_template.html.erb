@@ -32,8 +32,8 @@
     <%= render partial: template_name, locals: {
           caption: m.name,
           name: m.item_type_name,
-          prevent_edit: true,
-          prevent_create: true,
+          prevent_edit:  !(current_user.has_access_to? :edit, :table, m.full_item_type_name.pluralize),
+          prevent_create: !(current_user.has_access_to? :create, :table, m.full_item_type_name.pluralize),
           item_list: l,
           implementation_class: m.implementation_class,
           implementation_class_name: m.item_type_name,

@@ -351,7 +351,9 @@ module ActivityLogHandler
 
     latest_item = master.send(self.class.assoc_inverse).order(id: :desc).limit(1).first
 
-    (self.user_id == master.current_user.id && latest_item.id == self.id)
+    res = (self.user_id == master.current_user.id && latest_item.id == self.id)
+
+    res && super()
   end
 
 

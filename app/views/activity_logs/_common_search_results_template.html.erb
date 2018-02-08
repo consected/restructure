@@ -9,8 +9,8 @@
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: full_name,
     caption: al_name,
-    prevent_edit: false,
-    prevent_create: false,
+    prevent_edit: prevent_edit,
+    prevent_create: prevent_create,
     extra_class: "alt-width col-md-#{col_width}",
     item_list: implementation_class.view_attribute_list,
     data_sort: [:desc, data_action_when],
@@ -30,8 +30,8 @@
     name: blank_log_full_name,
     item_class_name: full_name,
     caption: blank_log_label, # substitute the rec_type attribute (capitalized) as the block caption
-    prevent_edit: false,
-    prevent_create: false,
+    prevent_edit: prevent_edit,
+    prevent_create: prevent_create,
     extra_class: "alt-width col-md-#{col_width}",
     item_list: implementation_class.view_blank_log_attribute_list,
     data_sort: [:desc, data_action_when],
@@ -52,8 +52,8 @@
       name: "#{full_name}_#{c.name}",
       item_class_name: full_name,
       caption: c.label, # substitute the rec_type attribute (capitalized) as the block caption
-      prevent_edit: false,
-      prevent_create: false,
+      prevent_edit: prevent_edit,
+      prevent_create: prevent_create,
       extra_class: "alt-width col-md-#{col_width}",
       item_list: c.fields,
       data_sort: [:desc, data_action_when],
@@ -101,11 +101,13 @@
 
 
 <script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
+  <% unless prevent_create %>
   <span id="activity-log-{{master_id}}-initial-action" class="" >
     <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
       <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %></a>
     </span>
    </span>
+   <% end %>
 </script>
 
 
@@ -118,7 +120,7 @@
     <% end %>
       <h4 class="list-group-item-heading al-label-<%=item_type_name_hyphenated%>-item"><%=al_name%></h4>
 
-      <% if hide_item_list_panel %>
+      <% if hide_item_list_panel && !prevent_create%>
       <p class="text-center action-buttons">
         {{#each <%=item_type.pluralize%>}}
         <% if rec_type.blank? %>
@@ -156,13 +158,19 @@
 
         </div>
         <br />
+        <% unless prevent_create %>
         <p class="help-block small">
           Select <%=item_type_name.humanize%> above to log an activity against it. Or click <b>+ <%= blank_log_label %></b> to add an activity not tied to a specific item (such as indicating that a follow up is no longer required.)
         </p>
         <br />
+        <% end %>
         <p class="text-center">
+          <% if current_user.has_access_to?( :create, :table, item_type.pluralize) %>
           <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/new<%= rec_type.blank? ? '' : "?#{item_type}[rec_type]=#{rec_type}"  %>" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" aria-label="add <%=item_type.humanize%> record"><span class="glyphicon glyphicon-plus"></span> <%= item_type.humanize%> record</a>
+          <% end %>
+          <% unless prevent_create %>
           <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
+          <% end %>
         </p>
       </div>
       <% end %>

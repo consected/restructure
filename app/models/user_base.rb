@@ -32,6 +32,10 @@ class UserBase < ActiveRecord::Base
     false
   end
 
+  def can_edit?
+    self.allows_current_user_access_to? :edit
+  end
+
 
   # Simple wrapper around #valid? that ensures certain validation methods avoid running and breaking outside of
   # the time we actually need them to run (save and create).

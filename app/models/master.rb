@@ -203,7 +203,7 @@ class Master < ActiveRecord::Base
       }
     end
 
-    tname = :tracker_history
+    tname = :tracker_histories
     if current_user.has_access_to? :access, :table, tname
       included_tables[:latest_tracker_history] = {
         methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]

@@ -11,7 +11,7 @@ class User < ActiveRecord::Base
 
   default_scope -> {order email: :asc}
 
-  before_create :set_access_levels
+  before_save :set_access_levels
 
   def self.active_id_name_list filter=nil
     active.map {|u| {id: u.id, value: u.id, name: u.email} }
@@ -89,10 +89,16 @@ class User < ActiveRecord::Base
 
     # Ensure that access controls are appropriately created and disabled
     def set_access_levels
-      if persisted? && self.disabled
-        user.access_controls.each {|uac| uac.disable! }
-      elsif !persisted?
+
+      if !persisted? || self.user_access_controls.length == 0
         UserAccessControl.create_all_for self, current_admin
+        return true
+      end
+
+      if persisted? && self.disabled
+        self.user_access_controls.each {|uac| uac.disable! }
+      elsif persisted? && !self.disabled
+        self.user_access_controls.each {|uac| uac.enable! }
       end
     end
 

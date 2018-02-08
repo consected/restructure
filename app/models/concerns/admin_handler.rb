@@ -29,6 +29,11 @@ module AdminHandler
     self.save
   end
 
+  def enable!
+    self.disabled = false
+    self.save
+  end
+
   def admin_name
     return unless admin
     admin.email

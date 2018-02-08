@@ -1,4 +1,4 @@
-class Admin::UserAuthorizationsController < ApplicationController
+class Admin::UserAccessControlsController < ApplicationController
 
   include AdminControllerHandler
   helper_method  :has_access_levels, :user_id_options
@@ -26,7 +26,7 @@ class Admin::UserAuthorizationsController < ApplicationController
     end
 
     def permitted_params
-      @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :user_id]
+      @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :user_id, :disabled]
     end
 
     def secure_params

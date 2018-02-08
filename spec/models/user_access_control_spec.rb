@@ -79,11 +79,29 @@ RSpec.describe UserAccessControl, type: :model do
     # First, check at an individual master level
     @master.current_user = @user
     jres = @master.to_json
-    puts jres
+
     res = JSON.parse jres
     expect(res['player_infos']).not_to be nil
     expect(res['player_infos'].first['id']).to eq id
 
+    # Now try a query
+    ids = []
+    player_ids = []
+    (0..9).each do
+      create_master
+      create_item
+      ids << @master.id
+      player_ids << @player_info.id
+    end
+
+    jres = Master.where(id: ids).to_json(current_user: @user)
+    res = JSON.parse jres
+
+    expect(res.length).to eq 10
+    res.each do |item|
+      expect(item['player_infos']).not_to be nil
+      expect(item['player_infos'].first['id']).to be_in player_ids
+    end
 
   end
 
@@ -112,11 +130,54 @@ RSpec.describe UserAccessControl, type: :model do
     # First, check at an individual master level
     @master.current_user = @user
     jres = @master.to_json
-    puts jres
+
     res = JSON.parse jres
     expect(res['player_infos']).to be nil
 
 
+    # Now try a query
+    ids = []
+    (0..9).each do
+      create_master
+      create_item
+      ids << @master.id
+    end
+
+    jres = Master.where(id: ids).to_json(current_user: @user)
+    res = JSON.parse jres
+
+    expect(res.length).to eq 10
+    res.each do |item|
+      expect(item['player_infos']).to be nil
+    end
+
+  end
+
+  # check a special case
+  it "prevents a user from accessing to latest tracker history association" do
+
+    create_admin
+    create_user
+    create_item
+
+    @master.current_user = @user
+    jres = @master.to_json
+    res = JSON.parse jres
+    puts jres
+    expect(res['latest_tracker_history']).not_to be nil
+
+    res = @user.has_access_to? :access, :table, :tracker_histories
+    res.access = nil
+    res.current_admin = @admin
+    res.save!
+
+    res = @user.has_access_to? :access, :table, :tracker_histories
+    expect(res).to be_falsey
+
+    @master.current_user = @user
+    jres = @master.to_json
+    res = JSON.parse jres
+    expect(res['latest_tracker_history']).to be nil
 
   end
 

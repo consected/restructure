@@ -9,6 +9,10 @@ module MasterHandler
     before_action :authenticate_user!
     before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
     before_action :set_instance_from_id, only: [:show]
+    before_action :set_instance_from_build, only: [:new, :create]
+    before_action :check_showable?, only: [:show]
+    before_action :check_editable?, only: [:edit, :update]
+    before_action :check_creatable?, only: [:new, :create]
 
     helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id
   end
@@ -27,15 +31,12 @@ module MasterHandler
   end
 
   def show
-    object_instance.current_user = current_user
     p = {full_object_name => object_instance.as_json}
 
     render json: p
   end
 
   def new
-    build_with = secure_params rescue nil
-    set_object_instance @master_objects.build(build_with)
 
     prep_item_flags
 
@@ -44,12 +45,6 @@ module MasterHandler
   end
 
   def edit
-
-    unless can_edit?
-      not_editable
-      return
-    end
-
     prep_item_flags
 
     render partial: edit_form, locals: edit_form_extras
@@ -57,7 +52,6 @@ module MasterHandler
 
   def create
 
-    set_object_instance @master_objects.build(secure_params)
     set_additional_attributes object_instance
     if object_instance.save
       handle_updated_item_flags
@@ -102,9 +96,6 @@ module MasterHandler
 
   protected
 
-    def can_edit?
-      true
-    end
 
     def edit_form
       'edit_form'
@@ -135,6 +126,29 @@ module MasterHandler
     end
 
     private
+
+      def check_showable?
+        return unless object_instance
+        unless object_instance.allows_current_user_access_to? :access
+          not_authorized
+          return
+        end
+      end
+
+      def check_editable?
+        unless object_instance.allows_current_user_access_to? :edit
+          not_editable
+          return
+        end
+      end
+
+      def check_creatable?
+        unless object_instance.allows_current_user_access_to? :create
+          not_creatable
+          return
+        end
+      end
+
 
       def set_additional_attributes obj
 
@@ -187,8 +201,19 @@ module MasterHandler
 
       end
 
+      def set_instance_from_build
+        build_with = secure_params rescue nil
+        set_object_instance @master_objects.build(build_with)
+      end
+
       def set_object_instance o
         instance_variable_set("@#{object_name}", o)
+
+        if object_instance.respond_to? :current_user
+          object_instance.current_user = current_user
+        elsif object_instance.respond_to? :master
+          object_instance.master.current_user = current_user
+        end
       end
 
       def set_objects_instance o

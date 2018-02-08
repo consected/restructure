@@ -374,12 +374,26 @@ _fpa.form_utils = {
                 // This is approximate, since forms typically make the block larger, but we are trying to avoid unnecessary
                 // scrolling, to keep the page from jumping around for the user where possible.
                 // Note that the timeout is set to ensure collapse sections have had time to grow to full height
-                window.setTimeout(function(){
-                    var rect = $(a).get(0).getBoundingClientRect();
-                    var not_visible = !(rect.top >= 0 && rect.bottom < $(window).height());
-                    if(not_visible)
-                        $(document).scrollTo(a, 100, {offset: -50});
-                }, 250);
+
+                var attempt_count = 0;
+                var doscroll = function(){
+                  var rect = $(a).get(0);
+                  if(!rect){
+                    if(attempt_count > 10){
+                      return;
+                    }
+                    attempt_count++;
+                    window.setTimeout(function(){ doscroll() }, 250);
+                    return;
+                  }
+                  rect = rect.getBoundingClientRect();
+
+                  var not_visible = !(rect.top >= 0 && rect.bottom < $(window).height());
+                  if(not_visible)
+                      $(document).scrollTo(a, 100, {offset: -50});
+                };
+
+                window.setTimeout(function(){ doscroll() }, 250);
             }
 
         }).addClass('attached-datatoggle-str');

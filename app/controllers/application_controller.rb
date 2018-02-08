@@ -95,6 +95,11 @@ protected
       render text: flash[:danger], status: :not_editable
     end
 
+    def not_creatable
+      flash[:danger] = "This item can't be created"
+      render text: flash[:danger], status: 403
+    end
+
     def not_found
       flash[:danger] = "Requested information not found"
       raise ActionController::RoutingError.new('Not Found')

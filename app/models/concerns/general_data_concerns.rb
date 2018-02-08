@@ -18,9 +18,6 @@ module GeneralDataConcerns
     @was_updated = updated_at_changed? ? 'updated' : false
   end
 
-  def can_edit?
-    true
-  end
 
   def _created
     @was_created
