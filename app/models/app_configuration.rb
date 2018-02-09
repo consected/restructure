@@ -1,12 +1,19 @@
 class AppConfiguration < ActiveRecord::Base
   include AdminHandler
   include SelectorCache
+  include AppTyped
 
   belongs_to :user
   validates :name, presence: true
 
-
-
+  def self.configurations
+    [
+      "default search form", "hide navbar search", "hide player accuracy",
+      "hide player tabs", "hide pro info", "hide search form advanced", "hide search form searchable reports",
+      "hide search form simple", "hide tracker panel", "menu create master record label",
+      "menu research label", "notes field caption", "show activity log panel", "user session timeout"
+    ]
+  end
   # Use `Configuration.value_for name` to get a cached configuration value
 
   # Allow the use of symbols to retrieve entries

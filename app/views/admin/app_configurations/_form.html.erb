@@ -3,8 +3,12 @@
 <%= form_for([:admin, object_instance], class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
+    <%= f.label :app_type %>
+    <%= f.select :name, AppType.active.map{|a| [a.label, a.name]}%>
+  </div>
+  <div class="form-group">
     <%= f.label :name %>
-    <%= f.text_field :name%>
+    <%= f.select :name, AppConfiguration.configurations %>
   </div>
   <div class="form-group">
     <%= f.label :value %>

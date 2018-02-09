@@ -2956,7 +2956,8 @@ CREATE TABLE app_configurations (
     value character varying,
     disabled boolean,
     admin_id integer,
-    user_id integer
+    user_id integer,
+    app_type_id integer
 );
 
 
@@ -2977,6 +2978,38 @@ CREATE SEQUENCE app_configurations_id_seq
 --
 
 ALTER SEQUENCE app_configurations_id_seq OWNED BY app_configurations.id;
+
+
+--
+-- Name: app_types; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE app_types (
+    id integer NOT NULL,
+    name character varying,
+    label character varying,
+    disabled boolean,
+    admin_id integer
+);
+
+
+--
+-- Name: app_types_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE app_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: app_types_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE app_types_id_seq OWNED BY app_types.id;
 
 
 --
@@ -5375,7 +5408,8 @@ CREATE TABLE user_access_controls (
     options character varying,
     access character varying,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    app_type_id integer
 );
 
 
@@ -5535,7 +5569,8 @@ CREATE TABLE users (
     unlock_token character varying,
     locked_at timestamp without time zone,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    app_type_id integer
 );
 
 
@@ -5696,6 +5731,13 @@ ALTER TABLE ONLY admins ALTER COLUMN id SET DEFAULT nextval('admins_id_seq'::reg
 --
 
 ALTER TABLE ONLY app_configurations ALTER COLUMN id SET DEFAULT nextval('app_configurations_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY app_types ALTER COLUMN id SET DEFAULT nextval('app_types_id_seq'::regclass);
 
 
 --
@@ -6318,6 +6360,14 @@ ALTER TABLE ONLY admins
 
 ALTER TABLE ONLY app_configurations
     ADD CONSTRAINT app_configurations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: app_types_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY app_types
+    ADD CONSTRAINT app_types_pkey PRIMARY KEY (id);
 
 
 --
@@ -7199,10 +7249,24 @@ CREATE INDEX index_app_configurations_on_admin_id ON app_configurations USING bt
 
 
 --
+-- Name: index_app_configurations_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_configurations_on_app_type_id ON app_configurations USING btree (app_type_id);
+
+
+--
 -- Name: index_app_configurations_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_app_configurations_on_user_id ON app_configurations USING btree (user_id);
+
+
+--
+-- Name: index_app_types_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_types_on_admin_id ON app_types USING btree (admin_id);
 
 
 --
@@ -8158,6 +8222,13 @@ CREATE INDEX index_trackers_on_user_id ON trackers USING btree (user_id);
 
 
 --
+-- Name: index_user_access_controls_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_access_controls_on_app_type_id ON user_access_controls USING btree (app_type_id);
+
+
+--
 -- Name: index_user_authorization_history_on_user_authorization_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -8176,6 +8247,13 @@ CREATE INDEX index_user_history_on_user_id ON user_history USING btree (user_id)
 --
 
 CREATE INDEX index_users_on_admin_id ON users USING btree (admin_id);
+
+
+--
+-- Name: index_users_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_users_on_app_type_id ON users USING btree (app_type_id);
 
 
 --
@@ -9656,6 +9734,22 @@ ALTER TABLE ONLY trackers
 
 
 --
+-- Name: fk_rails_647c63b069; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY app_configurations
+    ADD CONSTRAINT fk_rails_647c63b069 FOREIGN KEY (app_type_id) REFERENCES app_types(id);
+
+
+--
+-- Name: fk_rails_6a971dc818; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT fk_rails_6a971dc818 FOREIGN KEY (app_type_id) REFERENCES app_types(id);
+
+
+--
 -- Name: fk_rails_6de4fd560d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9736,6 +9830,14 @@ ALTER TABLE ONLY sub_processes
 
 
 --
+-- Name: fk_rails_8108e25f83; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY user_access_controls
+    ADD CONSTRAINT fk_rails_8108e25f83 FOREIGN KEY (app_type_id) REFERENCES app_types(id);
+
+
+--
 -- Name: fk_rails_83aa075398; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9749,6 +9851,14 @@ ALTER TABLE ONLY tracker_history
 
 ALTER TABLE ONLY pro_infos
     ADD CONSTRAINT fk_rails_86cecb1e36 FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_8be93bcf4b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY app_types
+    ADD CONSTRAINT fk_rails_8be93bcf4b FOREIGN KEY (admin_id) REFERENCES admins(id);
 
 
 --
@@ -10478,4 +10588,12 @@ INSERT INTO schema_migrations (version) VALUES ('20180123154108');
 INSERT INTO schema_migrations (version) VALUES ('20180126120818');
 
 INSERT INTO schema_migrations (version) VALUES ('20180206173516');
+
+INSERT INTO schema_migrations (version) VALUES ('20180209145336');
+
+INSERT INTO schema_migrations (version) VALUES ('20180209152723');
+
+INSERT INTO schema_migrations (version) VALUES ('20180209152747');
+
+INSERT INTO schema_migrations (version) VALUES ('20180209171641');
 

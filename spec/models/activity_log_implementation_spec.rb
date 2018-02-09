@@ -25,9 +25,11 @@ RSpec.describe 'Activity Log implementation', type: :model do
     master = @player_contact.master
     expect(master.current_user).to eq user
     al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user')
-
+    expect(al.master_user).to eq user
     expect(master.activity_log__player_contact_phones).not_to be nil
 
+    # res = al.player_contact.master_user
+    # expect(res).to eq user
     expect(al.player_contact).to eq @player_contact
     expect(al.save).to be true
     expect(al.master_id).to eq @player_contact.master_id

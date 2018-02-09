@@ -10,6 +10,7 @@ class ApplicationController < ActionController::Base
 
   before_action :prevent_cache
   before_action :setup_navs
+  before_action :setup_current_app_type
 
   rescue_from Exception, :with => :unhandled_exception_handler
   rescue_from RuntimeError, :with => :runtime_error_handler
@@ -32,6 +33,17 @@ protected
       # Prevent access to any management page unless the user is an administrator
     def check_admin
       redirect_to '/pages' and return unless current_admin
+    end
+
+    def setup_current_app_type
+      return unless current_user
+      #TODO resolve this with a real selection page
+      if current_user.app_type.nil? && AppType.count > 1
+        current_user.app_type = AppType.active.first
+        #redirect_to "/seleect_an_app_type"
+      else
+        current_user.app_type = AppType.active.first
+      end
     end
 
     def setup_navs

@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   belongs_to :admin
   has_many :user_authorizations
   has_many :user_access_controls, autosave: true
+  belongs_to :app_type
 
   default_scope -> {order email: :asc}
 
@@ -52,8 +53,9 @@ class User < ActiveRecord::Base
     UserAuthorization.user_can? self, auth
   end
 
-  def has_access_to? perform, resource_type, named, with_options=nil
-    UserAccessControl.access_for? self.id, perform, resource_type, named, with_options
+  def has_access_to? perform, resource_type, named, with_options=nil, alt_app_type_id: nil
+    app_type_id = self.app_type_id
+    UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
   end
 
   def to_s

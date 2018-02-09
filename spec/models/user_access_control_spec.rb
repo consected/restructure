@@ -5,27 +5,39 @@ RSpec.describe UserAccessControl, type: :model do
   include ModelSupport
   include PlayerInfoSupport
 
-  it "should create default access controls for a new user" do
+  it "should not create default access controls for a new user" do
 
     (1..3).each do
       create_user
 
       res = UserAccessControl.where(user_id: @user.id)
-      expect(res.length).to eq UserAccessControl.resource_names.length
-      expect(res.map(&:resource_name).uniq.sort).to eq UserAccessControl.resource_names.sort
+      expect(res.length).to eq 0
     end
   end
 
   it "should prevent a user from having multiple entries for the same named resource type" do
 
+    app_type_id = AppType.active.first.id
     (1..3).each do
       create_user
-      # Since creation of a user created all the resource entries, the following should fail
+      UserAccessControl.create user: @user, resource_type: :table, resource_name: 'player_infos', current_admin: @admin, app_type_id: app_type_id
       expect{
-        UserAccessControl.create! user: @user, resource_type: :table, resource_name: 'player_infos', current_admin: @admin
+        UserAccessControl.create! user: @user, resource_type: :table, resource_name: 'player_infos', current_admin: @admin, app_type_id: app_type_id
       }.to raise_error ActiveRecord::RecordInvalid
     end
   end
+
+  it "should create default access controls for a new app type" do
+
+    create_admin
+    (1..3).each do |i|
+      a = AppType.create! name: "app#{i}", label: "app#{i}", current_admin: @admin
+
+      res = UserAccessControl.where(app_type_id: a.id)
+      expect(res.length).to eq UserAccessControl.resource_names.length
+    end
+  end
+
 
   it "allows testing of a user's access to a resource" do
 

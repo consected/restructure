@@ -73,6 +73,8 @@ RSpec.describe ExternalIdentifier, type: :model do
     m = create_master
     c = e.implementation_class
 
+    expect(@user.app_type_id).not_to be nil
+    
     expect(@user.has_access_to? :create, :table, @implementation_table_name).to be_truthy
 
     eid = rand(9999999)

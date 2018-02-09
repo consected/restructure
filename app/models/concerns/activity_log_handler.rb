@@ -320,11 +320,10 @@ module ActivityLogHandler
 
       if !new_val.blank? && curr_val != new_val
         s[:item].send("#{s[:field]}=", new_val)
-
         # Do not set master - this should already be set, and setting it again breaks
         # secondary_key matched saves
         s[:item].master = self.master unless s[:item].master
-        s[:item].master.current_user = self.user unless s[:item].master_user
+        s[:item].master.current_user = self.master_user || self.user unless s[:item].master_user
         res = s[:item].save
         raise "Failed to save related item. #{s[:item].errors.full_messages.join("; ")}" unless res
       end

@@ -21,9 +21,6 @@ class Admin::UserAccessControlsController < ApplicationController
       User.active.map {|u| [u.email, u.id]}
     end
 
-    def view_folder
-      'admin/common_templates'
-    end
 
     def permitted_params
       @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :user_id, :disabled]
