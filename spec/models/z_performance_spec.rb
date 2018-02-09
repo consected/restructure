@@ -68,7 +68,7 @@ RSpec.describe "Performance", type: :model do
     # Load all items individually
     user = User.find(@user.id)
     master = Master.find(@master.id)
-
+    master.current_user = @user
     th = nil
     th_length = 0
 
@@ -101,7 +101,7 @@ RSpec.describe "Performance", type: :model do
     Rails.logger.debug "********************* Converting tracker  to JSON with preload optimizations *********************"
     jt = nil
     t = Benchmark.realtime do
-      jt = {trackers: th.as_json, multiple_results: 'trackers'}.to_json
+      jt = {trackers: th.as_json(current_user: @user), multiple_results: 'trackers'}.to_json(current_user: @user)
     end
 
     puts "Trackers JSON time: #{t}"
@@ -120,6 +120,7 @@ RSpec.describe "Performance", type: :model do
     # Load all items individually
     user = User.find(@user.id)
     master = Master.find(@master.id)
+    master.current_user = @user
 
     th = nil
     th_length = 0
@@ -153,7 +154,7 @@ RSpec.describe "Performance", type: :model do
     Rails.logger.debug "********************* Converting tracker histories to JSON with preload optimizations *********************"
     jt = nil
     t = Benchmark.realtime do
-      jt = {tracker_histories: th, master_id: master.id}.to_json
+      jt = {tracker_histories: th, master_id: master.id}.to_json(current_user: @user)
     end
 
     puts "TrackerHistory JSON time: #{t}"
@@ -176,11 +177,12 @@ RSpec.describe "Performance", type: :model do
     puts "Benchmarking tracker items for Masters"
     user = User.find(@user.id)
     master = Master.find(@master.id)
+    master.current_user = @masters.first.user
 
     jt = nil
     t = Benchmark.realtime do
       jt = {
-          masters: @masters.as_json,
+          masters: @masters.as_json(current_user: @user),
           count: {
             count: 0,
             show_count: @masters.length

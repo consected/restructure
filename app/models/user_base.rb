@@ -17,6 +17,7 @@ class UserBase < ActiveRecord::Base
 
   before_validation :downcase_attributes
 
+  before_save :check_can_save
 
   # This validation ensures that the user ID has been set in the master object
   # It implicitly reinforces security, in that the user must be authenticated for
@@ -36,6 +37,13 @@ class UserBase < ActiveRecord::Base
     self.allows_current_user_access_to? :edit
   end
 
+  def can_create?
+    self.allows_current_user_access_to? :create
+  end
+
+  def can_access?
+    self.allows_current_user_access_to? :access
+  end
 
   # Simple wrapper around #valid? that ensures certain validation methods avoid running and breaking outside of
   # the time we actually need them to run (save and create).
@@ -195,6 +203,14 @@ class UserBase < ActiveRecord::Base
         self.send("#{k}=".to_sym, v.downcase) if self.attributes[k].is_a? String
       end
       true
+    end
+
+    def check_can_save
+
+      raise FphsException.new "This item is not editable" if persisted? && !can_edit?
+      raise FphsException.new "This item can not be created" if !persisted? && !can_create?
+      true
+
     end
 
 end

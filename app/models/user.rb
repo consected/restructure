@@ -90,15 +90,16 @@ class User < ActiveRecord::Base
     # Ensure that access controls are appropriately created and disabled
     def set_access_levels
 
-      if !persisted? || self.user_access_controls.length == 0
-        UserAccessControl.create_all_for self, current_admin
-        return true
-      end
+      # Do not create all the permission
+      # if !persisted? || self.user_access_controls.length == 0
+      #   UserAccessControl.create_all_for self, current_admin
+      #   return true
+      # end
 
+      # Disable access controls when a user is disabled.
+      # Do not re-enable automatically, since this could provide undesired access being granted
       if persisted? && self.disabled
         self.user_access_controls.each {|uac| uac.disable! }
-      elsif persisted? && !self.disabled
-        self.user_access_controls.each {|uac| uac.enable! }
       end
     end
 

@@ -6,6 +6,7 @@ module DynamicModelHandler
     after_save :generate_model
     after_save :reload_routes
     after_save :add_master_association
+    after_save :add_user_access_controls
     after_save :check_implementation_class
     after_save :update_tracker_events
   end
@@ -219,6 +220,15 @@ module DynamicModelHandler
   def reload_routes
 
     self.class.routes_reload
+  end
+
+  def add_user_access_controls
+
+    if !persisted? || disabled_changed?
+      admin = self.current_admin
+      uac = UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
+    end
+
   end
 
   def check_implementation_class

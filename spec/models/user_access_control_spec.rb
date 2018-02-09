@@ -12,7 +12,7 @@ RSpec.describe UserAccessControl, type: :model do
 
       res = UserAccessControl.where(user_id: @user.id)
       expect(res.length).to eq UserAccessControl.resource_names.length
-      expect(res.map(&:resource_name).uniq).to eq UserAccessControl.resource_names
+      expect(res.map(&:resource_name).uniq.sort).to eq UserAccessControl.resource_names.sort
     end
   end
 
@@ -113,7 +113,7 @@ RSpec.describe UserAccessControl, type: :model do
 
     # by default, a user is granted access to all tables
 
-    res = @user.has_access_to? :access, :table, :player_infos
+    original_acl =res = @user.has_access_to? :access, :table, :player_infos
     res.access = nil
     res.current_admin = @admin
     res.save!
@@ -136,12 +136,22 @@ RSpec.describe UserAccessControl, type: :model do
 
 
     # Now try a query
+    res = original_acl
+    res.current_admin = @admin
+    res.access = :create
+    res.save!
+
+
     ids = []
     (0..9).each do
       create_master
       create_item
       ids << @master.id
     end
+
+    res.access = nil
+    res.save!
+
 
     jres = Master.where(id: ids).to_json(current_user: @user)
     res = JSON.parse jres
@@ -181,4 +191,42 @@ RSpec.describe UserAccessControl, type: :model do
 
   end
 
+  it "prevents a user updating a model instance" do
+
+    create_admin
+    create_user
+    create_item
+
+    @master.current_user = @user
+
+    @player_info.update!(first_name: 'oldaaabbbccc')
+
+    res = @user.has_access_to? :access, :table, :player_infos
+    res.access = :read
+    res.current_admin = @admin
+    res.save!
+
+    expect {
+      @player_info.update!(first_name: 'aaabbbccc')
+    }.to raise_error FphsException
+
+  end
+
+  it "prevents a user creating a model instance" do
+
+    create_admin
+    create_user
+    create_item
+
+    @master.current_user = @user
+    res = @user.has_access_to? :access, :table, :player_infos
+    res.access = :read
+    res.current_admin = @admin
+    res.save!
+
+    expect {
+      create_item
+    }.to raise_error FphsException
+
+  end
 end

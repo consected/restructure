@@ -48,7 +48,8 @@ EOF
     expect(c2.fields).to eq ['select_call_direction', 'extra_text']
     expect(c2.users).to eq [u.id]
 
-    expect(ExtraLogType.fields_for_all_in al).to eq ['select_call_direction', 'select_who', 'extra_text']
+    # Additional field for extra_log_type is expected to be added to the configuration by default
+    expect(ExtraLogType.fields_for_all_in al).to eq ['select_call_direction', 'select_who', 'extra_text', 'extra_log_type']
 
   end
 

@@ -12,7 +12,7 @@ RSpec.describe ExternalIdentifier, type: :model do
     @implementation_table_name = "test_external_#{r}_identifiers"
     @implementation_attr_name = "test_#{r}_id"
     unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
-      TableGenerators.external_identifiers_table(@implementation_table_name, @implementation_attr_name, true)
+      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
     end
 
   end
@@ -72,9 +72,14 @@ RSpec.describe ExternalIdentifier, type: :model do
 
     m = create_master
     c = e.implementation_class
-    eid = rand(9999999)
 
-    res = c.create(c.external_id_attribute => eid, master: m)
+    expect(@user.has_access_to? :create, :table, @implementation_table_name).to be_truthy
+
+    eid = rand(9999999)
+    m.current_user = @user
+    res = c.new(c.external_id_attribute => eid, master: m)
+
+    res.save
     expect(res).to be_a c
     expect(res.id).not_to be nil
     expect(res.attributes[c.external_id_attribute]).to eq eid
@@ -104,7 +109,9 @@ RSpec.describe ExternalIdentifier, type: :model do
     # Create an external identifier ID record
     c = e.implementation_class
     eid = rand(9999999)
-    res = c.create(c.external_id_attribute => eid, master: m)
+    m.current_user = @user
+    res = c.new(c.external_id_attribute => eid, master: m)
+    res.save
     expect(res.id).not_to be nil
 
     # Attempt to find the master

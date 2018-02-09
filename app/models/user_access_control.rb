@@ -48,7 +48,7 @@ class UserAccessControl < ActiveRecord::Base
   end
 
   def self.resource_names
-    Master.get_all_associations
+    Master.get_all_associations + ['item_flags']
   end
 
   def self.options
@@ -82,12 +82,20 @@ class UserAccessControl < ActiveRecord::Base
 
   end
 
-  def self.create_all_for user, admin, default_access: :create
+  def self.create_all_for user, admin, default_access=:create
     resource_names.each do |rn|
       rt = :table
       unless self.access_for? user.id, nil , rt, rn
         res = user.user_access_controls.build resource_name: rn, resource_type: rt, access: default_access, current_admin: admin
       end
+    end
+  end
+
+  # Add a new resource for all configured apps
+  def self.create_control_for_all_apps admin, resource_type, resource_name, default_access: :create, disabled: nil
+    User.active.all.each do |user|
+      a = user.has_access_to? :access, resource_type, resource_name
+      user.user_access_controls.create(resource_type: resource_type, resource_name: resource_name, access: default_access, current_admin: admin) unless a
     end
   end
 
