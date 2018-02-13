@@ -40,6 +40,8 @@ protected
       return unless current_user
 
       all_apps = AppType.all_available_to(@current_user)
+
+      # If the current user does not have any app types available, logout and flash a message
       if all_apps.length == 0
         current_user.app_type = nil
 
@@ -48,6 +50,7 @@ protected
         return
       end
 
+      # If the user requests a change to the app type from the nav bar selector, make the change
       if params[:use_app_type].present?
         a = all_apps.select{|app| app.id == params[:use_app_type].to_i}.first
         if a && current_user.app_type_id != a.id
@@ -62,9 +65,10 @@ protected
         # If there is only one app type, use it
         # Otherwise, assume the first until a user selects otherwise
         current_user.app_type = all_apps.first
+        current_user.save
+        return
       end
     end
-
 
 
     def current_email
