@@ -31,8 +31,14 @@ module ModelSupport
     good_password = user.password
     @user = user
 
+    app_type = AppType.active.first
+
+    UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
+
     # Set a default app_type to use to allow non-interactive tests to continue
-    user.app_type = AppType.active.first
+    user.app_type = app_type
+    user.save!
+
 
     if opt[:create_msid]
       UserAuthorization.create! current_admin: @admin, user: user, has_authorization: :create_msid

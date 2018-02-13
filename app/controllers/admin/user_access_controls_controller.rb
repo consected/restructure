@@ -6,7 +6,7 @@ class Admin::UserAccessControlsController < ApplicationController
   protected
 
     def filters
-      UserAccessControl.all_resource_names.sort.map {|u| [u, u] }.to_h
+      UserAccessControl.resource_names_by_type
     end
 
     def filters_on

@@ -192,7 +192,7 @@ module AdminControllerHandler
     end
 
     def filter_params
-      return nil if params[:filter].blank?
+      return nil if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
       params.require(:filter).permit(filters_on)
     end
 

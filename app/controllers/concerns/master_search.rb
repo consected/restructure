@@ -49,7 +49,7 @@ module MasterSearch
 
         #If the msid is an array of items then return the results in the order of the list
 
-        @masters = Master.where "id in(?)", ids
+        @masters = Master.where id: ids
 
 
 
@@ -60,6 +60,9 @@ module MasterSearch
       end
 
       if @masters
+
+        @masters = @masters.external_identifier_assignment_scope(current_user)
+
 
         #If the msid is an array of items then return the results in the order of the list
         if msid.is_a? Array

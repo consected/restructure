@@ -32,6 +32,7 @@ class Master < ActiveRecord::Base
   PrimaryAssociations = reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
 
 
+
   # DynamicModel associations take the form:
   #     master.player_contact_histories
   # i.e. the pluralized table name
@@ -59,6 +60,19 @@ class Master < ActiveRecord::Base
 
   attr_accessor :force_order
 
+
+  # Scope results with inner joins on external identifier tables if they are in the user access control conditions
+  def self.external_identifier_assignment_scope(user)
+    # Check if the resource is restricted through external identifier assignment
+    er = UserAccessControl.external_identifier_restrictions(user)
+
+    if er
+      list = er.map {|e| e.resource_name.to_sym }
+      joins(*list)
+    else
+      all
+    end
+  end
 
   def accuracy_rank
     pi = player_infos.first
@@ -160,6 +174,8 @@ class Master < ActiveRecord::Base
     self.current_user ||= extras[:current_user]
     extras.delete(:current_user)
 
+    return {} unless self.allows_user_access
+
     raise FphsException.new "current_user not set for master when getting results" unless self.current_user
 
     tname = :player_infos
@@ -214,6 +230,20 @@ class Master < ActiveRecord::Base
     super(extras)
   end
 
+  def allows_user_access
+    # Validate that the external identifier restrictions do not prevent access to this item
+    er = UserAccessControl.external_identifier_restrictions(current_user)
+
+    if er
+      er.map {|e| e.resource_name.to_sym }.each do |assoc|
+        return false unless self.send(assoc).first
+      end
+      return true
+    else
+      true
+    end
+
+  end
 
   private
 
@@ -234,6 +264,7 @@ class Master < ActiveRecord::Base
       errors.add :msid, "can not be updated by users" if msid_changed?
       errors.add "pro info association", "can not be updated by users" if pro_info_id_changed?
     end
+
 
     def set_user
       cu = @current_user

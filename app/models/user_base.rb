@@ -116,15 +116,27 @@ class UserBase < ActiveRecord::Base
   end
 
   def allows_current_user_access_to? perform, with_options=nil
-    raise FphsException.new "no master user in allows_current_user_access_to?" unless master_user
-    self.class.allows_user_access_to? master_user, perform, with_options=nil
+    raise FphsException.new "no master_user in allows_current_user_access_to?" unless master_user
+
+    res = self.class.allows_user_access_to? master_user, perform, with_options=nil
+    return false unless res
+
+    if respond_to?(:master) && master
+      m = master
+    elsif respond_to?(:item) && item.respond_to?(:master) && item.master
+      m = item.master
+    end
+
+    !!m.allows_user_access
+
   end
 
   def self.allows_user_access_to? user, perform, with_options=nil
     raise FphsException.new "no user in allows_user_access_to?" unless user
-    resource_type = :table
+
+    # Check at a table level that the user can access the resource
     named = self.name.ns_underscore.pluralize
-    !!user.has_access_to?( perform, resource_type, named, with_options)
+    !!user.has_access_to?( perform, :table, named, with_options)
   end
 
 
@@ -195,9 +207,9 @@ class UserBase < ActiveRecord::Base
 
     def downcase_attributes
 
-      ignore = ['item_type']
+      ignore = /(item_type)?(notes)?(description)?(.+_notes)?/
 
-      self.attributes.reject {|k,v| ignore.include? k}.each do |k, v|
+      self.attributes.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
 
         logger.info "Downcasing attribute (#{k})"
         self.send("#{k}=".to_sym, v.downcase) if self.attributes[k].is_a? String

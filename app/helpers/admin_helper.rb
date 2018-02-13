@@ -19,9 +19,28 @@ module AdminHelper
     res = ""
 
     if respond_to?(:filters) &&  filters
-      res = "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}"
-      filters.each do |k,v|
-        res << link_to(v, index_path(filter: {filters_on => k}), class: "btn btn-default btn-sm" )
+
+      if filters.first.last.is_a? String
+        all_filters = {all: filters}
+      else
+        all_filters = filters
+      end
+      res = ''
+
+      all_filters.each do |title, vals|
+        
+        res << "<div><p>#{title.to_s.humanize}</p>"
+        res << "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}"
+        if vals.is_a? Hash
+          vals.each do |k,v|
+            res << link_to(v, index_path(filter: {filters_on => k}), class: "btn btn-default btn-sm" )
+          end
+        else
+          vals.each do |v|
+            res << link_to(v, index_path(filter: {filters_on => v}), class: "btn btn-default btn-sm" )
+          end
+        end
+        res << "</div>"
       end
     end
 

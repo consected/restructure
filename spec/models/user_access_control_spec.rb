@@ -1,4 +1,5 @@
 require 'rails_helper'
+require './db/table_generators/external_identifiers_table.rb'
 
 RSpec.describe UserAccessControl, type: :model do
 
@@ -281,4 +282,114 @@ RSpec.describe UserAccessControl, type: :model do
     expect(j).to eq '{}'
 
   end
+
+  it "limits a user to master records with an external identifier" do
+
+    # Create an external identifier implementation
+    create_admin
+    user1, _ = create_user
+    create_user
+    r = 'test7'
+    @implementation_table_name = "test_external_uac_identifiers"
+    @implementation_attr_name = "uac_identifier_id"
+    unless ActiveRecord::Base.connection.table_exists? @implementation_table_name
+      TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
+    end
+
+    # We don't expect user1 can access the same app as @user.
+    # Set things up so she can
+    res = user1.has_access_to? :read, :general, :app_type, alt_app_type_id: @user.app_type_id
+    expect(res).to be_falsey
+    UserAccessControl.create! user: user1, app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type,  current_admin: @admin
+    user1.app_type_id = @user.app_type_id
+    user1.save!
+    res = user1.has_access_to? :read, :general, :app_type
+    expect(res).to be_truthy
+
+    vals = {
+      name: @implementation_table_name,
+      label: "test id",
+      external_id_attribute: @implementation_attr_name,
+      min_id: 1,
+      max_id: 99999999,
+      disabled: false,
+      current_admin: @admin
+    }
+
+    e = ExternalIdentifier.create! vals
+
+    c = e.implementation_class
+
+    # Create some master records
+    ids = []
+    player_ids = []
+    (0..9).each do
+      create_master
+      create_item
+      ids << @master.id
+      player_ids << @player_info.id
+    end
+
+    # Check that users can access these records
+
+    jres = Master.where(id: ids).external_identifier_assignment_scope(@user).to_json(current_user: @user)
+    res = JSON.parse jres
+    expect(res.length).to eq 10
+
+
+    # Initialize the acceess control to external id assignments, but don't enforce a restriction
+    ac = UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :external_id_assignments, resource_name: @implementation_table_name, current_admin: @admin
+    expect(UserAccessControl.external_identifier_restrictions(@user)).to be nil
+    res = @user.has_access_to? :limited, :external_id_assignments, @implementation_table_name
+    expect(res).to be_falsey
+
+    # Force users in the app type to only have access to externally identified records
+    ac.update! access: :limited
+
+    # Validate the control was set
+    res = @user.has_access_to? :limited, :external_id_assignments, @implementation_table_name
+    expect(res).to be_truthy
+    expect(UserAccessControl.external_identifier_restrictions(@user).first).to eq ac
+
+
+    # Now we should get none of the master records returned
+    jres = Master.where(id: ids).external_identifier_assignment_scope(@user).to_json(current_user: @user)
+    res = JSON.parse jres
+    expect(res.length).to eq 0
+
+    # Adding an external identifier for a master record allows access
+
+    # But we need a second user, with privileges to do this, as the current users can't create the external identifier
+    # because he can't see the master. This is of course correct, otherwise the current user could add an
+    # external identifier himself to gain access
+    # This demonstrates again that the default value can be overridden for a specific user
+    ac2 = UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :external_id_assignments, resource_name: @implementation_table_name, current_admin: @admin, user: user1
+
+    res = user1.has_access_to? :limited, :external_id_assignments, @implementation_table_name
+    expect(res).to be_falsey
+    expect(UserAccessControl.external_identifier_restrictions(user1)).to be nil
+
+
+    ids.each do |i|
+
+      m = Master.find(i)
+      m.current_user = @user
+      expect(m.to_json).to eq "{}"
+
+      m2 = Master.find(i)
+      m2.current_user = user1
+      j = JSON.parse(m2.to_json)
+      expect(j['id']).to eq m2.id
+
+      c.create! @implementation_attr_name => rand(1..99999999), master: m2
+
+      m = Master.find(i)
+      m.current_user = @user            
+      j = JSON.parse(m.to_json)
+      expect(j['id']).to eq m.id
+
+    end
+
+  end
+
 end

@@ -2,7 +2,7 @@ module ControllerUtils
 
   extend ActiveSupport::Concern
 
-  
+
   def params_nil_if_blank p
     p1 = p.dup
     p.each do |k,v|

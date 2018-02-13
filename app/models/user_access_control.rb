@@ -16,7 +16,8 @@ class UserAccessControl < ActiveRecord::Base
   def self.access_levels
     {
       table: [nil, :read, :update, :create],
-      general: [nil, :read]
+      general: [nil, :read],
+      external_id_assignments: [nil, :limited]
     }
   end
 
@@ -50,7 +51,7 @@ class UserAccessControl < ActiveRecord::Base
 
 
   def self.resource_types
-    [:table, :general, :activity_log_record_type]
+    [:table, :general, :external_id_assignments]
   end
 
   def self.all_resource_names
@@ -66,9 +67,19 @@ class UserAccessControl < ActiveRecord::Base
       return Master.get_all_associations + ['item_flags']
     elsif resource_type == :general
       return ['app_type']
+    elsif resource_type == :external_id_assignments
+      return ExternalIdentifier.active.map(&:name)
     else
       []
     end
+  end
+
+  def self.resource_names_by_type
+    rn = {}
+    UserAccessControl.resource_types.each do |k|
+      rn[k] = UserAccessControl.resource_names_for(k)
+    end
+    rn
   end
 
   def self.options
@@ -149,12 +160,43 @@ class UserAccessControl < ActiveRecord::Base
     view
   end
 
+  # Get list of controls for the external_id_assignments type in the user's current app.
+  # Get both the user's override, if it exists, and the default for each resource, which we then filter down to the actual access control
+  # If there are no restrictions for this user in this app, just return nil
+  def self.external_identifier_restrictions user
+    user_list = [user, nil]
+    res = UserAccessControl.active.where(app_type_id: user.app_type_id,  user: user_list, resource_type: :external_id_assignments).order('resource_name asc, user_id asc nulls last')
+    res_length = res.length
+    return unless res_length > 0
+
+    r_prev = nil
+    delist = []
+    (0..res_length-1).each do |i|
+      if r_prev && r_prev.app_type_id == res[i].app_type_id
+        delist << i
+      else
+        r_prev = res[i]
+      end
+    end
+
+    delist.each do |i|
+      res[i].access = 'remove'
+    end
+
+    # select only those with access set, since nil access means the resource can be accessed.
+    res = res.select {|r| r.access && r.access != 'remove' }
+
+    return if res.length == 0
+
+    res
+  end
+
   private
     def correct_access
       self.access = nil if self.access.blank?
       if self.user && self.user.disabled != self.disabled
         errors.add :disabled, "flag of an access control must match the disabled flag for its user"
-      elsif !self.class.valid_access_level?(:table, self.access)
+      elsif !self.class.valid_access_level?(self.resource_type.to_sym, self.access)
         errors.add :access, "is an invalid value"
       elsif resource_type.nil? || !self.class.resource_types.include?(self.resource_type.to_sym)
         errors.add :resource_type, "is an invalid value"

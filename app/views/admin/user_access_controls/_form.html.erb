@@ -12,7 +12,10 @@
   </div>
   <div class="form-group">
     <%= f.label :access %>
-    <%= f.text_field :access%>
+    <%
+    accesses = UserAccessControl.access_levels
+    %>
+    <%= f.select :access, accesses%>
   </div>
   <div class="form-group">
     <%= f.label :resource_type %>
@@ -20,7 +23,7 @@
   </div>
   <div class="form-group">
     <%= f.label :resource_name %>
-    <%= f.select :resource_name, UserAccessControl.all_resource_names %>
+    <%= f.select :resource_name, UserAccessControl.resource_names_by_type %>
   </div>
   <div class="form-group">
     <%= f.label :options %>
