@@ -13,7 +13,7 @@
     <% unless app_config_set(:hide_search_form_advanced) %>
     <button id="expand-adv-form" class="btn btn-primary collapsed" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="false" aria-controls="master-search-advanced-form">Advanced Search</button>
     <% end %>
-    <% Report.active.searchable.each do |r|%>
+    <% Report.active.searchable.for_user(current_user).each do |r|%>
       <%  # Hide the searchable reports, except for if one of those reports is the default.
         is_default = default_search_form == r.name.downcase
         if !app_config_set(:hide_search_form_searchable_reports) || is_default
@@ -42,7 +42,7 @@
     </div>
   </div>
 
-  <% Report.active.searchable.each do |r|
+  <% Report.active.searchable.for_user(current_user).each do |r|
       if default_search_form == r.name.downcase
         @view_context = :search
         @report = r

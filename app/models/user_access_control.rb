@@ -7,6 +7,11 @@ class UserAccessControl < ActiveRecord::Base
 
   validate :correct_access
 
+  def self.resource_types
+    [:table, :general, :external_id_assignments, :report]
+  end
+
+
   # access levels provide a distinct scale of control for each resource type
   # for a specific named resource a user is only assigned a single access level
   # For example, on a table, a user is able to only read the table if he has :read, :update or :create
@@ -17,7 +22,8 @@ class UserAccessControl < ActiveRecord::Base
     {
       table: [nil, :read, :update, :create],
       general: [nil, :read],
-      external_id_assignments: [nil, :limited]
+      external_id_assignments: [nil, :limited],
+      report: [nil, :read]
     }
   end
 
@@ -38,29 +44,13 @@ class UserAccessControl < ActiveRecord::Base
       },
       general: {
         access: [:read]
+      },
+      report: {
+        access: [:read]
       }
     }
   end
 
-  def self.valid_combo_level? on_resource_type, can_perform
-    return if can_perform.nil? || can_perform.is_a?(Array)
-    res = combo_levels[on_resource_type.to_sym]
-    can_perform = can_perform.to_sym if can_perform.respond_to? :to_sym
-    res[can_perform] if res
-  end
-
-
-  def self.resource_types
-    [:table, :general, :external_id_assignments]
-  end
-
-  def self.all_resource_names
-    a = []
-    resource_types.each do |r|
-      a += resource_names_for r
-    end
-    a
-  end
 
   def self.resource_names_for resource_type
     if resource_type == :table
@@ -69,9 +59,28 @@ class UserAccessControl < ActiveRecord::Base
       return ['app_type']
     elsif resource_type == :external_id_assignments
       return ExternalIdentifier.active.map(&:name)
+    elsif resource_type == :report
+      return Report.active.map(&:name)
     else
       []
     end
+  end
+
+
+
+  def self.valid_combo_level? on_resource_type, can_perform
+    return if can_perform.nil? || can_perform.is_a?(Array)
+    res = combo_levels[on_resource_type.to_sym]
+    can_perform = can_perform.to_sym if can_perform.respond_to? :to_sym
+    res[can_perform] if res
+  end
+
+  def self.all_resource_names
+    a = []
+    resource_types.each do |r|
+      a += resource_names_for r
+    end
+    a
   end
 
   def self.resource_names_by_type
@@ -201,7 +210,6 @@ class UserAccessControl < ActiveRecord::Base
       elsif resource_type.nil? || !self.class.resource_types.include?(self.resource_type.to_sym)
         errors.add :resource_type, "is an invalid value"
       elsif resource_name.nil? || !self.class.resource_names_for(self.resource_type.to_sym).include?(self.resource_name.to_s)
-        byebug
         errors.add :resource_name, "is an invalid value"
       else
         res = self.class.access_for? self.user, nil, self.resource_type, self.resource_name, self.options, alt_app_type_id: self.app_type_id

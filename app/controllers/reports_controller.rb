@@ -13,7 +13,7 @@ class ReportsController < ApplicationController
   # List of available reports
   def index
     @no_create = true
-    pm = Report.enabled
+    pm = Report.enabled.for_user(current_user)
     pm = pm.where filter_params if filter_params
 
     @reports = pm.order  auto: :desc, report_type: :asc, position: :asc
@@ -51,7 +51,7 @@ class ReportsController < ApplicationController
     @editable = @report.editable_data? && (current_admin || current_user && current_user.can?(:edit_report_data))
 
 
-    return unless @report.searchable || authorized?
+    return unless @report.searchable.for_user(current_user) || authorized?
 
     if search_attrs && !no_run
       begin

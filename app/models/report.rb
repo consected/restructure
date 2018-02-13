@@ -25,6 +25,16 @@ class Report < ActiveRecord::Base
     end
   end
 
+  def self.for_user user
+    ns = []
+    all.each do |r|      
+      ns << r.id if user.has_access_to? :read, :report, r.name
+    end
+
+    where(id: ns)
+
+  end
+
   def self.categories
     Report.select("distinct item_type").where('item_type is not null').all.map {|s| s.item_type}
   end

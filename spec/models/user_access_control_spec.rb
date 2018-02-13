@@ -9,7 +9,8 @@ RSpec.describe UserAccessControl, type: :model do
   it "should not create default access controls for a new user" do
 
     (1..3).each do
-      create_user
+
+      create_user nil, '', no_app_type_setup: true
 
       res = UserAccessControl.where(user_id: @user.id)
       expect(res.length).to eq 0
@@ -287,7 +288,7 @@ RSpec.describe UserAccessControl, type: :model do
 
     # Create an external identifier implementation
     create_admin
-    user1, _ = create_user
+    user1, _ = create_user opt: {no_app_type_setup: true}
     create_user
     r = 'test7'
     @implementation_table_name = "test_external_uac_identifiers"
@@ -384,7 +385,7 @@ RSpec.describe UserAccessControl, type: :model do
       c.create! @implementation_attr_name => rand(1..99999999), master: m2
 
       m = Master.find(i)
-      m.current_user = @user            
+      m.current_user = @user
       j = JSON.parse(m.to_json)
       expect(j['id']).to eq m.id
 
