@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   include ControllerUtils
   include AppExceptionHandler
   include AppConfigurationsHelper
+  include NavHandler
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -37,60 +38,34 @@ protected
 
     def setup_current_app_type
       return unless current_user
-      #TODO resolve this with a real selection page
-      if current_user.app_type.nil? && AppType.count > 1
-        current_user.app_type = AppType.active.first
-        #redirect_to "/seleect_an_app_type"
-      else
-        current_user.app_type = AppType.active.first
+
+      all_apps = AppType.all_available_to(@current_user)
+      if all_apps.length == 0
+        current_user.app_type = nil
+
+        flash[:error] = "You have not been granted access to any application types. Contact an administrator to continue use of the application."
+        sign_out current_user
+        return
+      end
+
+      if params[:use_app_type].present?
+        a = all_apps.select{|app| app.id == params[:use_app_type].to_i}.first
+        if a && current_user.app_type_id != a.id
+          current_user.app_type = a
+          current_user.save
+          return
+        end
+      end
+
+      # If we don't have an app type set, force one
+      if current_user.app_type.nil?
+        # If there is only one app type, use it
+        # Otherwise, assume the first until a user selects otherwise
+        current_user.app_type = all_apps.first
       end
     end
 
-    def setup_navs
 
-      return true if request.xhr?
-
-      @primary_navs = []
-      @secondary_navs = []
-
-      admin_sub = []
-      if current_admin
-
-        admin_sub << {label: 'manage', url: '/', route: '#root'}
-
-        admin_sub << {label: 'password', url: "/admins/edit", extras: {'data-do-action' => 'admin-change-password'}}
-        admin_sub << {label: 'logout_admin', url: "/admins/sign_out", extras: {method: :delete, 'data-do-action' => 'admin-logout'}}
-
-      else
-        admin_sub << {label: 'Admin Login', url: '/admins/sign_in', route: 'admins#sign_in', }
-      end
-
-      if current_user
-        user_sub = []
-        user_sub << {label: 'password', url: "/users/edit", extras: {'data-do-action' => 'user-change-password'}}
-        user_sub << {label: 'logout', url: "/users/sign_out", extras: {method: :delete, 'data-do-action' => 'user-logout'}}
-      end
-      if current_user  || current_admin
-        @secondary_navs << {label: '<span class="glyphicon glyphicon-wrench" title="administrator"></span>', url: "#", sub: admin_sub, extras: {'data-do-action' => 'show-admin-options'}}
-        @secondary_navs << {label: '<span class="glyphicon glyphicon-user" title="user"></span>', url: "#", sub: user_sub, extras: {title: current_email, 'data-do-action' => 'show-user-options'}}
-      end
-
-
-      if current_user
-        @primary_navs << {label: app_config_text(:menu_research_label, "Research"), url: '/masters/', route: 'masters#index'}
-        @primary_navs << {label: app_config_text(:menu_create_master_record_label, "Create MSID"), url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_msid
-      end
-
-      if current_user || current_admin
-        @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'} if current_admin || current_user.can?(:view_reports)
-        @primary_navs << {label: 'Import CSV', url: '/imports', route: 'imports#index'}  if current_admin || current_user.can?(:import_csv)
-
-      end
-
-      res  = @primary_navs.select {|n| n[:route] == "#{controller_name}##{action_name}" }
-      res.first[:active] = true if res && res.first
-
-    end
 
     def current_email
       return nil unless current_user || current_admin

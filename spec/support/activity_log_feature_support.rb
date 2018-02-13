@@ -78,6 +78,8 @@ module ActivityLogSupport
     master ||= create_master
     item ||= @player_contact
     att[:player_contact] = item
+    item.master.current_user ||= @user || create_user
+    item.master_user.app_type ||= AppType.active.first
     @activity_log = master.activity_log__player_contact_phones.create! att
 
   end

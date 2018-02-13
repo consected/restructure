@@ -4,7 +4,7 @@
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :app_type %>
-    <%= f.select :name, AppType.active.map{|a| [a.label, a.name]}%>
+    <%= f.select :app_type_id, AppType.active.map{|a| [a.label, a.id]}%>
   </div>
   <div class="form-group">
     <%= f.label 'user override' %>
@@ -20,11 +20,11 @@
   </div>
   <div class="form-group">
     <%= f.label :resource_name %>
-    <%= f.select :resource_name, UserAccessControl.resource_names %>
+    <%= f.select :resource_name, UserAccessControl.all_resource_names %>
   </div>
   <div class="form-group">
-    <%= f.label :option %>
-    <%= f.text_field :option %>
+    <%= f.label :options %>
+    <%= f.text_field :options %>
   </div>
   <div class="form-group">
     <%= f.check_box :disabled %>
@@ -33,6 +33,7 @@
 
 
   <div class="form-group">
+    <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
     <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
   </div>
 <% end %>

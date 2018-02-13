@@ -15,7 +15,8 @@ class UserAccessControl < ActiveRecord::Base
 
   def self.access_levels
     {
-      table: [nil, :read, :update, :create]
+      table: [nil, :read, :update, :create],
+      general: [nil, :read]
     }
   end
 
@@ -33,6 +34,9 @@ class UserAccessControl < ActiveRecord::Base
       table: {
         access: [:read, :update, :create],
         edit: [:update, :create],
+      },
+      general: {
+        access: [:read]
       }
     }
   end
@@ -46,11 +50,25 @@ class UserAccessControl < ActiveRecord::Base
 
 
   def self.resource_types
-    [:table, :activity_log_record_type]
+    [:table, :general, :activity_log_record_type]
   end
 
-  def self.resource_names
-    Master.get_all_associations + ['item_flags']
+  def self.all_resource_names
+    a = []
+    resource_types.each do |r|
+      a += resource_names_for r
+    end
+    a
+  end
+
+  def self.resource_names_for resource_type
+    if resource_type == :table
+      return Master.get_all_associations + ['item_flags']
+    elsif resource_type == :general
+      return ['app_type']
+    else
+      []
+    end
   end
 
   def self.options
@@ -81,21 +99,31 @@ class UserAccessControl < ActiveRecord::Base
       c = combo_levels[on_resource_type][can_perform] if valid_combo_level?(on_resource_type, can_perform)
       can_perform = c || can_perform
 
-      conditions[:access] = can_perform
+      # Don't use access in the query, since it excludes valid records that may override the app default but don't
+      # match the required access level
+      # conditions[:access] = can_perform
     end
 
     # Get the user's own access first, and the fallback of null last. If the
     # user does not have his own access, the default for the app type will return instead,
     # so that .first is always the most appropriate value
-    self.active.where(conditions).order('user_id asc nulls last').first
+    res = self.active.where(conditions).order('user_id asc nulls last').first
 
+    if res && can_perform
+      can_perform = [can_perform] unless can_perform.is_a? Array
+      res_access = nil
+      res_access = res.access.to_sym if res.access
+      return nil unless res_access.in?(can_perform)
+    end
+
+    res
   end
 
 
   # Create all possible controls on the specified app type
   def self.create_all_for app_type, admin, default_access=:create
-    resource_names.each do |rn|
-      rt = :table
+    rt = :table
+    resource_names_for(rt).each do |rn|
       res = app_type.user_access_controls.build resource_name: rn, resource_type: rt, access: default_access, current_admin: admin, user_id: nil
       res.save! if app_type.persisted?
     end
@@ -112,9 +140,9 @@ class UserAccessControl < ActiveRecord::Base
 
 
   # Check which tables a user can view in the current app type, or an alternative app type if specified
-  def self.view_tables? user, app_type, alt_app_type_id: nil
+  def self.view_tables? user, alt_app_type_id: nil
     view = {}
-    resource_names.each do |r|
+    resource_names_for(:table).each do |r|
       view[r.to_sym] = !!access_for?(user, :access, :table, r, alt_app_type_id: alt_app_type_id)
     end
 
@@ -130,12 +158,13 @@ class UserAccessControl < ActiveRecord::Base
         errors.add :access, "is an invalid value"
       elsif resource_type.nil? || !self.class.resource_types.include?(self.resource_type.to_sym)
         errors.add :resource_type, "is an invalid value"
-      elsif resource_name.nil? || !self.class.resource_names.include?(self.resource_name.to_s)
+      elsif resource_name.nil? || !self.class.resource_names_for(self.resource_type.to_sym).include?(self.resource_name.to_s)
+        byebug
         errors.add :resource_name, "is an invalid value"
       else
         res = self.class.access_for? self.user, nil, self.resource_type, self.resource_name, self.options, alt_app_type_id: self.app_type_id
-        if res && res.id != self.id # If the user has the authorization set and it is not this record
-          errors.add :user, "already has the access control #{self.access} on #{self.resource_type} #{self.resource_name} #{self.app_type.name} #{self.options}"
+        if res && self.user_id == res.user_id  && res.id != self.id # If the user has the authorization set and it is not this record
+          errors.add :user, "already has the access control #{self.access} on #{self.resource_type} #{self.resource_name} #{self.app_type ? self.app_type.name : ''} #{self.options}"
         end
       end
 

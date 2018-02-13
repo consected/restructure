@@ -9,6 +9,16 @@ class AppType < ActiveRecord::Base
   validates :label, presence: true, uniqueness: true
   after_save :set_access_levels
 
+  def self.all_available_to user
+    atavail = []
+
+    self.active.each do |a|
+      hat = user.has_access_to?(:access, :general, :app_type, alt_app_type_id: a.id)
+      atavail << hat.app_type if hat
+    end
+    atavail
+  end
+
 
   private
 

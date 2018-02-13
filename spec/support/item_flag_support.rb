@@ -93,7 +93,7 @@ module ItemFlagSupport
     item ||= @player_info
 
     raise "failed to set master user in player info" unless item.master_user
-
+    item.master_user.app_type ||= AppType.active.first
 
     @item_flag = item.item_flags.create! att
 

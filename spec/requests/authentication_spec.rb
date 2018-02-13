@@ -60,7 +60,7 @@ describe "user and admin authentication" do
 
     skip_urls = ["/admins/sign_in", "/users/sign_in", "/child_error_reporter"]
 
-    admin_controllers = %w(admin/accuracy_scores admin/colleges admin/general_selections admin/item_flag_names admin/manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links admin/activity_logs admin/external_identifiers admin/external_identifier_details)
+    admin_controllers = %w(admin/accuracy_scores admin/colleges admin/general_selections admin/item_flag_names admin/manage_users protocol_events protocols sub_processes admins admin/user_authorizations admin/dynamic_models admin/sage_assignments admin/reports admin/external_links admin/activity_logs admin/external_identifiers admin/external_identifier_details admin/app_types admin/user_access_controls admin/app_configurations)
 
     @url_list.each do |url|
       if url[:controller] && !skip_urls.include?(url[:url])
@@ -86,7 +86,7 @@ describe "user and admin authentication" do
           elsif admin_controllers.include?(url[:controller].to_s)
             expect(response).to redirect_to('http://www.example.com/admins/sign_in'), "expected a redirect to admins/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
           else
-            expect(response).to redirect_to('http://www.example.com/users/sign_in'), "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. Got #{response.inspect}"
+            expect(response).to redirect_to('http://www.example.com/users/sign_in'), "expected a redirect to users/sign_in for #{url} using controller #{url[:controller]} for original url #{url[:orig_url]}. (#{url[:url]}) Got #{response.inspect}"
           end
         rescue AbstractController::ActionNotFound
           Rails.logger.info "Action not defined. Skipping #{url.inspect}"

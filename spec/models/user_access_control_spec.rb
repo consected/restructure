@@ -34,7 +34,7 @@ RSpec.describe UserAccessControl, type: :model do
       a = AppType.create! name: "app#{i}", label: "app#{i}", current_admin: @admin
 
       res = UserAccessControl.where(app_type_id: a.id)
-      expect(res.length).to eq UserAccessControl.resource_names.length
+      expect(res.length).to eq UserAccessControl.resource_names_for(:table).length
     end
   end
 
@@ -137,7 +137,7 @@ RSpec.describe UserAccessControl, type: :model do
     expect(res).to be_falsey
 
 
-    id = @player_info.id
+    @player_info.id
 
     # First, check at an individual master level
     @master.current_user = @user
@@ -239,6 +239,46 @@ RSpec.describe UserAccessControl, type: :model do
     expect {
       create_item
     }.to raise_error FphsException
+
+  end
+
+
+  it "allows a user's access to override the default" do
+
+    create_admin
+    create_user
+    create_item
+
+    @master.current_user = @user
+
+    @player_info.update!(first_name: 'oldaaabbbccc')
+
+    res = @user.has_access_to? :access, :table, :player_infos
+    res.access = :read
+    res.current_admin = @admin
+    res.save!
+
+    expect {
+      @player_info.update!(first_name: 'aaabbbccc')
+    }.to raise_error FphsException
+
+    uac = UserAccessControl.create! app_type_id: @user.app_type_id, user_id: @user.id,  access: :update, resource_type: :table, resource_name: :player_infos, current_admin: @admin
+
+    res = @user.has_access_to? :update, :table, :player_infos
+    expect(res.id).to eq uac.id
+
+    expect(@player_info.update(first_name: 'aaabbbccc')).to be_truthy
+
+    uac.access = nil
+    uac.save!
+
+    res = @user.has_access_to? :access, :table, :player_infos
+    expect(res).to be nil
+
+
+    j = @player_info.to_json
+
+    expect(j).to eq '{}'
 
   end
 end

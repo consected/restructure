@@ -6,11 +6,11 @@ class Admin::UserAccessControlsController < ApplicationController
   protected
 
     def filters
-      User.active.map {|u| [u.id.to_s, u.email] }.to_h
+      UserAccessControl.all_resource_names.sort.map {|u| [u, u] }.to_h
     end
 
     def filters_on
-      :user_id
+      :resource_name
     end
 
     def has_access_levels
@@ -23,7 +23,7 @@ class Admin::UserAccessControlsController < ApplicationController
 
 
     def permitted_params
-      @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :user_id, :disabled]
+      @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :app_type_id, :user_id, :disabled]
     end
 
     def secure_params

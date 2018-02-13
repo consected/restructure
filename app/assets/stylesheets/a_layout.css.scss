@@ -51,6 +51,13 @@ a.navbar-brand {
     }
 }
 
+.navbar-nav > li > span.select {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 25px;
+  display: inline-block;
+}
+
 .flash {
     position: fixed;
     width: 100%;

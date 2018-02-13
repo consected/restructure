@@ -8,10 +8,12 @@ class User < ActiveRecord::Base
   belongs_to :admin
   has_many :user_authorizations
   has_many :user_access_controls, autosave: true
+
   belongs_to :app_type
 
   default_scope -> {order email: :asc}
 
+  before_save :set_app_type
   before_save :set_access_levels
 
   def self.active_id_name_list filter=nil
@@ -54,7 +56,6 @@ class User < ActiveRecord::Base
   end
 
   def has_access_to? perform, resource_type, named, with_options=nil, alt_app_type_id: nil
-    app_type_id = self.app_type_id
     UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
   end
 
@@ -102,6 +103,15 @@ class User < ActiveRecord::Base
       # Do not re-enable automatically, since this could provide undesired access being granted
       if persisted? && self.disabled
         self.user_access_controls.each {|uac| uac.disable! }
+      end
+    end
+
+    # Ensure that the app type being set for the user is valid and accessible to him
+    def set_app_type
+      if app_type_id
+        unless app_type in? AppType.all_available_to(self)
+          self.app_type_id = nil
+        end
       end
     end
 

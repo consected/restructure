@@ -51,7 +51,9 @@ module MasterSupport
 
 
   def create_master user=nil, att=nil
-    user ||= @user
+    user ||= @user || create_user
+
+    user.app_type ||= AppType.active.first
 
     att ||= { msid: rand(10000000), pro_id: rand(1000000) }
 

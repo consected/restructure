@@ -1,16 +1,16 @@
 module AddressSupport
   include MasterSupport
-  
+
   def get_a_rank
     res = GeneralSelection.where(item_type: 'player_addresses_rank').enabled.all
     r = res[rand res.length].value
-    
+
     r
   end
-  
+
   def list_valid_attribs
     res = []
-    
+
     (1..5).each do |l|
       res << {
         street: "#{rand(10000)} Main St",
@@ -26,7 +26,7 @@ module AddressSupport
     end
     res
   end
-  
+
   def list_invalid_attribs
     [
       {
@@ -37,7 +37,7 @@ module AddressSupport
       }
     ]
   end
-  
+
   def new_attribs
     @new_attribs = {
       street: "#{rand(10000)} Main St",
@@ -50,14 +50,14 @@ module AddressSupport
       rec_type: 'business'
     }
   end
-  
-  
-  
+
+
+
   def create_item att=nil, master=nil
     att ||= valid_attribs
     master ||= create_master
     create_sources
     @address = master.addresses.create! att
   end
-  
+
 end

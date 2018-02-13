@@ -1,10 +1,10 @@
 _fpa.loaded.default = function(){
-    
+
 
     _fpa.timed_flash_fadeout();
     _fpa.form_utils.format_block();
-          
-    
+
+
     $('#nav_q').on('keypress', function(){
         $('#nav_q_pro_id').val('');
         $('#nav_q_id').val('');
@@ -13,7 +13,7 @@ _fpa.loaded.default = function(){
         if(v && v != '')
             $('form.navbar-form').submit();
     });
-    
+
     $('#nav_q_pro_id').on('keypress', function(){
         $('#nav_q').val('');
         $('#nav_q_id').val('');
@@ -22,7 +22,7 @@ _fpa.loaded.default = function(){
         if(v && v != '')
             $('form.navbar-form').submit();
     });
-    
+
     $('#nav_q_id').on('keypress', function(){
         $('#nav_q').val('');
         $('#nav_q_pro_id').val('');
@@ -31,7 +31,10 @@ _fpa.loaded.default = function(){
         if(v && v != '')
             $('form.navbar-form').submit();
     });
-    
+
+    $('#use_app_type_select').on('change', function(){
+      window.location.href = '/masters/search?use_app_type=' + $(this).val()
+    });
     // Perform the controller callback only after everything else is in place
     // Otherwise we can break some standard functionality by performing on change type
     // handlers out of order
