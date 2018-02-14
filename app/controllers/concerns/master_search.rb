@@ -80,6 +80,8 @@ module MasterSearch
         original_length = @masters.length
         @masters = @masters[0, return_results_limit]
 
+        logger.debug "Masters should return #{@masters.length} items"
+
         m = {
           masters: @masters.as_json(current_user: current_user),
           count: {

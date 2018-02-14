@@ -28,8 +28,8 @@ module UserHandler
 
   class_methods do
 
-    def uses_item_flags?
-      ItemFlagName.enabled_for? self.name.ns_underscore
+    def uses_item_flags? user
+      ItemFlagName.enabled_for? self.name.ns_underscore, user
     end
 
     def foreign_key_name

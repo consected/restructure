@@ -26,13 +26,22 @@ class Report < ActiveRecord::Base
   end
 
   def self.for_user user
-    ns = []
-    all.each do |r|      
-      ns << r.id if user.has_access_to? :read, :report, r.name
+
+    if user.has_access_to?(:read, :report, :_all_reports_)
+      all
+    else
+      ns = []
+      all.each do |r|
+        ns << r.id if user.has_access_to? :read, :report, r.name
+      end
+
+      where(id: ns)
     end
+  end
 
-    where(id: ns)
-
+  def can_access? user
+    return true if user.has_access_to?(:read, :report, self.name)
+    return user.has_access_to?(:read, :report, :_all_reports_)
   end
 
   def self.categories

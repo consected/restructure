@@ -297,11 +297,12 @@ RSpec.describe UserAccessControl, type: :model do
       TableGenerators.external_identifiers_table(@implementation_table_name, true, @implementation_attr_name)
     end
 
-    # We don't expect user1 can access the same app as @user.
+    # We don't know if user1 can access the same app as @user.
     # Set things up so she can
     res = user1.has_access_to? :read, :general, :app_type, alt_app_type_id: @user.app_type_id
-    expect(res).to be_falsey
-    UserAccessControl.create! user: user1, app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type,  current_admin: @admin
+    unless res
+      UserAccessControl.create! user: user1, app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type,  current_admin: @admin
+    end
     user1.app_type_id = @user.app_type_id
     user1.save!
     res = user1.has_access_to? :read, :general, :app_type

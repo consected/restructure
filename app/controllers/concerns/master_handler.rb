@@ -202,6 +202,10 @@ module MasterHandler
       end
 
       def set_instance_from_build
+        
+        if defined? set_item
+          set_item
+        end
         build_with = secure_params rescue nil
         set_object_instance @master_objects.build(build_with)
       end
@@ -230,7 +234,7 @@ module MasterHandler
 
       def prep_item_flags
         # Handle the presentation of item flags, if enabled for this type of object
-        if object_instance.class.uses_item_flags?
+        if object_instance.class.uses_item_flags?(current_user)
           @flag_item_type = object_instance.item_type
           @item_flag = object_instance.item_flags.build
         end

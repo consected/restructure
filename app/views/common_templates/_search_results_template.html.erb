@@ -125,7 +125,7 @@
               {{> activity_log_<%=name%>_show_button_partial }}
             <% end %>
           <% end %>
-          <% if ItemFlagName.enabled_for?(item_class_name) && !item_flags_after %>
+          <% if ItemFlagName.enabled_for?(item_class_name, current_user) && !item_flags_after %>
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
@@ -149,7 +149,7 @@
             <% end %>
           <% end %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
-          <% if ItemFlagName.enabled_for?(item_class_name) && !item_flags_after %>
+          <% if ItemFlagName.enabled_for?(item_class_name, current_user) && !item_flags_after %>
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
@@ -169,13 +169,13 @@
           {{pretty_string this return_string="true"}}
           </div>
         </div>
-        {{#is @key "description"}}
+        {{else is @key "description"}}
         <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
         </div>
-        {{#is @key 'includes' "_notes"}}
+        {{else is @key 'includes' "_notes"}}
         <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
@@ -227,7 +227,7 @@
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}
 
-        <% if ItemFlagName.enabled_for?(item_class_name) && item_flags_after %>
+        <% if ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after %>
         {{#is @key '<%=item_flags_after%>'}}
           <li class="list-group-item is-full-width <%=name.hyphenate%>-item-flags">
           {{#with ..}}

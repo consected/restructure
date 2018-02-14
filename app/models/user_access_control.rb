@@ -60,7 +60,7 @@ class UserAccessControl < ActiveRecord::Base
     elsif resource_type == :external_id_assignments
       return ExternalIdentifier.active.map(&:name)
     elsif resource_type == :report
-      return Report.active.map(&:name)
+      return Report.active.map(&:name) + ['_all_reports_']
     else
       []
     end
@@ -86,7 +86,7 @@ class UserAccessControl < ActiveRecord::Base
   def self.resource_names_by_type
     rn = {}
     UserAccessControl.resource_types.each do |k|
-      rn[k] = UserAccessControl.resource_names_for(k)
+      rn[k] = UserAccessControl.resource_names_for(k).sort
     end
     rn
   end

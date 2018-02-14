@@ -12,10 +12,14 @@ class ItemFlagName < ActiveRecord::Base
 
   default_scope -> {order  "item_flag_names.updated_at DESC nulls last"}
 
-  def self.enabled_for? item_type
-    logger.debug "Checking we're enabled for #{item_type}"
+  def self.enabled_for? item_type, user
+    logger.debug "Checking we're enabled for #{item_type} with user #{user.id}"
     l = selector_array item_type: item_type
-    l.length > 0
+    res = l.length > 0
+    # Exit immediately if we already know this is not enabled
+    return false unless res
+
+    user.has_access_to? :access, :table, "#{item_type.pluralize}_item_flags".to_sym
   end
 
   def self.item_types

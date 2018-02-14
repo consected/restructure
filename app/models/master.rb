@@ -174,7 +174,10 @@ class Master < ActiveRecord::Base
     self.current_user ||= extras[:current_user]
     extras.delete(:current_user)
 
-    return {} unless self.allows_user_access
+    unless self.allows_user_access
+      logger.debug "|!!!!! as_json says the user is not allowed access"
+      return {}
+    end
 
     raise FphsException.new "current_user not set for master when getting results" unless self.current_user
 

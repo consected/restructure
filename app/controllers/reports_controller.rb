@@ -51,7 +51,9 @@ class ReportsController < ApplicationController
     @editable = @report.editable_data? && (current_admin || current_user && current_user.can?(:edit_report_data))
 
 
-    return unless @report.searchable.for_user(current_user) || authorized?
+    return unless @report.searchable || authorized?
+
+    return unless @report.can_access? current_user
 
     if search_attrs && !no_run
       begin

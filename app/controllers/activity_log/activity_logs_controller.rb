@@ -101,6 +101,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
     # set the parent item for the activity log by getting it from the URL params
     # and also checking that it is actually valid based on Activity Log config
     def set_item
+      return @item if @item && @implementation_class
       raise "Failed to get @master" unless @master
 
       if params[:item_id].blank?

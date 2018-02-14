@@ -9,7 +9,7 @@ class TrackerHistory < UserBase
   belongs_to :item, polymorphic: true
 
   # Avoids a lot of unnecessary database lookups
-  def self.uses_item_flags?
+  def self.uses_item_flags? user
     false
   end
 
