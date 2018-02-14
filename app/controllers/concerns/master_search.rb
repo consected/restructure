@@ -83,7 +83,7 @@ module MasterSearch
         logger.debug "Masters should return #{@masters.length} items"
 
         m = {
-          masters: @masters.as_json(current_user: current_user),
+          masters: @masters.as_json(current_user: current_user, filtered_search_results: true),
           count: {
             count: original_length,
             show_count: @masters.length

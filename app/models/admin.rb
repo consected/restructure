@@ -1,5 +1,5 @@
 class Admin < ActiveRecord::Base
-  
+
   include StandardAuthentication
 
   devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
@@ -8,6 +8,7 @@ class Admin < ActiveRecord::Base
   before_validation :prevent_reenabling_admin, on: :update
   before_validation :prevent_not_in_setup_script, on: :create
 
+  scope :active, -> { where "disabled is null or disabled = false" }
 
   def enabled?
     !self.disabled

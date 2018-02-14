@@ -37,7 +37,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     #login_as @user, scope: :user
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
@@ -56,7 +56,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     #login_as @user, scope: :user
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ""
@@ -65,7 +65,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     expect(page).to have_css "input:invalid"
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password + ' '
@@ -76,7 +76,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     expect(page).to have_css ".flash .alert", text: fail_message
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ' '+@good_password
@@ -86,7 +86,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     expect(page).to have_css ".flash .alert", text: fail_message
 
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
@@ -101,14 +101,14 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
 
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @d_email
       fill_in "Password", with: @d_pw
       click_button "Log in"
     end
 
-    expect(page).to have_css ".flash .alert", text: "× This account has been disabled."
+    expect(page).to have_css ".flash .alert"
 
   end
 

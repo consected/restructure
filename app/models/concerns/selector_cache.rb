@@ -161,8 +161,12 @@ module SelectorCache
       res.length == 1 ? res.first.last : nil
     end
 
-    def user_value_for name, user_id=nil
-      res = name_user_id_value.select{|p| p.first == name && (p[1] == user_id ) }
+    def user_value_for name, user_id: nil, app_type_id: nil
+      conditions = nil
+      if app_type_id
+        conditions = { app_type_id: app_type_id }
+      end
+      res = name_user_id_value(conditions).select{|p| p.first == name && (p[1] == user_id ) }
       # be sure to return a blank string for a result if one was received, or nil otherwise
       res.length == 1 ? (res.first.last || '') : nil
     end

@@ -18,13 +18,16 @@ describe "reports", js: true, driver: :app_firefox_driver do
 
     ua = UserAuthorization.create! has_authorization: 'view_reports', user_id: @user.id, current_admin: @admin, disabled: false
     ua = UserAuthorization.create! has_authorization: 'export_csv', user_id: @user.id, current_admin: @admin, disabled: false
-
     expect(@user.can?(:view_reports)).to be_truthy
+
+    UserAccessControl.create! user: @user, app_type: @user.app_type, access: :read, resource_type: :report, resource_name: :_all_reports_, current_admin: @admin
+    expect(@user.has_access_to?(:read, :report, :_all_reports_)).to be_truthy
 
     rl = Report.where(name: "Item Flags types")
     unless rl.count > 0
       r = Report.create(current_admin: @admin, name: "Item Flags types", description: "", sql: "select * from item_flags if1\r\ninner join item_flag_names ifn\r\non if1.item_flag_name_id = ifn.id", search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: false, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
       r.save!
+      expect(r.can_access? @user).to be_truthy
     else
       r = rl.first
     end

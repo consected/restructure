@@ -3,8 +3,8 @@
 <%= form_for([:admin, object_instance], class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
-    <%= f.label :app_type %>
-    <%= f.select :name, AppType.active.map{|a| [a.label, a.name]}%>
+    <%= f.label :app_type_id %>
+    <%= f.select :app_type_id, AppType.active.map{|a| [a.label, a.id]}%>
   </div>
   <div class="form-group">
     <%= f.label :name %>

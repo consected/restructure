@@ -25,7 +25,9 @@ class AppConfiguration < ActiveRecord::Base
       name = name.to_s.humanize.downcase
     end
 
-    res = user_value_for(name)
+    app_type_id = user.app_type_id if user
+
+    res = user_value_for(name, app_type_id: app_type_id)
 
     if user.nil?
       user_id = nil
@@ -35,7 +37,7 @@ class AppConfiguration < ActiveRecord::Base
       user_id = user
     end
 
-    res_user = user_value_for(name, user_id) if user_id
+    res_user = user_value_for(name, user_id: user_id, app_type_id: app_type_id) if user_id
 
     # since results are returned as nil if there was no entry and blank if there was (but it was not set)
     # we can return with a override expression

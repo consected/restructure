@@ -7,12 +7,12 @@ RSpec.describe PagesController, type: :routing do
       expect(:get => "/pages").to route_to("pages#index")
     end
 
-    it "does not route to #new" do
-      expect(:get => "/pages/new").not_to be_routable
+    it "does not route to #show" do
+      expect(:get => "/pages/1").to route_to("pages#show")
     end
 
-    it "does not route to #show" do
-      expect(:get => "/pages/1").not_to be_routable
+    it "does not route to #new" do
+      expect(:get => "/pages/new").to route_to("pages#show")
     end
 
     it "does not route to #edit" do

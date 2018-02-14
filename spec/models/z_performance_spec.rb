@@ -182,7 +182,7 @@ RSpec.describe "Performance", type: :model do
     jt = nil
     t = Benchmark.realtime do
       jt = {
-          masters: @masters.as_json(current_user: @user),
+          masters: @masters.as_json(current_user: @user, filtered_search_results: true),
           count: {
             count: 0,
             show_count: @masters.length

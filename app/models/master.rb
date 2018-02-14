@@ -174,9 +174,14 @@ class Master < ActiveRecord::Base
     self.current_user ||= extras[:current_user]
     extras.delete(:current_user)
 
-    unless self.allows_user_access
-      logger.debug "|!!!!! as_json says the user is not allowed access"
-      return {}
+    # If we are told these are filtered search results, they are already safe to
+    # show without extra filtering at this level.
+    if extras[:filtered_search_results]
+      extras.delete(:filtered_search_results)
+    else
+      unless self.allows_user_access
+        return {}
+      end
     end
 
     raise FphsException.new "current_user not set for master when getting results" unless self.current_user

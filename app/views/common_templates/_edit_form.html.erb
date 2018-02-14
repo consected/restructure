@@ -150,6 +150,9 @@
             <% elsif p.to_s.index(/(_date|_when)$/)  %>
               <%= f.label p %>
               <%= f.date_field p %>
+            <% elsif p.to_s.index(/(_url|_link)$/)  %>
+              <%= f.label p %>
+              <%= f.text_field p, type: 'url' %>
             <% elsif p.to_s.index(/_year$/)  %>
               <%= f.label p %>
               <%

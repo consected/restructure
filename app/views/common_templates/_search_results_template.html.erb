@@ -101,11 +101,21 @@
 <script id="activity_log_<%=name%>_data_template_name_partial"  type="text/x-handlebars-template" class="hidden handlebars-partial"><%= al_full_name.hyphenate %>{{#if rec_type}}-{{rec_type}}{{/if}}s-main-result-template</script>
 
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  <%
+  # Work out if the user has access to the activity log, and therefore should we show the link
+  controls = true
+  (works_with_rec_types_array||[]).each do |r|
+    controls &&= !!current_user.has_access_to?(:access, :table, [al_full_name, r].join('_').pluralize)
+  end
+    
+  if controls %>
   {{#if rec_type}}
   <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_<%=name%>_data_template_name_partial}}"></a>
   {{else}}
   <a data-toggle="uncollapse" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="{{> activity_log_<%=name%>_data_template_name_partial}}"></a>
   {{/if}}
+  <% end %>
 </script>
 
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -181,6 +191,14 @@
           {{pretty_string this return_string="true"}}
           </div>
         </div>
+        {{else is @key 'includes' '_url'}}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+          <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
+          </span></strong></li>
+        {{else is @key 'includes' '_link'}}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+          <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
+          </span></strong></li>
         {{else is @key 'includes' '_rank' }}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
 
@@ -326,13 +344,13 @@
 
     <% unless prevent_create %>
     {{#unless prevent_create}}
-    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus add-item-button"></span> <%= caption %> record</a> </p>
+    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %> record</a> </p>
     {{/unless}}
     <% end %>
 </script>
 
 <script id="<%=name%>_create_button-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <% unless prevent_create %>
-  <a href="/masters/{{id}}/<%=name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary" data-toggle="scrollto-result" data-target="<%=name.hyphenate%>-{{id}}-"><span class="glyphicon glyphicon-plus"></span> {{#if label}}{{label}}{{else}}<%= name.titleize %>{{/if}} record</a>
+  <a href="/masters/{{id}}/<%=name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="<%=name.hyphenate%>-{{id}}-"><span class="glyphicon glyphicon-plus"></span> {{#if label}}{{label}}{{else}}<%= name.titleize %>{{/if}} record</a>
   <% end %>
 </script>
