@@ -1,6 +1,10 @@
 module Seeds
   module AppTypes
 
+    def self.do_last
+      true
+    end
+
     def self.add_values values
       values.each do |v|
         res = AppType.find_or_initialize_by(v)

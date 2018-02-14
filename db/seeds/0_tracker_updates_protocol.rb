@@ -1,6 +1,10 @@
 module Seeds
   module TrackerUpdatesProtocol
 
+    def self.do_first
+      true
+    end
+
     def self.add_values values, sub_process
       values.each do |v|
         res = sub_process.protocol_events.find_or_initialize_by(v)
