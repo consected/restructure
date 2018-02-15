@@ -29,6 +29,12 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
   end
 
+  it "won't show the admin page unless using a secure URL param" do
+    visit "/admins/sign_in"
+    expect(current_path).to eq '/users/sign_in'
+  end
+
+
   it "should sign in" do
 
     admin = Admin.where(email: @good_email).first

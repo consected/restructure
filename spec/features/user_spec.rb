@@ -66,7 +66,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
 
     #login_as @user, scope: :user
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ""
@@ -77,7 +77,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
 
     expect(page).to have_css "input:invalid"
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password + ' '
@@ -86,7 +86,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
 
     expect(page).to have_css ".flash .alert", text: fail_message
 
-    visit "/admins/sign_in"
+    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ' '+@good_password

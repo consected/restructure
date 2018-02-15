@@ -8,11 +8,11 @@ RSpec.describe PagesController, type: :routing do
     end
 
     it "does not route to #show" do
-      expect(:get => "/pages/1").to route_to("pages#show")
+      expect(:get => "/pages/1").to route_to("pages#show", id: '1')
     end
 
     it "does not route to #new" do
-      expect(:get => "/pages/new").to route_to("pages#show")
+      expect(:get => "/pages/new").to route_to("pages#show", id: 'new')
     end
 
     it "does not route to #edit" do
