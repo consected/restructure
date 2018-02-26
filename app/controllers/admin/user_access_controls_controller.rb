@@ -1,6 +1,5 @@
-class Admin::UserAccessControlsController < ApplicationController
+class Admin::UserAccessControlsController < AdminController
 
-  include AdminControllerHandler
   helper_method  :has_access_levels, :user_id_options
 
   protected

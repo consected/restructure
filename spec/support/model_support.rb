@@ -42,8 +42,8 @@ module ModelSupport
     user.save!
 
 
-    if opt[:create_msid]
-      UserAuthorization.create! current_admin: @admin, user: user, has_authorization: :create_msid
+    if opt[:create_master]
+      UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
     end
 
     [user, good_password]

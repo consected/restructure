@@ -394,4 +394,21 @@ RSpec.describe UserAccessControl, type: :model do
 
   end
 
+  it "manages standard user authorizations to use features, such as create master record" do
+    create_admin
+    create_user
+
+
+    res = @user.has_access_to? :access, :general, :create_master
+    expect(res).to be_falsey
+
+    ac = UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+
+    res = @user.has_access_to? :access, :general, :create_master
+    expect(res).to be_truthy
+
+    expect(@user.can? :create_master).to be_truthy
+
+  end
+
 end

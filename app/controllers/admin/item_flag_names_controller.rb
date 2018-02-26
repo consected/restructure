@@ -1,5 +1,4 @@
-class Admin::ItemFlagNamesController < ApplicationController
-  include AdminControllerHandler
+class Admin::ItemFlagNamesController < AdminController
 
   private
     def secure_params

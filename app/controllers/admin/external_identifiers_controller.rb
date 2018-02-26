@@ -1,5 +1,5 @@
-class Admin::ExternalIdentifiersController < ApplicationController
-  include AdminControllerHandler
+class Admin::ExternalIdentifiersController < AdminController
+
   helper_method :permitted_params, :objects_instance, :human_name
 
 

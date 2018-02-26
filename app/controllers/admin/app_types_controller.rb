@@ -1,5 +1,4 @@
-class Admin::AppTypesController < ApplicationController
-  include AdminControllerHandler
+class Admin::AppTypesController < AdminController
 
   private
     def secure_params

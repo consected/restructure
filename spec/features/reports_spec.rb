@@ -16,8 +16,9 @@ describe "reports", js: true, driver: :app_firefox_driver do
     @user, @good_password  = create_user
     @good_email  = @user.email
 
-    ua = UserAuthorization.create! has_authorization: 'view_reports', user_id: @user.id, current_admin: @admin, disabled: false
-    ua = UserAuthorization.create! has_authorization: 'export_csv', user_id: @user.id, current_admin: @admin, disabled: false
+    UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :view_reports, current_admin: @admin, user: @user
+    UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :export_csv, current_admin: @admin, user: @user
+
     expect(@user.can?(:view_reports)).to be_truthy
 
     UserAccessControl.create! user: @user, app_type: @user.app_type, access: :read, resource_type: :report, resource_name: :_all_reports_, current_admin: @admin

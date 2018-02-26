@@ -1,5 +1,4 @@
-class Admin::ActivityLogsController < ApplicationController
-  include AdminControllerHandler
+class Admin::ActivityLogsController < AdminController
 
   private
     def secure_params

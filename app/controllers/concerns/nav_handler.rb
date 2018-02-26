@@ -5,6 +5,8 @@ module NavHandler
 
     return true if request.xhr?
 
+    admin_view = current_admin && self.is_a?(AdminController)
+
     @primary_navs = []
     @secondary_navs = []
     @app_type_switches = nil
@@ -37,12 +39,12 @@ module NavHandler
 
     if current_user
       @primary_navs << {label: app_config_text(:menu_research_label, "Research"), url: '/masters/', route: 'masters#index'}
-      @primary_navs << {label: app_config_text(:menu_create_master_record_label, "Create MSID"), url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_msid
+      @primary_navs << {label: app_config_text(:menu_create_master_record_label, "Create MSID"), url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_master
     end
 
-    if current_user || current_admin
-      @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'} if current_admin || current_user.can?(:view_reports)
-      @primary_navs << {label: 'Import CSV', url: '/imports', route: 'imports#index'}  if current_admin || current_user.can?(:import_csv)
+    if current_user || admin_view
+      @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'} if admin_view || current_user.can?(:view_reports)
+      @primary_navs << {label: 'Import CSV', url: '/imports', route: 'imports#index'}  if admin_view || current_user.can?(:import_csv)
 
     end
 

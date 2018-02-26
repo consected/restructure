@@ -110,7 +110,7 @@ private
   end
 
   def authorized?
-    return true if current_user.can? :create_msid
+    return true if current_user.can? :create_master
     return not_authorized
   end
 

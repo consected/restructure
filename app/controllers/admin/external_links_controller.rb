@@ -1,6 +1,6 @@
-class  Admin::ExternalLinksController < ApplicationController
-  include AdminControllerHandler
-  
+class  Admin::ExternalLinksController < AdminController
+
+
   private
     def secure_params
       params.require(:external_link).permit(:name, :value, :disabled)

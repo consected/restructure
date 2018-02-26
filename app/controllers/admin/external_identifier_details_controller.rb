@@ -1,6 +1,4 @@
-class Admin::ExternalIdentifierDetailsController < ApplicationController
-
-  include AdminControllerHandler
+class Admin::ExternalIdentifierDetailsController < AdminController
 
   before_action :set_type
 

@@ -1,5 +1,4 @@
-class Admin::AppConfigurationsController < ApplicationController
-  include AdminControllerHandler
+class Admin::AppConfigurationsController < AdminController
 
   protected
     def filters

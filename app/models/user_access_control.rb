@@ -56,7 +56,7 @@ class UserAccessControl < ActiveRecord::Base
     if resource_type == :table
       return Master.get_all_associations + ['item_flags']
     elsif resource_type == :general
-      return ['app_type']
+      return ['app_type', 'create_master', 'export_csv', 'export_json', 'view_reports', 'view_external_links', 'edit_report_data', 'import_csv']
     elsif resource_type == :external_id_assignments
       return ExternalIdentifier.active.map(&:name)
     elsif resource_type == :report
@@ -203,8 +203,8 @@ class UserAccessControl < ActiveRecord::Base
   private
     def correct_access
       self.access = nil if self.access.blank?
-      if self.user && self.user.disabled != self.disabled
-        errors.add :disabled, "flag of an access control must match the disabled flag for its user"
+      if self.user && self.user.disabled && !self.disabled
+        errors.add :disabled, "flag of an access control must be disabled, since the user is disabled"
       elsif !self.class.valid_access_level?(self.resource_type.to_sym, self.access)
         errors.add :access, "is an invalid value"
       elsif resource_type.nil? || !self.class.resource_types.include?(self.resource_type.to_sym)

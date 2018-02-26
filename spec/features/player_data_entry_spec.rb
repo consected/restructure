@@ -18,10 +18,9 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     @user, @good_password  = create_user
     @good_email  = @user.email
 
-    ua = UserAuthorization.create! has_authorization: 'create_msid', user_id: @user.id, current_admin: @admin, disabled: false
-    ua.save!
+    UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
 
-    expect(@user.can?(:create_msid)).to be_truthy
+    expect(@user.can?(:create_master)).to be_truthy
 
 
   end

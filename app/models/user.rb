@@ -51,8 +51,13 @@ class User < ActiveRecord::Base
     !self.disabled  ? super : :account_has_been_disabled
   end
 
-  def can? auth
-    UserAuthorization.user_can? self, auth
+  # Simple authorizations that say what type of general actions a user can perform in this app type.
+  # In previous versions, this was managed by the UserAuthoization class. Since
+  # we now have App Types and user access controls, this has been combined.
+  # The can? method defaults to resource_type :general for this reason, although
+  # can be used for checking access on other resource types if desired
+  def can? auth, resource_type=:general
+    self.has_access_to? :access, resource_type, auth
   end
 
   def has_access_to? perform, resource_type, named, with_options=nil, alt_app_type_id: nil

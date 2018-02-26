@@ -1,6 +1,5 @@
-class Admin::ReportsController < ApplicationController
+class Admin::ReportsController < AdminController
 
-  include AdminControllerHandler
 
   protected
     def default_index_order

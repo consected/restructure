@@ -2,7 +2,7 @@ require "#{::Rails.root}/spec/support/seed_support"
 
 module ControllerMacros
 
-  def self.create_user
+  def self.create_user opt={}
     a = User.all.unscope(:where, :order).order(id: :desc).first
     r = 1
     r = a.id + 1 if a
@@ -15,7 +15,9 @@ module ControllerMacros
 
     app_type = AppType.active.first
 
-    UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
+    unless opt[:no_app_type_setup]
+      UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
+    end
 
     # Set a default app_type to use to allow non-interactive tests to continue
     user.app_type = app_type
@@ -40,7 +42,7 @@ module ControllerMacros
   def before_each_login_user
     before(:each) do
       SeedSupport.setup
-      
+
       user, pw = ControllerMacros.create_user
       @request.env["devise.mapping"] = Devise.mappings[:user]
 

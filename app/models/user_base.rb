@@ -219,8 +219,8 @@ class UserBase < ActiveRecord::Base
 
     def check_can_save
 
-      raise FphsException.new "This item is not editable" if persisted? && !can_edit?
-      raise FphsException.new "This item can not be created" if !persisted? && !can_create?
+      raise FphsException.new "This item is not editable (#{self.class.name})" if persisted? && !can_edit?
+      raise FphsException.new "This item can not be created (#{self.class.name})" if !persisted? && !can_create?
       true
 
     end

@@ -6,7 +6,11 @@ RSpec.describe MastersController, type: :controller do
 
   before :each do
     @admin, _ = ControllerMacros.create_admin
-    UserAuthorization.create has_authorization: :create_msid, user_id: @user.id, current_admin: @admin unless UserAuthorization.user_can? @user, :create_msid
+
+    unless @user.can? :create_master
+      UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+    end
+
   end
 
   describe "Create master" do

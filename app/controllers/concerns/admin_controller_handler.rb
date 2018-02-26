@@ -77,6 +77,8 @@ module AdminControllerHandler
 
   protected
 
+    
+
     def filters
 
     end
