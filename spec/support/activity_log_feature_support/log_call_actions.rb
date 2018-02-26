@@ -38,18 +38,24 @@ module LogCallActions
       select to_who, from: 'Select call direction'
       select opt[:from], from: 'Select who'
       fill_in 'Called when', with: opt[:called_when]
-      dpc = all('.datepicker th.clear')
-      dpc.click if dpc.first
-      sleep 0.5
+      close_datepicker
     end
 
   end
 
 
   def mark_call_status as
+    close_datepicker
     within phone_log_block_css do
       select as, from: 'Select result'
     end
+  end
+
+  def close_datepicker
+    # Ensure the datepicker is not open
+    dpc = all('.al-label-player-contact-phone-item')
+    dpc.each {|e| e.click}
+    sleep 0.5
   end
 
   def mark_next_step_status as, opt={}
@@ -63,12 +69,11 @@ module LogCallActions
             opt[:when] = opt[:when].strftime('%Y-%m-%d')
             # We have to cheat to get Firefox 57 to accept dates
             f.send_keys opt[:when]
+            close_datepicker
           else
             opt[:when] = opt[:when].strftime('%m\/%d\/%Y')
             fill_in "Follow up when", with: opt[:when]
-            dpc = all('.datepicker th.clear')
-            dpc.click if dpc.first
-            sleep 0.5
+            close_datepicker
           end
         end
       end
