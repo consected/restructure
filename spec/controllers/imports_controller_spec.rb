@@ -47,12 +47,18 @@ RSpec.describe ImportsController, type: :controller do
   end
 
   def allow_import
-    @user.user_authorizations.create(has_authorization: 'import_csv', current_admin: @admin) unless @user.can?(:import_csv)
+    ac = @user.has_access_to? :read, :general, :import_csv
+    unless ac
+      UserAccessControl.create! user: @user, access: :read, resource_type: :general, resource_name: 'import_csv', current_admin: @admin, app_type_id: @user.app_type_id
+    end
   end
 
   def prevent_import
-    @user.user_authorizations.where(has_authorization: 'import_csv').each do |a|
-      a.delete! unless @user.can?(:import_csv)
+    ac = @user.has_access_to? :read, :general, :import_csv
+    if ac
+      ac.access = nil
+      ac.current_admin = @admin
+      ac.save!
     end
   end
 

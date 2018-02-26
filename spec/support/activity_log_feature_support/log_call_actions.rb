@@ -38,6 +38,8 @@ module LogCallActions
       select to_who, from: 'Select call direction'
       select opt[:from], from: 'Select who'
       fill_in 'Called when', with: opt[:called_when]
+      dpc = all('.datepicker th.clear')
+      dpc.click if dpc.first
       sleep 0.5
     end
 
@@ -64,6 +66,9 @@ module LogCallActions
           else
             opt[:when] = opt[:when].strftime('%m\/%d\/%Y')
             fill_in "Follow up when", with: opt[:when]
+            dpc = all('.datepicker th.clear')
+            dpc.click if dpc.first
+            sleep 0.5
           end
         end
       end

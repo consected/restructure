@@ -23,7 +23,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     # we have to force a new thread and connection to make this a transaction outside of the normal flow,
     # otherwise the Selenium session may not see it
 
-    @user, @good_password  = create_user nil, '', create_msid: true
+    @user, @good_password  = create_user nil, '', create_master: true
     @good_email  = @user.email
 
   end
@@ -32,8 +32,6 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     user = User.where(email: @good_email).first
     expect(user).to be_a User
     expect(user.id).to equal @user.id
-
-    #login_as @user, scope: :user
 
     login
 
@@ -59,6 +57,11 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
 
 
   it "should create a new tracker item in an empty list" do
+
+    ac = @user.can? :create_master
+    expect(ac).to be_truthy
+    # Be sure that the page is showing the menu correctly
+
 
     click_link 'Create MSID'
 
