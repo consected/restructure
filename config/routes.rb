@@ -9,7 +9,6 @@ Rails.application.routes.draw do
     resources :reports, except: [:show, :destroy]
     resources :external_identifier_details, except: [:destroy]
     resources :dynamic_models, except: [:show, :destroy]
-    resources :user_authorizations, except: [:show, :destroy]
     resources :user_access_controls, except: [:show, :destroy]
     resources :external_links, except: [:show, :destroy]
     resources :colleges, except: [:show, :destroy]
