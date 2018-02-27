@@ -98,7 +98,7 @@
 <script id="search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#if masters.length}}
   <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
-    <div class="panel panel-default">
+    <div class="panel panel-default results-panel">
 
     {{#each masters}}
       <div class="panel-heading master-result" role="tab" id="master-{{id}}">
@@ -170,7 +170,7 @@
             <% end %>
           <% end %>
         </ul>
-        <div class="panel-body">
+        <div class="panel-body master-main-panel">
           <% if current_user && current_user.can?(:view_external_links) %>
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>
           <% end %>
@@ -279,27 +279,33 @@
            </div>
           </div>
 
-          <div id="external-ids-{{id}}" class="row collapse external-ids-block">
-            <h4 class="results-divider"><a href="#external-ids-{{id}}" data-toggle="collapse" class="dropup scroll-to-master">external IDs <span class="caret up"></span></a></h4>
-            <div class="on-open-click hidden">
-            <%  external_id_types.each do |e|%>
-              <% if view?[e.plural_name.to_sym] %>
-              <p class="text-center">{{>player_info_create_button}}</p>
-              <a href="/masters/{{id}}/<%=e.plural_name%>" data-result-target="#<%=e.hyphenated_plural_name%>-{{id}}-" data-template="<%=e.hyphenated_plural_name%>-list-template" data-remote="true" class=""><%=e.label%></a>
+          <div id="external-ids-{{id}}" class="panel panel-default section-panel collapse external-ids-block">
+            <div class="is-header default-header section-panel-header">
+              <% unless app_config_set(:hide_player_tabs) %>
+                <a href="#external-ids-{{id}}" data-toggle="collapse" class="dropup no-scroll-on-collapse pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
               <% end %>
-            <% end %>
-
+              <h4 class="list-group-item-heading">External IDs</h4>
             </div>
-            <%  external_id_types.each do |e|%>
-              <% if view?[e.plural_name.to_sym] %>
-              <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+            <div class="row panel-body">
+              <div class="on-open-click hidden">
+              <%  external_id_types.each do |e|%>
+                <% if view?[e.plural_name.to_sym] %>
+                <p class="text-center">{{>player_info_create_button}}</p>
+                <a href="/masters/{{id}}/<%=e.plural_name%>" data-result-target="#<%=e.hyphenated_plural_name%>-{{id}}-" data-template="<%=e.hyphenated_plural_name%>-list-template" data-remote="true" class=""><%=e.label%></a>
+                <% end %>
               <% end %>
-            <% end %>
 
+              </div>
+              <%  external_id_types.each do |e|%>
+                <% if view?[e.plural_name.to_sym] %>
+                <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+                <% end %>
+              <% end %>
+            </div>
           </div>
 
           <% DynamicModel.categories.each do |cat| %>
-          <div id="<%=cat%>-{{id}}" class="row collapse <%=cat%>-block format-block-on-expand">
+          <div id="<%=cat%>-{{id}}" class="panel panel-default section-panel collapse <%=cat%>-block format-block-on-expand">
             <div class="on-open-click hidden">
               <% dm = DynamicModel.active.where(category: cat)
                  dm.each do |m|
@@ -310,16 +316,24 @@
                 <% end %>
               <% end %>
             </div>
-            <h4 class="results-divider"><a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master"><%=cat.underscore.humanize.downcase%> <span class="caret up"></span></a></h4>
-            <% dm.each do |m| %>
-            <% if view?[m.model_association_name] %>
-              <% if DynamicModel.orientation(cat) == :vertical %>
-              <div class="col-md-6" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
-              <% else %>
-              <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+            <div class="is-header default-header section-panel-header">
+              <% unless app_config_set(:hide_player_tabs) %>
+                <a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup no-scroll-on-collapse pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
               <% end %>
-            <% end %>
-            <% end %>
+              <h4 class="list-group-item-heading"><%=cat.underscore.humanize.titleize%></h4>
+            </div>
+
+            <div class="row panel-body">
+              <% dm.each do |m| %>
+              <% if view?[m.model_association_name] %>
+                <% if DynamicModel.orientation(cat) == :vertical %>
+                <div class="col-md-6" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+                <% else %>
+                <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+                <% end %>
+              <% end %>
+              <% end %>
+            </div>
           </div>
           <% end %>
 

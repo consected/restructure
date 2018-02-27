@@ -23,6 +23,14 @@ span.disabled, a.disabled {color: #ccc !important;}
   overflow: hidden;
 }
 
+.results-panel {
+  border: 0;
+}
+
+.panel-default > .panel-heading + .panel-collapse > .panel-body.master-main-panel {
+  border-top: 0;
+}
+
 h4.results-divider{
     background-color: #7DA4C7;
     color: white;
@@ -37,6 +45,16 @@ h4.results-divider{
             text-decoration: none;
         };
     }
+}
+
+
+.panel-group .panel.section-panel {
+  margin-top: 0.8em;
+
+  .is-header.default-header.section-panel-header {
+    padding: 1em;
+  }
+
 }
 
 li.list-group-item {

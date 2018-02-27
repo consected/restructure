@@ -21,8 +21,8 @@
       caption: m.name,
       name: m.model_def_name.to_s,
       full_name: "dynamic_model__#{m.model_def_name.to_s}",
-      prevent_edit: true,
-      prevent_create: true,
+      prevent_edit: !(current_user.has_access_to? :edit, :table, m.full_item_type_name.pluralize),
+      prevent_create: !(current_user.has_access_to? :create, :table, m.full_item_type_name.pluralize),
       item_list: l
     } %>
 <% end %>
