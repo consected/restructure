@@ -75,6 +75,10 @@
     item_flags_readonly = false
   end
 
+  unless defined? hide_rank_badge
+    hide_rank_badge = false
+  end
+
   al_full_name = "activity_log__#{full_name.underscore}"
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
@@ -108,7 +112,7 @@
   (works_with_rec_types_array||[]).each do |r|
     controls &&= !!current_user.has_access_to?(:access, :table, [al_full_name, r].join('_').pluralize)
   end
-    
+
   if controls %>
   {{#if rec_type}}
   <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_<%=name%>_data_template_name_partial}}"></a>
@@ -148,7 +152,9 @@
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="<%= edit_button_href %>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>
           {{/unless}}
           <% end %>
+          <% unless hide_rank_badge %>
           {{> rank_button name_h="<%= name.hyphenate %>"}}
+          <% end %>
           <% unless custom_activity_log == :none %>
             <% if works_with_rec_types.blank? %>
               {{> activity_log_<%=name%>_show_button_partial }}
