@@ -34,7 +34,6 @@ class DynamicModel < ActiveRecord::Base
 
 
   def update_tracker_events
-    # Can only add flags to dynamic models, and that is handled by item flags admin page
     return true
   end
 
@@ -43,6 +42,7 @@ class DynamicModel < ActiveRecord::Base
 
     obj = self
     failed = false
+    mcn = model_class_name
 
 
     if enabled? && !failed
@@ -54,7 +54,7 @@ class DynamicModel < ActiveRecord::Base
         man = self.model_association_name
         ro = self.result_order
         a_new_class = Class.new(UserBase) do
-          def self.is_dynamic_module
+          def self.is_dynamic_model
             true
           end
           self.table_name = obj.table_name
@@ -88,6 +88,8 @@ class DynamicModel < ActiveRecord::Base
           def self.result_order
             @result_order
           end
+
+
           self.primary_key = tkn
           self.foreign_key_name = fkn
           self.primary_key_name = pkn
@@ -110,6 +112,14 @@ class DynamicModel < ActiveRecord::Base
 
         a_new_controller = Class.new(DynamicModel::DynamicModelsController) do
 
+          def self.model_class_name= m
+            @model_class_name = m
+          end
+          def self.model_class_name
+            @model_class_name
+          end
+          self.model_class_name = mcn
+
           # Annoyingly this needs to be forced, since const_set below does not
           # appear to set the parent class correctly, unlike for models
           # Possibly this is a Rails specific override, but the parent is set correctly
@@ -119,19 +129,38 @@ class DynamicModel < ActiveRecord::Base
             ::DynamicModel
           end
 
+          def edit_form
+            'common_templates/edit_form'
+          end
+
+          def implementation_class
+            cn = self.class.model_class_name
+            cnf = "DynamicModel::#{cn}"
+            cnf.constantize
+          end
         end
 
         m_name = model_class_name
 
         klass = ::DynamicModel
-        klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass)
+        begin
+          klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass, fail_without_exception: true)
+        rescue => e
+          logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
+        end
+
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
 
 
         c_name = "#{table_name.pluralize.camelcase}Controller"
-        klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+        begin
+          klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
+        rescue => e
+          logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
+        end
+
         res2 = klass.const_set(c_name, a_new_controller)
         # Do the include after naming, to ensure the correct names are used during initialization
         res2.include MasterHandler
@@ -159,6 +188,9 @@ class DynamicModel < ActiveRecord::Base
 
     Rails.application.routes.draw do
       resources :masters do
+        mn.each do |pg|
+          resources pg.to_s.pluralize.to_sym, except: [:destroy], controller: "dynamic_model/#{pg.to_s.pluralize}"
+        end
         namespace :dynamic_model do
           mn.each do |pg|
             resources pg.to_s.pluralize.to_sym, except: [:destroy]

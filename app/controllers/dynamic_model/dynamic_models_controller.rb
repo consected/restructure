@@ -22,6 +22,21 @@ class DynamicModel::DynamicModelsController < ApplicationController
 
   private
 
-    def secure_params
+
+
+    def permitted_params
+      @implementation_class ||= implementation_class
+
+     res =  @implementation_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
+     res
     end
+
+    def secure_params
+      @implementation_class = implementation_class
+      puts params
+      params.require(@implementation_class.name.ns_underscore.gsub('__', '_').singularize.to_sym).permit(*permitted_params)
+    end
+
+
+
 end

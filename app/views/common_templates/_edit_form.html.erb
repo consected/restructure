@@ -10,7 +10,7 @@
   end
 
   unless caption && caption.to_s.include?('{{')
-    caption = (caption.to_s || name).humanize.titleize
+    caption = (caption.to_s || name).gsub('Dynamic Model/', '').humanize.titleize
   end
 
   unless defined? item_list
@@ -64,10 +64,16 @@
             <% elsif p == :rec_type%>
               <%= f.label :rec_type %>
               <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: object_instance.rec_type) %>
-            <% elsif p == :source %>
+            <% elsif p == :source
+                 gs = general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source, quiet_fail: true)
+            %>
               <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
-              <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source) %>
-              <% has_source = true %>
+                <% if gs %>
+                <%= f.select :source, gs %>
+                <% has_source = true %>
+                <% else %>
+                <%= f.text_field :source %>
+                <% end %>
             <% elsif p.to_s.index('select_record_from_') == 0
                   # Allow a 'data' selection to be made from an item
 
@@ -138,11 +144,18 @@
                 <%= f.label 'method' %><br/>
                 <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: "form-control input-sm" %>
             <% elsif p == :rank %>
-              <%= f.label :rank %>
               <% if respond_to? "#{name}_rank_array_pair".to_sym %>
+                <%= f.label :rank %>
                 <%= f.select :rank, self.send("#{name}_rank_array_pair") %>
-              <% else %>
-                <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank) %>
+              <% else
+                   gs = general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank, quiet_fail: true)
+              %>
+                <%= f.label :rank %>
+                <% if gs %>
+                <%= f.select :rank, gs %>
+                <% else %>
+                <%= f.text_field :rank %>
+                <% end %>
               <% end %>
             <% elsif set_related_field && p.to_s.end_with?('_rank') %>
               <%= f.label p %>
