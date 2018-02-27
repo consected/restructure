@@ -107,6 +107,10 @@ li.list-group-item.in-item-tracker-histories > strong {
 
 }
 
+.tracker-button-badge {
+  vertical-align: bottom;
+}
+
 .notes-block {
   position: relative;
 
@@ -200,11 +204,16 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
 }
 
 .form-actions {
-    border-bottom: 1px solid;
+    border-bottom: 0px solid;
     border-color: #f0f0ff;
     padding: 3px 18px 3px 8px;
 }
 
+.nav-pills.details-tabs > li > a {
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  
+}
 
 form.edit_tracker, form.new_tracker{
     .form-group {

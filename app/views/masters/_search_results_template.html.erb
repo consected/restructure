@@ -101,7 +101,7 @@
     <div class="panel panel-default results-panel">
 
     {{#each masters}}
-      <div class="panel-heading master-result" role="tab" id="master-{{id}}">
+      <div class="panel-heading master-result {{#is ../masters.length '===' 1}}selected-result{{/is}}" role="tab" id="master-{{id}}">
         <h3 class="panel-title">
           {{#if msid}}
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid" title="link to this record"> </a>
@@ -133,7 +133,7 @@
         </h3>
       </div>
       <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
-        <ul class="nav nav-pills <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %>">
+        <ul class="nav nav-pills details-tabs <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %>">
 
           <% unless app_config_set(:hide_tracker_panel) %>
           <li role="presentation">
