@@ -23,7 +23,8 @@
     prevent_edit: !(current_user.has_access_to? :edit, :table, :player_infos),
     prevent_create: !(current_user.has_access_to? :create, :table, :player_infos),
     item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes tracker_history_id),
-    data_sort: [:desc, "data-item-id"]
+    data_sort: [:desc, "data-item-id"],
+    hide_rank_badge: app_config_set(:hide_player_accuracy)
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
