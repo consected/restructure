@@ -282,7 +282,7 @@
           <div id="external-ids-{{id}}" class="panel panel-default section-panel collapse external-ids-block">
             <div class="is-header default-header section-panel-header">
               <% unless app_config_set(:hide_player_tabs) %>
-                <a href="#external-ids-{{id}}" data-toggle="collapse" class="dropup no-scroll-on-collapse pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
+                <a href="#external-ids-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
               <% end %>
               <h4 class="list-group-item-heading">External IDs</h4>
             </div>
@@ -318,7 +318,7 @@
             </div>
             <div class="is-header default-header section-panel-header">
               <% unless app_config_set(:hide_player_tabs) %>
-                <a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup no-scroll-on-collapse pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
+                <a href="#<%=cat%>-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
               <% end %>
               <h4 class="list-group-item-heading"><%=cat.underscore.humanize.titleize%></h4>
             </div>

@@ -19,7 +19,7 @@ span.disabled, a.disabled {color: #ccc !important;}
     }
 }
 
-.details-block {
+.panel-default, .details-block {
   overflow: hidden;
 }
 
@@ -108,6 +108,8 @@ li.list-group-item.in-item-tracker-histories > strong {
 }
 
 .notes-block {
+  position: relative;
+
   .panel {
     border-radius: 0;
   }
