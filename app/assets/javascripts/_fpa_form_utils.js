@@ -636,6 +636,21 @@ _fpa.form_utils = {
         }).addClass('formatted-date-local')
     },
 
+    setup_phone_field_mask: function(block) {
+      var check_phone = function(rec_type){
+        if(rec_type.val()==='phone')
+          block.find('input[data-attr-name="data"]').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}});
+        else
+          block.find('input[data-attr-name="data"]').unmask();
+      };
+
+      var e = block.find('.rec_type_has_phone').change(function(){
+        check_phone($(this));
+      });
+
+      check_phone(e);
+    },
+
     setup_textarea_autogrow: function(block) {
 
       block.find('textarea').each(function(){
@@ -722,6 +737,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_datepickers(block);
         _fpa.form_utils.mask_inputs(block);
         _fpa.form_utils.setup_textarea_autogrow(block);
+        _fpa.form_utils.setup_phone_field_mask(block);
         _fpa.form_utils.resize_children(block);
         block.removeClass('formatting-block');
     }

@@ -6,8 +6,8 @@ class ExternalIdentifier < ActiveRecord::Base
   validates :name, presence: true
   validates :label, presence: true
   validates :external_id_attribute, presence: true
-  validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}
-  validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}
+  validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}, unless: :alphanumeric?
+  validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}, unless: :alphanumeric?
   validate :name_format_correct
   validate :config_uniqueness
   validate :id_range_correct
@@ -107,6 +107,7 @@ class ExternalIdentifier < ActiveRecord::Base
     external_id_range = self.external_id_range
     allow_to_generate_ids = self.pregenerate_ids
     prevent_edit = self.prevent_edit
+    alphanumeric = self.alphanumeric
     label = self.label
     name = self.name
 
@@ -148,6 +149,10 @@ class ExternalIdentifier < ActiveRecord::Base
             @label = v
           end
 
+          def self.alphanumeric= v
+            @alphanumeric = v
+          end
+
           self.external_id_attribute = external_id_attribute
           self.external_id_edit_pattern = external_id_edit_pattern
           self.external_id_range = external_id_range
@@ -155,6 +160,7 @@ class ExternalIdentifier < ActiveRecord::Base
           self.prevent_edit = prevent_edit
           self.external_id_view_formatter = external_id_view_formatter
           self.label = label
+          self.alphanumeric = alphanumeric
 
         end
 

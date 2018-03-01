@@ -11,7 +11,7 @@ class Admin::ExternalIdentifiersController < AdminController
 
 
     def permitted_params
-      @permitted_params = [:id, :name, :label, :external_id_attribute, :external_id_view_formatter, :external_id_edit_pattern, :prevent_edit, :pregenerate_ids, :min_id, :max_id,  :disabled]
+      @permitted_params = [:id, :name, :label, :external_id_attribute, :alphanumeric, :external_id_view_formatter, :external_id_edit_pattern, :prevent_edit, :pregenerate_ids, :min_id, :max_id,  :disabled]
     end
 
     def secure_params

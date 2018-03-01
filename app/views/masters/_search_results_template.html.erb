@@ -72,6 +72,7 @@
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: e.name.underscore,
+    caption: e.label,
     prevent_edit: e.prevent_edit? || !(current_user.has_access_to? :edit, :table, e.plural_name),
     prevent_create: e.prevent_create? || !(current_user.has_access_to? :create, :table, e.plural_name),
     item_list: [label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s],
@@ -275,6 +276,10 @@
 
               </div>
               <% end %>
+
+              <% dm = DynamicModel.active.where(category: 'details') %>
+              <%= render partial: 'dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details' } %>
+
             </div>
            </div>
           </div>
@@ -324,15 +329,7 @@
             </div>
 
             <div class="row panel-body">
-              <% dm.each do |m| %>
-              <% if view?[m.model_association_name] %>
-                <% if DynamicModel.orientation(cat) == :vertical %>
-                <div class="col-md-6" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
-                <% else %>
-                <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
-                <% end %>
-              <% end %>
-              <% end %>
+              <%= render partial: 'dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: cat } %>
             </div>
           </div>
           <% end %>

@@ -20,33 +20,54 @@ module AdminHelper
 
     if respond_to?(:filters) &&  filters
 
-      if filters.first.last.is_a? String
-        all_filters = {all: filters}
-      else
-        all_filters = filters
-      end
+      filters_on_multiple = false
       res = ''
 
+      if filters_on.is_a? Symbol
+        fo = [filters_on]
+      else
+        fo = filters_on
+        filters_on_multiple = true
+      end
 
-      res << "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}" if all_filters.first.last.is_a?(Symbol)
-      all_filters.each do |title, vals|
+      fo.each do |filter_on|
 
-        if vals.is_a?( Symbol) || vals.is_a?( String)
-          res << link_to(title, index_path(filter: {filters_on => vals}), class: "btn btn-default btn-sm" )
+        res << "<h4>Filter on: #{filter_on.to_s.humanize}</h4>"
+
+        if filters_on_multiple
+          filter = filters[filter_on]
         else
+          filter = filters
+        end
 
-          res << "<div><p>#{title.to_s.humanize}</p>"
-          res << "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}"
-          if vals.is_a? Hash
-            vals.each do |k,v|
-              res << link_to(v, index_path(filter: {filters_on => k}), class: "btn btn-default btn-sm" )
+
+        if filter.first.last.is_a? String
+          all_filters = {all: filter}
+        else
+          all_filters = filter
+        end
+
+
+        res << "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}" if all_filters.first.last.is_a?(Symbol)
+        all_filters.each do |title, vals|
+
+          if vals.is_a?( Symbol) || vals.is_a?( String)
+            res << link_to(title, index_path(filter: {filter_on => vals}), class: "btn btn-default btn-sm" )
+          else
+
+            res << "<div><p>#{title.to_s.humanize}</p>"
+            res << "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}"
+            if vals.is_a? Hash
+              vals.each do |k,v|
+                res << link_to(v, index_path(filter: {filter_on => k}), class: "btn btn-default btn-sm" )
+              end
+            else
+              vals.each do |v|
+                res << link_to(v, index_path(filter: {filter_on => v}), class: "btn btn-default btn-sm" )
+              end
             end
-          else            
-            vals.each do |v|
-              res << link_to(v, index_path(filter: {filters_on => v}), class: "btn btn-default btn-sm" )
-            end
+            res << "</div>"
           end
-          res << "</div>"
         end
       end
     end

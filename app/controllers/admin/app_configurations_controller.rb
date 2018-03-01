@@ -1,13 +1,16 @@
 class Admin::AppConfigurationsController < AdminController
 
   protected
-    def filters
-      AppType.active.map {|g| [g.id.to_s, g.name]}.to_h
-    end
+  def filters
+    {
+      name: AppConfiguration.configurations,
+      app_type_id: AppType.all_by_name
+    }
+  end
 
-    def filters_on
-      :app_type
-    end
+  def filters_on
+    [:name, :app_type_id]
+  end
 
     def default_index_order
       {name: :asc}

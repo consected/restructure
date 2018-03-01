@@ -5,11 +5,14 @@ class Admin::UserAccessControlsController < AdminController
   protected
 
     def filters
-      UserAccessControl.resource_names_by_type
+      {
+        resource_name: UserAccessControl.resource_names_by_type,
+        app_type_id: AppType.all_by_name
+      }
     end
 
     def filters_on
-      :resource_name
+      [:resource_name, :app_type_id]
     end
 
     def has_access_levels

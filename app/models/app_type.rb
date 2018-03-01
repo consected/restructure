@@ -19,6 +19,15 @@ class AppType < ActiveRecord::Base
     atavail
   end
 
+  def self.all_by_name
+    res = {}
+
+    self.active.each do |a|
+      res[a.id.to_s] = a.name.underscore
+    end
+
+    res
+  end
 
   private
 

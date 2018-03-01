@@ -24,7 +24,7 @@ module ExternalIdHandler
     # @id_formatter = nil
     # @label = nil
 
-    validates self.external_id_attribute, presence: true,  numericality: { only_integer: true, greater_than_or_equal_to: external_id_range.min, less_than_or_equal_to: external_id_range.max }
+    validates self.external_id_attribute, presence: true,  numericality: { only_integer: true, greater_than_or_equal_to: (external_id_range.min || 0), less_than_or_equal_to: (external_id_range.max || 0) }, unless: :alphanumeric?
     validate :external_id_tests
 
   end
@@ -51,7 +51,7 @@ module ExternalIdHandler
     end
 
     def allow_to_generate_ids?
-      true
+      @allow_to_generate_ids
     end
 
     def prevent_edit= val
@@ -93,6 +93,10 @@ module ExternalIdHandler
     def prevent_create?
       return @prevent_create unless @prevent_create.nil?
       false
+    end
+
+    def alphanumeric
+      @alphanumeric
     end
 
     def external_id_attribute
@@ -243,6 +247,9 @@ module ExternalIdHandler
 
   end
 
+  def alphanumeric?
+    !!self.class.alphanumeric
+  end
 
   def data
     self.external_id

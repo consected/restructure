@@ -267,18 +267,7 @@ _fpa.postprocessors = {
 
     player_contact_edit_form: function(block,data){
         _fpa.form_utils.format_block(block);
-        var check_phone = function(rec_type){
-          if(rec_type.val()==='phone')
-            $('#player_contact_data').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}});
-          else
-            $('#player_contact_data').unmask();
-        };
 
-        var e = $('#player_contact_rec_type').change(function(){
-          check_phone($(this));
-        });
-
-        check_phone(e);
     },
 
 

@@ -4,8 +4,9 @@
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :app_type %>
-    <%= f.select :app_type_id, AppType.active.map{|a| [a.label, a.id]}%>
-  </div>
+    <% select_item_type = {}
+       select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'    %>
+    <%= f.select :app_type_id, AppType.active.map{|a| [a.label, a.id]}, select_item_type%>  </div>
   <div class="form-group">
     <%= f.label 'user override' %>
     <%= f.select :user_id, options_from_collection_for_select(User.active, 'id', 'email', object_instance.user_id), include_blank: true %>
@@ -23,7 +24,10 @@
   </div>
   <div class="form-group">
     <%= f.label :resource_name %>
-    <%= f.select :resource_name, UserAccessControl.resource_names_by_type %>
+    <% select_item_type = {}
+       select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'resource_name'    %>
+
+    <%= f.select :resource_name, UserAccessControl.resource_names_by_type, select_item_type %>
   </div>
   <div class="form-group">
     <%= f.label :options %>

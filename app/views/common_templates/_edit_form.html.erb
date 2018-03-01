@@ -24,6 +24,13 @@
   has_source = false
 
   select_desc = {}
+
+
+  if name.start_with? 'activity_log_'
+    gs_name = name
+  else
+    gs_name = name.pluralize
+  end
 %>
 
 <div class="data-results">
@@ -63,11 +70,25 @@
               <%= f.text_area p %>
             <% elsif p == :rec_type%>
               <%= f.label :rec_type %>
-              <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: object_instance.rec_type) %>
+              <%
+              gs = general_selection("#{gs_name}_type".to_sym, value: object_instance.rec_type, quiet_fail: true)
+              gs ||= general_selection("#{gs_name}_rec_type".to_sym, value: object_instance.rec_type, quiet_fail: true)
+
+              unless gs
+                raise FphsException.new "The general selection #{gs_name}_type or #{gs_name}_rec_type has not been defined. Please inform the administrator of this error."
+              end
+
+              has_phone = gs.select {|s| s.last == 'phone'}.first
+
+              %>
+              <%= f.select :rec_type, gs, {}, class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''}" %>
             <% elsif p == :source
-                 gs = general_selection("#{name.pluralize}_source".to_sym, value: object_instance.source, quiet_fail: true)
+                 gs = general_selection("#{gs_name}_source".to_sym, value: object_instance.source, quiet_fail: true) rescue nil
+                 unless gs
+                   raise FphsException.new "The general selection #{gs_name}_source has not been defined. Please inform the administrator of this error."
+                 end
             %>
-              <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{name.pluralize}_source".to_sym), title: 'original sources of data' %>
+              <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{gs_name}_source".to_sym), title: 'original sources of data' %>
                 <% if gs %>
                 <%= f.select :source, gs %>
                 <% has_source = true %>
@@ -118,18 +139,28 @@
 
             <% elsif p.to_s.index('select_') == 0
 
-                  desc = general_selection("#{name}_#{p}".to_sym, return_all: true).reduce(false){|r,i| r || !i[6].blank?}
+                  gs = general_selection("#{gs_name}_#{p}".to_sym, return_all: true) rescue nil
+                  unless gs
+                    raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
+                  end
+                  desc = gs.reduce(false){|r,i| r || !i[6].blank?}
                   v = object_instance.send(p)
                   if desc.blank?
                     opt = {}
                   else
-                    idesc = "#{name}_#{p}".to_sym
+                    idesc = "#{gs_name}_#{p}".to_sym
                     opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{p.to_s.humanize} options"}
-                    select_desc["#{name}_#{p}".to_sym] = v
+                    select_desc["#{gs_name}_#{p}".to_sym] = v
                   end
             %>
               <%= f.label p, opt %>
-              <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v)%>
+              <%
+              gs = general_selection("#{gs_name}_#{p}".to_sym, value: v) rescue nil
+              unless gs
+                raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
+              end
+              %>
+              <%= f.select p, gs %>
 
 
             <% elsif p == :protocol_id %>
@@ -148,7 +179,10 @@
                 <%= f.label :rank %>
                 <%= f.select :rank, self.send("#{name}_rank_array_pair") %>
               <% else
-                   gs = general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank, quiet_fail: true)
+                   gs = general_selection("#{gs_name}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank, quiet_fail: true)
+                   unless gs
+                     raise FphsException.new "The general selection #{name}_rank has not been defined. Please inform the administrator of this error."
+                   end
               %>
                 <%= f.label :rank %>
                 <% if gs %>
@@ -159,7 +193,13 @@
               <% end %>
             <% elsif set_related_field && p.to_s.end_with?('_rank') %>
               <%= f.label p %>
-              <%= f.select p, general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value]) %>
+              <%
+              gs = general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value], quiet_fail: true)
+              unless gs
+                raise FphsException.new "The general selection #{set_related_field[:name_and_field]} has not been defined. Please inform the administrator of this error."
+              end
+              %>
+              <%= f.select p, gs %>
             <% elsif p.to_s.index(/(_date|_when)$/)  %>
               <%= f.label p %>
               <%= f.date_field p %>
@@ -195,13 +235,20 @@
               <% end %>
 
               <%= f.text_area p, class: 'form-control'  %>
-            <% elsif GeneralSelection::BasicItemTypes.include?("#{name.pluralize}_#{p}".to_sym)%>
-              <%# Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down%>
+            <% elsif GeneralSelection::BasicItemTypes.include?("#{gs_name}_#{p}".to_sym)%>
+              <%
+              # Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down
+                gs = general_selection("#{gs_name}_#{p}".to_sym, value: object_instance.send(p), quiet_fail: true)
+                unless gs
+                  raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
+                end
+              %>
+
               <%= f.label p %>
-              <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: object_instance.send(p)) %>
+              <%= f.select p, gs %>
             <% else %>
               <%= f.label p %>
-              <%= f.text_field p %>
+              <%= f.text_field p, { data: {attr_name: p}} %>
             <% end %>
           </li>
           <%  if item_flags_after == p && item_flags_array.length > 0 %>
@@ -223,7 +270,7 @@
       <% end %>
     </div>
       <% if has_source %>
-        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{name.pluralize}_source", value: object_instance.source} %>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{gs_name}_source", value: object_instance.source} %>
       <% end %>
 
       <% select_desc.each do |k,v| %>

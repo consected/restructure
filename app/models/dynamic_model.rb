@@ -12,6 +12,29 @@ class DynamicModel < ActiveRecord::Base
   end
 
 
+  # List of item types that can be used to define GeneralSelection drop downs
+  # This does not represent the actual item types that are valid for selection when defining a new dynamic model record
+  def self.item_types
+
+    list = []
+
+    implementation_classes.each do |c|
+
+      cn = c.attribute_names.select{|a| a.index('select_') == 0 || a.in?(%w(source rec_type rank)) }.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
+      cn.each do |a|
+        list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+      end
+    end
+
+    list
+  end
+
+  # the list of defined activity log implementation classes
+  def self.implementation_classes
+    @implementation_classes = DynamicModel.active.map{|a| "DynamicModel::#{a.model_class_name.classify}".constantize }
+  end
+
+
   def implementation_model_name
     table_name.singularize
   end
@@ -34,7 +57,11 @@ class DynamicModel < ActiveRecord::Base
 
 
   def update_tracker_events
-    return true
+
+    return unless self.name && !disabled
+    Tracker.add_record_update_entries self.name.singularize, current_admin, 'record'
+    # flag items are added when item flag names are added to the list
+    #Tracker.add_record_update_entries self.name.singularize, current_admin, 'flag'
   end
 
 

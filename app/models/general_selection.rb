@@ -14,7 +14,7 @@ class GeneralSelection < ActiveRecord::Base
 
 
   def self.item_types
-    BasicItemTypes + Report.item_types + ActivityLog.item_types
+    BasicItemTypes + Report.item_types + ActivityLog.item_types + DynamicModel.item_types
   end
 
   # Format the item type source string for looking up different selection types from the general_selections table

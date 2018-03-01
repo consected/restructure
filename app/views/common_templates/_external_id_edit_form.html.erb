@@ -11,7 +11,12 @@
         <% unless primary_model.prevent_edit? %>
         <li class="list-group-item player-info-first_name">
             <%= f.label primary_model.external_id_attribute %>
-            <%= f.number_field primary_model.external_id_attribute, class: 'form-control', in: primary_model.external_id_range,  pattern: primary_model.external_id_edit_pattern %>
+            <% object_instance.send("#{primary_model.external_id_attribute}=", (object_instance.attributes[primary_model.external_id_attribute] || '').upcase)  %>
+            <% if primary_model.alphanumeric %>
+              <%= f.text_field primary_model.external_id_attribute, class: 'form-control', pattern: primary_model.external_id_edit_pattern %>
+            <% else %>
+              <%= f.number_field primary_model.external_id_attribute, class: 'form-control', in: primary_model.external_id_range,  pattern: primary_model.external_id_edit_pattern %>
+            <% end %>
         </li>
         <% else %>
         <li class="list-group-item player-info-first_name hidden">
@@ -20,7 +25,7 @@
         <% end %>
 
         <li class="list-group-item">
-          <%= f.submit class: "btn btn-primary" %>
+          <%= f.submit class: "btn btn-primary", value: 'Save' %>
         </li>
       </ul>
       <% end %>
