@@ -8,28 +8,18 @@ module TableGenerators
     end
   end
 
-  # Arguments:
-  # desired table name (plural)
-  # base parent table name (plural)
-  # true to generate, false to create script text, :drop to create drop sql, :drop_do to actually drop the table
-  # field names for the table
-  def self.activity_logs_table *args
+
+  def self.dynamic_models_table *args
+
     name=args[0]
-    base_name_plural=args[1]
-    generate_table=args[2]
-    attrib = args[3..-1]
+    generate_table=args[1]
+    attrib = args[2..-1]
 
-
-    if name.nil?
+    if name.nil? || name == ''
       puts "Usage:
-      db/table_generators/generate.sh activity_logs_table create <pluralized_table_name> <base_name_without_rectype>  'field1' 'field2' ...)\"
-      Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
+      db/table_generators/generate.sh dynamic_models_table <pluralized_table_name> create|drop 'field1' 'field2'...
       "
       return
-    end
-
-    unless name.start_with? 'activity_log_'
-      name = 'activity_log_' + name
     end
 
     @implementation_table_name = name
@@ -40,17 +30,6 @@ module TableGenerators
       return
     end
 
-    item_type_name = base_name_plural
-    base_name = singularize(base_name_plural)
-    unless base_name
-      puts "The provided base name does not appear to be pluralized"
-      return
-    end
-
-    base_name_id = "#{base_name}_id"
-
-
-    item_type_id = "#{singular_name.sub('activity_log_','')}_id"
 
     if generate_table == :drop || generate_table == :drop_do
       sql = <<EOF
@@ -59,11 +38,11 @@ module TableGenerators
       DROP TABLE if exists #{name} CASCADE;
       DROP FUNCTION if exists log_#{singular_name}_update();
 
-
 EOF
 
     else
 
+      # variable used for spec tests
       @implementation_attr_name = attrib
 
       attrib_pair = {}
@@ -80,27 +59,8 @@ EOF
         attrib_pair[a] = f
       end
 
-      sql = <<EOF
 
-      CREATE TABLE #{singular_name}_history (
-          id integer NOT NULL,
-          master_id integer,
-          #{base_name_id} integer,
-          #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
-          user_id integer,
-          created_at timestamp without time zone NOT NULL,
-          updated_at timestamp without time zone NOT NULL,
-          #{singular_name}_id integer
-      );
-      CREATE TABLE #{name} (
-          id integer NOT NULL,
-          master_id integer,
-          #{base_name_id} integer,
-          #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
-          user_id integer,
-          created_at timestamp without time zone NOT NULL,
-          updated_at timestamp without time zone NOT NULL
-      );
+      sql = <<EOF
 
       CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
           LANGUAGE plpgsql
@@ -109,7 +69,6 @@ EOF
                   INSERT INTO #{singular_name}_history
                   (
                       master_id,
-                      #{base_name_id},
                       #{attrib.join(",\n                      ")}#{attrib.length > 0 ? "," : ""}
                       user_id,
                       created_at,
@@ -118,7 +77,6 @@ EOF
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.#{base_name_id},
                       #{attrib.length > 0 ? "NEW." : ""}#{attrib.join(",\n                      NEW.")}#{attrib.length > 0 ? "," : ""}
                       NEW.user_id,
                       NEW.created_at,
@@ -129,6 +87,16 @@ EOF
               END;
           $$;
 
+      CREATE TABLE #{singular_name}_history (
+          id integer NOT NULL,
+          master_id integer,
+          #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
+          user_id integer,
+          created_at timestamp without time zone NOT NULL,
+          updated_at timestamp without time zone NOT NULL,
+          #{singular_name}_id integer
+      );
+
       CREATE SEQUENCE #{singular_name}_history_id_seq
           START WITH 1
           INCREMENT BY 1
@@ -138,7 +106,14 @@ EOF
 
       ALTER SEQUENCE #{singular_name}_history_id_seq OWNED BY #{singular_name}_history.id;
 
-
+      CREATE TABLE #{name} (
+          id integer NOT NULL,
+          master_id integer,
+          #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
+          user_id integer,
+          created_at timestamp without time zone NOT NULL,
+          updated_at timestamp without time zone NOT NULL
+      );
       CREATE SEQUENCE #{name}_id_seq
           START WITH 1
           INCREMENT BY 1
@@ -158,13 +133,13 @@ EOF
           ADD CONSTRAINT #{name}_pkey PRIMARY KEY (id);
 
       CREATE INDEX index_#{singular_name}_history_on_master_id ON #{singular_name}_history USING btree (master_id);
-      CREATE INDEX index_#{singular_name}_history_on_#{item_type_id} ON #{singular_name}_history USING btree (#{base_name_id});
+
 
       CREATE INDEX index_#{singular_name}_history_on_#{singular_name}_id ON #{singular_name}_history USING btree (#{singular_name}_id);
       CREATE INDEX index_#{singular_name}_history_on_user_id ON #{singular_name}_history USING btree (user_id);
 
       CREATE INDEX index_#{name}_on_master_id ON #{name} USING btree (master_id);
-      CREATE INDEX index_#{name}_on_#{item_type_id} ON #{name} USING btree (#{base_name_id});
+
       CREATE INDEX index_#{name}_on_user_id ON #{name} USING btree (user_id);
 
       CREATE TRIGGER #{singular_name}_history_insert AFTER INSERT ON #{name} FOR EACH ROW EXECUTE PROCEDURE log_#{singular_name}_update();
@@ -175,8 +150,8 @@ EOF
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
       ALTER TABLE ONLY #{name}
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
-      ALTER TABLE ONLY #{name}
-          ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (#{base_name_id}) REFERENCES #{item_type_name}(id);
+
+
 
       ALTER TABLE ONLY #{singular_name}_history
           ADD CONSTRAINT fk_#{singular_name}_history_users FOREIGN KEY (user_id) REFERENCES users(id);
@@ -184,8 +159,8 @@ EOF
       ALTER TABLE ONLY #{singular_name}_history
           ADD CONSTRAINT fk_#{singular_name}_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
-      ALTER TABLE ONLY #{singular_name}_history
-          ADD CONSTRAINT fk_#{singular_name}_history_#{item_type_id} FOREIGN KEY (#{base_name_id}) REFERENCES #{item_type_name}(id);
+
+
 
       ALTER TABLE ONLY #{singular_name}_history
           ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_id) REFERENCES #{name}(id);
@@ -197,7 +172,7 @@ EOF
     end
 
     if generate_table == true || generate_table == :drop_do
-      ActivityLog.connection.execute sql
+        ActiveRecord::Base.connection.execute sql
     else
       sql = "
       BEGIN;

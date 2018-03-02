@@ -1,5 +1,5 @@
 <% category_models.each do |m| %>
-  <% if viewable[m.model_association_name] %>
+  <% if viewable  [m.model_association_name] %>
     <% if DynamicModel.orientation(category) == :vertical %>
     <div class="col-md-6" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     <% else %>

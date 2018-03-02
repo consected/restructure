@@ -15,7 +15,7 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <% if current_user && @app_type_switches.length > 1 %>
-        <li><span class="select"><%= select_tag :use_app_type, options_for_select( @app_type_switches, selected: current_user.app_type_id), id: 'use_app_type_select', data: {app_type_id: current_user.app_type_id} %></span></li>
+        <li><span class="select"><%= select_tag :use_app_type, options_for_select( @app_type_switches, selected: current_user.app_type_id), id: 'use_app_type_select', data: {app_type_id: current_user.app_type_id}, class: 'has-value attached-has-value form-control input-sm ff' %></span></li>
         <% end %>
 
         <% @primary_navs.reject{|a| a[:label].blank? }.each do |nav| %>

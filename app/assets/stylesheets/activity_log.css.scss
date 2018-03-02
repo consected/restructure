@@ -97,3 +97,18 @@ a.related-tracker-histories-link {
   }
 
 }
+
+.model-reference-result {
+  .tracker-histories-caption {
+    display: none;
+  }
+
+}
+
+.prevent-edit {
+  .model-reference-result {
+    .edit-entity {
+      display: none;
+    }
+  }
+}

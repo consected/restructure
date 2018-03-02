@@ -58,4 +58,19 @@ module ActivityLogsHelper
       end
     end
   end
+
+  def model_reference_fields f
+    res = ""
+    ref_params = params[:references]
+    if ref_params.present?
+      ref_record_type = ref_params[:record_type]
+      ref_record_id = ref_params[:record_id]
+    end
+    if ref_record_id && ref_record_type
+      res << f.hidden_field( :ref_record_type, value: ref_record_type)
+      res << f.hidden_field( :ref_record_id, value: ref_record_id)
+    end
+
+    res.html_safe
+  end
 end

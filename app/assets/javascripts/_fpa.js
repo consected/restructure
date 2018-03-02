@@ -525,7 +525,8 @@ _fpa = {
                 var di = d.attr('data-result');
                 if(trigger.attr('data-target-force') === 'true'){
                   var t = trigger.attr('data-target');
-                  console.log('Failed due to no data-target attribute being set when data-target-force is true and the result is an HTML block');
+                  if(!t || t === '')
+                    console.log('Failed due to no data-target attribute being set when data-target-force is true and the result is an HTML block');
                   var targets = $(t);
                 }
                 else {

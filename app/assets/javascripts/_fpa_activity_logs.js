@@ -2,8 +2,8 @@ _fpa.activity_logs = {
 
   // when the sub list parent item (e.g. a phone number) is selected style appropriately
   selected_parent: function (block, attrs) {
-    
-    $('.activity-log-list .new-block.has-records').addClass('hidden');
+
+    $('.activity-log-list .alr-new-block.has-records').addClass('hidden');
 
     // Find the item sub list (for example, phone numbers in the phone log)
     var items = document.querySelectorAll('.activity-log-sub-list .sub-list-item .list-group');

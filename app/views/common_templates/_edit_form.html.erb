@@ -40,6 +40,8 @@
       <% if @extra_log_type %>
         <%= f.hidden_field :extra_log_type, value: @extra_log_type_name %>
       <% end %>
+      <%= model_reference_fields f %>
+
       <ul class="list-group">
         <li class="list-group-item">
           <%= inline_cancel_button %>
@@ -60,6 +62,9 @@
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
             <%
                col = object_instance.class.columns_hash[p.to_s]
+               if col.nil?
+                 raise FphsException.new "Column #{p} does not appear in the columns #{object_instance.class.columns_hash.map{|k,v| k}}"
+               end
                col_type = col.type
             %>
             <% if col_type == :boolean %>
@@ -226,7 +231,7 @@
             <% elsif p == :zip %>
               <%= f.label :zip %>
               <%= f.text_field :zip, zip_field_props %>
-            <% elsif p == :notes || p.to_s.include?('_notes') %>
+            <% elsif p == :notes || p == 'notes' || p.to_s.include?('_notes') %>
               <%= f.label p %>
               <% if caption_before[p]  %>
                   <p class="caption_before_notes">

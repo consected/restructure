@@ -157,6 +157,10 @@ module ActivityLogHandler
     self.send("#{action}=", d)
   end
 
+  def model_references
+    ModelReference.find_references self
+  end
+
 
   # Sync the tracker by adding a record to the protocol if it is set
   # This should only happen one time, since in the case of edit / update, a duplicate

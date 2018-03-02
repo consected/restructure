@@ -271,6 +271,12 @@
       return str.replace(/_/g, '-');
     });
 
+    Handlebars.registerHelper('pathify', function(str){
+      if(!str) return;
+      return str.replace(/__/g, '/');
+    });
+
+
     Handlebars.registerHelper('pluralize', function(str){
       if(!str) return;
       if(str[str.length - 1] == 'y')

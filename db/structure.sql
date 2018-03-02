@@ -3555,13 +3555,16 @@ ALTER SEQUENCE dynamic_models_id_seq OWNED BY dynamic_models.id;
 
 CREATE TABLE emergency_contacts (
     id integer NOT NULL,
+    rec_type character varying,
+    data character varying,
     first_name character varying,
     last_name character varying,
-    data character varying,
-    rec_type character varying,
+    select_relationship character varying,
     rank character varying,
     user_id integer,
-    master_id integer
+    master_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
 );
 
 
@@ -4339,6 +4342,41 @@ CREATE TABLE ml_copy (
     scantronid integer,
     insertauditkey text
 );
+
+
+--
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE model_references (
+    id integer NOT NULL,
+    from_record_type character varying,
+    from_record_id integer,
+    to_record_type character varying,
+    to_record_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: model_references_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE model_references_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: model_references_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE model_references_id_seq OWNED BY model_references.id;
 
 
 --
@@ -6473,6 +6511,13 @@ ALTER TABLE ONLY masters ALTER COLUMN id SET DEFAULT nextval('masters_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY model_references ALTER COLUMN id SET DEFAULT nextval('model_references_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY mrn_number_history ALTER COLUMN id SET DEFAULT nextval('mrn_number_history_id_seq'::regclass);
 
 
@@ -7188,6 +7233,14 @@ ALTER TABLE ONLY manage_users
 
 ALTER TABLE ONLY masters
     ADD CONSTRAINT masters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: model_references_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY model_references
+    ADD CONSTRAINT model_references_pkey PRIMARY KEY (id);
 
 
 --
@@ -8334,6 +8387,27 @@ CREATE INDEX index_masters_on_proid ON masters USING btree (pro_id);
 --
 
 CREATE INDEX index_masters_on_user_id ON masters USING btree (user_id);
+
+
+--
+-- Name: index_model_references_on_from_record_type_and_from_record_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_model_references_on_from_record_type_and_from_record_id ON model_references USING btree (from_record_type, from_record_id);
+
+
+--
+-- Name: index_model_references_on_to_record_type_and_to_record_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_model_references_on_to_record_type_and_to_record_id ON model_references USING btree (to_record_type, to_record_id);
+
+
+--
+-- Name: index_model_references_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_model_references_on_user_id ON model_references USING btree (user_id);
 
 
 --
@@ -10828,6 +10902,14 @@ ALTER TABLE ONLY colleges
 
 
 --
+-- Name: fk_rails_4bbf83b940; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY model_references
+    ADD CONSTRAINT fk_rails_4bbf83b940 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_564af80fb6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -11776,4 +11858,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180228111254');
 INSERT INTO schema_migrations (version) VALUES ('20180228145731');
 
 INSERT INTO schema_migrations (version) VALUES ('20180228174728');
+
+INSERT INTO schema_migrations (version) VALUES ('20180301114206');
 

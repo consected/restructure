@@ -118,10 +118,16 @@ module UserHandler
   public
 
     def human_name
+      cn = self.class.name
+
+      if self.class.respond_to?(:is_dynamic_model) && self.class.is_dynamic_model
+        cn = cn.split('::').last
+      end
+
       if respond_to?(:rec_type) && self.rec_type
-        rec_type.underscore.humanize.titleize
+        "#{cn.underscore.humanize.titleize} #{rec_type.underscore.humanize.titleize}"
       else
-        self.class.name.underscore.humanize.titleize
+        cn.underscore.humanize.titleize
       end
     end
 

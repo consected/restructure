@@ -54,7 +54,7 @@ module MasterHandler
 
     set_additional_attributes object_instance
     if object_instance.save
-      handle_updated_item_flags
+      handle_addition_updates
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
         index
@@ -69,7 +69,7 @@ module MasterHandler
 
   def update
     if object_instance.update(secure_params)
-      handle_updated_item_flags
+      handle_addition_updates
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
         index
@@ -202,7 +202,7 @@ module MasterHandler
       end
 
       def set_instance_from_build
-        
+
         if defined? set_item
           set_item
         end
@@ -240,7 +240,7 @@ module MasterHandler
         end
       end
 
-      def handle_updated_item_flags
+      def handle_addition_updates
         @flag_item_type = object_instance.item_type
         # Check for blank item_flag param to cover testing scenarios that do not return
         # the item_flag set. Which is reasonable and conceivable in a real form too
@@ -249,6 +249,27 @@ module MasterHandler
           flag_list = secure_item_flag_params[:item_flag_name_id].select {|f| !f.blank?}.map {|f| f.to_i}
           ItemFlag.set_flags flag_list, object_instance, current_user
         end
+
+        # Follow the pattern of the tracker to capture referenced items
+        pr = params[full_object_name.gsub('__', '_').to_sym]
+        if pr.present? && pr[:ref_record_type].present? && pr[:ref_record_id].present?
+          ref_item_class_name = pr[:ref_record_type].singularize.camelize
+
+          # Find the matching UserBase subclass that has this name, avoiding using the supplied param
+          # in a way that could be risky by allowing code injection
+          ic = UserBase.subclasses.select {|s| s.name == ref_item_class_name}.first
+
+          # look up the item using the item_id parameter.
+          rid = pr[:ref_record_id].to_i
+          @ref_item  = ic.find(rid)
+
+          if @ref_item
+            ModelReference.create_with @ref_item, object_instance
+
+          end
+        end
+        true
+
       end
 
 

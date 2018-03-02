@@ -2,6 +2,7 @@
   <div data-result="<%= edit_form_id %>">
     <div class="">
       <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
+      <%= model_reference_fields f %>
       <ul class="list-group">
         <li class="list-group-item">
           <%= inline_cancel_button %>

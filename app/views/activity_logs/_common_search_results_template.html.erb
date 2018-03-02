@@ -5,7 +5,13 @@
   blank_log_full_name_hyphenated = blank_log_full_name.hyphenate
   col_width = (hide_item_list_panel ? '6' : '8')
   data_action_when =  "data_#{action_when_attribute}".to_sym
+
+  primary_options = extra_log_type_configs.select {|e| e.name == 'primary'}.first
+  blank_options = extra_log_type_configs.select {|e| e.name == 'blank'}.first
+
+  extra_log_type_configs = extra_log_type_configs.reject {|c| c.name.in? ['primary', 'blank']}
 %>
+
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: full_name,
     caption: al_name,
@@ -23,7 +29,8 @@
     edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
     caption_before:{},
     item_flags_after: 'notes',
-    item_flags_readonly: true
+    item_flags_readonly: true,
+    references: primary_options.references
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -44,14 +51,15 @@
     edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
     caption_before:{},
     item_flags_after: 'notes',
-    item_flags_readonly: true
+    item_flags_readonly: true,
+    references: blank_options.references
   } %>
 
 <% extra_log_type_configs.each do |c| %>
   <%= render partial: 'common_templates/search_results_template', locals: {
       name: "#{full_name}_#{c.name}",
       item_class_name: full_name,
-      caption: c.label, # substitute the rec_type attribute (capitalized) as the block caption
+      caption: c.label,
       prevent_edit: prevent_edit,
       prevent_create: prevent_create,
       extra_class: "alt-width col-md-#{col_width}",
@@ -67,7 +75,8 @@
       caption_before:{},
       item_flags_after: 'notes',
       item_flags_readonly: true,
-      extra_type: c.name
+      extra_type: c.name,
+      references: c.references
     } %>
 
   <% end %>
@@ -170,6 +179,9 @@
           <% end %>
           <% unless prevent_create %>
           <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
+            <% extra_log_type_configs.each do |c| %>
+              <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.hyphenate %>" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.label %></a>
+            <% end %>
           <% end %>
         </p>
       </div>
@@ -179,12 +191,11 @@
 
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
           <div data-sort-desc="<%= data_action_when %>" <%= data_action_when %>="">
-            <div class="new-block new-after-parent col-md-<%=col_width%> {{#if <%= full_name.pluralize %>}}has-records has-records hidden{{/if}}" id="activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
-                {{#unless <%= full_name.pluralize %>}}<h4>No logged activity</h4>{{/unless}}
+            <div class="new-block new-after-parent alr-new-block col-md-<%=col_width%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
             </div>
-            <div class="new-block new-after-parent col-md-<%=col_width%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-blank-log-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
+            <div class="new-block new-after-parent alr-new-block col-md-<%=col_width%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-blank-log-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
             <% extra_log_type_configs.each do |c| %>
-              <div class="new-block new-after-parent col-md-<%=col_width%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
+              <div class="new-block new-after-parent alr-new-block col-md-<%=col_width%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
             <% end %>
           </div>
           {{#each <%=full_name.pluralize%>}}
