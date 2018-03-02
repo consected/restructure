@@ -11,7 +11,9 @@
 #     - select_call_direction
 #     - select_who
 #   references:
-#     - social_security_number
+#     social_security_number
+#       from: this | master
+#       add: one_to_this | one_to_master | many
 #
 # step_2:
 #   label: Step 2

@@ -1,11 +1,23 @@
--- Script created @ 2018-02-28 17:48:46 +0000
+-- Script created @ 2018-03-02 09:02:19 +0000
 set search_path=; 
  begin;  ;
-CREATE TABLE "emergency_contacts" ("id" serial primary key, "first_name" character varying, "last_name" character varying, "data" character varying, "select_relationship" character varying, "rec_type" character varying, "rank" character varying, "user_id_id" integer, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
-CREATE  INDEX  "index_emergency_contacts_on_user_id_id" ON "emergency_contacts"  ("user_id_id");
-ALTER TABLE "emergency_contacts" ADD CONSTRAINT "fk_rails_07831f8c5f"
-FOREIGN KEY ("user_id_id")
-  REFERENCES "user_ids" ("id")
+CREATE TABLE "model_references" ("id" serial primary key, "from_record_type" character varying, "from_record_id" integer, "from_record_master_id" integer, "to_record_type" character varying, "to_record_id" integer, "to_record_master_id" integer, "user_id" integer, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
+CREATE  INDEX  "index_model_references_on_from_record_master_id" ON "model_references"  ("from_record_master_id");
+CREATE  INDEX  "index_model_references_on_to_record_master_id" ON "model_references"  ("to_record_master_id");
+CREATE  INDEX  "index_model_references_on_user_id" ON "model_references"  ("user_id");
+ALTER TABLE "model_references" ADD CONSTRAINT "fk_rails_4bbf83b940"
+FOREIGN KEY ("user_id")
+  REFERENCES "users" ("id")
+;
+CREATE  INDEX  "index_model_references_on_from_record_type_and_from_record_id" ON "model_references"  ("from_record_type", "from_record_id");
+CREATE  INDEX  "index_model_references_on_to_record_type_and_to_record_id" ON "model_references"  ("to_record_type", "to_record_id");
+ALTER TABLE "model_references" ADD CONSTRAINT "fk_rails_2d8072edea"
+FOREIGN KEY ("to_record_master_id")
+  REFERENCES "masters" ("id")
+;
+ALTER TABLE "model_references" ADD CONSTRAINT "fk_rails_a4eb981c4a"
+FOREIGN KEY ("from_record_master_id")
+  REFERENCES "masters" ("id")
 ;
 
 

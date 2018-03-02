@@ -1295,6 +1295,36 @@ CREATE FUNCTION log_general_selection_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_appointment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_ipa_appointment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_appointment_history
+                  (
+                      master_id,
+                      visit_start_date,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_appointment_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.visit_start_date,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_ipa_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -2882,7 +2912,8 @@ CREATE TABLE activity_log_player_contact_phones (
     disabled boolean,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    set_related_player_contact_rank character varying
+    set_related_player_contact_rank character varying,
+    extra_log_type character varying
 );
 
 
@@ -3995,6 +4026,73 @@ ALTER SEQUENCE imports_id_seq OWNED BY imports.id;
 
 
 --
+-- Name: ipa_appointment_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ipa_appointment_history (
+    id integer NOT NULL,
+    master_id integer,
+    visit_start_date date,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_appointment_id integer
+);
+
+
+--
+-- Name: ipa_appointment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ipa_appointment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_appointment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ipa_appointment_history_id_seq OWNED BY ipa_appointment_history.id;
+
+
+--
+-- Name: ipa_appointments; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ipa_appointments (
+    id integer NOT NULL,
+    master_id integer,
+    visit_start_date date,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_appointments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ipa_appointments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_appointments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ipa_appointments_id_seq OWNED BY ipa_appointments.id;
+
+
+--
 -- Name: ipa_assignment_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4352,8 +4450,10 @@ CREATE TABLE model_references (
     id integer NOT NULL,
     from_record_type character varying,
     from_record_id integer,
+    from_record_master_id integer,
     to_record_type character varying,
     to_record_id integer,
+    to_record_master_id integer,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -6455,6 +6555,20 @@ ALTER TABLE ONLY imports ALTER COLUMN id SET DEFAULT nextval('imports_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ipa_appointment_history ALTER COLUMN id SET DEFAULT nextval('ipa_appointment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ipa_appointments ALTER COLUMN id SET DEFAULT nextval('ipa_appointments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ipa_assignment_history ALTER COLUMN id SET DEFAULT nextval('ipa_assignment_history_id_seq'::regclass);
 
 
@@ -7169,6 +7283,22 @@ ALTER TABLE ONLY general_selections
 
 ALTER TABLE ONLY imports
     ADD CONSTRAINT imports_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_appointment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ipa_appointment_history
+    ADD CONSTRAINT ipa_appointment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_appointments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ipa_appointments
+    ADD CONSTRAINT ipa_appointments_pkey PRIMARY KEY (id);
 
 
 --
@@ -8278,6 +8408,41 @@ CREATE INDEX index_imports_on_user_id ON imports USING btree (user_id);
 
 
 --
+-- Name: index_ipa_appointment_history_on_ipa_appointment_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_ipa_appointment_history_on_ipa_appointment_id ON ipa_appointment_history USING btree (ipa_appointment_id);
+
+
+--
+-- Name: index_ipa_appointment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_ipa_appointment_history_on_master_id ON ipa_appointment_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_appointment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_ipa_appointment_history_on_user_id ON ipa_appointment_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_appointments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_ipa_appointments_on_master_id ON ipa_appointments USING btree (master_id);
+
+
+--
+-- Name: index_ipa_appointments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_ipa_appointments_on_user_id ON ipa_appointments USING btree (user_id);
+
+
+--
 -- Name: index_ipa_assignment_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -8390,10 +8555,24 @@ CREATE INDEX index_masters_on_user_id ON masters USING btree (user_id);
 
 
 --
+-- Name: index_model_references_on_from_record_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_model_references_on_from_record_master_id ON model_references USING btree (from_record_master_id);
+
+
+--
 -- Name: index_model_references_on_from_record_type_and_from_record_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_model_references_on_from_record_type_and_from_record_id ON model_references USING btree (from_record_type, from_record_id);
+
+
+--
+-- Name: index_model_references_on_to_record_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_model_references_on_to_record_master_id ON model_references USING btree (to_record_master_id);
 
 
 --
@@ -9531,6 +9710,20 @@ CREATE TRIGGER general_selection_history_update AFTER UPDATE ON general_selectio
 
 
 --
+-- Name: ipa_appointment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_appointment_history_insert AFTER INSERT ON ipa_appointments FOR EACH ROW EXECUTE PROCEDURE log_ipa_appointment_update();
+
+
+--
+-- Name: ipa_appointment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_appointment_history_update AFTER UPDATE ON ipa_appointments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_appointment_update();
+
+
+--
 -- Name: ipa_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -10254,6 +10447,30 @@ ALTER TABLE ONLY general_selection_history
 
 
 --
+-- Name: fk_ipa_appointment_history_ipa_appointments; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ipa_appointment_history
+    ADD CONSTRAINT fk_ipa_appointment_history_ipa_appointments FOREIGN KEY (ipa_appointment_id) REFERENCES ipa_appointments(id);
+
+
+--
+-- Name: fk_ipa_appointment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ipa_appointment_history
+    ADD CONSTRAINT fk_ipa_appointment_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_ipa_appointment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ipa_appointment_history
+    ADD CONSTRAINT fk_ipa_appointment_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_ipa_assignment_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -10630,6 +10847,14 @@ ALTER TABLE ONLY mrn_numbers
 
 
 --
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ipa_appointments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -10723,6 +10948,14 @@ ALTER TABLE ONLY item_flag_names
 
 ALTER TABLE ONLY player_infos
     ADD CONSTRAINT fk_rails_23cd255bc6 FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: fk_rails_2d8072edea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY model_references
+    ADD CONSTRAINT fk_rails_2d8072edea FOREIGN KEY (to_record_master_id) REFERENCES masters(id);
 
 
 --
@@ -10874,6 +11107,14 @@ ALTER TABLE ONLY activity_log_bhs_assignments
 --
 
 ALTER TABLE ONLY mrn_numbers
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ipa_appointments
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
@@ -11115,6 +11356,14 @@ ALTER TABLE ONLY tracker_history
 
 ALTER TABLE ONLY addresses
     ADD CONSTRAINT fk_rails_a44670b00a FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_a4eb981c4a; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY model_references
+    ADD CONSTRAINT fk_rails_a4eb981c4a FOREIGN KEY (from_record_master_id) REFERENCES masters(id);
 
 
 --
@@ -11860,4 +12109,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180228145731');
 INSERT INTO schema_migrations (version) VALUES ('20180228174728');
 
 INSERT INTO schema_migrations (version) VALUES ('20180301114206');
+
+INSERT INTO schema_migrations (version) VALUES ('20180302144109');
 

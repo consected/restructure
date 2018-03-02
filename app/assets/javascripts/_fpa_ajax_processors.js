@@ -32,6 +32,20 @@ _fpa.postprocessors = {
             _fpa.form_utils.format_block($(this));
         }).addClass('attached-expander-format');
 
+        var item_key;
+        for (item_key in data) break;
+
+        var di = data[item_key];
+        if(di && di._created) {
+          var drf = di.referenced_from;
+          if(drf && drf.length > 0) {
+            for(var i in drf){
+              if(drf.hasOwnProperty(i) && drf[i].from_record_type_us)
+                _fpa.send_ajax_request("/masters/" + drf[i].from_record_master_id + "/" + drf[i].from_record_type_us.replace('__','/') + "s/" + drf[i].from_record_id);
+            }
+          }
+        }
+
     },
 
     modal_pi_search_results_template: function(block, data){

@@ -180,6 +180,8 @@ class DynamicModel < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
 
+        # Create an alias in the main namespace to make dynamic model easier to refer to
+        Object.const_set(model_class_name, res)
 
         c_name = "#{table_name.pluralize.camelcase}Controller"
         begin

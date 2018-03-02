@@ -112,6 +112,16 @@ module ActivityLogHandler
     end
   end
 
+
+  def extra_log_type_config
+
+    elt  = self.extra_log_type
+    if elt.blank?
+      elt = self.item ? 'primary' : 'blank'
+    end
+    self.class.extra_log_type_config_for elt
+  end
+
   # default record updates tracking is not performed, since we sync tracker separately
   def no_track
     false
@@ -158,7 +168,38 @@ module ActivityLogHandler
   end
 
   def model_references
-    ModelReference.find_references self
+    res = []
+    return res unless extra_log_type_config.references
+    extra_log_type_config.references.each do |ref_type, ref_config|
+      f = ref_config['from']
+      if f == 'this'
+        res += ModelReference.find_references self, to_record_type: ref_type
+      elsif f == 'master'
+        res += ModelReference.find_references self.master, to_record_type: ref_type
+      end
+    end
+    res
+  end
+
+  def creatable_model_references
+    res = {}
+
+    return res unless extra_log_type_config.references
+    extra_log_type_config.references.each do |ref_type, ref_config|
+      a = ref_config['add']
+      if a == 'many'
+        res[ref_type] = a
+      elsif a == 'one_to_master'
+        if ModelReference.find_references(self.master, to_record_type: ref_type).length == 0
+          res[ref_type] = a
+        end
+      elsif a == 'one_to_this'
+        if ModelReference.find_references(self, to_record_type: ref_type).length == 0
+          res[ref_type] = a
+        end
+      end
+    end
+    res
   end
 
 

@@ -112,3 +112,9 @@ a.related-tracker-histories-link {
     }
   }
 }
+
+.model-reference-result,
+.model-reference-list form.form-inline
+{
+  min-height: 0 !important;
+}

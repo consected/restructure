@@ -1,6 +1,5 @@
 <%
 
-  byebug if name == 'step_2'
   unless defined? caption
     caption = nil
   end
@@ -129,7 +128,7 @@
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}
   <% if name != full_name %><div id="<%=full_name.hyphenate%>-{{master_id}}-{{id}}"> <% end %>
-  <div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-sub-item="<%=full_name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
+  <div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-item-class="<%=item_class_name%>" data-sub-item="<%=full_name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
   <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}}" data-item-id="{{id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.to_s.html_safe}\"" }.join(' ').html_safe%> >
       <% if item_list.length == 1 && item_list.first.is_a?(Hash) %>
         <% item_list.each do |item| %>
@@ -317,7 +316,7 @@
           <li class="list-group-item <%=name.hyphenate%>-model-references in-item-model-references is-full-width">
             <span class="small">
               {{#if to_record_viewable}}
-              <a href="/masters/{{to_record_master_id}}/{{pathify to_record_type_us}}s/{{to_record_id}}" data-template="{{hyphenate to_record_short_type_us}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{to_record_id}}" data-remote="true" class="glyphicon glyphicon-triangle-bottom view-item"></a>
+              <a href="/masters/{{to_record_master_id}}/{{pathify to_record_type_us}}s/{{to_record_id}}" data-template="{{hyphenate to_record_short_type_us}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" data-remote="true" class="glyphicon glyphicon-triangle-bottom view-item"></a>
               {{else}}
               <span class="glyphicon glyphicon-ban-circle"></span>
               {{/if}}
@@ -325,19 +324,21 @@
             </span>
           </li>
           {{#if to_record_viewable}}
-          <div id="<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{to_record_id}}" class="model-reference-result">
+          <div id="<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" class="model-reference-result">
           </div>
           {{/if}}
 
           {{/each}}
         {{/if}}
 
+        <% references.each do |ref_type, ref_config| %>
+          {{#unless prevent_edit}}
+            {{#if creatable_model_references.<%= ref_type %> }}
+            <%= render partial: 'common_templates/reference_actions',  locals: {name: "activity_log/#{implementation_class_name}", ref_name: ref_type, caption: ref_type, block_id: "#{name.hyphenate}-#{ref_type}"} %>
+            {{/if}}
+          {{/unless}}
+        <%  end %>
 
-        <% references.each do |ref| %>
-        {{#unless prevent_edit}}
-        <%= render partial: 'common_templates/reference_actions',  locals: {name: "activity_log/#{implementation_class_name}", ref_name: ref, caption: ref, block_id: "#{name.hyphenate}-#{ref}"} %>
-        {{/unless}}
-        <% end %>
         <% if caption_before[:metadata]%>
         <div class="results-caption-before <%=name.hyphenate%>-caption-before-metadata">
           <div class="panel panel-default panel-body">

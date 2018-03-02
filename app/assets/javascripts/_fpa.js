@@ -125,9 +125,10 @@ _fpa = {
 
         new_block = html;
         var id = new_block.attr('id');
-        var existing = $('#'+id);
         // If the results has a root element with an id that exist in the DOM already,
+        // and has not been created in this transaction,
         // replace it rather than placing the result before the specified block
+        var existing = $('#'+id).not('.view-template-created');
         if(existing.length > 0){
             existing.replaceWith(new_block);
         }
@@ -372,6 +373,12 @@ _fpa = {
 
             var options = {};
             if(use_target){
+
+                // Check if a parent tells us to use a different target (a div around a form can force this to point to a specific location by putting the
+                // target in the data-result-target-for-child attribute)
+                var pt = $(this).parents('[data-result-target-for-child]').first();
+                if(pt.length == 1)
+                  t = pt.attr('data-result-target-for-child');
                 // A specific target was specified an is being used.
                 // Handle class markup that state whether to target this item directly, or add new elements above or below
                 // the targeted element
@@ -422,14 +429,17 @@ _fpa = {
                         // DOM attribute targeting
                         // will only use the following targets
                         // Certain refinements to each of these are identified through additional markup, specified below
-                        var targets = $('[data-sub-item="'+di+'"], [data-sub-list="'+di+'"] [data-sub-item]');
+                        var targets = $('[data-sub-item="'+di+'"], [data-sub-list="'+di+'"] [data-sub-item], [data-item-class="'+di+'"]');
 
                         res[di] = d;
                         targets.each(function(){
                             var use_data = res;
                             var dsid = $(this).attr('data-sub-id');
                             var dst = $(this).attr('data-sub-item');
-                            if(dsid && dst){
+                            // data-item-class is used for activity logs that gain the step type in the data-sub-item, breaking the matching
+                            // data-item-class is the plain class name
+                            var dsc = $(this).attr('data-item-class');
+                            if(dsid && (dst || dsc)){
                                 use_data = null;
                                 // Optionally use a different ID attribute (such as master_id) for the following listeners
                                 var dsfor = $(this).attr('data-sub-for');
@@ -472,9 +482,16 @@ _fpa = {
                                     item_data = d;
                                     var matching_data_sub_item = alt_data_key;
                                     if(!matching_data_sub_item) matching_data_sub_item = item_data.item_type.underscore();
-                                    if(item_data[dsfor] === +dsid && matching_data_sub_item === dst){
+                                    if(item_data[dsfor] === +dsid){
+                                      if(matching_data_sub_item === dst) {
                                         use_data = {};
                                         use_data[dst] = item_data;
+                                      }
+                                      else if(matching_data_sub_item === dsc) {
+                                        use_data = {};
+                                        use_data[dsc] = item_data;
+                                        use_data[dst] = item_data;
+                                      }
                                     }
                                 }else if(d){
                                     // The least specific case is to run through the array of data elements, having

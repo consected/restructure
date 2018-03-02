@@ -133,13 +133,12 @@
       <p class="text-center action-buttons">
         {{#each <%=item_type.pluralize%>}}
         <% if rec_type.blank? %>
-            <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %></a>
+            <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %>{{#is <%=item_type.pluralize%>.length '>' 1}} ({{data}}){{/is}}</a>
         <% else %>
           {{#is rec_type '===' '<%= rec_type %>'}}
-            <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %></a>
+            <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %>{{#is <%=item_type.pluralize%>.length '>' 1}} ({{data}}){{/is}}</a>
           {{/is}}
         <% end %>
-
         {{/each}}
         <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
         <% extra_log_type_configs.each do |c| %>

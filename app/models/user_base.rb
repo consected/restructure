@@ -139,6 +139,10 @@ class UserBase < ActiveRecord::Base
     !!user.has_access_to?( perform, :table, named, with_options)
   end
 
+  def referenced_from
+    ModelReference.find_where_referenced_from self
+  end
+
 
   if Master.respond_to? :alternative_id_fields
     # add the alternative_id_fields from the master as attributes, so we can use them for matching
