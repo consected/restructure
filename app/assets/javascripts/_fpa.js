@@ -368,7 +368,7 @@ _fpa = {
             // If no data-sub-item or data-sub-list is specified that matches a key in the reponse data, then we really have no other option but to position the result
             // where requested.
             // Finally if the results are 'multiple_results' but there was no original_item specified, then this a pure index. If there is a target, use it.
-            if(t && (t_abs_force || t_force || dataitem===null || dataitem['_created'] || dataitem['_merged'] ||  $('[data-sub-item="'+item_key+'"], [data-sub-list="'+item_key+'"] [data-sub-item]').length===0 ))
+            if(t && (t_abs_force || t_force || dataitem===null || dataitem['_created'] || dataitem['_merged'] ||  $('[data-sub-item="'+item_key+'"], [data-sub-list="'+item_key+'"] [data-sub-item]').length===0 || $(this).parents('[data-result-target-for-child]')))
                 use_target = true;
 
             var options = {};
@@ -377,8 +377,9 @@ _fpa = {
                 // Check if a parent tells us to use a different target (a div around a form can force this to point to a specific location by putting the
                 // target in the data-result-target-for-child attribute)
                 var pt = $(this).parents('[data-result-target-for-child]').first();
-                if(pt.length == 1)
+                if(pt.length == 1) {
                   t = pt.attr('data-result-target-for-child');
+                }
                 // A specific target was specified an is being used.
                 // Handle class markup that state whether to target this item directly, or add new elements above or below
                 // the targeted element
@@ -516,6 +517,8 @@ _fpa = {
                             // we can't overwrite a block previously processed in this request)
                             if(use_data){
                                 var dt = $(this).attr('data-template');
+                                if(!dt)
+                                  console.log('WARN: no data-template template name found');
                                 _fpa.view_template($(this), dt, use_data);
                                 _fpa.try_app_post_callback($(this));
                             }
@@ -540,6 +543,9 @@ _fpa = {
             html.find('[data-result]').each(function(){
                 var d = $(this);
                 var di = d.attr('data-result');
+                var isform = d.find('form');
+                var formcontainer = $(e.currentTarget).parents("[data-form-container]");
+
                 if(trigger.attr('data-target-force') === 'true'){
                   var t = trigger.attr('data-target');
                   if(!t || t === '')
@@ -547,7 +553,16 @@ _fpa = {
                   var targets = $(t);
                 }
                 else {
-                  var targets = $('[data-subscription="'+di+'"]');
+                  if(isform.length == 1 && formcontainer.length == 1) {
+                    if(formcontainer.attr('data-subscription') == di)
+                      var targets = formcontainer;
+                    else
+                      var targets = formcontainer.find('[data-subscription="'+di+'"]');
+                  }
+                  else {
+                    var targets = $('[data-subscription="'+di+'"]');
+                  }
+
                   if(targets.length === 0)
                     console.log('WARN: [data-subscription="'+di+'"] returns no targets');
                 }

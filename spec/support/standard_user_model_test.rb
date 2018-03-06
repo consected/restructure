@@ -5,6 +5,19 @@ shared_examples 'a standard user model' do
 
     before :all do
       seed_database
+      create_admin
+      create_user
+      uacs = UserAccessControl.active.where app_type: @user.app_type, resource_type: :table
+
+      uacs.each do |u|
+        u.access = 'create'
+        u.current_admin = @admin
+        u.save!
+      end
+
+      unless @user.has_access_to? :read, :general, :app_type
+        UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: @admin
+      end
     end
 
     it "records a creation" do
@@ -34,7 +47,7 @@ shared_examples 'a standard user model' do
       item = create_item
 
       res = item.update(new_attribs)
-      
+
       expect(res).to be true
 
       ts = item.trackers

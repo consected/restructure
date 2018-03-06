@@ -181,6 +181,13 @@ class DynamicModel < ActiveRecord::Base
         res.include UserHandler
 
         # Create an alias in the main namespace to make dynamic model easier to refer to
+
+        begin
+          Object.send(:remove_const, model_class_name) if implementation_class_defined?(Object, fail_without_exception: true)
+        rescue => e
+          logger.info "Failed to remove the old alias of Object::#{model_class_name}. #{e.inspect}"
+        end
+
         Object.const_set(model_class_name, res)
 
         c_name = "#{table_name.pluralize.camelcase}Controller"

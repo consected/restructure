@@ -5,6 +5,17 @@ RSpec.describe ExternalIdentifier, type: :model do
   include ModelSupport
   include ExternalIdentifierSupport
 
+  def allow_ext_id_create
+
+    unless @user.has_access_to? :create, :table, @implementation_table_name
+      uac = UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: @implementation_table_name.pluralize).first
+      uac ||= UserAccessControl.create app_type: @user.app_type, resource_type: :table, resource_name: @implementation_table_name.pluralize
+      uac.current_admin = @admin
+      uac.access = :create
+      uac.save!
+    end
+  end
+
   before :all do
     create_admin
     create_user
@@ -74,7 +85,7 @@ RSpec.describe ExternalIdentifier, type: :model do
     c = e.implementation_class
 
     expect(@user.app_type_id).not_to be nil
-    
+    allow_ext_id_create
     expect(@user.has_access_to? :create, :table, @implementation_table_name).to be_truthy
 
     eid = rand(9999999)
@@ -109,6 +120,7 @@ RSpec.describe ExternalIdentifier, type: :model do
     create_master
 
     # Create an external identifier ID record
+    allow_ext_id_create
     c = e.implementation_class
     eid = rand(9999999)
     m.current_user = @user

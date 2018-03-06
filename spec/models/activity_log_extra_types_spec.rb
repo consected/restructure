@@ -27,15 +27,12 @@ RSpec.describe 'Activity Log extra tyypes implementation', type: :model do
       fields:
         - select_call_direction
         - select_who
-      users:
 
     step_2:
       label: Step 2
       fields:
         - select_call_direction
         - extra_text
-      users:
-        - #{u.id}
 
 EOF
 
@@ -43,10 +40,10 @@ EOF
     expect(c1.label).to eq 'Step 1'
     expect(c1.fields).to eq ['select_call_direction', 'select_who']
 
-    c2 = al.extra_log_type_configs.last
+    c2 = al.extra_log_type_configs[1]
     expect(c2.label).to eq 'Step 2'
     expect(c2.fields).to eq ['select_call_direction', 'extra_text']
-    expect(c2.users).to eq [u.id]
+    
 
     # Additional field for extra_log_type is expected to be added to the configuration by default
     expect(ExtraLogType.fields_for_all_in al).to eq ['select_call_direction', 'select_who', 'extra_text', 'extra_log_type']

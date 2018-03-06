@@ -1,5 +1,5 @@
 _fpa.postprocessors_activity_logs = {};
-_fpa.activity_logs.generate_postprocessors = function (item_type_name)  {
+_fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log_type_config)  {
 
   var item_type_name_plural = '';
   var l = item_type_name.length;
@@ -12,13 +12,23 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name)  {
 
     _fpa.postprocessors_activity_logs['activity_log__' + item_type_name_plural + '_main_result_template'] = function(block, data){
       _fpa.activity_logs.show_main_block(block, data);
-    },
+    };
     _fpa.postprocessors_activity_logs['activity_log__' + item_type_name + '_result_template'] = function(block, data){
       _fpa.activity_logs.show_log_block(block, data);
-    },
+    };
     _fpa.postprocessors_activity_logs['activity_log__' + item_type_name + '_blank_log_result_template'] = function(block, data){
       _fpa.activity_logs.show_log_block(block, data);
-    },
+    };
+
+    if(extra_log_type_config) {
+      for(k in extra_log_type_config) {
+        if(extra_log_type_config.hasOwnProperty(k)) {
+          _fpa.postprocessors_activity_logs['activity_log__' + item_type_name + '_' + extra_log_type_config[k].name + '_result_template'] = function(block, data){
+            _fpa.activity_logs.show_log_block(block, data);
+          };
+        }
+      }
+    }
 
     _fpa.postprocessors_activity_logs['open_activity_log__' + item_type_name] = function(link, block, href){
       var master_id = link.attr('data-master-id');

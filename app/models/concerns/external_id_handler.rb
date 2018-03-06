@@ -24,7 +24,13 @@ module ExternalIdHandler
     # @id_formatter = nil
     # @label = nil
 
-    validates self.external_id_attribute, presence: true,  numericality: { only_integer: true, greater_than_or_equal_to: (external_id_range.min || 0), less_than_or_equal_to: (external_id_range.max || 0) }, unless: :alphanumeric?
+    validates self.external_id_attribute, presence: true,
+                                          numericality: {
+                                            only_integer: true,
+                                            greater_than_or_equal_to: (external_id_range.min || 0),
+                                            less_than_or_equal_to: (external_id_range.max || 0)
+                                          },
+                                          unless: :alphanumeric?
     validate :external_id_tests
 
   end

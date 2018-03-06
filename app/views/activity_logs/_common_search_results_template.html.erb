@@ -172,7 +172,7 @@
         </p>
         <br />
         <% end %>
-        <p class="text-center">
+        <p class="text-center al-create-actions">
           <% if current_user.has_access_to?( :create, :table, item_type.pluralize) %>
           <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/new<%= rec_type.blank? ? '' : "?#{item_type}[rec_type]=#{rec_type}"  %>" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" aria-label="add <%=item_type.humanize%> record"><span class="glyphicon glyphicon-plus"></span> <%= item_type.humanize%> record</a>
           <% end %>
@@ -219,5 +219,5 @@
 </script>
 
 <script>
-  _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>')
+  _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>', <%= extra_log_type_configs.to_json.html_safe %>)
 </script>

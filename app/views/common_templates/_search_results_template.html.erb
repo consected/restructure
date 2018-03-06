@@ -324,7 +324,8 @@
             </span>
           </li>
           {{#if to_record_viewable}}
-          <div id="<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" class="model-reference-result">
+          <div class="model-reference-result" >
+            <div id="<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" class="model-reference-result" data-result-target-for-child="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}, #{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}"  data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-subscription="{{hyphenate to_record_short_type_us}}-edit-form-{{to_record_master_id}}-{{to_record_id}}" data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-form-container="{{hyphenate to_record_type_us}}_edit_form" ></div>
           </div>
           {{/if}}
 

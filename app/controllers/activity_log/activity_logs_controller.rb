@@ -153,9 +153,15 @@ class ActivityLog::ActivityLogsController < ApplicationController
       cnf.constantize
     end
 
+    # Use the correct extra log type, based on either the param (for a new action) or
+    # the object_instance attribute (for an edit action)
     def handle_extra_log_type
       extra_type = nil
       etp = params[:extra_type]
+      if etp.blank?
+        etp = object_instance.extra_log_type
+      end
+
       if etp.present? && @implementation_class.extra_log_type_config_names.include?(etp.underscore)
         @extra_log_type_name = etp.underscore
         @extra_log_type = @implementation_class.extra_log_type_config_for(etp.underscore)

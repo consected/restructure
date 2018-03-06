@@ -74,6 +74,7 @@ EOF
         f = 'date' if a.end_with?('_date')
         f = 'varchar' if a == 'data'
         f = 'varchar' if a.end_with?('_name')
+        f = 'boolean' if a.end_with?('_check')
         f = 'varchar' if a == 'notes'
         f = 'varchar' if a.start_with?('select_')
         f += ','
@@ -87,6 +88,7 @@ EOF
           master_id integer,
           #{base_name_id} integer,
           #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
+          extra_log_type varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -97,6 +99,7 @@ EOF
           master_id integer,
           #{base_name_id} integer,
           #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
+          extra_log_type varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
@@ -111,6 +114,7 @@ EOF
                       master_id,
                       #{base_name_id},
                       #{attrib.join(",\n                      ")}#{attrib.length > 0 ? "," : ""}
+                      extra_log_type,
                       user_id,
                       created_at,
                       updated_at,
@@ -120,6 +124,7 @@ EOF
                       NEW.master_id,
                       NEW.#{base_name_id},
                       #{attrib.length > 0 ? "NEW." : ""}#{attrib.join(",\n                      NEW.")}#{attrib.length > 0 ? "," : ""}
+                      NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,

@@ -41,6 +41,11 @@ _fpa.activity_logs = {
 
   show_log_block: function(block, data) {
     _fpa.form_utils.format_block(block);
+
+    $('.activity-log-list .alr-new-block').addClass('hidden');
+
+
+
     var d = data;
     var d0;
     for(var e in data){

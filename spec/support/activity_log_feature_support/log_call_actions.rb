@@ -102,7 +102,7 @@ module LogCallActions
 
   def save_log
     within phone_log_block_css do
-      click_button 'Create Player contact phone'
+      click_button 'Save'
     end
   end
 

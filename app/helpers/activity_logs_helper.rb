@@ -2,17 +2,20 @@ module ActivityLogsHelper
 
   def activity_log_edit_form_id
 
-    extra_type = "-#{@extra_log_type_name.hyphenate}" if @extra_log_type_name
-
-    if @item
-
-      "#{@implementation_class.name.ns_hyphenate}#{extra_type}-edit-form-#{@master_id}-#{@id}"
-    else
-      extra_type ||= '-blank-log'
-      "#{@implementation_class.name.ns_hyphenate}#{extra_type}-edit-form-#{@master_id}-#{@id}"
+    if @extra_log_type_name
+      # The extra log type was passed as a param for a new item
+      extra_type = "-#{@extra_log_type_name.hyphenate}"
+    elsif object_instance.extra_log_type
+      # The object includes the extra log type
+      extra_type = "-#{object_instance.extra_log_type.hyphenate}"
+    elsif !@item
+      extra_type = '-blank-log'
     end
 
+    "#{@implementation_class.name.ns_hyphenate}#{extra_type}-edit-form-#{@master_id}-#{@id}"
+
   end
+
   def activity_log_edit_form_hash extras={}
     res = extras.dup
 

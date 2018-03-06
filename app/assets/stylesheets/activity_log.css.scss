@@ -114,7 +114,12 @@ a.related-tracker-histories-link {
 }
 
 .model-reference-result,
+.model-reference-result form.form-inline,
 .model-reference-list form.form-inline
 {
   min-height: 0 !important;
+}
+
+.al-create-actions {
+  line-height: 2.6em;
 }

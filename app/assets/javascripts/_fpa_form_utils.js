@@ -363,10 +363,18 @@ _fpa.form_utils = {
             if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed') || $(this).hasClass('no-scroll-on-collapse'))
               return;
 
-            var a = $(this).attr('data-target');
+            var a;
+            var f = $(this).parents('[data-form-container]');
+            if(f.length == 1) {
+              a = f.attr('data-form-container');
+            }
+            else
+              a = $(this).attr('data-target');
+
             if(!a || a==''){
                 a = $(this).attr('data-result-target');
             }
+
             if(a){
                 // Only jump to the target if the current top and bottom of the block are off screen. Usually we
                 // attempt to do this so that users do not have to constantly scroll an edit block into view just to type

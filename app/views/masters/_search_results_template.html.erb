@@ -278,7 +278,7 @@
               <% end %>
 
               <% dm = DynamicModel.active.where(category: 'details') %>
-              <%= render partial: 'dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details' } %>
+              <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details' } %>
 
             </div>
            </div>
@@ -329,7 +329,7 @@
             </div>
 
             <div class="row panel-body">
-              <%= render partial: 'dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: cat } %>
+              <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: cat } %>
             </div>
           </div>
           <% end %>
