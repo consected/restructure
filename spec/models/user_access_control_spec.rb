@@ -365,8 +365,8 @@ RSpec.describe UserAccessControl, type: :model do
     # because he can't see the master. This is of course correct, otherwise the current user could add an
     # external identifier himself to gain access
     # This demonstrates again that the default value can be overridden for a specific user
-    ac2 = UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :external_id_assignments, resource_name: @implementation_table_name, current_admin: @admin, user: user1
-
+    UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :external_id_assignments, resource_name: @implementation_table_name, current_admin: @admin, user: user1
+    UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: @implementation_table_name, current_admin: @admin, user: user1
     res = user1.has_access_to? :limited, :external_id_assignments, @implementation_table_name
     expect(res).to be_falsey
     expect(UserAccessControl.external_identifier_restrictions(user1)).to be nil
@@ -402,7 +402,7 @@ RSpec.describe UserAccessControl, type: :model do
     res = @user.has_access_to? :access, :general, :create_master
     expect(res).to be_falsey
 
-    ac = UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+    UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
 
     res = @user.has_access_to? :access, :general, :create_master
     expect(res).to be_truthy

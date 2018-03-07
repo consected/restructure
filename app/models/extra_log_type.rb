@@ -28,17 +28,23 @@
 
 class ExtraLogType
 
-  attr_accessor :name, :label, :fields, :references
+  attr_accessor :name, :label, :fields, :references, :auto_create, :resource_name
 
-  def initialize name, config
+  def initialize name, config, parent_activity_log
     @name = name
 
     config.each {|k, v| self.send("#{k}=", v)}
 
+    self.fields ||= []
+
+    pal = parent_activity_log
+
+    self.resource_name = "#{pal.full_implementation_class_name.ns_underscore}__#{self.name.underscore}"
+
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
     unless name.in?(['primary', 'blank'])
       raise FphsException.new "extra log options label: property can not be blank" if self.label.blank?
-      raise FphsException.new "extra log options fields: property must be an array" if self.fields.blank?
+      raise FphsException.new "extra log options fields: property must be an array" unless self.fields.is_a?(Array)
     end
   end
 
@@ -59,7 +65,7 @@ class ExtraLogType
       res['blank'] ||= {}
 
       res.each do |k, v|
-        i = ExtraLogType.new k, v
+        i = ExtraLogType.new k, v, activity_log
         configs << i
       end
     # rescue
@@ -72,10 +78,9 @@ class ExtraLogType
 
   def self.fields_for_all_in activity_log
     begin
-      activity_log.extra_log_type_configs.reject{|e| e.name.in?(['primary', 'blank'])}.map(&:fields).reduce([], &:+).uniq << 'extra_log_type'
+      activity_log.extra_log_type_configs.reject{|e| e.name.in?(['primary', 'blank'])}.map(&:fields).reduce([], &:+).uniq
     rescue => e
-      Rails.logger.debug "EEEEEEEEEEEEEEEEEE #{e}\n #{e.backtrace.join("\n")}"
-      raise FphsException.new "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as an array  "
+      raise FphsException.new "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
     end
   end
 

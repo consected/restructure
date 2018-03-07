@@ -6,7 +6,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
   include ParentHandler
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
   before_action :handle_extra_log_type, only: [:edit, :new]
-
+  before_action :auto_create, only: [:new]
 
 
 
@@ -15,6 +15,12 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
     def edit_form
       'common_templates/edit_form'
+    end
+
+    def auto_create
+      if @extra_log_type && @extra_log_type.auto_create
+        object_instance.save!
+      end
     end
 
     def edit_form_extras
@@ -156,7 +162,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
     # Use the correct extra log type, based on either the param (for a new action) or
     # the object_instance attribute (for an edit action)
     def handle_extra_log_type
-      extra_type = nil
+
       etp = params[:extra_type]
       if etp.blank?
         etp = object_instance.extra_log_type
@@ -165,6 +171,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
       if etp.present? && @implementation_class.extra_log_type_config_names.include?(etp.underscore)
         @extra_log_type_name = etp.underscore
         @extra_log_type = @implementation_class.extra_log_type_config_for(etp.underscore)
+        object_instance.extra_log_type ||= @extra_log_type_name
       end
 
     end

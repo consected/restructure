@@ -8,7 +8,7 @@ class UserAccessControl < ActiveRecord::Base
   validate :correct_access
 
   def self.resource_types
-    [:table, :general, :external_id_assignments, :report]
+    [:table, :general, :external_id_assignments, :report, :activity_log_type]
   end
 
 
@@ -23,7 +23,8 @@ class UserAccessControl < ActiveRecord::Base
       table: [nil, :read, :update, :create],
       general: [nil, :read],
       external_id_assignments: [nil, :limited],
-      report: [nil, :read]
+      report: [nil, :read],
+      activity_log_type: [nil, :read, :update, :create]
     }
   end
 
@@ -47,6 +48,10 @@ class UserAccessControl < ActiveRecord::Base
       },
       report: {
         access: [:read]
+      },
+      activity_log_type: {
+        access: [:read, :update, :create],
+        edit: [:update, :create],
       }
     }
   end
@@ -61,6 +66,12 @@ class UserAccessControl < ActiveRecord::Base
       return ExternalIdentifier.active.map(&:name)
     elsif resource_type == :report
       return Report.active.map(&:name) + ['_all_reports_']
+    elsif resource_type == :activity_log_type
+      res = []
+      ActivityLog.active.each do |a|
+        res += a.extra_log_type_configs.map(&:resource_name)
+      end
+      return res
     else
       []
     end

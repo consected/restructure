@@ -108,7 +108,7 @@ module ActivityLogHandler
     end
 
     def extra_log_type_config_for name
-      extra_log_type_configs.select{|s| s.name == name}.first
+      extra_log_type_configs.select{|s| s.name.underscore == name.underscore}.first
     end
   end
 
@@ -169,7 +169,7 @@ module ActivityLogHandler
 
   def model_references
     res = []
-    return res unless extra_log_type_config.references
+    return res unless extra_log_type_config && extra_log_type_config.references
     extra_log_type_config.references.each do |ref_type, ref_config|
       f = ref_config['from']
       if f == 'this'
@@ -184,7 +184,7 @@ module ActivityLogHandler
   def creatable_model_references
     res = {}
 
-    return res unless extra_log_type_config.references
+    return res unless extra_log_type_config && extra_log_type_config.references
     extra_log_type_config.references.each do |ref_type, ref_config|
       a = ref_config['add']
       if a == 'many'
@@ -325,6 +325,10 @@ module ActivityLogHandler
           end
         end
 
+        if relitem_name.blank?
+          raise FphsException.new "The field #{field_name} does not correspond to one of #{relitem_list}"
+        end
+
         # get the underlying related item and the value of the field
         relitem = self.send(relitem_name)
 
@@ -393,12 +397,34 @@ module ActivityLogHandler
 
   def can_edit?
 
-    latest_item = master.send(self.class.assoc_inverse).order(id: :desc).limit(1).first
+    res = master.current_user.has_access_to? :edit, :activity_log_type, extra_log_type_config.resource_name
+    return unless res
+
+    latest_item = master.send(self.class.assoc_inverse).unscope(:order).order(id: :desc).limit(1).first
 
     res = (self.user_id == master.current_user.id && latest_item.id == self.id)
 
     res && super()
   end
 
+  def can_create?
+
+    res = master.current_user.has_access_to? :create, :activity_log_type, extra_log_type_config.resource_name
+    res && super()
+  end
+
+  def can_access?
+
+    res = master.current_user.has_access_to? :access, :activity_log_type, extra_log_type_config.resource_name
+    res && super()
+  end
+
+  # Extend the standard access check with a check on the extra_log_type resource
+  def allows_current_user_access_to? perform, with_options=nil
+    raise FphsException.new "no master.current_user in activity_log_handler allows_current_user_access_to?" unless master.current_user
+    byebug unless extra_log_type_config
+    res = master.current_user.has_access_to? perform, :activity_log_type, extra_log_type_config.resource_name
+    res && super(perform, with_options)
+  end
 
 end

@@ -137,14 +137,14 @@ _fpa.masker.mask_from_pattern = function(p) {
         if(recursive)
           m += vrec;
 
-        for(var j = 0; j < opttimes; j++) {
-          m += vopt;
-        }
         for(var j = 0; j < times; j++) {
           if(!opt_block)
-            m += v;
+          m += v;
           else
-            m += vopt;
+          m += vopt;
+        }
+        for(var j = 0; j < opttimes; j++) {
+          m += vopt;
         }
       }
       prev_s = s;

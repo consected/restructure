@@ -9,6 +9,7 @@ class ActivityLog < ActiveRecord::Base
   validates :item_type, presence: true
   validate :item_type_exists
   validate :check_item_type_and_rec_type
+  default_scope -> { order 'disabled asc nulls last'}
 
   def implementation_model_name
     item_type_name

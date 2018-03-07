@@ -205,7 +205,7 @@ _fpa.form_utils = {
         block.find('.common-template-item').each(function(){
             var p = $(this).parents('.common-template-list').first();
             if(p.hasClass('row') && !$(this).hasClass('alt-width') ){
-                $(this).addClass('col-md-6');
+                $(this).addClass('col-md-8 col-lg-6');
             }
         });
     },
@@ -688,14 +688,15 @@ _fpa.form_utils = {
           block = ob;
         }
 
-        block.find('.resize-children ul.list-group').each(function(){
-          $(this).parent().css({minHeight: '1px'});
+        block.find('.resize-children').each(function(){
+          var cs = $(this).find('ul.list-group').first();
+          cs.parent().css({minHeight: '1px'});
         });
 
         block.find('.resize-children').each(function(){
 
           // run through all the candidate items
-          var cs = $(this).find('ul.list-group');
+          var cs = $(this).find('ul.list-group').first();
           cs.each(function(){
               var el = $(this).parent();
 

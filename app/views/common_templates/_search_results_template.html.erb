@@ -163,7 +163,7 @@
           <% unless custom_activity_log == :none %>
             <% if works_with_rec_types.blank? %>
               {{> activity_log_<%=name%>_show_button_partial }}
-            <% elsif %>
+            <% else %>
               {{#is rec_type 'in' '<%= works_with_rec_types %>' }}
                 {{> activity_log_<%=name%>_show_button_partial rec_type=rec_type}}
               {{/is}}
@@ -255,6 +255,12 @@
         <% end %>
         {{else is @key 'includes' 'select_record_from_' }}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_yes_no' }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_no_yes' }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_no_yes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_time' }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{this}}</strong></li>
         {{else is @key 'includes' '_notes' }}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else}}
@@ -320,7 +326,7 @@
               {{else}}
               <span class="glyphicon glyphicon-ban-circle"></span>
               {{/if}}
-              <i>{{to_record_label}}</i> {{to_record_data}}
+              <i>{{to_record_label}}</i> {{pretty_string to_record_data}}
             </span>
           </li>
           {{#if to_record_viewable}}

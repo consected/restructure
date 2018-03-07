@@ -53,6 +53,7 @@ EOF
         f = 'date' if a.end_with?('_date')
         f = 'varchar' if a == 'data'
         f = 'varchar' if a.end_with?('_name')
+        f = 'boolean' if a.end_with?('_check')
         f = 'varchar' if a == 'notes'
         f = 'varchar' if a.start_with?('select_')
         f += ','

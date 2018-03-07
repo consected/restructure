@@ -141,6 +141,16 @@
                 <%= f.select p, reslist%>
 
 
+            <% elsif p.to_s.end_with?('_yes_no') %>
+              <%= f.label p, p.to_s.sub('_yes_no', '').humanize %>
+              <%= f.select p, ['yes', 'no'] %>
+            <% elsif p.to_s.end_with?('_no_yes') %>
+              <%= f.label p, p.to_s.sub('_no_yes', '').humanize %>
+              <%= f.select p, ['no', 'yes'] %>
+
+            <% elsif p.to_s.end_with?('_time') %>
+              <%= f.label p %>
+              <%= f.text_field p, pattern: '\d{1,2}:\d{2} \D\D' %>
 
             <% elsif p.to_s.index('select_') == 0
 
@@ -273,6 +283,8 @@
         </li>
       </ul>
       <% end %>
+
+      <%= render partial: 'common_templates/edit_form_references' %>
     </div>
       <% if has_source %>
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{gs_name}_source", value: object_instance.source} %>

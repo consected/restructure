@@ -203,8 +203,6 @@ class DynamicModel < ActiveRecord::Base
 
         logger.info "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 
-        tn = model_def_name
-
         add_model_to_list res
       rescue=>e
         failed = true

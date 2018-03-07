@@ -81,7 +81,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
 
 
 
-              <div class="col-md-6" id="addresses-{{id}}-" data-sub-list="addresses">
+              <div class="col-md-8 col-lg-6" id="addresses-{{id}}-" data-sub-list="addresses">
                 {{#each addresses}}
 
                     {{>address_result _created=@index}}
@@ -93,7 +93,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
                 </div>
 
               </div>
-              <div class="col-md-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
+              <div class="col-md-8 col-lg-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
                 {{#each player_contacts}}
 
                   {{>player_contact_result _created=@index}}
@@ -117,7 +117,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
           <% end %>
           </div>
           <%  external_id_types.each do |e|%>
-          <div class="col-md-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+          <div class="col-md-8 col-lg-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
 
           <% end %>
 

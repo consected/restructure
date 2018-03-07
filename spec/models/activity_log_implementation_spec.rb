@@ -28,10 +28,19 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect(al.master_user).to eq user
     expect(master.activity_log__player_contact_phones).not_to be nil
 
-    # res = al.player_contact.master_user
-    # expect(res).to eq user
     expect(al.player_contact).to eq @player_contact
+
+    # Validate that the new activity log item can not be accessed without the appropriate access control
+    expect{
+      al.save
+    }.to raise_error FphsException
+
+    rn = al.extra_log_type_config.resource_name
+
+    uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
     expect(al.save).to be true
+
+
     expect(al.master_id).to eq @player_contact.master_id
     al.reload
     # We expect data to match, based on an automatic sync of related fields
@@ -41,6 +50,12 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect(al.select_who).to eq 'user'
     expect(al.user_id).to eq user.id
 
+
+    uac.update! access: nil, current_admin: @admin
+
+    expect(@user.has_access_to? :access, :activity_log_type, rn).to be_falsey
+
+    expect{al.as_json}.to raise_error FphsException
 
   end
 
