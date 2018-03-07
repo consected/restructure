@@ -1,9 +1,13 @@
 <%
-  if @extra_log_type && @extra_log_type.references
+  unless defined? embedded
+    embedded = false
+  end
+
+  if !embedded && @extra_log_type && @extra_log_type.references
     @extra_log_type.references.each do |ref_type, ref_config| %>
       <%
         if object_instance.creatable_model_references[ref_type.to_s] %>
-        <%= render partial: 'common_templates/reference_actions',  locals: {name: "#{object_instance.class.name.ns_underscore}", ref_name: ref_type, caption: ref_type, block_id: "#{object_instance.class.name.hyphenate}-#{ref_type}", id: object_instance.id, master_id: object_instance.master_id} %>
+        <%= render partial: 'common_templates/reference_actions',  locals: {name: "#{object_instance.class.name.ns_underscore}", ref_name: ref_type, caption: ref_type, block_id: "#{object_instance.class.name.hyphenate}-#{ref_type}", id: object_instance.id, master_id: object_instance.master_id, form_embed: form_embed} %>
       <% else %>
         <%
            object_instance.model_references.each do |model_reference|
@@ -20,13 +24,18 @@
         </li>
         <% if model_reference.to_record_viewable %>
         <div class="model-reference-result" >
-          <div id="<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id%>" class="model-reference-result" data-result-target-for-child="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id%>-<%= model_reference.to_record_id %>, #<%= model_reference.to_record_type_us.ns_hyphenate%>-<%= model_reference.to_record_master_id%>-<%= object_instance.id%>-<%= model_reference.to_record_id%>"  data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-subscription="<%= model_reference.to_record_short_type_us.ns_hyphenate%>-edit-form-<%= model_reference.to_record_master_id%>-<%= model_reference.to_record_id%>" data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-form-container="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" ></div>
+          <div id="<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id%>" class="model-reference-result" data-result-target-for-child="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id%>-<%= model_reference.to_record_id %>, #<%= model_reference.to_record_type_us.ns_hyphenate%>-<%= model_reference.to_record_master_id%>-<%= object_instance.id%>-<%= model_reference.to_record_id%>"  data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-subscription="<%= model_reference.to_record_short_type_us.ns_hyphenate%>-edit-form-<%= model_reference.to_record_master_id%>-<%= model_reference.to_record_id%>" data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-form-container="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" >
+            <% if @embedded_item %>
+            <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed} %>
+            <% end %>
+
+          </div>
         </div>
         <% end %>
         <% end %>
       <% end %>
 <%  end %>
-<% if object_instance.model_references.length == 1
+<% if false # object_instance.model_references.length == 1
     model_reference = object_instance.model_references.first
 %>
 <script>

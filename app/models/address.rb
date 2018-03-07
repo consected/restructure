@@ -45,6 +45,11 @@ class Address < UserBase
     Address.get_country_name self.country
   end
 
+  def self.permitted_params
+    [:master_id, :country,  :street, :street2, :street3, :city, :state, :zip, :region, :postal_code, :source, :rank, :rec_type]
+  end
+
+
   protected
 
     # Only one address for a master can be set as Primary

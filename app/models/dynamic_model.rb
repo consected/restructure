@@ -135,6 +135,10 @@ class DynamicModel < ActiveRecord::Base
             self.attributes[self.class.primary_key.to_s]
           end
 
+          def self.permitted_params
+            self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
+          end
+
         end
 
         a_new_controller = Class.new(DynamicModel::DynamicModelsController) do

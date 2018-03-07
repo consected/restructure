@@ -24,6 +24,8 @@ class UserBase < ActiveRecord::Base
   # the user to have been set
   validate :user_set
 
+
+
   def allows_nil_master?
     false
   end
@@ -143,6 +145,23 @@ class UserBase < ActiveRecord::Base
     ModelReference.find_where_referenced_from self
   end
 
+  def self.permitted_params
+    self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id]
+  end
+
+
+  def embedded_item
+    @embedded_item
+  end
+
+  def embedded_item= o
+    if o.is_a? UserBase
+      @embedded_item = o
+    elsif o.is_a?(Hash) && @embedded_item
+      @embedded_item.master.current_user ||= self.master_user
+      @embedded_item.update o
+    end
+  end
 
   if Master.respond_to? :alternative_id_fields
     # add the alternative_id_fields from the master as attributes, so we can use them for matching

@@ -46,7 +46,9 @@ class PlayerInfo < UserBase
     AccuracyScore.name_for(value)
   end
 
-
+  def self.permitted_params
+    [:master_id, :first_name, :last_name, :middle_name, :nick_name, :birth_date, :death_date, :start_year, :end_year, :college, :source, :rank, :notes]
+  end
 
   protected
     def dates_sensible

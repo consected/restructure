@@ -13,10 +13,14 @@ class ModelReference < ActiveRecord::Base
   attr_accessor :current_user
 
   def self.create_with from_item, to_item
+    m = ModelReference.where from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
+                            to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id
 
-    ModelReference.create! from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
+    if m.limit(1).length == 0
+      ModelReference.create! from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
                             user: to_item.master_user
+    end
   end
 
   def self.find_referenced_items from_item_or_master, record_type: nil

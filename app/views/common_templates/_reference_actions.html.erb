@@ -15,5 +15,8 @@
 </li>
 <div id="<%=ref_name.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_name.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">
 <div class="new-block" id="<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-result-target-for-child="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-, #<%=ref_name.ns_hyphenate%>-<%= master_id %>-" data-subscription="<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-preprocessor="<%=ref_name.ns_underscore%>_edit_form">
+<% if @embedded_item %>
+<%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed} %>
+<% end %>
 </div>
 </div>

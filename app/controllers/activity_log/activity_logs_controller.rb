@@ -7,7 +7,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
   before_action :handle_extra_log_type, only: [:edit, :new]
   before_action :auto_create, only: [:new]
-
+  before_action :handle_embedded_item, only: [:edit, :new, :create, :update]
 
 
   private
@@ -15,6 +15,16 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
     def edit_form
       'common_templates/edit_form'
+    end
+
+    def handle_embedded_item
+      if object_instance.model_references.length == 1
+        @embedded_item = object_instance.model_references.first.to_record
+      elsif object_instance.model_references.length == 0 && object_instance.creatable_model_references.length == 1
+        @embedded_item = object_instance.creatable_model_references.first.first.camelize.constantize.new
+      end
+
+      object_instance.embedded_item = @embedded_item
     end
 
     def auto_create
@@ -146,6 +156,11 @@ class ActivityLog::ActivityLogsController < ApplicationController
      fts = @implementation_class.fields_to_sync.map(&:to_sym)
 
      res =  @implementation_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
+
+     if @embedded_item
+       res << {embedded_item: @embedded_item.class.permitted_params}
+     end
+
      res
     end
 

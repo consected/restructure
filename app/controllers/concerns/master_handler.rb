@@ -54,7 +54,7 @@ module MasterHandler
 
     set_additional_attributes object_instance
     if object_instance.save
-      handle_addition_updates
+      handle_additional_updates
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
         index
@@ -69,7 +69,7 @@ module MasterHandler
 
   def update
     if object_instance.update(secure_params)
-      handle_addition_updates
+      handle_additional_updates
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
         index
@@ -240,7 +240,7 @@ module MasterHandler
         end
       end
 
-      def handle_addition_updates
+      def handle_additional_updates
         @flag_item_type = object_instance.item_type
         # Check for blank item_flag param to cover testing scenarios that do not return
         # the item_flag set. Which is reasonable and conceivable in a real form too
@@ -251,6 +251,7 @@ module MasterHandler
         end
 
         # Follow the pattern of the tracker to capture referenced items
+        # The submitted item has hidden fields that state the 'from' item referencing this object instance
         pr = params[full_object_name.gsub('__', '_').to_sym]
         if pr.present? && pr[:ref_record_type].present? && pr[:ref_record_id].present?
           ref_item_class_name = pr[:ref_record_type].singularize.camelize
@@ -265,9 +266,15 @@ module MasterHandler
 
           if @ref_item
             ModelReference.create_with @ref_item, object_instance
-
           end
         end
+
+        # Based on an embedded item coming from an activity log form, create the reference.
+        # In this mode we are in the activity log record, so the order is different from the previous create_with usage
+        if object_instance.embedded_item
+          ModelReference.create_with object_instance, object_instance.embedded_item
+        end
+
         true
 
       end
@@ -315,6 +322,15 @@ module MasterHandler
 
       def extend_result
         {}
+      end
+
+
+      def permitted_params
+        full_object_name.camelize.constantize.permitted_params
+      end
+
+      def secure_params
+        params.require(object_name.to_sym).permit(*permitted_params)
       end
 
 end

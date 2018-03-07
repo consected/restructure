@@ -1,5 +1,25 @@
 <%
-  name = full_object_name
+
+  unless defined? embedded
+    embedded = nil
+  end
+
+  form_object_instance = object_instance
+  if embedded
+    form_object_instance = @embedded_item
+  end
+
+  # If this object form is embedded in an outer form (an activity log), then use fields_for rather than form_for
+  if embedded
+    form_block = [:fields_for, :embedded_item, form_object_instance]
+    form_block_object = form_embed
+  else
+    form_block = [:form_for, [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash]
+    form_block_object = self
+  end
+
+
+  name = form_object_instance.item_type_us
 
   unless defined? caption
     caption = nil
@@ -14,7 +34,7 @@
   end
 
   unless defined? item_list
-    item_list = permitted_params - [:id, :master_id, :item_id, item_type_id]
+    item_list = form_object_instance.class.permitted_params - [:id, :master_id, :item_id, item_type_id]
   end
 
   unless defined? item_flags_after
@@ -31,12 +51,15 @@
   else
     gs_name = name.pluralize
   end
-%>
 
+%>
+<% unless embedded %>
 <div class="data-results">
   <div data-result="<%= edit_form_id %>">
+<% end %>
     <div class="">
-      <%=form_for([object_instance.belongs_directly_to, object_instance], edit_form_hash ) do |f|%>
+      <%= form_block_object.send(*form_block) do |f|%>
+      <% form_embed = f if @embedded_item && !embedded %>
       <% if @extra_log_type %>
         <%= f.hidden_field :extra_log_type, value: @extra_log_type_name %>
       <% end %>
@@ -61,9 +84,9 @@
 
           <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
             <%
-               col = object_instance.class.columns_hash[p.to_s]
+               col = form_object_instance.class.columns_hash[p.to_s]
                if col.nil?
-                 raise FphsException.new "Column #{p} does not appear in the columns #{object_instance.class.columns_hash.map{|k,v| k}}"
+                 raise FphsException.new "Column #{p} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}"
                end
                col_type = col.type
             %>
@@ -76,8 +99,8 @@
             <% elsif p == :rec_type%>
               <%= f.label :rec_type %>
               <%
-              gs = general_selection("#{gs_name}_type".to_sym, value: object_instance.rec_type, quiet_fail: true)
-              gs ||= general_selection("#{gs_name}_rec_type".to_sym, value: object_instance.rec_type, quiet_fail: true)
+              gs = general_selection("#{gs_name}_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
+              gs ||= general_selection("#{gs_name}_rec_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
 
               unless gs
                 raise FphsException.new "The general selection #{gs_name}_type or #{gs_name}_rec_type has not been defined. Please inform the administrator of this error."
@@ -88,7 +111,7 @@
               %>
               <%= f.select :rec_type, gs, {}, class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''}" %>
             <% elsif p == :source
-                 gs = general_selection("#{gs_name}_source".to_sym, value: object_instance.source, quiet_fail: true) rescue nil
+                 gs = general_selection("#{gs_name}_source".to_sym, value: form_object_instance.source, quiet_fail: true) rescue nil
                  unless gs
                    raise FphsException.new "The general selection #{gs_name}_source has not been defined. Please inform the administrator of this error."
                  end
@@ -108,7 +131,7 @@
                   if ActivityLog.use_with_class_names.include? rlit
                     rl = rlit
                     cn = ActivityLog.use_with_class_names.select{|s| s == rl}.first
-                    reslist = cn.camelize.constantize.where(master_id: object_instance.master_id)
+                    reslist = cn.camelize.constantize.where(master_id: form_object_instance.master_id)
                     if cn.camelize.constantize.attribute_names.include?('rank')
                       reslist = reslist.order(rank: :desc)
                       reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
@@ -121,7 +144,7 @@
                       if rlit.start_with?(ucn)
                         rl = rlit
                         cn = ActivityLog.use_with_class_names.select{|s| s == ucn}.first
-                        reslist = cn.camelize.constantize.where(master_id: object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
+                        reslist = cn.camelize.constantize.where(master_id: form_object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
                         if cn.camelize.constantize.attribute_names.include?('rank')
                           reslist = reslist.order(rank: :desc)
                           reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
@@ -159,7 +182,7 @@
                     raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
                   end
                   desc = gs.reduce(false){|r,i| r || !i[6].blank?}
-                  v = object_instance.send(p)
+                  v = form_object_instance.send(p)
                   if desc.blank?
                     opt = {}
                   else
@@ -194,7 +217,7 @@
                 <%= f.label :rank %>
                 <%= f.select :rank, self.send("#{name}_rank_array_pair") %>
               <% else
-                   gs = general_selection("#{gs_name}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: object_instance.rank, quiet_fail: true)
+                   gs = general_selection("#{gs_name}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: form_object_instance.rank, quiet_fail: true)
                    unless gs
                      raise FphsException.new "The general selection #{name}_rank has not been defined. Please inform the administrator of this error."
                    end
@@ -253,7 +276,7 @@
             <% elsif GeneralSelection::BasicItemTypes.include?("#{gs_name}_#{p}".to_sym)%>
               <%
               # Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down
-                gs = general_selection("#{gs_name}_#{p}".to_sym, value: object_instance.send(p), quiet_fail: true)
+                gs = general_selection("#{gs_name}_#{p}".to_sym, value: form_object_instance.send(p), quiet_fail: true)
                 unless gs
                   raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
                 end
@@ -282,17 +305,19 @@
           <%= f.submit class: "btn btn-primary", value: 'Save' %>
         </li>
       </ul>
+      <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
       <% end %>
 
-      <%= render partial: 'common_templates/edit_form_references' %>
     </div>
       <% if has_source %>
-        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{gs_name}_source", value: object_instance.source} %>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{gs_name}_source", value: form_object_instance.source} %>
       <% end %>
 
       <% select_desc.each do |k,v| %>
         <%= render partial: 'general_selections/definitions_block', locals: {item_type: k, value: v} %>
       <% end %>
 
+<% unless embedded %>
   </div>
 </div>
+<% end %>

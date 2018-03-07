@@ -14,12 +14,4 @@ class AddressesController < ApplicationController
       'common_templates/edit_form'
     end
 
-    def permitted_params
-      [:master_id,:country,  :street, :street2, :street3, :city, :state, :zip, :region, :postal_code, :source, :rank, :rec_type]
-    end
-  private
-
-    def secure_params
-      params.require(object_name.to_sym).permit(*permitted_params)
-    end
 end
