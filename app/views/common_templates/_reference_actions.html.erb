@@ -8,11 +8,13 @@
   end
 
 %>
+<% unless @embedded_item %>
 <li class="list-group-item is-full-width <%=block_id%>">
   <p class="text-center">
     <a href="/masters/<%= master_id %>/<%=ref_name.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption.humanize %></a>
   </p>
 </li>
+<% end %>
 <div id="<%=ref_name.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_name.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">
 <div class="new-block" id="<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-result-target-for-child="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-, #<%=ref_name.ns_hyphenate%>-<%= master_id %>-" data-subscription="<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-preprocessor="<%=ref_name.ns_underscore%>_edit_form">
 <% if @embedded_item %>

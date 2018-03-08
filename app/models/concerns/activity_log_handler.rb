@@ -119,7 +119,9 @@ module ActivityLogHandler
     if elt.blank?
       elt = self.item ? 'primary' : 'blank'
     end
-    self.class.extra_log_type_config_for elt
+    res = self.class.extra_log_type_config_for elt
+    logger.warn "No extra log type configuration exists for #{elt} in #{self.class.name}" unless res
+    res
   end
 
   # default record updates tracking is not performed, since we sync tracker separately
@@ -422,8 +424,9 @@ module ActivityLogHandler
   # Extend the standard access check with a check on the extra_log_type resource
   def allows_current_user_access_to? perform, with_options=nil
     raise FphsException.new "no master.current_user in activity_log_handler allows_current_user_access_to?" unless master.current_user
-    byebug unless extra_log_type_config
-    res = master.current_user.has_access_to? perform, :activity_log_type, extra_log_type_config.resource_name
+    if extra_log_type_config && extra_log_type_config.resource_name
+      res = master.current_user.has_access_to? perform, :activity_log_type, extra_log_type_config.resource_name
+    end
     res && super(perform, with_options)
   end
 

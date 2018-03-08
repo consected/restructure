@@ -51,6 +51,10 @@ a.navbar-brand {
     }
 }
 
+a {
+  -webkit-user-drag: none;
+}
+
 .navbar-nav > li > span.select {
   padding-top: 10px;
   padding-bottom: 10px;

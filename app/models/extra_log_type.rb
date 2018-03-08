@@ -28,7 +28,7 @@
 
 class ExtraLogType
 
-  attr_accessor :name, :label, :fields, :references, :auto_create, :resource_name
+  attr_accessor :name, :label, :fields, :references, :resource_name
 
   def initialize name, config, parent_activity_log
     @name = name

@@ -17,11 +17,15 @@
   blank_options = extra_log_type_configs.select {|e| e.name == 'blank'}.first
 
   extra_log_type_configs = extra_log_type_configs.reject {|c| c.name.in? ['primary', 'blank']}
+
+
+  main_log_caption = main_log_label
+  main_log_caption = al_name if main_log_caption == 'Add Log'
 %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: full_name,
-    caption: al_name,
+    caption: main_log_caption,
     prevent_edit: prevent_edit,
     prevent_create: prevent_create,
     extra_class: "alt-width #{col_width_classes}",

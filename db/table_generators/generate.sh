@@ -9,7 +9,7 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]
     echo
     echo "db/table_generators/generate.sh <generator_name> create|drop <pluralized_table_name> <activity_logs_base_name> [field_names...]"
     echo
-    echo "    generator_name            activity_logs_table, external_identifiers_table"
+    echo "    generator_name            activity_logs_table, external_identifiers_table, dynamic_models_table"
     echo "    create|drop               create or drop the tables, triggers and constraints"
     echo "    pluralized_table_name     name of primary table name to be used."
     echo "                              'activity_logs_table' generator, will automatically prefix name with activity_log_"

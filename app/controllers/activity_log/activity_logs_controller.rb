@@ -6,7 +6,6 @@ class ActivityLog::ActivityLogsController < ApplicationController
   include ParentHandler
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
   before_action :handle_extra_log_type, only: [:edit, :new]
-  before_action :auto_create, only: [:new]
   before_action :handle_embedded_item, only: [:edit, :new, :create, :update]
 
 
@@ -18,19 +17,25 @@ class ActivityLog::ActivityLogsController < ApplicationController
     end
 
     def handle_embedded_item
+
       if object_instance.model_references.length == 1
         @embedded_item = object_instance.model_references.first.to_record
       elsif object_instance.model_references.length == 0 && object_instance.creatable_model_references.length == 1
         @embedded_item = object_instance.creatable_model_references.first.first.camelize.constantize.new
       end
 
-      object_instance.embedded_item = @embedded_item
-    end
+      if @embedded_item
+        @embedded_item.master ||= object_instance.master
+        @embedded_item.master.current_user ||= object_instance.master_user
 
-    def auto_create
-      if @extra_log_type && @extra_log_type.auto_create
-        object_instance.save!
+        if action_name == 'create'
+          ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
+          @embedded_item.update ei_secure_params
+        end
       end
+
+
+      object_instance.embedded_item = @embedded_item
     end
 
     def edit_form_extras
@@ -153,15 +158,16 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
 
     def permitted_params
-     fts = @implementation_class.fields_to_sync.map(&:to_sym)
+      fts = @implementation_class.fields_to_sync.map(&:to_sym)
 
-     res =  @implementation_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
+      res =  @implementation_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
 
-     if @embedded_item
+      # The embedded_item params are only used in an update. Create actions are handled separately
+      if @embedded_item
        res << {embedded_item: @embedded_item.class.permitted_params}
-     end
+      end
 
-     res
+      res
     end
 
     def secure_params

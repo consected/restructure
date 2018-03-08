@@ -666,6 +666,9 @@ _fpa.form_utils = {
         var growingTextarea = new Autogrow(textarea);
         textarea.style.resize = 'none';
 	      textarea.style.boxSizing = 'content-box';
+        $(this).click(function(){
+          growingTextarea.autogrowFn();
+        });
       });
 
       setTimeout(function(){
