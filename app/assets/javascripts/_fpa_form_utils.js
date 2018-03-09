@@ -136,7 +136,7 @@ _fpa.form_utils = {
                 var wmax = 0;
                 var lgi = self.find('.list-group-item').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta');
                 var all = lgi.find('small, label');
-                all.css({display: 'inline-block', whiteSpace: 'nowrap'});
+                all.css({display: 'inline-block', whiteSpace: 'nowrap', verticalAlign: 'middle'});
 
                 var block_width = lgi.first().width();
 
@@ -152,9 +152,9 @@ _fpa.form_utils = {
                 if(wmax>10){
                     if(lgi.parents('form').length === 0){
                         lgi.css({paddingLeft: wmax+30}).addClass('labels-resized');
-                        all.css({minWidth: wmax, width: wmax, marginLeft: -wmax-14}).addClass('list-small-label');
+                        all.css({minWidth: wmax, width: wmax, marginLeft: -wmax-14, whiteSpace: 'normal'}).addClass('list-small-label');
                     }else{
-                        all.css({minWidth: wmax+6, width: wmax+6}).addClass('list-small-label');
+                        all.css({minWidth: wmax+6, width: wmax+6, whiteSpace: 'normal'}).addClass('list-small-label');
                     }
                 }
             }, 1);
@@ -692,15 +692,22 @@ _fpa.form_utils = {
         }
 
         block.find('.resize-children').each(function(){
-          var cs = $(this).find('ul.list-group').first();
-          cs.parent().css({minHeight: '1px'});
+          $(this).find('ul.list-group').each(function(){
+            if($(this).parents('ul.list-group').length == 0) {
+              var cs = $(this).first();
+              cs.parent().css({minHeight: '1px'});
+            }
+          });
+
         });
 
         block.find('.resize-children').each(function(){
 
           // run through all the candidate items
-          var cs = $(this).find('ul.list-group').first();
+          var cs = $(this).find('ul.list-group');
           cs.each(function(){
+              if($(this).parents('ul.list-group').length > 0)
+                return;
               var el = $(this).parent();
 
               // attempt to resize row by row if there is overflow

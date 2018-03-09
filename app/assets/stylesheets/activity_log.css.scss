@@ -123,3 +123,22 @@ a.related-tracker-histories-link {
 .al-create-actions {
   line-height: 2.6em;
 }
+
+.model-reference-result,
+.model-edit-form
+ {
+  .edit-form-header h4,
+  .object-results-header h4,
+  .list-group-item.record-meta {
+    display: none;
+  }
+}
+
+
+.model-reference-result.embedded-item,
+.model-edit-form.embedded-item
+{
+  .edit-form-header {
+    display: none;
+  }
+}

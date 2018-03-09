@@ -326,11 +326,11 @@ module MasterHandler
 
 
       def permitted_params
-        full_object_name.camelize.constantize.permitted_params
+        full_object_name.gsub('__', '/').camelize.constantize.permitted_params
       end
 
       def secure_params
-        params.require(object_name.to_sym).permit(*permitted_params)
+        params.require(full_object_name.gsub('__', '_').to_sym).permit(*permitted_params)
       end
 
 end

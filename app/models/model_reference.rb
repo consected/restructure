@@ -118,7 +118,7 @@ class ModelReference < ActiveRecord::Base
     self.current_user.has_access_to? :access, :table, from_record_type_us.pluralize
   end
 
-  def to_record_data
+  def to_record_data    
     to_record.data if to_record_viewable
   end
 

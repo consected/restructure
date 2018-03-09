@@ -135,6 +135,10 @@ small.list-small-label, label.list-small-label   {
    margin-right: 0;
 }
 
+label.list-small-label {
+  white-space: normal !important;
+}
+
 li.list-group-item.is-combo small {
    margin-right: 0.6em;
 }
@@ -212,7 +216,7 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
 .nav-pills.details-tabs > li > a {
   border-top: 0;
   border-radius: 0 0 4px 4px;
-  
+
 }
 
 form.edit_tracker, form.new_tracker{

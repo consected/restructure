@@ -70,7 +70,7 @@
       <%= model_reference_fields f %>
 
       <ul class="list-group">
-        <li class="list-group-item">
+        <li class="list-group-item edit-form-header">
           <% unless embedded %><%= inline_cancel_button %><% end %>
           <h4 class="list-group-item-heading"><%=caption%></h4>
           <%= render partial: 'common_templates/item_flags_block', locals: {f: f} unless item_flags_after || item_flags_array.length == 0 %>
@@ -299,7 +299,7 @@
           </li>
           <% end %>
         <% end %>
-        <% if @embedded_item && !embedded %>
+        <% if !embedded %>
         <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
         <% end %>
 
@@ -313,11 +313,6 @@
             <%= f.submit class: "btn btn-primary", value: 'Save' %>
           </li>
         <% end %>
-
-        <% if !@embedded_item && !embedded %>
-        <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
-        <% end %>
-
       </ul>
       <% end %>
 

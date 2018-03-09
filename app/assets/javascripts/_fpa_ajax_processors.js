@@ -46,6 +46,15 @@ _fpa.postprocessors = {
           }
         }
 
+        // Allow an auto click to be made on elements in the newly loaded block
+        block.find('.on-postprocess-click').not('.auto-clicked').each(function(){
+          var el = $(this);
+
+          window.setTimeout(function(){
+            el.addClass('auto-clicked').click();
+          });
+        });
+
     },
 
     modal_pi_search_results_template: function(block, data){

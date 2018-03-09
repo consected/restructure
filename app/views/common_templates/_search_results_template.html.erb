@@ -150,7 +150,7 @@
         </li>
         <%end%>
       <%else%>
-        <li class="list-group-item is-heading">
+        <li class="list-group-item is-heading object-results-header">
           <% unless prevent_edit %>
 
           {{#unless prevent_edit }}
@@ -174,6 +174,8 @@
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
+
+        <% if item_list.length > 0 %>
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
 
         {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
@@ -278,6 +280,7 @@
         <% end %>
 
         {{/filter}}
+        <% end %>
         <% if defined?(item_blocks)
             item_blocks.each do |item_name_sym, item_attrs|
               item_name = item_name_sym.to_s
@@ -316,13 +319,14 @@
         <%  end
           end
         end %>
+
       <% if references %>
         {{#if model_references}}
           {{#each model_references}}
           <li class="list-group-item <%=name.hyphenate%>-model-references in-item-model-references is-full-width">
             <span class="small">
               {{#if to_record_viewable}}
-              <a href="/masters/{{to_record_master_id}}/{{pathify to_record_type_us}}s/{{to_record_id}}" data-template="{{hyphenate to_record_short_type_us}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" data-remote="true" class="glyphicon glyphicon-triangle-bottom view-item"></a>
+              <a href="/masters/{{to_record_master_id}}/{{pathify to_record_type_us}}s/{{to_record_id}}" data-template="{{hyphenate to_record_short_type_us}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" data-remote="true" class="glyphicon glyphicon-triangle-bottom view-item  <% unless item_list.include?(',') %>{{#is ../model_references.length '===' 1}}on-postprocess-click{{/is}}<% end %>"></a>
               {{else}}
               <span class="glyphicon glyphicon-ban-circle"></span>
               {{/if}}
@@ -346,15 +350,16 @@
           {{/unless}}
         <%  end %>
 
-        <% if caption_before[:metadata]%>
-        <div class="results-caption-before <%=name.hyphenate%>-caption-before-metadata">
-          <div class="panel panel-default panel-body">
-            <%= caption_before[:metadata].html_safe %>
-          </div>
+      <% end %>
+
+      <% if caption_before[:metadata]%>
+      <div class="results-caption-before <%=name.hyphenate%>-caption-before-metadata">
+        <div class="panel panel-default panel-body">
+          <%= caption_before[:metadata].html_safe %>
         </div>
-      <% end
-      end %>
-      <% unless defined?(exclude_metadata) && exclude_metadata %><li class="list-group-item record-meta">{{>update_metadata <% if show_created_at %>show_created_at=true<%end%> }}</li><%end%>
+      </div>
+    <% end %>
+    <% unless defined?(exclude_metadata) && exclude_metadata %><li class="list-group-item record-meta">{{>update_metadata <% if show_created_at %>show_created_at=true<%end%> }}</li><%end%>
   </ul>
   {{#was _created}}
   </div>
