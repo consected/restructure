@@ -168,6 +168,9 @@
                 <%= f.select p, reslist%>
 
 
+            <% elsif p.to_s.end_with?('_blank_yes_no') %>
+              <%= f.label p, p.to_s.sub('_blank_yes_no', '').humanize %>
+              <%= f.select p, ['', 'yes', 'no'] %>
             <% elsif p.to_s.end_with?('_yes_no') %>
               <%= f.label p, p.to_s.sub('_yes_no', '').humanize %>
               <%= f.select p, ['yes', 'no'] %>

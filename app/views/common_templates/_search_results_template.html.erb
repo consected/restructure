@@ -257,6 +257,8 @@
         <% end %>
         {{else is @key 'includes' 'select_record_from_' }}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_blank_yes_no' }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_blank_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_yes_no' }}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_no_yes' }}

@@ -132,7 +132,7 @@
 
 
 <script id="activity-log--<%=item_type_name_hyphenated.pluralize%>-main-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
+  <div id="<%=item_type_hyphenated%>-activity-logs-<%=item_type_name_hyphenated%>-type-{{item_id}}" class="panel panel-default activity-logs-item-block activity-logs-<%=item_type_name_hyphenated%>-type-block <%= hide_item_list_panel ? 'hidden-item-list-panel' : 'shown-item-list-panel' %>" data-item-id="{{item_id}}" data-master-id="{{master_id}}" data-item-data="{{item_data}}">
 
     <div class="is-heading activity-logs-header">
     <% unless app_config_set(:hide_player_tabs) %>

@@ -18,7 +18,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
     def handle_embedded_item
 
-      if object_instance.model_references.length == 1
+      if object_instance.model_references.length == 1 && object_instance.creatable_model_references.length == 0
         @embedded_item = object_instance.model_references.first.to_record
       elsif object_instance.model_references.length == 0 && object_instance.creatable_model_references.length == 1
         @embedded_item = object_instance.creatable_model_references.first.first.camelize.constantize.new

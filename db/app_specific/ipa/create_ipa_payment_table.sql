@@ -8,8 +8,9 @@
                   INSERT INTO ipa_payment_history
                   (
                       master_id,
-                      screening_payment_sent_date,
-                      study_payment_sent_date,
+                      select_type,
+                      sent_date,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -17,8 +18,9 @@
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.screening_payment_sent_date,
-                      NEW.study_payment_sent_date,
+                      NEW.select_type,
+                      NEW.sent_date,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -31,8 +33,9 @@
       CREATE TABLE ipa_payment_history (
           id integer NOT NULL,
           master_id integer,
-          screening_payment_sent_date date,
-          study_payment_sent_date date,
+          select_type varchar,
+          sent_date date,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -51,8 +54,9 @@
       CREATE TABLE ipa_payments (
           id integer NOT NULL,
           master_id integer,
-          screening_payment_sent_date date,
-          study_payment_sent_date date,
+          select_type varchar,
+          sent_date date,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

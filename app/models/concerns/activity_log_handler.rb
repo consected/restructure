@@ -190,7 +190,13 @@ module ActivityLogHandler
     extra_log_type_config.references.each do |ref_type, ref_config|
       a = ref_config['add']
       if a == 'many'
-        res[ref_type] = a
+        l = ref_config['limit']
+        under_limit = true
+        if l && l.is_a?(Integer)
+          under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type).length < l)
+        end
+
+        res[ref_type] = a if under_limit
       elsif a == 'one_to_master'
         if ModelReference.find_references(self.master, to_record_type: ref_type).length == 0
           res[ref_type] = a
