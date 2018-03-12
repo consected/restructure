@@ -68,9 +68,11 @@ _fpa.activity_logs = {
     $('.activity-log-list .new-block').addClass('has-records');
     _fpa.activity_logs.selected_parent(block, {item_id: d.item_id, rec_type: d.rec_type, item_data: d.item_data, master_id: d.master_id});
 
+
+    // Refresh the sub list items, if they are not hidden
     var itype = block.parents('.activity-logs-item-block').first().find('.activity-log-sub-list').attr('data-sub-list');
 
-    if(d._updated){
+    if(d._updated && itype){
       var url = '/masters/'+d.master_id+'/'+itype+'.js';
       _fpa.send_ajax_request(url);
     }

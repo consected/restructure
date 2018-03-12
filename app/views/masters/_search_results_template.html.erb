@@ -294,8 +294,7 @@
             <div class="row panel-body">
               <div class="on-open-click hidden">
               <%  external_id_types.each do |e|%>
-                <% if view?[e.plural_name.to_sym] %>
-                <p class="text-center">{{>player_info_create_button}}</p>
+                <% if view?[e.plural_name.to_sym] %>                
                 <a href="/masters/{{id}}/<%=e.plural_name%>" data-result-target="#<%=e.hyphenated_plural_name%>-{{id}}-" data-template="<%=e.hyphenated_plural_name%>-list-template" data-remote="true" class=""><%=e.label%></a>
                 <% end %>
               <% end %>

@@ -288,7 +288,7 @@
               item_name = item_name_sym.to_s
               item_list = item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs
         %>
-        <div class="<%=name.hyphenate%>-<%=item_name%>">
+        <div class="<%=name.hyphenate%>-<%=item_name%> sr-item-block">
           <div class="">
           {{#with <%= item_name %>}}
           <% if item_list.include?(',') %>

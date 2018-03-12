@@ -289,6 +289,7 @@ _fpa = {
     }).on('ajax:beforeSend', sel, function(ev, xhr){
         // Save the current AJAX request so that we have the opportunity to cancel it before it completes
         _fpa.remote_request = xhr;
+        console.log(ev);
 
     }).on("ajax:success", sel, function(e, data, status, xhr) {
         // Since the result was a success, reset the client-side session timeout counter
