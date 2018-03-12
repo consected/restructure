@@ -8,7 +8,8 @@ class AppConfiguration < ActiveRecord::Base
 
   def self.configurations
     [
-      "default search form", "hide navbar search", "hide player accuracy",
+      "create master with",
+      "default search form", "hide master id in results", "hide navbar search", "hide player accuracy",
       "hide player tabs", "hide pro info", "hide search form advanced", "hide search form searchable reports",
       "hide search form simple", "hide tracker panel", "menu create master record label",
       "menu research label", "notes field caption", "show activity log panel", "user session timeout"

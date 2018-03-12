@@ -25,6 +25,36 @@ module SpecSetup
     puts 'creating a login user'
     create_user_for_login
 
+
+    # Ensure the table can be accessed
+    uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :table, resource_name: :activity_log__player_contact_phones
+    uac = uacs.first
+    if uac
+      uac.access = :create
+      uac.disabled = false
+      uac.current_admin = @admin
+      uac.save!
+    else
+      uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :table, resource_name: :activity_log__player_contact_phones, current_admin: @admin
+    end
+
+    # Ensure the steps can be accessed
+    ['primary', 'blank'].each do |s|
+      rn = (ActivityLog.enabled.first.extra_log_type_configs.select{|a| a.name == s}.first).resource_name
+      uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
+      uac = uacs.first
+      if uac
+        # uac.access = :create
+        # uac.disabled = false
+        # uac.current_admin = @admin
+        # uac.save!
+      else
+        uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
+      end
+    end
+
+
+
     puts "cleanup player contacts"
 
     ActiveRecord::Base.connection.execute("delete from player_contact_history;

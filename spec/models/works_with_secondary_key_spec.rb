@@ -16,8 +16,17 @@ RSpec.describe 'Works With handler', type: :model do
     # Create a random player contact item
     create_item(data: rand(10000000000000000), rank: 10, rec_type: 'phone')
 
-    # UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :table, resource_name: ActivityLog::PlayerContactPhone.name.ns_underscore.pluralize, current_admin: @admin
-    UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: :activity_log__player_contact_phone__primary, current_admin: @admin
+
+    uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: :activity_log__player_contact_phone__primary
+    if uacs.first
+      uac = uacs.first
+      uac.access = :create
+      uac.disabled = false
+      uac.current_admin = @admin
+      uac.save!
+    else
+      UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: :activity_log__player_contact_phone__primary, current_admin: @admin
+    end
 
   end
 

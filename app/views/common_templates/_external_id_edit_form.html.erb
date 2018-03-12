@@ -12,7 +12,7 @@
         <% unless primary_model.prevent_edit? %>
         <li class="list-group-item player-info-first_name">
             <%= f.label primary_model.external_id_attribute %>
-            <% object_instance.send("#{primary_model.external_id_attribute}=", (object_instance.attributes[primary_model.external_id_attribute] || '').upcase)  %>
+            <% object_instance.send("#{primary_model.external_id_attribute}=", (object_instance.attributes[primary_model.external_id_attribute] || '').to_s.upcase)  %>
             <% if primary_model.alphanumeric %>
               <%= f.text_field primary_model.external_id_attribute, class: 'form-control', pattern: primary_model.external_id_edit_pattern %>
             <% else %>

@@ -58,7 +58,7 @@ class Master < ActiveRecord::Base
   ExternalIdentifier.enable_active_configurations
 
 
-  attr_accessor :force_order
+  attr_accessor :force_order, :creating_master
 
 
   # Scope results with inner joins on external identifier tables if they are in the user access control conditions
@@ -120,12 +120,28 @@ class Master < ActiveRecord::Base
     raise "can not set user_id="
   end
 
-  def self.create_master_records user, options={}
+  def self.create_master_records user, empty: nil
 
     raise "no user specified" unless user
 
-    m = Master.create!(current_user: user)
-    m.player_infos.create! unless options[:empty]
+    m = Master.create!(current_user: user, creating_master: true)
+
+
+    # Create each of the items listed in the configuration item :create_master_with (comma separated)
+    create_with = AppConfiguration.value_for :create_master_with, user
+    if create_with && !empty
+      create_with.split(',').each do |cw|
+        cw = cw.strip.pluralize
+        raise FphsException.new "create master with configuration includes a non-existent model association" unless get_all_associations.include? cw
+
+        m.send(cw).create! creating_master: true
+
+      end
+
+    end
+
+    m.creating_master = false
+
     return m
 
   end
@@ -240,9 +256,13 @@ class Master < ActiveRecord::Base
 
   def allows_user_access
     # Validate that the external identifier restrictions do not prevent access to this item
-    er = UserAccessControl.external_identifier_restrictions(current_user)
+    # but ignore the test if not persisted yet, since the external identifier may be added during the creation process
+    unless self.creating_master
+      er = UserAccessControl.external_identifier_restrictions(current_user)
+    end
 
     if er
+      # Restrictions were returned. Go through each and validate an external ID has been assigned to this master by calling its association
       er.map {|e| e.resource_name.to_sym }.each do |assoc|
         return false unless self.send(assoc).first
       end

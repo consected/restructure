@@ -29,15 +29,28 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect(master.activity_log__player_contact_phones).not_to be nil
 
     expect(al.player_contact).to eq @player_contact
+    rn = al.extra_log_type_config.resource_name
+
+    uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
+    if uacs.first
+      uac = uacs.first
+      uac.access = nil
+      uac.current_admin = @admin
+      uac.save!
+    end
 
     # Validate that the new activity log item can not be accessed without the appropriate access control
     expect{
       al.save
     }.to raise_error FphsException
 
-    rn = al.extra_log_type_config.resource_name
-
-    uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
+    if uac
+      uac.access = :create
+      uac.disabled = false
+      uac.save!
+    else
+      uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
+    end
     expect(al.save).to be true
 
 

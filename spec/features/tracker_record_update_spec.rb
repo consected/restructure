@@ -70,7 +70,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
       sleep 1
       find("\#master_player_infos_attributes_0_last_name").send_keys :tab
     end
-    
+
     have_css '#advanced_search_master.ajax-running'
     expect(page).to have_css "#master_results_block", text: ''
     has_css? "#search_count .search_count"
@@ -111,7 +111,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     within "form#new_player_contact" do
       select "Phone", from: "Rec type"
       fill_in 'Data', with: phone
-      click_button 'Create Player contact'
+      click_button 'Save'
     end
     sleep 1
     have_css ".tracker-block.collapse.in"

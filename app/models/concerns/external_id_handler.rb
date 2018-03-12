@@ -12,6 +12,8 @@ module ExternalIdHandler
 
     attr_accessor :create_count, :just_assigned, :assign_all, :assign_all_request
     after_initialize :init_vars_external_id_handler
+
+    before_validation :during_create_master
     after_save :return_all
 
     scope :assigned, -> {where "master_id is not null"}
@@ -273,6 +275,10 @@ module ExternalIdHandler
     send(self.class.external_id_attribute)
   end
 
+  def external_id= val
+    send("#{self.class.external_id_attribute}=", val)
+  end
+
   def external_id_changed?
     send("#{self.class.external_id_attribute}_changed?")
   end
@@ -288,6 +294,18 @@ module ExternalIdHandler
 
   def init_vars_external_id_handler
     instance_var_init :admin_set
+  end
+
+  # A special case to handle the creation of instances during the creation of a master (under the app configuration :create_master_with)
+  # Since we don't want this to fail due to a validation error with a blank external ID, force the ID to the min value
+  # if the external ID is not already set
+  def during_create_master
+
+    if creating_master
+      if external_id.blank?
+        self.external_id = self.class.external_id_range.min
+      end
+    end
   end
 
   def external_id_tests

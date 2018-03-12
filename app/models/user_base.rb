@@ -163,6 +163,15 @@ class UserBase < ActiveRecord::Base
     end
   end
 
+  # Used as an indicator in certain models to show that this is part of a master record creation
+  def creating_master=cm
+    @creating_master = cm
+  end
+
+  def creating_master
+    @creating_master
+  end
+
   if Master.respond_to? :alternative_id_fields
     # add the alternative_id_fields from the master as attributes, so we can use them for matching
     Master.alternative_id_fields.each do |f|

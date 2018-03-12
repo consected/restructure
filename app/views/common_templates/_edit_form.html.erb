@@ -111,9 +111,10 @@
               end
 
               has_phone = gs.select {|s| s.last == 'phone'}.first
+              has_email = gs.select {|s| s.last == 'email'}.first
 
               %>
-              <%= f.select :rec_type, gs, {}, class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''}" %>
+              <%= f.select :rec_type, gs, {}, class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''} #{has_email ? 'rec_type_has_email' : ''}" %>
             <% elsif p == :source
                  gs = general_selection("#{gs_name}_source".to_sym, value: form_object_instance.source, quiet_fail: true) rescue nil
                  unless gs

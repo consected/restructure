@@ -154,7 +154,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       fill_in "Start year", with: startyear
       fill_in "End year", with: endyear
       select source, from: 'Source'
-      click_button "Update Player info"
+      click_button "Save"
     end
 
     if startyear!=''
@@ -192,7 +192,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       expect(page.all(h).first.text.downcase).to eq(keyed)
       page.all(h).first.click
 
-      click_button "Update Player info"
+      click_button "Save"
     end
 
     expect(page).to have_css("li.list-group-item.player-info-college")
