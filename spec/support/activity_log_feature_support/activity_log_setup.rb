@@ -20,6 +20,8 @@ module ActivityLogSetup
       end
     end
 
+    setup_access :player_infos
+
     ActivityLog.enabled.each do |a|
       a.current_admin = admin
       a.update_tracker_events

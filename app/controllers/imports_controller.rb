@@ -303,4 +303,8 @@ class ImportsController < ApplicationController
 
       return not_authorized
     end
+
+    def no_action_log
+      true
+    end
 end

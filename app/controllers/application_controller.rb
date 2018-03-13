@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   include AppExceptionHandler
   include AppConfigurationsHelper
   include NavHandler
+  include UserActionLogging
 
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -116,6 +117,12 @@ protected
         redirect_to new_user_session_path
       end
       return true
+    end
+
+  private
+
+    def no_action_log
+      false
     end
 
 end

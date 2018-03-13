@@ -95,4 +95,9 @@ class ItemFlagsController < ApplicationController
     def secure_params
       params.require(:item_flag).permit(item_flag_name_id: [])
     end
+
+    def no_action_log
+      true
+    end
+    
 end

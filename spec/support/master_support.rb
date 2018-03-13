@@ -6,6 +6,25 @@ module MasterSupport
     SeedSupport.setup
   end
 
+  def setup_access resource_name=nil, resource_type: :table
+
+    return if @path_prefix == "/admin"
+    resource_name ||= objects_symbol
+
+    uac = UserAccessControl.where(app_type: @user.app_type, resource_type: resource_type, resource_name: resource_name).first
+    if uac
+      uac.access = :create
+      uac.disabled = false
+      uac.current_admin = auto_admin
+      uac.save
+    else
+      UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: resource_type, resource_name: resource_name, current_admin: auto_admin
+    end
+
+  rescue => e
+    Rails.logger.debug "Failed to create access for #{resource_name}"
+  end
+
   def edit_form_prefix
     @edit_form_prefix = nil
   end
@@ -60,6 +79,9 @@ module MasterSupport
     master = Master.new att
     master.current_user = user
     master.save!
+
+    setup_access
+    setup_access :trackers
 
     create_sources
 

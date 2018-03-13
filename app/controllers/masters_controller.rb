@@ -11,7 +11,11 @@ class MastersController < ApplicationController
   def index
 
     #search_params
-    redirect_to '/masters/search/' and return if search_params.nil? || search_params.length == 0
+    if search_params.nil? || search_params.length == 0
+      @no_masters = true
+      redirect_to '/masters/search/'
+      return
+    end
 
     search_type = params[:mode]
     search_type = 'ADVANCED' if search_type.blank?

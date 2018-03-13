@@ -21,6 +21,18 @@ RSpec.describe MastersController, type: :controller do
 
     it "creates a master record and shows it" do
 
+      ac = AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
+
+      if ac
+        ac.value = 'player_info'
+        ac.current_admin = @admin
+        ac.save!
+      else
+        AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
+      end
+
+      setup_access :player_infos
+
       post :create
       @master = Master.last
       mid = @master.id

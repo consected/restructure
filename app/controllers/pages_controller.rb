@@ -12,4 +12,8 @@ class PagesController < ApplicationController
   end
 
   private
+
+    def no_action_log
+      true
+    end
 end

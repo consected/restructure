@@ -16,6 +16,8 @@ module ActivityLogSupport
 
 
     unless @player_contact
+      setup_access :player_contacts
+
       @player_contact = @master.player_contacts.create!(
       {
         data: "(516)262-1289",
@@ -84,6 +86,11 @@ module ActivityLogSupport
     item ||= @player_contact
     att[:player_contact] = item
     att[:master] ||= master
+
+    setup_access :activity_log__player_contact_phones
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
+    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
+
     @activity_log = @player_contact.activity_log__player_contact_phones.create! att
 
   end

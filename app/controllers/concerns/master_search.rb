@@ -41,6 +41,7 @@ module MasterSearch
         unless m_field
           render text: "<b>query must return a master_id field to function as a search</b>".html_safe
           flash.now[:warning] = "query must return a master_id field to function as a search"
+          @no_masters = true
           return
         end
 
@@ -96,9 +97,11 @@ module MasterSearch
 
       else
         # Return no results
+        @no_masters = true
         m = {message: "no conditions were specified", masters: [], count: {count: 0, show_count: 0} }
       end
     rescue => e
+      @no_masters = true
       logger.error "Error in MastersController#index: #{e.inspect}\n#{e.backtrace.join("\n")}"
       m = {error: ": unable to search - please check your search criteria."}
       render json: m, status: 400
@@ -120,6 +123,7 @@ module MasterSearch
         unless ma
           flash[:warning] = "no results to export"
           redirect_to(child_error_reporter_path)
+          @no_masters = true
           return
         end
 

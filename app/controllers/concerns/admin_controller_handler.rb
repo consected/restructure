@@ -77,7 +77,7 @@ module AdminControllerHandler
 
   protected
 
-    
+
 
     def filters
 
@@ -196,6 +196,12 @@ module AdminControllerHandler
     def filter_params
       return nil if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
       params.require(:filter).permit(filters_on)
+    end
+
+
+  private
+    def no_action_log
+      true
     end
 
 

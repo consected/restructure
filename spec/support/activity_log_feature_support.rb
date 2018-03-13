@@ -80,6 +80,11 @@ module ActivityLogSupport
     att[:player_contact] = item
     item.master.current_user ||= @user || create_user
     item.master_user.app_type ||= AppType.active.first
+
+    setup_access :activity_log__player_contact_phones
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
+    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
+    
     @activity_log = master.activity_log__player_contact_phones.create! att
 
   end

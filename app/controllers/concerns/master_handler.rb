@@ -55,6 +55,7 @@ module MasterHandler
     set_additional_attributes object_instance
     if object_instance.save
       handle_additional_updates
+      @id = object_instance.id
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
         index

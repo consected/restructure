@@ -22,6 +22,8 @@ module ItemFlagSupport
       master = create_master
       master.current_user = @user
 
+      setup_access :player_infos
+
       pi = master.player_infos.create!(
       {
         first_name: 'test',
