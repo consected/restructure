@@ -9,10 +9,19 @@ RSpec.describe Master, type: :model do
   before(:all) do
     seed_database
 
-
-
-
     create_data_set
+
+    ac = AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
+
+    if ac
+      ac.value = 'player_info'
+      ac.current_admin = @admin
+      ac.save!
+    else
+      AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
+    end
+
+
 
   end
 
@@ -54,8 +63,6 @@ RSpec.describe Master, type: :model do
   end
 
   it "should create a master and player like a user" do
-
-    AppConfiguration.create! name: "create master with", app_type: @user.app_type, value: 'player_info', current_admin: @admin
 
     m = Master.create_master_records(@user)
 

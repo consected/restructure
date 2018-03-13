@@ -134,10 +134,10 @@
                   rlit = p.to_s.sub('select_record_from_', '').singularize
 
                   if ActivityLog.use_with_class_names.include? rlit
-                    rl = rlit
-                    cn = ActivityLog.use_with_class_names.select{|s| s == rl}.first
-                    reslist = cn.camelize.constantize.where(master_id: form_object_instance.master_id)
-                    if cn.camelize.constantize.attribute_names.include?('rank')
+                    cn = rl = rlit
+                    cl = cn.camelize.constantize
+                    reslist = cl.where(master_id: form_object_instance.master_id)
+                    if cl.attribute_names.include?('rank')
                       reslist = reslist.order(rank: :desc)
                       reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
                     else
@@ -148,9 +148,10 @@
                     ActivityLog.use_with_class_names.each do |ucn|
                       if rlit.start_with?(ucn)
                         rl = rlit
-                        cn = ActivityLog.use_with_class_names.select{|s| s == ucn}.first
-                        reslist = cn.camelize.constantize.where(master_id: form_object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
-                        if cn.camelize.constantize.attribute_names.include?('rank')
+                        cn = ucn
+                        cl = cn.camelize.constantize
+                        reslist = cl.where(master_id: form_object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
+                        if cl.attribute_names.include?('rank')
                           reslist = reslist.order(rank: :desc)
                           reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
                         else
