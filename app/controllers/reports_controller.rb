@@ -13,6 +13,7 @@ class ReportsController < ApplicationController
   # List of available reports
   def index
     @no_create = true
+    @no_masters = true
     pm = Report.enabled.for_user(current_user)
     pm = pm.where filter_params if filter_params
 
@@ -39,6 +40,7 @@ class ReportsController < ApplicationController
     end
 
     if params[:commit] == 'count'
+      @no_masters = true
       options[:count_only] = true
       @count_only = true
     end
@@ -51,9 +53,15 @@ class ReportsController < ApplicationController
     @editable = @report.editable_data? && (current_admin || current_user && current_user.can?(:edit_report_data))
 
 
-    return unless @report.searchable || authorized?
+    unless @report.searchable || authorized?
+      @no_masters = true
+      return
+    end
 
-    return unless @report.can_access? current_user
+    unless @report.can_access? current_user
+      @no_masters = true
+      return
+    end
 
     if search_attrs && !no_run
       begin
@@ -61,6 +69,7 @@ class ReportsController < ApplicationController
       rescue ActiveRecord::PreparedStatementInvalid => e
         logger.info "Prepared statement invalid in reports_controller (#{search_attrs}) show: #{e.inspect}\n#{e.backtrace.join("\n")}"
         @results = nil
+        @no_masters = true
         flash.now[:danger] = "Generated SQL invalid.\n#{@report.clean_sql}\n#{e.to_s}"
         respond_to do |format|
           format.html {
@@ -114,9 +123,13 @@ class ReportsController < ApplicationController
           send_data res_a.join(""), filename: "report.csv"
         }
       end
+
+      @master_ids = @results.map {|r| r['master_id']} if @results
     elsif params[:get_filter_previous]
+      @no_masters = true
       render partial: 'filter_on'
     else
+      @no_masters = true
       @report.search_attr_values = search_attrs
       respond_to do |format|
         format.html {

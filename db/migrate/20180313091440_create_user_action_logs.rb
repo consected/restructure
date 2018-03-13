@@ -8,6 +8,7 @@ class CreateUserActionLogs < ActiveRecord::Migration
       t.integer :item_id
       t.integer :index_action_ids, array: true
       t.string :action
+      t.string :url
 
       t.timestamps null: false
     end

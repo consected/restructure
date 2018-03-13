@@ -22,6 +22,16 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     expect(@user.can?(:create_master)).to be_truthy
 
+    ac = AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
+
+    if ac
+      ac.value = 'player_info'
+      ac.current_admin = @admin
+      ac.save!
+    else
+      AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
+    end
+
 
   end
 
@@ -40,7 +50,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
         f.send_keys(e)
         sleep 0.01
       end
-      click_button 'Create Player contact'
+      click_button 'Save'
     end
 
     expect(page).not_to have_css('form#new_player_contact')
@@ -362,7 +372,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       select "Canada", from: "Country", :match => :first
       fill_in 'Street', with: '123 Private St'
       fill_in 'Region', with: 'Alberta'
-      click_button 'Create Address'
+      click_button 'Save'
     end
 
     # Add phone number

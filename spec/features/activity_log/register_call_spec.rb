@@ -82,8 +82,7 @@ describe "Register an incoming call", driver: :app_firefox_driver do
     expect_log_to_show select_call_direction: ActivityLogMain::CallToPlayer,
                         select_result: ActivityLogMain::CallBadNumber,
                         select_next_step: ActivityLogMain::NextStepCallBack,
-                        follow_up_when: follow_up_date.strftime('%-m/%-d/%Y'),
-                        set_related_player_contact_rank: ActivityLogMain::RankBadContact.split(' ').first
+                        follow_up_when: follow_up_date.strftime('%-m/%-d/%Y')
 
     expect_log_player_contact_to have_rank: ActivityLogMain::RankBadContact
 
