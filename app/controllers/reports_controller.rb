@@ -58,7 +58,7 @@ class ReportsController < ApplicationController
       return
     end
 
-    unless @report.can_access? current_user
+    unless current_admin || @report.can_access?(current_user)
       @no_masters = true
       return
     end

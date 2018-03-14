@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
 
   belongs_to :admin
-  has_many :user_authorizations
+  
   has_many :user_access_controls, autosave: true
 
   belongs_to :app_type

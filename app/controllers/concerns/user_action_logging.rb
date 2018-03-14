@@ -6,7 +6,7 @@ module UserActionLogging
     after_action :log_user_item_action, only: [:show, :create, :update]
     after_action :log_user_index_action, only: [:index]
 
-    ExcludeClasses = ['Devise::SessionsController']
+    ExcludeClasses = ['Devise::SessionsController', 'Devise::RegistrationsController']
   end
 
   private
