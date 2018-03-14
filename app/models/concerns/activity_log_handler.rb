@@ -406,6 +406,7 @@ module ActivityLogHandler
   def can_edit?
 
     res = master.current_user.has_access_to? :edit, :activity_log_type, extra_log_type_config.resource_name
+    Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} due to lack of access" unless res
     return unless res
 
     latest_item = master.send(self.class.assoc_inverse).unscope(:order).order(id: :desc).limit(1).first
@@ -418,12 +419,18 @@ module ActivityLogHandler
   def can_create?
 
     res = master.current_user.has_access_to? :create, :activity_log_type, extra_log_type_config.resource_name
+
+    Rails.logger.info "Can not create activity_log_type #{extra_log_type_config.resource_name} due to lack of access" unless res
+
     res && super()
   end
 
   def can_access?
 
     res = master.current_user.has_access_to? :access, :activity_log_type, extra_log_type_config.resource_name
+
+    Rails.logger.info "Can not access activity_log_type #{extra_log_type_config.resource_name} due to lack of access" unless res
+
     res && super()
   end
 

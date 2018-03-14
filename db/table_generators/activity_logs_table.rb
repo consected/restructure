@@ -83,6 +83,9 @@ EOF
 
       sql = <<EOF
 
+-- Command line:
+-- table_generators/generate.sh $@      
+
       CREATE TABLE #{singular_name}_history (
           id integer NOT NULL,
           master_id integer,

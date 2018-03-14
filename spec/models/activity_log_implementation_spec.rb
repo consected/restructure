@@ -32,9 +32,10 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect(al.player_contact).to eq @player_contact
     rn = al.extra_log_type_config.resource_name
 
+ 
     uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
-    if uacs.first
-      uac = uacs.first
+    uac = uacs.first
+    if uac
       uac.access = nil
       uac.current_admin = @admin
       uac.save!
@@ -48,6 +49,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     if uac
       uac.access = :create
       uac.disabled = false
+      uac.current_admin = @admin
       uac.save!
     else
       uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin

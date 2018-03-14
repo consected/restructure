@@ -63,6 +63,9 @@ EOF
 
       sql = <<EOF
 
+-- Command line:
+-- table_generators/generate.sh $@
+
       CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
