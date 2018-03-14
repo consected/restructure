@@ -13,6 +13,7 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
     ::ActivityLog.define_models
     create_admin
     create_user
+    setup_access :player_contacts
     create_item(data: rand(10000000000000000), rank: 10)
 
     @activity_log = al = ActivityLog.enabled.first

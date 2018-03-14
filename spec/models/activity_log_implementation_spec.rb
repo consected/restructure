@@ -12,6 +12,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     seed_database
     ::ActivityLog.define_models
     create_user
+    setup_access :player_contacts
     create_item(data: rand(10000000000000000), rank: 10)
   end
 

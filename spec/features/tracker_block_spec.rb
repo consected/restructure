@@ -26,6 +26,9 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     @user, @good_password  = create_user nil, '', create_master: true
     @good_email  = @user.email
 
+    setup_access :player_contacts
+    setup_access :player_infos
+    setup_access :trackers
   end
 
   before :each do

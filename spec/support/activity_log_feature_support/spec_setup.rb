@@ -26,6 +26,8 @@ module SpecSetup
     create_user_for_login
 
 
+    setup_access :player_contacts
+
     # Ensure the table can be accessed
     uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :table, resource_name: :activity_log__player_contact_phones
     uac = uacs.first
