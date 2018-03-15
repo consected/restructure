@@ -199,6 +199,9 @@
           </div>
         </div>
         {{else is @key 'includes' "_notes"}}
+        <div class="panel panel-default panel-heading">
+        <div class="notes-block-label small">{{humanize @key}}</div>
+        </div>
         <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
