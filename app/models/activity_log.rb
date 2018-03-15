@@ -301,13 +301,15 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def check_item_type_and_rec_type
-    unless item_type_valid?
-      errors.add(:item_type, "#{self.item_type} is invalid. It must be one of (#{self.class.use_with_class_names.join(", ")})")
-      return
-    end
-    unless rec_type_valid?
-      errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
-      return
+    unless disabled
+      unless item_type_valid?
+        errors.add(:item_type, "#{self.item_type} is invalid. It must be one of (#{self.class.use_with_class_names.join(", ")})")
+        return
+      end
+      unless rec_type_valid?
+        errors.add(:rec_type, "(#{rec_type}) invalid for the selected item type #{item_type}.")
+        return
+      end
     end
   end
 

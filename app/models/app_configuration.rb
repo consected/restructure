@@ -5,6 +5,7 @@ class AppConfiguration < ActiveRecord::Base
 
   belongs_to :user
   validates :name, presence: true
+  validate :valid_entry
 
   def self.configurations
     [
@@ -46,5 +47,20 @@ class AppConfiguration < ActiveRecord::Base
     res_user || res
 
   end
+
+
+  private
+
+    def valid_entry
+      unless self.disabled
+
+        cond = {name: self.name, user: self.user, app_type: self.app_type}
+        res = self.class.active.where(cond).first
+
+        raise FphsException.new "This item already exists (#{self.name} user: #{self.user_id} app_type: #{self.app_type_id})" if res && ((persisted? && res.id != self.id) || !persisted?)
+
+      end
+    end
+
 
 end

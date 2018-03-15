@@ -64,6 +64,23 @@ module AdminHandler
     !!@admin_set
   end
 
+  # user email to allow simplified exports
+  def user_email
+    if respond_to?(:user) && user
+      user.email
+    end
+  end
+
+  def as_json options={}
+
+    options[:methods] ||= []
+
+
+    options[:methods] << :user_email
+
+    super(options)
+  end
+
   def ensure_admin_set
     errors.add(:admin, "has not been set") unless admin_set?
   end

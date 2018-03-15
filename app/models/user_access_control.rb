@@ -213,6 +213,18 @@ class UserAccessControl < ActiveRecord::Base
     res
   end
 
+  def bad_resource_name
+    !disabled && (resource_name.nil? || !self.class.resource_names_for(self.resource_type.to_sym).include?(self.resource_name.to_s))
+  end
+
+  def allow_bad_resource_name= val
+    @allow_bad_resource_name=val
+  end
+
+  def allow_bad_resource_name
+    @allow_bad_resource_name
+  end
+
   private
     def correct_access
       self.access = nil if self.access.blank?
@@ -222,8 +234,8 @@ class UserAccessControl < ActiveRecord::Base
         errors.add :access, "is an invalid value"
       elsif resource_type.nil? || !self.class.resource_types.include?(self.resource_type.to_sym)
         errors.add :resource_type, "is an invalid value"
-      elsif resource_name.nil? || !self.class.resource_names_for(self.resource_type.to_sym).include?(self.resource_name.to_s)
-        errors.add :resource_name, "is an invalid value"
+      elsif !allow_bad_resource_name && (resource_name.nil? || !self.class.resource_names_for(self.resource_type.to_sym).include?(self.resource_name.to_s))
+        errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
       elsif !self.disabled
         res = self.class.access_for? self.user, nil, self.resource_type, self.resource_name, alt_app_type_id: self.app_type_id
         if res && self.user_id == res.user_id  && res.id != self.id # If the user has the authorization set and it is not this record

@@ -18,7 +18,8 @@ Rails.application.routes.draw do
     resources :accuracy_scores, except: [:show, :destroy]
     resources :activity_logs, except: [:show, :destroy]
     resources :app_configurations, except: [:show, :destroy]
-    resources :app_types, except: [:show, :destroy]
+    resources :app_types, except: [:destroy]
+    post 'app_types/upload', to: 'app_types#upload'
   end
 
 

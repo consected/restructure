@@ -24,10 +24,20 @@
         <td><%= list_item.disabled ? 'disabled' : ''%></td>
 
         <td><%= list_item.admin_name %></td>
+        <td><%= link_to 'export', admin_app_type_path(list_item) %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
+
+<div>
+  <h3>Upload a configuration file</h3>
+
+  <%= form_tag({action: :upload}, multipart: true) do %>
+    <%= file_field_tag 'config' %>
+    <%= submit_tag %>
+  <% end %>
+</div>
 
 <%=  render partial: 'admin_handler/index_actions'  %>
   </div>

@@ -29,7 +29,7 @@
         <td><%= list_item.user.email if list_item.user %></td>
         <td><%= list_item.access %></td>
         <td><%= list_item.resource_type %></td>
-        <td><%= list_item.resource_name %></td>
+        <td><%=list_item.bad_resource_name ? '<strong>BAD RESOURCE NAME</strong>'.html_safe : '' %> <%= list_item.resource_name %></td>
         <td><%= list_item.options %></td>
         <td><%= list_item.disabled ? 'disabled' : ''%></td>
 
