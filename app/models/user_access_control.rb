@@ -20,11 +20,11 @@ class UserAccessControl < ActiveRecord::Base
 
   def self.access_levels
     {
-      table: [nil, :read, :update, :create],
+      table: [nil, :see_presence, :read, :update, :create],
       general: [nil, :read],
       external_id_assignments: [nil, :limited],
       report: [nil, :read],
-      activity_log_type: [nil, :read, :update, :create]
+      activity_log_type: [nil, :see_presence, :read, :update, :create]
     }
   end
 
@@ -41,6 +41,7 @@ class UserAccessControl < ActiveRecord::Base
     {
       table: {
         access: [:read, :update, :create],
+        see_presence_or_access:  [:see_presence, :read, :update, :create],
         edit: [:update, :create],
       },
       general: {
@@ -51,6 +52,7 @@ class UserAccessControl < ActiveRecord::Base
       },
       activity_log_type: {
         access: [:read, :update, :create],
+        see_presence_or_access:  [:see_presence, :read, :update, :create],
         edit: [:update, :create],
       }
     }

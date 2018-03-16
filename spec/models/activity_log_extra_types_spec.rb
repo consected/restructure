@@ -72,5 +72,68 @@ EOF
 
   end
 
+  it "allows a user only to see the presence of an iten, not its content" do
+
+    al = @activity_log
+
+    resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for( 'primary').resource_name
+
+
+    uac = UserAccessControl.where(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name).first
+    unless uac
+      uac = UserAccessControl.new(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name)
+    end
+
+    # First, allow an activity log record to be created
+    uac.access = :create
+    uac.current_admin = @admin
+    uac.save!
+
+
+    @player_contact.master.current_user = @user
+    al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user')
+    al.save!
+    alid = al.id
+
+    alpcps = @player_contact.activity_log__player_contact_phones.where id: alid
+
+    alpcps.each do |a|
+      a.master.current_user = @user
+    end
+
+    j = alpcps.to_json
+
+    data = JSON.parse(j).first
+    expect(data['id']).to eq alid
+    expect(data['select_who']).to eq 'user'
+
+    # Now restrict access to only see its presence
+    uac.access = :see_presence
+    uac.current_admin = @admin
+    uac.save!
+
+    res = @user.has_access_to? :access, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
+    expect(res).to be_falsey
+
+    res = @user.has_access_to? :see_presence, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
+    expect(res).to be_truthy
+
+
+    res = @user.has_access_to? :see_presence_or_access, :activity_log_type, alpcps.first.extra_log_type_config.resource_name
+    expect(res).to be_truthy
+
+
+    alpcps.each do |a|
+      a.master.current_user = @user
+    end
+
+    j = alpcps.to_json
+    data = JSON.parse(j).first
+    expect(data['id']).to eq alid
+
+    expect(data['select_who']).to be_nil
+
+  end
+
 
 end

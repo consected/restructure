@@ -28,6 +28,7 @@
     caption: main_log_caption,
     prevent_edit: prevent_edit,
     prevent_create: prevent_create,
+    only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, primary_options.resource_name),
     extra_class: "alt-width #{col_width_classes}",
     item_list: implementation_class.view_attribute_list,
     data_sort: [:desc, data_action_when],
@@ -50,6 +51,7 @@
     caption: blank_log_label, # substitute the rec_type attribute (capitalized) as the block caption
     prevent_edit: prevent_edit,
     prevent_create: prevent_create,
+    only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, blank_options.resource_name),
     extra_class: "alt-width #{col_width_classes}",
     item_list: implementation_class.view_blank_log_attribute_list,
     data_sort: [:desc, data_action_when],
@@ -73,6 +75,7 @@
       caption: c.label,
       prevent_edit: prevent_edit,
       prevent_create: prevent_create,
+      only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, c.resource_name),
       extra_class: "alt-width #{col_width_classes}",
       item_list: c.fields,
       data_sort: [:desc, data_action_when],

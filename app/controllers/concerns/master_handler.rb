@@ -209,6 +209,10 @@ module MasterHandler
         end
         build_with = secure_params rescue nil
         set_object_instance @master_objects.build(build_with)
+
+        if @item && object_instance.respond_to?(:item_id) && !object_instance.item_id
+          object_instance.item_id = @item_id
+        end
       end
 
       def set_object_instance o

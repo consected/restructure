@@ -93,42 +93,62 @@ module GeneralDataConcerns
   def as_json extras={}
 
     # byebug if self.is_a?(TrackerHistory)
+    if self.allows_current_user_access_to?(:access)
 
-    return {} unless self.allows_current_user_access_to?(:access)
+      extras[:include] ||= {}
+      extras[:methods] ||= []
+      extras[:methods] << :item_id if respond_to? :item_id
+      extras[:methods] << :item_type if respond_to? :item_type
+      extras[:methods] << :full_item_type if respond_to? :full_item_type
+      extras[:methods] << :updated_at_ts if respond_to? :updated_at
+      extras[:methods] << :created_at_ts  if respond_to? :created_at
+      extras[:methods] << :data if respond_to? :data
+      extras[:methods] << :rank_name if respond_to? :rank
+      extras[:methods] << :state_name if respond_to? :state
+      extras[:methods] << :country_name if respond_to? :country
+      extras[:methods] << :source_name if respond_to? :source
+      extras[:methods] << :protocol_name if respond_to? :protocol
+      extras[:methods] << :sub_process_name if respond_to? :sub_process
+      extras[:methods] << :protocol_event_name if respond_to? :protocol_event
+      if !self.is_a?(Tracker) && !self.is_a?(TrackerHistory) && (respond_to?(:tracker_history_id) || respond_to?(:tracker_history))
+        extras[:methods] << :tracker_history_id
+        extras[:methods] << :tracker_histories if respond_to? :tracker_histories
+      end
+      extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
+      extras[:methods] << :user_name if respond_to? :user_name
+      # update_action can be used by requestor to identify whether the record was just updated (saved) or not
+      extras[:methods] << :update_action if respond_to? :update_action
+      extras[:methods] << :_created if respond_to? :_created
+      extras[:methods] << :_updated if respond_to? :_updated
 
-    extras[:include] ||= {}
-    extras[:methods] ||= []
-    extras[:methods] << :item_id if respond_to? :item_id
-    extras[:methods] << :item_type if respond_to? :item_type
-    extras[:methods] << :full_item_type if respond_to? :full_item_type
-    extras[:methods] << :updated_at_ts if respond_to? :updated_at
-    extras[:methods] << :created_at_ts  if respond_to? :created_at
-    extras[:methods] << :data if respond_to? :data
-    extras[:methods] << :rank_name if respond_to? :rank
-    extras[:methods] << :state_name if respond_to? :state
-    extras[:methods] << :country_name if respond_to? :country
-    extras[:methods] << :source_name if respond_to? :source
-    extras[:methods] << :protocol_name if respond_to? :protocol
-    extras[:methods] << :sub_process_name if respond_to? :sub_process
-    extras[:methods] << :protocol_event_name if respond_to? :protocol_event
-    if !self.is_a?(Tracker) && !self.is_a?(TrackerHistory) && (respond_to?(:tracker_history_id) || respond_to?(:tracker_history))
-      extras[:methods] << :tracker_history_id
-      extras[:methods] << :tracker_histories if respond_to? :tracker_histories
+      extras[:methods] << :model_references if respond_to? :model_references
+      extras[:methods] << :creatable_model_references if respond_to? :creatable_model_references
+      extras[:methods] << :referenced_from if respond_to? :referenced_from
+
+      extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
+      extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?(master_user)
+
+    elsif self.allows_current_user_access_to?(:see_presence_or_access)
+
+      extras[:include] ||= {}
+      extras[:methods] ||= []
+      extras[:only] = [:id]
+
+      extras[:methods] << :item_id if respond_to? :item_id
+      extras[:methods] << :item_type if respond_to? :item_type
+      extras[:methods] << :full_item_type if respond_to? :full_item_type
+      extras[:methods] << :updated_at_ts if respond_to? :updated_at
+      extras[:methods] << :created_at_ts  if respond_to? :created_at
+      extras[:methods] << :user_name if respond_to? :user_name
+      # update_action can be used by requestor to identify whether the record was just updated (saved) or not
+      extras[:methods] << :update_action if respond_to? :update_action
+      extras[:methods] << :_created if respond_to? :_created
+      extras[:methods] << :_updated if respond_to? :_updated
+
+      
+    else
+      return {}
     end
-    extras[:methods] << :accuracy_score_name if respond_to? :accuracy_score
-    extras[:methods] << :user_name if respond_to? :user_name
-    # update_action can be used by requestor to identify whether the record was just updated (saved) or not
-    extras[:methods] << :update_action if respond_to? :update_action
-    extras[:methods] << :_created if respond_to? :_created
-    extras[:methods] << :_updated if respond_to? :_updated
-
-    extras[:methods] << :model_references if respond_to? :model_references
-    extras[:methods] << :creatable_model_references if respond_to? :creatable_model_references
-    extras[:methods] << :referenced_from if respond_to? :referenced_from
-
-    extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
-    extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?(master_user)
-
 
     super(extras)
   end
