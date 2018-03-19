@@ -134,7 +134,7 @@ _fpa.form_utils = {
 
             window.setTimeout(function(){
                 var wmax = 0;
-                var lgi = self.find('.list-group-item').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta');
+                var lgi = self.find('.list-group-item').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta, .edit-form-header');
                 var all = lgi.find('small, label');
                 all.css({display: 'inline-block', whiteSpace: 'nowrap', verticalAlign: 'middle'});
 

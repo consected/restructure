@@ -71,6 +71,7 @@ class ExternalIdentifier < ActiveRecord::Base
   def add_master_association &association_block
     logger.debug "Add master association for #{self}"
 
+    return if disabled
     remove_assoc_class('Master')
 
     # Define the association
