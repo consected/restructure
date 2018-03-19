@@ -104,11 +104,7 @@
     {{#each masters}}
       <div class="panel-heading master-result {{#is ../masters.length '===' 1}}selected-result{{/is}}" role="tab" id="master-{{id}}">
         <h3 class="panel-title">
-          {{#if msid}}
-          <a class="glyphicon glyphicon-link pull-right" href="/masters/{{msid}}?type=msid" title="link to this record"> </a>
-          {{else}}
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="link to this record"> </a>
-          {{/if}}
           <div class="row">
             <% unless app_config_set(:hide_master_id_in_results) %>
             <div class="col-md-2 col-lg-1 result-refs">
