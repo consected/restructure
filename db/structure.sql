@@ -612,6 +612,10 @@ CREATE FUNCTION log_activity_log_bhs_assignment_update() RETURNS trigger
                       results_link,
                       select_result,
                       pi_notes_from_return_call,
+                      completed_q1_no_yes,
+                      completed_teamstudy_no_yes,
+                      previous_contact_with_team_no_yes,
+                      previous_contact_with_team_notes,
                       extra_log_type,
                       user_id,
                       created_at,
@@ -627,6 +631,10 @@ CREATE FUNCTION log_activity_log_bhs_assignment_update() RETURNS trigger
                       NEW.results_link,
                       NEW.select_result,
                       NEW.pi_notes_from_return_call,
+                      NEW.completed_q1_no_yes,
+                      NEW.completed_teamstudy_no_yes,
+                      NEW.previous_contact_with_team_no_yes,
+                      NEW.previous_contact_with_team_notes,
                       NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,
@@ -662,6 +670,50 @@ notes,
                       NEW.ext_assignment_id,
                       NEW.do_when,
                       NEW.notes,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_activity_log_ipa_assignment_minor_deviation_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION log_activity_log_ipa_assignment_minor_deviation_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_ipa_assignment_minor_deviation_history
+                  (
+                      master_id,
+                      ipa_assignment_id,
+                      activity_date,
+                      deviation_discovered_when,
+                      deviation_occurred_when,
+                      deviation_description,
+                      corrective_action_description,
+                      select_status,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_ipa_assignment_minor_deviation_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ipa_assignment_id,
+                      NEW.activity_date,
+                      NEW.deviation_discovered_when,
+                      NEW.deviation_occurred_when,
+                      NEW.deviation_description,
+                      NEW.corrective_action_description,
+                      NEW.select_status,
+                      NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -792,40 +844,6 @@ CREATE FUNCTION log_activity_log_new_test_update() RETURNS trigger
                       NEW.select_result,
                       NEW.notes,
                       NEW.protocol_id,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
--- Name: log_activity_log_player_contact_email_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION log_activity_log_player_contact_email_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO activity_log_player_contact_email_history
-                  (
-                      master_id,
-                      player_contact_id,
-                      emailed_when,
-                      extra_log_type,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      activity_log_player_contact_email_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.player_contact_id,
-                      NEW.emailed_when,
-                      NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -1382,6 +1400,7 @@ CREATE FUNCTION log_ipa_appointment_update() RETURNS trigger
                   (
                       master_id,
                       visit_start_date,
+                      select_navigator,
                       user_id,
                       created_at,
                       updated_at,
@@ -1390,6 +1409,7 @@ CREATE FUNCTION log_ipa_appointment_update() RETURNS trigger
                   SELECT
                       NEW.master_id,
                       NEW.visit_start_date,
+                      NEW.select_navigator,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -1487,38 +1507,6 @@ CREATE FUNCTION log_ipa_hotel_update() RETURNS trigger
                       NEW.master_id,
                       NEW.hotel,
                       NEW.room_number,
-                      NEW.notes,
-                      NEW.user_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
--- Name: log_ipa_navigator_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION log_ipa_navigator_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO ipa_navigator_history
-                  (
-                      master_id,
-                      select_navigator,
-                      notes,
-                      user_id,
-                      created_at,
-                      updated_at,
-                      ipa_navigator_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.select_navigator,
                       NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
@@ -2352,38 +2340,6 @@ CREATE FUNCTION log_test_ext_update() RETURNS trigger
 
 
 --
--- Name: log_test_external_test7_identifier_update(); Type: FUNCTION; Schema: ml_app; Owner: -
---
-
-CREATE FUNCTION log_test_external_test7_identifier_update() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-              BEGIN
-                  INSERT INTO test_external_test7_identifier_history
-                  (
-                      master_id,
-                      test_test7_id,
-                      user_id,
-                      admin_id,
-                      created_at,
-                      updated_at,
-                      test_external_test7_identifier_table_id
-                      )
-                  SELECT
-                      NEW.master_id,
-                      NEW.test_test7_id,
-                      NEW.user_id,
-                      NEW.admin_id,
-                      NEW.created_at,
-                      NEW.updated_at,
-                      NEW.id
-                  ;
-                  RETURN NEW;
-              END;
-          $$;
-
-
---
 -- Name: log_test_item_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -2833,6 +2789,10 @@ CREATE TABLE activity_log_bhs_assignment_history (
     results_link character varying,
     select_result character varying,
     pi_notes_from_return_call character varying,
+    completed_q1_no_yes character varying,
+    completed_teamstudy_no_yes character varying,
+    previous_contact_with_team_no_yes character varying,
+    previous_contact_with_team_notes character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
@@ -2874,6 +2834,10 @@ CREATE TABLE activity_log_bhs_assignments (
     results_link character varying,
     select_result character varying,
     pi_notes_from_return_call character varying,
+    completed_q1_no_yes character varying,
+    completed_teamstudy_no_yes character varying,
+    previous_contact_with_team_no_yes character varying,
+    previous_contact_with_team_notes character varying,
     extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
@@ -3058,6 +3022,87 @@ CREATE SEQUENCE activity_log_ipa_assignment_history_id_seq
 --
 
 ALTER SEQUENCE activity_log_ipa_assignment_history_id_seq OWNED BY activity_log_ipa_assignment_history.id;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE activity_log_ipa_assignment_minor_deviation_history (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    activity_date date,
+    deviation_discovered_when date,
+    deviation_occurred_when date,
+    deviation_description character varying,
+    corrective_action_description character varying,
+    select_status character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ipa_assignment_minor_deviation_id integer
+);
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE activity_log_ipa_assignment_minor_deviation_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE activity_log_ipa_assignment_minor_deviation_history_id_seq OWNED BY activity_log_ipa_assignment_minor_deviation_history.id;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE activity_log_ipa_assignment_minor_deviations (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    activity_date date,
+    deviation_discovered_when date,
+    deviation_occurred_when date,
+    deviation_description character varying,
+    corrective_action_description character varying,
+    select_status character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE activity_log_ipa_assignment_minor_deviations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE activity_log_ipa_assignment_minor_deviations_id_seq OWNED BY activity_log_ipa_assignment_minor_deviations.id;
 
 
 --
@@ -3257,54 +3302,27 @@ ALTER SEQUENCE activity_log_new_tests_id_seq OWNED BY activity_log_new_tests.id;
 
 
 --
--- Name: activity_log_player_contact_email_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE activity_log_player_contact_email_history (
-    id integer NOT NULL,
-    master_id integer,
-    player_contact_id integer,
-    emailed_when date,
-    extra_log_type character varying,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    activity_log_player_contact_email_id integer
-);
-
-
---
--- Name: activity_log_player_contact_email_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE activity_log_player_contact_email_history_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: activity_log_player_contact_email_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE activity_log_player_contact_email_history_id_seq OWNED BY activity_log_player_contact_email_history.id;
-
-
---
 -- Name: activity_log_player_contact_emails; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 CREATE TABLE activity_log_player_contact_emails (
     id integer NOT NULL,
-    master_id integer,
-    player_contact_id integer,
+    data character varying,
+    select_email_direction character varying,
+    select_who character varying,
     emailed_when date,
-    extra_log_type character varying,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    protocol_id integer,
+    notes character varying,
     user_id integer,
+    player_contact_id integer,
+    master_id integer,
+    disabled boolean,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    set_related_player_contact_rank character varying
 );
 
 
@@ -3335,21 +3353,21 @@ CREATE TABLE activity_log_player_contact_phone_history (
     id integer NOT NULL,
     master_id integer,
     player_contact_id integer,
-    select_result character varying,
-    select_next_step character varying,
-    follow_up_when date,
-    protocol_id bigint,
+    data character varying,
     select_call_direction character varying,
     select_who character varying,
     called_when date,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
     notes character varying,
-    data character varying,
+    protocol_id integer,
     set_related_player_contact_rank character varying,
-    extra_log_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_player_contact_phone_id integer
+    activity_log_player_contact_phone_id integer,
+    extra_log_type character varying
 );
 
 
@@ -3378,22 +3396,23 @@ ALTER SEQUENCE activity_log_player_contact_phone_history_id_seq OWNED BY activit
 
 CREATE TABLE activity_log_player_contact_phones (
     id integer NOT NULL,
-    master_id integer,
-    player_contact_id integer,
-    select_result character varying,
-    select_next_step character varying,
-    follow_up_when date,
-    protocol_id bigint,
+    data character varying,
     select_call_direction character varying,
     select_who character varying,
     called_when date,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    protocol_id integer,
     notes character varying,
-    data character varying,
-    set_related_player_contact_rank character varying,
-    extra_log_type character varying,
     user_id integer,
+    player_contact_id integer,
+    master_id integer,
+    disabled boolean,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    set_related_player_contact_rank character varying,
+    extra_log_type character varying
 );
 
 
@@ -3533,41 +3552,6 @@ CREATE SEQUENCE activity_logs_id_seq
 --
 
 ALTER SEQUENCE activity_logs_id_seq OWNED BY activity_logs.id;
-
-
---
--- Name: adders; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE adders (
-    id integer NOT NULL,
-    name character varying,
-    name2 character varying,
-    age integer,
-    master_id integer,
-    user_id integer,
-    updated_at timestamp without time zone,
-    created_at timestamp without time zone
-);
-
-
---
--- Name: adders_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE adders_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: adders_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE adders_id_seq OWNED BY adders.id;
 
 
 --
@@ -4515,6 +4499,7 @@ CREATE TABLE ipa_appointment_history (
     id integer NOT NULL,
     master_id integer,
     visit_start_date date,
+    select_navigator character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
@@ -4549,6 +4534,7 @@ CREATE TABLE ipa_appointments (
     id integer NOT NULL,
     master_id integer,
     visit_start_date date,
+    select_navigator character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL
@@ -4781,75 +4767,6 @@ CREATE SEQUENCE ipa_hotels_id_seq
 --
 
 ALTER SEQUENCE ipa_hotels_id_seq OWNED BY ipa_hotels.id;
-
-
---
--- Name: ipa_navigator_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE ipa_navigator_history (
-    id integer NOT NULL,
-    master_id integer,
-    select_navigator character varying,
-    notes character varying,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    ipa_navigator_id integer
-);
-
-
---
--- Name: ipa_navigator_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE ipa_navigator_history_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ipa_navigator_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE ipa_navigator_history_id_seq OWNED BY ipa_navigator_history.id;
-
-
---
--- Name: ipa_navigators; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE ipa_navigators (
-    id integer NOT NULL,
-    master_id integer,
-    select_navigator character varying,
-    notes character varying,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: ipa_navigators_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE ipa_navigators_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ipa_navigators_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE ipa_navigators_id_seq OWNED BY ipa_navigators.id;
 
 
 --
@@ -5372,6 +5289,46 @@ CREATE SEQUENCE masters_id_seq
 --
 
 ALTER SEQUENCE masters_id_seq OWNED BY masters.id;
+
+
+--
+-- Name: message_notifications; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE message_notifications (
+    id integer NOT NULL,
+    app_type_id integer,
+    master_id integer,
+    user_id integer,
+    item_id integer,
+    item_type character varying,
+    recipient_user_ids integer[],
+    layout_template_name character varying,
+    content_template_name character varying,
+    generated_content character varying,
+    status character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: message_notifications_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE message_notifications_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: message_notifications_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE message_notifications_id_seq OWNED BY message_notifications.id;
 
 
 --
@@ -6889,75 +6846,6 @@ ALTER SEQUENCE test_ext_history_id_seq OWNED BY test_ext_history.id;
 
 
 --
--- Name: test_external_test7_identifier_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE test_external_test7_identifier_history (
-    id integer NOT NULL,
-    master_id integer,
-    test_test7_id bigint,
-    user_id integer,
-    admin_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    test_external_test7_identifier_table_id integer
-);
-
-
---
--- Name: test_external_test7_identifier_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE test_external_test7_identifier_history_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: test_external_test7_identifier_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE test_external_test7_identifier_history_id_seq OWNED BY test_external_test7_identifier_history.id;
-
-
---
--- Name: test_external_test7_identifiers; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE test_external_test7_identifiers (
-    id integer NOT NULL,
-    master_id integer,
-    test_test7_id bigint,
-    user_id integer,
-    admin_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: test_external_test7_identifiers_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
---
-
-CREATE SEQUENCE test_external_test7_identifiers_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: test_external_test7_identifiers_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
---
-
-ALTER SEQUENCE test_external_test7_identifiers_id_seq OWNED BY test_external_test7_identifiers.id;
-
-
---
 -- Name: test_exts; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -7432,6 +7320,20 @@ ALTER TABLE ONLY activity_log_ipa_assignment_history ALTER COLUMN id SET DEFAULT
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviation_history ALTER COLUMN id SET DEFAULT nextval('activity_log_ipa_assignment_minor_deviation_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviations ALTER COLUMN id SET DEFAULT nextval('activity_log_ipa_assignment_minor_deviations_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY activity_log_ipa_assignments ALTER COLUMN id SET DEFAULT nextval('activity_log_ipa_assignments_id_seq'::regclass);
 
 
@@ -7461,13 +7363,6 @@ ALTER TABLE ONLY activity_log_new_test_history ALTER COLUMN id SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY activity_log_new_tests ALTER COLUMN id SET DEFAULT nextval('activity_log_new_tests_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY activity_log_player_contact_email_history ALTER COLUMN id SET DEFAULT nextval('activity_log_player_contact_email_history_id_seq'::regclass);
 
 
 --
@@ -7510,13 +7405,6 @@ ALTER TABLE ONLY activity_log_player_infos ALTER COLUMN id SET DEFAULT nextval('
 --
 
 ALTER TABLE ONLY activity_logs ALTER COLUMN id SET DEFAULT nextval('activity_logs_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY adders ALTER COLUMN id SET DEFAULT nextval('adders_id_seq'::regclass);
 
 
 --
@@ -7747,20 +7635,6 @@ ALTER TABLE ONLY ipa_hotels ALTER COLUMN id SET DEFAULT nextval('ipa_hotels_id_s
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY ipa_navigator_history ALTER COLUMN id SET DEFAULT nextval('ipa_navigator_history_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_navigators ALTER COLUMN id SET DEFAULT nextval('ipa_navigators_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
 ALTER TABLE ONLY ipa_payment_history ALTER COLUMN id SET DEFAULT nextval('ipa_payment_history_id_seq'::regclass);
 
 
@@ -7853,6 +7727,13 @@ ALTER TABLE ONLY manage_users ALTER COLUMN id SET DEFAULT nextval('manage_users_
 --
 
 ALTER TABLE ONLY masters ALTER COLUMN id SET DEFAULT nextval('masters_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY message_notifications ALTER COLUMN id SET DEFAULT nextval('message_notifications_id_seq'::regclass);
 
 
 --
@@ -8125,20 +8006,6 @@ ALTER TABLE ONLY test_ext_history ALTER COLUMN id SET DEFAULT nextval('test_ext_
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY test_external_test7_identifier_history ALTER COLUMN id SET DEFAULT nextval('test_external_test7_identifier_history_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_external_test7_identifiers ALTER COLUMN id SET DEFAULT nextval('test_external_test7_identifiers_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
---
-
 ALTER TABLE ONLY test_exts ALTER COLUMN id SET DEFAULT nextval('test_exts_id_seq'::regclass);
 
 
@@ -8277,6 +8144,22 @@ ALTER TABLE ONLY activity_log_ipa_assignment_history
 
 
 --
+-- Name: activity_log_ipa_assignment_minor_deviation_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT activity_log_ipa_assignment_minor_deviation_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviations
+    ADD CONSTRAINT activity_log_ipa_assignment_minor_deviations_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_ipa_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -8314,14 +8197,6 @@ ALTER TABLE ONLY activity_log_new_test_history
 
 ALTER TABLE ONLY activity_log_new_tests
     ADD CONSTRAINT activity_log_new_tests_pkey PRIMARY KEY (id);
-
-
---
--- Name: activity_log_player_contact_email_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY activity_log_player_contact_email_history
-    ADD CONSTRAINT activity_log_player_contact_email_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -8581,6 +8456,14 @@ ALTER TABLE ONLY ipa_appointments
 
 
 --
+-- Name: ipa_appointments_visit_start_date_key; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ipa_appointments
+    ADD CONSTRAINT ipa_appointments_visit_start_date_key UNIQUE (visit_start_date);
+
+
+--
 -- Name: ipa_assignment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -8626,22 +8509,6 @@ ALTER TABLE ONLY ipa_hotel_history
 
 ALTER TABLE ONLY ipa_hotels
     ADD CONSTRAINT ipa_hotels_pkey PRIMARY KEY (id);
-
-
---
--- Name: ipa_navigator_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY ipa_navigator_history
-    ADD CONSTRAINT ipa_navigator_history_pkey PRIMARY KEY (id);
-
-
---
--- Name: ipa_navigators_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY ipa_navigators
-    ADD CONSTRAINT ipa_navigators_pkey PRIMARY KEY (id);
 
 
 --
@@ -8754,6 +8621,14 @@ ALTER TABLE ONLY manage_users
 
 ALTER TABLE ONLY masters
     ADD CONSTRAINT masters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message_notifications_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY message_notifications
+    ADD CONSTRAINT message_notifications_pkey PRIMARY KEY (id);
 
 
 --
@@ -9061,22 +8936,6 @@ ALTER TABLE ONLY test_ext_history
 
 
 --
--- Name: test_external_test7_identifier_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY test_external_test7_identifier_history
-    ADD CONSTRAINT test_external_test7_identifier_history_pkey PRIMARY KEY (id);
-
-
---
--- Name: test_external_test7_identifiers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY test_external_test7_identifiers
-    ADD CONSTRAINT test_external_test7_identifiers_pkey PRIMARY KEY (id);
-
-
---
 -- Name: test_exts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -9312,6 +9171,55 @@ CREATE INDEX index_activity_log_ipa_assignment_history_on_user_id ON activity_lo
 
 
 --
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_ac; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_ac ON activity_log_ipa_assignment_minor_deviation_history USING btree (activity_log_ipa_assignment_minor_deviation_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_ip; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_ip ON activity_log_ipa_assignment_minor_deviation_history USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_ma; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_ma ON activity_log_ipa_assignment_minor_deviation_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_us; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_us ON activity_log_ipa_assignment_minor_deviation_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviations_on_ipa_assig; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviations_on_ipa_assig ON activity_log_ipa_assignment_minor_deviations USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviations_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviations_on_master_id ON activity_log_ipa_assignment_minor_deviations USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviations_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviations_on_user_id ON activity_log_ipa_assignment_minor_deviations USING btree (user_id);
+
+
+--
 -- Name: index_activity_log_ipa_assignments_on_ipa_assignment_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -9431,34 +9339,6 @@ CREATE INDEX index_activity_log_new_tests_on_user_id ON activity_log_new_tests U
 
 
 --
--- Name: index_activity_log_player_contact_email_history_on_activity_log; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_activity_log_player_contact_email_history_on_activity_log ON activity_log_player_contact_email_history USING btree (activity_log_player_contact_email_id);
-
-
---
--- Name: index_activity_log_player_contact_email_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_activity_log_player_contact_email_history_on_master_id ON activity_log_player_contact_email_history USING btree (master_id);
-
-
---
--- Name: index_activity_log_player_contact_email_history_on_player_conta; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_activity_log_player_contact_email_history_on_player_conta ON activity_log_player_contact_email_history USING btree (player_contact_id);
-
-
---
--- Name: index_activity_log_player_contact_email_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_activity_log_player_contact_email_history_on_user_id ON activity_log_player_contact_email_history USING btree (user_id);
-
-
---
 -- Name: index_activity_log_player_contact_emails_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -9466,10 +9346,17 @@ CREATE INDEX index_activity_log_player_contact_emails_on_master_id ON activity_l
 
 
 --
--- Name: index_activity_log_player_contact_emails_on_player_contact_emai; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_emails_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
-CREATE INDEX index_activity_log_player_contact_emails_on_player_contact_emai ON activity_log_player_contact_emails USING btree (player_contact_id);
+CREATE INDEX index_activity_log_player_contact_emails_on_player_contact_id ON activity_log_player_contact_emails USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_protocol_id ON activity_log_player_contact_emails USING btree (protocol_id);
 
 
 --
@@ -9515,10 +9402,17 @@ CREATE INDEX index_activity_log_player_contact_phones_on_master_id ON activity_l
 
 
 --
--- Name: index_activity_log_player_contact_phones_on_player_contact_phon; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phones_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
-CREATE INDEX index_activity_log_player_contact_phones_on_player_contact_phon ON activity_log_player_contact_phones USING btree (player_contact_id);
+CREATE INDEX index_activity_log_player_contact_phones_on_player_contact_id ON activity_log_player_contact_phones USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_phones_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_activity_log_player_contact_phones_on_protocol_id ON activity_log_player_contact_phones USING btree (protocol_id);
 
 
 --
@@ -10040,41 +9934,6 @@ CREATE INDEX index_ipa_hotels_on_user_id ON ipa_hotels USING btree (user_id);
 
 
 --
--- Name: index_ipa_navigator_history_on_ipa_navigator_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_ipa_navigator_history_on_ipa_navigator_id ON ipa_navigator_history USING btree (ipa_navigator_id);
-
-
---
--- Name: index_ipa_navigator_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_ipa_navigator_history_on_master_id ON ipa_navigator_history USING btree (master_id);
-
-
---
--- Name: index_ipa_navigator_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_ipa_navigator_history_on_user_id ON ipa_navigator_history USING btree (user_id);
-
-
---
--- Name: index_ipa_navigators_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_ipa_navigators_on_master_id ON ipa_navigators USING btree (master_id);
-
-
---
--- Name: index_ipa_navigators_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_ipa_navigators_on_user_id ON ipa_navigators USING btree (user_id);
-
-
---
 -- Name: index_ipa_payment_history_on_ipa_payment_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -10275,6 +10134,27 @@ CREATE INDEX index_masters_on_proid ON masters USING btree (pro_id);
 --
 
 CREATE INDEX index_masters_on_user_id ON masters USING btree (user_id);
+
+
+--
+-- Name: index_message_notifications_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_on_app_type_id ON message_notifications USING btree (app_type_id);
+
+
+--
+-- Name: index_message_notifications_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_on_master_id ON message_notifications USING btree (master_id);
+
+
+--
+-- Name: index_message_notifications_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_on_user_id ON message_notifications USING btree (user_id);
 
 
 --
@@ -10950,55 +10830,6 @@ CREATE INDEX index_test_ext_history_on_user_id ON test_ext_history USING btree (
 
 
 --
--- Name: index_test_external_test7_identifier_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_external_test7_identifier_history_on_admin_id ON test_external_test7_identifier_history USING btree (admin_id);
-
-
---
--- Name: index_test_external_test7_identifier_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_external_test7_identifier_history_on_master_id ON test_external_test7_identifier_history USING btree (master_id);
-
-
---
--- Name: index_test_external_test7_identifier_history_on_test_external_t; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_external_test7_identifier_history_on_test_external_t ON test_external_test7_identifier_history USING btree (test_external_test7_identifier_table_id);
-
-
---
--- Name: index_test_external_test7_identifier_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_external_test7_identifier_history_on_user_id ON test_external_test7_identifier_history USING btree (user_id);
-
-
---
--- Name: index_test_external_test7_identifiers_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_external_test7_identifiers_on_admin_id ON test_external_test7_identifiers USING btree (admin_id);
-
-
---
--- Name: index_test_external_test7_identifiers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_external_test7_identifiers_on_master_id ON test_external_test7_identifiers USING btree (master_id);
-
-
---
--- Name: index_test_external_test7_identifiers_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_test_external_test7_identifiers_on_user_id ON test_external_test7_identifiers USING btree (user_id);
-
-
---
 -- Name: index_test_exts_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -11314,6 +11145,20 @@ CREATE TRIGGER activity_log_ipa_assignment_history_update AFTER UPDATE ON activi
 
 
 --
+-- Name: activity_log_ipa_assignment_minor_deviation_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_minor_deviation_history_insert AFTER INSERT ON activity_log_ipa_assignment_minor_deviations FOR EACH ROW EXECUTE PROCEDURE log_activity_log_ipa_assignment_minor_deviation_update();
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_minor_deviation_history_update AFTER UPDATE ON activity_log_ipa_assignment_minor_deviations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_ipa_assignment_minor_deviation_update();
+
+
+--
 -- Name: activity_log_ipa_survey_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -11339,20 +11184,6 @@ CREATE TRIGGER activity_log_new_test_history_insert AFTER INSERT ON activity_log
 --
 
 CREATE TRIGGER activity_log_new_test_history_update AFTER UPDATE ON activity_log_new_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_new_test_update();
-
-
---
--- Name: activity_log_player_contact_email_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER activity_log_player_contact_email_history_insert AFTER INSERT ON activity_log_player_contact_emails FOR EACH ROW EXECUTE PROCEDURE log_activity_log_player_contact_email_update();
-
-
---
--- Name: activity_log_player_contact_email_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER activity_log_player_contact_email_history_update AFTER UPDATE ON activity_log_player_contact_emails FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_player_contact_email_update();
 
 
 --
@@ -11591,20 +11422,6 @@ CREATE TRIGGER ipa_hotel_history_insert AFTER INSERT ON ipa_hotels FOR EACH ROW 
 --
 
 CREATE TRIGGER ipa_hotel_history_update AFTER UPDATE ON ipa_hotels FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_hotel_update();
-
-
---
--- Name: ipa_navigator_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER ipa_navigator_history_insert AFTER INSERT ON ipa_navigators FOR EACH ROW EXECUTE PROCEDURE log_ipa_navigator_update();
-
-
---
--- Name: ipa_navigator_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER ipa_navigator_history_update AFTER UPDATE ON ipa_navigators FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_navigator_update();
 
 
 --
@@ -11958,20 +11775,6 @@ CREATE TRIGGER test_ext_history_update AFTER UPDATE ON test_exts FOR EACH ROW WH
 
 
 --
--- Name: test_external_test7_identifier_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER test_external_test7_identifier_history_insert AFTER INSERT ON test_external_test7_identifiers FOR EACH ROW EXECUTE PROCEDURE log_test_external_test7_identifier_update();
-
-
---
--- Name: test_external_test7_identifier_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
---
-
-CREATE TRIGGER test_external_test7_identifier_history_update AFTER UPDATE ON test_external_test7_identifiers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_test_external_test7_identifier_update();
-
-
---
 -- Name: tracker_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -12139,6 +11942,38 @@ ALTER TABLE ONLY activity_log_ipa_assignment_history
 
 
 --
+-- Name: fk_activity_log_ipa_assignment_minor_deviation_history_activity; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_minor_deviation_history_activity FOREIGN KEY (activity_log_ipa_assignment_minor_deviation_id) REFERENCES activity_log_ipa_assignment_minor_deviations(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_minor_deviation_history_ipa_assi; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_minor_deviation_history_ipa_assi FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_assignments(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_minor_deviation_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_minor_deviation_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_minor_deviation_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_minor_deviation_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: fk_activity_log_ipa_survey_history_activity_log_ipa_surveys; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -12200,38 +12035,6 @@ ALTER TABLE ONLY activity_log_new_test_history
 
 ALTER TABLE ONLY activity_log_new_test_history
     ADD CONSTRAINT fk_activity_log_new_test_history_users FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_activity_log_player_contact_email_history_activity_log_playe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY activity_log_player_contact_email_history
-    ADD CONSTRAINT fk_activity_log_player_contact_email_history_activity_log_playe FOREIGN KEY (activity_log_player_contact_email_id) REFERENCES activity_log_player_contact_emails(id);
-
-
---
--- Name: fk_activity_log_player_contact_email_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY activity_log_player_contact_email_history
-    ADD CONSTRAINT fk_activity_log_player_contact_email_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
--- Name: fk_activity_log_player_contact_email_history_player_contact_ema; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY activity_log_player_contact_email_history
-    ADD CONSTRAINT fk_activity_log_player_contact_email_history_player_contact_ema FOREIGN KEY (player_contact_id) REFERENCES player_contacts(id);
-
-
---
--- Name: fk_activity_log_player_contact_email_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY activity_log_player_contact_email_history
-    ADD CONSTRAINT fk_activity_log_player_contact_email_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -12552,30 +12355,6 @@ ALTER TABLE ONLY ipa_hotel_history
 
 ALTER TABLE ONLY ipa_hotel_history
     ADD CONSTRAINT fk_ipa_hotel_history_users FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_ipa_navigator_history_ipa_navigators; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_navigator_history
-    ADD CONSTRAINT fk_ipa_navigator_history_ipa_navigators FOREIGN KEY (ipa_navigator_id) REFERENCES ipa_navigators(id);
-
-
---
--- Name: fk_ipa_navigator_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_navigator_history
-    ADD CONSTRAINT fk_ipa_navigator_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
--- Name: fk_ipa_navigator_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_navigator_history
-    ADD CONSTRAINT fk_ipa_navigator_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -13006,23 +12785,7 @@ ALTER TABLE ONLY bhs_assignments
 -- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_bhs_assignments
-    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
 ALTER TABLE ONLY mrn_numbers
-    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_appointments
     ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
 
 
@@ -13047,14 +12810,6 @@ ALTER TABLE ONLY ipa_consent_mailings
 --
 
 ALTER TABLE ONLY ipa_screenings
-    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_navigators
     ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
 
 
@@ -13102,7 +12857,7 @@ ALTER TABLE ONLY activity_log_ipa_surveys
 -- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_player_contact_emails
+ALTER TABLE ONLY ipa_appointments
     ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
 
 
@@ -13110,7 +12865,7 @@ ALTER TABLE ONLY activity_log_player_contact_emails
 -- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY test_external_test7_identifiers
+ALTER TABLE ONLY activity_log_bhs_assignments
     ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
 
 
@@ -13118,7 +12873,7 @@ ALTER TABLE ONLY test_external_test7_identifiers
 -- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_player_contact_phones
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviations
     ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
 
 
@@ -13187,14 +12942,6 @@ ALTER TABLE ONLY mrn_numbers
 
 
 --
--- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_external_test7_identifiers
-    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES admins(id);
-
-
---
 -- Name: fk_rails_1fc7475261; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -13232,6 +12979,14 @@ ALTER TABLE ONLY player_infos
 
 ALTER TABLE ONLY model_references
     ADD CONSTRAINT fk_rails_2d8072edea FOREIGN KEY (to_record_master_id) REFERENCES masters(id);
+
+
+--
+-- Name: fk_rails_3a3553e146; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY message_notifications
+    ADD CONSTRAINT fk_rails_3a3553e146 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 --
@@ -13366,23 +13121,7 @@ ALTER TABLE ONLY bhs_assignments
 -- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_bhs_assignments
-    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
--- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
 ALTER TABLE ONLY mrn_numbers
-    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
--- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_appointments
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
@@ -13407,14 +13146,6 @@ ALTER TABLE ONLY ipa_consent_mailings
 --
 
 ALTER TABLE ONLY ipa_screenings
-    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
--- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ipa_navigators
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
@@ -13462,7 +13193,7 @@ ALTER TABLE ONLY activity_log_ipa_surveys
 -- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_player_contact_emails
+ALTER TABLE ONLY ipa_appointments
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
@@ -13470,7 +13201,7 @@ ALTER TABLE ONLY activity_log_player_contact_emails
 -- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY test_external_test7_identifiers
+ALTER TABLE ONLY activity_log_bhs_assignments
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
@@ -13478,7 +13209,7 @@ ALTER TABLE ONLY test_external_test7_identifiers
 -- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_player_contact_phones
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviations
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
@@ -13622,14 +13353,6 @@ ALTER TABLE ONLY activity_log_new_tests
 -- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_bhs_assignments
-    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (bhs_assignment_id) REFERENCES bhs_assignments(id);
-
-
---
--- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
 ALTER TABLE ONLY activity_log_ipa_assignments
     ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_assignments(id);
 
@@ -13646,16 +13369,16 @@ ALTER TABLE ONLY activity_log_ipa_surveys
 -- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_player_contact_emails
-    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (player_contact_id) REFERENCES player_contacts(id);
+ALTER TABLE ONLY activity_log_bhs_assignments
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (bhs_assignment_id) REFERENCES bhs_assignments(id);
 
 
 --
 -- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY activity_log_player_contact_phones
-    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (player_contact_id) REFERENCES player_contacts(id);
+ALTER TABLE ONLY activity_log_ipa_assignment_minor_deviations
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_assignments(id);
 
 
 --
@@ -13843,6 +13566,14 @@ ALTER TABLE ONLY user_action_logs
 
 
 --
+-- Name: fk_rails_d3566ee56d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY message_notifications
+    ADD CONSTRAINT fk_rails_d3566ee56d FOREIGN KEY (app_type_id) REFERENCES app_types(id);
+
+
+--
 -- Name: fk_rails_d3c0ddde90; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -13912,6 +13643,14 @@ ALTER TABLE ONLY emergency_contacts
 
 ALTER TABLE ONLY general_selections
     ADD CONSTRAINT fk_rails_f62500107f FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
+-- Name: fk_rails_fa6dbd15de; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY message_notifications
+    ADD CONSTRAINT fk_rails_fa6dbd15de FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -14128,38 +13867,6 @@ ALTER TABLE ONLY test_ext_history
 
 ALTER TABLE ONLY test_ext_history
     ADD CONSTRAINT fk_test_ext_history_users FOREIGN KEY (user_id) REFERENCES users(id);
-
-
---
--- Name: fk_test_external_test7_identifier_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_external_test7_identifier_history
-    ADD CONSTRAINT fk_test_external_test7_identifier_history_admins FOREIGN KEY (admin_id) REFERENCES admins(id);
-
-
---
--- Name: fk_test_external_test7_identifier_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_external_test7_identifier_history
-    ADD CONSTRAINT fk_test_external_test7_identifier_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
---
--- Name: fk_test_external_test7_identifier_history_test_external_test7_i; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_external_test7_identifier_history
-    ADD CONSTRAINT fk_test_external_test7_identifier_history_test_external_test7_i FOREIGN KEY (test_external_test7_identifier_table_id) REFERENCES test_external_test7_identifiers(id);
-
-
---
--- Name: fk_test_external_test7_identifier_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY test_external_test7_identifier_history
-    ADD CONSTRAINT fk_test_external_test7_identifier_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -14563,4 +14270,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180319133539');
 INSERT INTO schema_migrations (version) VALUES ('20180319133540');
 
 INSERT INTO schema_migrations (version) VALUES ('20180319175721');
+
+INSERT INTO schema_migrations (version) VALUES ('20180320105954');
 
