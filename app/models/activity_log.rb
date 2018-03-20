@@ -5,8 +5,10 @@ class ActivityLog < ActiveRecord::Base
   include SelectorCache
 
   before_validation :prevent_item_type_change,  on: :update
+  before_validation :set_table_name
   validates :name, presence: true, uniqueness: {scope: :disabled}
   validates :item_type, presence: true
+  validates :table_name, presence: true
   validate :item_type_exists
   validate :check_item_type_and_rec_type
   default_scope -> { order 'disabled asc nulls last'}
@@ -90,8 +92,11 @@ class ActivityLog < ActiveRecord::Base
   end
 
   # The table name for the activity log implementation
-  def table_name
-    "activity_log_#{item_type_name}".pluralize
+  def generate_table_name
+    tn = ["activity_log"]
+    tn << item_type_name
+
+    tn.join('_').pluralize
   end
 
   # The attribute list defined in the admin record. If blank, the implementation_class
@@ -126,8 +131,9 @@ class ActivityLog < ActiveRecord::Base
     return @item_type_name if @item_type_name
     tn = []
     tn << item_type
+    tn << process_name unless !respond_to?(:process_name) || process_name.blank?
     tn << rec_type unless rec_type.blank?
-    @item_type_name = tn.join('_')
+    @item_type_name = tn.join('_').singularize
   end
 
 
@@ -147,7 +153,7 @@ class ActivityLog < ActiveRecord::Base
 
   # the list of defined activity log implementation classes
   def self.implementation_classes
-    @implementation_classes = ActivityLog.enabled.map{|a| "ActivityLog::#{[a.item_type, a.rec_type].join('_').classify}".constantize }
+    @implementation_classes = ActivityLog.enabled.map{|a| "ActivityLog::#{a.item_type_name.classify}".constantize }
   end
 
 
@@ -171,7 +177,7 @@ class ActivityLog < ActiveRecord::Base
 
       cn = c.attribute_names.select{|a| a.index('select_') == 0}.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
       cn.each do |a|
-        list << "#{c.name.ns_underscore}_#{a}".to_sym
+        list << "#{c.model_name.to_s.ns_underscore}_#{a}".to_sym
       end
     end
 
@@ -229,14 +235,21 @@ class ActivityLog < ActiveRecord::Base
 
             m.each do |pg|
               mn = pg.model_def_name.to_s.pluralize.to_sym
-              ic = pg.item_type.pluralize
-              get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-              get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-              get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-              post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
-              get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
-              patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-              put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+
+              no_primary_step = pg.field_list.blank?
+
+              # Only create routes attached to the the parent item type if the primary step's fields have been entered.
+              # Without these fields there is no need to include these routes
+              unless no_primary_step
+                ic = pg.item_type.pluralize
+                get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
+                get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
+                get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
+                post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
+                get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
+                patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+                put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+              end
 
               # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
               get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
@@ -511,6 +524,10 @@ class ActivityLog < ActiveRecord::Base
       errors.add :item_type, "It seems that the model that this activity log definition is associated with does not exist. Check that the #{item_type.pluralize} table exists, and if this is a dynamic model or external ID, check it is enabled"
     end
 
+  end
+
+  def set_table_name
+    self.table_name = self.generate_table_name
   end
 
 end

@@ -13,7 +13,7 @@ default: &default
 
 development:
   <<: *default
-  database: fpa_development
+  database: <%= ENV['FPHS_POSTGRESQL_DATABASE'] || 'fpa_development' %>
   schema_search_path: ml_app
 
 # Warning: The database defined as "test" will be erased and
@@ -22,8 +22,8 @@ development:
 test: &test
   <<: *default
   database: fpa_test
-  schema_search_path: ml_app  
- 
+  schema_search_path: ml_app
+
 production:
   <<: *default
 

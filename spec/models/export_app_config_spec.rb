@@ -175,9 +175,10 @@ RSpec.describe "Export an app configuration", type: :model do
 
     expect(@user.has_access_to? :create, :table, :player_infos).to be_truthy
 
+    # The external identifier access can't be enabled, since the underlying table doesn't exist
     expect(ExternalIdentifier.where(name: 'bhs_assignments').first).to be_a ExternalIdentifier
     a = UserAccessControl.where app_type: @app_type, resource_type: :table, resource_name: :bhs_assignments
-    expect(a.first).to be_a UserAccessControl
+    expect(a.first).to be_nil
 
     # Activity log definition can not be enabled, since its table does not exist
     expect(ActivityLog.where(item_type: 'bhs_assignment').first).to be_a ActivityLog

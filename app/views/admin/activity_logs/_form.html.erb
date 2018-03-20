@@ -15,6 +15,10 @@
     <%= f.select :rec_type, general_selection("%_type", value: object_instance.rec_type, use_like: true), include_blank: true %>
   </div>
   <div class="form-group">
+    <%= f.label :process_name %>
+    <%= f.text_field :process_name %>
+  </div>
+  <div class="form-group">
     <%= f.label :action_when_attribute %>
     <%= f.text_field :action_when_attribute %>
   </div>

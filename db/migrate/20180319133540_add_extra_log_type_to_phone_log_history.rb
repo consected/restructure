@@ -2,10 +2,23 @@ class AddExtraLogTypeToPhoneLogHistory < ActiveRecord::Migration
 
   def self.up
 
-    add_column :activity_log_player_contact_phone_history, :extra_log_type, :string
 
 
 execute <<EOF
+
+DO
+$$
+BEGIN
+
+    IF not EXISTS (SELECT column_name
+             FROM information_schema.columns
+             WHERE table_schema='ml_app' and table_name='activity_log_player_contact_phone_history' and column_name='extra_log_type') THEN
+
+             alter table activity_log_player_contact_phone_history add column extra_log_type varchar;
+    END IF;
+    END
+$$
+;
 
     DROP FUNCTION if exists ml_app.log_activity_log_player_contact_phone_update() cascade;
 
