@@ -239,7 +239,7 @@ class UserBase < ActiveRecord::Base
 
     def downcase_attributes
 
-      ignore = /(item_type)?(notes)?(description)?(.+_notes)?/
+      ignore = /(item_type)?(notes)?(description)?(.+_notes)?(.+_description)?/
 
       self.attributes.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
 

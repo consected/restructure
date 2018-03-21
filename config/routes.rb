@@ -18,6 +18,9 @@ Rails.application.routes.draw do
     resources :accuracy_scores, except: [:show, :destroy]
     resources :activity_logs, except: [:show, :destroy]
     resources :app_configurations, except: [:show, :destroy]
+    resources :message_templates, except: [:show, :destroy]
+    resources :message_notifications, except: [:show, :destroy]
+    resources :job_reviews, except: [:show, :destroy]
     resources :app_types, except: [:destroy]
     post 'app_types/upload', to: 'app_types#upload'
   end

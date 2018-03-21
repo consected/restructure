@@ -8,13 +8,14 @@ module AdminControllerHandler
     before_action :set_instance_from_id, only: [:edit, :update, :destroy]
 
 
-    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :objects_instance, :human_name
+    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :objects_instance, :human_name, :no_edit
+
   end
 
   def index
     pm = primary_model
     pm = pm.where filter_params if filter_params
-    set_objects_instance pm.order(default_index_order)
+    set_objects_instance pm.index.order(default_index_order)
     response_to_index
 
   end
@@ -133,6 +134,10 @@ module AdminControllerHandler
       controller_name.singularize.humanize
     end
 
+    def no_edit
+      false
+    end
+
     def default_index_order
       nil
     end
@@ -195,7 +200,12 @@ module AdminControllerHandler
 
     def filter_params
       return nil if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
-      params.require(:filter).permit(filters_on)
+      res = params.require(:filter).permit(filters_on)
+      res.each do |k, v|
+        res[k] = nil if v == 'IS NULL'
+      end
+
+      res
     end
 
 

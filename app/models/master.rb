@@ -61,6 +61,10 @@ class Master < ActiveRecord::Base
   attr_accessor :force_order, :creating_master
 
 
+  def to_s
+    (id || '').to_s
+  end
+
   # Scope results with inner joins on external identifier tables if they are in the user access control conditions
   def self.external_identifier_assignment_scope(user)
     # Check if the resource is restricted through external identifier assignment

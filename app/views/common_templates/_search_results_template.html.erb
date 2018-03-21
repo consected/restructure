@@ -213,6 +213,15 @@
           {{pretty_string this return_string="true"}}
           </div>
         </div>
+        {{else is @key 'includes' "_description"}}
+        <div class="panel panel-default panel-heading">
+        <div class="notes-block-label small">{{humanize @key}}</div>
+        </div>
+        <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
+          <div class="panel panel-default panel-body">
+          {{pretty_string this return_string="true"}}
+          </div>
+        </div>
         {{else is @key 'includes' '_url'}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
           <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
@@ -276,6 +285,8 @@
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{this}}</strong></li>
         {{else is @key 'includes' '_notes' }}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_description' }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}

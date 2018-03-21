@@ -1,0 +1,40 @@
+<div class="data-results" data-subscription="admin-list" >
+  <div data-result="admin-list">
+<h1>Message Templates</h1>
+<p>
+    <%= show_filters %>
+</p>
+
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th class="no-sort"></th>
+      <th>Name</th>
+      <th>Message Type</th>
+      <th>Template Type</th>
+      <th>Template</th>
+      <th>Last Admin Update</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @message_templates.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td><%= admin_edit_btn list_item.id%> </td>
+        <td><%= list_item.name %></td>
+        <td><%= list_item.message_type %></td>
+        <td><%= list_item.template_type %></td>
+        <td>
+          <pre><code><%= list_item.template %></code></pre>
+        </td>
+        <td><%= list_item.admin_name %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%=  render partial: 'admin_handler/index_actions'  %>
+  </div>
+</div>

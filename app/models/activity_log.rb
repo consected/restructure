@@ -236,20 +236,15 @@ class ActivityLog < ActiveRecord::Base
             m.each do |pg|
               mn = pg.model_def_name.to_s.pluralize.to_sym
 
-              no_primary_step = pg.field_list.blank?
+              ic = pg.item_type.pluralize
+              get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
+              get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
+              get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
+              post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
+              get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
+              patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
+              put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
 
-              # Only create routes attached to the the parent item type if the primary step's fields have been entered.
-              # Without these fields there is no need to include these routes
-              unless no_primary_step
-                ic = pg.item_type.pluralize
-                get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
-                get "#{ic}/:item_id/activity_log/#{mn}/", to: "activity_log/#{mn}#index"
-                get "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#show"
-                post "#{ic}/:item_id/activity_log/#{mn}", to: "activity_log/#{mn}#create"
-                get "#{ic}/:item_id/activity_log/#{mn}/:id/edit", to: "activity_log/#{mn}#edit"
-                patch "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-                put "#{ic}/:item_id/activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
-              end
 
               # used by links to get to activity logs without having to use parent item (such as a player contact with phone logs)
               get "activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
@@ -259,7 +254,11 @@ class ActivityLog < ActiveRecord::Base
               post "activity_log/#{mn}", to: "activity_log/#{mn}#create"
               patch "activity_log/#{mn}/:id", to: "activity_log/#{mn}#update"
               # used by item flags to generate appropriate URLs
-              get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.model_def_name.to_s}"
+              begin
+                get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.model_def_name.to_s}"
+              rescue => e
+                Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.model_def_name.to_s} already exists?"
+              end
 
             end
         end

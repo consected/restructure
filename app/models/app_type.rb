@@ -9,6 +9,10 @@ class AppType < ActiveRecord::Base
   validates :label, presence: true
   after_save :set_access_levels
 
+  def to_s
+    name
+  end
+
   def self.all_available_to user
     atavail = []
 

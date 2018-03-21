@@ -12,7 +12,8 @@ module AdminHelper
   end
 
   def admin_edit_btn id
-     link_to '', edit_path(id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
+    return if no_edit
+    link_to '', edit_path(id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
   end
 
   def show_filters

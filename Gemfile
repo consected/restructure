@@ -19,6 +19,11 @@ gem 'syslog-logger'
 #   gem 'sdoc', '~> 0.4.0', group: :doc
 # end
 
+gem 'delayed_job'
+gem 'delayed_job_active_record'
+gem 'daemons'
+
+
 group :development do
 
   gem 'web-console', '~> 2.0'

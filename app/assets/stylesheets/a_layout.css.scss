@@ -127,19 +127,21 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
 
             background-color: white;
             color: #2e6da4;
-            border: 1px solid #2e6da4;
+            border: 1px solid rgb(238, 238, 238);
         }
         > a.collapsed {
-            background-color: #2e6da4;
-            color: white;
+          background-color: rgb(238, 238, 238);
+          color: #2e6da4;
 
 
         }
         > a > .caret {
-            visibility: hidden;
+          visibility: visible;
+          transform: rotate(180deg);
         }
         > a.collapsed > .caret {
             visibility: visible;
+            transform: none;
         }
     }
 }

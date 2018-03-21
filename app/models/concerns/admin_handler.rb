@@ -8,6 +8,8 @@ module AdminHandler
 
     before_validation :ensure_admin_set
     before_create :setup_values
+
+    scope :index, -> {}
   end
 
   def init_vars_admin_handler

@@ -3960,6 +3960,45 @@ CREATE TABLE copy_player_infos (
 
 
 --
+-- Name: delayed_jobs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE delayed_jobs (
+    id integer NOT NULL,
+    priority integer DEFAULT 0 NOT NULL,
+    attempts integer DEFAULT 0 NOT NULL,
+    handler text NOT NULL,
+    last_error text,
+    run_at timestamp without time zone,
+    locked_at timestamp without time zone,
+    failed_at timestamp without time zone,
+    locked_by character varying,
+    queue character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: delayed_jobs_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE delayed_jobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: delayed_jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE delayed_jobs_id_seq OWNED BY delayed_jobs.id;
+
+
+--
 -- Name: dynamic_model_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -5302,13 +5341,16 @@ CREATE TABLE message_notifications (
     user_id integer,
     item_id integer,
     item_type character varying,
+    message_type character varying,
     recipient_user_ids integer[],
     layout_template_name character varying,
     content_template_name character varying,
     generated_content character varying,
     status character varying,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    status_changed character varying,
+    subject character varying
 );
 
 
@@ -5329,6 +5371,42 @@ CREATE SEQUENCE message_notifications_id_seq
 --
 
 ALTER SEQUENCE message_notifications_id_seq OWNED BY message_notifications.id;
+
+
+--
+-- Name: message_templates; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE message_templates (
+    id integer NOT NULL,
+    name character varying,
+    message_type character varying,
+    template_type character varying,
+    template character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: message_templates_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE message_templates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: message_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE message_templates_id_seq OWNED BY message_templates.id;
 
 
 --
@@ -7481,6 +7559,13 @@ ALTER TABLE ONLY colleges ALTER COLUMN id SET DEFAULT nextval('colleges_id_seq':
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY delayed_jobs ALTER COLUMN id SET DEFAULT nextval('delayed_jobs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY dynamic_model_history ALTER COLUMN id SET DEFAULT nextval('dynamic_model_history_id_seq'::regclass);
 
 
@@ -7734,6 +7819,13 @@ ALTER TABLE ONLY masters ALTER COLUMN id SET DEFAULT nextval('masters_id_seq'::r
 --
 
 ALTER TABLE ONLY message_notifications ALTER COLUMN id SET DEFAULT nextval('message_notifications_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY message_templates ALTER COLUMN id SET DEFAULT nextval('message_templates_id_seq'::regclass);
 
 
 --
@@ -8328,6 +8420,14 @@ ALTER TABLE ONLY colleges
 
 
 --
+-- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY delayed_jobs
+    ADD CONSTRAINT delayed_jobs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: dynamic_model_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -8629,6 +8729,14 @@ ALTER TABLE ONLY masters
 
 ALTER TABLE ONLY message_notifications
     ADD CONSTRAINT message_notifications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message_templates_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY message_templates
+    ADD CONSTRAINT message_templates_pkey PRIMARY KEY (id);
 
 
 --
@@ -9021,6 +9129,13 @@ ALTER TABLE ONLY user_history
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: delayed_jobs_priority; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX delayed_jobs_priority ON delayed_jobs USING btree (priority, run_at);
 
 
 --
@@ -10155,6 +10270,20 @@ CREATE INDEX index_message_notifications_on_master_id ON message_notifications U
 --
 
 CREATE INDEX index_message_notifications_on_user_id ON message_notifications USING btree (user_id);
+
+
+--
+-- Name: index_message_notifications_status; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_status ON message_notifications USING btree (status);
+
+
+--
+-- Name: index_message_templates_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_templates_on_admin_id ON message_templates USING btree (admin_id);
 
 
 --
@@ -13246,6 +13375,14 @@ ALTER TABLE ONLY model_references
 
 
 --
+-- Name: fk_rails_4fe5122ed4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY message_templates
+    ADD CONSTRAINT fk_rails_4fe5122ed4 FOREIGN KEY (admin_id) REFERENCES admins(id);
+
+
+--
 -- Name: fk_rails_564af80fb6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -14272,4 +14409,14 @@ INSERT INTO schema_migrations (version) VALUES ('20180319133540');
 INSERT INTO schema_migrations (version) VALUES ('20180319175721');
 
 INSERT INTO schema_migrations (version) VALUES ('20180320105954');
+
+INSERT INTO schema_migrations (version) VALUES ('20180320113757');
+
+INSERT INTO schema_migrations (version) VALUES ('20180320154951');
+
+INSERT INTO schema_migrations (version) VALUES ('20180320183512');
+
+INSERT INTO schema_migrations (version) VALUES ('20180321082612');
+
+INSERT INTO schema_migrations (version) VALUES ('20180321095805');
 

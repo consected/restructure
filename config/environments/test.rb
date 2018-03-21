@@ -51,4 +51,6 @@ Rails.application.configure do
     config.logger = DoNothingLogger.new
   end
 
+  config.active_job.queue_adapter = :delayed_job
+
 end

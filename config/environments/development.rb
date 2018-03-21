@@ -26,8 +26,8 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :smtp
 
   config.action_mailer.smtp_settings = {
-    address: ENV['SMTP_SERVER'],
-    port: ENV['SMTP_PORT'],
+    address: ENV['SMTP_SERVER'] || 'email-smtp.us-east-1.amazonaws.com',
+    port: ENV['SMTP_PORT'] || 465,
     user_name: ENV['SMTP_USER_NAME'],
     password: ENV['SMTP_PASSWORD'],
     authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || 'login').to_sym,
@@ -59,6 +59,8 @@ Rails.application.configure do
   # Raises helpful error messages.
   config.assets.raise_runtime_errors = true
 
+
+  config.active_job.queue_adapter = :delayed_job
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true

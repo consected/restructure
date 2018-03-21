@@ -29,6 +29,8 @@ module ActivityLogHandler
 
     after_save :check_status
     after_save :track_record_update
+
+    after_commit :check_for_notification_records, on: :create
   end
 
   class_methods do
@@ -112,6 +114,18 @@ module ActivityLogHandler
     end
   end
 
+
+  def to_s
+    data
+  end
+
+  def data
+    if defined? super
+      super()
+    else
+      "#{self.class.admin_activity_log.name}: #{id}"
+    end
+  end
 
   def extra_log_type_config
 
@@ -441,6 +455,12 @@ module ActivityLogHandler
       res = master.current_user.has_access_to? perform, :activity_log_type, extra_log_type_config.resource_name
     end
     res && super(perform, with_options)
+  end
+
+  # An app specific DB trigger may have have created a message notification record.
+  # Check for new records, and work from there.
+  def check_for_notification_records
+    MessageNotification.handle_notification_records self
   end
 
 end

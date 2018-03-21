@@ -273,7 +273,7 @@
             <% elsif p == :zip %>
               <%= f.label :zip %>
               <%= f.text_field :zip, zip_field_props %>
-            <% elsif p == :notes || p == 'notes' || p.to_s.include?('_notes') %>
+            <% elsif p == :notes || p == 'notes' || p.to_s.include?('_notes') || p.to_s.include?('_description') %>
               <%= f.label p %>
               <% if caption_before[p]  %>
                   <p class="caption_before_notes">

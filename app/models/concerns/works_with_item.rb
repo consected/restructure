@@ -23,6 +23,11 @@ module WorksWithItem
       parent_class.secondary_key
     end
 
+    # The selection of possible class names that generically could be used with
+    def use_with_class_names
+      (DynamicModel.model_names + ExternalIdentifier.model_names + ActivityLog.model_names + Master::PrimaryAssociations).map{|m| m.to_s.singularize}
+    end
+
   end
 
 
@@ -34,6 +39,7 @@ module WorksWithItem
   def works_with
     self.class.use_with_class_names.include? item_type
   end
+
 
 
   def parent_class
