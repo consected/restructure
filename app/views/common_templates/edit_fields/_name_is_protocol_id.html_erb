@@ -1,0 +1,2 @@
+<%= form.label :protocol_id, 'data-add-icon' => 'info-sign', title: 'protocol this is related to' %>
+<%= form.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name.gsub('__',"_")}_sub_process_id", class: "form-control input-sm"}%>

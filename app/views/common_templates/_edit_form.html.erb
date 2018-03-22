@@ -1,4 +1,14 @@
 <%
+  # A common template for rendering edit forms.
+  # Automatically matches field templates in the edit_fields directory
+  # To add a new field matcher it is unlikely that this file needs to be edited,
+  # instead adding a file to edit_fields will typically suffice.
+
+  # This template can return the results of a Rails form_for or fields_for block
+  # dependent on whether the field set is embedded inside an outer form or not.
+
+  # An embedded form does not return a <form> tag, and also excludes some decoration and duplicate submit buttons.
+
 
   unless defined? embedded
     embedded = nil
@@ -19,7 +29,7 @@
   end
 
 
-  name = form_object_instance.item_type_us
+  form_object_item_type_us = form_object_instance.item_type_us
 
   unless defined? caption
     if embedded
@@ -34,7 +44,7 @@
   end
 
   unless caption && caption.to_s.include?('{{')
-    caption = (caption.to_s || name).gsub('Dynamic Model/', '').humanize.titleize
+    caption = (caption.to_s || form_object_item_type_us).gsub('Dynamic Model/', '').humanize.titleize
   end
 
   unless defined? item_list
@@ -45,15 +55,15 @@
     item_flags_after = nil
   end
 
-  has_source = false
+  @has_source = false
 
   select_desc = {}
 
 
-  if name.start_with? 'activity_log_'
-    gs_name = name
+  if form_object_item_type_us.start_with? 'activity_log_'
+    general_selection_name = form_object_item_type_us
   else
-    gs_name = name.pluralize
+    general_selection_name = form_object_item_type_us.pluralize
   end
 
 %>
@@ -62,268 +72,135 @@
   <div data-result="<%= edit_form_id %>">
 <% end %>
     <div class="">
-      <%= form_block_object.send(*form_block) do |f|%>
-      <% form_embed = f if @embedded_item && !embedded %>
+      <%= form_block_object.send(*form_block) do |form|%>
+      <% form_embed = form if @embedded_item && !embedded %>
       <% if @extra_log_type %>
-        <%= f.hidden_field :extra_log_type, value: @extra_log_type_name %>
+        <%= form.hidden_field :extra_log_type, value: @extra_log_type_name %>
       <% end %>
-      <%= model_reference_fields f %>
+      <%= model_reference_fields form %>
 
       <ul class="list-group">
         <li class="list-group-item edit-form-header">
           <% unless embedded %><%= inline_cancel_button %><% end %>
           <h4 class="list-group-item-heading"><%=caption%></h4>
-          <%= render partial: 'common_templates/item_flags_block', locals: {f: f} unless item_flags_after || item_flags_array.length == 0 %>
+          <%= render partial: 'common_templates/item_flags_block', locals: {f: form} unless item_flags_after || item_flags_array.length == 0 %>
         </li>
 
-        <% item_list.each do |p| %>
+        <% item_list.each do |field_name_sym| %>
           <%
-              set_related_field = handle_set_related_field(p)
+            field_name = field_name_sym.to_s
+
+            col = form_object_instance.class.columns_hash[field_name]
+            raise FphsException.new "Column #{field_name_sym} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
+            column_type = col.type
+
+            local_vars = {locals: {
+              form: form,
+              field_name_sym: field_name_sym,
+              field_name: field_name,
+              column_type: column_type,
+              general_selection_name: general_selection_name,
+              form_object_instance: form_object_instance,
+              form_object_item_type_us: form_object_item_type_us,
+              caption_before: caption_before
+              }
+            }
+            local_vars[:locals][:locals] = local_vars[:locals]
+
           %>
-          <% if caption_before[p] && p != :notes %>
-            <li class="list-group-item <%=name.hyphenate%>-caption-after-<%=p%>">
-              <%= caption_before[p].html_safe %>
+          <% if caption_before[field_name_sym] && field_name_sym != :notes %>
+            <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-caption-after-<%=field_name_sym%>">
+              <%= caption_before[field_name_sym].html_safe %>
             </li>
           <% end %>
 
-          <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
+          <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
             <%
-               col = form_object_instance.class.columns_hash[p.to_s]
-               if col.nil?
-                 raise FphsException.new "Column #{p} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}"
-               end
-               col_type = col.type
-            %>
-            <% if col_type == :boolean %>
-              <%= f.label p %>
-              <%= f.check_box p %>
-            <% elsif p == :description %>
-              <%= f.label p %>
-              <%= f.text_area p %>
-            <% elsif p == :rec_type%>
-              <%= f.label :rec_type %>
-              <%
-              gs = general_selection("#{gs_name}_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
-              gs ||= general_selection("#{gs_name}_rec_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
+              # Get the list of filenames for templates, making them into the matchers we wish to use.
+              # Sort by length to ensure the more specific matchers appear before the less specific matchers.
+              # For example 'name_starts_with_select_record_from' should be tested before 'name_starts_with_select'
+              f_names = Dir.entries(Rails.root.join 'app', 'views', 'common_templates', 'edit_fields').reject {|fn| fn.start_with?('.')}.map {|fn| fn[1..-10]}.sort {|a,b| b.length <=> a.length}
 
-              unless gs
-                raise FphsException.new "The general selection #{gs_name}_type or #{gs_name}_rec_type has not been defined. Please inform the administrator of this error."
+              got = false
+              match_name = "column_type_#{column_type}"
+              if f_names.include? match_name %>
+                <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+                <%
+                got = true
               end
 
-              has_phone = gs.select {|s| s.last == 'phone'}.first
-              has_email = gs.select {|s| s.last == 'email'}.first
-
-              %>
-              <%= f.select :rec_type, gs, {}, class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''} #{has_email ? 'rec_type_has_email' : ''}" %>
-            <% elsif p == :source
-                 gs = general_selection("#{gs_name}_source".to_sym, value: form_object_instance.source, quiet_fail: true) rescue nil
-                 unless gs
-                   raise FphsException.new "The general selection #{gs_name}_source has not been defined. Please inform the administrator of this error."
-                 end
-            %>
-              <%= f.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{gs_name}_source".to_sym), title: 'original sources of data' %>
-                <% if gs %>
-                <%= f.select :source, gs %>
-                <% has_source = true %>
-                <% else %>
-                <%= f.text_field :source %>
-                <% end %>
-            <% elsif p.to_s.index('select_record_from_') == 0
-                  # Allow a 'data' selection to be made from an item
-
-                  rlit = p.to_s.sub('select_record_from_', '').singularize
-
-                  if ActivityLog.use_with_class_names.include? rlit
-                    cn = rl = rlit
-                    cl = cn.camelize.constantize
-                    reslist = cl.where(master_id: form_object_instance.master_id)
-                    if cl.attribute_names.include?('rank')
-                      reslist = reslist.order(rank: :desc)
-                      reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
-                    else
-                      reslist = reslist.order(data: :asc)
-                      reslist = reslist.all.map{|i| [i.data, i.data]}
-                    end
-                  elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? rlit
-                    ActivityLog.use_with_class_names.each do |ucn|
-                      if rlit.start_with?(ucn)
-                        rl = rlit
-                        cn = ucn
-                        cl = cn.camelize.constantize
-                        reslist = cl.where(master_id: form_object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
-                        if cl.attribute_names.include?('rank')
-                          reslist = reslist.order(rank: :desc)
-                          reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
-                        else
-                          reslist = reslist.order(data: :asc)
-                          reslist = reslist.all.map{|i| [i.data, i.data]}
-                        end
-                      end
-                    end
-                  end
-                  unless rl
-                    logger.warn "Failed to find valid class name for #{p}"
-                  end
-
-              %>
-                <%= f.label rl %>
-                <%= f.select p, reslist%>
-
-
-            <% elsif p.to_s.end_with?('_blank_yes_no') %>
-              <%= f.label p, p.to_s.sub('_blank_yes_no', '').humanize %>
-              <%= f.select p, ['', 'yes', 'no'] %>
-            <% elsif p.to_s.end_with?('_yes_no') %>
-              <%= f.label p, p.to_s.sub('_yes_no', '').humanize %>
-              <%= f.select p, ['yes', 'no'] %>
-            <% elsif p.to_s.end_with?('_no_yes') %>
-              <%= f.label p, p.to_s.sub('_no_yes', '').humanize %>
-              <%= f.select p, ['no', 'yes'] %>
-
-            <% elsif p.to_s.end_with?('_time') %>
-              <%= f.label p %>
-              <%= f.text_field p, pattern: '\d{1,2}:\d{2} \D\D' %>
-
-            <% elsif p.to_s.index('select_') == 0
-
-                  gs = general_selection("#{gs_name}_#{p}".to_sym, return_all: true) rescue nil
-                  unless gs
-                    raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
-                  end
-                  desc = gs.reduce(false){|r,i| r || !i[6].blank?}
-                  v = form_object_instance.send(p)
-                  if desc.blank?
-                    opt = {}
-                  else
-                    idesc = "#{gs_name}_#{p}".to_sym
-                    opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{p.to_s.humanize} options"}
-                    select_desc["#{gs_name}_#{p}".to_sym] = v
-                  end
-            %>
-              <%= f.label p, opt %>
-              <%
-              gs = general_selection("#{gs_name}_#{p}".to_sym, value: v) rescue nil
-              unless gs
-                raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
-              end
-              %>
-              <%= f.select p, gs %>
-
-
-            <% elsif p == :protocol_id %>
-                <%= f.label :protocol_id, 'data-add-icon' => 'info-sign', title: 'protocol this is related to' %>
-                <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "-pick one-"}, {"data-filters-selector" => "##{name.gsub('__',"_")}_sub_process_id", class: "form-control input-sm"}%>
-
-            <% elsif p == :sub_process_id %>
-              <%= f.label 'status' %><br/>
-              <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "##{name.gsub('__',"_")}_protocol_event_id", class: "form-control input-sm"} %>
-
-            <% elsif p == :protocol_event_id %>
-                <%= f.label 'method' %><br/>
-                <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: "form-control input-sm" %>
-            <% elsif p == :rank %>
-              <% if respond_to? "#{name}_rank_array_pair".to_sym %>
-                <%= f.label :rank %>
-                <%= f.select :rank, self.send("#{name}_rank_array_pair") %>
-              <% else
-                   gs = general_selection("#{gs_name}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: form_object_instance.rank, quiet_fail: true)
-                   unless gs
-                     raise FphsException.new "The general selection #{name}_rank has not been defined. Please inform the administrator of this error."
-                   end
-              %>
-                <%= f.label :rank %>
-                <% if gs %>
-                <%= f.select :rank, gs %>
-                <% else %>
-                <%= f.text_field :rank %>
-                <% end %>
-              <% end %>
-            <% elsif set_related_field && p.to_s.end_with?('_rank') %>
-              <%= f.label p %>
-              <%
-              gs = general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value], quiet_fail: true)
-              unless gs
-                raise FphsException.new "The general selection #{set_related_field[:name_and_field]} has not been defined. Please inform the administrator of this error."
-              end
-              %>
-              <%= f.select p, gs %>
-            <% elsif p.to_s.index(/(_date|_when)$/)  %>
-              <%= f.label p %>
-              <%= f.date_field p %>
-            <% elsif p.to_s.index(/(_url|_link)$/)  %>
-              <%= f.label p %>
-              <%= f.text_field p, type: 'url' %>
-            <% elsif p.to_s.index(/_year$/)  %>
-              <%= f.label p %>
-              <%
-                h = {}
-                r = Settings.const_get("#{p.to_s.camelize}Range")
-                h[:in] = r if r
-              %>
-              <%= f.number_field p, h %>
-            <% elsif p == :country %>
-              <%= f.label :country %>
-              <%= f.country_select :country, priority_countries: ["US", "CA", "DE"], class: "form-control country-select"%>
-            <% elsif p == :college %>
-              <%= f.label :college %>
-              <%= f.text_field :college, class: 'college-input typeahead'  %>
-            <% elsif p == :state %>
-              <%= f.label :state %>
-              <%= f.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}  %>
-            <% elsif p == :zip %>
-              <%= f.label :zip %>
-              <%= f.text_field :zip, zip_field_props %>
-            <% elsif p == :notes || p == 'notes' || p.to_s.include?('_notes') || p.to_s.include?('_description') %>
-              <%= f.label p %>
-              <% if caption_before[p]  %>
-                  <p class="caption_before_notes">
-                    <%= caption_before[p].html_safe %>
-                  </p>
-              <% end %>
-
-              <%= f.text_area p, class: 'form-control'  %>
-            <% elsif GeneralSelection::BasicItemTypes.include?("#{gs_name}_#{p}".to_sym)%>
-              <%
-              # Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down
-                gs = general_selection("#{gs_name}_#{p}".to_sym, value: form_object_instance.send(p), quiet_fail: true)
-                unless gs
-                  raise FphsException.new "The general selection #{gs_name}_#{p} has not been defined. Please inform the administrator of this error."
+              unless got
+                match_name = "name_is_#{field_name_sym}"
+                if f_names.include? match_name %>
+                  <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+                  <%
+                  got = true
                 end
-              %>
+              end
 
-              <%= f.label p %>
-              <%= f.select p, gs %>
-            <% else %>
-              <%= f.label p %>
-              <%= f.text_field p, { data: {attr_name: p}} %>
-            <% end %>
+              unless got
+                f_names.select {|fn| fn.start_with?('name_starts_with_')}.map {|fn| fn.sub('name_starts_with_', '')}.each do |sw|
+                  match_name = "name_starts_with_#{sw}"
+                  if field_name.start_with?("#{sw}_") && f_names.include?(match_name) %>
+                    <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+                    <%
+                    got = true
+                    break
+                  end
+                end
+              end
+
+              unless got
+                f_names.select {|fn| fn.start_with?('name_ends_with_')}.map {|fn| fn.sub('name_ends_with_', '')}.each do |ew|
+                  match_name = "name_ends_with_#{ew}"
+                  if field_name.end_with?("_#{ew}") && f_names.include?(match_name) %>
+                    <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+                    <%
+                    got = true
+                    break
+                  end
+                end
+              end
+
+              unless got
+                if GeneralSelection::BasicItemTypes.include?("#{general_selection_name}_#{field_name_sym}".to_sym)%>
+                  <%= render local_vars.merge( {partial: "common_templates/edit_fields/is_general_selection"}) %>
+                <%
+                  got = true
+                end
+              end
+
+              unless got %>
+                <%= render local_vars.merge( {partial: "common_templates/edit_fields/default"}) %>
+              <%
+                got = true
+              end
+            %>
           </li>
-          <%  if item_flags_after == p && item_flags_array.length > 0 %>
-          <li class="list-group-item <%=name.hyphenate%>-<%=p%>">
+
+          <%  if item_flags_after == field_name_sym && item_flags_array.length > 0 %>
+          <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
             <%= render partial: 'common_templates/item_flags_block', locals: {f: f} %>
           </li>
           <% end %>
         <% end %>
-        <% if !embedded %>
-        <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
-        <% end %>
-
         <% unless embedded %>
+          <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
           <% if caption_before[:submit] %>
-            <li class="list-group-item <%=name.hyphenate%>-caption-after-<%=p%>">
+            <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-caption-after-<%=field_name_sym%>">
               <%= caption_before[:submit].html_safe %>
             </li>
           <% end %>
           <li class="list-group-item">
-            <%= f.submit class: "btn btn-primary", value: 'Save' %>
+            <%= form.submit class: "btn btn-primary", value: 'Save' %>
           </li>
         <% end %>
       </ul>
       <% end %>
 
     </div>
-      <% if has_source %>
-        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{gs_name}_source", value: form_object_instance.source} %>
+      <% if @has_source %>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{general_selection_name}_source", value: form_object_instance.source} %>
       <% end %>
 
       <% select_desc.each do |k,v| %>

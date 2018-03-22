@@ -1,0 +1,7 @@
+<%= form.label field_name_sym %>
+<%
+  h = {}
+  r = Settings.const_get("#{field_name.camelize}Range")
+  h[:in] = r if r
+%>
+<%= form.number_field field_name_sym, h %>

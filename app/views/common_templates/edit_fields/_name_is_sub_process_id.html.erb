@@ -1,0 +1,2 @@
+<%= form.label 'status' %><br/>
+<%= form.select :sub_process_id, sub_processes_array_with_class, {include_blank: "-select-"}, {"data-filters-selector" => "##{name.gsub('__',"_")}_protocol_event_id", class: "form-control input-sm"} %>

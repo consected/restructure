@@ -1,0 +1,8 @@
+<%= form.label field_name_sym %>
+<% if caption_before[field_name_sym]  %>
+    <p class="caption_before_notes">
+      <%= caption_before[field_name_sym].html_safe %>
+    </p>
+<% end %>
+
+<%= form.text_area field_name_sym, class: 'form-control'  %>

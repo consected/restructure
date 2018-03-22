@@ -1,0 +1,14 @@
+<%= form.label :rec_type %>
+<%
+gs = general_selection("#{general_selection_name}_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
+gs ||= general_selection("#{general_selection_name}_rec_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
+
+unless gs
+  raise FphsException.new "The general selection #{general_selection_name}_type or #{general_selection_name}_rec_type has not been defined. Please inform the administrator of this error."
+end
+
+has_phone = gs.select {|s| s.last == 'phone'}.first
+has_email = gs.select {|s| s.last == 'email'}.first
+
+%>
+<%= form.select :rec_type, gs, {}, class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''} #{has_email ? 'rec_type_has_email' : ''}" %>

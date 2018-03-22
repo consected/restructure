@@ -1,0 +1,16 @@
+<% if respond_to? "#{form_object_item_type_us}_rank_array_pair".to_sym %>
+  <%= form.label :rank %>
+  <%= form.select :rank, self.send("#{form_object_item_type_us}_rank_array_pair") %>
+<% else
+     gs = general_selection("#{general_selection_name}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: form_object_instance.rank, quiet_fail: true)
+     unless gs
+       raise FphsException.new "The general selection #{form_object_item_type_us}_rank has not been defined. Please inform the administrator of this error."
+     end
+%>
+  <%= form.label :rank %>
+  <% if gs %>
+  <%= form.select :rank, gs %>
+  <% else %>
+  <%= form.text_field :rank %>
+  <% end %>
+<% end %>

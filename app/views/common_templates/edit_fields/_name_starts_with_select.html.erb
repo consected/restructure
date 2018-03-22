@@ -1,0 +1,23 @@
+<%
+gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, return_all: true) rescue nil
+unless gs
+  raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
+end
+desc = gs.reduce(false){|r,i| r || !i[6].blank?}
+v = form_object_instance.send(field_name_sym)
+if desc.blank?
+  opt = {}
+else
+  idesc = "#{general_selection_name}_#{field_name_sym}".to_sym
+  opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{field_name.humanize} options"}
+  select_desc["#{general_selection_name}_#{field_name_sym}".to_sym] = v
+end
+%>
+<%= form.label field_name_sym, opt %>
+<%
+gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, value: v) rescue nil
+unless gs
+raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
+end
+%>
+<%= form.select field_name_sym, gs %>

@@ -1,0 +1,40 @@
+<%
+# Allow a 'data' selection to be made from an item
+
+rlit = field_name.sub('select_record_from_', '').singularize
+
+if ActivityLog.use_with_class_names.include? rlit
+  cn = rl = rlit
+  cl = cn.camelize.constantize
+  reslist = cl.where(master_id: form_object_instance.master_id)
+  if cl.attribute_names.include?('rank')
+    reslist = reslist.order(rank: :desc)
+    reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
+  else
+    reslist = reslist.order(data: :asc)
+    reslist = reslist.all.map{|i| [i.data, i.data]}
+  end
+elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? rlit
+  ActivityLog.use_with_class_names.each do |ucn|
+    if rlit.start_with?(ucn)
+      rl = rlit
+      cn = ucn
+      cl = cn.camelize.constantize
+      reslist = cl.where(master_id: form_object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
+      if cl.attribute_names.include?('rank')
+        reslist = reslist.order(rank: :desc)
+        reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
+      else
+        reslist = reslist.order(data: :asc)
+        reslist = reslist.all.map{|i| [i.data, i.data]}
+      end
+    end
+  end
+end
+unless rl
+  logger.warn "Failed to find valid class name for #{field_name_sym}"
+end
+
+%>
+<%= form.label rl %>
+<%= form.select field_name_sym, reslist%>

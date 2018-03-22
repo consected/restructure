@@ -1,0 +1,16 @@
+<%
+set_related_field = handle_set_related_field(field_name_sym)
+
+if set_related_field
+
+  gs = general_selection(set_related_field[:name_and_field], present: :hyphenate_name_val, order: :value_number_desc, value: set_related_field[:value], quiet_fail: true)
+  unless gs
+    raise FphsException.new "The general selection #{set_related_field[:name_and_field]} has not been defined. Please inform the administrator of this error."
+  end
+%>
+  <%= form.label field_name_sym %>
+  <%= form.select field_name_sym, gs %>
+<% else %>
+<% # This is a fallback that is unlikely to be used. If a use case arises for something like address_rank that does not set a related field, then feel free to expand on this. %>
+  <%= render partial: 'common_templates/edit_fields/name_is_rank', locals: locals %>
+<% end %>
