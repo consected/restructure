@@ -16,10 +16,25 @@ module AdminHelper
     link_to '', edit_path(id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
   end
 
+  def filter_btn title, filter_on, val
+
+    filter = (params[:filter] || {}).dup
+
+    prev_val = filter[filter_on].to_s
+    filter[filter_on] = val.to_s
+
+    if val.present? || title == 'all'
+      link_to(title, index_path(filter: filter), class: "btn #{ val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm" )
+    else
+      ''
+    end
+  end
+
   def show_filters
     res = ""
 
-    if respond_to?(:filters) &&  filters
+    if respond_to?(:filters) && filters
+      these_filters = filters.dup
 
       filters_on_multiple = false
       res = ''
@@ -31,14 +46,21 @@ module AdminHelper
         filters_on_multiple = true
       end
 
+      if these_filters.is_a? Array
+        these_filters ={ filters_on => these_filters }
+      end
+
+      these_filters[:disabled] = ['true', 'false']
+      fo << :disabled
+
       fo.each do |filter_on|
 
         res << "<h4>Filter on: #{filter_on.to_s.humanize}</h4>"
 
         if filters_on_multiple
-          filter = filters[filter_on]
+          filter = these_filters[filter_on]
         else
-          filter = filters
+          filter = these_filters
         end
 
 
@@ -49,22 +71,22 @@ module AdminHelper
         end
 
 
-        res << "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}" if all_filters.first.last.is_a?(Symbol)
+        res << filter_btn('all', filter_on, nil) if all_filters.first.last.is_a?(Symbol)
         all_filters.each do |title, vals|
 
           if vals.is_a?( Symbol) || vals.is_a?( String)
-            res << link_to(title, index_path(filter: {filter_on => vals}), class: "btn btn-default btn-sm" )
+            res << filter_btn(title, filter_on, vals)
           else
 
             res << "<div><p>#{title.to_s.humanize}</p>"
-            res << "#{link_to("all", index_path(filter: ""), class: "btn btn-default btn-sm" )}"
+            res << filter_btn('all', filter_on, nil)
             if vals.is_a? Hash
               vals.each do |k,v|
-                res << link_to(v, index_path(filter: {filter_on => k}), class: "btn btn-default btn-sm" )
+                res << filter_btn(v, filter_on, k)
               end
             else
               vals.each do |v|
-                res << link_to(v, index_path(filter: {filter_on => v}), class: "btn btn-default btn-sm" )
+                res << filter_btn(v, filter_on, v)
               end
             end
             res << "</div>"

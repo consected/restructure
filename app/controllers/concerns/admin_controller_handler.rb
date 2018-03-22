@@ -81,11 +81,15 @@ module AdminControllerHandler
 
 
     def filters
+      {}
+    end
 
+    def filters_on
+      []
     end
 
     def index_params
-      permitted_params + [:admin_id]
+      permitted_params + [:admin_id] - [:disabled]
     end
 
     def index_partial
@@ -199,13 +203,27 @@ module AdminControllerHandler
     end
 
     def filter_params
-      return nil if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
-      res = params.require(:filter).permit(filters_on)
+      return @filter_params if @filter_params
+      has_disabled_field = primary_model.attribute_names.include?('disabled')
+      if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
+        if has_disabled_field
+          params[:filter] = {disabled: 'false'}
+        else
+          return
+        end
+      end
+      fo = filters_on
+      fo << :disabled if has_disabled_field
+      res = params.require(:filter).permit(fo)
+
+      res.reject! {|k,v| v.blank?}
+
       res.each do |k, v|
         res[k] = nil if v == 'IS NULL'
       end
 
-      res
+
+      @filter_params = res
     end
 
 

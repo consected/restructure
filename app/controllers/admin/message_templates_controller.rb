@@ -8,9 +8,9 @@ class Admin::MessageTemplatesController < AdminController
     }
   end
 
-  def filters_on
-    [:message_type, :template_type]
-  end
+    def filters_on
+      [:message_type, :template_type]
+    end
 
     def default_index_order
       {name: :asc}

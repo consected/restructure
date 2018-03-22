@@ -15,7 +15,7 @@
         <% index_params.each do |p| %>
           <th><%= p.to_s.humanize %></th>
         <% end %>
-        <th class="no-sort"></th>
+        
       </tr>
     </thead>
 
@@ -43,6 +43,11 @@
       <% end %>
     </tbody>
   </table>
+
+  <div class="container">
+    <%= @help_description %>
+  </div>
+
 
   <%=  render partial: 'admin_handler/index_actions'  %>
   </div>

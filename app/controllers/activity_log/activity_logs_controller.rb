@@ -175,7 +175,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
     end
 
     def implementation_class
-      cn = "#{controller_name.singularize}_#{item_rec_type}".camelize
+      cn = "#{controller_name.singularize}".camelize
       cnf = "ActivityLog::#{cn}"
       cnf.constantize
     end

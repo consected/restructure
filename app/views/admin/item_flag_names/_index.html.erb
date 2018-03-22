@@ -1,6 +1,9 @@
 <div class="data-results" data-subscription="admin-list" >
-  <div data-result="admin-list">    
+  <div data-result="admin-list">
 <h1>Item Flag Names</h1>
+<p>
+  <%= show_filters %>
+</p>
 
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
 
@@ -21,13 +24,13 @@
         <td><%= admin_edit_btn list_item.id%> </td>
         <td><%= list_item.name %></td>
         <td><%= list_item.item_type %></td>
-        <td><%= list_item.disabled ? 'disabled' : ''%></td>        
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>
         <td><%= list_item.admin_name %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%=  render partial: 'admin_handler/index_actions'  %>    
+<%=  render partial: 'admin_handler/index_actions'  %>
   </div>
 </div>

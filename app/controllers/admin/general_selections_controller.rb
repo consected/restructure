@@ -4,11 +4,11 @@ class Admin::GeneralSelectionsController < AdminController
   protected
 
     def filters
-      GeneralSelection.item_types.map {|g| [g,g]}.to_h
+      { item_type: GeneralSelection.item_types.map {|g| [g,g]}.to_h }
     end
 
     def filters_on
-      :item_type
+      [:item_type]
     end
 
     def default_index_order

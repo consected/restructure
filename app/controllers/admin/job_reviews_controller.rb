@@ -32,6 +32,8 @@ class Admin::JobReviewsController < AdminController
         else
           res = 'failed_at is null'
         end
+      else
+        res.delete(:failed)
       end
       res
     end

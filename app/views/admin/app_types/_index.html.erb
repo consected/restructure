@@ -1,6 +1,9 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
 <h1>App Types</h1>
+<p>
+  <%= show_filters %>
+</p>
 
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
 
@@ -30,13 +33,16 @@
   </tbody>
 </table>
 
-<div>
-  <h3>Upload a configuration file</h3>
+<div class="row">
 
-  <%= form_tag({action: :upload}, multipart: true) do %>
+  <div class="panel panel-default panel-body col-sm-8 col-sm-offset-8">
+    <h3>Upload a configuration file</h3>
+
+    <%= form_tag({action: :upload}, multipart: true) do %>
     <%= file_field_tag 'config' %>
     <%= submit_tag %>
-  <% end %>
+    <% end %>
+  </div>
 </div>
 
 <%=  render partial: 'admin_handler/index_actions'  %>

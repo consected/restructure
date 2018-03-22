@@ -151,7 +151,7 @@ class ReportsController < ApplicationController
   end
 
   def update
-    if @report_item.respond_to? :master
+    if @report_item.respond_to?(:master) && @report_item.class.foreign_key_name
       @master = @report_item.master
       @master.current_user = current_user if @master
     elsif @report_item.respond_to? :user_id

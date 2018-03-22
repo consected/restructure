@@ -46,8 +46,11 @@ class DynamicModel < ActiveRecord::Base
 
 
   def add_master_association &association_block
-    # Now forcibly set the Master association:
-    Master.has_many self.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{self.model_class_name}", foreign_key: self.foreign_key_name, primary_key: self.primary_key_name
+    # Now forcibly set the Master association if there is a foreign_key_name set
+    # If there is no foreign_key_name set, then this is not attached to a master record
+    if foreign_key_name.present?
+      Master.has_many self.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{self.model_class_name}", foreign_key: self.foreign_key_name, primary_key: self.primary_key_name
+    end
   end
 
   def self.categories
@@ -76,7 +79,7 @@ class DynamicModel < ActiveRecord::Base
       begin
 
         pkn = (self.primary_key_name).to_sym
-        fkn = self.foreign_key_name.blank? ? 'master_id': self.foreign_key_name.to_sym
+        fkn = self.foreign_key_name.blank? ? nil: self.foreign_key_name.to_sym        
         tkn = self.table_key_name.blank? ? 'id' : self.table_key_name.to_sym
         man = self.model_association_name
         ro = self.result_order

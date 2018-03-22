@@ -1,0 +1,25 @@
+<%
+# Allow a 'data' selection to be made from a dynamic model table that is not tied to this master
+
+rlit = field_name.sub('select_record_from_table_', '').singularize
+cn = rl = rlit
+
+cl = cn.camelize.constantize
+reslist = cl
+if cl.attribute_names.include?('rank')
+  reslist = reslist.order(rank: :desc)
+  reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
+elsif cl.attribute_names.include?('rank')
+  reslist = reslist.order(data: :asc)
+  reslist = reslist.all.map{|i| [i.data, i.data]}
+else
+  reslist = reslist.all.map{|i| [i.data, i.data]}
+end
+
+unless rl
+  logger.warn "Failed to find valid class name for #{field_name_sym}"
+end
+
+%>
+<%= form.label rl %>
+<%= form.select field_name_sym, reslist%>

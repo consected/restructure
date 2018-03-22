@@ -1,6 +1,11 @@
 <div class="data-results" data-subscription="admin-list" >
-  <div data-result="admin-list">    
+  <div data-result="admin-list">
 <h1>Player Info Accuracy Scores</h1>
+
+<p>
+  <%= show_filters %>
+</p>
+
 
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
 
@@ -12,9 +17,9 @@
       <th>Value</th>
       <th>Disabled</th>
       <th>Admin</th>
-      
+
     </tr>
-  </thead>  
+  </thead>
   <tbody>
     <% @accuracy_scores.each do |list_item| %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
@@ -23,12 +28,12 @@
         <td><%= list_item.value %></td>
         <td><%= list_item.disabled ? 'disabled' : ''%></td>
         <td><%= list_item.admin_name %></td>
-        
+
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%=  render partial: 'admin_handler/index_actions'  %>    
+<%=  render partial: 'admin_handler/index_actions'  %>
   </div>
 </div>

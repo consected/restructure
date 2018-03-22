@@ -1,6 +1,9 @@
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list">
     <h1>Users</h1>
+    <p>
+      <%= show_filters %>
+    </p>
 
     <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below">
       <% if @updated_with %>
@@ -26,7 +29,7 @@
             <td><%= list_item.email %></td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
             <td><%= list_item.admin_name %></td>
-            
+
 
           </tr>
         <% end %>
