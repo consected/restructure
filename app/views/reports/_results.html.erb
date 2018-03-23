@@ -27,7 +27,7 @@
         <table class="" style="margin:1em;">
           <thead>
             <tr>
-              <% if @editable %><th class="no-sort"></th><% end %>
+              <% if editable? %><th class="no-sort"></th><% end %>
               <% i = 0 %>
               <% @results.fields.each do |col| %>
                 <th><p><%=col%></p>
@@ -43,7 +43,7 @@
 
 
               <tr class="" id="report-item-<%=list_item[0]%>">
-               <% if @editable %>
+               <% if editable? %>
                <td><%= report_edit_btn list_item[0]%> </td>
                <% end %>
                 <% i = 0 %>

@@ -162,7 +162,13 @@ class Report < ActiveRecord::Base
     report_definition = self
     filtering_previous = false
     using_defaults = (@search_attr_values == '_use_defaults_')
-    raise Report::BadSearchCriteria unless search_attrs_prep
+    unless search_attrs_prep
+      if options[:show_defaults_if_bad_attributes]
+        using_defaults = (@search_attr_values == '_use_defaults_')
+      else
+        raise Report::BadSearchCriteria
+      end
+    end
 
     sql = report_definition.sql
     primary_table = 'masters'

@@ -4,10 +4,11 @@ class ReportsController < ApplicationController
   before_action :authenticate_user_or_admin!
   before_action :authorized?, only: [:index]
   before_action :set_report, only: [:show]
-  before_action :set_editable_instance_from_id, only: [:edit, :update]
+  before_action :set_editable_instance_from_id, only: [:edit, :update, :new, :create]
+  before_action :set_instance_from_build, only: [:new, :create]
   after_action :clear_results, only: [:show, :run]
 
-  helper_method :filters, :filters_on, :index_path, :permitted_params
+  helper_method :filters, :filters_on, :index_path, :permitted_params, :editable?, :creatable?
   ResultsLimit = Master.results_limit
 
   # List of available reports
@@ -49,9 +50,6 @@ class ReportsController < ApplicationController
       options[:filter_previous] = true if search_attrs[:_filter_previous_]=='true'
       no_run = !search_attrs[:no_run].blank?
     end
-
-    @editable = @report.editable_data? && (current_admin || current_user && current_user.can?(:edit_report_data))
-
 
     unless @report.searchable || authorized?
       @no_masters = true
@@ -150,18 +148,23 @@ class ReportsController < ApplicationController
     render partial: 'edit_form'
   end
 
+  def new
+    render partial: 'edit_form'
+  end
+
+
   def update
-    if @report_item.respond_to?(:master) && @report_item.class.foreign_key_name
+    if @report_item.respond_to?(:master) && !@report_item.class.no_master_association
       @master = @report_item.master
       @master.current_user = current_user if @master
     elsif @report_item.respond_to? :user_id
       @report_item.user_id = current_user.id
+    else
+      @report_item.current_user = current_user
     end
     return not_authorized unless @report.editable_data?
 
     if @report_item.update(secure_params)
-      #redirect_to show_path(id: @report.id), notice: "#{@report_item.human_name} updated successfully"
-      #render partial: 'edit_form'
       # Need to update the master_id manually, since it could have been set by a trigger
       res = @report_item.class.find(@report_item.id)
       @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
@@ -174,9 +177,51 @@ class ReportsController < ApplicationController
 
   end
 
+  def create
+
+
+    if @report_item.save
+      # Need to update the master_id manually, since it could have been set by a trigger
+      res = @report_item.class.find(@report_item.id)
+      @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
+      @results = [@report_item]
+      search_attrs = @report_item.attributes
+      
+      params[:search_attrs] = search_attrs.dup
+
+      @results =  @report.run(search_attrs, show_defaults_if_bad_attributes: true)
+      render partial: 'results'
+    else
+      logger.warn "Error creating #{@report_item}: #{@report_item.errors.inspect}"
+      flash.now[:warning] = "Error creating #{@report_item}: #{error_message}"
+      edit
+    end
+
+
+  end
 
 
   protected
+
+    def editable?
+      @editable = @report.editable_data? && (current_admin || current_user && current_user.can?(:edit_report_data))
+    end
+
+    def creatable?
+      @creatable = @report.editable_data? && (current_admin || current_user && current_user.can?(:create_report_data))
+    end
+
+    def set_instance_from_build
+
+      build_with = secure_params rescue nil
+
+      if report_model.respond_to?(:no_master_association) && report_model.no_master_association || !report_model.respond_to?(:master)
+        @report_item = report_model.new(build_with)
+      else
+        @report_item = @master.send(report_model.to_s.ns_underscore.pluralize).build(build_with)
+      end
+
+    end
 
     def set_report
       id = params[:id]
@@ -251,7 +296,7 @@ class ReportsController < ApplicationController
       id = params[:report_id]
       id = id.to_i
       @report = Report.find(id)
-      return if params[:id] == 'cancel'
+      return if params[:id] == 'cancel' || params[:id].blank?
       @report_item = report_model.find(params[:id])
       @id = @report_item.id
     end
@@ -261,7 +306,7 @@ class ReportsController < ApplicationController
     end
 
     def report_params_holder
-      "report_#{@report.edit_model.classify.underscore}"
+      report_model.to_s.ns_underscore.gsub('__', '_')
     end
 
 

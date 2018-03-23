@@ -14,8 +14,8 @@ module GeneralDataConcerns
 
 
   def check_status
-    @was_created = id_changed? ? 'created' : false
-    @was_updated = updated_at_changed? ? 'updated' : false
+    @was_created = respond_to?(:id) && id_changed? ? 'created' : false
+    @was_updated = respond_to?(:updated_at) && updated_at_changed? ? 'updated' : false
   end
 
 

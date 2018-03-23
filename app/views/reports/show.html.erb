@@ -22,8 +22,13 @@
         <p><%= l %></p>
         <% end %>
         <p>&nbsp;</p>
-          <%= render partial: 'criteria' %>
-        </div>
+        <%= render partial: 'criteria' %>
+        <% if creatable? %>
+          <div class="text-center">
+            <%= link_to "New Item", new_report_path(report_id: @report.id), remote: true, class: "btn btn-default" %>
+          </div>
+        <% end %>
+      </div>
     </div>
   </div>
 </div>

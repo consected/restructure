@@ -258,8 +258,8 @@ class Master < ActiveRecord::Base
     super(extras)
   end
 
+  # Validate that the external identifier restrictions do not prevent access to this item
   def allows_user_access
-    # Validate that the external identifier restrictions do not prevent access to this item
     # but ignore the test if not persisted yet, since the external identifier may be added during the creation process
     unless self.creating_master
       er = UserAccessControl.external_identifier_restrictions(current_user)

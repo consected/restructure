@@ -79,7 +79,7 @@ class DynamicModel < ActiveRecord::Base
       begin
 
         pkn = (self.primary_key_name).to_sym
-        fkn = self.foreign_key_name.blank? ? nil: self.foreign_key_name.to_sym        
+        fkn = self.foreign_key_name.blank? ? nil: self.foreign_key_name.to_sym
         tkn = self.table_key_name.blank? ? 'id' : self.table_key_name.to_sym
         man = self.model_association_name
         ro = self.result_order
@@ -119,6 +119,10 @@ class DynamicModel < ActiveRecord::Base
             @result_order
           end
 
+          def self.no_master_association
+            !@foreign_key_name
+          end
+
 
           self.primary_key = tkn
           self.foreign_key_name = fkn
@@ -127,7 +131,16 @@ class DynamicModel < ActiveRecord::Base
           self.result_order = ro
 
           def master_id
+            return nil if self.class.no_master_association
             master.id
+          end
+
+          def current_user
+            @current_user
+          end
+
+          def current_user= cu
+            @current_user = cu
           end
 
           def self.find id

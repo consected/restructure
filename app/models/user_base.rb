@@ -35,6 +35,10 @@ class UserBase < ActiveRecord::Base
     false
   end
 
+  def self.no_master_association
+    false
+  end
+
   def can_edit?
     self.allows_current_user_access_to? :edit
   end
@@ -83,7 +87,7 @@ class UserBase < ActiveRecord::Base
   end
 
   def master_user
-
+    return current_user if self.class.no_master_association
     if respond_to?(:master) && master
       current_user = master.current_user
       current_user
@@ -123,7 +127,10 @@ class UserBase < ActiveRecord::Base
     res = self.class.allows_user_access_to? master_user, perform, with_options=nil
     return false unless res
 
-    if respond_to?(:master) && master
+    if self.class.no_master_association
+      # Since there is no master association, there is no master to block the access
+      return true
+    elsif respond_to?(:master) && master
       m = master
     elsif respond_to?(:item) && item.respond_to?(:master) && item.master
       m = item.master
@@ -138,7 +145,7 @@ class UserBase < ActiveRecord::Base
 
     # Check at a table level that the user can access the resource
     named = self.name.ns_underscore.pluralize
-    !!user.has_access_to?( perform, :table, named, with_options)
+    !!user.has_access_to?(perform, :table, named, with_options)
   end
 
   def referenced_from
@@ -204,6 +211,9 @@ class UserBase < ActiveRecord::Base
   protected
 
     def check_master
+
+      return if self.class.no_master_association
+
       msid = nil if msid.blank? && !msid.nil?
       if msid && !master_id
         m = Master.where(msid: msid).first
@@ -216,9 +226,13 @@ class UserBase < ActiveRecord::Base
       raise "master not set in #{self}" if self.respond_to?(:master) && !(self.master_id && self.master) && !validating?
     end
 
+    def no_user_validation
+      (creatable_without_user && !persisted?) || validating? || self.class.no_master_association
+    end
+
 
     def force_write_user
-      return true if creatable_without_user && !persisted? || validating?
+      return true if no_user_validation
       logger.debug "Forcing save of user in #{self}"
       return unless self.master if self.respond_to? :master
       mu = master_user
@@ -228,7 +242,7 @@ class UserBase < ActiveRecord::Base
     end
 
     def user_set
-      return true if (creatable_without_user && !persisted?) || validating?
+      return true if no_user_validation
 
       unless self.user
         errors.add :user, "must be authenticated and set"
