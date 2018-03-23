@@ -170,7 +170,7 @@ module UserHandler
     def track_record_update
       # Don't do this if we have the configuration set to avoid tracking, or
       # if the record was not created or updated
-      return if no_track || !(@was_updated || @was_created)
+      return if no_track || !(@was_updated || @was_created) || self.class.no_master_association
       @update_action = true
       Tracker.track_record_update self
     end

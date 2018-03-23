@@ -340,6 +340,10 @@ class Report < ActiveRecord::Base
       search_attr_values[k.to_sym] = nil unless search_attr_values.has_key? k.to_sym
     end
 
+    ks = search_attributes.keys
+    search_attr_values.slice!(*ks)
+
+    search_attr_values.symbolize_keys! unless search_attr_values.is_a?(ActionController::Parameters)
 
     search_attr_values.each do |k,v|
       all_blank &&= (k.to_s != ReportIdAttribName && (search_attributes[k.to_s].nil? || v.blank?))
@@ -358,8 +362,8 @@ class Report < ActiveRecord::Base
     end
 
 
-
-    return false if all_blank && search_attributes.length > 0
+    # We are now allowing blank searches, so don't return false for a blank search
+    # return false if all_blank && search_attributes.length > 0
 
     true
   end

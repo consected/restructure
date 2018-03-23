@@ -1,10 +1,10 @@
-
 <% rt = @report.result_tables_by_index || []%>
+
 <div class="data-results" data-subscription="admin-list" >
   <div data-result="admin-list" class="<%= @count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below"></div>
 
-    <p class="text-center"><%= link_to "link to report", report_path(id: @report.id, search_attrs: params[:search_attrs].merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>
+    <p class="text-center"><%= link_to "link to report", report_path(id: @report.id, search_attrs: @search_attrs.merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>
     <%= render partial: 'filter_on'  if @report.filtering_on %>
     <% if current_admin && @report.clean_sql%>
     <p class="text-center"><a href="#clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>

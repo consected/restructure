@@ -6,6 +6,7 @@ class ReportsController < ApplicationController
   before_action :set_report, only: [:show]
   before_action :set_editable_instance_from_id, only: [:edit, :update, :new, :create]
   before_action :set_instance_from_build, only: [:new, :create]
+  before_action :set_master_and_user, only: [:create, :update]
   after_action :clear_results, only: [:show, :run]
 
   helper_method :filters, :filters_on, :index_path, :permitted_params, :editable?, :creatable?
@@ -95,6 +96,7 @@ class ReportsController < ApplicationController
       respond_to do |format|
         format.html {
           if params[:part] == 'results'
+            @search_attrs = params[:search_attrs]
             render partial: 'results'
           else
             render :show
@@ -154,14 +156,7 @@ class ReportsController < ApplicationController
 
 
   def update
-    if @report_item.respond_to?(:master) && !@report_item.class.no_master_association
-      @master = @report_item.master
-      @master.current_user = current_user if @master
-    elsif @report_item.respond_to? :user_id
-      @report_item.user_id = current_user.id
-    else
-      @report_item.current_user = current_user
-    end
+
     return not_authorized unless @report.editable_data?
 
     if @report_item.update(secure_params)
@@ -185,11 +180,11 @@ class ReportsController < ApplicationController
       res = @report_item.class.find(@report_item.id)
       @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
       @results = [@report_item]
-      search_attrs = @report_item.attributes
-      
-      params[:search_attrs] = search_attrs.dup
 
-      @results =  @report.run(search_attrs, show_defaults_if_bad_attributes: true)
+      @search_attrs = @report_item.attributes.dup
+      
+      @results =  @report.run(@search_attrs, show_defaults_if_bad_attributes: true)
+
       render partial: 'results'
     else
       logger.warn "Error creating #{@report_item}: #{@report_item.errors.inspect}"
@@ -210,6 +205,20 @@ class ReportsController < ApplicationController
     def creatable?
       @creatable = @report.editable_data? && (current_admin || current_user && current_user.can?(:create_report_data))
     end
+
+    def set_master_and_user
+
+      return unless @report_item
+      if @report_item.respond_to?(:master) && !@report_item.class.no_master_association
+        @master = @report_item.master
+        @master.current_user = current_user if @master
+      elsif @report_item.respond_to? :user_id
+        @report_item.user_id = current_user.id
+      else
+        @report_item.current_user = current_user
+      end
+    end
+
 
     def set_instance_from_build
 
@@ -296,6 +305,7 @@ class ReportsController < ApplicationController
       id = params[:report_id]
       id = id.to_i
       @report = Report.find(id)
+      @report.current_user = current_user
       return if params[:id] == 'cancel' || params[:id].blank?
       @report_item = report_model.find(params[:id])
       @id = @report_item.id
