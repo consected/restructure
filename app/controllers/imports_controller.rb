@@ -92,7 +92,7 @@ class ImportsController < ApplicationController
 
       if @import.persisted?
         unless @import.errors.empty?
-          flash.now[:warning] = @import.errors.to_a.join("\n")
+          flash.now[:warning] = @import.errors.to_a.join("\n")[0..2000]
         end
         render 'new_import'
       else
@@ -194,7 +194,7 @@ class ImportsController < ApplicationController
       if errors.empty? && (prev_invalid_items != 0 || @import.item_count.nil?)
         flash.now[:notice] = "Newly entered data has been validated and matched. Check the data is correct and submit again."
       else
-        flash.now[:warning] = errors.uniq.join("\n")
+        flash.now[:warning] = errors.uniq.join("\n")[0..2000]
       end
 
       @import.items = items

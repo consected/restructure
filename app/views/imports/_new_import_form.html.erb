@@ -34,15 +34,60 @@ filled_items = 0
                     invalid_items += 1 unless valid_item || !filled_row
                     filled_items +=1 if filled_row
                   end
+
+                  form_object_instance = item
+                  form_object_item_type_us = form_object_instance.item_type_us
+                  label_redefined = false
                 %>
 
                 <tr class="<%= valid_item ?  'item-valid' : 'item-invalid'%> <%= filled_row ? 'filled-row' : 'blank-row'%>  <%= row_num == @import.item_count+1 ? 'next-blank-row' : ''%>" data-error-items="<%= item.errors.keys.join(",")%>" >
                   <td class="row-num">
                     <%= row_num %>
                   </td>
-                  <% fields.each do |p| %>
-                    <td data-col-type="<%=p%>">
+                  <% fields.each do |field_name_sym|
 
+                  %>
+                    <td data-col-type="<%=field_name_sym%>">
+                      <%
+                        field_name = field_name_sym.to_s
+
+                        col = form_object_instance.class.columns_hash[field_name]
+                        # raise FphsException.new "Column #{field_name_sym} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
+                        # External IDs and master crosswalk ids (msid) do not feature in the item. Ignore if they appear
+                        column_type = :string
+                        column_type = col.type if col
+
+                        if form_object_item_type_us.start_with? 'activity_log_'
+                          general_selection_name = form_object_item_type_us
+                        else
+                          general_selection_name = form_object_item_type_us.pluralize
+                        end
+
+                        local_vars = {locals: {
+                          form: f,
+                          field_name_sym: field_name_sym,
+                          field_name: field_name,
+                          column_type: column_type,
+                          general_selection_name: general_selection_name,
+                          form_object_instance: form_object_instance,
+                          form_object_item_type_us: form_object_item_type_us,
+                          caption_before: {}
+                          }
+                        }
+                        local_vars[:locals][:locals] = local_vars[:locals]
+
+                        # One time only, redefine the label method for this specific form fields instance
+                        unless label_redefined
+                          def f.label *args
+                            ""
+                          end
+                          label_redefined = true
+                        end
+                      %>
+
+                      <%= render local_vars.merge(partial: 'common_templates/edit_form_field') %>
+
+<% if false %>
                       <%
                          col = item.class.columns_hash[p.to_s]
                          col_type = col.type if col
@@ -106,7 +151,7 @@ filled_items = 0
                       <% else %>
                         <%= f.text_field p %>
                       <% end %>
-
+<%end%>
 
                     </td>
                   <% end %>

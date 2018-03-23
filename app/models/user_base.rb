@@ -223,7 +223,7 @@ class UserBase < ActiveRecord::Base
         raise "MSID and master_id set, but they do not correspond to the same record" unless self.master.msid == msid
       end
 
-      raise "master not set in #{self}" if self.respond_to?(:master) && !(self.master_id && self.master) && !validating?
+      raise FphsException.new "master not set in #{self} #{self.id}" if self.respond_to?(:master) && !(self.master_id && self.master) && !validating?
     end
 
     def no_user_validation

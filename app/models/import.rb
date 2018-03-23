@@ -86,6 +86,10 @@ class Import < ActiveRecord::Base
         new_obj = self.item_class.new(row.to_h)
         attempt_match_on_secondary_key new_obj
 
+        if new_obj.respond_to?(:master) && !new_obj.no_master_association && !new_obj.master && new_obj.master_id
+          new_obj.master = Master.find(master_id)
+        end
+
       rescue FphsException => e
         self.errors.add 'import error', e.message
       rescue => e

@@ -14,14 +14,14 @@ class ApplicationController < ActionController::Base
   before_action :setup_navs
   before_action :setup_current_app_type
 
-  rescue_from Exception, :with => :unhandled_exception_handler
-  rescue_from RuntimeError, :with => :runtime_error_handler
-  rescue_from ActiveRecord::RecordNotFound, :with => :runtime_record_not_found_handler
-  rescue_from ActionController::RoutingError, :with => :routing_error_handler
-  rescue_from ActionController::InvalidAuthenticityToken, :with => :bad_auth_token
-  rescue_from FphsException, :with => :fphs_app_exception_handler
-  rescue_from PG::RaiseException, :with => :fphs_app_exception_handler
-
+  rescue_from Exception, with: :unhandled_exception_handler
+  rescue_from RuntimeError, with: :runtime_error_handler
+  rescue_from ActiveRecord::RecordNotFound, with: :runtime_record_not_found_handler
+  rescue_from ActionController::RoutingError, with: :routing_error_handler
+  rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
+  rescue_from FphsException, with: :fphs_app_exception_handler
+  rescue_from PG::RaiseException, with: :fphs_app_exception_handler
+  rescue_from ActionDispatch::Cookies::CookieOverflow, with: :cookie_overflow_handler
 
 protected
 
@@ -103,12 +103,12 @@ protected
     end
 
     def unexpected_error msg
-      flash[:danger] = "An error occurred: #{msg}"
+      flash[:danger] = "An error occurred: #{msg}"[0..2000]
       render text: flash[:danger], status: 400
     end
 
     def general_error msg, level=:info
-      flash[level] = "Error: #{msg}"
+      flash[level] = "Error: #{msg}"[0..2000]
       render text: flash[level], status: 400
     end
 
