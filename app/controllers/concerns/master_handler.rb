@@ -198,6 +198,9 @@ module MasterHandler
       def set_instance_from_id
         return if params[:id] == 'cancel'
         set_object_instance primary_model.find(params[:id])
+        if object_instance.respond_to?(:master) && object_instance.master
+          object_instance.master.current_user = current_user
+        end
         @id = object_instance.id
 
       end
