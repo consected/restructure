@@ -5,7 +5,7 @@
   <h3>Check, edit data or cancel before submitting import</h3>
   <p>Filename: <strong><%= @import.filename %></strong></p>
   <p>Number of rows: <strong><%=@import.item_count%></strong></p>
-  <% if @import.items.first.attribute_names.include? 'master_id' %>
+  <% if @import.items.first && @import.items.first.attribute_names.include?('master_id') %>
   <br/>
   <p class="help-block">Master ID cells have links to the full master data.</p>
   <%end%>

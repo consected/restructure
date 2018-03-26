@@ -42,6 +42,11 @@
     display: table-row;
   }
 
+
+  tr.final-blank-row {
+    display: none;
+  }
+
   .bottom-tab.hide-blank-rows {
     display: none;
   }
@@ -50,7 +55,6 @@
     display: inline-block;
   }
 }
-
 
 
 table.import-grid {

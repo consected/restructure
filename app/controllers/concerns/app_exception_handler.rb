@@ -50,7 +50,7 @@ module AppExceptionHandler
     def return_and_log_error e, msg, code
       logger.error e.inspect
       logger.error e.backtrace.join("\n")
-      byebug
+      
       if performed?
         flash[:danger] = msg[0..2000]
         return true

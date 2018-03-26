@@ -25,6 +25,7 @@ filled_items = 0
                 <% row_num = 1 %>
                 <%= form.fields_for @primary_table.to_sym, @import.items do |f| %>
                 <%
+                  final_blank_row = row_num == @import.items.length
                   item = @import.items[f.index]
                   item.send :write_attribute, :user_id, current_user.id
                   valid_item =  true
@@ -40,7 +41,7 @@ filled_items = 0
                   label_redefined = false
                 %>
 
-                <tr class="<%= valid_item ?  'item-valid' : 'item-invalid'%> <%= filled_row ? 'filled-row' : 'blank-row'%>  <%= row_num == @import.item_count+1 ? 'next-blank-row' : ''%>" data-error-items="<%= item.errors.keys.join(",")%>" >
+                <tr class="<%= valid_item ?  'item-valid' : 'item-invalid'%> <%= final_blank_row ? 'final-blank-row' : filled_row ? 'filled-row' : 'blank-row'%>  <%= row_num == @import.item_count+1 ? 'next-blank-row' : ''%>" data-error-items="<%= item.errors.keys.join(",")%>" >
                   <td class="row-num">
                     <%= row_num %>
                   </td>
@@ -87,71 +88,7 @@ filled_items = 0
 
                       <%= render local_vars.merge(partial: 'common_templates/edit_form_field') %>
 
-<% if false %>
-                      <%
-                         col = item.class.columns_hash[p.to_s]
-                         col_type = col.type if col
-                      %>
-                      <% if p == :master_id && item.master_id %>
-                      <%= link_to "", masters_path(format: 'json', mode: 'MSID', master: {id: item.master_id}),  class: "glyphicon glyphicon-share pull-right import-link-item",  title: 'open in new window', data: {remote: true, result_target: "#modal_results_block", result_target_force: "true", template: "modal-pi-search-results-template", on_click_call: 'utils.show_modal_results'} %>
-                      <% end %>
-                      <% if col_type == :boolean %>
-                        <%= f.check_box p %>
-                      <% elsif Master.external_id? p
-                            primary_model = Master.external_id_definition p
-                      %>
-                        <%= f.number_field primary_model.external_id_attribute, class: 'form-control', in: primary_model.external_id_range,  pattern: primary_model.external_id_edit_pattern %>
-                      <% elsif p == :description %>
-                        <%= f.text_area p %>
-                      <% elsif p == :rec_type%>
-                        <%= f.select :rec_type, general_selection("#{name.pluralize}_type".to_sym, value: item.rec_type), {prompt: ''} %>
-                      <% elsif p == :source %>
-                        <%= f.select :source, general_selection("#{name.pluralize}_source".to_sym, value: item.source), {prompt: ''} %>
-                        <% has_source = true %>
-                      <% elsif p.to_s.index('select_') == 0
-                          v = item.send(p)
-                      %>
-                        <%= f.select p, general_selection("#{name}_#{p}".to_sym, value: v), {prompt: ''}%>
-                      <% elsif p.to_s.start_with?('set_related_') && p.to_s.end_with?('_rank') %>
-                          <%= f.select p, general_selection("#{p.to_s.gsub('set_related_', '').gsub('_rank', '').pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc), {include_blank: true} %>
-                      <% elsif p == :protocol_id %>
-                          <%= f.select :protocol_id, protocol_array_without_updates, {prompt: "#{@readonly ? '' : ''}"}, {"data-filters-selector" => "##{name}_sub_process_id", class: ""}%>
-                      <% elsif p == :sub_process_id %>
-                        <%= f.select :sub_process_id, sub_processes_array_with_class, {include_blank: "#{@readonly ? '' : ''}"}, {"data-filters-selector" => "##{name}_protocol_event_id", class: ""} %>
-                      <% elsif p == :protocol_event_id %>
-                          <%= f.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "#{@readonly ? '' : ''}"}, class: "" %>
-                      <% elsif p == :rank %>
-                        <% if respond_to? "#{name}_rank_array_pair".to_sym %>
-                          <%= f.select :rank, self.send("#{name}_rank_array_pair"), {prompt: ''} %>
-                        <% else %>
-                          <%= f.select :rank, general_selection("#{name.pluralize}_rank".to_sym, present: :hyphenate_name_val, order: :value_number_desc, value: item.rank), {prompt: ''} %>
-                        <% end %>
-                      <% elsif p.to_s.index(/(_date|_when)$/)  %>
-                        <%= f.date_field p %>
-                      <% elsif p.to_s.index(/_year$/)  %>
-                        <%
-                          h = {}
-                          r = Settings.const_get("#{p.to_s.camelize}Range")
-                          h[:in] = r if r
-                        %>
-                        <%= f.number_field p, h %>
-                      <% elsif p == :country %>
-                        <%= f.country_select :country, priority_countries: ["US", "CA", "DE"], class: " country-select"%>
-                      <% elsif p == :college %>
-                        <%= f.text_field :college, class: 'college-input typeahead'  %>
-                      <% elsif p == :state %>
-                        <%= f.collection_select :state, state_hash, :first, :last, {include_blank: "#{@readonly ? '' : '-select-'}"}  %>
-                      <% elsif p == :zip %>
-                        <%= f.text_field :zip, zip_field_props %>
-                      <% elsif p == :notes %>
-                        <%= f.text_area :notes, class: ''  %>
-                      <% elsif GeneralSelection::BasicItemTypes.include?("#{name.pluralize}_#{p}".to_sym)%>
-                        <%# Any entry in BasicItemTypes not otherwise handled will be treated as a general selection drop down%>
-                        <%= f.select p, general_selection("#{name.pluralize}_#{p}".to_sym, value: item.send(p)) %>
-                      <% else %>
-                        <%= f.text_field p %>
-                      <% end %>
-<%end%>
+
 
                     </td>
                   <% end %>
@@ -224,13 +161,44 @@ filled_items = 0
   });
 
   window.setTimeout(function(){
+
+    var final_blank_row = $('tr.final-blank-row');
+    final_blank_row.clone().insertAfter(final_blank_row);
+    $(final_blank_row).removeClass('final-blank-row');
+
     $(document).on('change', 'tr.next-blank-row td input, select, textarea', function(){
       var v = $(this).val();
       if(!v || v == '')
         return;
+
+      var blank_row = $(this).parents('form').find('tr.final-blank-row');
       var row = $(this).parents('tr');
+      var new_row = blank_row.clone().insertAfter(row);
+      var rn = parseInt(row.find('td.row-num').html());
+
+      var new_rn = rn + 1;
+      new_row.find('td.row-num').html(new_rn);
+
+      new_row.find('td input, select, textarea').each(function(){
+        var id = $(this).attr('id');
+        if(id) {
+          $(this).attr('id', id.replace('_0_', '_' + rn + '_' ));
+        }
+        var name = $(this).attr('name');
+        if(name) {
+          $(this).attr('name', name.replace('[0]', '[' + rn + ']' ))  ;
+        }
+      });
+
       row.removeClass('next-blank-row').addClass('filled-row').removeClass('blank-row');
-      row.next().addClass('next-blank-row');
+      new_row.removeClass('final-blank-row');
+      _fpa.form_utils.format_block(new_row);
+
+    });
+
+    $(document).on('submit', 'form', function(){
+      $(this).find('.next-blank-row').remove();
+
     });
 
     $('fieldset[disabled] a[data-remote]').on('click', function(ev){

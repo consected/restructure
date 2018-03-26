@@ -83,7 +83,7 @@ class ImportsController < ApplicationController
         @import.item_count = 0
       end
 
-      @blanks = 100 - @import.item_count
+      @blanks = 1
       if @blanks > 0
         @import.generate_blank_items @blanks
       else
@@ -137,11 +137,16 @@ class ImportsController < ApplicationController
 
         if non_blank
           item_count += 1
-
+          byebug
           if r.check_valid?
             begin
               r.save!
             rescue => e
+              failed = true
+              em = r.errors.first || e.to_s
+              errors << em
+              logger.debug "------------------------>Failed to add item to import when saving: #{e}"
+            rescue FphsException => e
               failed = true
               em = r.errors.first || e.to_s
               errors << em
