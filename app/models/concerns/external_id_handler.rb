@@ -263,6 +263,10 @@ module ExternalIdHandler
     self.external_id
   end
 
+  def no_master_association
+    false
+  end
+
   def allows_nil_master?
     self.class.allow_to_generate_ids?
   end

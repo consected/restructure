@@ -25,7 +25,7 @@ filled_items = 0
                 <% row_num = 1 %>
                 <%= form.fields_for @primary_table.to_sym, @import.items do |f| %>
                 <%
-                  final_blank_row = row_num == @import.items.length
+                  final_blank_row = row_num == @import.item_count+1
                   item = @import.items[f.index]
                   item.send :write_attribute, :user_id, current_user.id
                   valid_item =  true
