@@ -4,7 +4,7 @@ module ReportsHelper
      link_to '', edit_report_path(id, report_id: @report.id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
   end
   def report_edit_cancel
-     link_to 'cancel', "#", id: "report-edit-cancel", class: "btn btn-danger"
+     link_to '', "#", id: "report-edit-cancel", class: "btn btn-default glyphicon glyphicon-remove report-edit-cancel"
   end
   def report_field name, type, value, options={}
 

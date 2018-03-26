@@ -1,0 +1,165 @@
+.import-edit-container, .import-table-container, #report-results-block {
+  margin: 30px 30px 0 30px;
+}
+.import-edit-form, .report-results-inner {
+  width: auto;
+  height: auto;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  background-color: white;
+}
+
+
+#import-container.hide-blank-rows, #report-container.hide-blank-rows {
+  tr.blank-row {
+    display: none;
+  }
+
+  tr.next-blank-row {
+    display: table-row;
+  }
+
+
+  tr.final-blank-row {
+    display: none;
+  }
+
+  .bottom-tab.hide-blank-rows {
+    display: none;
+  }
+
+  .bottom-tab.show-blank-rows {
+    display: inline-block;
+  }
+}
+
+table.table.report-table {
+  margin: 0;
+}
+
+
+table.import-grid, table.table.report-table {
+
+  th, thead th.tablesorter-header {
+    padding: 6px 8px 0 8px;
+    border: 1px solid silver;
+    background-color: #eee;
+  }
+
+  td {
+    padding: 0 0 0 4px;
+    border: 1px solid silver;
+    background-color: white;
+    line-height: normal;
+    font-size: 12px;
+
+    input.form-control, select.form-control {
+
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      width: auto;
+      padding-right: 4px;
+      background-image: none;
+      -moz-appearance: none;
+    }
+    select.form-control {
+      width: auto;
+    }
+    textarea.form-control {
+      height: 2em;
+      margin: 0;
+      border: 0;
+      box-shadow: none;
+      font-size: 12px;
+      padding: 2px 2px;
+      min-width: 200px;
+
+      &:focus {
+        height: auto !important;
+      }
+    }
+    input[type='checkbox'] {
+      border: 1px solid silver;
+      -moz-appearance: checkbox;
+      box-sizing: border-box;
+
+      padding: 0;
+      line-height: normal;
+      display: inline-block;
+
+      width: 1em;
+      height: 1em;
+
+      vertical-align: middle;
+      color: #444;
+    }
+
+  }
+
+  .edit-entity {
+    margin: 0;
+  }
+
+  select, input {
+    &.form-control.has-value {
+      background-color: white !important;
+      background-image: none;
+    }
+  }
+
+  select {
+    &.form-control.has-value {
+      -moz-appearance: none;
+    }
+  }
+
+  .import-link-item {
+    position: relative;
+    margin-bottom: -2em;
+    margin-top: 0.4em;
+  }
+
+  tr.item-invalid {
+    .form-control { color: red !important;}
+
+  }
+
+  td.row-num {
+    background-color: #e6e6e6;
+    font-size: 12px;
+    padding-right: 4px;
+    text-align: center;
+  }
+
+  .report-el {
+    padding: 8px 8px;
+  }
+
+ .report-edit-btn-cell {
+   padding: 4px 6px;
+ }
+
+}
+
+fieldset[disabled] {
+  .form-control {
+    background-color: inherit;
+    cursor: default;
+  }
+  h3, h4 { color: gray; }
+}
+
+p.field-names {
+  font-weight: bold;
+  margin-bottom: 4px;
+  margin-top: 16px;
+}
+
+table.table.tablesorter > thead > tr > th.no-sort.tablesorter-header:after {
+  display: none;
+}
+
+table th.edit-button-column {
+  width: 80px;
+}

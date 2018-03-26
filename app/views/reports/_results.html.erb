@@ -1,6 +1,6 @@
 <% rt = @report.result_tables_by_index || []%>
 
-<div class="data-results" data-subscription="admin-list" >
+<div class="data-results" data-subscription="admin-list" id="report-container">
   <div data-result="admin-list" class="<%= @count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below"></div>
 
@@ -23,15 +23,26 @@
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
     </div>
-    <div  id="report-results-block" class="<%= @count_only ? 'hidden' : '' %>">
-        <table class="" style="margin:1em;">
+    <div id="report-results-block" class="<%= @count_only ? 'hidden' : '' %>">
+      <div class="report-results-inner">
+        <table class="report-table">
           <thead>
             <tr>
-              <% if editable? %><th class="no-sort"></th><% end %>
-              <% i = 0 %>
-              <% @results.fields.each do |col| %>
-                <th><p><%=col%></p>
-                  <p class="small"><%=rt[i] %></p>
+              <% if editable? %><th class="no-sort edit-button-column"></th><% end %>
+              <%
+                i = 0
+
+                table_names = rt.uniq
+                num_tables = table_names.length
+              %>
+              <% @results.fields.each do |col|
+
+              %>
+                <th>
+                  <p><%=col%></p>
+                  <% unless num_tables == 1 %>
+                  <p class="small report-table-name"><%=rt[i] %></p>
+                  <% end %>
                 </th>
               <%  i += 1%>
               <% end %>
@@ -44,19 +55,20 @@
 
               <tr class="" id="report-item-<%=list_item[0]%>">
                <% if editable? %>
-               <td><%= report_edit_btn list_item[0]%> </td>
+               <td class="report-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </td>
                <% end %>
                 <% i = 0 %>
 
                 <% list_item.each do |col| %>
-                <td data-col-type="<%=@results.fields[i] %>"  data-col-table="<%=rt[i] %>"><%= col %></td>
-                <%  i += 1%>
+                <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=rt[i] %>" class="report-el"><%= col %></td>
+                <%  i += 1 %>
                 <% end %>
 
               </tr>
             <% end %>
           </tbody>
         </table>
+      </div>
     </div>
 
 

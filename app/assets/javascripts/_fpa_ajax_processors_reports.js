@@ -1,17 +1,17 @@
 _fpa.postprocessors_reports = {
-    
+
     reports_form: function(block, data){
-        _fpa.form_utils.format_block(block);            
+        _fpa.form_utils.format_block(block);
         $('#master_results_block').html('');
-        
+
 
         _fpa.masters.handle_search_form(block.find('form'));
-        
-        
+
+
         block.find('a.btn[data-attribute]').click(function(ev){
           ev.preventDefault();
           var da = $(this).attr('data-attribute');
-          
+
           var v = $('#search_attrs_'+da);
           var newval = v.val();
           if(newval.length > 0) newval += "\n";
@@ -22,23 +22,23 @@ _fpa.postprocessors_reports = {
           v.change();
           from_f.change();
         });
-        
+
         block.find('form').not('.attached-complete-listener').on('ajax:complete',function(){
             $('#search_attrs__filter_previous_').attr('checked', false);
             $('#filter_on_block').html('');
         }).addClass('attached-complete-listener');
-        
+
         var cb = $('#search_attrs__filter_previous_').not('.attached-click-listener');
-        
+
         if(cb.length === 1 && cb.is(':checked')){
             window.setTimeout(function(){
                 $('a#get_filter_previous').click();
             }, 100);
         }
-        
+
         cb.on('change',function(){
             if(!$('#search_attrs__filter_previous_').is(':checked')){
-               $('#filter_on_block').html('');   
+               $('#filter_on_block').html('');
             }else{
                 window.setTimeout(function(){
                     $('a#get_filter_previous').click();
@@ -46,11 +46,11 @@ _fpa.postprocessors_reports = {
             }
             return false;
         }).addClass('attached-click-listener');
-        
+
     },
-    
+
     reports_result: function(block, data){
-        
+
         if(data){
             // Update the search form results count bar manually
             var c = $('.result-count').html();
@@ -59,12 +59,12 @@ _fpa.postprocessors_reports = {
             if(table_count.length === 1){
                 c = table_count.html();
             }
-            data.count = {count: c, show_count: c};                
+            data.count = {count: c, show_count: c};
             var h = _fpa.templates['search-count-template'](data);
             $('.search_count_reports').html(h);
         }
-        
-      
+
+
         window.setTimeout(function(){
           $('table').addClass('table tablesorter');
           var tables = {trackers:
@@ -108,16 +108,16 @@ _fpa.postprocessors_reports = {
                     col_types = tables[t];
                     var idname = col_types[i];
                     console.log("Getting " + i + " for " + idname + ' in ' + t);
-                    _fpa.set_definition(i, function(){                                                
+                    _fpa.set_definition(i, function(){
                       var pe = _fpa.cache(i);
                       var cells = $('td[data-col-table="'+t+'"][data-col-type="'+idname+'"]');
                       cells.each(function(){
                         var cell = $(this);
-                        var d = cell.html();    
+                        var d = cell.html();
                         var p = _fpa.get_item_by('value', pe, d);
 
                         if(!p || p.value == null){
-                          p = _fpa.get_item_by('id', pe, d);                        
+                          p = _fpa.get_item_by('id', pe, d);
                         }
                         if(p) cell.append(' <em>'+p.name+'</em>');
                       });
@@ -131,36 +131,58 @@ _fpa.postprocessors_reports = {
 
           _fpa.form_utils.setup_tablesorter($('#report-results-block'));
 
-        }, 50);        
-        
+        }, 50);
+
     },
     report_edit_form: function(block, data){
-        
-        $.scrollTo(block, 200, {offset:-50});
-        _fpa.form_utils.format_block(block);
-        block.find('#report-edit-cancel').click(function(ev){
-            ev.preventDefault();
-            block.html('');
+
+        // $.scrollTo(block, 200, {offset:-50});
+        // _fpa.form_utils.format_block(block);
+        // block.find('#report-edit-cancel').click(function(ev){
+        //     ev.preventDefault();
+        //     block.html('');
+        // });
+        //
+        //
+        // $('input[data-field-name="phone"], input[data-field-name="telephone"]').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}});
+        var form = block.find('form');
+        var form_id = form.attr('id');
+        var row = block.find('tr');
+        var item_id = form.attr('data-object-id');
+
+        var orig_row = $('tr#report-item-' + item_id);
+        orig_row.after(row);
+        orig_row.hide();
+
+        var hidden = block.find('input');
+        row.find('.report-edit-btn-cell').append(hidden);
+
+
+
+        row.find('input, select, textarea, button').each(function(){
+          $(this).attr('form', form_id);
         });
-        
-        
-        $('input[data-field-name="phone"], input[data-field-name="telephone"]').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}});
-        
-        
-                
+
+        _fpa.form_utils.format_block(row);
+
     },
-    
+
     edit_report_result: function(block, data){
         $('#report-edit-').html("");
-        var row = $('#report-item-' + data.report_item.id);
-        
+        var id = data.report_item.id;
+        var row = $('#report-item-' + id);
+
         for(var i in data.report_item){
             if(data.report_item.hasOwnProperty(i))
                 row.find('[data-col-type="'+i+'"]').first().html(data.report_item[i]);
         };
-                
+
+        row.show();
+
+        var edit_row = $('tr#report-item-edit-' + id).remove();
+
         //_fpa.postprocessors.reports_result(row);
     }
-    
+
 };
 $.extend(_fpa.postprocessors, _fpa.postprocessors_reports);
