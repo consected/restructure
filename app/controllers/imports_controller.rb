@@ -137,7 +137,7 @@ class ImportsController < ApplicationController
 
         if non_blank
           item_count += 1
-          byebug
+          
           if r.check_valid?
             begin
               r.save!

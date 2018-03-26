@@ -127,6 +127,11 @@ module ActivityLogHandler
     end
   end
 
+
+  def no_master_association
+    false
+  end
+
   def extra_log_type_config
 
     elt  = self.extra_log_type

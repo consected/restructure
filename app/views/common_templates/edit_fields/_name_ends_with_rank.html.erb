@@ -10,7 +10,6 @@ if set_related_field
 %>
   <%= form.label field_name_sym %>
   <%= form.select field_name_sym, gs %>
-<% else %>
-<% # This is a fallback that is unlikely to be used. If a use case arises for something like address_rank that does not set a related field, then feel free to expand on this. %>
+<% elsif form_object_instance.respond_to?(:rank) %>
   <%= render partial: 'common_templates/edit_fields/name_is_rank', locals: locals %>
 <% end %>
