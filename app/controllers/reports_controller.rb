@@ -179,13 +179,15 @@ class ReportsController < ApplicationController
       # Need to update the master_id manually, since it could have been set by a trigger
       res = @report_item.class.find(@report_item.id)
       @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
-      @results = [@report_item]
-
-      @search_attrs = @report_item.attributes.dup
+      # @results = [@report_item]
+      #
+      # @search_attrs = @report_item.attributes.dup
+      #
+      # @results =  @report.run(@search_attrs, show_defaults_if_bad_attributes: true)
+      #
+      # render partial: 'results'
       
-      @results =  @report.run(@search_attrs, show_defaults_if_bad_attributes: true)
-
-      render partial: 'results'
+      render json: {report_item: @report_item}
     else
       logger.warn "Error creating #{@report_item}: #{@report_item.errors.inspect}"
       flash.now[:warning] = "Error creating #{@report_item}: #{error_message}"

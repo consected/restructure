@@ -58,13 +58,13 @@ table.import-grid, table.table.report-table {
       border: 0;
       border-radius: 0;
       box-shadow: none;
-      width: auto;
+      width: 100%;
       padding-right: 4px;
       background-image: none;
       -moz-appearance: none;
     }
     select.form-control {
-      width: auto;
+      width: 100%;
     }
     textarea.form-control {
       height: 2em;
@@ -74,6 +74,7 @@ table.import-grid, table.table.report-table {
       font-size: 12px;
       padding: 2px 2px;
       min-width: 200px;
+      width: 97%;
 
       &:focus {
         height: auto !important;
@@ -136,8 +137,28 @@ table.import-grid, table.table.report-table {
     padding: 8px 8px;
   }
 
+  .report-item-edit {
+    .report-el {
+      padding: 0px 4px;
+    }
+
+  }
+
+  .report-el.report-el-object-id {
+    padding: 8px 8px;
+  }
+
+
  .report-edit-btn-cell {
    padding: 4px 6px;
+ }
+
+ .report-edit-btn-cell.report-edit-btn-cell-editing {
+   padding: 4px 4px;
+
+   a.btn {
+     top: 0;
+   }
  }
 
 }

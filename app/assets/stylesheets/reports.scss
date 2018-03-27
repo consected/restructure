@@ -33,7 +33,25 @@ tr.report-auto {background-color: #FFFADF;}
 }
 
 .report-edit-submit, .report-edit-cancel {
-    font-size: 12px;
+    font-size: 10px;
     padding: 2px 4px;
     margin: 0 2px;
+}
+
+.report-edit-form {
+  display: none;
+}
+
+table.table.report-table .report-el.report-el-object-id {
+  width: 10em;
+  background-color: #eee;
+}
+
+#report-item-new a.edit-entity {display: none;}
+
+.report-new-item-btn {
+  font-size: 10px;
+  margin: 0;
+  padding: 2px 3px;  
+
 }

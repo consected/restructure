@@ -23,18 +23,12 @@
         <% end %>
         <p>&nbsp;</p>
         <%= render partial: 'criteria' %>
-        <% if creatable? %>
-          <div class="text-center">
-            <%= link_to "New Item", new_report_path(report_id: @report.id), remote: true, class: "btn btn-default" %>
-          </div>
-        <% end %>
       </div>
     </div>
   </div>
 </div>
 <div id="master_results_block" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results">
 <% if @results %>
-<%= render partial: 'results' %>
-
+  <%= render partial: 'results' %>
 <% end %>
 </div>

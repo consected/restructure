@@ -1,16 +1,16 @@
 <div class="data-results">
-  <div data-result="report-edit-form-"  class="admin-edit-form">
+  <div data-result="report-edit-form-"  class="report-edit-form">
 <% object_instance = @report_item %>
 <table>
 <%= form_for(object_instance, url: (object_instance.id ? url_for(controller: controller_name, action: :update, report_id: @report.id, id: object_instance.id) : url_for(controller: controller_name, action: :create, report_id: @report.id) ), class: "inline-form", remote: true, html: {'data-result-target' => '#report-edit-results', 'data-template' => "edit-report-result",  'data-object-id' => object_instance.id }) do |f| %>
-<tr id="report-item-edit-<%=object_instance.id%>">
+<tr id="report-item-edit-<%=object_instance.id%>" class="report-item-edit">
   <%= render partial: 'form_errors' %>
-  <td class="report-el report-edit-btn-cell">
+  <td class="report-el report-edit-btn-cell report-edit-btn-cell-editing">
     <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
     <%= report_edit_cancel %><button class="btn btn-primary report-edit-submit"><i class="glyphicon glyphicon-ok"></i></button>
   </td>
   <% if object_instance.respond_to?(:id) %>
-   <td class="report-el"><%= object_instance.id %></td>
+   <td class="report-el report-el-object-id"><%= object_instance.id %></td>
   <% end %>
   <% (permitted_params - [:id]).each do |field_name_sym| %>
 
