@@ -1,7 +1,7 @@
---
+﻿--
 -- PostgreSQL database dump
 --
-
+SET search_path = ml_app_zeus_full;
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -13,10 +13,10 @@ SET client_min_messages = warning;
 -- Name: ml_app; Type: SCHEMA; Schema: -; Owner: -
 --
 
-CREATE SCHEMA ml_app;
+--CREATE SCHEMA ml_app_zeus_full;
 
 
-SET search_path = ml_app, pg_catalog;
+SET search_path = ml_app_zeus_full, pg_catalog;
 
 --
 -- Name: add_study_update_entry(integer, character varying, character varying, date, character varying, integer, integer, character varying); Type: FUNCTION; Schema: ml_app; Owner: -
@@ -14074,7 +14074,7 @@ ALTER TABLE ONLY tracker_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app;
+--SET search_path TO ml_app;
 
 INSERT INTO schema_migrations (version) VALUES ('20150602181200');
 
