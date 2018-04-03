@@ -12,5 +12,12 @@ class Settings
   UserTimeout = 30.minutes.freeze
   AdminTimeout = 15.minutes.freeze
 
+  OsWordsFile = "/usr/share/dict/words"
+  PasswordEntropyConfig = {
+    min_entropy: 20,
+    min_word_length: 4,
+    extra_dictionary_words: :word_list,
+    use_dictionary: true
+  }.freeze
 
 end

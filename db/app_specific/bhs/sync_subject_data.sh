@@ -7,33 +7,51 @@
 # NOTE: master_id on Zeus FPHS DB and Elaine AWS DB ** do not match **.
 #       Only BHS ID can be used to match records in Zeus and Elaine
 
-export AWS_DB=fphs
-export ZEUS_DB=fphs
 
-export ZEUS_FPHS_DB_SCHEMA=ml_app2
-export ZEUS_FPHS_DB_HOST=
-export ZEUS_FPHS_DB_USER=fphs
-export AWS_DB_SCHEMA=ml_app
-export AWS_DB_HOST=
-export AWS_DB_USER=fphs
+# Connection details for the local FPHS Zeus database
+ZEUS_DB=ebdb
+ZEUS_FPHS_DB_SCHEMA=ml_app_zeus_full
+ZEUS_FPHS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+ZEUS_FPHS_DB_USER=fphs
 
+# Connection details for the remote AWS Elaine database
+AWS_DB=ebdb
+AWS_DB_SCHEMA=ml_app
+AWS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+AWS_DB_USER=fphs
+
+# Main SQL scripts
+BHS_ZEUS_FPHS_SQL_FILE=./db/app_specific/bhs/run_sync_subject_data_fphs_db.sql
+BHS_AWS_SQL_FILE=./db/app_specific/bhs/run_sync_subject_data_aws_db.sql
+
+# Temp files - can be anywhere - and will be cleaned up before and after use
+BHS_SQL_FILE=/tmp/temp_bhs.sql
+BHS_IDS_FILE=/tmp/remote_bhs_ids
+BHS_ASSIGNMENTS_FILE=/tmp/zeus_bhs_assignments.csv
+BHS_PLAYER_INFOS_FILE=/tmp/zeus_bhs_player_infos.csv
+BHS_PLAYER_CONTACTS_FILE=/tmp/zeus_bhs_player_contacts.csv
+
+# Initially set the default schema for psql to be the AWS schema. This way, we do not need
+# set search_path=... directly coded in the scripts
 export PGOPTIONS=--search_path=$AWS_DB_SCHEMA
-export BHS_SQL_FILE=/tmp/temp_bhs.sql
-export BHS_ZEUS_FPHS_SQL_FILE=./db/app_specific/bhs/run_sync_subject_data_fphs_db.sql
-export BHS_AWS_SQL_FILE=./db/app_specific/bhs/run_sync_subject_data_aws_db.sql
-export BHS_IDS_FILE=/tmp/remote_bhs_ids
-export BHS_ASSIGNMENTS_FILE=/tmp/zeus_bhs_assignments.csv
-export BHS_PLAYER_INFOS_FILE=/tmp/zeus_bhs_player_infos.csv
-export BHS_PLAYER_CONTACTS_FILE=/tmp/zeus_bhs_player_contacts.csv
+
+function cleanup {
+  echo "Cleanup"
+  rm $BHS_IDS_FILE
+  rm $BHS_SQL_FILE
+  rm $BHS_ASSIGNMENTS_FILE
+  rm $BHS_PLAYER_INFOS_FILE
+  rm $BHS_PLAYER_CONTACTS_FILE
+}
 
 # ----> Cleanup from previous runs, just in case
-rm $BHS_IDS_FILE
-rm $BHS_SQL_FILE
+cleanup
 
 # ----> On Remote AWS DB
-# Run find_new_remote_bhs_record() and copy to a CSV file (BHS_IDS_FILE)
+# Run find_new_remote_bhs_records() and copy to a CSV file (BHS_IDS_FILE)
 # This returns a list of BHS IDs to be sync'd from the Zeus FPHS DB
 #
+echo "Find remote BHS records"
 echo "\copy (select * from find_new_remote_bhs_records()) to $BHS_IDS_FILE with (format csv, header true);" > $BHS_SQL_FILE
 psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $BHS_SQL_FILE
 
@@ -50,6 +68,7 @@ psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $BHS_SQL_FILE
 #
 # Copy temp_bhs_assignments to BHS_ASSIGNMENTS_FILE
 
+echo "Match and export Zeus records"
 PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $BHS_ZEUS_FPHS_SQL_FILE
 
 # ----> On Remote AWS DB
@@ -68,4 +87,9 @@ PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_H
 # This creates the player_infos, player_contacts and updates activity_log_bhs_assignments, using the
 # AWS DB master_id and user_id as a substitution for the original values pulled from Zeus.
 #
+
+echo "Transfer matched records to remote DB"
 psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $BHS_AWS_SQL_FILE
+
+# ----> Cleanup
+cleanup

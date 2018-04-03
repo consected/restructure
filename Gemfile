@@ -7,6 +7,7 @@ gem 'pg', '~> 0.15'
 gem 'jquery-rails'
 
 gem 'devise'
+gem 'strong_password', '~> 0.0.5'
 
 gem 'dalli'
 

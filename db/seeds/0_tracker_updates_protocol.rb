@@ -55,7 +55,8 @@ module Seeds
 
     def self.setup
       log "In #{self}.setup"
-      if Rails.env.test? || Protocol.active.count == 0
+      log "Updates: #{Protocol.active.where(name: 'Updates').count}"
+      if Rails.env.test? || Protocol.active.where(name: 'Updates').count == 0
         create_protocol_events
         log "Ran #{self}.setup"
       else
