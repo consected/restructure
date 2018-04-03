@@ -3,20 +3,20 @@ require 'rails_helper'
 RSpec.describe Admin::ManageUsersController, type: :controller do
 
   include ManageUserSupport
-  
+
   def object_class
     User
   end
-  
+
   def object_name
     "manage_user"
   end
-  
-  
+
+
   def item
     @manage_user
   end
-  
+
   def edit_form_admin
     '_form'
   end
@@ -24,7 +24,7 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
   let(:valid_attributes) {
     valid_attribs
   }
-  
+
   let(:list_invalid_attributes){
     list_invalid_attribs
   }
@@ -33,7 +33,7 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
     list_invalid__update_attribs
   }
 
-  
+
   let(:invalid_attributes) {
     invalid_attribs
   }
@@ -48,26 +48,28 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
     end
     @path_prefix
   }
-  
+
   describe "Ensure authentication" do
     before_each_login_admin
-    it "returns a result" do            
+    it "returns a result" do
       get :index
       expect(response).to have_http_status(200), "Attempting #{@admin}"
     end
   end
-  
+
   describe "GET #index" do
     before_each_login_admin
-     
-    it "assigns all users, included the newly created ones as @users" do      
+
+    it "assigns all users, included the newly created ones as @users" do
       create_items
-      
-      get :index      
+
+      # Get all items, active or disabled
+      get :index, filter: {disabled: nil}
+            
       @created_items.each do |ci|
         expect(assigns(:users)).to include(ci), "Failed to get created items. #{@exceptions}"
       end
-      
+
       expect(assigns(:users).length).to eq User.all.length
       expect(response).to render_template 'index'
     end
@@ -75,20 +77,20 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
 
   describe "GET #show" do
     before_each_login_admin
-    
-    
+
+
     it "to not be routable" do
       create_item
-        
+
       expect(get: "#{path_prefix}/#{object_symbol}/#{@manage_user.id}" ).not_to be_routable
     end
   end
 
   describe "GET #new" do
     before_each_login_admin
-    
+
     it "assigns a new item as @var" do
-      
+
       get :new
       expect(assigns(:user)).to be_a_new(object_class)
     end
@@ -106,17 +108,17 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
 
   describe "POST #create" do
     before_each_login_admin
-    context "with valid params" do            
-      
+    context "with valid params" do
+
       it "creates a new item" do
-        
+
         expect {
           post :create, {:user => valid_attributes}
         }.to change(object_class, :count).by(1)
       end
 
       it "assigns a newly created item as @var" do
-        
+
         post :create, {:user => valid_attributes}
         expect(assigns(:user)).to be_a(object_class)
         expect(assigns(:user)).to be_persisted
@@ -133,14 +135,14 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
 
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
-        
+
         post :create, {:user => invalid_attributes}
         expect(assigns(:user)).to be_a_new(object_class)
       end
 
       it "re-renders the 'form' template" do
         list_invalid_attributes.each do |inv|
-          
+
           post :create, {:user => inv}
           expect(response).to render_template("_form")
         end
@@ -155,7 +157,7 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
         new_attribs
       }
 
-      
+
       it "updates the requested item" do
         create_item
         put :update, {:id => item_id, :user => new_attributes}
@@ -190,33 +192,33 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
       it "re-renders the 'edit' template" do
         create_item
         put :update, {:id => item_id, :user => invalid_update_attributes}
-        
+
         expect(response).to render_template(edit_form_admin)
       end
     end
-    
+
     context "special actions" do
       it "disables the user" do
         create_item
-        put :update, {:id => item_id, :user => {disabled: 'true'}}        
+        put :update, {:id => item_id, :user => {disabled: 'true'}}
         expect(flash[:warning]).to_not be_present
         expect(assigns(:user)).to eq @manage_user
         expect(assigns(:user).disabled?).to be true
-        
+
         expect(response).to render_template '_index'
       end
-      
+
       it "generates a new password for the user" do
         create_item
-        put :update, {:id => item_id, :gen_new_pw => '1', :user => {disabled: 'false'}}        
+        put :update, {:id => item_id, :gen_new_pw => '1', :user => {disabled: 'false'}}
         expect(flash[:warning]).to_not be_present
         expect(assigns(:user)).to eq @manage_user
         expect(assigns(:user).new_password).not_to be nil
-        
+
         expect(response).to render_template '_index'
       end
     end
-    
+
   end
 
   describe "DELETE #destroy" do
@@ -226,7 +228,7 @@ RSpec.describe Admin::ManageUsersController, type: :controller do
       expect(delete: "#{path_prefix}/#{object_symbol}/#{item_id}" ).not_to be_routable
     end
 
-    
-  end  
-  
+
+  end
+
 end

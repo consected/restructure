@@ -168,13 +168,6 @@ _fpa.loaded.masters = function(){
         $('#master_results_block').html('');
     });
 
-//    // Handle the switch between the advanced and simple forms
-//    $('#master-search-advanced').on('show.bs.collapse', function () {
-//        $('#master-search-simple').collapse('hide');
-//      });
-//    $('#master-search-simple').on('show.bs.collapse', function () {
-//        $('#master-search-advanced').collapse('hide');
-//    });
 
     // On any entry in a form, clear the entries in the navbar search forms so there is no confusion
     // over what is being used

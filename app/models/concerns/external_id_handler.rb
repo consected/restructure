@@ -335,7 +335,7 @@ module ExternalIdHandler
       s = self.class.find_by_external_id(external_id)
       if s
         errors.add self.class.external_id_attribute, "already exists in this master record" if s.master_id == self.master_id
-        errors.add self.class.external_id_attribute, "already exists in another master record (#{s.master.msid ? "MSID: #{s.master.msid}" : "master ID: #{s.master_id}"})" if s.master_id != self.master_id
+        errors.add self.class.external_id_attribute, "already exists in another master record (master ID: #{s.master_id})" if s.master_id != self.master_id
       end
 
     end

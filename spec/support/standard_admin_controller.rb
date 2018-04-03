@@ -40,7 +40,8 @@ shared_examples 'a standard admin controller' do
     it "assigns all items as @vars" do
       create_items
 
-      get :index
+      # Get all items, active or disabled
+      get :index, filter: {disabled: nil}
 
       # Do this, since we can't guarantee the order of any particular controller response
       @created_items.each do |ci|

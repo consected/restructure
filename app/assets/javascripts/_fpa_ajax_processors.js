@@ -64,7 +64,7 @@ _fpa.postprocessors = {
 
             _fpa.masters.switch_id_on_click(block);
 
-            block.find('.on-open-click a[data-remote="true"]').not('.auto-clicked').click().addClass('auto-clicked');
+            block.find('.on-open-click a[data-remote="true"], .on-open-click a[data-target]').not('.auto-clicked').click().addClass('auto-clicked');
 
         }, 30);
 
@@ -178,7 +178,7 @@ _fpa.postprocessors = {
     },
 
     extras_panel_handler: function(block){
-        block.find('.on-open-click a[data-remote="true"]').not('.auto-clicked').click().addClass('auto-clicked');
+        block.find('.on-open-click a[data-remote="true"], .on-open-click a[data-target]').not('.auto-clicked').click().addClass('auto-clicked');
     },
 
 

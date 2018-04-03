@@ -144,8 +144,11 @@
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#details-{{id}}" class="scroll-to-expanded "><span class="caret"></span> details</a>
           </li>
-          <% if external_id_types.select{|e| view?[e.plural_name.to_sym] }.length > 0 %>
-          <li role="presentation">
+          <%
+          viewable_external_ids = external_id_types.select{|e| view?[e.plural_name.to_sym] }.map(&:plural_name)
+          if viewable_external_ids.length > 0
+          %>
+          <li role="presentation" class="<%= viewable_external_ids.include?(app_config_text(:create_master_with).pluralize) ? "on-open-click".html_safe : '' %>">
             <a href="#/" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> external ids</a>
           </li>
           <% end %>

@@ -27,7 +27,6 @@ module MasterSearch
           n = id.length
           @masters = Master.where id: id
         end
-        @result_message = "Displaying results for a list of #{n} record #{'ID'.pluralize(n)}."
 
       elsif search_type == 'SIMPLE'
         @masters = Master.search_on_params(search_params[:master])
@@ -83,11 +82,17 @@ module MasterSearch
 
         logger.debug "Masters should return #{@masters.length} items"
 
+        mlen = @masters.length
+
+        if search_type == 'MSID' && mlen > 0
+          @result_message = "Displaying results for a list of #{mlen} record #{'ID'.pluralize(mlen)}."
+        end
+
         m = {
           masters: @masters.as_json(current_user: current_user, filtered_search_results: true),
           count: {
             count: original_length,
-            show_count: @masters.length
+            show_count: mlen
           },
           search_action: search_type,
           message: @result_message
