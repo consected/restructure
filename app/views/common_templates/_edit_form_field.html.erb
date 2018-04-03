@@ -8,17 +8,28 @@
   f_names = Dir.entries(Rails.root.join 'app', 'views', 'common_templates', 'edit_fields').reject {|fn| fn.start_with?('.')}.map {|fn| fn[1..-10]}.sort {|a,b| b.length <=> a.length}
 
   got = false
-  match_name = "column_type_#{column_type}"
-  if f_names.include? match_name %>
-    <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+
+  # Handle Brakeman issue with using column type directly to generate partial path
+
+  valid_col_types = [:boolean]
+  ct = valid_col_types.select {|c| c == column_type.to_sym }.first
+
+  match_name = "column_type_#{ct}"
+
+  if f_names.include? match_name
+    partial_fn = "common_templates/edit_fields/#{match_name}"
+  %>
+    <%= render partial: partial_fn, locals: local_vars[:locals] %>
     <%
     got = true
   end
 
   unless got
     match_name = "name_is_#{field_name_sym}"
-    if f_names.include? match_name %>
-      <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+    if f_names.include? match_name
+      partial_fn = "common_templates/edit_fields/#{match_name}"
+    %>
+      <%= render partial: partial_fn, locals: local_vars[:locals] %>
       <%
       got = true
     end
@@ -27,8 +38,10 @@
   unless got
     f_names.select {|fn| fn.start_with?('name_starts_with_')}.map {|fn| fn.sub('name_starts_with_', '')}.each do |sw|
       match_name = "name_starts_with_#{sw}"
-      if field_name.start_with?("#{sw}_") && f_names.include?(match_name) %>
-        <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+      if field_name.start_with?("#{sw}_") && f_names.include?(match_name)
+        partial_fn = "common_templates/edit_fields/#{match_name}"
+      %>
+        <%= render partial: partial_fn, locals: local_vars[:locals] %>
         <%
         got = true
         break
@@ -39,8 +52,10 @@
   unless got
     f_names.select {|fn| fn.start_with?('name_ends_with_')}.map {|fn| fn.sub('name_ends_with_', '')}.each do |ew|
       match_name = "name_ends_with_#{ew}"
-      if field_name.end_with?("_#{ew}") && f_names.include?(match_name) %>
-        <%= render local_vars.merge( {partial: "common_templates/edit_fields/#{match_name}"}) %>
+      if field_name.end_with?("_#{ew}") && f_names.include?(match_name)
+        partial_fn = "common_templates/edit_fields/#{match_name}"
+      %>
+        <%= render partial: partial_fn, locals: local_vars[:locals] %>
         <%
         got = true
         break
@@ -50,14 +65,14 @@
 
   unless got
     if GeneralSelection::BasicItemTypes.include?("#{general_selection_name}_#{field_name_sym}".to_sym)%>
-      <%= render local_vars.merge( {partial: "common_templates/edit_fields/is_general_selection"}) %>
+      <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
     <%
       got = true
     end
   end
 
   unless got %>
-    <%= render local_vars.merge( {partial: "common_templates/edit_fields/default"}) %>
+    <%= render partial: "common_templates/edit_fields/default", locals: local_vars[:locals] %>
   <%
     got = true
   end

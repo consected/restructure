@@ -54,7 +54,7 @@
           end
         %>
         <td class="report-el">
-          <%= render local_vars.merge(partial: 'common_templates/edit_form_field') %>
+          <%= render partial: 'common_templates/edit_form_field', locals: local_vars[:locals] %>
         </td>
 
 

@@ -186,7 +186,7 @@ class ReportsController < ApplicationController
       # @results =  @report.run(@search_attrs, show_defaults_if_bad_attributes: true)
       #
       # render partial: 'results'
-      
+
       render json: {report_item: @report_item}
     else
       logger.warn "Error creating #{@report_item}: #{@report_item.errors.inspect}"
@@ -309,7 +309,9 @@ class ReportsController < ApplicationController
       @report = Report.find(id)
       @report.current_user = current_user
       return if params[:id] == 'cancel' || params[:id].blank?
-      @report_item = report_model.find(params[:id])
+      id = params[:id]
+      id = id.to_i
+      @report_item = report_model.find(id)
       @id = @report_item.id
     end
 
