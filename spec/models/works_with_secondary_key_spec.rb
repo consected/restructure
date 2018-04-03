@@ -39,7 +39,10 @@ RSpec.describe 'Works With handler', type: :model do
 
     al = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', data: data)
 
-    res = al.save rescue nil
+    begin
+      res = al.save
+    rescue FphsException
+    end
     expect(res).to be nil
 
     al.match_with_parent_secondary_key current_user: @user

@@ -9,6 +9,9 @@ RSpec.describe MessageTemplate, type: :model do
     rec_user, _ = create_user
     create_user
     seed_database
+
+    MessageTemplate.where(name: 'test email layout').delete_all
+    MessageTemplate.where(name: 'test email content').delete_all
   end
 
   it "generates a message" do
