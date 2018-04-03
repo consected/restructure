@@ -59,8 +59,9 @@ module StandardAuthentication
     def check_strength
       if errors.any? && password
         res = self.class.calculate_strength(password)
+        c = self.class.password_config
         unless res >= c[:min_entropy]
-          errors.add :password, "strength was #{(res.to_f / self.class.password_config[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
+          errors.add :password, "strength was #{(res.to_f / c[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
           return false
         end
       end
