@@ -2889,7 +2889,8 @@ CREATE TABLE ml_app.message_notifications (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     status_changed character varying,
-    subject character varying
+    subject character varying,
+    data json
 );
 
 
