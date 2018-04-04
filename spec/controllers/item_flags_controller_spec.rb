@@ -95,6 +95,11 @@ RSpec.describe ItemFlagsController, type: :controller do
   describe "POST #create" do
     before_each_login_user
     before_each_login_admin
+
+    before :each do
+      setup_access :player_infos
+      setup_access :item_flags
+    end
     context "with valid params" do
 
       it "creates a new item" do
@@ -119,8 +124,7 @@ RSpec.describe ItemFlagsController, type: :controller do
 
       end
 
-      it "return success" do
-
+      it "returns success" do
         va = valid_attributes
         attr = {master_id: @player_info.master_id, item_controller: 'player_infos', item_id: @player_info.id, item_flag: {item_flag_name_id: [@item_flag_name.id]} }
         post :create,  attr
