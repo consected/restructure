@@ -35,13 +35,22 @@ btn = !click_to_search ? "btn btn-default btn-sm pull-right" : "btn btn-primary"
                 </div>
               <% i += 1
                  end%>
+
+             <% if @report.editable_data? || !@report_criteria  %>
+             <div class="col-md-2 col-lg-2" style="padding-bottom: 1em;">
+               <label>&nbsp;</label>
+               <div>
+                 <%= submit_tag :search, value: :search, class: "btn btn-default #{!@report_criteria && @report.auto ? 'hidden' : ''} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" if @report.report_type == 'search'  %>
+               </div>
+             </div>
+             <% end %>
             </div>
             <div class="form-group form-actions clearfix" style="border-color: transparent;">
               <%= hidden_field_tag  "search_attrs[#{Report::ReportIdAttribName}]", ''%>
               <%= hidden_field_tag  "part", ''%>
               <% if click_to_search %> <span></span><%end%>
-              <% unless @report.editable_data? %>
-              <%= submit_tag :search, value: :search,class: "#{btn} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" if @report.report_type == 'search'  %>
+              <% unless @report.editable_data? || !@report_criteria %>
+              <%= submit_tag :search, value: :search, class: "#{btn} #{!@report_criteria && @report.auto ? 'hidden' : ''} #{!@report_page ? 'auto-submitter' : ''} #{!@report_page && @report.auto ? 'auto-run' : ''}" if @report.report_type == 'search'  %>
               <% end %>
               <%= submit_tag :table, class: "#{btn}"  unless @view_context==:search %>
               <% unless @report.editable_data? %>

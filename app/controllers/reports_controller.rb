@@ -99,6 +99,7 @@ class ReportsController < ApplicationController
             @search_attrs = params[:search_attrs]
             render partial: 'results'
           else
+            @report_criteria = true
             render :show
           end
         }
@@ -136,6 +137,7 @@ class ReportsController < ApplicationController
           if params[:part] == 'form'
             render partial: 'form'
           else
+            @report_criteria = true
             render :show
           end
         }
