@@ -48,6 +48,8 @@ RSpec.describe ActivityLog::PlayerContactPhonesController, type: :controller do
 
     TableGenerators.activity_logs_table('activity_log_player_contact_phones', 'player_contacts', true, 'select_result', 'select_next_step', 'follow_up_when', 'protocol_id', 'select_call_direction', 'select_who', 'called_when', 'notes', 'data', 'set_related_player_contact_rank')
 
+    setup_access :player_contacts
+
   end
 
   # before :each do

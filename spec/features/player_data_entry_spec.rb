@@ -231,11 +231,11 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
   end
 
   def add_player_msid player
-        # create MSID
 
+    # create Master
     expect(page).to have_css("a[href='/masters/new']")
 
-    click_link 'Create MSID'
+    click_link 'Create Master'
 
     within "#new_master" do
       click_button 'Create'
@@ -302,11 +302,11 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     visit "/masters/search"
 
-    # create MSID
+    # create Master
 
     expect(page).to have_css("a[href='/masters/new']")
 
-    click_link 'Create MSID'
+    click_link 'Create Master'
 
     within "#new_master" do
       click_button 'Create'

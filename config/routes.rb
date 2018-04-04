@@ -43,6 +43,7 @@ Rails.application.routes.draw do
   post 'masters/create' => 'masters#create'
   post 'masters/' => 'masters#index'
   get 'masters/search', as: 'msid_search'
+  get 'masters/search', as: 'masters_search'
   get 'masters/search' => 'masters#search'
 
   resources :definitions, only: [:show]

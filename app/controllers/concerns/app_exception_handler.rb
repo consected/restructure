@@ -56,7 +56,7 @@ module AppExceptionHandler
         return true
       end
       respond_to do |type|
-        type.html { render 'layouts/error_page', locals: {text: msg, status: code} }
+        type.html { render 'layouts/error_page', locals: {text: msg, status: code}, status: code }
         type.json  { render :json => {message: msg}, status: code }
         # special handling for CSV failures as they open new windows
         flash[:danger] = msg[0..2000]

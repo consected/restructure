@@ -38,8 +38,8 @@ module NavHandler
 
 
     if current_user
-      @primary_navs << {label: app_config_text(:menu_research_label, "Research"), url: '/masters/', route: 'masters#index'}
-      @primary_navs << {label: app_config_text(:menu_create_master_record_label, "Create MSID"), url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_master
+      @primary_navs << {label: app_config_text(:menu_research_label, "Research"), url: '/masters/', route: 'masters#index'} unless app_config_text(:menu_research_label) == 'none'
+      @primary_navs << {label: app_config_text(:menu_create_master_record_label, "Create Master"), url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_master
     end
 
     if current_user || admin_view

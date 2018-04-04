@@ -4,11 +4,21 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
   include ModelSupport
 
-  before(:all) do
+  def make_an_admin
     @good_email = "testuser#{rand(1000000000)}admin@testing.com"
-
-    @admin = Admin.create email: @good_email
+    @admin = Admin.create! email: @good_email
     @good_password = @admin.new_password
+  end
+
+  before(:all) do
+
+    make_an_admin
+
+    @final_good_email = "testuser#{rand(1000000000)}admin@testing.com"
+    @final_admin = Admin.create! email: @final_good_email
+    @final_good_password = @final_admin.new_password
+
+
     ENV['FPHS_ADMIN_SETUP']='yes'
 
     #create an admin that has been disabled
@@ -71,6 +81,9 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     expect(page).to have_css "input:invalid"
 
+    # make a new admin to avoid lockout
+    make_an_admin
+
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @good_email
@@ -84,8 +97,8 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
-      fill_in "Email", with: @good_email
-      fill_in "Password", with: ' '+@good_password
+      fill_in "Email", with: @final_good_email
+      fill_in "Password", with: ' '+@final_good_password
       click_button "Log in"
     end
 
@@ -94,8 +107,8 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
-      fill_in "Email", with: @good_email
-      fill_in "Password", with: @good_password
+      fill_in "Email", with: @final_good_email
+      fill_in "Password", with: @final_good_password
       click_button "Log in"
     end
 

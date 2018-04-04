@@ -18,7 +18,7 @@ module StandardAuthentication
     def calculate_strength password
       checker = StrongPassword::StrengthChecker.new(password)
       c = self.password_config
-      checker.calculate_entropy  min_word_length: c[:min_word_length], use_dictionary: true, extra_dictionary_words: self.send(c[:extra_dictionary_words])
+      checker.calculate_entropy min_word_length: c[:min_word_length], use_dictionary: true, extra_dictionary_words: self.send(c[:extra_dictionary_words])
     end
 
     def word_list
@@ -61,7 +61,7 @@ module StandardAuthentication
         res = self.class.calculate_strength(password)
         c = self.class.password_config
         unless res >= c[:min_entropy]
-          errors.add :password, "strength was #{(res.to_f / c[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
+          errors.add :password, "strength is #{(res.to_f / c[:min_entropy] * 100).to_i}%. Try to use a mix of upper and lower case, symbols and numbers, and avoid dictionary words."
           return false
         end
       end
@@ -77,10 +77,18 @@ module StandardAuthentication
     # Return the plain text password in the new_password attribute
     def generate_password
       res = false
+      i = 0
       while !res
         generated_password = Devise.friendly_token.first(16)
-        res = self.class.calculate_strength generated_password
+        res = (self.class.calculate_strength(generated_password) >= self.class.password_config[:min_entropy])
+        i += 1
       end
+
+      if i > 1
+        Rails.logger.info "Took #{i} times to make password"
+        puts "Took #{i} times to make password"
+      end
+
       @new_password = generated_password
       self.password = generated_password
     end

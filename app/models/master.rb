@@ -124,31 +124,78 @@ class Master < ActiveRecord::Base
     raise "can not set user_id="
   end
 
-  def self.create_master_records user, empty: nil
+  def create_master_with_assoc assoc_sym
+    raise FphsException.new "create master with configuration includes a non-existent model association" unless self.class.get_all_associations.include? assoc_sym
+    self.send(assoc_sym)
+  end
 
-    raise "no user specified" unless user
-
-    m = Master.create!(current_user: user, creating_master: true)
-
-
+  def self.each_create_master_with_item user
     # Create each of the items listed in the configuration item :create_master_with (comma separated)
-    create_with = AppConfiguration.value_for :create_master_with, user
-    if create_with && !empty
-      create_with.split(',').each do |cw|
+    create_master_with = AppConfiguration.value_for :create_master_with, user
+    if create_master_with
+      create_master_with.split(',').each do |cw|
         cw = cw.strip.pluralize
         raise FphsException.new "create master with configuration includes a non-existent model association" unless get_all_associations.include? cw
-
-        m.send(cw).create! creating_master: true
-
+        yield cw
       end
+    end
+  end
 
+  def self.create_master_record user, empty: nil, with_embedded_params: nil
+
+    raise "no user specified" unless user
+    m = Master.create!(current_user: user, creating_master: true)
+
+    unless empty
+      i = 0
+      each_create_master_with_item(user) do |cw|
+        with_embedded_params = nil  if i > 0
+
+        init_data = { creating_master: true }
+        assoc = m.create_master_with_assoc(cw)
+
+        if with_embedded_params
+          init_data.merge! with_embedded_params.permit(assoc.permitted_params)
+        end
+
+        assoc.create! init_data
+
+        i += 1
+      end
     end
 
     m.creating_master = false
-
     return m
-
   end
+
+  def self.new_master_record user, empty: nil
+
+    raise "no user specified" unless user
+    m = Master.new(current_user: user, creating_master: true)
+
+    unless empty
+      each_create_master_with_item(user) do |cw|
+        m.create_master_with_assoc(cw).build creating_master: true
+      end
+    end
+
+    m.creating_master = false
+    return m
+  end
+
+  def embedded_item
+    @embedded_item
+  end
+
+  def embedded_item= o
+    if o.is_a? UserBase
+      @embedded_item = o
+    elsif o.is_a?(Hash) && @embedded_item
+      @embedded_item.master.current_user ||= self.current_user
+      @embedded_item.update o
+    end
+  end
+
 
   def self.external_id_matching_fields
     ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}

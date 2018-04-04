@@ -175,4 +175,8 @@ _fpa.loaded.masters = function(){
         $('.navbar-form input[type="text"]').removeClass('has-value').val('');
     });
 
+    $('form.new_master').on('submit', function() {
+      _fpa.preprocessors.before_all($(this));
+    });
+
 };

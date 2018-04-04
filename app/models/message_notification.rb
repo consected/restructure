@@ -25,7 +25,7 @@ class MessageNotification < ActiveRecord::Base
 
   scope :unhandled, -> { where status: nil }
   scope :index, -> { limit 10 }
-  
+
   attr_accessor :generated_text, :disabled, :admin_id
 
   def layout_template
@@ -57,15 +57,19 @@ class MessageNotification < ActiveRecord::Base
   # Generate the message text from the templates and data
   def generate
 
-    data = item.attributes
+    if data.blank?
+      data = item.attributes
 
-    # if the referenced item has its own referenced item (much like an activity log might), then get it
-    if item.respond_to? :item
-      data[:item] = item.item.attributes
-    end
+      # if the referenced item has its own referenced item (much like an activity log might), then get it
+      if item.respond_to? :item
+        data[:item] = item.item.attributes
+      end
 
-    if item.respond_to? :user
-      data[:user_email] = user.email
+      if item.respond_to? :user
+        data[:user_email] = user.email
+      end
+
+      self.save!
     end
 
     self.generated_text = layout_template.generate content_template_name: content_template_name, data: data

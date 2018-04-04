@@ -66,7 +66,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     # Be sure that the page is showing the menu correctly
 
 
-    click_link 'Create MSID'
+    click_link 'Create Master'
 
     # click a test only hidden button to generate a completely empty master record
     # Without this, the player info record that is normally created doesn't provide a completely empty set of tracker records

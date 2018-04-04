@@ -1,11 +1,33 @@
+<%
+  form_object_instance = object_instance
+
+  if defined? embedded
+    if embedded
+      form_object_instance = @embedded_item
+    end
+  else
+    embedded = false
+  end
+
+  # If this object form is embedded in an outer form (an activity log), then use fields_for rather than form_for
+  if embedded
+    form_block = [:fields_for, :embedded_item, form_object_instance]
+    form_block_object = form_embed
+  else
+    form_block = [:form_for, [@master, object_instance], edit_form_hash]
+    form_block_object = self
+  end
+%>
 <div class="data-results">
   <div data-result="<%= edit_form_id %>">
     <div class="">
-      <%=form_for([@master, object_instance], edit_form_hash ) do |f|%>
+
+
+      <%=form_block_object.send(*form_block) do |f|%>
       <%= model_reference_fields f %>
       <ul class="list-group">
         <li class="list-group-item">
-          <%= inline_cancel_button %>
+          <%= inline_cancel_button unless embedded%>
           <h4 class="list-group-item-heading"><%= primary_model.prevent_edit? ? "Assign" : "Edit" %> <%= primary_model.label %></h4>
           <%= render partial: 'common_templates/item_flags_block', locals: {f: f} unless item_flags_array.length == 0 %>
         </li>
@@ -25,9 +47,11 @@
         </li>
         <% end %>
 
+        <% unless embedded %>
         <li class="list-group-item">
           <%= f.submit class: "btn btn-primary", value: 'Save' %>
         </li>
+        <% end %>
       </ul>
       <% end %>
     </div>

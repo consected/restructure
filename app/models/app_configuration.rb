@@ -7,6 +7,11 @@ class AppConfiguration < ActiveRecord::Base
   validates :name, presence: true
   validate :valid_entry
 
+  # Special notes:
+  # hide and show items should enter true, false or blank (equivalent to false)
+  # menu research label may enter none to hide the menu (otherwise it defaults to Research)
+
+
   def self.configurations
     [
       "create master with",
@@ -16,7 +21,7 @@ class AppConfiguration < ActiveRecord::Base
       "menu research label", "notes field caption", "show activity log panel", "user session timeout"
     ]
   end
-  # Use `Configuration.value_for name` to get a cached configuration value
+  # Use `AppConfiguration.value_for name` to get a cached configuration value
 
   # Allow the use of symbols to retrieve entries
   # If a user is set, use it to override the default value

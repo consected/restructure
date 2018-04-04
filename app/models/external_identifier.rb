@@ -122,6 +122,11 @@ class ExternalIdentifier < ActiveRecord::Base
 
           self.table_name = name
 
+          def self.is_external_identifier?
+            true
+          end
+
+
           def self.external_id_attribute=v
             @external_id_attribute = v
           end

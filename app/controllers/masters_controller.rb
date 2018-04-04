@@ -3,6 +3,7 @@ class MastersController < ApplicationController
   before_action :init_vars
   before_action :authenticate_user!
   before_action :authorized?, only: [:new, :create]
+
   include MasterSearch
 
 
@@ -73,7 +74,7 @@ class MastersController < ApplicationController
   end
 
   def new
-    @master = Master.new
+    @master = Master.new_master_record current_user
     render :new
   end
 
@@ -81,13 +82,17 @@ class MastersController < ApplicationController
 
     if Rails.env.test? && params[:commit] == 'Create Empty Master'
       # Test an edge case that requires a completely empty master record to be created, without Player Info
-      @master = Master.create_master_records current_user, empty: true
+      @master = Master.create_master_record current_user, empty: true
     else
       # Unfortunately there is no easy way to force the create request to fail for the purposes of testing
       # Therefore we provide a way to force an apparent failure in the test environment.
       # This is necessary in order to allow testing of what appears to be a false positive for this action in Brakeman
-      @master = Master.create_master_records current_user unless Rails.env.test? && params[:testfail] == 'testfail'
+      unless Rails.env.test? && params[:testfail] == 'testfail'
+        wep = params[:master].require(:embedded_item) if params[:master]
+        @master = Master.create_master_record current_user, with_embedded_params: wep
+      end
     end
+
     if @master && @master.id
       redirect_to master_path(@master.id), notice:  "Created Master Record with MSID #{@master.id}"
     else
@@ -95,27 +100,27 @@ class MastersController < ApplicationController
     end
   end
 
-private
+  private
 
-  def init_vars
-    instance_var_init :master
-    instance_var_init :id
-    instance_var_init :do_search
-  end
+    def init_vars
+      instance_var_init :master
+      instance_var_init :id
+      instance_var_init :do_search
+    end
 
-  def search_params
+    def search_params
 
-    p = params_nil_if_blank params
-    p = params_downcase p
-    #p = p.permit(:master_id, player_info_attributes: [:first_name, :middle_name, :last_name, :nick_name, :birth_date, :death_date, :start_year], player_contacts_attributes: [], pro_info_attributes: [], address_attributes: [], manual_investigation_attributes: [])
-    p = p.except(:utf8, :controller, :action).permit!
-    logger.debug "Screened params: #{p.inspect}"
-    p
-  end
+      p = params_nil_if_blank params
+      p = params_downcase p
+      #p = p.permit(:master_id, player_info_attributes: [:first_name, :middle_name, :last_name, :nick_name, :birth_date, :death_date, :start_year], player_contacts_attributes: [], pro_info_attributes: [], address_attributes: [], manual_investigation_attributes: [])
+      p = p.except(:utf8, :controller, :action).permit!
+      logger.debug "Screened params: #{p.inspect}"
+      p
+    end
 
-  def authorized?
-    return true if current_user.can? :create_master
-    return not_authorized
-  end
+    def authorized?
+      return true if current_user.can? :create_master
+      return not_authorized
+    end
 
 end

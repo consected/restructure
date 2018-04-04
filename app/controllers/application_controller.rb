@@ -57,6 +57,8 @@ protected
         if a && current_user.app_type_id != a.id
           current_user.app_type = a
           current_user.save
+          # Redirect, to ensure the flash and navs in the layout are updated
+          redirect_to masters_search_path
           return
         end
       end
@@ -67,6 +69,8 @@ protected
         # Otherwise, assume the first until a user selects otherwise
         current_user.app_type = all_apps.first
         current_user.save
+        # Redirect, to ensure the flash and navs in the layout are updated
+        redirect_to masters_search_path
         return
       end
     end

@@ -64,7 +64,7 @@ RSpec.describe Master, type: :model do
 
   it "should create a master and player like a user" do
 
-    m = Master.create_master_records(@user)
+    m = Master.create_master_record(@user)
 
     expect(m).to be_a Master
     expect(m).to be_persisted
