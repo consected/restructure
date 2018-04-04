@@ -230,7 +230,7 @@ _fpa = {
   // Handle AJAX calls made through Rails data-remote="true" functionality
   handle_remotes: function(){
 
-    var sel = "form[data-remote='true'], a[data-remote='true']";
+    var sel = "form[data-remote='true'], a, btn";
 
     $(document).on('click', sel,  function(ev){
       // Clear flash notices by clicking an ajax enabled link or form
