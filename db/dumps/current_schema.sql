@@ -613,47 +613,49 @@ CREATE FUNCTION ml_app.log_accuracy_score_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_activity_log_player_contact_phone_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-            BEGIN
-                INSERT INTO activity_log_player_contact_phone_history
-                (
-                    master_id,
-                    player_contact_id,
-                    data,
-                    select_call_direction,
-                    select_who,
-                    called_when,
-                    select_result,
-                    select_next_step,
-                    follow_up_when,
-                    notes,
-                    protocol_id,
-                    set_related_player_contact_rank,
-                    user_id,
-                    created_at,
-                    updated_at,
-                    activity_log_player_contact_phone_id
-                    )
-                SELECT
-                    NEW.master_id,
-                    NEW.player_contact_id,
-                    NEW.data,
-                    NEW.select_call_direction,
-                    NEW.select_who,
-                    NEW.called_when,
-                    NEW.select_result,
-                    NEW.select_next_step,
-                    NEW.follow_up_when,
-                    NEW.notes,
-                    NEW.protocol_id,
-                    NEW.set_related_player_contact_rank,
-                    NEW.user_id,
-                    NEW.created_at,
-                    NEW.updated_at,
-                    NEW.id
-                ;
-                RETURN NEW;
-            END;
-        $$;
+                BEGIN
+                    INSERT INTO activity_log_player_contact_phone_history
+                    (
+                        master_id,
+                        player_contact_id,
+                        data,
+                        select_call_direction,
+                        select_who,
+                        called_when,
+                        select_result,
+                        select_next_step,
+                        follow_up_when,
+                        notes,
+                        protocol_id,
+                        set_related_player_contact_rank,
+                        extra_log_type,
+                        user_id,
+                        created_at,
+                        updated_at,
+                        activity_log_player_contact_phone_id
+                        )
+                    SELECT
+                        NEW.master_id,
+                        NEW.player_contact_id,
+                        NEW.data,
+                        NEW.select_call_direction,
+                        NEW.select_who,
+                        NEW.called_when,
+                        NEW.select_result,
+                        NEW.select_next_step,
+                        NEW.follow_up_when,
+                        NEW.notes,
+                        NEW.protocol_id,
+                        NEW.set_related_player_contact_rank,
+                        NEW.extra_log_type,
+                        NEW.user_id,
+                        NEW.created_at,
+                        NEW.updated_at,
+                        NEW.id
+                    ;
+                    RETURN NEW;
+                END;
+            $$;
 
 
 --
@@ -1433,52 +1435,54 @@ CREATE FUNCTION ml_app.log_user_authorization_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_user_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO user_history
-            (
-                    user_id,
-    email,
-    encrypted_password,
-    reset_password_token,
-    reset_password_sent_at,
-    remember_created_at,
-    sign_in_count,
-    current_sign_in_at,
-    last_sign_in_at,
-    current_sign_in_ip ,
-    last_sign_in_ip ,
-    created_at ,
-    updated_at,
-    failed_attempts,
-    unlock_token,
-    locked_at,
-    disabled ,
-    admin_id 
+            BEGIN
+                INSERT INTO user_history
+                (
+                        user_id,
+        email,
+        encrypted_password,
+        reset_password_token,
+        reset_password_sent_at,
+        remember_created_at,
+        sign_in_count,
+        current_sign_in_at,
+        last_sign_in_at,
+        current_sign_in_ip ,
+        last_sign_in_ip ,
+        created_at ,
+        updated_at,
+        failed_attempts,
+        unlock_token,
+        locked_at,
+        disabled ,
+        admin_id,
+        app_type_id
 
-                )                 
-            SELECT                 
-                NEW.id,
-                NEW.email,
-    NEW.encrypted_password,
-    NEW.reset_password_token,
-    NEW.reset_password_sent_at,
-    NEW.remember_created_at,
-    NEW.sign_in_count,
-    NEW.current_sign_in_at,
-    NEW.last_sign_in_at,
-    NEW.current_sign_in_ip ,
-    NEW.last_sign_in_ip ,
-    NEW.created_at ,
-    NEW.updated_at,
-    NEW.failed_attempts,
-    NEW.unlock_token,
-    NEW.locked_at,
-    NEW.disabled ,
-    NEW.admin_id  
-            ;
-            RETURN NEW;
-        END;
-    $$;
+                    )
+                SELECT
+                    NEW.id,
+                    NEW.email,
+        NEW.encrypted_password,
+        NEW.reset_password_token,
+        NEW.reset_password_sent_at,
+        NEW.remember_created_at,
+        NEW.sign_in_count,
+        NEW.current_sign_in_at,
+        NEW.last_sign_in_at,
+        NEW.current_sign_in_ip ,
+        NEW.last_sign_in_ip ,
+        NEW.created_at ,
+        NEW.updated_at,
+        NEW.failed_attempts,
+        NEW.unlock_token,
+        NEW.locked_at,
+        NEW.disabled ,
+        NEW.admin_id,
+        NEW.app_type_id
+                ;
+                RETURN NEW;
+            END;
+        $$;
 
 
 --
@@ -1813,7 +1817,8 @@ CREATE TABLE ml_app.activity_log_player_contact_phone_history (
     user_id integer,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    activity_log_player_contact_phone_id integer
+    activity_log_player_contact_phone_id integer,
+    extra_log_type character varying
 );
 
 
@@ -1900,7 +1905,9 @@ CREATE TABLE ml_app.activity_logs (
     blank_log_name character varying,
     extra_log_types character varying,
     hide_item_list_panel boolean,
-    main_log_name character varying
+    main_log_name character varying,
+    process_name character varying,
+    table_name character varying
 );
 
 
@@ -2257,6 +2264,45 @@ CREATE TABLE ml_app.copy_player_infos (
     end_year integer,
     source character varying
 );
+
+
+--
+-- Name: delayed_jobs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.delayed_jobs (
+    id integer NOT NULL,
+    priority integer DEFAULT 0 NOT NULL,
+    attempts integer DEFAULT 0 NOT NULL,
+    handler text NOT NULL,
+    last_error text,
+    run_at timestamp without time zone,
+    locked_at timestamp without time zone,
+    failed_at timestamp without time zone,
+    locked_by character varying,
+    queue character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: delayed_jobs_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.delayed_jobs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: delayed_jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.delayed_jobs_id_seq OWNED BY ml_app.delayed_jobs.id;
 
 
 --
@@ -2821,6 +2867,85 @@ CREATE SEQUENCE ml_app.masters_id_seq
 --
 
 ALTER SEQUENCE ml_app.masters_id_seq OWNED BY ml_app.masters.id;
+
+
+--
+-- Name: message_notifications; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.message_notifications (
+    id integer NOT NULL,
+    app_type_id integer,
+    master_id integer,
+    user_id integer,
+    item_id integer,
+    item_type character varying,
+    message_type character varying,
+    recipient_user_ids integer[],
+    layout_template_name character varying,
+    content_template_name character varying,
+    generated_content character varying,
+    status character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    status_changed character varying,
+    subject character varying
+);
+
+
+--
+-- Name: message_notifications_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.message_notifications_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: message_notifications_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.message_notifications_id_seq OWNED BY ml_app.message_notifications.id;
+
+
+--
+-- Name: message_templates; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.message_templates (
+    id integer NOT NULL,
+    name character varying,
+    message_type character varying,
+    template_type character varying,
+    template character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: message_templates_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.message_templates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: message_templates_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates.id;
 
 
 --
@@ -3854,7 +3979,8 @@ CREATE TABLE ml_app.user_history (
     locked_at timestamp without time zone,
     disabled boolean,
     admin_id integer,
-    user_id integer
+    user_id integer,
+    app_type_id integer
 );
 
 
@@ -4025,6 +4151,13 @@ ALTER TABLE ONLY ml_app.colleges ALTER COLUMN id SET DEFAULT nextval('ml_app.col
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.delayed_jobs ALTER COLUMN id SET DEFAULT nextval('ml_app.delayed_jobs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.dynamic_model_history ALTER COLUMN id SET DEFAULT nextval('ml_app.dynamic_model_history_id_seq'::regclass);
 
 
@@ -4124,6 +4257,20 @@ ALTER TABLE ONLY ml_app.manage_users ALTER COLUMN id SET DEFAULT nextval('ml_app
 --
 
 ALTER TABLE ONLY ml_app.masters ALTER COLUMN id SET DEFAULT nextval('ml_app.masters_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_notifications ALTER COLUMN id SET DEFAULT nextval('ml_app.message_notifications_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_templates ALTER COLUMN id SET DEFAULT nextval('ml_app.message_templates_id_seq'::regclass);
 
 
 --
@@ -4428,6 +4575,14 @@ ALTER TABLE ONLY ml_app.colleges
 
 
 --
+-- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.delayed_jobs
+    ADD CONSTRAINT delayed_jobs_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: dynamic_model_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4545,6 +4700,22 @@ ALTER TABLE ONLY ml_app.manage_users
 
 ALTER TABLE ONLY ml_app.masters
     ADD CONSTRAINT masters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message_notifications_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.message_notifications
+    ADD CONSTRAINT message_notifications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: message_templates_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.message_templates
+    ADD CONSTRAINT message_templates_pkey PRIMARY KEY (id);
 
 
 --
@@ -4793,6 +4964,13 @@ ALTER TABLE ONLY ml_app.user_history
 
 ALTER TABLE ONLY ml_app.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: delayed_jobs_priority; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX delayed_jobs_priority ON ml_app.delayed_jobs USING btree (priority, run_at);
 
 
 --
@@ -5094,6 +5272,41 @@ CREATE INDEX index_masters_on_proid ON ml_app.masters USING btree (pro_id);
 --
 
 CREATE INDEX index_masters_on_user_id ON ml_app.masters USING btree (user_id);
+
+
+--
+-- Name: index_message_notifications_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_on_app_type_id ON ml_app.message_notifications USING btree (app_type_id);
+
+
+--
+-- Name: index_message_notifications_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_on_master_id ON ml_app.message_notifications USING btree (master_id);
+
+
+--
+-- Name: index_message_notifications_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_on_user_id ON ml_app.message_notifications USING btree (user_id);
+
+
+--
+-- Name: index_message_notifications_status; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_notifications_status ON ml_app.message_notifications USING btree (status);
+
+
+--
+-- Name: index_message_templates_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_templates_on_admin_id ON ml_app.message_templates USING btree (admin_id);
 
 
 --
@@ -5458,6 +5671,13 @@ CREATE INDEX index_user_action_logs_on_user_id ON ml_app.user_action_logs USING 
 --
 
 CREATE INDEX index_user_authorization_history_on_user_authorization_id ON ml_app.user_authorization_history USING btree (user_authorization_id);
+
+
+--
+-- Name: index_user_history_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_history_on_app_type_id ON ml_app.user_history USING btree (app_type_id);
 
 
 --
@@ -6221,6 +6441,14 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
+-- Name: fk_rails_3a3553e146; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_notifications
+    ADD CONSTRAINT fk_rails_3a3553e146 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_447d125f63; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6266,6 +6494,14 @@ ALTER TABLE ONLY ml_app.colleges
 
 ALTER TABLE ONLY ml_app.model_references
     ADD CONSTRAINT fk_rails_4bbf83b940 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_4fe5122ed4; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_templates
+    ADD CONSTRAINT fk_rails_4fe5122ed4 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
@@ -6445,6 +6681,14 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
+-- Name: fk_rails_af2f6ffc55; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_history
+    ADD CONSTRAINT fk_rails_af2f6ffc55 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
+
+
+--
 -- Name: fk_rails_b071294797; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6533,6 +6777,14 @@ ALTER TABLE ONLY ml_app.user_action_logs
 
 
 --
+-- Name: fk_rails_d3566ee56d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_notifications
+    ADD CONSTRAINT fk_rails_d3566ee56d FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
+
+
+--
 -- Name: fk_rails_d3c0ddde90; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6594,6 +6846,14 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 ALTER TABLE ONLY ml_app.general_selections
     ADD CONSTRAINT fk_rails_f62500107f FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_fa6dbd15de; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_notifications
+    ADD CONSTRAINT fk_rails_fa6dbd15de FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
