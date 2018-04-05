@@ -13,11 +13,13 @@ class MessageNotification < ActiveRecord::Base
   belongs_to :app_type
   belongs_to :user
   belongs_to :master
-
+  # Even external systems that use a Rails based script to fire notifications must use a real user 
   validates :user, presence: true
-  validates :app_type, presence: true
   validates :master, presence: true
-  validates :recipient_user_ids, length: {minimum: 1, maximum: MaxRecipients}
+  # No validation on app_type, since external systems may use Rails based script to fire notifications
+  # validates :app_type, presence: true
+  # No minimum on recipient_user_ids, since recipient_emails may be used instead
+  validates :recipient_user_ids, length: {maximum: MaxRecipients}
   validates :layout_template_name, presence: true
   validates :content_template_name, presence: true
   validates :message_type, presence: true
@@ -81,11 +83,21 @@ class MessageNotification < ActiveRecord::Base
   end
 
   def recipient_emails
-    recipient_users.pluck(:email)
+    res = super()
+    return res if res
+    res = recipient_users.pluck(:email)
+    self.recipient_emails = res
+    self.save
+    res
   end
 
   def from_user_email
-    self.user.email
+    res = super()
+    return res if res
+    res = self.user.email
+    self.from_user_email = res
+    self.save
+    res
   end
 
   # Handle new notification records that may have been added by a DB trigger

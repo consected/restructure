@@ -5,7 +5,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
   include MasterHandler
   include ParentHandler
   before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
-  before_action :handle_extra_log_type, only: [:edit, :new]
+  # before_action :handle_extra_log_type, only: [:edit, :new]
   before_action :handle_embedded_item, only: [:edit, :new, :create, :update]
 
 
@@ -196,5 +196,22 @@ class ActivityLog::ActivityLogsController < ApplicationController
       end
 
     end
+
+    def check_editable?
+      handle_extra_log_type if action_name == 'edit'
+      unless object_instance.allows_current_user_access_to? :edit
+        not_editable
+        return
+      end
+    end
+
+    def check_creatable?
+      handle_extra_log_type if action_name == 'new'
+      unless object_instance.allows_current_user_access_to? :create
+        not_creatable
+        return
+      end
+    end
+
 
 end

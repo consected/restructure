@@ -6,6 +6,7 @@ CREATE FUNCTION activity_log_bhs_assignment_insert_notification() RETURNS trigge
         DECLARE
           app_type RECORD;
           dl_user RECORD;
+          info_request RECORD;
         BEGIN
 
             select id from app_types
@@ -51,8 +52,55 @@ CREATE FUNCTION activity_log_bhs_assignment_insert_notification() RETURNS trigge
                 now()
                 ;
 
-              RETURN NEW;
+                RETURN NEW;
             END IF;
+
+            IF NEW.extra_log_type = 'contact_initiator' THEN
+
+              -- Get the most recent info request from the activity log records for this master_id
+              -- This gives us the user_id of the initiator of the request
+              select * from activity_log_bhs_assignments
+              into info_request
+              where
+                master_id = NEW.master_id
+                and (extra_log_type is null OR extra_log_type = '')
+              order by id desc
+              limit 1;
+
+              insert into ml_app.message_notifications
+              (
+                subject,
+                app_type_id,
+                user_id,
+                recipient_user_ids,
+                layout_template_name,
+                content_template_name,
+                item_type,
+                item_id,
+                master_id,
+                message_type,
+                created_at,
+                updated_at
+              )
+              SELECT
+                'Brain Health Study contact from PI',
+                app_type.id,
+                NEW.user_id,
+                ARRAY[info_request.user_id],
+                'bhs pi notification layout',
+                'bhs pi notification content',
+                'ActivityLog::BhsAssignment',
+                NEW.id,
+                NEW.master_id,
+                'email',
+                now(),
+                now()
+                ;
+
+                RETURN NEW;
+            END IF;
+
+            RETURN NEW;
         END;
     $$;
 

@@ -154,6 +154,10 @@ _fpa.postprocessors = {
             document.title = 'FPHS results';
             window.history.pushState({"html": "/masters/search?utf8=✓&nav_q="+msid_list, "pageTitle": document.title}, "", "/masters/search?utf8=✓&nav_q="+msid_list);
         }
+        else {
+          document.title = 'FPHS results';
+          window.history.pushState({"html": "/masters/search", "pageTitle": document.title}, "", "/masters/search");
+        }
 
 
 

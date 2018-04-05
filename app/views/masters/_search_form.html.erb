@@ -5,7 +5,7 @@
 %>
 
 
-<div class="panel-group" id="master-search-accordion" role="tablist" aria-multiselectable="true">
+<div class="panel-group <%= @requested_master ? 'loading-results' : '' %>" id="master-search-accordion" role="tablist" aria-multiselectable="true">
   <div class="advanced-form-selections">
     <% unless app_config_set(:hide_search_form_simple) %>
     <button id="expand-simple-form" class="btn btn-primary" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="true" aria-controls="master-search-advanced-form">Simple Search</button>
@@ -67,8 +67,12 @@
 
   var panel = $('.searchable-report-panel .collapse.in');
   if(panel && panel.length == 1) {
-    if($('#search-action').html() != ('MSID'))
-      panel.find('input[type="submit"].auto-run').click();
+    if($('#search-action').html() != ('MSID')) {
+      // Prevent an auto run report if the page is refreshing with a requested master or result set
+      if(!$('#master-search-accordion').hasClass('loading-results')) {
+        panel.find('input[type="submit"].auto-run').click();
+      }
+    }
   }
 
   $('.searchable-report-panel').on('shown.bs.collapse', function(){
@@ -76,7 +80,11 @@
     var data = {count: {count: 0, show_count: 0}};
     var h = _fpa.templates['search-count-template'](data);
     $('.search_count_reports').html(h);
-    $(this).find('input[type="submit"].auto-run').click();
+    // Prevent an auto run report if the page is refreshing with a requested master or result set
+    if(!$('#master-search-accordion').hasClass('loading-results')) {
+      $(this).find('input[type="submit"].auto-run').click();
+    }
   });
 
+  $('#master-search-accordion').removeClass('loading-results');
 </script>

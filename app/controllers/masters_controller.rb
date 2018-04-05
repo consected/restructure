@@ -48,6 +48,8 @@ class MastersController < ApplicationController
     @master_pro_id ||= params[:nav_q_pro_id]
     @master_id ||= params[:nav_q_id]
 
+    @requested_master = @master_id || @master_pro_id || @msid
+
     @master_req_format = params[:req_format] || 'reg'
 
     @master =  Master.new
