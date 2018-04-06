@@ -38,6 +38,28 @@
   <% end %>
 </script>
 
+<script id="master_id_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<% id_list = app_config_items(:show_ids_in_master_result, ['master_id']) %>
+<% unless id_list.first == 'none' %>
+<div class="col-md-2 col-lg-1 result-refs">
+  <% if id_list.length > 1 %>
+  <% end %>
+  <%
+  first = true
+  id_list.each do |i|
+  %>
+    <% if first && id_list.length > 1 %>
+    <a href="#" class="switch_id glyphicon glyphicon-random" title="switch to alternative ID"></a>
+    <% end %>
+    <span class="<%= first && id_list.length > 1 ? '' : 'alt_id' %> <%=i%>" <% unless first %> style="display: none"<% end %> title="<%= i.humanize %>">{{#if <%= i %>}}{{<%= i %>}}{{else}}no&nbsp;<%= i.humanize %>{{/if}}</span>
+  <%
+    first = false
+  end
+  %>
+</div>
+<% end %>
+</script>
+
 <script id="pro_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
         <strong class="pro-names">
                   {{capitalize first_name}}

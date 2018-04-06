@@ -144,7 +144,6 @@ module MasterHandler
       end
 
       def check_creatable?
-        byebug
         unless object_instance.allows_current_user_access_to? :create
           not_creatable
           return

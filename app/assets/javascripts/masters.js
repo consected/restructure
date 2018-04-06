@@ -11,16 +11,16 @@ _fpa.masters = {
         block.find('.switch_id').not('attached-switch-click').click(function(ev){
             ev.preventDefault();
             var p = $(this).parent();
-            var msid = p.find('span.msid');
+            var alt_id = p.find('span.alt_id');
             var master_id = p.find('span.master_id');
-            if(msid.is(':visible')){
-                msid.hide();
+            if(alt_id.is(':visible')){
+                alt_id.hide();
                 master_id.show();
                 $(this).attr('title', 'switch to Master ID');
             }else{
                 master_id.hide();
-                msid.show();
-                $(this).attr('title', 'switch to MSID');
+                alt_id.show();
+                $(this).attr('title', 'switch to alternative ID');
             }
         }).addClass('attached-switch-click');
     },

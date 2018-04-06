@@ -93,6 +93,8 @@ class ExternalIdentifier < ActiveRecord::Base
     # Now update the master's nested attributes this model's symbol
     Master.add_nested_attribute model_association_name.to_sym
 
+    Master.add_alternative_id_method external_id_attribute
+
   end
 
 

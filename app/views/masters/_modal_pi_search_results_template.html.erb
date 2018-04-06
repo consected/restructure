@@ -11,7 +11,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
         <h3 class="panel-title">
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="open in new tab" target="openmaster"> </a>
           <div class="row">
-            <div class="col-md-2 col-lg-1 result-refs"><a href="#" class="switch_id glyphicon glyphicon-random"  title="switch to MSID"></a> <span class="master_id"  title="Master ID">{{id}}</span><span class="msid"  style="display: none" title="MSID">{{#if msid}}{{msid}}{{else}}no&nbsp;MSID{{/if}}</span></div>
+            <div class="col-md-2 col-lg-1 result-refs"><span class="master_id"  title="Master ID">{{id}}</span></div>
             <a class="modal-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
 
               <div class="col-md-11 col-lg-12 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">

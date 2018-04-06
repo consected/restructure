@@ -106,6 +106,15 @@ module MasterSearchHandler
       Master.accepts_nested_attributes_for(*@master_nested_attrib)
     end
 
+    # provide methods that allow easy access to alternative_id values
+    # such as alternative_id_bhs_id
+    def add_alternative_id_method name
+      define_method name.to_sym do
+        self.alternative_id_value name
+      end
+    end
+
+
     # Build a Master search using the Master and nested attributes passed in
     # Any attributes that are nil will be rejected and will not appear in the query
     # Tables will only be joined if the nested attributes for the association have one or more

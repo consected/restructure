@@ -15,10 +15,10 @@ class AppConfiguration < ActiveRecord::Base
   def self.configurations
     [
       "create master with",
-      "default search form", "hide master id in results", "hide navbar search", "hide player accuracy",
+      "default search form", "hide navbar search", "hide player accuracy",
       "hide player tabs", "hide pro info", "hide search form advanced", "hide search form searchable reports",
       "hide search form simple", "hide tracker panel", "heading create master record label", "menu create master record label",
-      "menu research label", "notes field caption", "show activity log panel", "user session timeout"
+      "menu research label", "notes field caption", "show activity log panel", "show ids in master result", "user session timeout"
     ]
   end
   # Use `AppConfiguration.value_for name` to get a cached configuration value

@@ -57,6 +57,8 @@ class Master < ActiveRecord::Base
   # This is placed here, since there is a dependence on MasterSearchHandler
   ExternalIdentifier.enable_active_configurations
 
+  include AlternativeIds
+
 
   attr_accessor :force_order, :creating_master
 
@@ -197,43 +199,6 @@ class Master < ActiveRecord::Base
   end
 
 
-  def self.external_id_matching_fields
-    ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}
-  end
-
-  def self.external_id? attr_name
-    external_id_matching_fields.include? attr_name
-  end
-
-  def self.alternative_id_fields
-    [:msid, :pro_id] + external_id_matching_fields
-  end
-
-  def self.external_id_definition attr_name
-    ExternalIdentifier.active.where(external_id_attribute: attr_name).first
-  end
-
-  def self.find_with_alternative_id field_name, value
-    return if value.blank?
-    field_name = field_name.to_sym
-    # Start by attempting to match on a field in the master record
-    raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}" unless alternative_id_fields.include?(field_name)
-    return self.where(field_name => value).first if self.attribute_names.include?(field_name.to_s)
-
-    # No master record field was found. So try an external ID instead
-    if external_id_matching_fields.include?(field_name.to_sym)
-      ei = ExternalIdentifier.class_for(field_name).find_by_external_id(value)
-      if ei
-        return ei.master
-      else
-        return nil
-      end
-    else
-      raise "The field specified is not valid for external identifier matching"
-    end
-
-  end
-
 
   def as_json extras={}
     included_tables = {}
@@ -302,6 +267,17 @@ class Master < ActiveRecord::Base
     end
 
     extras.merge!({ include: included_tables })
+    extras[:methods] ||= []
+
+    res = AppConfiguration.value_for(:show_ids_in_master_result, current_user)
+    res = [] if res.blank?
+    res = res.split(',').map {|i| i.strip.to_sym}
+    res = res - self.class.crosswalk_attrs
+
+    res.each do |id_attr|
+      extras[:methods] << id_attr
+    end
+
     super(extras)
   end
 
