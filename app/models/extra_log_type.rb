@@ -28,7 +28,7 @@
 
 class ExtraLogType
 
-  attr_accessor :name, :label, :fields, :references, :resource_name
+  attr_accessor :name, :label, :fields, :references, :resource_name, :caption_before
 
   def initialize name, config, parent_activity_log
     @name = name
@@ -40,12 +40,16 @@ class ExtraLogType
     pal = parent_activity_log
 
     self.resource_name = "#{pal.full_implementation_class_name.ns_underscore}__#{self.name.underscore}"
+    self.caption_before ||= {}
+    self.caption_before = self.caption_before.symbolize_keys
 
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
     unless name.in?(['primary', 'blank'])
       raise FphsException.new "extra log options label: property can not be blank" if self.label.blank?
       raise FphsException.new "extra log options fields: property must be an array" unless self.fields.is_a?(Array)
     end
+
+    raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
   end
 
   def self.parse_config activity_log

@@ -60,6 +60,8 @@ module MasterHandler
         @master_objects = object_instance.multiple_results
         index
       else
+        object_instance.reload
+        object_instance.master.current_user = current_user
         show
       end
     else
@@ -75,6 +77,8 @@ module MasterHandler
         @master_objects = object_instance.multiple_results
         index
       else
+        object_instance.reload
+        object_instance.master.current_user = current_user
         show
       end
 

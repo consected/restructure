@@ -588,8 +588,20 @@ _fpa.form_utils = {
             descp.find('[data-sort-desc]').sort(function(a,b){
               var bres = $(b).find('['+s+']').attr(s);
               var ares = $(a).find('['+s+']').attr(s);
-              ares = _fpa.utils.ISOdatetoTimestamp(ares);
-              bres = _fpa.utils.ISOdatetoTimestamp(bres);
+
+              if(bres == null) bres = $(b).attr(s);
+              if(ares == null) ares = $(a).attr(s);
+
+              if(bres){
+                var bboth = bres.split('--');
+                bres = _fpa.utils.ISOdatetoTimestamp(bboth[0]) + '--' + bboth[1];                
+              }
+
+              if(ares){
+                var aboth = ares.split('--');
+                ares = _fpa.utils.ISOdatetoTimestamp(aboth[0]) + '--' + aboth[1];
+              }
+
 
               if(ares == null || ares == '') return -1;
               if(bres == null || bres == '') return 1;

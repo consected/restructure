@@ -86,12 +86,14 @@
           <%= render partial: 'common_templates/item_flags_block', locals: {f: form} unless item_flags_after || item_flags_array.length == 0 %>
         </li>
 
-        <% item_list.each do |field_name_sym| %>
+        <% item_list.each do |field_name| %>
           <%
-            field_name = field_name_sym.to_s
+            field_name = field_name.to_s
+            field_name_sym = field_name.to_sym
 
             col = form_object_instance.class.columns_hash[field_name]
-            raise FphsException.new "Column #{field_name_sym} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
+
+            raise FphsException.new "Column #{field_name} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
             column_type = col.type
             local_vars = {locals: {
               form: form,
@@ -107,7 +109,8 @@
             local_vars[:locals][:locals] = local_vars[:locals]
 
           %>
-          <% if caption_before[field_name_sym] && field_name_sym != :notes %>
+          <%
+          if caption_before[field_name_sym] && field_name_sym != :notes %>
             <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-caption-after-<%=field_name_sym%>">
               <%= caption_before[field_name_sym].html_safe %>
             </li>

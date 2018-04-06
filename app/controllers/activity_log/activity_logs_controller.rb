@@ -39,9 +39,11 @@ class ActivityLog::ActivityLogsController < ApplicationController
     end
 
     def edit_form_extras
+      extras_caption_before = {}
       if @extra_log_type
         caption = @extra_log_type.label
         item_list = @extra_log_type.fields - @implementation_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
+        extras_caption_before  = @extra_log_type.caption_before
       end
       if @item
         caption ||= @item.data
@@ -60,6 +62,8 @@ class ActivityLog::ActivityLogsController < ApplicationController
       }
 
       cb[:submit] = 'To add specific protocol status and method records, save this form first.' if item_list.include?(:protocol_id) && !item_list.include?(:sub_process_id )
+
+      cb.merge! extras_caption_before
 
       {
         caption: caption,
