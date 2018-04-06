@@ -136,7 +136,7 @@ module ActivityLogHandler
 
     elt  = self.extra_log_type
     if elt.blank?
-      elt = self.item ? 'primary' : 'blank'
+      elt = self.item ? 'primary' : 'blank_log'
     end
     res = self.class.extra_log_type_config_for elt
     logger.warn "No extra log type configuration exists for #{elt} in #{self.class.name}" unless res

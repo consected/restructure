@@ -41,7 +41,7 @@ module SpecSetup
     end
 
     # Ensure the steps can be accessed
-    ['primary', 'blank'].each do |s|
+    ['primary', 'blank_log'].each do |s|
       rn = (ActivityLog.enabled.first.extra_log_type_configs.select{|a| a.name == s}.first).resource_name
       uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
       uac = uacs.first

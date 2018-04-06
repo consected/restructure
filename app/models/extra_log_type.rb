@@ -10,6 +10,8 @@
 #   fields:
 #     - select_call_direction
 #     - select_who
+#   caption_before:
+#     select_who: Who does this refer to?
 #   references:
 #     social_security_number
 #       from: this | master
@@ -44,10 +46,10 @@ class ExtraLogType
     self.caption_before = self.caption_before.symbolize_keys
 
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
-    unless name.in?(['primary', 'blank'])
-      raise FphsException.new "extra log options label: property can not be blank" if self.label.blank?
-      raise FphsException.new "extra log options fields: property must be an array" unless self.fields.is_a?(Array)
-    end
+    # unless name.in?(['primary', 'blank_log'])
+    #   raise FphsException.new "extra log options label: property can not be blank" if self.label.blank?
+    #   raise FphsException.new "extra log options fields: property must be an array" unless self.fields.is_a?(Array)
+    # end
 
     raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
   end
@@ -66,13 +68,18 @@ class ExtraLogType
 
       # Add primary and blank items if they don't exist
       res['primary'] ||= {}
-      res['blank'] ||= {}
+      res['blank_log'] ||= {}
+
+      res['primary']['label'] ||= activity_log.main_log_name
+      res['blank_log']['label'] ||= activity_log.blank_log_name
+      res['primary']['fields'] ||= activity_log.view_attribute_list
+      res['blank_log']['fields'] ||= activity_log.view_blank_log_attribute_list
+
 
       res.each do |k, v|
         i = ExtraLogType.new k, v, activity_log
         configs << i
       end
-    # rescue
 
     end
 
@@ -82,7 +89,7 @@ class ExtraLogType
 
   def self.fields_for_all_in activity_log
     begin
-      activity_log.extra_log_type_configs.reject{|e| e.name.in?(['primary', 'blank'])}.map(&:fields).reduce([], &:+).uniq
+      activity_log.extra_log_type_configs.reject{|e| e.name.in?(['primary', 'blank_log'])}.map(&:fields).reduce([], &:+).uniq
     rescue => e
       raise FphsException.new "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
     end

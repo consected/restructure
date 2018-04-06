@@ -4,7 +4,8 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
   include MasterHandler
   include ParentHandler
-  before_action :set_item, only: [:index, :new, :edit, :create, :update, :destroy]
+  # Not for new or edit, since these are call elsewhere
+  before_action :set_item, only: [:index, :create, :update, :destroy]
   # before_action :handle_extra_log_type, only: [:edit, :new]
   before_action :handle_embedded_item, only: [:edit, :new, :create, :update]
 
@@ -193,7 +194,13 @@ class ActivityLog::ActivityLogsController < ApplicationController
         etp = object_instance.extra_log_type
       end
 
-      if etp.present? && @implementation_class.extra_log_type_config_names.include?(etp.underscore)
+      if etp.blank?
+        etp = object_instance ? 'primary' : 'blank_log'
+      end
+
+      set_item
+
+      if etp.present? && @implementation_class && @implementation_class.extra_log_type_config_names.include?(etp.underscore)
         @extra_log_type_name = etp.underscore
         @extra_log_type = @implementation_class.extra_log_type_config_for(etp.underscore)
         object_instance.extra_log_type ||= @extra_log_type_name

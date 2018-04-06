@@ -28,7 +28,7 @@ module ActivityLogsHelper
     end
 
     if @item
-      res.merge!({url: "/masters/#{@master_id}/#{@item.item_type_path.pluralize}/#{@item_id}/#{object_instance.item_type_path}/#{object_instance.id}#{extra_type_param}", action: :post, remote: true, html: {"data-result-target" => "##{@implementation_class.name.ns_hyphenate}#{extra_type}-#{@master_id}-#{@id}", "data-template" => "#{@implementation_class.name.ns_hyphenate}#{extra_type}-result-template"}})
+      res.merge!({url: "/masters/#{@master_id}/#{@item.item_type_path.pluralize}/#{@item_id}/#{object_instance.item_type_path}/#{object_instance.id}#{extra_type_param}", action: :post, remote: true, html: {"data-result-target" => "##{@implementation_class.name.ns_hyphenate}#{extra_type}-#{@master_id}-#{@id}", "data-template" => "#{@implementation_class.name.ns_hyphenate}#{extra_type}-result-template", "data-use-alt-result-key" => "#{@implementation_class.name.ns_underscore}_primary" }})
     else
       extra_type ||= '-blank-log'
       res.merge!({url: "/masters/#{@master_id}/#{object_instance.item_type_path}/#{object_instance.id}#{extra_type_param}", action: :post, remote: true, html: {"data-result-target" => "##{@implementation_class.name.ns_hyphenate}#{extra_type}-#{@master_id}-#{@id}", "data-template" => "#{@implementation_class.name.ns_hyphenate}#{extra_type}-result-template", "data-use-alt-result-key" => "#{@implementation_class.name.ns_underscore}#{extra_type.underscore}" }})
