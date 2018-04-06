@@ -230,15 +230,12 @@
           </div>
           {{#each <%=full_name.pluralize%>}}
             {{#if extra_log_type}}
-            <% extra_log_type_configs.each do |c| %>
+            <% all_extra_log_type_configs.each do |c| %>
               {{#is extra_log_type '===' '<%=c.name%>'}}
               {{><%= full_name %>_<%=c.name%>_result _created=@index prevent_edit=@index}}
               {{/is}}
             <% end %>
-            {{else if item_id}}
-            {{><%= main_log_full_name %>_result _created=@index prevent_edit=@index}}
-            {{else}}
-            {{><%= blank_log_full_name %>_result _created=@index prevent_edit=@index}}
+            
             {{/if}}
           {{/each}}
         </div>

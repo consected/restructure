@@ -58,7 +58,7 @@ BEGIN
 		PERFORM create_remote_bhs_record(
 			bhs_record.bhs_id,
 			(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = bhs_record.master_id LIMIT 1),
-			ARRAY(SELECT (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = bhs_record.master_id)
+			ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = bhs_record.master_id)
 		);
 
 	END LOOP;
@@ -81,6 +81,7 @@ DECLARE
 	found_bhs record;
 	player_contact record;
 	pc_length INTEGER;
+	found_pc record;
 BEGIN
 
 -- Find the bhs_assignments external identifier record for this master record and
@@ -168,27 +169,39 @@ ELSE
 
 
 	FOREACH player_contact IN ARRAY new_player_contact_records LOOP
-	  INSERT INTO player_contacts
-		(
-						master_id,
-						rec_type,
-						data,
-						source,
-						rank,
-						user_id,
-						created_at,
-						updated_at
-		)
-		SELECT
-				found_bhs.master_id,
-				player_contact.rec_type,
-				player_contact.data,
-				player_contact.source,
-				player_contact.rank,
-				found_bhs.user_id,
-				player_contact.created_at,
-				player_contact.updated_at
-		;
+
+		SELECT * from player_contacts
+		INTO found_pc
+		WHERE
+			master_id = found_bhs.master_id AND
+			rec_type = player_contact.rec_type AND
+			data = player_contact.data
+		LIMIT 1;
+
+		IF found_pc.id IS NULL THEN
+
+		  INSERT INTO player_contacts
+			(
+							master_id,
+							rec_type,
+							data,
+							source,
+							rank,
+							user_id,
+							created_at,
+							updated_at
+			)
+			SELECT
+					found_bhs.master_id,
+					player_contact.rec_type,
+					player_contact.data,
+					player_contact.source,
+					player_contact.rank,
+					found_bhs.user_id,
+					player_contact.created_at,
+					player_contact.updated_at
+			;
+		END IF;
 
 	END LOOP;
 
@@ -206,7 +219,7 @@ ELSE
 
 END IF;
 
-return found_bhs.master_id;	
+return found_bhs.master_id;
 
 END;
 $$;
