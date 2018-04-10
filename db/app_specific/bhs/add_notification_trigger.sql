@@ -20,7 +20,7 @@ CREATE FUNCTION activity_log_bhs_assignment_insert_notification() RETURNS trigge
             where email = 'dl-fphs-elaine-bhs-pis@listserv.med.harvard.edu'
             limit 1;
 
-            IF NEW.bhs_assignment_id IS NOT NULL and (NEW.extra_log_type IS NULL or NEW.extra_log_type = '') THEN
+            IF NEW.bhs_assignment_id IS NOT NULL and (NEW.extra_log_type IS NULL or NEW.extra_log_type = '' or NEW.extra_log_type = 'primary') THEN
 
               insert into ml_app.message_notifications
               (

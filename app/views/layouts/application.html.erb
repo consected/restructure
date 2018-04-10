@@ -16,7 +16,7 @@
 
 </head>
 <body <%= body_classes %>>
-    <%= render partial: 'layouts/navbar' %>
+    <%= render partial: 'layouts/navbar' if @navbar_ready%>
     <%= render partial: 'layouts/flash_alerts' %>
     <%= render partial: 'admin_handler/status_bar' %>
 <%= yield %>

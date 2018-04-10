@@ -13,7 +13,7 @@ class MessageNotification < ActiveRecord::Base
   belongs_to :app_type
   belongs_to :user
   belongs_to :master
-  # Even external systems that use a Rails based script to fire notifications must use a real user 
+  # Even external systems that use a Rails based script to fire notifications must use a real user
   validates :user, presence: true
   validates :master, presence: true
   # No validation on app_type, since external systems may use Rails based script to fire notifications
@@ -63,7 +63,7 @@ class MessageNotification < ActiveRecord::Base
       data = item.attributes
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
-      if item.respond_to? :item
+      if item.respond_to?(:item) && item.item.respond_to?(:attributes)
         data[:item] = item.item.attributes
       end
 

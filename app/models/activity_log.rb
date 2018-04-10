@@ -37,11 +37,14 @@ class ActivityLog < ActiveRecord::Base
   # even if the configuration specifies a rec_type as a requirement
   # Only enabled admin activity log records are used, excluding other possible options that are not configured.
   # Returns the item_type_name if true
-  def self.works_with item_type, rec_type=nil
+  def self.works_with item_type, rec_type=nil, process_name=nil
     item_type = item_type.downcase
     cond = {item_type: item_type}
     cond[:rec_type] = rec_type if rec_type
-    res = self.enabled.where(cond).first
+    cond[:process_name] = process_name if process_name
+    # Get the first item, since this will get the null rec_type and process_name if they match
+    # For the least exact match this is what we want
+    res = self.enabled.where(cond).unscope(:order).order('rec_type asc nulls first, process_name asc nulls first').first
     return unless res
     res.item_type_name
   end
@@ -59,7 +62,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   # return the activity log implementation class that corresponds to
-  # this item (item_type / rec_type in an enabled admin activity log record)
+  # this item (item_type / rec_type / process_name in an enabled admin activity log record)
   def self.implementation_class_for item
 
     item_type = item.item_type
@@ -76,6 +79,18 @@ class ActivityLog < ActiveRecord::Base
 
     #  return if the Activity Log does not work with this item_type / rec_type combo
     return nil unless al_cn
+
+
+    # If Activity Log broadly works with this item and rec_type
+    # attempt the same test with the process_name set to see if there is a more specific match
+    if item.respond_to?(:process_name) && !item.process_name.blank?
+      al_cn_rc_pn = ActivityLog.works_with item_type, item.rec_type, item.process_name
+      al_cn = al_cn_rc_pn if al_cn_rc_pn
+    end
+
+    #  return if the Activity Log does not work with this item_type / rec_type combo
+    return nil unless al_cn
+
 
     # attempt to get the activity log implementation class based on class name
     # al_cn = al_cn.camelize

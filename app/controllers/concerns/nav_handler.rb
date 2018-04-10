@@ -48,6 +48,8 @@ module NavHandler
 
     end
 
+
+    @navbar_ready = true
     res  = @primary_navs.select {|n| n[:route] == "#{controller_name}##{action_name}" }
     res.first[:active] = true if res && res.first
 
