@@ -594,12 +594,14 @@ _fpa.form_utils = {
 
               if(bres){
                 var bboth = bres.split('--');
-                bres = _fpa.utils.ISOdatetoTimestamp(bboth[0]) + '--' + bboth[1];                
+                if(bboth[1] == null) bboth[1] = "";
+                bres = _fpa.utils.ISOdatetoTimestamp(bboth[0]) + bboth[1];
               }
 
               if(ares){
                 var aboth = ares.split('--');
-                ares = _fpa.utils.ISOdatetoTimestamp(aboth[0]) + '--' + aboth[1];
+                if(aboth[1] == null) aboth[1] = "";
+                ares = _fpa.utils.ISOdatetoTimestamp(aboth[0]) + aboth[1];
               }
 
 

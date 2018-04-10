@@ -1,11 +1,11 @@
 module LogExpectations
 
-  LogItemsCss = ".activity-log--player-contact-phone-item"
-  LogTrackerHistoriesCss = ".related-tracker-collapser.in .activity-log--player-contact-phone-tracker-histories"
-  LogTrackerHistoriesCaptionCss = ".activity-log--player-contact-phone-tracker-histories-caption"
+  LogItemsCss = ".activity-log--player-contact-phone-primary-item"
+  LogTrackerHistoriesCss = ".related-tracker-collapser.in .activity-log--player-contact-phone-primary-tracker-histories"
+  LogTrackerHistoriesCaptionCss = ".activity-log--player-contact-phone-primary-tracker-histories-caption"
   ActivityLogListBlockCss = ".activity-log--player-contact-phones-block .activity-log-list"
-  LoggedPhoneCallCss = "#{ActivityLogListBlockCss} .activity-log--player-contact-phone-item"
-  PhoneNumberInItemCss = ".activity-log--player-contact-phone-data strong"
+  LoggedPhoneCallCss = "#{ActivityLogListBlockCss} .activity-log--player-contact-phone-primary-item"
+  PhoneNumberInItemCss = ".activity-log--player-contact-phone-primary-data strong"
 
 
 
@@ -52,9 +52,9 @@ module LogExpectations
     within log do
       values.each do |k, v|
         if k == :notes
-          el = ".activity-log--player-contact-phone-#{k} .panel-body"
+          el = ".activity-log--player-contact-phone-primary-#{k} .panel-body"
         else
-          el = ".activity-log--player-contact-phone-#{k} strong"
+          el = ".activity-log--player-contact-phone-primary-#{k} strong"
         end
         expect(find(el).text.downcase).to eq v.downcase
       end

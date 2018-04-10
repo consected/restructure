@@ -65,7 +65,7 @@ RSpec.describe MessageNotification, type: :model do
 
     expect(Delayed::Job.count).to eq 0
 
-    mn_id = MessageNotification.last.id
+    mn_id = MessageNotification.last.id if MessageNotification.last
 
     testcnx = ActiveRecord::Base.establish_connection(:test).connection
 testcnx.transaction do

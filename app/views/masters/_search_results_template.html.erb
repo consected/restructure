@@ -109,7 +109,7 @@
             {{>master_id_summary_result master_id=id}}
             <a class="master-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
 
-              <div class="col-md-11 col-lg-12 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
+              <div class="col-md-11 col-lg-11 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
                 <% if view?[:player_infos] %>
                 {{#with player_infos.[0]}}
                   {{>player_info_summary_result}}

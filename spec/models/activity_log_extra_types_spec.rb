@@ -14,6 +14,7 @@ RSpec.describe 'Activity Log extra types implementation', type: :model do
     create_admin
     create_user
     setup_access :player_contacts
+    setup_access :activity_log__player_contact_phones
     create_item(data: rand(10000000000000000), rank: 10)
 
     @activity_log = al = ActivityLog.enabled.first
@@ -76,7 +77,7 @@ EOF
 
     al = @activity_log
 
-    resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for( 'primary').resource_name
+    resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for('primary').resource_name
 
 
     uac = UserAccessControl.where(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name).first

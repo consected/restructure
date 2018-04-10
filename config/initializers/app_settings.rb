@@ -14,10 +14,10 @@ class Settings
 
   OsWordsFile = "/usr/share/dict/words"
   PasswordEntropyConfig = {
-    min_entropy: 20,
+    min_entropy: (Rails.env.test? ? 5 : 20),
     min_word_length: 4,
     extra_dictionary_words: :word_list,
-    use_dictionary: true
+    use_dictionary: !Rails.env.test?
   }.freeze
 
 end
