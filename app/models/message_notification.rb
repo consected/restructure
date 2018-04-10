@@ -14,16 +14,16 @@ class MessageNotification < ActiveRecord::Base
   belongs_to :user
   belongs_to :master
   # Even external systems that use a Rails based script to fire notifications must use a real user
-  validates :user, presence: true
-  validates :master, presence: true
+  validates :user, presence: true, if: :app_type
+  validates :master, presence: true, if: :app_type
   # No validation on app_type, since external systems may use Rails based script to fire notifications
   # validates :app_type, presence: true
   # No minimum on recipient_user_ids, since recipient_emails may be used instead
-  validates :recipient_user_ids, length: {maximum: MaxRecipients}
+  validates :recipient_user_ids, length: {maximum: MaxRecipients}, if: :app_type
   validates :layout_template_name, presence: true
   validates :content_template_name, presence: true
   validates :message_type, presence: true
-  validate :item_type_valid?
+  validate :item_type_valid?, if: :app_type
 
   scope :unhandled, -> { where status: nil }
   scope :index, -> { limit 10 }
@@ -42,11 +42,11 @@ class MessageNotification < ActiveRecord::Base
   # Handle getting and setting of the item and use of the actual class referenced
   # in the item_type / item_id attributes
   def item_class
-    item_type.classify.constantize
+    item_type.classify.constantize if item_type
   end
 
   def item
-    @item ||= item_class.where(id: item_id).first
+    @item ||= item_class.where(id: item_id).first if item_class
   end
 
   def item= new_item
@@ -58,8 +58,11 @@ class MessageNotification < ActiveRecord::Base
 
   # Generate the message text from the templates and data
   def generate
-
+    
+    data = self.data
     if data.blank?
+      raise FphsException.new "Data is blank and item_type / item_id does not return an item" unless item
+
       data = item.attributes
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
@@ -74,8 +77,19 @@ class MessageNotification < ActiveRecord::Base
       self.save!
     end
 
+    raise FphsException.new "Layout template #{layout_template_name} was not found" unless layout_template
+    raise FphsException.new "Content template #{content_template_name} was not found" unless content_template
+
     self.generated_text = layout_template.generate content_template_name: content_template_name, data: data
 
+  end
+
+  def generate_view
+    begin
+      generate
+    rescue FphsException => e
+      "EXCEPTION: #{e}"
+    end
   end
 
   def recipient_users

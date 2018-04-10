@@ -31,7 +31,7 @@ class MessageTemplate < ActiveRecord::Base
   def generate content_template_name: nil, data: {}
 
     raise FphsException.new "Must use a layout template to generate from" unless layout_template?
-    raise FphsException.new "Must use a hash for data" unless data.is_a? Hash
+    raise FphsException.new "Must use a hash for data" unless !data || data.is_a?(Hash)
 
     content_template = MessageTemplate.active.content_templates.where(name: content_template_name).first
     raise FphsException.new "No content template found with name: #{content_template_name}" unless content_template
@@ -43,7 +43,7 @@ class MessageTemplate < ActiveRecord::Base
     tags.each do |tag_container|
       tag = tag_container[2..-3]
 
-      raise FphsException.new "Data does not contain the tag #{tag} or :#{tag}" unless data.key?(tag) || data.key?(tag.to_sym)
+      raise FphsException.new "Data does not contain the tag #{tag} or :#{tag}\n#{data ? data : 'data is empty'}" unless data && (data.key?(tag) || data.key?(tag.to_sym))
 
       tag_value = get_tag_value data, tag
       all_content.gsub!(tag_container, tag_value.to_s)

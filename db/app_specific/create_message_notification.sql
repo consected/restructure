@@ -6,7 +6,7 @@ DECLARE
   last_id INTEGER;
 BEGIN
 
-  INSERT INTO delayed_jobs
+  INSERT INTO ml_app.delayed_jobs
   (
     priority,
     attempts,
@@ -38,5 +38,50 @@ BEGIN
   ;
 
 	RETURN last_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION create_message_notification_email(layout_template_name VARCHAR, content_template_name VARCHAR, subject VARCHAR,
+                                                              data JSON, recipient_emails VARCHAR[], from_user_email VARCHAR)
+    RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  last_id INTEGER;
+BEGIN
+
+  INSERT INTO ml_app.message_notifications
+  (
+    message_type,
+    created_at,
+    updated_at,
+    layout_template_name,
+    content_template_name,
+    subject,
+    data,
+    recipient_emails,
+    from_user_email
+  )
+  VALUES
+  (
+    'email',
+    now(),
+    now(),
+    layout_template_name,
+    content_template_name,
+    subject,
+    data,
+    recipient_emails,
+    from_user_email
+  )
+  RETURNING id
+  INTO last_id
+  ;
+
+  SELECT create_message_notification_job(last_id)
+  INTO last_id
+  ;
+
+  RETURN last_id;
 END;
 $$;
