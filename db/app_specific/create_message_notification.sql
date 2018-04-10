@@ -1,3 +1,28 @@
+/*
+
+Create a message by specifying:
+
+  layout and content templates
+  subject
+  JSON data for variable substitutions into the content template
+  array of recipient emails
+  address the email shows as being sent from
+This creates a record in message_notifications table, then schedules a background job, returning an ID.
+The ID represents the job in the table delayed_jobs
+
+Example:
+
+    SELECT create_message_notification_email(
+      'test email layout',
+      'test email content',
+      'Test Subject',
+      '{"data_item": 1234}',
+      Array['test-person@test.test'],
+      'phil@test.com'
+    );
+
+*/
+
 
 CREATE OR REPLACE FUNCTION create_message_notification_job(message_notification_id INTEGER) returns INTEGER
 LANGUAGE plpgsql
