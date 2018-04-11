@@ -22,8 +22,8 @@ class ApplicationController < ActionController::Base
   rescue_from FphsException, with: :fphs_app_exception_handler
   rescue_from PG::RaiseException, with: :fphs_app_exception_handler
   rescue_from ActionDispatch::Cookies::CookieOverflow, with: :cookie_overflow_handler
-  rescue_from PG::UniqueViolation, with: :fphs_app_exception_handler
-  
+  rescue_from PG::UniqueViolation, with: :db_unique_violation
+
 protected
 
 

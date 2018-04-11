@@ -11,6 +11,13 @@ module AppExceptionHandler
 
   protected
 
+    def db_unique_violation e
+      msg = e.message
+      msg = msg.gsub('  ',' ').split('DETAIL: Key ').last.gsub('(',' ').gsub(')',' ').gsub('_',' ')
+      code = 400
+      return_and_log_error e, msg, code
+    end
+
     def unhandled_exception_handler e
       msg = "An unexpected error occurred. Contact the administrator if this condition persists. #{e.message}"
       code = 500
@@ -58,6 +65,8 @@ module AppExceptionHandler
       respond_to do |type|
         type.html { render 'layouts/error_page', locals: {text: msg, status: code}, status: code }
         type.json  { render :json => {message: msg}, status: code }
+        # For some errors the request suddenly gets interpreted as Javascript and breaks the errors on the front end
+        type.js  { render :text => msg, status: code, content_type: 'text/plain'  }
         # special handling for CSV failures as they open new windows
         flash[:danger] = msg[0..2000]
         type.csv { redirect_to child_error_reporter_path }

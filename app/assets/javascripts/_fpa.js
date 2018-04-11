@@ -602,12 +602,13 @@ _fpa = {
 
         var format_message = function(j){
             var msg = '';
+            var msgar = [];
             for(var i in j){
                 if(j.hasOwnProperty(i)){
-                  msg += '|' + i.replace(/_/g, ' ') + ' ' + j[i] + '|';
+                  msgar.push(i.replace(/_/g, ' ') + ' ' + j[i]);
                 }
             }
-
+            msg = msgar.join(' \n');
             return msg;
         }
 

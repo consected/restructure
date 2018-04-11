@@ -17,7 +17,7 @@ module MasterSearch
           msid = params[:master][:msid].to_s
           if msid.index(/[,| ]/)
             msid = msid.split(/[,| ]/)
-            sort_by_ids = msid.map(&:to_i)
+            sort_by_ids = msid.map(&:to_i).uniq
           end
           n = msid.length
           @masters = Master.where msid: msid
@@ -25,7 +25,7 @@ module MasterSearch
           proid = params[:master][:pro_id].to_s
           if proid.index(/[,| ]/)
             proid = proid.split(/[,| ]/)
-            sort_by_ids = pro_id.map(&:to_i)
+            sort_by_ids = pro_id.map(&:to_i).uniq
           end
           n = proid.length
           @masters = Master.where pro_id: proid
@@ -33,10 +33,10 @@ module MasterSearch
           id = params[:master][:id].to_s
           if id.index(/[,| ]/)
             id = id.split(/[,| ]/)
-            sort_by_ids = id.map(&:to_i)
+            sort_by_ids = id.map(&:to_i).uniq
           end
           n = id.length
-          @masters = Master.where id: id
+          @masters = Master.where(id: id)
         end
 
       elsif search_type == 'SIMPLE'
@@ -80,6 +80,8 @@ module MasterSearch
           @masters = @masters.sort_by {|m| sort_by_ids.index(m.id)}
         end
 
+
+        @masters.uniq!
         original_length = @masters.length
         @masters = @masters[0, return_results_limit]
 

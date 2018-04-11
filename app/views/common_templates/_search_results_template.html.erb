@@ -352,7 +352,7 @@
               {{else}}
               <span class="glyphicon glyphicon-ban-circle"></span>
               {{/if}}
-              <i>{{to_record_label}}</i> {{pretty_string to_record_data}}
+              <i>{{to_record_label}}</i> {{pretty_string to_record_data return_string=true}}
             </span>
           </li>
           {{#if to_record_viewable}}
@@ -416,7 +416,7 @@
     {{/each}}
 
     <% if name != full_name %><div id="<%=full_name.hyphenate%>-{{master_id}}-{{id}}"> <% end %>
-    <div class="col-md-24 new-block new-before-parent" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
+    <div class="col-md-24 new-block<% if name != full_name %> new-before-parent<% end %>" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
       {{#unless <%=full_name.pluralize%>}}
       <ul class="list-group">
         <li class="list-group-item is-heading">
