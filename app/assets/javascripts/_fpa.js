@@ -84,7 +84,7 @@ _fpa = {
   view_template: function(block, template_name, data, options){
 
     // Prevent an attempt to render the template in a block that has already been rendered in this request
-    if(block.hasClass('view-template-created')) return;
+    if(block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
 
     if(!template_name) console.log("no template_name provided");
 

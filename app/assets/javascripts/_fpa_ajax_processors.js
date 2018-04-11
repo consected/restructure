@@ -86,17 +86,20 @@ _fpa.postprocessors = {
     },
     search_action_template: function(block, data){
 
+      // If we show a list of IDs rather than actual search results then collapse the forms to avoid confusion
       if(data.search_action == 'MSID') {
-        var dtte = $('.advanced-form-selections a[data-toggle="collapse"]').not('.collapsed')
-        var dtt = dtte.attr('data-target');
-        if(dtt && dtt != '')
-          var dt = $(dtt);
-        else
-          return;
-        if(dt && dt.length == 1) {
-          $(dt).removeClass('in').attr('aria-expanded', 'false');
-          $(dtte).addClass('collapsed').attr('aria-expanded', 'false');
-        }
+        var dtte = $('.advanced-form-selections [data-toggle="collapse"]').not('.collapsed');
+        dtte.click();
+
+        // var dtt = dtte.attr('data-target');
+        // if(dtt && dtt != '')
+        //   var dt = $(dtt);
+        // else
+        //   return;
+        // if(dt && dt.length == 1) {
+        //   $(dt).removeClass('in').attr('aria-expanded', 'false');
+        //   $(dtte).addClass('collapsed').attr('aria-expanded', 'false');
+        // }
       }
     },
     search_results_template: function(block, data){

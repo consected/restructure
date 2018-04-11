@@ -60,9 +60,6 @@ module UserHandler
       GeneralSelection.name_for self, value, :source
     end
 
-    def human_name
-      name.underscore.humanize.titleize
-    end
 
     def valid_rec_types
       return nil unless self.attribute_names.include?('rec_type')
@@ -117,19 +114,6 @@ module UserHandler
 
   public
 
-    def human_name
-      cn = self.class.name
-
-      if self.class.respond_to?(:is_dynamic_model) && self.class.is_dynamic_model
-        cn = cn.split('::').last
-      end
-
-      if respond_to?(:rec_type) && self.rec_type
-        "#{cn.underscore.humanize.titleize} #{rec_type.underscore.humanize.titleize}"
-      else
-        cn.underscore.humanize.titleize
-      end
-    end
 
     def belongs_directly_to
       master

@@ -362,6 +362,7 @@ class ActivityLog < ActiveRecord::Base
         parent_rec_type = (self.rec_type).to_sym
         action_when_attribute = (self.action_when_attribute).to_sym
         activity_log_name = self.name
+        definition = self
 
         # Main implementation class
         a_new_class = Class.new(UserBase) do
@@ -394,11 +395,19 @@ class ActivityLog < ActiveRecord::Base
             @activity_log_name
           end
 
+          def self.definition= d
+            @definition = d
+          end
+
+          def self.definition
+            @definition
+          end
+
+          self.definition = definition
           self.parent_type = parent_type
           self.parent_rec_type = parent_rec_type
           self.action_when_attribute = action_when_attribute
           self.activity_log_name = activity_log_name
-
         end
 
         a_new_controller = Class.new(ActivityLog::ActivityLogsController) do

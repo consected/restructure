@@ -83,6 +83,8 @@ class DynamicModel < ActiveRecord::Base
         tkn = self.table_key_name.blank? ? 'id' : self.table_key_name.to_sym
         man = self.model_association_name
         ro = self.result_order
+        definition = self
+
         a_new_class = Class.new(UserBase) do
           def self.is_dynamic_model
             true
@@ -123,7 +125,15 @@ class DynamicModel < ActiveRecord::Base
             !@foreign_key_name
           end
 
+          def self.definition= d
+            @definition = d
+          end
 
+          def self.definition
+            @definition
+          end
+
+          self.definition = definition
           self.primary_key = tkn
           self.foreign_key_name = fkn
           self.primary_key_name = pkn

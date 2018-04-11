@@ -88,6 +88,27 @@ class UserBase < ActiveRecord::Base
     @validating
   end
 
+  # Provide a modified human name for an instance
+  def human_name
+
+    if respond_to?(:rec_type) && self.rec_type
+      rec_type.underscore.humanize.titleize
+    else
+      self.class.human_name
+    end
+  end
+
+  def self.human_name
+    cn = self.name
+
+    if self.respond_to?(:is_dynamic_model) && self.is_dynamic_model || self.respond_to?(:is_activity_log) && self.is_activity_log
+      cn = cn.split('::').last
+    end
+
+    cn.underscore.humanize.titleize
+  end
+
+
   def master_user
     return current_user if self.class.no_master_association
     if respond_to?(:master) && master

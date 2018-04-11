@@ -10,20 +10,31 @@ module MasterSearch
     msid = nil
     begin
 
+      # Search a single or list of items by master id, MSID or pro_id,
+      # typically from the URL or nav bar search form
       if search_type == 'MSID'
         if !params[:master][:msid].blank?
           msid = params[:master][:msid].to_s
-          msid = msid.split(/[,| ]/) if msid.index(/[,| ]/)
+          if msid.index(/[,| ]/)
+            msid = msid.split(/[,| ]/)
+            sort_by_ids = msid.map(&:to_i)
+          end
           n = msid.length
           @masters = Master.where msid: msid
         elsif !params[:master][:pro_id].blank?
           proid = params[:master][:pro_id].to_s
-          proid = proid.split(/[,| ]/) if proid.index(/[,| ]/)
+          if proid.index(/[,| ]/)
+            proid = proid.split(/[,| ]/)
+            sort_by_ids = pro_id.map(&:to_i)
+          end
           n = proid.length
           @masters = Master.where pro_id: proid
         elsif !params[:master][:id].blank?
           id = params[:master][:id].to_s
-          id = id.split(/[,| ]/) if id.index(/[,| ]/)
+          if id.index(/[,| ]/)
+            id = id.split(/[,| ]/)
+            sort_by_ids = id.map(&:to_i)
+          end
           n = id.length
           @masters = Master.where id: id
         end
@@ -45,13 +56,13 @@ module MasterSearch
         end
 
         ids = []
-        @results.each_row {|r| ids << r[m_field]}
+        @results.each_row {|r| ids << r[m_field].to_i}
 
         #If the msid is an array of items then return the results in the order of the list
 
-        @masters = Master.where id: ids
+        @masters = Master.where(id: ids)
 
-
+        sort_by_ids = ids
 
 
       else
@@ -64,17 +75,9 @@ module MasterSearch
         @masters = @masters.external_identifier_assignment_scope(current_user)
 
 
-        #If the msid is an array of items then return the results in the order of the list
-        if msid.is_a? Array
-          i = 0
-          #@masters = @masters.take(ResultsLimit)
-          msid.each do |d|
-            m1 = @masters.select {|n| n.msid.to_s == d}.first
-            m1.force_order = i if m1
-            i += 1
-          end
-
-          @masters = @masters.sort {|m,n| m.force_order <=> n.force_order}
+        # If a list of IDs to sort by is provided (from a report search), sort by it
+        if sort_by_ids
+          @masters = @masters.sort_by {|m| sort_by_ids.index(m.id)}
         end
 
         original_length = @masters.length

@@ -35,6 +35,10 @@ module ActivityLogHandler
 
   class_methods do
 
+    def is_activity_log
+      true
+    end
+
     # get the attributes that are common between the parent item and the new logged item
     def fields_to_sync
       self.attribute_names & parent_class.attribute_names - ["id", "master_id", "user_id", "created_at", "updated_at", "item_id"]
@@ -53,18 +57,18 @@ module ActivityLogHandler
 
 
 
-    # Find the record in the admin activity log that defines this activity log
-    def admin_activity_log
-      res = ActivityLog.active.select{|s| s.table_name == self.table_name}
-      raise "Found incorrect number (#{res.length}) of admin activity logs for table name #{self.table_name} from possible list of #{ActivityLog.active.length}" if res.length != 1
-      res.first
-    end
+    # # Find the record in the admin activity log that defines this activity log
+    # def admin_activity_log
+    #   res = ActivityLog.active.select{|s| s.table_name == self.table_name}
+    #   raise "Found incorrect number (#{res.length}) of admin activity logs for table name #{self.table_name} from possible list of #{ActivityLog.active.length}" if res.length != 1
+    #   res.first
+    # end
 
     # List of attributes to be used in common template views
     # Use the defined field_list if it is not blank
     # Otherwise use attribute names from the model, removing common junk
     def view_attribute_list
-      al = admin_activity_log
+      al = self.definition
       unless al.field_list.blank?
         res = al.view_attribute_list + ['tracker_history_id']
       else
@@ -78,11 +82,11 @@ module ActivityLogHandler
     # Use the defined blank_log_field_list if it is not blank
     # Otherwise use the view_attribute_list
     def view_blank_log_attribute_list
-      al = admin_activity_log
+      al = self.definition
       if al.blank_log_field_list.blank?
         res = self.view_attribute_list.clone
       else
-        res = admin_activity_log.view_blank_log_attribute_list.map(&:to_s) + ['tracker_history_id']
+        res = self.definition.view_blank_log_attribute_list.map(&:to_s) + ['tracker_history_id']
       end
       res.map(&:to_sym)
     end
@@ -102,16 +106,21 @@ module ActivityLogHandler
     end
 
     def extra_log_type_config_names
-      admin_activity_log.extra_log_type_configs.map(&:name)
+      self.definition.extra_log_type_configs.map(&:name)
     end
 
     def extra_log_type_configs
-      admin_activity_log.extra_log_type_configs
+      self.definition.extra_log_type_configs
     end
 
     def extra_log_type_config_for name
       extra_log_type_configs.select{|s| s.name.underscore == name.underscore}.first
     end
+  end
+
+
+  def human_name
+    self.class.activity_log_name
   end
 
 
@@ -123,7 +132,7 @@ module ActivityLogHandler
     if defined? super
       super()
     else
-      "#{self.class.admin_activity_log.name}: #{id}"
+      "#{human_name}: #{id}"
     end
   end
 

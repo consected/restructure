@@ -113,6 +113,7 @@ class ExternalIdentifier < ActiveRecord::Base
     alphanumeric = self.alphanumeric
     label = self.label
     name = self.name
+    definition = self
 
     if enabled? && !failed
 
@@ -160,7 +161,16 @@ class ExternalIdentifier < ActiveRecord::Base
           def self.alphanumeric= v
             @alphanumeric = v
           end
+          
+          def self.definition= d
+            @definition = d
+          end
 
+          def self.definition
+            @definition
+          end
+
+          self.definition = definition
           self.external_id_attribute = external_id_attribute
           self.external_id_edit_pattern = external_id_edit_pattern
           self.external_id_range = external_id_range

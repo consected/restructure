@@ -329,7 +329,11 @@ module MasterHandler
       end
 
       def human_name
-        controller_name.singularize.humanize
+        if object_instance && object_instance.respond_to?(:human_name)
+          object_instance.human_name
+        else
+          controller_name.singularize.humanize
+        end
       end
 
       def extend_result

@@ -43,8 +43,13 @@
     caption_before = {}
   end
 
-  unless caption && caption.to_s.include?('{{')
-    caption = (caption.to_s || form_object_item_type_us).gsub('Dynamic Model/', '').humanize.titleize
+  if caption.blank?
+    # if object_instance.respond_to?(:human_name) && object_instance.human_name.present?
+      caption = object_instance.human_name 
+
+    # elsif caption.include?('_') || caption.downcase == caption
+    #   caption = (caption.to_s || form_object_item_type_us).gsub('Dynamic Model/', '').humanize.titleize
+    # end
   end
 
   unless defined? item_list
