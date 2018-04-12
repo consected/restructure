@@ -12,7 +12,8 @@
 # PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/aws/bin:/root/bin
 # * * * * * root cd /var/app/current ; ./db/app_specific/bhs/sync_subject_data.sh > /dev/null 2>&1
 #
-
+# Ensure that .pgpass is setup with the appropriate credentials
+#
 
 
 cd $(dirname $0)
@@ -23,15 +24,15 @@ ZEUS_DB=fphs_demo
 ZEUS_FPHS_DB_SCHEMA=ml_app
 ZEUS_FPHS_DB_HOST=localhost
 #aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
-ZEUS_FPHS_DB_USER=phil
+ZEUS_FPHS_DB_USER=fphsetl
 #fphs
 # Connection details for the remote AWS Elaine database
-AWS_DB=fphs
+AWS_DB=fpa_development
 #ebdb
 AWS_DB_SCHEMA=ml_app
 AWS_DB_HOST=localhost
 #aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
-AWS_DB_USER=phil
+AWS_DB_USER=fphsetl
 #fphs
 
 # Main SQL scripts

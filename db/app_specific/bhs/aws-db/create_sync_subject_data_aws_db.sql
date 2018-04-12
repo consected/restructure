@@ -108,9 +108,10 @@ END IF;
 
 IF new_player_info_record.master_id IS NULL THEN
 	RAISE NOTICE 'No new_player_info_record found for BHS_ID --> %', (match_bhs_id);
+	RETURN NULL;
 ELSE
 
-	raise notice 'Syncing player info record %', (new_player_info_record::varchar);
+	RAISE NOTICE 'Syncing player info record %', (new_player_info_record::varchar);
 
 	-- Create the player info record
   INSERT INTO player_infos
@@ -158,8 +159,6 @@ ELSE
 	  INTO last_id
 	  ;
 
-	-- Now send a notification to the PI
-	PERFORM activity_log_bhs_assignment_info_request_notification(last_id);
 
 END IF;
 
@@ -168,12 +167,12 @@ END IF;
 SELECT array_length(new_player_contact_records, 1)
 INTO pc_length;
 
-RAISE NOTICE 'player contacts length %', (pc_length);
 
 IF pc_length IS NULL THEN
 	RAISE NOTICE 'No new_player_contact_records found for BHS_ID --> %', (match_bhs_id);
 ELSE
 
+	RAISE NOTICE 'player contacts length %', (pc_length);
 
 	FOREACH player_contact IN ARRAY new_player_contact_records LOOP
 
@@ -213,15 +212,33 @@ ELSE
 	END LOOP;
 
 
+	SELECT id
+	INTO last_id
+	FROM activity_log_bhs_assignments
+	WHERE
+		bhs_assignment_id IS NOT NULL
+		AND (select_record_from_player_contact_phones is null OR select_record_from_player_contact_phones = '')
+		AND master_id = found_bhs.master_id
+		AND extra_log_type = 'primary'
+	ORDER BY id ASC
+	LIMIT 1;
+
+
   -- Now update the activity log record.
 	UPDATE activity_log_bhs_assignments
 	SET select_record_from_player_contact_phones = (
-		SELECT data FROM player_contacts
-		WHERE rec_type='phone' AND rank is not null AND master_id = found_bhs.master_id
-		ORDER BY rank desc
-		LIMIT 1
-	), results_link = ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar)
-	WHERE bhs_assignment_id is not null AND (select_record_from_player_contact_phones is null OR select_record_from_player_contact_phones = '');
+			SELECT data FROM player_contacts
+			WHERE rec_type='phone' AND rank is not null AND master_id = found_bhs.master_id
+			ORDER BY rank desc
+			LIMIT 1
+		),
+		results_link = ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar)
+	WHERE
+		id = last_id;
+
+
+	-- Now send a notification to the PI
+	PERFORM activity_log_bhs_assignment_info_request_notification(last_id);
 
 
 END IF;
