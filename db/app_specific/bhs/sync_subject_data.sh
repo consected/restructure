@@ -6,23 +6,37 @@
 #
 # NOTE: master_id on Zeus FPHS DB and Elaine AWS DB ** do not match **.
 #       Only BHS ID can be used to match records in Zeus and Elaine
+#
+# Cron is setup by the AWS EB deploy script, in file /etc/cron.d/fphs_sync:
+# MAILTO=""
+# PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/aws/bin:/root/bin
+# * * * * * root cd /var/app/current ; ./db/app_specific/bhs/sync_subject_data.sh > /dev/null 2>&1
+#
 
+
+
+cd $(dirname $0)
 
 # Connection details for the local FPHS Zeus database
-ZEUS_DB=ebdb
-ZEUS_FPHS_DB_SCHEMA=ml_app_zeus_full
-ZEUS_FPHS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
-ZEUS_FPHS_DB_USER=fphs
-
+ZEUS_DB=fphs_demo
+#ebdb
+ZEUS_FPHS_DB_SCHEMA=ml_app
+ZEUS_FPHS_DB_HOST=localhost
+#aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+ZEUS_FPHS_DB_USER=phil
+#fphs
 # Connection details for the remote AWS Elaine database
-AWS_DB=ebdb
+AWS_DB=fphs
+#ebdb
 AWS_DB_SCHEMA=ml_app
-AWS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
-AWS_DB_USER=fphs
+AWS_DB_HOST=localhost
+#aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+AWS_DB_USER=phil
+#fphs
 
 # Main SQL scripts
-BHS_ZEUS_FPHS_SQL_FILE=./db/app_specific/bhs/run_sync_subject_data_fphs_db.sql
-BHS_AWS_SQL_FILE=./db/app_specific/bhs/run_sync_subject_data_aws_db.sql
+BHS_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
+BHS_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
 
 # Temp files - can be anywhere - and will be cleaned up before and after use
 BHS_SQL_FILE=/tmp/temp_bhs.sql

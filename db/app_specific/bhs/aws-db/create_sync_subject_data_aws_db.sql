@@ -82,6 +82,7 @@ DECLARE
 	player_contact record;
 	pc_length INTEGER;
 	found_pc record;
+	last_id INTEGER;
 BEGIN
 
 -- Find the bhs_assignments external identifier record for this master record and
@@ -152,7 +153,13 @@ ELSE
     new_player_info_record.college,
     new_player_info_record.end_year,
     new_player_info_record.source
-  ;
+
+		RETURNING id
+	  INTO last_id
+	  ;
+
+	-- Now send a notification to the PI
+	PERFORM activity_log_bhs_assignment_info_request_notification(last_id);
 
 END IF;
 

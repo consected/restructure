@@ -97,13 +97,6 @@ _fpa.postprocessors = {
             var dt = $(dtt);
             dt.collapse();
         }
-
-        // else
-        //   return;
-        // if(dt && dt.length == 1) {
-        //   $(dt).removeClass('in').attr('aria-expanded', 'false');
-        //   $(dtte).addClass('collapsed').attr('aria-expanded', 'false');
-        // }
       }
     },
     search_results_template: function(block, data){

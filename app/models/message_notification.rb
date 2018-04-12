@@ -58,7 +58,7 @@ class MessageNotification < ActiveRecord::Base
 
   # Generate the message text from the templates and data
   def generate
-    
+
     data = self.data
     if data.blank?
       raise FphsException.new "Data is blank and item_type / item_id does not return an item" unless item
@@ -114,24 +114,24 @@ class MessageNotification < ActiveRecord::Base
     res
   end
 
-  # Handle new notification records that may have been added by a DB trigger
-  # Run each message notification in a job, to avoid blocking
-  def self.handle_notification_records item
-
-    mns = MessageNotification.where(item_id: item.id, item_type: item.class.name, status: nil).all
-
-    logger.info "Got message notifications #{mns.pluck(:id)}"
-
-    return if mns.length == 0
-
-    logger.info "Creating a job for each of #{mns.pluck(:id)}"
-    # Create a background job for each message notification
-    mns.each do |mn|
-      logger.info "Creating a new job for #{mn.id}"
-      HandleMessageNotificationJob.perform_later(mn)
-    end
-
-  end
+  # # Handle new notification records that may have been added by a DB trigger
+  # # Run each message notification in a job, to avoid blocking
+  # def self.handle_notification_records item
+  #
+  #   mns = MessageNotification.where(item_id: item.id, item_type: item.class.name, status: nil).all
+  #
+  #   logger.info "Got message notifications #{mns.pluck(:id)}"
+  #
+  #   return if mns.length == 0
+  #
+  #   logger.info "Creating a job for each of #{mns.pluck(:id)}"
+  #   # Create a background job for each message notification
+  #   mns.each do |mn|
+  #     logger.info "Creating a new job for #{mn.id}"
+  #     HandleMessageNotificationJob.perform_later(mn)
+  #   end
+  #
+  # end
 
   # Process this MessageNotification record
   def handle_notification_now logger: Rails.logger

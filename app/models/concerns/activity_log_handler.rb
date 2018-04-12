@@ -30,7 +30,7 @@ module ActivityLogHandler
     after_save :check_status
     after_save :track_record_update
 
-    after_commit :check_for_notification_records, on: :create
+    # after_commit :check_for_notification_records, on: :create
   end
 
   class_methods do

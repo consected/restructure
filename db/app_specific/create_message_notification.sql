@@ -24,12 +24,16 @@ Example:
 */
 
 
-CREATE OR REPLACE FUNCTION create_message_notification_job(message_notification_id INTEGER) returns INTEGER
+CREATE OR REPLACE FUNCTION create_message_notification_job(message_notification_id INTEGER, run_at TIMESTAMP DEFAULT NULL) returns INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
   last_id INTEGER;
 BEGIN
+
+  IF run_at IS NULL THEN
+    run_at := now();
+  END IF;
 
   INSERT INTO ml_app.delayed_jobs
   (
@@ -53,7 +57,7 @@ BEGIN
       arguments:
       - _aj_globalid: gid://fpa1/MessageNotification/' || message_notification_id::varchar || '
       locale: :en',
-    now(),
+    run_at,
     'default',
     now(),
     now()
@@ -67,13 +71,17 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION create_message_notification_email(layout_template_name VARCHAR, content_template_name VARCHAR, subject VARCHAR,
-                                                              data JSON, recipient_emails VARCHAR[], from_user_email VARCHAR)
+                                                              data JSON, recipient_emails VARCHAR[], from_user_email VARCHAR, run_at TIMESTAMP DEFAULT NULL)
     RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
   last_id INTEGER;
 BEGIN
+
+  IF run_at IS NULL THEN
+    run_at := now();
+  END IF;
 
   INSERT INTO ml_app.message_notifications
   (
@@ -103,7 +111,64 @@ BEGIN
   INTO last_id
   ;
 
-  SELECT create_message_notification_job(last_id)
+  SELECT create_message_notification_job(last_id, run_at)
+  INTO last_id
+  ;
+
+  RETURN last_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION create_message_notification_email(app_type_id INTEGER, master_id INTEGER, item_id INTEGER, item_type VARCHAR,
+                                                              user_id INTEGER, recipient_user_ids INTEGER[],
+                                                              layout_template_name VARCHAR, content_template_name VARCHAR, subject VARCHAR,
+                                                              run_at TIMESTAMP DEFAULT NULL)
+    RETURNS INTEGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  last_id INTEGER;
+BEGIN
+
+  IF run_at IS NULL THEN
+    run_at := now();
+  END IF;
+
+  INSERT INTO ml_app.message_notifications
+  (
+    subject,
+    app_type_id,
+    user_id,
+    recipient_user_ids,
+    layout_template_name,
+    content_template_name,
+    item_type,
+    item_id,
+    master_id,
+    message_type,
+    created_at,
+    updated_at
+  )
+  VALUES
+  (
+    subject,
+    app_type_id,
+    user_id,
+    recipient_user_ids,
+    layout_template_name,
+    content_template_name,
+    item_type,
+    item_id,
+    master_id,
+    'email',
+    now(),
+    now()
+  )
+  RETURNING id
+  INTO last_id
+  ;
+
+  SELECT create_message_notification_job(last_id, run_at)
   INTO last_id
   ;
 
