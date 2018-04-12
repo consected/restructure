@@ -1,4 +1,4 @@
-<%= form.label field_name_sym %>
+<%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
 <%
   h = {}
   r = Settings.const_get("#{field_name.camelize}Range")

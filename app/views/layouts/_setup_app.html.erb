@@ -3,6 +3,8 @@
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
   _fpa.status['session'] = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
 
+  _fpa.current_locale = 'en';
+
 <% # We attempt to load these cached definitions here, to speed up future forms and results that rely on them.
   if current_email %>
     //_fpa.set_definition('colleges');

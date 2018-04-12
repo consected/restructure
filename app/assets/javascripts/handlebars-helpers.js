@@ -110,6 +110,21 @@
       return res;
     });
 
+    // if all are true
+    // From: https://stackoverflow.com/a/14840042/483133
+    Handlebars.registerHelper('if_all', function() {
+        var args = [].slice.apply(arguments);
+        var opts = args.pop();
+
+        var fn = opts.fn;
+        for(var i = 0; i < args.length; ++i) {
+            if(args[i])
+                continue;
+            fn = opts.inverse;
+            break;
+        }
+        return fn(this);
+    });
 
     // Replace instance(s) of replace_str in orig_str, with with_str.
     // re_options represents zero or more standard regex options
@@ -299,6 +314,16 @@
 
     Handlebars.registerHelper('humanize', function(obj) {
      if(!obj) return;
+
+
+     if(_fpa.locale_t && _fpa.locale_t.field_names) {
+       var t = _fpa.locale_t.field_names[obj];
+       if(t) {
+         obj = t;
+         return obj;
+       }
+     }
+
      return obj.replace(/_/g, ' ');
     });
 
@@ -314,13 +339,6 @@
 
 
     });
-
-
-
-
-
-
-
 
     return eR;
 

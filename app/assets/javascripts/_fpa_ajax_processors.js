@@ -256,6 +256,7 @@ _fpa.postprocessors = {
         if(data.player_contact) d = data.player_contact;
         _fpa.postprocessors.info_update_handler(block, d);
     },
+
     address_edit_form: function(block, data){
         _fpa.form_utils.format_block(block);
 

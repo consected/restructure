@@ -1,2 +1,2 @@
-<%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
+<%= form.label (object_instance.rec_type || field_name_sym) %>
 <%= form.text_field field_name_sym, { data: {attr_name: field_name_sym}} %>

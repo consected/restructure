@@ -1,2 +1,2 @@
-<%= form.label field_name_sym %>
+<%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
 <%= form.text_field field_name_sym, pattern: '\d{1,2}:\d{2} \D\D' %>

@@ -8,7 +8,7 @@ if set_related_field
     raise FphsException.new "The general selection #{set_related_field[:name_and_field]} has not been defined. Please inform the administrator of this error."
   end
 %>
-  <%= form.label field_name_sym %>
+  <%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
   <%= form.select field_name_sym, gs %>
 <% elsif form_object_instance.respond_to?(:rank) %>
   <%= render partial: 'common_templates/edit_fields/name_is_rank', locals: locals %>

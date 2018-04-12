@@ -20,16 +20,19 @@
     <%= render partial: 'layouts/flash_alerts' %>
     <%= render partial: 'admin_handler/status_bar' %>
 <%= yield %>
-    <%= render partial: 'layouts/bootstrap_modal' %>
-    <script id="flash_template" type="text/x-handlebars-template" class="handlebars-template">
-      {{#if message}}
-      <div class="alert alert-info" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        {{message}}
-      </div>
-      {{/if}}
-    </script>
 
-
+  <script>
+    _fpa.translations = <%= YAML.load_file(Rails.root.join('config', 'locales', "#{I18n.locale}.yml")).to_json.html_safe %>;
+    _fpa.locale_t = _fpa.translations[_fpa.current_locale];
+  </script>
+  <%= render partial: 'layouts/bootstrap_modal' %>
+  <script id="flash_template" type="text/x-handlebars-template" class="handlebars-template">
+    {{#if message}}
+    <div class="alert alert-info" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      {{message}}
+    </div>
+    {{/if}}
+  </script>
 </body>
 </html>

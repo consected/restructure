@@ -222,6 +222,10 @@
           {{pretty_string this return_string="true"}}
           </div>
         </div>
+        {{else is @key "data" }}
+          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>
+          {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}
+          </small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_url'}}
           <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
           <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>

@@ -23,12 +23,16 @@ en:
 
     models:
         sub_process: status
-    
+
     activerecord:
         errors:
             models:
-                tracker:          
+                tracker:
                     attributes:
-                        sub_process:       
+                        sub_process:
                             blank: "status must be selected"
-        
+
+
+
+    field_names:
+          rec_type: record type

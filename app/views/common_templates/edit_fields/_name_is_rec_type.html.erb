@@ -1,4 +1,4 @@
-<%= form.label :rec_type %>
+<%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
 <%
 gs = general_selection("#{general_selection_name}_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
 gs ||= general_selection("#{general_selection_name}_rec_type".to_sym, value: form_object_instance.rec_type, quiet_fail: true)
