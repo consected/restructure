@@ -161,6 +161,20 @@ Date.prototype.asYMD = function(){
     return today;
 };
 
+// Translate an obj from a loc in the translation files, such as 'field_labels'
+// Returns the original obj if not found
+_fpa.utils.translate = function(obj, loc) {
+
+  if(_fpa.locale_t && _fpa.locale_t[loc]) {
+    var t = _fpa.locale_t.field_names[obj];
+    if(t) {
+      obj = t;
+      return obj;
+    }
+  }
+  return obj;
+};
+
 _fpa.utils.pretty_print = function(stre, options_hash){
     if(stre === null || stre === '' ) return "";
         var startTime;

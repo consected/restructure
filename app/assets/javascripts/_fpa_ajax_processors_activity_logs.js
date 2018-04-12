@@ -66,3 +66,11 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log
   $.extend(_fpa.postprocessors, _fpa.postprocessors_activity_logs);
 
 }
+
+_fpa.preprocessors.activity_log_edit_form = function(block, data) {
+  $('.activity-log-list .new-block').each(function(){
+    $(this).hide().html('');
+  });
+  block.show();
+
+}

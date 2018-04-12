@@ -30,8 +30,12 @@ class ActivityLog::ActivityLogsController < ApplicationController
         @embedded_item.master.current_user ||= object_instance.master_user
 
         if action_name == 'create'
-          ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
-          @embedded_item.update ei_secure_params
+          begin
+            ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
+            @embedded_item.update ei_secure_params
+          rescue ActionController::ParameterMissing
+            raise FphsException.new "Could not save the item, since you do not have access to any of the data it references."
+          end
         end
       end
 
@@ -203,7 +207,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
       if etp.present? && @implementation_class && @implementation_class.extra_log_type_config_names.include?(etp.underscore)
         @extra_log_type_name = etp.underscore
         @extra_log_type = @implementation_class.extra_log_type_config_for(etp.underscore)
-        object_instance.extra_log_type ||= @extra_log_type_name
+        object_instance.extra_log_type = @extra_log_type_name unless object_instance.persisted?
       end
 
     end

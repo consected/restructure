@@ -661,14 +661,24 @@ _fpa.form_utils = {
 
     setup_contact_field_mask: function(block) {
       var check_rec = function(rec_type){
-        if(rec_type.val()==='phone') {
-          block.find('input[data-attr-name="data"]').mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}}).attr('type', 'text');
+
+        var val = rec_type.val();
+
+        var input = block.find('input[data-attr-name="data"]');
+        if(val==='phone') {
+          input.mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}}).attr('type', 'text');
         }
-        else if(rec_type.val()==='email') {
-          block.find('input[data-attr-name="data"]').unmask().attr('type', 'email');
+        else if(val==='email') {
+          input.unmask().attr('type', 'email');
         }
         else
-          block.find('input[data-attr-name="data"]').unmask().attr('type', 'text');
+          input.unmask().attr('type', 'text');
+
+        var data_label = _fpa.utils.translate(val, 'field_labels');
+        data_label = data_label ? _fpa.utils.capitalize(data_label) : 'Data'
+        
+        input.parent().find('label').html(data_label);
+
       };
 
       var e = block.find('.rec_type_has_phone, .rec_type_has_email').change(function(){

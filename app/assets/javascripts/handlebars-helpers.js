@@ -315,14 +315,7 @@
     Handlebars.registerHelper('humanize', function(obj) {
      if(!obj) return;
 
-
-     if(_fpa.locale_t && _fpa.locale_t.field_names) {
-       var t = _fpa.locale_t.field_names[obj];
-       if(t) {
-         obj = t;
-         return obj;
-       }
-     }
+     obj = _fpa.utils.translate(obj, 'field_labels');
 
      return obj.replace(/_/g, ' ');
     });
