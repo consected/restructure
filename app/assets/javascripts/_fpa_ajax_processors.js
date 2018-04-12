@@ -86,14 +86,18 @@ _fpa.postprocessors = {
     },
     search_action_template: function(block, data){
 
-      // If we show a list of IDs rather than actual search results then collapse the forms to avoid confusion
+      // If we show a list of IDs rather than actual search results then collapse the forms to avoid confusion.
+      // We don't just click though, since that hides flash messages too fast
       if(data.search_action == 'MSID') {
         var dtte = $('.advanced-form-selections [data-toggle="collapse"]').not('.collapsed');
-        dtte.click();
+        // dtte.click();
 
-        // var dtt = dtte.attr('data-target');
-        // if(dtt && dtt != '')
-        //   var dt = $(dtt);
+        var dtt = dtte.attr('data-target');
+        if(dtt && dtt != '') {
+            var dt = $(dtt);
+            dt.collapse();
+        }
+
         // else
         //   return;
         // if(dt && dt.length == 1) {
