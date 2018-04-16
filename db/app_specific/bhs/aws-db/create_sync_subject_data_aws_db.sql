@@ -241,7 +241,8 @@ ELSE
 	UPDATE activity_log_bhs_assignments
 	SET
 	  select_record_from_player_contact_phones = phone,
-		results_link = ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar)
+		results_link = ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar),
+		updated_at = now()
 	WHERE
 		id = last_id;
 
