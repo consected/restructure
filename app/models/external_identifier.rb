@@ -3,9 +3,9 @@ class ExternalIdentifier < ActiveRecord::Base
   include DynamicModelHandler
   include AdminHandler
 
-  validates :name, presence: true
-  validates :label, presence: true
-  validates :external_id_attribute, presence: true
+  validates :name, presence: true, presence: {scope: :active}
+  validates :label, presence: true, presence: {scope: :active}
+  validates :external_id_attribute, presence: {scope: :active}
   validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}, unless: :alphanumeric?
   validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}, unless: :alphanumeric?
   validate :name_format_correct
@@ -161,7 +161,7 @@ class ExternalIdentifier < ActiveRecord::Base
           def self.alphanumeric= v
             @alphanumeric = v
           end
-          
+
           def self.definition= d
             @definition = d
           end

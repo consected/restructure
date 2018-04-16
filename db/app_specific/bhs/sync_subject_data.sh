@@ -10,7 +10,7 @@
 # Cron is setup by the AWS EB deploy script, in file /etc/cron.d/fphs_sync:
 # MAILTO=""
 # PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/aws/bin:/root/bin
-# * * * * * root cd /var/app/current ; ./db/app_specific/bhs/sync_subject_data.sh > /dev/null 2>&1
+# * * * * * root cd /var/app/current ; RAILS_ENV=production ./db/app_specific/bhs/sync_subject_data.sh > /dev/null 2>&1
 #
 # Ensure that .pgpass is setup with the appropriate credentials
 #
@@ -18,22 +18,13 @@
 
 cd $(dirname $0)
 
-# Connection details for the local FPHS Zeus database
-ZEUS_DB=fphs_demo
-#ebdb
-ZEUS_FPHS_DB_SCHEMA=ml_app
-ZEUS_FPHS_DB_HOST=localhost
-#aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
-ZEUS_FPHS_DB_USER=fphsetl
-#fphs
-# Connection details for the remote AWS Elaine database
-AWS_DB=fpa_development
-#ebdb
-AWS_DB_SCHEMA=ml_app
-AWS_DB_HOST=localhost
-#aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
-AWS_DB_USER=fphsetl
-#fphs
+. ../sync_db_connections.sh
+
+if [ -z "$ZEUS_DB" ]
+then
+  echo "No matching environment"
+  exit 1
+fi
 
 # Main SQL scripts
 BHS_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql

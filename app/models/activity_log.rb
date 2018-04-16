@@ -6,9 +6,9 @@ class ActivityLog < ActiveRecord::Base
 
   before_validation :prevent_item_type_change,  on: :update
   before_validation :set_table_name
-  validates :name, presence: true, uniqueness: {scope: :disabled}
-  validates :item_type, presence: true
-  validates :table_name, presence: true
+  validates :name, presence: {scope: :active}
+  validates :item_type, presence: {scope: :active}
+  validates :table_name, presence: {scope: :active}
   validate :item_type_exists
   validate :check_item_type_and_rec_type
   default_scope -> { order 'disabled asc nulls last'}

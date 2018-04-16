@@ -77,7 +77,10 @@ class AppType < ActiveRecord::Base
       res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['name']
 
       app_type.user_access_controls.active.each do |a|
-        a.update!(access: nil, current_admin: admin)
+        unless a.update(access: nil, current_admin: admin)
+          puts "Failed to update UAC #{a.inspect}. #{a.errors.first}"
+          a.disable!
+        end
       end
       res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'user_access_controls', ['resource_type', 'resource_name'], add_vals: {allow_bad_resource_name: true}, reject: Proc.new {|a| a['access'].nil?}
       app_type.reload

@@ -18,12 +18,14 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 	RETURN QUERY
-		SELECT bhs.master_id, bhs.bhs_id
+		SELECT distinct bhs.master_id, bhs.bhs_id
 		FROM masters m
 		LEFT JOIN player_infos pi
 		ON pi.master_id = m.id
 		INNER JOIN bhs_assignments bhs
 		ON m.id = bhs.master_id
+		INNER JOIN activity_log_bhs_assignments al
+		ON m.id = al.master_id AND al.extra_log_type = 'primary'
 		WHERE
 		  pi.id IS NULL
 			AND bhs.bhs_id is not null
@@ -83,6 +85,7 @@ DECLARE
 	pc_length INTEGER;
 	found_pc record;
 	last_id INTEGER;
+	phone VARCHAR;
 BEGIN
 
 -- Find the bhs_assignments external identifier record for this master record and
@@ -224,14 +227,20 @@ ELSE
 	LIMIT 1;
 
 
+	-- Get the best phone number
+	SELECT data FROM player_contacts
+	INTO phone
+	WHERE rec_type='phone' AND rank is not null AND master_id = found_bhs.master_id
+	ORDER BY rank desc
+	LIMIT 1;
+
+	RAISE NOTICE 'best phone number %', (phone);
+  RAISE NOTICE 'AL ID %', (last_id);
+
   -- Now update the activity log record.
 	UPDATE activity_log_bhs_assignments
-	SET select_record_from_player_contact_phones = (
-			SELECT data FROM player_contacts
-			WHERE rec_type='phone' AND rank is not null AND master_id = found_bhs.master_id
-			ORDER BY rank desc
-			LIMIT 1
-		),
+	SET
+	  select_record_from_player_contact_phones = phone,
 		results_link = ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar)
 	WHERE
 		id = last_id;

@@ -1,7 +1,7 @@
 INSERT INTO users (email, disabled, created_at, updated_at) values ('dl-fphs-elaine-bhs-pis@listserv.med.harvard.edu', false, now(), now());
 
 /* Simple support function to get app_type.id using a name */
-CREATE FUNCTION get_app_type_id_by_name(app_type_name VARCHAR) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION get_app_type_id_by_name(app_type_name VARCHAR) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
   DECLARE
@@ -26,7 +26,7 @@ $$;
   Run by the BHS sync scripts after a successful insert of Zeus player data into skeleton Elaine BHS subject record
 
 */
-CREATE FUNCTION activity_log_bhs_assignment_info_request_notification(activity_id INTEGER) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION activity_log_bhs_assignment_info_request_notification(activity_id INTEGER) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
     DECLARE
@@ -51,12 +51,13 @@ AS $$
               get_app_type_id_by_name('bhs'),
               activity_record.master_id,
               activity_record.id,
-              'ActivityLog::BhsAssignment',
+              'ActivityLog::BhsAssignment'::VARCHAR,
               activity_record.user_id,
               ARRAY[dl_user.id],
-              'bhs pi notification layout',
-              'bhs pi notification content',
-              'New Brain Health Study Info Request'
+              'bhs pi notification layout'::VARCHAR,
+              'bhs pi notification content'::VARCHAR,
+              'New Brain Health Study Info Request'::VARCHAR,
+              now()::TIMESTAMP
             )
           ;
 
@@ -72,7 +73,9 @@ $$;
   Run from a trigger on insert into activity_log_bhs_assignments table
 
 */
-CREATE FUNCTION activity_log_bhs_assignment_insert_notification() RETURNS trigger
+DROP FUNCTION IF EXISTS activity_log_bhs_assignment_insert_notification() cascade;
+
+CREATE OR REPLACE FUNCTION activity_log_bhs_assignment_insert_notification() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
     DECLARE
@@ -98,12 +101,13 @@ AS $$
                 get_app_type_id_by_name('bhs'),
                 NEW.master_id,
                 NEW.id,
-                'ActivityLog::BhsAssignment',
+                'ActivityLog::BhsAssignment'::VARCHAR,
                 NEW.user_id,
                 ARRAY[responding_to.user_id],
-                'bhs pi notification layout',
-                'bhs message notification content',
-                'Brain Health Study contact from PI'
+                'bhs pi notification layout'::VARCHAR,
+                'bhs message notification content'::VARCHAR,
+                'Brain Health Study contact from PI'::VARCHAR,
+                now()::TIMESTAMP
               )
             ;
 
@@ -128,12 +132,13 @@ AS $$
                 get_app_type_id_by_name('bhs'),
                 NEW.master_id,
                 NEW.id,
-                'ActivityLog::BhsAssignment',
+                'ActivityLog::BhsAssignment'::VARCHAR,
                 NEW.user_id,
                 ARRAY[responding_to.user_id],
-                'bhs pi notification layout',
-                'bhs message notification content',
-                'Brain Health Study contact from RA'
+                'bhs pi notification layout'::VARCHAR,
+                'bhs message notification content'::VARCHAR,
+                'Brain Health Study contact from RA'::VARCHAR,
+                now()::TIMESTAMP
               );
 
             RETURN NEW;

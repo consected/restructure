@@ -22,7 +22,7 @@ Example:
     );
 
 */
-
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE OR REPLACE FUNCTION create_message_notification_job(message_notification_id INTEGER, run_at TIMESTAMP DEFAULT NULL) returns INTEGER
 LANGUAGE plpgsql
