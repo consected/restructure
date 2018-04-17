@@ -3,7 +3,7 @@ module UserActionLogging
   extend ActiveSupport::Concern
 
   included do
-    after_action :log_user_item_action, only: [:show, :create, :update]
+    after_action :log_user_item_action, only: [:show, :create, :update], unless: :canceled?
     after_action :log_user_index_action, only: [:index]
 
     ExcludeClasses = ['Devise::SessionsController', 'Devise::RegistrationsController']

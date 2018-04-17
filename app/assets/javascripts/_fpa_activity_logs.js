@@ -61,7 +61,10 @@ _fpa.activity_logs = {
     }
 
     block.parents('.activity-log-list').find('.common-template-item').not('[data-sub-id='+d.id+']').each(function(){
+      $(this).addClass('prevent-edit');
       $(this).find('a.edit-entity').remove();
+      $(this).find('.new-block').remove();
+      $(this).find('a.add-item-button').remove();
     });
 
 

@@ -231,6 +231,10 @@ class UserBase < ActiveRecord::Base
     puts "Master does not respond to alternative_id_fields. Hopefully this is just during seeding"
   end
 
+  def self.default_options
+    
+  end
+
   protected
 
     def check_master

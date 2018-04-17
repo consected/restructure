@@ -90,4 +90,8 @@ module ApplicationHelper
 
   end
 
+  def show_caption_before key
+    @caption_before[key].gsub("\n","<br/>").html_safe
+  end
+
 end

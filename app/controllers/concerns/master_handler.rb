@@ -107,8 +107,10 @@ module MasterHandler
     end
 
     def edit_form_extras
+      cb = object_instance.class.default_options.caption_before if object_instance.class.default_options
       {
-        caption: object_instance.human_name
+        caption: object_instance.human_name,
+        caption_before: cb
       }
     end
 
@@ -200,7 +202,7 @@ module MasterHandler
 
 
       def set_instance_from_id
-        return if params[:id] == 'cancel'
+        return if canceled?
         set_object_instance primary_model.find(params[:id])
         if object_instance.respond_to?(:master) && object_instance.master
           object_instance.master.current_user = current_user

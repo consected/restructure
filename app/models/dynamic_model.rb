@@ -20,7 +20,7 @@ class DynamicModel < ActiveRecord::Base
 
     implementation_classes.each do |c|
 
-      cn = c.attribute_names.select{|a| a.index('select_') == 0 || a.in?(%w(source rec_type rank)) }.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
+      cn = c.attribute_names.select{|a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w(source rec_type rank)) }.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
       cn.each do |a|
         list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
       end
@@ -57,12 +57,25 @@ class DynamicModel < ActiveRecord::Base
     active.select(:category).distinct(:category).unscope(:order).map {|s| s.category||'default'}
   end
 
+  def option_configs
+    @option_configs ||= DynamicModelOptions.parse_config(self)
+  end
+
+  def option_config_for name
+    return unless option_configs
+    option_configs.select{|s| s.name.underscore == name.underscore}.first
+  end
+
+  def default_options
+    res = option_config_for 'default'
+    res || DynamicModelOptions.new('default', {}, self)
+  end
 
 
   def update_tracker_events
 
     return unless self.name && !disabled
-    Tracker.add_record_update_entries self.name.singularize, current_admin, 'record'
+    Tracker.add_record_update_entries self.table_name.singularize, current_admin, 'record'
     # flag items are added when item flag names are added to the list
     #Tracker.add_record_update_entries self.name.singularize, current_admin, 'flag'
   end
@@ -83,6 +96,7 @@ class DynamicModel < ActiveRecord::Base
         tkn = self.table_key_name.blank? ? 'id' : self.table_key_name.to_sym
         man = self.model_association_name
         ro = self.result_order
+        default_options = self.default_options
         definition = self
 
         a_new_class = Class.new(UserBase) do
@@ -133,12 +147,21 @@ class DynamicModel < ActiveRecord::Base
             @definition
           end
 
+          def self.default_options= default_options
+            @default_options = default_options
+          end
+
+          def self.default_options
+            @default_options
+          end
+
           self.definition = definition
           self.primary_key = tkn
           self.foreign_key_name = fkn
           self.primary_key_name = pkn
           self.assoc_inverse = man
           self.result_order = ro
+          self.default_options = default_options
 
           def master_id
             return nil if self.class.no_master_association

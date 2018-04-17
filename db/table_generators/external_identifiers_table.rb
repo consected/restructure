@@ -40,7 +40,7 @@ EOF
       sql = <<EOF
 
 -- Command line:
--- table_generators/generate.sh $@
+-- table_generators/generate.sh create external_identifiers_table #{ARGV.join(' ')}
 
       CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
           LANGUAGE plpgsql

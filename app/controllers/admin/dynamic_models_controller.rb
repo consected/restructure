@@ -38,7 +38,8 @@ EOF
 
 
     def permitted_params
-      @permitted_params = [:id, :name, :table_name, :category, :table_key_name, :primary_key_name, :foreign_key_name, :result_order, :field_list, :position, :description, :disabled]
+
+      @permitted_params = [:id, :name, :table_name, :category, :table_key_name, :primary_key_name, :foreign_key_name, :result_order, :field_list, :position, :options, :description, :disabled]
     end
 
     def secure_params

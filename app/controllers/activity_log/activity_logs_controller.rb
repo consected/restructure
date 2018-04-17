@@ -60,11 +60,12 @@ class ActivityLog::ActivityLogsController < ApplicationController
         item_list ||= @implementation_class.view_blank_log_attribute_list - [:tracker_history_id]
       end
       cb = {
-        select_call_direction: "Enter details about the #{activity_log_name}",
         protocol_id: "Select the protocol this  #{activity_log_name} is related to. A tracker event will be recorded under this protocol.",
         "set_related_#{item_type_us}_rank".to_sym => "To change the rank of the related #{item_name}, select it:",
         notes: app_config_text(:notes_field_caption)
       }
+
+      cb[:all_fields] ||= "Enter details about the #{activity_log_name}" if permitted_params.include? :select_call_direction
 
       cb[:submit] = 'To add specific protocol status and method records, save this form first.' if item_list.include?(:protocol_id) && !item_list.include?(:sub_process_id )
 

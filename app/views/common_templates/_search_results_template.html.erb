@@ -8,6 +8,10 @@
     caption_before = {}
   end
 
+
+  # Allow show_caption_before helper to work
+  @caption_before = caption_before
+
   unless defined? item_flags_after
     item_flags_after = nil
   end
@@ -180,6 +184,13 @@
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
+        <% if caption_before[:all_fields]%>
+          <div class="results-caption-before <%=name.hyphenate%>-caption-before-all-fields">
+            <div class="panel panel-default panel-body">
+              <small><%= show_caption_before :all_fields %></small>
+            </div>
+          </div>
+        <% end %>
 
         <% if item_list.length > 0 %>
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
@@ -269,7 +280,7 @@
           <% if implementation_class_name %>
           <div class="results-caption-before <%=name.hyphenate%>-add-linked-tracker">
             <div class="panel panel-default panel-body">
-              <p>Add a specific tracker status record related to this item:</p>
+              <p><small>Add a specific tracker status record related to this item:</small></p>
               <p class="text-center">
               <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/<%=implementation_class_name%>&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
               </p>
@@ -349,7 +360,7 @@
       <% if references %>
         {{#if model_references}}
           {{#each model_references}}
-          <li class="list-group-item <%=name.hyphenate%>-model-references in-item-model-references is-full-width">
+          <li class="list-group-item <%=name.hyphenate%>-model-references in-item-model-references is-full-width {{#if to_record_viewable}}{{#is ../model_references.length '===' 1}} single-model-reference {{#if from_record_id}}model-reference-auto-shown-caption{{/if}}{{/is}}{{/if}}">
             <span class="small">
               {{#if to_record_viewable}}
               <a href="/masters/{{to_record_master_id}}/{{pathify to_record_type_us}}s/{{to_record_id}}" data-template="{{hyphenate to_record_short_type_us}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" data-remote="true" class="glyphicon glyphicon-triangle-bottom view-item  <% unless item_list.include?(',') %>{{#is ../model_references.length '===' 1}}{{#if from_record_id}}on-postprocess-click{{/if}}{{/is}}<% end %>"></a>
@@ -360,7 +371,7 @@
             </span>
           </li>
           {{#if to_record_viewable}}
-          <div class="model-reference-result" >
+          <div class="model-reference-result {{#is ../model_references.length '===' 1}} single-model-reference-result {{#if from_record_id}}model-reference-auto-shown{{/if}}{{/is}}" >
             <div id="<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" class="model-reference-result" data-result-target-for-child="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}, #{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}"  data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-subscription="{{hyphenate to_record_short_type_us}}-edit-form-{{to_record_master_id}}-{{to_record_id}}" data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-form-container="{{hyphenate to_record_type_us}}_edit_form" ></div>
           </div>
           {{/if}}
@@ -381,7 +392,7 @@
       <% if caption_before[:metadata]%>
       <div class="results-caption-before <%=name.hyphenate%>-caption-before-metadata">
         <div class="panel panel-default panel-body">
-          <%= caption_before[:metadata].html_safe %>
+          <small><%= show_caption_before :metadata %></small>
         </div>
       </div>
     <% end %>

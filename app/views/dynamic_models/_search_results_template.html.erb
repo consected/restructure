@@ -25,6 +25,7 @@
       full_name: full_name,
       prevent_edit: !(current_user.has_access_to? :edit, :table, m.full_item_type_name.pluralize),
       prevent_create: !(current_user.has_access_to? :create, :table, m.full_item_type_name.pluralize),
-      item_list: l
+      item_list: l,
+      caption_before: m.default_options.caption_before
     } %>
 <% end %>

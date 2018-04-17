@@ -132,9 +132,14 @@ class ActivityLog < ActiveRecord::Base
 
   # Get a complete list of all fields required to generate a table.
   # The individual field lists may overlap or be distinct. This gets us a usable list
-  def all_implementation_fields
-    res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + ExtraLogType.fields_for_all_in(self)
-    res.uniq
+  def all_implementation_fields ignore_errors: true
+    begin
+      res = (view_attribute_list || []) + (view_blank_log_attribute_list || []) + ExtraLogType.fields_for_all_in(self)
+      res.uniq
+    rescue FphsException => e
+      raise e unless ignore_errors
+      return []
+    end
   end
 
   # The class that an activity log implementation belongs to
@@ -493,7 +498,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def generator_script
-    "db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{all_implementation_fields.join(' ')}"
+    "db/table_generators/generate.sh activity_logs_table create #{table_name} #{item_type.pluralize} #{all_implementation_fields(ignore_errors: true).join(' ')}"
   end
 
 

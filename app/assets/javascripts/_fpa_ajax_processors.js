@@ -9,6 +9,14 @@ _fpa.preprocessors = {
         _fpa.form_utils.date_inputs_to_iso(block);
 
         _fpa.form_utils.unmask_inputs(block);
+
+        // Mark the block a form was within, to make scrolling more reliable
+        if(block.is('form')) {
+          var b = block.parents('.common-template-item, .new-block');
+          if(b.hasClass('new-block'))
+            b = b.parent();
+          b.addClass('postprocessed-scroll-here');
+        }
     },
 
     default: function(block, data, has_preprocessor){
@@ -44,6 +52,25 @@ _fpa.postprocessors = {
                 _fpa.send_ajax_request("/masters/" + drf[i].from_record_master_id + "/" + drf[i].from_record_type_us.replace('__','/') + "s/" + drf[i].from_record_id);
             }
           }
+        }
+
+        // Scroll to block a form was within, rather than some random location that may have been triggered by another ajax event
+        var h = $('.postprocessed-scroll-here');
+        if(h.length > 0) {
+          // Scroll if necessary
+          if(h.length == 0)
+            h = block;
+          else
+            h.removeClass('postprocessed-scroll-here');
+
+          var rect = h.get(0).getBoundingClientRect();
+          var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
+          if(not_visible) {
+            window.setTimeout(function() {
+              $.scrollTo(h, 200, {offset: -50});
+            }, 300);
+          }
+
         }
 
         // Allow an auto click to be made on elements in the newly loaded block

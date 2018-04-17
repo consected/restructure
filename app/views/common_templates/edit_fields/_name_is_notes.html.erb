@@ -1,7 +1,7 @@
 <%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
-<% if caption_before[field_name_sym]  %>
-    <p class="caption_before_notes">
-      <%= caption_before[field_name_sym].html_safe %>
+<% if field_name_sym == :notes && caption_before[field_name_sym]  %>
+    <p class="caption_before caption_before_notes">
+      <%= show_caption_before field_name_sym %>
     </p>
 <% end %>
 

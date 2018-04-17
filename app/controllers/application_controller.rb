@@ -26,6 +26,9 @@ class ApplicationController < ActionController::Base
 
 protected
 
+    def canceled?
+      params[:id] == 'cancel'
+    end
 
     def prevent_cache
       response.headers["Cache-Control"] = "no-cache, no-store, max-age=0, must-revalidate"

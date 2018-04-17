@@ -28,22 +28,14 @@
 
 
 
-class ExtraLogType
+class ExtraLogType < ExtraOptions
 
-  attr_accessor :name, :label, :fields, :references, :resource_name, :caption_before
+  attr_accessor :label, :fields, :references, :resource_name, :caption_before
 
   def initialize name, config, parent_activity_log
-    @name = name
-
-    config.each {|k, v| self.send("#{k}=", v)}
+    super(name, config, parent_activity_log)
 
     self.fields ||= []
-
-    pal = parent_activity_log
-
-    self.resource_name = "#{pal.full_implementation_class_name.ns_underscore}__#{self.name.underscore}"
-    self.caption_before ||= {}
-    self.caption_before = self.caption_before.symbolize_keys
 
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
     # unless name.in?(['primary', 'blank_log'])
@@ -54,38 +46,6 @@ class ExtraLogType
     raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
   end
 
-  def self.parse_config activity_log
-
-    c = activity_log.extra_log_types
-
-    configs = []
-    begin
-      if c.present?
-        res = YAML.load(c)
-      else
-        res = {}
-      end
-
-      # Add primary and blank items if they don't exist
-      res['primary'] ||= {}
-      res['blank_log'] ||= {}
-
-      res['primary']['label'] ||= activity_log.main_log_name
-      res['blank_log']['label'] ||= activity_log.blank_log_name
-      res['primary']['fields'] ||= activity_log.view_attribute_list
-      res['blank_log']['fields'] ||= activity_log.view_blank_log_attribute_list
-
-
-      res.each do |k, v|
-        i = ExtraLogType.new k, v, activity_log
-        configs << i
-      end
-
-    end
-
-    return configs
-  end
-
 
   def self.fields_for_all_in activity_log
     begin
@@ -94,5 +54,22 @@ class ExtraLogType
       raise FphsException.new "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
     end
   end
+
+  protected
+
+    def self.options_text activity_log
+      activity_log.extra_log_types
+    end
+
+    def self.set_defaults activity_log, all_options={}
+      # Add primary and blank items if they don't exist
+      all_options['primary'] ||= {}
+      all_options['blank_log'] ||= {}
+
+      all_options['primary']['label'] ||= activity_log.main_log_name
+      all_options['blank_log']['label'] ||= activity_log.blank_log_name
+      all_options['primary']['fields'] ||= activity_log.view_attribute_list
+      all_options['blank_log']['fields'] ||= activity_log.view_blank_log_attribute_list
+    end
 
 end

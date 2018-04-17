@@ -56,6 +56,9 @@ EOF
         f = 'boolean' if a.end_with?('_check')
         f = 'varchar' if a == 'notes'
         f = 'varchar' if a.start_with?('select_')
+        f = 'integer' if a == 'age'
+        f = 'integer' if a.start_with?('number_')
+        f = 'integer' if a.end_with?('_number')
         f += ','
         attrib_pair[a] = f
       end
@@ -64,7 +67,7 @@ EOF
       sql = <<EOF
 
 -- Command line:
--- table_generators/generate.sh $@
+-- table_generators/generate.sh create dynamic_models_table #{args.join(' ')}
 
       CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
           LANGUAGE plpgsql

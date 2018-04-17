@@ -40,12 +40,21 @@
   end
 
   unless defined? caption_before
-    caption_before = {}
+    if embedded
+      d = form_object_instance.class.default_options
+      caption_before = d.caption_before if d
+    else
+      caption_before = {}
+    end
   end
+  caption_before ||= {}
+  # Allow show_caption_before helper to work
+  @caption_before = caption_before
+
 
   if caption.blank?
     # if object_instance.respond_to?(:human_name) && object_instance.human_name.present?
-      caption = object_instance.human_name 
+      caption = object_instance.human_name
 
     # elsif caption.include?('_') || caption.downcase == caption
     #   caption = (caption.to_s || form_object_item_type_us).gsub('Dynamic Model/', '').humanize.titleize
@@ -91,6 +100,14 @@
           <%= render partial: 'common_templates/item_flags_block', locals: {f: form} unless item_flags_after || item_flags_array.length == 0 %>
         </li>
 
+
+        <% if caption_before[:all_fields] %>
+          <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-caption-before-all_fields">
+            <%= show_caption_before :all_fields %>
+          </li>
+        <% end %>
+
+
         <% item_list.each do |field_name| %>
           <%
             field_name = field_name.to_s
@@ -115,18 +132,21 @@
 
           %>
           <%
-          if caption_before[field_name_sym] && field_name_sym != :notes %>
-            <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-caption-after-<%=field_name_sym%>">
-              <%= caption_before[field_name_sym].html_safe %>
+          showed_caption_before = false
+          if caption_before[field_name_sym] && field_name_sym != :notes
+            showed_caption_before = true
+          %>
+            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-caption-before-<%=field_name_sym%>">
+              <%= show_caption_before field_name_sym %>
             </li>
           <% end %>
 
-          <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
+          <li class="list-group-item edit-field-container <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
             <%= render local_vars.merge(partial: 'common_templates/edit_form_field') %>
           </li>
 
           <%  if item_flags_after == field_name_sym && item_flags_array.length > 0 %>
-          <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
+          <li class="list-group-item item-flag-container <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
             <%= render partial: 'common_templates/item_flags_block', locals: {f: f} %>
           </li>
           <% end %>
@@ -136,11 +156,11 @@
         <% unless embedded %>
           <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
           <% if caption_before[:submit] %>
-            <li class="list-group-item <%=form_object_item_type_us.hyphenate%>-caption-before-submit">
-              <%= caption_before[:submit].html_safe %>
+            <li class="list-group-item edit-form-references-container <%=form_object_item_type_us.hyphenate%>-caption-before-submit">
+              <%= show_caption_before :submit %>
             </li>
           <% end %>
-          <li class="list-group-item">
+          <li class="list-group-item submit-action-container">
             <%= form.submit class: "btn btn-primary", value: 'Save' %>
           </li>
         <% end %>

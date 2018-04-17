@@ -564,6 +564,30 @@ a.switch_id {font-size: 10px; margin-left: -14px; position:absolute; margin-top:
   background-color: #eeeeee;
 }
 
+.results-caption-before > .panel,
+form .caption-before {
+  border-bottom: 0;
+  border-radius: 0;
+  padding: 0.7em;
+  background: rgb(243, 243, 243);
+}
+
+form .caption-before {
+  font-size: 94%;
+}
+
+.results-caption-before > .panel small {
+  font-size: 94%;
+}
+
+.model-reference-auto-shown .object-results-header, .model-reference-auto-shown-caption {
+  display: none;
+}
+
+.results-caption-before .list-group-item small {
+  display: none;
+}
+
 @media only screen and (min-width: 1023px) {
 
     td.tracker-notes , td.tracker-history-notes{
