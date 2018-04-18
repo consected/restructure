@@ -125,6 +125,10 @@ class ExternalIdentifier < ActiveRecord::Base
 
           self.table_name = name
 
+          # allow views to be used, where a primary key index is not defined, but the
+          # integer id field is guaranteed to be unique in the source table.          
+          self.primary_key = :id
+
           def self.is_external_identifier?
             true
           end
