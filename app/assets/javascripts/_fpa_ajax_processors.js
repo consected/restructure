@@ -15,6 +15,7 @@ _fpa.preprocessors = {
           var b = block.parents('.common-template-item, .new-block');
           if(b.hasClass('new-block'))
             b = b.parent();
+          $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here');
           b.addClass('postprocessed-scroll-here');
         }
     },
@@ -222,9 +223,11 @@ _fpa.postprocessors = {
             var t = '#trackers-' + master_id;
 
             var a = $('a.open-tracker[data-target="' + t + '"]');
-            a[0].app_callback = function(){
+            if(a && a[0]) {
+              a[0].app_callback = function(){
                 $(t).collapse('show');
-            };
+              };
+            }
             a.trigger('click.rails');
         }
     },

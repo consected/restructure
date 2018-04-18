@@ -28,6 +28,6 @@ For production:
   create view ml_app.bhs_assignments as select id, master_id, id bhs_id, now() created_at, now() updated_at from testmybrain.tmbs;
 
   GRANT ALL ON ml_app.bhs_assignments TO fphs;
-  GRANT SELECT,INSERT,UPDATE,DELETE ON ml_app.bhs_assignments TO fphsusr;
-  GRANT SELECT,INSERT,UPDATE,DELETE ON ml_app.bhs_assignments TO fphsetl;
-  GRANT SELECT,INSERT,DELETE,TRUNCATE,UPDATE ON ml_app.bhs_assignments TO fphsadm;
+  GRANT SELECT ON ml_app.bhs_assignments TO fphsusr;
+  GRANT SELECT ON ml_app.bhs_assignments TO fphsetl;
+  GRANT SELECT ON ml_app.bhs_assignments TO fphsadm;

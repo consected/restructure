@@ -565,20 +565,14 @@ a.switch_id {font-size: 10px; margin-left: -14px; position:absolute; margin-top:
 }
 
 .results-caption-before > .panel,
-form .caption-before {
+.caption-before {
   border-bottom: 0;
   border-radius: 0;
   padding: 0.7em;
   background: rgb(243, 243, 243);
-}
-
-form .caption-before {
   font-size: 94%;
 }
 
-.results-caption-before > .panel small {
-  font-size: 94%;
-}
 
 .model-reference-auto-shown .object-results-header, .model-reference-auto-shown-caption {
   display: none;

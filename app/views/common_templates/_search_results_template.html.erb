@@ -95,6 +95,9 @@
   al_full_name = "activity_log__#{full_name.underscore}"
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
+
+  field_result_class = "list-group-item result-field-container #{name.hyphenate}-{{@key}}"
+
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -196,11 +199,9 @@
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
 
         {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
-        <div class="results-caption-before <%=name.hyphenate%>-caption-before-{{@key}}">
-          <div class="panel panel-default panel-body">
-          <small>{{{fpa_state_item 'caption_before_<%=name.underscore%>' @key}}}</small>
-          </div>
-        </div>
+        <li class="list-group-item caption-before results-caption-before <%=name.hyphenate%>-caption-before-{{@key}}">
+          {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key}}}
+        </li>
         {{/is}}
 
         {{#is @key "notes"}}
@@ -234,31 +235,31 @@
           </div>
         </div>
         {{else is @key "data" }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>
+          <li class="<%= field_result_class %>"><small>
           {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}
           </small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_url'}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
           <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
           </span></strong></li>
         {{else is @key 'includes' '_link'}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
           <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
           </span></strong></li>
         {{else is @key 'includes' '_rank' }}
           <% if hide_rank_badge %>
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
           <% end %>
         {{else is @key '===' 'rank' }}
           <% if hide_rank_badge %>
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
           <% end %>
         {{else is @key "protocol_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "sub_process_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "protocol_event_id"}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
         {{else is @key "tracker_history_id"}}
         <% unless app_config_set(:hide_tracker_panel) %>
           {{#if ../tracker_histories}}
@@ -289,21 +290,25 @@
           <% end %>
         <% end %>
         {{else is @key 'includes' 'select_record_from_' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_blank_yes_no_dont_know' }}
+          <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+        {{else is @key 'includes' '_yes_no_dont_know' }}
+          <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_blank_yes_no' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_blank_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_yes_no' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_no_yes' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_no_yes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_no_yes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_time' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{this}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{this}}</strong></li>
         {{else is @key 'includes' '_notes' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_description' }}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else}}
-          <li class="list-group-item <%=name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{/is}}
 
         <% if ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after %>
@@ -339,11 +344,11 @@
               </div>
             </div>
             {{else}}
-              <li class="list-group-item <%=name.hyphenate%>-<%=item_name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+              <li class="list-group-item result-field-container <%=name.hyphenate%>-<%=item_name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
             {{/is}}
           {{/filter}}
           <% else %>
-          <li class="list-group-item  <%=name.hyphenate%>-<%=item_name.hyphenate%>">
+          <li class="list-group-item  result-field-container <%=name.hyphenate%>-<%=item_name.hyphenate%>">
             {{#filter this "<%= item_list %>" }}
             <small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong>
             {{/filter}}

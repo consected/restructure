@@ -179,6 +179,21 @@ a.add-icon{
 }
 
 
+
+.label-resizer {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.list-group-item.result-field-container, .list-group-item.edit-field-container {
+
+  visibility: hidden;
+  &.done-label-resize {
+    visibility: visible;
+  }
+}
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;

@@ -134,16 +134,32 @@ _fpa.form_utils = {
 
             window.setTimeout(function(){
                 var wmax = 0;
-                var lgi = self.find('.list-group-item').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta, .edit-form-header');
+                // Get all the items that need resizing PLUS the caption-before each, allowing them to be excluded
+                var list_items = self.find('.list-group-item.result-field-container, .list-group-item.edit-field-container, .list-group-item.caption-before');
+
+                var prev_caption_before = false;
+                list_items.each(function() {
+                  var this_caption_before = $(this).hasClass('caption-before');
+                  if(prev_caption_before && !this_caption_before) {
+                    $(this).find('small, label').remove();
+                  }
+                  prev_caption_before = this_caption_before;
+                });
+
+                var lgi = self.find('.list-group-item.result-field-container, .list-group-item.edit-field-container').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta, .edit-form-header');
+
+
                 var all = lgi.find('small, label');
-                all.css({display: 'inline-block', whiteSpace: 'nowrap', verticalAlign: 'middle'});
+                all.addClass('label-resizer');
 
                 var block_width = lgi.first().width();
 
                 all.each(function(){
+                  if($(this).is(':visible')) {
                     var wnew = $(this).width();
                     if(wnew > wmax)
-                        wmax = wnew;
+                      wmax = wnew;
+                  }
                 });
 
                 if(wmax > block_width * 0.5)
@@ -157,6 +173,7 @@ _fpa.form_utils = {
                         all.css({minWidth: wmax+6, width: wmax+6, whiteSpace: 'normal'}).addClass('list-small-label');
                     }
                 }
+                lgi.addClass('done-label-resize');
             }, 1);
             self.addClass('attached-resize-labels');
         });
@@ -676,7 +693,7 @@ _fpa.form_utils = {
 
         var data_label = _fpa.utils.translate(val, 'field_labels');
         data_label = data_label ? _fpa.utils.capitalize(data_label) : 'Data'
-        
+
         input.parent().find('label').html(data_label);
 
       };
