@@ -186,10 +186,10 @@ a.add-icon{
   vertical-align: middle;
 }
 
-.list-group-item.result-field-container, .list-group-item.edit-field-container {
+li.list-group-item.result-field-container, li.list-group-item.edit-field-container {
 
   visibility: hidden;
-  &.done-label-resize {
+  &.done-label-resize, &.done-label-resize strong {
     visibility: visible;
   }
 }

@@ -1,6 +1,6 @@
 class ExtraOptions
 
-  attr_accessor :name, :config_obj, :caption_before, :resource_name
+  attr_accessor :name, :config_obj, :caption_before, :show_if, :resource_name
 
   def initialize name, config, config_obj
     @name = name
@@ -11,6 +11,9 @@ class ExtraOptions
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name.underscore}"
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
+
+    self.show_if ||= {}
+    self.show_if = self.show_if.symbolize_keys    
     self
   end
 

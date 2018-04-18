@@ -8,6 +8,10 @@
     caption_before = {}
   end
 
+  unless defined? show_if
+    show_if = {}
+  end
+
 
   # Allow show_caption_before helper to work
   @caption_before = caption_before
@@ -96,8 +100,8 @@
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
 
-  field_result_class = "list-group-item result-field-container #{name.hyphenate}-{{@key}}"
-
+  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}}"
+  notes_result_class = "result-notes-container #{full_name.hyphenate}-{{@key}} {{#is this ''}}notes-empty{{/is}}"
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -188,7 +192,7 @@
           <% end %>
         </li>
         <% if caption_before[:all_fields]%>
-          <div class="results-caption-before <%=name.hyphenate%>-caption-before-all-fields">
+          <div class="results-caption-before caption-before <%=full_name.hyphenate%>-all_fields">
             <div class="panel panel-default panel-body">
               <small><%= show_caption_before :all_fields %></small>
             </div>
@@ -199,19 +203,19 @@
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
 
         {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
-        <li class="list-group-item caption-before results-caption-before <%=name.hyphenate%>-caption-before-{{@key}}">
+        <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-{{@key}}">
           {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key}}}
         </li>
         {{/is}}
 
         {{#is @key "notes"}}
-        <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
+        <div class="<%=notes_result_class%>">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
         </div>
         {{else is @key "description"}}
-        <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
+        <div class="<%=notes_result_class%>">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
@@ -220,7 +224,7 @@
         <div class="panel panel-default panel-heading">
         <div class="notes-block-label small">{{humanize @key}}</div>
         </div>
-        <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
+        <div class="<%=notes_result_class%>">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
@@ -229,7 +233,11 @@
         <div class="panel panel-default panel-heading">
         <div class="notes-block-label small">{{humanize @key}}</div>
         </div>
-        <div class="notes-block <%=name.hyphenate%>-notes  {{#is this ''}}notes-empty{{/is}}">
+        {{else is @key 'includes' "_details"}}
+        <div class="panel panel-default panel-heading">
+        <div class="notes-block-label small">{{humanize @key}}</div>
+        </div>
+        <div class="<%=notes_result_class%>">
           <div class="panel panel-default panel-body">
           {{pretty_string this return_string="true"}}
           </div>
@@ -263,13 +271,13 @@
         {{else is @key "tracker_history_id"}}
         <% unless app_config_set(:hide_tracker_panel) %>
           {{#if ../tracker_histories}}
-          <li class="list-group-item <%=name.hyphenate%>-tracker-histories-caption tracker-histories-caption is-minor-heading">
+          <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories-caption tracker-histories-caption is-minor-heading">
             <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" aria-expanded="false">Related tracker items <span class="caret"></span></a>
           </li>
           {{/if}}
-          <span id="<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" class="collapse related-tracker-collapser">
+          <span id="<%=full_name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" class="collapse related-tracker-collapser">
           {{#each ../tracker_histories}}
-            <li class="list-group-item <%=name.hyphenate%>-tracker-histories in-item-tracker-histories is-full-width">
+            <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories in-item-tracker-histories is-full-width">
               <span class="small">
                  <a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
                  {{pretty_string event_date}}
@@ -279,7 +287,7 @@
           {{/each}}
           </span>
           <% if implementation_class_name %>
-          <div class="results-caption-before <%=name.hyphenate%>-add-linked-tracker">
+          <div class="results-caption-before <%=full_name.hyphenate%>-add-linked-tracker">
             <div class="panel panel-default panel-body">
               <p><small>Add a specific tracker status record related to this item:</small></p>
               <p class="text-center">
@@ -395,7 +403,7 @@
       <% end %>
 
       <% if caption_before[:metadata]%>
-      <div class="results-caption-before <%=name.hyphenate%>-caption-before-metadata">
+      <div class="results-caption-before <%=full_name.hyphenate%>-metadata">
         <div class="panel panel-default panel-body">
           <small><%= show_caption_before :metadata %></small>
         </div>
@@ -457,4 +465,8 @@
   <% unless prevent_create %>
   <a href="/masters/{{id}}/<%=name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="<%=name.hyphenate%>-{{id}}-"><span class="glyphicon glyphicon-plus"></span> {{#if label}}{{label}}{{else}}<%= name.titleize %>{{/if}} record</a>
   <% end %>
+</script>
+
+<script>
+  _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;
 </script>

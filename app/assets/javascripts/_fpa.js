@@ -234,7 +234,9 @@ _fpa = {
 
     $(document).on('click', sel,  function(ev){
       // Clear flash notices by clicking an ajax enabled link or form
-      _fpa.clear_flash_notices();
+      if($(this).is(':visible')) {
+        _fpa.clear_flash_notices();
+      }
 
     }).on('ajax:before', sel, function(ev){
         var block = $(this);
@@ -299,7 +301,9 @@ _fpa = {
         _fpa.status.session.reset_timeout();
         var block = $(this);
         var data = xhr.responseJSON;
-        _fpa.clear_flash_notices();
+        if($(this).is(':visible')) {
+          _fpa.clear_flash_notices();
+        }
         _fpa.ajax_done(block);
 
         // Attempt an app-specific callback that a preprocessor may have created.

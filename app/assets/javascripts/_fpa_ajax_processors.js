@@ -55,6 +55,9 @@ _fpa.postprocessors = {
           }
         }
 
+        // Handle conditional form fields
+        _fpa.show_if.methods.show_items(block, di);
+
         // Scroll to block a form was within, rather than some random location that may have been triggered by another ajax event
         var h = $('.postprocessed-scroll-here');
         if(h.length > 0) {

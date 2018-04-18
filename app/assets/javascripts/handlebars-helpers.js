@@ -283,12 +283,12 @@
 
     Handlebars.registerHelper('hyphenate', function(str){
       if(!str) return;
-      return str.replace(/_/g, '-');
+      return str.hyphenate();
     });
 
     Handlebars.registerHelper('pathify', function(str){
       if(!str) return;
-      return str.replace(/__/g, '/');
+      return str.pathify();
     });
 
 

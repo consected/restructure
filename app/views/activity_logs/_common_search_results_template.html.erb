@@ -46,7 +46,8 @@
     item_flags_after: 'notes',
     item_flags_readonly: true,
     extra_type: 'primary',
-    references: primary_options.references
+    references: primary_options.references,
+    show_if: primary_options.show_if
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -70,7 +71,8 @@
     item_flags_after: 'notes',
     item_flags_readonly: true,
     extra_type: 'blank_log',
-    references: blank_options.references
+    references: blank_options.references,
+    show_if: blank_options.show_if
   } %>
 
 <% extra_log_type_configs.each do |c| %>
@@ -91,11 +93,12 @@
       item_blocks: {item_type.to_sym => implementation_class.parent_data_names},
       show_created_at: true,
       edit_button_href: "/masters/{{master_id}}/{{#if item_id}}#{item_type.pluralize}/{{item_id}}/{{/if}}activity_log/#{item_type_name.pluralize}/{{id}}/edit",
-      caption_before:{},
+      caption_before: c.caption_before,
       item_flags_after: 'notes',
       item_flags_readonly: true,
       extra_type: c.name,
-      references: c.references
+      references: c.references,
+      show_if: c.show_if
     } %>
 
   <% end %>
@@ -235,7 +238,7 @@
               {{><%= full_name %>_<%=c.name%>_result _created=@index prevent_edit=@index}}
               {{/is}}
             <% end %>
-            
+
             {{/if}}
           {{/each}}
         </div>
