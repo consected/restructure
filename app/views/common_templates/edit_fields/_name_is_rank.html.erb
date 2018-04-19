@@ -9,8 +9,8 @@
 %>
   <%= form.label :rank %>
   <% if gs %>
-  <%= form.select :rank, gs %>
+  <%= form.select :rank, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
   <% else %>
-  <%= form.text_field :rank %>
+  <%= form.text_field :rank, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
   <% end %>
 <% end %>

@@ -3,4 +3,4 @@ fn = field_name_sym
 fn = object_instance.rec_type  if object_instance.respond_to?(:rec_type) && object_instance.rec_type.present?
 %>
 <%= form.label t("field_names.#{fn}", default: field_name) %>
-<%= form.text_field field_name_sym, { data: {attr_name: field_name_sym}} %>
+<%= form.text_field field_name_sym, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

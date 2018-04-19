@@ -1,2 +1,2 @@
 <%= form.label field_name_sym, field_name.sub('_yes_no', '').humanize %>
-<%= form.select field_name_sym, ['yes', 'no'] %>
+<%= form.select field_name_sym, ['yes', 'no'], {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

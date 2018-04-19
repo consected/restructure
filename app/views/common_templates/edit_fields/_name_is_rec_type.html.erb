@@ -11,4 +11,4 @@ has_phone = gs.select {|s| s.last == 'phone'}.first
 has_email = gs.select {|s| s.last == 'email'}.first
 
 %>
-<%= form.select :rec_type, gs, {}, class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''} #{has_email ? 'rec_type_has_email' : ''}" %>
+<%= form.select :rec_type, gs, {}, { class: "rec_type_selector #{has_phone ? 'rec_type_has_phone' : ''} #{has_email ? 'rec_type_has_email' : ''}", data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

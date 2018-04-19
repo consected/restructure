@@ -24,6 +24,7 @@ _fpa.show_if.methods = {
     var obj = _fpa.show_if.forms[form_name];
     if(obj) {
       var field_def = obj[field_name];
+      var cond_success = true;
       for(var cond_field in field_def) {
         if(field_def.hasOwnProperty(cond_field)) {
           // Expect field data
@@ -33,19 +34,21 @@ _fpa.show_if.methods = {
 
           // generate the class names for the field to be conditionally hidden
           var show_field_class = '.' + form_name.hyphenate() + '-' + field_name;
-          var sels = ['.list-group-item.caption-before' + show_field_class, '.list-group-item.result-field-container' + show_field_class, '.list-group-item.edit-field-container' + show_field_class];
+          var sels = ['.list-group-item.caption-before' + show_field_class,
+                      '.list-group-item.result-field-container' + show_field_class,
+                      '.list-group-item.result-notes-container' + show_field_class,
+                      '.list-group-item.edit-field-container' + show_field_class];
           var sel = sels.join(', ');
           var els = block.find(sel);
 
-          var cond_success = (exp_field_value == exp_value);
-
-          if(cond_success) {
-            els.show();
-          }
-          else {
-            els.hide();
-          }
+          cond_success = cond_success && (exp_field_value == exp_value);
         }
+      }
+      if(cond_success) {
+        els.show();
+      }
+      else {
+        els.hide();
       }
     }
   }

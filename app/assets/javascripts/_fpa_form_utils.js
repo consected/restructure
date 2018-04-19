@@ -135,7 +135,7 @@ _fpa.form_utils = {
             window.setTimeout(function(){
                 var wmax = 0;
                 // Get all the items that need resizing PLUS the caption-before each, allowing them to be excluded
-                var list_items = self.find('.list-group-item.result-field-container, .list-group-item.edit-field-container, .list-group-item.caption-before');
+                var list_items = self.find('.list-group-item.result-field-container, .list-group-item.result-notes-container, .list-group-item.edit-field-container, .list-group-item.caption-before');
 
                 var prev_caption_before = false;
                 list_items.each(function() {

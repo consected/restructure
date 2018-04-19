@@ -4,18 +4,18 @@
   <%= render partial: 'admin_handler/form_errors' %>
 
   <% (permitted_params - [:id]).each do |p| %>
-      <div class="form-group">
       <%
-         col = object_instance.class.columns_hash[p.to_s]
-         col_type = col.type
+        col = object_instance.class.columns_hash[p.to_s]
+        col_type = col.type
       %>
+      <div class="form-group" data-out-attr-name="<%= p %>" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
       <% if col_type == :boolean %>
         <%= f.label p %>
         <%= f.check_box p %>
       <% elsif p == :description %>
         <%= f.label p %>
         <%= f.text_area p %>
-      <% elsif p == :options %>    
+      <% elsif p == :options %>
         <%= f.label p %>
         <%= f.text_area p %>
       <% elsif p == :disabled %>

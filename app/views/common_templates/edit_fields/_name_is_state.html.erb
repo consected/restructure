@@ -1,2 +1,2 @@
 <%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
-<%= form.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}  %>
+<%= form.collection_select :state, state_hash, :first, :last, {include_blank: '-select-'}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}  %>

@@ -57,6 +57,22 @@ h4.results-divider{
 
 }
 
+.model-reference-result {
+
+  .list-group {
+    margin-bottom: 0;
+    border-bottom: 8px solid rgb(221,221,221);
+    border-radius: 0;
+
+  }
+  .list-group-item:last-child {
+
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+
 li.list-group-item {
 
     min-height: 36px;
@@ -499,7 +515,20 @@ strong {
 
 }
 
-.player-info-notes {
+.notes-block {
+  .notes-text {
+    min-height: 52px;
+    border-radius: 0;
+  }
+  &.notes-empty > .notes-text:before {
+    content: 'no notes entered';
+    color: #999;
+  }
+
+}
+
+
+.result-notes-container {
     word-break: break-word;
     word-wrap: break-word;
 }

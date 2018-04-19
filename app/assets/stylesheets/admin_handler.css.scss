@@ -34,3 +34,7 @@ table.admin-list tbody {
 #admin-edit- .form-inline .form-group {
   margin-bottom: 1em;
 }
+
+.form-inline [data-out-attr-name="options"] textarea.form-control  {
+  width: 800px;
+}

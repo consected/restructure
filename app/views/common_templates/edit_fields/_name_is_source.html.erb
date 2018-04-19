@@ -6,8 +6,8 @@
 %>
 <%= form.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{general_selection_name}_source".to_sym), title: 'original sources of data' %>
 <% if gs %>
-  <%= form.select :source, gs %>
+  <%= form.select :source, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
   <% @has_source = true %>
 <% else %>
-  <%= form.text_field :source %>
+  <%= form.text_field :source, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
 <% end %>

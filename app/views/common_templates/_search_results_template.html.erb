@@ -100,8 +100,7 @@
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
 
-  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}}"
-  notes_result_class = "result-notes-container #{full_name.hyphenate}-{{@key}} {{#is this ''}}notes-empty{{/is}}"
+  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}}".html_safe
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -123,6 +122,17 @@
 %>
 
 <script id="activity_log_<%=name%>_data_template_name_partial"  type="text/x-handlebars-template" class="hidden handlebars-partial"><%= al_full_name.hyphenate %>{{#if rec_type}}-{{rec_type}}{{/if}}s-main-result-template</script>
+
+<script id="search_results_notes_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{@key}} notes-block {{#unless value}}notes-empty{{/unless}}{{#is value ''}}notes-empty{{/is}}">
+    {{#if label}}
+    <small class="notes-block-label">{{label}}</small>
+    {{/if}}
+    <div class="notes-text">
+    {{pretty_string value return_string="true"}}
+    </div>
+  </li>
+</script>
 
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
@@ -192,11 +202,9 @@
           <% end %>
         </li>
         <% if caption_before[:all_fields]%>
-          <div class="results-caption-before caption-before <%=full_name.hyphenate%>-all_fields">
-            <div class="panel panel-default panel-body">
-              <small><%= show_caption_before :all_fields %></small>
-            </div>
-          </div>
+          <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields">
+            <%= show_caption_before :all_fields %>
+          </li>
         <% end %>
 
         <% if item_list.length > 0 %>
@@ -209,39 +217,15 @@
         {{/is}}
 
         {{#is @key "notes"}}
-        <div class="<%=notes_result_class%>">
-          <div class="panel panel-default panel-body">
-          {{pretty_string this return_string="true"}}
-          </div>
-        </div>
+        {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
         {{else is @key "description"}}
-        <div class="<%=notes_result_class%>">
-          <div class="panel panel-default panel-body">
-          {{pretty_string this return_string="true"}}
-          </div>
-        </div>
+        {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
         {{else is @key 'includes' "_notes"}}
-        <div class="panel panel-default panel-heading">
-        <div class="notes-block-label small">{{humanize @key}}</div>
-        </div>
-        <div class="<%=notes_result_class%>">
-          <div class="panel panel-default panel-body">
-          {{pretty_string this return_string="true"}}
-          </div>
-        </div>
+        {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
         {{else is @key 'includes' "_description"}}
-        <div class="panel panel-default panel-heading">
-        <div class="notes-block-label small">{{humanize @key}}</div>
-        </div>
+        {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
         {{else is @key 'includes' "_details"}}
-        <div class="panel panel-default panel-heading">
-        <div class="notes-block-label small">{{humanize @key}}</div>
-        </div>
-        <div class="<%=notes_result_class%>">
-          <div class="panel panel-default panel-body">
-          {{pretty_string this return_string="true"}}
-          </div>
-        </div>
+        {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
         {{else is @key "data" }}
           <li class="<%= field_result_class %>"><small>
           {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}

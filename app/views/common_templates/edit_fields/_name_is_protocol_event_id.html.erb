@@ -1,2 +1,2 @@
 <%= form.label 'method' %><br/>
-<%= form.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, class: "form-control input-sm" %>
+<%= form.select :protocol_event_id, protocol_events_array_with_class, {include_blank: "-select-"}, { class: "form-control input-sm", data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
