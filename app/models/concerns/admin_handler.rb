@@ -28,12 +28,12 @@ module AdminHandler
 
   def disable!
     self.disabled = true
-    self.save
+    self.save!
   end
 
   def enable!
     self.disabled = false
-    self.save
+    self.save!
   end
 
   def admin_name

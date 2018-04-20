@@ -1,4 +1,4 @@
-<%= form.label t("field_names.#{field_name_sym}", default: field_name) %>
+<%= form.label field_name_sym, t("field_names.#{field_name_sym}", default: field_name.humanize).capitalize %>
 <% if field_name_sym == :notes && caption_before[field_name_sym]  %>
     <p class="caption_before caption_before_notes">
       <%= show_caption_before field_name_sym %>

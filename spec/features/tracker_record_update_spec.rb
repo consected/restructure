@@ -110,7 +110,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     phone = '(615)876-6815'
     within "form#new_player_contact" do
       select "Phone", from: "Record type"
-      fill_in 'Data', with: phone
+      fill_in 'Phone', with: phone
       click_button 'Save'
     end
     sleep 1

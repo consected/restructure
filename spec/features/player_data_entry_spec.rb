@@ -13,6 +13,14 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     gs = GeneralSelection.all
     gs.each {|g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save!}
 
+    # Clean up the general selection list to only allow one phone, email etc
+    gslist = []
+    GeneralSelection.enabled.where(item_type: 'player_contacts_type').each do |gs|
+      gs.current_admin = @admin
+      gs.disable! if gslist.include? gs.value
+      gslist << gs.value
+    end
+
     create_data_set
 
     @user, @good_password  = create_user
@@ -42,7 +50,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     expect(page).to have_css("form#new_player_contact")
 
     within "form#new_player_contact" do
-      select ctype, from: "Rec type"
+      select ctype, from: "Record type"
       f = find('#player_contact_data')
       entry.chars.each do |e|
         # break up the sending of keys to make the mask work, since the cursor resetting now breaks it when
@@ -345,6 +353,9 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     t = find("li.list-group-item.player-info-birth_date strong").text
     expect(t).to match(/0?3\/26\/2012/)
 
+    # Now necessary to expand the search form when just loading a master record directly
+    sf = find '#expand-simple-form'
+    sf.click
 
     search_dob 3, 26, 2012
 
