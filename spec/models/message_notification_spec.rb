@@ -31,6 +31,7 @@ RSpec.describe MessageNotification, type: :model do
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
+    Delayed::Job.delete_all
 
   end
 
@@ -63,7 +64,7 @@ RSpec.describe MessageNotification, type: :model do
 
     mn = nil
 
-    expect(Delayed::Job.count).to eq 0
+    # expect(Delayed::Job.count).to eq 0
 
     mn_id = MessageNotification.last.id if MessageNotification.last
 

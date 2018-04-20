@@ -28,7 +28,7 @@ module AdminHandler
 
   def disable!
     self.disabled = true
-    self.save!
+    self.save
   end
 
   def enable!

@@ -9,7 +9,7 @@ RSpec.describe 'BHS App Sync', type: :model do
   include PlayerContactSupport
 
   def create_item_to_sync
-    bhs_id = 580830939
+    bhs_id = 574
 
     BhsAssignment.all.each do |b|
 
@@ -42,7 +42,7 @@ RSpec.describe 'BHS App Sync', type: :model do
     expect(res).to eq 1
 
     # Setup the triggers, functions, etc
-    files = %w(create_bhs_assignments_external_identifier.sql create_activity_log.sql add_notification_triggers.sql add_testmybrain_trigger.sql create_sync_subject_data_aws_db.sql grant_roles_access_to_ml_app.sql)
+    files = %w(../../create_message_notification.sql create_bhs_assignments_external_identifier.sql create_activity_log.sql add_notification_triggers.sql add_testmybrain_trigger.sql create_sync_subject_data_aws_db.sql grant_roles_access_to_ml_app.sql)
 
     files.each do |fn|
 
@@ -65,7 +65,7 @@ RSpec.describe 'BHS App Sync', type: :model do
 
     ExternalIdentifier.where(name: 'bhs_assignments').update_all(disabled: true)
     i = ExternalIdentifier.where(name: 'bhs_assignments').order(id: :desc).first
-    i.update! disabled: false, current_admin: @admin if i
+    i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
 
     ActivityLog.where(table_name: 'activity_log_bhs_assignments').update_all(disabled: true)
     i = ActivityLog.where(table_name: 'activity_log_bhs_assignments').order(id: :desc).first
