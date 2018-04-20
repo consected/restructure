@@ -70,6 +70,12 @@ h4.results-divider{
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
   }
+
+  &.model-reference-auto-shown {
+    .list-group {
+      border-bottom: 0;
+    }
+  }
 }
 
 

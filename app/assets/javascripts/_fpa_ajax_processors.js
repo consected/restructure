@@ -56,21 +56,9 @@ _fpa.postprocessors = {
         }
 
         // Handle conditional form fields
-        if(di) {
-          _fpa.show_if.methods.show_items(block, di);
-        }
-        else {
+        if(data.form_data) {
+          var form_data = data.form_data;
           var form_els = block.find('[data-attr-name][data-object-name]');
-          var form_data = {};
-          form_els.each(function() {
-            var e = $(this);
-            var obj_name = e.attr('data-object-name');
-            var a_name = e.attr('data-attr-name');
-            if(!form_data[obj_name]) {
-              form_data[obj_name] = { item_type: obj_name };
-            }
-            form_data[obj_name][a_name] = e.val();
-          });
           form_els.on('change', function() {
             var e = $(this);
             var obj_name = e.attr('data-object-name');
@@ -83,6 +71,11 @@ _fpa.postprocessors = {
               _fpa.show_if.methods.show_items(block, form_data[fe]);
             }
           }
+        }
+        else if(di) {
+          _fpa.show_if.methods.show_items(block, di);
+
+
         }
 
         // Scroll to block a form was within, rather than some random location that may have been triggered by another ajax event
@@ -105,11 +98,11 @@ _fpa.postprocessors = {
         }
 
         // Allow an auto click to be made on elements in the newly loaded block
-        block.find('.on-postprocess-click').not('.auto-clicked').each(function(){
+        block.find('.on-postprocess-click').not('.auto-clicked, .ajax-running').each(function(){
           var el = $(this);
-
+          el.addClass('auto-clicked');
           window.setTimeout(function(){
-            el.addClass('auto-clicked').click();
+            el.click();
           });
         });
 

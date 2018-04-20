@@ -91,6 +91,23 @@ _fpa.form_utils = {
       }
     },
 
+    data_from_form: function(block) {
+      var form_els = block.find('[data-attr-name][data-object-name]');
+      var form_data = {};
+      form_els.each(function() {
+        var e = $(this);
+        var obj_name = e.attr('data-object-name');
+        var a_name = e.attr('data-attr-name');
+        if(!form_data[obj_name]) {
+          form_data[obj_name] = { item_type: obj_name };
+        }
+        form_data[obj_name][a_name] = e.val();
+      });
+
+      return form_data;
+    },
+
+
     // Setup the typeahead prediction for a specific text input element
     setup_typeahead: function(element, list, name){
 

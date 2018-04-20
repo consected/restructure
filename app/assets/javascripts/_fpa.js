@@ -563,6 +563,7 @@ _fpa = {
                       var targets = formcontainer;
                     else
                       var targets = formcontainer.find('[data-subscription="'+di+'"]');
+
                   }
                   else {
                     var targets = $('[data-subscription="'+di+'"]');
@@ -571,6 +572,10 @@ _fpa = {
                   if(targets.length === 0)
                     console.log('WARN: [data-subscription="'+di+'"] returns no targets');
                 }
+
+                if(isform.length == 1)
+                  data.form_data = _fpa.form_utils.data_from_form(isform);
+
                 var res = {};
                 res[di] = d;
                 targets.each(function(){
