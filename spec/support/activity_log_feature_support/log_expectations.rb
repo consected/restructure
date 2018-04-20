@@ -52,7 +52,7 @@ module LogExpectations
     within log do
       values.each do |k, v|
         if k == :notes
-          el = ".activity-log--player-contact-phone-primary-#{k} .panel-body"
+          el = ".activity-log--player-contact-phone-primary-#{k} .notes-text"
         else
           el = ".activity-log--player-contact-phone-primary-#{k} strong"
         end

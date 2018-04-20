@@ -89,13 +89,14 @@ module LogCallActions
 
   def set_related_player_contact_rank rank
     within phone_log_block_css do
-      select rank, from: 'Set related player contact rank'
+
+      select rank, from: 'activity_log_player_contact_phone_set_related_player_contact_rank'
     end
   end
 
   def select_related_protocol protocol
     within phone_log_block_css do
-      select protocol, from: 'Protocol'
+      select protocol, from: 'activity_log_player_contact_phone_protocol_id'
     end
   end
 
