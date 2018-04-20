@@ -2369,7 +2369,8 @@ CREATE TABLE ml_app.dynamic_models (
     category character varying,
     table_key_name character varying,
     field_list character varying,
-    result_order character varying
+    result_order character varying,
+    options character varying
 );
 
 
