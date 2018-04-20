@@ -801,7 +801,14 @@ _fpa.form_utils = {
               if(el.offset().top > curr_top){
                 curr_top = el.offset().top
                 if(maxh>1)
-                  block.find('.ready-to-resize').removeClass('ready-to-resize').css({minHeight: maxh});
+                  var inc = 0;
+                  // to resize the items go through each
+                  // add a small increment to each item, to ensure that subpixel issues
+                  // don't lead to errors
+                  block.find('.ready-to-resize').each(function() {
+                    $(this).removeClass('ready-to-resize').css({minHeight: maxh + inc});
+                    inc++;
+                  });
                 maxh = 1;
               }
 
