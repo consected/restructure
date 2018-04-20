@@ -204,7 +204,7 @@
            <div class="panel-body">
             <div class="row">
               <% if view?[:player_infos] || view?[:pro_infos] %>
-              <div class="<%= app_config_set(:hide_pro_info) || !current_user.has_access_to?(:access, :table, :player_infos) || !current_user.has_access_to?( :access, :table, :pro_infos)  ? 'col-md-8 col-lg-6' : 'col-md-16 col-lg-12' %>">
+              <div class="<%= app_config_set(:hide_pro_info) || !current_user.has_access_to?(:access, :table, :player_infos) || !current_user.has_access_to?( :access, :table, :pro_infos)  ? layout_item_block_sizes[:regular] : 'col-md-16 col-lg-12' %>">
                 <div class="row">
                 <% if view?[:player_infos] %>
                 {{#with player_infos.[0]}}
@@ -245,7 +245,7 @@
               <% end %>
 
               <% if view?[:addresses] %>
-              <div class="col-md-8 col-lg-6" id="addresses-{{id}}-" data-sub-list="addresses">
+              <div class="<%= layout_item_block_sizes[:regular] %>" id="addresses-{{id}}-" data-sub-list="addresses">
                 {{#each addresses}}
 
                     {{>address_result _created=@index}}
@@ -261,7 +261,7 @@
               <% end %>
 
               <% if view?[:player_contacts] %>
-              <div class="col-md-8 col-lg-6" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
+              <div class="<%= layout_item_block_sizes[:regular] %>" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
                 {{#each player_contacts}}
 
                   {{>player_contact_result _created=@index}}
@@ -301,7 +301,7 @@
               </div>
               <%  external_id_types.each do |e|%>
                 <% if view?[e.plural_name.to_sym] %>
-                <div class="col-md-8 col-lg-6" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+                <div class="<%= layout_item_block_sizes[:regular] %>" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
                 <% end %>
               <% end %>
             </div>

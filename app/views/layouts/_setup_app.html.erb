@@ -5,6 +5,9 @@
 
   _fpa.current_locale = 'en';
 
+  _fpa.layout = {item_blocks: <%= layout_item_block_sizes.to_json.html_safe %> };
+
+
 <% # We attempt to load these cached definitions here, to speed up future forms and results that rely on them.
   if current_email %>
     //_fpa.set_definition('colleges');

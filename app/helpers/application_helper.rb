@@ -94,4 +94,11 @@ module ApplicationHelper
     @caption_before[key].gsub("\n","<br/>").html_safe
   end
 
+  def layout_item_block_sizes
+    {
+      narrow: 'col-md-6 col-lg-4',
+      regular: 'col-md-8 col-lg-6',
+      wide: 'col-md-12 col-lg-12'  
+    }
+  end
 end
