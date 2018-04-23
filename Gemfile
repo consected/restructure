@@ -24,6 +24,7 @@ gem 'delayed_job'
 gem 'delayed_job_active_record'
 gem 'daemons'
 
+gem 'crass', '~> 1.0.4'
 
 group :development do
 

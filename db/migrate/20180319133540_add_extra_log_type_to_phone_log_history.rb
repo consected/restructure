@@ -16,7 +16,7 @@ BEGIN
 
              alter table activity_log_player_contact_phone_history add column extra_log_type varchar;
     END IF;
-    END
+    END;
 $$
 ;
 

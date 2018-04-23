@@ -30,7 +30,7 @@ then
   echo '2 (vagrant-fphs-webapp-box - update vagrant test box from host)'
   echo '3 (test DBs fphs against fpa_development within vagrant dev box guest)'
   echo '4 (fphs-webapp-dev01)'
-  echo '5 (fphs-webapp-dev01)'
+  echo '5 (fphs-webapp-dev02)'
   echo '6 (fphs-webapp-prod01)'
 
   read OPT
@@ -146,7 +146,7 @@ export EXTUSER=$ext_user
 export SCHEMA=ml_app
 export EXTDB=fphs
 export EXTDBHOST=fphs-db-dev01
-export EXTDBUSER=$ext_user
+export EXTDBUSER=passenger
 export EXPORTSVR=fphs-crm-dev01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
@@ -164,9 +164,9 @@ export EXTUSER=$ext_user
 export SCHEMA=ml_app
 export EXTDB=fphs
 export EXTDBHOST=fphs-crm-dev02
-export EXTDBUSER=$ext_user
+export EXTDBUSER=fphs
 export EXPORTSVR=fphs-crm-dev02
-export EXPORTLOC=/FPHS/data/db_migrations
+export EXPORTLOC=/tmp
 export EXTROLE=FPHSUSR
 export EXTADMROLE=FPHSADM
 ###############################
@@ -180,7 +180,7 @@ export EXTUSER=$ext_user
 export SCHEMA=ml_app
 export EXTDB=fphs
 export EXTDBHOST=fphs-db-prod01
-export EXTDBUSER=$ext_user
+export EXTDBUSER=passenger
 export EXPORTSVR=fphs-crm-prod01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
@@ -198,6 +198,7 @@ if [ -z "$BECOME_USER" ]
 then
   export BECOME_USER_CMD=""
   export EXTDBCONN="-h $EXTDBHOST -U $EXTDBUSER"
+  echo "NOTE: your ecommons user on the remote server requires a .pgpass entry for $EXTDBHOST:5432:$EXTDB:$EXTDBUSER:<password>"
 else
   export BECOME_USER_CMD="sudo -u $BECOME_USER -i"
   export EXTDBCONN=''
@@ -212,7 +213,7 @@ fi
 
 echo Storing results to development directory: $DEVDIR
 
-if [ $MAKEREFDB == 'yes' ]
+if [ "$MAKEREFDB" == 'yes' ]
 then
   echo Create the local reference database
   CURRDIR=`pwd`
@@ -238,10 +239,12 @@ fi
 
 echo Prepare dump of current schema from the server $EXTNAME
 $RUNSCRIPT <<EOF
+echo become user? $BECOME_USER_CMD
 $BECOME_USER_CMD
 cd /tmp
 mkdir -p migrate-$EXTNAME
 cd migrate-$EXTNAME
+echo -d $EXTDB $EXTDBCONN
 pg_dump -O -d $EXTDB $EXTDBCONN --clean --create --schema-only --schema=$SCHEMA -T $SCHEMA.jd_tmp  -x > "db-schema.sql"
 pg_dump -O -d $EXTDB $EXTDBCONN --data-only --schema=$SCHEMA --table=$SCHEMA.schema_migrations -x > "db-schema-migrations.sql"
 chmod 777 .

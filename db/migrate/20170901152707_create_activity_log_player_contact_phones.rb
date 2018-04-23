@@ -4,7 +4,7 @@ class CreateActivityLogPlayerContactPhones < ActiveRecord::Migration
       t.string :data
       t.string :select_call_direction
       t.string :select_who
-      t.date :called_when      
+      t.date :called_when
       t.string  :select_result
       t.string  :select_next_step
       t.date  :follow_up_when
@@ -16,7 +16,7 @@ class CreateActivityLogPlayerContactPhones < ActiveRecord::Migration
       t.references :player_contact, index: true, foreign_key: true
       t.references :master, index: true, foreign_key: true
       t.boolean :disabled
-      
+
       t.timestamps null: false
 
     end

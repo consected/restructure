@@ -63,7 +63,13 @@ namespace :db do
           puts    "Created file: #{sqlfile}"
 
           # invoke the normal migration procedure now
-          Rake::Task[original_task].invoke
+          begin
+            Rake::Task[original_task].invoke
+          rescue => e
+            puts e
+            puts e.backtrace.join("\n")
+            raise e
+          end
 
           sqlfile = "\n#{ENV['APPEND_SQL']}\n commit; "
           File.open(SQL_FILENAME, 'a') { |f| f.puts "#{sqlfile};\n" }
