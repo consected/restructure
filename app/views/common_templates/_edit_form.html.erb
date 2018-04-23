@@ -55,11 +55,16 @@
   if caption.blank?
     # if object_instance.respond_to?(:human_name) && object_instance.human_name.present?
       caption = object_instance.human_name
-
-    # elsif caption.include?('_') || caption.downcase == caption
-    #   caption = (caption.to_s || form_object_item_type_us).gsub('Dynamic Model/', '').humanize.titleize
-    # end
   end
+
+  unless defined? save_action
+    d = form_object_instance.class.default_options
+    save_action = d.save_action if d
+    save_action ||= { label: 'Save' }
+  end
+
+  save_label = save_action[:label] || 'Save'
+
 
   unless defined? item_list
     item_list = form_object_instance.class.permitted_params - [:id, :master_id, :item_id, item_type_id]
@@ -161,7 +166,7 @@
             </li>
           <% end %>
           <li class="list-group-item submit-action-container">
-            <%= form.submit class: "btn btn-primary", value: 'Save' %>
+            <%= form.submit class: "btn btn-primary", value: save_label %>
           </li>
         <% end %>
       </ul>

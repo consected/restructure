@@ -3,8 +3,8 @@ class ExternalIdentifier < ActiveRecord::Base
   include DynamicModelHandler
   include AdminHandler
 
-  validates :name, presence: true, presence: {scope: :active}
-  validates :label, presence: true, presence: {scope: :active}
+  validates :name, presence: {scope: :active}
+  validates :label, presence: {scope: :active}
   validates :external_id_attribute, presence: {scope: :active}
   validates :min_id, presence: true, numericality: {greater_than_or_equal_to: 0}, unless: :alphanumeric?
   validates :max_id, presence: true, numericality: {greater_than_or_equal_to: 0}, unless: :alphanumeric?
@@ -126,7 +126,7 @@ class ExternalIdentifier < ActiveRecord::Base
           self.table_name = name
 
           # allow views to be used, where a primary key index is not defined, but the
-          # integer id field is guaranteed to be unique in the source table.          
+          # integer id field is guaranteed to be unique in the source table.
           self.primary_key = :id
 
           def self.is_external_identifier?

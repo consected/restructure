@@ -194,6 +194,11 @@ li.list-group-item.result-field-container, li.list-group-item.edit-field-contain
   }
 }
 
+li.list-group-item small.notes-block-label {
+  display: block;
+  position: relative;
+}
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;
