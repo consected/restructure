@@ -15,6 +15,21 @@ GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphsusr;
 GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphsetl;
 GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphsadm;
 
-GRANT USAGE ON SCHEMA ml_app TO fphsrailsapp;
-GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphsrailsapp;
-GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphsrailsapp;
+
+DO
+$body$
+BEGIN
+
+IF EXISTS (
+   SELECT *
+   FROM   pg_catalog.pg_roles
+   WHERE  rolname = 'fphsrailsapp') THEN
+
+   GRANT USAGE ON SCHEMA ml_app TO fphsrailsapp;
+   GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphsrailsapp;
+   GRANT SELECT,USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphsrailsapp;
+END IF;
+
+
+END
+$body$;

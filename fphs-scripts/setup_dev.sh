@@ -5,8 +5,8 @@
 # Then download and run this script:
 #   read -p 'openmed username:' omu;curl -su $omu "https://open.med.harvard.edu/svn/fphs-rails/branches/phase3-1/fphs-scripts/setup_dev.sh" > /tmp/setup_dev.sh;sh /tmp/setup_dev.sh
 
-# Set the required ruby version. 
-RUBYVER=2.4.1
+# Set the required ruby version.
+RUBYVER=`python -c "import yaml; print(yaml.load(open('$TOP/package_vars.yml'))['rbenv_ruby_version'])"`
 
 # --- setup_dev.sh prerequisites ---
 # postgres 9.4 and postgres client
@@ -28,8 +28,8 @@ if [ -n "$rtype" ]
 then
   echo "rvm is installed. `ruby --version`"
   gr=`ruby --version |grep "ruby $RUBYVER"`
-  if [ -z "$gr" ] 
-  then 
+  if [ -z "$gr" ]
+  then
     echo "RVM is installed. rvm install ruby $RUBYVER and set it as default, then rerun setup_dev.sh"
     exit 1
   fi
@@ -41,8 +41,8 @@ if [ -n "$rtype" ]
 then
   echo "rbenv is installed. `ruby --version`"
   gr=`ruby --version |grep "ruby $RUBYVER"`
-  if [ -z "$gr" ] 
-  then 
+  if [ -z "$gr" ]
+  then
     echo Attempting to install ruby $RUBYVER and set it as default
     # Update rbenv, just in case it is needed to get the latest ruby version
     cd ~/.rbenv/plugins/ruby-build && git pull && cd -
@@ -57,7 +57,7 @@ then
 fi
 
 
-echo Checking out the current HEAD to `pwd`. 
+echo Checking out the current HEAD to `pwd`.
 echo Enter your openmed username to contine:
 read SVNUSR
 svn checkout  --username="$SVNUSR" https://open.med.harvard.edu/svn/fphs-rails/branches/phase3-1 .
@@ -68,7 +68,7 @@ gem install bundler
 bundle install
 
 res=`psql -d fpa_development -c "select '1';"`
-if [ -z "$res" ] 
+if [ -z "$res" ]
 then
 echo "Enter sudo password to act as postgres to create database"
 sudo -u postgres createdb -O `whoami` fpa_development
@@ -78,7 +78,7 @@ echo "database fpa_development exists"
 fi
 
 res=`psql -d fpa_test -c "select '1';"`
-if [ -z "$res" ] 
+if [ -z "$res" ]
 then
 echo "Enter sudo password to act as postgres to create database"
 sudo -u postgres createdb -O `whoami` fpa_test
@@ -94,8 +94,7 @@ RAILS_ENV=test rake db:migrate
 chmod 770 ./fphs-scripts/add_admin.sh
 PWRES=`RAILS_ENV=development ./fphs-scripts/add_admin.sh admin@test.com`
 clear
-echo To run the app server run 
+echo To run the app server run
 echo  bin/rails server
 echo Then browse to http://localhost:3000/admins/sign_in
 echo Login to server using credentials for $PWRES
-
