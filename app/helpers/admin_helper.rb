@@ -64,32 +64,33 @@ module AdminHelper
         end
 
 
-        if filter.first.last.is_a? String
+        if filter.first && filter.first.last.is_a?(String)
           all_filters = {all: filter}
         else
           all_filters = filter
         end
 
+        if all_filters.first
+          res << filter_btn('all', filter_on, nil) if all_filters.first.last.is_a?(Symbol)
+          all_filters.each do |title, vals|
 
-        res << filter_btn('all', filter_on, nil) if all_filters.first.last.is_a?(Symbol)
-        all_filters.each do |title, vals|
-
-          if vals.is_a?( Symbol) || vals.is_a?( String)
-            res << filter_btn(title, filter_on, vals)
-          else
-
-            res << "<div><p>#{title.to_s.humanize}</p>"
-            res << filter_btn('all', filter_on, nil)
-            if vals.is_a? Hash
-              vals.each do |k,v|
-                res << filter_btn(v, filter_on, k)
-              end
+            if vals.is_a?( Symbol) || vals.is_a?( String)
+              res << filter_btn(title, filter_on, vals)
             else
-              vals.each do |v|
-                res << filter_btn(v, filter_on, v)
+
+              res << "<div><p>#{title.to_s.humanize}</p>"
+              res << filter_btn('all', filter_on, nil)
+              if vals.is_a? Hash
+                vals.each do |k,v|
+                  res << filter_btn(v, filter_on, k)
+                end
+              else
+                vals.each do |v|
+                  res << filter_btn(v, filter_on, v)
+                end
               end
+              res << "</div>"
             end
-            res << "</div>"
           end
         end
       end
