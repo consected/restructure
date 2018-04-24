@@ -47,18 +47,18 @@ class ActivityLog::ActivityLogsController < ApplicationController
       extras_caption_before = {}
       if @extra_log_type
         caption = @extra_log_type.label
-        item_list = @extra_log_type.fields - @implementation_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
+        item_list = @extra_log_type.fields - @implementation_class.fields_to_sync.map(&:to_s) - ['tracker_history_id']
         extras_caption_before  = @extra_log_type.caption_before
         sa = @extra_log_type.save_action
       end
       if @item
         caption ||= @item.data
         item_name = @item.class.human_name
-        item_list ||= @implementation_class.view_attribute_list - @implementation_class.fields_to_sync.map(&:to_sym) - [:tracker_history_id]
+        item_list ||= @implementation_class.view_attribute_list - @implementation_class.fields_to_sync.map(&:to_s) - ['tracker_history_id']
       else
         caption ||= 'log item'
         item_name = ''
-        item_list ||= @implementation_class.view_blank_log_attribute_list - [:tracker_history_id]
+        item_list ||= @implementation_class.view_blank_log_attribute_list - ['tracker_history_id']
       end
       cb = {
         protocol_id: "Select the protocol this  #{activity_log_name} is related to. A tracker event will be recorded under this protocol.",
@@ -170,10 +170,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
 
     def permitted_params
-      fts = @implementation_class.fields_to_sync.map(&:to_sym)
-
-      res =  @implementation_class.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, item_type_id, @item_type.singularize.to_sym, :tracker_id] + [:item_id] - fts
-
+      res =  @implementation_class.permitted_params
       # The embedded_item params are only used in an update. Create actions are handled separately
       if @embedded_item
        res << {embedded_item: @embedded_item.class.permitted_params}

@@ -168,7 +168,7 @@ filled_items = 0
 
     $(document).on('change', 'tr.next-blank-row td input, select, textarea', function(){
       var v = $(this).val();
-      if(!v || v == '')
+      if(!v || v == '' || $(this).parents('tr').hasClass('filled-row'))
         return;
 
       var blank_row = $(this).parents('form').find('tr.final-blank-row');
