@@ -96,9 +96,9 @@ export EXTADMROLE=FPHSADM
 echo This option creates a local reference database from a schema SQL definition previously exported from a remote database.
 echo In addition, an export of the data from the table 'schema_migrations' is required.
 echo To create these:
-echo   pg_dump -O -s -d db_name > "schema.sql"
-echo   pg_dump -O -d db_name --data-only --schema=ml_app --table=ml_app.schema_migrations -x > "db-schema-migrations.sql"
-echo When ready to continue, press Enter
+echo '  pg_dump -O -s -d db_name > "schema.sql"'
+echo '  pg_dump -O -d db_name --data-only --schema=ml_app --table=ml_app.schema_migrations -x > "db-schema-migrations.sql"'
+echo 'When ready to continue, press Enter'
 read _ready
 ##############################
 fi
@@ -229,7 +229,7 @@ then
   chmod 600 ~/.pgpass
 
   echo "Use '\i schema.sql' to import the database and migration files"
-  sudo -u postgres psql
+  sudo -u postgres psql -d $EXTDB
 
   cd $CURRDIR
 
@@ -239,6 +239,9 @@ fi
 
 echo Prepare dump of current schema from the server $EXTNAME
 $RUNSCRIPT <<EOF
+cd /tmp
+mv migrate-$EXTNAME migrate-$EXTNAME.old.`date --iso-8601=seconds`
+cd -
 echo become user? $BECOME_USER_CMD
 $BECOME_USER_CMD
 cd /tmp
@@ -266,8 +269,14 @@ echo Preparing full db/migrate list of Rails files
 ls -1 ../../migrate/  | grep -oP '([0-9]+)' > migration-list.txt
 echo `wc -l migration-list.txt` files available as Rails migrations
 
-echo Pull the db-schema files back locally using rsync
-rsync $EXTUSER@$EXTNAME:/tmp/migrate-$EXTNAME/db-schema* .
+if [ "$EXTNAME" == 'localhost' ]
+then
+  echo Copying the local db-schema files to the correct location
+  cp /tmp/migrate-$EXTNAME/db-schema* .
+else
+  echo Pull the db-schema files back locally using rsync
+  rsync $EXTUSER@$EXTNAME:/tmp/migrate-$EXTNAME/db-schema* .
+fi
 
 echo Create the local database
 CURRDIR=`pwd`
