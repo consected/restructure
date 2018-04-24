@@ -15,6 +15,7 @@ require 'devise'
 require 'browser_helper'
 include BrowserHelper
 
+Capybara.server = :webrick
 setup_browser
 
 include Warden::Test::Helpers

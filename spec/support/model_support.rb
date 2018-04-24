@@ -55,7 +55,7 @@ module ModelSupport
       r = 1
       r = a.id + 1 if a
     end
-    good_admin_email = "d-testadmin-tester#{r}@testing.com"
+    good_admin_email = "e-testadmin-tester#{r}@testing.com"
 
     admin = Admin.create! email: good_admin_email
     good_admin_password = admin.password

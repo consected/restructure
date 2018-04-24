@@ -51,7 +51,7 @@ group :development, :test do
 end
 
 group :test do
-  gem 'capybara'
+  gem 'capybara', '~> 2.18'
   gem 'selenium-webdriver', '3.4.4'
   gem 'database_cleaner'
   gem 'simplecov', :require => false
