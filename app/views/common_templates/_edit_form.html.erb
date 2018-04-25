@@ -138,7 +138,7 @@
           %>
           <%
           showed_caption_before = false
-          if caption_before[field_name_sym] && field_name_sym != :notes
+          if caption_before[field_name_sym]
             showed_caption_before = true
           %>
             <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">

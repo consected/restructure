@@ -1,8 +1,2 @@
 <%= form.label field_name_sym, t("field_names.#{field_name_sym}", default: field_name.humanize).capitalize %>
-<% if field_name_sym == :notes && caption_before[field_name_sym]  %>
-    <p class="caption_before caption_before_notes">
-      <%= show_caption_before field_name_sym %>
-    </p>
-<% end %>
-
 <%= form.text_area field_name_sym, class: 'form-control', data: {attr_name: field_name_sym, object_name: form_object_item_type_us}  %>
