@@ -32,7 +32,7 @@ Rails.application.configure do
     password: ENV['SMTP_PASSWORD'],
     authentication: (ENV['SMTP_AUTHENTICATION_MODE'] || 'login').to_sym,
     enable_starttls_auto: true,
-    openssl_verify_mode: :peer,
+    # openssl_verify_mode: :peer,
     tls: true
   }
 
