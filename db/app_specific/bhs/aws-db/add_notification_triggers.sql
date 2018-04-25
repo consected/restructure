@@ -1,4 +1,5 @@
 INSERT INTO users (email, disabled, created_at, updated_at) values ('dl-fphs-elaine-bhs-pis@listserv.med.harvard.edu', false, now(), now());
+INSERT INTO users (email, disabled, created_at, updated_at) values ('dl-fphs-elaine-bhs-ras@listserv.med.harvard.edu', false, now(), now());
 
 /* Simple support function to get app_type.id using a name */
 CREATE OR REPLACE FUNCTION get_app_type_id_by_name(app_type_name VARCHAR) RETURNS INTEGER
@@ -54,7 +55,7 @@ AS $$
               'ActivityLog::BhsAssignment'::VARCHAR,
               activity_record.user_id,
               ARRAY[dl_user.id],
-              'bhs pi notification layout'::VARCHAR,
+              'bhs notification layout'::VARCHAR,
               'bhs pi notification content'::VARCHAR,
               'New Brain Health Study Info Request'::VARCHAR,
               now()::TIMESTAMP
@@ -79,21 +80,28 @@ CREATE OR REPLACE FUNCTION activity_log_bhs_assignment_insert_notification() RET
 LANGUAGE plpgsql
 AS $$
     DECLARE
-      responding_to RECORD;
       message_id INTEGER;
+      to_user_id INTEGER;
     BEGIN
 
         IF NEW.extra_log_type = 'contact_initiator' THEN
 
             -- Get the most recent info request from the activity log records for this master_id
             -- This gives us the user_id of the initiator of the request
-            select * from activity_log_bhs_assignments
-            into responding_to
+            select user_id from activity_log_bhs_assignments
+            into to_user_id
             where
               master_id = NEW.master_id
               and extra_log_type = 'primary'
             order by id desc
             limit 1;
+
+            IF to_user_id IS NULL THEN
+              select id from users
+              into to_user_id
+              where email = 'dl-fphs-elaine-bhs-ras@listserv.med.harvard.edu'
+              limit 1;
+            END IF;
 
             SELECT
             INTO message_id
@@ -103,8 +111,8 @@ AS $$
                 NEW.id,
                 'ActivityLog::BhsAssignment'::VARCHAR,
                 NEW.user_id,
-                ARRAY[responding_to.user_id],
-                'bhs pi notification layout'::VARCHAR,
+                ARRAY[to_user_id],
+                'bhs notification layout'::VARCHAR,
                 'bhs message notification content'::VARCHAR,
                 'Brain Health Study contact from PI'::VARCHAR,
                 now()::TIMESTAMP
@@ -118,13 +126,21 @@ AS $$
 
             -- Get the most recent contact_initiator from the activity log records for this master_id
             -- This gives us the user_id of the PI making the Contact RA request
-            select * from activity_log_bhs_assignments
-            into responding_to
+            select user_id from activity_log_bhs_assignments
+            into to_user_id
             where
               master_id = NEW.master_id
               and extra_log_type = 'contact_initiator'
             order by id desc
             limit 1;
+
+            IF to_user_id IS NULL THEN
+              select id from users
+              into to_user_id
+              where email = 'dl-fphs-elaine-bhs-pis@listserv.med.harvard.edu'
+              limit 1;
+            END IF;
+
 
             SELECT
             INTO message_id
@@ -134,8 +150,8 @@ AS $$
                 NEW.id,
                 'ActivityLog::BhsAssignment'::VARCHAR,
                 NEW.user_id,
-                ARRAY[responding_to.user_id],
-                'bhs pi notification layout'::VARCHAR,
+                ARRAY[to_user_id],
+                'bhs notification layout'::VARCHAR,
                 'bhs message notification content'::VARCHAR,
                 'Brain Health Study contact from RA'::VARCHAR,
                 now()::TIMESTAMP
