@@ -158,7 +158,7 @@ _fpa.form_utils = {
                 list_items.each(function() {
                   var this_caption_before = $(this).hasClass('caption-before');
                   if(prev_caption_before && !this_caption_before) {
-                    $(this).find('small, label').addClass('removeme');
+                    $(this).find('small, label').remove();
                   }
                   prev_caption_before = this_caption_before;
                 });
