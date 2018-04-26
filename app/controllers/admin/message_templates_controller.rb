@@ -17,7 +17,7 @@ class Admin::MessageTemplatesController < AdminController
     end
 
   private
-    def secure_params
-        params.require(object_name.to_sym).permit(:name, :message_type, :template_type, :template, :disabled)
+    def permitted_params
+        [:name, :message_type, :template_type, :template, :disabled]
     end
 end

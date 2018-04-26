@@ -53,8 +53,7 @@ class Admin::ManageUsersController < AdminController
 
   private
 
-    def secure_params
-
-      params.require(:user).permit(:email, :disabled)
+    def permitted_params
+      [:email, :disabled]
     end
 end

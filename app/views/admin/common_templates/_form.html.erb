@@ -21,6 +21,14 @@
       <% elsif p == :disabled %>
         <%= f.check_box p %>
         <%= f.label p %>
+      <% elsif p == :app_type_id %>
+          <%= f.label p %>
+          <% select_item_type = {}
+             select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'    %>
+          <%= f.select :app_type_id, AppType.active.map{|a| [a.label, a.id]}, select_item_type%>
+      <% elsif p == :user_id %>
+          <%= f.label p %>
+          <%= f.select :user_id, options_from_collection_for_select(User.active, 'id', 'email', object_instance.user_id), include_blank: true %>
       <% elsif respond_to? ("#{p}_options") %>
         <%= f.label p %>
         <% select_item_type = {}

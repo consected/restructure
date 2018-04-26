@@ -32,7 +32,4 @@ class Admin::MessageNotificationsController < AdminController
       [:id, :app_type_id, :master_id, :user_id, :item_id, :message_type, :recipient_user_ids, :layout_template_name, :content_template_name, :subject, :data, :recipient_emails, :from_user_email, :generate_view, :status, :created_at, :updated_at]
     end
 
-    def secure_params
-      params.require(object_name.to_sym).permit(*permitted_params)
-    end
 end

@@ -48,10 +48,6 @@ class Admin::JobReviewsController < AdminController
       [:id, :priority, :attempts, :handler, :last_error, :run_at, :locked_at, :failed, :failed_at, :locked_by, :queue, :created_at, :updated_at]
     end
 
-    def secure_params
-      params.require(object_name.to_sym).permit(*permitted_params)
-    end
-
     def human_name
       "Background Jobs"
     end

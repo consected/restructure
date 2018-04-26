@@ -3,7 +3,7 @@ class MessageNotification < ActiveRecord::Base
 
 
   # Set the max number of recipients for a message, to avoid an unexpected nasty error spamming the whole organization
-  MaxRecipients = 10
+  MaxRecipients = 20
   StatusComplete = 'complete'
   StatusInProgress = 'in progress'
   StatusFailed = 'failed'

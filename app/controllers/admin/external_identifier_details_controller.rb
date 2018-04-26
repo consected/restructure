@@ -76,7 +76,7 @@ class Admin::ExternalIdentifierDetailsController < AdminController
     end
 
     def secure_params
-      SageAssignment.new.admin_id = 1
+      # SageAssignment.new.admin_id = 1
       p = @external_identifier.name.singularize.to_sym
       params.require(p).permit(:create_count, :assign_all, :assign_all_request)
     end

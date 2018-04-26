@@ -14,7 +14,7 @@ class Admin::AppTypesController < AdminController
   end
 
   private
-    def secure_params
-        params.require(object_name.to_sym).permit(:name, :label, :app_type_id, :disabled)
+    def permitted_params
+        [:name, :label, :app_type_id, :disabled]
     end
 end

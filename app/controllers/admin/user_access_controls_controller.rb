@@ -7,12 +7,13 @@ class Admin::UserAccessControlsController < AdminController
     def filters
       {
         resource_name: UserAccessControl.resource_names_by_type,
-        app_type_id: AppType.all_by_name
+        app_type_id: AppType.all_by_name,
+        user_id: User.active.pluck(:id, :email).to_h
       }
     end
 
     def filters_on
-      [:resource_name, :app_type_id]
+      [:resource_name, :app_type_id, :user_id]
     end
 
     def has_access_levels
@@ -27,10 +28,5 @@ class Admin::UserAccessControlsController < AdminController
     def permitted_params
       @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :app_type_id, :user_id, :disabled]
     end
-
-    def secure_params
-      params.require(object_name.to_sym).permit(*permitted_params)
-    end
-
 
 end

@@ -16,19 +16,19 @@
   <%end%>
 
   <%if @report %>
-    <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>    
+    <%= link_to "reports", admin_reports_path(all: true), class: "btn btn-warning" %>
   <%end%>
-  <% if @reports 
+  <% if @reports
        no_create = @no_create
-     end 
+     end
   %>
 
   <%if @sage_assignment || @sage_assignments %>
-    <%= link_to "Sage IDs", admin_sage_assignments_path, class: "btn btn-warning" %>    
+    <%= link_to "Sage IDs", admin_sage_assignments_path, class: "btn btn-warning" %>
     <% no_create = true %>
   <%end%>
 
   <%unless no_create%>
-  <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: params[:filter]), remote: true, class: "btn btn-primary add-item-button" if action_name == 'index' rescue nil%>
+  <%= link_to "<span class=\"glyphicon glyphicon-plus\"></span> #{controller_name.singularize.humanize}".html_safe, url_for(action: :new, filter: params[:filter]), remote: true, class: "btn btn-primary add-item-button" if action_name.in? ['index', 'create'] rescue nil%>
   <%end%>
 <%end%>
