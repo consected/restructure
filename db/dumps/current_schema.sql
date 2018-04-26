@@ -4008,6 +4008,41 @@ ALTER SEQUENCE ml_app.user_history_id_seq OWNED BY ml_app.user_history.id;
 
 
 --
+-- Name: user_roles; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.user_roles (
+    id integer NOT NULL,
+    app_type_id integer,
+    role_name character varying,
+    user_id integer,
+    admin_id integer,
+    disabled boolean DEFAULT false NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: user_roles_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_roles_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_roles_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_roles_id_seq OWNED BY ml_app.user_roles.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4457,6 +4492,13 @@ ALTER TABLE ONLY ml_app.user_authorizations ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY ml_app.user_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_roles ALTER COLUMN id SET DEFAULT nextval('ml_app.user_roles_id_seq'::regclass);
 
 
 --
@@ -4960,6 +5002,14 @@ ALTER TABLE ONLY ml_app.user_authorizations
 
 ALTER TABLE ONLY ml_app.user_history
     ADD CONSTRAINT user_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_roles_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.user_roles
+    ADD CONSTRAINT user_roles_pkey PRIMARY KEY (id);
 
 
 --
@@ -5692,6 +5742,27 @@ CREATE INDEX index_user_history_on_user_id ON ml_app.user_history USING btree (u
 
 
 --
+-- Name: index_user_roles_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_roles_on_admin_id ON ml_app.user_roles USING btree (admin_id);
+
+
+--
+-- Name: index_user_roles_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_roles_on_app_type_id ON ml_app.user_roles USING btree (app_type_id);
+
+
+--
+-- Name: index_user_roles_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_roles_on_user_id ON ml_app.user_roles USING btree (user_id);
+
+
+--
 -- Name: index_users_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6381,6 +6452,14 @@ ALTER TABLE ONLY ml_app.activity_log_history
 
 
 --
+-- Name: fk_rails_174e058eb3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_roles
+    ADD CONSTRAINT fk_rails_174e058eb3 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6442,6 +6521,14 @@ ALTER TABLE ONLY ml_app.model_references
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
     ADD CONSTRAINT fk_rails_2de1cadfad FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_318345354e; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_roles
+    ADD CONSTRAINT fk_rails_318345354e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -6722,6 +6809,14 @@ ALTER TABLE ONLY ml_app.reports
 
 ALTER TABLE ONLY ml_app.imports
     ADD CONSTRAINT fk_rails_b1e2154c26 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_b345649dfe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_roles
+    ADD CONSTRAINT fk_rails_b345649dfe FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
 
 
 --
