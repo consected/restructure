@@ -5,8 +5,8 @@ module ModelSupport
   UserDomain = 'testing.com'
 
   def seed_database
-    Rails.logger.info "Starting seed setup"
-    SeedSupport.setup
+    Rails.logger.info "NOT Starting seed setup"
+    # SeedSupport.setup
   end
 
   def gen_username r
