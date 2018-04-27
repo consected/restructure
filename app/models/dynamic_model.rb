@@ -40,9 +40,16 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def self.orientation category
-    return :horizontal if category.to_s.include?('history')
+    return :horizontal if category.to_s.include?('history') || category.to_s.include?('-records')
     return :vertical
   end
+
+  def self.show_add_button category
+    return true unless category
+    return false if category.to_s.include?('history') || category.to_s.include?('-records') || category.to_s.include?('ipa-phone-screen')
+    return true
+  end
+
 
 
   def add_master_association &association_block

@@ -171,7 +171,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       fill_in "Last name", with: lname
       fill_in "Start year", with: startyear
       fill_in "End year", with: endyear
-      select source, from: 'Source'
+      # select source, from: 'Source'
       click_button "Save"
     end
 

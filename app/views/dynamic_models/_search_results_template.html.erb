@@ -27,6 +27,7 @@
       prevent_create: !(current_user.has_access_to? :create, :table, m.full_item_type_name.pluralize),
       item_list: l,
       caption_before: m.default_options.caption_before,
-      show_if: m.default_options.show_if
+      show_if: m.default_options.show_if,
+      category: m.category
     } %>
 <% end %>

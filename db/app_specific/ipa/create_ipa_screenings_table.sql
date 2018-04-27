@@ -1,6 +1,9 @@
 
       BEGIN;
 
+-- Command line:
+-- table_generators/generate.sh dynamic_models_table create ipa_screenings screening_date cognitive_screening_score eligible_for_study_blank_yes_no select_reason_if_not_eligible
+
       CREATE FUNCTION log_ipa_screening_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
@@ -9,14 +12,9 @@
                   (
                       master_id,
                       screening_date,
+                      cognitive_screening_score,
                       eligible_for_study_blank_yes_no,
                       select_reason_if_not_eligible,
-                      select_status,
-                      select_subject_withdrew_reason,
-                      select_investigator_terminated,
-                      lost_to_follow_up_no_yes,
-                      no_longer_participating_no_yes,
-                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -25,14 +23,9 @@
                   SELECT
                       NEW.master_id,
                       NEW.screening_date,
+                      NEW.cognitive_screening_score,
                       NEW.eligible_for_study_blank_yes_no,
                       NEW.select_reason_if_not_eligible,
-                      NEW.select_status,
-                      NEW.select_subject_withdrew_reason,
-                      NEW.select_investigator_terminated,
-                      NEW.lost_to_follow_up_no_yes,
-                      NEW.no_longer_participating_no_yes,
-                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -46,14 +39,9 @@
           id integer NOT NULL,
           master_id integer,
           screening_date date,
+          cognitive_screening_score integer,
           eligible_for_study_blank_yes_no varchar,
           select_reason_if_not_eligible varchar,
-          select_status varchar,
-          select_subject_withdrew_reason varchar,
-          select_investigator_terminated varchar,
-          lost_to_follow_up_no_yes varchar,
-          no_longer_participating_no_yes varchar,
-          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -73,14 +61,9 @@
           id integer NOT NULL,
           master_id integer,
           screening_date date,
+          cognitive_screening_score integer,
           eligible_for_study_blank_yes_no varchar,
           select_reason_if_not_eligible varchar,
-          select_status varchar,
-          select_subject_withdrew_reason varchar,
-          select_investigator_terminated varchar,
-          lost_to_follow_up_no_yes varchar,
-          no_longer_participating_no_yes varchar,
-          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

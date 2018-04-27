@@ -87,7 +87,7 @@ EOF
       sql = <<EOF
 
 -- Command line:
--- table_generators/generate.sh create activity_logs_table #{ARGV.join(' ')}
+-- table_generators/generate.sh activity_logs_table create #{name} #{base_name} #{attrib.join(' ')}
 
       CREATE TABLE #{singular_name}_history (
           id integer NOT NULL,

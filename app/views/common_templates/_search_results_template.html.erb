@@ -4,6 +4,10 @@
     caption = nil
   end
 
+  unless defined? category
+    category = nil
+  end
+
   unless defined? caption_before
     caption_before = {}
   end
@@ -437,12 +441,14 @@
       </ul>
       {{/unless}}
     </div>
-    <% if name != full_name %></div> <% end %>
-    <% unless prevent_create %>
-    {{#unless prevent_create}}
-    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %> record</a> </p>
-    {{/unless}}
+    <% unless prevent_create || !DynamicModel.show_add_button(category)%>
+      {{#unless prevent_create}}
+      <div class="new-button-container">
+      <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %> record</a> </p>
+      </div>
+      {{/unless}}
     <% end %>
+    <% if name != full_name %></div> <% end %>
 </script>
 
 <script id="<%=name%>_create_button-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">

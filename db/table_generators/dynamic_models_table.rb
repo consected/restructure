@@ -67,7 +67,7 @@ EOF
       sql = <<EOF
 
 -- Command line:
--- table_generators/generate.sh create dynamic_models_table #{args.join(' ')}
+-- table_generators/generate.sh dynamic_models_table create #{name} #{attrib.join(' ')}
 
       CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
           LANGUAGE plpgsql

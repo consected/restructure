@@ -55,13 +55,8 @@
               if @embedded_item
                 r = @extra_log_type.references[model_reference.to_record_type_us] || @extra_log_type.references[model_reference.to_record.class.table_name.singularize]
                 dis = r && r['view_as'] && r['view_as']['edit']  == 'readonly'
-                # if
             %>
-
-            <%  #else %>
-
-                  <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed, disabled_form: dis  } %>
-              <% #end %>
+              <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed, disabled_form: dis  } %>
             <% end %>
           </div>
         </div>

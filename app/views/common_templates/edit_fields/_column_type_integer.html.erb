@@ -1,0 +1,2 @@
+<%= form.label field_name_sym, t("field_names.#{field_name_sym}", default: field_name.humanize).capitalize %>
+<%= form.number_field field_name_sym, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

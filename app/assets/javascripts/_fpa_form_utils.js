@@ -764,21 +764,24 @@ _fpa.form_utils = {
 
           // Set the column width classes based on the content
           $(this).find('.common-template-item, .new-block').not('.resized-width, .model-reference-new-block').each(function() {
-
+            var me = $(this);
+            var dc = $(this).parents('.dynamic-container');
+            if(dc.length > 0)
+              me = dc;
             var c = _fpa.layout.item_blocks.regular;
             var max_h = 0;
-            $(this).find('.list-group-item.caption-before').each(function() {
+            me.find('.list-group-item.caption-before').each(function() {
               var curr_h = $(this).height();
               if(curr_h > max_h) max_h = curr_h;
             });
             if(max_h > 40) {
               c = _fpa.layout.item_blocks.wide;
-              $(this).first().removeClass(_fpa.layout.item_blocks.regular);
-              $(this).addClass(c).addClass('resized-width');
+              me.first().removeClass(_fpa.layout.item_blocks.regular);
+              me.addClass(c).addClass('resized-width');
             }
             else {
-              if($(this).hasClass('new-block'))
-                $(this).addClass(_fpa.layout.item_blocks.regular);
+              if(me.hasClass('new-block'))
+                me.addClass(_fpa.layout.item_blocks.regular);
             }
 
           });
