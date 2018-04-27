@@ -14,6 +14,10 @@
     embedded = nil
   end
 
+  unless defined? disabled_form
+    disabled_form = nil
+  end
+
   form_object_instance = object_instance
   if embedded
     form_object_instance = @embedded_item
@@ -98,6 +102,7 @@
       <% end %>
       <%= model_reference_fields form %>
 
+      <% if disabled_form %><fieldset disabled class="readonly-edit-fieldset"><% end %>
       <ul class="list-group">
         <li class="list-group-item edit-form-header">
           <% unless embedded %><%= inline_cancel_button %><% end %>
@@ -170,6 +175,7 @@
           </li>
         <% end %>
       </ul>
+      <% if disabled_form %></fieldset><% end %>
       <% end %>
 
     </div>

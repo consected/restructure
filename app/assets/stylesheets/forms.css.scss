@@ -199,6 +199,99 @@ li.list-group-item small.notes-block-label {
   position: relative;
 }
 
+
+fieldset.readonly-edit-fieldset
+{
+  li.list-group-item.edit-field-container {
+    padding-top: 4px;
+    padding-bottom: 4px;
+
+    label {
+      font-weight: normal;
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+  }
+
+
+  input.form-control, select.form-control {
+
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    min-width: 100px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-right: 4px;
+    background-image: none;
+    font-weight: bold;
+    font-size: 14px;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+  }
+
+  span.fixed-field {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  select.form-control {
+    width: 100%;
+  }
+  textarea.form-control {
+    min-height: 1em;
+    height: auto;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+    font-size: 12px;
+    padding: 2px 2px;
+    min-width: 200px;
+    width: 97%;
+
+    &:focus {
+      height: auto !important;
+    }
+  }
+  input[type='checkbox'] {
+    border: 1px solid silver;
+    -moz-appearance: checkbox;
+    -webkit-appearance: checkbox;
+    box-sizing: border-box;
+
+    padding: 0;
+    line-height: normal;
+    display: inline-block;
+
+    width: 1em;
+    height: 1em;
+
+    vertical-align: middle;
+    color: #444;
+  }
+
+
+  select, input {
+    &.form-control.has-value {
+      background-color: white !important;
+      background-image: none;
+    }
+  }
+
+  select {
+    &.form-control.has-value {
+      -moz-appearance: none;
+      -webkit-appearance: none;
+    }
+  }
+  select::-ms-expand {
+      display: none;
+  }
+
+
+}
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;

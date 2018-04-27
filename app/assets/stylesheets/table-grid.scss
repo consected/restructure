@@ -63,6 +63,7 @@ table.import-grid, table.table.report-table {
       padding-right: 4px;
       background-image: none;
       -moz-appearance: none;
+      -webkit-appearance: none;
     }
     select.form-control {
       width: 100%;
@@ -84,6 +85,7 @@ table.import-grid, table.table.report-table {
     input[type='checkbox'] {
       border: 1px solid silver;
       -moz-appearance: checkbox;
+      -webkit-appearance: checkbox;
       box-sizing: border-box;
 
       padding: 0;
@@ -113,6 +115,7 @@ table.import-grid, table.table.report-table {
   select {
     &.form-control.has-value {
       -moz-appearance: none;
+      -webkit-appearance: none;
     }
   }
 
