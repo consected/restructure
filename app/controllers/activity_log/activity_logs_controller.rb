@@ -19,10 +19,16 @@ class ActivityLog::ActivityLogsController < ApplicationController
 
     def handle_embedded_item
 
-      if object_instance.model_references.length == 1 && object_instance.creatable_model_references.length == 0
-        @embedded_item = object_instance.model_references.first.to_record
-      elsif object_instance.model_references.length == 0 && object_instance.creatable_model_references.length == 1
-        @embedded_item = object_instance.creatable_model_references.first.first.camelize.constantize.new
+      mrs = object_instance.model_references
+      cmrs = object_instance.creatable_model_references
+      if mrs.length == 1 && cmrs.length == 0
+        # A referenced record exists and no more are creatable
+        # Therefore just use this existing item
+        @embedded_item = mrs.first.to_record
+      elsif mrs.length == 0 && cmrs.length == 1
+        # No referenced record exists yet, and one is creatable
+        # Make a new creatable item
+        @embedded_item = object_instance.build_model_reference cmrs.first
       end
 
       if @embedded_item

@@ -6,3 +6,4 @@ cd $(dirname $0)
 
 sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;"
 RAILS_ENV=test rake db:setup
+RAILS_ENV=test rake db:seed

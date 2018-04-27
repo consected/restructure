@@ -14,21 +14,27 @@
       </ul>
     </div>
     <div class="col-sm-4">
+      <h3>App Configs</h3>
+      <ul class="nav">
+        <li class="nav"><%= link_to "App Types", admin_app_types_path %> </li>
+        <li class="nav"><%= link_to "General App Configurations", admin_app_configurations_path %> </li>
+      </ul>
+    </div>
+    <div class="col-sm-4">
       <h3>Definitions</h3>
       <ul class="nav">
         <li class="nav"><%= link_to "Reports", admin_reports_path %> </li>
         <li class="nav"><%= link_to "Activity Logs", admin_activity_logs_path %> </li>
         <li class="nav"><%= link_to "Dynamic Models", admin_dynamic_models_path %> </li>
+        <li class="nav"><%= link_to "Configure External Identifiers", admin_external_identifiers_path %> </li>
       </ul>
     </div>
     <div class="col-sm-4">
       <h3>Users and Access</h3>
       <ul class="nav">
         <li class="nav"><%= link_to "Usernames & Passwords", admin_manage_users_path %> </li>
-        <li class="nav"><%= link_to "App Types", admin_app_types_path %> </li>
         <li class="nav"><%= link_to "User Roles", admin_user_roles_path %> </li>
         <li class="nav"><%= link_to "User Access Controls", admin_user_access_controls_path %> </li>
-        <li class="nav"><%= link_to "General App Configurations", admin_app_configurations_path %> </li>
       </ul>
     </div>
     <div class="col-sm-4">
@@ -42,7 +48,6 @@
     <div class="col-sm-4">
       <h3>External ID Functions</h3>
       <ul class="nav">
-        <li class="nav"><%= link_to "Configure External Identifiers", admin_external_identifiers_path %> </li>
         <%= render partial: 'pages/index_admin_external_identifiers' %>
       </ul>
     </div>

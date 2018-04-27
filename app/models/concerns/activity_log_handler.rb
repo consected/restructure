@@ -210,9 +210,9 @@ module ActivityLogHandler
     extra_log_type_config.references.each do |ref_type, ref_config|
       f = ref_config['from']
       if f == 'this'
-        res += ModelReference.find_references self, to_record_type: ref_type
+        res += ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config['filter_by']
       elsif f == 'master'
-        res += ModelReference.find_references self.master, to_record_type: ref_type
+        res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']
       end
     end
     res
@@ -228,21 +228,32 @@ module ActivityLogHandler
         l = ref_config['limit']
         under_limit = true
         if l && l.is_a?(Integer)
-          under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type).length < l)
+          under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length < l)
         end
 
         res[ref_type] = a if under_limit
       elsif a == 'one_to_master'
-        if ModelReference.find_references(self.master, to_record_type: ref_type).length == 0
+        if ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
           res[ref_type] = a
         end
       elsif a == 'one_to_this'
-        if ModelReference.find_references(self, to_record_type: ref_type).length == 0
+        if ModelReference.find_references(self, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
           res[ref_type] = a
         end
       end
     end
     res
+  end
+
+  # Use a provided creatable model reference to make a new item
+  # Initialize attributes with any filter_by configurations, to ensure the
+  # item is set up correctly to be picked up again later
+  def build_model_reference creatable_model_ref
+
+    k = creatable_model_ref.first
+    fb = extra_log_type_config.references[k]['filter_by'] || {}
+    k.camelize.constantize.new fb
+
   end
 
 

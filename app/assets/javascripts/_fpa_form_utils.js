@@ -163,7 +163,7 @@ _fpa.form_utils = {
                   prev_caption_before = this_caption_before;
                 });
 
-                var lgi = self.find('.list-group-item.result-field-container, .list-group-item.edit-field-container').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta, .edit-form-header');
+                var lgi = self.find('.list-group-item.result-field-container, .list-group-item.edit-field-container').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta, .edit-form-header, .has-caption-before');
 
 
                 var all = lgi.find('small, label');

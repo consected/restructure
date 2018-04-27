@@ -12,6 +12,7 @@ class ModelReference < ActiveRecord::Base
 
   attr_accessor :current_user
 
+  # TODO consider if there is a significant race condition that we should be concerned about
   def self.create_with from_item, to_item
     m = ModelReference.where from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id
@@ -36,22 +37,19 @@ class ModelReference < ActiveRecord::Base
 
   # Find referenced items belonging to either an item or a master record
   # If belonging to an item, the results may be further limited to those with a to_record_type
-  # If belonging to a master record, the to_record_type must be specified
-  def self.find_references from_item_or_master, to_record_type: nil
+  # If belonging to a master record, the to_record_type must be specified.
+  # These can be further limited by a filter_by condition on the to_record,
+  # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
+  def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil
 
     if to_record_type
       to_record_type = to_record_type.camelize
-
-      # unless to_record_type.start_with? 'DynamicModel::'
-        trtc = to_record_type.constantize
-        # if trtc.name
-        to_record_type = trtc.name
-        # end
-      # end
+      trtc = to_record_type.constantize
+      to_record_type = trtc.name
     end
 
     if from_item_or_master.is_a? Master
-      res = ModelReference.find_records_in_master to_record_type: to_record_type, master: from_item_or_master
+      res = ModelReference.find_records_in_master to_record_type: to_record_type, master: from_item_or_master, filter_by: filter_by
     else
       cond = {from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id}
       cond[:to_record_type] = to_record_type if to_record_type
@@ -118,7 +116,7 @@ class ModelReference < ActiveRecord::Base
     self.current_user.has_access_to? :access, :table, from_record_type_us.pluralize
   end
 
-  def to_record_data    
+  def to_record_data
     to_record.data if to_record_viewable
   end
 
@@ -132,10 +130,13 @@ class ModelReference < ActiveRecord::Base
     @to_record = rec
   end
 
-  def self.find_records_in_master master: nil, to_record_type: nil
+  def self.find_records_in_master master: nil, to_record_type: nil, filter_by: nil
     rec_class = to_record_type.camelize.constantize
     res = []
-    rec_class.where(master: master).each do |i|
+    cond = {master: master}
+    cond.merge! filter_by if filter_by
+
+    rec_class.where(cond).each do |i|
       # Instantiate temporary model reference objects to hold the results
       # They cannot be accidentally persisted, since the validations will fail
       rec = ModelReference.new from_record_master_id: master.id, to_record_type: to_record_type, to_record_id: i.id, to_record_master_id: i.master_id

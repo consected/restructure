@@ -226,7 +226,7 @@ module DynamicModelHandler
 
     if !persisted? || disabled_changed?
       admin = self.current_admin
-      uac = UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
+      UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
     end
 
   end

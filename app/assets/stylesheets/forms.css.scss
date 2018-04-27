@@ -189,7 +189,7 @@ a.add-icon{
 li.list-group-item.result-field-container, li.list-group-item.edit-field-container {
 
   visibility: hidden;
-  &.done-label-resize, &.done-label-resize strong {
+  &.done-label-resize, &.done-label-resize strong, &.has-caption-before, &.has-caption-before strong {
     visibility: visible;
   }
 }
