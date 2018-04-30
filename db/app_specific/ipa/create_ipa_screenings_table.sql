@@ -2,7 +2,7 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_screenings screening_date cognitive_screening_score eligible_for_study_blank_yes_no select_reason_if_not_eligible
+-- table_generators/generate.sh dynamic_models_table create ipa_screenings screening_date eligible_for_study_blank_yes_no select_reason_if_not_eligible
 
       CREATE FUNCTION log_ipa_screening_update() RETURNS trigger
           LANGUAGE plpgsql
@@ -12,7 +12,6 @@
                   (
                       master_id,
                       screening_date,
-                      cognitive_screening_score,
                       eligible_for_study_blank_yes_no,
                       select_reason_if_not_eligible,
                       user_id,
@@ -23,7 +22,6 @@
                   SELECT
                       NEW.master_id,
                       NEW.screening_date,
-                      NEW.cognitive_screening_score,
                       NEW.eligible_for_study_blank_yes_no,
                       NEW.select_reason_if_not_eligible,
                       NEW.user_id,
@@ -39,7 +37,6 @@
           id integer NOT NULL,
           master_id integer,
           screening_date date,
-          cognitive_screening_score integer,
           eligible_for_study_blank_yes_no varchar,
           select_reason_if_not_eligible varchar,
           user_id integer,
@@ -61,7 +58,6 @@
           id integer NOT NULL,
           master_id integer,
           screening_date date,
-          cognitive_screening_score integer,
           eligible_for_study_blank_yes_no varchar,
           select_reason_if_not_eligible varchar,
           user_id integer,

@@ -276,7 +276,7 @@ class ActivityLog < ActiveRecord::Base
               # used by item flags to generate appropriate URLs
               begin
                 get "activity_log__#{mn}/:id", to: "activity_log/#{mn}#show", as: "activity_log_#{pg.model_def_name.to_s}"
-              rescue => e
+              rescue
                 Rails.logger.warn "Skipped creating route activity_log__#{mn}/:id since activity_log_#{pg.model_def_name.to_s} already exists?"
               end
 

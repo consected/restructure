@@ -277,6 +277,12 @@
     });
 
 
+    Handlebars.registerHelper('local_time', function(stre, options) {
+        if(options && !options.hash) options.hash = {};
+        return new Date(stre).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
+    });
+
+
     Handlebars.registerHelper('capitalize', function(str){
       return _fpa.utils.capitalize(str);
     });
