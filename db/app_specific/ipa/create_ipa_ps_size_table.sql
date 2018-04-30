@@ -42,7 +42,7 @@
       CREATE TABLE ipa_ps_size_history (
           id integer NOT NULL,
           master_id integer,
-          weight varchar,
+          weight integer,
           height varchar,
           hat_size varchar,
           shirt_size varchar,
@@ -66,7 +66,7 @@
       CREATE TABLE ipa_ps_sizes (
           id integer NOT NULL,
           master_id integer,
-          weight varchar,
+          weight integer,
           height varchar,
           hat_size varchar,
           shirt_size varchar,

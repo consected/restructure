@@ -1,6 +1,6 @@
 class ExtraOptions
 
-  attr_accessor :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action
+  attr_accessor :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options
 
   def initialize name, config, config_obj
     @name = name
@@ -17,6 +17,9 @@ class ExtraOptions
 
     self.save_action ||= {}
     self.save_action = self.save_action.symbolize_keys
+
+    self.view_options ||= {}
+    self.view_options = self.view_options.symbolize_keys
 
     self
   end

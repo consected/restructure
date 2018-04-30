@@ -7,7 +7,7 @@ Ensure it references the original phone screen dynamic model record.
 */
 
 
-
+DROP FUNCTION IF EXISTS activity_log_ipa_assignment_phone_screens_callback_set() CASCADE;
 
 CREATE OR REPLACE FUNCTION activity_log_ipa_assignment_phone_screens_callback_set() RETURNS trigger
 LANGUAGE plpgsql
@@ -74,7 +74,7 @@ AS $$
     ORDER BY id DESC
     LIMIT 1;
 
-    -- Get the latest sleep record
+    -- Get the latest tmoca record
     SELECT *
     INTO tmoca
     FROM ipa_ps_tmocas
@@ -135,7 +135,7 @@ AS $$
         THEN 'yes' ELSE 'no' END,
 
       --ix_diagnosed_sleep_apnea_blank_yes_no
-      CASE WHEN tms.sleep_disorder_blank_yes_no_dont_know = 'yes' THEN 'yes' ELSE 'no' END,
+      CASE WHEN sleep.sleep_disorder_blank_yes_no_dont_know = 'yes' THEN 'yes' ELSE 'no' END,
 
       --ix_diagnosed_heart_stroke_or_meds_blank_yes_no
       NULL,
@@ -159,7 +159,6 @@ AS $$
         THEN 'no'
         ELSE 'yes' END,
 
-      NULL,
 
       --ix_mi_ok_blank_yes_no
       NULL,
@@ -168,23 +167,25 @@ AS $$
       CASE WHEN health.cycle_blank_yes_no = 'yes' THEN 'yes' ELSE 'no' END
 
     )
-    INTO inex_id;
+    RETURNING id INTO inex_id;
 
     INSERT INTO activity_log_ipa_assignment_inex_checklists
     (
       master_id,
       created_at,
       updated_at,
-      user_id
+      user_id,
+      extra_log_type
     )
     VALUES
     (
       NEW.master_id,
       NOW(),
       NOW(),
-      NEW.user_id
+      NEW.user_id,
+      'phone_screen_review'
     )
-    INTO act_id;
+    RETURNING id INTO act_id;
 
     INSERT INTO model_references
     (

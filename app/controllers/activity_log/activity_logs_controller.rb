@@ -56,6 +56,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
         item_list = @extra_log_type.fields - @implementation_class.fields_to_sync.map(&:to_s) - ['tracker_history_id']
         extras_caption_before  = @extra_log_type.caption_before
         sa = @extra_log_type.save_action
+        veat = @extra_log_type.view_options[:show_embedded_at_top]
       end
       if @item
         caption ||= @item.data
@@ -83,6 +84,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
       {
         caption: caption,
         caption_before: cb,
+        view_embedded_at_top: veat,
         item_list: item_list,
         item_flags_after: :notes,
         save_action: sa

@@ -55,6 +55,9 @@
   # Allow show_caption_before helper to work
   @caption_before = caption_before
 
+  unless defined? view_embedded_at_top
+    view_embedded_at_top = false
+  end
 
   if caption.blank?
     # if object_instance.respond_to?(:human_name) && object_instance.human_name.present?
@@ -118,6 +121,13 @@
         <% end %>
 
 
+        <% unless embedded %>
+          <% if view_embedded_at_top %>
+          <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
+          <% end %>
+        <% end %>
+
+
         <% item_list.each do |field_name| %>
           <%
             field_name = field_name.to_s
@@ -164,9 +174,14 @@
         <% end # item_list.each %>
 
         <% unless embedded %>
+          <% unless view_embedded_at_top %>
           <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
-          <% if caption_before[:submit] %>
-            <li class="list-group-item edit-form-references-container <%=form_object_item_type_us.hyphenate%>-submit">
+          <% end %>
+          <% if caption_before[:submit]
+               # Reset the caption before variable in case we set it inside an embedded item
+               @caption_before = caption_before
+          %>
+            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-submit">
               <%= show_caption_before :submit %>
             </li>
           <% end %>
