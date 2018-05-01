@@ -57,8 +57,7 @@
         return right.indexOf(left) !== -1;
     });
     eR.add('includes', function(left, right) {
-      var re = new RegExp(right);
-      return left.search(right) !== -1;
+        return left.indexOf(right) !== -1;
     });
 
     var isHelper = function() {
@@ -279,6 +278,7 @@
 
 
     Handlebars.registerHelper('local_time', function(stre, options) {
+        if(!stre) return;
         if(options && !options.hash) options.hash = {};
         return new Date(stre).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
     });

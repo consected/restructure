@@ -3,8 +3,8 @@ class Admin::MessageTemplatesController < AdminController
   protected
   def filters
     {
-      message_type: ['email'],
-      template_type: ['layout', 'content']
+      message_type: MessageTemplate.message_types.map(&:to_s),
+      template_type: MessageTemplate.template_types.map(&:to_s)
     }
   end
 

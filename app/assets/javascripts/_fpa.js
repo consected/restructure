@@ -716,10 +716,12 @@ _fpa = {
     if(title) t.html(title);
     if(message) m.html(message);
 
-    if(large)
-        $('.modal-dialog').addClass('modal-lg');
+    if(large && large == 'md')
+      $('.modal-dialog').removeClass('modal-lg').addClass('modal-md');
+    else if(large)
+        $('.modal-dialog').removeClass('modal-md').addClass('modal-lg');
     else
-        $('.modal-dialog').removeClass('modal-lg');
+        $('.modal-dialog').removeClass('modal-lg').removeClass('modal-md');
 
     pm.modal('show');
   },

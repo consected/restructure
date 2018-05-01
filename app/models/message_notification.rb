@@ -63,7 +63,7 @@ class MessageNotification < ActiveRecord::Base
     if data.blank?
       raise FphsException.new "Data is blank and item_type / item_id does not return an item" unless item
 
-      data = item.attributes
+      data = item.attributes.dup
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       if item.respond_to?(:item) && item.item.respond_to?(:attributes)

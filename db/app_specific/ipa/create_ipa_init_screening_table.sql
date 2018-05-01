@@ -2,7 +2,7 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_initial_screenings select_is_good_time_to_speak select_may_i_begin any_questions_blank_yes_no select_still_interested
+-- table_generators/generate.sh dynamic_models_table create ipa_initial_screenings select_is_good_time_to_speak select_may_i_begin any_questions_blank_yes_no select_still_interested follow_up_date follow_up_time notes
 
       CREATE FUNCTION log_ipa_initial_screening_update() RETURNS trigger
           LANGUAGE plpgsql
@@ -15,6 +15,9 @@
                       select_may_i_begin,
                       any_questions_blank_yes_no,
                       select_still_interested,
+                      follow_up_date,
+                      follow_up_time,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -26,6 +29,9 @@
                       NEW.select_may_i_begin,
                       NEW.any_questions_blank_yes_no,
                       NEW.select_still_interested,
+                      NEW.follow_up_date,
+                      NEW.follow_up_time,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -42,6 +48,9 @@
           select_may_i_begin varchar,
           any_questions_blank_yes_no varchar,
           select_still_interested varchar,
+          follow_up_date date,
+          follow_up_time varchar,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -64,6 +73,9 @@
           select_may_i_begin varchar,
           any_questions_blank_yes_no varchar,
           select_still_interested varchar,
+          follow_up_date date,
+          follow_up_time varchar,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

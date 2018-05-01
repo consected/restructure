@@ -80,6 +80,12 @@ body.sessions.new {
     }
 }
 
+.all_caps {
+  text-transform: uppercase;
+  font-style: normal;
+  font-weight: bold; 
+}
+
 .version-info {font-size: 12px; color: gray;}
 
 .glyphicon-info-sign[title] {cursor: help;}

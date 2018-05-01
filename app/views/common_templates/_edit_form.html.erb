@@ -55,6 +55,18 @@
   # Allow show_caption_before helper to work
   @caption_before = caption_before
 
+  unless defined? dialog_before
+    if embedded
+      d = form_object_instance.class.default_options
+      dialog_before = d.dialog_before if d
+    else
+      dialog_before = {}
+    end
+  end
+  dialog_before ||= {}
+  # Allow show_caption_before helper to work
+  @dialog_before = dialog_before
+
   unless defined? view_embedded_at_top
     view_embedded_at_top = false
   end
@@ -113,6 +125,11 @@
           <%= render partial: 'common_templates/item_flags_block', locals: {f: form} unless item_flags_after || item_flags_array.length == 0 %>
         </li>
 
+        <% if dialog_before[:all_fields] %>
+          <li class="list-group-item dialog-before <%=form_object_item_type_us.hyphenate%>-all_fields all-fields-dialog">
+            <%= show_dialog_before :all_fields, form_object_instance %>
+          </li>
+        <% end %>
 
         <% if caption_before[:all_fields] %>
           <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-all_fields all-fields-caption">
@@ -145,16 +162,23 @@
               general_selection_name: general_selection_name,
               form_object_instance: form_object_instance,
               form_object_item_type_us: form_object_item_type_us,
-              caption_before: caption_before
+              caption_before: caption_before,
+              dialog_before: dialog_before
               }
             }
             local_vars[:locals][:locals] = local_vars[:locals]
 
+            showed_caption_before = false
           %>
-          <%
-          showed_caption_before = false
-          if caption_before[field_name_sym]
-            showed_caption_before = true
+
+          <% if dialog_before[field_name_sym]
+              showed_caption_before = true
+             %>
+            <li class="list-group-item dialog-before <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
+              <%= show_dialog_before field_name_sym, form_object_instance %>
+            </li>
+          <% elsif caption_before[field_name_sym]
+              showed_caption_before = true
           %>
             <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
               <%= show_caption_before field_name_sym %>
@@ -177,7 +201,15 @@
           <% unless view_embedded_at_top %>
           <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
           <% end %>
-          <% if caption_before[:submit]
+
+          <% if dialog_before[:submit]
+               # Reset the caption before variable in case we set it inside an embedded item
+               @dialog_before = dialog_before
+          %>
+            <li class="list-group-item dialog-before <%=form_object_item_type_us.hyphenate%>-submit">
+              <%= show_dialog_before :submit, form_object_instance %>
+            </li>
+          <% elsif caption_before[:submit]
                # Reset the caption before variable in case we set it inside an embedded item
                @caption_before = caption_before
           %>
