@@ -122,7 +122,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
     def extend_result
       item_id = @item.id if @item
 
-      {
+      extras = {
         al_type: al_type,
         item_type: item_type_us,
         item_types_name: @item_type,
@@ -130,6 +130,8 @@ class ActivityLog::ActivityLogsController < ApplicationController
         item_data: item_data,
         @item_type => items
       }
+      
+      extras
     end
 
     def set_additional_attributes obj

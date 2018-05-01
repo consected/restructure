@@ -55,6 +55,36 @@ class ExtraLogType < ExtraOptions
     end
   end
 
+  def calc_creatable_if obj
+    return true unless self.creatable_if
+    all_res = Master.select(:id).where(id: obj.master.id)
+    res = true
+
+    self.creatable_if.each do |c_var, c_is_res|
+      c_is = {}
+      c_is_res.each {|c,v| c_is[c.gsub('__', '_').gsub('dynamic_model_', '').to_sym] = v}
+      j = c_is_res.keys.map(&:to_sym)
+      q = all_res.joins(j)
+
+      if c_var == :all
+        res &&= !!q.where(c_is).order(id: :desc).first
+      elsif c_var == :not_any
+
+        c_is.each do |ck, cv|
+          res &&= !q.where(ck => cv).order(id: :desc).first
+          break unless res
+        end
+
+      end
+
+      break unless res
+    end
+
+
+    res
+  end
+
+
   protected
 
     def self.options_text activity_log

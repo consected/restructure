@@ -57,7 +57,9 @@
         return right.indexOf(left) !== -1;
     });
     eR.add('includes', function(left, right) {
-        return left.indexOf(right) !== -1;
+      if(!left) return;
+      var re = new RegExp(right);
+      return left.search(right) !== -1;
     });
 
     var isHelper = function() {
@@ -156,8 +158,9 @@
 
 
     Handlebars.registerHelper('includes', function(obj, inc){
-      if(!obj) return null;
-      return (obj.indexOf(inc) >= 0);
+      if(!obj) return;
+      var re = new RegExp(inc);
+      return obj.search(inc) !== -1;
     });
 
     Handlebars.registerHelper('with_content',function(name, type, context, options){
@@ -280,7 +283,7 @@
     Handlebars.registerHelper('local_time', function(stre, options) {
         if(!stre) return;
         if(options && !options.hash) options.hash = {};
-        return new Date(stre).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
+        return new Date(stre.toString()).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
     });
 
 

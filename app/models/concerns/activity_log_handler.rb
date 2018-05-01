@@ -204,6 +204,21 @@ module ActivityLogHandler
     self.send("#{action}=", d)
   end
 
+  def creatables
+
+    current_user = master.current_user
+    implementation_class = self.class
+    res = {}
+
+    # Make a creatable actions, based on standard user access controls and extra log type creatable_if rules
+    implementation_class.extra_log_type_configs.each do |c|
+      result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name) && c.calc_creatable_if(self)
+      res[c.name] = result ? c.resource_name : nil
+    end
+    
+    res
+  end
+
   def model_references
     res = []
     return res unless extra_log_type_config && extra_log_type_config.references

@@ -36,6 +36,8 @@ _fpa.activity_logs = {
     _fpa.form_utils.format_block(block);
     _fpa.activity_logs.selected_parent(block, {item_id: data.item_id, rec_type: data.rec_type, item_data: data.item_data, master_id: data.master_id});
 
+    _fpa.activity_logs.handle_creatables(block, data);
+
 
   },
 
@@ -43,7 +45,6 @@ _fpa.activity_logs = {
     _fpa.form_utils.format_block(block);
 
     $('.activity-log-list .alr-new-block').addClass('hidden');
-
 
 
     var d = data;
@@ -59,6 +60,8 @@ _fpa.activity_logs = {
       // assume if the length is only a single item that it is really the object we are looking for
       d = d0;
     }
+
+    _fpa.activity_logs.handle_creatables(block, d);
 
     block.parents('.activity-log-list').find('.common-template-item').not('[data-sub-id='+d.id+']').each(function(){
       $(this).addClass('prevent-edit');
@@ -80,6 +83,29 @@ _fpa.activity_logs = {
       _fpa.send_ajax_request(url);
     }
     _fpa.postprocessors.info_update_handler(block, d);
+  },
+
+  handle_creatables: function(block, data) {
+    if(data.multiple_results) {
+      var res = data[data.multiple_results][0]
+    }
+    else {
+      var res = data;
+    }
+    if(res && res.creatables) {
+      for(var i in res.creatables) {
+        if(res.creatables.hasOwnProperty(i)) {
+          var c = res.creatables[i];
+          var sel = '.activity-logs-item-block[data-master-id="'+data.master_id+'"] a.add-item-button[data-extra-log-type="' +i+'"]';
+          if(!c) {
+            $(sel).attr('disabled', true);
+          }
+          else {
+            $(sel).attr('disabled', false);
+          }
+        }
+      }
+    }
   }
 
 };

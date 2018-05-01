@@ -770,7 +770,7 @@ _fpa.form_utils = {
               me = dc;
             var c = _fpa.layout.item_blocks.regular;
             var max_h = 0;
-            me.find('.list-group-item.caption-before').each(function() {
+            me.find('.list-group-item.caption-before, .list-group-item.dialog-before').each(function() {
               var curr_h = $(this).height();
               if(curr_h > max_h) max_h = curr_h;
             });

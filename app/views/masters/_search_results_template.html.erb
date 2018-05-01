@@ -148,12 +148,22 @@
             <a href="#/" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> external ids</a>
           </li>
           <% end %>
+
+          <% if (DynamicModel.categories - ['details']).length > 1 %>
+          <li role="presentation" class="dropdown">
+            <a href="#" class="dropdown-toggle" id="dm-tag-drop" data-toggle="dropdown" aria-controls="dm-tag-drop-contents" aria-expanded="false">records</a>
+            <ul class="dropdown-menu" aria-labelledby="dm-tag-drop" id="dm-tag-drop-contents">
+          <%end%>
           <% (DynamicModel.categories - ['details']).each do |cat| %>
             <% if DynamicModel.active.where(category: cat).all.select {|d| @true_views.include? d.model_association_name }.length  > 0 %>
           <li role="presentation">
             <a href="#/" data-toggle="collapse" data-target="#<%=cat%>-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> <%= cat.underscore.humanize.downcase %></a>
           </li>
             <% end %>
+          <% end %>
+          <% if (DynamicModel.categories - ['details']).length > 1 %>
+            </ul>
+          </li>
           <% end %>
 
           <% if current_user && current_user.can?(:view_external_links) %>

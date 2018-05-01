@@ -83,7 +83,7 @@ body.sessions.new {
 .all_caps {
   text-transform: uppercase;
   font-style: normal;
-  font-weight: bold; 
+  font-weight: bold;
 }
 
 .version-info {font-size: 12px; color: gray;}
@@ -152,6 +152,11 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
     }
 }
 
+
+.nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
+    background-color: rgb(238, 238, 238);
+    border-color: rgb(238, 238, 238);
+}
 
 li.search-field input.default {width: 100% !important;}
 
