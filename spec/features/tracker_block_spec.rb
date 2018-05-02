@@ -10,9 +10,9 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
 
     create_admin
 
-    #sp = SubProcess.first
+    #sp = Classification::SubProcess.first
 
-    ProtocolEvent.enabled.each do |d|
+    Classification::ProtocolEvent.enabled.each do |d|
       d.update! disabled:true, current_admin: @admin#, sub_process: sp
     end
 
@@ -153,7 +153,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
 
 
     # Validate that we don't already have a protocol / sub process tracked for this player
-    protocol = Protocol.selectable.first
+    protocol = Classification::Protocol.selectable.first
     sps = protocol.sub_processes.enabled
 
     sp = nil
@@ -262,7 +262,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: "by #{@user.email}"
 
 
-    # Search for the player by current Protocol, subprocess and event
+    # Search for the player by current Classification::Protocol, subprocess and event
     dismiss_modal
     click_link 'clear fields'
     within '#advanced_search_master' do
@@ -310,7 +310,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i
     expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: "by #{@user.email}"
 
-    # Search for the player by current Protocol, subprocess and event, but not the historical event
+    # Search for the player by current Classification::Protocol, subprocess and event, but not the historical event
     within '#advanced_search_master' do
 
       find("#master_not_tracker_histories_attributes_0_sub_process_id option[value='#{sp.id}']").select_option

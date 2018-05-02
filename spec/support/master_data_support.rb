@@ -82,7 +82,7 @@ module MasterDataSupport
   end
 
   def get_a_rank
-    ranks =  AccuracyScore.all
+    ranks =  Classification::AccuracyScore.all
     ranks[rand(ranks.length)].value
   end
 
@@ -197,7 +197,7 @@ module MasterDataSupport
         li[:rank] = 9
       end
 
-      li[:rank] = AccuracyScore.enabled.last unless AccuracyScore.enabled.include?(li[:rank])
+      li[:rank] = Classification::AccuracyScore.enabled.last unless Classification::AccuracyScore.enabled.include?(li[:rank])
       create_player_info li
       @master_count += 1
     end
@@ -217,7 +217,7 @@ module MasterDataSupport
 
   def create_trackers master
     (1..rand(5)).each do
-      Protocol.selectable.each do |pr|
+      Classification::Protocol.selectable.each do |pr|
 
         sps = pr.sub_processes.enabled
         sp = pick_one_from sps

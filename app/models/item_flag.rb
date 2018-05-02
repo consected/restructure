@@ -57,7 +57,7 @@ class ItemFlag < UserBase
   # Get only the list of active class names (based on admin item flag name configurations) that
   # are also genuine class names that ItemFlag reports as working with
   def self.active_class_names
-    ItemFlagName.active.map(&:item_type).uniq & self.use_with_class_names
+    Admin::ItemFlagName.active.map(&:item_type).uniq & self.use_with_class_names
   end
 
   def self.is_active_for? class_or_class_name

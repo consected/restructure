@@ -2,7 +2,7 @@ module ItemFlagSupport
   include MasterSupport
 
   def create_item_flag_name item_type
-    ifn = ItemFlagName.create! name: "IFN #{Time.new.to_f} #{rand 1000000000}", current_admin: @admin, item_type: item_type
+    ifn = Admin::ItemFlagName.create! name: "IFN #{Time.new.to_f} #{rand 1000000000}", current_admin: @admin, item_type: item_type
     @item_flag_name = ifn
   end
 
@@ -95,7 +95,7 @@ module ItemFlagSupport
     item ||= @player_info
 
     raise "failed to set master user in player info" unless item.master_user
-    item.master_user.app_type ||= AppType.active.first
+    item.master_user.app_type ||= Admin::AppType.active.first
 
     setup_access :item_flags
 

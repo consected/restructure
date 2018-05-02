@@ -5,7 +5,7 @@ RSpec.describe Admin::GeneralSelectionsController, type: :controller do
   include GeneralSelectionSupport
   
   def object_class
-    GeneralSelection
+    Classification::GeneralSelection
   end
   def item
     @general_selection
@@ -19,7 +19,7 @@ RSpec.describe Admin::GeneralSelectionsController, type: :controller do
     connection = ActiveRecord::Base.connection
     connection.execute("delete from general_selection_history") 
     @path_prefix = "/admin"
-    GeneralSelection.destroy_all
+    Classification::GeneralSelection.destroy_all
   }
   it_behaves_like 'a standard admin controller'
   

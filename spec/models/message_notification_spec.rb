@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe MessageNotification, type: :model do
+RSpec.describe Messaging::MessageNotification, type: :model do
 
 
   include ModelSupport
@@ -26,10 +26,10 @@ RSpec.describe MessageNotification, type: :model do
     @activity_log = @player_contact.activity_log__player_contact_phones.create!(select_call_direction: 'from player', select_who: 'user', master: @player_contact.master)
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
-    @layout = MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    @layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
-    @content = MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
+    @content = Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
     Delayed::Job.delete_all
 
@@ -42,7 +42,7 @@ RSpec.describe MessageNotification, type: :model do
     layout = @layout
     content = @content
 
-    mn = MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
     content_template_name: content.name, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email
 
     mn.generate
@@ -66,7 +66,7 @@ RSpec.describe MessageNotification, type: :model do
 
     # expect(Delayed::Job.count).to eq 0
 
-    mn_id = MessageNotification.last.id if MessageNotification.last
+    mn_id = Messaging::MessageNotification.last.id if Messaging::MessageNotification.last
 
     testcnx = ActiveRecord::Base.establish_connection(:test).connection
 testcnx.transaction do
@@ -77,7 +77,7 @@ testcnx.execute <<EOF
   values (#{@user.app_type_id}, #{@user.id}, '{#{@rec_user.id}}', '#{layout.name}', '#{content.name}', '#{@activity_log.class.name}', '#{@activity_log.id}', #{master.id}, 'email', now(), now() );
 EOF
   # Check that the new message notification record has been entered into the database and can be read
-  new_mn_id = MessageNotification.last.id
+  new_mn_id = Messaging::MessageNotification.last.id
   puts "Previous #{mn_id} and new one to be processed #{new_mn_id}"
   expect(mn_id).not_to eq new_mn_id
 end

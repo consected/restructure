@@ -8,7 +8,7 @@ module SubProcessSupport
     
     (1..5).each do |l|
       res << {
-        name: "SubProcess #{l}",
+        name: "Classification::SubProcess #{l}",
         
         disabled: false,
         protocol_id: @protocol_id
@@ -16,7 +16,7 @@ module SubProcessSupport
     end
     (1..5).each do |l|
       res << {
-        name: "Dis SubProcess #{l}",
+        name: "Dis Classification::SubProcess #{l}",
         
         disabled: true,
         protocol_id: @protocol_id

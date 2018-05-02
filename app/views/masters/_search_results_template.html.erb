@@ -2,7 +2,7 @@
 
   def view?
     return @viewables if @viewables
-    @viewables = UserAccessControl.view_tables? current_user
+    @viewables = Admin::UserAccessControl.view_tables? current_user
     @viewables[:pro_infos] &&= !app_config_set(:hide_pro_info)
     @viewables
   end

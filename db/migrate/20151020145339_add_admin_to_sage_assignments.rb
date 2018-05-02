@@ -19,7 +19,7 @@ class AddAdminToSageAssignments < ActiveRecord::Migration
     auto_admin.save!
     Seeds::TrackerUpdatesProtocol.setup 
     
-    protocol = Protocol.where(name: 'Updates').enabled.first
+    protocol = Classification::Protocol.where(name: 'Updates').enabled.first
     protocol.current_admin = auto_admin
     sp = protocol.sub_processes.find_by(name: 'record updates')
     sp.current_admin = auto_admin

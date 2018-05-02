@@ -1,19 +1,19 @@
 <div class="data-results">
   <div data-result="admin-edit-form-" class="admin-edit-form">
-<%= form_for([:admin, object_instance], class: "inline-form", remote: true) do |f| %>
+<%= form_for(object_instance, class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :app_type_id %>
     <% select_item_type = {}
        select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'    %>
-    <%= f.select :app_type_id, AppType.active.map{|a| [a.label, a.id]}, select_item_type%>
+    <%= f.select :app_type_id, Admin::AppType.active.map{|a| [a.label, a.id]}, select_item_type%>
   </div>
   <div class="form-group">
     <%= f.label :name %>
     <% select_item_type = {}
        select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'name'    %>
 
-    <%= f.select :name, AppConfiguration.configurations, select_item_type %>
+    <%= f.select :name, Admin::AppConfiguration.configurations, select_item_type %>
   </div>
   <div class="form-group">
     <%= f.label :value %>

@@ -12,7 +12,7 @@ module NavHandler
     @app_type_switches = nil
 
     if current_user
-      @app_type_switches = AppType.all_available_to(current_user).map {|m| [m.label, m.id]}
+      @app_type_switches = Admin::AppType.all_available_to(current_user).map {|m| [m.label, m.id]}
     end
     admin_sub = []
     if current_admin

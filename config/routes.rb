@@ -26,18 +26,22 @@ Rails.application.routes.draw do
     post 'app_types/upload', to: 'app_types#upload'
 
     resources :user_roles, except: [:show, :destroy]
-  end
+    resources :page_layouts, except: [:show, :destroy]
 
 
-  resources :protocols, except: [:show, :destroy] do
-    resources :sub_processes, except: [:show, :destroy] do
-      resources :protocol_events, except: [:show, :destroy]
+    resources :protocols, except: [:show, :destroy] do
+      resources :sub_processes, except: [:show, :destroy] do
+        resources :protocol_events, except: [:show, :destroy]
+      end
+
     end
-
+    resources :protocol_events, except: [:show, :destroy]
+    resources :sub_processes, except: [:show, :destroy]
   end
 
-  resources :protocol_events, except: [:show, :destroy]
-  resources :sub_processes, except: [:show, :destroy]
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ItemFlagName, type: :model do
+RSpec.describe Admin::ItemFlagName, type: :model do
   
   include ModelSupport
   include ItemFlagNameSupport  
@@ -13,12 +13,12 @@ RSpec.describe ItemFlagName, type: :model do
       create_items :list_valid_attribs
     end
     
-    it "allows multiple ItemFlagName records to be created" do
+    it "allows multiple Admin::ItemFlagName records to be created" do
       
       
       expect(@created_count).to eq @list.length
             
-      ItemFlagName.all.each do |p|                      
+      Admin::ItemFlagName.all.each do |p|                      
         expect(p.name).not_to be_nil 
         
       end
@@ -26,14 +26,14 @@ RSpec.describe ItemFlagName, type: :model do
     end
     
     it "can return active items only" do
-      pa = ItemFlagName.active
+      pa = Admin::ItemFlagName.active
       expect(pa.length).to be > 0
       res = pa.select {|p| p.disabled }
       expect(res.length).to eq 0
     end
             
     it "can only have name updated by an admin" do
-      pa = ItemFlagName.active.first
+      pa = Admin::ItemFlagName.active.first
       pa.name = "new name by me"
       
       expect(pa.save).to be false

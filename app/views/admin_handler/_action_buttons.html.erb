@@ -4,15 +4,15 @@
   <%= link_to "admin menu", "/", class: "btn btn-warning" %>
 
   <%if @sub_processes || @protocol_events%>
-    <%= link_to "protocols", protocols_path, class: "btn btn-warning" %>
+    <%= link_to "protocols", admin_protocols_path, class: "btn btn-warning" %>
   <%end%>
 
   <%if @protocol_events && @protocol%>
-    <%= link_to "processes", protocol_sub_processes_path(@protocol), class: "btn btn-warning" %>
+    <%= link_to "processes", admin_protocol_sub_processes_path(@protocol), class: "btn btn-warning" %>
   <%end%>
 
   <%if @protocols %>
-    <%= link_to "events for all protocols", protocol_events_path(all: true), class: "btn btn-warning" %>
+    <%= link_to "events for all protocols", admin_protocol_events_path(all: true), class: "btn btn-warning" %>
   <%end%>
 
   <%if @report %>

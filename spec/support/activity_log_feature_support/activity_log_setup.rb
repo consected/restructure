@@ -7,7 +7,7 @@ module ActivityLogSetup
   def create_phone_log_config
     admin, _ = create_admin
 
-    if GeneralSelection.enabled.where(item_type: 'activity_log__player_contact_phone_select_who').length >= 5
+    if Classification::GeneralSelection.enabled.where(item_type: 'activity_log__player_contact_phone_select_who').length >= 5
 
       gs = [
         ["Rob Standish", "rob standish", "activity_log__player_contact_phone_select_who"],
@@ -16,7 +16,7 @@ module ActivityLogSetup
         ["Andy Morehouse", "andy morehouse", "activity_log__player_contact_phone_select_who"]
       ]
       gs.each do |g|
-        GeneralSelection.create!(name: g[0], value: g[2], item_type: g[2], current_admin: admin, disabled: false, create_with: true, edit_always: false, lock: true )
+        Classification::GeneralSelection.create!(name: g[0], value: g[2], item_type: g[2], current_admin: admin, disabled: false, create_with: true, edit_always: false, lock: true )
       end
     end
 

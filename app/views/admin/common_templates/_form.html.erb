@@ -1,6 +1,15 @@
 <div class="data-results">
   <div data-result="admin-edit-form-"  class="admin-edit-form">
-<%= form_for([:admin, object_instance], class: "inline-form", remote: true) do |f| %>
+<%
+
+  if object_has_admin_parent?
+    fref = object_instance
+  else
+    fref = [:admin, object_instance]
+  end
+
+%>
+<%= form_for(fref, class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
 
   <% (permitted_params - [:id]).each do |p| %>
@@ -21,11 +30,14 @@
       <% elsif p == :disabled %>
         <%= f.check_box p %>
         <%= f.label p %>
+      <% elsif p == :item_type %>
+        <%= f.label :item_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'item type for existing records can not be changed.' : 'Set item type'}" %>
+        <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
       <% elsif p == :app_type_id %>
           <%= f.label p %>
           <% select_item_type = {}
              select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'    %>
-          <%= f.select :app_type_id, AppType.active.map{|a| [a.label, a.id]}, select_item_type%>
+          <%= f.select :app_type_id, Admin::AppType.active.map{|a| [a.label, a.id]}, select_item_type%>
       <% elsif p == :user_id %>
           <%= f.label p %>
           <%= f.select :user_id, options_from_collection_for_select(User.active, 'id', 'email', object_instance.user_id), include_blank: true %>

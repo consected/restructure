@@ -65,7 +65,7 @@ EOF
 
     res = @user.has_access_to? :access, :activity_log_type, resource_name
     expect(res).to be_falsey
-    UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :activity_log_type, resource_name: resource_name, current_admin: @admin
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :activity_log_type, resource_name: resource_name, current_admin: @admin
 
     res = @user.has_access_to? :access, :activity_log_type, resource_name
     expect(res).to be_truthy
@@ -80,9 +80,9 @@ EOF
     resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for('primary').resource_name
 
 
-    uac = UserAccessControl.where(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name).first
+    uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name).first
     unless uac
-      uac = UserAccessControl.new(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name)
+      uac = Admin::UserAccessControl.new(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name)
     end
 
     # First, allow an activity log record to be created

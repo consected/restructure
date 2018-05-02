@@ -1,22 +1,22 @@
   module ApplicationHelper
 
 
-    def object_name
-      (@object_name || controller_name.singularize)
-    end
+    # def object_name
+    #   (@object_name || controller_name.singularize)
+    # end
 
     # Namespace safe lower cased name
-    def full_object_name
-      if controller.class.parent.name != 'Object'
-        "#{controller.class.parent.name.underscore}__#{object_name}"
-      else
-        object_name
-      end
-    end
+    # def full_object_name
+    #   if controller.class.parent.name != 'Object'
+    #     "#{controller.class.parent.name.underscore}__#{object_name}"
+    #   else
+    #     object_name
+    #   end
+    # end
 
-    def object_instance
-      instance_variable_get("@#{object_name}")
-    end
+    # def object_instance
+    #   instance_variable_get("@#{object_name}")
+    # end
 
     def hyphenated_name
       controller_name.singularize.hyphenate

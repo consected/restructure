@@ -102,7 +102,7 @@ module ActivityLogHandler
     end
 
     def uses_item_flags? user
-      ItemFlagName.enabled_for? self.name.ns_underscore, user
+      Admin::ItemFlagName.enabled_for? self.name.ns_underscore, user
     end
 
     def extra_log_type_config_names
@@ -215,7 +215,7 @@ module ActivityLogHandler
       result = current_user.has_access_to?(:create, :activity_log_type, c.resource_name) && c.calc_creatable_if(self)
       res[c.name] = result ? c.resource_name : nil
     end
-    
+
     res
   end
 
@@ -281,13 +281,13 @@ module ActivityLogHandler
 
     return unless @allow_tracker_sync
 
-    protocol = Protocol.find(protocol_id)
+    protocol = Classification::Protocol.find(protocol_id)
 
     # if we are not already passing through sub_process based on a user selection then
     # look up what the Activity name is for protocol sub processes
     if self.attribute_names.include? 'sub_process_id'
       sub_process_id = self.sub_process_id
-      sub_process = SubProcess.find(sub_process_id)
+      sub_process = Classification::SubProcess.find(sub_process_id)
     else
       # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
       sub_process = protocol.sub_processes.where(name: ActivityLog.sub_process_name).first
@@ -507,7 +507,7 @@ module ActivityLogHandler
   # An app specific DB trigger may have have created a message notification record.
   # Check for new records, and work from there.
   def check_for_notification_records
-    MessageNotification.handle_notification_records self
+    Messaging::MessageNotification.handle_notification_records self
   end
 
 end

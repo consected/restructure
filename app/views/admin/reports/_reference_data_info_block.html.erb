@@ -1,6 +1,6 @@
 <div class="col-sm-7" style="text-align: left">
     
-  <%= f.label 'Protocol / status (sub_process) / method (protocol_event)'%> <a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a>    
+  <%= f.label 'Classification::Protocol / status (sub_process) / method (protocol_event)'%> <a class="glyphicon glyphicon-info-sign" href="#p-help" class="collapsed" data-toggle="collapse"></a>    
     <div class="help-block collapse" id="p-help">
       <p>
       Use a protocol, status or method lookup directly against a master record. For example, to find a player who has ever had a status of 144 or 24:
@@ -19,7 +19,7 @@
           
     </div>
   <ul id="protocols-list" style="max-height: 330px; overflow: auto; background-color: white;">
-  <% Protocol.all.sort.each do |p| %>
+  <% Classification::Protocol.all.sort.each do |p| %>
       <li  id="protocol-<%=p.id%>">
           <a href="#pblock-<%=p.id%>" data-toggle="collapse"  class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.id%> - <%= p.name %></a>
       </li>
@@ -54,12 +54,12 @@
     </div>
   <ul id="gs-list" style="max-height: 330px; overflow: auto; background-color: white;">
   
-  <% GeneralSelection.item_types.each do |p| %>
+  <% Classification::GeneralSelection.item_types.each do |p| %>
       <li  id="gs-<%=p%>">
           <a href="#gsblock-<%=p%>" data-toggle="collapse"  class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
       </li>      
       <ul id="gsblock-<%=p%>" class="collapse">
-        <% GeneralSelection.where(item_type: p).each do |gs| %>
+        <% Classification::GeneralSelection.where(item_type: p).each do |gs| %>
           <li style="color: <%= gs.disabled ? '#aaa' : 'auto' %>" data-gs-item-type="<%=p%>" id="general_selection-<%=gs.id%>"><%=gs.value%> - <%= gs.name %></li>
         <% end %>
       </ul>
@@ -82,12 +82,12 @@
     </div>
   <ul id="if-list" style="max-height: 270px; overflow: auto; background-color: white;">
   
-  <% ItemFlagName.item_types.each do |p| %>
+  <% Admin::ItemFlagName.item_types.each do |p| %>
       <li  id="gs-<%=p%>">
           <a href="#ifblock-<%=p%>" data-toggle="collapse"  class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
       </li>      
       <ul id="ifblock-<%=p%>" class="collapse">
-        <% ItemFlagName.where(item_type: p).each do |i| %>
+        <% Admin::ItemFlagName.where(item_type: p).each do |i| %>
           <li style="color: <%= i.disabled ? '#aaa' : 'auto' %>" data-if-item-type="<%=p%>" id="general_selection-<%=i.id%>"><%=i.id%> - <%=i.name%></li>
         <% end %>
       </ul>
@@ -110,7 +110,7 @@
     </div>
   <ul id="as-list" style="max-height: 140px; overflow: auto; background-color: white;">
   
-  <% AccuracyScore.all.each do |p| %>
+  <% Classification::AccuracyScore.all.each do |p| %>
       <li  id="as-<%=p.value%>">
           <span href="#ifblock-<%=p.value%>" data-toggle="collapse"  class="collapsed" style="color: <%= p.disabled ? '#aaa' : 'auto' %>"><%=p.value %> - <%=p.name%></span>
       </li>            

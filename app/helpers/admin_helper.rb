@@ -16,6 +16,11 @@ module AdminHelper
     link_to '', edit_path(id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
   end
 
+  # Use in forms where the object is not in the admin module (and so a specific path is needed)
+  def admin_form_url
+    ['', controller_path, object_instance.id ].join('/')
+  end
+
   def filter_btn title, filter_on, val
 
     filter = (params[:filter] || {}).dup

@@ -1,6 +1,4 @@
-class ActivityLog::ActivityLogsController < ApplicationController
-
-  before_action :authenticate_user!
+class ActivityLog::ActivityLogsController < UserBaseController
 
   include MasterHandler
   include ParentHandler
@@ -130,7 +128,7 @@ class ActivityLog::ActivityLogsController < ApplicationController
         item_data: item_data,
         @item_type => items
       }
-      
+
       extras
     end
 

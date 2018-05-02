@@ -12,14 +12,14 @@ RSpec.describe Report, type: :model do
 
     first_rep = Report.active.searchable.first
     expect(first_rep).to be_a Report
-    UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: first_rep.name, current_admin: @admin
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: first_rep.name, current_admin: @admin
 
     res = Report.active.searchable.for_user(@user)
     expect(res.length).to eq 1
     expect(res.first).to eq first_rep
 
 
-    UserAccessControl.create! app_type: @user.app_type, user: @user, access: nil, resource_type: :report, resource_name: first_rep.name, current_admin: @admin
+    Admin::UserAccessControl.create! app_type: @user.app_type, user: @user, access: nil, resource_type: :report, resource_name: first_rep.name, current_admin: @admin
     res = Report.active.searchable.for_user(@user)
     expect(res.length).to eq 0
 

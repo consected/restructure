@@ -18,7 +18,7 @@ class DialogTemplate
 
     data[:player_info] = item.master.player_infos.first.attributes
 
-    mt = MessageTemplate.active.dialog_templates.where(name: name).first
+    mt = Admin::MessageTemplate.active.dialog_templates.where(name: name).first
     raise FphsException.new "Dialog template '#{name}' not found" unless mt
     all_content = mt.template.dup
     mt.substitute all_content, data: data, tag_subs: 'em class="all_caps"'

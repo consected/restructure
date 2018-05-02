@@ -31,10 +31,10 @@ module ModelSupport
     good_password = user.password
     @user = user
 
-    app_type = AppType.active.first
+    app_type = Admin::AppType.active.first
 
     unless opt[:no_app_type_setup]
-      UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
+      Admin::UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
     end
 
     # Set a default app_type to use to allow non-interactive tests to continue
@@ -43,7 +43,7 @@ module ModelSupport
 
 
     if opt[:create_master]
-      UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+      Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
     end
 
     [user, good_password]

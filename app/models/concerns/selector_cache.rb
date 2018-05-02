@@ -175,7 +175,7 @@ module SelectorCache
 
   def invalidate_cache
 
-    logger.info "College added or updated. Invalidating cache."
+    logger.info "Selector added or updated (#{self.class.name}). Invalidating cache."
     # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
     Rails.cache.clear
 

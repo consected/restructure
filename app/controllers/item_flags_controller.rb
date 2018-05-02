@@ -1,9 +1,9 @@
-class ItemFlagsController < ApplicationController
+class ItemFlagsController < UserBaseController
 
   include ParentHandler
 
   before_action :init_vars
-  before_action :authenticate_user!
+
   before_action :set_parent_item
   before_action :set_item, only: [:show]
 
@@ -99,5 +99,5 @@ class ItemFlagsController < ApplicationController
     def no_action_log
       true
     end
-    
+
 end

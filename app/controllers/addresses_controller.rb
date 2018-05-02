@@ -1,4 +1,4 @@
-class AddressesController < ApplicationController
+class AddressesController < UserBaseController
   include MasterHandler
 
   def edit

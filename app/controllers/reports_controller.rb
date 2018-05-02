@@ -1,4 +1,4 @@
-class ReportsController < ApplicationController
+class ReportsController < UserBaseController
   include MasterSearch
   before_action :init_vars
   before_action :authenticate_user_or_admin!

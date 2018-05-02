@@ -8,7 +8,7 @@ RSpec.describe MastersController, type: :controller do
     @admin, _ = ControllerMacros.create_admin
 
     unless @user.can? :create_master
-      UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+      Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
     end
 
   end
@@ -21,14 +21,14 @@ RSpec.describe MastersController, type: :controller do
 
     it "creates a master record and shows it" do
 
-      ac = AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
+      ac = Admin::AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
 
       if ac
         ac.value = 'player_info'
         ac.current_admin = @admin
         ac.save!
       else
-        AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
+        Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
       end
 
       setup_access :player_infos

@@ -70,7 +70,7 @@ class Master < ActiveRecord::Base
   # Scope results with inner joins on external identifier tables if they are in the user access control conditions
   def self.external_identifier_assignment_scope(user)
     # Check if the resource is restricted through external identifier assignment
-    er = UserAccessControl.external_identifier_restrictions(user)
+    er = Admin::UserAccessControl.external_identifier_restrictions(user)
 
     if er
       list = er.map {|e| e.resource_name.to_sym }
@@ -133,7 +133,7 @@ class Master < ActiveRecord::Base
 
   def self.each_create_master_with_item user
     # Create each of the items listed in the configuration item :create_master_with (comma separated)
-    create_master_with = AppConfiguration.value_for :create_master_with, user
+    create_master_with = Admin::AppConfiguration.value_for :create_master_with, user
     if create_master_with
       create_master_with.split(',').each do |cw|
         cw = cw.strip.pluralize
@@ -269,7 +269,7 @@ class Master < ActiveRecord::Base
     extras.merge!({ include: included_tables })
     extras[:methods] ||= []
 
-    res = AppConfiguration.value_for(:show_ids_in_master_result, current_user)
+    res = Admin::AppConfiguration.value_for(:show_ids_in_master_result, current_user)
     res = '' if res.blank?
     res = res.split(',').map {|i| i.strip.to_sym}
     res = res - self.class.crosswalk_attrs
@@ -285,7 +285,7 @@ class Master < ActiveRecord::Base
   def allows_user_access
     # but ignore the test if not persisted yet, since the external identifier may be added during the creation process
     unless self.creating_master
-      er = UserAccessControl.external_identifier_restrictions(current_user)
+      er = Admin::UserAccessControl.external_identifier_restrictions(current_user)
     end
 
     if er

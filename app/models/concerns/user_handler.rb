@@ -29,7 +29,7 @@ module UserHandler
   class_methods do
 
     def uses_item_flags? user
-      ItemFlagName.enabled_for? self.name.ns_underscore, user
+      Admin::ItemFlagName.enabled_for? self.name.ns_underscore, user
     end
 
     def foreign_key_name
@@ -54,16 +54,16 @@ module UserHandler
     end
 
     def get_rank_name value
-      GeneralSelection.name_for self, value, :rank
+      Classification::GeneralSelection.name_for self, value, :rank
     end
     def get_source_name value
-      GeneralSelection.name_for self, value, :source
+      Classification::GeneralSelection.name_for self, value, :source
     end
 
 
     def valid_rec_types
       return nil unless self.attribute_names.include?('rec_type')
-      GeneralSelection.selector_attributes([:value], item_type: "#{self.assoc_inverse}_type").map(&:first)
+      Classification::GeneralSelection.selector_attributes([:value], item_type: "#{self.assoc_inverse}_type").map(&:first)
     end
 
 

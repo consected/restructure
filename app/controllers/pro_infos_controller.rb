@@ -1,4 +1,4 @@
-class ProInfosController < ApplicationController
+class ProInfosController < UserBaseController
   include MasterHandler
 
   def edit

@@ -14,7 +14,7 @@ module Seeds
 
     def self.create_protocol_events
 
-      protocol = Protocol.active.find_or_initialize_by(name: 'Updates')
+      protocol = Classification::Protocol.active.find_or_initialize_by(name: 'Updates')
       protocol.current_admin = auto_admin
       protocol.position = 100
       protocol.save!
@@ -55,8 +55,8 @@ module Seeds
 
     def self.setup
       log "In #{self}.setup"
-      log "Updates: #{Protocol.active.where(name: 'Updates').count}"
-      if Rails.env.test? || Protocol.active.where(name: 'Updates').count == 0
+      log "Updates: #{Classification::Protocol.active.where(name: 'Updates').count}"
+      if Rails.env.test? || Classification::Protocol.active.where(name: 'Updates').count == 0
         create_protocol_events
         log "Ran #{self}.setup"
       else

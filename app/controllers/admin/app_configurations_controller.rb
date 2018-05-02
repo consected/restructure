@@ -3,8 +3,8 @@ class Admin::AppConfigurationsController < AdminController
   protected
   def filters
     {
-      name: AppConfiguration.configurations,
-      app_type_id: AppType.all_by_name
+      name: Admin::AppConfiguration.configurations,
+      app_type_id: Admin::AppType.all_by_name
     }
   end
 

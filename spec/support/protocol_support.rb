@@ -5,14 +5,14 @@ module ProtocolSupport
     
     (1..5).each do |l|
       res << {
-        name: "Protocol #{l}",
+        name: "Classification::Protocol #{l}",
         position: 50+l*3,        
         disabled: false
       }
     end
     (1..5).each do |l|
       res << {
-        name: "Dis Protocol #{l}",
+        name: "Dis Classification::Protocol #{l}",
         position: 100+l*3,        
         disabled: true
       }
@@ -50,7 +50,7 @@ module ProtocolSupport
     att ||= valid_attribs    
     att[:current_admin] = admin||@admin
     
-    @protocol = Protocol.create! att
+    @protocol = Classification::Protocol.create! att
   end
   
 end

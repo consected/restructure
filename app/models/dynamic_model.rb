@@ -12,7 +12,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
 
-  # List of item types that can be used to define GeneralSelection drop downs
+  # List of item types that can be used to define Classification::GeneralSelection drop downs
   # This does not represent the actual item types that are valid for selection when defining a new dynamic model record
   def self.item_types
 

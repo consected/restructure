@@ -27,7 +27,7 @@
                   <select id="search_attrs_filter">
                       <option value="all">all</option>
 
-                      <% GeneralSelection.item_types.dup.each do |i|%>
+                      <% Classification::GeneralSelection.item_types.dup.each do |i|%>
                         <option value="item_type: <%=i%>">item_type: <%=i%></option>
                       <% end %>
 

@@ -10,9 +10,9 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
 
     create_admin
 
-    #sp = SubProcess.first
+    #sp = Classification::SubProcess.first
 
-    ProtocolEvent.enabled.each do |d|
+    Classification::ProtocolEvent.enabled.each do |d|
       d.update! disabled:true, current_admin: @admin#, sub_process: sp
     end
 
@@ -119,7 +119,7 @@ describe "tracker record update", js: true, driver: :app_firefox_driver do
     pc_rec = @master.player_contacts.where(data: phone).first
 
 
-    protocol = Protocol.active.where(name: 'Updates').first
+    protocol = Classification::Protocol.active.where(name: 'Updates').first
 
     paperclip = nil
 

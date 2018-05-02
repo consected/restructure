@@ -238,7 +238,7 @@ class ImportsController < ApplicationController
 
     def setup_table_rules
       @table_rules = {}
-      gsit = GeneralSelection.enabled.pluck(:item_type).uniq
+      gsit = Classification::GeneralSelection.enabled.pluck(:item_type).uniq
       @primary_tables.each do |tn|
         @primary_table = tn
         if tn.start_with?('activity_log__')

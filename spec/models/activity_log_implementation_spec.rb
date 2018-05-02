@@ -33,7 +33,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     rn = al.extra_log_type_config.resource_name
 
  
-    uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
+    uacs = Admin::UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
     uac = uacs.first
     if uac
       uac.access = nil
@@ -52,7 +52,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
       uac.current_admin = @admin
       uac.save!
     else
-      uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
+      uac = Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
     end
     expect(al.save).to be true
 

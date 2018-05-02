@@ -59,7 +59,7 @@ RSpec.describe 'BHS App Sync', type: :model do
     create_admin
     create_user
 
-    AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'bhs_config.json')), @admin
+    Admin::AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'bhs_config.json')), @admin
 
     # Make sure the activity log configuration is available
 
@@ -101,8 +101,8 @@ RSpec.describe 'BHS App Sync', type: :model do
     al = m.activity_log__bhs_assignments.first
     expect(al.select_record_from_player_contact_phones).to eq m.player_contacts.phone.order(rank: :desc).first.data
 
-    msg = MessageNotification.where(item_id: al.id, item_type: al.class.name, master_id: @master.id).first
-    expect(msg).to be_a MessageNotification
+    msg = Messaging::MessageNotification.where(item_id: al.id, item_type: al.class.name, master_id: @master.id).first
+    expect(msg).to be_a Messaging::MessageNotification
 
   end
 

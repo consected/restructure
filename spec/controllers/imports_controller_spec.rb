@@ -49,7 +49,7 @@ RSpec.describe ImportsController, type: :controller do
   def allow_import
     ac = @user.has_access_to? :read, :general, :import_csv
     unless ac
-      UserAccessControl.create! user: @user, access: :read, resource_type: :general, resource_name: 'import_csv', current_admin: @admin, app_type_id: @user.app_type_id
+      Admin::UserAccessControl.create! user: @user, access: :read, resource_type: :general, resource_name: 'import_csv', current_admin: @admin, app_type_id: @user.app_type_id
     end
   end
 

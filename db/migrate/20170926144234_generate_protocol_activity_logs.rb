@@ -6,7 +6,7 @@ class GenerateProtocolActivityLogs < ActiveRecord::Migration
 
     admin = Admin.where("disabled is null or disabled = false").first
 
-    Protocol.enabled.each do |p|
+    Classification::Protocol.enabled.each do |p|
 
       sp = p.sub_processes.create! name: ActivityLog.sub_process_name, current_admin: admin
 

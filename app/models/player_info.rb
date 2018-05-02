@@ -38,12 +38,12 @@ class PlayerInfo < UserBase
   end
 
   # Override the standard rank_name, to ensure correct validation, since
-  # player ranks are a special case and are defined as AccuracyScore instances
+  # player ranks are a special case and are defined as Classification::AccuracyScore instances
   def rank_name
     PlayerInfo.get_rank_name self.rank
   end
   def self.get_rank_name value
-    AccuracyScore.name_for(value)
+    Classification::AccuracyScore.name_for(value)
   end
 
   def self.permitted_params
@@ -68,7 +68,7 @@ class PlayerInfo < UserBase
     end
 
     def check_college
-      College.create_if_new college, user unless college.blank?
+      Classification::College.create_if_new college, user unless college.blank?
     end
 
     def prevent_user_changes

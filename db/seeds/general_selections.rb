@@ -3,7 +3,7 @@ module Seeds
 
     def self.add_values values, item_type
       values.each do |v|
-        res = GeneralSelection.find_or_initialize_by( v.merge(item_type: item_type))
+        res = Classification::GeneralSelection.find_or_initialize_by( v.merge(item_type: item_type))
         res.update(current_admin: auto_admin) unless res.admin
       end
 
@@ -18,7 +18,7 @@ module Seeds
       ]
 
       add_values values, item_type
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
     end
 
 
@@ -35,7 +35,7 @@ module Seeds
 
       add_values values, item_type
 
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
     end
 
     def self.create_player_contacts_source
@@ -47,7 +47,7 @@ module Seeds
       ]
 
       add_values values, item_type
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
     end
 
     def self.create_addresses_source
@@ -59,7 +59,7 @@ module Seeds
       ]
 
       add_values values, item_type
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
     end
 
     def self.create_addresses_rank
@@ -75,7 +75,7 @@ module Seeds
 
       add_values values, item_type
 
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
     end
 
     def self.create_player_contacts_type
@@ -89,7 +89,7 @@ module Seeds
 
       add_values values, item_type
 
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
       raise "Bad Seed! #{PlayerContact.valid_rec_types}" unless PlayerContact.valid_rec_types.length > 0
     end
 
@@ -97,7 +97,7 @@ module Seeds
     def self.setup
       log "In #{self}.setup"
 
-      if Rails.env.test? || GeneralSelection.where(item_type: 'player_infos_source').length == 0
+      if Rails.env.test? || Classification::GeneralSelection.where(item_type: 'player_infos_source').length == 0
         create_player_infos_source
 
         create_player_contacts_rank

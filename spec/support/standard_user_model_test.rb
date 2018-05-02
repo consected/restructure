@@ -7,7 +7,7 @@ shared_examples 'a standard user model' do
       seed_database
       create_admin
       create_user
-      uacs = UserAccessControl.active.where app_type: @user.app_type, resource_type: :table
+      uacs = Admin::UserAccessControl.active.where app_type: @user.app_type, resource_type: :table
 
       uacs.each do |u|
         u.access = 'create'
@@ -16,7 +16,7 @@ shared_examples 'a standard user model' do
       end
 
       unless @user.has_access_to? :read, :general, :app_type
-        UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: @admin
+        Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: @admin
       end
     end
 

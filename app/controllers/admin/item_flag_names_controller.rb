@@ -2,13 +2,18 @@ class Admin::ItemFlagNamesController < AdminController
 
   protected
 
-  def filters
-    { item_type: ItemFlagName.item_types }
-  end
+    def view_folder
+      'admin/common_templates'
+    end
 
-  def filters_on
-    [:item_type]
-  end
+
+    def filters
+      { item_type: Admin::ItemFlagName.item_types }
+    end
+
+    def filters_on
+      [:item_type]
+    end
 
 
 

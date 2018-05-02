@@ -3,7 +3,7 @@ module Seeds
 
     def self.add_values values
       values.each do |v|
-        res = ItemFlagName.find_or_initialize_by(v)
+        res = Admin::ItemFlagName.find_or_initialize_by(v)
         res.update(current_admin: auto_admin) unless res.admin
       end
 
@@ -21,14 +21,14 @@ module Seeds
       
       add_values values
       
-      Rails.logger.info "#{self.name} = #{ItemFlagName.all.length}"
+      Rails.logger.info "#{self.name} = #{Admin::ItemFlagName.all.length}"
     end
     
     
     def self.setup
       log "In #{self}.setup"
-      if Rails.env.test? || ItemFlagName.count == 0
-        if Protocol.count == 0 || Protocol.where(name: 'Updates').count == 0
+      if Rails.env.test? || Admin::ItemFlagName.count == 0
+        if Classification::Protocol.count == 0 || Classification::Protocol.where(name: 'Updates').count == 0
           Seeds::TrackerUpdatesProtocol.create_protocol_events
         end
         create_item_flag_names 

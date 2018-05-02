@@ -10,7 +10,7 @@ class Admin::MessageNotificationsController < AdminController
     def filters
       {
         message_type: ['email'],
-        status: ['IS NULL', MessageNotification::StatusInProgress, MessageNotification::StatusFailed, MessageNotification::StatusComplete]
+        status: ['IS NULL', Messaging::MessageNotification::StatusInProgress, Messaging::MessageNotification::StatusFailed, Messaging::MessageNotification::StatusComplete]
       }
     end
 

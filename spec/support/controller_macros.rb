@@ -13,10 +13,10 @@ module ControllerMacros
     user = User.create! email: good_email, current_admin: admin
     good_password = user.password
 
-    app_type = AppType.active.first
+    app_type = Admin::AppType.active.first
 
     unless opt[:no_app_type_setup]
-      UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
+      Admin::UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
     end
 
     # Set a default app_type to use to allow non-interactive tests to continue
@@ -48,7 +48,7 @@ module ControllerMacros
 
       Rails.logger.info "Attempting to sign in new user with email #{user.email} and password #{pw}"
       res = sign_in user
-      user.app_type = AppType.all_available_to(user).first
+      user.app_type = Admin::AppType.all_available_to(user).first
       user.save!
       @user = user
       Rails.logger.info "Result: #{res}"

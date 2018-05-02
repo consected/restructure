@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe Protocol do
+describe Classification::Protocol do
   include ModelSupport
   include ProtocolSupport  
   describe "definition" do
@@ -17,14 +17,14 @@ describe Protocol do
       
       expect(@created_count).to eq @list.length
       
-      Protocol.all.each do |p|
+      Classification::Protocol.all.each do |p|
         p.position = rand 100
         p.current_admin = @admin
         p.save!
       end
       
       prev_pos = -1
-      Protocol.all.each do |p|                      
+      Classification::Protocol.all.each do |p|                      
         expect(p.position).to be >= prev_pos
         prev_pos  = p.position if p.position
       end
@@ -34,14 +34,14 @@ describe Protocol do
     end
     
     it "can return active items only" do
-      pa = Protocol.active
+      pa = Classification::Protocol.active
       expect(pa.length).to be > 0
       res = pa.select {|p| p.disabled }
       expect(res.length).to eq 0
     end
     
     it "can only have name updated by an admin" do
-      pa = Protocol.active.first
+      pa = Classification::Protocol.active.first
       pa.name = "new name by me"
       
       expect(pa.save).to be false

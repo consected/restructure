@@ -1,4 +1,4 @@
-class PlayerContactsController < ApplicationController
+class PlayerContactsController < UserBaseController
 
   include MasterHandler
 

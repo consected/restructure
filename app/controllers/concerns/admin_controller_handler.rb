@@ -8,7 +8,7 @@ module AdminControllerHandler
     before_action :set_instance_from_id, only: [:edit, :update, :destroy]
 
 
-    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :objects_instance, :human_name, :no_edit
+    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance, :objects_instance, :human_name, :no_edit
 
   end
 
@@ -126,16 +126,16 @@ module AdminControllerHandler
 
 
     def primary_model
-      controller_name.classify.constantize
+      Admin::AdminBase.class_from_name controller_name
     end
     def object_name
-      controller_name.singularize
+      @object_name = primary_model.name.ns_underscore.singularize
     end
     def objects_name
-      controller_name.to_sym
+      object_name.pluralize.to_sym
     end
     def human_name
-      controller_name.singularize.humanize
+      object_name.humanize
     end
 
     def no_edit

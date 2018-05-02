@@ -12,9 +12,6 @@ class Address < UserBase
   before_save :handle_country
   after_save :handle_primary_status
 
-  def human_name
-    'Address'
-  end
 
   def data
     self.street

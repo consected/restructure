@@ -1,6 +1,6 @@
 <div class="data-results">
-  <div data-result="admin-edit-form-"  class="admin-edit-form">    
-<%= form_for(object_instance, url: (object_instance.id ? admin_external_link_path(object_instance) : admin_external_links_path ), class: "inline-form", remote: true) do |f| %>
+  <div data-result="admin-edit-form-"  class="admin-edit-form">
+<%= form_for(object_instance,  class: "inline-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
   <div class="form-group">
     <%= f.label :name %>
@@ -8,7 +8,7 @@
       <p class="help-block">&nbsp;</p>
   </div>
   <div class="form-group">
-    <%= f.label :value %>      
+    <%= f.label :value %>
     <%= f.text_field :value, style: 'width:300px;' %>
     <p class="help-block">Enter field names to be substituted like this: {{field_name}}</p>
   </div>

@@ -2,7 +2,7 @@ module AddressSupport
   include MasterSupport
 
   def get_a_rank
-    res = GeneralSelection.where(item_type: 'player_addresses_rank').enabled.all
+    res = Classification::GeneralSelection.where(item_type: 'player_addresses_rank').enabled.all
     r = res[rand res.length].value
 
     r

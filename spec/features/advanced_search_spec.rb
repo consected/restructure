@@ -104,7 +104,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     dismiss_modal
 
-    protocol = Protocol.selectable.first
+    protocol = Classification::Protocol.selectable.first
 
     within '#advanced_search_master' do
 
@@ -164,7 +164,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
      # Wait for the advance form collapse animation to complete
     expect(page).to have_css '#master-search-advanced-form.in'
 
-    sprot = Protocol.selectable
+    sprot = Classification::Protocol.selectable
 
     expect(sprot.length).to be > 0
 

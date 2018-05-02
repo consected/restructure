@@ -32,8 +32,8 @@ RSpec.describe AddressesController, type: :controller do
     t0 = DateTime.now
     get :show, id: @address.id, master_id: @master.id
 
-    res = UserActionLog.order(id: :desc).limit(1).first
-    expect(res).to be_a UserActionLog
+    res = Admin::UserActionLog.order(id: :desc).limit(1).first
+    expect(res).to be_a Admin::UserActionLog
     expect(res.master_id).to eq @master.id
     expect(res.item_type).to eq 'addresses'
     expect(res.item_id).to eq @address.id

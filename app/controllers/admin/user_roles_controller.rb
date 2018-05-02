@@ -6,7 +6,7 @@ class Admin::UserRolesController < AdminController
 
   def filters
     res = {
-      app_type_id: AppType.all_by_name,
+      app_type_id: Admin::AppType.all_by_name,
       role_name: UserRole.active.role_names,
       user_id: UserRole.active.users.pluck(:id, :email).to_h
     }

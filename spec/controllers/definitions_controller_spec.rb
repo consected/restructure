@@ -26,7 +26,7 @@ describe DefinitionsController, type: :controller do
       expect(response).to have_http_status(:success)
       j = JSON.parse(response.body)
       expect(j).to be_a Array
-      expect(j.length).to eq ProtocolEvent.enabled.length      
+      expect(j.length).to eq Classification::ProtocolEvent.enabled.length      
     end
     
     it "should not get an unexpected item" do

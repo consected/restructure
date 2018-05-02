@@ -79,7 +79,7 @@ RSpec.describe Address, type: :model do
 
     it "validates correct source" do
 
-      gs = GeneralSelection.where(item_type: 'addresses_source').where('disabled is null OR disabled = true')
+      gs = Classification::GeneralSelection.where(item_type: 'addresses_source').where('disabled is null OR disabled = true')
 
       expect(gs.length).to be > 0
       expect(gs.first.value).to_not be_nil

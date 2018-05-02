@@ -1,6 +1,5 @@
-class TrackerHistoriesController < ApplicationController
+class TrackerHistoriesController < UserBaseController
 
-  before_action :authenticate_user!
   before_action :set_parent_item
 
   def index

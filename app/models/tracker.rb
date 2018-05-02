@@ -131,12 +131,12 @@ class Tracker < UserBase
 
     if added_flags.length > 0
       cp << "added  flags: "
-      added_flags.each {|k| cp << "#{ItemFlagName.find(k).name}; " }
+      added_flags.each {|k| cp << "#{Admin::ItemFlagName.find(k).name}; " }
     end
 
     if removed_flags.length > 0
       cp << "removed flags: "
-      removed_flags.each {|k| cp << "#{ItemFlagName.find(k).name}; " }
+      removed_flags.each {|k| cp << "#{Admin::ItemFlagName.find(k).name}; " }
     end
 
     # If there were no changes, discard this item. Otherwise, save it.
@@ -167,13 +167,13 @@ class Tracker < UserBase
   def self.add_record_update_entries name, admin, update_type='record'
 
     begin
-      protocol = Protocol.updates.first
+      protocol = Classification::Protocol.updates.first
       sp = protocol.sub_processes.find_by_name("#{update_type} updates")
       values = []
 
       name = name.humanize.downcase
     rescue => e
-      logger.error "Error finding protocol or sub process for tracker record update. Protocols #{Protocol.count}"
+      logger.error "Error finding protocol or sub process for tracker record update. Protocols #{Classification::Protocol.count}"
       raise e
     end
 
@@ -209,7 +209,7 @@ class Tracker < UserBase
   def set_record_updates_sub_process type
 
     self.sub_process = Rails.cache.fetch "record_updates_sub_process_#{type}" do
-      Protocol.record_updates_protocol.sub_processes.where(name: "#{type} updates").first
+      Classification::Protocol.record_updates_protocol.sub_processes.where(name: "#{type} updates").first
     end
 
     raise "Bad sub_process for tracker (#{type})" unless self.sub_process
@@ -218,8 +218,8 @@ class Tracker < UserBase
 
   def self.get_or_create_record_updates_tracker record
 
-    t = record.master.trackers.where(protocol_id: Protocol.record_updates_protocol).first
-    t ||= record.master.trackers.new protocol: Protocol.record_updates_protocol
+    t = record.master.trackers.where(protocol_id: Classification::Protocol.record_updates_protocol).first
+    t ||= record.master.trackers.new protocol: Classification::Protocol.record_updates_protocol
     t
 
   end

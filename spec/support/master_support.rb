@@ -11,14 +11,14 @@ module MasterSupport
     return if @path_prefix == "/admin"
     resource_name ||= objects_symbol
 
-    uac = UserAccessControl.where(app_type: @user.app_type, resource_type: resource_type, resource_name: resource_name).first
+    uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: resource_type, resource_name: resource_name).first
     if uac
       uac.access = :create
       uac.disabled = false
       uac.current_admin = auto_admin
       uac.save
     else
-      UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: resource_type, resource_name: resource_name, current_admin: auto_admin
+      Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: resource_type, resource_name: resource_name, current_admin: auto_admin
     end
 
   rescue => e
@@ -57,9 +57,9 @@ module MasterSupport
 
   def create_sources
 
-    if GeneralSelection.where(item_type: 'addresses_source').length == 0
-      GeneralSelection.create! item_type: 'addresses_source', name: 'NFL', value: 'nfl', current_admin: auto_admin
-      GeneralSelection.create! item_type: 'addresses_source', name: 'NFLPA', value: 'nflpa', current_admin: auto_admin
+    if Classification::GeneralSelection.where(item_type: 'addresses_source').length == 0
+      Classification::GeneralSelection.create! item_type: 'addresses_source', name: 'NFL', value: 'nfl', current_admin: auto_admin
+      Classification::GeneralSelection.create! item_type: 'addresses_source', name: 'NFLPA', value: 'nflpa', current_admin: auto_admin
 
     end
   end
@@ -72,7 +72,7 @@ module MasterSupport
   def create_master user=nil, att=nil
     user ||= @user || create_user
 
-    user.app_type ||= AppType.active.first
+    user.app_type ||= Admin::AppType.active.first
 
     att ||= { msid: rand(10000000), pro_id: rand(1000000) }
 

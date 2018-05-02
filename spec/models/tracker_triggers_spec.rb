@@ -17,8 +17,8 @@ RSpec.describe Tracker, type: :model do
     
     create_user
     create_admin
-    @p1 = Protocol.create name: 'P1-trig', current_admin: @admin
-    @p2 = Protocol.create name: 'P2-trig', current_admin: @admin
+    @p1 = Classification::Protocol.create name: 'P1-trig', current_admin: @admin
+    @p2 = Classification::Protocol.create name: 'P2-trig', current_admin: @admin
     
     @sp1_1 = @p1.sub_processes.create name: 'SP1-trig', current_admin: @admin
     @sp1_2 = @p1.sub_processes.create name: 'SP12-trig', current_admin: @admin

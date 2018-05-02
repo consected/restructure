@@ -1,4 +1,4 @@
-class TrackersController < ApplicationController
+class TrackersController < UserBaseController
   include MasterHandler
 
   before_action :merge_entry_if_exists, only: [:create]

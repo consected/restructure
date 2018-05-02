@@ -6,8 +6,8 @@ class Admin::UserAccessControlsController < AdminController
 
     def filters
       {
-        resource_name: UserAccessControl.resource_names_by_type,
-        app_type_id: AppType.all_by_name,
+        resource_name: Admin::UserAccessControl.resource_names_by_type,
+        app_type_id: Admin::AppType.all_by_name,
         user_id: User.active.pluck(:id, :email).to_h
       }
     end

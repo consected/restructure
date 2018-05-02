@@ -3,7 +3,7 @@ module Seeds
 
     def self.create_tracker_updates
       Rails.logger.info  "Seeding tracker updates"
-      protocol = Protocol.active.find_or_initialize_by(name: 'Updates')
+      protocol = Classification::Protocol.active.find_or_initialize_by(name: 'Updates')
       protocol.update(current_admin: auto_admin) unless protocol.admin
 
       fu = protocol.sub_processes.find_or_initialize_by(name: 'flag updates')
@@ -31,14 +31,14 @@ module Seeds
       end
 
 
-      Rails.logger.info  "Updates > Protocol events = #{sub_process.protocol_events.collect {|k| k.name }.join(",") }"
-      Rails.logger.info  "Flag Updates > Protocol events = #{fu.protocol_events.collect {|k| k.name }.join(",") }"
+      Rails.logger.info  "Updates > Classification::Protocol events = #{sub_process.protocol_events.collect {|k| k.name }.join(",") }"
+      Rails.logger.info  "Flag Updates > Classification::Protocol events = #{fu.protocol_events.collect {|k| k.name }.join(",") }"
     end
 
 
     def self.setup
       log "In #{self}.setup"
-      if Rails.env.test? || Protocol.active.count == 0
+      if Rails.env.test? || Classification::Protocol.active.count == 0
         create_tracker_updates
         log "Ran #{self}.setup"
       else

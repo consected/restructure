@@ -1,7 +1,7 @@
 <script id="external-links-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <div class="row">
     <div class="col-sm-24">
-      <% ExternalLink.selector_name_value_pair_no_downcase.each do |s|%>
+      <% Admin::ExternalLink.selector_name_value_pair_no_downcase.each do |s|%>
         <%= link_to "#{s.first}", s.last, target: s.first.ns_underscore, class: "open-in-new-window", title: "opens in a new window" %>
       <% end %>
     </div>

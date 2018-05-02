@@ -10,7 +10,7 @@ describe "simple search reports", js: true, driver: :app_firefox_driver do
     @admin, _ = create_admin
 
     seed_database
-    gs = GeneralSelection.all
+    gs = Classification::GeneralSelection.all
     gs.each {|g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save!}
 
     create_data_set
@@ -18,8 +18,8 @@ describe "simple search reports", js: true, driver: :app_firefox_driver do
     @user, @good_password  = create_user
     @good_email  = @user.email
 
-    UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
-    UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :export_csv, current_admin: @admin, user: @user    
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :export_csv, current_admin: @admin, user: @user    
 
     expect(@user.can?(:create_master)).to be_truthy
     expect(@user.can?(:export_csv)).to be_truthy

@@ -8,7 +8,7 @@ module ProtocolEventSupport
     
     (1..5).each do |l|
       res << {
-        name: "Protocol Event #{l}",
+        name: "Classification::Protocol Event #{l}",
         
         disabled: false,
         
@@ -17,7 +17,7 @@ module ProtocolEventSupport
     end
     (1..5).each do |l|
       res << {
-        name: "Dis Protocol Event #{l}",
+        name: "Dis Classification::Protocol Event #{l}",
         
         disabled: true,
         

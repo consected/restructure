@@ -7,9 +7,9 @@ class User < ActiveRecord::Base
 
   belongs_to :admin
 
-  has_many :user_access_controls, autosave: true
+  has_many :user_access_controls, autosave: true, class_name: "Admin::UserAccessControl"
 
-  belongs_to :app_type
+  belongs_to :app_type, class_name: "Admin::AppType"
 
   default_scope -> {order email: :asc}
 
@@ -33,7 +33,7 @@ class User < ActiveRecord::Base
   end
 
   def timeout_in
-    ust = AppConfiguration.value_for(:user_session_timeout)
+    ust = Admin::AppConfiguration.value_for(:user_session_timeout)
     if ust.blank?
        Settings::UserTimeout
     else
@@ -61,7 +61,7 @@ class User < ActiveRecord::Base
   end
 
   def has_access_to? perform, resource_type, named, with_options=nil, alt_app_type_id: nil
-    UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
+    Admin::UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
   end
 
   def to_s
@@ -100,7 +100,7 @@ class User < ActiveRecord::Base
 
       # Do not create all the permission
       # if !persisted? || self.user_access_controls.length == 0
-      #   UserAccessControl.create_all_for self, current_admin
+      #   Admin::UserAccessControl.create_all_for self, current_admin
       #   return true
       # end
 
@@ -114,7 +114,7 @@ class User < ActiveRecord::Base
     # Ensure that the app type being set for the user is valid and accessible to him
     def set_app_type
       if app_type_id
-        unless app_type in? AppType.all_available_to(self)
+        unless app_type in? Admin::AppType.all_available_to(self)
           self.app_type_id = nil
         end
       end

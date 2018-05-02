@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe SubProcess do
+describe Classification::SubProcess do
 
   include ModelSupport
   include SubProcessSupport
@@ -10,10 +10,10 @@ describe SubProcess do
       create_user
       create_admin
       create_master
-      @protocol = Protocol.create! name: "QA#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
+      @protocol = Classification::Protocol.create! name: "QA#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
       create_items :list_valid_attribs
 
-      @protocol = Protocol.create! name: "QB#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
+      @protocol = Classification::Protocol.create! name: "QB#{rand 1000}", position: rand(10000), disabled: false, current_admin: @admin
       create_items :list_valid_attribs
     end
 
@@ -22,14 +22,14 @@ describe SubProcess do
 
       expect(@created_count).to eq @list.length
 
-      SubProcess.all.each do |p|
+      Classification::SubProcess.all.each do |p|
 
         p.current_admin = @admin
         p.save!
       end
 
       prev_pos = (DateTime.now + 1.year)
-      SubProcess.all.each do |p|
+      Classification::SubProcess.all.each do |p|
         if p.updated_at
           expect(p.updated_at).to be <= prev_pos
           prev_pos = p.updated_at
@@ -41,14 +41,14 @@ describe SubProcess do
     end
 
     it "can return active items only" do
-      pa = SubProcess.active
+      pa = Classification::SubProcess.active
       expect(pa.length).to be > 0
       res = pa.select {|p| p.disabled }
       expect(res.length).to eq 0
     end
 
     it "can only have name updated by an admin" do
-      pa = SubProcess.active.first
+      pa = Classification::SubProcess.active.first
       pa.name = "new name by me"
 
       expect(pa.save).to be false
@@ -63,7 +63,7 @@ describe SubProcess do
     it "belongs to a protocol" do
       pa = @protocol.sub_processes.active
 
-      expect(pa.length).to be < SubProcess.all.length
+      expect(pa.length).to be < Classification::SubProcess.all.length
 
 
 

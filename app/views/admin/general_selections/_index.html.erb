@@ -1,9 +1,9 @@
 <div class="data-results" data-subscription="admin-list" >
-  <div data-result="admin-list">    
+  <div data-result="admin-list">
 <h1>General Selections</h1>
 
 <p>
-    <%= show_filters %>    
+    <%= show_filters %>
 </p>
 
 
@@ -15,42 +15,42 @@
       <th class="no-sort"></th>
       <th>Name</th>
       <th>Value</th>
-      <th>Item type</th>      
+      <th>Item type</th>
       <th>Disabled</th>
       <th>Create</th>
       <th>Lock</th>
       <th>Edit - if set</th>
       <th>Edit - always</th>
       <th>Admin</th>
-      
+
     </tr>
   </thead>
 
   <tbody>
-    <% @general_selections.each do |list_item| %>
+    <% objects_instance.each do |list_item| %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td><%= admin_edit_btn list_item.id%> </td>
         <td style="white-space: nowrap;"><%= list_item.name %></td>
         <td><%= list_item.value %></td>
         <td><%= list_item.item_type %></td>
-        
-        <td><%= list_item.disabled ? 'disabled' : ''%></td>       
-        <td><%= list_item.create_with ? 'create' : ''%></td>       
-        <td><%= list_item.lock ? 'lock' : ''%></td>       
-        <td><%= list_item.edit_if_set ? 'edit (if set)' : ''%></td>       
-        <td><%= list_item.edit_always ? 'edit (always)' : ''%></td>       
+
+        <td><%= list_item.disabled ? 'disabled' : ''%></td>
+        <td><%= list_item.create_with ? 'create' : ''%></td>
+        <td><%= list_item.lock ? 'lock' : ''%></td>
+        <td><%= list_item.edit_if_set ? 'edit (if set)' : ''%></td>
+        <td><%= list_item.edit_always ? 'edit (always)' : ''%></td>
         <td><%= list_item.admin_name %></td>
       </tr>
       <% unless list_item.description.blank? %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> protocol-event-description">
           <td colspan="2"></td>
-          <td colspan="8">              
+          <td colspan="8">
             <pre><%= list_item.description %></pre>
           </td>
-          
+
       </tr>
       <% end %>
-      
+
     <% end %>
   </tbody>
 </table>

@@ -20,7 +20,7 @@
   </thead>
 
   <tbody>
-    <% @app_configurations.each do |list_item| %>
+    <% objects_instance.each do |list_item| %>
       <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
         <td><%= admin_edit_btn list_item.id%> </td>
         <td><%= list_item.app_type.name %></td>

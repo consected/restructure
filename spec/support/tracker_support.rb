@@ -13,7 +13,7 @@ module TrackerSupport
     day = 0
     
     (1..5).each do |l|
-      protocol = Protocol.create! name: "Prot #{rand 100000}", current_admin: @admin
+      protocol = Classification::Protocol.create! name: "Prot #{rand 100000}", current_admin: @admin
       (1..3).each do |s|
         sp = protocol.sub_processes.create! name: "SP #{rand 100000}", disabled: false, current_admin: @admin      
         
@@ -54,7 +54,7 @@ module TrackerSupport
   
   def list_invalid_attribs
     
-    protocol = Protocol.create! name: "Prot #{rand 100000}", current_admin: @admin
+    protocol = Classification::Protocol.create! name: "Prot #{rand 100000}", current_admin: @admin
     sp = protocol.sub_processes.create! name: "SP #{rand 100000}", disabled: false, current_admin: @admin   
     ev = sp.protocol_events.create! name: "EV #{rand 100000}", current_admin: @admin      
     

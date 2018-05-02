@@ -6,8 +6,8 @@ RSpec.describe Tracker, type: :model do
     
     create_user
     create_admin
-    @p1 = Protocol.create name: 'P1', current_admin: @admin
-    @p2 = Protocol.create name: 'P2', current_admin: @admin
+    @p1 = Classification::Protocol.create name: 'P1', current_admin: @admin
+    @p2 = Classification::Protocol.create name: 'P2', current_admin: @admin
     
     @sp1_1 = @p1.sub_processes.create name: 'SP1', current_admin: @admin
     @sp1_2 = @p1.sub_processes.create name: 'SP12', current_admin: @admin
@@ -57,7 +57,7 @@ RSpec.describe Tracker, type: :model do
     # Create an event to test with
     ev = @tracker.sub_process.protocol_events.create! name: "event 1", current_admin: @admin
     
-    expect(ev).to be_a ProtocolEvent
+    expect(ev).to be_a Classification::ProtocolEvent
     expect(ev).to be_persisted
     
     t2.protocol_event_id = ev.id

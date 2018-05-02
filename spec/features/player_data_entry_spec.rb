@@ -10,12 +10,12 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     @admin, _ = create_admin
 
     seed_database
-    gs = GeneralSelection.all
+    gs = Classification::GeneralSelection.all
     gs.each {|g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save!}
 
     # Clean up the general selection list to only allow one phone, email etc
     gslist = []
-    GeneralSelection.enabled.where(item_type: 'player_contacts_type').each do |gs|
+    Classification::GeneralSelection.enabled.where(item_type: 'player_contacts_type').each do |gs|
       gs.current_admin = @admin
       gs.disable! if gslist.include? gs.value
       gslist << gs.value
@@ -26,18 +26,18 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     @user, @good_password  = create_user
     @good_email  = @user.email
 
-    UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
 
     expect(@user.can?(:create_master)).to be_truthy
 
-    ac = AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
+    ac = Admin::AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
 
     if ac
       ac.value = 'player_info'
       ac.current_admin = @admin
       ac.save!
     else
-      AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
+      Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
     end
 
 
@@ -330,7 +330,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     expect(page).to have_css("form.edit_player_info")
 
     item_type = 'player_infos_source'
-    sources = GeneralSelection.where(item_type: item_type)
+    sources = Classification::GeneralSelection.where(item_type: item_type)
 
     edit_player_info 'Robert', 'Andrew-Yamel', nil, nil, sources.first.name
 

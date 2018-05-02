@@ -1,7 +1,7 @@
-class MastersController < ApplicationController
+class MastersController < UserBaseController
 
   before_action :init_vars
-  before_action :authenticate_user!
+  
   before_action :authorized?, only: [:new, :create]
 
   include MasterSearch

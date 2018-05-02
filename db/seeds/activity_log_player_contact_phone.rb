@@ -3,7 +3,7 @@ module Seeds
 
     def self.add_values values, item_type
       values.each do |v|
-        res = GeneralSelection.find_or_initialize_by( v.merge(item_type: item_type))
+        res = Classification::GeneralSelection.find_or_initialize_by( v.merge(item_type: item_type))
         res.update(current_admin: auto_admin) unless res.admin
       end
     end
@@ -29,7 +29,7 @@ module Seeds
       ]
 
       add_values values, item_type
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
 
 
       item_type = "activity_log__player_contact_phone_select_next_step"
@@ -40,7 +40,7 @@ module Seeds
         {name: "More Info Requested", value: "more info requested", create_with: true, lock: true}
       ]
       add_values values, item_type
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
 
       item_type = "activity_log__player_contact_phone_select_result"
       values = [
@@ -50,7 +50,7 @@ module Seeds
         {name: "Bad Number", value: "bad number", create_with: true, lock: true}
       ]
       add_values values, item_type
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
 
 
       item_type = "activity_log__player_contact_phone_select_who"
@@ -58,14 +58,14 @@ module Seeds
         {name: "User", value: "user", create_with: true, lock: true}
       ]
       add_values values, item_type
-      Rails.logger.info "#{self.name} for #{item_type} = #{GeneralSelection.where(item_type: item_type).length}"
+      Rails.logger.info "#{self.name} for #{item_type} = #{Classification::GeneralSelection.where(item_type: item_type).length}"
 
     end
 
     def self.setup
       log "In #{self}.setup"
 
-      if Rails.env.test? || GeneralSelection.where(item_type: "activity_log__player_contact_phone_select_call_direction").length == 0
+      if Rails.env.test? || Classification::GeneralSelection.where(item_type: "activity_log__player_contact_phone_select_call_direction").length == 0
         create_phone_log_general_selections
       end
 

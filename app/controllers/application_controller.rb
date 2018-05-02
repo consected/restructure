@@ -44,7 +44,7 @@ protected
     def setup_current_app_type
       return unless current_user
 
-      all_apps = AppType.all_available_to(@current_user)
+      all_apps = Admin::AppType.all_available_to(@current_user)
 
       # If the current user does not have any app types available, logout and flash a message
       if all_apps.length == 0

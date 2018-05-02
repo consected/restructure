@@ -5,7 +5,7 @@ RSpec.describe Admin::CollegesController, type: :controller do
   include CollegeSupport
   
   def object_class
-    College
+    Classification::College
   end
   
   def item
@@ -14,7 +14,7 @@ RSpec.describe Admin::CollegesController, type: :controller do
   
   before(:all) do
     @path_prefix = "/admin"
-    College.connection.execute "
+    Classification::College.connection.execute "
       delete from college_history;
       delete from colleges;
     "

@@ -7,7 +7,7 @@ module GeneralSelectionsHelper
   def general_selection type, options={}
     type = type.to_sym if type.is_a? String
 
-    unless options[:use_like] || GeneralSelection.item_types.include?(type)
+    unless options[:use_like] || Classification::GeneralSelection.item_types.include?(type)
       return nil if options[:quiet_fail]
       raise "Item type not recognized: #{type}"
     end
@@ -19,7 +19,7 @@ module GeneralSelectionsHelper
     end
 
     attr = [:name, :value, :create_with, :edit_if_set, :edit_always, :lock, :description]
-    res_attr = GeneralSelection.selector_attributes(attr, cond)
+    res_attr = Classification::GeneralSelection.selector_attributes(attr, cond)
 
     if @id
       # Get results to check if the item is set to lock, and the value is set

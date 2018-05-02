@@ -3,19 +3,19 @@ require 'rails_helper'
 RSpec.describe Admin::ItemFlagNamesController, type: :controller do
 
   include ItemFlagNameSupport
-  
+
   def object_class
-    ItemFlagName
+    Admin::ItemFlagName
   end
   def item
     @item_flag_name
   end
-  
-  before(:all) do    
+
+  before(:all) do
     seed_database
     @path_prefix = "/admin"
-  end  
-  
+  end
+
   it_behaves_like 'a standard admin controller'
-  
+
 end

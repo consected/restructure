@@ -4,7 +4,7 @@ class Admin::GeneralSelectionsController < AdminController
   protected
 
     def filters
-      { item_type: GeneralSelection.item_types.map {|g| [g,g]}.to_h }
+      { item_type: Classification::GeneralSelection.item_types.map {|g| [g,g]}.to_h }
     end
 
     def filters_on

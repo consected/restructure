@@ -29,7 +29,7 @@ module SpecSetup
     setup_access :player_contacts
 
     # Ensure the table can be accessed
-    uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :table, resource_name: :activity_log__player_contact_phones
+    uacs = Admin::UserAccessControl.where app_type: @user.app_type, resource_type: :table, resource_name: :activity_log__player_contact_phones
     uac = uacs.first
     if uac
       uac.access = :create
@@ -37,13 +37,13 @@ module SpecSetup
       uac.current_admin = @admin
       uac.save!
     else
-      uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :table, resource_name: :activity_log__player_contact_phones, current_admin: @admin
+      uac = Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :table, resource_name: :activity_log__player_contact_phones, current_admin: @admin
     end
 
     # Ensure the steps can be accessed
     ['primary', 'blank_log'].each do |s|
       rn = (ActivityLog.enabled.first.extra_log_type_configs.select{|a| a.name == s}.first).resource_name
-      uacs = UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
+      uacs = Admin::UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
       uac = uacs.first
       if uac
         # uac.access = :create
@@ -51,7 +51,7 @@ module SpecSetup
         # uac.current_admin = @admin
         # uac.save!
       else
-        uac = UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
+        uac = Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
       end
     end
 
@@ -71,7 +71,7 @@ module SpecSetup
     @test_player_infos = PlayerInfo.all[-20..-1]
     @test_player_infos.each do |p|
       m = p.master
-      # pr = Protocol.active.where(name: 'Study').first
+      # pr = Classification::Protocol.active.where(name: 'Study').first
       # sp = pr.sub_processes.active.where(name: 'Alerts').first
       # pe = sp.protocol_events.active.where(name: 'Level 1').first
       #

@@ -12,7 +12,7 @@ RSpec.describe "Performance", type: :model do
   def create_trackers_for master, num=NumTrackerItems
     @trackers = []
     (1..NumProtocols).each do |i|
-      p1 = Protocol.active.where(name: "PerfP1 #{i}").first
+      p1 = Classification::Protocol.active.where(name: "PerfP1 #{i}").first
       sp1_1 = p1.sub_processes.active.where(name: "SP1 #{i}").first
       pe1 = sp1_1.protocol_events.first
       num.times do
@@ -22,7 +22,7 @@ RSpec.describe "Performance", type: :model do
   end
 
   def create_trackers_for_all_types_for master
-     Protocol.active.each do |p|
+     Classification::Protocol.active.each do |p|
        p.sub_processes.active.each do |sp|
          active_sp = sp.protocol_events.active
          if active_sp.length > 0
@@ -44,8 +44,8 @@ RSpec.describe "Performance", type: :model do
     @masters = []
 
     (1..NumProtocols).each do |i|
-      @p1 = Protocol.create name: "PerfP1 #{i}", current_admin: @admin
-      @p2 = Protocol.create name: "PerfP2 #{i}", current_admin: @admin
+      @p1 = Classification::Protocol.create name: "PerfP1 #{i}", current_admin: @admin
+      @p2 = Classification::Protocol.create name: "PerfP2 #{i}", current_admin: @admin
 
       @sp1_1 = @p1.sub_processes.create name: "SP1 #{i}", current_admin: @admin
       @sp1_2 = @p1.sub_processes.create name: "SP12 #{i}", current_admin: @admin

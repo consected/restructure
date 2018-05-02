@@ -21,14 +21,14 @@ module CollegeSupport
     
     (1..5).each do |l|
       res << {
-        name: "College #{l}",        
+        name: "Classification::College #{l}",        
         disabled: false,
         current_admin: admin
       }
     end
     (1..5).each do |l|
       res << {
-        name: "Dis College #{l}",        
+        name: "Dis Classification::College #{l}",        
         disabled: true,
         current_admin: admin
       }
@@ -38,7 +38,7 @@ module CollegeSupport
   
   def list_invalid_attribs
     admin1 = create_admin.first
-    College.create! name: "dup college", current_admin: admin1
+    Classification::College.create! name: "dup college", current_admin: admin1
     admin = create_admin.first
     [
       {
@@ -67,7 +67,7 @@ module CollegeSupport
   end  
   
   def new_attribs
-    prev_college = College.create! name: "ref college", current_admin: create_admin.first
+    prev_college = Classification::College.create! name: "ref college", current_admin: create_admin.first
     @new_attribs = {  
       
       synonym_for_id: prev_college.id      
@@ -82,7 +82,7 @@ module CollegeSupport
     att ||= valid_attribs    
     att[:current_admin] ||= admin  if admin.is_a? Admin
     
-    @college = College.create! att
+    @college = Classification::College.create! att
   end
   
 end

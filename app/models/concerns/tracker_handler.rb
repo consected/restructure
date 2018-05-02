@@ -3,10 +3,9 @@ module TrackerHandler
   extend ActiveSupport::Concern
 
   included do
-    belongs_to :protocol
-    belongs_to :sub_process
-    belongs_to :protocol_event
-
+    belongs_to :protocol, class_name: 'Classification::Protocol'
+    belongs_to :sub_process, class_name: 'Classification::SubProcess'
+    belongs_to :protocol_event, class_name: 'Classification::ProtocolEvent'
 
   end
 

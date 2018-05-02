@@ -28,7 +28,7 @@ class ActivityLog < ActiveRecord::Base
 
   # List of record types across all item types that are valid for use
   def self.all_valid_item_and_rec_types
-    GeneralSelection.selector_collection(['item_type like ?', "%_type"]).map{|i| [i.item_type.sub(/(_rec)?_type$/ ,'').singularize, i.value].join('_')} + self.use_with_class_names
+    Classification::GeneralSelection.selector_collection(['item_type like ?', "%_type"]).map{|i| [i.item_type.sub(/(_rec)?_type$/ ,'').singularize, i.value].join('_')} + self.use_with_class_names
   end
 
 
@@ -186,7 +186,7 @@ class ActivityLog < ActiveRecord::Base
 
 
 
-  # List of item types that can be used to define GeneralSelection drop downs
+  # List of item types that can be used to define Classification::GeneralSelection drop downs
   # This does not represent the actual item types that are valid for selection when defining a new admin activity log record, which
   # is in fact provided by self.use_with_class_names
   def self.item_types
@@ -307,7 +307,7 @@ class ActivityLog < ActiveRecord::Base
 
     Tracker.add_record_update_entries track_name, admin, 'record'
 
-    Protocol.enabled.each do |p|
+    Classification::Protocol.enabled.each do |p|
       logger.info "For protocol: #{p.id} #{p.name}"
 
       # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
