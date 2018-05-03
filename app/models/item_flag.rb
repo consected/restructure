@@ -3,7 +3,7 @@ class ItemFlag < UserBase
   include WorksWithItem
 
   belongs_to :item, polymorphic: true, inverse_of: :item_flags
-  belongs_to :item_flag_name
+  belongs_to :item_flag_name, class_name: 'Classification::ItemFlagName'
   belongs_to :user
 
   before_validation :prevent_item_change,  on: :update
@@ -57,7 +57,7 @@ class ItemFlag < UserBase
   # Get only the list of active class names (based on admin item flag name configurations) that
   # are also genuine class names that ItemFlag reports as working with
   def self.active_class_names
-    Admin::ItemFlagName.active.map(&:item_type).uniq & self.use_with_class_names
+    Classification::ItemFlagName.active.map(&:item_type).uniq & self.use_with_class_names
   end
 
   def self.is_active_for? class_or_class_name

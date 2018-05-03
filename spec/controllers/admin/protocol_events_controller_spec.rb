@@ -129,20 +129,20 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
       it "creates a new item" do
 
         expect {
-          post :create, {object_symbol => valid_attributes}
+          post :create, {object_param_symbol => valid_attributes}
         }.to change(object_class, :count).by(1)
       end
 
       it "assigns a newly created item as @var" do
 
-        post :create, {object_symbol => valid_attributes}
+        post :create, {object_param_symbol => valid_attributes}
         expect(assigns(object_symbol)).to be_a(object_class)
         expect(assigns(object_symbol)).to be_persisted
       end
 
       it "return success" do
 
-        post :create, {object_symbol => valid_attributes}
+        post :create, {object_param_symbol => valid_attributes}
         expect(response).to render_template('_index')
         #redirect_to "/protocols/#{@protocol_id}/sub_processes/#{@sub_process_id}/#{objects_symbol}"
       end
@@ -151,14 +151,14 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
 
-        post :create, {object_symbol => invalid_attributes}
+        post :create, {object_param_symbol => invalid_attributes}
         expect(assigns(object_symbol)).to be_a_new(object_class)
       end
 
       it "re-renders the 'form' template" do
         list_invalid_attributes.each do |inv|
 
-          post :create, {object_symbol => inv}
+          post :create, {object_param_symbol => inv}
           expect(response).to render_template("_form")
         end
       end
@@ -175,7 +175,7 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
 
       it "updates the requested item" do
         create_item
-        put :update, {:id => item_id, object_symbol => new_attributes}
+        put :update, {:id => item_id, object_param_symbol => new_attributes}
         item.reload
         new_attribs_downcase.each do |k, att|
           expect(item.send(k)).to eq att
@@ -184,13 +184,13 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
 
       it "assigns the requested item as @var" do
         create_item
-        put :update, {:id => item_id, object_symbol => new_attributes}
+        put :update, {:id => item_id, object_param_symbol => new_attributes}
         expect(assigns(object_symbol)).to eq item
       end
 
       it "redirects to the index" do
         create_item
-        put :update, {:id => item_id, object_symbol => new_attributes}
+        put :update, {:id => item_id, object_param_symbol => new_attributes}
         expect(flash[:warning]).to_not be_present
         #expect(response).to redirect_to("/protocols/#{@protocol_id}/sub_processes/#{@sub_process_id}/#{objects_symbol}")
         expect(response).to render_template('_index')
@@ -201,14 +201,14 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
       it "assigns the item as @var" do
         create_item
         ia = invalid_update_attributes
-        put :update, {:id => item_id, object_symbol => ia}
+        put :update, {:id => item_id, object_param_symbol => ia}
         expect(flash[:warning]).to be_present, "No error was reported when assigning with invalid params: #{ia}"
         expect(assigns(object_symbol)).to eq(item)
       end
 
       it "re-renders the 'edit' template" do
         create_item
-        put :update, {:id => item_id, object_symbol => invalid_update_attributes}
+        put :update, {:id => item_id, object_param_symbol => invalid_update_attributes}
 
         expect(response).to render_template(edit_form_admin)
       end

@@ -12,7 +12,7 @@ shared_examples 'a standard user model' do
       uacs.each do |u|
         u.access = 'create'
         u.current_admin = @admin
-        u.save!
+        u.save
       end
 
       unless @user.has_access_to? :read, :general, :app_type

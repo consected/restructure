@@ -1,4 +1,4 @@
-class Admin::ItemFlagName < ActiveRecord::Base
+class Classification::ItemFlagName < ActiveRecord::Base
 
   self.table_name = 'item_flag_names'
   include AdminHandler
@@ -35,7 +35,7 @@ class Admin::ItemFlagName < ActiveRecord::Base
   private
 
     def name_and_item_type_unique
-      if !self.persisted? && Admin::ItemFlagName.enabled.where(item_type: self.item_type, name: self.name).length > 0
+      if !self.persisted? && Classification::ItemFlagName.enabled.where(item_type: self.item_type, name: self.name).length > 0
         errors.add :name, "has already been used for this item type"
       end
     end

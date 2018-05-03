@@ -111,7 +111,6 @@ class Master < ActiveRecord::Base
   end
 
   def current_user
-    logger.debug "Getting current user: #{@current_user} from #{self}"
     # Do not get the user association when requesting the current_user, since we
     # do not want the value that has been persisted in the data
     @current_user

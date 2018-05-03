@@ -102,7 +102,7 @@ module ActivityLogHandler
     end
 
     def uses_item_flags? user
-      Admin::ItemFlagName.enabled_for? self.name.ns_underscore, user
+      Classification::ItemFlagName.enabled_for? self.name.ns_underscore, user
     end
 
     def extra_log_type_config_names

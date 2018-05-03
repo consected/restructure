@@ -186,24 +186,9 @@ class ExternalIdentifier < ActiveRecord::Base
 
         end
 
-        a_new_controller = Class.new(ApplicationController) do
-
-            protected
-              # By default the external id edit form is handled through a common template. To provide a customized form, copy the content of
-              # "common_templates/external_id_edit_form.html.erb" to views/<name>/_edit_form.html.erb
-              def edit_form
-                'common_templates/external_id_edit_form'
-              end
+        a_new_controller = Class.new(ExternalIdentifier::ExternalIdentifierController) do
 
             private
-
-              def secure_params
-                res = params.require(self.class.name.singularize.to_sym).permit(:master_id, self.class.external_id_attribute.to_sym)
-                # Extra protection to avoid possible injection of an alternative value
-                # when we should be using a generated ID
-                res[self.class.external_id_attribute.to_sym] = nil if self.class.allow_to_generate_ids
-                res
-              end
 
               def self.external_id_attribute
                 @external_id_attribute

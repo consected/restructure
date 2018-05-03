@@ -56,7 +56,7 @@ module AddressSupport
   def create_item att=nil, master=nil
     att ||= valid_attribs
     master ||= create_master
-    create_sources
+    create_sources 'addresses'
     @address = master.addresses.create! att
   end
 

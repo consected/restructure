@@ -5,10 +5,13 @@ RSpec.describe Admin::ItemFlagNamesController, type: :controller do
   include ItemFlagNameSupport
 
   def object_class
-    Admin::ItemFlagName
+    Classification::ItemFlagName
   end
   def item
     @item_flag_name
+  end
+  def edit_form_admin
+    @edit_form_admin = "admin/common_templates/_form"
   end
 
   before(:all) do

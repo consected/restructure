@@ -89,6 +89,7 @@ module MasterDataSupport
   def create_player_info att=nil, master=nil
     master ||= create_master
     setup_access :player_infos
+    create_sources 'player_infos'
     @player_info = master.player_infos.create! att
   end
   def create_pro_info att=nil, master=nil

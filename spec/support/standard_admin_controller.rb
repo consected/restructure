@@ -87,7 +87,7 @@ shared_examples 'a standard admin controller' do
 
       it "creates a new item" do
         va = valid_attributes
-        os = object_symbol
+        os = object_param_symbol
         expect {
           post :create, {os => va}
         }.to change(object_class, :count).by(1), "#{os} was not created with valid attributes #{va}. "
@@ -95,14 +95,14 @@ shared_examples 'a standard admin controller' do
 
       it "assigns a newly created item as @var" do
 
-        post :create, {object_symbol => valid_attributes}
+        post :create, {object_param_symbol => valid_attributes}
         expect(assigns(object_symbol)).to be_a(object_class)
         expect(assigns(object_symbol)).to be_persisted, "#{object_symbol} was not persisted. #{assigns(object_symbol).errors.to_a.join(" ")}"
       end
 
       it "return success" do
         va = valid_attributes
-        post :create, {object_symbol => va }
+        post :create, {object_param_symbol => va }
         expect(response).to render_template("_index"), "Incorrect response from create #{object_symbol} with #{va} (#{response}). Expected render template _index.  #{assigns(object_symbol).errors.to_a.join("\n")}"
       end
     end
@@ -110,13 +110,13 @@ shared_examples 'a standard admin controller' do
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
 
-        post :create, {object_symbol => invalid_attributes}
+        post :create, {object_param_symbol => invalid_attributes}
         expect(assigns(object_symbol)).to be_a_new(object_class)
       end
 
       it "re-renders the 'form' template" do
         list_invalid_attributes.each do |inv|
-          post :create, {object_symbol => inv}
+          post :create, {object_param_symbol => inv}
           expect(response).to render_template(edit_form_admin)
         end
       end
@@ -133,7 +133,7 @@ shared_examples 'a standard admin controller' do
 
       it "updates the requested item" do
         create_item
-        put :update, {:id => item_id, object_symbol => new_attributes}
+        put :update, {:id => item_id, object_param_symbol => new_attributes}
         item.reload
         new_attribs_downcase.each do |k, att|
 
@@ -143,13 +143,13 @@ shared_examples 'a standard admin controller' do
 
       it "assigns the requested item as @var" do
         create_item
-        put :update, {:id => item_id, object_symbol => new_attributes}
+        put :update, {:id => item_id, object_param_symbol => new_attributes}
         expect(assigns(object_symbol)).to eq item
       end
 
       it "render the index" do
         create_item
-        put :update, {:id => item_id, object_symbol => new_attributes}
+        put :update, {:id => item_id, object_param_symbol => new_attributes}
         expect(flash[:warning]).to_not be_present
         expect(response).to render_template('_index')
       end
@@ -159,14 +159,14 @@ shared_examples 'a standard admin controller' do
       it "assigns the item as @var" do
         create_item
         ia = invalid_update_attributes
-        put :update, {:id => item_id, object_symbol => ia}
+        put :update, {:id => item_id, object_param_symbol => ia}
         expect(flash[:warning]).to be_present, "No error was reported when assigning with invalid params: #{ia}"
         expect(assigns(object_symbol)).to eq(item)
       end
 
       it "re-renders the 'edit' template" do
         create_item
-        put :update, {:id => item_id, object_symbol => invalid_update_attributes}
+        put :update, {:id => item_id, object_param_symbol => invalid_update_attributes}
 
         expect(response).to render_template(edit_form_admin)#, "Rendered incorrect template with invalid_update_attributes: #{invalid_update_attributes.inspect}"
       end

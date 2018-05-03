@@ -1,21 +1,6 @@
-class DynamicModel::DynamicModelsController < ApplicationController
+class DynamicModel::DynamicModelsController < UserBaseController
 
-  # def edit
-  #   not_authorized
-  # end
-  #
-  # def update
-  #   not_authorized
-  # end
-  #
-  # def new
-  #   not_authorized
-  # end
-  #
-  # def create
-  #   not_authorized
-  # end
-
+  
   def destroy
     not_authorized
   end

@@ -29,7 +29,7 @@ module UserHandler
   class_methods do
 
     def uses_item_flags? user
-      Admin::ItemFlagName.enabled_for? self.name.ns_underscore, user
+      Classification::ItemFlagName.enabled_for? self.name.ns_underscore, user
     end
 
     def foreign_key_name

@@ -48,8 +48,8 @@ RSpec.describe ItemFlagsController, type: :controller do
 
     it "assigns all items as @vars" do
       create_items
-      raise "No item flag names specified" unless Admin::ItemFlagName.active.length > 0
-      raise "Tests require player_info to have an item flag name" unless Admin::ItemFlagName.use_with_class_names.include?('player_info')
+      raise "No item flag names specified" unless Classification::ItemFlagName.active.length > 0
+      raise "Tests require player_info to have an item flag name" unless Classification::ItemFlagName.use_with_class_names.include?('player_info')
 
       get :index, {master_id: @player_info.master_id, item_controller: 'player_infos', item_id: @player_info.id}
       expect(assigns(objects_symbol)).to eq([item])

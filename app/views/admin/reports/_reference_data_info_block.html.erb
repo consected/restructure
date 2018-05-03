@@ -82,12 +82,12 @@
     </div>
   <ul id="if-list" style="max-height: 270px; overflow: auto; background-color: white;">
   
-  <% Admin::ItemFlagName.item_types.each do |p| %>
+  <% Classification::ItemFlagName.item_types.each do |p| %>
       <li  id="gs-<%=p%>">
           <a href="#ifblock-<%=p%>" data-toggle="collapse"  class="collapsed" style="color: <%= p ? '#aaa' : 'auto' %>"><%=p %></a>
       </li>      
       <ul id="ifblock-<%=p%>" class="collapse">
-        <% Admin::ItemFlagName.where(item_type: p).each do |i| %>
+        <% Classification::ItemFlagName.where(item_type: p).each do |i| %>
           <li style="color: <%= i.disabled ? '#aaa' : 'auto' %>" data-if-item-type="<%=p%>" id="general_selection-<%=i.id%>"><%=i.id%> - <%=i.name%></li>
         <% end %>
       </ul>

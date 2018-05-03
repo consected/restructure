@@ -1,4 +1,7 @@
 class Admin::UserActionLog < ActiveRecord::Base
+
+  self.table_name = 'user_action_logs'
+
   # belongs_to :user
   # belongs_to :app_type
   # belongs_to :master

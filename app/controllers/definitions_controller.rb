@@ -24,7 +24,7 @@ class DefinitionsController < ApplicationController
     # This protects against insecure requests
     return not_found unless item_selector
 
-    item = @def_class.classify.constantize
+    item = Admin::AdminBase.class_from_name @def_class#.classify.constantize
 
     j = item.send(item_selector, @filter)
 

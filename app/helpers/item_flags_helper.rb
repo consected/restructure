@@ -25,7 +25,7 @@ module ItemFlagsHelper
   def item_flags_array item_type=nil
     item_type ||= @flag_item_type
 
-    Admin::ItemFlagName.selector_collection(item_type: item_type)
+    Classification::ItemFlagName.selector_collection(item_type: item_type)
   end
 
   def flags_selected item=nil

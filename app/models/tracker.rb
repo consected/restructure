@@ -131,12 +131,12 @@ class Tracker < UserBase
 
     if added_flags.length > 0
       cp << "added  flags: "
-      added_flags.each {|k| cp << "#{Admin::ItemFlagName.find(k).name}; " }
+      added_flags.each {|k| cp << "#{Classification::ItemFlagName.find(k).name}; " }
     end
 
     if removed_flags.length > 0
       cp << "removed flags: "
-      removed_flags.each {|k| cp << "#{Admin::ItemFlagName.find(k).name}; " }
+      removed_flags.each {|k| cp << "#{Classification::ItemFlagName.find(k).name}; " }
     end
 
     # If there were no changes, discard this item. Otherwise, save it.

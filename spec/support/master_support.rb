@@ -33,11 +33,19 @@ module MasterSupport
   end
 
   def objects_symbol
-    object_class.to_s.underscore.pluralize.to_sym
+    object_class.to_s.ns_underscore.pluralize.to_sym
   end
 
   def object_symbol
-    object_class.to_s.underscore.to_sym
+    object_class.to_s.ns_underscore.to_sym
+  end
+
+  def objects_short_name
+    object_class.to_s.split('::').underscore.pluralize
+  end
+
+  def custom_edit_form_prefix
+    "/admin/#{objects_short_name.pluralize}"
   end
 
   def item_id
@@ -48,19 +56,22 @@ module MasterSupport
     unless defined? @edit_form_admin
       @edit_form_admin = nil
     end
-    @edit_form_admin || "#{objects_symbol}/_form"
+    @edit_form_admin || "#{edit_form_prefix || custom_edit_form_prefix}/_form"
   end
 
   def edit_form_user
     "#{edit_form_prefix || objects_symbol}/#{edit_form_name || '_edit_form'}"
   end
 
-  def create_sources
-
-    if Classification::GeneralSelection.where(item_type: 'addresses_source').length == 0
-      Classification::GeneralSelection.create! item_type: 'addresses_source', name: 'NFL', value: 'nfl', current_admin: auto_admin
-      Classification::GeneralSelection.create! item_type: 'addresses_source', name: 'NFLPA', value: 'nflpa', current_admin: auto_admin
-
+  def create_sources name
+    i = "#{name}_source"
+    gs = Classification::GeneralSelection.active.where(item_type: i, value: ['nfl', 'nflpa'])
+    if (gs.length) == 0
+      Classification::GeneralSelection.create item_type: i, name: 'NFL', value: 'nfl', current_admin: auto_admin, create_with: true
+      Classification::GeneralSelection.create item_type: i, name: 'NFLPA', value: 'nflpa', current_admin: auto_admin, create_with: true
+    else
+      gs.update_all create_with: true
+      Rails.cache.clear
     end
   end
 
@@ -83,7 +94,7 @@ module MasterSupport
     setup_access
     setup_access :trackers
 
-    create_sources
+
 
     @master_id = master.id
     @master = master

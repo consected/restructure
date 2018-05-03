@@ -8,7 +8,7 @@ class Admin::ItemFlagNamesController < AdminController
 
 
     def filters
-      { item_type: Admin::ItemFlagName.item_types }
+      { item_type: Classification::ItemFlagName.item_types }
     end
 
     def filters_on

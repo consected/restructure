@@ -40,7 +40,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
     res = item_type_name_value_pair record, type
 
     resn = res.select {|l| l.last.to_s == value.to_s}
-    if resn.length == 1
+    if resn.length >= 1
       return resn.first.first
     end
     return

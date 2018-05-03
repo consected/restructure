@@ -104,7 +104,6 @@ class Admin::AppType < Admin::AdminBase
       begin
         cname = self.class.class_from_name name.sub('associated_', '')
       rescue NameError => e
-        byebug
         raise
       end
     else
