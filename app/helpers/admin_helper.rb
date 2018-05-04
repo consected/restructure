@@ -55,50 +55,12 @@ module AdminHelper
         these_filters ={ filters_on => these_filters }
       end
 
-      these_filters[:disabled] = ['true', 'false']
-      fo << :disabled
-
-      fo.each do |filter_on|
-
-        res << "<h4>Filter on: #{filter_on.to_s.humanize}</h4>"
-
-        if filters_on_multiple
-          filter = these_filters[filter_on]
-        else
-          filter = these_filters
-        end
-
-
-        if filter.first && filter.first.last.is_a?(String)
-          all_filters = {all: filter}
-        else
-          all_filters = filter
-        end
-
-        if all_filters.first
-          res << filter_btn('all', filter_on, nil) if all_filters.first.last.is_a?(Symbol)
-          all_filters.each do |title, vals|
-
-            if vals.is_a?( Symbol) || vals.is_a?( String)
-              res << filter_btn(title, filter_on, vals)
-            else
-
-              res << "<div><p>#{title.to_s.humanize}</p>"
-              res << filter_btn('all', filter_on, nil)
-              if vals.is_a? Hash
-                vals.each do |k,v|
-                  res << filter_btn(v, filter_on, k)
-                end
-              else
-                vals.each do |v|
-                  res << filter_btn(v, filter_on, v)
-                end
-              end
-              res << "</div>"
-            end
-          end
-        end
+      if current_admin
+        these_filters[:disabled] = ['disabled', 'enabled']
+        fo << :disabled
       end
+
+      res << render( partial: 'admin_handler/filters', locals: {fo: fo, filters_on_multiple: filters_on_multiple, these_filters: these_filters})
     end
 
     res.html_safe

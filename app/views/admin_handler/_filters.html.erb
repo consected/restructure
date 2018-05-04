@@ -1,0 +1,63 @@
+<div class="panel-group" id="filter-accordion" role="tablist" aria-multiselectable="false">
+<%
+is_first = true
+fo.each do |filter_on|
+
+  if filters_on_multiple
+    filter = these_filters[filter_on]
+  else
+    filter = these_filters
+  end
+
+  if filter.first && filter.first.last.is_a?(String)
+    all_filters = {all: filter}
+  else
+    all_filters = filter
+  end
+
+  if all_filters.first
+%>
+  <%= filter_btn('all', filter_on, nil) if all_filters.first.last.is_a?(Symbol) %>
+<%
+  single_filter_set = all_filters.length > 1
+
+  all_filters.each do |title, vals|
+
+    if vals.is_a?( Symbol) || vals.is_a?( String)
+%>
+      <%= filter_btn(title, filter_on, vals) %>
+<%  else %>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab"  id="heading-<%=filter_on%>-<%=title%>">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#filter-accordion" href="#collapse-<%=filter_on%>-<%=title%>" aria-expanded="<%=is_first%>" aria-controls="collapse-<%=filter_on%>-<%=title%>"><%=filter_on.to_s.humanize%>: <%=title.to_s.humanize%></a>
+      </h4>
+    </div>
+    <div id="collapse-<%=filter_on%>-<%=title%>" class="panel-collapse collapse <%=is_first ? 'in' : ''%>" role="tabpanel" aria-labelledby="heading-<%=filter_on%>-<%=title%>">
+      <div class="panel-body">
+      <%= filter_btn('all', filter_on, nil) %>
+<%
+      if vals.is_a? Hash
+        vals.each do |k,v|
+%>
+        <%= filter_btn(v, filter_on, k) %>
+<%      end
+      else
+        vals.each do |v|
+%>
+       <%= filter_btn(v, filter_on, v) %>
+<%
+        end
+      end
+%>
+      </div>
+    </div>
+  </div>
+<%
+    end
+    is_first = false
+  end
+end
+%>
+<% end %>
+</div>

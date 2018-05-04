@@ -461,4 +461,7 @@
 
 <script>
   _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;
+  <% if full_name.to_s.end_with?('_primary') %>
+  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <%= show_if.to_json.html_safe %>;
+  <% end %>
 </script>

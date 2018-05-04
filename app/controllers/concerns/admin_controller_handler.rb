@@ -13,8 +13,9 @@ module AdminControllerHandler
   end
 
   def index
-    pm = primary_model
-    pm = pm.where filter_params if filter_params
+
+    pm = filtered_primary_model
+
     set_objects_instance pm.index.order(default_index_order)
     response_to_index
 
@@ -202,29 +203,6 @@ module AdminControllerHandler
       instance_variable_get("@#{objects_name}")
     end
 
-    def filter_params
-      return @filter_params if @filter_params
-      has_disabled_field = primary_model.attribute_names.include?('disabled')
-      if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
-        if has_disabled_field
-          params[:filter] = {disabled: 'false'}
-        else
-          return
-        end
-      end
-      fo = filters_on
-      fo << :disabled if has_disabled_field
-      res = params.require(:filter).permit(fo)
-
-      res.reject! {|k,v| v.blank?}
-
-      res.each do |k, v|
-        res[k] = nil if v == 'IS NULL'
-      end
-
-
-      @filter_params = res
-    end
 
 
   private

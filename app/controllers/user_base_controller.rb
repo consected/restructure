@@ -1,7 +1,10 @@
 class UserBaseController < ApplicationController
 
+  include FilterUtils
+
   before_action :authenticate_user!
   helper_method :object_name, :object_instance, :full_object_name
+
 
   protected
     # return the class for the current item

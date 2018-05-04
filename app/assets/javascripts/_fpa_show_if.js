@@ -35,6 +35,7 @@ _fpa.show_if.methods = {
           // generate the class names for the field to be conditionally hidden
           var show_field_class = '.' + form_name.hyphenate() + '-' + field_name;
           var sels = ['.list-group-item.caption-before' + show_field_class,
+                      '.list-group-item.dialog-before' + show_field_class,
                       '.list-group-item.result-field-container' + show_field_class,
                       '.list-group-item.result-notes-container' + show_field_class,
                       '.list-group-item.edit-field-container' + show_field_class];
@@ -45,7 +46,12 @@ _fpa.show_if.methods = {
         }
       }
       if(cond_success) {
+        var prev_vis = els.is(':visible');
         els.show();
+        if(!prev_vis) {
+          var btn = els.find('.in-form-dialog-btn:visible')
+          btn.click();          
+        }
       }
       else {
         els.hide();
