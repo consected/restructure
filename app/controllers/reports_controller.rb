@@ -1,4 +1,4 @@
-class ReportsController < ApplicationController
+class ReportsController < UserBaseController
   include MasterSearch
   before_action :init_vars
   before_action :authenticate_user_or_admin!
@@ -17,7 +17,7 @@ class ReportsController < ApplicationController
     @no_create = true
     @no_masters = true
     pm = Report.enabled.for_user(current_user)
-    pm = pm.where filter_params if filter_params
+    pm = filtered_primary_model(pm)
 
     @reports = pm.order  auto: :desc, report_type: :asc, position: :asc
 
@@ -181,13 +181,6 @@ class ReportsController < ApplicationController
       # Need to update the master_id manually, since it could have been set by a trigger
       res = @report_item.class.find(@report_item.id)
       @report_item.master_id = res.master_id if res.respond_to?(:master_id) && res.master_id
-      # @results = [@report_item]
-      #
-      # @search_attrs = @report_item.attributes.dup
-      #
-      # @results =  @report.run(@search_attrs, show_defaults_if_bad_attributes: true)
-      #
-      # render partial: 'results'
 
       render json: {report_item: @report_item}
     else
@@ -258,20 +251,23 @@ class ReportsController < ApplicationController
     end
 
     def filters_on
-      :item_type
+      [:item_type]
     end
 
     def filters
-      Report.categories.map {|g| [g,g.to_s.humanize]}.to_h
+      {item_type: Report.categories.map {|g| [g,g.to_s.humanize]}.to_h}
     end
 
 
-    def filter_params
-      return nil if params[:filter].blank?
-      params.require(:filter).permit(filters_on)
+    # def filter_params
+    #   params[:filter] ||= filter_defaults
+    #   return nil if params[:filter].blank?
+    #   params.require(:filter).permit(filters_on)
+    # end
+
+    def filter_defaults
+      {item_type: app_config_text(:default_report_tab, nil)}
     end
-
-
 
     def connection
       @connection ||= ActiveRecord::Base.connection
