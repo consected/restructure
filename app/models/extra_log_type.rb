@@ -42,7 +42,20 @@ class ExtraLogType < ExtraOptions
       fields: [
         'field_name_1', 'field_name_2'
       ],
-      references: {}
+      references: {
+        model_name: {
+          from: "this | master",
+          add: "many | one_to_master | one_to_this",
+          filter_by: {
+            field_name: 'value to filter the referenced items by'
+          },
+          view_as: {
+            edit: 'readonly',
+            show: 'readonly'
+          }
+
+        }
+      }
     }
     res.merge(super)
   end
@@ -68,35 +81,6 @@ class ExtraLogType < ExtraOptions
     rescue => e
       raise FphsException.new "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
     end
-  end
-
-  def calc_creatable_if obj
-    return true unless self.creatable_if
-    all_res = Master.select(:id).where(id: obj.master.id)
-    res = true
-
-    self.creatable_if.each do |c_var, c_is_res|
-      c_is = {}
-      c_is_res.each {|c,v| c_is[c.gsub('__', '_').gsub('dynamic_model_', '').to_sym] = v}
-      j = c_is_res.keys.map(&:to_sym)
-      q = all_res.joins(j)
-
-      if c_var == :all
-        res &&= !!q.where(c_is).order(id: :desc).first
-      elsif c_var == :not_any
-
-        c_is.each do |ck, cv|
-          res &&= !q.where(ck => cv).order(id: :desc).first
-          break unless res
-        end
-
-      end
-
-      break unless res
-    end
-
-
-    res
   end
 
 

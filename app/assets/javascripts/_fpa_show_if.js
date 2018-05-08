@@ -50,7 +50,7 @@ _fpa.show_if.methods = {
         els.show();
         if(!prev_vis) {
           var btn = els.find('.in-form-dialog-btn:visible')
-          btn.click();          
+          btn.click();
         }
       }
       else {
@@ -60,49 +60,49 @@ _fpa.show_if.methods = {
   },
 
 
-  show_creatables: function(block, data) {
-    if(!block || !data) return;
-    var item_key = data.item_type;
-    if(!item_key) return;
-
-    var obj = _fpa.show_if.forms[item_key];
-    if(obj) {
-      for(var show_field in obj) {
-        if(obj.hasOwnProperty(show_field)) {
-          _fpa.show_if.methods.show_creatable(block, data, item_key, show_field);
-        }
-      }
-    }
-
-  },
-
-  show_creatable: function(block, data, al_name, type_name) {
-    var obj = _fpa.show_if.forms[al_name];
-    if(obj) {
-      var field_def = obj[type_name];
-      var cond_success = true;
-      for(var cond_field in field_def) {
-        if(field_def.hasOwnProperty(cond_field)) {
-          // Expect field data
-          var exp_field_value = data[cond_field];
-          // to have value
-          var exp_value = field_def[cond_field];
-
-          // generate the class names for the field to be conditionally hidden
-          var show_field_class = '.' + al_name.hyphenate() + '-' + type_name;
-          var sels = ['.action-buttons .add-item-button' + show_field_class];
-          var sel = sels.join(', ');
-          var els = block.find(sel);
-
-          cond_success = cond_success && (exp_field_value == exp_value);
-        }
-      }
-      if(cond_success) {
-        els.show();
-      }
-      else {
-        els.hide();
-      }
-    }
-  }
+  // show_creatables: function(block, data) {
+  //   if(!block || !data) return;
+  //   var item_key = data.item_type;
+  //   if(!item_key) return;
+  //
+  //   var obj = _fpa.show_if.forms[item_key];
+  //   if(obj) {
+  //     for(var show_field in obj) {
+  //       if(obj.hasOwnProperty(show_field)) {
+  //         _fpa.show_if.methods.show_creatable(block, data, item_key, show_field);
+  //       }
+  //     }
+  //   }
+  //
+  // },
+  //
+  // show_creatable: function(block, data, al_name, type_name) {
+  //   var obj = _fpa.show_if.forms[al_name];
+  //   if(obj) {
+  //     var field_def = obj[type_name];
+  //     var cond_success = true;
+  //     for(var cond_field in field_def) {
+  //       if(field_def.hasOwnProperty(cond_field)) {
+  //         // Expect field data
+  //         var exp_field_value = data[cond_field];
+  //         // to have value
+  //         var exp_value = field_def[cond_field];
+  //
+  //         // generate the class names for the field to be conditionally hidden
+  //         var show_field_class = '.' + al_name.hyphenate() + '-' + type_name;
+  //         var sels = ['.action-buttons .add-item-button' + show_field_class];
+  //         var sel = sels.join(', ');
+  //         var els = block.find(sel);
+  //
+  //         cond_success = cond_success && (exp_field_value == exp_value);
+  //       }
+  //     }
+  //     if(cond_success) {
+  //       els.show();
+  //     }
+  //     else {
+  //       els.hide();
+  //     }
+  //   }
+  // }
 };

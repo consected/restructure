@@ -45,6 +45,10 @@ class UserBase < ActiveRecord::Base
     self.allows_current_user_access_to? :edit
   end
 
+  def prevent_edit
+    !can_edit?
+  end
+
   def can_create?
     self.allows_current_user_access_to? :create
   end
@@ -232,7 +236,7 @@ class UserBase < ActiveRecord::Base
   end
 
   def self.default_options
-    
+
   end
 
   protected

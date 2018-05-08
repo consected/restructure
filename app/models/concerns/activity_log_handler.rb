@@ -473,8 +473,11 @@ module ActivityLogHandler
     latest_item = master.send(self.class.assoc_inverse).unscope(:order).order(id: :desc).limit(1).first
 
     res = (self.user_id == master.current_user.id && latest_item.id == self.id)
+    return unless res
 
-    res && super()
+    return unless self.extra_log_type_config.calc_editable_if(self)
+
+    super()
   end
 
   def can_create?

@@ -1,7 +1,7 @@
 class ExtraOptions
 
   def self.base_key_attributes
-    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if]
+    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if]
   end
   def self.add_key_attributes
     []
@@ -50,6 +50,21 @@ class ExtraOptions
         not_any: {
           field_name: 'not conditional value',
           field_name_2: 'AND not conditional value'
+        },
+        not_all: {
+          field_name: 'not this conditional value',
+          field_name_2: 'and this conditional value...'
+        }
+
+      },
+      editable_if: {
+        all: {
+          field_name: 'conditional value',
+          field_name_2: 'AND conditional value'
+        },
+        not_any: {
+          field_name: 'not conditional value',
+          field_name_2: 'AND not conditional value'
         }
       }
     }
@@ -90,6 +105,9 @@ class ExtraOptions
     self.creatable_if ||= {}
     self.creatable_if = self.creatable_if.symbolize_keys
 
+    self.editable_if ||= {}
+    self.editable_if = self.editable_if.symbolize_keys
+
 
     self
   end
@@ -117,6 +135,46 @@ class ExtraOptions
 
     return configs
   end
+
+  def calc_creatable_if obj
+    calc_action_if self.creatable_if, obj
+  end
+
+  def calc_editable_if obj
+    calc_action_if self.editable_if, obj
+  end
+
+  def calc_action_if action_conf, obj
+    return true unless action_conf
+    all_res = Master.select(:id).where(id: obj.master.id)
+    res = true
+
+    action_conf.each do |c_var, c_is_res|
+      c_is = {}
+      c_is_res.each {|c,v| c_is[c.gsub('__', '_').gsub('dynamic_model_', '').to_sym] = v}
+      j = c_is_res.keys.map(&:to_sym)
+      q = all_res.joins(j)
+
+      if c_var == :all
+        res &&= !!q.where(c_is).order(id: :desc).first
+      elsif c_var == :not_all
+        res &&= !q.where(c_is).order(id: :desc).first
+      elsif c_var == :not_any
+
+        c_is.each do |ck, cv|
+          res &&= !q.where(ck => cv).order(id: :desc).first
+          break unless res
+        end
+
+      end
+
+      break unless res
+    end
+
+
+    res
+  end
+
 
   protected
 

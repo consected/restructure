@@ -125,6 +125,7 @@ module GeneralDataConcerns
       extras[:methods] << :referenced_from if respond_to? :referenced_from
 
       extras[:methods] << :creatables if respond_to? :creatables
+      extras[:methods] << :prevent_edit if respond_to? :prevent_edit
 
       extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
       extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?(master_user)
