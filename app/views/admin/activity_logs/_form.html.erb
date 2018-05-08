@@ -59,7 +59,7 @@
       </pre>
     </div>
     <div class="form-group" style="vertical-align: top">
-      <div data-spy="affix" >
+      <div data-spy="affix" class="affixed-admin-edit-btns" >
         <p><%= f.submit class: "btn btn-primary" %></p><p><%= admin_edit_cancel %></p>
       </div>
     </div>
@@ -67,28 +67,3 @@
 <% end %>
   </div>
 </div>
-<script>
-    window.setTimeout(function() {
-      var el = $('#activity_log_extra_log_types');
-      el.click();
-
-      // console.log('clicked');
-      //
-      // var ds = $('[data-spy="affix"]');
-      // var dsp = ds.parent();
-      // var h = el.parent().outerHeight(true);
-      // dsp.height(h);
-      //
-      // var top = dsp.parent().position().top;
-      // var bottom = $('body').outerHeight(true) - h - top;
-      // console.log(h);
-      //
-      // ds.affix({
-      //   offset: {
-      //     top: top,
-      //     bottom: bottom
-      //   }
-      // });
-    }, 300);
-
-</script>

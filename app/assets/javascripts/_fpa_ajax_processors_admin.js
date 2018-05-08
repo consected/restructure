@@ -7,20 +7,25 @@ _fpa.postprocessors_admin = {
             ev.preventDefault();
             block.html('');
         });
-        
+
         if(block.find('.admin-edit-form.admin-report').length === 1){
             _admin.handle_admin_report_config(block);
-        };        
+        };
+
+        window.setTimeout(function() {
+          var el = $('.admin-edit-form textarea');
+          el.click();
+        }, 300);
     },
-    
+
     handle_admin_report_config: function(block){
-        
+
         $('#search_attrs_filter').val('all').attr('disabled', true);
         $('#search_attr_instruction').hide();
-          $('#search_attrs_type').change(function(){              
+          $('#search_attrs_type').change(function(){
             $('#search_attrs_filter').val('all');
 
-            var d = ($(this).val()!=='general_selection');      
+            var d = ($(this).val()!=='general_selection');
             $('#search_attrs_filter').attr('disabled', d);
           });
           $('#search_attrs_add').click(function(ev){
@@ -34,9 +39,9 @@ _fpa.postprocessors_admin = {
             var d = $('#search_attrs_default').val();
             $('#search_attr_ex').html(":"+n);
             $('#search_attr_instruction').show();
-            
-            
-            
+
+
+
             var add = n + ': ';
             {
                 add += '\n  '+ t + ': ';
@@ -49,7 +54,7 @@ _fpa.postprocessors_admin = {
                     add += "\n    multiple: " + m;
                 if(l)
                     add += "\n    label: " + l;
-                
+
                 if(d){
                     if(m === 'single'){
                         d = d.trim();
@@ -60,15 +65,15 @@ _fpa.postprocessors_admin = {
                             d += '\n      - ' + ds[id];
                         }
                     }
-                    
-                    add += "\n    default: " + d; 
+
+                    add += "\n    default: " + d;
                 }
             }
             var v = $('#report_search_attrs').val();
             $('#report_search_attrs').val(v+ "\n" + add);
-            
+
           });
     }
-    
+
 };
 $.extend(_fpa.postprocessors, _fpa.postprocessors_admin);
