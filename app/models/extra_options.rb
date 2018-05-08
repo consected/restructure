@@ -1,12 +1,72 @@
 class ExtraOptions
 
-  attr_accessor :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if
+  def self.base_key_attributes
+    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if]
+  end
+  def self.add_key_attributes
+    []
+  end
+  def self.key_attributes
+    self.base_key_attributes + self.add_key_attributes
+  end
+  def self.editable_attributes
+    self.key_attributes - [:name, :config_obj, :resource_name] + [:label]
+  end
+
+  attr_accessor *self.key_attributes
+
+
+  def self.attr_defs
+    {
+      caption_before: {
+        field_name: "string caption to appear before field",
+        all_fields: "caption to appear before all fields",
+        submit: "caption to appear before submit button"
+      },
+      show_if: {
+        field_name: {
+          depends_on_field_name: 'conditional value'
+        }
+      },
+      view_options: {
+        option_name: 'a value'
+      },
+      save_action: {
+        label: 'button label'
+      },
+      field_options: {
+        include_blank: 'true or false to force a drop down field to include a selectable blank'
+      },
+      dialog_before: {
+        field_name: {name: "message template name", label: "show dialog button label" },
+        all_fields: {name: "message template name", label: "show dialog button label" },
+        submit: {name: "message template name", label: "show dialog button label" }
+      },
+      creatable_if: {
+        all: {
+          field_name: 'conditional value',
+          field_name_2: 'AND conditional value'
+        },
+        not_any: {
+          field_name: 'not conditional value',
+          field_name_2: 'AND not conditional value'
+        }
+      }
+    }
+  end
+
 
   def initialize name, config, config_obj
     @name = name
 
     @config_obj = config_obj
-    config.each {|k, v| self.send("#{k}=", v)}
+    config.each do |k, v|
+      begin
+        self.send("#{k}=", v)
+      rescue NoMethodError => e
+        raise FphsException.new "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
+      end
+    end
 
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name.underscore}"
     self.caption_before ||= {}

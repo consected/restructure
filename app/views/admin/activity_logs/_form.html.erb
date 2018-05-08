@@ -48,13 +48,47 @@
   </div>
   <div>
     <div class="form-group">
-      <%= f.label :extra_log_types %>
+      <%= f.label :extra_log_types %><br>
       <%= f.text_area :extra_log_types %>
     </div>
-  </div>
-  <div class="form-group">
-    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+    <div class="form-group" style="vertical-align: top">
+      <h4>Extra Log Options</h4>
+      <% example = {'extras_log_type_name' => ExtraLogType.attr_defs.deep_stringify_keys} %>
+      <pre style="font-size: 12px">
+<%= example.to_yaml %>
+      </pre>
+    </div>
+    <div class="form-group" style="vertical-align: top">
+      <div data-spy="affix" >
+        <p><%= f.submit class: "btn btn-primary" %></p><p><%= admin_edit_cancel %></p>
+      </div>
+    </div>
   </div>
 <% end %>
   </div>
 </div>
+<script>
+    window.setTimeout(function() {
+      var el = $('#activity_log_extra_log_types');
+      el.click();
+
+      // console.log('clicked');
+      //
+      // var ds = $('[data-spy="affix"]');
+      // var dsp = ds.parent();
+      // var h = el.parent().outerHeight(true);
+      // dsp.height(h);
+      //
+      // var top = dsp.parent().position().top;
+      // var bottom = $('body').outerHeight(true) - h - top;
+      // console.log(h);
+      //
+      // ds.affix({
+      //   offset: {
+      //     top: top,
+      //     bottom: bottom
+      //   }
+      // });
+    }, 300);
+
+</script>

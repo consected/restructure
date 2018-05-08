@@ -72,7 +72,7 @@ class Report < ActiveRecord::Base
       Report.const_get(model_class_name)
     else
       obj_table_name = edit_model.downcase
-      a_new_class = Class.new(ActiveRecord::Base) do
+      a_new_class = Class.new(ReportBase) do
         self.table_name = obj_table_name
       end
       Report.const_set(model_class_name, a_new_class)

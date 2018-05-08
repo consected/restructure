@@ -30,7 +30,22 @@
 
 class ExtraLogType < ExtraOptions
 
-  attr_accessor :label, :fields, :references, :resource_name, :caption_before
+  def self.add_key_attributes
+    [:fields, :references, :label]
+  end
+
+  attr_accessor *self.key_attributes
+
+  def self.attr_defs
+    res = {
+      label: "button label",
+      fields: [
+        'field_name_1', 'field_name_2'
+      ],
+      references: {}
+    }
+    res.merge(super)
+  end
 
   def initialize name, config, parent_activity_log
     super(name, config, parent_activity_log)

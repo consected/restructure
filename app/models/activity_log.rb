@@ -26,6 +26,10 @@ class ActivityLog < ActiveRecord::Base
     'Activity'
   end
 
+  def human_name
+    name
+  end
+
   # List of record types across all item types that are valid for use
   def self.all_valid_item_and_rec_types
     Classification::GeneralSelection.selector_collection(['item_type like ?', "%_type"]).map{|i| [i.item_type.sub(/(_rec)?_type$/ ,'').singularize, i.value].join('_')} + self.use_with_class_names
