@@ -19,10 +19,15 @@ tr.report-auto {
     content: '\e066';
     display: inline-block;
     font-family: 'Glyphicons Halflings';
+    font-size: 80%;
     padding-left:0.4em;
     margin-right: -1.6em;
     }
 
+}
+
+body.reports.show {
+  overflow-x: hidden;
 }
 
 .item-selected {
