@@ -1,0 +1,6 @@
+<%= form.label field_name_sym %>
+<%
+  select_item_type = {}
+  select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first.to_s == field_name   
+%>
+<%= form.select field_name_sym, send("#{field_name_sym}_options"), select_item_type %>

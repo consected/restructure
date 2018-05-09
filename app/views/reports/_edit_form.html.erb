@@ -12,7 +12,7 @@
   <% if object_instance.respond_to?(:id) %>
    <td class="report-el report-el-object-id"><%= object_instance.id %></td>
   <% end %>
-  <% (permitted_params - [:id]).each do |field_name_sym| %>
+  <% (@report.all_edit_fields - [:id]).each do |field_name_sym| %>
 
         <%
           form_object_instance = object_instance
@@ -28,6 +28,8 @@
 
           if form_object_item_type_us.start_with? 'activity_log_'
             general_selection_name = form_object_item_type_us
+          elsif form_object_item_type_us.start_with? 'report_'
+            general_selection_name = "report_#{@report.name.id_underscore}".to_sym
           else
             general_selection_name = form_object_item_type_us.pluralize
           end
@@ -53,9 +55,15 @@
             label_redefined = true
           end
         %>
+        <% if @report.edit_fields.include?(field_name_sym) %>
         <td class="report-el">
           <%= render partial: 'common_templates/edit_form_field', locals: local_vars[:locals] %>
         </td>
+        <% else%>
+        <td class="report-el report-el-disabled">
+          &nbsp;
+        </td>
+        <% end %>
 
 
   <% end %>

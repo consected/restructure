@@ -37,6 +37,18 @@ table.table.report-table {
   margin: 0;
 }
 
+table.import-grid, table.table.report-table {
+
+  tr.report-item-edit td {
+    background-color: rgb(255, 255, 200);
+  }
+
+  tr.report-item-edit td.report-el-disabled {
+    background-color: #eee;
+  }
+}
+
+
 
 table.import-grid, table.table.report-table {
 

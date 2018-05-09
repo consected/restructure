@@ -79,10 +79,16 @@ class Report < ActiveRecord::Base
     end
   end
 
+  def search_reports_fields
+    @search_reports_fields ||= all_edit_fields.select {|s| s.to_s.start_with?('search_reports_') }
+  end
+
+  def all_edit_fields
+    @all_edit_fields ||= edit_field_names.split(/[^a-zA-Z0-9_]/).select {|s| !s.blank?}.collect {|s| s.to_sym}
+  end
+
   def edit_fields
-    res =  edit_field_names.split(/[^a-zA-Z0-9_]/).select {|s| !s.blank?}.collect {|s| s.to_sym}
-    logger.info "Edit fields: #{res.inspect}"
-    res
+    all_edit_fields - search_reports_fields
   end
 
   def report_identifier

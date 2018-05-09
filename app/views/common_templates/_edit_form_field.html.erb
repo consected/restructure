@@ -64,7 +64,15 @@
   end
 
   unless got
-    if Classification::GeneralSelection::BasicItemTypes.include?("#{general_selection_name}_#{field_name_sym}".to_sym)%>
+    if respond_to?("#{field_name}_options") %>
+      <%= render partial: "common_templates/edit_fields/respond_to_options", locals: local_vars[:locals] %>
+    <%
+      got = true
+    end
+  end
+
+  unless got
+    if Classification::GeneralSelection.item_types.include?("#{general_selection_name}_#{field_name_sym}".to_sym)%>
       <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
     <%
       got = true

@@ -12,7 +12,7 @@ _fpa.preprocessors = {
 
         // Mark the block a form was within, to make scrolling more reliable
         if(block.is('form')) {
-          var b = block.parents('.common-template-item, .new-block');
+          var b = block.parents('.common-template-item, .new-block').not('.no-processed-scroll');
           if(b.hasClass('new-block'))
             b = b.parent();
           $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here');

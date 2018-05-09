@@ -1,3 +1,12 @@
+_fpa.preprocessors_reports = {
+  report_edit_form: function(block){
+
+    $('.report-item-edit').find('.report-edit-cancel').click();
+
+  }
+
+};
+
 _fpa.postprocessors_reports = {
 
     reports_form: function(block, data){
@@ -212,3 +221,4 @@ _fpa.postprocessors_reports = {
 
 };
 $.extend(_fpa.postprocessors, _fpa.postprocessors_reports);
+$.extend(_fpa.preprocessors, _fpa.preprocessors_reports);
