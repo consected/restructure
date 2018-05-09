@@ -80,7 +80,7 @@
                <% i = 0 %>
 
                <% @results.fields.each do |field| %>
-               <td data-col-type="<%=field %>" data-col-table="<%=rt[i] %>" class="report-el <%= field == 'id' ? 'report-el-object-id' : '' %>"></td>
+               <td data-col-type="<%=field %>" data-col-table="<%=rt[i] %>" class="report-el-was-from-new report-el <%= field == 'id' ? 'report-el-object-id' : '' %>"></td>
                <%  i += 1 %>
                <% end %>
 
