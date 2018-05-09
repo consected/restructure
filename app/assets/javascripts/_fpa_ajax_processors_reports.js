@@ -54,7 +54,7 @@ _fpa.postprocessors_reports = {
         if(data){
             // Update the search form results count bar manually
             var c = $('.result-count').html();
-            var table_count = $('.count-only [data-col-type="result_count"]');
+            var table_count = $('.count-only [data-col-type="result_count"]').not('.report-el-was-from-new');
             var h;
             if(table_count.length === 1){
                 c = table_count.html();
