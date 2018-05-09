@@ -34,7 +34,7 @@ class ExtraLogType < ExtraOptions
     [:fields, :references, :label]
   end
 
-  attr_accessor *self.key_attributes
+  attr_accessor(*self.key_attributes)
 
   def self.attr_defs
     res = {

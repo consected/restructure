@@ -113,7 +113,9 @@
       <%= form_block_object.send(*form_block) do |form|%>
       <% form_embed = form if @embedded_item && !embedded %>
       <% if @extra_log_type %>
-        <%= form.hidden_field :extra_log_type, value: @extra_log_type_name %>
+        <%= form.hidden_field :extra_log_type, value: @extra_log_type_name, data: {attr_name: 'option_type', option_type: 'extra_log_type', object_name: form_object_item_type_us} %>
+      <% else %>
+        <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us} %>
       <% end %>
       <%= model_reference_fields form %>
 

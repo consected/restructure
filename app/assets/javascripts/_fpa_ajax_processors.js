@@ -73,9 +73,20 @@ _fpa.postprocessors = {
           }
         }
         else if(di) {
-          _fpa.show_if.methods.show_items(block, di);
-
-
+          if(di.length) {
+            for(var i = 0; i < di.length; i++) {
+              if(di[i] && di[i].item_type) {
+                var dii = di[i];
+                var fit = dii.item_type;
+                if(dii.option_type) fit += '_' + dii.option_type;
+                var sub_block = block.find('.common-template-item[data-sub-item="'+fit+'"][data-sub-id="'+dii.id+'"]')
+                _fpa.show_if.methods.show_items(sub_block, dii);
+              }
+            }
+          }
+          else {
+            _fpa.show_if.methods.show_items(block, di);
+          }
         }
 
         // Scroll to block a form was within, rather than some random location that may have been triggered by another ajax event

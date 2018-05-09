@@ -281,9 +281,11 @@
 
 
     Handlebars.registerHelper('local_time', function(stre, options) {
-        if(!stre) return;
+        if(!stre || stre == '' || !stre.length) return;
         if(options && !options.hash) options.hash = {};
-        return new Date(stre.toString()).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
+        var s = stre.toString();
+        console.log(s);
+        return new Date(s).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
     });
 
 

@@ -112,6 +112,8 @@ class UserBase < ActiveRecord::Base
     cn.underscore.humanize.titleize
   end
 
+  def option_type
+  end
 
   def master_user
     return current_user if self.class.no_master_association

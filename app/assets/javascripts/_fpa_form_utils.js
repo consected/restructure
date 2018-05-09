@@ -94,12 +94,23 @@ _fpa.form_utils = {
     data_from_form: function(block) {
       var form_els = block.find('[data-attr-name][data-object-name]');
       var form_data = {};
+      var in_option = null;
       form_els.each(function() {
         var e = $(this);
         var obj_name = e.attr('data-object-name');
         var a_name = e.attr('data-attr-name');
+
+        if(a_name == 'option_type') {
+          in_option = e.val();
+          if(in_option && in_option != '')
+            var full_option_type = obj_name + '_' + in_option;
+          else
+            full_option_type = null;
+        }
+
         if(!form_data[obj_name]) {
           form_data[obj_name] = { item_type: obj_name };
+          form_data[obj_name].full_option_type = full_option_type;
         }
         form_data[obj_name][a_name] = e.val();
       });

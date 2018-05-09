@@ -7,21 +7,24 @@ _fpa.show_if.methods = {
   show_items: function(block, data) {
     if(!block || !data) return;
     var item_key = data.item_type;
+    var form_key = data.full_option_type;
+    if(!form_key && data.option_type) form_key = item_key + '_' + data.option_type;
+    if(!form_key) form_key = item_key;
     if(!item_key) return;
 
-    var obj = _fpa.show_if.forms[item_key];
+    var obj = _fpa.show_if.forms[form_key];
     if(obj) {
       for(var show_field in obj) {
         if(obj.hasOwnProperty(show_field)) {
-          _fpa.show_if.methods.show_item(block, data, item_key, show_field);
+          _fpa.show_if.methods.show_item(block, data, item_key, show_field, form_key);
         }
       }
     }
 
   },
 
-  show_item: function(block, data, form_name, field_name) {
-    var obj = _fpa.show_if.forms[form_name];
+  show_item: function(block, data, form_name, field_name, form_key) {
+    var obj = _fpa.show_if.forms[form_key];
     if(obj) {
       var field_def = obj[field_name];
       var cond_success = true;
@@ -33,12 +36,13 @@ _fpa.show_if.methods = {
           var exp_value = field_def[cond_field];
 
           // generate the class names for the field to be conditionally hidden
-          var show_field_class = '.' + form_name.hyphenate() + '-' + field_name;
+          var show_field_class = '.' + form_key.hyphenate() + '-' + field_name;
+          var show_edit_field_class = '.' + form_name.hyphenate() + '-' + field_name;
           var sels = ['.list-group-item.caption-before' + show_field_class,
                       '.list-group-item.dialog-before' + show_field_class,
                       '.list-group-item.result-field-container' + show_field_class,
                       '.list-group-item.result-notes-container' + show_field_class,
-                      '.list-group-item.edit-field-container' + show_field_class];
+                      '.list-group-item.edit-field-container' + show_edit_field_class];
           var sel = sels.join(', ');
           var els = block.find(sel);
 

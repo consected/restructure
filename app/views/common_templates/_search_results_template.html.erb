@@ -300,7 +300,7 @@
         {{else is @key 'includes' '_no_yes' }}
           <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_no_yes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_time$' }}
-          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong data-orig-value="{{this}}">{{local_time this}}</strong></li>
+          <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{local_time this}}</strong></li>
         {{else is @key 'includes' '_notes' }}
           <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
         {{else is @key 'includes' '_description' }}

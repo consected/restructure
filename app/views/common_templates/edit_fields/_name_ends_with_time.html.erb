@@ -1,2 +1,6 @@
 <%= form.label field_name_sym, t("field_names.#{field_name_sym}", default: field_name.humanize).capitalize %>
-<%= form.text_field field_name_sym, pattern: '\d{1,2}:\d{2} \D\D', data: {attr_name: field_name_sym, object_name: form_object_item_type_us} %>
+<%
+  val = form_object_instance.attributes[field_name]
+  val = val.strftime('%l %M %p') if val.present?
+%>
+<%= form.text_field field_name_sym, value: val  , placeholder: '__:__ am',  pattern: '\d{1,2}:\d{2} \D\D', data: {attr_name: field_name_sym, object_name: form_object_item_type_us} %>

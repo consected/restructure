@@ -13,7 +13,7 @@ class ExtraOptions
     self.key_attributes - [:name, :config_obj, :resource_name] + [:label]
   end
 
-  attr_accessor *self.key_attributes
+  attr_accessor(*self.key_attributes)
 
 
   def self.attr_defs
@@ -78,7 +78,7 @@ class ExtraOptions
     config.each do |k, v|
       begin
         self.send("#{k}=", v)
-      rescue NoMethodError => e
+      rescue NoMethodError
         raise FphsException.new "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
       end
     end
