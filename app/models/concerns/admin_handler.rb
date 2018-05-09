@@ -5,7 +5,8 @@ module AdminHandler
     after_initialize :init_vars_admin_handler
     belongs_to :admin
     scope :active, -> {where "disabled is null or disabled = false"}
-
+    scope :disabled, -> {where "disabled = true"}
+    
     before_validation :ensure_admin_set
     before_create :setup_values
 

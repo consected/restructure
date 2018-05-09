@@ -1,4 +1,4 @@
-class SubProcessesController < ApplicationController
+class SubProcessesController < AdminController
   include AdminControllerHandler
   before_action :set_protocol, only: [:index, :new, :show, :edit]
   before_action :set_protocol_for_edit, only: [:create, :update]
@@ -27,5 +27,5 @@ class SubProcessesController < ApplicationController
     def secure_params
       params.require(:sub_process).permit(:name, :disabled, :protocol_id)
     end
-      
+
 end

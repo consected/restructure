@@ -1,4 +1,4 @@
-class ProtocolsController < ApplicationController
+class ProtocolsController < AdminController
   include AdminControllerHandler
 
 

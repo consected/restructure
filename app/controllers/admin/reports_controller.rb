@@ -15,6 +15,9 @@ class Admin::ReportsController < AdminController
     end
 
   private
+    def secure_params
+      params.require(object_name.to_sym).permit(*permitted_params)
+    end
     def permitted_params
       [:id, :name, :item_type, :primary_table, :sql, :description, :disabled, :report_type, :auto, :searchable, :position, :search_attrs, :edit_model, :edit_field_names, :selection_fields]
     end

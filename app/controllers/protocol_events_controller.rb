@@ -1,4 +1,4 @@
-class ProtocolEventsController < ApplicationController
+class ProtocolEventsController < AdminController
   include AdminControllerHandler
 
   before_action :set_protocol, only: [:index, :new, :show, :edit]

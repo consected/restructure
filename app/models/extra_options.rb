@@ -1,6 +1,6 @@
 class ExtraOptions
 
-  attr_accessor :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action
+  attr_accessor :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if
 
   def initialize name, config, config_obj
     @name = name
