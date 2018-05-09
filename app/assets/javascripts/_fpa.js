@@ -234,6 +234,7 @@ _fpa = {
 
     $(document).on('click', sel,  function(ev){
       // Clear flash notices by clicking an ajax enabled link or form
+      if($(this).attr('disabled')) return;
       if($(this).is(':visible')) {
         _fpa.clear_flash_notices();
       }

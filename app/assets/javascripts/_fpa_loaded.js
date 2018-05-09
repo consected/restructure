@@ -35,6 +35,10 @@ _fpa.loaded.default = function(){
     $('#use_app_type_select').on('change', function(){
       window.location.href = '/masters/search?use_app_type=' + $(this).val()
     });
+
+    $(document).on('click', 'a[disabled], btn[disabled]', function(ev) {
+      ev.preventDefault();
+    });
     // Perform the controller callback only after everything else is in place
     // Otherwise we can break some standard functionality by performing on change type
     // handlers out of order

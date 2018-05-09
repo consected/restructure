@@ -115,6 +115,9 @@ class UserBase < ActiveRecord::Base
   def option_type
   end
 
+  def creatables
+  end
+
   def master_user
     return current_user if self.class.no_master_association
     if respond_to?(:master) && master

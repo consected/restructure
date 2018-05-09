@@ -359,6 +359,7 @@ _fpa.form_utils = {
     setup_data_toggles: function(block){
         if(!block) block = $(document);
         block.find('[data-toggle~="clear"]').not('.attached-datatoggle-clear').on('click', function(){
+            if($(this).attr('disabled')) return;
             var a = $(this).attr('data-target');
             var el = $(a).html('');
             if(el.hasClass('collapse'))
@@ -368,16 +369,19 @@ _fpa.form_utils = {
         }).addClass('attached-datatoggle-clear');
 
         block.find('[data-toggle~="unhide"]').not('.attached-datatoggle-uh').on('click', function(){
+            if($(this).attr('disabled')) return;
             var a = $(this).attr('data-target');
             $(a).removeClass('hidden');
         }).addClass('attached-datatoggle-uh');
 
         block.find('[data-toggle~="uncollapse"]').not('.attached-datatoggle-uncoll').on('click', function(){
+            if($(this).attr('disabled')) return;
             var a = $(this).attr('data-target');
             $(a).collapse('show');
         }).addClass('attached-datatoggle-uncoll');
 
         block.find('a.scroll-to-master').not('.attached-datatoggle-stm').on('click', function(){
+            if($(this).attr('disabled')) return;
             var a;
             if(block.hasClass('panel-collapse'))
                 a = block;
@@ -391,12 +395,14 @@ _fpa.form_utils = {
 
 
         block.find('[data-toggle~="scrollto-target"]').not('.attached-datatoggle-stt').on('click', function(){
+          if($(this).attr('disabled')) return;
           var a = $(this).attr('data-target');
           _fpa.utils.jump_to_linked_item(a);
         }).addClass('attached-datatoggle-stt');
 
 
         block.find('[data-prevent-on-collapse="true"]').not('.attached-prevent-on-collapse').on('click', function(ev){
+          if($(this).attr('disabled')) return;
           if(!$(this).hasClass('collapse')){
             ev.preventDefault();
           }
@@ -405,6 +411,7 @@ _fpa.form_utils = {
 
 
         block.find('[data-toggle~="scrollto-result"], [data-toggle~="scrollto-target"], [data-toggle~="collapse"].scroll-to-expanded, [data-toggle~="uncollapse"].always-scroll-to-expanded ').not('.attached-datatoggle-str').on('click', function(){
+            if($(this).attr('disabled')) return;
             if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed') || $(this).hasClass('no-scroll-on-collapse'))
               return;
 
@@ -452,6 +459,7 @@ _fpa.form_utils = {
         }).addClass('attached-datatoggle-str');
 
         block.find('[data-toggle~="expandable"]').not('.attached-datatoggle-exp').on('click', function(){
+            if($(this).attr('disabled')) return;
             _fpa.form_utils.toggle_expandable($(this));
         }).addClass('attached-datatoggle-exp');
 
@@ -459,11 +467,13 @@ _fpa.form_utils = {
         // _fpa.something(block, data) or _fpa.something.other(block, data)
         // data is produced by parsing the clicked element's data- attributes
         block.find('[data-on-click-call]').not('.attached-toggle_on_click_call').on('click', function(){
+            if($(this).attr('disabled')) return;
             _fpa.form_utils.toggle_on_click_call($(this));
         }).addClass('attached-toggle_on_click_call');
 
 
         block.find('[data-result-callback]').not('.attached-toggle_on_result_callback').on('click', function(){
+            if($(this).attr('disabled')) return;
             var cb = $(this).attr('data-result-callback');
             var cbc = cb.split('.');
             if(cbc[1]) {
@@ -479,10 +489,12 @@ _fpa.form_utils = {
         // comma separate a list of template@domloc to show multiple items for a single click activity
         // data-on-click-show="phone_record-partial@#domid, another-partial@#activity-log2"
         block.find('[data-on-click-show]').not('.attached-toggle_on_click_show').on('click', function(){
+            if($(this).attr('disabled')) return;
             _fpa.form_utils.toggle_on_click_show($(this));
         }).addClass('attached-toggle_on_click_show');
 
         block.find('[data-toggle~="clear-content"]').not('.attached-datatoggle-cc').on('click', function(){
+            if($(this).attr('disabled')) return;
             var a = $(this).attr('data-target');
             _fpa.form_utils.clear_content($(a));
         }).addClass('attached-datatoggle-cc');

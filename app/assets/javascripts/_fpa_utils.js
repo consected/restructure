@@ -28,6 +28,14 @@ _fpa.utils.jump_to_linked_item = function(target) {
   return block;
 };
 
+_fpa.utils.pluralize = function(str) {
+  if(str[str.length - 1] == 'y')
+    str = str.slice(0,-1) + 'ies';
+  else
+    str = str + 's';
+  return str;
+}
+
 _fpa.utils.make_readable_notes_expandable = function(block, max_height, click_callback) {
   if(!max_height) max_height = 40;
 

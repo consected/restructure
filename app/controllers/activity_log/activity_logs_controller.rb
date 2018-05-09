@@ -120,13 +120,16 @@ class ActivityLog::ActivityLogsController < UserBaseController
     def extend_result
       item_id = @item.id if @item
 
+      creatables = @master_objects.build.creatables
+
       extras = {
         al_type: al_type,
         item_type: item_type_us,
         item_types_name: @item_type,
         item_id: item_id,
         item_data: item_data,
-        @item_type => items
+        @item_type => items,
+        creatables: creatables
       }
 
       extras

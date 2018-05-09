@@ -31,7 +31,8 @@ module MasterHandler
   end
 
   def show
-    p = {full_object_name => object_instance.as_json}
+    c = object_instance.creatables if object_instance
+    p = {full_object_name => object_instance.as_json, creatables: c}
 
     render json: p
   end

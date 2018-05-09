@@ -113,7 +113,7 @@ _fpa.masters = {
         _fpa.masters.handle_search_form(forms);
 
         $('.clear-fields').not('.attached-clear-fields').on('click', function(ev){
-
+            if($(this).attr('disabled')) return;
             ev.preventDefault();
             // Clear all values in the form
             forms.find('input, select').not('[type="submit"], [type="hidden"]').val(null).removeClass('has-value');

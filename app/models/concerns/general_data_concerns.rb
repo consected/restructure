@@ -124,7 +124,7 @@ module GeneralDataConcerns
       extras[:methods] << :creatable_model_references if respond_to? :creatable_model_references
       extras[:methods] << :referenced_from if respond_to? :referenced_from
 
-      extras[:methods] << :creatables if respond_to? :creatables
+      # extras[:methods] << :creatables if respond_to? :creatables
       extras[:methods] << :prevent_edit if respond_to? :prevent_edit
       extras[:methods] << :option_type if respond_to? :option_type
 

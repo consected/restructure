@@ -86,17 +86,34 @@ _fpa.activity_logs = {
   },
 
   handle_creatables: function(block, data) {
-    if(data.multiple_results) {
-      var res = data[data.multiple_results][0]
-    }
-    else {
-      var res = data;
-    }
+    // if(data.multiple_results) {
+    //   var res = data[data.multiple_results][0]
+    // }
+    // else {
+    var res = data;
+    // }
     if(res && res.creatables) {
       for(var i in res.creatables) {
         if(res.creatables.hasOwnProperty(i)) {
           var c = res.creatables[i];
-          var sel = '.activity-logs-item-block[data-master-id="'+data.master_id+'"] a.add-item-button[data-extra-log-type="' +i+'"]';
+          var topitem = data.multiple_results;
+          var master_id = data.master_id;
+          if(!topitem) {
+            for(var p in data) {
+              if(data.hasOwnProperty(p)) {
+                var r = data[p].item_type;
+                if(r) {
+                  topitem = r;
+                  topitem = _fpa.utils.pluralize(topitem);
+                  master_id = data[p].master_id;
+                  break;
+                }
+              }
+            }
+
+          }
+
+          var sel = '.activity-logs-generic-block[data-sub-id="'+master_id+'"][data-sub-item="'+topitem+'"] a.add-item-button[data-extra-log-type="' +i+'"]';
           if(!c) {
             $(sel).attr('disabled', true);
           }
