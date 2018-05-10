@@ -31,8 +31,7 @@ module MasterHandler
   end
 
   def show
-    c = object_instance.creatables if object_instance
-    p = {full_object_name => object_instance.as_json, creatables: c}
+    p = {full_object_name => object_instance.as_json, _control: control_feedback}
 
     render json: p
   end
@@ -117,6 +116,19 @@ module MasterHandler
 
     def edit_form_helper_prefix
       'common'
+    end
+
+    def control_feedback
+      res = {}
+      
+      if object_instance
+        c = object_instance.creatables
+        sa = object_instance.save_action
+      end
+      res[:creatables] = c if c
+      res[:save_action] = sa if sa
+
+      res
     end
 
     def item_type_id

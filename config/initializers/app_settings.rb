@@ -9,8 +9,8 @@ class Settings
   YearFieldPattern = '\\d{4,4}'.freeze
 
 
-  UserTimeout = 30.minutes.freeze
-  AdminTimeout = 15.minutes.freeze
+  UserTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
+  AdminTimeout = (Rails.env.production? ? 15 : 60).minutes.freeze
 
   OsWordsFile = "/usr/share/dict/words"
   PasswordEntropyConfig = {

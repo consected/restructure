@@ -163,6 +163,17 @@ a.add-icon{
 
 #master-search-accordion .panel-default {border: 0;}
 
+.btn-primary.disabled, .btn-primary[disabled] {
+  background-color: gray;
+  border-color: gray;
+
+  &:hover, &:active, &:link {
+    background-color: gray;
+    border-color: gray;
+
+  }
+}
+
 .advanced-form-selections .btn {
 
     color: #2e6da4;

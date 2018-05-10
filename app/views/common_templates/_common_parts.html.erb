@@ -4,10 +4,10 @@
 
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#if show_created_at}}
-    <span class="meta-created-at-shown" data-toggle="popover" data-trigger="click hover" data-content="date/time created">{{date_time created_at}}</span>
+    <span class="meta-created-at glyphicon glyphicon-plus-sign"></span>&nbsp;<span class="meta-created-at-shown" data-toggle="popover" data-trigger="click hover" data-content="created {{date_time created_at}}">{{pretty_string created_at}}</span>
   {{else}}
-    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}"></span> 
+    <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}"></span>
   {{/if}}
-    {{#if updated_at}}<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
-    {{#if user_name}} by <span class="meta-created-by-shown" data-toggle="popover" data-trigger="click hover" data-content="created by">{{user_name}}</span>{{/if}}    
+  {{#if updated_at}}  &nbsp; {{#is updated_at_ts '===' created_at_ts }}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="not updated"></span>{{else}}<span class="meta-last-updated glyphicon glyphicon-pencil"></span>&nbsp;<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{/is}}{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
+  {{#if user_name}} &nbsp; <span class="meta-created-by glyphicon glyphicon-user"></span>&nbsp;<span class="meta-created-by-shown" data-toggle="popover" data-trigger="click hover" data-content="edited by">{{user_name}}</span>{{/if}}
 </script>

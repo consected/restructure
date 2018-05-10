@@ -235,7 +235,7 @@
             {{#if extra_log_type}}
             <% all_extra_log_type_configs.each do |c| %>
               {{#is extra_log_type '===' '<%=c.name%>'}}
-              {{><%= full_name %>_<%=c.name%>_result _created=@index prevent_edit=prevent_edit}}
+              {{><%= full_name %>_<%=c.name%>_result _created=@index}}
               {{/is}}
             <% end %>
 

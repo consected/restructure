@@ -284,7 +284,8 @@
         if(!stre || stre == '' || !stre.length) return;
         if(options && !options.hash) options.hash = {};
         var s = stre.toString();
-        console.log(s);
+        if(s.toLowerCase().indexOf('pm') > 1 || s.toLowerCase().indexOf('am') > 1)
+          return s;
         return new Date(s).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
     });
 

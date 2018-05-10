@@ -64,16 +64,20 @@ _fpa.activity_logs = {
     _fpa.activity_logs.handle_creatables(block, d);
 
     block.parents('.activity-log-list').find('.common-template-item').not('[data-sub-id='+d.id+']').each(function(){
-      $(this).addClass('prevent-edit');
-      $(this).find('a.edit-entity').remove();
-      $(this).find('.new-block').remove();
-      $(this).find('a.add-item-button').remove();
+      if( $(this).hasClass('prevent-edit')){
+        $(this).find('a.edit-entity').remove();
+        $(this).find('.new-block').remove();
+        $(this).find('a.add-item-button').remove();
+      }
     });
 
 
     $('.activity-log-list .new-block').addClass('has-records');
     _fpa.activity_logs.selected_parent(block, {item_id: d.item_id, rec_type: d.rec_type, item_data: d.item_data, master_id: d.master_id});
 
+    window.setTimeout(function() {
+      _fpa.activity_logs.handle_save_action(block, d);
+    }, 100);
 
     // Refresh the sub list items, if they are not hidden
     var itype = block.parents('.activity-logs-item-block').first().find('.activity-log-sub-list').attr('data-sub-list');
@@ -85,41 +89,70 @@ _fpa.activity_logs = {
     _fpa.postprocessors.info_update_handler(block, d);
   },
 
-  handle_creatables: function(block, data) {
-    // if(data.multiple_results) {
-    //   var res = data[data.multiple_results][0]
-    // }
-    // else {
-    var res = data;
-    // }
-    if(res && res.creatables) {
-      for(var i in res.creatables) {
-        if(res.creatables.hasOwnProperty(i)) {
-          var c = res.creatables[i];
-          var topitem = data.multiple_results;
-          var master_id = data.master_id;
-          if(!topitem) {
-            for(var p in data) {
-              if(data.hasOwnProperty(p)) {
-                var r = data[p].item_type;
-                if(r) {
-                  topitem = r;
-                  topitem = _fpa.utils.pluralize(topitem);
-                  master_id = data[p].master_id;
-                  break;
-                }
-              }
+  get_object_data: function(data) {
+    data.item_types = data.multiple_results;
+
+    if(!data.item_types) {
+      if(!data.item_type){
+        for(var p in data) {
+          if(data.hasOwnProperty(p)) {
+            var r = data[p].item_type;
+            if(r) {
+              data = data[p];
+              break;
             }
-
           }
+        }
+      }
+      data.item_types = _fpa.utils.pluralize(data.item_type);
+    }
+    return data;
+  },
 
-          var sel = '.activity-logs-generic-block[data-sub-id="'+master_id+'"][data-sub-item="'+topitem+'"] a.add-item-button[data-extra-log-type="' +i+'"]';
+  handle_creatables: function(block, data) {
+    if(data._control) {
+      var control = data._control
+    }
+    else {
+      var control = data;
+    }
+    obj_data = _fpa.activity_logs.get_object_data(data);
+
+    if(control && control.creatables) {
+      for(var i in control.creatables) {
+        if(control.creatables.hasOwnProperty(i)) {
+          var c = control.creatables[i];
+          var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type="' +i+'"]';
           if(!c) {
             $(sel).attr('disabled', true);
           }
           else {
             $(sel).attr('disabled', false);
           }
+        }
+      }
+    }
+  },
+
+  handle_save_action(block, data) {
+
+
+    if(data._control) {
+      obj_data = _fpa.activity_logs.get_object_data(data);
+
+      if (obj_data._created) {
+        var save_action = data._control.save_action.on_create;
+      }
+      else if(obj_data._updated) {
+        var save_action = data._control.save_action.on_update;
+      }
+
+      if(save_action) {
+
+        if(save_action == 'create_next_creatable') {
+          var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type]';
+          var res = $(sel).not('[disabled]').first().click();
+          console.log(res);
         }
       }
     }

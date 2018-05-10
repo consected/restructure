@@ -118,6 +118,9 @@ class UserBase < ActiveRecord::Base
   def creatables
   end
 
+  def save_action
+  end
+
   def master_user
     return current_user if self.class.no_master_association
     if respond_to?(:master) && master
@@ -199,6 +202,7 @@ class UserBase < ActiveRecord::Base
     elsif o.is_a?(Hash) && @embedded_item
       @embedded_item.master.current_user ||= self.master_user
       @embedded_item.update o
+      self.updated_at = @embedded_item.updated_at
     end
   end
 

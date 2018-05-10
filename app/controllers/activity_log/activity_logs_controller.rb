@@ -37,6 +37,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
           begin
             ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
             @embedded_item.update ei_secure_params
+            object_instance.updated_at = @embedded_item.updated_at
           rescue ActionController::ParameterMissing
             raise FphsException.new "Could not save the item, since you do not have access to any of the data it references."
           end

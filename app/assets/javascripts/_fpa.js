@@ -347,7 +347,11 @@ _fpa = {
 
             }
             else {
-                for (item_key in data) break;
+                // Get the first data key (ignoring _control, which is used for non-data management tasks)
+                for (item_key in data) {
+                  if(item_key != '_control') break;
+                }
+
 
                 if(alt_data_key){
                   data[alt_data_key] = data[item_key];
@@ -511,7 +515,7 @@ _fpa = {
                                     // and will pass just the matched item to the template
                                     for(var g in d){
                                         var item_data = d[g];
-                                        if(item_data[dsfor] === +dsid && item_data.item_type === dst){
+                                        if(item_data && (typeof item_data != 'string') && item_data[dsfor] === +dsid && item_data.item_type === dst){
                                             use_data = {};
                                             use_data[dst] = item_data;
                                         }

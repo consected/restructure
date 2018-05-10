@@ -9,7 +9,7 @@
   end
 
 %>
-<%= form_for(fref, class: "inline-form", remote: true) do |f| %>
+<%= form_for(fref, class: "inline-form admin-edit-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
 
   <% (permitted_params - [:id]).each do |p| %>

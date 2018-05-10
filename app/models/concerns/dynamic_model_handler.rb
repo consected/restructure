@@ -118,6 +118,20 @@ module DynamicModelHandler
       return false
   end
 
+  def can_edit?
+
+    # either use the editable_if configuration if there is one,
+    # or only allow the latest item to be used otherwise
+    dopt = self.default_options
+    if dopt.editable_if
+      res = dopt.calc_editable_if(self)
+      return unless res
+    end
+
+    # Finally continue with the standard checks if none of the previous have failed
+    super()
+  end
+
 
   def ready?
     begin
