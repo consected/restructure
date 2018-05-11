@@ -9,21 +9,6 @@
 
   got = false
 
-  # Handle Brakeman issue with using column type directly to generate partial path
-
-  valid_col_types = [:boolean, :integer]
-  ct = valid_col_types.select {|c| c == column_type.to_sym }.first
-
-  match_name = "column_type_#{ct}"
-
-  if f_names.include? match_name
-    partial_fn = "common_templates/edit_fields/#{match_name}"
-  %>
-    <%= render partial: partial_fn, locals: local_vars[:locals] %>
-    <%
-    got = true
-  end
-
   unless got
     match_name = "name_is_#{field_name_sym}"
     if f_names.include? match_name
@@ -75,6 +60,24 @@
     if Classification::GeneralSelection.item_types.include?("#{general_selection_name}_#{field_name_sym}".to_sym)%>
       <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
     <%
+      got = true
+    end
+  end
+
+
+  # Handle Brakeman issue with using column type directly to generate partial path
+  unless got
+
+    valid_col_types = [:boolean, :integer]
+    ct = valid_col_types.select {|c| c == column_type.to_sym }.first
+
+    match_name = "column_type_#{ct}"
+
+    if f_names.include? match_name
+      partial_fn = "common_templates/edit_fields/#{match_name}"
+    %>
+      <%= render partial: partial_fn, locals: local_vars[:locals] %>
+      <%
       got = true
     end
   end
