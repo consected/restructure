@@ -5,6 +5,10 @@ RSpec.describe Admin::ProtocolsController, type: :controller do
 
   include ProtocolSupport
 
+  let(:object_param_symbol) {
+    :classification_protocol
+  }
+
   def object_class
     Classification::Protocol
   end

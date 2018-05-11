@@ -349,7 +349,7 @@ _fpa = {
             else {
                 // Get the first data key (ignoring _control, which is used for non-data management tasks)
                 for (item_key in data) {
-                  if(item_key != '_control') break;
+                  if(data.hasOwnProperty(item_key) && item_key != '_control') break;
                 }
 
 

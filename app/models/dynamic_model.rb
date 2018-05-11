@@ -195,6 +195,14 @@ class DynamicModel < ActiveRecord::Base
             self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
           end
 
+          def option_type
+            'default'
+          end
+
+          def option_type_config
+            self.class.default_options
+          end
+
         end
 
         a_new_controller = Class.new(DynamicModel::DynamicModelsController) do

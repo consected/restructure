@@ -8,8 +8,9 @@
                   INSERT INTO ipa_consent_mailing_history
                   (
                       master_id,
-                      copy_of_consent_docs_mailed_to_subject_no_yes,
-                      mailed_when,
+                      select_record_from_player_contact_email,
+                      select_record_from_addresses,
+                      sent_when,
                       user_id,
                       created_at,
                       updated_at,
@@ -17,8 +18,9 @@
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.copy_of_consent_docs_mailed_to_subject_no_yes,
-                      NEW.mailed_when,
+                      NEW.select_record_from_player_contact_email,
+                      NEW.select_record_from_addresses,
+                      NEW.sent_when,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -31,8 +33,9 @@
       CREATE TABLE ipa_consent_mailing_history (
           id integer NOT NULL,
           master_id integer,
-          copy_of_consent_docs_mailed_to_subject_no_yes varchar,
-          mailed_when date,
+          select_record_from_player_contact_email varchar,
+          select_record_from_addresses varchar,
+          sent_when date,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -51,8 +54,9 @@
       CREATE TABLE ipa_consent_mailings (
           id integer NOT NULL,
           master_id integer,
-          copy_of_consent_docs_mailed_to_subject_no_yes varchar,
-          mailed_when date,
+          select_record_from_player_contact_email varchar,
+          select_record_from_addresses varchar,
+          sent_when date,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

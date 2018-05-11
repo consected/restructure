@@ -1,5 +1,6 @@
 class ExternalIdentifier::ExternalIdentifierController < UserBaseController
 
+  include MasterHandler
 
   protected
     # By default the external id edit form is handled through a common template. To provide a customized form, copy the content of
@@ -12,10 +13,11 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   private
 
     def secure_params
-      res = params.require(@implementation_class.name.singularize.to_sym).permit(:master_id, @implementation_class.external_id_attribute.to_sym)
+      defn = implementation_class.definition
+      res = params.require(controller_name.singularize.to_sym).permit(:master_id, defn.external_id_attribute.to_sym)
       # Extra protection to avoid possible injection of an alternative value
       # when we should be using a generated ID
-      res[@implementation_class.external_id_attribute.to_sym] = nil if @implementation_class.allow_to_generate_ids
+      res[implementation_class.external_id_attribute.to_sym] = nil if implementation_class.allow_to_generate_ids?
       res
     end
 

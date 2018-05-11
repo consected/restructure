@@ -32,6 +32,9 @@ RSpec.describe Admin::ProtocolEventsController, type: :controller do
     invalid_update_attribs
   }
 
+  let(:object_param_symbol) {
+    :classification_protocol_event
+  }
 
 
 

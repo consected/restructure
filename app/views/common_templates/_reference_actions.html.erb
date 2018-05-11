@@ -10,9 +10,13 @@
 %>
 <% unless @embedded_item %>
 <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
-  <% if action_name.in? ['new', 'edit'] %>
+  <% if action_name.in? ['new', 'edit']
+      # List the reference items that can be created after saving
+  %>
         <span class="small"><i><%= caption.humanize %></i></span>
-  <% else %>
+  <% else
+      # Show the 'add' reference item button
+  %>
     <p class="text-center">
         <a href="/masters/<%= master_id %>/<%=ref_name.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption.humanize %></a>
       </p>

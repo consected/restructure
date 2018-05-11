@@ -115,6 +115,9 @@ class UserBase < ActiveRecord::Base
   def option_type
   end
 
+  def option_type_config
+  end
+
   def creatables
   end
 

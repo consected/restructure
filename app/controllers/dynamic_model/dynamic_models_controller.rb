@@ -1,6 +1,6 @@
 class DynamicModel::DynamicModelsController < UserBaseController
 
-  
+
   def destroy
     not_authorized
   end
@@ -18,7 +18,6 @@ class DynamicModel::DynamicModelsController < UserBaseController
 
     def secure_params
       @implementation_class = implementation_class
-      puts params
       params.require(@implementation_class.name.ns_underscore.gsub('__', '_').singularize.to_sym).permit(*permitted_params)
     end
 

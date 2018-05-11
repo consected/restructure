@@ -24,7 +24,7 @@ AS $$
       act_id INTEGER;
   BEGIN
 
-  IF NEW.extra_log_type = 'schedule_callback' THEN
+  IF NEW.extra_log_type = 'finalize' THEN
 
     -- Get the latest football experience record
     SELECT *

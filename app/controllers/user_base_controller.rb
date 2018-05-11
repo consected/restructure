@@ -3,8 +3,7 @@ class UserBaseController < ApplicationController
   include FilterUtils
 
   before_action :authenticate_user!
-  helper_method :object_name, :object_instance, :full_object_name
-
+  helper_method :object_name, :object_instance, :full_object_name, :extra_options
 
   protected
     # return the class for the current item

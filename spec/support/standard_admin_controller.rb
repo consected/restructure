@@ -26,6 +26,10 @@ shared_examples 'a standard admin controller' do
     @path_prefix
   }
 
+  let(:object_param_symbol) {
+    object_class.name.underscore.gsub('/','_')
+  }
+
   describe "Ensure authentication" do
     before_each_login_admin
     it "returns a result" do

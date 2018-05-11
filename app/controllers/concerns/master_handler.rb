@@ -120,7 +120,7 @@ module MasterHandler
 
     def control_feedback
       res = {}
-      
+
       if object_instance
         c = object_instance.creatables
         sa = object_instance.save_action

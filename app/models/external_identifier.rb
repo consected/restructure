@@ -113,6 +113,7 @@ class ExternalIdentifier < ActiveRecord::Base
     alphanumeric = self.alphanumeric
     label = self.label
     name = self.name
+    model_class_name = self.model_class_name
     definition = self
 
     if enabled? && !failed
@@ -211,6 +212,11 @@ class ExternalIdentifier < ActiveRecord::Base
                 @allow_to_generate_ids
               end
 
+              def implementation_class
+                cnf = controller_name.singularize.classify
+                @implementation_class = cnf.constantize
+              end
+
               self.allow_to_generate_ids = allow_to_generate_ids
               self.external_id_attribute = external_id_attribute
               self.name = name
@@ -226,7 +232,7 @@ class ExternalIdentifier < ActiveRecord::Base
         c_name = full_implementation_controller_name
         klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         res2 = klass.const_set(c_name, a_new_controller)
-        res2.include MasterHandler
+        # res2.include MasterHandler
 
         add_model_to_list res
       rescue=>e

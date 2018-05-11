@@ -154,6 +154,11 @@ module ActivityLogHandler
     extra_log_type
   end
 
+  def option_type_config
+    extra_log_type_config
+  end
+
+
   def extra_log_type_config
 
     elt  = self.extra_log_type

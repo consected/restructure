@@ -50,7 +50,7 @@ _fpa.activity_logs = {
     var d = data;
     var d0;
     for(var e in data){
-      if(data.hasOwnProperty(e)){
+      if(data.hasOwnProperty(e) && e != '_control'){
         d0 = data[e];
         break;
       }
@@ -61,7 +61,7 @@ _fpa.activity_logs = {
       d = d0;
     }
 
-    _fpa.activity_logs.handle_creatables(block, d);
+    _fpa.activity_logs.handle_creatables(block, data);
 
     block.parents('.activity-log-list').find('.common-template-item').not('[data-sub-id='+d.id+']').each(function(){
       if( $(this).hasClass('prevent-edit')){
@@ -76,7 +76,7 @@ _fpa.activity_logs = {
     _fpa.activity_logs.selected_parent(block, {item_id: d.item_id, rec_type: d.rec_type, item_data: d.item_data, master_id: d.master_id});
 
     window.setTimeout(function() {
-      _fpa.activity_logs.handle_save_action(block, d);
+      _fpa.activity_logs.handle_save_action(block, data);
     }, 100);
 
     // Refresh the sub list items, if they are not hidden

@@ -41,11 +41,11 @@ module MasterSupport
   end
 
   def objects_short_name
-    object_class.to_s.split('::').underscore.pluralize
+    object_class.to_s.split('::').last.underscore.pluralize
   end
 
   def custom_edit_form_prefix
-    "/admin/#{objects_short_name.pluralize}"
+    "admin/#{objects_short_name.pluralize}"
   end
 
   def item_id

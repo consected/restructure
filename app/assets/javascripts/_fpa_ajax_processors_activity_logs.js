@@ -1,4 +1,5 @@
 _fpa.postprocessors_activity_logs = {};
+_fpa.preprocessors_activity_logs = {};
 _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log_type_config)  {
 
   var item_type_name_plural = '';
@@ -13,6 +14,9 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log
     _fpa.postprocessors_activity_logs['activity_log__' + item_type_name_plural + '_main_result_template'] = function(block, data){
       _fpa.activity_logs.show_main_block(block, data);
     };
+    _fpa.preprocessors_activity_logs['activity_log__' + item_type_name_plural + '_main_result_template'] = function(block, data){
+      _fpa.preprocessors.activity_log_show_log_block(block, data);
+    };
     _fpa.postprocessors_activity_logs['activity_log__' + item_type_name + '_primary_result_template'] = function(block, data){
       _fpa.activity_logs.show_log_block(block, data);
     };
@@ -25,6 +29,9 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log
         if(extra_log_type_config.hasOwnProperty(k)) {
           _fpa.postprocessors_activity_logs['activity_log__' + item_type_name + '_' + extra_log_type_config[k].name + '_result_template'] = function(block, data){
             _fpa.activity_logs.show_log_block(block, data);
+          };
+          _fpa.preprocessors_activity_logs['activity_log__' + item_type_name + '_' + extra_log_type_config[k].name + '_result_template'] = function(block, data){
+            _fpa.preprocessors.activity_log_show_log_block(block, data);
           };
         }
       }
@@ -64,6 +71,7 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log
 
 
   $.extend(_fpa.postprocessors, _fpa.postprocessors_activity_logs);
+  $.extend(_fpa.preprocessors, _fpa.preprocessors_activity_logs);
 
 }
 
@@ -72,5 +80,42 @@ _fpa.preprocessors.activity_log_edit_form = function(block, data) {
     $(this).hide().html('');
   });
   block.show();
+
+}
+
+
+_fpa.preprocessors.activity_log_show_log_block = function(block, data) {
+   {
+
+    var ds;
+    if(data.multiple_results) {
+      ds = data[data.multiple_results]
+    }
+    else {
+      for(var e in data){
+        if(data.hasOwnProperty(e) && e != '_control'){
+          ds = [data[e]];
+          break;
+        }
+      }
+    }
+
+    for(var i = 0; i < ds.length; i++){
+      var d = ds[i];
+      var no_creatable_references;
+      if(d.creatable_model_references) {
+        no_creatable_references = true;
+        var cr0 = null;
+        for(var p in d.creatable_model_references) {
+          if(d.creatable_model_references.hasOwnProperty(p)) {
+            no_creatable_references = d.creatable_model_references[p] != 'many';
+          }
+        }
+      }
+
+      d._show_embedded_as_single_item = (d.model_references.length == 1 && no_creatable_references);
+    }
+  }
+
 
 }

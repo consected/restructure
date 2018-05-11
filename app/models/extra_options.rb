@@ -35,7 +35,9 @@ class ExtraOptions
         label: 'button label'
       },
       field_options: {
-        include_blank: 'true or false to force a drop down field to include a selectable blank'
+        field_name: {
+          include_blank: 'true or false to force a drop down field to include a selectable blank'
+        }
       },
       dialog_before: {
         field_name: {name: "message template name", label: "show dialog button label" },
