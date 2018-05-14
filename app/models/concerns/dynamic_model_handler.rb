@@ -238,7 +238,7 @@ module DynamicModelHandler
 
   def add_user_access_controls
 
-    if check_implementation_class && (!persisted? || disabled_changed?)
+    if !persisted? || disabled_changed?
       admin = self.current_admin
       Admin::UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
     end

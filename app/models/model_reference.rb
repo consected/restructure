@@ -43,9 +43,7 @@ class ModelReference < ActiveRecord::Base
   def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil
 
     if to_record_type
-      to_record_type = to_record_type.camelize
-      trtc = to_record_type.constantize
-      to_record_type = trtc.name
+      to_record_type = to_record_class_for_type(to_record_type).name
     end
 
     if from_item_or_master.is_a? Master
@@ -82,6 +80,14 @@ class ModelReference < ActiveRecord::Base
       r.current_user = mu
     end
     res
+  end
+
+  def self.to_record_class_for_type rec_type
+    rec_type.camelize.constantize
+  end
+
+  def to_record_class
+    to_record_type.camelize.constantize
   end
 
   def to_record_label
@@ -122,8 +128,7 @@ class ModelReference < ActiveRecord::Base
 
   def to_record
     return @to_record if @to_record
-    rec_class = self.to_record_type.constantize
-    @to_record = rec_class.find(self.to_record_id)
+    @to_record = self.to_record_class.find(self.to_record_id)
   end
 
   def to_record= rec
@@ -131,12 +136,11 @@ class ModelReference < ActiveRecord::Base
   end
 
   def self.find_records_in_master master: nil, to_record_type: nil, filter_by: nil
-    rec_class = to_record_type.camelize.constantize
     res = []
     cond = {master: master}
     cond.merge! filter_by if filter_by
 
-    rec_class.where(cond).each do |i|
+    to_record_class_for_type(to_record_type).where(cond).each do |i|
       # Instantiate temporary model reference objects to hold the results
       # They cannot be accidentally persisted, since the validations will fail
       rec = ModelReference.new from_record_master_id: master.id, to_record_type: to_record_type, to_record_id: i.id, to_record_master_id: i.master_id

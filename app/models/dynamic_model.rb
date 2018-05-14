@@ -104,6 +104,7 @@ class DynamicModel < ActiveRecord::Base
         man = self.model_association_name
         ro = self.result_order
         default_options = self.default_options
+        n = self.name
         definition = self
 
         a_new_class = Class.new(UserBase) do
@@ -162,6 +163,14 @@ class DynamicModel < ActiveRecord::Base
             @default_options
           end
 
+          def self.human_name= n
+            @human_name = n
+          end
+          
+          def self.human_name
+            @human_name
+          end
+
           self.definition = definition
           self.primary_key = tkn
           self.foreign_key_name = fkn
@@ -169,6 +178,7 @@ class DynamicModel < ActiveRecord::Base
           self.assoc_inverse = man
           self.result_order = ro
           self.default_options = default_options
+          self.human_name = n
 
           def master_id
             return nil if self.class.no_master_association

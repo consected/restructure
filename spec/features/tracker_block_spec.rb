@@ -192,7 +192,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     end
     dismiss_modal
     # After a moment the tracker will show the newly created item
-    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
+    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "#{@user.email}"
 
     sleep 1
     have_css '.tracker-tree-results tbody.new-block'
@@ -226,7 +226,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     end
 
     # Validate the new item was created as the current record of the same protocol
-    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
+    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "#{@user.email}"
     expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: /0?2\/0?2\/2030/
     # Now try an earlier item
     within ".tracker-tree-results" do
@@ -248,7 +248,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     end
 
     # Validate the new item was NOT created as the current record of the same protocol
-    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
+    expect(page).to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "#{@user.email}"
     expect(page).not_to have_css 'tbody.index-created[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: "1/2/2010"
 
     # Click into the history to check the previous record is now visible there
@@ -259,7 +259,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     find 'tbody.tracker-history.collapse.in', wait: 5
 
     expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: pe_orig.name.titleize
-    expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: "by #{@user.email}"
+    expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: "#{@user.email}"
 
 
     # Search for the player by current Classification::Protocol, subprocess and event
@@ -308,7 +308,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
 
     # The previous item is there still
     expect(page).to have_css 'tbody.tracker-history .tracker-history-event_name', text: /#{pe_orig.name}/i
-    expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: "by #{@user.email}"
+    expect(page).to have_css 'tbody.tracker-history .tracker-history span.record-meta', text: "#{@user.email}"
 
     # Search for the player by current Classification::Protocol, subprocess and event, but not the historical event
     within '#advanced_search_master' do
@@ -376,7 +376,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     end
 
     have_css '.master-expander'
-    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "by #{@user.email}"
+    expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] span.record-meta', text: "#{@user.email}"
     expect(page).to have_css "##{h} " + 'tbody[data-template="tracker-result-template"][data-tracker-protocol="'+protocol.name.downcase+'"] .tracker-event_date', text: /10\/0?1\/2125/
 
 

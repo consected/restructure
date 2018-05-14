@@ -113,7 +113,7 @@ _fpa.preprocessors.activity_log_show_log_block = function(block, data) {
         }
       }
 
-      d._show_embedded_as_single_item = (d.model_references.length == 1 && no_creatable_references);
+      d._show_embedded_as_single_item = (d.model_references && d.model_references.length == 1 && no_creatable_references);
     }
   }
 

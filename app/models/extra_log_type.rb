@@ -66,12 +66,13 @@ class ExtraLogType < ExtraOptions
     self.fields ||= []
 
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
-    # unless name.in?(['primary', 'blank_log'])
-    #   raise FphsException.new "extra log options label: property can not be blank" if self.label.blank?
-    #   raise FphsException.new "extra log options fields: property must be an array" unless self.fields.is_a?(Array)
-    # end
-
     raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
+
+    if self.references
+      self.references.each do |mn, conf|
+        self.references[mn]['to_record_label'] = ModelReference.to_record_class_for_type(mn).human_name
+      end
+    end
   end
 
 
