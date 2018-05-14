@@ -95,6 +95,7 @@ class ExtraLogType < ExtraOptions
 
     if sa.is_a? Hash
       res = {}
+      return unless sa.first
       if sa.first.last.is_a? String
         return sa
       else
