@@ -97,7 +97,7 @@ class ExtraLogType < ExtraOptions
       res = {}
       return unless sa.first
       if sa.first.last.is_a? String
-        return sa
+        return {sa.first.first => {sa.first.last => true}}
       else
         sa.each do |on_act, conf|
           conf.each do |do_act, conf_act|

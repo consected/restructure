@@ -124,7 +124,13 @@ class ExtraOptions
 
       set_defaults config_obj, res
 
+      opt_default = res['_default']
+      res.delete('_default')
+
       res.each do |name, value|
+        # If defined, use the optional _default entry as the basis for all individual options,
+        # allowing for a definable set of default values
+        value = opt_default.merge(value) if opt_default
         i = self.new name, value, config_obj
         configs << i
       end
@@ -146,6 +152,9 @@ class ExtraOptions
     return true unless action_conf
     all_res = Master.select(:id).where(id: obj.master.id)
     res = true
+
+    return false if action_conf[:never]
+    return true if action_conf[:always]
 
     action_conf.each do |c_var, c_is_res|
       c_is = {}

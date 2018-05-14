@@ -123,11 +123,19 @@ _fpa.activity_logs = {
         if(control.creatables.hasOwnProperty(i)) {
           var c = control.creatables[i];
           var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type="' +i+'"]';
+          var ael = $(sel);
+          var huc = ael.hasClass('hide-unless-creatable');
           if(!c) {
-            $(sel).attr('disabled', true);
+            if(huc)
+              ael.hide();
+            else
+              ael.attr('disabled', true);
           }
           else {
-            $(sel).attr('disabled', false);
+            if(huc)
+              ael.show();
+            else
+              ael.attr('disabled', false);
           }
         }
       }
@@ -151,7 +159,7 @@ _fpa.activity_logs = {
       if(typeof save_action == 'object') {
         if(save_action.create_next_creatable) {
           var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type]';
-          var res = $(sel).not('[disabled]').first().click();          
+          var res = $(sel).not('[disabled]').first().click();
         }
         if(save_action.show_panel) {
           var tab = $('.master-panel[data-master-id="'+obj_data.master_id+'"] a[data-panel-tab="'+save_action.show_panel+'"]').click();

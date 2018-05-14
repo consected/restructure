@@ -67,8 +67,8 @@
   # Allow show_caption_before helper to work
   @dialog_before = dialog_before
 
-  unless defined? view_embedded_at_top
-    view_embedded_at_top = false
+  unless defined? view_options
+    view_options = {}
   end
 
   if caption.blank?
@@ -141,7 +141,7 @@
 
 
         <% unless embedded %>
-          <% if view_embedded_at_top %>
+          <% if view_options[:show_embedded_at_top]  %>
           <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
           <% end %>
         <% end %>
@@ -200,7 +200,7 @@
         <% end # item_list.each %>
 
         <% unless embedded %>
-          <% unless view_embedded_at_top %>
+          <% unless view_options[:show_embedded_at_top]  %>
           <%= render partial: 'common_templates/edit_form_references', locals: {embedded: embedded, form_embed: form_embed} %>
           <% end %>
 
