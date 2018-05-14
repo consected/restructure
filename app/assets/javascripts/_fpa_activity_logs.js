@@ -147,9 +147,24 @@ _fpa.activity_logs = {
         var save_action = data._control.save_action.on_update;
       }
 
-      if(save_action == 'create_next_creatable') {
-        var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type]';
-        var res = $(sel).not('[disabled]').first().click();
+
+      if(typeof save_action == 'object') {
+        if(save_action.create_next_creatable) {
+          var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type]';
+          var res = $(sel).not('[disabled]').first().click();          
+        }
+        if(save_action.show_panel) {
+          var tab = $('.master-panel[data-master-id="'+obj_data.master_id+'"] a[data-panel-tab="'+save_action.show_panel+'"]').click();
+          window.setTimeout(function() {
+            $(tab.attr('data-target')).collapse('show');
+          }, 10);
+        }
+        if(save_action.hide_panel) {
+          var tab = $('.master-panel[data-master-id="'+obj_data.master_id+'"] a[data-panel-tab="'+save_action.hide_panel+'"]');
+          window.setTimeout(function() {
+            $(tab.attr('data-target')).collapse('hide');
+          }, 10);
+        }
       }
     }
   }

@@ -102,7 +102,14 @@ class ExtraLogType < ExtraOptions
         sa.each do |on_act, conf|
           conf.each do |do_act, conf_act|
             succ = calc_action_if conf_act['if'].symbolize_keys, obj
-            res[on_act] = do_act if succ
+            if succ
+              res[on_act] ||= {}
+              if conf_act['value']
+                res[on_act].merge!( do_act => conf_act['value'] )
+              else
+                res[on_act][do_act] = true
+              end
+            end
           end
         end
       end

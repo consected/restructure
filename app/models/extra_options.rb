@@ -157,6 +157,13 @@ class ExtraOptions
         res &&= !!q.where(c_is).order(id: :desc).first
       elsif c_var == :not_all
         res &&= !q.where(c_is).order(id: :desc).first
+      elsif c_var == :any
+
+        c_is.each do |ck, cv|
+          res = q.where(ck => cv).order(id: :desc).first
+          break if res
+        end
+
       elsif c_var == :not_any
 
         c_is.each do |ck, cv|
