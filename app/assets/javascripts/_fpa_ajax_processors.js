@@ -42,7 +42,10 @@ _fpa.postprocessors = {
         }).addClass('attached-expander-format');
 
         var item_key;
-        for (item_key in data) break;
+        for (item_key in data) {
+          if(data.hasOwnProperty(item_key) && item_key != '_control')
+            break;
+        }
 
         var di = data[item_key];
         if(di && di._created) {

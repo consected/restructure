@@ -147,13 +147,9 @@ _fpa.activity_logs = {
         var save_action = data._control.save_action.on_update;
       }
 
-      if(save_action) {
-
-        if(save_action == 'create_next_creatable') {
-          var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type]';
-          var res = $(sel).not('[disabled]').first().click();
-          console.log(res);
-        }
+      if(save_action == 'create_next_creatable') {
+        var sel = '.activity-logs-generic-block[data-sub-id="'+obj_data.master_id+'"][data-sub-item="'+obj_data.item_types+'"] a.add-item-button[data-extra-log-type]';
+        var res = $(sel).not('[disabled]').first().click();
       }
     }
   }

@@ -214,7 +214,7 @@ module ActivityLogHandler
   end
 
   def save_action
-    self.extra_log_type_config.save_action
+    extra_log_type_config.calc_save_action_if self
   end
 
   def creatables

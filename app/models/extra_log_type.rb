@@ -55,6 +55,11 @@ class ExtraLogType < ExtraOptions
           }
 
         }
+      },
+      on_create: {
+        create_next_creatable: {
+          if: attr_for_conditions
+        }
       }
     }
     res.merge(super)
@@ -82,6 +87,26 @@ class ExtraLogType < ExtraOptions
     rescue => e
       raise FphsException.new "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
     end
+  end
+
+
+  def calc_save_action_if obj
+    sa = self.save_action
+
+    if sa.is_a? Hash
+      res = {}
+      if sa.first.last.is_a? String
+        return sa
+      else
+        sa.each do |on_act, conf|
+          conf.each do |do_act, conf_act|
+            succ = calc_action_if conf_act['if'].symbolize_keys, obj
+            res[on_act] = do_act if succ
+          end
+        end
+      end
+    end
+    res
   end
 
 

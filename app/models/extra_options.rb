@@ -44,32 +44,28 @@ class ExtraOptions
         all_fields: {name: "message template name", label: "show dialog button label" },
         submit: {name: "message template name", label: "show dialog button label" }
       },
-      creatable_if: {
-        all: {
-          field_name: 'conditional value',
-          field_name_2: 'AND conditional value'
-        },
-        not_any: {
-          field_name: 'not conditional value',
-          field_name_2: 'AND not conditional value'
-        },
-        not_all: {
-          field_name: 'not this conditional value',
-          field_name_2: 'and this conditional value...'
-        }
-
-      },
-      editable_if: {
-        all: {
-          field_name: 'conditional value',
-          field_name_2: 'AND conditional value'
-        },
-        not_any: {
-          field_name: 'not conditional value',
-          field_name_2: 'AND not conditional value'
-        }
-      }
+      creatable_if: attr_for_conditions,
+      editable_if: attr_for_conditions
     }
+  end
+
+  def self.attr_for_conditions
+      {all: {
+        field_name: 'all conditional values must be true',
+        field_name_2: '...'
+      },
+      any: {
+        field_name: 'any conditional value must be true',
+        field_name_2: '...'
+      },
+      not_any: {
+        field_name: 'all conditional values must be false',
+        field_name_2: '...'
+      },
+      not_all: {
+        field_name: 'any conditional value must be false',
+        field_name_2: '...'
+      }}
   end
 
 
