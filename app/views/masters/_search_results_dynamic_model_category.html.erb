@@ -1,14 +1,7 @@
-<div class="on-open-click hidden">
-<% dm = DynamicModel.active.where(category: category)
-   dm.each do |dynamic_model|
+<%
+  dm = DynamicModel.active.where(category: category)
+  dm = dm.select {|m| m.model_association_name.in? @true_views}
 %>
-<%= dynamic_model.model_association_name %>
-  <% if view?[dynamic_model.model_association_name] %>
-  <a href="/masters/{{id}}/dynamic_model/<%=dynamic_model.implementation_model_name.pluralize%>" data-result-target="#<%=dynamic_model.full_item_types_name%>-{{id}}-" data-template="<%=dynamic_model.implementation_model_name.hyphenate.pluralize%>-list-template" data-remote="true" class=""><%=dynamic_model.name%></a>
-  <% end %>
-<% end %>
-</div>
-
 <div class="row panel-body">
-  <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: category } %>
+  <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: category, force_load: true } %>
 </div>

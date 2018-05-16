@@ -90,10 +90,10 @@
 
     end
 
-    def show_dialog_before key, object_instance
-      return unless @dialog_before && @dialog_before[key]
-      dname = @dialog_before[key]['name']
-      dlabel = @dialog_before[key]['label']
+    def show_dialog_before key, object_instance, dialogs
+      return unless dialogs && dialogs[key]
+      dname = dialogs[key]['name']
+      dlabel = dialogs[key]['label']
       dmsg = DialogTemplate.generate_message(dname, object_instance)
       id = "dialog-#{dname}-#{dlabel}".gsub(' ', '-')
 
@@ -101,9 +101,13 @@
     end
 
 
-    def show_caption_before key
-      return unless @caption_before && @caption_before[key]
-      @caption_before[key].gsub("\n","<br/>").html_safe
+    def show_caption_before key, captions
+      return unless captions && captions[key]
+      caption = captions[key]
+      if caption.is_a?(Hash)
+        caption = caption['caption']
+      end
+      caption.gsub("\n","<br/>").html_safe
     end
 
     def layout_item_block_sizes

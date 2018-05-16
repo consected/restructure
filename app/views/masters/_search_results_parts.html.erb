@@ -171,27 +171,29 @@
       </div>
       <% end %>
 
-      <% dm = DynamicModel.active.where(category: 'details') %>
-      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details' } %>
-
+      <%
+        dm = DynamicModel.active.where(category: 'details')
+        dm = dm.select {|m| m.model_association_name.in? @true_views}
+      %>
+      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details', force_load: 1 } %>
     </div>
    </div>
 
 </script>
 
-<script id="master_tracker_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<script id="master_trackers_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <% unless app_config_set(:hide_tracker_panel) %>
-  <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
-  {{#with trackers}}
-    {{>tracker_tree_results master_id=id}}
-  {{else}}
-    {{>empty_tracker_tree_results master_id=id}}
-  {{/with}}
+    <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
+    {{#with trackers}}
+      {{>tracker_tree_results master_id=id}}
+    {{else}}
+      {{>empty_tracker_tree_results master_id=id}}
+    {{/with}}
 
-  {{#with latest_tracker_history.[0]}}
-    <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>
-  {{/with}}
-  </div>
+    {{#with latest_tracker_history.[0]}}
+      <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>
+    {{/with}}
+    </div>
   <% end %>
 </script>
 

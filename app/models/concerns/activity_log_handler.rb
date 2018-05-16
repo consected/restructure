@@ -486,7 +486,8 @@ module ActivityLogHandler
     # either use the editable_if configuration if there is one,
     # or only allow the latest item to be used otherwise
     eltc = self.extra_log_type_config
-    if eltc.editable_if
+
+    if eltc.editable_if.is_a?(Hash) && eltc.editable_if.first
       res = eltc.calc_editable_if(self)
       return unless res
     else

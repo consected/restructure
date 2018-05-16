@@ -89,6 +89,7 @@ class ExtraOptions
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name.underscore}"
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
+    self.caption_before = self.caption_before.each {|k,v| self.caption_before[k] = {'caption' => v} if v.is_a? String }
 
     self.dialog_before ||= {}
     self.dialog_before = self.dialog_before.symbolize_keys
@@ -129,13 +130,14 @@ class ExtraOptions
 
       set_defaults config_obj, res
 
-      opt_default = res['_default']
-      res.delete('_default')
+      opt_default = res.delete('_default')
 
       res.each do |name, value|
         # If defined, use the optional _default entry as the basis for all individual options,
         # allowing for a definable set of default values
+
         value = opt_default.merge(value) if opt_default
+
         i = self.new name, value, config_obj
         configs << i
       end
@@ -154,7 +156,7 @@ class ExtraOptions
   end
 
   def calc_action_if action_conf, obj
-    return true unless action_conf
+    return true unless action_conf.is_a?(Hash) && action_conf.first
     all_res = Master.select(:id).where(id: obj.master.id)
     res = true
 

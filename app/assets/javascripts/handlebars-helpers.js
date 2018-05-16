@@ -204,10 +204,12 @@
         return new Handlebars.SafeString(d);
     });
 
-    Handlebars.registerHelper('fpa_state_item', function(name, key) {
+    Handlebars.registerHelper('fpa_state_item', function(name, key, sub_key) {
         var res = _fpa.state[name];
         if(res && key)
           res = res[key];
+        if(res && sub_key)
+          res = res[sub_key];
         return res;
     });
 

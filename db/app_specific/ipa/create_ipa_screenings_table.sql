@@ -2,7 +2,7 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_screenings screening_date eligible_for_study_blank_yes_no select_reason_if_not_eligible
+-- table_generators/generate.sh dynamic_models_table create ipa_screenings eligible_for_study_blank_yes_no notes
 
       CREATE FUNCTION log_ipa_screening_update() RETURNS trigger
           LANGUAGE plpgsql
@@ -11,9 +11,8 @@
                   INSERT INTO ipa_screening_history
                   (
                       master_id,
-                      screening_date,
                       eligible_for_study_blank_yes_no,
-                      select_reason_if_not_eligible,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -21,9 +20,8 @@
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.screening_date,
                       NEW.eligible_for_study_blank_yes_no,
-                      NEW.select_reason_if_not_eligible,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -36,9 +34,8 @@
       CREATE TABLE ipa_screening_history (
           id integer NOT NULL,
           master_id integer,
-          screening_date date,
           eligible_for_study_blank_yes_no varchar,
-          select_reason_if_not_eligible varchar,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -57,9 +54,8 @@
       CREATE TABLE ipa_screenings (
           id integer NOT NULL,
           master_id integer,
-          screening_date date,
           eligible_for_study_blank_yes_no varchar,
-          select_reason_if_not_eligible varchar,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

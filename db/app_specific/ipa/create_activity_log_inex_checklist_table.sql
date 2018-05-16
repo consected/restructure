@@ -2,12 +2,13 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh create activity_logs_table 
+-- db/table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_inex_checklists ipa_assignments select_ready_for_review_no_yes signed_no_yes
 
       CREATE TABLE activity_log_ipa_assignment_inex_checklist_history (
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
+          select_ready_for_review_no_yes varchar,
           signed_no_yes varchar,
           extra_log_type varchar,
           user_id integer,
@@ -19,6 +20,7 @@
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
+          select_ready_for_review_no_yes varchar,
           signed_no_yes varchar,
           extra_log_type varchar,
           user_id integer,
@@ -34,6 +36,7 @@
                   (
                       master_id,
                       ipa_assignment_id,
+                      select_ready_for_review_no_yes,
                       signed_no_yes,
                       extra_log_type,
                       user_id,
@@ -44,6 +47,7 @@
                   SELECT
                       NEW.master_id,
                       NEW.ipa_assignment_id,
+                      NEW.select_ready_for_review_no_yes,
                       NEW.signed_no_yes,
                       NEW.extra_log_type,
                       NEW.user_id,

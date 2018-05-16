@@ -5,7 +5,7 @@
     if view?[resource.to_sym]
       rs = resource.split('__', 2)
       if rs.length == 2
-        resource_type = rs.first.hyphenate
+        resource_type = rs.first.hyphenate.pluralize
       else
         resource_type = 'details'
       end

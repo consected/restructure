@@ -2,40 +2,37 @@
 <script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <ul class="nav nav-pills details-tabs <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %>">
 
+
+
   <%
-    panels.each do |panel|
-      panel_name = panel.panel_name
-      panel_name_us = panel_name.underscore
-      panel_label = panel.panel_label.downcase
-      categories = panel.contains && panel.contains.categories
-      resources = panel.contains && panel.contains.resources
-      initial_show = panel.view_options && panel.view_options.initial_show
-  %>
-    <% if categories && categories.include?('trackers') %>
-      <li role="presentation">
-        <a href="/masters/{{id}}/trackers" data-panel-tab="trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
+    drop_down = nil
+    prev_drop_down = nil
+    tab_panels = panels.sort {|p, q| (p.tab && p.tab.parent) <=> (p.tab && p.tab.parent) }
+    tab_panels.each do |panel|
+      drop_down = panel.tab && panel.tab.parent
+      if prev_drop_down && drop_down != prev_drop_down
+      %>
+        </ul>
       </li>
-    <% end %>
-
-    <% if categories %>
-      <li role="presentation">
-        <a href="#/" data-panel-tab="<%= panel_name_us %>" data-toggle="collapse" data-target="#<%= panel_name%>-{{id}}" class="scroll-to-expanded "><span class="caret"></span> <%= panel_label %></a>
-      </li>
-    <% end %>
-
-    <% if resources
-        resources.each do |resource|
-          table_name = resource.gsub('__', '_')
-          template_postfix = ''
-          template_postfix = '-main-result-template' if resource.start_with?('activity_log__')
-    %>
-      <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-        <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= resource.gsub('__', '/') %>"  data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= table_name %><%= template_postfix %>"><span class="caret"></span> <%= panel_label %></a>
-      </li>
-    <%
-        end
+      <%
       end
+
+      if drop_down && drop_down != prev_drop_down
+        dd_label = drop_down.humanize.underscore
+        dd_name = drop_down.hyphenate
+        prev_drop_down = drop_down
+        %>
+        <li role="presentation" class="dropdown">
+          <a href="#" class="dropdown-toggle" id="dm-tag-drop-<%=dd_name%>" data-toggle="dropdown" aria-controls="dm-tag-drop-contents-<%=dd_name%>" aria-expanded="false"><%= dd_label%></a>
+          <ul class="dropdown-menu" aria-labelledby="dm-tag-drop-<%=dd_name%>" id="dm-tag-drop-contents-<%=dd_name%>">
+      <% end %>
+    <%= render partial: 'search_results_master_tabs_item', locals: {panel: panel} %>
+  <%
     end
-  %>
+    if drop_down
+    %>
+      </ul>
+    </li>
+    <% end %>
   </ul>
 </script>

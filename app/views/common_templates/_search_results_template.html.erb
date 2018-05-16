@@ -17,8 +17,6 @@
   end
 
 
-  # Allow show_caption_before helper to work
-  @caption_before = caption_before
 
   unless defined? item_flags_after
     item_flags_after = nil
@@ -104,7 +102,7 @@
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
 
-  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.keys.join(',') }'}}has-caption-before{{/is}}".html_safe
+  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.select {|k,v| !v['keep_label']}.keys.join(',') }'}}has-caption-before{{/is}}".html_safe
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -208,7 +206,7 @@
         </li>
         <% if caption_before[:all_fields]%>
           <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
-            <%= show_caption_before :all_fields %>
+            <%= show_caption_before :all_fields, caption_before %>
           </li>
         <% end %>
 
@@ -216,8 +214,8 @@
         {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
 
         {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
-        <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-          {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key}}}
+        <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
+          {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption'}}}
         </li>
         {{/is}}
 
@@ -366,7 +364,7 @@
       <% if caption_before[:metadata]%>
       <div class="results-caption-before <%=full_name.hyphenate%>-metadata">
         <div class="panel panel-default panel-body">
-          <small><%= show_caption_before :metadata %></small>
+          <small><%= show_caption_before :metadata, caption_before %></small>
         </div>
       </div>
     <% end %>

@@ -1,9 +1,20 @@
-<% category_models.each do |m| %>
-  <% if viewable  [m.model_association_name] %>
-    <% if DynamicModel.orientation(category) == :vertical %>
-    <div class="<%= layout_item_block_sizes[:regular] %> dynamic-container resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+<%
+category_models.each do |m|
+  if viewable  [m.model_association_name]
+    if DynamicModel.orientation(category) == :vertical
+%>
+      <div class="<%= layout_item_block_sizes[:regular] %> dynamic-container resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     <% else %>
-    <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
-    <% end %>
-  <% end %>
-<% end %>
+      <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+<%
+    end
+    if defined?(force_load) && force_load
+      # Force the new dynamic models to load in the details panel, which they wouldn't do otherwise
+%>
+    <div class="on-open-click hidden">
+      <a href="/masters/{{id}}/dynamic_model/<%=m.implementation_model_name.pluralize%>" data-result-target="#<%=m.full_item_types_name%>-{{id}}-" data-template="<%=m.implementation_model_name.hyphenate.pluralize%>-list-template" data-remote="true"  data-open-priority="<%= force_load == true ? 1000 : force_load %>"><%=m.name%></a>
+    </div>
+<%  end
+  end
+end
+%>

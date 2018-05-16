@@ -62,6 +62,26 @@ _fpa.form_utils = {
 
     },
 
+    on_open_click: function(block, timeout) {
+      var res = block.find('.on-open-click a[data-remote="true"], .on-open-click a[data-target]').not('.auto-clicked').addClass('auto-clicked');
+      res.each(function() {
+        var item = $(this);
+
+        var p = timeout;
+        if(!p) {
+          p = item.attr('data-open-priority');
+          if(!p)
+            p = 20;
+          else
+            p = parseInt(p);
+        }
+
+        window.setTimeout(function() {
+          item.click();
+        }, p);
+      });
+    },
+
     unmask_inputs: function(block){
 
       var inputs = block.find("input[data-unmask='number'].is-masked");
@@ -167,7 +187,7 @@ _fpa.form_utils = {
 
                 var prev_caption_before = false;
                 list_items.each(function() {
-                  var this_caption_before = $(this).hasClass('caption-before');
+                  var this_caption_before = $(this).hasClass('caption-before') && !$(this).hasClass('caption-before-keep-label');
                   if(prev_caption_before && !this_caption_before) {
                     $(this).find('small, label').remove();
                   }
@@ -797,7 +817,7 @@ _fpa.form_utils = {
               var curr_h = $(this).height();
               if(curr_h > max_h) max_h = curr_h;
             });
-            if(max_h > 40) {
+            if(max_h > 60) {
               c = _fpa.layout.item_blocks.wide;
               me.first().removeClass(_fpa.layout.item_blocks.regular);
               me.addClass(c).addClass('resized-width');

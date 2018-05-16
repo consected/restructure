@@ -2,31 +2,6 @@
 # They provide the ability to present different record types in meaningful forms, for recording keeping or
 # driving workflows.
 
-#
-# An array of configurations:
-#
-# step_1:
-#   label: Step 1
-#   fields:
-#     - select_call_direction
-#     - select_who
-#   caption_before:
-#     select_who: Who does this refer to?
-#   references:
-#     social_security_number
-#       from: this | master
-#       add: one_to_this | one_to_master | many
-#
-# step_2:
-#   label: Step 2
-#   fields:
-#     - select_call_direction
-#     - extra_text
-
-# Reserved names are: primary, blank
-# These correspond to additional options for the primary and blank log fields
-
-
 
 class ExtraLogType < ExtraOptions
 
@@ -101,7 +76,11 @@ class ExtraLogType < ExtraOptions
       else
         sa.each do |on_act, conf|
           conf.each do |do_act, conf_act|
-            succ = calc_action_if conf_act['if'].symbolize_keys, obj
+            if conf_act['if']
+              succ = calc_action_if conf_act['if'].symbolize_keys, obj
+            else
+              succ = true
+            end
             if succ
               res[on_act] ||= {}
               if conf_act['value']

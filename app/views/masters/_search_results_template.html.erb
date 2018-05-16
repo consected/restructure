@@ -115,56 +115,55 @@
   <div class="panel-group" id="results-accordion" role="tablist" aria-multiselectable="true">
     <div class="panel panel-default results-panel">
 
-    {{#each masters}}
-      {{>master_panel_heading num_masters=../masters.length}}
-      <div id="master-{{id}}-main-container" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}} master-panel" data-master-id="{{id}}" role="tabpanel" aria-labelledby="master-{{id}}">
-        {{>master_tabs}}
-        <div class="panel-body master-main-panel">
-          <%
-          if panels && panels.length > 0
+      {{#each masters}}
+        {{>master_panel_heading num_masters=../masters.length}}
+        <div id="master-{{id}}-main-container" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}} master-panel" data-master-id="{{id}}" role="tabpanel" aria-labelledby="master-{{id}}">
+          {{>master_tabs}}
+          <div class="panel-body master-main-panel">
+            <%
+            if panels && panels.length > 0
 
-            panels.each do |panel|
-              initial_show = panel.view_options && panel.view_options.initial_show
-              if panel.contains && panel.contains.categories
-                panel.contains.categories.each do |cat|
-          %>
-                 <%= render partial: 'masters/search_results_category_panel', locals: {panel: panel, category: cat, panel_name: panel.panel_name, panel_label: panel.panel_label, initial_show: initial_show} %>
-          <%
+              panels.each do |panel|
+                initial_show = panel.view_options && panel.view_options.initial_show
+                if panel.contains && panel.contains.categories
+                  panel.contains.categories.each do |cat|
+            %>
+                   <%= render partial: 'masters/search_results_category_panel', locals: {panel: panel, category: cat, panel_name: panel.panel_name, panel_label: panel.panel_label, initial_show: initial_show} %>
+            <%
+                  end
+                elsif panel.contains && panel.contains.resources
+            %>
+                  <%= render partial: 'masters/search_results_resources_panel', locals: {panel: panel} %>
+            <%
                 end
-              elsif panel.contains && panel.contains.resources
-          %>
-                <%= render partial: 'masters/search_results_resources_panel', locals: {panel: panel} %>
-          <%
               end
-            end
-          %>
-          <% else # panels %>
-          {{>master_external_links_panel}}
+            %>
+            <% elsif # no panels defined %>
+              {{>master_external_links_panel}}
 
-            <% ActivityLog.enabled.each do |a| %>
-              <% if view?[a.full_item_types_name.to_sym] %>
-              <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_data_template_name %>-main-result-template"  >
-                  <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
-              </div>
+              <% ActivityLog.enabled.each do |a| %>
+                <% if view?[a.full_item_types_name.to_sym] %>
+                <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_data_template_name %>-main-result-template"  >
+                    <div id="<%= a.full_item_types_name.hyphenate %>-inner-{{id}}" class="activity-logs-inner-block"></div>
+                </div>
+                <% end %>
+              <% end %>
+
+              <%= render partial: 'masters/search_results_category_panel', locals: {category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
+              <%= render partial: 'masters/search_results_category_panel', locals: {category: 'details', panel_name: 'details', panel_label: 'Details', initial_show: true} %>
+              <%= render partial: 'masters/search_results_category_panel', locals: {category: 'external-ids', panel_name: 'external-ids', panel_label: 'External IDs', initial_show: false} %>
+
+              <% DynamicModel.categories.each do |cat| %>
+                <%= render partial: 'masters/search_results_category_panel', locals: {category: cat, panel_name: cat, panel_label: cat.humanize.titleize, initial_show: false} %>
               <% end %>
             <% end %>
-
-            <%= render partial: 'masters/search_results_category_panel', locals: {category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
-            <%= render partial: 'masters/search_results_category_panel', locals: {category: 'details', panel_name: 'details', panel_label: 'Details', initial_show: true} %>
-            <%= render partial: 'masters/search_results_category_panel', locals: {category: 'external-ids', panel_name: 'external-ids', panel_label: 'External IDs', initial_show: false} %>
-
-            <% DynamicModel.categories.each do |cat| %>
-              <%= render partial: 'masters/search_results_category_panel', locals: {category: cat, panel_name: cat, panel_label: cat.humanize.titleize, initial_show: false} %>
-            <% end %>
-          <% end %>
-
+          </div>
         </div>
-      </div>
-    {{/each}}
+      {{/each}}
 
-    </div>
-    <div class="hidden" id="msid_list">{{#each masters}}{{msid}} {{/each}}</div>
-    <div class="hidden" id="master_id_list">{{#each masters}}{{id}} {{/each}}</div>
+  </div>
+  <div class="hidden" id="msid_list">{{#each masters}}{{msid}} {{/each}}</div>
+  <div class="hidden" id="master_id_list">{{#each masters}}{{id}} {{/each}}</div>
   {{else}}
       <h2>No Results</h2>
   {{/if}}

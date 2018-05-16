@@ -129,7 +129,7 @@ _fpa.postprocessors = {
 
             _fpa.masters.switch_id_on_click(block);
 
-            block.find('.on-open-click a[data-remote="true"], .on-open-click a[data-target]').not('.auto-clicked').click().addClass('auto-clicked');
+            _fpa.form_utils.on_open_click(block);
 
         }, 30);
 
@@ -247,7 +247,7 @@ _fpa.postprocessors = {
     },
 
     extras_panel_handler: function(block){
-        block.find('.on-open-click a[data-remote="true"], .on-open-click a[data-target]').not('.auto-clicked').click().addClass('auto-clicked');
+      _fpa.form_utils.on_open_click(block);
     },
 
 
@@ -293,12 +293,8 @@ _fpa.postprocessors = {
                 a.trigger('click.rails');
               }
             }, 10);
-            // After a short delay, trigger the background loading of items for this master
-            window.setTimeout(function(){
-              // This on-open-click is always handled to force a refresh. It only works with hidden blocks,
-              // avoiding accidental refresh of visible items
-              $('#master-'+ master_id + '-main-container').find('.on-open-click.hidden a[data-remote="true"]').click();
-            }, 500);
+
+            _fpa.form_utils.on_open_click($('#master-'+ master_id + '-main-container'), 500);            
         }
     },
 

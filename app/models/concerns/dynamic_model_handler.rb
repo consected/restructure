@@ -123,7 +123,7 @@ module DynamicModelHandler
     # either use the editable_if configuration if there is one,
     # or only allow the latest item to be used otherwise
     dopt = self.default_options
-    if dopt.editable_if
+    if dopt.editable_if.is_a?(Hash) && dopt.editable_if.first
       res = dopt.calc_editable_if(self)
       return unless res
     end

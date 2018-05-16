@@ -47,6 +47,7 @@ class Admin::PageLayout < ActiveRecord::Base
   def access_options
 
     begin
+      return unless options
       o = YAML.load options
       return unless o
 
