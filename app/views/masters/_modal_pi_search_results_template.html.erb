@@ -12,7 +12,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
           <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="open in new tab" target="openmaster"> </a>
           <div class="row">
             <div class="col-md-2 col-lg-2 result-refs"><span class="master_id"  title="Master ID">{{id}}</span></div>
-            <a class="modal-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-player-infos" aria-expanded="false" aria-controls="master-{{id}}-player-infos" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
+            <a class="modal-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-main-container" aria-expanded="false" aria-controls="master-{{id}}-main-container" class=" {{#is ../masters.length '!==' 1}}collapsed{{/is}}">
 
               <div class="col-md-11 col-lg-11 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
                 {{#with player_infos.[0]}}
@@ -30,7 +30,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
           </div>
         </h3>
       </div>
-      <div id="master-{{id}}-player-infos" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
+      <div id="master-{{id}}-main-container" class="panel-collapse collapse {{#is ../masters.length 1}}in{{/is}}" role="tabpanel" aria-labelledby="master-{{id}}">
         <div class="panel-body">
           <% if current_user && current_user.can?(:view_external_links) %>
           <div class="external-links row collapse " id="external-links-{{id}}" data-master-id="{{id}}"></div>

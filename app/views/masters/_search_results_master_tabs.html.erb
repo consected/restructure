@@ -1,0 +1,41 @@
+
+<script id="master_tabs" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <ul class="nav nav-pills details-tabs <%= app_config_set(:hide_player_tabs) ? 'hidden' : '' %>">
+
+  <%
+    panels.each do |panel|
+      panel_name = panel.panel_name
+      panel_name_us = panel_name.underscore
+      panel_label = panel.panel_label.downcase
+      categories = panel.contains && panel.contains.categories
+      resources = panel.contains && panel.contains.resources
+      initial_show = panel.view_options && panel.view_options.initial_show
+  %>
+    <% if categories && categories.include?('trackers') %>
+      <li role="presentation">
+        <a href="/masters/{{id}}/trackers" data-panel-tab="trackers" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker {{#is trackers.length '===' 0}}collapsed{{/is}}{{#if trackers}}{{else}}collapsed{{/if}}"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
+      </li>
+    <% end %>
+
+    <% if categories %>
+      <li role="presentation">
+        <a href="#/" data-panel-tab="<%= panel_name_us %>" data-toggle="collapse" data-target="#<%= panel_name%>-{{id}}" class="scroll-to-expanded "><span class="caret"></span> <%= panel_label %></a>
+      </li>
+    <% end %>
+
+    <% if resources
+        resources.each do |resource|
+          table_name = resource.gsub('__', '_')
+          template_postfix = ''
+          template_postfix = '-main-result-template' if resource.start_with?('activity_log__')
+    %>
+      <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
+        <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= resource.gsub('__', '/') %>"  data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= table_name %><%= template_postfix %>"><span class="caret"></span> <%= panel_label %></a>
+      </li>
+    <%
+        end
+      end
+    end
+  %>
+  </ul>
+</script>

@@ -29,7 +29,8 @@ class ExtraOptions
         }
       },
       view_options: {
-        option_name: 'a value'
+        show_embedded_at_top: 'true | false to position a single auto loaded embedded item',
+        hide_unless_creatable: 'true | false to hide add-item buttons in activity logs if they are not creatable'
       },
       save_action: {
         label: 'button label'
@@ -50,22 +51,26 @@ class ExtraOptions
   end
 
   def self.attr_for_conditions
-      {all: {
-        field_name: 'all conditional values must be true',
-        field_name_2: '...'
-      },
-      any: {
-        field_name: 'any conditional value must be true',
-        field_name_2: '...'
-      },
-      not_any: {
-        field_name: 'all conditional values must be false',
-        field_name_2: '...'
-      },
-      not_all: {
-        field_name: 'any conditional value must be false',
-        field_name_2: '...'
-      }}
+    {
+      model_table_name: {
+        all: {
+          field_name: 'all conditional values must be true',
+          field_name_2: '...'
+        },
+        any: {
+          field_name: 'any conditional value must be true',
+          field_name_2: '...'
+        },
+        not_any: {
+          field_name: 'all conditional values must be false',
+          field_name_2: '...'
+        },
+        not_all: {
+          field_name: 'any conditional value must be false',
+          field_name_2: '...'
+        }
+      }
+    }
   end
 
 

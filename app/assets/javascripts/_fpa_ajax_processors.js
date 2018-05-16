@@ -297,7 +297,7 @@ _fpa.postprocessors = {
             window.setTimeout(function(){
               // This on-open-click is always handled to force a refresh. It only works with hidden blocks,
               // avoiding accidental refresh of visible items
-              $('#master-'+ master_id + '-player-infos').find('.on-open-click.hidden a[data-remote="true"]').click();
+              $('#master-'+ master_id + '-main-container').find('.on-open-click.hidden a[data-remote="true"]').click();
             }, 500);
         }
     },

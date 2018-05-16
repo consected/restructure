@@ -24,7 +24,7 @@ module PlayerContactActions
     finish_form_formatting
 
 
-    expect(page).to have_css("#master-#{@player.master_id}-player-infos.collapse.in")
+    expect(page).to have_css("#master-#{@player.master_id}-main-container.collapse.in")
     expect(page).not_to have_css(".collapse.collapsing")
 
 

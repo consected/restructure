@@ -2,7 +2,7 @@ class Admin::PageLayoutsController < AdminController
 
   protected
     def default_index_order
-      "disabled asc nulls first, layout_name asc, panel_position asc"
+      "disabled asc nulls first, app_type_id asc, layout_name asc, panel_position asc"
     end
 
     def filters_on
