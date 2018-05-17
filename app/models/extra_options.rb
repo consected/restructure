@@ -52,24 +52,32 @@ class ExtraOptions
 
   def self.attr_for_conditions
     {
-      model_table_name: {
-        all: {
+
+      all: {
+        model_table_name: {
           field_name: 'all conditional values must be true',
           field_name_2: '...'
-        },
-        any: {
+        }
+      },
+      any: {
+        model_table_name: {
           field_name: 'any conditional value must be true',
           field_name_2: '...'
-        },
-        not_any: {
+        }
+      },
+      not_any: {
+        model_table_name: {
           field_name: 'all conditional values must be false',
           field_name_2: '...'
-        },
-        not_all: {
+        }
+      },
+      not_all: {
+        model_table_name: {
           field_name: 'any conditional value must be false',
           field_name_2: '...'
         }
       }
+
     }
   end
 
@@ -165,10 +173,24 @@ class ExtraOptions
 
     action_conf.each do |c_var, c_is_res|
       c_is = {}
-      c_is_res.each {|c,v| c_is[c.gsub('__', '_').gsub('dynamic_model_', '').to_sym] = v}
+      c_is_res.each do |c_table, t_conds|
+        table_name = c_table.gsub('__', '_').gsub('dynamic_model_', '').to_sym
+        c_is[table_name] ||= {}
+        t_conds.each do |field, val|
+
+          if val.is_a? Hash
+
+            if val.first.first == 'this'
+              val = obj.attributes[val.first.last]
+            end
+          end
+          c_is[table_name][field] = val
+        end
+      end
+
       j = c_is_res.keys.map(&:to_sym)
       q = all_res.joins(j)
-
+      c_var = c_var.to_sym
       if c_var == :all
         res &&= !!q.where(c_is).order(id: :desc).first
       elsif c_var == :not_all

@@ -18,12 +18,17 @@ class ActivityLog::ActivityLogsController < UserBaseController
     def handle_embedded_item
 
       mrs = object_instance.model_references
-      cmrs = object_instance.creatable_model_references
-      if mrs.length == 1 && cmrs.length == 0
+      cmrs = object_instance.creatable_model_references.select {|k,v| v}
+
+      #template = mrs.first && mrs.first.to_record_type_us.sub('dynamic_model__', '')
+      if action_name.in?(['new', 'create']) && cmrs.length == 1
+        @embedded_item = object_instance.build_model_reference cmrs.first        
+        @embedded_item = nil if @embedded_item.class.parent == ActivityLog
+      elsif mrs.length == 1 && !(action_name.in?( ['new', 'create']) && cmrs.length > 0)# && cmrs[template] != 'many'
         # A referenced record exists and no more are creatable
         # Therefore just use this existing item
         @embedded_item = mrs.first.to_record
-      elsif mrs.length == 0 && cmrs.length == 1 && cmrs.first.last != 'many'#!(action_name == 'edit' && cmrs.first.last == 'many')
+      elsif mrs.length == 0 && cmrs.length == 1 && !(action_name == 'edit' && cmrs.first.last == 'many')
         # No referenced record exists yet, and one is creatable
         # Make a new creatable item
         @embedded_item = object_instance.build_model_reference cmrs.first
@@ -208,6 +213,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
     def handle_extra_log_type
 
       etp = params[:extra_type]
+      etp = params[:extra_log_type] if etp.blank?
       if etp.blank?
         etp = object_instance.extra_log_type
       end
