@@ -85,7 +85,7 @@ end
     sleep 1
 
     res = nil
-    (1..10).times.each do
+    10.times.each do
        break if Delayed::Job.count == 0
       sleep 2
       puts "Waiting again"

@@ -12,6 +12,7 @@ class ExtraLogType < ExtraOptions
   attr_accessor(*self.key_attributes)
 
   def self.attr_defs
+
     res = {
       label: "button label",
       fields: [
@@ -28,12 +29,27 @@ class ExtraLogType < ExtraOptions
             edit: 'readonly',
             show: 'readonly'
           }
-
         }
       },
       on_create: {
         create_next_creatable: {
           if: attr_for_conditions
+        },
+        create_reference: {
+          model_name: {
+            if: attr_for_conditions,
+            in: "this | master",
+            with: {
+              field_name: "now()",
+              field_name_2: "literal value",
+              field_name_3: {
+                this: 'field_name'
+              },
+              field_name_3: {
+                reference_name: 'field_name'
+              }
+            }
+          }
         }
       }
     }

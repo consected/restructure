@@ -34,6 +34,7 @@ module TableGenerators
 
     @implementation_table_name = name
     singular_name = singularize(name)
+    short_name = singular_name.sub('activity_log_', 'al_')
 
     unless singular_name
       puts "The provided table name does not appear to be pluralized"
@@ -169,11 +170,11 @@ EOF
       ALTER TABLE ONLY #{name}
           ADD CONSTRAINT #{name}_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_#{singular_name}_history_on_master_id ON #{singular_name}_history USING btree (master_id);
-      CREATE INDEX index_#{singular_name}_history_on_#{item_type_id} ON #{singular_name}_history USING btree (#{base_name_id});
+      CREATE INDEX index_#{short_name}_history_on_master_id ON #{singular_name}_history USING btree (master_id);
+      CREATE INDEX index_#{short_name}_history_on_#{item_type_id} ON #{singular_name}_history USING btree (#{base_name_id});
 
-      CREATE INDEX index_#{singular_name}_history_on_#{singular_name}_id ON #{singular_name}_history USING btree (#{singular_name}_id);
-      CREATE INDEX index_#{singular_name}_history_on_user_id ON #{singular_name}_history USING btree (user_id);
+      CREATE INDEX index_#{short_name}_history_on_#{singular_name}_id ON #{singular_name}_history USING btree (#{singular_name}_id);
+      CREATE INDEX index_#{short_name}_history_on_user_id ON #{singular_name}_history USING btree (user_id);
 
       CREATE INDEX index_#{name}_on_master_id ON #{name} USING btree (master_id);
       CREATE INDEX index_#{name}_on_#{item_type_id} ON #{name} USING btree (#{base_name_id});

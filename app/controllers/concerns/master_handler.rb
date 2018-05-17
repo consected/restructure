@@ -285,7 +285,9 @@ module MasterHandler
 
           # Find the matching UserBase subclass that has this name, avoiding using the supplied param
           # in a way that could be risky by allowing code injection
-          ic = UserBase.subclasses.select {|s| s.name == ref_item_class_name}.first
+          # Subsclasses may be subclassed further - go to the next level if needed.
+          all_subclasses = UserBase.subclasses.map {|s| s.subclasses ? s.subclasses : s }.flatten
+          ic = all_subclasses.select {|s| s.name == ref_item_class_name}.first
 
           # look up the item using the item_id parameter.
           rid = pr[:ref_record_id].to_i

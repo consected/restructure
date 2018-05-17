@@ -7,21 +7,38 @@
     id = '{{id}}'
   end
 
+  caption = ref_config['label'] || caption
+
 %>
 <% unless @embedded_item %>
-<li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
   <% if action_name.in? ['new', 'edit']
       # List the reference items that can be created after saving
   %>
-        <span class="small"><i><%= caption.humanize %></i></span>
+    <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
+      <span class="small"><i><%= caption.humanize %></i></span>
+    </li>
   <% else
       # Show the 'add' reference item button
+
+      add_extra_params = ref_config['add_with']
+      if add_extra_params
+        add_extra_params = "&#{add_extra_params.to_query}"
+      end
+
+      caption_before_ref_name = "reference_#{ref_name}".to_sym
+      cb = caption_before[caption_before_ref_name]
   %>
-    <p class="text-center">
-        <a href="/masters/<%= master_id %>/<%=ref_name.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
+    <% if cb %>
+    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_name.to_s.hyphenate%> <%=caption_before_ref_name.to_s.hyphenate%>-caption">
+      <%= show_caption_before caption_before_ref_name, caption_before %>
+    </li>
+    <% end %>
+    <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
+      <p class="text-center">
+        <a href="/masters/<%= master_id %>/<%=ref_name.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params%>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
       </p>
+    </li>
   <% end %>
-</li>
 <% end %>
 <div id="<%=ref_name.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_name.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">
 <div class="new-block model-reference-new-block" id="<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-result-target-for-child="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-, #<%=ref_name.ns_hyphenate%>-<%= master_id %>-" data-subscription="<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-preprocessor="<%=ref_name.ns_underscore%>_edit_form">

@@ -107,7 +107,7 @@ class DynamicModel < ActiveRecord::Base
         n = self.name
         definition = self
 
-        a_new_class = Class.new(UserBase) do
+        a_new_class = Class.new(DynamicModelBase) do
           def self.is_dynamic_model
             true
           end
@@ -166,7 +166,7 @@ class DynamicModel < ActiveRecord::Base
           def self.human_name= n
             @human_name = n
           end
-          
+
           def self.human_name
             @human_name
           end

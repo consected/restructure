@@ -83,7 +83,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def self.to_record_class_for_type rec_type
-    rec_type.camelize.constantize
+    rec_type.ns_camelize.constantize
   end
 
   def to_record_class
@@ -131,6 +131,20 @@ class ModelReference < ActiveRecord::Base
     @to_record = self.to_record_class.find(self.to_record_id)
   end
 
+  def to_record_result_key
+    if to_record.respond_to? :extra_log_type
+      return "#{to_record_type_us}_#{to_record.extra_log_type}"
+    end
+    return to_record_type_us
+  end
+
+  def to_record_template
+    if to_record.respond_to? :extra_log_type
+      return "#{to_record_type_us}_#{to_record.extra_log_type}"
+    end
+    return to_record_short_type_us
+  end
+
   def to_record= rec
     @to_record = rec
   end
@@ -166,6 +180,8 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :from_record_type_us
     extras[:methods] << :from_record_short_type_us
     extras[:methods] << :from_record_viewable
+    extras[:methods] << :to_record_result_key
+    extras[:methods] << :to_record_template
 
     # Don't return the full referenced object
     super(extras)

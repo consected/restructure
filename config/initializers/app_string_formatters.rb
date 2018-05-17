@@ -31,4 +31,9 @@ class String
     self.gsub('__', '/').camelize
   end
 
+  # Pathify the string, treating double underscores as a path separator
+  def ns_pathify
+    self.gsub('__', '/')
+  end
+
 end

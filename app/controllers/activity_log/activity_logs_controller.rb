@@ -23,7 +23,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
         # A referenced record exists and no more are creatable
         # Therefore just use this existing item
         @embedded_item = mrs.first.to_record
-      elsif mrs.length == 0 && cmrs.length == 1
+      elsif mrs.length == 0 && cmrs.length == 1 && cmrs.first.last != 'many'#!(action_name == 'edit' && cmrs.first.last == 'many')
         # No referenced record exists yet, and one is creatable
         # Make a new creatable item
         @embedded_item = object_instance.build_model_reference cmrs.first

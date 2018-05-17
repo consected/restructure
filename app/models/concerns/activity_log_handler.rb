@@ -132,7 +132,8 @@ module ActivityLogHandler
     if defined? super
       super()
     else
-      "#{human_name}: #{id}"
+      n = extra_log_type_config.label || extra_log_type.humanize
+      "#{n}"
     end
   end
 
@@ -202,6 +203,8 @@ module ActivityLogHandler
     self.action_when
   end
 
+  # action_when represents the date or timestamp attribute that is used to order results
+  # Often this will be the created_at attribute value, although it may represent an alternative value
   # the action_when attribute may vary from one activity log model to another. Get the value
   def action_when
     action = self.class.action_when_attribute
@@ -217,6 +220,7 @@ module ActivityLogHandler
     extra_log_type_config.calc_save_action_if self
   end
 
+  # List of activity log types that can be created or not, based on user access controls and creatable_if rules
   def creatables
 
     current_user = master.current_user
@@ -280,7 +284,7 @@ module ActivityLogHandler
 
     k = creatable_model_ref.first
     fb = extra_log_type_config.references[k]['filter_by'] || {}
-    k.camelize.constantize.new fb
+    k.ns_camelize.constantize.new fb
 
   end
 
