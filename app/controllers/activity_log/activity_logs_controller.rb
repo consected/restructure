@@ -31,9 +31,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     def handle_embedded_item
 
       mrs = object_instance.model_references
-      cmrs = object_instance.creatable_model_references.select {|k,v| v}
+
+      cmrs = object_instance.creatable_model_references only_creatables: true
 
       #template = mrs.first && mrs.first.to_record_type_us.sub('dynamic_model__', '')
+      
       if action_name.in?(['new', 'create']) && cmrs.length == 1
         @embedded_item = object_instance.build_model_reference cmrs.first
         @embedded_item = nil if @embedded_item.class.parent == ActivityLog

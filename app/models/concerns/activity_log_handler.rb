@@ -239,70 +239,79 @@ module ActivityLogHandler
   def model_references
     res = []
     return res unless extra_log_type_config && extra_log_type_config.references
-    extra_log_type_config.references.each do |ref_type, ref_config|
-      f = ref_config['from']
-      if f == 'this'
-        res += ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config['filter_by']
-      elsif f == 'master'
-        res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']
+    extra_log_type_config.references.each do |ref_key, refitem|
+      refitem.each do |ref_type, ref_config|
+        f = ref_config['from']
+        if f == 'this'
+          res += ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config['filter_by']
+        elsif f == 'master'
+          res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']
+        end
       end
     end
     res
   end
 
-  def creatable_model_references
-    res = {}
-    res.compare_by_identity
+  def creatable_model_references only_creatables: false
+    cre_res = {}
+    return cre_res unless extra_log_type_config && extra_log_type_config.references
+    extra_log_type_config.references.each do |ref_key, refitem|
+      refitem.each do |ref_type, ref_config|
 
-    return res unless extra_log_type_config && extra_log_type_config.references
-    extra_log_type_config.references.each do |ref_type, ref_config|
+        res = {}
+        ires = nil
+        ci_res = true
+        # Check if creatable_if has been defined on the reference configuration
+        # and if it evaluates to true
+        ci = ref_config['creatable_if']
+        ci_res = extra_log_type_config.calc_action_if ci, self if ci
 
-      res[ref_type] = nil
-      ci_res = true
-      # Check if creatable_if has been defined on the reference configuration
-      # and if it evaluates to true
-      ci = ref_config['creatable_if']
-      ci_res = extra_log_type_config.calc_action_if ci, self if ci
+        if ci_res
+          a = ref_config['add']
+          if a == 'many'
+            l = ref_config['limit']
+            under_limit = true
+            if l && l.is_a?(Integer)
+              under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length < l)
+            end
 
-      if ci_res
-        a = ref_config['add']
-        if a == 'many'
-          l = ref_config['limit']
-          under_limit = true
-          if l && l.is_a?(Integer)
-            under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length < l)
+            ires = a if under_limit
+          elsif a == 'one_to_master'
+            if ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
+              ires = a
+            end
+          elsif a == 'one_to_this'
+            if ModelReference.find_references(self, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
+              ires = a
+            end
           end
 
-          res[ref_type] = a if under_limit
-        elsif a == 'one_to_master'
-          if ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
-            res[ref_type] = a
+          if ires
+            # Check if the user has access to create the item
+
+            mrc = ModelReference.to_record_class_for_type(ref_type)
+            if mrc.parent == ActivityLog
+              elt = ref_config['add_with'] && ref_config['add_with']['extra_log_type']
+              o = mrc.new(extra_log_type: elt, master: master)
+            else
+              o = mrc.new master: master
+            end
+
+
+
+            i = o.allows_current_user_access_to? :create
+            res = {ref_type: ref_type, many: ires, ref_config: ref_config}  if ires && i
+
           end
-        elsif a == 'one_to_this'
-          if ModelReference.find_references(self, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
-            res[ref_type] = a
-          end
+
         end
 
-        if res[ref_type]
-          # Check if the user has access to create the item
-
-          mrc = ModelReference.to_record_class_for_type(ref_type)
-          if mrc.parent == ActivityLog
-            elt = ref_config['add_with'] && ref_config['add_with']['extra_log_type']
-            o = mrc.new(extra_log_type: elt, master: master)
-          else
-            o = mrc.new master: master
-          end
-
-          i = o.allows_current_user_access_to? :create
-          res[ref_type] = nil unless i
-
+        if res[:ref_type] || !only_creatables
+          cre_res[ref_key] = {ref_type => res}
         end
-
       end
     end
-    res
+    cre_res
   end
 
   # Use a provided creatable model reference to make a new item
@@ -310,8 +319,10 @@ module ActivityLogHandler
   # item is set up correctly to be picked up again later
   def build_model_reference creatable_model_ref, optional_params: {}
 
-    k = creatable_model_ref.first
-    fb = extra_log_type_config.references[k]['filter_by'] || {}
+    m = creatable_model_ref.first
+    fb = extra_log_type_config.references[m]
+    k = fb.first.first
+    fb = fb.first.last['filter_by'] || {}
     optional_params.merge! fb
     k.ns_camelize.constantize.new optional_params
 
