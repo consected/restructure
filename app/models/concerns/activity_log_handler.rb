@@ -265,23 +265,25 @@ module ActivityLogHandler
         # and if it evaluates to true
         ci = ref_config['creatable_if']
         ci_res = extra_log_type_config.calc_action_if ci, self if ci
+        fb = ref_config['filter_by']
 
         if ci_res
           a = ref_config['add']
           if a == 'many'
             l = ref_config['limit']
             under_limit = true
+
             if l && l.is_a?(Integer)
-              under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length < l)
+              under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: fb).length < l)
             end
 
             ires = a if under_limit
           elsif a == 'one_to_master'
-            if ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
+            if ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: fb).length == 0
               ires = a
             end
           elsif a == 'one_to_this'
-            if ModelReference.find_references(self, to_record_type: ref_type, filter_by: ref_config['filter_by']).length == 0
+            if ModelReference.find_references(self, to_record_type: ref_type, filter_by: fb).length == 0
               ires = a
             end
           end
@@ -319,10 +321,8 @@ module ActivityLogHandler
   # item is set up correctly to be picked up again later
   def build_model_reference creatable_model_ref, optional_params: {}
 
-    m = creatable_model_ref.first
-    fb = extra_log_type_config.references[m]
-    k = fb.first.first
-    fb = fb.first.last['filter_by'] || {}
+    k = creatable_model_ref.first
+    fb = extra_log_type_config.references[k]['filter_by'] || {}
     optional_params.merge! fb
     k.ns_camelize.constantize.new optional_params
 

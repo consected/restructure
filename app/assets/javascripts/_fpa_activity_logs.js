@@ -144,15 +144,21 @@ _fpa.activity_logs = {
 
   handle_save_action(block, data) {
 
-
+    var save_action;
     if(data._control) {
       obj_data = _fpa.activity_logs.get_object_data(data);
 
       if (obj_data._created) {
-        var save_action = data._control.save_action.on_create;
+        var dc = obj_data._control;
+        if(!dc) dc = data._control;
+        if(dc)
+          save_action = dc.save_action.on_create;
       }
       else if(obj_data._updated) {
-        var save_action = data._control.save_action.on_update;
+        var dc = obj_data._control;
+        if(!dc) dc = data._control;
+        if(dc)
+          save_action = dc.save_action.on_update;
       }
 
 

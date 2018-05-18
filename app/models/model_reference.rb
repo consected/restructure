@@ -52,6 +52,8 @@ class ModelReference < ActiveRecord::Base
       cond = {from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id}
       cond[:to_record_type] = to_record_type if to_record_type
       res = ModelReference.where cond
+      # Handle the filter_by clause
+      res = res.select {|mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v }   } if filter_by
     end
 
     # Set the current user, so that access controls can be correctly applied

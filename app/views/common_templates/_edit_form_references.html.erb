@@ -8,7 +8,7 @@
   if !embedded && @extra_log_type && @extra_log_type.references
     # Get the creatable references and work out what we can show based on the items that can be created
     # only_creatables = object_instance.creatable_model_references only_creatables: true
-
+    
     creatable_references = @extra_log_type.references.select {|ref_key| object_instance.creatable_model_references[ref_key.to_s].length > 0 }
     creatable_count = creatable_references.length
 
