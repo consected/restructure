@@ -386,17 +386,19 @@ _fpa = {
 
                 // Check if a parent tells us to use a different target (a div around a form can force this to point to a specific location by putting the
                 // target in the data-result-target-for-child attribute)
-                if(!t_abs_force) {
+                var base_block = $('body');
+                // if(!t_abs_force) {
                   var pt = $(this).parents('[data-result-target-for-child]').first();
                   if(pt.length == 1) {
                     t = pt.attr('data-result-target-for-child');
-                  }
 
-                }
+                    base_block = $(this).parents('[data-template]');
+                  }
+                // }
                 // A specific target was specified an is being used.
                 // Handle class markup that state whether to target this item directly, or add new elements above or below
                 // the targeted element
-                var b = $(t);
+                var b = base_block.find(t);
                 if(b.hasClass('new-block')){
                     if(b.hasClass('new-after-parent'))
                         options.position = 'after parent';

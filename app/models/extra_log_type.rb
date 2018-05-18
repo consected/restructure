@@ -45,7 +45,7 @@ class ExtraLogType < ExtraOptions
               field_name_3: {
                 this: 'field_name'
               },
-              field_name_3: {
+              field_name_4: {
                 reference_name: 'field_name'
               }
             }
@@ -65,9 +65,20 @@ class ExtraLogType < ExtraOptions
     raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
 
     if self.references
+      if self.references.is_a? Array
+        new_references = {}
+        new_references.compare_by_identity
+        self.references.each do |i|
+          i.each do |k,v|
+            new_references[k] = v
+          end
+        end
+        self.references = new_references
+      end
+
       self.references.each do |mn, conf|
         self.references[mn]['to_record_label'] = ModelReference.to_record_class_for_type(mn).human_name
-      end
+      end      
     end
   end
 

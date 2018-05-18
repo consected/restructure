@@ -173,23 +173,10 @@ class ExtraOptions
 
     action_conf.each do |c_var, c_is_res|
       c_is = {}
-      c_is_res.each do |c_table, t_conds|
-        table_name = c_table.gsub('__', '_').gsub('dynamic_model_', '').to_sym
-        c_is[table_name] ||= {}
-        t_conds.each do |field, val|
+      join_tables = []
 
-          if val.is_a? Hash
-
-            if val.first.first == 'this'
-              val = obj.attributes[val.first.last]
-            end
-          end
-          c_is[table_name][field] = val
-        end
-      end
-
-      j = c_is_res.keys.map(&:to_sym)
-      q = all_res.joins(j)
+      c_is, join_tables = calc_query_conditions c_is_res, obj
+      q = all_res.joins(join_tables)
       c_var = c_var.to_sym
       if c_var == :all
         res &&= !!q.where(c_is).order(id: :desc).first
@@ -216,6 +203,43 @@ class ExtraOptions
 
 
     res
+  end
+
+  # Generate query conditions and a list of join tables based on a conditional configuration,
+  # such as
+  # creatable_if:
+  #  all:
+  #    <creatable conditions>
+  #
+  def calc_query_conditions condition_config, current_instance
+    join_tables = condition_config.keys.map(&:to_sym)
+    conditions = {}
+
+    condition_config.each do |c_table, t_conds|
+      table_name = c_table.gsub('__', '_').gsub('dynamic_model_', '').to_sym
+      conditions[table_name] ||= {}
+      t_conds.each do |field, val|
+
+        if val.is_a? Hash
+          
+          if val.first.first == 'this'
+            val = current_instance.attributes[val.first.last]
+          elsif val.first.first == 'this_references'
+            valset = []
+            current_instance.model_references.each do |mr|
+              valset << mr.to_record.attributes[val.first.last]
+            end
+            val = valset
+          else
+            val_key = val.keys.first
+            join_tables << val_key unless join_tables.includes? val_key
+          end
+        end
+        conditions[table_name][field] = val
+      end
+    end
+
+    return conditions, join_tables
   end
 
 

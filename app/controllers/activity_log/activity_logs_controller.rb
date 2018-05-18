@@ -15,6 +15,19 @@ class ActivityLog::ActivityLogsController < UserBaseController
       'common_templates/edit_form'
     end
 
+    def set_embedded_item_optional_params
+      return unless @embedded_item
+
+      # Allow passing of params to embedded item to initialize the new form
+      if params[al_type.singularize.to_sym] && params[al_type.singularize.to_sym][:embedded_item]
+        ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
+        ei_secure_params.each do |p,v|
+          @embedded_item.send("#{p}=", v)
+        end
+      end
+
+    end
+
     def handle_embedded_item
 
       mrs = object_instance.model_references
@@ -22,7 +35,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
       #template = mrs.first && mrs.first.to_record_type_us.sub('dynamic_model__', '')
       if action_name.in?(['new', 'create']) && cmrs.length == 1
-        @embedded_item = object_instance.build_model_reference cmrs.first        
+        @embedded_item = object_instance.build_model_reference cmrs.first
         @embedded_item = nil if @embedded_item.class.parent == ActivityLog
       elsif mrs.length == 1 && !(action_name.in?( ['new', 'create']) && cmrs.length > 0)# && cmrs[template] != 'many'
         # A referenced record exists and no more are creatable
@@ -37,6 +50,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
       if @embedded_item
         @embedded_item.master ||= object_instance.master
         @embedded_item.master.current_user ||= object_instance.master_user
+
+        set_embedded_item_optional_params if action_name == 'new'
 
         if action_name == 'create'
           begin

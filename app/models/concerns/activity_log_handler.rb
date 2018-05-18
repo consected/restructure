@@ -252,6 +252,7 @@ module ActivityLogHandler
 
   def creatable_model_references
     res = {}
+    res.compare_by_identity
 
     return res unless extra_log_type_config && extra_log_type_config.references
     extra_log_type_config.references.each do |ref_type, ref_config|
@@ -285,7 +286,7 @@ module ActivityLogHandler
 
         if res[ref_type]
           # Check if the user has access to create the item
-          
+
           mrc = ModelReference.to_record_class_for_type(ref_type)
           if mrc.parent == ActivityLog
             elt = ref_config['add_with'] && ref_config['add_with']['extra_log_type']
@@ -307,11 +308,12 @@ module ActivityLogHandler
   # Use a provided creatable model reference to make a new item
   # Initialize attributes with any filter_by configurations, to ensure the
   # item is set up correctly to be picked up again later
-  def build_model_reference creatable_model_ref
+  def build_model_reference creatable_model_ref, optional_params: {}
 
     k = creatable_model_ref.first
     fb = extra_log_type_config.references[k]['filter_by'] || {}
-    k.ns_camelize.constantize.new fb
+    optional_params.merge! fb
+    k.ns_camelize.constantize.new optional_params
 
   end
 

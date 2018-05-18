@@ -22,7 +22,7 @@
 
       add_extra_params = ref_config['add_with']
       if add_extra_params
-        add_extra_params = "&#{add_extra_params.to_query}"
+        add_extra_params = "&#{add_extra_params.to_query.gsub('%7B%7B', '{{').gsub('%7D%7D', '}}')}"
       end
 
       caption_before_ref_name = "reference_#{ref_name}".to_sym
