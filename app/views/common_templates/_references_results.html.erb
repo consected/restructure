@@ -26,10 +26,9 @@
 
   <% references.each do |ref_key, refitem|
       refitem.each do |ref_type, ref_config| %>
-    {{#unless prevent_edit}}
-    {{log creatable_model_references}}
+    
       {{#if creatable_model_references.<%= ref_key %> }}
-      
+
         {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %> }}
 
           {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %>.ref_type }}
@@ -38,7 +37,7 @@
           {{/if}}
         {{/if}}
       {{/if}}
-    {{/unless}}
+
   <%    end
       end %>
 

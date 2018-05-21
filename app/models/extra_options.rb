@@ -1,7 +1,7 @@
 class ExtraOptions
 
   def self.base_key_attributes
-    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if]
+    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if]
   end
   def self.add_key_attributes
     []
@@ -120,6 +120,8 @@ class ExtraOptions
     self.editable_if ||= {}
     self.editable_if = self.editable_if.symbolize_keys
 
+    self.showable_if ||= {}
+    self.showable_if = self.showable_if.symbolize_keys
 
     self
   end
@@ -161,6 +163,10 @@ class ExtraOptions
 
   def calc_editable_if obj
     calc_action_if self.editable_if, obj
+  end
+
+  def calc_showable_if obj    
+    calc_action_if self.showable_if, obj
   end
 
   def calc_action_if action_conf, obj
@@ -221,7 +227,7 @@ class ExtraOptions
       t_conds.each do |field, val|
 
         if val.is_a? Hash
-          
+
           if val.first.first == 'this'
             val = current_instance.attributes[val.first.last]
           elsif val.first.first == 'this_references'

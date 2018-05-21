@@ -112,9 +112,8 @@ _fpa.postprocessors = {
         }
 
         // Allow an auto click to be made on elements in the newly loaded block
-        block.find('.on-postprocess-click').not('.auto-clicked, .ajax-running').each(function(){
+        block.find('.on-postprocess-click').not('.auto-clicked, .ajax-running').addClass('auto-clicked').each(function(){
           var el = $(this);
-          el.addClass('auto-clicked');
           window.setTimeout(function(){
             el.click();
           });
@@ -294,7 +293,7 @@ _fpa.postprocessors = {
               }
             }, 10);
 
-            _fpa.form_utils.on_open_click($('#master-'+ master_id + '-main-container'), 500);            
+            _fpa.form_utils.on_open_click($('#master-'+ master_id + '-main-container'), 500);
         }
     },
 

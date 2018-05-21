@@ -45,7 +45,7 @@ _fpa = {
       options = {};
 
     options.url = url;
-
+    console.log('send_ajax_request: ' + url);
     $.rails.ajax(options).done(function(data, status, xhr){
       var el = $('.temp-ajax-requester');
       if(el.length === 0) {
@@ -126,13 +126,14 @@ _fpa = {
         new_block = html;
         var id = new_block.attr('id');
         // If the results has a root element with an id that exist in the DOM already,
-        // and has not been created in this transaction,
+        // TODO: !!!! this seems wrong - we don't want duplicate items !!!! and has not been created in this transaction,
         // replace it rather than placing the result before the specified block
-        var existing = $('#'+id).not('.view-template-created');
+
+        var existing = $('#'+id);//.not('.view-template-created');
         if(existing.length > 0){
             existing.replaceWith(new_block);
         }
-        else{
+        else {
             beforeBlock.before(new_block);
         }
         block.html('');

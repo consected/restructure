@@ -35,7 +35,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       cmrs = object_instance.creatable_model_references only_creatables: true
 
       #template = mrs.first && mrs.first.to_record_type_us.sub('dynamic_model__', '')
-      
+
       if action_name.in?(['new', 'create']) && cmrs.length == 1
         @embedded_item = object_instance.build_model_reference cmrs.first
         @embedded_item = nil if @embedded_item.class.parent == ActivityLog
@@ -139,6 +139,19 @@ class ActivityLog::ActivityLogsController < UserBaseController
     def items
       @master.send(@item_type)
     end
+
+    def filter_records records
+      # Remove items that are not showable, based on showable_if in the extra log type config
+      # This is a soft filtering of items, rather than a secure approach to avoiding them being seen,
+      # since we are using showable_if only to filter in the activity log list, but continue to show the
+      # items as an embedded log item.
+      # Be sure to check that the item responds to this, since it is possible for the items
+      # being retrieved to be the underlying parent items that activity log records belong to
+      # For example, in a phone log, the log records belong to player contacts, and these are retrieved
+      # through the activity log controller
+      records.select { |i| i.extra_log_type_config.calc_showable_if(i) }
+    end
+
 
     def extend_result
       item_id = @item.id if @item

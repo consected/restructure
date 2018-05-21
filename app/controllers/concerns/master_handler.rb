@@ -19,7 +19,7 @@ module MasterHandler
 
   def index
     set_objects_instance @master_objects
-    s = {objects_name => @master_objects.as_json(current_user: current_user), multiple_results: objects_name}
+    s = {objects_name => filter_records(@master_objects).as_json(current_user: current_user), multiple_results: objects_name}
     s.merge!(extend_result)
     if object_instance
       s[:original_item] = object_instance
@@ -308,7 +308,9 @@ module MasterHandler
 
       end
 
-
+      def filter_records records
+        records
+      end
 
       def extend_result
         {}

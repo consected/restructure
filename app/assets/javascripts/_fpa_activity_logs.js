@@ -151,13 +151,13 @@ _fpa.activity_logs = {
       if (obj_data._created) {
         var dc = obj_data._control;
         if(!dc) dc = data._control;
-        if(dc)
+        if(dc && dc.save_action)
           save_action = dc.save_action.on_create;
       }
       else if(obj_data._updated) {
         var dc = obj_data._control;
         if(!dc) dc = data._control;
-        if(dc)
+        if(dc && dc.save_action)
           save_action = dc.save_action.on_update;
       }
 

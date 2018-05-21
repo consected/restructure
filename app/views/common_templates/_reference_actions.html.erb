@@ -35,7 +35,7 @@
     <% end %>
     <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
       <p class="text-center">
-        <a href="/masters/<%= master_id %>/<%=ref_name.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params%>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
+        <a href="/masters/<%= master_id %>/<%=ref_name.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params%>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-remote="true" class="btn btn-sm btn-primary embedded-add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
       </p>
     </li>
   <% end %>
