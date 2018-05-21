@@ -5,6 +5,8 @@ class DynamicModel < ActiveRecord::Base
 
   default_scope -> {order disabled: :asc, category: :asc, position: :asc,  updated_at: :desc }
 
+  after_save :force_option_config_parse
+  
   attr_accessor :editable
 
   def self.implementation_prefix
@@ -64,7 +66,8 @@ class DynamicModel < ActiveRecord::Base
     active.select(:category).distinct(:category).unscope(:order).map {|s| s.category||'default'}
   end
 
-  def option_configs
+  def option_configs force: false
+    @option_configs = nil if force
     @option_configs ||= DynamicModelOptions.parse_config(self)
   end
 
@@ -78,6 +81,9 @@ class DynamicModel < ActiveRecord::Base
     res || DynamicModelOptions.new('default', {}, self)
   end
 
+  def force_option_config_parse
+    option_configs force:true
+  end
 
   def update_tracker_events
 

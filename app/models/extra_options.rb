@@ -30,7 +30,8 @@ class ExtraOptions
       },
       view_options: {
         show_embedded_at_top: 'true | false to position a single auto loaded embedded item',
-        hide_unless_creatable: 'true | false to hide add-item buttons in activity logs if they are not creatable'
+        hide_unless_creatable: 'true | false to hide add-item buttons in activity logs if they are not creatable',
+        data_attribute: 'string or list of fields to use as the data attribute'
       },
       save_action: {
         label: 'button label'
@@ -46,7 +47,8 @@ class ExtraOptions
         submit: {name: "message template name", label: "show dialog button label" }
       },
       creatable_if: attr_for_conditions,
-      editable_if: attr_for_conditions
+      editable_if: attr_for_conditions,
+      showable_if: attr_for_conditions
     }
   end
 
@@ -165,7 +167,7 @@ class ExtraOptions
     calc_action_if self.editable_if, obj
   end
 
-  def calc_showable_if obj    
+  def calc_showable_if obj
     calc_action_if self.showable_if, obj
   end
 

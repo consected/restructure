@@ -13,6 +13,8 @@ class ActivityLog < ActiveRecord::Base
   validate :check_item_type_and_rec_type
   default_scope -> { order 'disabled asc nulls last'}
 
+  after_save :force_option_config_parse
+
   def implementation_model_name
     item_type_name
   end
@@ -61,8 +63,13 @@ class ActivityLog < ActiveRecord::Base
     !blank_log_field_list.blank?
   end
 
-  def extra_log_type_configs
+  def extra_log_type_configs force: false
+    @extra_log_type_configs = nil if force
     @extra_log_type_configs ||= ExtraLogType.parse_config(self)
+  end
+
+  def force_option_config_parse
+    extra_log_type_configs force:true
   end
 
   # return the activity log implementation class that corresponds to

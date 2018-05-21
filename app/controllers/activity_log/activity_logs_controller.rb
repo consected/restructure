@@ -149,7 +149,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       # being retrieved to be the underlying parent items that activity log records belong to
       # For example, in a phone log, the log records belong to player contacts, and these are retrieved
       # through the activity log controller
-      records.select { |i| i.extra_log_type_config.calc_showable_if(i) }
+      records.select { |i| i.extra_log_type_config && i.extra_log_type_config.calc_showable_if(i) }
     end
 
 
