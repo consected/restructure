@@ -1,16 +1,16 @@
 require 'set'
 shared_examples 'a standard admin routing' do
-  
+
   describe "routing" do
 
     let(:target_path) {
       if object_path.include? '/admin/'
-        return object_path.split('/').select{|n| !n.blank?}.join('/')      
+        return object_path.split('/').select{|n| !n.blank?}.join('/')
       else
         return object_name
       end
     }
-    
+
     it "routes to #index" do
       expect(:get => "#{object_path}").to route_to("#{target_path}#index", parent_params)
     end
