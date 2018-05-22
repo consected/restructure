@@ -70,7 +70,7 @@ module CalcActions
         res = true
         # equivalent of NOT(cond1 OR cond2 OR cond3 ...)
         # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
-        c_is.each do |ck, cv|
+        c_is.each do |ck, fields|
           fields.each do |cvf, cvk|
             res_q = q.where(ck => {cvf => cvk}).order(id: :desc).limit(1)
             res_q = calc_sub_conditions(c_is_res, obj, res_q)
