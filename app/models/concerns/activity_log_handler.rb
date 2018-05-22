@@ -321,10 +321,10 @@ module ActivityLogHandler
   # item is set up correctly to be picked up again later
   def build_model_reference creatable_model_ref, optional_params: {}
 
-    k = creatable_model_ref.first
-    fb = extra_log_type_config.references[k]['filter_by'] || {}
+    cmrdef = creatable_model_ref.last.first.last
+    fb = cmrdef[:filter_by] || {}
     optional_params.merge! fb
-    k.ns_camelize.constantize.new optional_params
+    cmrdef[:ref_type].ns_camelize.constantize.new optional_params
 
   end
 

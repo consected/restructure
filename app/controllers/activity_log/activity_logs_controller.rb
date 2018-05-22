@@ -5,8 +5,10 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # Not for new or edit, since these are call elsewhere
   before_action :set_item, only: [:index, :create, :update, :destroy]
   # before_action :handle_extra_log_type, only: [:edit, :new]
-  before_action :handle_embedded_item, only: [:edit, :new, :create, :update]
+  before_action :handle_embedded_item, only: [:show, :edit, :new, :create, :update]
+  before_action :handle_embedded_items, only: [:index]
 
+  attr_accessor :embedded_item
 
   private
 
@@ -28,18 +30,22 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     end
 
-    def handle_embedded_item
+    def handle_embedded_items
+      @master_objects.each {|o| handle_embedded_item o}
+    end
 
-      mrs = object_instance.model_references
+    def handle_embedded_item use_object=nil
+      oi = use_object || object_instance
+      mrs = oi.model_references
 
-      cmrs = object_instance.creatable_model_references only_creatables: true
+      cmrs = oi.creatable_model_references only_creatables: true
 
-      always_embed_reference = object_instance.extra_log_type_config.view_options[:always_embed_reference]
+      always_embed_reference = oi.extra_log_type_config.view_options[:always_embed_reference]
 
       always_embed_item = mrs.select{|m| m.to_record_type == always_embed_reference.ns_camelize}.first if always_embed_reference
 
       if action_name.in?(['new', 'create']) && cmrs.length == 1
-        @embedded_item = object_instance.build_model_reference cmrs.first
+        @embedded_item = oi.build_model_reference cmrs.first
         @embedded_item = nil if @embedded_item.class.parent == ActivityLog
       elsif mrs.length == 1 && !(action_name.in?( ['new', 'create']) && cmrs.length > 0)# && cmrs[template] != 'many'
         # A referenced record exists and no more are creatable
@@ -50,12 +56,12 @@ class ActivityLog::ActivityLogsController < UserBaseController
       elsif mrs.length == 0 && cmrs.length == 1 && !(action_name == 'edit' && cmrs.first.last == 'many')
         # No referenced record exists yet, and one is creatable
         # Make a new creatable item
-        @embedded_item = object_instance.build_model_reference cmrs.first
+        @embedded_item = oi.build_model_reference cmrs.first
       end
 
       if @embedded_item
-        @embedded_item.master ||= object_instance.master
-        @embedded_item.master.current_user ||= object_instance.master_user
+        @embedded_item.master ||= oi.master
+        @embedded_item.master.current_user ||= oi.master_user
 
         set_embedded_item_optional_params if action_name == 'new'
 
@@ -63,7 +69,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
           begin
             ei_secure_params = params[al_type.singularize.to_sym].require(:embedded_item).permit(@embedded_item.class.permitted_params)
             @embedded_item.update ei_secure_params
-            object_instance.updated_at = @embedded_item.updated_at
+            oi.updated_at = @embedded_item.updated_at
           rescue ActionController::ParameterMissing
             raise FphsException.new "Could not save the item, since you do not have access to any of the data it references."
           end
@@ -71,7 +77,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       end
 
 
-      object_instance.embedded_item = @embedded_item
+      oi.embedded_item = @embedded_item
     end
 
     def edit_form_extras

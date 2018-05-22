@@ -3,12 +3,19 @@
 %>
 <script id="activity_log_<%=name%>_references"  type="text/x-handlebars-template" class="hidden handlebars-partial">
 <% if references %>
+
+  {{#with embedded_item}}
+    {{><%=references.first.first.sub('dynamic_model__', '')%>_result_fields}}
+  {{/with}}
+
+
   {{#if model_references}}
     {{#each model_references}}
+    {{#is ../embedded_item.id '!==' to_record_id}}
     <li class="list-group-item <%=name.hyphenate%>-model-references in-item-model-references is-full-width {{#if to_record_viewable}}{{#if ../_show_embedded_as_single_item}} single-model-reference model-reference-auto-shown-caption{{/if}}{{/if}}">
       <span class="small" data-result-target-for-child="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}">
         {{#if to_record_viewable}}
-        <a href="/masters/{{to_record_master_id}}/{{pathify to_record_type_us}}s/{{to_record_id}}" data-template="{{hyphenate to_record_template}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" data-remote="true" class="glyphicon glyphicon-triangle-bottom view-item  <% unless item_list.include?(',') %>{{#if ../_show_embedded_as_single_item}}on-postprocess-click{{/if}}<% end %>" data-use-alt-result-key="{{to_record_result_key}}"></a>
+        <a href="/masters/{{to_record_master_id}}/{{pathify to_record_type_us}}s/{{to_record_id}}" data-template="{{hyphenate to_record_template}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" data-remote="true" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-item <% unless item_list.include?(',') %>{{#if ../_show_embedded_as_single_item}}on-postprocess-click{{/if}}<% end %>" data-use-alt-result-key="{{to_record_result_key}}"></a>
         {{else}}
         <span class="glyphicon glyphicon-ban-circle"></span>
         {{/if}}
@@ -20,13 +27,12 @@
       <div id="<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}" class="model-reference-result" data-result-target-for-child="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}, #{{hyphenate to_record_type_us}}-{{to_record_master_id}}-{{../id}}-{{to_record_id}}"  data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-subscription="{{hyphenate to_record_template}}-edit-form-{{to_record_master_id}}-{{to_record_id}}" data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-form-container="{{hyphenate to_record_type_us}}_edit_form" ></div>
     </div>
     {{/if}}
-
+    {{/is}}
     {{/each}}
   {{/if}}
 
   <% references.each do |ref_key, refitem|
       refitem.each do |ref_type, ref_config| %>
-    
       {{#if creatable_model_references.<%= ref_key %> }}
 
         {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %> }}
