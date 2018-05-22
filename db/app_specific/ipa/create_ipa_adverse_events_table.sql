@@ -11,6 +11,7 @@
                   INSERT INTO ipa_adverse_event_history
                   (
                       master_id,
+                      select_problem_type,
                       event_occurred_when,
                       event_discovered_when,
                       select_severity,
@@ -26,6 +27,7 @@
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.select_problem_type,
                       NEW.event_occurred_when,
                       NEW.event_discovered_when,
                       NEW.select_severity,
@@ -46,6 +48,7 @@
       CREATE TABLE ipa_adverse_event_history (
           id integer NOT NULL,
           master_id integer,
+          select_problem_type varchar,
           event_occurred_when date,
           event_discovered_when date,
           select_severity varchar,
@@ -72,6 +75,7 @@
       CREATE TABLE ipa_adverse_events (
           id integer NOT NULL,
           master_id integer,
+          select_problem_type varchar,
           event_occurred_when date,
           event_discovered_when date,
           select_severity varchar,
