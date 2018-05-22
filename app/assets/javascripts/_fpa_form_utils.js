@@ -519,6 +519,28 @@ _fpa.form_utils = {
             _fpa.form_utils.clear_content($(a));
         }).addClass('attached-datatoggle-cc');
 
+        block.find('[data-toggle-caret]').not('.attached-toggle_caret').on('click', function() {
+          if($(this).hasClass('glyphicon-triangle-bottom')){
+            var el = $(this);
+            $(this).removeClass('glyphicon-triangle-bottom');
+            $(this).addClass('glyphicon-triangle-top');
+            window.setTimeout(function() {
+              el.attr('disabled', true);
+
+            }, 10);
+          }
+          else {
+            var el = $(this);
+            $(this).addClass('glyphicon-triangle-bottom');
+            $(this).removeClass('glyphicon-triangle-top');
+            var t = $(this).attr('data-result-target');
+            if(t) $(t).html('');
+            window.setTimeout(function() {
+              el.attr('disabled', false);
+
+            }, 10);
+          }
+        }).addClass('attached-toggle_caret');
     },
 
     mask_inputs: function(block) {
