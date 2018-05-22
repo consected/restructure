@@ -80,23 +80,25 @@ _fpa.show_if.methods = {
           var exp_field_value = data[cond_field];
           // to have value
           var exp_value = cond_def[cond_field];
+          if(typeof exp_value == 'string')
+            exp_value = [exp_value];
 
           if(cond_type == 'all') {
-            cond_success = cond_success && (exp_field_value == exp_value);
+            cond_success = cond_success && (exp_value.includes(exp_field_value));
           }
           else if(cond_type == 'not_all') {
-            if(exp_field_value != exp_value) {
+            if(!exp_value.includes(exp_field_value)) {
               cond_success = true;
               break;
             }
             cond_success = false;
           }
           else if(cond_type == 'any') {
-            cond_success = (exp_field_value == exp_value);
+            cond_success = (exp_value.includes(exp_field_value));
             if(cond_success) break;
           }
           else if(cond_type == 'not_any') {
-            if(exp_field_value == exp_value) {
+            if(exp_value.includes(exp_field_value)) {
               cond_success = false;
               break;
             }
