@@ -33,7 +33,8 @@ class ExtraOptions
       view_options: {
         show_embedded_at_top: 'true | false to position a single auto loaded embedded item',
         hide_unless_creatable: 'true | false to hide add-item buttons in activity logs if they are not creatable',
-        data_attribute: 'string or list of fields to use as the data attribute'
+        data_attribute: 'string or list of fields to use as the data attribute',
+        always_embed_reference: 'reference name to always show embedded'
       },
       save_action: {
         label: 'button label'
