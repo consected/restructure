@@ -88,6 +88,7 @@ AS $$
       created_at,
       updated_at,
       user_id,
+      fixed_checklist_type,
       ix_not_pro_blank_yes_no,
       ix_age_range_blank_yes_no,
       ix_weight_ok_blank_yes_no,
@@ -110,6 +111,8 @@ AS $$
       NOW(),
       NOW(),
       NEW.user_id,
+
+      'phone screen review',
 
       --ix_not_pro_blank_yes_no
       CASE WHEN football_experience.played_in_nfl_blank_yes_no = 'no' THEN 'yes' ELSE 'no' END,
