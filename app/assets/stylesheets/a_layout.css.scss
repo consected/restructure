@@ -102,17 +102,17 @@ a.add-icon[data-show-modal] {color: #09c;}
 
 a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
     color: white;
-    background-color: #CC0000;
+    background-color: rgb(227, 141, 19);
     display: inline-block;
     padding: 2px;
 
-    border: 1px solid #ff0000;
+    border: 1px solid rgb(200, 111, 13);
     border-radius: 4px;
     text-decoration: none;
     font-size: 12px;
 
     &:hover {
-        background-color: #ff0000;
+        background-color: rgb(227, 161, 33);
         text-decoration: none;
     }
 
@@ -125,6 +125,14 @@ a.glyphicon.show-entity, a.glyphicon.edit-entity, a.close-entity {
       background-color: #E67171;
       border-color: #E67171;
     }
+}
+
+a.close-entity, a.glyphicon.glyphicon-remove-sign {
+   background-color: #CC0000;
+   border: 1px solid #ff0000;
+   &:hover {
+       background-color: #ff0000;
+     }
 }
 
 .nav.nav-pills {

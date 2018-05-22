@@ -35,13 +35,13 @@
     <% end %>
     <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
       <p class="text-center">
-        <a href="/masters/<%= master_id %>/<%=ref_name.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params%>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-remote="true" class="btn btn-sm btn-primary embedded-add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
+        <a href="/masters/<%= master_id %>/<%=ref_name.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params%>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>" data-remote="true" class="btn btn-sm btn-primary embedded-add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
       </p>
     </li>
   <% end %>
 <% end %>
 <div id="<%=ref_name.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_name.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">
-<div class="new-block model-reference-new-block" id="<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-result-target-for-child="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-, #<%=ref_name.ns_hyphenate%>-<%= master_id %>-" data-subscription="<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-preprocessor="<%=ref_name.ns_underscore%>_edit_form">
+<div class="new-block model-reference-new-block" id="<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>" data-result-target-for-child="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>, #<%=ref_name.ns_hyphenate%>-<%= master_id %>-" data-subscription="<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-preprocessor="<%=ref_name.ns_underscore%>_edit_form">
 <% if @embedded_item %>
 <div class="model-edit-form <%= @embedded_item ? 'embedded-item' : 'not-embedded-item' %>">
   <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed} %>
