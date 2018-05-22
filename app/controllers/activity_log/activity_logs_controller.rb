@@ -34,7 +34,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
       cmrs = object_instance.creatable_model_references only_creatables: true
 
-      #template = mrs.first && mrs.first.to_record_type_us.sub('dynamic_model__', '')
+      always_embed_reference = object_instance.extra_log_type_config.view_options[:always_embed_reference]
+
+      always_embed_item = mrs.select{|m| m.to_record_type == always_embed_reference.ns_camelize}.first if always_embed_reference
 
       if action_name.in?(['new', 'create']) && cmrs.length == 1
         @embedded_item = object_instance.build_model_reference cmrs.first
@@ -43,6 +45,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
         # A referenced record exists and no more are creatable
         # Therefore just use this existing item
         @embedded_item = mrs.first.to_record
+      elsif always_embed_item
+        @embedded_item = always_embed_item.to_record
       elsif mrs.length == 0 && cmrs.length == 1 && !(action_name == 'edit' && cmrs.first.last == 'many')
         # No referenced record exists yet, and one is creatable
         # Make a new creatable item

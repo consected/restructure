@@ -8,7 +8,7 @@
   if !embedded && @extra_log_type && @extra_log_type.references
     # Get the creatable references and work out what we can show based on the items that can be created
     # only_creatables = object_instance.creatable_model_references only_creatables: true
-    
+
     creatable_references = @extra_log_type.references.select {|ref_key| object_instance.creatable_model_references[ref_key.to_s].length > 0 }
     creatable_count = creatable_references.length
 
@@ -71,15 +71,18 @@
               <% end %>
             </span>
           </li>
-        <% end %>
-      <% end %>
-      <% if model_reference.to_record_viewable %>
+    <%
+         end
+       end # unless @embedded_item
+       if model_reference.to_record_viewable
+     %>
         <div class="model-reference-result <%= @embedded_item ? 'embedded-item' : 'not-embedded-item' %>" >
           <div id="<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id %>-<%= model_reference.to_record_id%>" class="model-reference-result" data-result-target-for-child="#<%= object_instance.class.name.ns_hyphenate%>-<%= model_reference.to_record_type_us.ns_hyphenate %>-<%= model_reference.to_record_master_id %>-<%= object_instance.id%>-<%= model_reference.to_record_id %>, #<%= model_reference.to_record_type_us.ns_hyphenate%>-<%= model_reference.to_record_master_id%>-<%= object_instance.id%>-<%= model_reference.to_record_id%>"  data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-subscription="<%= model_reference.to_record_short_type_us.ns_hyphenate%>-edit-form-<%= model_reference.to_record_master_id%>-<%= model_reference.to_record_id%>" data-preprocessor="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" data-form-container="<%= model_reference.to_record_type_us.ns_hyphenate%>_edit_form" >
             <%
               if @embedded_item && !shown_embedded
                 r = @extra_log_type.references[model_reference.to_record_template] || @extra_log_type.references[model_reference.to_record.class.table_name.singularize]
                 dis = r && r['view_as'] && r['view_as']['edit']  == 'readonly'
+                shown_embedded = true
             %>
               <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed, disabled_form: dis  } %>
             <% end %>
