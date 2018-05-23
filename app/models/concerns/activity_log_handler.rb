@@ -322,8 +322,19 @@ module ActivityLogHandler
   def build_model_reference creatable_model_ref, optional_params: {}
 
     cmrdef = creatable_model_ref.last.first.last
-    fb = cmrdef[:filter_by] || {}
-    optional_params.merge! fb
+    cmrdef.with_indifferent_access
+
+    ref_config = cmrdef[:ref_config].with_indifferent_access
+
+    # Ensure that the filter_by attributes are used to generate the referenced item,
+    # otherwise the filter will not work correctly after creation (since the fields won't be set)
+    # Also include additional add_with items if provided
+    fb = ref_config[:filter_by] || {}
+    aw = ref_config[:add_with] || {}
+    tot = fb.merge(aw)
+
+    optional_params.merge!(tot)
+
     cmrdef[:ref_type].ns_camelize.constantize.new optional_params
 
   end

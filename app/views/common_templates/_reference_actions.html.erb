@@ -18,30 +18,24 @@
       <span class="small"><i><%= caption.humanize %></i></span>
     </li>
   <% else
-      # Show the 'add' reference item button
 
-      add_extra_params = ref_config['add_with']
-      if add_extra_params
-        add_extra_params = "&#{add_extra_params.to_query.gsub('%7B%7B', '{{').gsub('%7D%7D', '}}')}"
-      end
-
-      caption_before_ref_name = "reference_#{ref_name}".to_sym
-      cb = caption_before[caption_before_ref_name]
+      caption_before_ref_type = "reference_#{ref_type}".to_sym
+      cb = caption_before[caption_before_ref_type]
   %>
     <% if cb %>
-    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_name.to_s.hyphenate%> <%=caption_before_ref_name.to_s.hyphenate%>-caption">
-      <%= show_caption_before caption_before_ref_name, caption_before %>
+    <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=caption_before_ref_type.to_s.hyphenate%>-caption">
+      <%= show_caption_before caption_before_ref_type, caption_before %>
     </li>
     <% end %>
     <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
       <p class="text-center">
-        <a href="/masters/<%= master_id %>/<%=ref_name.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params%>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>" data-remote="true" class="btn btn-sm btn-primary embedded-add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
+        <a href="/masters/<%= master_id %>/<%=ref_type.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params_to_add_item_link ref_type, ref_config%>" data-toggle="scrollto-result" data-target-force="true" data-target="#<%= name.ns_hyphenate%>-<%=ref_type.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>" data-remote="true" class="btn btn-sm btn-primary embedded-add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
       </p>
     </li>
   <% end %>
 <% end %>
-<div id="<%=ref_name.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_name.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">
-<div class="new-block model-reference-new-block" id="<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>" data-result-target-for-child="#<%= name.ns_hyphenate%>-<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>, #<%=ref_name.ns_hyphenate%>-<%= master_id %>-" data-subscription="<%=ref_name.ns_hyphenate%>-edit-form-<%= master_id %>-" data-preprocessor="<%=ref_name.ns_underscore%>_edit_form">
+<div id="<%=ref_type.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_type.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">
+<div class="new-block model-reference-new-block" id="<%= name.ns_hyphenate%>-<%=ref_type.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>" data-result-target-for-child="#<%= name.ns_hyphenate%>-<%=ref_type.ns_hyphenate%>-edit-form-<%= master_id %>-<%=id%>, #<%=ref_type.ns_hyphenate%>-<%= master_id %>-" data-subscription="<%=ref_type.ns_hyphenate%>-edit-form-<%= master_id %>-" data-preprocessor="<%=ref_type.ns_underscore%>_edit_form">
 <% if @embedded_item %>
 <div class="model-edit-form <%= @embedded_item ? 'embedded-item' : 'not-embedded-item' %>">
   <%= render partial: 'common_templates/edit_form', locals: {embedded: true, form_embed: form_embed} %>

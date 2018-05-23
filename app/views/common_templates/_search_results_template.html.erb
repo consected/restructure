@@ -275,6 +275,8 @@
   <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
 {{else is @key 'includes' '_description' }}
   <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+{{else is @key 'includes' '^fixed_' }}
+  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^fixed_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
 {{else}}
   <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
 {{/is}}

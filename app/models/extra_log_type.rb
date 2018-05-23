@@ -22,6 +22,14 @@ class ExtraLogType < ExtraOptions
         model_name: {
           from: "this | master",
           add: "many | one_to_master | one_to_this",
+          add_with: {
+            extra_log_type: "type name",
+            item_name: {
+              embedded_item: {
+                field_name: "value"
+              }
+            }
+          },
           filter_by: {
             field_name: 'value to filter the referenced items by'
           },
@@ -92,7 +100,7 @@ class ExtraLogType < ExtraOptions
           refitem[mn]['to_record_label'] = ModelReference.to_record_class_for_type(mn).human_name
         end
       end
-      
+
     end
   end
 

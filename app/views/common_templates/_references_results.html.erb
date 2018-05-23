@@ -39,7 +39,7 @@
 
           {{#if creatable_model_references.<%= ref_key %>.<%= ref_type %>.ref_type }}
 
-      <%= render partial: 'common_templates/reference_actions',  locals: {name: "activity_log/#{implementation_class_name}", ref_name: ref_type, caption: ref_config['to_record_label'], block_id: "#{name.hyphenate}-#{ref_type}", ref_config: ref_config, caption_before: caption_before} %>
+      <%= render partial: 'common_templates/reference_actions',  locals: {name: "activity_log/#{implementation_class_name}", ref_type: ref_type, caption: ref_config['to_record_label'], block_id: "#{name.hyphenate}-#{ref_type}", ref_config: ref_config, caption_before: caption_before} %>
           {{/if}}
         {{/if}}
       {{/if}}
