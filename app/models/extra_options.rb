@@ -37,7 +37,16 @@ class ExtraOptions
         always_embed_reference: 'reference name to always show embedded'
       },
       save_action: {
-        label: 'button label'
+        label: 'button label',
+        on_update: {
+          create_next_creatable: true,
+          show_panel: 'panel / category name',
+          hide_panel: 'panel / category name'
+        },
+        on_create: {},
+        on_save: {
+          notes: 'on_save: provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.'
+        }
       },
       field_options: {
         field_name: {
@@ -112,6 +121,15 @@ class ExtraOptions
 
     self.save_action ||= {}
     self.save_action = self.save_action.symbolize_keys
+
+    # Make save_action.on_save the default for on_create and on_update
+    os = self.save_action[:on_save]
+    if os
+      ou = self.save_action[:on_update] || {}
+      oc = self.save_action[:on_create] || {}
+      self.save_action[:on_update] = os.merge(ou)
+      self.save_action[:on_create] = os.merge(oc)
+    end
 
     self.view_options ||= {}
     self.view_options = self.view_options.symbolize_keys
