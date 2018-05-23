@@ -293,7 +293,7 @@ module ExternalIdHandler
   end
 
   def return_all
-    self.multiple_results = self.master.send(assoc_inverse_name).all if self.master && self.class.prevent_edit?
+    self.multiple_results = self.master.send(self.class.assoc_inverse).all if self.master && self.class.prevent_edit?
   end
 
   def init_vars_external_id_handler

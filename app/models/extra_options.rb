@@ -3,7 +3,7 @@ class ExtraOptions
   include CalcActions
 
   def self.base_key_attributes
-    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if]
+    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :valid_if]
   end
   def self.add_key_attributes
     []
@@ -60,7 +60,13 @@ class ExtraOptions
       },
       creatable_if: attr_for_conditions,
       editable_if: attr_for_conditions,
-      showable_if: attr_for_conditions
+      showable_if: attr_for_conditions,
+      valid_if: {
+        on_save:  attr_for_conditions,
+        on_create: {},
+        on_update: {}
+      }
+
     }
   end
 
@@ -70,7 +76,9 @@ class ExtraOptions
       all: {
         model_table_name: {
           field_name: 'all conditional values must be true',
-          field_name_2: '...'
+          field_name_2: 'literal value | null',
+          field_name_3: { this: 'attribute in this record' },
+          field_name_4: { this_references: 'attribute in any referenced record' }
         }
       },
       any: {
@@ -146,6 +154,17 @@ class ExtraOptions
     self.showable_if ||= {}
     self.showable_if = self.showable_if.symbolize_keys
 
+    self.valid_if ||= {}
+    self.valid_if = self.valid_if.symbolize_keys
+
+    os = self.valid_if[:on_save]
+    if os
+      ou = self.valid_if[:on_update] || {}
+      oc = self.valid_if[:on_create] || {}
+      self.valid_if[:on_update] = os.merge(ou)
+      self.valid_if[:on_create] = os.merge(oc)
+    end
+
     self
   end
 
@@ -192,6 +211,9 @@ class ExtraOptions
     calc_action_if self.showable_if, obj
   end
 
+  def calc_valid_if action_type, obj, return_failures: nil
+    calc_action_if self.valid_if["on_#{action_type}".to_sym], obj, return_failures: return_failures
+  end
 
 
   protected

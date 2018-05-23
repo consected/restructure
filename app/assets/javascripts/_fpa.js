@@ -270,6 +270,7 @@ _fpa = {
 
         _fpa.preprocessors.before_all(block);
         _fpa.ajax_working(block);
+        _fpa.form_utils.set_field_errors(block);
 
         // data-only-for allows hidden and other inputs to be blanked if the dependent
         // 'only-for' input is blank. This ensures the data is set only for the times when the
@@ -636,6 +637,7 @@ _fpa = {
 
             var j = xhr.responseJSON;
             if(xhr.status === 422){
+                _fpa.form_utils.set_field_errors(block, j);
                 if(j) {
                     var msg = "<p>Could not complete action:</p>";
                     msg += format_message(j);

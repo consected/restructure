@@ -23,6 +23,9 @@ class UserBase < ActiveRecord::Base
   # It implicitly reinforces security, in that the user must be authenticated for
   # the user to have been set
   validate :user_set
+  validate :configurable_valid_if
+  validate :valid_embedded_item
+
 
   def self.is_external_identifier?
     false
@@ -155,9 +158,6 @@ class UserBase < ActiveRecord::Base
     self.item_type.ns_underscore
   end
 
-  def assoc_inverse_name
-    self.class.name.ns_underscore.pluralize
-  end
 
   def allows_current_user_access_to? perform, with_options=nil
     raise FphsException.new "no master_user in allows_current_user_access_to?" unless master_user
@@ -312,6 +312,56 @@ class UserBase < ActiveRecord::Base
       raise FphsException.new "This item can not be created (#{self.class.name})" if !persisted? && !can_create?
       true
 
+    end
+
+    def configurable_valid_if
+
+      return true unless option_type_config.respond_to?(:valid_if)
+
+      vi = option_type_config.valid_if
+      return true if vi.empty?
+
+      action_name = persisted? ? :update : :create
+      return_failures = {}
+      res = option_type_config.calc_valid_if action_name, self, return_failures: return_failures
+
+      unless res
+        if return_failures.empty?
+          errors.add :field_validation, "failed. Check your entries and try again"
+        else
+          return_failures.each do |c_var, c_vals|
+            f = ""
+            c_vals.each do |table, cond|
+              cond.each do |k, v|
+                v = v.present? ? v : '(blank)'
+                k = table == :this ? k : "#{table}.#{k}"
+                if c_var == :all
+                  errors.add k.to_sym, "is invalid. Expected value to be: #{v}."
+                elsif c_var == :any
+                  errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value: #{v}."
+                elsif c_var == :not_any
+                  errors.add k.to_sym, "is invalid. Expected value not to be: #{v}."
+                elsif c_var == :not_all
+                  errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not: #{v}."
+                end
+              end
+            end
+          end
+        end
+        return
+      else
+        true
+      end
+
+    end
+
+    def valid_embedded_item
+
+      if embedded_item && !embedded_item.errors.empty?
+        embedded_item.errors.each do |k, v|
+          errors.add k, v
+        end
+      end
     end
 
 end

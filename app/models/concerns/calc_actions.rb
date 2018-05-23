@@ -6,7 +6,7 @@ module CalcActions
     SelectionTypes = :all, :any, :not_all, :not_any
   end
 
-  def calc_action_if action_conf, obj, current_scope=nil
+  def calc_action_if action_conf, obj, current_scope: nil, return_failures: nil
     return true unless action_conf.is_a?(Hash) && action_conf.first
 
     # For the lowest level, setup the query with the master record
@@ -42,29 +42,62 @@ module CalcActions
         # equivalent of (cond1 AND cond2 AND cond3 ...)
         # These conditions are easy to handle as a standard query
         res_q = q.where(c_is).order(id: :desc).limit(1)
-        res_q = calc_sub_conditions(c_is_res, obj, res_q)
+        res_q = calc_sub_conditions(c_is_res, obj, current_scope: res_q, return_failures: return_failures)
+        if !res_q && return_failures
+          return_failures.deep_merge!({c_var => c_is_res})
+        end
+        c_is.each do |ck, fields|
+          fields.each do |cvf, cvk|
+            if ck == :this
+              res_q &&= obj.attributes[cvf.to_s] == cvk
+              if !res_q && return_failures
+                return_failures.deep_merge!({c_var => {ck => fields}})
+              end
+            end
+          end
+        end
         res &&= !!res_q
 
       elsif c_var == :not_all
         res = true
         # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
         res_q = q.where(c_is).order(id: :desc).limit(1)
-        res_q = calc_sub_conditions(c_is_res, obj, res_q)
-
+        res_q = calc_sub_conditions(c_is_res, obj, current_scope: res_q, return_failures: return_failures)
+        c_is.each do |ck, fields|
+          fields.each do |cvf, cvk|
+            if ck == :this
+              res_q &&= obj.attributes[cvf.to_s] == cvk
+            end
+          end
+        end
         res &&= !res_q
+
+        if !res && return_failures
+          # Not all matches - return all possible items that failed
+          return_failures.deep_merge!({c_var => c_is})
+        end
 
       elsif c_var == :any
         res = false
         # equivalent of (cond1 OR cond2 OR cond3 ...)
         c_is.each do |ck, fields|
           fields.each do |cvf, cvk|
-            res_q = q.where(ck => {cvf => cvk}).order(id: :desc).limit(1)
-            res_q = calc_sub_conditions(c_is_res, obj, res_q)
+            if ck == :this
+              res_q = obj.attributes[cvf.to_s] == cvk
+            else
+              res_q = q.where(ck => {cvf => cvk}).order(id: :desc).limit(1)
+              res_q = calc_sub_conditions(c_is_res, obj, current_scope: res_q, return_failures: return_failures)
+            end
             res ||= res_q
             break if res
           end
+          break if res
         end
 
+        if !res && return_failures
+          # No matches - return all possible items that failed
+          return_failures.deep_merge!({c_var => c_is})
+        end
 
       elsif c_var == :not_any
         res = true
@@ -72,11 +105,21 @@ module CalcActions
         # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
         c_is.each do |ck, fields|
           fields.each do |cvf, cvk|
-            res_q = q.where(ck => {cvf => cvk}).order(id: :desc).limit(1)
-            res_q = calc_sub_conditions(c_is_res, obj, res_q)
+            if ck == :this
+              res_q = obj.attributes[cvf.to_s] == cvk
+            else
+              res_q = q.where(ck => {cvf => cvk}).order(id: :desc).limit(1)
+              res_q = calc_sub_conditions(c_is_res, obj, current_scope: res_q, return_failures: return_failures)
+            end
+
+            if res_q && return_failures
+              return_failures.deep_merge!({c_var => {ck => fields}})
+            end
+
             res &&= !res_q
             break unless res
           end
+          break unless res
         end
 
       else
@@ -121,49 +164,34 @@ module CalcActions
               val = valset
             else
               val_key = val.keys.first
-              join_tables << val_key unless join_tables.includes? val_key
+              join_tables << val_key unless join_tables.include? val_key
             end
           end
           conditions[table_name][field] = val
         end
       end
     end
-
+    join_tables = join_tables - [:this]
     return conditions, join_tables
   end
 
   # Calculate the sub conditions for this level if it contains any of the selection types
   # The condition_type optional argument represents how the individual selection calculations
   # should be combined, based on the parent definition.
-  def calc_sub_conditions condition_config, current_instance, current_scope, condition_type=:all
+  def calc_sub_conditions condition_config, current_instance, current_scope: nil, return_failures: nil
 
-    res = condition_type.in?([:all, :not_any])
+    res = true
 
-    return !res if current_scope.length == 0
+    return false if current_scope.length == 0
 
     condition_config.each do |c_type, t_conds|
 
       if c_type.to_sym.in? SelectionTypes
 
-        res_a = calc_action_if( {c_type => t_conds}, current_instance, current_scope)
-        if condition_type == :all
-          res &&= res_a
-          return unless res
-        elsif condition_type == :any
-          res ||= res_a
-          return if res_a
-        elsif condition_type == :not_any
-          res &&= !res_a
-          return unless res
-        elsif condition_type == :not_all
-          # NOT(cond1 AND cond2 AND cond3)
-          # equivalent to (NOT(cond1) OR NOT(cond2) OR NOT(cond3))
-          # which allows a simpler step by step evaluation
-          res ||= !res_a
-          return if res
-        else
-          raise FphsException.new "Incorrect condition type specified when calculating sub conditions: #{condition_type}"
-        end
+        res_a = calc_action_if( {c_type => t_conds}, current_instance, current_scope: current_scope, return_failures: return_failures)
+
+        res &&= res_a
+        return unless res
       end
     end
 

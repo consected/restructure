@@ -3,6 +3,38 @@ _fpa.form_utils = {
     // convenience calling them individually on an ad-hoc basis around the code base does
     // not make this a good choice.
 
+    set_field_errors: function(block, obj) {
+
+      if(!obj) {
+        // clear previous results
+        $('.has-error').each(function() {
+          $(this).find('.error-help').remove();
+        }).removeClass('has-error');
+        return;
+      }
+
+      for(var p in obj) {
+        if(obj.hasOwnProperty(p)) {
+          var v = obj[p];
+          var f = block.find("[data-attr-name='"+p+"']").parent();
+          if(f.length == 1) {
+            f.addClass('has-error');
+            var fn = p;
+            if(f.hasClass('showed-caption-before'))
+            fn = 'Entry'
+
+            v = fn + ' ' + v;
+            var el = $('<p class="help-block error-help">'+v+'</p>');
+            f.append(el);
+            delete obj[p];
+            obj.form = "has errors. Check the highlighted fields."
+
+          }
+        }
+      }
+    },
+
+
     clear_content:function(block){
       block.removeClass('in');
       block.html('');
