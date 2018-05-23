@@ -4,9 +4,10 @@ _fpa.utils = {};
 // If necessary expand the block containing this item by uncollapsing and showing it
 // Finally scroll it onto the viewport if necessary
 // Returns the block that was linked if successful
-_fpa.utils.jump_to_linked_item = function(target) {
+_fpa.utils.jump_to_linked_item = function(target, offset) {
 
   var block = h;
+  if(offset == null) offset = -50;
 
   $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
   if(!target) return;
@@ -23,7 +24,7 @@ _fpa.utils.jump_to_linked_item = function(target) {
   var rect = h.get(0).getBoundingClientRect();
   var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
   if(not_visible)
-      $.scrollTo(h, 200, {offset: -50});
+      $.scrollTo(h, 200, {offset: offset});
 
   return block;
 };

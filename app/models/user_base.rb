@@ -336,13 +336,13 @@ class UserBase < ActiveRecord::Base
                 v = v.present? ? v : '(blank)'
                 k = table == :this ? k : "#{table}.#{k}"
                 if c_var == :all
-                  errors.add k.to_sym, "is invalid. Expected value to be: #{v}."
+                  errors.add k.to_sym, "is invalid. Expected value to be: #{v}"
                 elsif c_var == :any
-                  errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value: #{v}."
+                  errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value: #{v}"
                 elsif c_var == :not_any
-                  errors.add k.to_sym, "is invalid. Expected value not to be: #{v}."
+                  errors.add k.to_sym, "is invalid. Expected value not to be: #{v}"
                 elsif c_var == :not_all
-                  errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not: #{v}."
+                  errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not: #{v}"
                 end
               end
             end

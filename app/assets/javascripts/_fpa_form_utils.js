@@ -13,11 +13,13 @@ _fpa.form_utils = {
         return;
       }
 
+      var first_field;
       for(var p in obj) {
         if(obj.hasOwnProperty(p)) {
           var v = obj[p];
           var f = block.find("[data-attr-name='"+p+"']").parent();
           if(f.length == 1) {
+            if(!first_field) first_field = f;
             f.addClass('has-error');
             var fn = p;
             if(f.hasClass('showed-caption-before'))
@@ -32,6 +34,8 @@ _fpa.form_utils = {
           }
         }
       }
+      if(first_field)
+        _fpa.utils.jump_to_linked_item(first_field, -300);
     },
 
 
@@ -839,6 +843,14 @@ _fpa.form_utils = {
 
     },
 
+    setup_error_clear: function (block) {
+      block.on('change', '.has-error .form-control', function() {
+        var p = $(this).parent();
+        p.removeClass('has-error');
+        p.find('.error-help').remove();
+      });
+    },
+
     resize_children: function(block){
 
       window.setTimeout(function(){
@@ -948,6 +960,8 @@ _fpa.form_utils = {
         _fpa.form_utils.mask_inputs(block);
         _fpa.form_utils.setup_textarea_autogrow(block);
         _fpa.form_utils.setup_contact_field_mask(block);
+
+        _fpa.form_utils.setup_error_clear(block);
         _fpa.form_utils.resize_children(block);
         block.removeClass('formatting-block');
     }
