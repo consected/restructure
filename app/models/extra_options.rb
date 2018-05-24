@@ -204,6 +204,14 @@ class ExtraOptions
     ca.calc_action_if
   end
 
+  def calc_reference_creatable_if ref_config, obj
+    ci = ref_config['creatable_if']
+    return true unless ci
+    ca = ConditionalActions.new ci, obj
+    ca.calc_action_if
+  end
+
+
   def calc_editable_if obj
     ca = ConditionalActions.new self.editable_if, obj
     ca.calc_action_if
