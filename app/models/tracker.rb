@@ -195,7 +195,7 @@ class Tracker < UserBase
 
   def set_record_updates_event record
     new_rec = record.id_changed?
-    rec_type = "#{new_rec ? 'created' : 'updated'} #{record.class.human_name.downcase}"
+    rec_type = "#{new_rec ? 'created' : 'updated'} #{ModelReference.record_type_to_ns_table_name(record.class).humanize.downcase}"
 
     self.protocol_event = Rails.cache.fetch "record_updates_protocol_events_#{self.sub_process.id}_#{rec_type}" do
       self.sub_process.protocol_events.where(name: rec_type).first

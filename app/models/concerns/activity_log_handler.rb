@@ -263,8 +263,8 @@ module ActivityLogHandler
         ci_res = true
         # Check if creatable_if has been defined on the reference configuration
         # and if it evaluates to true
-        ci = ref_config[:creatable_if]
-        ci_res = extra_log_type_config.calc_action_if ci, self if ci
+
+        ci_res = extra_log_type_config.calc_reference_creatable_if ref_config, self 
         fb = ref_config[:filter_by]
 
         if ci_res

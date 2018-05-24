@@ -156,9 +156,9 @@ module CalcActions
 
             if val.is_a? Hash
               val_item_key = val.first.first
-              if val_item_key == 'this'
+              if val_item_key == :this
                 val = @current_instance.attributes[val.first.last]
-              elsif val_item_key == 'this_references'
+              elsif val_item_key == :this_references
                 valset = []
                 @current_instance.model_references.each do |mr|
                   valset << mr.to_record.attributes[val.first.last]
@@ -173,7 +173,7 @@ module CalcActions
           end
         end
       end
-      join_tables = join_tables - [:this]
+      join_tables = join_tables - [:this, :this_references]
 
       @base_query = @current_scope.joins(join_tables)
     end
