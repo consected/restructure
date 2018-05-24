@@ -1,6 +1,6 @@
 class ExtraOptions
 
-  include CalcActions
+  # include CalcActions
 
   def self.base_key_attributes
     [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :valid_if]
@@ -200,19 +200,24 @@ class ExtraOptions
   end
 
   def calc_creatable_if obj
-    calc_action_if self.creatable_if, obj
+    ca = ConditionalActions.new self.creatable_if, obj
+    ca.calc_action_if
   end
 
   def calc_editable_if obj
-    calc_action_if self.editable_if, obj
+    ca = ConditionalActions.new self.editable_if, obj
+    ca.calc_action_if
   end
 
   def calc_showable_if obj
-    calc_action_if self.showable_if, obj
+    ca = ConditionalActions.new self.showable_if, obj
+    ca.calc_action_if
   end
 
   def calc_valid_if action_type, obj, return_failures: nil
-    calc_action_if self.valid_if["on_#{action_type}".to_sym], obj, return_failures: return_failures
+    raise FphsException.new "incorrect action type requested in calc_valid_if #{action_type}" unless action_type.to_s.in?(%w(create update save))
+    ca = ConditionalActions.new self.valid_if["on_#{action_type}".to_sym], obj, return_failures: return_failures
+    ca.calc_action_if
   end
 
 
