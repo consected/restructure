@@ -877,20 +877,23 @@ _fpa.form_utils = {
             var dc = $(this).parents('.dynamic-container');
             if(dc.length > 0)
               me = dc;
-            var c = _fpa.layout.item_blocks.regular;
-            var max_h = 0;
-            me.find('.list-group-item.caption-before, .list-group-item.dialog-before').each(function() {
-              var curr_h = $(this).height();
-              if(curr_h > max_h) max_h = curr_h;
-            });
-            if(max_h > 60) {
-              c = _fpa.layout.item_blocks.wide;
-              me.first().removeClass(_fpa.layout.item_blocks.regular);
-              me.addClass(c).addClass('resized-width');
-            }
-            else {
-              if(me.hasClass('new-block'))
+
+            if(me.height() > 1200) {
+              var c = _fpa.layout.item_blocks.regular;
+              var max_h = 0;
+              me.find('.list-group-item.caption-before, .list-group-item.dialog-before').each(function() {
+                var curr_h = $(this).height();
+                if(curr_h > max_h) max_h = curr_h;
+              });
+              if(max_h > 60) {
+                c = _fpa.layout.item_blocks.wide;
+                me.first().removeClass(_fpa.layout.item_blocks.regular);
+                me.addClass(c).addClass('resized-width');
+              }
+              else {
+                if(me.hasClass('new-block'))
                 me.addClass(_fpa.layout.item_blocks.regular);
+              }
             }
 
           });

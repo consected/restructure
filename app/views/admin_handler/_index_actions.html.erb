@@ -1,3 +1,11 @@
-<div class="well admin-index-actions text-center">  
-  <%= render partial: 'admin_handler/action_buttons' %>      
+<div class="well admin-index-actions text-center">
+  <%= render partial: 'admin_handler/action_buttons' %>
 </div>
+
+<script>
+  setTimeout(function(){
+    var blocks = $('.shrinkable-block')
+    _fpa.utils.make_readable_notes_expandable(blocks, 100);
+
+  }, 10);
+</script>

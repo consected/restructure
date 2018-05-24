@@ -42,3 +42,47 @@ textarea#activity_log_extra_log_types
   font-family: courier;
   font-size: 13px;
 }
+
+table.admin-list  {
+  .expandable {
+    max-height: 100px;
+    padding-bottom: 20px;
+    margin-bottom:26px;
+    border-bottom: 2px dotted gray;
+    display: block;
+    overflow: hidden;
+
+
+    &:hover {
+      cursor: s-resize;
+    }
+
+    &:after {
+      content: '(click to expand)';
+      font-size: 90%;
+      font-weight: normal;
+      font-style: italic;
+      display: block;
+      padding-top: 0;
+      color: rgb(128, 128, 128);
+      position: absolute;
+      top: 104px;
+    }
+  }
+  .expanded {
+      max-height: none;
+      border-bottom: 0;
+
+      &:hover {
+          cursor: n-resize;
+      }
+      &:after {
+        content: '(click to shrink)';
+        font-size: 90%;
+        font-weight: normal;
+        font-style: italic;
+        position: relative;
+        top: 4px;
+      }
+  }
+}

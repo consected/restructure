@@ -40,7 +40,7 @@ _fpa.utils.pluralize = function(str) {
 _fpa.utils.make_readable_notes_expandable = function(block, max_height, click_callback) {
   if(!max_height) max_height = 40;
 
-  block.not('attached-expandable').each(function(){
+  block.not('.attached-expandable').each(function(){
       if($(this).height() > max_height){
           $(this).click(function(){
             // don't do it if there is a selection

@@ -12,8 +12,19 @@
     <thead>
       <tr>
         <th class="no-sort"></th>
-        <% index_params.each do |p| %>
+        <%
+          num_fields = 0
+          found_options = false
+          index_params.each do |p|
+            is_options_field = p.to_s.end_with?('options')
+            unless found_options
+              num_fields += 1
+              found_options = p if is_options_field
+            end
+          %>
+          <% unless is_options_field %>
           <th><%= p.to_s.humanize %></th>
+          <% end %>
         <% end %>
 
       </tr>
@@ -36,10 +47,19 @@
           <% elsif test_assoc_ids && list_item.respond_to?(test_assoc_ids) %>
             <td><%= list_item.send(test_assoc_ids).map(&:to_s).join("; ") %></td>
           <% else %>
-            <td><%= list_item.send(p) %></td>
+            <% unless p.to_s.end_with? 'options' %>
+              <td><%= list_item.send(p) %></td>
+            <% end %>
           <% end %>
         <% end %>
+
         </tr>
+        <% if found_options %>
+          <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+            <td>&nbsp;</td>
+            <td colspan="<%=num_fields%>"><strong><%=found_options%>:</strong> <pre style="font-size: 12px" class="shrinkable-block"><%= list_item.send(found_options) %></pre></td>
+          </tr>
+        <% end %>
       <% end %>
     </tbody>
   </table>
