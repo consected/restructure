@@ -109,7 +109,7 @@
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
 
-  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.select {|k,v| !v['keep_label']}.keys.join(',') }'}}has-caption-before{{/is}}".html_safe
+  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.select {|k,v| !v[:keep_label]}.keys.map(&:to_s).join(',') }'}}has-caption-before{{/is}}".html_safe
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -175,7 +175,7 @@
 
 
 <script id="<%=name%>_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<% if caption_before[:all_fields]%>
+<% if caption_before[:all_fields] %>
   <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
     <%= show_caption_before :all_fields, caption_before %>
   </li>

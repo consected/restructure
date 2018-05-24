@@ -82,12 +82,12 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     def edit_form_extras
       extras_caption_before = {}
-      if @extra_log_type
-        caption = @extra_log_type.label
-        item_list = @extra_log_type.fields - @implementation_class.fields_to_sync.map(&:to_s) - ['tracker_history_id']
-        extras_caption_before  = @extra_log_type.caption_before
-        sa = @extra_log_type.save_action
-        vo = @extra_log_type.view_options || {}
+      if @extra_log_type_config
+        caption = @extra_log_type_config.label
+        item_list = @extra_log_type_config.fields - @implementation_class.fields_to_sync.map(&:to_s) - ['tracker_history_id']
+        extras_caption_before  = @extra_log_type_config.caption_before
+        sa = @extra_log_type_config.save_action
+        vo = @extra_log_type_config.view_options || {}
       end
       if @item
         caption ||= @item.data
@@ -259,14 +259,16 @@ class ActivityLog::ActivityLogsController < UserBaseController
       end
 
       if etp.blank?
-        etp = object_instance ? 'primary' : 'blank_log'
+        etp = object_instance ? :primary : :blank_log
+      else
+        etp = etp.to_s.underscore.to_sym
       end
 
       set_item
 
-      if etp.present? && @implementation_class && @implementation_class.extra_log_type_config_names.include?(etp.underscore)
-        @extra_log_type_name = etp.underscore
-        @extra_log_type = @implementation_class.extra_log_type_config_for(etp.underscore)
+      if etp.present? && @implementation_class && @implementation_class.extra_log_type_config_names.include?(etp)
+        @extra_log_type_name = etp
+        @extra_log_type_config = @implementation_class.extra_log_type_config_for(etp)
         object_instance.extra_log_type = @extra_log_type_name unless object_instance.persisted?
       end
 

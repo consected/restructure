@@ -53,6 +53,10 @@ module UserHandler
       self.to_s.ns_underscore.pluralize.to_sym
     end
 
+    def ns_table_name
+      assoc_inverse.to_s.singularize.to_sym
+    end
+
     def get_rank_name value
       Classification::GeneralSelection.name_for self, value, :rank
     end

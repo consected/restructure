@@ -77,19 +77,19 @@ class ExtraLogType < ExtraOptions
       if self.references.is_a? Array
         self.references.each do |refitem|
           refitem.each do |k,v|
-            vi = v['add_with'] && v['add_with']['extra_log_type']
-            ckey = k
+            vi = v[:add_with] && v[:add_with][:extra_log_type]
+            ckey = k.to_s
             ckey += "_#{vi}" if vi
-            new_ref[ckey] = {k => v}
+            new_ref[ckey.to_sym] = {k => v}
           end
         end
       else
         new_ref = {}
         self.references.each do |k, v|
-          vi = v['add_with'] && v['add_with']['extra_log_type']
-          ckey = k
+          vi = v[:add_with] && v[:add_with][:extra_log_type]
+          ckey = k.to_s
           ckey += "_#{vi}" if vi
-          new_ref[ckey] = {k => v}
+          new_ref[ckey.to_sym] = {k => v}
         end
       end
 
@@ -97,7 +97,7 @@ class ExtraLogType < ExtraOptions
 
       self.references.each do |k, refitem|
         refitem.each do |mn, conf|
-          refitem[mn]['to_record_label'] = ModelReference.to_record_class_for_type(mn).human_name
+          refitem[mn][:to_record_label] = ModelReference.to_record_class_for_type(mn).human_name
         end
       end
 
@@ -107,7 +107,7 @@ class ExtraLogType < ExtraOptions
 
   def self.fields_for_all_in activity_log
     begin
-      activity_log.extra_log_type_configs.reject{|e| e.name.in?(['primary', 'blank_log'])}.map(&:fields).reduce([], &:+).uniq
+      activity_log.extra_log_type_configs.reject{|e| e.name.in?([:primary, :blank_log])}.map(&:fields).reduce([], &:+).uniq
     rescue => e
       raise FphsException.new "Failed to use the extra log options. It is likely that the 'fields:' attribute of one of the extra entries (not primary or blank) is missing or not formatted as expected. #{e}"
     end
@@ -128,13 +128,13 @@ class ExtraLogType < ExtraOptions
 
     def self.set_defaults activity_log, all_options={}
       # Add primary and blank items if they don't exist
-      all_options['primary'] ||= {}
-      all_options['blank_log'] ||= {}
+      all_options[:primary] ||= {}
+      all_options[:blank_log] ||= {}
 
-      all_options['primary']['label'] ||= activity_log.main_log_name
-      all_options['blank_log']['label'] ||= activity_log.blank_log_name
-      all_options['primary']['fields'] ||= activity_log.view_attribute_list
-      all_options['blank_log']['fields'] ||= activity_log.view_blank_log_attribute_list
+      all_options[:primary][:label] ||= activity_log.main_log_name
+      all_options[:blank_log][:label] ||= activity_log.blank_log_name
+      all_options[:primary][:fields] ||= activity_log.view_attribute_list
+      all_options[:blank_log][:fields] ||= activity_log.view_blank_log_attribute_list
     end
 
 end

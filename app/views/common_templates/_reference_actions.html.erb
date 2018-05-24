@@ -7,8 +7,7 @@
     id = '{{id}}'
   end
 
-  caption = ref_config['label'] || caption
-
+  caption = ref_config[:label] || caption.to_s
 %>
 <% unless @embedded_item %>
   <% if action_name.in? ['new', 'edit']

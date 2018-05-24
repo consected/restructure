@@ -88,6 +88,19 @@ class ModelReference < ActiveRecord::Base
     rec_type.ns_camelize.constantize
   end
 
+  def self.record_type_to_ns_table_name rt
+    if rt.is_a?(String) || rt.is_a?(Symbol)
+      rt.to_s.sub('dynamic_model__', '')
+    else
+      rt.name.ns_underscore.sub('dynamic_model__', '')
+    end
+  end
+
+  def self.record_type_to_table_name rt
+    record_type_to_ns_table_name(rt).gsub('__', '_')
+  end
+
+
   def to_record_class
     to_record_type.camelize.constantize
   end

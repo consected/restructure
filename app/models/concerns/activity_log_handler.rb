@@ -114,7 +114,7 @@ module ActivityLogHandler
     end
 
     def extra_log_type_config_for name
-      extra_log_type_configs.select{|s| s.name.underscore == name.underscore}.first
+      extra_log_type_configs.select{|s| s.name == name.to_s.underscore.to_sym}.first
     end
   end
 
@@ -132,7 +132,7 @@ module ActivityLogHandler
     if defined? super
       super()
     else
-      n = extra_log_type_config.label || extra_log_type.humanize
+      n = extra_log_type_config.label || extra_log_type.to_s.humanize
       "#{n}"
     end
   end
@@ -145,10 +145,10 @@ module ActivityLogHandler
   def extra_log_type
     elt  = super()
     if elt.blank?
-      elt = self.item ? 'primary' : 'blank_log'
+      elt = self.item ? :primary : :blank_log
     end
 
-    elt
+    elt.to_sym
   end
 
   def option_type
@@ -241,11 +241,11 @@ module ActivityLogHandler
     return res unless extra_log_type_config && extra_log_type_config.references
     extra_log_type_config.references.each do |ref_key, refitem|
       refitem.each do |ref_type, ref_config|
-        f = ref_config['from']
+        f = ref_config[:from]
         if f == 'this'
-          res += ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config['filter_by']
+          res += ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config[:filter_by]
         elsif f == 'master'
-          res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config['filter_by']
+          res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config[:filter_by]
         end
       end
     end
@@ -263,14 +263,14 @@ module ActivityLogHandler
         ci_res = true
         # Check if creatable_if has been defined on the reference configuration
         # and if it evaluates to true
-        
-        ci_res = extra_log_type_config.calc_reference_creatable_if ref_config, self
-        fb = ref_config['filter_by']
+        ci = ref_config[:creatable_if]
+        ci_res = extra_log_type_config.calc_action_if ci, self if ci
+        fb = ref_config[:filter_by]
 
         if ci_res
-          a = ref_config['add']
+          a = ref_config[:add]
           if a == 'many'
-            l = ref_config['limit']
+            l = ref_config[:limit]
             under_limit = true
 
             if l && l.is_a?(Integer)
@@ -286,6 +286,8 @@ module ActivityLogHandler
             if ModelReference.find_references(self, to_record_type: ref_type, filter_by: fb).length == 0
               ires = a
             end
+          elsif a.present?
+            raise FphsException.new "Unknown add type for creatable_model_references: #{a}"
           end
 
           if ires
@@ -293,7 +295,7 @@ module ActivityLogHandler
 
             mrc = ModelReference.to_record_class_for_type(ref_type)
             if mrc.parent == ActivityLog
-              elt = ref_config['add_with'] && ref_config['add_with']['extra_log_type']
+              elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
               o = mrc.new(extra_log_type: elt, master: master)
             else
               o = mrc.new master: master

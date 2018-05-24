@@ -6,7 +6,7 @@ class DynamicModel < ActiveRecord::Base
   default_scope -> {order disabled: :asc, category: :asc, position: :asc,  updated_at: :desc }
 
   after_save :force_option_config_parse
-  
+
   attr_accessor :editable
 
   def self.implementation_prefix
@@ -73,12 +73,12 @@ class DynamicModel < ActiveRecord::Base
 
   def option_config_for name
     return unless option_configs
-    option_configs.select{|s| s.name.underscore == name.underscore}.first
+    option_configs.select{|s| s.name == name}.first
   end
 
   def default_options
-    res = option_config_for 'default'
-    res || DynamicModelOptions.new('default', {}, self)
+    res = option_config_for :default
+    res || DynamicModelOptions.new(:default, {}, self)
   end
 
   def force_option_config_parse

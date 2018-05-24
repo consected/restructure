@@ -15,10 +15,10 @@
   data_action_when =  "data_#{action_when_attribute}".to_sym
 
   all_extra_log_type_configs = extra_log_type_configs.dup
-  primary_options = extra_log_type_configs.select {|e| e.name == 'primary'}.first
-  blank_options = extra_log_type_configs.select {|e| e.name == 'blank_log'}.first
+  primary_options = extra_log_type_configs.select {|e| e.name == :primary}.first
+  blank_options = extra_log_type_configs.select {|e| e.name == :blank_log}.first
 
-  extra_log_type_configs = extra_log_type_configs.reject {|c| c.name.in? ['primary', 'blank_log']}
+  extra_log_type_configs = extra_log_type_configs.reject {|c| c.name.in? [:primary, :blank_log]}
 
 
   main_log_caption = main_log_label
@@ -46,7 +46,7 @@
     caption_before: primary_options.caption_before,
     item_flags_after: 'notes',
     item_flags_readonly: true,
-    extra_type: 'primary',
+    extra_type: :primary,
     references: primary_options.references,
     show_if: primary_options.show_if
   } %>
@@ -72,7 +72,7 @@
     caption_before: blank_options.caption_before,
     item_flags_after: 'notes',
     item_flags_readonly: true,
-    extra_type: 'blank_log',
+    extra_type: :blank_log,
     references: blank_options.references,
     show_if: blank_options.show_if
   } %>
@@ -135,7 +135,7 @@
 
 
 <script id="activity_logs_<%=item_type_name%>_actions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial handlebars-template">
-  <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, implementation_class.extra_log_type_config_for('primary').resource_name)%>
+  <% unless prevent_create  || !current_user.has_access_to?(:create, :activity_log_type, implementation_class.extra_log_type_config_for(:primary).resource_name)%>
   <span id="activity-log-{{master_id}}-initial-action" class="" >
     <span class="activity-log--<%=item_type_name_hyphenated%>-actions">
       <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{item_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-extra-log-type="primary" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= main_log_label %></a>
@@ -158,7 +158,7 @@
       <p class="text-center action-buttons">
         {{#each <%=item_type.pluralize%>}}
         <%
-        eltc = implementation_class.extra_log_type_config_for('primary')
+        eltc = implementation_class.extra_log_type_config_for(:primary)
         if current_user.has_access_to?(:create, :activity_log_type, eltc.resource_name)
         %>
           <% if rec_type.blank? %>
@@ -171,7 +171,7 @@
         <% end %>
         {{/each}}
         <%
-        eltc = implementation_class.extra_log_type_config_for('blank_log')
+        eltc = implementation_class.extra_log_type_config_for(:blank_log)
         if current_user.has_access_to?(:create, :activity_log_type, eltc.resource_name)
         %>
         <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new?extra_type=blank-log" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>"  data-extra-log-type="blank_log" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
@@ -180,7 +180,7 @@
             eltc = c
             if current_user.has_access_to? :create, :activity_log_type, c.resource_name
         %>
-          <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.hyphenate %>"  data-extra-log-type="<%=c.name%>" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.label %></a>
+          <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>"  data-extra-log-type="<%=c.name%>" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.label %></a>
         <%  end
            end %>
       </p>
@@ -216,13 +216,13 @@
           <a href="/masters/{{master_id}}/<%=item_type.pluralize%>/new<%= rec_type.blank? ? '' : "?#{item_type}[rec_type]=#{rec_type}"  %>" data-remote="true" class="btn btn-sm btn-default add-item-button" data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log--<%=item_type_name_hyphenated%>-edit-form-{{master_id}}-" aria-label="add <%=item_type.humanize%> record"><span class="glyphicon glyphicon-plus"></span> <%= item_type.humanize%> record</a>
           <% end %>
           <% unless prevent_create %>
-          <% if current_user.has_access_to?(:create, :activity_log_type, implementation_class.extra_log_type_config_for('blank_log').resource_name) %>
+          <% if current_user.has_access_to?(:create, :activity_log_type, implementation_class.extra_log_type_config_for(:blank_log).resource_name) %>
           <a href="/masters/{{master_id}}/activity_log/<%=item_type_name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= blank_log_label %></a>
           <% end %>
             <% extra_log_type_configs.each do |c|
                 if current_user.has_access_to? :create, :activity_log_type, c.resource_name
             %>
-              <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.hyphenate %>" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.label %></a>
+              <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.label %></a>
             <%  end
                end %>
           <% end %>
@@ -238,7 +238,7 @@
             </div>
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-blank-log-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
             <% extra_log_type_configs.each do |c| %>
-              <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.hyphenate %>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
+              <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>
             <% end %>
           </div>
           {{#each <%=full_name.pluralize%>}}

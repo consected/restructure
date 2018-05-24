@@ -115,11 +115,10 @@ class ExtraOptions
         raise FphsException.new "Prevented a bad configuration of #{self.class.name} in #{config_obj.class.name} (#{config_obj.respond_to?(:human_name) ? config_obj.human_name : config_obj.id}). #{k} is not recognized as a valid attribute."
       end
     end
-
-    self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name.underscore}"
+    self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
-    self.caption_before = self.caption_before.each {|k,v| self.caption_before[k] = {'caption' => v} if v.is_a? String }
+    self.caption_before = self.caption_before.each {|k,v| self.caption_before[k] = {:caption => v} if v.is_a? String }
 
     self.dialog_before ||= {}
     self.dialog_before = self.dialog_before.symbolize_keys
@@ -179,10 +178,11 @@ class ExtraOptions
       else
         res = {}
       end
+      res.deep_symbolize_keys!
 
       set_defaults config_obj, res
 
-      opt_default = res.delete('_default')
+      opt_default = res.delete(:_default)
 
       res.each do |name, value|
         # If defined, use the optional _default entry as the basis for all individual options,
@@ -205,7 +205,7 @@ class ExtraOptions
   end
 
   def calc_reference_creatable_if ref_config, obj
-    ci = ref_config['creatable_if']
+    ci = ref_config[:creatable_if]
     return true unless ci
     ca = ConditionalActions.new ci, obj
     ca.calc_action_if

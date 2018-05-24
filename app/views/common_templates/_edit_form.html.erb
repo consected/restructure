@@ -109,7 +109,7 @@
     <div class="">
       <%= form_block_object.send(*form_block) do |form|%>
       <% form_embed = form if @embedded_item && !embedded %>
-      <% if @extra_log_type && !embedded %>
+      <% if @extra_log_type_config && !embedded %>
         <%= form.hidden_field :extra_log_type, value: @extra_log_type_name, data: {attr_name: 'option_type', option_type: 'extra_log_type', object_name: form_object_item_type_us} %>
       <% else %>
         <%= hidden_field_tag :option_type, nil, data: {attr_name: 'option_type', option_type: 'embedded', object_name: form_object_item_type_us} %>
@@ -172,14 +172,14 @@
 
           <% if dialog_before[field_name_sym]
               showed_caption_before = true
-              showed_caption_before_kl = dialog_before[field_name_sym]['keep_label'] ? 'showed-caption-before-keep-label' : 'showed-caption-before'
+              showed_caption_before_kl = dialog_before[field_name_sym][:keep_label] ? 'showed-caption-before-keep-label' : 'showed-caption-before'
              %>
             <li class="list-group-item dialog-before <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
               <%= show_dialog_before field_name_sym, form_object_instance, dialog_before %>
             </li>
           <% elsif caption_before[field_name_sym]
               showed_caption_before = true
-              showed_caption_before_kl = caption_before[field_name_sym]['keep_label'] ? 'caption-before-keep-label' : ''
+              showed_caption_before_kl = caption_before[field_name_sym][:keep_label] ? 'caption-before-keep-label' : ''
           %>
             <li class="list-group-item caption-before <%= showed_caption_before_kl %> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
               <%= show_caption_before field_name_sym, caption_before %>

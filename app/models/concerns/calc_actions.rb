@@ -147,7 +147,7 @@ module CalcActions
       @condition_values = {}
 
       @condition_config.each do |c_table, t_conds|
-        table_name = c_table.gsub('__', '_').gsub('dynamic_model_', '').to_sym
+        table_name = ModelReference.record_type_to_table_name(c_table).to_sym
 
         unless table_name.in? SelectionTypes
 

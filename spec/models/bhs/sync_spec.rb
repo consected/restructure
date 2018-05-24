@@ -24,7 +24,7 @@ RSpec.describe 'BHS App Sync', type: :model do
 
     m = Master.create! current_user: @user
     b = m.bhs_assignments.create! bhs_id: bhs_id
-    m.activity_log__bhs_assignments.create! bhs_assignment_id: b.id, extra_log_type: 'primary', item_id: b.id, return_call_availability_notes: "Created at #{DateTime.now}"
+    m.activity_log__bhs_assignments.create! bhs_assignment_id: b.id, extra_log_type: :primary, item_id: b.id, return_call_availability_notes: "Created at #{DateTime.now}"
     @master = m
   end
 

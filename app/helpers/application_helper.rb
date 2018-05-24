@@ -92,8 +92,8 @@
 
     def show_dialog_before key, object_instance, dialogs
       return unless dialogs && dialogs[key]
-      dname = dialogs[key]['name']
-      dlabel = dialogs[key]['label']
+      dname = dialogs[key][:name]
+      dlabel = dialogs[key][:label]
       dmsg = DialogTemplate.generate_message(dname, object_instance)
       id = "dialog-#{dname}-#{dlabel}".gsub(' ', '-')
 
@@ -105,7 +105,7 @@
       return unless captions && captions[key]
       caption = captions[key]
       if caption.is_a?(Hash)
-        caption = caption['caption']
+        caption = caption[:caption]
       end
       caption.gsub("\n","<br/>").html_safe
     end

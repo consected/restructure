@@ -4,6 +4,6 @@ class DynamicModelOptions < ExtraOptions
   protected
 
     def self.set_defaults config_obj, all_options={}
-      all_options['default'] ||= {}      
+      all_options[:default] ||= {}
     end
 end

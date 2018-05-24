@@ -77,7 +77,7 @@ EOF
 
     al = @activity_log
 
-    resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for('primary').resource_name
+    resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:primary).resource_name
 
 
     uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :activity_log_type, resource_name: resource_name).first

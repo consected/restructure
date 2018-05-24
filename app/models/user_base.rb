@@ -26,6 +26,8 @@ class UserBase < ActiveRecord::Base
   validate :configurable_valid_if
   validate :valid_embedded_item
 
+  attr_accessor :ignore_configurable_valid_if
+
 
   def self.is_external_identifier?
     false
@@ -316,7 +318,7 @@ class UserBase < ActiveRecord::Base
 
     def configurable_valid_if
 
-      return true unless option_type_config.respond_to?(:valid_if)
+      return true if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if) 
 
       vi = option_type_config.valid_if
       return true if vi.empty?
