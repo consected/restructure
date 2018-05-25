@@ -9,6 +9,13 @@ module CalcActions
 
   private
 
+    def is_selection_type table_name
+
+      return table_name if table_name.in? SelectionTypes
+
+      SelectionTypes.select {|st| table_name.to_s.start_with? st.to_s}.first
+    end
+
     def do_calc_action_if
       return true unless action_conf.is_a?(Hash) && action_conf.first
 
@@ -34,13 +41,18 @@ module CalcActions
 
         calc_base_query
 
+        condition_type = is_selection_type(condition_type) || condition_type
+
         if condition_type == :all
           cond_res = true
+          res_q = true
           # equivalent of (cond1 AND cond2 AND cond3 ...)
           # These conditions are easy to handle as a standard query
-          calc_query @condition_values
-          res_q = calc_query_conditions
-          merge_failures({condition_type => condition_config}) if !res_q
+          unless @condition_values.empty?
+            calc_query @condition_values
+            res_q = calc_query_conditions
+            merge_failures({condition_type => @condition_config}) if !res_q
+          end
 
           @non_query_conditions.each do |table, fields|
             fields.each do |field_name, expected_val|
@@ -52,9 +64,12 @@ module CalcActions
 
         elsif condition_type == :not_all
           cond_res = true
+          res_q = true
           # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
-          calc_query @condition_values
-          res_q = calc_query_conditions
+          unless @condition_values.empty?
+            calc_query @condition_values
+            res_q = calc_query_conditions
+          end
 
           @non_query_conditions.each do |table, fields|
             fields.each do |field_name, expected_val|
@@ -71,6 +86,7 @@ module CalcActions
 
         elsif condition_type == :any
           cond_res = false
+          res_q = false
           # equivalent of (cond1 OR cond2 OR cond3 ...)
           @condition_values.each do |table, fields|
             fields.each do |field_name, expected_val|
@@ -104,10 +120,8 @@ module CalcActions
           # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
           @condition_values.each do |table, fields|
             fields.each do |field_name, expected_val|
-              unless table == :this
-                calc_query(table => {field_name => expected_val})
-                res_q = calc_query_conditions
-              end
+              calc_query(table => {field_name => expected_val})
+              res_q = calc_query_conditions
               merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
               cond_res &&= !res_q
               break unless cond_res && !return_failures
@@ -118,9 +132,9 @@ module CalcActions
           @non_query_conditions.each do |table, fields|
             fields.each do |field_name, expected_val|
 
-              cond_res &&= !calc_this_condition(table, field_name, expected_val)
-              merge_failures({condition_type => {field_name => expected_val}}) if res_q
-
+              res_q = !calc_this_condition(table, field_name, expected_val)
+              merge_failures({condition_type => {table => {field_name => expected_val}}}) if !res_q
+              cond_res &&= res_q
             end
           end
 
@@ -137,7 +151,13 @@ module CalcActions
     end
 
     def merge_failures results
-      if return_failures
+      if return_failures && !@skip_merge
+        results.first.last.each do |t, res|
+          if res.is_a?(Hash) && res.first.last.first.first == :validate
+            field = res.first.first
+            results.first.last[t] = {field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
+          end
+        end
         return_failures.deep_merge!(results)
       end
     end
@@ -148,16 +168,21 @@ module CalcActions
     end
 
     def calc_this_condition table, field_name, expected_val
-
+      @skip_merge = false
       if table == :this
         if expected_val.is_a? Hash
-          if expected_val.keys.first.in? validation_types
-            calc_complex_validation expected_val, current_instance.attributes[field_name.to_s]
+          if is_selection_type field_name
+            ca = ConditionalActions.new({field_name => expected_val}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
+            res = ca.calc_action_if
+            @skip_merge = true
+          elsif expected_val.keys.first == :validate
+            res = calc_complex_validation expected_val[:validate], current_instance.attributes[field_name.to_s]
           end
         else
-          current_instance.attributes[field_name.to_s] == expected_val
+          res = current_instance.attributes[field_name.to_s] == expected_val
         end
       end
+      res
     end
 
     # Generate query conditions and a list of join tables based on a conditional configuration,
@@ -168,25 +193,30 @@ module CalcActions
     #
     def calc_base_query
 
-      join_tables = @condition_config.keys.map(&:to_sym) - SelectionTypes
+      # join_tables = @condition_config.keys.map(&:to_sym) - SelectionTypes
+      join_tables = []
       @condition_values = {}
       @non_query_conditions = {}
+      @sub_conditions = {}
 
       @condition_config.each do |c_table, t_conds|
         table_name = ModelReference.record_type_to_table_name(c_table).to_sym
 
-        unless table_name.in? SelectionTypes
+        if is_selection_type(table_name)
+          @sub_conditions[table_name] ||= {}
+          @sub_conditions[table_name] = t_conds
+        else
 
           t_conds.each do |field_name, val|
 
-            non_query_condition = table_name == :table
+            non_query_condition = table_name == :this
             if val.is_a? Hash
               val_item_key = val.first.first
-              if val_item_key == :this
-                non_query_condition = true
+              if val_item_key == :this && !val.first.last.is_a?(Hash)
+                # non_query_condition = true
                 val = @current_instance.attributes[val.first.last]
-              elsif val_item_key == :this_references
-                non_query_condition = true
+              elsif val_item_key == :this_references && !val.first.last.is_a?(Hash)
+                # non_query_condition = true
                 val = []
                 # Get the specified attribute's value from each of the model references
                 # Generate an array, allowing the conditions to be IN any of these
@@ -195,7 +225,7 @@ module CalcActions
                 end
               else
                 val.keys.each do |val_key|
-                  if val_key.in? validation_types
+                  if val_key.in? %i(this this_references validate)
                     non_query_condition = true
                   else
                     join_tables << val_key unless join_tables.include? val_key
@@ -233,7 +263,7 @@ module CalcActions
         # If this is a sub condition (the key is one of :all, :any, :not_any, :not_all)
         # go ahead and calculate the sub conditions results by instantiating a ConditionalActions class
         # with the scope as the current condition scope from the query
-        if c_type.to_sym.in? SelectionTypes
+        if is_selection_type c_type
           ca = ConditionalActions.new({c_type => t_conds}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
           res_a = ca.calc_action_if
           res &&= res_a
@@ -245,19 +275,25 @@ module CalcActions
     end
 
 
-    def validation_types
-      %i(min_length max_length)
-    end
 
     def calc_complex_validation condition, value
       res = true
       condition.each do |k, opts|
-        validator_class = Validates.const_get("#{k.to_s.classify}Validator")
-        v = validator_class.new k=>opts, attributes: {_attr: value}
-        res &&= v.value_is_valid? value
+
+        v = new_validator k, value, options:{k=>opts}
+        test_res = v.value_is_valid? value
+        res &&= test_res
       end
 
       res
+    end
+
+    def new_validator k, value, options: options
+      validator_class(k).new options.merge(attributes: {_attr: value})
+    end
+
+    def validator_class k
+      Validates.const_get("#{k.to_s.classify}Validator")
     end
 
 

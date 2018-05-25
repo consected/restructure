@@ -637,7 +637,7 @@ _fpa = {
 
             var j = xhr.responseJSON;
             if(xhr.status === 422){
-                _fpa.form_utils.set_field_errors(block, j);
+                _fpa.form_utils.set_field_errors($('.ajax-running'), j);
                 if(j) {
                     var msg = "<p>Could not complete action:</p>";
                     msg += format_message(j);
