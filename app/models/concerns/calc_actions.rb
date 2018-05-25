@@ -40,6 +40,7 @@ module CalcActions
         @condition_config = condition_config
 
         calc_base_query
+        byebug
 
         condition_type = is_selection_type(condition_type) || condition_type
 
@@ -200,6 +201,7 @@ module CalcActions
       @sub_conditions = {}
 
       @condition_config.each do |c_table, t_conds|
+        join_table_name = ModelReference.record_type_to_ns_table_name(c_table).to_sym
         table_name = ModelReference.record_type_to_table_name(c_table).to_sym
 
         if is_selection_type(table_name)
@@ -236,6 +238,7 @@ module CalcActions
             unless non_query_condition
               @condition_values[table_name] ||= {}
               @condition_values[table_name][field_name] = val
+              join_tables << join_table_name unless join_tables.include? table_name
             else
               @non_query_conditions[table_name] ||= {}
               @non_query_conditions[table_name][field_name] = val
