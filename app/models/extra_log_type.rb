@@ -72,6 +72,8 @@ class ExtraLogType < ExtraOptions
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
     raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
 
+    init_caption_before
+
     if self.references
       new_ref = {}
       if self.references.is_a? Array
@@ -136,5 +138,35 @@ class ExtraLogType < ExtraOptions
       all_options[:primary][:fields] ||= activity_log.view_attribute_list
       all_options[:blank_log][:fields] ||= activity_log.view_blank_log_attribute_list
     end
+
+    def init_caption_before
+      
+      curr_name = @config_obj.name
+
+      item_type = 'item'
+      item_type = @config_obj.implementation_class.parent_type if @config_obj.implementation_class.respond_to? :parent_type
+
+      cb = {
+        protocol_id: {
+          caption: "Select the protocol this #{curr_name} is related to. A tracker event will be recorded under this protocol."
+        },
+        "set_related_#{item_type}_rank".to_sym => {
+          caption: "To change the rank of the related #{item_type.to_s.humanize}, select it:"
+        }
+      }
+
+      cb[:all_fields] = {
+        caption: "Enter details about the #{curr_name}"
+        } if @caption_before[:all_fields].blank? && @fields.include?('select_call_direction')
+
+
+      cb[:submit] =  {
+        caption: 'To add specific protocol status and method records, save this form first.'
+        } if @fields.include?('protocol_id') && !@fields.include?('sub_process_id' )
+
+      @caption_before.merge! cb
+
+    end
+
 
 end

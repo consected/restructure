@@ -75,7 +75,7 @@ class TrackersController < UserBaseController
 
       # Find the matching UserBase subclass that has this name, avoiding using the supplied param
       # in a way that could be risky by allowing code injection
-      ic = UserBase.subclasses.select {|s| s.name == item_class_name}.first
+      ic = UserBase.class_from_name item_class_name
 
       # look up the item using the item_id parameter.
       rid = params[:record_id].to_i

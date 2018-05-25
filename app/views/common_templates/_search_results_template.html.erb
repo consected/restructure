@@ -245,6 +245,7 @@
   {{/each}}
   </span>
   <% if implementation_class_name %>
+  {{#unless ../prevent_edit}}
   <div class="results-caption-before <%=full_name.hyphenate%>-add-linked-tracker">
     <div class="panel panel-default panel-body">
       <p class="add-tracker-label">Add a specific tracker status record related to this item:</p>
@@ -253,6 +254,7 @@
       </p>
     </div>
   </div>
+  {{/unless}}
   <% end %>
 <% end %>
 {{else is @key 'includes' '^select_record_from_' }}

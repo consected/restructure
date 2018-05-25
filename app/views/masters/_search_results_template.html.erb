@@ -153,7 +153,9 @@
               <%= render partial: 'masters/search_results_category_panel', locals: {category: 'details', panel_name: 'details', panel_label: 'Details', initial_show: true} %>
               <%= render partial: 'masters/search_results_category_panel', locals: {category: 'external-ids', panel_name: 'external-ids', panel_label: 'External IDs', initial_show: false} %>
 
-              <% DynamicModel.categories.each do |cat| %>
+              <%
+                dmc = DynamicModel.categories - ['details', 'external-ids']
+                dmc.each do |cat| %>
                 <%= render partial: 'masters/search_results_category_panel', locals: {category: cat, panel_name: cat, panel_label: cat.humanize.titleize, initial_show: false} %>
               <% end %>
             <% end %>

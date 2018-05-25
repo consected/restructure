@@ -91,37 +91,19 @@ class ActivityLog::ActivityLogsController < UserBaseController
       end
       if @item
         caption ||= @item.data
-        item_name = @item.class.human_name
         item_list ||= @implementation_class.view_attribute_list - @implementation_class.fields_to_sync.map(&:to_s) - ['tracker_history_id']
       else
         caption ||= 'log item'
-        item_name = ''
         item_list ||= @implementation_class.view_blank_log_attribute_list - ['tracker_history_id']
       end
-      cb = {
-        protocol_id: {
-          caption: "Select the protocol this  #{activity_log_name} is related to. A tracker event will be recorded under this protocol."
-        },
-        "set_related_#{item_type_us}_rank".to_sym => {
-          caption: "To change the rank of the related #{item_name}, select it:"
-        }
-      }
 
-      cb[:all_fields] = {
-        caption: "Enter details about the #{activity_log_name}"
-        } if extras_caption_before[:all_fields].blank? && permitted_params.include?(:select_call_direction)
-
+      cb = {}
       if extras_caption_before[:notes].blank?
         nfc = app_config_text(:notes_field_caption)
         cb[:notes] =  {
           caption: nfc
           } unless nfc.blank?
       end
-
-      cb[:submit] =  {
-        caption: 'To add specific protocol status and method records, save this form first.'
-        } if item_list.include?(:protocol_id) && !item_list.include?(:sub_process_id )
-
       cb.merge! extras_caption_before
 
       {
@@ -132,10 +114,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
         item_flags_after: :notes,
         save_action: sa
       }
-    end
-
-    def activity_log_name
-      object_instance.class.activity_log_name
     end
 
     def edit_form_helper_prefix

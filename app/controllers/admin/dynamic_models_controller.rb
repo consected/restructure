@@ -2,9 +2,17 @@ class Admin::DynamicModelsController < AdminController
 
   helper_method :permitted_params, :objects_instance, :human_name
   before_action :set_help_description
+  before_action :set_defaults
+  helper_method :view_folder
 
   protected
-
+    def set_defaults
+      @show_again_on_save = true
+      @show_extra_help_info = {}
+      @show_extra_help_info[:title] = "Options"
+      example = {'default' => DynamicModelOptions.attr_defs.deep_stringify_keys}
+      @show_extra_help_info[:text] = example.to_yaml
+    end
 
     def filters
       {

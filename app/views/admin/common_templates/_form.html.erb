@@ -7,7 +7,7 @@
   else
     fref = [:admin, object_instance]
   end
-
+  has_options = false
 %>
 <%= form_for(fref, class: "inline-form admin-edit-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
@@ -24,9 +24,9 @@
       <% elsif p == :description %>
         <%= f.label p %>
         <%= f.text_area p %>
-      <% elsif p == :options %>
-        <%= f.label p %>
-        <%= f.text_area p %>
+      <% elsif p == :options
+          has_options = true
+      %>
       <% elsif p == :disabled %>
         <%= f.check_box p %>
         <%= f.label p %>
@@ -51,7 +51,24 @@
         <%= f.text_field p %>
       <% end %>
       </div>
+
   <% end %>
+  <% if has_options %>
+    <div></div>
+  <div class="form-group" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
+    <h4>Options</h4>
+    <%= f.text_area :options %>
+  </div>
+  <% end %>
+
+<% if @show_extra_help_info %>
+  <div class="form-group" style="vertical-align: top">
+    <h4><%= @show_extra_help_info[:title] %></h4>
+    <pre style="font-size: 12px">
+        <%= @show_extra_help_info[:text] %>
+    </pre>
+  </div>
+<% end %>
 
   <div class="form-group">
 

@@ -29,6 +29,15 @@ class UserBase < ActiveRecord::Base
   attr_accessor :ignore_configurable_valid_if
 
 
+  def self.all_subclasses
+    # Subsclasses may be subclassed further - go to the next level if needed.
+    UserBase.subclasses.map {|s| s.subclasses ? s.subclasses : s }.flatten
+  end
+
+  def self.class_from_name class_name
+     all_subclasses.select {|s| s.name == class_name}.first
+  end
+
   def self.is_external_identifier?
     false
   end
@@ -318,7 +327,7 @@ class UserBase < ActiveRecord::Base
 
     def configurable_valid_if
 
-      return true if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if) 
+      return true if @ignore_configurable_valid_if || !option_type_config.respond_to?(:valid_if)
 
       vi = option_type_config.valid_if
       return true if vi.empty?
