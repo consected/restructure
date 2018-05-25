@@ -1,10 +1,14 @@
 class Validates::EmailValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
-    record.errors.add attribute, (options[:message] || message) unless value_is_valid?(value)
+    record.errors.add attribute, (options[:message] || neg_message) unless value_is_valid?(value)
+  end
+
+  def neg_message
+    "is not an email"
   end
 
   def message
-    "is not an email"
+    "an email"
   end
 
   def value_is_valid? value
