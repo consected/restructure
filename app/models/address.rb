@@ -5,7 +5,7 @@ class Address < UserBase
   SecondaryRank = 5
   InactiveRank = 0
 
-  validates :zip, zip: true, allow_blank: true
+  validates :zip, "validates/zip": true, allow_blank: true
   validates :source, source: true, allow_blank: true
   validates :rank, presence: true
 

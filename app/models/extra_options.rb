@@ -62,7 +62,7 @@ class ExtraOptions
       editable_if: attr_for_conditions,
       showable_if: attr_for_conditions,
       valid_if: {
-        on_save:  attr_for_conditions,
+        on_save:  attr_for_validations,
         on_create: {},
         on_update: {}
       }
@@ -74,8 +74,8 @@ class ExtraOptions
     {
 
       all: {
-        model_table_name: {
-          field_name: 'all conditional values must be true',
+        'model_table_name | this': {
+          field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)',
           field_name_2: 'literal value | null',
           field_name_3: { this: 'attribute in this record' },
           field_name_4: { this_references: 'attribute in any referenced record' }
@@ -83,24 +83,31 @@ class ExtraOptions
       },
       any: {
         model_table_name: {
-          field_name: 'any conditional value must be true',
-          field_name_2: '...'
+          field_name: 'any conditional value must be true'
         }
       },
       not_any: {
         model_table_name: {
-          field_name: 'all conditional values must be false',
-          field_name_2: '...'
+          field_name: 'all conditional values must be false'
         }
       },
       not_all: {
         model_table_name: {
-          field_name: 'any conditional value must be false',
-          field_name_2: '...'
+          field_name: 'any conditional value must be false'
         }
       }
 
     }
+  end
+
+  def self.attr_for_validations
+    self.attr_for_conditions.deep_merge(
+      all: {
+        "model_table_name | this": {
+          validation_field_name_5: { validation_type: 'validation options'}
+        }
+      }
+    )
   end
 
 

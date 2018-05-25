@@ -6,8 +6,9 @@ class PlayerContact < UserBase
   InactiveRank = 0
 
   before_validation :format_phone, if: :is_phone?
-  validates :data, email: true, if: :is_email?
-  validates :data, phone: true, if: :is_phone?
+  validates :data, "validates/email": true, if: :is_email?
+  validates :data, "validates/phone": true, if: :is_phone?
+  validate :valid_format_phone?
   validates :source, source: true, allow_blank: true
   validates :rank, presence: true
   after_save :handle_primary_status
@@ -84,15 +85,24 @@ class PlayerContact < UserBase
 
   private
 
-    def format_phone
+    def valid_format_phone?
       return "" if self.data.blank?
       res = self.class.format_phone(self.data, self.rec_type)
       if res
         self.data = res
       else
-        self.errors.add "phone", "cannot be formatted. Check it is at least 10 digits and does not contain incorrect characters"
+        self.errors.add "phone", "cannot be formatted. Check it is at least 10 digits and does not contain incorrect characters" if self.errors.empty?
         self.mark_invalid = true
       end
+    end
+
+    def format_phone
+      return "" if self.data.blank?
+      res = self.class.format_phone(self.data, self.rec_type)
+      if res
+        self.data = res
+      end
+      true
     end
 
     # Format a phone number to US format: "(aaa)bbb-cccc[ optional-freetext]"

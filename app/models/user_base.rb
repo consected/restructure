@@ -345,15 +345,20 @@ class UserBase < ActiveRecord::Base
             c_vals.each do |table, cond|
               cond.each do |k, v|
                 v = v.present? ? v : '(blank)'
+                if v.is_a? Hash
+                  v = "#{v.first.first.to_s.humanize.downcase}: #{v.first.last}"
+                else
+                  v = ": #{v}"
+                end
                 k = table == :this ? k : "#{table}.#{k}"
                 if c_var == :all
-                  errors.add k.to_sym, "is invalid. Expected value to be: #{v}"
+                  errors.add k.to_sym, "is invalid. Expected value to be #{v}"
                 elsif c_var == :any
-                  errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value: #{v}"
+                  errors.add k.to_sym, "is one of several possible fields that is invalid - one must match. Expected value #{v}"
                 elsif c_var == :not_any
-                  errors.add k.to_sym, "is invalid. Expected value not to be: #{v}"
+                  errors.add k.to_sym, "is invalid. Expected value not to be #{v}"
                 elsif c_var == :not_all
-                  errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not: #{v}"
+                  errors.add k.to_sym, "is one of several possible fields that is invalid - none must match. Expected value not #{v}"
                 end
               end
             end
