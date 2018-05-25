@@ -46,7 +46,7 @@ module CalcActions
             fields.each do |field_name, expected_val|
               if table == :this
                 res_q &&= calc_this_condition(table, field_name, expected_val)
-                merge_failures({condition_type => {table => fields}}) if !res_q
+                merge_failures({condition_type => {table => {field_name => expected_val}}}) if !res_q
               end
             end
           end
@@ -100,12 +100,12 @@ module CalcActions
                 calc_query(table => {field_name => expected_val})
                 res_q = calc_sub_conditions
               end
-              merge_failures({condition_type => {table => fields}}) if res_q
+              merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
 
               cond_res &&= !res_q
-              break unless cond_res
+              break unless cond_res unless return_failures
             end
-            break unless cond_res
+            break unless cond_res unless return_failures
           end
 
         else
