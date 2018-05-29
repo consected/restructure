@@ -1,4 +1,6 @@
-class UserRole < ActiveRecord::Base
+class Admin::UserRole < ActiveRecord::Base
+
+  self.table_name = 'user_roles'
 
   include AdminHandler
 

@@ -75,6 +75,10 @@ class Admin::ExternalIdentifierDetailsController < AdminController
       @external_identifier = ExternalIdentifier.active.find(params[:id])
     end
 
+    def primary_model
+      Admin::ExternalIdentifier
+    end
+
     def secure_params
       # SageAssignment.new.admin_id = 1
       p = @external_identifier.name.singularize.to_sym
