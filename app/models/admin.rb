@@ -7,6 +7,7 @@ class Admin < ActiveRecord::Base
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_reenabling_admin, on: :update
   before_validation :prevent_not_in_setup_script, on: :create
+  after_save :unlock_account, on: :update
 
   scope :active, -> { where "disabled is null or disabled = false" }
 
@@ -38,6 +39,13 @@ class Admin < ActiveRecord::Base
   end
 
   protected
+
+    def unlock_account
+      if self.access_locked? && self.encrypted_password_changed?
+        self.locked_at = nil
+        self.failed_attempts = nil
+      end
+    end
 
     def prevent_email_change
       if email_changed? && self.persisted?

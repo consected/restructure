@@ -69,7 +69,7 @@ class ActivityLog < ActiveRecord::Base
   end
 
   def force_option_config_parse
-    extra_log_type_configs force:true
+    # extra_log_type_configs force:true
   end
 
   # return the activity log implementation class that corresponds to

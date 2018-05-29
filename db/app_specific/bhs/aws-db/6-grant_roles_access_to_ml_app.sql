@@ -1,3 +1,5 @@
+SET SEARCH_PATH=ml_app;
+
 REVOKE ALL ON SCHEMA ml_app FROM fphs;
 GRANT ALL ON SCHEMA ml_app TO fphs;
 GRANT USAGE ON SCHEMA ml_app TO fphsadm;

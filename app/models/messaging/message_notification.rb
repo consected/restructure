@@ -141,7 +141,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
     Messaging::MessageNotification.transaction do
       begin
-        email_body = self.generate
+        self.generate
 
         NotificationMailer.send_message_notification(self, logger: logger).deliver_now
         logger.info "Deliver now #{self.id}"

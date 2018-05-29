@@ -1,3 +1,5 @@
+SET SEARCH_PATH=ml_app;
+
 DROP FUNCTION IF EXISTS activity_log_bhs_assignment_insert_testmybrain() cascade;
 DROP FUNCTION IF EXISTS activity_log_bhs_assignment_insert_defaults() cascade;
 
@@ -35,7 +37,7 @@ CREATE FUNCTION activity_log_bhs_assignment_insert_defaults() RETURNS trigger
 
 
             IF found_bhs.bhs_id is not null THEN
-              NEW.results_link := ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar);
+              NEW.results_link := ('https://testmybrain.org/fphs/get_id.php?id=' || found_bhs.bhs_id::varchar);
             END IF;
             RETURN NEW;
         END;

@@ -1,3 +1,4 @@
+SET SEARCH_PATH=ml_app;
 
       BEGIN;
 
