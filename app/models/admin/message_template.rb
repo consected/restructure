@@ -47,8 +47,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
       raise FphsException.new "Data does not contain the tag #{tag} or :#{tag}\n#{d ? d : 'data is empty'}" unless d && (d.key?(tag) || d.key?(tag.to_sym))
 
       tag_value = get_tag_value d, tag
-      tag_subs_type = tag_subs.split(' ').first
       if tag_subs
+        tag_subs_type = tag_subs.split(' ').first
         tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
       end
       all_content.gsub!(tag_container, tag_value)
