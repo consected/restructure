@@ -50,7 +50,7 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     res = mn.generated_text
     expected_name = @activity_log.select_who
 
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id <span>#{master.id}</span>. This is a name: <span>#{expected_name}</span>.</p></div></body></html>"
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end

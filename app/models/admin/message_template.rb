@@ -50,6 +50,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
       if tag_subs
         tag_subs_type = tag_subs.split(' ').first
         tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
+      else
+        tag_value = tag_value.to_s
       end
       all_content.gsub!(tag_container, tag_value)
     end
