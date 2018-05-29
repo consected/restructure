@@ -164,6 +164,3 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
     end
 end
-
-# Make an alias of this class at the top level, to allow globalid to work
-::MessageNotification = Messaging::MessageNotification

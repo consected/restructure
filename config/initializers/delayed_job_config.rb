@@ -11,3 +11,6 @@ if Rails.env.production?
 else
   Delayed::Worker.logger = Logger.new(File.join(Rails.root, 'log', 'delayed_job.log'))
 end
+
+# Make an alias of this class at the top level, to allow globalid to work
+MessageNotification = Messaging::MessageNotification
