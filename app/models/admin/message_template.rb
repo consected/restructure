@@ -30,7 +30,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
     template_type == 'content'
   end
 
-  def substitute all_content, data: {}, tag_subs: 'span'
+  def substitute all_content, data: {}, tag_subs: nil
     tags = all_content.scan(/{{[0-9a-zA-z_\.]+}}/)
 
     tags.each do |tag_container|
@@ -48,7 +48,9 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       tag_value = get_tag_value d, tag
       tag_subs_type = tag_subs.split(' ').first
-      tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
+      if tag_subs
+        tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
+      end
       all_content.gsub!(tag_container, tag_value)
     end
     raise FphsException.new "Not all the tags were replaced. This suggests there was an error in the markup." if all_content.scan(/{{.*}}/).length > 0
