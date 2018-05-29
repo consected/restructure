@@ -6,6 +6,6 @@ DBOWNER=`whoami`
 cd $(dirname $0)
 
 sudo -u postgres psql -c "create database $DBNAME with owner $DBOWNER;"
-sudo -u postgres psql -d $DBNAME -c "set_search_path=$SCHEMA_NAME; create extension if not exists pgcrypto";
+sudo -u postgres psql -d $DBNAME -c "set search_path=$SCHEMA_NAME; create extension if not exists pgcrypto;"
 RAILS_ENV=$APPENV FPHS_POSTGRESQL_DATABASE=$DBNAME rake db:setup
 RAILS_ENV=$APPENV FPHS_POSTGRESQL_DATABASE=$DBNAME rake db:seed

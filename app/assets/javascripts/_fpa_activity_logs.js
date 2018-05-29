@@ -111,7 +111,7 @@ _fpa.activity_logs = {
 
   handle_creatables: function(block, data) {
     if(data._control) {
-      var control = data._control
+      var control = data._control;
     }
     else {
       var control = data;
@@ -142,7 +142,7 @@ _fpa.activity_logs = {
     }
   },
 
-  handle_save_action(block, data) {
+  handle_save_action: function(block, data) {
 
     var save_action;
     if(data._control) {

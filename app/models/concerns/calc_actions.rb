@@ -291,7 +291,7 @@ module CalcActions
       res
     end
 
-    def new_validator k, value, options: options
+    def new_validator k, value, options: {}
       validator_class(k).new options.merge(attributes: {_attr: value})
     end
 
