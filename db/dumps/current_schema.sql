@@ -181,6 +181,167 @@ CREATE FUNCTION ml_app.assign_sage_ids_to_players() RETURNS record
 
 
 --
+-- Name: create_message_notification_email(character varying, character varying, character varying, json, character varying[], character varying, timestamp without time zone); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.create_message_notification_email(layout_template_name character varying, content_template_name character varying, subject character varying, data json, recipient_emails character varying[], from_user_email character varying, run_at timestamp without time zone DEFAULT NULL::timestamp without time zone) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+      last_id INTEGER;
+    BEGIN
+
+      IF run_at IS NULL THEN
+        run_at := now();
+      END IF;
+
+      INSERT INTO ml_app.message_notifications
+      (
+        message_type,
+        created_at,
+        updated_at,
+        layout_template_name,
+        content_template_name,
+        subject,
+        data,
+        recipient_emails,
+        from_user_email
+      )
+      VALUES
+      (
+        'email',
+        now(),
+        now(),
+        layout_template_name,
+        content_template_name,
+        subject,
+        data,
+        recipient_emails,
+        from_user_email
+      )
+      RETURNING id
+      INTO last_id
+      ;
+
+      SELECT create_message_notification_job(last_id, run_at)
+      INTO last_id
+      ;
+
+      RETURN last_id;
+    END;
+    $$;
+
+
+--
+-- Name: create_message_notification_email(integer, integer, integer, character varying, integer, integer[], character varying, character varying, character varying, timestamp without time zone); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.create_message_notification_email(app_type_id integer, master_id integer, item_id integer, item_type character varying, user_id integer, recipient_user_ids integer[], layout_template_name character varying, content_template_name character varying, subject character varying, run_at timestamp without time zone DEFAULT NULL::timestamp without time zone) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+      last_id INTEGER;
+    BEGIN
+
+      IF run_at IS NULL THEN
+        run_at := now();
+      END IF;
+
+      INSERT INTO ml_app.message_notifications
+      (
+        subject,
+        app_type_id,
+        user_id,
+        recipient_user_ids,
+        layout_template_name,
+        content_template_name,
+        item_type,
+        item_id,
+        master_id,
+        message_type,
+        created_at,
+        updated_at
+      )
+      VALUES
+      (
+        subject,
+        app_type_id,
+        user_id,
+        recipient_user_ids,
+        layout_template_name,
+        content_template_name,
+        item_type,
+        item_id,
+        master_id,
+        'email',
+        now(),
+        now()
+      )
+      RETURNING id
+      INTO last_id
+      ;
+
+      SELECT create_message_notification_job(last_id, run_at)
+      INTO last_id
+      ;
+
+      RETURN last_id;
+    END;
+    $$;
+
+
+--
+-- Name: create_message_notification_job(integer, timestamp without time zone); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.create_message_notification_job(message_notification_id integer, run_at timestamp without time zone DEFAULT NULL::timestamp without time zone) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+      last_id INTEGER;
+    BEGIN
+
+      IF run_at IS NULL THEN
+        run_at := now();
+      END IF;
+
+      INSERT INTO ml_app.delayed_jobs
+      (
+        priority,
+        attempts,
+        handler,
+        run_at,
+        queue,
+        created_at,
+        updated_at
+      )
+      VALUES
+      (
+        0,
+        0,
+        '--- !ruby/object:ActiveJob::QueueAdapters::DelayedJobAdapter::JobWrapper
+        job_data:
+          job_class: HandleMessageNotificationJob
+          job_id: ' || gen_random_uuid() || '
+          queue_name: default
+          arguments:
+          - _aj_globalid: gid://fpa1/MessageNotification/' || message_notification_id::varchar || '
+          locale: :en',
+        run_at,
+        'default',
+        now(),
+        now()
+      )
+      RETURNING id
+      INTO last_id
+      ;
+
+    	RETURN last_id;
+    END;
+    $$;
+
+
+--
 -- Name: current_user_id(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -3002,6 +3163,44 @@ CREATE SEQUENCE ml_app.msid_seq
 
 
 --
+-- Name: page_layouts; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.page_layouts (
+    id integer NOT NULL,
+    app_type_id integer,
+    layout_name character varying,
+    panel_name character varying,
+    panel_label character varying,
+    panel_position integer,
+    options character varying,
+    disabled boolean,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: page_layouts_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.page_layouts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: page_layouts_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.page_layouts_id_seq OWNED BY ml_app.page_layouts.id;
+
+
+--
 -- Name: player_contact_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4323,6 +4522,13 @@ ALTER TABLE ONLY ml_app.model_references ALTER COLUMN id SET DEFAULT nextval('ml
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.page_layouts ALTER COLUMN id SET DEFAULT nextval('ml_app.page_layouts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.player_contact_history ALTER COLUMN id SET DEFAULT nextval('ml_app.player_contact_history_id_seq'::regclass);
 
 
@@ -4770,6 +4976,14 @@ ALTER TABLE ONLY ml_app.message_templates
 
 ALTER TABLE ONLY ml_app.model_references
     ADD CONSTRAINT model_references_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: page_layouts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.page_layouts
+    ADD CONSTRAINT page_layouts_pkey PRIMARY KEY (id);
 
 
 --
@@ -5396,6 +5610,20 @@ CREATE INDEX index_model_references_on_to_record_type_and_to_record_id ON ml_app
 --
 
 CREATE INDEX index_model_references_on_user_id ON ml_app.model_references USING btree (user_id);
+
+
+--
+-- Name: index_page_layouts_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_page_layouts_on_admin_id ON ml_app.page_layouts USING btree (admin_id);
+
+
+--
+-- Name: index_page_layouts_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_page_layouts_on_app_type_id ON ml_app.page_layouts USING btree (app_type_id);
 
 
 --
@@ -6532,6 +6760,14 @@ ALTER TABLE ONLY ml_app.user_roles
 
 
 --
+-- Name: fk_rails_37a2f11066; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.page_layouts
+    ADD CONSTRAINT fk_rails_37a2f11066 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
+
+
+--
 -- Name: fk_rails_3a3553e146; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6913,6 +7149,14 @@ ALTER TABLE ONLY ml_app.dynamic_models
 
 ALTER TABLE ONLY ml_app.sage_assignments
     ADD CONSTRAINT fk_rails_e3c559b547 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_e410af4010; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.page_layouts
+    ADD CONSTRAINT fk_rails_e410af4010 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
