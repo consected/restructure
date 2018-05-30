@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   belongs_to :admin
 
   has_many :user_access_controls, autosave: true, class_name: "Admin::UserAccessControl"
+  has_many :user_roles, autosave: true, class_name: "Admin::UserRole"
 
   belongs_to :app_type, class_name: "Admin::AppType"
 

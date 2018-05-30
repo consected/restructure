@@ -3,10 +3,9 @@ class Admin::UserRole < ActiveRecord::Base
   self.table_name = 'user_roles'
 
   include AdminHandler
+  include AppTyped
 
-  belongs_to :app_type
   belongs_to :user
-  belongs_to :admin
 
   validates :role_name, presence: true
   validates :user_id, uniqueness: {scope: [:app_type_id, :role_name]}

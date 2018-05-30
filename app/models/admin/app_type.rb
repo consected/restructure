@@ -6,6 +6,8 @@ class Admin::AppType < Admin::AdminBase
 
   has_many :user_access_controls, autosave: true, class_name: "Admin::UserAccessControl"
   has_many :app_configurations, autosave: true, class_name: "Admin::AppConfiguration"
+  has_many :page_layouts, autosave: true, class_name: "Admin::PageLayout"
+  has_many :user_roles, autosave: true, class_name: "Admin::UserRole"
 
   validates :name, presence: true
   validates :label, presence: true
@@ -77,6 +79,9 @@ class Admin::AppType < Admin::AdminBase
 
       res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value']
       res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['name']
+
+      res['page_layouts'] = app_type.import_config_sub_items app_type_config, 'page_layouts', ['layout_name', 'panel_name']
+      res['user_roles'] = app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
 
       app_type.user_access_controls.active.each do |a|
         unless a.update(access: nil, current_admin: admin)
@@ -215,6 +220,8 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :associated_external_identifiers
     options[:methods] << :associated_reports
     options[:methods] << :associated_general_selections
+    options[:methods] << :page_layouts
+    options[:methods] << :user_roles
 
     super(options)
   end

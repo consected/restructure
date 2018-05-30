@@ -3,9 +3,7 @@ class Admin::PageLayout < ActiveRecord::Base
   self.table_name = 'page_layouts'
 
   include AdminHandler
-
-  belongs_to :app_type
-  belongs_to :admin
+  include AppTyped
 
   validates :app_type_id, presence: {scope: :active}
   validates :layout_name, presence: {scope: :active}
