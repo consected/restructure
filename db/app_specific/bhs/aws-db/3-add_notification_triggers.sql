@@ -28,11 +28,15 @@ AS $$
     user_ids INTEGER[];
   BEGIN
 
-    select array_agg(user_id) from user_roles
+    select array_agg(ur.user_id)
+    from user_roles ur
+    inner join users u on ur.user_id = u.id
     into user_ids
     where
       role_name = with_role_name AND
-      app_type_id = for_app_type_id
+      ur.app_type_id = for_app_type_id AND
+      (ur.disabled is null or ur.disabled = false) AND
+      (ur.disabled is null or u.disabled = false)
     ;
 
     RETURN user_ids;
