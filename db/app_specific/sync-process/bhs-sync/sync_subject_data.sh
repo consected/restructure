@@ -7,14 +7,16 @@
 # NOTE: master_id on Zeus FPHS DB and Elaine AWS DB ** do not match **.
 #       Only BHS ID can be used to match records in Zeus and Elaine
 #
-# Cron is setup by the AWS EB deploy script, in file /etc/cron.d/fphs_sync:
+# Cron is setup to run on the VNC server.
+# In file /etc/cron.d/fphs_sync:
 # MAILTO=""
 # PATH=/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/opt/aws/bin:/root/bin
-# * * * * * root cd /var/app/current ; RAILS_ENV=production ./db/app_specific/bhs/sync_subject_data.sh > /dev/null 2>&1
+# * * * * * fphsetl cd /<location of this file> ; RAILS_ENV=production EBENV=PROD-fphs ./sync_subject_data.sh > /dev/null 2>&1
 #
 # Ensure that .pgpass is setup with the appropriate credentials
 #
 
+WORKINGDIR=/tmp
 
 cd $(dirname $0)
 
@@ -31,11 +33,11 @@ BHS_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
 BHS_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
 
 # Temp files - can be anywhere - and will be cleaned up before and after use
-BHS_SQL_FILE=/tmp/temp_bhs.sql
-BHS_IDS_FILE=/tmp/remote_bhs_ids
-BHS_ASSIGNMENTS_FILE=/tmp/zeus_bhs_assignments.csv
-BHS_PLAYER_INFOS_FILE=/tmp/zeus_bhs_player_infos.csv
-BHS_PLAYER_CONTACTS_FILE=/tmp/zeus_bhs_player_contacts.csv
+BHS_SQL_FILE=$WORKINGDIR/temp_bhs.sql
+BHS_IDS_FILE=$WORKINGDIR/remote_bhs_ids
+BHS_ASSIGNMENTS_FILE=$WORKINGDIR/zeus_bhs_assignments.csv
+BHS_PLAYER_INFOS_FILE=$WORKINGDIR/zeus_bhs_player_infos.csv
+BHS_PLAYER_CONTACTS_FILE=$WORKINGDIR/zeus_bhs_player_contacts.csv
 
 # Initially set the default schema for psql to be the AWS schema. This way, we do not need
 # set search_path=... directly coded in the scripts

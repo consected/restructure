@@ -1,5 +1,6 @@
 #
 # Source this file to setup the appropriate connection variables to support Elaine App synchronizations
+# This file may be reused across multiple sync scripts (BHS, IPA, etc), therefore take care if moving or editing it
 #
 
 if [ -z "$RAILS_ENV" ]
