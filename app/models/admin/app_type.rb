@@ -83,6 +83,8 @@ class Admin::AppType < Admin::AdminBase
       res['page_layouts'] = app_type.import_config_sub_items app_type_config, 'page_layouts', ['layout_name', 'panel_name']
       res['user_roles'] = app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
 
+      res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
+
       app_type.user_access_controls.active.each do |a|
         unless a.update(access: nil, current_admin: admin)
           puts "Failed to update UAC #{a.inspect}. #{a.errors.first}"
@@ -204,6 +206,27 @@ class Admin::AppType < Admin::AdminBase
     gs
   end
 
+  def associated_message_templates
+    ms = []
+    associated_activity_logs.all.each do |a|
+      a.extra_log_type_configs.each do |c|
+        c.dialog_before.each do |d, v|
+          res = Admin::MessageTemplate.active.where(name: v[:name], message_type: 'dialog', template_type: 'content').first
+          ms << res
+        end
+      end
+    end
+    associated_dynamic_models.all.each do |a|
+      a.option_configs.each do |c|
+        c.dialog_before.each do |d, v|
+          res = Admin::MessageTemplate.active.where(name: v[:name], message_type: 'dialog', template_type: 'content').first
+          ms << res
+        end
+      end
+    end
+    ms
+  end
+
 
   def export_config
     self.to_json
@@ -224,6 +247,7 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :associated_general_selections
     options[:methods] << :page_layouts
     options[:methods] << :user_roles
+    options[:methods] << :associated_message_templates
 
     super(options)
   end
