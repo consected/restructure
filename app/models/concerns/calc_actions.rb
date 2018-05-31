@@ -200,7 +200,7 @@ module CalcActions
       @sub_conditions = {}
 
       @condition_config.each do |c_table, t_conds|
-        join_table_name = c_table.to_sym 
+        join_table_name = c_table.to_sym
         table_name = ModelReference.record_type_to_table_name(c_table).to_sym
 
         if is_selection_type(table_name)
@@ -217,12 +217,13 @@ module CalcActions
                 # non_query_condition = true
                 val = @current_instance.attributes[val.first.last]
               elsif val_item_key == :this_references && !val.first.last.is_a?(Hash)
+                att = val.first.last
                 # non_query_condition = true
                 val = []
                 # Get the specified attribute's value from each of the model references
                 # Generate an array, allowing the conditions to be IN any of these
                 @current_instance.model_references.each do |mr|
-                  val << mr.to_record.attributes[val.first.last]
+                  val << mr.to_record.attributes[att]
                 end
               else
                 val.keys.each do |val_key|
