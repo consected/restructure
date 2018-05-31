@@ -2181,6 +2181,43 @@ ALTER SEQUENCE ml_app.addresses_id_seq OWNED BY ml_app.addresses.id;
 
 
 --
+-- Name: admin_action_logs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.admin_action_logs (
+    id integer NOT NULL,
+    admin_id integer,
+    item_type character varying,
+    item_id integer,
+    action character varying,
+    url character varying,
+    prev_value json,
+    new_value json,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: admin_action_logs_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.admin_action_logs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: admin_action_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.admin_action_logs_id_seq OWNED BY ml_app.admin_action_logs.id;
+
+
+--
 -- Name: admin_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4347,6 +4384,13 @@ ALTER TABLE ONLY ml_app.addresses ALTER COLUMN id SET DEFAULT nextval('ml_app.ad
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.admin_action_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.admin_action_logs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.admin_history ALTER COLUMN id SET DEFAULT nextval('ml_app.admin_history_id_seq'::regclass);
 
 
@@ -4776,6 +4820,14 @@ ALTER TABLE ONLY ml_app.address_history
 
 ALTER TABLE ONLY ml_app.addresses
     ADD CONSTRAINT addresses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: admin_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.admin_action_logs
+    ADD CONSTRAINT admin_action_logs_pkey PRIMARY KEY (id);
 
 
 --
@@ -5351,6 +5403,13 @@ CREATE INDEX index_addresses_on_master_id ON ml_app.addresses USING btree (maste
 --
 
 CREATE INDEX index_addresses_on_user_id ON ml_app.addresses USING btree (user_id);
+
+
+--
+-- Name: index_admin_action_logs_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_admin_action_logs_on_admin_id ON ml_app.admin_action_logs USING btree (admin_id);
 
 
 --
@@ -6757,6 +6816,14 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 ALTER TABLE ONLY ml_app.user_roles
     ADD CONSTRAINT fk_rails_318345354e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_3389f178f6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.admin_action_logs
+    ADD CONSTRAINT fk_rails_3389f178f6 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
