@@ -1,6 +1,7 @@
 class AdminController < ApplicationController
   include AdminControllerHandler
   include FilterUtils
+  include AdminActionLogging
 
   helper_method :object_has_admin_parent?, :object_name
 
