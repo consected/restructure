@@ -128,10 +128,11 @@ class Admin::AppType < Admin::AdminBase
         new_vals[:current_admin] = admin
 
         if parent
-          cond[:user] = user = self.class.user_from_email ac['user_email']
+          has_user = parent.send(assoc_name).attribute_names.include?('user_id')
+          cond[:user] = user = self.class.user_from_email ac['user_email'] if has_user
           unless user == :unknown
             # Use the app type's admin as the current admin
-            new_vals[:user] = user
+            new_vals[:user] = user if has_user
             new_vals.merge! add_vals
             i = parent.send(assoc_name).active.where(cond).first
 
