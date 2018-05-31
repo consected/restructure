@@ -17,5 +17,9 @@ FPHS_POSTGRESQL_USERNAME=fphs \
 FPHS_POSTGRESQL_PORT=5432 \
 FPHS_RAILS_SECRET_KEY_BASE=temp \
 FPHS_RAILS_DEVISE_SECRET_KEY=temp \
-FPHS_POSTGRESQL_PASSWORD=TEMP_DB_PW \
+FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
 rake db:migrate
+
+export PGPASSWORD="$TEMP_DB_PW"
+
+psql -d fphs -h fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com -U fphs < fphs-sql/grant_roles_access_to_ml_app.sql
