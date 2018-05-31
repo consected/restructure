@@ -73,9 +73,9 @@ class Admin::AppType < Admin::AdminBase
 
       res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name']
 
-      res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name'], create_disabled: true
-      res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name'], create_disabled: true
-      res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'associated_activity_logs', ['item_type', 'rec_type'], create_disabled: true
+      res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name']#, create_disabled: true
+      res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name']#, create_disabled: true
+      res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'associated_activity_logs', ['item_type', 'rec_type', 'process_name']#, create_disabled: true
 
       res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value']
       res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['name']
@@ -134,7 +134,7 @@ class Admin::AppType < Admin::AdminBase
             # Use the app type's admin as the current admin
             new_vals[:user] = user if has_user
             new_vals.merge! add_vals
-            i = parent.send(assoc_name).active.where(cond).first
+            i = parent.send(assoc_name).where(cond).order('disabled asc nulls first, id desc').first
 
             if i
               el = i
@@ -146,7 +146,8 @@ class Admin::AppType < Admin::AdminBase
           end
         else
           new_vals.merge! add_vals
-          i = cname.active.where(cond).first
+
+          i = cname.where(cond).order('disabled asc nulls first, id desc').first
 
           if i
             el = i

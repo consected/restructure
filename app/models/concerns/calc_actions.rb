@@ -40,7 +40,6 @@ module CalcActions
         @condition_config = condition_config
 
         calc_base_query
-        byebug
 
         condition_type = is_selection_type(condition_type) || condition_type
 
@@ -201,7 +200,7 @@ module CalcActions
       @sub_conditions = {}
 
       @condition_config.each do |c_table, t_conds|
-        join_table_name = ModelReference.record_type_to_ns_table_name(c_table).to_sym
+        join_table_name = c_table.to_sym 
         table_name = ModelReference.record_type_to_table_name(c_table).to_sym
 
         if is_selection_type(table_name)
