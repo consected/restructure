@@ -28,7 +28,7 @@ unless alt_options
 else
   gs = alt_options
 end
-
+options = field_options_for(form_object_instance, field_name_sym)
 %>
 <%= form.label field_name_sym, opt %>
-<%= form.select field_name_sym, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
+<%= form.select field_name_sym, gs, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

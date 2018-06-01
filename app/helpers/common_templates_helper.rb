@@ -16,6 +16,9 @@ module CommonTemplatesHelper
       fopt = form_object_instance.option_type_config.field_options[field_name_sym]
     end
 
+    fopt[:value] = DateTime.now.iso8601 if fopt[:value] == 'now()'
+    fopt[:value] = DateTime.now.iso8601.split('T').first if fopt[:value] == 'today()' 
+
     fopt ||= {}
   end
 
