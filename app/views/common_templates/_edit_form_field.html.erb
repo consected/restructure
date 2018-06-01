@@ -20,8 +20,10 @@
 
   unless got
     match_name = "name_is_#{curr_field_name_sym}"
-    if f_names.include? match_name
-      partial_fn = "common_templates/edit_fields/#{match_name}"
+    # Use a select rather than just includes? to ensure brakeman doesn't complain about params driving render paths
+    resname = f_names.select {|f| f == match_name}.first
+    if resname
+      partial_fn = "common_templates/edit_fields/#{resname}"
     %>
       <%= render partial: partial_fn, locals: local_vars[:locals] %>
       <%
