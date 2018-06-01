@@ -113,8 +113,11 @@ module ActivityLogHandler
       self.definition.extra_log_type_configs
     end
 
+    # Select the extra log type configuration by name, or use the first item if nothing matches
+    # The default allows viewing of data in the case that a configuration has changed and removed an item
+    # that an extra_log_type field value still refers to 
     def extra_log_type_config_for name
-      extra_log_type_configs.select{|s| s.name == name.to_s.underscore.to_sym}.first
+      extra_log_type_configs.select{|s| s.name == name.to_s.underscore.to_sym}.first || extra_log_type_configs.first
     end
   end
 
@@ -264,7 +267,7 @@ module ActivityLogHandler
         # Check if creatable_if has been defined on the reference configuration
         # and if it evaluates to true
 
-        ci_res = extra_log_type_config.calc_reference_creatable_if ref_config, self 
+        ci_res = extra_log_type_config.calc_reference_creatable_if ref_config, self
         fb = ref_config[:filter_by]
 
         if ci_res
