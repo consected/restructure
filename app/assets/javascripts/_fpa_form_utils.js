@@ -878,7 +878,7 @@ _fpa.form_utils = {
             if(dc.length > 0)
               me = dc;
 
-            if(me.height() > 1200) {
+            if(me.height() > 1200 || me.find('.in-form-dialog').length > 0) {
               var c = _fpa.layout.item_blocks.regular;
               var max_h = 0;
               me.find('.list-group-item.caption-before, .list-group-item.dialog-before').each(function() {
