@@ -35,14 +35,7 @@ unless rl
   logger.warn "Failed to find valid class name for #{field_name_sym}"
 end
 
-options = {}
-
-if form_object_instance.option_type_config
-  fopt = form_object_instance.option_type_config.field_options[field_name_sym]
-  if fopt
-    options[:include_blank] = fopt[:include_blank]
-  end
-end
+options = field_options_for(form_object_instance, field_name_sym)
 %>
 <%= form.label rl %>
 <%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

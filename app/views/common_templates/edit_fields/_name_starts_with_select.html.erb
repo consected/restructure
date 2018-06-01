@@ -1,23 +1,34 @@
 <%
-gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, return_all: true) rescue nil
-unless gs
+fopt = field_options_for(form_object_instance, field_name_sym)
+
+alt_options = fopt[:edit_as] && fopt[:edit_as][:alt_options]
+
+opt = {}
+
+unless alt_options
+  gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, return_all: true) rescue nil
+  unless gs
+    raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
+  end
+  desc = gs.reduce(false){|r,i| r || !i[6].blank?}
+
+  v = form_object_instance.send(field_name_sym)
+  if desc.blank?
+  else
+    idesc = "#{general_selection_name}_#{field_name_sym}".to_sym
+    opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{field_name.humanize} options"}
+    select_desc["#{general_selection_name}_#{field_name_sym}".to_sym] = v
+  end
+
+  gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, value: v) rescue nil
+  unless gs
   raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
-end
-desc = gs.reduce(false){|r,i| r || !i[6].blank?}
-v = form_object_instance.send(field_name_sym)
-if desc.blank?
-  opt = {}
+  end
+
 else
-  idesc = "#{general_selection_name}_#{field_name_sym}".to_sym
-  opt = {'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id(idesc), title: "#{field_name.humanize} options"}
-  select_desc["#{general_selection_name}_#{field_name_sym}".to_sym] = v
+  gs = alt_options
 end
+
 %>
 <%= form.label field_name_sym, opt %>
-<%
-gs = general_selection("#{general_selection_name}_#{field_name_sym}".to_sym, value: v) rescue nil
-unless gs
-raise FphsException.new "The general selection #{general_selection_name}_#{field_name_sym} has not been defined. Please inform the administrator of this error."
-end
-%>
 <%= form.select field_name_sym, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

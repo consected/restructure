@@ -40,10 +40,6 @@
       " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class}\"".html_safe
     end
 
-    def zip_field_props init={}
-      init.merge({pattern: "\\d{5,5}(-\\d{4,4})?"})
-    end
-
     def common_inline_cancel_button class_extras="pull-right"
 
       if object_instance.id

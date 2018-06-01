@@ -50,7 +50,8 @@ class ExtraOptions
       },
       field_options: {
         field_name: {
-          include_blank: 'true or false to force a drop down field to include a selectable blank'
+          include_blank: 'true or false to force a drop down field to include a selectable blank',
+          pattern: "provide a mask for a text field"
         }
       },
       dialog_before: {

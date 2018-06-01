@@ -9,8 +9,17 @@
 
   got = false
 
+  curr_field_name = field_name
+  opt = field_options_for(form_object_instance, field_name_sym)
+
+  if opt[:edit_as]
+    curr_field_name = opt[:edit_as][:field_type] || curr_field_name
+  end
+
+  curr_field_name_sym = curr_field_name.to_sym
+
   unless got
-    match_name = "name_is_#{field_name_sym}"
+    match_name = "name_is_#{curr_field_name_sym}"
     if f_names.include? match_name
       partial_fn = "common_templates/edit_fields/#{match_name}"
     %>
@@ -23,7 +32,7 @@
   unless got
     f_names.select {|fn| fn.start_with?('name_starts_with_')}.map {|fn| fn.sub('name_starts_with_', '')}.each do |sw|
       match_name = "name_starts_with_#{sw}"
-      if field_name.start_with?("#{sw}_") && f_names.include?(match_name)
+      if curr_field_name.start_with?("#{sw}_") && f_names.include?(match_name)
         partial_fn = "common_templates/edit_fields/#{match_name}"
       %>
         <%= render partial: partial_fn, locals: local_vars[:locals] %>
@@ -37,7 +46,7 @@
   unless got
     f_names.select {|fn| fn.start_with?('name_ends_with_')}.map {|fn| fn.sub('name_ends_with_', '')}.each do |ew|
       match_name = "name_ends_with_#{ew}"
-      if field_name.end_with?("_#{ew}") && f_names.include?(match_name)
+      if curr_field_name.end_with?("_#{ew}") && f_names.include?(match_name)
         partial_fn = "common_templates/edit_fields/#{match_name}"
       %>
         <%= render partial: partial_fn, locals: local_vars[:locals] %>
@@ -49,7 +58,7 @@
   end
 
   unless got
-    if respond_to?("#{field_name}_options") %>
+    if respond_to?("#{curr_field_name}_options") %>
       <%= render partial: "common_templates/edit_fields/respond_to_options", locals: local_vars[:locals] %>
     <%
       got = true
@@ -57,7 +66,7 @@
   end
 
   unless got
-    if Classification::GeneralSelection.item_types.include?("#{general_selection_name}_#{field_name_sym}".to_sym)%>
+    if Classification::GeneralSelection.item_types.include?("#{general_selection_name}_#{curr_field_name_sym}".to_sym)%>
       <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
     <%
       got = true

@@ -19,7 +19,7 @@ end
 unless rl
   logger.warn "Failed to find valid class name for #{field_name_sym}"
 end
-
+options = field_options_for(form_object_instance, field_name_sym)
 %>
 <%= form.label rl %>
-<%= form.select field_name_sym, reslist, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}%>
+<%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}%>

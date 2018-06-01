@@ -6,6 +6,17 @@ module CommonTemplatesHelper
     end
   end
 
+  def zip_field_props init={}
+    init.merge({pattern: "\\d{5,5}(-\\d{4,4})?"})
+  end
+
+
+  def field_options_for form_object_instance, field_name_sym
+    if form_object_instance.option_type_config
+      fopt = form_object_instance.option_type_config.field_options[field_name_sym]
+    end
+
+    fopt ||= {}
+  end
+
 end
-
-
