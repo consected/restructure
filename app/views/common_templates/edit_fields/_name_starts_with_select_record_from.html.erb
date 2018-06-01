@@ -1,7 +1,11 @@
 <%
 # Allow a 'data' selection to be made from an item associated with an activity log master
 
-rlit = field_name.sub('select_record_from_', '').singularize
+# optionally use another field type specification (allowing a field to be limited to a rec type for example)
+options = field_options_for(form_object_instance, field_name_sym)
+curr_field_name = options[:edit_as] && options[:edit_as][:field_type] || field_name
+
+rlit = curr_field_name.sub('select_record_from_', '').singularize
 
 if ActivityLog.use_with_class_names.include? rlit
   cn = rl = rlit
@@ -35,7 +39,7 @@ unless rl
   logger.warn "Failed to find valid class name for #{field_name_sym}"
 end
 
-options = field_options_for(form_object_instance, field_name_sym)
+
 %>
 <%= form.label rl %>
 <%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>

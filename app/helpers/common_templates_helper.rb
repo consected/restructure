@@ -17,8 +17,17 @@ module CommonTemplatesHelper
     end
 
     fopt ||= {}
-    fopt[:value] = DateTime.now.iso8601 if fopt[:value] == 'now()'
-    fopt[:value] = DateTime.now.iso8601.split('T').first if fopt[:value] == 'today()'
+
+    if fopt[:value]
+      fres = form_object_instance.attributes[field_name_sym.to_s]
+      if !form_object_instance.persisted?  && fres.blank?
+        fres = fopt[:value]
+        fres = DateTime.now.iso8601 if fres == 'now()'
+        fres = DateTime.now.iso8601.split('T').first if fres == 'today()'
+      end
+
+      fopt[:value] = fres
+    end
 
     fopt
   end
