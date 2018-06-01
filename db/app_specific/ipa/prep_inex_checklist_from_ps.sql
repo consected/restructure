@@ -13,6 +13,7 @@ CREATE OR REPLACE FUNCTION activity_log_ipa_assignment_phone_screens_callback_se
 LANGUAGE plpgsql
 AS $$
     DECLARE
+      initial_screening RECORD;
       football_experience RECORD;
       subject_size RECORD;
       tms RECORD;
@@ -25,6 +26,15 @@ AS $$
   BEGIN
 
   IF NEW.extra_log_type = 'finalize' THEN
+
+    -- Get the latest football experience record
+    SELECT *
+    INTO initial_screening
+    FROM ipa_ps_initial_screenings
+    WHERE master_id = NEW.master_id
+    ORDER BY id DESC
+    LIMIT 1;
+
 
     -- Get the latest football experience record
     SELECT *
@@ -89,20 +99,37 @@ AS $$
       updated_at,
       user_id,
       fixed_checklist_type,
+
+      ix_consent_blank_yes_no,
+      ix_consent_details,
       ix_not_pro_blank_yes_no,
+      ix_not_pro_details,
       ix_age_range_blank_yes_no,
+      ix_age_range_details,
       ix_weight_ok_blank_yes_no,
+      ix_weight_ok_details,
       ix_no_seizure_blank_yes_no,
+      ix_no_seizure_details,
       ix_no_device_impl_blank_yes_no,
+      ix_no_device_impl_details,
       ix_no_ferromagnetic_impl_blank_yes_no,
+      ix_no_ferromagnetic_impl_details,
       ix_diagnosed_sleep_apnea_blank_yes_no,
+      ix_diagnosed_sleep_apnea_details,
       ix_diagnosed_heart_stroke_or_meds_blank_yes_no,
+      ix_diagnosed_heart_stroke_or_meds_details,
       ix_chronic_pain_and_meds_blank_yes_no,
+      ix_chronic_pain_and_meds_details,
       ix_tmoca_score_blank_yes_no,
+      ix_tmoca_score_details,
       ix_no_hemophilia_blank_yes_no,
+      ix_no_hemophilia_details,
       ix_raynauds_ok_blank_yes_no,
+      ix_raynauds_ok_details,
       ix_mi_ok_blank_yes_no,
-      ix_bicycle_ok_blank_yes_no
+      ix_mi_ok_details,
+      ix_bicycle_ok_blank_yes_no,
+      ix_bicycle_ok_details
 
     )
     VALUES
@@ -114,47 +141,81 @@ AS $$
 
       'phone screen review',
 
+      --ix_consent_blank_yes_no
+      initial_screening.select_still_interested,
+      -- ix_consent_details
+'Responded "yes" to all questions including the final confirmation to continue in Start Phone Screening form',
+
       --ix_not_pro_blank_yes_no
       CASE WHEN football_experience.played_in_nfl_blank_yes_no = 'no' THEN 'yes' ELSE 'no' END,
+      --ix_not_pro_details
+'Responded "' || football_experience.played_in_nfl_blank_yes_no || '" to question "Have you ever played in the National Football League (NFL)?" in Football Experience form.',
 
       --ix_age_range_blank_yes_no
       CASE WHEN football_experience.age >= 24
         AND football_experience.age <= 55
         THEN 'yes' ELSE 'no' END,
+      --ix_age_range_details
+'Stated age ' || football_experience.age || ' in Football Experience form',
 
       --ix_weight_ok_blank_yes_no
       CASE WHEN subject_size.weight <= 450 THEN 'yes' ELSE 'no' END,
+      --ix_weight_ok_details
+'Stated weight ' || subject_size.weight || ' lbs in Size form.',
 
       --ix_no_seizure_blank_yes_no
-      NULL,
+      CASE WHEN tms.convulsion_or_seizue_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
+      --ix_no_seizure_details
+'Responded "' || tms.convulsion_or_seizue_blank_yes_no_dont_know || '" to question "Have you ever had a convulsion or a seizure?" in TMS form.',
 
       --ix_no_device_impl_blank_yes_no
-      CASE WHEN tms.pacemaker_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
+      CASE WHEN mri.electrical_implants_blank_yes_no_dont_know = 'no' AND tms.pacemaker_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
+      --ix_no_device_impl_details
+'Responded "' || mri.electrical_implants_blank_yes_no_dont_know || '" to question "Do you have any electrical or battery-powered implants such as a cardiac pacemaker or a perfusion pump?" in MRI form.
+Responded "' || tms.pacemaker_blank_yes_no_dont_know || '" to question "Do you have a cardiac pacemaker or intracardiac lines?" in TMS form.',
 
       --ix_no_ferromagnetic_impl_blank_yes_no
       CASE WHEN tms.metal_blank_yes_no_dont_know = 'no'
         AND mri.metal_implants_blank_yes_no_dont_know = 'no'
         AND mri.metal_jewelry_blank_yes_no = 'no'
         THEN 'yes' ELSE 'no' END,
+      --ix_no_ferromagnetic_impl_details
+'Responded "' || tms.metal_blank_yes_no_dont_know || '" to question "Do you have any metal in the brain, skull or elsewhere in the body?" in TMS form.
+Responded "' || mri.metal_implants_blank_yes_no_dont_know || '" to question "Do you have any metal implants such as surgical clips, heart valves with steel parts, metal fragments, shrapnel or steel implants?" in MRI form.
+Responded "' || mri.metal_jewelry_blank_yes_no || '" to question "Do you have any piercings or other metal jewelry that would not be able to be easily removed before an MRI scan?" in MRI form.',
+
 
       --ix_diagnosed_sleep_apnea_blank_yes_no
       CASE WHEN sleep.sleep_disorder_blank_yes_no_dont_know = 'yes' THEN 'yes' ELSE 'no' END,
+      --ix_diagnosed_sleep_apnea_details
+'Responded "' || sleep.sleep_disorder_blank_yes_no_dont_know || '" to question "Have you ever been diagnosed with sleep apnea or any other sleep disorders (e.g. narcolepsy)" in Sleep form.',
 
       --ix_diagnosed_heart_stroke_or_meds_blank_yes_no
-      NULL,
+      CASE WHEN health.other_heart_conditions_blank_yes_no_dont_know = 'yes'
+      THEN 'yes' ELSE '' END,
+
+      --ix_diagnosed_heart_stroke_or_meds_details
+'Responded "' || health.other_heart_conditions_blank_yes_no_dont_know || '" to question "Have you been diagnosed with any other heart conditions or problems (e.g. heart attack, stroke, irregular heart rhythms, heart failure)?" in Health form.
+Responded "' || health.hypertension_diagnosis_blank_yes_no_dont_know || '" to question "Have you been diagnosed with high blood pressure (hypertension), diabetes or high cholesterol?" in Health form.
+To the follow up question "IF YES Have you ever or are you currently taking medications to manage these? Please describe." responded "' || health.hypertension_diagnosis_details || '"',
 
       --ix_chronic_pain_and_meds_blank_yes_no
       CASE WHEN health.chronic_pain_blank_yes_no = 'yes'
         AND health.chronic_pain_meds_blank_yes_no_dont_know = 'yes'
         THEN 'yes' ELSE 'no' END,
+      --ix_chronic_pain_and_meds_details
+'Responded "' || health.chronic_pain_blank_yes_no || '" to question "Do you have chronic pain?" in Health form.
+Responded "' || health.chronic_pain_meds_blank_yes_no_dont_know || '" to question "IF YES - Do you currently take any medication (prescription or over the counter) or utilize alternative therapies to manage your chronic pain?" in Health form.',
 
       --ix_tmoca_score_blank_yes_no
       CASE WHEN tmoca.tmoca_score <= 19 THEN 'yes' ELSE 'no' END,
+      --ix_tmoca_score_details
+'Scored "' || tmoca.tmoca_score || ' in T-MoCA.',
 
       --ix_no_hemophilia_blank_yes_no
-      CASE WHEN health.hemophilia_blank_yes_no_dont_know = 'yes' THEN 'no'
-           WHEN health.hemophilia_blank_yes_no_dont_know = 'no' THEN 'yes'
-           ELSE null END,
+      CASE WHEN health.hemophilia_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
+      --ix_no_hemophilia_details
+'Responded "' || health.hemophilia_blank_yes_no_dont_know || '" to question "Do you suffer from hemophilia?" in Health form.',
 
       --ix_raynauds_ok_blank_yes_no
       CASE WHEN health.raynauds_syndrome_severity_selection = 'moderate' OR
@@ -162,12 +223,19 @@ AS $$
         THEN 'no'
         ELSE 'yes' END,
 
+      --ix_raynauds_ok_details
+'Responded "' || health.raynauds_syndrome_blank_yes_no_dont_know || '" to question "Do you suffer from Raynaud''s syndrome?" in Health form.
+Responded "' || health.raynauds_syndrome_severity_selection || '" to follow up question "Would you say that it is mild, moderate or severe?".',
 
       --ix_mi_ok_blank_yes_no
       NULL,
+      --ix_mi_ok_details
+'',
 
       --ix_bicycle_ok_blank_yes_no
-      CASE WHEN health.cycle_blank_yes_no = 'yes' THEN 'yes' ELSE 'no' END
+      CASE WHEN health.cycle_blank_yes_no = 'yes' THEN 'yes' ELSE 'no' END,
+      --ix_bicycle_ok_details
+'Responded "' || health.cycle_blank_yes_no || '" to question "Are you able to sit on and pedal a bicycle?" in Health form.'
 
     )
     RETURNING id INTO inex_id;
