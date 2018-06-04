@@ -8,16 +8,21 @@ module ReportsHelper
   end
   def report_field name, type, value, options={}
 
+    use_dropdown = nil
+
     if type.is_a? String
       type_string = type
       return nil
     elsif type.is_a? Hash
       type_string = type.first.first
       type_val = type.first.last
-      c = type_string.to_s.classify.constantize rescue nil
+      if type_string == 'config_selector'
+        use_dropdown = true
+      else
+        c = type_string.to_s.classify.constantize rescue nil
+      end
     end
 
-    use_dropdown = nil
 
 
     value ||= @report.calculate_default(type_val['default'], type_string)
@@ -34,7 +39,8 @@ module ReportsHelper
         type_filter[:disabled] = false
       end
       use_dropdown = options_for_select(c.all_name_value_enable_flagged(type_filter), value)
-
+    elsif use_dropdown
+      use_dropdown = options_for_select(type_val['selections'], value)
     end
 
     if type_val['label']

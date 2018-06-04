@@ -15,6 +15,7 @@
                       <option value="address_state">address state</option>
                       <option value="accuracy_score">accuracy score</option>
                       <option value="general_selection">general selection</option>
+                      <option value="config_selector">config selector</option>
                       <option value="protocol">tracker protocol</option>
                       <option value="sub_process">tracker status (sub_process)</option>
                       <option value="protocol_event">tracker method (protocol_event)</option>
@@ -50,7 +51,15 @@
 
               </td>
             </tr>
-            <tr><td></td><td><p><a id="search_attrs_add" class="btn btn-default">Add Attribute</a></p></td></tr>
+            <tr><td></td><td>
+              <p class="help-block">For config_selector add:</p>
+              <pre class="help-block">
+    selections:
+      label: value
+      label: value
+              </pre>
+              <p><a id="search_attrs_add" class="btn btn-default">Add Attribute</a></p>
+            </td></tr>
       </table>
 
     <div id="search_attr_instruction">(reference in SQL with <strong id="search_attr_ex"></strong>)</div>
