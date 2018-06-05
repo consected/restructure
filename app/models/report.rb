@@ -380,7 +380,7 @@ class Report < ActiveRecord::Base
 
     res = default
     if default.is_a? String
-      m = default.scan(/(-\d+) (days|day|months|month|years|year)/)
+      m = default.scan(/(-?+?\d+) (days|day|months|month|years|year)/)
       if m.first
         t = m.first.last
         res = DateTime.now + m.first.first.to_i.send(t)

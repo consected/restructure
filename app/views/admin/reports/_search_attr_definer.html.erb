@@ -43,21 +43,24 @@
                   </select>
               </td>
             </tr><tr>
+              <td>config selections</td>
+              <td><textarea id="search_attrs_config_selections"></textarea>
+                <p class="help-block">add one line per option:</p>
+                <pre class="help-block">
+label 1: value 1
+label 2: value 2</pre>
+                <p class="help-block">A label is shown in the dropdown and the corresponding value is used in the query.</p>
+              </td>
+            </tr><tr>
               <td>default</td>
               <td><textarea id="search_attrs_default"></textarea>
                 <p class="help-block">Set the default value of an attribute to be searched. If the query is run automatically then the default value will be used.</p>
-                <p class="help-block">Enter literal values; 'current_user' for the current user; 'now' for today; or calculate a date with (-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, 5 months, 2 weeks.</p>
+                <p class="help-block">Enter literal values; 'current_user' for the current user; 'now' for today; or calculate a date with (+/-)n days|day |weeks|week |months|month |years|year. For example: -5 days, -1 year, +5 months, +2 weeks.</p>
                 <p class="help-block">For multiple values, enter each value on a new line.</p>
 
               </td>
             </tr>
             <tr><td></td><td>
-              <p class="help-block">For config_selector add:</p>
-              <pre class="help-block">
-    selections:
-      label: value
-      label: value
-              </pre>
               <p><a id="search_attrs_add" class="btn btn-default">Add Attribute</a></p>
             </td></tr>
       </table>

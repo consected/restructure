@@ -37,6 +37,7 @@ _fpa.postprocessors_admin = {
             var m = $('#search_attrs_multi').val();
             var l = $('#search_attrs_label').val();
             var d = $('#search_attrs_default').val();
+            var s = $('#search_attrs_config_selections').val();
             $('#search_attr_ex').html(":"+n);
             $('#search_attr_instruction').show();
 
@@ -68,6 +69,15 @@ _fpa.postprocessors_admin = {
 
                     add += "\n    default: " + d;
                 }
+
+                if(s) {
+                  add += "\n    selections: ";
+                  var ds = s.split('\n');
+                  for(var id in ds){
+                      add += '\n      ' + ds[id];
+                  }
+                }
+
             }
             var v = $('#report_search_attrs').val();
             $('#report_search_attrs').val(v+ "\n" + add);
