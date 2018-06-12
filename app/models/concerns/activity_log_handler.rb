@@ -30,6 +30,8 @@ module ActivityLogHandler
     after_save :check_status
     after_save :track_record_update
 
+    after_save :handle_save_triggers
+
     # after_commit :check_for_notification_records, on: :create
   end
 
@@ -115,7 +117,7 @@ module ActivityLogHandler
 
     # Select the extra log type configuration by name, or use the first item if nothing matches
     # The default allows viewing of data in the case that a configuration has changed and removed an item
-    # that an extra_log_type field value still refers to 
+    # that an extra_log_type field value still refers to
     def extra_log_type_config_for name
       extra_log_type_configs.select{|s| s.name == name.to_s.underscore.to_sym}.first || extra_log_type_configs.first
     end
@@ -591,6 +593,11 @@ module ActivityLogHandler
   # Check for new records, and work from there.
   def check_for_notification_records
     Messaging::MessageNotification.handle_notification_records self
+  end
+
+  def handle_save_triggers
+    self.extra_log_type_config.calc_save_trigger_if self
+    true
   end
 
 end

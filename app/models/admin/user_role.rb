@@ -19,5 +19,8 @@ class Admin::UserRole < ActiveRecord::Base
     User.where id: user_ids
   end
 
+  def self.user_ids
+    select("user_id").distinct.pluck(:user_id)
+  end
 
 end

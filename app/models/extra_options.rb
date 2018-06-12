@@ -39,7 +39,9 @@ class ExtraOptions
       save_action: {
         label: 'button label',
         on_update: {
-          create_next_creatable: true,
+          create_next_creatable: {
+            if: attr_for_conditions
+          },
           show_panel: 'panel / category name',
           hide_panel: 'panel / category name'
         },

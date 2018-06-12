@@ -5,8 +5,11 @@
 
 class ExtraLogType < ExtraOptions
 
+  ValidSaveTriggers = [:notify, :create_reference].freeze
+
+
   def self.add_key_attributes
-    [:fields, :references, :label]
+    [:fields, :references, :label, :save_trigger]
   end
 
   attr_accessor(*self.key_attributes)
@@ -39,27 +42,19 @@ class ExtraLogType < ExtraOptions
           }
         }
       },
-      on_create: {
-        create_next_creatable: {
-          if: attr_for_conditions
+      save_trigger: {
+        on_create: {
+          notify: SaveTriggers::Notify.config_def(if_extras: attr_for_conditions),
+          create_reference: SaveTriggers::CreateReference.config_def(if_extras: attr_for_conditions)
         },
-        create_reference: {
-          model_name: {
-            if: attr_for_conditions,
-            in: "this | master",
-            with: {
-              field_name: "now()",
-              field_name_2: "literal value",
-              field_name_3: {
-                this: 'field_name'
-              },
-              field_name_4: {
-                reference_name: 'field_name'
-              }
-            }
-          }
+        on_update: {
+        },
+        on_save: {
+          notes: 'on_save: provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.'
         }
+
       }
+
     }
     res.merge(super)
   end
@@ -104,6 +99,18 @@ class ExtraLogType < ExtraOptions
       end
 
     end
+
+    self.save_trigger ||= {}
+    self.save_trigger = self.save_trigger.symbolize_keys
+    # Make save_trigger.on_save the default for on_create and on_update
+    os = self.save_trigger[:on_save]
+    if os
+      ou = self.save_trigger[:on_update] || {}
+      oc = self.save_trigger[:on_create] || {}
+      self.save_trigger[:on_update] = os.merge(ou)
+      self.save_trigger[:on_create] = os.merge(oc)
+    end
+
   end
 
 
@@ -121,6 +128,38 @@ class ExtraLogType < ExtraOptions
     ca.calc_save_action_if
   end
 
+  def calc_save_trigger_if obj
+    ca = ConditionalActions.new self.save_trigger, obj
+
+    if obj._created
+      action = :on_create
+    elsif obj._updated
+      action = :on_update
+    else
+      # Neither create or update - so just return
+      return true
+    end
+
+    res = ca.calc_save_action_if
+
+    if res.is_a?(Hash) && res[action]
+      res[action].each do |perform, pres|
+        # Use the symbol from the list of valid items, to prevent manipulation that could cause Brakeman warnings
+        t = ValidSaveTriggers.select {|t| t == perform}.first
+        if t
+          config = self.save_trigger[action][t]
+          c = SaveTriggers.const_get(t.to_s.camelize)
+
+          o = c.new config, obj
+          return o.perform
+        else
+          raise FphsException.new "The save_trigger action #{action} is not valid when attempting to perform #{perform}"
+        end
+      end
+    end
+
+    true
+  end
 
   protected
 
@@ -140,7 +179,7 @@ class ExtraLogType < ExtraOptions
     end
 
     def init_caption_before
-      
+
       curr_name = @config_obj.name
 
       item_type = 'item'
