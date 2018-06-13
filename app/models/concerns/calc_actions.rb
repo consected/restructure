@@ -197,21 +197,34 @@ module CalcActions
 
     def calc_this_condition table, field_name, expected_vals
       @skip_merge = false
-      res = nil
-      if table == :this
-        # Allow a list of possible conditions to be used
-        expected_vals = [expected_vals] unless expected_vals.is_a?(Array) && expected_vals.first.is_a?(Hash)
-        expected_vals.each do |expected_val|
+      res = true
+      # Allow a list of possible conditions to be used
+      expected_vals = [expected_vals] unless expected_vals.is_a?(Array) && expected_vals.first.is_a?(Hash)
+      expected_vals.each do |expected_val|
+        if table == :this
           if expected_val.is_a?(Hash)
             if is_selection_type field_name
               ca = ConditionalActions.new({field_name => expected_val}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
-              res = ca.calc_action_if
+              res &&= ca.calc_action_if
               @skip_merge = true
             elsif expected_val.keys.first == :validate
-              res = calc_complex_validation expected_val[:validate], current_instance.attributes[field_name.to_s]
+              res &&= calc_complex_validation expected_val[:validate], current_instance.attributes[field_name.to_s]
             end
           else
-            res = current_instance.attributes[field_name.to_s] == expected_val
+            res &&= current_instance.attributes[field_name.to_s] == expected_val
+          end
+        elsif table == :user
+          if field_name == :role_name
+            user = @current_instance.master.current_user
+            role_names = user.user_roles.active.where(app_type: user.app_type).pluck(:role_name)
+            expected_val = [expected_val] unless expected_val.is_a? Array
+            role_res = false
+            expected_val.each do |e|
+              role_res ||= role_names.include? e
+            end
+            res &&= role_res
+          else
+            res = false
           end
         end
       end
@@ -244,7 +257,7 @@ module CalcActions
 
           t_conds.each do |field_name, val|
 
-            non_query_condition = table_name == :this
+            non_query_condition = table_name.in?([:this, :user])
             if val.is_a? Hash
               val_item_key = val.first.first
               if val_item_key == :this && !val.first.last.is_a?(Hash)
@@ -280,7 +293,7 @@ module CalcActions
           end
         end
       end
-      join_tables = join_tables - [:this, :this_references]
+      join_tables = join_tables - [:this, :this_references, :user]
 
       @base_query = @current_scope.joins(join_tables)
     end

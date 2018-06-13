@@ -609,4 +609,57 @@ RSpec.describe "Calculate conditional actions", type: :model do
     expect(res.calc_action_if).to be true
   end
 
+  it "checks if a certain the current user has a specific role" do
+
+    conf = {
+      all: {
+        user: {
+          role_name: 'test-role'
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+
+    expect(res.calc_action_if).to be false
+
+    Admin::UserRole.create! current_admin: @admin, role_name: 'test-role', app_type: @user.app_type, user: @user
+
+    conf = {
+      all: {
+        user: {
+          role_name: 'test-role'
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+
+    conf = {
+      all: {
+        user: {
+          role_name: ['test-role', 'x']
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        user: {
+          role_name: ['y', 'x']
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+  end
+
+
 end
