@@ -44,8 +44,8 @@ class ExtraLogType < ExtraOptions
       },
       save_trigger: {
         on_create: {
-          notify: SaveTriggers::Notify.config_def(if_extras: attr_for_conditions),
-          create_reference: SaveTriggers::CreateReference.config_def(if_extras: attr_for_conditions)
+          notify: SaveTriggers::Notify.config_def(if_extras: "ref: ** conditions reference **"),
+          create_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **")
         },
         on_update: {
         },

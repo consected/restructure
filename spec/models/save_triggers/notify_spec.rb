@@ -6,6 +6,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
   include ActivityLogSupport
 
   before :all do
+    ud, _ = create_user
+    ud.disable!
+    u0, _ = create_user
     u1, _ = create_user
     create_user
     create_master
@@ -22,8 +25,12 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     Admin::UserRole.where(role_name: 'test').delete_all
     Admin::UserRole.create! app_type: u1.app_type, user: u1, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test', current_admin: @admin
+    Admin::UserRole.create! app_type: u1.app_type, user: ud, role_name: 'test', current_admin: @admin
 
-    expect(Admin::UserRole.where(role_name: 'test').count).to eq 2
+    at2 = Admin::AppType.create! name: 'new-notify', label:'Test Notify App', current_admin: @admin
+    Admin::UserRole.create! app_type: at2, user: u0, role_name: 'test', current_admin: @admin
+
+    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 2
 
     @role_user_ids = [u1.id, @user.id]
 
@@ -40,7 +47,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       subject: "subject text"
     }
 
-    expect(Admin::UserRole.where(role_name: 'test').count).to eq 2
+    # Check that we only get users that are enabled for the role in this app type
+    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 2
 
     @trigger = SaveTriggers::Notify.new config, @al
 

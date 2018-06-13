@@ -9,6 +9,10 @@ module CalcActions
 
   private
 
+    # Allow the same selection type to be used multiple times, such as:
+    # not_any:
+    # not_any_2:
+    # not_any_3:
     def is_selection_type table_name
 
       return table_name if table_name.in? SelectionTypes
@@ -36,113 +40,137 @@ module CalcActions
       #   selection_type:
       #     table_name: ...
 
-      action_conf.each do |condition_type, condition_config|
-        @condition_config = condition_config
+      action_conf.each do |condition_type, condition_config_array|
+        condition_config_array = [condition_config_array] unless condition_config_array.is_a? Array
 
-        calc_base_query
+        # Provide the option of configuring as a list of conditions, such as:
+        # not_any: ...
+        # - addresses: ...
+        # - addresses: ...
+        # all of which must meet the condition type
+        loop_res = condition_type.in?([:all, :not_any])
 
-        condition_type = is_selection_type(condition_type) || condition_type
 
-        if condition_type == :all
-          cond_res = true
-          res_q = true
-          # equivalent of (cond1 AND cond2 AND cond3 ...)
-          # These conditions are easy to handle as a standard query
-          unless @condition_values.empty?
-            calc_query @condition_values
-            res_q = calc_query_conditions
-            merge_failures({condition_type => @condition_config}) if !res_q
+        condition_config_array.each do |condition_config|
+          @condition_config = condition_config
+
+          if is_selection_type(@condition_config.first.first)
+            @condition_config = {this: @condition_config}
           end
 
-          @non_query_conditions.each do |table, fields|
-            fields.each do |field_name, expected_val|
-              res_q &&= calc_this_condition(table, field_name, expected_val)
-              merge_failures({condition_type => {table => {field_name => expected_val}}}) if !res_q
-            end
-          end
-          cond_res &&= !!res_q
 
-        elsif condition_type == :not_all
-          cond_res = true
-          res_q = true
-          # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
-          unless @condition_values.empty?
-            calc_query @condition_values
-            res_q = calc_query_conditions
-          end
+          calc_base_query
 
-          @non_query_conditions.each do |table, fields|
-            fields.each do |field_name, expected_val|
-              res_q &&= calc_this_condition(table, field_name, expected_val)
-            end
-          end
+          condition_type = is_selection_type(condition_type) || condition_type
 
-          cond_res &&= !res_q
-
-          # Not all matches - return all possible items that failed
-          merge_failures({condition_type => @condition_values}) if !cond_res
-          merge_failures({condition_type => @non_query_conditions}) if !cond_res
-
-
-        elsif condition_type == :any
-          cond_res = false
-          res_q = false
-          # equivalent of (cond1 OR cond2 OR cond3 ...)
-          @condition_values.each do |table, fields|
-            fields.each do |field_name, expected_val|
-              calc_query(table => {field_name => expected_val})
+          if condition_type == :all
+            cond_res = true
+            res_q = true
+            # equivalent of (cond1 AND cond2 AND cond3 ...)
+            # These conditions are easy to handle as a standard query
+            unless @condition_values.empty?
+              calc_query @condition_values
               res_q = calc_query_conditions
-              break if res_q
+              merge_failures({condition_type => @condition_config}) if !res_q
             end
-            break if res_q
-          end
 
-          # If no matches - return all possible items that failed
-          merge_failures({condition_type => @condition_values}) if !res_q
-
-          unless res_q
             @non_query_conditions.each do |table, fields|
               fields.each do |field_name, expected_val|
-                res_q ||= calc_this_condition(table, field_name, expected_val)
-                break if res_q
+                res_q &&= calc_this_condition(table, field_name, expected_val)
+                merge_failures({condition_type => {table => {field_name => expected_val}}}) if !res_q
               end
             end
-          end
+            cond_res &&= !!res_q
 
-          merge_failures({condition_type => @non_query_conditions}) if !res_q
-
-          cond_res = res_q
-
-
-        elsif condition_type == :not_any
-          cond_res = true
-          # equivalent of NOT(cond1 OR cond2 OR cond3 ...)
-          # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
-          @condition_values.each do |table, fields|
-            fields.each do |field_name, expected_val|
-              calc_query(table => {field_name => expected_val})
+          elsif condition_type == :not_all
+            cond_res = true
+            res_q = true
+            # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
+            unless @condition_values.empty?
+              calc_query @condition_values
               res_q = calc_query_conditions
-              merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
-              cond_res &&= !res_q
+            end
+
+            @non_query_conditions.each do |table, fields|
+              fields.each do |field_name, expected_val|
+                res_q &&= calc_this_condition(table, field_name, expected_val)
+              end
+            end
+
+            cond_res &&= !res_q
+
+            # Not all matches - return all possible items that failed
+            merge_failures({condition_type => @condition_values}) if !cond_res
+            merge_failures({condition_type => @non_query_conditions}) if !cond_res
+
+
+          elsif condition_type == :any
+            cond_res = false
+            res_q = false
+            # equivalent of (cond1 OR cond2 OR cond3 ...)
+            @condition_values.each do |table, fields|
+              fields.each do |field_name, expected_val|
+                calc_query(table => {field_name => expected_val})
+                res_q = calc_query_conditions
+                break if res_q
+              end
+              break if res_q
+            end
+
+            # If no matches - return all possible items that failed
+            merge_failures({condition_type => @condition_values}) if !res_q
+
+            unless res_q
+              @non_query_conditions.each do |table, fields|
+                fields.each do |field_name, expected_val|
+                  res_q ||= calc_this_condition(table, field_name, expected_val)
+                  break if res_q
+                end
+              end
+            end
+
+            merge_failures({condition_type => @non_query_conditions}) if !res_q
+
+            cond_res = res_q
+
+
+          elsif condition_type == :not_any
+            cond_res = true
+            # equivalent of NOT(cond1 OR cond2 OR cond3 ...)
+            # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
+            @condition_values.each do |table, fields|
+              fields.each do |field_name, expected_val|
+                calc_query(table => {field_name => expected_val})
+                res_q = calc_query_conditions
+                merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
+                cond_res &&= !res_q
+                break unless cond_res && !return_failures
+              end
               break unless cond_res && !return_failures
             end
-            break unless cond_res && !return_failures
-          end
 
-          @non_query_conditions.each do |table, fields|
-            fields.each do |field_name, expected_val|
+            @non_query_conditions.each do |table, fields|
+              fields.each do |field_name, expected_val|
 
-              res_q = !calc_this_condition(table, field_name, expected_val)
-              merge_failures({condition_type => {table => {field_name => expected_val}}}) if !res_q
-              cond_res &&= res_q
+                res_q = !calc_this_condition(table, field_name, expected_val)
+                merge_failures({condition_type => {table => {field_name => expected_val}}}) if !res_q
+                cond_res &&= res_q
+              end
             end
+
+          else
+            raise FphsException.new "Incorrect condition type specified when calculating action if: #{condition_type}"
           end
 
-        else
-          raise FphsException.new "Incorrect condition type specified when calculating action if: #{condition_type}"
+          # puts "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - #{@condition_config}" unless Rails.env.production?
+          loop_res &&= cond_res if condition_type == :all
+          loop_res ||= cond_res if condition_type == :any
+          loop_res ||= cond_res if condition_type == :not_all
+          loop_res &&= cond_res if condition_type == :not_any
+          break unless loop_res
         end
 
-        final_res &&= cond_res
+        final_res &&= loop_res
         break unless final_res
       end
 
@@ -167,19 +195,24 @@ module CalcActions
       @condition_scope = @base_query.where(conditions).order(id: :desc).limit(1)
     end
 
-    def calc_this_condition table, field_name, expected_val
+    def calc_this_condition table, field_name, expected_vals
       @skip_merge = false
+      res = nil
       if table == :this
-        if expected_val.is_a? Hash
-          if is_selection_type field_name
-            ca = ConditionalActions.new({field_name => expected_val}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
-            res = ca.calc_action_if
-            @skip_merge = true
-          elsif expected_val.keys.first == :validate
-            res = calc_complex_validation expected_val[:validate], current_instance.attributes[field_name.to_s]
+        # Allow a list of possible conditions to be used
+        expected_vals = [expected_vals] unless expected_vals.is_a?(Array) && expected_vals.first.is_a?(Hash)
+        expected_vals.each do |expected_val|
+          if expected_val.is_a?(Hash)
+            if is_selection_type field_name
+              ca = ConditionalActions.new({field_name => expected_val}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
+              res = ca.calc_action_if
+              @skip_merge = true
+            elsif expected_val.keys.first == :validate
+              res = calc_complex_validation expected_val[:validate], current_instance.attributes[field_name.to_s]
+            end
+          else
+            res = current_instance.attributes[field_name.to_s] == expected_val
           end
-        else
-          res = current_instance.attributes[field_name.to_s] == expected_val
         end
       end
       res
@@ -204,6 +237,7 @@ module CalcActions
         table_name = ModelReference.record_type_to_table_name(c_table).to_sym
 
         if is_selection_type(table_name)
+          # Does this actually do anything?
           @sub_conditions[table_name] ||= {}
           @sub_conditions[table_name] = t_conds
         else

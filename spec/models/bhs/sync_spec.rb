@@ -42,7 +42,7 @@ RSpec.describe 'BHS App Sync', type: :model do
     expect(res).to eq 1
 
     # Setup the triggers, functions, etc
-    files = %w(../../create_message_notification.sql create_bhs_assignments_external_identifier.sql create_activity_log.sql add_notification_triggers.sql add_testmybrain_trigger.sql create_sync_subject_data_aws_db.sql grant_roles_access_to_ml_app.sql)
+    files = %w(1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql)
 
     files.each do |fn|
 
@@ -90,7 +90,7 @@ RSpec.describe 'BHS App Sync', type: :model do
   it "syncs a master ID" do
 
     puts "Running sync"
-    `RAILS_ENV=test ./db/app_specific/bhs/sync_subject_data.sh`
+    `RAILS_ENV=test ./db/app_specific/sync-process/bhs-sync/sync_subject_data.sh`
 
     m = @master
     m.reload

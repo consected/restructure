@@ -15,7 +15,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
   def initialize config, item
     super
-    
+
     @role = config[:role]
     raise FphsException.new "role must be specified in save_trigger: notify: role: ..." unless @role
     @layout_template = config[:layout_template]
@@ -23,7 +23,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @message_type = config[:type]
     @subject = config[:subject]
 
-    @receiving_user_ids = Admin::UserRole.where(role_name: @role).user_ids
+    @receiving_user_ids = Admin::UserRole.active_user_ids role_name: @role, app_type: @user.app_type
 
   end
 

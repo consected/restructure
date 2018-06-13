@@ -119,6 +119,7 @@ class Admin::AppType < Admin::AdminBase
     end
 
     acs = app_type_config[name]
+    return unless acs
     acs = acs.reject(&reject) if reject
     acs.each do |ac|
       el = nil

@@ -19,6 +19,7 @@ class ExtraOptions
 
 
   def self.attr_defs
+    attr_for_conditions_marker = "ref: ** conditions reference **"
     {
       caption_before: {
         field_name: "string caption to appear before field",
@@ -40,7 +41,7 @@ class ExtraOptions
         label: 'button label',
         on_update: {
           create_next_creatable: {
-            if: attr_for_conditions
+            if: attr_for_conditions_marker
           },
           show_panel: 'panel / category name',
           hide_panel: 'panel / category name'
@@ -66,15 +67,16 @@ class ExtraOptions
         all_fields: {name: "message template name", label: "show dialog button label" },
         submit: {name: "message template name", label: "show dialog button label" }
       },
-      creatable_if: attr_for_conditions,
-      editable_if: attr_for_conditions,
-      showable_if: attr_for_conditions,
+      creatable_if: attr_for_conditions_marker,
+      editable_if: attr_for_conditions_marker,
+      showable_if: attr_for_conditions_marker,
       valid_if: {
         on_save:  attr_for_validations,
         on_create: {},
         on_update: {}
-      }
+      },
 
+      "** conditions reference **": attr_for_conditions
     }
   end
 
@@ -92,6 +94,9 @@ class ExtraOptions
       any: {
         model_table_name: {
           field_name: 'any conditional value must be true'
+        },
+        'all|any|not_all|not_any': {
+          'nested conditions...': {}
         }
       },
       not_any: {
@@ -103,19 +108,31 @@ class ExtraOptions
         model_table_name: {
           field_name: 'any conditional value must be false'
         }
-      }
+      },
+      'all_2|not_any_3...': 'allows for repeat of the condition type',
+      'all|any|not_all|not_any': [
+        {
+          repeated_model_table_name: {}
+        },
+        {
+          repeated_model_table_name: {}
+        }
+      ]
+
+
 
     }
   end
 
   def self.attr_for_validations
-    self.attr_for_conditions.deep_merge(
+    {
+      "ref: conditions": "** ref: conditions",
       all: {
         "model_table_name | this": {
           validation_field_name_5: { validation_type: 'validation options'}
         }
       }
-    )
+    }
   end
 
 
