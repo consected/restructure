@@ -22,6 +22,7 @@ module StandardAuthentication
     end
 
     def word_list
+      return [] if Rails.env.test?
       words = []
       File.open(Settings::OsWordsFile) do |file|
         file.each do |line|

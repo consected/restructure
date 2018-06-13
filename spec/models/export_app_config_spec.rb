@@ -17,7 +17,7 @@ RSpec.describe "Export an app configuration", type: :model do
       a.save!
     end
 
-    @app_type = Admin::AppType.create!(name: 'test1', label:'Test App 12', current_admin: @admin)
+    @app_type = Admin::AppType.create!(name: 'test1', label: 'Test App 12', current_admin: @admin)
 
     # Allow all users access to the app
     Admin::UserAccessControl.create! app_type: @app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: @admin
@@ -129,8 +129,9 @@ RSpec.describe "Export an app configuration", type: :model do
 
 
     al_orig_name = @activity_log.name
-    @activity_log.name = 'Changed!'
+    @activity_log.name = "Changed #{rand}!"
     @activity_log.current_admin = @admin
+    @activity_log.disabled = false
     @activity_log.save!
 
     res, results = Admin::AppType.import_config(config, @admin, name: 'new_name')
@@ -164,9 +165,26 @@ RSpec.describe "Export an app configuration", type: :model do
   end
 
   it "imports a test JSON config file" do
+
+    # Setup the triggers, functions, etc
+    files = %w(1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql)
+
+    files.each do |fn|
+
+      begin
+        sqlfn = Rails.root.join('db', 'app_specific', 'bhs', 'aws-db', fn)
+        puts "Running psql: #{sqlfn}"
+        `PGOPTIONS=--search_path=ml_app psql -d fpa_test < #{sqlfn}`
+      rescue ActiveRecord::StatementInvalid => e
+        puts "Exception due to PG error?... #{e}"
+      end
+    end
+
+
+
     config = File.read Rails.root.join('docs/config_tests/bhs_app_type_test_config.json')
 
-    res, results = Admin::AppType.import_config(config, @admin)
+    res, results = Admin::AppType.import_config(config, @admin, force_disable: true)
 
     expect(res).to be_a Admin::AppType
 

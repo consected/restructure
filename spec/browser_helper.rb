@@ -6,6 +6,8 @@ module BrowserHelper
 
     return if @@running
 
+    puts "--> Setup browser"
+
     @@running = true
 
     ENV['LANGUAGE']='en_US:en'

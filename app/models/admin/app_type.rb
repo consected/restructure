@@ -47,7 +47,7 @@ class Admin::AppType < Admin::AdminBase
     user
   end
 
-  def self.import_config config_json, admin, name: nil
+  def self.import_config config_json, admin, name: nil, force_disable: false
 
     config = JSON.parse(config_json)
 
@@ -73,9 +73,9 @@ class Admin::AppType < Admin::AdminBase
 
       res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name']
 
-      res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name']#, create_disabled: true
-      res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name']#, create_disabled: true
-      res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'associated_activity_logs', ['item_type', 'rec_type', 'process_name']#, create_disabled: true
+      res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name'], create_disabled: force_disable
+      res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name'], create_disabled: force_disable
+      res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'associated_activity_logs', ['item_type', 'rec_type', 'process_name'], create_disabled: force_disable
 
       res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value']
       res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['name']
@@ -154,6 +154,7 @@ class Admin::AppType < Admin::AdminBase
 
           if i
             el = i
+            new_vals['disabled'] = true if i.respond_to?(:ready?) && !i.ready?
             i.update! new_vals
           else
             new_vals['disabled'] = true if create_disabled

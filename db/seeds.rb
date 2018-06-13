@@ -3,7 +3,7 @@ Dir[Rails.root.join('db/seeds/*.rb')].each { |f| Rails.logger.info "requiring: #
 module Seeds
 
   def self.setup
-    Rails.logger.info "Starting seed setup"
+    Rails.logger.info "============ Starting seed setup (#{DateTime.now}) ==============="
 
     do_last = []
     do_first = []
@@ -32,7 +32,7 @@ module Seeds
     do_last.each do |s|
       s.setup
     end
-
+    Rails.logger.info "============ Completed seed setup (#{DateTime.now}) ==============="
   end
 
 end
