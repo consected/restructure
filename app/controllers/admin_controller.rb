@@ -8,7 +8,7 @@ class AdminController < ApplicationController
   protected
 
    def object_has_admin_parent?
-     object_instance.class.parent == Admin
+     object_instance.class.parent.in? [Admin, Classification]
    end
 
   private

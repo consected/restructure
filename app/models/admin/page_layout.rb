@@ -53,7 +53,9 @@ class Admin::PageLayout < ActiveRecord::Base
         option_type = ot.to_s
         ot_class = "#{self.class.name}::#{option_type.camelize}".constantize
         c = o[option_type]
-        self.send("#{option_type}=", ot_class.new(c)) if c
+        if c && c.is_a?(Hash)
+          self.send("#{option_type}=", ot_class.new(c))
+        end
       end
 
 #    rescue

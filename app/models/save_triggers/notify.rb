@@ -34,7 +34,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     end
 
     mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@receiving_user_ids], layout_template_name: @layout_template,
-    content_template_name: @content_template, item_type: @item.class.name, item_id: @item.id, master_id: @item.master_id, message_type: @message_type
+    content_template_name: @content_template, item_type: @item.class.name, item_id: @item.id, master_id: @item.master_id, message_type: @message_type, subject: @subject
 
     HandleMessageNotificationJob.perform_later(mn)
   end

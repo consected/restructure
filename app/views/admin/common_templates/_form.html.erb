@@ -4,12 +4,14 @@
 
   if object_has_admin_parent?
     fref = object_instance
+    url = admin_form_url
   else
     fref = [:admin, object_instance]
+    url = url_for([:admin, object_instance])
   end
   has_options = false
 %>
-<%= form_for(fref, class: "inline-form admin-edit-form", remote: true) do |f| %>
+<%= form_for(fref, url: url, class: "inline-form admin-edit-form", remote: true) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
 
   <% (permitted_params - [:id]).each do |p| %>
@@ -24,8 +26,13 @@
       <% elsif p == :description %>
         <%= f.label p %>
         <%= f.text_area p %>
-      <% elsif p == :options
-          has_options = true
+      <% elsif respond_to? ("#{p}_options") %>
+        <%= f.label p %>
+        <% select_item_type = {}
+           select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first.to_s == p.to_s   %>
+        <%= f.select p, send("#{p}_options"), select_item_type %>
+      <% elsif p.to_s.end_with?('options') || p.to_s.end_with?('template')
+          has_options = p
       %>
       <% elsif p == :disabled %>
         <%= f.check_box p %>
@@ -41,11 +48,6 @@
       <% elsif p == :user_id %>
           <%= f.label p %>
           <%= f.select :user_id, options_from_collection_for_select(User.active, 'id', 'email', object_instance.user_id), include_blank: true %>
-      <% elsif respond_to? ("#{p}_options") %>
-        <%= f.label p %>
-        <% select_item_type = {}
-           select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first.to_s == p.to_s   %>
-        <%= f.select p, send("#{p}_options"), select_item_type %>
       <% else %>
         <%= f.label p %>
         <%= f.text_field p %>
@@ -56,8 +58,8 @@
   <% if has_options %>
     <div></div>
   <div class="form-group" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
-    <h4>Options</h4>
-    <%= f.text_area :options %>
+    <h4><%= has_options.to_s.humanize %></h4>
+    <%= f.text_area has_options %>
   </div>
   <% end %>
 
@@ -74,7 +76,7 @@
 
     <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
 
-    <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
+    <%= f.submit class: "btn btn-primary", value: "save" %> <%= admin_edit_cancel %>
   </div>
 <% end %>
   </div>

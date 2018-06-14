@@ -10,7 +10,9 @@ class Admin::AppTypesController < AdminController
   end
 
   def show
-    render json: Admin::AppType.find(params[:id]).export_config
+    app_type = Admin::AppType.find(params[:id])
+    send_data app_type.export_config, filename: "#{app_type.name}_config.json"
+
   end
 
   protected
