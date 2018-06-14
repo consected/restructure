@@ -16,6 +16,9 @@
     show_if = {}
   end
 
+  unless defined? external_id_options
+    external_id_options = nil
+  end
 
 
   unless defined? item_flags_after
@@ -306,11 +309,11 @@
           {{><%=name%>_edit_item_button}}
           <h4 class="list-group-item-heading"><%=caption%></h4>
         </li>
-      <% elsif item_list.length == 1 && item_list.first.is_a?(Hash) %>
-        <% item_list.each do |item| %>
+      <% elsif item_list.length == 1 && external_id_options %>
+
         <li class="list-group-item <%=name%>-<%=name%>_id is-heading compact-heading">
           {{><%=name%>_edit_item_button}}
-          <small><%= item[:label] %></small> <strong>{{<%= item[:formatter].html_safe || 'pretty_string' %> <%= item[:attribute] %>}}</strong>
+          <small><%= external_id_options[:label] %></small> <strong>{{<%= external_id_options[:formatter].html_safe || 'pretty_string' %> <%= external_id_options[:attribute] %>}}</strong>
           <% unless custom_activity_log == :none %>
             <% if works_with_rec_types.blank? %>
               {{> activity_log_<%=name%>_show_button_partial }}
@@ -320,7 +323,7 @@
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
-        <%end%>
+
       <%else%>
         <li class="list-group-item is-heading object-results-header">
           {{><%=name%>_edit_item_button}}

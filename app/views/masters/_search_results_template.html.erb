@@ -75,7 +75,8 @@
     caption: e.label,
     prevent_edit: e.prevent_edit? || !(current_user.has_access_to? :edit, :table, e.plural_name),
     prevent_create: e.prevent_create? || !(current_user.has_access_to? :create, :table, e.plural_name),
-    item_list: [label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s],
+    item_list: [e.external_id_attribute.to_s],
+    external_id_options: {label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s},
     data_sort: [:desc, "data-updated-at-ts"]
   } %>
 <% end %>
