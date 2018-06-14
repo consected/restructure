@@ -13,6 +13,7 @@ module MasterHandler
     before_action :check_showable?, only: [:show]
     before_action :check_editable?, only: [:edit, :update]
     before_action :check_creatable?, only: [:new, :create]
+    before_action :capture_ref_item, only: [:create, :update]
 
     helper_method :primary_model, :permitted_params, :edit_form_helper_prefix, :item_type_id, :object_name
   end
@@ -277,24 +278,6 @@ module MasterHandler
           ItemFlag.set_flags flag_list, object_instance, current_user
         end
 
-        # Follow the pattern of the tracker to capture referenced items
-        # The submitted item has hidden fields that state the 'from' item referencing this object instance
-        pr = params[full_object_name.gsub('__', '_').to_sym]
-        if pr.present? && pr[:ref_record_type].present? && pr[:ref_record_id].present?
-          ref_item_class_name = pr[:ref_record_type].singularize.camelize
-
-          # Find the matching UserBase subclass that has this name, avoiding using the supplied param
-          # in a way that could be risky by allowing code injection
-          ic = UserBase.class_from_name ref_item_class_name
-
-          # look up the item using the item_id parameter.
-          rid = pr[:ref_record_id].to_i
-          @ref_item  = ic.find(rid)
-
-          if @ref_item
-            ModelReference.create_with @ref_item, object_instance
-          end
-        end
 
         # Based on an embedded item coming from an activity log form, create the reference.
         # In this mode we are in the activity log record, so the order is different from the previous create_with usage
@@ -304,6 +287,21 @@ module MasterHandler
 
         true
 
+      end
+
+      def capture_ref_item
+        # Follow the pattern of the tracker to capture referenced items
+        # The submitted item has hidden fields that state the 'from' item referencing this object instance
+        pr = params[full_object_name.gsub('__', '_').to_sym]
+        if pr.present?
+          ref_record_type = pr[:ref_record_type]
+          ref_record_id = pr[:ref_record_id]
+          if ref_record_type.present? && ref_record_id.present?
+
+            object_instance.set_referring_record(ref_record_type, ref_record_id)
+            # The reference will actually get created when the object instance is saved
+          end
+        end
       end
 
       def filter_records records

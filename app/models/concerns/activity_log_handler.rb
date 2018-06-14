@@ -24,7 +24,7 @@ module ActivityLogHandler
     validates :master_id, presence: true
 
     after_save :sync_set_related_fields
-
+    after_save :create_referring_record
     after_save :sync_tracker
 
     after_save :check_status
@@ -32,6 +32,7 @@ module ActivityLogHandler
 
     after_save :handle_save_triggers
 
+    attr_reader :referring_record
     # after_commit :check_for_notification_records, on: :create
   end
 
@@ -346,6 +347,10 @@ module ActivityLogHandler
 
   end
 
+  def set_referring_record ref_record_type, ref_record_id
+    @ref_record_type = ref_record_type
+    @ref_record_id = ref_record_id
+  end
 
   # Sync the tracker by adding a record to the protocol if it is set
   # This should only happen one time, since in the case of edit / update, a duplicate
@@ -593,6 +598,24 @@ module ActivityLogHandler
   # Check for new records, and work from there.
   def check_for_notification_records
     Messaging::MessageNotification.handle_notification_records self
+  end
+
+
+  def create_referring_record
+    if @ref_record_type
+      ref_item_class_name = @ref_record_type.singularize.camelize
+
+      # Find the matching UserBase subclass that has this name, avoiding using the supplied param
+      # in a way that could be risky by allowing code injection
+      ic = UserBase.class_from_name ref_item_class_name
+
+      # look up the item using the item_id parameter.
+      @referring_record  = ic.find(@ref_record_id.to_i)
+
+      if @referring_record
+        ModelReference.create_with @referring_record, self
+      end
+    end
   end
 
   def handle_save_triggers
