@@ -28,9 +28,9 @@ set search_path=ml_app;
 \i db/app_specific/ipa/create_ipa_tms_tests_table.sql
 \i db/app_specific/ipa/create_ipa_transportation_table.sql
 \i db/app_specific/ipa/create_ipa_withdrawals_table.sql
+\i db/app_specific/ipa/post_create_alter_withdrawals_table.sql
 \i db/app_specific/ipa/create_minor_deviations_activity_log.sql
 \i db/app_specific/ipa/create_mrn_external_identifier.sql
 \i db/app_specific/ipa/prep_inex_checklist_from_ps.sql
 \i db/app_specific/ipa/trigger_new_screening_schedule.sql
 \i db/app_specific/ipa/trigger_screening_follow_up.sql
-end;
