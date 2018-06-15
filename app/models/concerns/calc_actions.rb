@@ -48,6 +48,7 @@ module CalcActions
         # - addresses: ...
         # - addresses: ...
         # all of which must meet the condition type
+        condition_type = is_selection_type(condition_type) || condition_type
         loop_res = condition_type.in?([:all, :not_any])
 
 
@@ -61,7 +62,6 @@ module CalcActions
 
           calc_base_query
 
-          condition_type = is_selection_type(condition_type) || condition_type
 
           if condition_type == :all
             cond_res = true
@@ -162,7 +162,7 @@ module CalcActions
             raise FphsException.new "Incorrect condition type specified when calculating action if: #{condition_type}"
           end
 
-          # puts "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - #{@condition_config}" unless Rails.env.production?
+          puts "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - #{@condition_config}" unless Rails.env.production?
           loop_res &&= cond_res if condition_type == :all
           loop_res ||= cond_res if condition_type == :any
           loop_res ||= cond_res if condition_type == :not_all
