@@ -162,7 +162,11 @@ module CalcActions
             raise FphsException.new "Incorrect condition type specified when calculating action if: #{condition_type}"
           end
 
-          puts "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - #{@condition_config}" unless Rails.env.production?
+          unless Rails.env.production?
+            Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - #{@condition_config}"
+            Rails.logger.debug @non_query_conditions
+            Rails.logger.debug @base_query.to_sql
+          end
           loop_res &&= cond_res if condition_type == :all
           loop_res ||= cond_res if condition_type == :any
           loop_res ||= cond_res if condition_type == :not_all
@@ -268,9 +272,9 @@ module CalcActions
                 # non_query_condition = true
                 val = []
                 mrs = @current_instance.model_references
-                
-                unless table_name.in? %i(this this_references parent_references validate)
-                  mrs = mrs.select {|r| r.to_record_type == table_name.to_s.singularize.ns_camelize}
+
+                unless join_table_name.in? %i(this this_references parent_references validate)
+                  mrs = mrs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
                 end
 
                 # Get the specified attribute's value from each of the model references
@@ -288,8 +292,8 @@ module CalcActions
                 # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
                 parent_model_refs = @current_instance.referring_record.model_references
 
-                unless table_name.in? %i(this this_references parent_references validate)
-                  parent_model_refs = parent_model_refs.select {|r| r.to_record_type == table_name.to_s.singularize.ns_camelize}
+                unless join_table_name.in? %i(this this_references parent_references validate)
+                  parent_model_refs = parent_model_refs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
                 end
 
                 parent_model_refs.each do |mr|
@@ -316,7 +320,7 @@ module CalcActions
           end
         end
       end
-      join_tables = join_tables - [:this, :this_references, :parent_references, :user]
+      join_tables = (join_tables - [:this, :this_references, :parent_references, :user, :master]).uniq
 
       @base_query = @current_scope.joins(join_tables)
     end
