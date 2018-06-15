@@ -21,6 +21,7 @@ module ActivityLogMain
   include PhoneSetup
   include PlayerSetup
   include SpecSetup
+  include UserActionsSetup
 
   include LogCallActions
   include LogExpectations

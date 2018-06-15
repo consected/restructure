@@ -6,19 +6,24 @@ module MasterSupport
     SeedSupport.setup
   end
 
-  def setup_access resource_name=nil, resource_type: :table
+  def enable_user_app_access app_name
+    @user.app_type = Admin::AppType.where(name: app_name).first
+    setup_access :app_type, resource_type: :general, access: :read
+  end
+
+  def setup_access resource_name=nil, resource_type: :table, access: :create
 
     return if @path_prefix == "/admin"
     resource_name ||= objects_symbol
 
     uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: resource_type, resource_name: resource_name).first
     if uac
-      uac.access = :create
+      uac.access = access
       uac.disabled = false
       uac.current_admin = auto_admin
       uac.save
     else
-      Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: resource_type, resource_name: resource_name, current_admin: auto_admin
+      Admin::UserAccessControl.create! app_type: @user.app_type, access: access, resource_type: resource_type, resource_name: resource_name, current_admin: auto_admin
     end
 
   rescue => e
