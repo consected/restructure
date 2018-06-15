@@ -786,7 +786,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, @al
-    byebug
+    
     expect(res.calc_action_if).to be true
 
 

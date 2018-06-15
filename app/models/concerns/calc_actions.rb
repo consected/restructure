@@ -267,9 +267,15 @@ module CalcActions
                 att = val.first.last
                 # non_query_condition = true
                 val = []
+                mrs = @current_instance.model_references
+                
+                unless table_name.in? %i(this this_references parent_references validate)
+                  mrs = mrs.select {|r| r.to_record_type == table_name.to_s.singularize.ns_camelize}
+                end
+
                 # Get the specified attribute's value from each of the model references
                 # Generate an array, allowing the conditions to be IN any of these
-                @current_instance.model_references.each do |mr|
+                mrs.each do |mr|
                   val << mr.to_record.attributes[att]
                 end
               elsif val_item_key == :parent_references && !val.first.last.is_a?(Hash)
@@ -281,6 +287,10 @@ module CalcActions
                 # Generate an array, allowing the conditions to be IN any of these
                 # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
                 parent_model_refs = @current_instance.referring_record.model_references
+
+                unless table_name.in? %i(this this_references parent_references validate)
+                  parent_model_refs = parent_model_refs.select {|r| r.to_record_type == table_name.to_s.singularize.ns_camelize}
+                end
 
                 parent_model_refs.each do |mr|
                   val << mr.to_record.attributes[att]
