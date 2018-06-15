@@ -215,6 +215,7 @@ class ExtraOptions
       set_defaults config_obj, res
 
       opt_default = res.delete(:_default)
+      res.delete(:_definitions)
 
       res.each do |name, value|
         # If defined, use the optional _default entry as the basis for all individual options,

@@ -272,9 +272,22 @@ module CalcActions
                 @current_instance.model_references.each do |mr|
                   val << mr.to_record.attributes[att]
                 end
+              elsif val_item_key == :parent_references && !val.first.last.is_a?(Hash)
+                att = val.first.last
+                # non_query_condition = true
+                val = []
+
+                # Get the specified attribute's value from each of the parent model references
+                # Generate an array, allowing the conditions to be IN any of these
+                # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
+                parent_model_refs = @current_instance.referring_record.model_references
+
+                parent_model_refs.each do |mr|
+                  val << mr.to_record.attributes[att]
+                end
               else
                 val.keys.each do |val_key|
-                  if val_key.in? %i(this this_references validate)
+                  if val_key.in? %i(this this_references parent_references validate)
                     non_query_condition = true
                   else
                     join_tables << val_key unless join_tables.include? val_key
@@ -293,7 +306,7 @@ module CalcActions
           end
         end
       end
-      join_tables = join_tables - [:this, :this_references, :user]
+      join_tables = join_tables - [:this, :this_references, :parent_references, :user]
 
       @base_query = @current_scope.joins(join_tables)
     end
