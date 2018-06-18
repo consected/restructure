@@ -233,7 +233,7 @@
 
 
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
-          <div data-sort-desc="<%= data_action_when %>" <%= data_action_when %>="">
+          <div data-sort-desc="<%= data_action_when.hyphenate %>" <%= data_action_when.hyphenate %>="">
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-primary-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
             </div>
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-blank-log-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-blank-log-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form"></div>

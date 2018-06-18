@@ -119,7 +119,7 @@ class ModelReference < ActiveRecord::Base
 
 
   def to_record_viewable
-    self.current_user.has_access_to? :access, :table, to_record_type_us.pluralize
+    !!self.current_user.has_access_to?(:access, :table, to_record_type_us.pluralize)
   end
 
   def from_record_type_us
@@ -134,7 +134,12 @@ class ModelReference < ActiveRecord::Base
 
   def from_record_viewable
     return unless from_record_type_us
-    self.current_user.has_access_to? :access, :table, from_record_type_us.pluralize
+    !!self.current_user.has_access_to?(:access, :table, from_record_type_us.pluralize)
+  end
+
+  def from_record
+    return unless from_record_type && from_record_id
+    from_record_type.ns_constantize.find(from_record_id)
   end
 
   def to_record_data
@@ -162,6 +167,14 @@ class ModelReference < ActiveRecord::Base
 
   def to_record= rec
     @to_record = rec
+  end
+
+  def to_record_options_config
+    if from_record && from_record.respond_to?(:option_type_config)
+      res = from_record.option_type_config.model_reference_config self
+      return unless res
+      res[from_record_type_us.to_sym]
+    end
   end
 
   def self.find_records_in_master master: nil, to_record_type: nil, filter_by: nil
@@ -192,6 +205,7 @@ class ModelReference < ActiveRecord::Base
 
     extras[:methods] << :to_record_data
 
+    extras[:methods] << :to_record_options_config if from_record.respond_to? :option_type_config
     extras[:methods] << :from_record_type_us
     extras[:methods] << :from_record_short_type_us
     extras[:methods] << :from_record_viewable

@@ -139,7 +139,10 @@ _fpa.utils.ISOdatetoTimestamp = function(stre){
 
   if(typeof stre == 'number') return stre;
 
-  if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
+  if( (stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || 
+      (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) ||
+      (stre.indexOf('t')>=0 && stre.indexOf('+')>=0) ||
+      (stre.indexOf('T')>=0 && stre.indexOf('+')>=0)) {
     var ds = new Date(Date.parse(stre));
     if(!ds) return stre;
     var res = ds.getTime().toFixed(0);

@@ -44,19 +44,32 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
       always_embed_item = mrs.select{|m| m.to_record_type == always_embed_reference.ns_camelize}.first if always_embed_reference
 
-      if action_name.in?(['new', 'create']) && cmrs.length == 1
+      if always_embed_item
+        # Always embed if instructed to do so by the options config
+        @embedded_item = always_embed_item.to_record
+      elsif action_name.in?(['new', 'create']) && cmrs.length == 1
+        # If exactly one item is creatable, use this, unless the embeddable item is an activity log.
         @embedded_item = oi.build_model_reference cmrs.first
         @embedded_item = nil if @embedded_item.class.parent == ActivityLog
-      elsif mrs.length == 1 && !(action_name.in?( ['new', 'create']) && cmrs.length > 0)# && cmrs[template] != 'many'
+      elsif action_name.in?( ['new', 'create']) && cmrs.length > 1
+        # If more than one item is creatable, don't use it
+        @embedded_item = nil
+      elsif action_name.in?( ['new', 'create']) && cmrs.length == 0 && mrs.length == 1
+        # Nothing is creatable, but one has been created. Use the existing one.
+        @embedded_item = mrs.first.to_record
+      elsif action_name.in?(['edit', 'update', 'show', 'index']) && mrs.length == 0
+        # If nothing has been embedded, there is nothing to show
+        @embedded_item = nil
+      elsif action_name.in?(['edit', 'update']) && mrs.length == 1
+        # A referenced record exists - the form expects this to be embedded
+        # Therefore just use this existing item
+        @embedded_item = mrs.first.to_record
+
+      elsif action_name.in?(['show', 'index']) && mrs.length == 1 && cmrs.length == 0
         # A referenced record exists and no more are creatable
         # Therefore just use this existing item
         @embedded_item = mrs.first.to_record
-      elsif always_embed_item
-        @embedded_item = always_embed_item.to_record
-      elsif mrs.length == 0 && cmrs.length == 1 && !(action_name == 'edit' && cmrs.first.last == 'many')
-        # No referenced record exists yet, and one is creatable
-        # Make a new creatable item
-        @embedded_item = oi.build_model_reference cmrs.first
+
       end
 
       if @embedded_item

@@ -281,7 +281,7 @@ module MasterHandler
 
         # Based on an embedded item coming from an activity log form, create the reference.
         # In this mode we are in the activity log record, so the order is different from the previous create_with usage
-        if object_instance.embedded_item
+        if object_instance.embedded_item && object_instance.embedded_item.id
           ModelReference.create_with object_instance, object_instance.embedded_item
         end
 
@@ -296,7 +296,7 @@ module MasterHandler
         if pr.present?
           ref_record_type = pr[:ref_record_type]
           ref_record_id = pr[:ref_record_id]
-          if ref_record_type.present? && ref_record_id.present?
+          if ref_record_type.present? && ref_record_id.present? && object_instance.respond_to?(:set_referring_record)
 
             object_instance.set_referring_record(ref_record_type, ref_record_id)
             # The reference will actually get created when the object instance is saved

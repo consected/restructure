@@ -161,6 +161,12 @@ class ExtraLogType < ExtraOptions
     true
   end
 
+  def model_reference_config model_reference
+    return unless self.references
+    self.references[model_reference.to_record_template.to_sym] || self.references[model_reference.to_record.class.table_name.singularize.to_sym]
+  end
+
+
   protected
 
     def self.options_text activity_log

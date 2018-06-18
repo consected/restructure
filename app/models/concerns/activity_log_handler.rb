@@ -33,6 +33,7 @@ module ActivityLogHandler
     after_save :handle_save_triggers
 
     attr_reader :referring_record
+    attr_writer :alt_order
     # after_commit :check_for_notification_records, on: :create
   end
 
@@ -134,12 +135,46 @@ module ActivityLogHandler
     data
   end
 
+
+  def alt_order
+
+    if self.extra_log_type_config && self.extra_log_type_config.view_options
+      da = self.extra_log_type_config.view_options[:alt_order]
+      da = [da] unless da.is_a? Array
+      res = ''
+      da.each do |n|
+        v = self.attributes[n]
+        if v.nil?
+        elsif v.is_a? Date
+          res =  DateTime.new(v.year, v.month, v.day, 0, 0, 0, v.send(:zone))
+        elsif v.is_a? Time
+
+          res =  DateTime.new(res.year, res.month, res.day, v.hour, v.min, 0, v.send(:zone))
+        else
+          res += v
+        end
+      end
+
+      return res
+    end
+  end
+
   def data
     if defined? super
       super()
     else
-      n = extra_log_type_config.label || extra_log_type.to_s.humanize
-      "#{n}"
+      if self.extra_log_type_config && self.extra_log_type_config.view_options
+        da = self.extra_log_type_config.view_options[:data_attribute]
+      end
+
+      if da
+        da = [da] if da.is_a? String
+        res = da.map {|i| self.attributes[i]}
+        return res.join(' ')
+      else
+        n = extra_log_type_config.label || extra_log_type.to_s.humanize
+        return "#{n}"
+      end
     end
   end
 
@@ -214,7 +249,8 @@ module ActivityLogHandler
   # the action_when attribute may vary from one activity log model to another. Get the value
   def action_when
     action = self.class.action_when_attribute
-    self.send(action)
+    res = self.send(action)
+    res
   end
 
   def action_when= d

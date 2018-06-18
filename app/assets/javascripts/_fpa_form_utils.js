@@ -709,12 +709,18 @@ _fpa.form_utils = {
         // will sort all blocks in the parent of this block with the attribute data-sort-desc, using the
         // value from a child of each block with the data attribute data-item-rank, for example
         // data-item-rank="10"
-        // The sort will automatically sort on numeric values only
+        // The sort will automatically sort on numeric or date/time values only
         var sort_block = block;
         var s = sort_block.attr('data-sort-desc');
         if(!s) {
           sort_block = sort_block.children().first();
-          if (sort_block)
+          if (sort_block.length)
+            s = sort_block.attr('data-sort-desc');
+        }
+        if(!s) {
+          sort_block = sort_block.find('[data-sub-list]');
+          sort_block = sort_block.children().first();
+          if (sort_block.length)
             s = sort_block.attr('data-sort-desc');
         }
 
