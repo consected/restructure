@@ -37,9 +37,9 @@ class ExtraLogType < ExtraOptions
             field_name: 'value to filter the referenced items by'
           },
           view_as: {
-            edit: 'hide|readonly',
+            edit: 'hide|readonly|not_embedded',
             show: 'hide|readonly|see_presence',
-            new: 'outside_this'
+            new: 'outside_this|not_embedded'
           }
         }
       },
