@@ -47,8 +47,7 @@
   </div>
 
   <div class="form-group">
-
-    <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
+    <%= hidden_filter_fields %>
 
     <%= f.submit class: "btn btn-primary" %> <%= admin_edit_cancel %>
   </div>

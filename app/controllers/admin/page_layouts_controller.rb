@@ -10,7 +10,7 @@ class Admin::PageLayoutsController < AdminController
     end
 
     def filters
-      { layout_name: Admin::PageLayout.active.pluck(:layout_name) }
+      { layout_name: Admin::PageLayout.active.pluck(:layout_name).uniq }
     end
 
     def view_folder

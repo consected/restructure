@@ -66,5 +66,14 @@ module AdminHelper
     res.html_safe
   end
 
+  def hidden_filter_fields
+    res = ""
+    if params[:filter]
+      params[:filter].each do |filter|
+        res += hidden_field_tag "filter[#{filter.first}]", filter.last
+      end
+    end
+    res.html_safe
+  end
 
 end

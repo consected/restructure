@@ -6,7 +6,7 @@
 <tr id="report-item-edit-<%=object_instance.id%>" class="report-item-edit">
   <%= render partial: 'form_errors' %>
   <td class="report-el report-edit-btn-cell report-edit-btn-cell-editing">
-    <%= hidden_field_tag "filter[#{params[:filter].first.first}]", params[:filter].first.last  if params[:filter]%>
+    <%= hidden_filter_fields %>
     <%= report_edit_cancel %><button class="btn btn-primary report-edit-submit"><i class="glyphicon glyphicon-ok"></i></button>
   </td>
   <% if object_instance.respond_to?(:id) %>
