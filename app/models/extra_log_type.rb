@@ -37,8 +37,9 @@ class ExtraLogType < ExtraOptions
             field_name: 'value to filter the referenced items by'
           },
           view_as: {
-            edit: 'readonly',
-            show: 'readonly'
+            edit: 'hide|readonly',
+            show: 'hide|readonly|see_presence',
+            new: 'outside_this'
           }
         }
       },
@@ -145,7 +146,7 @@ class ExtraLogType < ExtraOptions
     if res.is_a?(Hash) && res[action]
       res[action].each do |perform, pres|
         # Use the symbol from the list of valid items, to prevent manipulation that could cause Brakeman warnings
-        t = ValidSaveTriggers.select {|t| t == perform}.first
+        t = ValidSaveTriggers.select {|vt| vt == perform}.first
         if t
           config = self.save_trigger[action][t]
           c = SaveTriggers.const_get(t.to_s.camelize)
@@ -163,7 +164,7 @@ class ExtraLogType < ExtraOptions
 
   def model_reference_config model_reference
     return unless self.references
-    self.references[model_reference.to_record_template.to_sym] || self.references[model_reference.to_record.class.table_name.singularize.to_sym]
+    self.references[model_reference.to_record_result_key.to_sym] || self.references[model_reference.to_record.class.table_name.singularize.to_sym]
   end
 
 

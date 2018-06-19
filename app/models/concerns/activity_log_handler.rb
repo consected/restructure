@@ -24,7 +24,7 @@ module ActivityLogHandler
     validates :master_id, presence: true
 
     after_save :sync_set_related_fields
-    after_save :create_referring_record
+    
     after_save :sync_tracker
 
     after_save :check_status
@@ -142,16 +142,30 @@ module ActivityLogHandler
       da = self.extra_log_type_config.view_options[:alt_order]
       da = [da] unless da.is_a? Array
       res = ''
+      # collect potential date / time pairs from adjacent fields
+      dtp = nil
       da.each do |n|
         v = self.attributes[n]
-        if v.nil?
-        elsif v.is_a? Date
-          res =  DateTime.new(v.year, v.month, v.day, 0, 0, 0, v.send(:zone))
+        if v.is_a? Date
+          # Set the date portion of the date / time pair, but don't store it yet
+          dtp =  DateTime.new(v.year, v.month, v.day, 0, 0, 0, v.send(:zone))
         elsif v.is_a? Time
-
-          res =  DateTime.new(res.year, res.month, res.day, v.hour, v.min, 0, v.send(:zone))
+          if dtp
+            # A date portion of a date / time pair is present, so add the time and store to the result
+            res =  DateTime.new(dtp.year, dtp.month, dtp.day, v.hour, v.min, 0, v.send(:zone))
+            # Clear the date / time pair now we are done with it
+            dtp = nil
+          else
+            # Since no date portion was already available, just store the time (this is based on 2001-01-01 date)
+            res += "#{v.to_i}"
+          end
         else
-          res += v
+          # If a date / time pair is set, but was not yet stored, then a date portion was provided, but no time.
+          # Store that date to the result from the previous iteration, before storing the value for the current attribute.
+          # Remember to clear the date / time pair after storing
+          res += dtp.to_s if dtp
+          dtp = nil
+          res += v if v
         end
       end
 
@@ -381,11 +395,6 @@ module ActivityLogHandler
 
     cmrdef[:ref_type].ns_camelize.constantize.new optional_params
 
-  end
-
-  def set_referring_record ref_record_type, ref_record_id
-    @ref_record_type = ref_record_type
-    @ref_record_id = ref_record_id
   end
 
   # Sync the tracker by adding a record to the protocol if it is set
@@ -636,23 +645,6 @@ module ActivityLogHandler
     Messaging::MessageNotification.handle_notification_records self
   end
 
-
-  def create_referring_record
-    if @ref_record_type
-      ref_item_class_name = @ref_record_type.singularize.camelize
-
-      # Find the matching UserBase subclass that has this name, avoiding using the supplied param
-      # in a way that could be risky by allowing code injection
-      ic = UserBase.class_from_name ref_item_class_name
-
-      # look up the item using the item_id parameter.
-      @referring_record  = ic.find(@ref_record_id.to_i)
-
-      if @referring_record
-        ModelReference.create_with @referring_record, self
-      end
-    end
-  end
 
   def handle_save_triggers
     self.extra_log_type_config.calc_save_trigger_if self

@@ -12,6 +12,7 @@ module UserBaseHelper
             "embedded_item" => aw
           }
         }
+        awp[item_param].merge!(aw)
       end
       add_extra_params = {}
       elt = ref_config[:add_with][:extra_log_type]

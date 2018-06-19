@@ -165,15 +165,20 @@ class ModelReference < ActiveRecord::Base
     return to_record_short_type_us
   end
 
+  def to_record_assoc
+    to_record_class.assoc_inverse
+  end
+
   def to_record= rec
     @to_record = rec
   end
+
 
   def to_record_options_config
     if from_record && from_record.respond_to?(:option_type_config)
       res = from_record.option_type_config.model_reference_config self
       return unless res
-      res[from_record_type_us.to_sym]
+      res[to_record_assoc.to_s.singularize.to_sym]
     end
   end
 

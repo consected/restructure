@@ -185,7 +185,7 @@ module CalcActions
     def merge_failures results
       if return_failures && !@skip_merge
         results.first.last.each do |t, res|
-          if res.is_a?(Hash) && res.first.last.first.first == :validate
+          if res.is_a?(Hash) && res.first.last && res.first.last.first.first == :validate
             field = res.first.first
             results.first.last[t] = {field => new_validator(res.first.last[:validate].first.first, nil, options: {}).message }
           end

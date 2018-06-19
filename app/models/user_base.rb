@@ -26,6 +26,8 @@ class UserBase < ActiveRecord::Base
   validate :configurable_valid_if
   validate :valid_embedded_item
 
+  after_save :create_referring_record
+
   attr_accessor :ignore_configurable_valid_if
 
 
@@ -262,6 +264,31 @@ class UserBase < ActiveRecord::Base
 
   end
 
+  def set_referring_record ref_record_type, ref_record_id
+    @ref_record_type = ref_record_type
+    @ref_record_id = ref_record_id
+  end
+
+
+  def create_referring_record
+    if @ref_record_type
+      ref_item_class_name = @ref_record_type.singularize.camelize
+
+      # Find the matching UserBase subclass that has this name, avoiding using the supplied param
+      # in a way that could be risky by allowing code injection
+      ic = UserBase.class_from_name ref_item_class_name
+
+      # look up the item using the item_id parameter.
+      @referring_record  = ic.find(@ref_record_id.to_i)
+
+      if @referring_record
+        ModelReference.create_with @referring_record, self
+      end
+    end
+  end
+
+
+
   protected
 
     def check_master
@@ -341,7 +368,7 @@ class UserBase < ActiveRecord::Base
           errors.add :field_validation, "failed. Check your entries and try again"
         else
           return_failures.each do |c_var, c_vals|
-            f = ""
+
             c_vals.each do |table, cond|
               cond.each do |k, v|
                 v = v.present? ? v : '(blank)'

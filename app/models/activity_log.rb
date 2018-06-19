@@ -226,7 +226,7 @@ class ActivityLog < ActiveRecord::Base
       # Add the association
       logger.debug "Associated master: has_many #{self.model_association_name} with class_name: #{self.full_implementation_class_name}"
       awa = self.action_when_attribute.to_sym
-      awa = :created_at if awa = :alt_order
+      awa = :created_at if awa == :alt_order
       Master.has_many self.model_association_name, -> { order(awa => :desc, id: :desc)}, inverse_of: :master, class_name: self.full_implementation_class_name, &association_block
       # Unlike external_id handlers (Scantron, etc) there is no need to update the master's nested attributes this model's symbol
       # since there is no link to advanced search

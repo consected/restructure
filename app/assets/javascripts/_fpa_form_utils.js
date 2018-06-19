@@ -21,7 +21,7 @@ _fpa.form_utils = {
           if(f.length == 1) {
             if(!first_field) first_field = f;
             f.addClass('has-error');
-            var fn = p;
+            var fn = p.replace(/_/g, ' ');
             if(f.hasClass('showed-caption-before'))
             fn = 'Entry'
 
@@ -709,7 +709,7 @@ _fpa.form_utils = {
         // will sort all blocks in the parent of this block with the attribute data-sort-desc, using the
         // value from a child of each block with the data attribute data-item-rank, for example
         // data-item-rank="10"
-        // The sort will automatically sort on numeric or date/time values only
+        // The sort will automatically sort on string, numeric or date/time values
         var sort_block = block;
         var s = sort_block.attr('data-sort-desc');
         if(!s) {
@@ -801,11 +801,17 @@ _fpa.form_utils = {
     },
 
     setup_contact_field_mask: function(block) {
-      var check_rec = function(rec_type){
+      var check_rec = function(rec_type, input){
 
-        var val = rec_type.val();
+        if(typeof rec_type == 'string') {
+          var val = rec_type;
+          var no_rec_type = true;
+        }
+        else {
+          var val = rec_type.val();
+          input = block.find('input[data-attr-name="data"]');
+        }
 
-        var input = block.find('input[data-attr-name="data"]');
         if(val==='phone') {
           input.mask("(000)000-0000 nn", {'translation': {0: {pattern: /\d/}, n: {pattern: /.*/, recursive: true, optional: true}}}).attr('type', 'text');
         }
@@ -815,10 +821,12 @@ _fpa.form_utils = {
         else
           input.unmask().attr('type', 'text');
 
-        var data_label = _fpa.utils.translate(val, 'field_labels');
-        data_label = data_label ? _fpa.utils.capitalize(data_label) : 'Data'
+        if(!no_rec_type) {
+          var data_label = _fpa.utils.translate(val, 'field_labels');
+          data_label = data_label ? _fpa.utils.capitalize(data_label) : 'Data'
 
-        input.parent().find('label').html(data_label);
+          input.parent().find('label').html(data_label);
+        }
 
       };
 
@@ -827,6 +835,15 @@ _fpa.form_utils = {
       });
 
       check_rec(e);
+
+      block.find('.is_phone').each(function(){
+        check_rec('phone', $(this));
+      });
+
+      block.find('.is_email').each(function(){
+        check_rec('email', $(this));
+      });
+
     },
 
     setup_textarea_autogrow: function(block) {

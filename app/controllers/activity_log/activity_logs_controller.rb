@@ -49,8 +49,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
         @embedded_item = always_embed_item.to_record
       elsif action_name.in?(['new', 'create']) && cmrs.length == 1
         # If exactly one item is creatable, use this, unless the embeddable item is an activity log.
+        cmr_view_as = cmrs.first.last.first.last[:ref_config][:view_as] rescue nil
         @embedded_item = oi.build_model_reference cmrs.first
-        @embedded_item = nil if @embedded_item.class.parent == ActivityLog
+        @embedded_item = nil if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new] == 'not_embedded'
       elsif action_name.in?( ['new', 'create']) && cmrs.length > 1
         # If more than one item is creatable, don't use it
         @embedded_item = nil
@@ -64,6 +65,8 @@ class ActivityLog::ActivityLogsController < UserBaseController
         # A referenced record exists - the form expects this to be embedded
         # Therefore just use this existing item
         @embedded_item = mrs.first.to_record
+        mr_view_as = mrs.first.to_record_options_config[:view_as] rescue nil
+        @embedded_item = nil if mr_view_as && mr_view_as[:edit] == 'not_embedded'
 
       elsif action_name.in?(['show', 'index']) && mrs.length == 1 && cmrs.length == 0
         # A referenced record exists and no more are creatable

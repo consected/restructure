@@ -48,7 +48,7 @@ _fpa.postprocessors = {
         }
 
         var di = data[item_key];
-        if(di && di._created) {
+        if(di && (di._created || di._updated)) {
           var drf = di.referenced_from;
           if(drf && drf.length > 0) {
             for(var i in drf){
