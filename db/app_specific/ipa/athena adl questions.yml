@@ -1,3 +1,5 @@
+default:
+  caption_before:
     select_regarding_eating: |
       Regarding <b>eating</b>
       Which best describes {{first_name}} usual performance during the past 4 weeks?
@@ -8,27 +10,27 @@
     select_regarding_dressing: |
       Regarding <b>dressing</b>, in the past 4 weeks
       Did {{first_name}} setect his/her first set of clothes for the day?
-    regarding_dressing_performance: <i>If yes</i>, which best describes his/her usual performance
+    select_regarding_dressing_performance: <i>If yes</i>, which best describes his/her usual performance
     select_regarding_getting_dressed: Regarding physically getting dressed, which best describes his/her usual performance in the past 4 week
     used_telephone_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>use a telephone</b>
     select_telephone_performance: fyes, which best describes his/her <b>highest</b> level of performance
-    watched_tv_yes_know_dont_know: In the past 4 weeks, did {{first_name}} <b>watch television</b>?
+    watched_tv_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>watch television</b>?
     selected_programs_yes_no_dont_know: |
       <i>If yes</i>, ask all questions.
       Did {{first_name}}
       usually select or ask for different programs or his/her favorite show?
-    talk_about_content_during_yes_know_dont_know: usually talk about the content of a program while watching it?
-    talk_about_content_after_yes_know_dont_know: talk about the content of a program within a day (24 hours) after watching it?
+    talk_about_content_during_yes_no_dont_know: usually talk about the content of a program while watching it?
+    talk_about_content_after_yes_no_dont_know: talk about the content of a program within a day (24 hours) after watching it?
     pay_attention_to_conversation_yes_no_dont_know: |
       In the past 4 weeks, did {{first_name}} ever appear to <b>pay attention to conversation or small talk</b> for at least 5 minutes?
       Note: {{first_name}} did not need to initiate the conversation.
     select_degree_of_participation: <i>If yes</i>, which best describes his/her usual degree of participation
     clear_dishes_yes_no_dont_know: Did {{first_name}} clear the dishes from the table after a meal or snack?
     select_clear_dishes_performance: <i>If yes</i>, which best describes how he/she usually performed
-    find_personal_belongings_yes_know_dont_know: In the past 4 weeks, did {{first_name}} usually manage to <b>find his/her personal belongings</b> at home?
+    find_personal_belongings_yes_no_dont_know: In the past 4 weeks, did {{first_name}} usually manage to <b>find his/her personal belongings</b> at home?
     select_find_personal_belongings_performance: <i>If yes</i>, which best describes how he/she usually performed
     obtain_beverage_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>obtain a hot or cold beverage</b> for him/herself? (A cold beverage includes a glass of water)
-    select_obtain_beverage_performance: <i>If yes</i>, which describes his/her highest [eve[ of performance
+    select_obtain_beverage_performance: <i>If yes</i>, which describes his/her highest level of performance
     make_meal_yes_no_dont_know: In the past 4 weeks, did {{first_name}} make him/herself a meal or snack at home?
     select_make_meal_performance: <i>If yes</i>, which best describes his/her highest level of food preparation
     dispose_of_garbage_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>dispose</b> of garbage or litter in an appropriate place or container at home?
@@ -54,7 +56,7 @@
     did_not_take_part_in_yes_no_dont_know: |
       Did {{first_name}} talk about events that...
       he/she heard or read about or saw on TV but did not take part in?
-    took_part_in_outside_home_yes_no_dont_know: {{first_name}} took part in <b>outside home</b> involving family, friends, or neighbors?
+    took_part_in_outside_home_yes_no_dont_know: "{{first_name}} took part in <b>outside home</b> involving family, friends, or neighbors?"
     took_part_in_at_home_yes_no_dont_know: events that occurred <b>at home</b> that he/she took part in or watched?
     read_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>read a magazine, newspaper or book</b> for more than 5 minutes at a time?
     talk_about_reading_shortly_after_yes_no_dont_know: |
