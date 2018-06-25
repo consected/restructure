@@ -1,0 +1,3 @@
+<%= form.label field_name_sym, field_name.sub('_yes_no_dont_know', '').humanize %>
+<% options = field_options_for(form_object_instance, field_name_sym) %>
+<%= form.select field_name_sym, ['yes', 'no', "don't know"], options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}}  %>
