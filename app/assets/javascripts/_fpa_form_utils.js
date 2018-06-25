@@ -504,6 +504,12 @@ _fpa.form_utils = {
                   }
                   rect = rect.getBoundingClientRect();
 
+                  if(!rect.height) {
+                    attempt_count++;
+                    window.setTimeout(function(){ doscroll() }, 250);
+                    return;
+                  }
+
                   var not_visible = !(rect.top >= 0 && rect.bottom < $(window).height());
                   if(not_visible)
                       $(document).scrollTo(a, 100, {offset: -50});
