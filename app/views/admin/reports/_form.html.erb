@@ -60,7 +60,9 @@
         <%= f.label :sql %>
         <%= f.text_area :sql, style: "width: 99%; height: 270px; font-family: monospace;" %>
       </div>
-
+      <p>
+        <%= link_to 'test report in new window', @report, target: '_blank' %>
+      </p>
 
       <%= render partial: 'search_attr_definer', locals: {f: f} %>
 
