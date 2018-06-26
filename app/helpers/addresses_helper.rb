@@ -1,7 +1,7 @@
 module AddressesHelper
 
   def state_hash
-    AddressState.id_value_pairs
+    Classification::AddressState.id_value_pairs
   end
- 
+
 end

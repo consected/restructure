@@ -19,7 +19,9 @@ module ReportsHelper
       if type_string == 'config_selector'
         use_dropdown = true
       else
-        c = type_string.to_s.classify.constantize rescue nil
+        c = Classification.const_get(type_string.to_s.classify) rescue nil
+        # c = type_string.to_s.classify.constantize rescue nil unless c
+        # c = Admin.const_get(type_string.to_s.classify) rescue nil unless c
       end
     end
 

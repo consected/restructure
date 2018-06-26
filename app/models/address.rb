@@ -18,7 +18,7 @@ class Address < UserBase
   end
 
   def self.states
-    AddressState.id_value_pairs
+    Classification::AddressState.id_value_pairs
   end
 
   def self.get_state_name code
