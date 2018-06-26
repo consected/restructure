@@ -108,7 +108,10 @@ module DynamicModelHandler
       rescue Exception => e
         err  = "Failed to instantiate the class #{full_implementation_class_name} in parent #{parent_class}: #{e}"
         if opt[:fail_without_exception]
-          return false
+          # By default, return false if an error occurred attempting the initialization.
+          # In certain cases (for example, checking if a class exists so it can be removed), returning true if the
+          # class is defined regardless of whether it can be initialized makes most sense. Provide an option to support this.
+          return opt[:fail_without_exception_newable_result]
         else
           raise FphsException.new err
         end

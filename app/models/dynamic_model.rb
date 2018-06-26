@@ -255,7 +255,7 @@ class DynamicModel < ActiveRecord::Base
 
         klass = ::DynamicModel
         begin
-          klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass, fail_without_exception: true)
+          klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass, fail_without_exception: true, fail_without_exception_newable_result: true)
         rescue => e
           logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
         end
@@ -267,7 +267,7 @@ class DynamicModel < ActiveRecord::Base
         # Create an alias in the main namespace to make dynamic model easier to refer to
 
         begin
-          Object.send(:remove_const, model_class_name) if implementation_class_defined?(Object, fail_without_exception: true)
+          Object.send(:remove_const, model_class_name) if implementation_class_defined?(Object, fail_without_exception: true, fail_without_exception_newable_result: true)
         rescue => e
           logger.info "Failed to remove the old alias of Object::#{model_class_name}. #{e.inspect}"
         end
