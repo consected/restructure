@@ -357,7 +357,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
       rec_type: 'home',
       source: 'nflpa'
 
-    a2 = m.addresses.create! city: "Portland",
+    m.addresses.create! city: "Portland",
       state: "OR",
       zip: "#{rand(99999).to_s.rjust(5, "0")}",
       rank: 10,
@@ -786,7 +786,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = conf.deep_symbolize_keys
 
     res = ConditionalActions.new conf, @al
-    
+
     expect(res.calc_action_if).to be true
 
 
@@ -828,4 +828,119 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
   end
 
+  it "checks non-equality conditions" do
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          created_at: {
+            condition: "<",
+            value: "#{@al.created_at + 1.second}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+
+          created_at: {
+            condition: ">",
+            value: "#{@al.created_at + 1.second}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    @al.updated_at = DateTime.now
+    @al.save!
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+
+          updated_at: {
+            condition: '<=',
+            value: 'now()'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+
+          updated_at: {
+            condition: '<',
+            value: '+1 day'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+
+          updated_at: {
+            condition: '>',
+            value: '-1 day'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          select_who: {
+            condition: "<>",
+            value: @al.select_who
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          select_who: {
+            condition: "<",
+            value: "a-#{@al.select_who}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+  end
 end

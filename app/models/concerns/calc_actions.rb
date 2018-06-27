@@ -2,8 +2,12 @@ module CalcActions
 
   extend ActiveSupport::Concern
 
+  include FieldDefaults
+
   included do
     SelectionTypes = :all, :any, :not_all, :not_any
+    BoolTypeString = '__!BOOL__'.freeze
+    ValidExtraConditions = ['<', '>', '<>', '<=', '>='].freeze
     attr_accessor :condition_scope
   end
 
@@ -69,7 +73,7 @@ module CalcActions
             # equivalent of (cond1 AND cond2 AND cond3 ...)
             # These conditions are easy to handle as a standard query
             unless @condition_values.empty?
-              calc_query @condition_values
+              calc_query @condition_values, @extra_conditions
               res_q = calc_query_conditions
               merge_failures({condition_type => @condition_config}) if !res_q
             end
@@ -87,7 +91,7 @@ module CalcActions
             res_q = true
             # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
             unless @condition_values.empty?
-              calc_query @condition_values
+              calc_query @condition_values, @extra_conditions
               res_q = calc_query_conditions
             end
 
@@ -110,7 +114,7 @@ module CalcActions
             # equivalent of (cond1 OR cond2 OR cond3 ...)
             @condition_values.each do |table, fields|
               fields.each do |field_name, expected_val|
-                calc_query(table => {field_name => expected_val})
+                calc_query({table => {field_name => expected_val}}, @extra_conditions, 'OR')
                 res_q = calc_query_conditions
                 break if res_q
               end
@@ -140,7 +144,7 @@ module CalcActions
             # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
             @condition_values.each do |table, fields|
               fields.each do |field_name, expected_val|
-                calc_query(table => {field_name => expected_val})
+                calc_query({table => {field_name => expected_val}}, @extra_conditions, 'OR')
                 res_q = calc_query_conditions
                 merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
                 cond_res &&= !res_q
@@ -195,8 +199,13 @@ module CalcActions
     end
 
 
-    def calc_query conditions
-      @condition_scope = @base_query.where(conditions).order(id: :desc).limit(1)
+    def calc_query conditions, extra_conditions = [], bool = 'AND'
+      @condition_scope = @base_query.where(conditions)
+      if extra_conditions.length > 1
+        extra_conditions[0].gsub(BoolTypeString, bool)
+        @condition_scope = @condition_scope.where(extra_conditions)
+      end
+      @condition_scope = @condition_scope.order(id: :desc).limit(1)
     end
 
     def calc_this_condition table, field_name, expected_vals
@@ -246,6 +255,7 @@ module CalcActions
       # join_tables = @condition_config.keys.map(&:to_sym) - SelectionTypes
       join_tables = []
       @condition_values = {}
+      @extra_conditions = []
       @non_query_conditions = {}
       @sub_conditions = {}
 
@@ -311,7 +321,22 @@ module CalcActions
             end
             unless non_query_condition
               @condition_values[table_name] ||= {}
-              @condition_values[table_name][field_name] = val
+              if val.is_a?(Hash) && val[:condition].in?(ValidExtraConditions)
+
+                if @extra_conditions[0].blank?
+                  @extra_conditions[0] = ""
+                else
+                  @extra_conditions[0] += " #{BoolTypeString} "
+                end
+
+                vc = ValidExtraConditions.find {|c| c == val[:condition]}
+                vv = dynamic_value(val[:value])
+
+                @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
+                @extra_conditions << vv
+              else
+                @condition_values[table_name][field_name] = dynamic_value(val)
+              end
               join_tables << join_table_name unless join_tables.include? table_name
             else
               @non_query_conditions[table_name] ||= {}
@@ -320,9 +345,14 @@ module CalcActions
           end
         end
       end
-      join_tables = (join_tables - [:this, :this_references, :parent_references, :user, :master]).uniq
+      join_tables = (join_tables - [:this, :this_references, :parent_references, :user, :master, :condition, :value]).uniq
 
       @base_query = @current_scope.joins(join_tables)
+    end
+
+    # Create a dynamic value if the condition's value matches certain strings
+    def dynamic_value val, type=nil
+      FieldDefaults.calculate_default(self, val, type)
     end
 
     # Calculate the sub conditions for this level if it contains any of the selection types

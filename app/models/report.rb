@@ -329,7 +329,7 @@ class Report < ActiveRecord::Base
 
     search_attributes.each do |k,v|
 
-      @search_attr_values[k.to_sym] = self.calculate_default v.first.last['default'], v.first.first
+      @search_attr_values[k.to_sym] = FieldDefaults.calculate_default(self, v.first.last['default'], v.first.first)
     end
     logger.info "Using defaults as search attributes #{@search_attr_values}"
     @search_attr_values
@@ -374,29 +374,6 @@ class Report < ActiveRecord::Base
     true
   end
 
-
-  def calculate_default default, type
-    default ||= ''
-
-    res = default
-    if default.is_a? String
-      m = default.scan(/(-?+?\d+) (days|day|months|month|years|year)/)
-      if m.first
-        t = m.first.last
-        res = DateTime.now + m.first.first.to_i.send(t)
-      elsif default == 'now'
-        res = DateTime.now
-      elsif default == 'current_user'
-        res = self.current_user.id
-      end
-    end
-
-    if type == 'date'
-      res = res.strftime('%Y-%m-%d') rescue nil
-    end
-
-    res
-  end
 
   def field_index name
     m_field = nil
