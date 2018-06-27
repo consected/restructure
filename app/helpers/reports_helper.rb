@@ -27,7 +27,7 @@ module ReportsHelper
 
 
 
-    value ||= @report.calculate_default(type_val['default'], type_string)
+    value ||= FieldDefaults.calculate_default(@report, type_val['default'], type_string)
 
     if c && c.respond_to?(:all_name_value_enable_flagged)
       if type_val['item_type'] == 'all'
