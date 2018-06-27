@@ -228,9 +228,9 @@ Responded "' || health.chronic_pain_meds_blank_yes_no_dont_know || '" to questio
 Responded "' || health.raynauds_syndrome_severity_selection || '" to follow up question "Would you say that it is mild, moderate or severe?".',
 
       --ix_mi_ok_blank_yes_no
-      NULL,
+      CASE WHEN health.other_heart_conditions_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
       --ix_mi_ok_details
-'',
+'Responded "' || health.other_heart_conditions_blank_yes_no_dont_know || '" to question "Have you been diagnosed with any other heart conditions or problems (e.g. heart attack, stroke, irregular heart rhythms, heart failure)?" in Health form',
 
       --ix_bicycle_ok_blank_yes_no
       CASE WHEN health.cycle_blank_yes_no = 'yes' THEN 'yes' ELSE 'no' END,
