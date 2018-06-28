@@ -231,7 +231,7 @@ class Admin::AppType < Admin::AdminBase
 
 
   def export_config
-    self.to_json
+    JSON.pretty_generate(JSON.parse self.to_json)
   end
 
   def as_json options={}
