@@ -6,9 +6,13 @@ _fpa.show_if.methods = {
 
   show_items: function(block, data) {
     if(!block || !data) return;
+
+    if(data.embedded_item)
+      _fpa.show_if.methods.show_items(block, data.embedded_item);
+
     var item_key = data.item_type;
     var form_key = data.full_option_type;
-    if(!form_key && data.option_type) form_key = item_key + '_' + data.option_type;
+    if(!form_key && data.option_type && data.option_type != 'default') form_key = item_key + '_' + data.option_type;
     if(!form_key) form_key = item_key;
     if(!item_key) return;
 
