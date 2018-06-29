@@ -24,7 +24,11 @@ class ExtraOptions
       caption_before: {
         field_name: "string caption to appear before field",
         all_fields: "caption to appear before all fields",
-        submit: "caption to appear before submit button"
+        submit: "caption to appear before submit button",
+        field_to_retain_label: {
+          keep_label: true,
+          caption: 'caption to appear before label'
+        }
       },
       show_if: {
         field_name: {
@@ -44,8 +48,14 @@ class ExtraOptions
           create_next_creatable: {
             if: attr_for_conditions_marker
           },
-          show_panel: 'panel / category name',
-          hide_panel: 'panel / category name'
+          show_panel: {
+            value: 'panel / category name',
+            if: attr_for_conditions_marker
+          },
+          hide_panel: {
+            value: 'panel / category name',
+            if: attr_for_conditions_marker
+          }
         },
         on_create: {},
         on_save: {

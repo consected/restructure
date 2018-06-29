@@ -82,6 +82,18 @@ _fpa.show_if.methods = {
           var exp_value = cond_def[cond_field];
           if(typeof exp_value == 'string')
             exp_value = [exp_value];
+          else if(typeof exp_value == 'boolean') {
+            exp_value = [exp_value, (exp_value ? 'yes' : 'no')];
+          }
+          else if(typeof exp_value == 'number') {
+            exp_value = [exp_value];
+          }
+          else if(typeof exp_value == 'object') {
+            for(var i = 0; i < exp_value.length; i ++) {
+              if(exp_value[i] === true) exp_value.push('yes');
+              if(exp_value[i] === false) exp_value.push('no');
+            }
+          }
 
           if(cond_type == 'all') {
             cond_success = cond_success && (exp_value.includes(exp_field_value));
