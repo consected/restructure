@@ -163,7 +163,7 @@
     <div class="row">
     <%= f_main.fields_for :trackers, child_index: 0 do |f| %>
       <div class="form-group col-sm-3  tracker-search-field">
-        <%= f.label "Classification::Protocol / Category" %>
+        <%= f.label "Protocol / Category" %>
         <%= f.select :protocol_id, protocol_array_without_updates, {include_blank: "-select-"}, {"data-filters-selector" => "#master_trackers_attributes_0_sub_process_id, #master_not_trackers_attributes_0_sub_process_id, #master_tracker_histories_attributes_0_sub_process_id, #master_not_tracker_histories_attributes_0_sub_process_id", class: 'form-control'}%>
       </div>
       <div class="form-group col-sm-3 tracker-sub-process tracker-search-field">
