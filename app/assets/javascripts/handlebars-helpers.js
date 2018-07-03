@@ -288,7 +288,9 @@
         var s = stre.toString();
         if(s.toLowerCase().indexOf('pm') > 1 || s.toLowerCase().indexOf('am') > 1)
           return s;
-        return new Date(s).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
+        var s = new Date(s);
+        var stz = new Date( s.getTime() + ( s.getTimezoneOffset() * 60000 ) );
+        return stz.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
     });
 
 
