@@ -95,6 +95,16 @@
         "user_id": null,
         "app_type_id": 3,
         "user_email": null
+      },
+      {
+        "id": 35,
+        "name": "user session timeout",
+        "value": "30",
+        "disabled": false,
+        "admin_id": 2,
+        "user_id": null,
+        "app_type_id": 3,
+        "user_email": null
       }
     ],
     "user_access_controls": [
@@ -2199,26 +2209,6 @@
         "user_email": null
       },
       {
-        "id": 52,
-        "name": "IPA Outstanding Activities",
-        "description": "Search for records where one activity has been performed and another hasn't been performed after it (optional).",
-        "sql": "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT id,\r\n   master_id,\r\n   extra_log_type,\r\n   select_result,\r\n   rank()\r\n OVER (\r\n  PARTITION BY master_id \r\n  ORDER BY created_at DESC\r\n ) AS r\r\n FROM activity_log_ipa_assignments\r\n WHERE\r\n  :activity_performed = 'general-follow-up' AND extra_log_type='general' AND select_result='follow up'\r\n OR\r\n  :activity_performed = 'general-completed' AND extra_log_type='general' AND select_result='completed'\r\n OR\r\n  :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND extra_log_type='general' AND select_result='follow up'\r\n OR\r\n  :activity_outstanding is not null AND :activity_outstanding = 'general-completed' AND extra_log_type='general' AND select_result='completed'\r\n OR\r\n\r\n  extra_log_type IN (:activity_performed, :activity_outstanding) \r\n\r\n) AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\n\r\nWHERE\r\n  r = 1 \r\nAND ( \r\n  :activity_performed = 'general-follow-up' AND dt.extra_log_type='general' AND dt.select_result='follow up'\r\n OR\r\n  :activity_performed = 'general-completed' AND dt.extra_log_type='general' AND dt.select_result='completed'\r\n OR\r\n  dt.extra_log_type = :activity_performed\r\n)\r\n\r\nORDER BY\r\n  dt.id DESC\r\n;\r\n",
-        "search_attrs": "\r\nactivity_performed: \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default: general-follow-up\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label: Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n    default: general-completed\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n",
-        "admin_id": 2,
-        "disabled": false,
-        "created_at": "2018-06-04T17:22:35.951Z",
-        "updated_at": "2018-06-05T11:17:33.840Z",
-        "report_type": "search",
-        "auto": false,
-        "searchable": true,
-        "position": 20,
-        "edit_model": "",
-        "edit_field_names": "",
-        "selection_fields": "",
-        "item_type": "IPA",
-        "user_email": null
-      },
-      {
         "id": 53,
         "name": "IPA Protocol Deviation Initial Review",
         "description": "IPA records requiring initial review by the Senior Clinical Research Coordinator.",
@@ -2332,6 +2322,26 @@
         "auto": false,
         "searchable": false,
         "position": null,
+        "edit_model": "",
+        "edit_field_names": "",
+        "selection_fields": "",
+        "item_type": "IPA",
+        "user_email": null
+      },
+      {
+        "id": 52,
+        "name": "IPA Outstanding Activities",
+        "description": "Search for records where one activity has been performed and another hasn't been performed after it (optional).",
+        "sql": "SELECT \r\n   dt.master_id,\r\n   pi.first_name,\r\n   pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n   dt.checklist_signed,\r\n   dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n  SELECT\r\n    di.*,\r\n    rank()\r\n    OVER (\r\n    PARTITION BY di.master_id \r\n    ORDER BY di.created_at DESC\r\n    ) AS r\r\n  FROM  \r\n  (\r\n    SELECT      \r\n      al.master_id,\r\n      'tracker' \"source\",\r\n      al.extra_log_type,\r\n      al.select_result \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n      al.created_at\r\n      \r\n    FROM activity_log_ipa_assignments al\r\n    \r\n    WHERE\r\n    :activity_performed = 'general-follow-up' AND al.extra_log_type='general' AND select_result='follow up'\r\n    OR\r\n    :activity_performed = 'general-completed' AND al.extra_log_type='general' AND select_result='completed'\r\n    OR\r\n    :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND al.extra_log_type='general' \r\n    OR\r\n    :activity_outstanding is not null AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general' \r\n    OR\r\n    al.extra_log_type IN (:activity_performed, :activity_outstanding)\r\n\r\n    UNION\r\n\r\n    SELECT      \r\n      inex.master_id,\r\n      'inex' \"source\",\r\n      inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n      inex.signed_no_yes \"checklist_signed\",\r\n      inex.created_at\r\n      \r\n\r\n    FROM activity_log_ipa_assignment_inex_checklists inex\r\n    WHERE\r\n        \r\n    (:activity_performed = 'inex-complete' OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'inex-complete' )\r\n    AND extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') \r\n    \r\n\r\n      \r\n  ) AS di\r\n\r\n) AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\n\r\nWHERE\r\n(:activity_outstanding IS NULL OR :activity_outstanding IS NOT NULL AND r = 1)\r\nAND \r\n( \r\n  \r\n  :activity_performed = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'\r\n  OR\r\n    :activity_performed = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n  OR (   \r\n    :activity_performed = 'inex-complete'\r\n    AND (\r\n      dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND\r\n      checklist_signed = 'yes'\r\n    )\r\n  )  \r\n  OR :activity_performed <> 'inex-complete' AND dt.extra_log_type = :activity_performed \r\n)\r\nAND (\r\n  :activity_outstanding IS NULL \r\n  OR NOT (\r\n    r = 1\r\n    AND (\r\n      :activity_outstanding = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'\r\n      OR :activity_outstanding = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n      OR (\r\n          :activity_outstanding = 'inex-complete'\r\n          AND (\r\n            dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND\r\n            checklist_signed = 'yes'\r\n          )\r\n      )\r\n      OR :activity_outstanding <> 'inex-complete' AND dt.extra_log_type = :activity_outstanding\r\n    )\r\n  )\r\n\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n",
+        "search_attrs": "\r\nactivity_performed: \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default: general-follow-up\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      inclusion/exclusion screening complete: inex-complete\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label: Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n    default: general-completed\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      inclusion/exclusion screening complete: inex-complete\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n",
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-06-04T17:22:35.951Z",
+        "updated_at": "2018-07-04T11:51:08.524Z",
+        "report_type": "search",
+        "auto": false,
+        "searchable": true,
+        "position": 20,
         "edit_model": "",
         "edit_field_names": "",
         "selection_fields": "",
