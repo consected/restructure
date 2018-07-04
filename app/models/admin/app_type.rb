@@ -4,10 +4,10 @@ class Admin::AppType < Admin::AdminBase
   include AdminHandler
   include SelectorCache
 
-  has_many :user_access_controls, autosave: true, class_name: "Admin::UserAccessControl"
-  has_many :app_configurations, autosave: true, class_name: "Admin::AppConfiguration"
-  has_many :page_layouts, autosave: true, class_name: "Admin::PageLayout"
-  has_many :user_roles, autosave: true, class_name: "Admin::UserRole"
+  has_many :user_access_controls, -> { order id: :asc }, autosave: true, class_name: "Admin::UserAccessControl"
+  has_many :app_configurations, -> { order id: :asc }, autosave: true, class_name: "Admin::AppConfiguration"
+  has_many :page_layouts, -> { order id: :asc }, autosave: true, class_name: "Admin::PageLayout"
+  has_many :user_roles, -> { order id: :asc }, autosave: true, class_name: "Admin::UserRole"
 
   validates :name, presence: true
   validates :label, presence: true
@@ -176,23 +176,23 @@ class Admin::AppType < Admin::AdminBase
   # Select activity logs that have some kind of access
   def associated_activity_logs
     names = user_access_controls.active.where(resource_type: :table).select {|a| a.access && a.resource_name.start_with?( 'activity_log__')}.map{|n| n.resource_name.singularize.sub('activity_log__', '')}.uniq
-    ActivityLog.active.where("((rec_type is null or rec_type = '') and item_type in (?)) or ((item_type || '_' || rec_type) in (?))", names, names)
+    ActivityLog.active.where("((rec_type is null or rec_type = '') and item_type in (?)) or ((item_type || '_' || rec_type) in (?))", names, names).order(id: :asc)
   end
 
   def associated_dynamic_models
     names = user_access_controls.active.where(resource_type: :table).select {|a| a.access && a.resource_name.start_with?( 'dynamic_model__')}.map{|n| n.resource_name.sub('dynamic_model__', '')}.uniq
-    DynamicModel.active.where(table_name: names)
+    DynamicModel.active.where(table_name: names).order(id: :asc)
   end
 
   def associated_external_identifiers
     eids = ExternalIdentifier.active.map(&:name)
     names = user_access_controls.active.where(resource_type: :table).select {|a| a.access && a.resource_name.in?(eids)}.map(&:resource_name).uniq
-    ExternalIdentifier.active.where(name: names)
+    ExternalIdentifier.active.where(name: names).order(id: :asc)
   end
 
   def associated_reports
     names = user_access_controls.active.where(resource_type: :report).select {|a| a.access }.map(&:resource_name).uniq
-    Report.active.where(name: names)
+    Report.active.where(name: names).order(id: :asc)
   end
 
   def associated_general_selections
@@ -201,11 +201,11 @@ class Admin::AppType < Admin::AdminBase
     associated_table_names.each do |tn|
       tnlike = "#{tn.singularize}_%"
       tnplurallike = "#{tn}_%"
-      res = Classification::GeneralSelection.active.where("item_type LIKE ? or item_type LIKE ?", tnlike, tnplurallike)
+      res = Classification::GeneralSelection.active.where("item_type LIKE ? or item_type LIKE ?", tnlike, tnplurallike).order(id: :asc)
       gs += res
     end
 
-    gs
+    gs.sort {|a, b| a.id <=> b.id}
   end
 
   def associated_message_templates
@@ -226,7 +226,7 @@ class Admin::AppType < Admin::AdminBase
         end
       end
     end
-    ms
+    ms.sort {|a, b| a.id <=> b.id}
   end
 
 
