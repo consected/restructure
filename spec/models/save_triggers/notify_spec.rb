@@ -72,8 +72,22 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     expect(res).to eq expected_text
 
+  end
 
-    # expect(last_dj).not_to eq new_dj
+  it "uses a conditional field reference to get the users for a notification" do
+    config = {
+      type: "email",
+      users: {
+        this: {
+          user_id: 'return_value'
+        }
+      } ,
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: "subject text"
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+    expect(@trigger.receiving_user_ids.first).to eq @al.user_id
 
   end
 

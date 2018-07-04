@@ -20,16 +20,10 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     @role = config[:role]
     @users = config[:users]
     if @role
-      if @role.is_a? Hash
-        action_conf = @role
-        ca = ConditionalActions.new action_conf, item
-        role_name = ca.get_this_val
-      else
-        role_name = @role
-      end
+      role_name = calc_field_or_return(@role)
       @receiving_user_ids = Admin::UserRole.active_user_ids role_name: role_name, app_type: @user.app_type
-    elsif
-      user_ids = @users
+    elsif @users
+      user_ids = calc_field_or_return(@users)
       @receiving_user_ids = User.where(id: user_ids).active.pluck(:id)
     else
       raise FphsException.new "either role or users must be specified in save_trigger: notify: role: ..."
@@ -52,6 +46,16 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     content_template_name: @content_template, item_type: @item.class.name, item_id: @item.id, master_id: @item.master_id, message_type: @message_type, subject: @subject
 
     HandleMessageNotificationJob.perform_later(mn)
+  end
+
+  def calc_field_or_return cond
+    if cond.is_a? Hash
+      action_conf = cond
+      ca = ConditionalActions.new action_conf, item
+      return ca.get_this_val
+    else
+      return cond
+    end
   end
 
 
