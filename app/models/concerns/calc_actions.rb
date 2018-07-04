@@ -206,10 +206,16 @@ module CalcActions
         @condition_scope = @condition_scope.where(extra_conditions)
       end
       @condition_scope = @condition_scope.order(id: :desc).limit(1)
+      if @this_val_where && @condition_scope.first
+        @this_val = @condition_scope.first&.send(@this_val_where[:assoc]).first&.attributes[@this_val_where[:field_name].to_s]
+      end
+      @condition_scope
     end
 
     def calc_this_condition table, field_name, expected_vals
       @skip_merge = false
+      # this_val attribute is used to return the last value from a definition. Used for simple lookups
+
       res = true
       # Allow a list of possible conditions to be used
       expected_vals = [expected_vals] unless expected_vals.is_a?(Array) && expected_vals.first.is_a?(Hash)
@@ -224,12 +230,15 @@ module CalcActions
               res &&= calc_complex_validation expected_val[:validate], current_instance.attributes[field_name.to_s]
             end
           else
-            res &&= current_instance.attributes[field_name.to_s] == expected_val
+            this_val = current_instance.attributes[field_name.to_s]
+            res &&= this_val == expected_val
+            @this_val = this_val if expected_val == 'return_value'
           end
         elsif table == :user
           if field_name == :role_name
             user = @current_instance.master.current_user
             role_names = user.user_roles.active.where(app_type: user.app_type).pluck(:role_name)
+            @this_val = role_names if expected_val == 'return_value'
             expected_val = [expected_val] unless expected_val.is_a? Array
             role_res = false
             expected_val.each do |e|
@@ -335,7 +344,11 @@ module CalcActions
                 @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
                 @extra_conditions << vv
               else
-                @condition_values[table_name][field_name] = dynamic_value(val)
+                if val == 'return_value'
+                  @this_val_where = {assoc: ModelReference.record_type_to_ns_table_name(c_table).to_sym, field_name: field_name}
+                else
+                  @condition_values[table_name][field_name] = dynamic_value(val)
+                end
               end
               join_tables << join_table_name unless join_tables.include? table_name
             else

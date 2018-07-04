@@ -943,4 +943,40 @@ RSpec.describe "Calculate conditional actions", type: :model do
     expect(res.calc_action_if).to be false
 
   end
+
+  it "returns the last value from a condition as this_val attribute" do
+    conf = {
+      activity_log__player_contact_phones: {
+        id: @al.id,
+        select_who: 'return_value'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq @al.select_who
+
+    conf = {
+      activity_log__player_contact_phones: {
+        id: @al.id+100,
+        select_who: 'return_value'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to be nil
+
+    conf = {
+      this: {
+        select_who: 'return_value'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq @al.select_who
+
+
+  end
 end

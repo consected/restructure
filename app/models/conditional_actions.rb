@@ -1,7 +1,7 @@
 class ConditionalActions
 
   include CalcActions
-  attr_accessor :current_instance, :action_conf, :return_failures, :current_scope
+  attr_accessor :current_instance, :action_conf, :return_failures, :current_scope, :condition_config, :this_val
 
 
   def initialize action_conf, current_instance, return_failures: nil, current_scope: nil
@@ -17,6 +17,14 @@ class ConditionalActions
 
   def calc_action_if
     do_calc_action_if
+  end
+
+  # Get the value of a field with expected value set as 'return_value'
+  # Since we are only trying to return a single field value, no :all is needed on the configuration
+  def get_this_val
+    @action_conf = {all: @action_conf}
+    do_calc_action_if
+    return @this_val
   end
 
   # Calculate the save actions to return for the front end to process
