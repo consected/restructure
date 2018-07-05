@@ -859,7 +859,9 @@ _fpa.form_utils = {
         var growingTextarea = new Autogrow(textarea);
         textarea.style.resize = 'none';
 	      textarea.style.boxSizing = 'content-box';
-        $(this).click(function(){
+        $(this).click(function() {
+          if($(this).hasClass('done-auto-grow')) return;
+          $(this).addClass('done-auto-grow');
           growingTextarea.autogrowFn();
         });
       });
