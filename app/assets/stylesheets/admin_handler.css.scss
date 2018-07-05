@@ -90,3 +90,15 @@ table.admin-list  {
       max-width: 1300px;
   }
 }
+
+td.admin-field-generate_view {
+    max-width: 500px;
+    white-space: pre;
+    font-family: monospace;
+    font-size: 13px;
+    background-color: #f9f9f9;
+    line-height: 1.42857143;
+    word-break: break-all;
+    word-wrap: break-word;
+    overflow: auto;
+}
