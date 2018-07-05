@@ -3,6 +3,8 @@ module FeatureSupport
 
   include FeatureHelper
 
+  ResultsMasterPanel = '.results-panel .master-panel'
+
   def login
     visit "/users/sign_in"
     have_css('#new_user')
@@ -12,7 +14,9 @@ module FeatureSupport
       fill_in "Password", with: @good_password
       click_button "Log in"
     end
-    expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
+    already_signed_in = user_logged_in?
+    just_signed_in = has_css? ".flash .alert", text: "× Signed in successfully" unless already_signed_in
+    expect(just_signed_in || already_signed_in).to be true
   end
 
   def logout
@@ -63,6 +67,33 @@ module FeatureSupport
     h = el[:href].split('#').last
     find "##{h}.collapse.in", wait: 5
     h
+  end
+
+  def expect_master_record
+    expect(page).to have_css(ResultsMasterPanel)
+  end
+
+  def all_master_record_panels
+    all(ResultsMasterPanel)
+  end
+
+  def expand_master_record_tab name
+    tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
+    expect(tab_link).not_to be nil
+    if tab_link.attributes['aria-expanded'] != 'true'
+      all('ul.details-tabs').click_link name
+    end
+  end
+
+  def expand_search_with_button name
+    search_btn = all(".advanced-form-selections a[type='button']").select {|b| b.text == name}.first
+    expect(search_btn).not_to be nil
+    if search_btn[:class].include?('collapsed')
+      search_btn.click
+    end
+
+    form_id = search_btn['data-result-target']
+    expect(page).to have_css(form_id)
   end
 
 end

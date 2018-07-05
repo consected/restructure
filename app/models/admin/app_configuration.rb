@@ -7,6 +7,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   include AppTyped
 
   belongs_to :user
+  before_validation :humanize_name
   validates :name, presence: true
   validate :valid_entry
 
@@ -32,7 +33,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   # user attribute can be a User or an id
   def self.value_for name, user=nil
     if name.is_a? Symbol
-      name = name.to_s.humanize.downcase
+      name = sym_to_name(name)
     end
 
     app_type_id = user.app_type_id if user
@@ -56,8 +57,57 @@ class Admin::AppConfiguration < Admin::AdminBase
 
   end
 
+  def self.sym_to_name config_name
+    config_name.to_s.humanize.downcase
+  end
+
+
+  def self.find_app_config_for_user user, app_type, config_name
+    Admin::AppConfiguration.where(app_type: app_type, user: user, name: sym_to_name(config_name)).first
+  end
+
+  def self.find_default_app_config app_type, config_name
+    res = Admin::AppConfiguration.where(app_type: app_type, name: sym_to_name(config_name)).first
+  end
+
+  def self.add_default_config app_type, config_name, config_value, admin
+    res = find_default_app_config(app_type, config_name)
+    if res
+      res.update!(value: config_value, disabled: false, current_admin: admin)
+    else
+      self.create!(app_type: app_type, user: nil, name: config_name, value: config_value, current_admin: admin)
+    end
+  end
+
+  def self.remove_default_config app_type, config_name, admin
+    res = find_default_app_config(app_type, config_name)
+
+    res.with_admin(admin).disable! if res
+  end
+
+  def self.add_user_config user, app_type, config_name, config_value, admin
+    res = self.find_app_config_for_user(user, app_type, config_name)
+    if res
+      res.update!(value: config_value, disabled: false, current_admin: admin)
+    else
+      self.create!(app_type: app_type, user: user, name: config_name, value: config_value, current_admin: admin)
+    end
+  end
+
+  def self.remove_user_config user, app_type, config_name, admin
+    res = self.find_app_config_for_user(user, app_type, config_name)
+
+    res.with_admin(admin).disable! if res
+  end
+
 
   private
+
+    def humanize_name
+      if self.name.present?
+        self.name = self.class.sym_to_name(self.name)
+      end
+    end
 
     def valid_entry
       unless self.disabled

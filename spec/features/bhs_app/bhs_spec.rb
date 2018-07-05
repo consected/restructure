@@ -2,42 +2,74 @@ require 'rails_helper'
 
 describe "Create a BHS subject and activity", driver: :app_firefox_driver do
 
+  include FeatureSupport
   include BhsActivityLogSetup
   include BhsImportConfig
   include BhsUi
+  include BhsExpectations
+  include BhsActions
 
   before :all do
     create_bhs_config
-    enable_user_app_access BhsUi::AppShortName
-    # Ensure we have adequate access controls
-    setup_access :create_master, resource_type: :general, access: :read
 
-    setup_access :player_infos
-    setup_access :player_contacts
+    create_user_for_login
+    setup_access_as :ra
+    @ra = @user
 
-    setup_access :bhs_assignments
-    setup_access :activity_log__bhs_assignments
-    setup_access :activity_log__bhs_assignment__primary, resource_type: :activity_log_type
+    create_user_for_login
+    setup_access_as :pi
+    @pi = @user
+  end
 
+  before :each do
+    create_master_as_ra
+  end
 
+  def create_master_as_ra
+    user_logout if user_logged_in?
+    @user = @ra
+    login_to_app
+    create_bhs_master
+    click_button BhsUi::SearchButton
+  end
+
+  def login_to_app
+    visit "/" if user_logged_in?
     user_logs_in
-
     select_app BhsUi::AppName
   end
 
   it "allows a user to create a subject record" do
-    click_link BhsUi::CreateSubjectRecord
-    fill_in BhsUi::BhsIdField, with: '234612'
-    click_button BhsUi::NewSubjectCreateButton
+    @user = @ra
+    login_to_app
+    create_bhs_master
+    expect_master_record
   end
 
-  it "finds a subject" do
-    click_link BhsUi::SearchPlayer
-    click_button BhsUi::SearchButton
+  it "finds a subject as PI" do
 
-    expect(page).to have_css('.resuls-panel .master-panel')
+    @user = @pi
+    login_to_app
+
+    search_player ""
+
+
+    expect_master_record
+    expect_bhs_tabs :pi
+
   end
 
+  it "finds a subject as RA" do
+    @user = @ra
+    login_to_app
+
+    search_player ""
+
+    expect_master_record
+    expect_bhs_tabs :ra
+    expand_master_record_tab 'external ids'
+
+  end
 
 
 end

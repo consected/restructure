@@ -12,7 +12,7 @@ module BhsActivityLogSetup
   def create_bhs_config
     admin, _ = create_admin
 
-    import_config
+    @app_type = import_config
 
     create_user_for_login
   end

@@ -57,6 +57,13 @@ module AdminHandler
     write_attribute(:admin_id, new_admin.id)
   end
 
+  # Chainable function, allowing something like:
+  # admin_resource.with_admin(admin).disable!
+  def with_admin admin
+    self.current_admin = admin
+    self
+  end
+
   def current_admin
     return nil unless @admin_set
     @current_admin

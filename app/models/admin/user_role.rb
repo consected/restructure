@@ -30,4 +30,22 @@ class Admin::UserRole < ActiveRecord::Base
     res.distinct.pluck(:user_id)
   end
 
+  def self.find_user_role_for_user user, app_type, role_name
+    user.user_roles.where(app_type: app_type, role_name: role_name).first
+  end
+
+  def self.add_to_role user, app_type, role_name, admin
+    res = find_user_role_for_user user, app_type, role_name
+    if res
+      res.with_admin(admin).enable! if res if res.disabled?
+    else
+      user.user_roles.create!(app_type: app_type, role_name: role_name, disabled: false, current_admin: admin)
+    end
+  end
+
+  def self.remove_from_role user, app_type, role_name, admin
+    res = find_user_role_for_user user, app_type, role_name
+    res.with_admin(admin).disable! if res
+  end
+
 end

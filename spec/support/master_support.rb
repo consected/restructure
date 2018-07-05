@@ -11,23 +11,46 @@ module MasterSupport
     setup_access :app_type, resource_type: :general, access: :read
   end
 
-  def setup_access resource_name=nil, resource_type: :table, access: :create
+  def setup_access resource_name=nil, resource_type: :table, access: :create, user: nil
 
     return if @path_prefix == "/admin"
     resource_name ||= objects_symbol
 
-    uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: resource_type, resource_name: resource_name).first
+    uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: resource_type, resource_name: resource_name)
+    uac = uac.where(user: user) if user
+    uac = uac.active.first || uac.first
     if uac
       uac.access = access
       uac.disabled = false
       uac.current_admin = auto_admin
-      uac.save
+      uac.save!
     else
-      Admin::UserAccessControl.create! app_type: @user.app_type, access: access, resource_type: resource_type, resource_name: resource_name, current_admin: auto_admin
+      Admin::UserAccessControl.create! app_type: @user.app_type, access: access, resource_type: resource_type, resource_name: resource_name, user: user, current_admin: auto_admin
     end
 
   rescue => e
     Rails.logger.debug "Failed to create access for #{resource_name}"
+  end
+
+  def add_user_to_role role_name
+    Admin::UserRole.add_to_role @user, @user.app_type, role_name, @admin
+  end
+
+  def remove_user_from_role role_name
+    Admin::UserRole.remove_from_role @user, @user.app_type, role_name, @admin
+  end
+
+  def add_user_config config_name, config_value
+    Admin::AppConfiguration.add_user_config @user, @user.app_type, config_name, config_value, @admin
+  end
+
+
+  def remove_user_config config_name
+    Admin::AppConfiguration.remove_user_config @user, @user.app_type, config_name, @admin
+  end
+
+  def add_default_app_config app_type, config_name, config_value
+    Admin::AppConfiguration.add_default_config app_type, config_name, config_value, @admin
   end
 
   def edit_form_prefix
