@@ -17,16 +17,18 @@
 
   <% end %>
 <script>
-  _fpa.masters.handle_search_form($('form.auto_search_master'));
+  $(document).ready(function() {
+    _fpa.masters.handle_search_form($('form.auto_search_master'));
 
-  $('#simple_master_id').val('<%=@msid%>');
-  $('#simple_m_id').val('<%=@master_id%>');
-  $('#simple_master_pro_id').val('<%=@master_pro_id%>');
-  window.setTimeout(function(){
+    $('#simple_master_id').val('<%=@msid%>');
+    $('#simple_m_id').val('<%=@master_id%>');
+    $('#simple_master_pro_id').val('<%=@master_pro_id%>');
+    window.setTimeout(function(){
 
-    console.log('loading: <%=@master_req_format%>' );
-    $('#msid_search_<%=@master_req_format%>').click();
-  }, 100);
+      console.log('loading: <%=@master_req_format%>' );
+      $('#msid_search_<%=@master_req_format%>').click();
+    }, 100);
+  });
 
 </script>
 
@@ -34,6 +36,8 @@
 
 <% if @do_search %>
 <script>
+$(document).ready(function() {
+
   window.setTimeout(function(){
     if($('#advanced_search_master').is(':visible')){
       $('form#advanced_search_master').submit();
@@ -42,6 +46,7 @@
       $('form#simple_search_master').submit();
     }
   },1);
+});
 </script>
 <% end %>
 
