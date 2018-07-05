@@ -52,6 +52,7 @@ module CalcActions
         # - addresses: ...
         # - addresses: ...
         # all of which must meet the condition type
+        orig_cond_type = condition_type
         condition_type = is_selection_type(condition_type) || condition_type
         loop_res = condition_type.in?([:all, :not_any])
 
@@ -166,15 +167,21 @@ module CalcActions
             raise FphsException.new "Incorrect condition type specified when calculating action if: #{condition_type}"
           end
 
-          unless Rails.env.production?
-            Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - #{@condition_config}"
-            Rails.logger.debug @non_query_conditions
-            Rails.logger.debug @base_query.to_sql
-          end
+          orig_loop_res = loop_res
+
           loop_res &&= cond_res if condition_type == :all
           loop_res ||= cond_res if condition_type == :any
           loop_res ||= cond_res if condition_type == :not_all
           loop_res &&= cond_res if condition_type == :not_any
+          unless Rails.env.production?
+            Rails.logger.debug "**#{orig_cond_type}*******************************************************************************************************"
+            Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+            Rails.logger.debug @condition_config
+            Rails.logger.debug @non_query_conditions
+            Rails.logger.debug @base_query.to_sql if @base_query
+            Rails.logger.debug @condition_scope.to_sql if @condition_scope
+            Rails.logger.debug "*********************************************************************************************************"
+          end
           break unless loop_res
         end
 
@@ -200,7 +207,16 @@ module CalcActions
 
 
     def calc_query conditions, extra_conditions = [], bool = 'AND'
-      @condition_scope = @base_query.where(conditions)
+
+      unless conditions.first.last.length == 0
+        # Conditions are available - apply them as a where clause on top of the base query
+        @condition_scope = @base_query.where(conditions)
+      else
+        # If no conditions are specified for this table, don't apply it as a where clause
+        # since it always invalidates the query
+        # This typically happens as a result of extra_conditions being applied
+        @condition_scope = @base_query
+      end
       if extra_conditions.length > 1
         extra_conditions[0].gsub(BoolTypeString, bool)
         @condition_scope = @condition_scope.where(extra_conditions)
