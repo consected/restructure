@@ -6,9 +6,9 @@ module MasterSupport
     SeedSupport.setup
   end
 
-  def enable_user_app_access app_name
+  def enable_user_app_access app_name, user=nil
     @user.app_type = Admin::AppType.where(name: app_name).first
-    setup_access :app_type, resource_type: :general, access: :read
+    setup_access :app_type, resource_type: :general, access: :read, user: user
   end
 
   def setup_access resource_name=nil, resource_type: :table, access: :create, user: nil
@@ -18,6 +18,10 @@ module MasterSupport
 
     uac = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: resource_type, resource_name: resource_name)
     uac = uac.where(user: user) if user
+
+    if uac.active.length > 1
+      uac.active.update_all(disabled: true)
+    end
     uac = uac.active.first || uac.first
     if uac
       uac.access = access

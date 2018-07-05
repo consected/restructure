@@ -4,6 +4,7 @@ module FeatureSupport
   include FeatureHelper
 
   ResultsMasterPanel = '.results-panel .master-panel'
+  ResultsMasterExpander = '.master-expander'
 
   def login
     visit "/users/sign_in"
@@ -77,7 +78,23 @@ module FeatureSupport
     all(ResultsMasterPanel)
   end
 
+  def all_master_record_expanders
+    has_css?(ResultsMasterExpander)
+    all(ResultsMasterExpander)
+  end
+
+  def expand_master index
+    has_css?('.results-panel')
+    finish_form_formatting
+    els = all_master_record_expanders
+    el = els[index]
+    h = open_player_element el, els
+    new_panel = find("##{h}")
+    expect(new_panel).to have_css('.master-main-panel')
+  end
+
   def expand_master_record_tab name
+    finish_form_formatting
     tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
     expect(tab_link).not_to be nil
     if tab_link.attributes['aria-expanded'] != 'true'

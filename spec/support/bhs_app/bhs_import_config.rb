@@ -58,35 +58,38 @@ module BhsImportConfig
 
     app_name = BhsUi::AppShortName
     @app_type = Admin::AppType.active.where(name: app_name).first
-    enable_user_app_access app_name
+    enable_user_app_access app_name, @user
     @user.update!(app_type: @app_type)
     # Ensure we have adequate access controls
 
-    setup_access :player_infos
-    setup_access :player_contacts
-    setup_access :activity_log__bhs_assignments
-
-    # default settings for activities
-    setup_access :activity_log__bhs_assignment__contact_initiator, resource_type: :activity_log_type, access: :read
-    setup_access :activity_log__bhs_assignment__respond_to_pi, resource_type: :activity_log_type, access: :read
-    setup_access :activity_log__bhs_assignment__primary, resource_type: :activity_log_type, access: :read
-    setup_access :activity_log__bhs_assignment__blank_log, resource_type: :activity_log_type, access: :read
-    setup_access :create_master, resource_type: :general, access: nil
-    setup_access 'BHS Subjects Pending Sync', resource_type: :report, access: nil
-    setup_access 'Contact from PI', resource_type: :report, access: nil
-    remove_user_from_role :pi
-    remove_user_from_role :ra
+    # setup_access :player_infos
+    # setup_access :player_contacts
+    # setup_access :activity_log__bhs_assignments
+    #
+    # # default settings for activities
+    # setup_access :activity_log__bhs_assignment__contact_initiator, resource_type: :activity_log_type, access: :read
+    # setup_access :activity_log__bhs_assignment__respond_to_pi, resource_type: :activity_log_type, access: :read
+    # setup_access :activity_log__bhs_assignment__primary, resource_type: :activity_log_type, access: :read
+    # setup_access :activity_log__bhs_assignment__blank_log, resource_type: :activity_log_type, access: :read
+    # setup_access :create_master, resource_type: :general, access: nil
+    # setup_access 'BHS Subjects Pending Sync', resource_type: :report, access: nil
+    # setup_access 'Contact from PI', resource_type: :report, access: nil
+    # remove_user_from_role :pi
+    # remove_user_from_role :ra
     add_default_app_config @app_type, :hide_player_tabs, 'true'
-    add_default_app_config @app_type, 'menu create master record label', "Create Subject Record"
+    # add_default_app_config @app_type, 'menu create master record label', "Create Subject Record"
+
 
     if role == :pi
       add_user_to_role :pi
+      add_user_config :hide_player_tabs, 'true'
+
       setup_access :activity_log__bhs_assignment__blank_log, resource_type: :activity_log_type, access: :create, user: @user
       setup_access :activity_log__bhs_assignment__contact_initiator, resource_type: :activity_log_type, access: :create, user: @user
-
-      add_user_config :hide_player_tabs, 'false'
     elsif role == :ra
       add_user_to_role :ra
+      add_user_config :hide_player_tabs, 'false'
+
       setup_access :create_master, resource_type: :general, access: :read, user: @user
       setup_access 'BHS Subjects Pending Sync', resource_type: :report, access: :read, user: @user
       setup_access 'Contact from PI', resource_type: :report, access: :read, user: @user
