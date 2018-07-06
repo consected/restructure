@@ -20,8 +20,6 @@ module ReportsHelper
         use_dropdown = true
       else
         c = Classification.const_get(type_string.to_s.classify) rescue nil
-        # c = type_string.to_s.classify.constantize rescue nil unless c
-        # c = Admin.const_get(type_string.to_s.classify) rescue nil unless c
       end
     end
 
@@ -34,6 +32,9 @@ module ReportsHelper
         type_filter = nil
       elsif type_val['item_type']
         type_filter = {item_type: type_val['item_type']}
+
+      elsif type_val['conditions']
+        type_filter = type_val['conditions']
       end
 
       unless @report_page

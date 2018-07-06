@@ -38,6 +38,7 @@ _fpa.postprocessors_admin = {
             var l = $('#search_attrs_label').val();
             var d = $('#search_attrs_default').val();
             var s = $('#search_attrs_config_selections').val();
+            var s = $('#search_attrs_conditions').val();
             $('#search_attr_ex').html(":"+n);
             $('#search_attr_instruction').show();
 
@@ -77,6 +78,14 @@ _fpa.postprocessors_admin = {
                       add += '\n      ' + ds[id];
                   }
                 }
+                if(c) {
+                  add += "\n    conditions: ";
+                  var ds = c.split('\n');
+                  for(var id in ds){
+                      add += '\n      ' + ds[id];
+                  }
+                }
+
 
             }
             var v = $('#report_search_attrs').val();

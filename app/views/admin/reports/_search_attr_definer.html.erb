@@ -52,6 +52,17 @@ label 2: value 2</pre>
                 <p class="help-block">A label is shown in the dropdown and the corresponding value is used in the query.</p>
               </td>
             </tr><tr>
+              <td>conditions</td>
+              <td><textarea id="search_attrs_conditions"></textarea>
+                <p class="help-block">add one line per option:</p>
+                <pre class="help-block">
+field (equals): value 1
+field2 (any of):
+  - val1
+  - val2</pre>
+                <p class="help-block">Conditions will be applied to the search for the list of selections.</p>
+              </td>
+            </tr><tr>
               <td>default</td>
               <td><textarea id="search_attrs_default"></textarea>
                 <p class="help-block">Set the default value of an attribute to be searched. If the query is run automatically then the default value will be used.</p>
