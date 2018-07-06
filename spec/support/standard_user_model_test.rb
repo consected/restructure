@@ -8,6 +8,7 @@ shared_examples 'a standard user model' do
       create_admin
       create_user
       setup_access :addresses
+      setup_access :scantrons
       setup_access :player_contacts
       setup_access :player_infos, access: :edit
 

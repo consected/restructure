@@ -11,6 +11,10 @@ RSpec.describe 'Alternative ID implementation', type: :model do
   before :all do
     seed_database
     create_user
+
+    setup_access :scantrons
+    setup_access :player_contacts
+
     @master = create_master
     @scantron = Scantron.unscoped.order(scantron_id: :desc).first
     if @scantron

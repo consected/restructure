@@ -8,18 +8,32 @@ RSpec.describe Admin::AppConfiguration, type: :model do
 
     create_admin
     create_user
-    app_type_id = @user.app_type_id
+    app_type = @user.app_type
 
-    res = Admin::AppConfiguration.create! name: 'some test config', value: 'a value', app_type_id: app_type_id, current_admin: @admin
+    Admin::AppConfiguration.remove_user_config @user, app_type, 'notes field caption', @admin
+    Admin::AppConfiguration.remove_default_config app_type, 'notes field caption', @admin
+
+    res = Admin::AppConfiguration.value_for :notes_field_config, @user
+    expect(res).to be nil
+
+    res = Admin::AppConfiguration.value_for :notes_field_config
+    expect(res).to be nil
+
+    expect {
+      Admin::AppConfiguration.add_default_config app_type, 'some test config', 'a value', @admin
+    }.to raise_error FphsException
+
+    res = Admin::AppConfiguration.add_default_config app_type, 'notes field caption', 'a value', @admin
     expect(res).to be_a Admin::AppConfiguration
 
-    res = Admin::AppConfiguration.value_for :some_test_config, @user
+    res = Admin::AppConfiguration.value_for :notes_field_caption, @user
     expect(res).to eq 'a value'
 
-    res = Admin::AppConfiguration.create! name: 'some test config', value: 'user value', app_type_id: app_type_id, current_admin: @admin, user: @user
+    res = Admin::AppConfiguration.add_user_config @user, app_type, 'notes field caption', 'user value', @admin
     expect(res).to be_a Admin::AppConfiguration
 
-    res = Admin::AppConfiguration.value_for :some_test_config, @user
+    
+    res = Admin::AppConfiguration.value_for :notes_field_caption, @user
     expect(res).to eq 'user value'
 
   end
