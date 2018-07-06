@@ -6,15 +6,17 @@ module BhsExpectations
     tabs = master_panel.all('ul.details-tabs li[role="presentation"]')
 
     if role == :ra
-      expect(tabs.length).to eq BhsUi::TabNames.length
+      expect(tabs.length).to eq BhsUi::DefaultTabs.length
 
       tabs.each do |tab|
-        expect(tab.text).to be_in BhsUi::TabNames
+        expect(tab.text).to be_in BhsUi::DefaultTabs
         if tab.text.in? BhsUi::DefaultTabs
           expect(tab).to have_css('a[aria-expanded="true"]')
         end
       end
     elsif role == :pi
+      res = Admin::AppConfiguration.value_for :hide_player_tabs, @user
+      expect(res).to eq 'true'
       expect(tabs.length).to eq 0
     end
   end

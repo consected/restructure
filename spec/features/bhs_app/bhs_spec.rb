@@ -48,8 +48,17 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
   end
 
   def login_to_app
-    visit "/" if user_logged_in?
+
+    if user_logged_in?
+      logged_in_user = find('a[data-do-action="show-user-options"]')
+      if logged_in_user == @good_email
+        visit "/"
+      else
+        user_logout
+      end
+    end
     user_logs_in
+
     select_app BhsUi::AppName
   end
 
@@ -63,12 +72,9 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
   it "finds a subject as PI" do
 
     create_master_as_ra
-
     as_user @pi
 
-
     search_player ""
-
 
     expand_master 0
     expect_master_record
@@ -79,7 +85,6 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
   it "finds a subject as RA" do
     create_master_as_ra
     as_user @ra
-
 
     search_player ""
 

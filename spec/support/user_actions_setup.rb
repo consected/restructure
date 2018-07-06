@@ -4,7 +4,11 @@ module UserActionsSetup
     def user_logs_in
     #Given "the user has logged in" do
       login unless user_logged_in?
+      dismiss_modal
+      all('[data-dismiss]').first&.click
       expect(user_logged_in?).to be true
+      logged_in_user = find('a[data-do-action="show-user-options"]')
+      expect(logged_in_user[:title]).to eq @good_email
     end
 
 

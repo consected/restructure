@@ -114,7 +114,7 @@ class Admin::AppConfiguration < Admin::AdminBase
 
         cond = {name: self.name, user: self.user, app_type: self.app_type}
         res = self.class.active.where(cond).first
-
+        raise FphsException.new "Invalid configuration name: #{self.name}" unless self.name.in? self.class.configurations
         raise FphsException.new "This item already exists (#{self.name} user: #{self.user_id} app_type: #{self.app_type_id})" if res && ((persisted? && res.id != self.id) || !persisted?)
 
       end
