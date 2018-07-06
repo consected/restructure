@@ -97,8 +97,8 @@ module FeatureSupport
     finish_form_formatting
     tab_link = all("ul.details-tabs li a[data-panel-tab='#{name.id_underscore}']").first
     expect(tab_link).not_to be nil
-    if tab_link.attributes['aria-expanded'] != 'true'
-      all('ul.details-tabs').click_link name
+    if tab_link['aria-expanded'] != 'true'
+      all('ul.details-tabs').first.click_link name
     end
   end
 

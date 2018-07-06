@@ -6,12 +6,15 @@ module BhsExpectations
     tabs = master_panel.all('ul.details-tabs li[role="presentation"]')
 
     if role == :ra
-      expect(tabs.length).to eq BhsUi::DefaultTabs.length
+      expect(tabs.length).to eq BhsUi::TabNames.length
 
       tabs.each do |tab|
-        expect(tab.text).to be_in BhsUi::DefaultTabs
+        expect(tab.text).to be_in BhsUi::TabNames
+        tab_a = tab.find('a')
         if tab.text.in? BhsUi::DefaultTabs
-          expect(tab).to have_css('a[aria-expanded="true"]')
+          expect(tab_a[:class]).not_to include 'collapsed'
+        else
+          expect(tab_a[:class]).to include 'collapsed'
         end
       end
     elsif role == :pi
