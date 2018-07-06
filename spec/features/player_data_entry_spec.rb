@@ -40,6 +40,16 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
     end
 
+    setup_access :addresses
+    setup_access :player_contacts
+    setup_access :player_infos, access: :edit
+    setup_access :item_flags, access: :create
+    setup_access :player_infos_item_flags, access: :create
+    setup_access :not_tracker_histories
+    setup_access :not_trackers
+    setup_access :trackers
+    setup_access :tracker_histories
+    setup_access :latest_tracker_history
 
   end
 

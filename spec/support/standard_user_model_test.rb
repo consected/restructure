@@ -7,16 +7,12 @@ shared_examples 'a standard user model' do
       seed_database
       create_admin
       create_user
-      uacs = Admin::UserAccessControl.active.where app_type: @user.app_type, resource_type: :table
-
-      uacs.each do |u|
-        u.access = 'create'
-        u.current_admin = @admin
-        u.save
-      end
+      setup_access :addresses
+      setup_access :player_contacts
+      setup_access :player_infos, access: :edit
 
       unless @user.has_access_to? :read, :general, :app_type
-        Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: @admin
+        setup_access :app_type, access: :read, resource_type: :general
       end
     end
 

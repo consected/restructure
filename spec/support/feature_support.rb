@@ -1,12 +1,15 @@
 require './spec/support/feature_helper.rb'
+require './spec/support/user_actions_setup.rb'
 module FeatureSupport
 
   include FeatureHelper
+  include UserActionsSetup
 
   ResultsMasterPanel = '.results-panel .master-panel'
   ResultsMasterExpander = '.master-expander'
 
   def login
+    return if user_logged_in?
     visit "/users/sign_in"
     have_css('#new_user')
     expect(page).to have_css('#new_user')
