@@ -55,18 +55,8 @@ function cleanup {
 # ----> Cleanup from previous runs, just in case
 cleanup
 
-# ----> On Remote AWS DB
-# Run find_new_remote_ipa_records() and copy to a CSV file (IPA_IDS_FILE)
-# This returns a list of IPA IDs to be sync'd from the Zeus FPHS DB
-#
-echo "Find remote IPA records"
-echo "\copy (select * from find_new_remote_ipa_records()) to $IPA_IDS_FILE with (format csv, header true);" > $IPA_SQL_FILE
-psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE
-
-
 # ----> On Zeus FPHS DB
-# Create a temp table temp_ipa_assignments to contain the IPA_IDS_FILE list of IPA IDs to sync
-# Copy the IPA_IDS_FILE to temp_ipa_assignments
+# Create a temp table temp_ipa_assignments to contain the  IPA IDs to sync, based on a simple query
 #
 # For each temp_ipa_assignments record, update the record to include the Zeus master_id from the
 # permanent ipa_assignments table
