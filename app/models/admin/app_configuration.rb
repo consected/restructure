@@ -71,6 +71,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   end
 
   def self.add_default_config app_type, config_name, config_value, admin
+    config_name = sym_to_name(config_name)
     res = find_default_app_config(app_type, config_name)
     if res
       res.update!(value: config_value, disabled: false, current_admin: admin)
@@ -80,12 +81,14 @@ class Admin::AppConfiguration < Admin::AdminBase
   end
 
   def self.remove_default_config app_type, config_name, admin
+    config_name = sym_to_name(config_name)
     res = find_default_app_config(app_type, config_name)
 
     res.with_admin(admin).disable! if res
   end
 
   def self.add_user_config user, app_type, config_name, config_value, admin
+    config_name = sym_to_name(config_name)
     res = self.find_app_config_for_user(user, app_type, config_name)
     if res
       res.update!(value: config_value, disabled: false, current_admin: admin)
@@ -95,6 +98,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   end
 
   def self.remove_user_config user, app_type, config_name, admin
+    config_name = sym_to_name(config_name)
     res = self.find_app_config_for_user(user, app_type, config_name)
 
     res.with_admin(admin).disable! if res
