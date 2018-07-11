@@ -69,13 +69,13 @@ module GeneralDataConcerns
     if defined?(super)
       @memo_tracker_histories = super
     else
-      @memo_tracker_histories = TrackerHistory.where(item_id: self.id, item_type: self.class.name, master_id: self.master_id).order(id: :desc)
+      @memo_tracker_histories = TrackerHistory.where(item_id: self.id, item_type: self.class.name, master_id: self.master_id).order(id: :asc)
     end
   end
 
   # look up the tracker_history item that corresponds to the latest tracker entry linked to this item
   def tracker_history
-    tracker_histories.first
+    tracker_histories.last
   end
 
   def tracker_history_id
