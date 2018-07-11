@@ -61,8 +61,7 @@ module GeneralDataConcerns
   end
 
   # look up the tracker_history items that correspond to the item
-  # we use the master tracker_histories association as a base, since the
-  # query can be optimized from this
+  # we would use the master tracker_histories association as a base, but it doesn't serialize as_json correctly :(
   def tracker_histories
     return @memo_tracker_histories if @memo_tracker_histories
     # Check for the existence of tracker_histories in the super class. If it
@@ -70,7 +69,7 @@ module GeneralDataConcerns
     if defined?(super)
       @memo_tracker_histories = super
     else
-      @memo_tracker_histories = self.master.tracker_histories.where(item_id: self.id, item_type: self.class.name).order(id: :desc)
+      @memo_tracker_histories = TrackerHistory.where(item_id: self.id, item_type: self.class.name, master_id: self.master_id).order(id: :desc)
     end
   end
 
