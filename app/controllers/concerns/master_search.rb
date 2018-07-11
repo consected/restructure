@@ -93,8 +93,11 @@ module MasterSearch
           @result_message = "Displaying results for a list of #{mlen} record #{'ID'.pluralize(mlen)}."
         end
 
+        # Only return a full set of data for the master record if there is a single item
+        # Otherwise we just return the essentials for the index listing, saving loads of DB and processing time
+        style = @masters.length < 2 ? :full : :index
         m = {
-          masters: @masters.as_json(current_user: current_user, filtered_search_results: true),
+          masters: @masters.as_json(current_user: current_user, filtered_search_results: true, style: style),
           count: {
             count: original_length,
             show_count: mlen

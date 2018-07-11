@@ -163,6 +163,24 @@ _fpa.postprocessors = {
         }
       }
     },
+
+    // On load of a specific master record when a list item is expanded
+    master_main_template: function(block, data) {
+      _fpa.form_utils.format_block(block);
+
+      _fpa.postprocessors.show_external_links(block, data);
+
+      _fpa.postprocessors.tracker_notes_handler(block);
+      _fpa.postprocessors.tracker_item_link_hander(block);
+
+      _fpa.postprocessors.tracker_events_handler(block);
+
+      _fpa.postprocessors.extras_panel_handler(block);
+      block.addClass('loaded-master-main');
+
+    },
+
+    // On load of the full list of master records
     search_results_template: function(block, data){
         // Ensure we format the viewed item on expanding it
         _fpa.masters.switch_id_on_click(block);
@@ -182,8 +200,7 @@ _fpa.postprocessors = {
 
         $('a.master-expander').click(function(ev){
             ev.preventDefault();
-            var id = $(this).attr('href');
-
+            var id = $(this).attr('data-target');
             $(id).on('shown.bs.collapse', function(){
 
                 $('.selected-result').removeClass('selected-result');

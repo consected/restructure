@@ -2,6 +2,7 @@ require "rails_helper"
 require "benchmark"
 
 RSpec.describe "Performance", type: :model do
+  include MasterSupport
   include ModelSupport
 
   NumProtocols = 10
@@ -58,6 +59,8 @@ RSpec.describe "Performance", type: :model do
       @master.save!
       @masters << @master
     end
+
+    setup_access :tracker_histories
 
   end
 
@@ -182,7 +185,7 @@ RSpec.describe "Performance", type: :model do
     jt = nil
     t = Benchmark.realtime do
       jt = {
-          masters: @masters.as_json(current_user: @user, filtered_search_results: true),
+          masters: @masters.as_json(current_user: @user, filtered_search_results: true, style: :index),
           count: {
             count: 0,
             show_count: @masters.length
@@ -197,10 +200,38 @@ RSpec.describe "Performance", type: :model do
 
     expect(JSON.parse(jt)["masters"].length).to be >= NumMasters
 
-    expect(JSON.parse(jt)["masters"][(NumMasters/2).to_i]["latest_tracker_history"].length).to be == 1
+    # The index style of as_json removes most of the junk from the result. latest_tracker_history is only
+    # returned when we get a non-index / full as_json
+    expect(JSON.parse(jt)["masters"][(NumMasters/2).to_i]["latest_tracker_history"]).to be nil
 
   end
 
+  it "ensures that tracker history results are correct after applying more performant processing" do
 
+    # Pick a player contact
+    m = @masters[NumMasters/2]
+    pc = m.player_contacts.create!(rec_type: 'phone', data: '(617)123-1234', rank: 0)
+
+    # update it a few times to ensure there are tracker histories associated with it
+    m.current_user = @user
+
+    10.times do
+      pc.update!(rank: -1)
+      pc.update!(rank: 10)
+    end
+
+    th_expected = TrackerHistory.where(item_id: pc.id, item_type: pc.class.name)
+    th_latest_expected = TrackerHistory.where(item_id: pc.id, item_type: pc.class.name).order(id: :desc).first
+
+    expect(th_expected.length).to be > 20
+    expect(th_latest_expected).not_to be nil
+
+    expect(th_expected.length).to be > 20
+    expect(th_latest_expected).not_to be nil
+
+    expect(th_expected.pluck(:id).sort).to eq pc.tracker_histories.pluck(:id).sort
+    expect(th_latest_expected.id).to eq pc.tracker_history.id
+
+  end
 
 end

@@ -66,15 +66,27 @@ module FeatureSupport
       el = find('.master-expander')
       el.find('.player-info-header')
     end
-
     dismiss_modal
-    h = el[:href].split('#').last
-    find "##{h}.collapse.in", wait: 5
+    h = el['data-target'].split('#').last
+    # Wait for the master record to load
+
+    expect(page).to have_css("##{h}.loaded-master-main")
+    have_css("##{h}.collapse.in")
+    find "##{h}.collapse.in"
     h
   end
 
   def expect_master_record
     expect(page).to have_css(ResultsMasterPanel)
+  end
+
+  def expect_master_to_have_expanded master_id
+    expect(page).to have_css("#master-#{master_id}-main-container.collapse.in.loaded-master-main")
+    expect(page).not_to have_css(".collapse.collapsing")
+  end
+
+  def expect_tracker_to_be_expanded master_id
+    expect(page).to have_css "#trackers-#{master_id}.collapse.in"
   end
 
   def all_master_record_panels

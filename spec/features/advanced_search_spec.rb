@@ -94,12 +94,12 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     have_css("a.master-expander.attached-me-click")
 
-    have_css("a.master-expander.attached-me-click[href='#master-#{@full_player_info.master_id}-main-container'].collapsed .player-info-header")
-    page.all(:css, "a.master-expander.attached-me-click[href='#master-#{@full_player_info.master_id}-main-container'].collapsed .player-info-header").first.click
+    have_css("a.master-expander.attached-me-click[data-target='#master-#{@full_player_info.master_id}-main-container'].collapsed .player-info-header")
+    page.all(:css, "a.master-expander.attached-me-click[data-target='#master-#{@full_player_info.master_id}-main-container'].collapsed .player-info-header").first.click
 
     # expect the player section to expand
     expect(page).to have_css "#master-#{@full_player_info.master_id}-main-container.collapse.in"
-
+    expect(page).to have_css "#details-#{@full_player_info.master_id}"
     expect(page).to have_css "#player-info-#{@full_player_info.master_id}-#{@full_player_info.id} .player-info-first_name", text: "first name #{@full_player_info.first_name.capitalize}"
 
     dismiss_modal
@@ -205,12 +205,12 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       h = open_player_element el, items
 
 
-      b = all('button[data-dismiss="modal"]')
-      b.first.click if b && b.length > 0
-
-      h = el[:href].split('#').last
-      have_css("##{h}.collapse.in")
-      find "##{h}.collapse.in", wait: 5
+      # b = all('button[data-dismiss="modal"]')
+      # b.first.click if b && b.length > 0
+      #
+      # h = el['data-target'].split('#').last
+      # have_css("##{h}.collapse.in")
+      # find "##{h}.collapse.in", wait: 5
       have_css "##{h}.tracker-block.collapse.in"
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-protocol_name", text: /#{protocol.name}/i
       expect(page).to have_css "##{h} div.tracker-block table.tracker-tree-results tbody[data-tracker-protocol='#{protocol.name.downcase}'] .tracker-sub_process_name", text: /#{sp.name}/i

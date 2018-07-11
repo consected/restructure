@@ -44,7 +44,7 @@
       <a class="glyphicon glyphicon-link pull-right" href="/masters/{{id}}" title="link to this record"> </a>
       <div class="row">
         {{>master_id_summary_result master_id=id}}
-        <a class="master-expander collapsed" data-toggle="collapse" data-parent="#results-accordion" href="#master-{{id}}-main-container" aria-expanded="false" aria-controls="master-{{id}}-main-container" class=" {{#is num_masters '!==' 1}}collapsed{{/is}}">
+        <a class="master-expander one-time-only-ajax {{#is num_masters '!==' 1}}collapsed{{/is}}" data-toggle="collapse" data-parent="#results-accordion" href="/masters/{{id}}.json" data-remote="true" data-target="#master-{{id}}-main-container" data-result-target="#master-{{id}}-main-container" data-template="master-main-template" aria-expanded="false" aria-controls="master-{{id}}-main-container">
 
           <div class="col-md-11 col-lg-11 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
             <% if view?[:player_infos] %>
@@ -105,7 +105,7 @@
         {{#with player_infos.[0]}}
 
             <div class="col-md-<%= !view?[:pro_infos] ? '24' : '12' %>">
-              {{>player_info_result _created=@index}}
+              {{>player_info_result _created=0}}
             </div>
 
         {{else}}
@@ -122,7 +122,7 @@
         <% if view?[:pro_infos] %>
         {{#with pro_infos.[0]}}
             <div class="col-md-<%= !view?[:player_infos] ? '24' : '12' %>">
-              {{>pro_info_result _created=@index}}
+              {{>pro_info_result _created=0}}
             </div>
         {{else}}
 

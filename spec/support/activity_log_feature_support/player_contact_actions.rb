@@ -23,10 +23,7 @@ module PlayerContactActions
     dismiss_modal
     finish_form_formatting
 
-
-    expect(page).to have_css("#master-#{@player.master_id}-main-container.collapse.in")
-    expect(page).not_to have_css(".collapse.collapsing")
-
+    expect_master_to_have_expanded @player.master_id
 
     finish_form_formatting
     dismiss_modal

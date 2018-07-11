@@ -215,56 +215,79 @@ class Master < ActiveRecord::Base
       end
     end
 
+
+    style = extras[:style]
+    extras.delete(:style) if extras[:style]
+
+
     raise FphsException.new "current_user not set for master when getting results" unless self.current_user
 
-    tname = :player_infos
-    if current_user.has_access_to? :access, :table, tname
-      included_tables[tname] = {order: Master::PlayerInfoRankOrderClause,
-        include: {
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
-        },
-        methods: [:user_name, :accuracy_score_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
-      }
-    end
-
-    tname = :pro_infos
-    if current_user.has_access_to? :access, :table, tname
-      included_tables[tname] = {
-        include: {
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+    if style == :index
+      tname = :player_infos
+      if current_user.has_access_to? :access, :table, tname
+        included_tables[tname] = {
+          order: Master::PlayerInfoRankOrderClause,
+          methods: [:user_name, :accuracy_score_name, :rank_name, :source_name]
         }
-      }
-    end
+      end
 
-    tname = :player_contacts
-    if current_user.has_access_to? :access, :table, tname
-      included_tables[tname] = {
-        order: {rank: :desc},
-        methods: [:user_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories],
-        include: {
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+      tname = :pro_infos
+      if current_user.has_access_to? :access, :table, tname
+        included_tables[tname] = {
         }
-      }
-    end
+      end
 
-    tname = :addresses
-    if current_user.has_access_to? :access, :table, tname
-      included_tables[tname] = {
-        order: {rank: :desc},
-        methods: [:user_name, :rank_name, :state_name, :country_name, :source_name, :tracker_history_id, :tracker_histories],
-        include: {
-          item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+
+    else
+
+      tname = :player_infos
+      if current_user.has_access_to? :access, :table, tname
+        included_tables[tname] = {order: Master::PlayerInfoRankOrderClause,
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          },
+          methods: [:user_name, :accuracy_score_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories]
         }
-      }
-    end
+      end
 
-    tname = :tracker_histories
-    if current_user.has_access_to? :access, :table, tname
-      included_tables[:latest_tracker_history] = {
-        methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]
-      }
-    end
+      tname = :pro_infos
+      if current_user.has_access_to? :access, :table, tname
+        included_tables[tname] = {
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }
+        }
+      end
 
+      tname = :player_contacts
+      if current_user.has_access_to? :access, :table, tname
+        included_tables[tname] = {
+          order: {rank: :desc},
+          methods: [:user_name, :rank_name, :source_name, :tracker_history_id, :tracker_histories],
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }
+        }
+      end
+
+      tname = :addresses
+      if current_user.has_access_to? :access, :table, tname
+        included_tables[tname] = {
+          order: {rank: :desc},
+          methods: [:user_name, :rank_name, :state_name, :country_name, :source_name, :tracker_history_id, :tracker_histories],
+          include: {
+            item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
+          }
+        }
+      end
+
+      tname = :tracker_histories
+      if current_user.has_access_to? :access, :table, tname
+        included_tables[:latest_tracker_history] = {
+          methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]
+        }
+      end
+    end
     extras.merge!({ include: included_tables })
     extras[:methods] ||= []
 

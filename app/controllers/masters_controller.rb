@@ -37,10 +37,14 @@ class MastersController < UserBaseController
       @master = Master.find(params[:id])
       return not_found unless @master
       @master_id = @master.id
+      @master.current_user = current_user
     end
 
-    search
-
+    # Allow return of a simple JSON master
+    respond_to do |format|
+      format.html { search }
+      format.json { render json: {master: @master}  }
+    end
   end
 
   def search

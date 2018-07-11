@@ -60,20 +60,23 @@ module GeneralDataConcerns
     self.class.get_source_name self.source
   end
 
-  # look up the tracker_history items that corresponds
+  # look up the tracker_history items that correspond to the item
+  # we use the master tracker_histories association as a base, since the
+  # query can be optimized from this
   def tracker_histories
+    return @memo_tracker_histories if @memo_tracker_histories
     # Check for the existence of tracker_histories in the super class. If it
     # already exists, it is an association that we should not be overriding
     if defined?(super)
-      super
+      @memo_tracker_histories = super
     else
-      TrackerHistory.where(item_id: self.id, item_type: self.class.name)
+      @memo_tracker_histories = self.master.tracker_histories.where(item_id: self.id, item_type: self.class.name).order(id: :desc)
     end
   end
 
   # look up the tracker_history item that corresponds to the latest tracker entry linked to this item
   def tracker_history
-    TrackerHistory.where(item_id: self.id, item_type: self.class.name).order(id: :desc).first
+    @memo_tracker_histories = tracker_histories.first
   end
 
   def tracker_history_id

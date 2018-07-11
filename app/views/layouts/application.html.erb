@@ -13,7 +13,7 @@
   </script>
   <%= render partial: "layouts/setup_app" if current_email %>
   <%= csrf_meta_tags %>
-
+  <link rel="shortcut icon" type="image/png" href="/favicon.png">
 </head>
 <body <%= body_classes %>>
     <%= render partial: 'layouts/navbar' if @navbar_ready%>
