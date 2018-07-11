@@ -29,9 +29,9 @@ then
   echo '1 (localhost - using exported scripts to create a reference database)'
   echo '2 (vagrant-fphs-webapp-box - update vagrant test box from host)'
   echo '3 (test DBs fphs against fpa_development within vagrant dev box guest)'
-  echo '4 (fphs-webapp-dev01)'
-  echo '5 (fphs-webapp-dev02)'
-  echo '6 (fphs-webapp-prod01)'
+  echo '4 (fphs-crm-dev01)'
+  echo '5 (fphs-crm-dev02)'
+  echo '6 (fphs-crm-prod01)'
 
   read OPT
 
@@ -148,7 +148,7 @@ export EXTDB=fphs
 export EXTDBHOST=fphs-db-dev01
 export EXTDBUSER=passenger
 export EXPORTSVR=fphs-crm-dev01
-export EXPORTLOC=/FPHS/data/db_migrations
+export EXPORTLOC=/FPHS/share/db_migrations
 export EXTROLE=FPHSUSR
 export EXTADMROLE=FPHSADM
 ###############################
