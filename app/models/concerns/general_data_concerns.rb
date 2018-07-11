@@ -76,7 +76,7 @@ module GeneralDataConcerns
 
   # look up the tracker_history item that corresponds to the latest tracker entry linked to this item
   def tracker_history
-    @memo_tracker_histories = tracker_histories.first
+    tracker_histories.first
   end
 
   def tracker_history_id
