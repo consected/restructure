@@ -3,7 +3,12 @@ class Admin::AppTypesController < AdminController
   def upload
     uploaded_io = params[:config]
 
-    _, results = Admin::AppType.import_config(uploaded_io.read, current_admin)
+    begin
+      _, results = Admin::AppType.import_config(uploaded_io.read, current_admin)
+    rescue => e
+      render text: "#{e}\n#{e.backtrace.join("\n")}"
+      return
+    end
 
     render json: results
 

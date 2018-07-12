@@ -243,7 +243,13 @@ module DynamicModelHandler
 
     if !persisted? || disabled_changed?
       admin = self.current_admin
-      Admin::UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
+      begin
+        if ready?
+          Admin::UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
+        end
+      rescue => e
+        raise FphsException.new "A failure occurred created user access control for all apps with: #{model_association_name}"
+      end
     end
 
   end

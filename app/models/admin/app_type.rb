@@ -13,6 +13,8 @@ class Admin::AppType < Admin::AdminBase
   validates :label, presence: true
   after_save :set_access_levels
 
+  attr_accessor :import_results
+
   def to_s
     name
   end
@@ -84,6 +86,10 @@ class Admin::AppType < Admin::AdminBase
       res['user_roles'] = app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
 
       res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
+
+      res['associated_protocols'] = app_type.import_config_sub_items app_type_config, 'associated_protocols', ['name']
+      res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name', 'protocol_name']
+      res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name', 'sub_process_name', 'protocol_name']
 
       app_type.user_access_controls.active.each do |a|
         unless a.update(access: nil, current_admin: admin)
@@ -192,6 +198,7 @@ class Admin::AppType < Admin::AdminBase
 
   def associated_reports
     names = user_access_controls.active.where(resource_type: :report).select {|a| a.access }.map(&:resource_name).uniq
+    names = Report.active.pluck(:name).uniq if names.include? '_all_reports_'
     Report.active.where(name: names).order(id: :asc)
   end
 
@@ -206,6 +213,23 @@ class Admin::AppType < Admin::AdminBase
     end
 
     gs.sort {|a, b| a.id <=> b.id}
+  end
+
+  def associated_protocols
+    return [] unless self.name == 'zeus'
+    Classification::Protocol.active.order(id: :asc)
+  end
+
+  def associated_sub_processes
+    return [] unless self.name == 'zeus'
+    protocol_ids = associated_protocols.pluck(:id)
+    Classification::SubProcess.active.where(protocol_id: protocol_ids).order(id: :asc)
+  end
+
+  def associated_protocol_events
+    return [] unless self.name == 'zeus'
+    sub_processes = associated_sub_processes.pluck(:id)
+    Classification::ProtocolEvent.active.where(sub_process_id: sub_processes).order(id: :asc)
   end
 
   def associated_message_templates
@@ -250,6 +274,9 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :page_layouts
     options[:methods] << :user_roles
     options[:methods] << :associated_message_templates
+    options[:methods] << :associated_protocols
+    options[:methods] << :associated_sub_processes
+    options[:methods] << :associated_protocol_events
 
     super(options)
   end

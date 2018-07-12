@@ -22,4 +22,12 @@ class Classification::SubProcess < ActiveRecord::Base
     protocol_name
   end
 
+
+  def as_json options={}
+    options[:methods] ||= []
+    options[:methods] << :protocol_name    
+    super
+  end
+
+
 end

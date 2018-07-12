@@ -12,10 +12,12 @@
   an = field_list
   if an.length > 1
     l = an
-  else
+  elsif an.first&.end_with? '_id'
     an.each do |k|
       l << [label: k.to_s.humanize, formatter: 'format_sage_id', attribute: k.to_s]
     end
+  else
+    l = an
   end
 
 %>

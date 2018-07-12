@@ -30,4 +30,12 @@ class Classification::ProtocolEvent < ActiveRecord::Base
     "#{protocol_name} #{sub_process_name}"
   end
 
+  def as_json options={}
+    options[:methods] ||= []
+    options[:methods] << :protocol_name
+    options[:methods] << :sub_process_name
+
+    super
+  end
+
 end
