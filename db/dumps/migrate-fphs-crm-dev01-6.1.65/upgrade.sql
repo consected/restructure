@@ -2,7 +2,7 @@
 set search_path=ml_app;
  begin;  ;
 
-CREATE TABLE "user_roles" ("id" serial primary key, "app_type_id" integer, "role_name" character varying, "user_id" integer, "admin_id" integer, "disabled" boolean DEFAULT 0 NOT NULL, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
+CREATE TABLE "user_roles" ("id" serial primary key, "app_type_id" integer, "role_name" character varying, "user_id" integer, "admin_id" integer, "disabled" boolean DEFAULT false NOT NULL, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
 CREATE  INDEX  "index_user_roles_on_app_type_id" ON "user_roles"  ("app_type_id");
 CREATE  INDEX  "index_user_roles_on_user_id" ON "user_roles"  ("user_id");
 CREATE  INDEX  "index_user_roles_on_admin_id" ON "user_roles"  ("admin_id");
