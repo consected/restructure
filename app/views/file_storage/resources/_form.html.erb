@@ -1,0 +1,59 @@
+<%= s3_uploader_form callback_url: master_file_storage_resources_path(master_id: object_instance.master_id),
+                     callback_method: "POST",
+                     callback_param: "file_storage_resource[s3_url]",
+                     key: "files/{timestamp}-{unique_id}-#{SecureRandom.hex}/${filename}",
+                     key_starts_with: "files/",
+                     acl: "public-read",
+                     max_file_size: 50.megabytes,
+                     id: "s3-uploader",
+                     class: "upload-form",
+                     data: {:key => :val} do %>
+  <%= file_field_tag :file, multiple: true, data: { url: s3_uploader_url } %>
+<% end %>
+<script id="template-upload" type="text/x-tmpl">
+<div id="file-<%=o.unique_id%>" class="upload">
+<%=o.name%>
+<div class="progress"><div class="bar" style="width: 0%"></div></div>
+</div>
+</script>
+
+<script>
+  window.setTimeout(function() {
+    $("#s3-uploader").S3Uploader();
+  });
+</script>
+
+
+<%= form_for(object_instance) do |f| %>
+  <% if object_instance.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(object_instance.errors.count, "error") %> prohibited this file_storage_resource from being saved:</h2>
+
+      <ul>
+      <% object_instance.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :s3_url %><br>
+    <%= f.text_field :s3_url %>
+  </div>
+  <div class="field">
+    <%= f.label :notes %><br>
+    <%= f.text_field :notes %>
+  </div>
+  <div class="field">
+    <%= f.label :user_id %><br>
+    <%= f.text_field :user_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

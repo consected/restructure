@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @file_storage_resource.name %>
+</p>
+
+<p>
+  <strong>S3 url:</strong>
+  <%= @file_storage_resource.s3_url %>
+</p>
+
+<p>
+  <strong>Notes:</strong>
+  <%= @file_storage_resource.notes %>
+</p>
+
+<p>
+  <strong>User:</strong>
+  <%= @file_storage_resource.user %>
+</p>
+
+<%= link_to 'Edit', edit_file_storage_resource_path(@file_storage_resource) %> |
+<%= link_to 'Back', file_storage_resources_path %>

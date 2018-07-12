@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing File Storage Resources</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>S3 url</th>
+      <th>Notes</th>
+      <th>User</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @file_storage_resources.each do |file_storage_resource| %>
+      <tr>
+        <td><%= file_storage_resource.name %></td>
+        <td><%= file_storage_resource.s3_url %></td>
+        <td><%= file_storage_resource.notes %></td>
+        <td><%= file_storage_resource.user %></td>
+        <td><%= link_to 'Show', file_storage_resource %></td>
+        <td><%= link_to 'Edit', edit_file_storage_resource_path(file_storage_resource) %></td>
+        <td><%= link_to 'Destroy', file_storage_resource, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New File storage resource', new_file_storage_resource_path %>

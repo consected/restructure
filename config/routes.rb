@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
 
-
   resources :reports
   resources :imports
 
@@ -70,6 +69,10 @@ Rails.application.routes.draw do
     get ':item_controller/:item_id/item_flags/', to: 'item_flags#index'
     get ':item_controller/:item_id/item_flags/:id', to: 'item_flags#show'
     post ':item_controller/:item_id/item_flags', to: 'item_flags#create'
+
+    namespace :file_storage do
+      resources :resources
+    end
 
   end
 

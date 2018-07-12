@@ -20,4 +20,5 @@
 //= require jquery-scrollto-min
 //= require jquery-mask
 //= require textarea-autogrow
+//= require s3_direct_upload
 //= require_tree .

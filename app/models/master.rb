@@ -16,6 +16,7 @@ class Master < ActiveRecord::Base
 
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory', inverse_of: :master
 
+  has_many :file_storage__resources, class_name: 'FileStorage::Resource'
 
   # Note that additional has_many associations are added dynamically by the external_id handlers,
   # such as Scantron, SageAssignment, etc. This is handled through the external_id_yyy_settings.rb call to Class.add_to_app_list
