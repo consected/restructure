@@ -6,7 +6,7 @@ class Admin::AppTypesController < AdminController
     begin
       _, results = Admin::AppType.import_config(uploaded_io.read, current_admin)
     rescue => e
-      render text: "#{e}\n#{e.backtrace.join("\n")}"
+      render text: "<textarea>#{e}\n#{e.backtrace.join("\n")}</textarea>"
       return
     end
 

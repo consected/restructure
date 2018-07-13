@@ -88,8 +88,8 @@ class Admin::AppType < Admin::AdminBase
       res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
 
       res['associated_protocols'] = app_type.import_config_sub_items app_type_config, 'associated_protocols', ['name']
-      res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name', 'protocol_name']
-      res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name', 'sub_process_name', 'protocol_name']
+      res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'], filter_on: ['protocol_name']
+      res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name'], filter_on: ['sub_process_name', 'protocol_name']
 
       app_type.user_access_controls.active.each do |a|
         unless a.update(access: nil, current_admin: admin)
@@ -105,7 +105,17 @@ class Admin::AppType < Admin::AdminBase
 
   end
 
-  def import_config_sub_items app_type_config, name, lookup_existing_with_fields, reject: nil, add_vals: {}, create_disabled: false
+  def filtered_results items, filter
+
+    f = items.select {|item|
+      res = true
+      filter.each {|fk, fv| res &&= (item.send(fk.to_s) == fv) }
+      res
+    }
+    f
+  end
+
+  def import_config_sub_items app_type_config, name, lookup_existing_with_fields, reject: nil, add_vals: {}, create_disabled: false, filter_on: nil
 
     results = []
 
@@ -133,6 +143,7 @@ class Admin::AppType < Admin::AdminBase
       unless ac['disabled']
         # Get the item if it has been set up automatically
         cond = ac.slice(*lookup_existing_with_fields)
+        filter = ac.slice(*filter_on) if filter_on
         new_vals = ac.except('user_email', 'user_id', 'app_type_id', 'admin_id', 'id', 'created_at', 'updated_at')
         new_vals[:current_admin] = admin
 
@@ -143,8 +154,9 @@ class Admin::AppType < Admin::AdminBase
             # Use the app type's admin as the current admin
             new_vals[:user] = user if has_user
             new_vals.merge! add_vals
-            i = parent.send(assoc_name).where(cond).order('disabled asc nulls first, id desc').first
-
+            i = parent.send(assoc_name).where(cond).order('disabled asc nulls first, id desc')
+            i = filtered_results(i, filter) if filter
+            i = i.first
             if i
               el = i
               i.update! new_vals
@@ -156,7 +168,9 @@ class Admin::AppType < Admin::AdminBase
         else
           new_vals.merge! add_vals
 
-          i = cname.where(cond).order('disabled asc nulls first, id desc').first
+          i = cname.where(cond).order('disabled asc nulls first, id desc')
+          i = filtered_results(i, filter) if filter
+          i = i.first
 
           if i
             el = i

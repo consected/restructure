@@ -22,10 +22,18 @@ class Classification::SubProcess < ActiveRecord::Base
     protocol_name
   end
 
+  def self.find_by_name name
+    active.where(name: name).first
+  end
+
+  # Allows app type import to function
+  def protocol_name= name
+    self.protocol = Classification::Protocol.find_by_name(name)
+  end
 
   def as_json options={}
     options[:methods] ||= []
-    options[:methods] << :protocol_name    
+    options[:methods] << :protocol_name
     super
   end
 

@@ -17,6 +17,10 @@ class Classification::Protocol < ActiveRecord::Base
     id
   end
 
+  def self.find_by_name name
+    active.where(name: name).first
+  end
+
   # A simple method to cache the record that is used to indicate Tracker Updates
   # so that we can quickly and repetitively user this
   def self.record_updates_protocol
