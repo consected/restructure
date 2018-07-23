@@ -19,6 +19,8 @@ CREATE TEMPORARY TABLE temp_addresses AS ( SELECT * FROM addresses WHERE ID IS N
 \copy temp_player_contacts from $IPA_PLAYER_CONTACTS_FILE with (header true, format csv)
 \copy temp_addresses from $IPA_ADDRESSES_FILE with (header true, format csv)
 
+UPDATE temp_ipa_assignments SET status = 'failed';
+
 SELECT create_all_remote_ipa_records();
 
 \copy (SELECT * FROM temp_ipa_assignments) TO $IPA_ASSIGNMENTS_RESULTS_FILE WITH (format csv, header true);

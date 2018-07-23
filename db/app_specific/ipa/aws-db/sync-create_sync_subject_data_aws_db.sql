@@ -73,7 +73,9 @@ LIMIT 1;
 -- If the IPA external identifier already exists then the sync should fail.
 
 IF FOUND THEN
-	RAISE EXCEPTION 'No ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
+	RAISE NOTICE 'Already transferred: ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
+	UPDATE temp_ipa_assignments SET status='already transferred', to_master_id=new_master_id WHERE ipa_id = match_ipa_id;
+  RETURN found_ipa.master_id;
 END IF;
 
 -- We create new records setting user_id for the user with email fphsetl@hms.harvard.edu, rather than the original

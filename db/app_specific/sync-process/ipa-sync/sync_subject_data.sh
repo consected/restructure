@@ -68,12 +68,12 @@ export PGOPTIONS=--search_path=$AWS_DB_SCHEMA
 
 function cleanup {
   echo "Cleanup"
-  rm $IPA_SQL_FILE
-  rm $IPA_ASSIGNMENTS_FILE
-  rm $IPA_PLAYER_INFOS_FILE
-  rm $IPA_PLAYER_CONTACTS_FILE
-  rm $IPA_ADDRESSES_FILE
-  rm $IPA_ASSIGNMENTS_RESULTS_FILE
+  rm $IPA_SQL_FILE 2> /dev/null
+  rm $IPA_ASSIGNMENTS_FILE 2> /dev/null
+  rm $IPA_PLAYER_INFOS_FILE 2> /dev/null
+  rm $IPA_PLAYER_CONTACTS_FILE 2> /dev/null
+  rm $IPA_ADDRESSES_FILE 2> /dev/null
+  rm $IPA_ASSIGNMENTS_RESULTS_FILE 2> /dev/null
 }
 
 # ----> Cleanup from previous runs, just in case
@@ -90,6 +90,14 @@ cleanup
 echo "Match and export Zeus records"
 envsubst < $IPA_ZEUS_FPHS_SQL_FILE > $IPA_SQL_FILE
 PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE
+
+if [ "$(wc -l < $IPA_ASSIGNMENTS_FILE)" == '1' ]
+then
+  echo "Nothing to transfer. Exiting."
+  cleanup
+  exit
+fi
+
 
 # ----> On Remote AWS DB
 # Create temp tables for ipa_assignments, player_infos, player_contacts and addresses:

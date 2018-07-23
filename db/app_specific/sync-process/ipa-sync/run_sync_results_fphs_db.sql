@@ -12,7 +12,8 @@ CREATE TEMPORARY TABLE temp_ipa_assignments_results (
 UPDATE sync_statuses
 SET
   select_status = t.status,
-  to_master_id=t.to_master_id
+  to_master_id=t.to_master_id,
+  updated_at = now()
 FROM (
   SELECT * FROM temp_ipa_assignments_results
 ) AS t
@@ -20,4 +21,4 @@ WHERE
   from_master_id = t.master_id
   AND from_db = 'fphs-db'
   AND to_db = 'athena-db'
-  AND select_status = 'new';
+  AND coalesce(select_status, '') NOT IN ('completed', 'already transferred');

@@ -22,9 +22,12 @@ BEGIN
 	    AND to_db = 'athena-db'
 			AND m.id = s.from_master_id
 		WHERE
-			ipa.ipa_id is not null
+			(
+				s.id IS NULL
+				OR coalesce(s.select_status, '') NOT IN ('completed', 'already transferred') AND s.created_at < now() - interval '2 hours'
+			)
+			AND ipa.ipa_id is not null
     	AND th.sub_process_id = sel_sub_process_id
-			AND s.select_status IS NULL
 		;
 END;
 $$;
@@ -34,9 +37,9 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 	INSERT into sync_statuses
-	( from_master_id, from_db, to_db, select_status )
+	( from_master_id, from_db, to_db, select_status, created_at, updated_at )
 	(
-		SELECT unnest(master_ids), from_db, to_db, 'new'
+		SELECT unnest(master_ids), from_db, to_db, 'new', now(), now()
 	);
 
 	RETURN 1;
