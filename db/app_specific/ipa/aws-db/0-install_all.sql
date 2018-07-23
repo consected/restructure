@@ -38,7 +38,6 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/post_create_alter_api_screenings_table.sql
 \i db/app_specific/ipa/post_create_alter_withdrawals_table.sql
 \i db/app_specific/ipa/prep_inex_checklist_from_ps.sql
-\i db/app_specific/ipa/sync-create_sync_subject_data_aws_db.sql
 \i db/app_specific/ipa/trigger_new_screening_schedule.sql
 \i db/app_specific/ipa/trigger_perform_screening_actions.sql
 \i db/app_specific/ipa/trigger_screening_follow_up.sql
@@ -78,3 +77,7 @@ END IF;
 
 END
 $body$;
+
+
+set search_path=ml_app;
+\i db/app_specific/ipa/sync-create_sync_subject_data_aws_db.sql

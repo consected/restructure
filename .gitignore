@@ -49,3 +49,4 @@ bower.json
 docs/junk
 
 db/app_specific/**/*.zip
+db/dumps/aws-elaine-dev.sql
