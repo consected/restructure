@@ -3,6 +3,10 @@
     SET search_path=ipa_ops;
     BEGIN;
 
+      -- create table ipa_ops.subjects (id serial, master_id integer);
+      -- insert into ipa_ops.subjects (master_id) (select id from ml_app.masters);
+
+
       -- Create a table for recruitment ranks, which will be viewed in the ml_app schema by Zeus
       CREATE TABLE ipa_recruitment_ranks (
           id SERIAL,

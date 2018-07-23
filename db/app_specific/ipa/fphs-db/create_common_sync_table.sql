@@ -1,3 +1,4 @@
+SET search_path=ml_app;
 create table sync_statuses
   (
     id serial,

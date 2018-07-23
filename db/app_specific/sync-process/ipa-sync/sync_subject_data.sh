@@ -28,16 +28,39 @@ then
   exit 1
 fi
 
+# Configurations
+if [ "$RAILS_ENV" == 'development' ]
+then
+  export SUBPROCESS_ID=169
+fi
+
+if [ "$RAILS_ENV" == 'production' ]
+then
+
+  if [ "$EBENV" == 'DEV-fphs' ]
+  then
+    export SUBPROCESS_ID=169
+
+  fi
+
+  if [ "$EBENV" == 'PROD-fphs' ]
+  then
+    export SUBPROCESS_ID=169
+  fi
+fi
+
 # Main SQL scripts
-IPA_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
-IPA_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
+export IPA_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
+export IPA_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
+export IPA_ZEUS_FPHS_RESULTS_SQL_FILE=run_sync_results_fphs_db.sql
 
 # Temp files - can be anywhere - and will be cleaned up before and after use
-IPA_SQL_FILE=$WORKINGDIR/temp_ipa.sql
-IPA_IDS_FILE=$WORKINGDIR/remote_ipa_ids
-IPA_ASSIGNMENTS_FILE=$WORKINGDIR/zeus_ipa_assignments.csv
-IPA_PLAYER_INFOS_FILE=$WORKINGDIR/zeus_ipa_player_infos.csv
-IPA_PLAYER_CONTACTS_FILE=$WORKINGDIR/zeus_ipa_player_contacts.csv
+export IPA_SQL_FILE=$WORKINGDIR/temp_ipa.sql
+export IPA_ASSIGNMENTS_FILE=$WORKINGDIR/zeus_ipa_assignments.csv
+export IPA_PLAYER_INFOS_FILE=$WORKINGDIR/zeus_ipa_player_infos.csv
+export IPA_PLAYER_CONTACTS_FILE=$WORKINGDIR/zeus_ipa_player_contacts.csv
+export IPA_ADDRESSES_FILE=$WORKINGDIR/zeus_ipa_addresses.csv
+export IPA_ASSIGNMENTS_RESULTS_FILE=$WORKINGDIR/aws_ipa_assignments_results.csv
 
 # Initially set the default schema for psql to be the AWS schema. This way, we do not need
 # set search_path=... directly coded in the scripts
@@ -45,11 +68,12 @@ export PGOPTIONS=--search_path=$AWS_DB_SCHEMA
 
 function cleanup {
   echo "Cleanup"
-  rm $IPA_IDS_FILE
   rm $IPA_SQL_FILE
   rm $IPA_ASSIGNMENTS_FILE
   rm $IPA_PLAYER_INFOS_FILE
   rm $IPA_PLAYER_CONTACTS_FILE
+  rm $IPA_ADDRESSES_FILE
+  rm $IPA_ASSIGNMENTS_RESULTS_FILE
 }
 
 # ----> Cleanup from previous runs, just in case
@@ -58,22 +82,20 @@ cleanup
 # ----> On Zeus FPHS DB
 # Create a temp table temp_ipa_assignments to contain the  IPA IDs to sync, based on a simple query
 #
-# For each temp_ipa_assignments record, update the record to include the Zeus master_id from the
-# permanent ipa_assignments table
-#
-# For all master_id in temp_ipa_assignments table, copy matching player_infos and player_contacts records
-# to CSV fields IPA_PLAYER_INFOS_FILE and IPA_PLAYER_CONTACTS_FILE
+# For all master_id in temp_ipa_assignments table, copy matching player_infos, player_contacts and addresses records
+# to CSV files IPA_PLAYER_INFOS_FILE, IPA_PLAYER_CONTACTS_FILE AND IPA_ADDRESSES_FILE
 #
 # Copy temp_ipa_assignments to IPA_ASSIGNMENTS_FILE
 
 echo "Match and export Zeus records"
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_ZEUS_FPHS_SQL_FILE
+envsubst < $IPA_ZEUS_FPHS_SQL_FILE > $IPA_SQL_FILE
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE
 
 # ----> On Remote AWS DB
-# Create temp tables for ipa_assignments, player_infos and player_contacts:
-# temp_ipa_assignments, temp_player_infos and temp_player_contacts
+# Create temp tables for ipa_assignments, player_infos, player_contacts and addresses:
+# temp_ipa_assignments, temp_player_infos, temp_player_contacts, temp_addresses
 #
-# Copy IPA_IDS_FILE CSV data to temp_ipa_assignments
+# Copy IPA_ASSIGNMENTS_FILE CSV data to temp_ipa_assignments
 # Copy IPA_PLAYER_INFOS_FILE CSV data to temp_player_infos
 # Copy IPA_PLAYER_CONTACTS_FILE CSV data to temp_player_contacts
 # Copy IPA_ADDRESSES_FILE CSV data to temp_addresses
@@ -88,7 +110,14 @@ PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_H
 #
 
 echo "Transfer matched records to remote DB"
-psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_AWS_SQL_FILE
+envsubst < $IPA_AWS_SQL_FILE > $IPA_SQL_FILE
+psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE
+
+# Mark the transferred records as completed
+echo "Mark sync_statuses for transferred records"
+envsubst < $IPA_ZEUS_FPHS_RESULTS_SQL_FILE > $IPA_SQL_FILE
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE
+
 
 # ----> Cleanup
 cleanup

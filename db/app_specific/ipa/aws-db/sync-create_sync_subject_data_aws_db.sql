@@ -27,7 +27,7 @@ BEGIN
 	LOOP
 
 		PERFORM create_remote_ipa_record(
-			ipa_record.ipa_id,
+			ipa_record.ipa_id::BIGINT,
 			(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = ipa_record.master_id LIMIT 1),
 			ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = ipa_record.master_id),
 			ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ipa_record.master_id)
@@ -42,15 +42,17 @@ $$;
 
 -------------------------------------------------------
 -- Create player_infos record, multiple player_contacts records, multiple addresses records
--- Pass in the IPA ID to be matched, a single row player info, and an array of player_contacts records.
+-- Pass in the IPA ID to be matched, a single row player info, and arrays of player_contacts and addresses records.
 -- Run tests with:
--- select ml_app.create_remote_ipa_record(364648868, (select pi from player_infos pi where master_id = 105029 limit 1), ARRAY(select pi from player_contacts pi where master_id = 105029), ARRAY(select pi from addresses pi where master_id = 105029) );
+-- select ipa_ops.create_remote_ipa_record(364648868, (select pi from player_infos pi where master_id = 105029 limit 1), ARRAY(select pi from player_contacts pi where master_id = 105029), ARRAY(select pi from addresses pi where master_id = 105029) );
 -- Notice that player_contacts and addresses results are converted to an array, using the ARRAY() function, allowing them to be passed to the function.
 CREATE OR REPLACE FUNCTION create_remote_ipa_record(match_ipa_id BIGINT, new_player_info_record player_infos, new_player_contact_records player_contacts[], new_address_records addresses[]) returns INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
 	found_ipa record;
+	etl_user_id INTEGER;
+	new_master_id INTEGER;
 	player_contact record;
 	address record;
 	pc_length INTEGER;
@@ -58,7 +60,6 @@ DECLARE
 	a_length INTEGER;
 	found_a record;
 	last_id INTEGER;
-	phone VARCHAR;
 BEGIN
 
 -- Find the ipa_assignments external identifier record for this master record and
@@ -69,21 +70,45 @@ FROM ipa_assignments ipa
 WHERE ipa.ipa_id = match_ipa_id
 LIMIT 1;
 
--- At this point, if we found the above record, then the master record can be referred to with found_ipa.master_id
--- We also create the new records setting the user_id to match that of the found_ipa record, rather than the original
--- value from the source database, which probably would not match the user IDs in the remote database. The user_id of the
--- found_ipa record is conceptually valid, since it is that user that has effectively kicked off the synchronization process
--- and requested the new player_infos and player_contacts records be created.
+-- If the IPA external identifier already exists then the sync should fail.
 
-IF NOT FOUND THEN
+IF FOUND THEN
 	RAISE EXCEPTION 'No ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
 END IF;
 
+-- We create new records setting user_id for the user with email fphsetl@hms.harvard.edu, rather than the original
+-- value from the source database, which probably would not match the user IDs in the remote database.
+SELECT id
+INTO etl_user_id
+FROM users u
+WHERE u.email = 'fphsetl@hms.harvard.edu'
+LIMIT 1;
+
+IF NOT FOUND THEN
+	RAISE EXCEPTION 'No user with email fphsetl@hms.harvard.edu was found. Can not continue.';
+END IF;
+
+UPDATE temp_ipa_assignments SET status='started sync' WHERE ipa_id = match_ipa_id;
+
+
+RAISE NOTICE 'Creating master record with user_id %', (etl_user_id::varchar);
+
+INSERT INTO masters
+(user_id, created_at, updated_at) VALUES (etl_user_id, now(), now())
+RETURNING id
+INTO new_master_id;
+
+RAISE NOTICE 'Creating external identifier record %', (match_ipa_id::varchar);
+
+INSERT INTO ipa_assignments
+(ipa_id, master_id, user_id, created_at, updated_at)
+VALUES (match_ipa_id, new_master_id, etl_user_id, now(), now());
 
 
 
 IF new_player_info_record.master_id IS NULL THEN
 	RAISE NOTICE 'No new_player_info_record found for IPA_ID --> %', (match_ipa_id);
+	UPDATE temp_ipa_assignments SET status='failed - no player info provided' WHERE ipa_id = match_ipa_id;
 	RETURN NULL;
 ELSE
 
@@ -112,14 +137,14 @@ ELSE
     source
   )
   SELECT
-    found_ipa.master_id,
+    new_master_id,
     new_player_info_record.first_name,
     new_player_info_record.last_name,
     new_player_info_record.middle_name,
     new_player_info_record.nick_name,
     new_player_info_record.birth_date,
     new_player_info_record.death_date,
-    found_ipa.user_id,
+    etl_user_id,
     new_player_info_record.created_at,
     new_player_info_record.updated_at,
     new_player_info_record.contact_pref,
@@ -155,7 +180,7 @@ ELSE
 		SELECT * from player_contacts
 		INTO found_pc
 		WHERE
-			master_id = found_ipa.master_id AND
+			master_id = new_master_id AND
 			rec_type = player_contact.rec_type AND
 			data = player_contact.data
 		LIMIT 1;
@@ -174,12 +199,12 @@ ELSE
 							updated_at
 			)
 			SELECT
-					found_ipa.master_id,
+					new_master_id,
 					player_contact.rec_type,
 					player_contact.data,
 					player_contact.source,
 					player_contact.rank,
-					found_ipa.user_id,
+					etl_user_id,
 					player_contact.created_at,
 					player_contact.updated_at
 			;
@@ -207,7 +232,7 @@ ELSE
 		SELECT * from addresses
 		INTO found_a
 		WHERE
-			master_id = found_ipa.master_id AND
+			master_id = new_master_id AND
 			street = address.street AND
 			zip = address.zip
 		LIMIT 1;
@@ -231,7 +256,7 @@ ELSE
 							updated_at
 			)
 			SELECT
-					found_ipa.master_id,
+					new_master_id,
 					address.street,
 					address.street2,
 					address.street3,
@@ -241,7 +266,7 @@ ELSE
 					address.source,
 					address.rank,
 					address.rec_type,
-					found_ipa.user_id,
+					etl_user_id,
 					address.created_at,
 					address.updated_at
 			;
@@ -251,10 +276,11 @@ ELSE
 
 END IF;
 
+RAISE NOTICE 'Setting results for master_id %', (new_master_id);
 
+UPDATE temp_ipa_assignments SET status='completed', to_master_id=new_master_id WHERE ipa_id = match_ipa_id;
 
-
-return found_ipa.master_id;
+return new_master_id;
 
 END;
 $$;
