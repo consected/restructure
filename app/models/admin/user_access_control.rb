@@ -123,8 +123,6 @@ class Admin::UserAccessControl < ActiveRecord::Base
     # have the requested access under his own identity
     user_list = [user, nil]
 
-    conditions = {user: user_list, resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
-    conditions[:options] = with_options if with_options
     if can_perform
       unless can_perform.is_a?(Array) || valid_access_level?(on_resource_type, can_perform) || valid_combo_level?(on_resource_type, can_perform)
         raise FphsException.new "Access level #{can_perform} does not exist for resource type #{on_resource_type}"
@@ -133,16 +131,48 @@ class Admin::UserAccessControl < ActiveRecord::Base
       # Get a combo of levels if one exists, otherwise use the provided value
       c = combo_levels[on_resource_type][can_perform] if valid_combo_level?(on_resource_type, can_perform)
       can_perform = c || can_perform
-
-      # Don't use access in the query, since it excludes valid records that may override the app default but don't
-      # match the required access level
-      # conditions[:access] = can_perform
     end
 
-    # Get the user's own access first, and the fallback of null last. If the
-    # user does not have his own access, the default for the app type will return instead,
+
+    # conditions = {user: user_list, resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
+    # conditions[:options] = with_options if with_options
+    # if user
+    #   rn = user.user_roles.pluck(:role_name)
+    #   if rn.length > 0
+    #     rn << nil
+    #     conditions[:role_name] = rn
+    #   end
+    # end
+
+    primary_conditions = {resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
+
+    where_clause = ''
+    where_conditions = []
+    if user
+      where_clause << 'user_id = ?'
+      where_conditions << user.id
+      rn = user.user_roles.pluck(:role_name)
+    end
+
+    if rn && rn.length > 0
+      where_clause << ' OR ' if where_clause.present?
+      where_clause << 'role_name IN (?)'
+      where_conditions << rn
+    end
+
+    where_clause << ' OR ' if where_clause.present?
+    where_clause << '(user_id IS NULL AND role_name IS NULL)'
+    conditions = [where_clause] + where_conditions
+
+    # Get the user's own access first, roles next, and the fallback of null last. If the
+    # user does not have his own access, then if she is a member of role_name, that'll be used and finally
+    # the default for the app type will return instead,
     # so that .first is always the most appropriate value
-    res = self.active.where(conditions).order('user_id asc nulls last').first
+    res = self.active.where(primary_conditions).where(conditions).order('CASE
+    WHEN user_id IS NOT NULL THEN user_id::varchar
+    WHEN role_name IS NOT NULL THEN role_name
+    ELSE user_id::varchar
+    END').first
 
     if res && can_perform
       can_perform = [can_perform] unless can_perform.is_a? Array

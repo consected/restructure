@@ -6,6 +6,18 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   include ModelSupport
   include PlayerInfoSupport
 
+  def let_user_create_player_infos
+    res = @user.has_access_to? :access, :table, :player_infos
+    if res
+      res.disabled = true
+      res.current_admin = @admin
+      res.save!
+    # else
+    end
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :create, resource_type: :table, resource_name: :player_infos
+
+  end
+
   it "should not create default access controls for a new user" do
 
     (1..3).each do
@@ -23,6 +35,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     (1..3).each do
       create_user
       Admin::UserAccessControl.create user: @user, resource_type: :table, resource_name: 'player_infos', current_admin: @admin, app_type_id: app_type_id
+
       expect{
         Admin::UserAccessControl.create! user: @user, resource_type: :table, resource_name: 'player_infos', current_admin: @admin, app_type_id: app_type_id
       }.to raise_error ActiveRecord::RecordInvalid
@@ -44,6 +57,9 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   it "allows testing of a user's access to a resource" do
 
     create_user
+
+    let_user_create_player_infos
+
 
     res = @user.has_access_to? :read, :table, 'player_infos'
     expect(res).to be_falsey
@@ -74,6 +90,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   it "allows a user access to a table" do
 
     create_user
+    let_user_create_player_infos
+
     create_item
 
     # by default, a user is granted access to all tables
@@ -123,6 +141,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     create_admin
     create_user
+    let_user_create_player_infos
+
     create_item
 
     # by default, a user is granted access to all tables
@@ -182,7 +202,16 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     create_admin
     create_user
+    let_user_create_player_infos
+
     create_item
+
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :read, resource_type: :table, resource_name: :latest_tracker_history
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :read, resource_type: :table, resource_name: :tracker_histories
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :create, resource_type: :table, resource_name: :trackers
+
+    res = @user.has_access_to? :access, :table, :tracker_histories
+    expect(res).to be_truthy
 
     @master.current_user = @user
     jres = @master.to_json
@@ -209,6 +238,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     create_admin
     create_user
+    let_user_create_player_infos
+
     create_item
 
     @master.current_user = @user
@@ -230,6 +261,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     create_admin
     create_user
+    let_user_create_player_infos
+
     create_item
 
     @master.current_user = @user
@@ -249,6 +282,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     create_admin
     create_user
+    let_user_create_player_infos
+
     create_item
 
     @master.current_user = @user
@@ -264,15 +299,19 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       @player_info.update!(first_name: 'aaabbbccc')
     }.to raise_error FphsException
 
-    uac = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, user_id: @user.id,  access: :update, resource_type: :table, resource_name: :player_infos, current_admin: @admin
+    # uac = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, user_id: @user.id,  access: :update, resource_type: :table, resource_name: :player_infos, current_admin: @admin
+    res.access = :update
+    res.current_admin = @admin
+    res.save!
 
     res = @user.has_access_to? :update, :table, :player_infos
-    expect(res.id).to eq uac.id
+    # expect(res.id).to eq uac.id
 
     expect(@player_info.update(first_name: 'aaabbbccc')).to be_truthy
 
-    uac.access = nil
-    uac.save!
+    res.access = nil
+    res.current_admin = @admin
+    res.save!
 
     res = @user.has_access_to? :access, :table, :player_infos
     expect(res).to be nil
@@ -321,6 +360,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     e = ExternalIdentifier.create! vals
 
     c = e.implementation_class
+
+    let_user_create_player_infos
 
     # Create some master records
     ids = []
@@ -408,6 +449,83 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     expect(res).to be_truthy
 
     expect(@user.can? :create_master).to be_truthy
+
+  end
+
+  it "allows a role instead of a user override" do
+    create_admin
+    @user1, _ = create_user
+    @user2, _ = create_user
+    @user3, _ = create_user
+    @user4, _ = create_user
+    let_user_create_player_infos
+    create_item
+
+    OtherRoleName = 'other_test_role'
+    RoleName = 'test_role'
+
+    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: OtherRoleName, user: @user1
+    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: RoleName, user: @user1
+    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: RoleName, user: @user2
+
+
+    res = Admin::UserAccessControl.where(app_type: @user1.app_type, resource_type: :table, resource_name: :player_infos)
+    res.update_all disabled: true
+
+
+    res = @user1.has_access_to? :access, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user2.has_access_to? :access, :table, :player_infos
+    expect(res).to be_falsey
+
+    # Create a role based access control
+    uac1 = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :create, resource_type: :table, resource_name: :player_infos, current_admin: @admin, role_name: OtherRoleName
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+
+    # The next role will enable @user2 and will be overriden by other_test_role for @user1 (based on alphanumeric sorting)
+
+    # Create a role based access control
+    uac2 = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin, role_name: RoleName
+
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+    # User 2 can read but not create
+    res = @user2.has_access_to? :read, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    # A user specific setting will override everything
+    @user = @user2
+    let_user_create_player_infos
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+
+    # User 3 has no access
+    res = @user3.has_access_to? :access, :table, :player_infos
+    expect(res).to be_falsey
+
+    # A user specific setting will override everything
+    @user = @user3
+    let_user_create_player_infos
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
 
   end
 
