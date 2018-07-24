@@ -14,6 +14,10 @@ class Admin::UserRole < ActiveRecord::Base
     select("role_name").distinct.pluck(:role_name)
   end
 
+  def self.role_names_for app_type: nil
+    active.where(app_type: app_type).role_names
+  end
+
   def self.users
     user_ids = select("user_id").distinct.pluck(:user_id)
     User.where id: user_ids

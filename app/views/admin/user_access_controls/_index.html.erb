@@ -12,6 +12,7 @@
       <th class="no-sort"></th>
       <th>App Type</th>
       <th>User Override</th>
+      <th>Role Override</th>
       <th>Access</th>
       <th>Resource Type</th>
       <th>Resource Name</th>
@@ -27,6 +28,7 @@
         <td><%= admin_edit_btn list_item.id%> </td>
         <td><%= list_item.app_type.name %></td>
         <td><%= list_item.user.email if list_item.user %></td>
+        <td><%= list_item.role_name %></td>
         <td><%= list_item.access %></td>
         <td><%= list_item.resource_type %></td>
         <td><%=list_item.bad_resource_name ? '<strong>BAD RESOURCE NAME</strong>'.html_safe : '' %> <%= list_item.resource_name %></td>

@@ -12,6 +12,10 @@
     <%= f.select :user_id, options_from_collection_for_select(User.active, 'id', 'email', object_instance.user_id), include_blank: true %>
   </div>
   <div class="form-group">
+    <%= f.label 'role name override' %>
+    <%= f.text_field :role_name %>
+  </div>
+  <div class="form-group">
     <%= f.label :access %>
     <%
     accesses = Admin::UserAccessControl.access_levels

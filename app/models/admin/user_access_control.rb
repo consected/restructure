@@ -115,7 +115,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   # an array to check for multiple possible options
   # If it is necessary to check for access to a resource on an app type that is not the user's current one,
   # or the user is nil, specify the alt_app_type_id
-  def self.access_for? user, can_perform, on_resource_type, named, with_options=nil, alt_app_type_id: nil
+  def self.access_for? user, can_perform, on_resource_type, named, with_options=nil, alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil
 
     app_type_id = alt_app_type_id || user.app_type_id
 
@@ -145,13 +145,19 @@ class Admin::UserAccessControl < ActiveRecord::Base
     # end
 
     primary_conditions = {resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
+    primary_conditions[:options] = with_options if with_options
 
     where_clause = ''
     where_conditions = []
     if user
       where_clause << 'user_id = ?'
       where_conditions << user.id
-      rn = user.user_roles.pluck(:role_name)
+      rn = user.user_roles.role_names_for app_type: user.app_type
+    end
+
+    if alt_role_name
+      rn = alt_role_name
+      rn = [rn] unless rn.is_a? Array
     end
 
     if rn && rn.length > 0
@@ -172,7 +178,10 @@ class Admin::UserAccessControl < ActiveRecord::Base
     WHEN user_id IS NOT NULL THEN user_id::varchar
     WHEN role_name IS NOT NULL THEN role_name
     ELSE user_id::varchar
-    END').first
+    END')
+
+    res = res.where(add_conditions) if add_conditions
+    res = res.first
 
     if res && can_perform
       can_perform = [can_perform] unless can_perform.is_a? Array
@@ -271,9 +280,13 @@ class Admin::UserAccessControl < ActiveRecord::Base
       elsif !allow_bad_resource_name && (resource_name.nil? || !self.class.resource_names_for(self.resource_type.to_sym).include?(self.resource_name.to_s))
         errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
       elsif !self.disabled
-        res = self.class.access_for? self.user, nil, self.resource_type, self.resource_name, alt_app_type_id: self.app_type_id
-        if res && self.user_id == res.user_id  && res.id != self.id # If the user has the authorization set and it is not this record
-          errors.add :user, "already has the access control #{self.access} on #{self.resource_type} #{self.resource_name} #{self.app_type ? self.app_type.name : ''} #{self.options}"
+        res = self.class.access_for? self.user, nil, self.resource_type, self.resource_name, alt_role_name: self.role_name, alt_app_type_id: self.app_type_id
+        if res  && res.id != self.id # If we have a result and it is not this record
+          if self.user_id && self.user_id == res.user_id # If the user has the authorization set
+            errors.add :user, "already has the access control #{self.access} on #{self.resource_type} #{self.resource_name} #{self.app_type ? self.app_type.name : ''} #{self.options}"
+          elsif !self.user_id && res.user_id.nil? && self.role_name == res.role_name # If the new record has no user set and has a matching role _name
+            errors.add :user_access_control, "already exists for #{self.role_name} #{self.access} on #{self.resource_type} #{self.resource_name} #{self.app_type ? self.app_type.name : ''} #{self.options}"
+          end
         end
       end
 

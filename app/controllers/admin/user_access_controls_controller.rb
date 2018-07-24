@@ -26,7 +26,7 @@ class Admin::UserAccessControlsController < AdminController
 
 
     def permitted_params
-      @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :app_type_id, :user_id, :disabled]
+      @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :app_type_id, :user_id, :role_name, :disabled]
     end
 
 end

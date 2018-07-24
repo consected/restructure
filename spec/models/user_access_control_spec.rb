@@ -6,9 +6,12 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   include ModelSupport
   include PlayerInfoSupport
 
+  OtherRoleName = 'other_test_role'
+  TestRoleName = 'test_role'
+
   def let_user_create_player_infos
     res = @user.has_access_to? :access, :table, :player_infos
-    if res
+    if res && res.user_id == @user.id
       res.disabled = true
       res.current_admin = @admin
       res.save!
@@ -453,7 +456,9 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   end
 
   it "allows a role instead of a user override" do
+
     create_admin
+    app0 = Admin::AppType.create! current_admin: @admin, name: 'test_0', label: 'Test 0'
     @user1, _ = create_user
     @user2, _ = create_user
     @user3, _ = create_user
@@ -461,13 +466,14 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     let_user_create_player_infos
     create_item
 
-    OtherRoleName = 'other_test_role'
-    RoleName = 'test_role'
+    # Create a role in another app to ensure that there is no leakage
+    Admin::UserRole.create! current_admin: @admin, app_type: app0, role_name: OtherRoleName, user: @user4
+
+
+    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user1
+    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user2
 
     Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: OtherRoleName, user: @user1
-    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: RoleName, user: @user1
-    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: RoleName, user: @user2
-
 
     res = Admin::UserAccessControl.where(app_type: @user1.app_type, resource_type: :table, resource_name: :player_infos)
     res.update_all disabled: true
@@ -480,7 +486,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     expect(res).to be_falsey
 
     # Create a role based access control
-    uac1 = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :create, resource_type: :table, resource_name: :player_infos, current_admin: @admin, role_name: OtherRoleName
+    uac_other_role = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :create, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
+                                            role_name: OtherRoleName
 
     res = @user2.has_access_to? :create, :table, :player_infos
     expect(res).to be_falsey
@@ -491,11 +498,15 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     res = @user1.has_access_to? :create, :table, :player_infos
     expect(res).to be_truthy
 
+    res = @user4.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
 
     # The next role will enable @user2 and will be overriden by other_test_role for @user1 (based on alphanumeric sorting)
 
     # Create a role based access control
-    uac2 = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin, role_name: RoleName
+    uac_test_role = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
+                                            role_name: TestRoleName
 
     res = @user1.has_access_to? :create, :table, :player_infos
     expect(res).to be_truthy
@@ -505,6 +516,9 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     expect(res).to be_truthy
 
     res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user3.has_access_to? :create, :table, :player_infos
     expect(res).to be_falsey
 
     # A user specific setting will override everything
@@ -526,6 +540,104 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     res = @user3.has_access_to? :create, :table, :player_infos
     expect(res).to be_truthy
 
+    uac_other_role.update! disabled: true, current_admin: @admin
+
+    uac_test_role.update! current_admin: @admin, access: :create
+
+    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: :player_infos, user_id: @user1.id).first
+    uac_user&.update! current_admin: @admin, disabled: true
+
+    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: :player_infos, user_id: @user2.id).first
+    uac_user.update! current_admin: @admin, disabled: true
+
+    uac_user = Admin::UserAccessControl.where(app_type: @user.app_type, resource_type: :table, resource_name: :player_infos, user_id: @user3.id).first
+    uac_user.update! current_admin: @admin, disabled: true
+
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    # Remove the role uac, so nobody can access
+    uac_test_role.update! disabled: true, current_admin: @admin
+
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    # Create a basic - all access - uac
+    all_access = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :read, resource_type: :table, resource_name: :player_infos, current_admin: @admin
+    res = @user1.has_access_to? :read, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user2.has_access_to? :read, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user3.has_access_to? :read, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    # Now override with a role
+    uac_test_role.update!(current_admin: @admin, disabled: false, access: :create)
+
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user3.has_access_to? :read, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    # Restrict with a user
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user2, access: nil, resource_type: :table, resource_name: :player_infos
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user2.has_access_to? :access, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user3.has_access_to? :read, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    # Check that a duplicate role can't be created
+
+  end
+
+  it "prevents duplicate role entries being defined" do
+    create_admin
+    create_user
+
+    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
+                                            role_name: TestRoleName
+
+    expect {
+      Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
+                                              role_name: TestRoleName
+    }.to raise_error ActiveRecord::RecordInvalid
 
   end
 
