@@ -4066,7 +4066,8 @@ CREATE TABLE ml_app.user_access_controls (
     access character varying,
     disabled boolean,
     admin_id integer,
-    app_type_id integer
+    app_type_id integer,
+    role_name character varying
 );
 
 
