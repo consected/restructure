@@ -19,7 +19,7 @@ _fpa.utils.jump_to_linked_item = function(target, offset) {
       // Open up the block containing this item
       h.parents('.collapse').collapse('show');
       if(h.hasClass('collapse')) {
-        let a = $('[data-toggle="collapse"][data-target="'+target+'"]:visible').first().click()
+        var a = $('[data-toggle="collapse"][data-target="'+target+'"]:visible').first().click()
       }
 
   }
