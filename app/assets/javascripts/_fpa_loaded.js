@@ -47,4 +47,13 @@ _fpa.loaded.default = function(){
         _fpa.loaded[_fpa.status.controller]();
         has_loaded_callback = true;
     }
+
+    // Finally, if a hash is set in the URL, jump to it:
+    var target = window.location.hash;
+    if(target) {
+      window.setTimeout(function(){
+        _fpa.utils.jump_to_linked_item(target);
+      }, 1000);
+
+    }
 };

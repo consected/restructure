@@ -18,6 +18,9 @@ _fpa.utils.jump_to_linked_item = function(target, offset) {
   if(!h.is(':visible')){
       // Open up the block containing this item
       h.parents('.collapse').collapse('show');
+      if(h.hasClass('collapse')) {
+        let a = $('[data-toggle="collapse"][data-target="'+target+'"]:visible').first().click()
+      }
 
   }
   // Scroll if necessary
@@ -139,7 +142,7 @@ _fpa.utils.ISOdatetoTimestamp = function(stre){
 
   if(typeof stre == 'number') return stre;
 
-  if( (stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || 
+  if( (stre.indexOf('t')>=0 && stre.indexOf('z')>=0) ||
       (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) ||
       (stre.indexOf('t')>=0 && stre.indexOf('+')>=0) ||
       (stre.indexOf('T')>=0 && stre.indexOf('+')>=0)) {
