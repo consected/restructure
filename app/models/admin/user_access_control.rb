@@ -117,6 +117,8 @@ class Admin::UserAccessControl < ActiveRecord::Base
   # or the user is nil, specify the alt_app_type_id
   def self.access_for? user, can_perform, on_resource_type, named, with_options=nil, alt_app_type_id: nil, alt_role_name: nil, add_conditions: nil
 
+    FphsException.new "Options can not be added to access_for?" if with_options
+
     app_type_id = alt_app_type_id || user.app_type_id
 
     # Setup the user list of the desired user and nil, to allow fallback to nil if the user doesn't

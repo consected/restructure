@@ -55,14 +55,17 @@ class User < ActiveRecord::Base
   end
 
   # Simple authorizations that say what type of general actions a user can perform in this app type.
-  # In previous versions, this was managed by the UserAuthoization class. Since
+  # In previous versions, this was managed by the UserAuthorization class. Since
   # we now have App Types and user access controls, this has been combined.
   # The can? method defaults to resource_type :general for this reason, although
   # can be used for checking access on other resource types if desired
+  # example: user.can? :create_master
   def can? auth, resource_type=:general
     self.has_access_to? :access, resource_type, auth
   end
 
+  # Preferred mechanism for checking access controls for a user
+  # Note: with_options usage is vague and should be avoided
   def has_access_to? perform, resource_type, named, with_options=nil, alt_app_type_id: nil
     Admin::UserAccessControl.access_for? self, perform, resource_type, named, with_options, alt_app_type_id: alt_app_type_id
   end
@@ -100,12 +103,6 @@ class User < ActiveRecord::Base
 
     # Ensure that access controls are appropriately created and disabled
     def set_access_levels
-
-      # Do not create all the permission
-      # if !persisted? || self.user_access_controls.length == 0
-      #   Admin::UserAccessControl.create_all_for self, current_admin
-      #   return true
-      # end
 
       # Disable access controls when a user is disabled.
       # Do not re-enable automatically, since this could provide undesired access being granted
