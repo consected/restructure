@@ -8,14 +8,16 @@ class User < ActiveRecord::Base
   belongs_to :admin
 
   has_many :user_access_controls, autosave: true, class_name: "Admin::UserAccessControl"
-  has_many :user_roles, autosave: true, class_name: "Admin::UserRole"
-
   belongs_to :app_type, class_name: "Admin::AppType"
+  # Enforce use of app_type when getting user_roles, to prevent leakage of same named user roles across apps
+  has_many :user_roles, ->(user) { user_app_type(user)}, autosave: true, class_name: "Admin::UserRole"
+  # has_many :user_roles, autosave: true, class_name: "Admin::UserRole"
 
   default_scope -> {order email: :asc}
 
   before_save :set_app_type
   before_save :set_access_levels
+
 
   def self.active_id_name_list filter=nil
     active.map {|u| {id: u.id, value: u.id, name: u.email} }

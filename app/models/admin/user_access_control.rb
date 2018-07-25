@@ -134,16 +134,6 @@ class Admin::UserAccessControl < ActiveRecord::Base
     end
 
 
-    # conditions = {user: user_list, resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
-    # conditions[:options] = with_options if with_options
-    # if user
-    #   rn = user.user_roles.pluck(:role_name)
-    #   if rn.length > 0
-    #     rn << nil
-    #     conditions[:role_name] = rn
-    #   end
-    # end
-
     primary_conditions = {resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
     primary_conditions[:options] = with_options if with_options
 
@@ -152,7 +142,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     if user
       where_clause << 'user_id = ?'
       where_conditions << user.id
-      rn = user.user_roles.role_names_for app_type: user.app_type
+      rn = user.user_roles.role_names #_for app_type: user.app_type
     end
 
     if alt_role_name

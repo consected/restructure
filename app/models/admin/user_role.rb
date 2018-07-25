@@ -10,12 +10,12 @@ class Admin::UserRole < ActiveRecord::Base
   validates :role_name, presence: true
   validates :user_id, uniqueness: {scope: [:app_type_id, :role_name]}
 
+  # Scope used when user.user_roles association is called, effectively forcing the results
+  # to the user's current app type
+  scope :user_app_type, ->(user) { where user_roles: { app_type_id: user.app_type_id } }
+
   def self.role_names
     select("role_name").distinct.pluck(:role_name)
-  end
-
-  def self.role_names_for app_type: nil
-    active.where(app_type: app_type).role_names
   end
 
   def self.users
@@ -23,12 +23,12 @@ class Admin::UserRole < ActiveRecord::Base
     User.where id: user_ids
   end
 
-  # conditions may include app_type and role_name
-  def self.active_user_ids conditions
+  # conditions must include app_type and role_name, and may include other conditions
+  def self.active_user_ids conditions=nil, app_type: app_type, role_name: role_name
     res = select("user_id").joins(:user).where(
       "(user_roles.disabled is null or user_roles.disabled = false) AND (users.disabled is null or users.disabled = false)"
     )
-
+    res = res.where app_type: app_type, role_name: role_name
     res = res.where conditions if conditions
 
     res.distinct.pluck(:user_id)
@@ -41,7 +41,7 @@ class Admin::UserRole < ActiveRecord::Base
   def self.add_to_role user, app_type, role_name, admin
     res = find_user_role_for_user user, app_type, role_name
     if res
-      res.with_admin(admin).enable! if res if res.disabled?
+      res.with_admin(admin).enable! if res.disabled?
     else
       user.user_roles.create!(app_type: app_type, role_name: role_name, disabled: false, current_admin: admin)
     end

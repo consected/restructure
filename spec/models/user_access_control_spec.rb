@@ -9,17 +9,6 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   OtherRoleName = 'other_test_role'
   TestRoleName = 'test_role'
 
-  def let_user_create_player_infos
-    res = @user.has_access_to? :access, :table, :player_infos
-    if res && res.user_id == @user.id
-      res.disabled = true
-      res.current_admin = @admin
-      res.save!
-    # else
-    end
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user, access: :create, resource_type: :table, resource_name: :player_infos
-
-  end
 
   it "should not create default access controls for a new user" do
 
@@ -49,7 +38,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
     create_admin
     (1..3).each do |i|
-      a = Admin::AppType.create! name: "app#{i}", label: "app#{i}", current_admin: @admin
+      a = create_app_type name: "app#{i}", label: "app#{i}"
 
       res = Admin::UserAccessControl.where(app_type_id: a.id)
       expect(res.length).to eq Admin::UserAccessControl.resource_names_for(:table).length
@@ -458,7 +447,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
   it "allows a role instead of a user override" do
 
     create_admin
-    app0 = Admin::AppType.create! current_admin: @admin, name: 'test_0', label: 'Test 0'
+    app0 = create_app_type name: 'test_0', label: 'Test 0'
     @user1, _ = create_user
     @user2, _ = create_user
     @user3, _ = create_user
@@ -467,13 +456,14 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     create_item
 
     # Create a role in another app to ensure that there is no leakage
-    Admin::UserRole.create! current_admin: @admin, app_type: app0, role_name: OtherRoleName, user: @user4
-
-
-    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user1
-    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user2
-
-    Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: OtherRoleName, user: @user1
+    create_user_role OtherRoleName, app_type: app0, user: @user4
+    create_user_role OtherRoleName, user: @user1
+    create_user_role TestRoleName, user: @user1
+    create_user_role TestRoleName, user: @user2
+    # Admin::UserRole.create! current_admin: @admin, app_type: app0, role_name: OtherRoleName, user: @user4
+    # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user1
+    # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user2
+    # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: OtherRoleName, user: @user1
 
     res = Admin::UserAccessControl.where(app_type: @user1.app_type, resource_type: :table, resource_name: :player_infos)
     res.update_all disabled: true
@@ -489,14 +479,14 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     uac_other_role = Admin::UserAccessControl.create! app_type_id: @user1.app_type_id, access: :create, resource_type: :table, resource_name: :player_infos, current_admin: @admin,
                                             role_name: OtherRoleName
 
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
     res = @user2.has_access_to? :create, :table, :player_infos
     expect(res).to be_falsey
 
     res = @user3.has_access_to? :create, :table, :player_infos
     expect(res).to be_falsey
-
-    res = @user1.has_access_to? :create, :table, :player_infos
-    expect(res).to be_truthy
 
     res = @user4.has_access_to? :create, :table, :player_infos
     expect(res).to be_falsey

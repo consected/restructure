@@ -62,4 +62,29 @@ module ModelSupport
     @admin = admin
     [admin, good_admin_password]
   end
+
+  def create_user_role role_name, user: nil, app_type: nil
+    user ||= @user
+    app_type ||= user.app_type
+    Admin::UserRole.create! current_admin: @admin, app_type: app_type, role_name: role_name, user: user
+  end
+
+  def create_app_type name: name, label: label
+    Admin::AppType.create! current_admin: @admin, name: name, label: label
+  end
+
+  def let_user_create_player_infos in_app_type: nil
+    res = @user.has_access_to? :access, :table, :player_infos
+    if res && res.user_id == @user.id
+      res.disabled = true
+      res.current_admin = @admin
+      res.save!
+    # else
+    end
+
+    in_app_type ||= @user.app_type
+    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create, resource_type: :table, resource_name: :player_infos
+
+  end
+
 end
