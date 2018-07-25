@@ -7,6 +7,12 @@ RSpec.describe Admin::UserRole, type: :model do
 
   TestRoleName = 'test_role_1'
 
+  it "prevents others from querying UserRole.where directly" do
+    expect {
+      Admin::UserRole.where TestRoleName
+    }.to raise_error NoMethodError
+  end
+
   it "always ensures an app type is applied to the user roles selection" do
     create_admin
     app_type_2 = create_app_type name: 'apptype2', label: 'apptype2'
@@ -89,6 +95,10 @@ RSpec.describe Admin::UserRole, type: :model do
     res = Admin::UserRole.active_user_ids role_name: TestRoleName, app_type: app_type_2
     expect(res).to eq [user2.id]
 
+    res = user1.user_roles.active.where(app_type: user1.app_type).pluck(:role_name)
+    res1 = user1.user_roles.active.pluck(:role_name)
+    expect(res).to eq res1
+
     # Now add user1 to the Test Role
     r3 = create_user_role TestRoleName, user: user1, app_type: app_type_2
 
@@ -96,7 +106,7 @@ RSpec.describe Admin::UserRole, type: :model do
     expect(res).to eq [user1.id]
 
     res = Admin::UserRole.active_user_ids role_name: TestRoleName, app_type: app_type_2
-    expect(res).to eq [user2.id, user1.id]
+    expect(res.sort).to eq [user2.id, user1.id].sort
 
     # The user should now see the role for both app types
     expect(user1.app_type_id).to eq app_type_2.id

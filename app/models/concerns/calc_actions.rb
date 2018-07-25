@@ -253,7 +253,7 @@ module CalcActions
         elsif table == :user
           if field_name == :role_name
             user = @current_instance.master.current_user
-            role_names = user.user_roles.active.where(app_type: user.app_type).pluck(:role_name)
+            role_names = user.user_roles.active.pluck(:role_name)
             @this_val = role_names if expected_val == 'return_value'
             expected_val = [expected_val] unless expected_val.is_a? Array
             role_res = false
