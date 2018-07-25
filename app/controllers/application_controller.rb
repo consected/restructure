@@ -14,8 +14,6 @@ class ApplicationController < ActionController::Base
   before_action :setup_navs
   before_action :setup_current_app_type
 
-  rescue_from Exception, with: :unhandled_exception_handler
-  rescue_from RuntimeError, with: :runtime_error_handler
   rescue_from ActiveRecord::RecordNotFound, with: :runtime_record_not_found_handler
   rescue_from ActionController::RoutingError, with: :routing_error_handler
   rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
@@ -23,6 +21,8 @@ class ApplicationController < ActionController::Base
   rescue_from PG::RaiseException, with: :fphs_app_exception_handler
   rescue_from ActionDispatch::Cookies::CookieOverflow, with: :cookie_overflow_handler
   rescue_from PG::UniqueViolation, with: :db_unique_violation
+  rescue_from RuntimeError, with: :runtime_error_handler
+  rescue_from Exception, with: :unhandled_exception_handler
 
 protected
 

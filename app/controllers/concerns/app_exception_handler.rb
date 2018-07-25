@@ -58,6 +58,12 @@ module AppExceptionHandler
       logger.error e.inspect
       logger.error e.backtrace.join("\n")
 
+      if code.in? [400, 500]
+        user_id = current_user&.id
+        admin_id = current_admin&.id
+        Admin::ExceptionLog.create message: (msg || 'error'), main: e.inspect, backtrace: e.backtrace.join("\n"), user_id: user_id, admin_id: admin_id
+      end
+
       if performed?
         flash[:danger] = msg[0..2000]
         return true
