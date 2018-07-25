@@ -378,7 +378,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - inex",
         "user_email": null
       },
       {
@@ -391,7 +391,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -404,7 +404,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -417,7 +417,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -430,7 +430,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -443,7 +443,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -456,7 +456,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -469,7 +469,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -482,7 +482,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -495,7 +495,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - adverse event",
         "user_email": null
       },
       {
@@ -508,7 +508,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - protocol deviation",
         "user_email": null
       },
       {
@@ -521,7 +521,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -534,7 +534,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -573,7 +573,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -586,7 +586,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -599,7 +599,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -612,7 +612,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -638,7 +638,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -651,7 +651,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -690,7 +690,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -742,7 +742,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -755,7 +755,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -768,7 +768,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -781,7 +781,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -794,7 +794,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -872,7 +872,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -885,7 +885,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -911,7 +911,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -924,7 +924,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -937,7 +937,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -950,7 +950,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -963,7 +963,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -972,11 +972,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_phone_screen",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - inex",
         "user_email": null
       },
       {
@@ -989,7 +989,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - inex",
         "user_email": null
       },
       {
@@ -1002,7 +1002,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -1015,7 +1015,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -1028,7 +1028,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -1041,7 +1041,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -1054,7 +1054,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -1067,7 +1067,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -1080,7 +1080,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -1093,7 +1093,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -1102,11 +1102,11 @@
         "resource_type": "general",
         "resource_name": "create_master",
         "options": "",
-        "access": "read",
+        "access": null,
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "",
         "user_email": null
       },
       {
@@ -1119,7 +1119,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -1132,7 +1132,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "staff - inex",
         "user_email": null
       },
       {
@@ -1141,11 +1141,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_phone_screen_staff",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - inex",
         "user_email": null
       },
       {
@@ -1158,7 +1158,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - navigation",
         "user_email": null
       },
       {
@@ -1171,7 +1171,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - navigation",
         "user_email": null
       },
       {
@@ -1184,7 +1184,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - navigation",
         "user_email": null
       },
       {
@@ -1197,7 +1197,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - protocol deviation",
         "user_email": null
       },
       {
@@ -1210,20 +1210,20 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - protocol deviation",
         "user_email": null
       },
       {
         "id": 195,
         "user_id": null,
-        "resource_type": "activity_log_type",
-        "resource_name": "activity_log__ipa_assignment_protocol_deviation__minor_deviation_complete",
+        "resource_type": "table",
+        "resource_name": "activity_log__bhs_assignments",
         "options": "",
         "access": "create",
-        "disabled": false,
+        "disabled": true,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "",
         "user_email": null
       },
       {
@@ -1232,11 +1232,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_protocol_deviation__report_to_irb",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - protocol deviation",
         "user_email": null
       },
       {
@@ -1245,11 +1245,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_protocol_deviation__initial_review",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - protocol deviation",
         "user_email": null
       },
       {
@@ -1258,11 +1258,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_protocol_deviation__pi_review",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - protocol deviation",
         "user_email": null
       },
       {
@@ -1275,7 +1275,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - adverse event",
         "user_email": null
       },
       {
@@ -1288,7 +1288,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - adverse event",
         "user_email": null
       },
       {
@@ -1297,11 +1297,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_adverse_event__initial_review",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - adverse event",
         "user_email": null
       },
       {
@@ -1310,11 +1310,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_adverse_event__pi_review",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - adverse event",
         "user_email": null
       },
       {
@@ -1323,11 +1323,11 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_adverse_event__report_to_irb",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - adverse event",
         "user_email": null
       },
       {
@@ -1353,7 +1353,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - inex",
         "user_email": null
       },
       {
@@ -1379,7 +1379,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - inex",
         "user_email": null
       },
       {
@@ -1388,24 +1388,24 @@
         "resource_type": "activity_log_type",
         "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_baseline",
         "options": "",
-        "access": "create",
+        "access": "read",
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - inex",
         "user_email": null
       },
       {
         "id": 225,
         "user_id": null,
-        "resource_type": "report",
-        "resource_name": "IPA Subjects Pending Sync",
+        "resource_type": "table",
+        "resource_name": "activity_log__bhs_assignments",
         "options": "",
-        "access": "read",
-        "disabled": false,
+        "access": null,
+        "disabled": true,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "",
         "user_email": null
       },
       {
@@ -1509,7 +1509,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "tracker",
         "user_email": null
       },
       {
@@ -1548,7 +1548,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - navigation",
         "user_email": null
       },
       {
@@ -1561,7 +1561,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "user - navigation",
         "user_email": null
       },
       {
@@ -1600,7 +1600,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -1626,7 +1626,7 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
+        "role_name": "phone screener",
         "user_email": null
       },
       {
@@ -1653,6 +1653,162 @@
         "admin_id": 2,
         "app_type_id": 3,
         "role_name": null,
+        "user_email": null
+      },
+      {
+        "id": 319,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_adverse_event__pi_review",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "pi",
+        "user_email": null
+      },
+      {
+        "id": 320,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_protocol_deviation__pi_review",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "pi",
+        "user_email": null
+      },
+      {
+        "id": 321,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_adverse_event__initial_review",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "clinical research coordinator",
+        "user_email": null
+      },
+      {
+        "id": 322,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_adverse_event__report_to_irb",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "clinical research coordinator",
+        "user_email": null
+      },
+      {
+        "id": 323,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_protocol_deviation__initial_review",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "clinical research coordinator",
+        "user_email": null
+      },
+      {
+        "id": 324,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_protocol_deviation__report_to_irb",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "clinical research coordinator",
+        "user_email": null
+      },
+      {
+        "id": 325,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_baseline",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "pi",
+        "user_email": null
+      },
+      {
+        "id": 326,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_phone_screen",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "pi",
+        "user_email": null
+      },
+      {
+        "id": 327,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_baseline_staff",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "user - inex",
+        "user_email": null
+      },
+      {
+        "id": 328,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_phone_screen_staff",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "staff - inex",
+        "user_email": null
+      },
+      {
+        "id": 329,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_baseline_staff",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "pi",
+        "user_email": null
+      },
+      {
+        "id": 330,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_inex_checklist__sign_phone_screen_staff",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "pi",
         "user_email": null
       }
     ],
@@ -5546,31 +5702,31 @@
         "role_name": "adverse event reviewer",
         "user_id": 1,
         "admin_id": 2,
-        "disabled": false,
+        "disabled": true,
         "created_at": "2018-06-14T10:09:45.470Z",
-        "updated_at": "2018-06-14T10:09:45.470Z",
+        "updated_at": "2018-07-24T18:08:06.850Z",
         "user_email": "phil_ayres@hms.harvard.edu"
       },
       {
         "id": 7,
         "app_type_id": 3,
-        "role_name": "protocol deviation reviewer",
+        "role_name": "user - protocol deviation",
         "user_id": 1,
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-06-14T10:10:04.990Z",
-        "updated_at": "2018-06-14T10:10:04.990Z",
+        "updated_at": "2018-07-24T18:07:45.139Z",
         "user_email": "phil_ayres@hms.harvard.edu"
       },
       {
         "id": 8,
         "app_type_id": 3,
-        "role_name": "pi",
+        "role_name": "-- pi",
         "user_id": 1,
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-06-14T10:10:17.901Z",
-        "updated_at": "2018-06-14T10:10:17.901Z",
+        "updated_at": "2018-07-24T18:28:09.208Z",
         "user_email": "phil_ayres@hms.harvard.edu"
       },
       {
@@ -5581,7 +5737,73 @@
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-06-14T10:32:47.735Z",
-        "updated_at": "2018-06-14T10:32:47.735Z",
+        "updated_at": "2018-07-24T18:28:14.156Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
+        "id": 10,
+        "app_type_id": 3,
+        "role_name": "user - adverse event",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-07-24T17:25:00.694Z",
+        "updated_at": "2018-07-24T18:06:56.953Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
+        "id": 11,
+        "app_type_id": 3,
+        "role_name": "tracker",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-07-24T17:25:11.833Z",
+        "updated_at": "2018-07-24T17:25:11.833Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
+        "id": 12,
+        "app_type_id": 3,
+        "role_name": "user - navigation",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-07-24T17:25:23.795Z",
+        "updated_at": "2018-07-24T18:07:25.413Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
+        "id": 13,
+        "app_type_id": 3,
+        "role_name": "phone screener",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-07-24T17:26:03.592Z",
+        "updated_at": "2018-07-24T17:26:03.592Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
+        "id": 14,
+        "app_type_id": 3,
+        "role_name": "user - inex",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-07-24T17:26:32.248Z",
+        "updated_at": "2018-07-24T17:59:41.688Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
+        "id": 15,
+        "app_type_id": 3,
+        "role_name": "staff - inex",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-07-24T17:46:25.623Z",
+        "updated_at": "2018-07-24T17:59:34.423Z",
         "user_email": "phil_ayres@hms.harvard.edu"
       }
     ],
