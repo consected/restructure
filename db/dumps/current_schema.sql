@@ -2592,6 +2592,42 @@ ALTER SEQUENCE ml_app.dynamic_models_id_seq OWNED BY ml_app.dynamic_models.id;
 
 
 --
+-- Name: exception_logs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.exception_logs (
+    id integer NOT NULL,
+    message character varying,
+    main character varying,
+    backtrace character varying,
+    user_id integer,
+    admin_id integer,
+    notified_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: exception_logs_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.exception_logs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: exception_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.exception_logs_id_seq OWNED BY ml_app.exception_logs.id;
+
+
+--
 -- Name: external_identifier_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4455,6 +4491,13 @@ ALTER TABLE ONLY ml_app.dynamic_models ALTER COLUMN id SET DEFAULT nextval('ml_a
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.exception_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.exception_logs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.external_identifier_history ALTER COLUMN id SET DEFAULT nextval('ml_app.external_identifier_history_id_seq'::regclass);
 
 
@@ -4901,6 +4944,14 @@ ALTER TABLE ONLY ml_app.dynamic_model_history
 
 ALTER TABLE ONLY ml_app.dynamic_models
     ADD CONSTRAINT dynamic_models_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: exception_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.exception_logs
+    ADD CONSTRAINT exception_logs_pkey PRIMARY KEY (id);
 
 
 --
@@ -5481,6 +5532,20 @@ CREATE INDEX index_dynamic_model_history_on_dynamic_model_id ON ml_app.dynamic_m
 --
 
 CREATE INDEX index_dynamic_models_on_admin_id ON ml_app.dynamic_models USING btree (admin_id);
+
+
+--
+-- Name: index_exception_logs_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_exception_logs_on_admin_id ON ml_app.exception_logs USING btree (admin_id);
+
+
+--
+-- Name: index_exception_logs_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_exception_logs_on_user_id ON ml_app.exception_logs USING btree (user_id);
 
 
 --
@@ -6900,6 +6965,14 @@ ALTER TABLE ONLY ml_app.message_templates
 
 
 --
+-- Name: fk_rails_51ae125c4f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.exception_logs
+    ADD CONSTRAINT fk_rails_51ae125c4f FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: fk_rails_564af80fb6; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7153,6 +7226,14 @@ ALTER TABLE ONLY ml_app.item_flags
 
 ALTER TABLE ONLY ml_app.tracker_history
     ADD CONSTRAINT fk_rails_c55341c576 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_c720bf523c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.exception_logs
+    ADD CONSTRAINT fk_rails_c720bf523c FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
