@@ -1,4 +1,4 @@
-
+set search_path=ipa_ops, ml_app;
       BEGIN;
 
 -- Command line:
@@ -132,8 +132,8 @@
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
           ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_activity_log_ipa_assignment_session_filestores FOREIGN KEY (activity_log_ipa_assignment_session_filestore_id) REFERENCES activity_log_ipa_assignment_session_filestores(id);
 
-      GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
-      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
-      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
+      GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ipa_ops TO fphs;
+      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
+      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
 
       COMMIT;

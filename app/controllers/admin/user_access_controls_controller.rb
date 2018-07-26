@@ -5,19 +5,19 @@ class Admin::UserAccessControlsController < AdminController
   protected
 
     def default_index_order
-      "app_type_id asc, resource_type asc, resource_name asc, #{Admin::UserAccessControl::PermissionPriorityOrder}"
+      "app_type_id asc, resource_type asc, translate(resource_name, '__', 'ZZZZ') asc, #{Admin::UserAccessControl::PermissionPriorityOrder}"
     end
 
     def filters
       {
-        resource_name: Admin::UserAccessControl.resource_names_by_type,
         app_type_id: Admin::AppType.all_by_name,
+        resource_name: Admin::UserAccessControl.resource_names_by_type,
         user_id: User.active.pluck(:id, :email).to_h
       }
     end
 
     def filters_on
-      [:resource_name, :app_type_id, :user_id]
+      [:app_type_id, :resource_name, :user_id]
     end
 
     def has_access_levels
