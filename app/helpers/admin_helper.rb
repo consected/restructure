@@ -1,6 +1,7 @@
 module AdminHelper
 
   def edit_path id, opt={}
+    return unless id
     redir = {action: :edit, id: id}
     redir.merge! opt
     url_for(redir)

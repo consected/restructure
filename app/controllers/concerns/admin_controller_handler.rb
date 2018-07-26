@@ -8,7 +8,7 @@ module AdminControllerHandler
     before_action :set_instance_from_id, only: [:edit, :update, :destroy]
 
 
-    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance, :objects_instance, :human_name, :no_edit
+    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance, :objects_instance, :human_name, :no_edit, :primary_model, :view_path
 
   end
 
@@ -51,7 +51,11 @@ module AdminControllerHandler
     end
     if res
       @updated_with = object_instance
-      index
+      begin
+        render partial: view_path('item'), locals: {list_item: object_instance}
+      rescue ActionView::MissingTemplate
+        index
+      end
     else
       logger.warn "Error creating #{human_name}: #{object_instance.errors.inspect}"
       flash.now[:warning] ||= "Error creating #{human_name}: #{error_message}"
@@ -64,7 +68,11 @@ module AdminControllerHandler
     if object_instance.update(secure_params)
       flash.now[:notice] = "#{human_name} updated successfully"
       @updated_with = object_instance
-      index
+      begin
+        render partial: view_path('item'), locals: {list_item: object_instance}
+      rescue ActionView::MissingTemplate
+        index
+      end
     else
       logger.warn "Error updating #{human_name}: #{object_instance.errors.inspect}"
       flash.now[:warning] = "Error updating #{human_name}: #{error_message}"

@@ -4,6 +4,10 @@ class Admin::UserAccessControlsController < AdminController
 
   protected
 
+    def default_index_order
+      "app_type_id asc, resource_type asc, resource_name asc, #{Admin::UserAccessControl::PermissionPriorityOrder}"
+    end
+
     def filters
       {
         resource_name: Admin::UserAccessControl.resource_names_by_type,

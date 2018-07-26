@@ -9,6 +9,12 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   validate :correct_access
 
+  PermissionPriorityOrder = 'CASE
+  WHEN user_id IS NOT NULL THEN user_id::varchar
+  WHEN role_name IS NOT NULL THEN role_name
+  ELSE user_id::varchar
+  END'
+
   def self.resource_types
     [:table, :general, :external_id_assignments, :report, :activity_log_type]
   end
@@ -166,11 +172,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     # user does not have his own access, then if she is a member of role_name, that'll be used and finally
     # the default for the app type will return instead,
     # so that .first is always the most appropriate value
-    res = self.active.where(primary_conditions).where(conditions).order('CASE
-    WHEN user_id IS NOT NULL THEN user_id::varchar
-    WHEN role_name IS NOT NULL THEN role_name
-    ELSE user_id::varchar
-    END')
+    res = self.active.where(primary_conditions).where(conditions).order(PermissionPriorityOrder)
 
     res = res.where(add_conditions) if add_conditions
     res = res.first

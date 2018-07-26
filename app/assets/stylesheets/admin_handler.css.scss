@@ -102,3 +102,7 @@ td.admin-field-generate_view {
     word-wrap: break-word;
     overflow: auto;
 }
+
+tr.saved-row, tbody.saved-row .admin-list-item {
+  background-color: #ffa;
+}

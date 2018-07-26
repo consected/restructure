@@ -61,7 +61,7 @@ module AppExceptionHandler
       if code.in? [400, 500]
         user_id = current_user&.id
         admin_id = current_admin&.id
-        Admin::ExceptionLog.create message: (msg || 'error'), main: e.inspect, backtrace: e.backtrace.join("\n"), user_id: user_id, admin_id: admin_id
+        Admin::ExceptionLog.create message: (msg || 'error'), main: e.inspect, backtrace: e.backtrace.join("\n"), user_id: user_id, admin_id: admin_id if Rails.env.production?
       end
 
       if performed?

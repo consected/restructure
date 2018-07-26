@@ -29,18 +29,8 @@ module SpecSetup
     setup_access :addresses
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
+    setup_access :trackers
 
-    # # Ensure the table can be accessed
-    # uacs = Admin::UserAccessControl.where app_type: @user.app_type, resource_type: :table, resource_name: :activity_log__player_contact_phones
-    # uac = uacs.first
-    # if uac
-    #   uac.access = :create
-    #   uac.disabled = false
-    #   uac.current_admin = @admin
-    #   uac.save!
-    # else
-    #   uac = Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :table, resource_name: :activity_log__player_contact_phones, current_admin: @admin
-    # end
 
     # Ensure the steps can be accessed
     [:primary, :blank_log].each do |s|

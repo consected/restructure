@@ -96,16 +96,14 @@ _fpa.postprocessors = {
         var h = $('.postprocessed-scroll-here');
         if(h.length > 0) {
           // Scroll if necessary
-          if(h.length == 0)
-            h = block;
-          else
-            h.removeClass('postprocessed-scroll-here');
+          h.removeClass('postprocessed-scroll-here');
 
           var rect = h.get(0).getBoundingClientRect();
           var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
           if(not_visible) {
             window.setTimeout(function() {
-              $.scrollTo(h, 200, {offset: -50});
+              if(!h.hasClass('prevent-scroll'))
+                $.scrollTo(h, 200, {offset: -50});
             }, 300);
           }
 

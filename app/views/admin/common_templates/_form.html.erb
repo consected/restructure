@@ -11,7 +11,7 @@
   end
   has_options = false
 %>
-<%= form_for(fref, url: url, class: "inline-form admin-edit-form", remote: true) do |f| %>
+<%= form_for(fref, url: url, class: "inline-form admin-edit-form", remote: true, data: {result_target: "#admin-item-#{object_instance.id}", preprocessor: "admin_result"}) do |f| %>
   <%= render partial: 'admin_handler/form_errors' %>
 
   <% (permitted_params - [:id]).each do |p| %>

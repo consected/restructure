@@ -17,14 +17,8 @@
       <tr>
         <th class="no-sort"></th>
         <%
-          num_fields = 0
-          found_options = false
           index_params.each do |p|
             is_options_field = p.to_s.end_with?('options') || p.to_s.end_with?('template')
-            unless found_options
-              num_fields += 1
-              found_options = p if is_options_field
-            end
           %>
           <% unless is_options_field %>
           <th><%= p.to_s.humanize %></th>
@@ -33,39 +27,10 @@
 
       </tr>
     </thead>
-
-    <tbody>
+      <%= render partial: view_path('item'), locals: {list_item: primary_model.new} %>
       <% objects_instance.each do |list_item| %>
-        <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-          <td class="admin-field-<%=p%>"><%= admin_edit_btn list_item.id%> </td>
-          <% index_params.each do |p|
-              test_assoc = p.to_s.gsub('_id','')
-              test_assoc_ids = p.to_s.gsub('_ids','').pluralize
-
-              test_assoc_ids = nil if test_assoc_ids == p.to_s
-              test_assoc = nil if test_assoc_ids == test_assoc || test_assoc == p.to_s
-          %>
-
-          <% if test_assoc && list_item.respond_to?(test_assoc) %>
-            <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc).to_s %></td>
-          <% elsif test_assoc_ids && list_item.respond_to?(test_assoc_ids) %>
-            <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc_ids).map(&:to_s).join("; ") %></td>
-          <% else %>
-            <% unless p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
-              <td class="admin-field-<%=p%>"><%= list_item.send(p) %></td>
-            <% end %>
-          <% end %>
-        <% end %>
-
-        </tr>
-        <% if found_options %>
-          <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-            <td>&nbsp;</td>
-            <td colspan="<%=num_fields%>" class="admin-field-<%=p%>"><strong><%=found_options%>:</strong> <pre style="font-size: 12px" class="shrinkable-block"><%= list_item.send(found_options) %></pre></td>
-          </tr>
-        <% end %>
+        <%= render partial: view_path('item'), locals: {list_item: list_item} %>
       <% end %>
-    </tbody>
   </table>
 
   <div class="container">

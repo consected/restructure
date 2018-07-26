@@ -546,6 +546,18 @@ _fpa = {
             }
         } else {
 
+            var put_in_position = function(t, d) {
+              var pos = t.attr('data-result-position');
+              if(pos == 'replace')
+                t.replaceWith(d);
+              else if(pos == 'before')
+                t.before(d);
+              else if(pos == 'after')
+                t.after(d);
+              else
+                t.html(d);
+            };
+
             // Since the results was basic HTML rendered by a partial typically, just push it into the
             // DOM where specified
             var html = $(xhr.responseText);
@@ -592,9 +604,8 @@ _fpa = {
                 res[di] = d;
                 targets.each(function(){
                     var pre = $(this).attr('data-preprocessor');
-
                     _fpa.do_preprocessors(pre, $(this), data);
-                    $(this).html(d);
+                    put_in_position($(this), d);
                     _fpa.do_postprocessors(pre, $(this), data);
                     updated++;
                 });
@@ -607,7 +618,8 @@ _fpa = {
                     var pre = $(this).attr('data-preprocessor');
 
                     _fpa.do_preprocessors(pre, $(target), data);
-                    $(target).html(html);
+                    put_in_position($(target), html);
+                    // $(target).html(html);
                     _fpa.do_postprocessors(pre, $(target), data);
                 }
             }

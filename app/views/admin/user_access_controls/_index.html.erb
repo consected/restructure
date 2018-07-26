@@ -23,20 +23,9 @@
   </thead>
 
   <tbody>
+    <%= render partial: view_path('item'), locals: {list_item: primary_model.new} %>
     <% objects_instance.each do |list_item| %>
-      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
-        <td><%= admin_edit_btn list_item.id%> </td>
-        <td><%= list_item.app_type.name %></td>
-        <td><%= list_item.user.email if list_item.user %></td>
-        <td><%= list_item.role_name %></td>
-        <td><%= list_item.access %></td>
-        <td><%= list_item.resource_type %></td>
-        <td><%=list_item.bad_resource_name ? '<strong>BAD RESOURCE NAME</strong>'.html_safe : '' %> <%= list_item.resource_name %></td>
-        <td><%= list_item.options %></td>
-        <td><%= list_item.disabled ? 'disabled' : ''%></td>
-
-        <td><%= list_item.admin_name %></td>
-      </tr>
+      <%= render partial: view_path('item'), locals: {list_item: list_item} %>
     <% end %>
   </tbody>
 </table>

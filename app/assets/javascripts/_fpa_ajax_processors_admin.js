@@ -2,6 +2,10 @@ _fpa.postprocessors_admin = {
     admin_edit_form: function(block, data){
         var _admin = this;
         $.scrollTo(block, 200, {offset:-50});
+
+        $('tr.new-record').before($('tr.admin-list-item').first());
+
+        $('.saved-row').removeClass('saved-row');
         _fpa.form_utils.format_block(block);
         block.find('#admin-edit-cancel').click(function(ev){
             ev.preventDefault();
@@ -16,6 +20,32 @@ _fpa.postprocessors_admin = {
           var el = $('.admin-edit-form textarea');
           el.click();
         }, 300);
+
+
+        // For the selection of resource types / names in user access control form
+        var res_type_change = function($el) {
+          var val = $el.val();
+          $('#admin_user_access_control_resource_name optgroup[label]').hide();
+          $('#admin_user_access_control_resource_name optgroup[label="'+val+'"]').show();
+        };
+        res_type_change($('#admin_user_access_control_resource_type'));        
+        block.on('change', '#admin_user_access_control_resource_type', function() {
+          res_type_change($(this));
+        });
+    },
+
+    admin_result: function(block, data) {
+      $('#admin-edit-').html('');
+      var b = $('.attached-tablesorter').trigger("update"); ;
+      // _fpa.form_utils.format_block($('.tablesorter').parent());
+      $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
+
+      window.setTimeout(function() {
+        $.scrollTo(block, 200, {offset:-50});
+      }, 100);
+      window.setTimeout(function() {
+        $('prevent-scroll').removeClass('prevent-scroll');
+      }, 1000);
     },
 
     handle_admin_report_config: function(block){

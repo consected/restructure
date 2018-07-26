@@ -115,6 +115,7 @@ module MasterDataSupport
     player_list.each do |l|
       # Create a user with a specific number embedded
       create_user(@master_count+@user_start, "mds1")
+      setup_access :trackers
 
       #Create a master and use the created user as the current user
       @master = Master.new
