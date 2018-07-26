@@ -57,7 +57,11 @@ table.import-grid, table.table.report-table {
     padding: 6px 8px 0 8px;
     border: 1px solid silver;
     background-color: #eee;
+    &[aria-sort="descending"], &[aria-sort="ascending"] {
+      background-color: #ffb;
+    }
   }
+
 
   td {
     padding: 0 0 0 4px;
@@ -138,6 +142,13 @@ table.import-grid, table.table.report-table {
     margin-top: 0.4em;
   }
 
+  tr:hover {
+    background-color: #ffd;
+    td {
+      background-color: #ffd;
+    }
+  }
+
   tr.item-invalid {
     .form-control { color: red !important;}
 
@@ -201,4 +212,52 @@ table.table.tablesorter > thead > tr > th.no-sort.tablesorter-header:after {
 
 table th.edit-button-column {
   width: 80px;
+}
+
+table.table.report-table  {
+  .expandable {
+    max-height: 100px;
+    padding-bottom: 20px;
+    margin-bottom:26px;
+    border-bottom: 2px dotted gray;
+    display: block;
+    overflow: hidden;
+
+
+    &:hover {
+      cursor: s-resize;
+    }
+
+    &:after {
+      content: '(click to expand)';
+      font-size: 90%;
+      font-weight: normal;
+      font-style: italic;
+      display: block;
+      padding-top: 0;
+      color: rgb(128, 128, 128);
+      position: absolute;
+      top: 104px;
+    }
+  }
+  .expanded {
+      max-height: none;
+      border-bottom: 0;
+
+      &:hover {
+          cursor: n-resize;
+      }
+      &:after {
+        content: '(click to shrink)';
+        font-size: 90%;
+        font-weight: normal;
+        font-style: italic;
+        position: relative;
+        top: 4px;
+      }
+  }
+
+  pre.shrinkable-block.expandable {
+      max-width: 1300px;
+  }
 }

@@ -25,10 +25,10 @@ _fpa.postprocessors_admin = {
         // For the selection of resource types / names in user access control form
         var res_type_change = function($el) {
           var val = $el.val();
-          $('#admin_user_access_control_resource_name optgroup[label]').hide();
-          $('#admin_user_access_control_resource_name optgroup[label="'+val+'"]').show();
+          $('#admin_user_access_control_resource_name optgroup[label], #admin_user_access_control_access optgroup[label]').hide();
+          $('#admin_user_access_control_resource_name optgroup[label="'+val+'"], #admin_user_access_control_access optgroup[label="'+val+'"]').show();
         };
-        res_type_change($('#admin_user_access_control_resource_type'));        
+        res_type_change($('#admin_user_access_control_resource_type'));
         block.on('change', '#admin_user_access_control_resource_type', function() {
           res_type_change($(this));
         });

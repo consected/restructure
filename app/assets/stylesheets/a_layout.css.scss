@@ -135,6 +135,15 @@ a.close-entity, a.glyphicon.glyphicon-remove-sign {
      }
 }
 
+.caret {
+  visibility: visible;
+  transform: none;
+}
+.caret.up {
+    visibility: visible;
+    transform: rotate(180deg);
+}
+
 .nav.nav-pills {
     li {
         > a {

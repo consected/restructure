@@ -16,13 +16,6 @@
     <%= f.text_field :role_name %>
   </div>
   <div class="form-group">
-    <%= f.label :access %>
-    <%
-    accesses = Admin::UserAccessControl.access_levels
-    %>
-    <%= f.select :access, accesses%>
-  </div>
-  <div class="form-group">
     <%= f.label :resource_type %>
     <%= f.select :resource_type, Admin::UserAccessControl.resource_types %>
   </div>
@@ -32,6 +25,13 @@
        select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'resource_name'    %>
 
     <%= f.select :resource_name, Admin::UserAccessControl.resource_names_by_type, select_item_type %>
+  </div>
+  <div class="form-group">
+    <%= f.label :access %>
+    <%
+    accesses = Admin::UserAccessControl.access_levels
+    %>
+    <%= f.select :access, accesses%>
   </div>
   <div class="form-group">
     <%= f.label :options %>

@@ -1,7 +1,7 @@
 <% rt = @report.result_tables_by_index || []%>
 
-<div class="data-results" data-subscription="admin-list" id="report-container">
-  <div data-result="admin-list" class="<%= @count_only ? 'count-only' : '' %>">
+<div class="data-results" id="report-container">
+  <div class="<%= @count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below no-processed-scroll"></div>
 
     <p class="text-center"><%= link_to "link to report", report_path(id: @report.id, search_attrs: @search_attrs.merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>
@@ -24,8 +24,12 @@
       </div>
     </div>
     <div id="report-results-block" class="<%= @count_only ? 'hidden' : '' %>">
+      <p class="text-center back-to-search-form">
+        <a href="#body-top" class="btn btn-default small back-to-search-form-btn"><i class="caret up"></i> back to search form</a>
+        <a href="#report-results-block" class="btn btn-default small show-results-btn"><i class="caret"></i> show all results</a>
+      </p>
       <div class="report-results-inner">
-        <table class="report-table">
+        <table class="report-table table tablesorter">
           <thead>
             <tr>
               <% if editable? %><th class="no-sort edit-button-column"></th><% end %>
@@ -38,7 +42,7 @@
               <% @results.fields.each do |col|
 
               %>
-                <th>
+                <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort.">
                   <p><%=col%></p>
                   <% unless num_tables == 1 %>
                   <p class="small report-table-name"><%=rt[i] %></p>
@@ -60,7 +64,11 @@
                 <% i = 0 %>
 
                 <% list_item.each do |col| %>
-                <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=rt[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %>"><%= col %></td>
+                <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=rt[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %>">
+                  <%  l = col&.scan("\n")&.length || 0
+                      got_nl = l > 2 %>
+                  <% if got_nl%><pre class="expandable"><% end %><%= col %><% if got_nl%></pre><% end %>
+                </td>
                 <%  i += 1 %>
                 <% end %>
 

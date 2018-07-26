@@ -548,6 +548,7 @@ _fpa = {
 
             var put_in_position = function(t, d) {
               var pos = t.attr('data-result-position');
+              console.log('Put in position');
               if(pos == 'replace')
                 t.replaceWith(d);
               else if(pos == 'before')
@@ -556,6 +557,7 @@ _fpa = {
                 t.after(d);
               else
                 t.html(d);
+              console.log('Done put in position');
             };
 
             // Since the results was basic HTML rendered by a partial typically, just push it into the

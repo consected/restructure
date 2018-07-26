@@ -158,13 +158,15 @@ _fpa.utils.ISOdatetoTimestamp = function(stre){
 _fpa.utils.YMDtoLocale = function(stre){
 
     // Take special care to avoid issues with timezones and daylight savings time quirks
-    if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0)){
+    if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) || stre.length > 15){
         startTime = new Date(Date.parse(stre));
         startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-        var d = startTime.toLocaleDateString();
+        var d = startTime.toLocaleString();
     } else {
         var d = new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
     }
+    if(d == 'Invalid Date') d = stre;
+
     return d;
 };
 
