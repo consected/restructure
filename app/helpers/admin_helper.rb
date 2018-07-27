@@ -30,7 +30,11 @@ module AdminHelper
     filter[filter_on] = val.to_s
 
     if val.present? || title == 'all'
-      link_to(title, index_path(filter: filter), class: "btn #{ val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm" )
+      like_type = title.end_with?('__%')
+      title = title[0..-4] if like_type
+      res = link_to(title, index_path(filter: filter), class: "btn #{ val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{like_type ? 'like-type' : ''}" )
+      res = "<p class=\"like-type\">#{res}</p>".html_safe if like_type
+      res
     else
       ''
     end

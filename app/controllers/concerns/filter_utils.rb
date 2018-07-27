@@ -11,7 +11,20 @@ module FilterUtils
       p = filter_params
       p.delete(:disabled)
 
-      pm = pm.where(p).all
+      likes = [""]
+      p.each do |k,v|
+        if v.end_with? '%'
+          likes[0] << ' AND ' if likes.length > 1
+          likes[0] << "#{k} LIKE ?"
+          likes << v
+          p.delete(k)
+        end
+      end
+
+      pm = pm.where(p)
+      pm = pm.where(likes) if likes.length > 1
+      
+      pm = pm.all
     end
 
     pm

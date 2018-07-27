@@ -27,6 +27,24 @@ _fpa.postprocessors_admin = {
           var val = $el.val();
           $('#admin_user_access_control_resource_name optgroup[label], #admin_user_access_control_access optgroup[label]').hide();
           $('#admin_user_access_control_resource_name optgroup[label="'+val+'"], #admin_user_access_control_access optgroup[label="'+val+'"]').show();
+          if(val == 'activity_log_type') {
+            var url = new URL(window.location.href);
+
+            var p = url.searchParams.get('filter[resource_name]')
+            var opts = $('#admin_user_access_control_resource_name optgroup[label="'+val+'"] option');
+            opts.show();
+            if(p) {
+              ps = p.replace('__%', '');
+              if(ps != p) {
+                opts.each(function() {
+                  var h = $(this).val();
+                  if(h.indexOf(ps) < 0) {
+                    $(this).hide();
+                  }
+                });
+              }
+            }
+          }
         };
         res_type_change($('#admin_user_access_control_resource_type'));
         block.on('change', '#admin_user_access_control_resource_type', function() {

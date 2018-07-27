@@ -9,9 +9,17 @@ class Admin::UserAccessControlsController < AdminController
     end
 
     def filters
+      rns = Admin::UserAccessControl.resource_names_by_type.clone
+      rnls = {}
+      rns.each do |rnt, v|
+        rnl = v.map {|rn| rn.split('__')[0..-2].join('__') + '__%'}.uniq.reject{|rn| rn == '__%'}
+        rns[rnt] += rnl
+        rns[rnt].sort!
+      end
+
       {
         app_type_id: Admin::AppType.all_by_name,
-        resource_name: Admin::UserAccessControl.resource_names_by_type,
+        resource_name: rns,
         user_id: User.active.pluck(:id, :email).to_h
       }
     end
