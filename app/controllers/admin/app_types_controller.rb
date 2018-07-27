@@ -6,11 +6,16 @@ class Admin::AppTypesController < AdminController
     begin
       _, results = Admin::AppType.import_config(uploaded_io.read, current_admin)
     rescue => e
-      render text: "<textarea>#{e}\n#{e.backtrace.join("\n")}</textarea>"
+      @message = 'FAILED'
+      @primary = "#{e}\n#{e.backtrace.join("\n")}"
+      render 'upload_results'
       return
     end
 
-    render json: results
+    @message = "SUCCESS"
+    @primary = JSON.pretty_generate results
+
+    render 'upload_results'
 
   end
 

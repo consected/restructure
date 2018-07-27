@@ -97,7 +97,7 @@ class Admin::AppType < Admin::AdminBase
           a.disable!
         end
       end
-      res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'user_access_controls', ['resource_type', 'resource_name'], add_vals: {allow_bad_resource_name: true}, reject: Proc.new {|a| a['access'].nil?}
+      res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'user_access_controls', ['resource_type', 'resource_name', 'role_name'], add_vals: {allow_bad_resource_name: true}, reject: Proc.new {|a| a['access'].nil?}
       app_type.reload
       return app_type, results
     end
@@ -159,6 +159,7 @@ class Admin::AppType < Admin::AdminBase
             i = i.first
             if i
               el = i
+              el = nil unless el.changed?
               i.update! new_vals
             else
               new_vals['disabled'] = true if create_disabled
@@ -175,13 +176,20 @@ class Admin::AppType < Admin::AdminBase
           if i
             el = i
             new_vals['disabled'] = true if i.respond_to?(:ready?) && !i.ready?
+            el = nil unless el.changed?
             i.update! new_vals
           else
             new_vals['disabled'] = true if create_disabled
             el = cname.create! new_vals
           end
         end
-        results << el if el
+        if el
+          if el.respond_to? :attributes
+            results << el.attributes
+          else
+            results << el
+          end
+        end
       end
     end
     results
