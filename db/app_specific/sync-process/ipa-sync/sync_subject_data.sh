@@ -21,6 +21,7 @@ WORKINGDIR=${BASEDIR}/tmp
 LOGDIR=${BASEDIR}/log
 SCRDIR=${BASEDIR}/scripts
 LOGFL=${LOGDIR}/sync_subject_data.log
+PSQLRESFL=${WORKINGDIR}/.last_psql_error
 
 
 cd $(dirname $0)
@@ -55,17 +56,17 @@ then
 fi
 
 # Main SQL scripts
-export IPA_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
-export IPA_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
-export IPA_ZEUS_FPHS_RESULTS_SQL_FILE=run_sync_results_fphs_db.sql
+export IPA_ZEUS_FPHS_SQL_FILE=${SCRDIR}/run_sync_subject_data_fphs_db.sql
+export IPA_AWS_SQL_FILE=${SCRDIR}/run_sync_subject_data_aws_db.sql
+export IPA_ZEUS_FPHS_RESULTS_SQL_FILE=${SCRDIR}/run_sync_results_fphs_db.sql
 
 # Temp files - can be anywhere - and will be cleaned up before and after use
-export IPA_SQL_FILE=$WORKINGDIR/temp_ipa.sql
-export IPA_ASSIGNMENTS_FILE=$WORKINGDIR/zeus_ipa_assignments.csv
-export IPA_PLAYER_INFOS_FILE=$WORKINGDIR/zeus_ipa_player_infos.csv
-export IPA_PLAYER_CONTACTS_FILE=$WORKINGDIR/zeus_ipa_player_contacts.csv
-export IPA_ADDRESSES_FILE=$WORKINGDIR/zeus_ipa_addresses.csv
-export IPA_ASSIGNMENTS_RESULTS_FILE=$WORKINGDIR/aws_ipa_assignments_results.csv
+export IPA_SQL_FILE=${WORKINGDIR}/temp_ipa.sql
+export IPA_ASSIGNMENTS_FILE=${WORKINGDIR}/zeus_ipa_assignments.csv
+export IPA_PLAYER_INFOS_FILE=${WORKINGDIR}/zeus_ipa_player_infos.csv
+export IPA_PLAYER_CONTACTS_FILE=${WORKINGDIR}/zeus_ipa_player_contacts.csv
+export IPA_ADDRESSES_FILE=${WORKINGDIR}/zeus_ipa_addresses.csv
+export IPA_ASSIGNMENTS_RESULTS_FILE=${WORKINGDIR}/aws_ipa_assignments_results.csv
 
 # Initially set the default schema for psql to be the AWS schema. This way, we do not need
 # set search_path=... directly coded in the scripts
@@ -79,14 +80,15 @@ function cleanup {
   rm $IPA_PLAYER_CONTACTS_FILE 2> /dev/null
   rm $IPA_ADDRESSES_FILE 2> /dev/null
   rm $IPA_ASSIGNMENTS_RESULTS_FILE 2> /dev/null
+  rm $PSQLRESFL 2> /dev/null
 }
 
 function log {
   echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}
 }
 
-function log_pipe {
-  read DATA
+function log_last_error {
+  DATA=$(cat ${PSQLRESFL} 2> /dev/null)
   if [ ! -z "${DATA}" ]
   then
     log "${DATA}"
@@ -111,11 +113,11 @@ log 'Starting subject data sync.'
 
 log "Match and export Zeus records"
 envsubst < $IPA_ZEUS_FPHS_SQL_FILE > $IPA_SQL_FILE
-{
-  PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE
-  LINECOUNT="$(wc -l < $IPA_ASSIGNMENTS_FILE)"
-} 2>&1 | log_pipe
 
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE 2> ${PSQLRESFL}
+log_last_error
+
+LINECOUNT="$(wc -l < $IPA_ASSIGNMENTS_FILE)"
 if [ -z "$LINECOUNT" ] || [ "$LINECOUNT" == '1' ]
 then
   log "Nothing to transfer. Exiting."
@@ -144,15 +146,14 @@ fi
 
 log "Transfer matched records to remote DB"
 envsubst < $IPA_AWS_SQL_FILE > $IPA_SQL_FILE
-{
-  psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE 2>&1 | log_pipe
-} 2>&1 | log_pipe
+psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE 2> ${PSQLRESFL}
+log_last_error
+
 # Mark the transferred records as completed
 log "Mark sync_statuses for transferred records"
 envsubst < $IPA_ZEUS_FPHS_RESULTS_SQL_FILE > $IPA_SQL_FILE
-{
-  PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE 2>&1 | log_pipe
-} 2>&1 | log_pipe
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE 2> ${PSQLRESFL}
+log_last_error
 
 # ----> Cleanup
 cleanup
