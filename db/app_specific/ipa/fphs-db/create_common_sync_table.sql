@@ -1,3 +1,5 @@
+-- sync_statuses table used to record attempted and completed synchronization of master record data from
+-- Zeus to external (AWS) databases
 SET search_path=ml_app;
 create table sync_statuses
   (

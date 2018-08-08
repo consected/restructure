@@ -16,15 +16,20 @@
 # Ensure that .pgpass is setup with the appropriate credentials
 #
 
-WORKINGDIR=/tmp
+BASEDIR=/FPHS/data/ipa-sync
+WORKINGDIR=${BASEDIR}/tmp
+LOGDIR=${BASEDIR}/log
+SCRDIR=${BASEDIR}/scripts
+LOGFL=${LOGDIR}/sync_subject_data.log
+
 
 cd $(dirname $0)
 
-. ../sync_db_connections.sh
+. ${BASEDIR}/sync_db_connections.sh
 
 if [ -z "$ZEUS_DB" ]
 then
-  echo "No matching environment"
+  log "No matching environment"
   exit 1
 fi
 
@@ -76,10 +81,27 @@ function cleanup {
   rm $IPA_ASSIGNMENTS_RESULTS_FILE 2> /dev/null
 }
 
+function log {
+  echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}
+}
+
+function log_pipe {
+  read DATA
+  if [ ! -z "${DATA}" ]
+  then
+    log "${DATA}"
+  fi
+}
+
 # ----> Cleanup from previous runs, just in case
 cleanup
 
+#================ Main Program ======================================
+
+log 'Starting subject data sync.'
+
 # ----> On Zeus FPHS DB
+# Run run_sync_subject_data_fphs_db.sql
 # Create a temp table temp_ipa_assignments to contain the  IPA IDs to sync, based on a simple query
 #
 # For all master_id in temp_ipa_assignments table, copy matching player_infos, player_contacts and addresses records
@@ -87,13 +109,16 @@ cleanup
 #
 # Copy temp_ipa_assignments to IPA_ASSIGNMENTS_FILE
 
-echo "Match and export Zeus records"
+log "Match and export Zeus records"
 envsubst < $IPA_ZEUS_FPHS_SQL_FILE > $IPA_SQL_FILE
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE
+{
+  PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE
+  LINECOUNT="$(wc -l < $IPA_ASSIGNMENTS_FILE)"
+} 2>&1 | log_pipe
 
-if [ "$(wc -l < $IPA_ASSIGNMENTS_FILE)" == '1' ]
+if [ -z "$LINECOUNT" ] || [ "$LINECOUNT" == '1' ]
 then
-  echo "Nothing to transfer. Exiting."
+  log "Nothing to transfer. Exiting."
   cleanup
   exit
 fi
@@ -117,15 +142,17 @@ fi
 # AWS DB master_id and user_id as a substitution for the original values pulled from Zeus.
 #
 
-echo "Transfer matched records to remote DB"
+log "Transfer matched records to remote DB"
 envsubst < $IPA_AWS_SQL_FILE > $IPA_SQL_FILE
-psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE
-
+{
+  psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE 2>&1 | log_pipe
+} 2>&1 | log_pipe
 # Mark the transferred records as completed
-echo "Mark sync_statuses for transferred records"
+log "Mark sync_statuses for transferred records"
 envsubst < $IPA_ZEUS_FPHS_RESULTS_SQL_FILE > $IPA_SQL_FILE
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE
-
+{
+  PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE 2>&1 | log_pipe
+} 2>&1 | log_pipe
 
 # ----> Cleanup
 cleanup

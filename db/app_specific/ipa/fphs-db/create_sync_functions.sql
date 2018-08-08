@@ -1,8 +1,11 @@
 SET search_path=ml_app;
 -------------------------------------------------------
 -- Find the IPA IDs that
--- are not null or the default value of 100 000 000
--- have a master record without a matching player_infos record
+-- are not null (an IPA ID is necessary)
+-- have an IPA Opt In tracker history record (the user has requested the sync)
+-- don't have a sync_statuses record (no attempt to sync has already been made) or
+-- a sync_statuses record is not marked as 'completed' or 'already transferred', and was created over 2 hours ago (allowing failed items to be retried)
+--
 CREATE OR REPLACE FUNCTION find_new_local_ipa_records(sel_sub_process_id INTEGER) RETURNS TABLE (
 	master_id integer,
   ipa_id integer
@@ -32,6 +35,7 @@ BEGIN
 END;
 $$;
 
+-- Add records to sync_statuses that indicate specific master IDs are in the process of being sync'd
 CREATE OR REPLACE FUNCTION lock_transfer_records(from_db VARCHAR, to_db VARCHAR, master_ids INTEGER[]) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
