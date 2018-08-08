@@ -114,10 +114,14 @@ class User < ActiveRecord::Base
     # Ensure that the app type being set for the user is valid and accessible to him
     def set_app_type
       if app_type_id
-        unless app_type in? Admin::AppType.all_available_to(self)
+        unless app_type_valid?
           self.app_type_id = nil
         end
       end
+    end
+
+    def app_type_valid?
+      app_type in? Admin::AppType.all_available_to(self)
     end
 
 end
