@@ -3,7 +3,9 @@ _fpa.loaded.reports = function(){
     _fpa.postprocessors.reports_form($('.report-criteria'));
     $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
-    _fpa.reports.window_scrolling();
+    if($('body').hasClass('user_page')) {
+      _fpa.reports.window_scrolling();      
+    }
 
 
     // If this an editable data form, automatically submit it if there are no criteria fields to enter

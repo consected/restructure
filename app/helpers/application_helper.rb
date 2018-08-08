@@ -32,12 +32,16 @@
       (ENV['FPHS_ENV_NAME'] || 'unknown').gsub(' ','_').underscore.downcase
     end
 
+    def admin_or_user_class
+      request.path.start_with?('/admin/') ? 'admin_page' : 'user_page'
+    end
+
     def current_app_type_id_class
       "app-type-id-#{current_user.app_type_id}" if current_user
     end
 
     def body_classes
-      " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class}\"".html_safe
+      " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class}\"".html_safe
     end
 
     def common_inline_cancel_button class_extras="pull-right"
