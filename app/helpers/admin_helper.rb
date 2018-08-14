@@ -23,18 +23,28 @@ module AdminHelper
   end
 
   def filter_btn title, filter_on, val
-
+    res = ''
     filter = (params[:filter] || {}).dup
 
     prev_val = filter[filter_on].to_s
     filter[filter_on] = val.to_s
 
+    unless title == 'all' || title.include?('__') || @shown_filter_break
+      @shown_filter_break = true
+      res = '<p>&nbsp;</p>'.html_safe
+    end
+
     if val.present? || title == 'all'
       like_type = title.end_with?('__%')
       title = title[0..-4] if like_type
-      res = link_to(title, index_path(filter: filter), class: "btn #{ val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{like_type ? 'like-type' : ''}" )
-      res = "<p class=\"like-type\">#{res}</p>".html_safe if like_type
-      res
+      linkres = link_to(title, index_path(filter: filter), class: "btn #{ val.blank? && prev_val.blank? || val.to_s == prev_val.to_s ? 'btn-primary' : 'btn-default'} btn-sm #{like_type ? 'like-type' : ''}" )
+      if like_type
+        @shown_filter_break = false
+        res += "<p class=\"like-type\">#{linkres}</p>".html_safe
+      else
+        res += linkres.html_safe
+      end
+      res.html_safe
     else
       ''
     end

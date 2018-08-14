@@ -9,11 +9,11 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   validate :correct_access
 
-  PermissionPriorityOrder = 'CASE
+  PermissionPriorityOrder = "CASE
   WHEN user_id IS NOT NULL THEN user_id::varchar
-  WHEN role_name IS NOT NULL THEN role_name
+  WHEN (role_name IS NOT NULL AND role_name <> '') THEN role_name
   ELSE user_id::varchar
-  END'
+  END"
 
   def self.resource_types
     [:table, :general, :external_id_assignments, :report, :activity_log_type]
@@ -127,9 +127,6 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
     app_type_id = alt_app_type_id || user.app_type_id
 
-    # Setup the user list of the desired user and nil, to allow fallback to nil if the user doesn't
-    # have the requested access under his own identity
-    user_list = [user, nil]
 
     if can_perform
       unless can_perform.is_a?(Array) || valid_access_level?(on_resource_type, can_perform) || valid_combo_level?(on_resource_type, can_perform)
@@ -145,28 +142,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     primary_conditions = {resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
     primary_conditions[:options] = with_options if with_options
 
-    where_clause = ''
-    where_conditions = []
-    if user
-      where_clause << 'user_id = ?'
-      where_conditions << user.id
-      rn = user.user_roles.role_names #_for app_type: user.app_type
-    end
-
-    if alt_role_name
-      rn = alt_role_name
-      rn = [rn] unless rn.is_a? Array
-    end
-
-    if rn && rn.length > 0
-      where_clause << ' OR ' if where_clause.present?
-      where_clause << 'role_name IN (?)'
-      where_conditions << rn
-    end
-
-    where_clause << ' OR ' if where_clause.present?
-    where_clause << '(user_id IS NULL AND role_name IS NULL)'
-    conditions = [where_clause] + where_conditions
+    conditions = generate_access_conditions(user, alt_role_name)
 
     # Get the user's own access first, roles next, and the fallback of null last. If the
     # user does not have his own access, then if she is a member of role_name, that'll be used and finally
@@ -185,6 +161,32 @@ class Admin::UserAccessControl < ActiveRecord::Base
     end
 
     res
+  end
+
+  def self.generate_access_conditions user, alt_role_name=nil
+    where_clause = ''
+    where_conditions = []
+    if user
+      where_clause << 'user_id = ?'
+      where_conditions << user.id
+      rn = user.user_roles.role_names
+    end
+
+    if alt_role_name
+      rn = alt_role_name
+      rn = [rn] unless rn.is_a? Array
+    end
+
+    if rn && rn.length > 0
+      where_clause << ' OR ' if where_clause.present?
+      where_clause << 'role_name IN (?)'
+      where_conditions << rn
+    end
+
+    where_clause << ' OR ' if where_clause.present?
+    where_clause << "(user_id IS NULL AND (role_name IS NULL OR role_name = ''))"
+    [where_clause] + where_conditions
+
   end
 
 
@@ -223,8 +225,13 @@ class Admin::UserAccessControl < ActiveRecord::Base
   # Get both the user's override, if it exists, and the default for each resource, which we then filter down to the actual access control
   # If there are no restrictions for this user in this app, just return nil
   def self.external_identifier_restrictions user
-    user_list = [user, nil]
-    res = Admin::UserAccessControl.active.where(app_type_id: user.app_type_id,  user: user_list, resource_type: :external_id_assignments).order('resource_name asc, user_id asc nulls last')
+
+    primary_conditions = {resource_type: :external_id_assignments, app_type_id: user.app_type_id}
+
+    conditions = generate_access_conditions(user)
+    res = self.active.where(primary_conditions).where(conditions).order(PermissionPriorityOrder)
+
+    # res = Admin::UserAccessControl.active.where(app_type_id: user.app_type_id,  user: user_list, resource_type: :external_id_assignments).order('resource_name asc, user_id asc nulls last')
     res_length = res.length
     return unless res_length > 0
 

@@ -3,7 +3,11 @@ class ExtraOptions
   # include CalcActions
 
   def self.base_key_attributes
-    [:name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options, :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :valid_if]
+    [
+      :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options,
+      :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :valid_if,
+      :filestore
+    ]
   end
   def self.add_key_attributes
     []
@@ -41,6 +45,11 @@ class ExtraOptions
         data_attribute: 'string or list of fields to use as the data attribute',
         always_embed_reference: 'reference name to always show embedded',
         alt_order: 'string or list of date / time or integer fields to use for ordering'
+      },
+      filestore: {
+        container: {
+          
+        }
       },
       save_action: {
         label: 'button label',
@@ -206,6 +215,9 @@ class ExtraOptions
       self.valid_if[:on_update] = os.merge(ou)
       self.valid_if[:on_create] = os.merge(oc)
     end
+
+    self.filestore ||= {}
+    self.filestore = self.filestore.symbolize_keys
 
     self
   end

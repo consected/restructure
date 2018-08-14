@@ -5,7 +5,7 @@
 
 class ExtraLogType < ExtraOptions
 
-  ValidSaveTriggers = [:notify, :create_reference].freeze
+  ValidSaveTriggers = [:notify, :create_reference, :create_filestore_container].freeze
 
 
   def self.add_key_attributes
@@ -46,7 +46,8 @@ class ExtraLogType < ExtraOptions
       save_trigger: {
         on_create: {
           notify: SaveTriggers::Notify.config_def(if_extras: "ref: ** conditions reference **"),
-          create_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **")
+          create_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **"),
+          create_filestore_container: SaveTriggers::CreateFilestoreContainer(if_extras: "ref: ** conditions reference **")
         },
         on_update: {
         },

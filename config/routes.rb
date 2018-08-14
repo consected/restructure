@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
 
-
   resources :reports
   resources :imports
 
@@ -79,6 +78,8 @@ Rails.application.routes.draw do
   devise_for :admins, :skip => [:registrations]
   devise_for :users, :skip => [:registrations]
 
+
+  mount NfsStore::Engine, at: "/nfs_store"
 
   as :admin do
     get 'admins/edit' => 'devise/registrations#edit', :as => 'edit_admin_registration'

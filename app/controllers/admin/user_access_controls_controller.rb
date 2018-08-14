@@ -10,11 +10,11 @@ class Admin::UserAccessControlsController < AdminController
 
     def filters
       rns = Admin::UserAccessControl.resource_names_by_type.clone
-      rnls = {}
       rns.each do |rnt, v|
         rnl = v.map {|rn| rn.split('__')[0..-2].join('__') + '__%'}.uniq.reject{|rn| rn == '__%'}
         rns[rnt] += rnl
-        rns[rnt].sort!
+        s = rns[rnt]
+        rns[rnt] = s.reject {|r| r.include?('__')}.sort + s.select {|r| r.include?('__')}.sort
       end
 
       {

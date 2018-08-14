@@ -24,6 +24,8 @@ gem 'delayed_job'
 gem 'delayed_job_active_record'
 gem 'daemons'
 
+gem 'nfs_store', path: '../nfs_store'
+
 gem 'crass', '~> 1.0.4'
 
 group :development do
