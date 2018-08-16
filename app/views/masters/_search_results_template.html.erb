@@ -81,6 +81,16 @@
   } %>
 <% end %>
 
+
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'nfs_store__manage__container',
+    caption: '{{name}}', # substitute the rec_type attribute (capitalized) as the block caption
+    prevent_edit: !(current_user.has_access_to? :edit, :table, :nfs_store__manage__containers),
+    prevent_create: !(current_user.has_access_to? :create, :table, :nfs_store__manage__containers),
+    item_list: %w(data),
+    data_sort: [:desc, "data-updated-at-ts"]
+  } %>
+
 <% # Setup the tracker handlebars templates %>
 <%= render partial: 'trackers/search_results_template' %>
 <%= render partial: 'tracker_histories/search_results_template' %>

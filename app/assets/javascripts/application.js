@@ -20,4 +20,5 @@
 //= require jquery-scrollto-min
 //= require jquery-mask
 //= require textarea-autogrow
+//= require nfs_store/application
 //= require_tree .

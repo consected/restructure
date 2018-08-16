@@ -1,4 +1,4 @@
-class CreateFilestoreContainer::Notify < SaveTriggers::SaveTriggersBase
+class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
 
   attr_accessor :role, :users, :layout_template, :content_template, :message_type, :subject, :receiving_user_ids
 
@@ -26,7 +26,10 @@ class CreateFilestoreContainer::Notify < SaveTriggers::SaveTriggersBase
   end
 
   def perform
-    NfsStore::Manage::Container.create_in_current_app name: @name
+    
+    container = NfsStore::Manage::Container.create_in_current_app user: item.master_user, name: @name, extra_params: {master: item.master}
+
+    ModelReference.create_with item, container
   end
 
 

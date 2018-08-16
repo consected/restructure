@@ -13,6 +13,7 @@
  *= require bootstrap
  *= require bootstrap-theme
  *= require chosen
+ *= require nfs_store/application
  *= require_tree .
  *= require_self
  */

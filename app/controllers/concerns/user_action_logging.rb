@@ -55,5 +55,12 @@ module UserActionLogging
       Admin::UserActionLog.create! user_id: current_user.id, app_type_id: current_user.app_type_id, master_id: master_id, item_type: it, index_action_ids: ids, action: action, url: request.original_fullpath
     end
 
+    # Overridable method. By default, action logging is enabled
+    # @return [Boolean]
+    #   false: enable logging
+    #   true: disable logging
+    def no_action_log
+      false
+    end
 
 end

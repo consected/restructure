@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 
-gem 'rails', '4.2.9'
+gem 'rails', '4.2.10'
 gem 'pg', '~> 0.15'
 
 gem 'jquery-rails'
@@ -25,6 +25,8 @@ gem 'delayed_job_active_record'
 gem 'daemons'
 
 gem 'nfs_store', path: '../nfs_store'
+gem 'activerecord-import'
+
 
 gem 'crass', '~> 1.0.4'
 

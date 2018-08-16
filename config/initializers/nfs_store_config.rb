@@ -37,3 +37,34 @@ ActiveSupport.on_load(:nfs_store_config) do
 end
 
 raise FsException::Config.new "action_dispatch.x_sendfile_header not set in production.rb" if Rails.env.production? && ! Rails.configuration.action_dispatch.x_sendfile_header
+
+ActiveSupport.on_load(:nfs_store_container) do
+
+  module NfsStore
+
+    module Manage
+      class Container < NfsStore::UserBase
+        include HandlesUserBase
+        include UserHandler
+        include NfsStore::OverrideContainer
+
+      end
+    end
+  end
+
+end
+
+ActiveSupport.on_load(:nfs_store_container_list_controller) do
+
+  module NfsStore
+    class ContainerListController < NfsStoreController
+      include ModelNaming
+      include ControllerUtils
+      include AppExceptionHandler
+      include UserActionLogging
+      include MasterHandler
+      include NfsStore::OverrideContainerListController
+    end
+  end
+
+end

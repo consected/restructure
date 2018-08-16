@@ -874,6 +874,19 @@ _fpa.form_utils = {
 
     },
 
+    setup_filestore: function(block) {
+
+      block.find('.browse-container').not('.nfs-store-setup').each(function() {
+        var inblock = $(this);
+        window.setTimeout(function() {
+          inblock.find('.refresh-container-list').click();
+          (inblock.nfs_store_uploader = _nfs_store.uploader)(inblock);
+        },10);
+      }).addClass('nfs-store-setup');
+      // Initialize the nfs_store browser and uploader
+
+    },
+
     setup_error_clear: function (block) {
       block.on('change', '.has-error .form-control', function() {
         var p = $(this).parent();
@@ -995,6 +1008,7 @@ _fpa.form_utils = {
         _fpa.form_utils.mask_inputs(block);
         _fpa.form_utils.setup_textarea_autogrow(block);
         _fpa.form_utils.setup_contact_field_mask(block);
+        _fpa.form_utils.setup_filestore(block);
 
         _fpa.form_utils.setup_error_clear(block);
         _fpa.form_utils.resize_children(block);

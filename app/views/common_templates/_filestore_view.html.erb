@@ -1,0 +1,25 @@
+<script id="filestore_<%=name%>_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+<div class="browse-container">
+  <%= render partial: 'nfs_store/browse/browser_header', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}' } %>
+  <div class="upload-dropzone">
+
+    <div class="nfs-store-container-block" data-container-id="{{to_record_id}}">
+      <%= render partial: 'nfs_store/browse/show', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}' } %>
+
+      <div class="browse-controls">
+        <div class="download-actions text-center">
+          <%= render partial: 'nfs_store/browse/download_button', locals: { container_id: '{{to_record_id}}' } %>
+          <%= render partial: 'nfs_store/uploader/add_files', locals: { container_id: '{{to_record_id}}', container_writable: true } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <%= render partial: 'nfs_store/uploader/index' %>
+    </div>
+
+    <div class="drop-info">drop files to upload</div>
+  </div>
+</div>
+</script>

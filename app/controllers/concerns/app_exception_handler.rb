@@ -2,6 +2,16 @@ module AppExceptionHandler
   extend ActiveSupport::Concern
 
   included do
+    rescue_from ActiveRecord::RecordNotFound, with: :runtime_record_not_found_handler
+    rescue_from ActionController::RoutingError, with: :routing_error_handler
+    rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
+    rescue_from FphsException, with: :fphs_app_exception_handler
+    rescue_from PG::RaiseException, with: :fphs_app_exception_handler
+    rescue_from ActionDispatch::Cookies::CookieOverflow, with: :cookie_overflow_handler
+    rescue_from PG::UniqueViolation, with: :db_unique_violation
+    rescue_from RuntimeError, with: :runtime_error_handler
+    rescue_from Exception, with: :unhandled_exception_handler
+
   end
 
   def child_error_reporter
@@ -10,6 +20,42 @@ module AppExceptionHandler
 
 
   protected
+
+    def not_authorized
+      flash[:danger] = "You are not authorized to perform the requested action"
+      render text: flash[:danger], status: :unauthorized
+    end
+
+    def not_editable
+      flash[:danger] = "This item can't be edited"
+      render text: flash[:danger], status: :not_editable
+    end
+
+    def not_creatable
+      flash[:danger] = "This item can't be created"
+      render text: flash[:danger], status: 403
+    end
+
+    def not_found
+      flash[:danger] = "Requested information not found"
+      raise ActionController::RoutingError.new('Not Found')
+    end
+
+    def bad_request
+      flash[:danger] = "The request failed to validate"
+      render text: flash[:danger], status: 422
+    end
+
+    def unexpected_error msg
+      flash[:danger] = "An error occurred: #{msg}"[0..2000]
+      render text: flash[:danger], status: 400
+    end
+
+    def general_error msg, level=:info
+      flash[level] = "Error: #{msg}"[0..2000]
+      render text: flash[level], status: 400
+    end
+
 
     def db_unique_violation e
       msg = e.message

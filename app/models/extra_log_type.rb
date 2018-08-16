@@ -47,7 +47,7 @@ class ExtraLogType < ExtraOptions
         on_create: {
           notify: SaveTriggers::Notify.config_def(if_extras: "ref: ** conditions reference **"),
           create_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **"),
-          create_filestore_container: SaveTriggers::CreateFilestoreContainer(if_extras: "ref: ** conditions reference **")
+          create_filestore_container: SaveTriggers::CreateFilestoreContainer.config_def(if_extras: "ref: ** conditions reference **")
         },
         on_update: {
         },

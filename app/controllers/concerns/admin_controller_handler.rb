@@ -87,6 +87,9 @@ module AdminControllerHandler
 
   protected
 
+    def canceled?
+      params[:id] == 'cancel'
+    end
 
 
     def filters

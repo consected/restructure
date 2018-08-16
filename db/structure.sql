@@ -10991,7 +10991,10 @@ CREATE TABLE ml_app.nfs_store_containers (
     name character varying,
     user_id integer,
     app_type_id integer,
-    nfs_store_container_id integer
+    nfs_store_container_id integer,
+    master_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -17939,6 +17942,13 @@ CREATE INDEX index_nfs_store_archived_files_on_nfs_store_container_id ON ml_app.
 
 
 --
+-- Name: index_nfs_store_containers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_containers_on_master_id ON ml_app.nfs_store_containers USING btree (master_id);
+
+
+--
 -- Name: index_nfs_store_containers_on_nfs_store_container_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -22188,6 +22198,14 @@ ALTER TABLE ONLY ml_app.player_infos
 
 
 --
+-- Name: fk_rails_2708bd6a94; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_containers
+    ADD CONSTRAINT fk_rails_2708bd6a94 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_272f69e6af; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -23568,4 +23586,8 @@ INSERT INTO schema_migrations (version) VALUES ('20180814142561');
 INSERT INTO schema_migrations (version) VALUES ('20180814142562');
 
 INSERT INTO schema_migrations (version) VALUES ('20180814142924');
+
+INSERT INTO schema_migrations (version) VALUES ('20180814180843');
+
+INSERT INTO schema_migrations (version) VALUES ('20180815104221');
 
