@@ -41,6 +41,9 @@ module ControllerUtils
       p1
     end
 
+    def canceled?
+      params[:id] == 'cancel'
+    end
 
 
 end

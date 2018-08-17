@@ -10,7 +10,7 @@ _fpa.utils.jump_to_linked_item = function(target, offset) {
   if(offset == null) offset = -50;
 
   $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
-  if(!target) return;
+  if(!target || target.length < 5) return;
   var h = $(target).addClass('item-highlight linked-item-highlight');
   if(!h || h.length == 0)
     return;
