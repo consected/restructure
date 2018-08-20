@@ -1,0 +1,5 @@
+en:
+  errors:
+    messages:
+      password:
+        password_strength: "is too weak"
