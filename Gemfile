@@ -25,8 +25,8 @@ gem 'delayed_job_active_record'
 gem 'daemons'
 
 
-# gem 'nfs_store', path: '../nfs_store'
-gem 'nfs_store', '0.0.1', path: '.'
+gem 'nfs_store', path: '../nfs_store'
+# gem 'nfs_store', '0.0.1', path: '.'
 
 
 
