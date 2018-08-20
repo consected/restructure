@@ -5,7 +5,7 @@ class CreateUploads < ActiveRecord::Migration
       t.string   "file_hash", null: false
       t.string   "file_name", null: false
       t.string   "content_type", null: false
-      t.integer  "file_size", null: false
+      t.bigint  "file_size", null: false
       t.integer  "chunk_count"
       t.boolean  "completed"
       t.datetime "file_updated_at"

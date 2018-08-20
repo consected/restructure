@@ -5,7 +5,7 @@ class CreateStoredFiles < ActiveRecord::Migration
       t.string   "file_hash", unique: true, null: false
       t.string   "file_name", null: false
       t.string   "content_type", null: false
-      t.integer  "file_size", null: false
+      t.bigint  "file_size", null: false
       t.string  "path"
       t.datetime "file_updated_at"
       t.belongs_to :user, foreign_key: true

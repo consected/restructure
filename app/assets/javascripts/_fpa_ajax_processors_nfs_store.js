@@ -5,6 +5,7 @@ _fpa.postprocessors_nfs_store = {
     p.fs_browser = _nfs_store.fs_browser;
     setTimeout(function() {
       p.fs_browser(p);
+      _fpa.form_utils.setup_extra_actions(block);
       _fpa.form_utils.resize_children(block);
     }, 100);
   }

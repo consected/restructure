@@ -54,6 +54,26 @@ ActiveSupport.on_load(:nfs_store_container) do
 
 end
 
+# ActiveSupport.on_load(:nfs_store_container_file) do
+#
+#   module NfsStore
+#
+#     module Manage
+#       class ContainerFile < NfsStore::UserBase
+#         include HandlesUserBase
+#         include UserHandler
+#         include NfsStore::OverrideContainerFile
+#
+#         def master
+#           container.master
+#         end
+#
+#       end
+#     end
+#   end
+#
+# end
+
 ActiveSupport.on_load(:nfs_store_container_list_controller) do
 
   module NfsStore
@@ -68,3 +88,19 @@ ActiveSupport.on_load(:nfs_store_container_list_controller) do
   end
 
 end
+
+
+# ActiveSupport.on_load(:nfs_store_classification_controller) do
+#
+#   module NfsStore
+#     class ClassificationController < NfsStoreController
+#       include ModelNaming
+#       include ControllerUtils
+#       include AppExceptionHandler
+#       include UserActionLogging
+#       # include MasterHandler
+#       include NfsStore::OverrideClassificationController
+#     end
+#   end
+#
+# end
