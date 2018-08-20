@@ -24,7 +24,14 @@ gem 'delayed_job'
 gem 'delayed_job_active_record'
 gem 'daemons'
 
-gem 'nfs_store', path: '../nfs_store'
+group :development, :test do
+  gem 'nfs_store', path: '../nfs_store'
+end
+group :production do
+  gem 'nfs_store', path: './nfs_store-0.0.1.gem'
+end
+
+
 gem 'activerecord-import'
 
 
