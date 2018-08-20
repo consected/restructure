@@ -50,3 +50,8 @@ docs/junk
 
 db/app_specific/**/*.zip
 db/dumps/aws-elaine-dev.sql
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
