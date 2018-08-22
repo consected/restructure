@@ -10949,7 +10949,7 @@ ALTER SEQUENCE ml_app.new_tests_id_seq OWNED BY ml_app.new_tests.id;
 
 CREATE TABLE ml_app.nfs_store_archived_files (
     id integer NOT NULL,
-    file_hash character varying NOT NULL,
+    file_hash character varying,
     file_name character varying NOT NULL,
     content_type character varying NOT NULL,
     archive_file character varying NOT NULL,
@@ -11113,7 +11113,8 @@ CREATE TABLE ml_app.nfs_store_uploads (
     user_id integer,
     nfs_store_container_id integer,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    path character varying
 );
 
 
@@ -18791,7 +18792,7 @@ CREATE UNIQUE INDEX index_users_on_unlock_token ON ml_app.users USING btree (unl
 -- Name: nfs_store_stored_files_unique_file; Type: INDEX; Schema: ml_app; Owner: -
 --
 
-CREATE UNIQUE INDEX nfs_store_stored_files_unique_file ON ml_app.nfs_store_stored_files USING btree (nfs_store_container_id, file_hash, file_name);
+CREATE UNIQUE INDEX nfs_store_stored_files_unique_file ON ml_app.nfs_store_stored_files USING btree (nfs_store_container_id, file_hash, file_name, path);
 
 
 --
@@ -23595,4 +23596,10 @@ INSERT INTO schema_migrations (version) VALUES ('20180817114138');
 INSERT INTO schema_migrations (version) VALUES ('20180817114157');
 
 INSERT INTO schema_migrations (version) VALUES ('20180818133205');
+
+INSERT INTO schema_migrations (version) VALUES ('20180821123717');
+
+INSERT INTO schema_migrations (version) VALUES ('20180822085118');
+
+INSERT INTO schema_migrations (version) VALUES ('20180822093147');
 

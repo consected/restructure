@@ -2,7 +2,7 @@
 class CreateArchivedFile < ActiveRecord::Migration
   def change
     create_table :nfs_store_archived_files do |t|
-      t.string "file_hash", null: false
+      t.string "file_hash"
       t.string "file_name", null: false
       t.string "content_type", null: false
       t.string :archive_file, null: false

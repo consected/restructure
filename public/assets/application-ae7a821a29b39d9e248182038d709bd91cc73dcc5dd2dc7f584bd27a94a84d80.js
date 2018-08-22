@@ -28316,7 +28316,7 @@ _nfs_store.uploader = function ($outer) {
         currentChunk = 0,
         spark = new SparkMD5.ArrayBuffer(),
         spark_chunk = new SparkMD5.ArrayBuffer();
-
+    var abortClicked;
 
     var frOnload = function(e) {
 
@@ -28345,6 +28345,10 @@ _nfs_store.uploader = function ($outer) {
     };
 
     function md5Chunk(new_file, callback) {
+      if(abortClicked) {
+        callback = null;
+        return;
+      }
 
       if(new_file) {
         currentChunk = 0;
@@ -28366,16 +28370,30 @@ _nfs_store.uploader = function ($outer) {
     };
 
 
-    var addFileBlock = function(data, index, file) {
+    var addFileBlock = function(data, index, file, e, that) {
       var $block = $outer.find('.template .file-block').clone(true).attr('data-file-index', index);
       $block.find('.file-name').text(file.name);
+      abortClicked = false;
 
       $block.find('.button-upload-abort').on('click', function () {
         var $this = $(this),
             data = $this.data();
-        $this.remove();
+        $this.hide();
+        abortClicked = true;
+        $block.find('.button-upload-resume').show();
         data.abort();
       }).data(data);
+
+      $block.find('.button-upload-resume').on('click', function () {
+        $(this).hide();
+        $block.find('.button-upload-abort').show();
+        abortClicked = false;
+        setBlockReady($block);
+        // $.blueimp.fileupload.prototype.options.add.call(that, e, data);
+        // setTimeout(function() { data.submit(); }, 100);
+        submitNext(that, e);
+      });
+
 
       $block.find('.started-at').html(new Date().toLocaleString());
 
@@ -28394,6 +28412,7 @@ _nfs_store.uploader = function ($outer) {
 
     var setBlockComplete = function($block) {
       $block.removeClass('process-ready').addClass('process-complete');
+      $block.removeClass('progress-running');
       removeAbortButton($block);
       console.log('completed upload of file');
     };
@@ -28406,12 +28425,21 @@ _nfs_store.uploader = function ($outer) {
       $block.find('.file-error').text('file upload failed: ' + error_array.join(' | '));
       $block.find('.progress-bar').addClass('progress-bar-failed').removeClass('progress-bar-success');
       $block.find('.progress-bar-status-text').text('failed');
+      $block.removeClass('progress-running');
       removeAbortButton($block);
       showAddFilesButton();
     };
 
+    var setBlockReady = function($block) {
+      $block.addClass('process-ready').removeClass('process-complete');
+      $block.find('.file-error').text('');
+      $block.find('.progress-bar').removeClass('progress-bar-failed').addClass('progress-bar-success');
+      $block.find('.progress-bar-status-text').text('processing');
+
+    };
+
     var removeAbortButton = function($block) {
-      $block.find('.button-upload-abort').remove();
+      $block.find('.button-upload-abort').hide();
     };
 
     var showAddFilesButton = function() {
@@ -28459,16 +28487,26 @@ _nfs_store.uploader = function ($outer) {
       var $block = getFileBlock();
       if($block.length == 0) return;
       var data = $block.data();
+
+      abortClicked = false;
+      $block.addClass('progress-running');
+      $block.find('.progress-bar-status-text').text('processing');
       md5Chunk(data.files[0], function(md5){
         if(!data.formData) data.formData = {};
         data.formData.file_hash = md5;
         data.formData.container_id = getContainerId();
-
+        if(data.files[0].relativePath && data.files[0].relativePath != '')
+          data.formData.relative_path = data.files[0].relativePath;
         if(chunk_hashes.length == 1)
           data.formData.chunk_hash = chunk_hashes.shift();
         if(that) {
+          var test_params = {
+            file_name: data.files[0].name,
+            file_hash: data.formData.file_hash,
+            relative_path: data.formData.relative_path
+          };
 
-          $.getJSON(fileupload_config.url + '/' + getContainerId(), {file_name: data.files[0].name, file_hash: data.formData.file_hash}, function (result) {
+          $.getJSON(fileupload_config.url + '/' + getContainerId(), test_params, function (result) {
             if(result.result == 'found' && !result.completed) {
               var file_size = result.file_size;
               var chunk_count = result.chunk_count;
@@ -28508,34 +28546,35 @@ _nfs_store.uploader = function ($outer) {
     });
 
 
-    $outer.find('input.nfs-store-fileupload').fileupload(fileupload_config).on('click', function(){
+    var $main_uploader = $outer.find('input.nfs-store-fileupload').fileupload(fileupload_config).on('click', function(){
       clearFileBlocks();
     }).on('fileuploadadd', function (e, data) {
       hideAddFilesButton();
       var that = this;
       $.each(data.files, function (index, file) {
         var first_file = getFileBlock().length == 0;
-        var $block = addFileBlock(data, index, file);
+        var $block = addFileBlock(data, index, file, e, that);
         if(first_file)
           submitNext(that, e);
       });
     }).on('fileuploadchunkbeforesend', function (e, data) {
       if(!data.formData) data.formData = {};
       data.formData.chunk_hash = chunk_hashes.shift();
+      var $block = getFileBlock();
+      $block.find('.progress-bar-status-text').text('uploading');
 
-
+    }).on('fileuploadchunksend', function (e, data) {
+      return !abortClicked;
     }).on('fileuploadprocessalways', function (e, data) {
       console.log('fileuploadprocessalways');
-        var index = 0,
-            file = data.files[index],
-            $block = getFileBlock();
-            $block.find('.progress-bar-status-text').text('uploading');
-        // if (file.preview) {
-        //     $block.prepend(file.preview);
-        // }
-        if (file.error) {
-            $block.find('.file-error').text(file.error);
-        }
+      var index = 0,
+          file = data.files[index],
+          $block = getFileBlock();
+
+      $block.find('.progress-bar-status-text').text('uploading');
+      if (file.error) {
+          $block.find('.file-error').text(file.error);
+      }
 
     }).on('fileuploadprogress', function (e, data) {
 
@@ -28560,7 +28599,6 @@ _nfs_store.uploader = function ($outer) {
       var $block = getFileBlock();
 
       if (file.url) {
-          refreshContainerList();
           $block.find('.progress-bar-status-text').text('completed');
       } else if (file.error) {
           $block.find('.file-error').text(file.error);
@@ -28570,12 +28608,15 @@ _nfs_store.uploader = function ($outer) {
 
 
     }).on('fileuploadfail', function (e, data) {
+      var error_array;
       console.log('fileuploadfail');
-      $.each(data.files, function (index) {
-        var error_array = errorFromHeader(data);
-        setBlockFailed(error_array);
-      });
-
+      if(abortClicked) {
+        error_array = ['Upload canceled'];
+      }
+      else {
+        error_array = errorFromHeader(data);
+      }
+      setBlockFailed(error_array);
     }).on('fileuploadalways', function (e, data) {
       console.log('fileuploadalways');
       var that = this;
@@ -28586,11 +28627,12 @@ _nfs_store.uploader = function ($outer) {
 
         // blocks left to complete?
         var next_block = getFileBlock();
-        if(next_block.length > 0) {
+        if(!abortClicked && next_block.length > 0) {
           submitNext();
         }
         else {
           showAddFilesButton();
+          refreshContainerList();
         }
       })
 
@@ -31390,6 +31432,10 @@ _fpa.postprocessors_reports = {
           _fpa.reports.results_subsearch(block);
 
           _fpa.form_utils.setup_tablesorter($('#report-results-block'));
+          block.find('.expandable').not('.attached-exp').on('click', function(){
+              if($(this).attr('disabled')) return;
+              _fpa.form_utils.toggle_expandable($(this));
+          }).addClass('attached-exp');
           $('prevent-scroll').removeClass('prevent-scroll');
         }, 50);
 

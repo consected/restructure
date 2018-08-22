@@ -79,7 +79,8 @@
   display: none; }
 
 .container-meta-controls {
-  text-align: right; }
+  text-align: right;
+  padding-right: 1em; }
   .container-meta-controls input[type="radio"] {
     vertical-align: text-bottom; }
   .container-meta-controls .show-label {
@@ -117,28 +118,51 @@
 .browse-container .progress {
   float: right;
   width: 45%;
-  margin-bottom: 0; }
+  margin-bottom: 0;
+  position: relative;
+  background-image: linear-gradient(to bottom, #aaa 0%, #aaa 100%); }
 .browse-container .file-info-block {
   float: none;
   clear: both;
   display: block;
   position: relative;
   overflow: hidden; }
-.browse-container .started-at {
-  float: left;
-  padding-left: 1em;
-  text-shadow: 1px 1px 1px black; }
-.browse-container .progress-bar-status-text {
-  text-shadow: 1px 1px 1px black;
-  font-weight: bold; }
-.browse-container .ended-at {
-  float: right;
-  padding-right: 1em;
-  text-shadow: 1px 1px 1px black; }
+.browse-container .progress-info {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  color: white;
+  text-align: center; }
+  .browse-container .progress-info .started-at {
+    padding-left: 1em;
+    text-shadow: 1px 1px 1px black;
+    white-space: nowrap;
+    float: left; }
+  .browse-container .progress-info .progress-bar-status-text {
+    text-shadow: 1px 1px 1px black;
+    font-weight: bold;
+    width: 100%;
+    left: 0;
+    right: 0;
+    position: absolute; }
+  .browse-container .progress-info .ended-at {
+    float: right;
+    padding-right: 1em;
+    text-shadow: 1px 1px 1px black; }
 .browse-container .progress-bar-failed {
   background-color: #a54444; }
 .browse-container .file-error {
   margin-top: 10px; }
+.browse-container .button-upload-abort {
+  float: right;
+  margin-top: -10px;
+  display: none; }
+.browse-container .button-upload-resume {
+  float: right;
+  margin-top: -10px;
+  display: none; }
+.browse-container .progress-running .button-upload-abort {
+  display: inline-block; }
 /*
  * jQuery File Upload Plugin CSS
  * https://github.com/blueimp/jQuery-File-Upload
