@@ -14,8 +14,6 @@ class Admin::UserRole < ActiveRecord::Base
   # to the user's current app type
   scope :user_app_type, ->(user) { where user_roles: { app_type_id: user.app_type_id } }
 
-  # Prevent Admin::UserRole.where being called directly, accidentally bypassing the app_type scoping.
-  private_class_method :where
 
   def self.role_names
     select("role_name").distinct.pluck(:role_name)

@@ -23,7 +23,7 @@ module FilterUtils
 
       pm = pm.where(p)
       pm = pm.where(likes) if likes.length > 1
-      
+
       pm = pm.all
     end
 
