@@ -6,12 +6,7 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
     {
       name: 'general name',
       label: 'human name',
-      set_default_roles: {
-        role_name: {
-          dir_permissions: 'rwx',
-          file_permissions: 'r'
-        }
-      },
+      create_with_role: 'role name',
       if: if_extras
     }
   end
@@ -21,14 +16,14 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
 
     @name = config[:name]
     @label = config[:label]
-    @set_default_roles = config[:set_default_roles]
+    @create_with_role = config[:create_with_role]
+    
 
   end
 
   def perform
-    
-    container = NfsStore::Manage::Container.create_in_current_app user: item.master_user, name: @name, extra_params: {master: item.master}
 
+    container = NfsStore::Manage::Container.create_in_current_app user: item.master_user, name: @name, extra_params: {master: item.master, create_with_role: @create_with_role}
     ModelReference.create_with item, container
   end
 
