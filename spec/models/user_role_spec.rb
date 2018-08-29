@@ -8,9 +8,15 @@ RSpec.describe Admin::UserRole, type: :model do
   TestRoleName = 'test_role_1'
 
   it "prevents others from querying UserRole.where directly" do
+    create_admin
+    create_user
+
     expect {
-      Admin::UserRole.where TestRoleName
-    }.to raise_error NoMethodError
+      Admin::UserRole.where role_name: TestRoleName
+    }.to raise_error FphsException
+
+    res = Admin::UserRole.where role_name: TestRoleName, app_type: @user.app_type
+    expect(res).to be_a ActiveRecord::Relation
   end
 
   it "always ensures an app type is applied to the user roles selection" do

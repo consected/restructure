@@ -15,6 +15,30 @@ class Admin::UserRole < ActiveRecord::Base
   scope :user_app_type, ->(user) { where user_roles: { app_type_id: user.app_type_id } }
 
 
+  # Get a resultset of active roles for the user.
+  # @param user [User] if the app_type attribute is set in the user, and is not set in conditions
+  #                    then the user app_type will be used
+  # @param conditions [Hash] if app_type or app_type_id are set then they will be used to set the app_type,
+  #                          overriding the attribute set in the user
+  # @return [ActiveRecord::Relation]
+  def self.active_app_roles user, conditions={}
+    app_type = conditions[:app_type] || conditions[:app_type_id] || user.app_type
+    active.where user: user, app_type: app_type
+  end
+
+  # Prevent Admin::UserRole.where from accidentally bypassing the app_type scoping.
+  # @param conditions [Hash] full set of where clause conditions
+  # @return [ActiveRecord::Relation]
+  def self.where conditions
+
+    ur_cond = conditions
+    if ur_cond.is_a? Hash
+      ur_cond = conditions[:user_roles] if conditions[:user_roles]
+      raise FphsException.new "UserRole.where must use app_type condition" unless ur_cond[:app_type] || ur_cond[:app_type_id]
+    end
+    super
+  end
+
   def self.role_names
     select("role_name").distinct.pluck(:role_name)
   end
@@ -25,7 +49,7 @@ class Admin::UserRole < ActiveRecord::Base
   end
 
   # conditions must include app_type and role_name, and may include other conditions
-  def self.active_user_ids conditions=nil, app_type: app_type, role_name: role_name
+  def self.active_user_ids conditions=nil, app_type:, role_name:
     res = select("user_id").joins(:user).where(
       "(user_roles.disabled is null or user_roles.disabled = false) AND (users.disabled is null or users.disabled = false)"
     )

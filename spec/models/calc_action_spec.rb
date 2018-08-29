@@ -18,11 +18,11 @@ RSpec.describe "Calculate conditional actions", type: :model do
     @al0.master_id = @al.master_id
     @al0.save!
 
-    Admin::UserRole.send(:where, role_name: 'test').delete_all
+    Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).delete_all
     Admin::UserRole.create! app_type: u1.app_type, user: u1, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test', current_admin: @admin
 
-    expect(Admin::UserRole.send(:where, role_name: 'test').count).to eq 2
+    expect(Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).count).to eq 2
 
     @role_user_ids = [u1.id, @user.id]
 
