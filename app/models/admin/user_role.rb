@@ -31,10 +31,11 @@ class Admin::UserRole < ActiveRecord::Base
   # @return [ActiveRecord::Relation]
   def self.where conditions
 
-    ur_cond = conditions
-    if ur_cond.is_a? Hash
+    if conditions.is_a? Hash
+      ur_cond = conditions.dup
       ur_cond = conditions[:user_roles] if conditions[:user_roles]
-      raise FphsException.new "UserRole.where must use app_type condition" unless ur_cond[:app_type] || ur_cond[:app_type_id]
+      ur_cond.symbolize_keys!
+      raise FphsException.new "UserRole.where must use app_type condition" unless ur_cond[:id] || ur_cond[:app_type] || ur_cond[:app_type_id]
     end
     super
   end
