@@ -14,9 +14,14 @@ RSpec.describe Admin::ItemFlagNamesController, type: :controller do
     @edit_form_admin = "admin/common_templates/_form"
   end
 
+  def saved_item_template
+    'admin/common_templates/_item'
+  end
+
   before(:all) do
     seed_database
     @path_prefix = "/admin"
+    @uses_common_templates = true
   end
 
   it_behaves_like 'a standard admin controller'

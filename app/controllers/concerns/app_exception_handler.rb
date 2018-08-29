@@ -38,7 +38,7 @@ module AppExceptionHandler
 
     def not_found
       flash[:danger] = "Requested information not found"
-      raise ActionController::RoutingError.new('Not Found')
+      routing_error_handler ActionController::RoutingError.new('Not Found')
     end
 
     def bad_request
@@ -102,7 +102,7 @@ module AppExceptionHandler
 
     def return_and_log_error e, msg, code
       logger.error e.inspect
-      logger.error e.backtrace.join("\n")
+      logger.error e.backtrace.join("\n") if e.backtrace
 
       if code.in? [400, 500]
         user_id = current_user&.id

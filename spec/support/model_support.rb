@@ -69,7 +69,7 @@ module ModelSupport
     Admin::UserRole.create! current_admin: @admin, app_type: app_type, role_name: role_name, user: user
   end
 
-  def create_app_type name: name, label: label
+  def create_app_type name: nil, label: nil
     Admin::AppType.create! current_admin: @admin, name: name, label: label
   end
 
