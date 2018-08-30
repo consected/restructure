@@ -6,7 +6,7 @@
 
     <div class="nfs-store-container-block" data-container-id="{{to_record_id}}">
       <%= render partial: 'nfs_store/browse/show', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}' } %>
-
+      <%= render partial: 'filestore/classification/block', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}' } %>
       <div class="browse-controls">
         <div class="download-actions text-center">
           <%= render partial: 'nfs_store/browse/download_button', locals: { container_id: '{{to_record_id}}' } %>

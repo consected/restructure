@@ -70,6 +70,10 @@ Rails.application.routes.draw do
     get ':item_controller/:item_id/item_flags/:id', to: 'item_flags#show'
     post ':item_controller/:item_id/item_flags', to: 'item_flags#create'
 
+    namespace :filestore do
+      resources :classification
+    end
+
   end
 
   ExternalIdentifier.routes_load

@@ -54,25 +54,28 @@ ActiveSupport.on_load(:nfs_store_container) do
 
 end
 
-# ActiveSupport.on_load(:nfs_store_container_file) do
-#
-#   module NfsStore
-#
-#     module Manage
-#       class ContainerFile < NfsStore::UserBase
-#         include HandlesUserBase
-#         include UserHandler
-#         include NfsStore::OverrideContainerFile
-#
-#         def master
-#           container.master
-#         end
-#
-#       end
-#     end
-#   end
-#
-# end
+ActiveSupport.on_load(:nfs_store_container_file) do
+
+  module NfsStore
+
+    module Manage
+      class ContainerFile < NfsStore::UserBase
+        include HandlesUserBase
+        include UserHandler
+        include NfsStore::OverrideContainerFile
+
+        def master
+          container.master
+        end
+
+        Master.has_many :nfs_store__manage__stored_files , inverse_of: :master, class_name: 'NfsStore::Manage::StoredFile'
+
+      end
+    end
+  end
+
+
+end
 
 ActiveSupport.on_load(:nfs_store_container_list_controller) do
 
@@ -98,7 +101,7 @@ end
 #       include ControllerUtils
 #       include AppExceptionHandler
 #       include UserActionLogging
-#       # include MasterHandler
+#       include MasterHandler
 #       include NfsStore::OverrideClassificationController
 #     end
 #   end
