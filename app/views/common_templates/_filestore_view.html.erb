@@ -1,7 +1,7 @@
 <script id="filestore_<%=name%>_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
 
 <div class="browse-container">
-  <%= render partial: 'nfs_store/browse/browser_header', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}' } %>
+  <%= render partial: 'nfs_store/browse/browser_header', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}', container_label: '{{to_record_label}}' } %>
   <div class="upload-dropzone">
 
     <div class="nfs-store-container-block" data-container-id="{{to_record_id}}">

@@ -4,7 +4,7 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
 
   def self.config_def if_extras: {}
     {
-      name: 'general name',
+      name: 'part of directory name or array of attribute names to use to generate directory name (value used directly if attribute not found)',
       label: 'human name',
       create_with_role: 'role name',
       if: if_extras
@@ -15,9 +15,18 @@ class SaveTriggers::CreateFilestoreContainer < SaveTriggers::SaveTriggersBase
     super
 
     @name = config[:name]
+
+    # If name is defined as an array, then get the attributes instead to build the name
+    if @name.is_a? Array
+      atts = item.attributes
+      @name = @name.map {|i| atts.keys.include?(i) ? atts[i] : i }.join(' -- ')
+    end
+
+    @name.gsub!(/[\/\.]/, '-')
+
     @label = config[:label]
     @create_with_role = config[:create_with_role]
-    
+
 
   end
 
