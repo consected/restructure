@@ -122,6 +122,10 @@ class ModelReference < ActiveRecord::Base
     !!self.current_user.has_access_to?(:access, :table, to_record_type_us.pluralize)
   end
 
+  def to_record_editable
+    !!self.current_user.has_access_to?(:edit, :table, to_record_type_us.pluralize)
+  end
+
   def from_record_type_us
     return unless from_record_type
     from_record_type.ns_underscore
@@ -207,6 +211,7 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :to_record_short_type_us
     extras[:methods] << :to_record_label
     extras[:methods] << :to_record_viewable
+    extras[:methods] << :to_record_editable
 
     extras[:methods] << :to_record_data
 

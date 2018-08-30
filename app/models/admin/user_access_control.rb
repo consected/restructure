@@ -142,7 +142,6 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
 
     primary_conditions = {resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
-    primary_conditions[:options] = with_options if with_options
 
     conditions = generate_access_conditions(user, app_type_id, alt_role_name)
 
