@@ -7,7 +7,6 @@ _fpa.postprocessors_nfs_store = {
       container_block.fs_browser(container_block);
       _fpa.form_utils.setup_extra_actions(block);
       _fpa.form_utils.resize_children(block);
-      _fpa.form_utils.setup_data_toggles(block);
       var writable = block.find('.container-browser').attr('data-container-writable');
       var button = container_block.find('.fileinput-button');
       if(writable == 'false') {
@@ -19,6 +18,23 @@ _fpa.postprocessors_nfs_store = {
         container_block.parents('.upload-dropzone-disabled').removeClass('upload-dropzone-disabled').addClass('upload-dropzone');
       }
     }, 100);
+  },
+
+  filestore_classification_block: function(block) {
+    _fpa.form_utils.format_block(block);
+    window.setTimeout(function() {
+      var rect = block.get(0).getBoundingClientRect();
+      var winbot = $(window).height()*0.9;
+      var not_visible = !(rect.top >= 0 && rect.bottom <= winbot);
+      if(not_visible)
+      $.scrollTo(block, { offset: -(winbot-rect.height) });
+
+    }, 100);
+
+  },
+
+  filestore_classification_result_template: function(block) {
+    $('[data-result="filestore-classification-edit-form--79"]').remove();
   }
 
 };
