@@ -68,8 +68,6 @@ ActiveSupport.on_load(:nfs_store_container_file) do
           container.master
         end
 
-        Master.has_many :nfs_store__manage__stored_files , inverse_of: :master, class_name: 'NfsStore::Manage::StoredFile'
-
       end
     end
   end
@@ -91,19 +89,3 @@ ActiveSupport.on_load(:nfs_store_container_list_controller) do
   end
 
 end
-
-
-# ActiveSupport.on_load(:nfs_store_classification_controller) do
-#
-#   module NfsStore
-#     class ClassificationController < NfsStoreController
-#       include ModelNaming
-#       include ControllerUtils
-#       include AppExceptionHandler
-#       include UserActionLogging
-#       include MasterHandler
-#       include NfsStore::OverrideClassificationController
-#     end
-#   end
-#
-# end

@@ -10961,7 +10961,6 @@ CREATE TABLE ml_app.nfs_store_archived_files (
     nfs_store_container_id integer,
     user_id integer,
     title character varying,
-    tags character varying[],
     description character varying
 );
 
@@ -11073,7 +11072,6 @@ CREATE TABLE ml_app.nfs_store_stored_files (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     title character varying,
-    tags character varying[],
     description character varying
 );
 
@@ -23604,4 +23602,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180822085118');
 INSERT INTO schema_migrations (version) VALUES ('20180822093147');
 
 INSERT INTO schema_migrations (version) VALUES ('20180830144523');
+
+INSERT INTO schema_migrations (version) VALUES ('20180831132605');
 

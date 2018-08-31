@@ -336,11 +336,18 @@ module HandlesUserBase
       self.user
     end
 
+    # Downcase attributes prior to validation only if
+    # the name does not match a predefined 'ignore' regex
+    # and it is one of the permitted params
+    # NOTE: previously there was a bug that downcased params that were not in the
+    # permitted params list, and this could unexpectedly change attributes that were
+    # not submitted by a user. Although this could be considered reasonable, with the
+    # introduction of filepaths with Filestore, the result was damaging.
     def downcase_attributes
 
       ignore = /(item_type)?(notes)?(description)?(.+_notes)?(.+_description)?/
 
-      self.attributes.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
+      self.attributes.select {|k,v| k.to_sym.in? self.class.permitted_params }.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
 
         logger.info "Downcasing attribute (#{k})"
         self.send("#{k}=".to_sym, v.downcase) if self.attributes[k].is_a? String

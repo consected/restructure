@@ -1,1 +1,18 @@
-<%= render partial: 'filestore/classification/result_template' %>
+<%= render partial: 'filestore/classification/result_template', locals: {full_name: 'nfs_store__manage__stored_file', name: 'stored_file'} %>
+<%= render partial: 'filestore/classification/result_template', locals: {full_name: 'nfs_store__manage__archived_file', name: 'archived_file'} %>
+<%= render partial: 'common_templates/search_results_template', locals: {
+    name: 'filestore-classification-stored-file-full',
+    with_data: 'nfs_store__manage__stored_file',
+    caption: 'Stored File',
+    prevent_edit: false,
+    prevent_create: true,
+    item_list: NfsStore::Manage::StoredFile.permitted_params
+  } %>
+  <%= render partial: 'common_templates/search_results_template', locals: {
+      name: 'filestore-classification-archived-file-full',
+      with_data: 'nfs_store__manage__archived_file',
+      caption: 'Archived File',
+      prevent_edit: false,
+      prevent_create: true,
+      item_list: NfsStore::Manage::StoredFile.permitted_params
+    } %>

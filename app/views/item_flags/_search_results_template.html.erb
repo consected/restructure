@@ -17,13 +17,14 @@
 <script id="item_flags_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
   <div class="">
-
+  {{#if item_flags}}
   <select multiple="true" disabled="disabled" class="form-control">
   {{#each item_flags}}
     {{>item_flag_result}}
-  {{else}}
-    <span class="no-item-flags">no flags</span>
   {{/each}}
+  {{else}}
+    <span class="no-item-flags">(no tags)</span>
+  {{/if}}
   </select>
   {{#if readonlyview}}
   {{else}}

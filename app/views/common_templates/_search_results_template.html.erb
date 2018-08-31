@@ -134,7 +134,7 @@
 %>
 
 <%= render partial: 'common_templates/references_results', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
-<%= render partial: 'common_templates/filestore_view', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
+<%= render partial: 'filestore/common_template_view', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
 
 <script id="activity_log_<%=name%>_data_template_name_partial"  type="text/x-handlebars-template" class="hidden handlebars-partial"><%= al_full_name.hyphenate %>{{#if rec_type}}-{{rec_type}}{{/if}}s-main-result-template</script>
 

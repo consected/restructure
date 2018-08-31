@@ -10,7 +10,9 @@ class AddNfsStoreTrackerEntries < ActiveRecord::Migration
       {name: "created nfs store  manage  container", sub_process_id: sp.id},
       {name: "updated nfs store  manage  container", sub_process_id: sp.id},
       {name: "created nfs store  manage  stored file", sub_process_id: sp.id},
-      {name: "updated nfs store  manage  stored file", sub_process_id: sp.id}
+      {name: "updated nfs store  manage  stored file", sub_process_id: sp.id},
+      {name: "created nfs store  manage  archived file", sub_process_id: sp.id},
+      {name: "updated nfs store  manage  archived file", sub_process_id: sp.id}
     ]
 
     values.each do |cond|

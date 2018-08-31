@@ -5,8 +5,10 @@ _fpa.postprocessors_nfs_store = {
     container_block.fs_browser = _nfs_store.fs_browser;
     setTimeout(function() {
       container_block.fs_browser(container_block);
-      _fpa.form_utils.setup_extra_actions(block);
-      _fpa.form_utils.resize_children(block);
+      // _fpa.form_utils.setup_extra_actions(block);
+      // _fpa.form_utils.resize_children(block);
+      _fpa.form_utils.format_block(block);
+
       var writable = block.find('.container-browser').attr('data-container-writable');
       var button = container_block.find('.fileinput-button');
       if(writable == 'false') {
@@ -33,8 +35,16 @@ _fpa.postprocessors_nfs_store = {
 
   },
 
-  filestore_classification_result_template: function(block) {
-    $('[data-result="filestore-classification-edit-form--79"]').remove();
+  filestore_classification_stored_file_result_template: function(block, data) {
+    _fpa.form_utils.format_block(block);
+    var container_id = data.nfs_store__manage__stored_file.nfs_store_container_id;
+    $('[data-result="filestore-classification-stored-file-edit-form--'+container_id+'"]').remove();
+  },
+
+  filestore_classification_archived_file_result_template: function(block, data) {
+    _fpa.form_utils.format_block(block);
+    var container_id = data.nfs_store__manage__archived_file.nfs_store_container_id;
+    $('[data-result="filestore-classification-archived-file-edit-form--'+container_id+'"]').remove();
   }
 
 };

@@ -32,7 +32,7 @@ module NfsStore
 
 
       def permitted_params
-        super - [:id, :file_hash, :file_name, :content_type, :file_size, :path, :file_updated_at, :nfs_store_container_id]
+        super - [:id, :file_hash, :file_name, :content_type, :file_size, :path, :file_updated_at, :nfs_store_container_id, :archive_file]
       end
 
     end

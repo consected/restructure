@@ -58,3 +58,39 @@
     margin-top: 6px;
   }
 }
+
+.container-entry .browse-entry-classifications {
+
+  span {
+    margin-left: 0em;
+  }
+
+  .bem-classification-attrs > span {
+    display: inline-block;
+    margin-left: 1em;
+  }
+
+  .item-flags-block {
+    margin-top:0px;
+    display: inline-block;
+
+    .chosen-container-multi .chosen-choices {
+      background: none;
+      border: 0;
+
+      li.search-field {
+        display: none;
+      }
+    }
+
+    div.chosen-container.chosen-disabled li.search-choice {
+      background: rgb(243, 243, 243);
+      margin: 0;
+      padding: 2px;
+
+      > span {
+        margin-left: 2px;
+      }
+    }
+  }
+}

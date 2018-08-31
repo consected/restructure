@@ -1,7 +1,6 @@
 module Filestore
-  class ClassificationController < UserBaseController # < NfsStoreController
+  class ClassificationController < UserBaseController
 
-    # helper Application::ApplicationHelper
 
     include NfsStore::InNfsStoreContainer
     # include ModelNaming
@@ -19,7 +18,7 @@ module Filestore
 
 
     def edit
-
+      prep_item_flags
       render partial: 'filestore/classification/edit'
     end
 
@@ -38,18 +37,22 @@ module Filestore
           params[:id] = params[:download_id]
         end
         @container = NfsStore::Browse.open_container id: cid, user: current_user
-        if params[:retrieval_type] == 'stored_file'
+        @retrieval_type = params[:retrieval_type]
+        if @retrieval_type == 'stored_file'
           @download = @container.stored_files.where(id: params[:download_id]).first
-        elsif params[:retrieval_type] == 'archived_file'
+        elsif @retrieval_type == 'archived_file'
           @download = @container.archived_files.where(id: params[:download_id]).first
+        else
+          raise FphsException.new 'Incorrect retrieval_type set'
         end
+
         @master = @container.master
         @master.current_user ||= current_user
         @container
       end
 
       def hyphenated_name
-        'filestore-classification'
+        "filestore-classification-#{object_name.hyphenate}"
       end
 
       def edit_form_id
@@ -62,7 +65,7 @@ module Filestore
         res[:remote] = true
         res[:html] ||= {}
         res[:html].merge!("data-result-target" => "#container-entry-#{@container.id}-#{ @download.id }-#{ @download.class.retrieval_type} .bem-classification-attrs", "data-template" => "#{hyphenated_name}-result-template")
-        res[:url] = master_filestore_classification_path(object_instance.master_id, object_instance.id, container_id: @container.id)
+        res[:url] = master_filestore_classification_path(object_instance.master_id, object_instance.id, container_id: @container.id, retrieval_type: @retrieval_type)
 
         res
       end
@@ -71,31 +74,40 @@ module Filestore
         "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign dropup\" title=\"cancel\" href=\"##{hyphenated_name}-edit-form--#{@container.id}\" data-toggle=\"collapse\"></a>".html_safe
       end
 
-      def object_instance
-        @stored_file
-      end
 
       # return the class for the current item
       # handles namespace if the item is like an ActivityLog:Something
       def primary_model
-        NfsStore::Manage::StoredFile
+        if params[:retrieval_type] == 'stored_file'
+          NfsStore::Manage::StoredFile
+        elsif params[:retrieval_type] == 'archived_file'
+          NfsStore::Manage::ArchivedFile
+        else
+          raise FphsException.new "No retrieval_type set"
+        end
       end
 
       def object_name
-        'stored_file'
+        if params[:retrieval_type] == 'stored_file'
+          'stored_file'
+        elsif params[:retrieval_type] == 'archived_file'
+          'archived_file'
+        else
+          raise FphsException.new "No retrieval_type set"
+        end
       end
 
       # notice the double underscore for namespaced models to indicate the delimiter
       # to remain consistent with the associations
       def full_object_name
-        'nfs_store__manage__stored_file'
+        "nfs_store__manage__#{object_name}"
       end
 
       # the association name from master to these objects
       # for example player_contacts or activity_log__player_contacts_phones
       # notice the double underscore for namespaced models to indicate the delimiter
       def objects_name
-        :nfs_store__manage__stored_files
+        full_object_name.pluralize.to_sym
       end
 
       def human_name
@@ -106,7 +118,7 @@ module Filestore
     private
 
       def secure_params
-        params.require(:manage_stored_file).permit(*permitted_params)
+        params.require("manage_#{object_name}".to_sym).permit(*permitted_params)
       end
 
 
