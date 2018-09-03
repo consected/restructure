@@ -458,7 +458,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     # Create a role in another app to ensure that there is no leakage
     create_user_role OtherRoleName, app_type: app0, user: @user4
     create_user_role OtherRoleName, user: @user1
-    create_user_role TestRoleName, user: @user1
+    user_role1 = create_user_role TestRoleName, user: @user1
     create_user_role TestRoleName, user: @user2
     # Admin::UserRole.create! current_admin: @admin, app_type: app0, role_name: OtherRoleName, user: @user4
     # Admin::UserRole.create! current_admin: @admin, app_type: @user.app_type, role_name: TestRoleName, user: @user1
@@ -599,6 +599,25 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     res = @user3.has_access_to? :create, :table, :player_infos
     expect(res).to be_falsey
 
+    # Ensure disabled user roles are ignored
+    user_role1.update!(current_admin: @admin, disabled: true)
+
+    res = @user1.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    res = @user2.has_access_to? :create, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user3.has_access_to? :read, :table, :player_infos
+    expect(res).to be_truthy
+
+    res = @user3.has_access_to? :create, :table, :player_infos
+    expect(res).to be_falsey
+
+    # Reset the role to be enabled
+    user_role1.update!(current_admin: @admin, disabled: false)
+
+
     # Restrict with a user
     Admin::UserAccessControl.create! current_admin: @admin, app_type: @user.app_type, user: @user2, access: nil, resource_type: :table, resource_name: :player_infos
     res = @user1.has_access_to? :create, :table, :player_infos
@@ -613,10 +632,10 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     res = @user3.has_access_to? :create, :table, :player_infos
     expect(res).to be_falsey
 
-    # Check that a duplicate role can't be created
 
   end
 
+  # Check that a duplicate role can't be created
   it "prevents duplicate role entries being defined" do
     create_admin
     create_user

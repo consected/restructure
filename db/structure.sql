@@ -2,6 +2,9 @@
 -- PostgreSQL database dump
 --
 
+-- Dumped from database version 9.5.13
+-- Dumped by pg_dump version 9.5.13
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -9,12 +12,161 @@ SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: ipa_ops; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA ipa_ops;
+
 
 --
 -- Name: ml_app; Type: SCHEMA; Schema: -; Owner: -
 --
 
 CREATE SCHEMA ml_app;
+
+
+--
+-- Name: testmybrain; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA testmybrain;
+
+
+--
+-- Name: activity_log_bhs_assignment_insert_notification(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.activity_log_bhs_assignment_insert_notification() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          app_type RECORD;
+          dl_user RECORD;
+          info_request RECORD;
+        BEGIN
+
+            select id from app_types
+            into app_type
+            where name = 'bhs' and (disabled is null or disabled = false)
+            order by id asc
+            limit 1;
+
+            select id from users
+            into dl_user
+            where email = 'dl-fphs-elaine-bhs-pis@listserv.med.harvard.edu'
+            limit 1;
+
+            IF NEW.bhs_assignment_id IS NOT NULL and (NEW.extra_log_type IS NULL or NEW.extra_log_type = '') THEN
+
+              insert into ml_app.message_notifications
+              (
+                subject,
+                app_type_id,
+                user_id,
+                recipient_user_ids,
+                layout_template_name,
+                content_template_name,
+                item_type,
+                item_id,
+                master_id,
+                message_type,
+                created_at,
+                updated_at
+              )
+              SELECT
+                'New Brain Health Study Info Request',
+                app_type.id,
+                NEW.user_id,
+                ARRAY[dl_user.id],
+                'bhs pi notification layout',
+                'bhs pi notification content',
+                'ActivityLog::BhsAssignment',
+                NEW.id,
+                NEW.master_id,
+                'email',
+                now(),
+                now()
+                ;
+
+                RETURN NEW;
+            END IF;
+
+            IF NEW.extra_log_type = 'contact_initiator' THEN
+
+              -- Get the most recent info request from the activity log records for this master_id
+              -- This gives us the user_id of the initiator of the request
+              select * from activity_log_bhs_assignments
+              into info_request
+              where
+                master_id = NEW.master_id
+                and (extra_log_type is null OR extra_log_type = '')
+              order by id desc
+              limit 1;
+
+              insert into ml_app.message_notifications
+              (
+                subject,
+                app_type_id,
+                user_id,
+                recipient_user_ids,
+                layout_template_name,
+                content_template_name,
+                item_type,
+                item_id,
+                master_id,
+                message_type,
+                created_at,
+                updated_at
+              )
+              SELECT
+                'Brain Health Study contact from PI',
+                app_type.id,
+                NEW.user_id,
+                ARRAY[info_request.user_id],
+                'bhs pi notification layout',
+                'bhs pi notification content',
+                'ActivityLog::BhsAssignment',
+                NEW.id,
+                NEW.master_id,
+                'email',
+                now(),
+                now()
+                ;
+
+                RETURN NEW;
+            END IF;
+
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: activity_log_bhs_assignment_insert_testmybrain(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.activity_log_bhs_assignment_insert_testmybrain() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          found_bhs RECORD;
+        BEGIN
+
+            select * from bhs_assignments
+            into found_bhs
+            where master_id = NEW.master_id
+            limit 1;
+
+
+            IF found_bhs.bhs_id is not null THEN
+              NEW.results_link := ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar);
+            END IF;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -152,31 +304,49 @@ CREATE FUNCTION ml_app.assign_sage_ids_to_players() RETURNS record
         res record;
       BEGIN
 
-
         -- update the precreated Sage ID records with the master_id from the player info, based on matching ID. 
-
         -- apply an offset here if the Sage ID does not start at zero
-
         -- find the first unassigned Sage ID
-
         select min(id) into min_sa from sage_assignments where master_id is null;
-
         -- update the sage assignments in a block starting from the minimum unassigned ID
-
         update sage_assignments sa set master_id = (select master_id from temp_pit where id = sa.id - min_sa) where sa.master_id is null and sa.id >= min_sa;
-
         -- get the max value to return the results
-
         select max(id) into max_sa from sage_assignments where master_id is not null;
-
         select min_sa, max_sa into res;
-
         return res;
 
-
        END;
-
     $$;
+
+
+--
+-- Name: create_all_remote_bhs_records(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.create_all_remote_bhs_records() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+bhs_record RECORD;
+pc_length INTEGER;
+BEGIN
+
+FOR bhs_record IN
+  SELECT * from temp_bhs_assignments
+LOOP
+
+PERFORM create_remote_bhs_record(
+bhs_record.bhs_id,
+(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = bhs_record.master_id LIMIT 1),
+ARRAY(SELECT (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = bhs_record.master_id)
+);
+
+END LOOP;
+
+return 1;
+
+END;
+$$;
 
 
 --
@@ -290,6 +460,53 @@ CREATE FUNCTION ml_app.create_message_notification_email(app_type_id integer, ma
 
 
 --
+-- Name: create_message_notification_job(integer); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.create_message_notification_job(message_notification_id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  last_id INTEGER;
+BEGIN
+
+  INSERT INTO delayed_jobs
+  (
+    priority,
+    attempts,
+    handler,
+    run_at,
+    queue,
+    created_at,
+    updated_at
+  )
+  VALUES
+  (
+    0,
+    0,
+    '--- !ruby/object:ActiveJob::QueueAdapters::DelayedJobAdapter::JobWrapper'
+    'job_data:'
+    '  job_class: HandleMessageNotificationJob'
+    '  job_id: ' || gen_random_uuid(),
+    '  queue_name: default'
+    '  arguments:'
+    '  - _aj_globalid: gid://fpa1/MessageNotification/' || message_notification_id
+    '  locale: :en',
+    now(),
+    'default',
+    now(),
+    now()
+  )
+  RETURNING id
+  INTO last_id
+  ;
+
+RETURN last_id;
+END;
+$$;
+
+
+--
 -- Name: create_message_notification_job(integer, timestamp without time zone); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -340,6 +557,316 @@ CREATE FUNCTION ml_app.create_message_notification_job(message_notification_id i
     $$;
 
 
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- Name: player_contacts; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.player_contacts (
+    id integer NOT NULL,
+    master_id integer,
+    rec_type character varying,
+    data character varying,
+    source character varying,
+    rank integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:36.922871'::timestamp without time zone
+);
+
+
+--
+-- Name: player_infos; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.player_infos (
+    id integer NOT NULL,
+    master_id integer,
+    first_name character varying,
+    last_name character varying,
+    middle_name character varying,
+    nick_name character varying,
+    birth_date date,
+    death_date date,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.094626'::timestamp without time zone,
+    contact_pref character varying,
+    start_year integer,
+    rank integer,
+    notes character varying,
+    contact_id integer,
+    college character varying,
+    end_year integer,
+    source character varying,
+    other_count integer,
+    other_type character varying
+);
+
+
+--
+-- Name: create_remote_bhs_record(integer, ml_app.player_infos, ml_app.player_contacts[]); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.create_remote_bhs_record(match_bhs_id integer, new_player_info_record ml_app.player_infos, new_player_contact_records ml_app.player_contacts[]) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	found_bhs record;
+	player_contact record;
+BEGIN
+
+-- Find the bhs_assignments external identifier record for this master record and
+-- validate that it exists
+SELECT *
+INTO found_bhs
+FROM bhs_assignments bhs
+WHERE bhs.bhs_id = match_bhs_id
+LIMIT 1;
+
+-- At this point, if we found the above record, then the master record can be referred to with found_bhs.master_id
+-- We also create the new records setting the user_id to match that of the found_bhs record, rather than the original
+-- value from the source database, which probably would not match the user IDs in the remote database. The user_id of the
+-- found_bhs record is conceptually valid, since it is that user that has effectively kicked off the synchronization process
+-- and requested the new player_infos and player_contacts records be created.
+
+IF NOT FOUND THEN
+	RAISE EXCEPTION 'No BHS ID found for master_id --> %', (new_player_info_record.master_id);
+ELSE
+
+
+	-- Create the player info record
+  INSERT INTO player_infos
+  (
+    master_id,
+    first_name,
+    last_name,
+    middle_name,
+    nick_name,
+    birth_date,
+    death_date,
+    user_id,
+    created_at,
+    updated_at,
+    contact_pref,
+    start_year,
+    rank,
+    notes,
+    contact_id,
+    college,
+    end_year,
+    source
+  )
+  SELECT
+    found_bhs.master_id,
+    new_player_info_record.first_name,
+    new_player_info_record.last_name,
+    new_player_info_record.middle_name,
+    new_player_info_record.nick_name,
+    new_player_info_record.birth_date,
+    new_player_info_record.death_date,
+    found_bhs.user_id,
+    new_player_info_record.created_at,
+    new_player_info_record.updated_at,
+    new_player_info_record.contact_pref,
+    new_player_info_record.start_year,
+    new_player_info_record.rank,
+    new_player_info_record.notes,
+    new_player_info_record.contact_id,
+    new_player_info_record.college,
+    new_player_info_record.end_year,
+    new_player_info_record.source
+  ;
+
+	FOREACH player_contact IN ARRAY new_player_contact_records LOOP
+	  INSERT INTO player_contacts
+		(
+						master_id,
+						rec_type,
+						data,
+						source,
+						rank,
+						user_id,
+						created_at,
+						updated_at
+		)
+		SELECT
+				found_bhs.master_id,
+				player_contact.rec_type,
+				player_contact.data,
+				player_contact.source,
+				player_contact.rank,
+				found_bhs.user_id,
+				player_contact.created_at,
+				player_contact.updated_at
+		;
+
+	END LOOP;
+
+
+  -- Now update the activity log record.
+	UPDATE activity_log_bhs_assignments
+	SET select_record_from_player_contact_phones = (
+		SELECT data FROM player_contacts
+		WHERE rec_type='phone' AND rank is not null AND master_id = found_bhs.master_id
+		ORDER BY rank desc
+		LIMIT 1
+	), results_link = ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar)
+	WHERE bhs_assignment_id is not null AND (select_record_from_player_contact_phones is null OR select_record_from_player_contact_phones = '');
+
+
+	return found_bhs.master_id;
+END IF;
+
+END;
+$$;
+
+
+--
+-- Name: create_remote_bhs_record(bigint, ml_app.player_infos, ml_app.player_contacts[]); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.create_remote_bhs_record(match_bhs_id bigint, new_player_info_record ml_app.player_infos, new_player_contact_records ml_app.player_contacts[]) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+found_bhs record;
+player_contact record;
+pc_length INTEGER;
+BEGIN
+
+-- Find the bhs_assignments external identifier record for this master record and
+-- validate that it exists
+SELECT *
+INTO found_bhs
+FROM bhs_assignments bhs
+WHERE bhs.bhs_id = match_bhs_id
+LIMIT 1;
+
+-- At this point, if we found the above record, then the master record can be referred to with found_bhs.master_id
+-- We also create the new records setting the user_id to match that of the found_bhs record, rather than the original
+-- value from the source database, which probably would not match the user IDs in the remote database. The user_id of the
+-- found_bhs record is conceptually valid, since it is that user that has effectively kicked off the synchronization process
+-- and requested the new player_infos and player_contacts records be created.
+
+IF NOT FOUND THEN
+RAISE EXCEPTION 'No bhs_assigments record found for BHS_ID --> %', (match_bhs_id);
+END IF;
+
+
+
+
+IF new_player_info_record.master_id IS NULL THEN
+RAISE NOTICE 'No new_player_info_record found for BHS_ID --> %', (match_bhs_id);
+ELSE
+
+raise notice 'Syncing player info record %', (new_player_info_record::varchar);
+
+-- Create the player info record
+  INSERT INTO player_infos
+  (
+    master_id,
+    first_name,
+    last_name,
+    middle_name,
+    nick_name,
+    birth_date,
+    death_date,
+    user_id,
+    created_at,
+    updated_at,
+    contact_pref,
+    start_year,
+    rank,
+    notes,
+    contact_id,
+    college,
+    end_year,
+    source
+  )
+  SELECT
+    found_bhs.master_id,
+    new_player_info_record.first_name,
+    new_player_info_record.last_name,
+    new_player_info_record.middle_name,
+    new_player_info_record.nick_name,
+    new_player_info_record.birth_date,
+    new_player_info_record.death_date,
+    found_bhs.user_id,
+    new_player_info_record.created_at,
+    new_player_info_record.updated_at,
+    new_player_info_record.contact_pref,
+    new_player_info_record.start_year,
+    new_player_info_record.rank,
+    new_player_info_record.notes,
+    new_player_info_record.contact_id,
+    new_player_info_record.college,
+    new_player_info_record.end_year,
+    new_player_info_record.source
+  ;
+
+END IF;
+
+
+
+SELECT array_length(new_player_contact_records, 1)
+INTO pc_length;
+
+RAISE NOTICE 'player contacts length %', (pc_length);
+
+IF pc_length IS NULL THEN
+RAISE NOTICE 'No new_player_contact_records found for BHS_ID --> %', (match_bhs_id);
+ELSE
+
+
+FOREACH player_contact IN ARRAY new_player_contact_records LOOP
+  INSERT INTO player_contacts
+(
+master_id,
+rec_type,
+data,
+source,
+rank,
+user_id,
+created_at,
+updated_at
+)
+SELECT
+found_bhs.master_id,
+player_contact.rec_type,
+player_contact.data,
+player_contact.source,
+player_contact.rank,
+found_bhs.user_id,
+player_contact.created_at,
+player_contact.updated_at
+;
+
+END LOOP;
+
+
+  -- Now update the activity log record.
+UPDATE activity_log_bhs_assignments
+SET select_record_from_player_contact_phones = (
+SELECT data FROM player_contacts
+WHERE rec_type='phone' AND rank is not null AND master_id = found_bhs.master_id
+ORDER BY rank desc
+LIMIT 1
+), results_link = ('https://testmybrain.org?demotestid=' || found_bhs.bhs_id::varchar)
+WHERE bhs_assignment_id is not null AND (select_record_from_player_contact_phones is null OR select_record_from_player_contact_phones = '');
+
+
+END IF;
+
+return found_bhs.master_id; 
+
+END;
+$$;
+
+
 --
 -- Name: current_user_id(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
@@ -355,6 +882,61 @@ CREATE FUNCTION ml_app.current_user_id() RETURNS integer
         return user_id;
       END;
     $$;
+
+
+--
+-- Name: find_new_local_ipa_records(integer); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.find_new_local_ipa_records(sel_sub_process_id integer) RETURNS TABLE(master_id integer, ipa_id integer)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+ RETURN QUERY
+  SELECT distinct m.id, ipa.ipa_id
+  FROM masters m
+  INNER JOIN ipa_assignments ipa
+   ON m.id = ipa.master_id
+  INNER JOIN tracker_history th
+     ON m.id = th.master_id
+  LEFT JOIN sync_statuses s
+   ON from_db = 'fphs-db'
+     AND to_db = 'athena-db'
+   AND m.id = s.from_master_id
+  WHERE
+   (
+    s.id IS NULL
+    OR coalesce(s.select_status, '') NOT IN ('completed', 'already transferred') AND s.created_at < now() - interval '2 hours'
+   )
+   AND ipa.ipa_id is not null
+     AND th.sub_process_id = sel_sub_process_id
+  ;
+END;
+$$;
+
+
+--
+-- Name: find_new_remote_bhs_records(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.find_new_remote_bhs_records() RETURNS TABLE(master_id integer, bhs_id bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	RETURN QUERY
+		SELECT bhs.master_id, bhs.bhs_id
+		FROM masters m
+		LEFT JOIN player_infos pi
+		ON pi.master_id = m.id
+		INNER JOIN bhs_assignments bhs
+		ON m.id = bhs.master_id
+		WHERE
+		  pi.id IS NULL
+			AND bhs.bhs_id is not null
+			AND bhs.bhs_id <> 100000000
+			;
+END;
+$$;
 
 
 --
@@ -735,6 +1317,26 @@ CREATE FUNCTION ml_app.handle_tracker_history_update() RETURNS trigger
 
 
 --
+-- Name: lock_transfer_records(character varying, character varying, integer[]); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.lock_transfer_records(from_db character varying, to_db character varying, master_ids integer[]) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+ INSERT into sync_statuses
+( from_master_id, from_db, to_db, select_status, created_at, updated_at )
+(
+  SELECT unnest(master_ids), from_db, to_db, 'new', now(), now()
+ );
+
+ RETURN 1;
+
+END;
+$$;
+
+
+--
 -- Name: log_accuracy_score_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -764,6 +1366,268 @@ CREATE FUNCTION ml_app.log_accuracy_score_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_activity_log_bhs_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_bhs_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_bhs_assignment_history
+                  (
+                      master_id,
+                      bhs_assignment_id,
+                      select_record_from_player_contact_phones,
+                      return_call_availability_notes,
+                      questions_from_call_notes,
+                      results_link,
+                      select_result,
+                      pi_notes_from_return_call,
+                      completed_q1_no_yes,
+                      completed_teamstudy_no_yes,
+                      previous_contact_with_team_no_yes,
+                      previous_contact_with_team_notes,
+                      notes,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_bhs_assignment_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.bhs_assignment_id,
+                      NEW.select_record_from_player_contact_phones,
+                      NEW.return_call_availability_notes,
+                      NEW.questions_from_call_notes,
+                      NEW.results_link,
+                      NEW.select_result,
+                      NEW.pi_notes_from_return_call,
+                      NEW.completed_q1_no_yes,
+                      NEW.completed_teamstudy_no_yes,
+                      NEW.previous_contact_with_team_no_yes,
+                      NEW.previous_contact_with_team_notes,
+                      NEW.notes,
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_activity_log_ext_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_ext_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_ext_assignment_history
+                  (
+                      master_id,
+                      ext_assignment_id,
+                      do_when,
+notes,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_ext_assignment_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ext_assignment_id,
+                      NEW.do_when,
+                      NEW.notes,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_activity_log_ipa_assignment_minor_deviation_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_ipa_assignment_minor_deviation_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_ipa_assignment_minor_deviation_history
+                  (
+                      master_id,
+                      ipa_assignment_id,
+                      activity_date,
+                      deviation_discovered_when,
+                      deviation_occurred_when,
+                      deviation_description,
+                      corrective_action_description,
+                      select_status,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_ipa_assignment_minor_deviation_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ipa_assignment_id,
+                      NEW.activity_date,
+                      NEW.deviation_discovered_when,
+                      NEW.deviation_occurred_when,
+                      NEW.deviation_description,
+                      NEW.corrective_action_description,
+                      NEW.select_status,
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_activity_log_ipa_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_ipa_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_ipa_assignment_history
+                  (
+                      master_id,
+                      ipa_assignment_id,
+                      select_activity,
+                      activity_date,
+                      select_record_from_player_contacts,
+                      select_direction,
+                      select_who,
+                      select_result,
+                      select_next_step,
+                      follow_up_when,
+                      notes,
+                      protocol_id,
+                      select_record_from_addresses,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_ipa_assignment_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ipa_assignment_id,
+                      NEW.select_activity,
+                      NEW.activity_date,
+                      NEW.select_record_from_player_contacts,
+                      NEW.select_direction,
+                      NEW.select_who,
+                      NEW.select_result,
+                      NEW.select_next_step,
+                      NEW.follow_up_when,
+                      NEW.notes,
+                      NEW.protocol_id,
+                      NEW.select_record_from_addresses,
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_activity_log_ipa_survey_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_ipa_survey_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_ipa_survey_history
+                  (
+                      master_id,
+                      ipa_survey_id,
+                      screened_by_who,
+                      screening_date,
+                      select_status,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_ipa_survey_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ipa_survey_id,
+                      NEW.screened_by_who,
+                      NEW.screening_date,
+                      NEW.select_status,
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_activity_log_new_test_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_new_test_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_new_test_history
+                  (
+                      master_id,
+                      new_test_id,
+                      done_when,
+                      select_result,
+                      notes,
+                      protocol_id,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_new_test_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.new_test_id,
+                      NEW.done_when,
+                      NEW.select_result,
+                      NEW.notes,
+                      NEW.protocol_id,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
 
 
 --
@@ -816,6 +1680,44 @@ CREATE FUNCTION ml_app.log_activity_log_player_contact_phone_update() RETURNS tr
                     RETURN NEW;
                 END;
             $$;
+
+
+--
+-- Name: log_activity_log_player_info_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_player_info_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_player_info_history
+                  (
+                      master_id,
+                      player_info_id,
+                      done_when,
+                      notes,
+                      protocol_id,
+                      select_who,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_player_info_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.player_info_id,
+                      NEW.done_when,
+                      NEW.notes,
+                      NEW.protocol_id,
+                      NEW.select_who,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
 
 
 --
@@ -959,6 +1861,38 @@ CREATE FUNCTION ml_app.log_admin_update() RETURNS trigger
 
 
 --
+-- Name: log_bhs_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_bhs_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO bhs_assignment_history
+                  (
+                      master_id,
+                      bhs_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      bhs_assignment_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.bhs_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_college_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1042,6 +1976,68 @@ CREATE FUNCTION ml_app.log_dynamic_model_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_ext_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ext_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ext_assignment_history
+                  (
+                      master_id,
+                      ext_id,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ext_assignment_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ext_id,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ext_gen_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ext_gen_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ext_gen_assignment_history
+                  (
+                      master_id,
+                      ext_gen_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      ext_gen_assignment_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ext_gen_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
 
 
 --
@@ -1169,6 +2165,304 @@ CREATE FUNCTION ml_app.log_general_selection_update() RETURNS trigger
 
 
 --
+-- Name: log_ipa_appointment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_appointment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_appointment_history
+                  (
+                      master_id,
+                      visit_start_date,
+                      select_navigator,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_appointment_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.visit_start_date,
+                      NEW.select_navigator,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_assignment_history
+                  (
+                      master_id,
+                      ipa_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      ipa_assignment_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ipa_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_consent_mailing_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_consent_mailing_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_consent_mailing_history
+                  (
+                      master_id,
+                      copy_of_consent_docs_mailed_to_subject_no_yes,
+                      mailed_when,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_consent_mailing_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.copy_of_consent_docs_mailed_to_subject_no_yes,
+                      NEW.mailed_when,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_hotel_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_hotel_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_hotel_history
+                  (
+                      master_id,
+                      hotel,
+                      room_number,
+                      notes,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_hotel_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.hotel,
+                      NEW.room_number,
+                      NEW.notes,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_payment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_payment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_payment_history
+                  (
+                      master_id,
+                      select_type,
+                      sent_date,
+                      notes,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_payment_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.select_type,
+                      NEW.sent_date,
+                      NEW.notes,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_screening_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_screening_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_screening_history
+                  (
+                      master_id,
+                      screening_date,
+                      eligible_for_study_blank_yes_no,
+                      select_reason_if_not_eligible,
+                      select_status,
+                      select_subject_withdrew_reason,
+                      select_investigator_terminated,
+                      lost_to_follow_up_no_yes,
+                      no_longer_participating_no_yes,
+                      notes,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_screening_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.screening_date,
+                      NEW.eligible_for_study_blank_yes_no,
+                      NEW.select_reason_if_not_eligible,
+                      NEW.select_status,
+                      NEW.select_subject_withdrew_reason,
+                      NEW.select_investigator_terminated,
+                      NEW.lost_to_follow_up_no_yes,
+                      NEW.no_longer_participating_no_yes,
+                      NEW.notes,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_survey_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_survey_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_survey_history
+                  (
+                      master_id,
+                      select_survey_type,
+                      sent_date,
+                      completed_date,
+                      send_next_survey_when,
+                      notes,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_survey_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.select_survey_type,
+                      NEW.sent_date,
+                      NEW.completed_date,
+                      NEW.send_next_survey_when,
+                      NEW.notes,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_transportation_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_ipa_transportation_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_transportation_history
+                  (
+                      master_id,
+                      travel_date,
+                      travel_confirmed_no_yes,
+                      select_direction,
+                      origin_city_and_state,
+                      destination_city_and_state,
+                      select_mode_of_transport,
+                      airline,
+                      flight_number,
+                      departure_time,
+                      arrival_time,
+                      notes,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_transportation_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.travel_date,
+                      NEW.travel_confirmed_no_yes,
+                      NEW.select_direction,
+                      NEW.origin_city_and_state,
+                      NEW.destination_city_and_state,
+                      NEW.select_mode_of_transport,
+                      NEW.airline,
+                      NEW.flight_number,
+                      NEW.departure_time,
+                      NEW.arrival_time,
+                      NEW.notes,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_item_flag_name_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1235,6 +2529,70 @@ CREATE FUNCTION ml_app.log_item_flag_update() RETURNS trigger
 
 
 --
+-- Name: log_mrn_number_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_mrn_number_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO mrn_number_history
+                  (
+                      master_id,
+                      mrn_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      mrn_number_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.mrn_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_new_test_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_new_test_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO new_test_history
+                  (
+                      master_id,
+                      new_test_ext_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      new_test_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.new_test_ext_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_player_contact_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1277,53 +2635,57 @@ CREATE FUNCTION ml_app.log_player_contact_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_player_info_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO player_info_history
-            (
-                    master_id,
-                    first_name,
-                    last_name,
-                    middle_name,
-                    nick_name,
-                    birth_date,
-                    death_date,
-                    user_id,
-                    created_at,
-                    updated_at,
-                    contact_pref,
-                    start_year,
-                    rank,
-                    notes,
-                    contact_id,
-                    college,
-                    end_year,
-                    source,
-                    player_info_id
-                )                 
-            SELECT
-                NEW.master_id,
-                NEW.first_name,
-                NEW.last_name,
-                NEW.middle_name,
-                NEW.nick_name,
-                NEW.birth_date,
-                NEW.death_date,
-                NEW.user_id,
-                NEW.created_at,
-                NEW.updated_at,
-                NEW.contact_pref,
-                NEW.start_year,
-                NEW.rank,
-                NEW.notes,
-                NEW.contact_id,
-                NEW.college,
-                NEW.end_year,
-                NEW.source, 
-                NEW.id
-            ;
-            RETURN NEW;
-        END;
-    $$;
+ BEGIN
+ INSERT INTO player_info_history
+ (
+ master_id,
+ first_name,
+ last_name,
+ middle_name,
+ nick_name,
+ birth_date,
+ death_date,
+ user_id,
+ created_at,
+ updated_at,
+ contact_pref,
+ start_year,
+ rank,
+ notes,
+ contact_id,
+ college,
+ end_year,
+ source,
+ other_count, -- <<<< added
+ other_type, -- <<<< added
+ player_info_id
+ ) 
+ SELECT
+ NEW.master_id,
+ NEW.first_name,
+ NEW.last_name,
+ NEW.middle_name,
+ NEW.nick_name,
+ NEW.birth_date,
+ NEW.death_date,
+ NEW.user_id,
+ NEW.created_at,
+ NEW.updated_at,
+ NEW.contact_pref,
+ NEW.start_year,
+ NEW.rank,
+ NEW.notes,
+ NEW.contact_id,
+ NEW.college,
+ NEW.end_year, 
+ NEW.source, 
+ NEW.other_count, -- <<<< added
+ NEW.other_type,  -- <<<< added
+ NEW.id
+ ;
+ RETURN NEW;
+ END;
+ $$;
 
 
 --
@@ -1446,6 +2808,62 @@ CREATE FUNCTION ml_app.log_report_update() RETURNS trigger
 
 
 --
+-- Name: log_sage_two_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_sage_two_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO sage_two_history
+            (
+                    sage_two_id,                    
+                    external_id,
+                    user_id,
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.external_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at 
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_scantron_series_two_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_scantron_series_two_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO scantron_series_two_history
+            (
+                    scantron_series_two_id,                    
+                    external_id,
+                    user_id,
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.external_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at 
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_scantron_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1473,6 +2891,38 @@ CREATE FUNCTION ml_app.log_scantron_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_social_security_number_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_social_security_number_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO social_security_number_history
+                  (
+                      master_id,
+                      ssn_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      social_security_number_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ssn_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
 
 
 --
@@ -1507,6 +2957,224 @@ CREATE FUNCTION ml_app.log_sub_process_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_test1_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_test1_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO test1_history
+                  (
+                      master_id,
+                      test1_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      test1_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.test1_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_test2_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_test2_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO test2_history
+                  (
+                      master_id,
+                      test_2ext_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      test2_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.test_2ext_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_test_2_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_test_2_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO test_2_history
+                  (
+                      master_id,
+                      test_2ext_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      test_2_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.test_2ext_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_test_ext2_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_test_ext2_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                INSERT INTO test_ext2_history
+                (
+                    master_id,
+                    test_e2_id,
+                    user_id,
+                    created_at,
+                    updated_at,
+                    test_ext2_table_id
+                    )
+                SELECT
+                    NEW.master_id,
+                    NEW.test_e2_id,
+                    NEW.user_id,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
+
+
+--
+-- Name: log_test_ext_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_test_ext_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                INSERT INTO test_ext_history
+                (
+                    master_id,
+                    test_e_id,
+                    user_id,
+                    created_at,
+                    updated_at,
+                    test_ext_table_id
+                    )
+                SELECT
+                    NEW.master_id,
+                    NEW.test_e_id,
+                    NEW.user_id,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
+
+
+--
+-- Name: log_test_item_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_test_item_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO test_item_history
+            (
+                    test_item_id,                    
+                    external_id,
+                    user_id,
+                    created_at,
+                    updated_at
+                )                 
+            SELECT                 
+                NEW.id,
+                NEW.external_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at 
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_testing_dl_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_testing_dl_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO testing_dl_history
+                  (
+                      master_id,
+                      name,
+                      select_yes_no,
+                      select_record_from_table_dl_addresses,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      testing_dl_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.name,
+                      NEW.select_yes_no,
+                      NEW.select_record_from_table_dl_addresses,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
 
 
 --
@@ -1844,12 +3512,67 @@ CREATE FUNCTION ml_app.update_player_contact_ranks(set_master_id integer, set_re
     $$;
 
 
-SET default_tablespace = '';
+--
+-- Name: ipa_recruitment_ranks; Type: TABLE; Schema: ipa_ops; Owner: -
+--
 
-SET default_with_oids = false;
+CREATE TABLE ipa_ops.ipa_recruitment_ranks (
+    id integer NOT NULL,
+    master_id integer,
+    rank integer
+);
+
 
 --
--- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: ipa_recruitment_ranks_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_recruitment_ranks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_recruitment_ranks_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_recruitment_ranks_id_seq OWNED BY ipa_ops.ipa_recruitment_ranks.id;
+
+
+--
+-- Name: subjects; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.subjects (
+    id integer NOT NULL,
+    master_id integer
+);
+
+
+--
+-- Name: subjects_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.subjects_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: subjects_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.subjects_id_seq OWNED BY ipa_ops.subjects.id;
+
+
+--
+-- Name: accuracy_score_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.accuracy_score_history (
@@ -1884,7 +3607,7 @@ ALTER SEQUENCE ml_app.accuracy_score_history_id_seq OWNED BY ml_app.accuracy_sco
 
 
 --
--- Name: accuracy_scores; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: accuracy_scores; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.accuracy_scores (
@@ -1918,7 +3641,173 @@ ALTER SEQUENCE ml_app.accuracy_scores_id_seq OWNED BY ml_app.accuracy_scores.id;
 
 
 --
--- Name: activity_log_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_bhs_assignment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_bhs_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    bhs_assignment_id integer,
+    select_record_from_player_contact_phones character varying,
+    return_call_availability_notes character varying,
+    questions_from_call_notes character varying,
+    results_link character varying,
+    select_result character varying,
+    pi_notes_from_return_call character varying,
+    completed_q1_no_yes character varying,
+    completed_teamstudy_no_yes character varying,
+    previous_contact_with_team_no_yes character varying,
+    previous_contact_with_team_notes character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_bhs_assignment_id integer,
+    notes character varying
+);
+
+
+--
+-- Name: activity_log_bhs_assignment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_bhs_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_bhs_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_bhs_assignment_history_id_seq OWNED BY ml_app.activity_log_bhs_assignment_history.id;
+
+
+--
+-- Name: activity_log_bhs_assignments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_bhs_assignments (
+    id integer NOT NULL,
+    master_id integer,
+    bhs_assignment_id integer,
+    select_record_from_player_contact_phones character varying,
+    return_call_availability_notes character varying,
+    questions_from_call_notes character varying,
+    results_link character varying,
+    select_result character varying,
+    pi_notes_from_return_call character varying,
+    completed_q1_no_yes character varying,
+    completed_teamstudy_no_yes character varying,
+    previous_contact_with_team_no_yes character varying,
+    previous_contact_with_team_notes character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    notes character varying
+);
+
+
+--
+-- Name: activity_log_bhs_assignments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_bhs_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_bhs_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_bhs_assignments_id_seq OWNED BY ml_app.activity_log_bhs_assignments.id;
+
+
+--
+-- Name: activity_log_ext_assignment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ext_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    ext_assignment_id integer,
+    do_when date,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ext_assignment_id integer
+);
+
+
+--
+-- Name: activity_log_ext_assignment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ext_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ext_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ext_assignment_history_id_seq OWNED BY ml_app.activity_log_ext_assignment_history.id;
+
+
+--
+-- Name: activity_log_ext_assignments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ext_assignments (
+    id integer NOT NULL,
+    master_id integer,
+    ext_assignment_id integer,
+    do_when date,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    select_call_direction character varying,
+    select_who character varying,
+    extra_text character varying,
+    extra_log_type character varying
+);
+
+
+--
+-- Name: activity_log_ext_assignments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ext_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ext_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ext_assignments_id_seq OWNED BY ml_app.activity_log_ext_assignments.id;
+
+
+--
+-- Name: activity_log_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.activity_log_history (
@@ -1957,7 +3846,374 @@ ALTER SEQUENCE ml_app.activity_log_history_id_seq OWNED BY ml_app.activity_log_h
 
 
 --
--- Name: activity_log_player_contact_phone_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_ipa_assignment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    select_activity character varying,
+    activity_date date,
+    select_record_from_player_contacts character varying,
+    select_direction character varying,
+    select_who character varying,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    notes character varying,
+    protocol_id bigint,
+    select_record_from_addresses character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ipa_assignment_id integer
+);
+
+
+--
+-- Name: activity_log_ipa_assignment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_assignment_history_id_seq OWNED BY ml_app.activity_log_ipa_assignment_history.id;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_assignment_minor_deviation_history (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    activity_date date,
+    deviation_discovered_when date,
+    deviation_occurred_when date,
+    deviation_description character varying,
+    corrective_action_description character varying,
+    select_status character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ipa_assignment_minor_deviation_id integer
+);
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_assignment_minor_deviation_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_assignment_minor_deviation_history_id_seq OWNED BY ml_app.activity_log_ipa_assignment_minor_deviation_history.id;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_assignment_minor_deviations (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    activity_date date,
+    deviation_discovered_when date,
+    deviation_occurred_when date,
+    deviation_description character varying,
+    corrective_action_description character varying,
+    select_status character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_assignment_minor_deviations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_assignment_minor_deviations_id_seq OWNED BY ml_app.activity_log_ipa_assignment_minor_deviations.id;
+
+
+--
+-- Name: activity_log_ipa_assignments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_assignments (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    select_activity character varying,
+    activity_date date,
+    select_record_from_player_contacts character varying,
+    select_direction character varying,
+    select_who character varying,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    notes character varying,
+    protocol_id bigint,
+    select_record_from_addresses character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_ipa_assignments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_assignments_id_seq OWNED BY ml_app.activity_log_ipa_assignments.id;
+
+
+--
+-- Name: activity_log_ipa_survey_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_survey_history (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_survey_id integer,
+    screened_by_who character varying,
+    screening_date date,
+    select_status character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ipa_survey_id integer
+);
+
+
+--
+-- Name: activity_log_ipa_survey_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_survey_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_survey_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_survey_history_id_seq OWNED BY ml_app.activity_log_ipa_survey_history.id;
+
+
+--
+-- Name: activity_log_ipa_surveys; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_surveys (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_survey_id integer,
+    screened_by_who character varying,
+    screening_date date,
+    select_status character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_ipa_surveys_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_surveys_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_surveys_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_surveys_id_seq OWNED BY ml_app.activity_log_ipa_surveys.id;
+
+
+--
+-- Name: activity_log_new_test_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_new_test_history (
+    id integer NOT NULL,
+    master_id integer,
+    new_test_id integer,
+    done_when date,
+    select_result character varying,
+    notes character varying,
+    protocol_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_new_test_id integer
+);
+
+
+--
+-- Name: activity_log_new_test_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_new_test_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_new_test_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_new_test_history_id_seq OWNED BY ml_app.activity_log_new_test_history.id;
+
+
+--
+-- Name: activity_log_new_tests; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_new_tests (
+    id integer NOT NULL,
+    master_id integer,
+    new_test_id integer,
+    done_when date,
+    select_result character varying,
+    notes character varying,
+    protocol_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    new_test_ext_id bigint
+);
+
+
+--
+-- Name: activity_log_new_tests_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_new_tests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_new_tests_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_new_tests_id_seq OWNED BY ml_app.activity_log_new_tests.id;
+
+
+--
+-- Name: activity_log_player_contact_emails; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_player_contact_emails (
+    id integer NOT NULL,
+    data character varying,
+    select_email_direction character varying,
+    select_who character varying,
+    emailed_when date,
+    select_result character varying,
+    select_next_step character varying,
+    follow_up_when date,
+    protocol_id integer,
+    notes character varying,
+    user_id integer,
+    player_contact_id integer,
+    master_id integer,
+    disabled boolean,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    set_related_player_contact_rank character varying
+);
+
+
+--
+-- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_player_contact_emails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_contact_emails_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_player_contact_emails_id_seq OWNED BY ml_app.activity_log_player_contact_emails.id;
+
+
+--
+-- Name: activity_log_player_contact_phone_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.activity_log_player_contact_phone_history (
@@ -2002,7 +4258,7 @@ ALTER SEQUENCE ml_app.activity_log_player_contact_phone_history_id_seq OWNED BY 
 
 
 --
--- Name: activity_log_player_contact_phones; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_player_contact_phones; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.activity_log_player_contact_phones (
@@ -2047,7 +4303,82 @@ ALTER SEQUENCE ml_app.activity_log_player_contact_phones_id_seq OWNED BY ml_app.
 
 
 --
--- Name: activity_logs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_player_info_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_player_info_history (
+    id integer NOT NULL,
+    master_id integer,
+    player_info_id integer,
+    done_when date,
+    notes character varying,
+    protocol_id integer,
+    select_who character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_player_info_id integer
+);
+
+
+--
+-- Name: activity_log_player_info_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_player_info_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_info_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_player_info_history_id_seq OWNED BY ml_app.activity_log_player_info_history.id;
+
+
+--
+-- Name: activity_log_player_infos; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_player_infos (
+    id integer NOT NULL,
+    master_id integer,
+    player_info_id integer,
+    done_when date,
+    notes character varying,
+    protocol_id integer,
+    select_who character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_player_infos_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_player_infos_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_player_infos_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_player_infos_id_seq OWNED BY ml_app.activity_log_player_infos.id;
+
+
+--
+-- Name: activity_logs; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.activity_logs (
@@ -2091,7 +4422,7 @@ ALTER SEQUENCE ml_app.activity_logs_id_seq OWNED BY ml_app.activity_logs.id;
 
 
 --
--- Name: address_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: address_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.address_history (
@@ -2108,7 +4439,7 @@ CREATE TABLE ml_app.address_history (
     rec_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:35.841791'::timestamp without time zone,
     country character varying(3),
     postal_code character varying,
     region character varying,
@@ -2136,7 +4467,7 @@ ALTER SEQUENCE ml_app.address_history_id_seq OWNED BY ml_app.address_history.id;
 
 
 --
--- Name: addresses; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: addresses; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.addresses (
@@ -2153,7 +4484,7 @@ CREATE TABLE ml_app.addresses (
     rec_type character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:35.929228'::timestamp without time zone,
     country character varying(3),
     postal_code character varying,
     region character varying
@@ -2180,7 +4511,7 @@ ALTER SEQUENCE ml_app.addresses_id_seq OWNED BY ml_app.addresses.id;
 
 
 --
--- Name: admin_action_logs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: admin_action_logs; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.admin_action_logs (
@@ -2217,7 +4548,7 @@ ALTER SEQUENCE ml_app.admin_action_logs_id_seq OWNED BY ml_app.admin_action_logs
 
 
 --
--- Name: admin_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: admin_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.admin_history (
@@ -2259,7 +4590,7 @@ ALTER SEQUENCE ml_app.admin_history_id_seq OWNED BY ml_app.admin_history.id;
 
 
 --
--- Name: admins; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: admins; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.admins (
@@ -2300,7 +4631,7 @@ ALTER SEQUENCE ml_app.admins_id_seq OWNED BY ml_app.admins.id;
 
 
 --
--- Name: app_configurations; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: app_configurations; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.app_configurations (
@@ -2334,7 +4665,7 @@ ALTER SEQUENCE ml_app.app_configurations_id_seq OWNED BY ml_app.app_configuratio
 
 
 --
--- Name: app_types; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: app_types; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.app_types (
@@ -2366,7 +4697,99 @@ ALTER SEQUENCE ml_app.app_types_id_seq OWNED BY ml_app.app_types.id;
 
 
 --
--- Name: college_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: bhs_assignment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.bhs_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    bhs_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    bhs_assignment_table_id integer
+);
+
+
+--
+-- Name: bhs_assignment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.bhs_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: bhs_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.bhs_assignment_history_id_seq OWNED BY ml_app.bhs_assignment_history.id;
+
+
+--
+-- Name: tmbs; Type: TABLE; Schema: testmybrain; Owner: -
+--
+
+CREATE TABLE testmybrain.tmbs (
+    id integer NOT NULL,
+    master_id integer
+);
+
+
+--
+-- Name: bhs_assignments; Type: VIEW; Schema: ml_app; Owner: -
+--
+
+CREATE VIEW ml_app.bhs_assignments AS
+ SELECT tmbs.id,
+    tmbs.master_id,
+    tmbs.id AS bhs_id,
+    now() AS created_at,
+    now() AS updated_at
+   FROM testmybrain.tmbs;
+
+
+--
+-- Name: bhs_assignments_old; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.bhs_assignments_old (
+    id integer NOT NULL,
+    master_id integer,
+    bhs_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: bhs_assignments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.bhs_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: bhs_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.bhs_assignments_id_seq OWNED BY ml_app.bhs_assignments_old.id;
+
+
+--
+-- Name: college_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.college_history (
@@ -2402,7 +4825,7 @@ ALTER SEQUENCE ml_app.college_history_id_seq OWNED BY ml_app.college_history.id;
 
 
 --
--- Name: colleges; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: colleges; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.colleges (
@@ -2437,7 +4860,7 @@ ALTER SEQUENCE ml_app.colleges_id_seq OWNED BY ml_app.colleges.id;
 
 
 --
--- Name: copy_player_infos; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: copy_player_infos; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.copy_player_infos (
@@ -2464,7 +4887,7 @@ CREATE TABLE ml_app.copy_player_infos (
 
 
 --
--- Name: delayed_jobs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: delayed_jobs; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.delayed_jobs (
@@ -2503,7 +4926,37 @@ ALTER SEQUENCE ml_app.delayed_jobs_id_seq OWNED BY ml_app.delayed_jobs.id;
 
 
 --
--- Name: dynamic_model_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: dl_addresses; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.dl_addresses (
+    id integer NOT NULL,
+    email character varying,
+    name character varying
+);
+
+
+--
+-- Name: dl_addresses_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.dl_addresses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: dl_addresses_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.dl_addresses_id_seq OWNED BY ml_app.dl_addresses.id;
+
+
+--
+-- Name: dynamic_model_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.dynamic_model_history (
@@ -2547,7 +5000,7 @@ ALTER SEQUENCE ml_app.dynamic_model_history_id_seq OWNED BY ml_app.dynamic_model
 
 
 --
--- Name: dynamic_models; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: dynamic_models; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.dynamic_models (
@@ -2591,7 +5044,45 @@ ALTER SEQUENCE ml_app.dynamic_models_id_seq OWNED BY ml_app.dynamic_models.id;
 
 
 --
--- Name: exception_logs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: emergency_contacts; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.emergency_contacts (
+    id integer NOT NULL,
+    rec_type character varying,
+    data character varying,
+    first_name character varying,
+    last_name character varying,
+    select_relationship character varying,
+    rank character varying,
+    user_id integer,
+    master_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: emergency_contacts_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.emergency_contacts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: emergency_contacts_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.emergency_contacts_id_seq OWNED BY ml_app.emergency_contacts.id;
+
+
+--
+-- Name: exception_logs; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.exception_logs (
@@ -2627,7 +5118,143 @@ ALTER SEQUENCE ml_app.exception_logs_id_seq OWNED BY ml_app.exception_logs.id;
 
 
 --
--- Name: external_identifier_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: ext_assignment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ext_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    ext_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ext_assignment_table_id integer
+);
+
+
+--
+-- Name: ext_assignment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ext_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ext_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ext_assignment_history_id_seq OWNED BY ml_app.ext_assignment_history.id;
+
+
+--
+-- Name: ext_assignments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ext_assignments (
+    id integer NOT NULL,
+    master_id integer,
+    ext_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ext_assignments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ext_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ext_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ext_assignments_id_seq OWNED BY ml_app.ext_assignments.id;
+
+
+--
+-- Name: ext_gen_assignment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ext_gen_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    ext_gen_id integer,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ext_gen_assignment_table_id integer
+);
+
+
+--
+-- Name: ext_gen_assignment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ext_gen_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ext_gen_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ext_gen_assignment_history_id_seq OWNED BY ml_app.ext_gen_assignment_history.id;
+
+
+--
+-- Name: ext_gen_assignments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ext_gen_assignments (
+    id integer NOT NULL,
+    master_id integer,
+    ext_gen_id integer,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ext_gen_assignments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ext_gen_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ext_gen_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ext_gen_assignments_id_seq OWNED BY ml_app.ext_gen_assignments.id;
+
+
+--
+-- Name: external_identifier_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.external_identifier_history (
@@ -2669,7 +5296,7 @@ ALTER SEQUENCE ml_app.external_identifier_history_id_seq OWNED BY ml_app.externa
 
 
 --
--- Name: external_identifiers; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: external_identifiers; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.external_identifiers (
@@ -2711,7 +5338,7 @@ ALTER SEQUENCE ml_app.external_identifiers_id_seq OWNED BY ml_app.external_ident
 
 
 --
--- Name: external_link_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: external_link_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.external_link_history (
@@ -2746,7 +5373,7 @@ ALTER SEQUENCE ml_app.external_link_history_id_seq OWNED BY ml_app.external_link
 
 
 --
--- Name: external_links; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: external_links; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.external_links (
@@ -2780,7 +5407,25 @@ ALTER SEQUENCE ml_app.external_links_id_seq OWNED BY ml_app.external_links.id;
 
 
 --
--- Name: general_selection_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: found_bhs_id; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.found_bhs_id (
+    bhs_id bigint
+);
+
+
+--
+-- Name: found_bhs_ids; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.found_bhs_ids (
+    bhs_id bigint
+);
+
+
+--
+-- Name: general_selection_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.general_selection_history (
@@ -2822,7 +5467,7 @@ ALTER SEQUENCE ml_app.general_selection_history_id_seq OWNED BY ml_app.general_s
 
 
 --
--- Name: general_selections; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: general_selections; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.general_selections (
@@ -2863,7 +5508,7 @@ ALTER SEQUENCE ml_app.general_selections_id_seq OWNED BY ml_app.general_selectio
 
 
 --
--- Name: imports; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: imports; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.imports (
@@ -2898,7 +5543,558 @@ ALTER SEQUENCE ml_app.imports_id_seq OWNED BY ml_app.imports.id;
 
 
 --
--- Name: item_flag_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: ipa_appointment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_appointment_history (
+    id integer NOT NULL,
+    master_id integer,
+    visit_start_date date,
+    select_navigator character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_appointment_id integer
+);
+
+
+--
+-- Name: ipa_appointment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_appointment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_appointment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_appointment_history_id_seq OWNED BY ml_app.ipa_appointment_history.id;
+
+
+--
+-- Name: ipa_appointments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_appointments (
+    id integer NOT NULL,
+    master_id integer,
+    visit_start_date date,
+    select_navigator character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_appointments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_appointments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_appointments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_appointments_id_seq OWNED BY ml_app.ipa_appointments.id;
+
+
+--
+-- Name: ipa_assignments; Type: VIEW; Schema: ml_app; Owner: -
+--
+
+CREATE VIEW ml_app.ipa_assignments AS
+ SELECT subjects.id,
+    subjects.master_id,
+    subjects.id AS ipa_id,
+    now() AS created_at,
+    now() AS updated_at
+   FROM ipa_ops.subjects;
+
+
+--
+-- Name: ipa_consent_mailing_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_consent_mailing_history (
+    id integer NOT NULL,
+    master_id integer,
+    copy_of_consent_docs_mailed_to_subject_no_yes character varying,
+    mailed_when date,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_consent_mailing_id integer
+);
+
+
+--
+-- Name: ipa_consent_mailing_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_consent_mailing_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_consent_mailing_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_consent_mailing_history_id_seq OWNED BY ml_app.ipa_consent_mailing_history.id;
+
+
+--
+-- Name: ipa_consent_mailings; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_consent_mailings (
+    id integer NOT NULL,
+    master_id integer,
+    copy_of_consent_docs_mailed_to_subject_no_yes character varying,
+    mailed_when date,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_consent_mailings_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_consent_mailings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_consent_mailings_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_consent_mailings_id_seq OWNED BY ml_app.ipa_consent_mailings.id;
+
+
+--
+-- Name: ipa_hotel_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_hotel_history (
+    id integer NOT NULL,
+    master_id integer,
+    hotel character varying,
+    room_number character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_hotel_id integer
+);
+
+
+--
+-- Name: ipa_hotel_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_hotel_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_hotel_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_hotel_history_id_seq OWNED BY ml_app.ipa_hotel_history.id;
+
+
+--
+-- Name: ipa_hotels; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_hotels (
+    id integer NOT NULL,
+    master_id integer,
+    hotel character varying,
+    room_number character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_hotels_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_hotels_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_hotels_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_hotels_id_seq OWNED BY ml_app.ipa_hotels.id;
+
+
+--
+-- Name: ipa_payment_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_payment_history (
+    id integer NOT NULL,
+    master_id integer,
+    select_type character varying,
+    sent_date date,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_payment_id integer
+);
+
+
+--
+-- Name: ipa_payment_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_payment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_payment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_payment_history_id_seq OWNED BY ml_app.ipa_payment_history.id;
+
+
+--
+-- Name: ipa_payments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_payments (
+    id integer NOT NULL,
+    master_id integer,
+    select_type character varying,
+    sent_date date,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_payments_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_payments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_payments_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_payments_id_seq OWNED BY ml_app.ipa_payments.id;
+
+
+--
+-- Name: ipa_recruitment_ranks; Type: VIEW; Schema: ml_app; Owner: -
+--
+
+CREATE VIEW ml_app.ipa_recruitment_ranks AS
+ SELECT ipa_recruitment_ranks.id,
+    ipa_recruitment_ranks.master_id,
+    ipa_recruitment_ranks.rank,
+    now() AS created_at,
+    now() AS updated_at
+   FROM ipa_ops.ipa_recruitment_ranks;
+
+
+--
+-- Name: ipa_screening_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_screening_history (
+    id integer NOT NULL,
+    master_id integer,
+    screening_date date,
+    eligible_for_study_blank_yes_no character varying,
+    select_reason_if_not_eligible character varying,
+    select_status character varying,
+    select_subject_withdrew_reason character varying,
+    select_investigator_terminated character varying,
+    lost_to_follow_up_no_yes character varying,
+    no_longer_participating_no_yes character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_screening_id integer
+);
+
+
+--
+-- Name: ipa_screening_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_screening_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_screening_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_screening_history_id_seq OWNED BY ml_app.ipa_screening_history.id;
+
+
+--
+-- Name: ipa_screenings; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_screenings (
+    id integer NOT NULL,
+    master_id integer,
+    screening_date date,
+    eligible_for_study_blank_yes_no character varying,
+    select_reason_if_not_eligible character varying,
+    select_status character varying,
+    select_subject_withdrew_reason character varying,
+    select_investigator_terminated character varying,
+    lost_to_follow_up_no_yes character varying,
+    no_longer_participating_no_yes character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_screenings_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_screenings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_screenings_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_screenings_id_seq OWNED BY ml_app.ipa_screenings.id;
+
+
+--
+-- Name: ipa_survey_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_survey_history (
+    id integer NOT NULL,
+    master_id integer,
+    select_survey_type character varying,
+    sent_date date,
+    completed_date date,
+    send_next_survey_when date,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_survey_id integer
+);
+
+
+--
+-- Name: ipa_survey_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_survey_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_survey_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_survey_history_id_seq OWNED BY ml_app.ipa_survey_history.id;
+
+
+--
+-- Name: ipa_surveys; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_surveys (
+    id integer NOT NULL,
+    master_id integer,
+    select_survey_type character varying,
+    sent_date date,
+    completed_date date,
+    send_next_survey_when date,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_surveys_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_surveys_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_surveys_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_surveys_id_seq OWNED BY ml_app.ipa_surveys.id;
+
+
+--
+-- Name: ipa_transportation_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_transportation_history (
+    id integer NOT NULL,
+    master_id integer,
+    travel_date date,
+    travel_confirmed_no_yes character varying,
+    select_direction character varying,
+    origin_city_and_state character varying,
+    destination_city_and_state character varying,
+    select_mode_of_transport character varying,
+    airline character varying,
+    flight_number character varying,
+    departure_time character varying,
+    arrival_time character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_transportation_id integer
+);
+
+
+--
+-- Name: ipa_transportation_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_transportation_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_transportation_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_transportation_history_id_seq OWNED BY ml_app.ipa_transportation_history.id;
+
+
+--
+-- Name: ipa_transportations; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ipa_transportations (
+    id integer NOT NULL,
+    master_id integer,
+    travel_date date,
+    travel_confirmed_no_yes character varying,
+    select_direction character varying,
+    origin_city_and_state character varying,
+    destination_city_and_state character varying,
+    select_mode_of_transport character varying,
+    airline character varying,
+    flight_number character varying,
+    departure_time character varying,
+    arrival_time character varying,
+    notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_transportations_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.ipa_transportations_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_transportations_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.ipa_transportations_id_seq OWNED BY ml_app.ipa_transportations.id;
+
+
+--
+-- Name: item_flag_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.item_flag_history (
@@ -2934,7 +6130,7 @@ ALTER SEQUENCE ml_app.item_flag_history_id_seq OWNED BY ml_app.item_flag_history
 
 
 --
--- Name: item_flag_name_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: item_flag_name_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.item_flag_name_history (
@@ -2969,7 +6165,7 @@ ALTER SEQUENCE ml_app.item_flag_name_history_id_seq OWNED BY ml_app.item_flag_na
 
 
 --
--- Name: item_flag_names; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: item_flag_names; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.item_flag_names (
@@ -3003,7 +6199,7 @@ ALTER SEQUENCE ml_app.item_flag_names_id_seq OWNED BY ml_app.item_flag_names.id;
 
 
 --
--- Name: item_flags; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: item_flags; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.item_flags (
@@ -3038,7 +6234,7 @@ ALTER SEQUENCE ml_app.item_flags_id_seq OWNED BY ml_app.item_flags.id;
 
 
 --
--- Name: manage_users; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: manage_users; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.manage_users (
@@ -3068,7 +6264,7 @@ ALTER SEQUENCE ml_app.manage_users_id_seq OWNED BY ml_app.manage_users.id;
 
 
 --
--- Name: masters; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: masters; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.masters (
@@ -3104,7 +6300,7 @@ ALTER SEQUENCE ml_app.masters_id_seq OWNED BY ml_app.masters.id;
 
 
 --
--- Name: message_notifications; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: message_notifications; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.message_notifications (
@@ -3150,7 +6346,7 @@ ALTER SEQUENCE ml_app.message_notifications_id_seq OWNED BY ml_app.message_notif
 
 
 --
--- Name: message_templates; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: message_templates; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.message_templates (
@@ -3186,7 +6382,82 @@ ALTER SEQUENCE ml_app.message_templates_id_seq OWNED BY ml_app.message_templates
 
 
 --
--- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: ml_copy; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.ml_copy (
+    procontactid integer,
+    fill_in_addresses character varying(255),
+    in_survey character varying(255),
+    verify_survey_participation character varying(255),
+    verify_player_and_or_match character varying(255),
+    accuracy character varying(255),
+    accuracy_score character varying(255),
+    contactid integer,
+    pro_id integer,
+    separator_a text,
+    first_name character varying(255),
+    middle_name character varying(255),
+    last_name character varying(255),
+    nick_name character varying(255),
+    separator_b text,
+    pro_first_name character varying(255),
+    pro_middle_name character varying(255),
+    pro_last_name character varying(255),
+    pro_nick_name character varying(255),
+    birthdate character varying(255),
+    pro_dob character varying(255),
+    pro_dod character varying(255),
+    startyear character varying(255),
+    pro_start_year character varying(255),
+    accruedseasons integer,
+    pro_end_year character varying(255),
+    first_contract character varying(255),
+    second_contract character varying(255),
+    third_contract character varying(255),
+    pro_career_info character varying(255),
+    pro_birthplace character varying(255),
+    pro_college character varying(255),
+    email character varying(255),
+    homecity character varying(255),
+    homestate character varying(50),
+    homezipcode character varying(10),
+    homestreet character varying(255),
+    homestreet2 character varying(255),
+    homestreet3 character varying(255),
+    businesscity character varying(255),
+    businessstate character varying(50),
+    businesszipcode character varying(10),
+    businessstreet character varying(255),
+    businessstreet2 character varying(255),
+    businessstreet3 character varying(255),
+    changed integer,
+    changed_column character varying(255),
+    verified integer,
+    notes text,
+    email2 character varying(255),
+    email3 character varying(255),
+    updatehomestreet character varying(255),
+    updatehomestreet2 character varying(255),
+    updatehomecity character varying(255),
+    updatehomestate character varying(50),
+    updatehomezipcode character varying(10),
+    lastmod character varying(255),
+    sourc character varying(255),
+    changed_by character varying(255),
+    msid integer,
+    mailing character varying(255),
+    outreach_vfy character varying(255),
+    lastupdate text,
+    lastupdateby text,
+    cprefs character varying(255),
+    scantronid integer,
+    insertauditkey text
+);
+
+
+--
+-- Name: model_references; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.model_references (
@@ -3223,6 +6494,75 @@ ALTER SEQUENCE ml_app.model_references_id_seq OWNED BY ml_app.model_references.i
 
 
 --
+-- Name: mrn_number_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.mrn_number_history (
+    id integer NOT NULL,
+    master_id integer,
+    mrn_id character varying,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    mrn_number_table_id integer
+);
+
+
+--
+-- Name: mrn_number_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.mrn_number_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: mrn_number_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.mrn_number_history_id_seq OWNED BY ml_app.mrn_number_history.id;
+
+
+--
+-- Name: mrn_numbers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.mrn_numbers (
+    id integer NOT NULL,
+    master_id integer,
+    mrn_id character varying,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: mrn_numbers_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.mrn_numbers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: mrn_numbers_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.mrn_numbers_id_seq OWNED BY ml_app.mrn_numbers.id;
+
+
+--
 -- Name: msid_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -3235,7 +6575,76 @@ CREATE SEQUENCE ml_app.msid_seq
 
 
 --
--- Name: page_layouts; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: new_test_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.new_test_history (
+    id integer NOT NULL,
+    master_id integer,
+    new_test_ext_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    new_test_table_id integer
+);
+
+
+--
+-- Name: new_test_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.new_test_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: new_test_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.new_test_history_id_seq OWNED BY ml_app.new_test_history.id;
+
+
+--
+-- Name: new_tests; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.new_tests (
+    id integer NOT NULL,
+    master_id integer,
+    new_test_ext_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: new_tests_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.new_tests_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: new_tests_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.new_tests_id_seq OWNED BY ml_app.new_tests.id;
+
+
+--
+-- Name: page_layouts; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.page_layouts (
@@ -3273,7 +6682,7 @@ ALTER SEQUENCE ml_app.page_layouts_id_seq OWNED BY ml_app.page_layouts.id;
 
 
 --
--- Name: player_contact_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: player_contact_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.player_contact_history (
@@ -3285,7 +6694,7 @@ CREATE TABLE ml_app.player_contact_history (
     rank integer,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:36.835851'::timestamp without time zone,
     player_contact_id integer
 );
 
@@ -3310,23 +6719,6 @@ ALTER SEQUENCE ml_app.player_contact_history_id_seq OWNED BY ml_app.player_conta
 
 
 --
--- Name: player_contacts; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE ml_app.player_contacts (
-    id integer NOT NULL,
-    master_id integer,
-    rec_type character varying,
-    data character varying,
-    source character varying,
-    rank integer,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now()
-);
-
-
---
 -- Name: player_contacts_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -3346,7 +6738,7 @@ ALTER SEQUENCE ml_app.player_contacts_id_seq OWNED BY ml_app.player_contacts.id;
 
 
 --
--- Name: player_info_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: player_info_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.player_info_history (
@@ -3360,7 +6752,7 @@ CREATE TABLE ml_app.player_info_history (
     death_date date,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:36.99602'::timestamp without time zone,
     contact_pref character varying,
     start_year integer,
     rank integer,
@@ -3369,7 +6761,9 @@ CREATE TABLE ml_app.player_info_history (
     college character varying,
     end_year integer,
     source character varying,
-    player_info_id integer
+    player_info_id integer,
+    other_count integer,
+    other_type character varying
 );
 
 
@@ -3393,33 +6787,6 @@ ALTER SEQUENCE ml_app.player_info_history_id_seq OWNED BY ml_app.player_info_his
 
 
 --
--- Name: player_infos; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
---
-
-CREATE TABLE ml_app.player_infos (
-    id integer NOT NULL,
-    master_id integer,
-    first_name character varying,
-    last_name character varying,
-    middle_name character varying,
-    nick_name character varying,
-    birth_date date,
-    death_date date,
-    user_id integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now(),
-    contact_pref character varying,
-    start_year integer,
-    rank integer,
-    notes character varying,
-    contact_id integer,
-    college character varying,
-    end_year integer,
-    source character varying
-);
-
-
---
 -- Name: player_infos_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -3439,7 +6806,7 @@ ALTER SEQUENCE ml_app.player_infos_id_seq OWNED BY ml_app.player_infos.id;
 
 
 --
--- Name: pro_infos; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: pro_infos; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.pro_infos (
@@ -3458,7 +6825,7 @@ CREATE TABLE ml_app.pro_infos (
     birthplace character varying,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone DEFAULT now()
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.165247'::timestamp without time zone
 );
 
 
@@ -3482,7 +6849,7 @@ ALTER SEQUENCE ml_app.pro_infos_id_seq OWNED BY ml_app.pro_infos.id;
 
 
 --
--- Name: protocol_event_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocol_event_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.protocol_event_history (
@@ -3519,7 +6886,7 @@ ALTER SEQUENCE ml_app.protocol_event_history_id_seq OWNED BY ml_app.protocol_eve
 
 
 --
--- Name: protocol_events; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocol_events; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.protocol_events (
@@ -3555,7 +6922,7 @@ ALTER SEQUENCE ml_app.protocol_events_id_seq OWNED BY ml_app.protocol_events.id;
 
 
 --
--- Name: protocol_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocol_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.protocol_history (
@@ -3590,7 +6957,7 @@ ALTER SEQUENCE ml_app.protocol_history_id_seq OWNED BY ml_app.protocol_history.i
 
 
 --
--- Name: protocols; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocols; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.protocols (
@@ -3624,7 +6991,7 @@ ALTER SEQUENCE ml_app.protocols_id_seq OWNED BY ml_app.protocols.id;
 
 
 --
--- Name: rc_cis; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: rc_cis; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.rc_cis (
@@ -3632,8 +6999,8 @@ CREATE TABLE ml_app.rc_cis (
     fname character varying,
     lname character varying,
     status character varying,
-    created_at timestamp without time zone DEFAULT now(),
-    updated_at timestamp without time zone DEFAULT now(),
+    created_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.367264'::timestamp without time zone,
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.367264'::timestamp without time zone,
     user_id integer,
     master_id integer,
     street character varying,
@@ -3648,7 +7015,7 @@ CREATE TABLE ml_app.rc_cis (
 
 
 --
--- Name: rc_cis2; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: rc_cis2; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.rc_cis2 (
@@ -3682,10 +7049,11 @@ ALTER SEQUENCE ml_app.rc_cis_id_seq OWNED BY ml_app.rc_cis.id;
 
 
 --
--- Name: rc_stage_cif_copy; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: rc_stage_cif_copy; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.rc_stage_cif_copy (
+    id integer NOT NULL,
     record_id integer,
     redcap_survey_identifier integer,
     time_stamp timestamp without time zone,
@@ -3702,12 +7070,11 @@ CREATE TABLE ml_app.rc_stage_cif_copy (
     email character varying,
     hearabout character varying,
     completed integer,
-    id integer NOT NULL,
     status character varying,
-    created_at timestamp without time zone DEFAULT now(),
+    created_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.419709'::timestamp without time zone,
     user_id integer,
     master_id integer,
-    updated_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT '2017-09-25 15:43:37.419709'::timestamp without time zone,
     added_tracker boolean
 );
 
@@ -3732,7 +7099,7 @@ ALTER SEQUENCE ml_app.rc_stage_cif_copy_id_seq OWNED BY ml_app.rc_stage_cif_copy
 
 
 --
--- Name: report_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: report_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.report_history (
@@ -3777,7 +7144,7 @@ ALTER SEQUENCE ml_app.report_history_id_seq OWNED BY ml_app.report_history.id;
 
 
 --
--- Name: reports; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: reports; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.reports (
@@ -3821,7 +7188,7 @@ ALTER SEQUENCE ml_app.reports_id_seq OWNED BY ml_app.reports.id;
 
 
 --
--- Name: sage_assignments; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: sage_assignments; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.sage_assignments (
@@ -3856,7 +7223,74 @@ ALTER SEQUENCE ml_app.sage_assignments_id_seq OWNED BY ml_app.sage_assignments.i
 
 
 --
--- Name: scantron_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: sage_two_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.sage_two_history (
+    id integer NOT NULL,
+    sage_two_id integer,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: sage_two_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.sage_two_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sage_two_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.sage_two_history_id_seq OWNED BY ml_app.sage_two_history.id;
+
+
+--
+-- Name: sage_twos; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.sage_twos (
+    id integer NOT NULL,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: sage_twos_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.sage_twos_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sage_twos_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.sage_twos_id_seq OWNED BY ml_app.sage_twos.id;
+
+
+--
+-- Name: scantron_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.scantron_history (
@@ -3890,7 +7324,74 @@ ALTER SEQUENCE ml_app.scantron_history_id_seq OWNED BY ml_app.scantron_history.i
 
 
 --
--- Name: scantrons; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: scantron_series_two_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.scantron_series_two_history (
+    id integer NOT NULL,
+    scantron_series_two_id integer,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: scantron_series_two_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.scantron_series_two_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: scantron_series_two_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.scantron_series_two_history_id_seq OWNED BY ml_app.scantron_series_two_history.id;
+
+
+--
+-- Name: scantron_series_twos; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.scantron_series_twos (
+    id integer NOT NULL,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: scantron_series_twos_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.scantron_series_twos_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: scantron_series_twos_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.scantron_series_twos_id_seq OWNED BY ml_app.scantron_series_twos.id;
+
+
+--
+-- Name: scantrons; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.scantrons (
@@ -3923,7 +7424,7 @@ ALTER SEQUENCE ml_app.scantrons_id_seq OWNED BY ml_app.scantrons.id;
 
 
 --
--- Name: schema_migrations; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: schema_migrations; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.schema_migrations (
@@ -3932,7 +7433,7 @@ CREATE TABLE ml_app.schema_migrations (
 
 
 --
--- Name: smback; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: smback; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.smback (
@@ -3941,7 +7442,76 @@ CREATE TABLE ml_app.smback (
 
 
 --
--- Name: sub_process_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: social_security_number_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.social_security_number_history (
+    id integer NOT NULL,
+    master_id integer,
+    ssn_id character varying,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    social_security_number_table_id integer
+);
+
+
+--
+-- Name: social_security_number_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.social_security_number_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: social_security_number_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.social_security_number_history_id_seq OWNED BY ml_app.social_security_number_history.id;
+
+
+--
+-- Name: social_security_numbers; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.social_security_numbers (
+    id integer NOT NULL,
+    master_id integer,
+    ssn_id character varying,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: social_security_numbers_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.social_security_numbers_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: social_security_numbers_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.social_security_numbers_id_seq OWNED BY ml_app.social_security_numbers.id;
+
+
+--
+-- Name: sub_process_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.sub_process_history (
@@ -3976,7 +7546,7 @@ ALTER SEQUENCE ml_app.sub_process_history_id_seq OWNED BY ml_app.sub_process_his
 
 
 --
--- Name: sub_processes; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: sub_processes; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.sub_processes (
@@ -4010,7 +7580,531 @@ ALTER SEQUENCE ml_app.sub_processes_id_seq OWNED BY ml_app.sub_processes.id;
 
 
 --
--- Name: tracker_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: sync_statuses; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.sync_statuses (
+    id integer NOT NULL,
+    from_db character varying,
+    from_master_id integer,
+    to_db character varying,
+    to_master_id integer,
+    select_status character varying DEFAULT 'new'::character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: sync_statuses_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.sync_statuses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sync_statuses_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.sync_statuses_id_seq OWNED BY ml_app.sync_statuses.id;
+
+
+--
+-- Name: temp_ipa_assignments; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.temp_ipa_assignments (
+    master_id integer,
+    ipa_id integer
+);
+
+
+--
+-- Name: test1_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test1_history (
+    id integer NOT NULL,
+    master_id integer,
+    test1_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test1_table_id integer
+);
+
+
+--
+-- Name: test1_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test1_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test1_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test1_history_id_seq OWNED BY ml_app.test1_history.id;
+
+
+--
+-- Name: test1s; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test1s (
+    id integer NOT NULL,
+    master_id integer,
+    test1_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test1s_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test1s_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test1s_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test1s_id_seq OWNED BY ml_app.test1s.id;
+
+
+--
+-- Name: test2_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test2_history (
+    id integer NOT NULL,
+    master_id integer,
+    test_2ext_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test2_table_id integer
+);
+
+
+--
+-- Name: test2_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test2_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test2_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test2_history_id_seq OWNED BY ml_app.test2_history.id;
+
+
+--
+-- Name: test2s; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test2s (
+    id integer NOT NULL,
+    master_id integer,
+    test_2ext_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test2s_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test2s_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test2s_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test2s_id_seq OWNED BY ml_app.test2s.id;
+
+
+--
+-- Name: test_2_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_2_history (
+    id integer NOT NULL,
+    master_id integer,
+    test_2ext_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_2_table_id integer
+);
+
+
+--
+-- Name: test_2_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_2_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_2_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_2_history_id_seq OWNED BY ml_app.test_2_history.id;
+
+
+--
+-- Name: test_2s; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_2s (
+    id integer NOT NULL,
+    master_id integer,
+    test_2ext_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_2s_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_2s_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_2s_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_2s_id_seq OWNED BY ml_app.test_2s.id;
+
+
+--
+-- Name: test_ext2_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_ext2_history (
+    id integer NOT NULL,
+    master_id integer,
+    test_e2_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_ext2_table_id integer
+);
+
+
+--
+-- Name: test_ext2_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_ext2_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_ext2_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_ext2_history_id_seq OWNED BY ml_app.test_ext2_history.id;
+
+
+--
+-- Name: test_ext2s; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_ext2s (
+    id integer NOT NULL,
+    master_id integer,
+    test_e2_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_ext2s_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_ext2s_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_ext2s_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_ext2s_id_seq OWNED BY ml_app.test_ext2s.id;
+
+
+--
+-- Name: test_ext_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_ext_history (
+    id integer NOT NULL,
+    master_id integer,
+    test_e_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    test_ext_table_id integer
+);
+
+
+--
+-- Name: test_ext_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_ext_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_ext_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_ext_history_id_seq OWNED BY ml_app.test_ext_history.id;
+
+
+--
+-- Name: test_exts; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_exts (
+    id integer NOT NULL,
+    master_id integer,
+    test_e_id integer,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_exts_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_exts_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_exts_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_exts_id_seq OWNED BY ml_app.test_exts.id;
+
+
+--
+-- Name: test_item_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_item_history (
+    id integer NOT NULL,
+    test_item_id integer,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_item_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_item_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_item_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_item_history_id_seq OWNED BY ml_app.test_item_history.id;
+
+
+--
+-- Name: test_items; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.test_items (
+    id integer NOT NULL,
+    master_id integer,
+    external_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: test_items_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.test_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: test_items_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.test_items_id_seq OWNED BY ml_app.test_items.id;
+
+
+--
+-- Name: testing_dl_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.testing_dl_history (
+    id integer NOT NULL,
+    master_id integer,
+    name character varying,
+    select_yes_no character varying,
+    select_record_from_table_dl_addresses character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    testing_dl_id integer
+);
+
+
+--
+-- Name: testing_dl_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.testing_dl_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: testing_dl_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.testing_dl_history_id_seq OWNED BY ml_app.testing_dl_history.id;
+
+
+--
+-- Name: testing_dls; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.testing_dls (
+    id integer NOT NULL,
+    master_id integer,
+    name character varying,
+    select_yes_no character varying,
+    select_record_from_table_dl_addresses character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: testing_dls_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.testing_dls_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: testing_dls_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.testing_dls_id_seq OWNED BY ml_app.testing_dls.id;
+
+
+--
+-- Name: tracker_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.tracker_history (
@@ -4050,7 +8144,7 @@ ALTER SEQUENCE ml_app.tracker_history_id_seq OWNED BY ml_app.tracker_history.id;
 
 
 --
--- Name: trackers; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: trackers; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.trackers (
@@ -4058,7 +8152,7 @@ CREATE TABLE ml_app.trackers (
     master_id integer,
     protocol_id integer NOT NULL,
     event_date timestamp without time zone,
-    user_id integer DEFAULT ml_app.current_user_id(),
+    user_id integer DEFAULT 0,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     notes character varying,
@@ -4089,7 +8183,7 @@ ALTER SEQUENCE ml_app.trackers_id_seq OWNED BY ml_app.trackers.id;
 
 
 --
--- Name: user_access_controls; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_access_controls; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.user_access_controls (
@@ -4126,7 +8220,7 @@ ALTER SEQUENCE ml_app.user_access_controls_id_seq OWNED BY ml_app.user_access_co
 
 
 --
--- Name: user_action_logs; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_action_logs; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.user_action_logs (
@@ -4164,7 +8258,7 @@ ALTER SEQUENCE ml_app.user_action_logs_id_seq OWNED BY ml_app.user_action_logs.i
 
 
 --
--- Name: user_authorization_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_authorization_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.user_authorization_history (
@@ -4199,7 +8293,7 @@ ALTER SEQUENCE ml_app.user_authorization_history_id_seq OWNED BY ml_app.user_aut
 
 
 --
--- Name: user_authorizations; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_authorizations; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.user_authorizations (
@@ -4233,7 +8327,7 @@ ALTER SEQUENCE ml_app.user_authorizations_id_seq OWNED BY ml_app.user_authorizat
 
 
 --
--- Name: user_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.user_history (
@@ -4280,7 +8374,7 @@ ALTER SEQUENCE ml_app.user_history_id_seq OWNED BY ml_app.user_history.id;
 
 
 --
--- Name: user_roles; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_roles; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.user_roles (
@@ -4315,7 +8409,7 @@ ALTER SEQUENCE ml_app.user_roles_id_seq OWNED BY ml_app.user_roles.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: users; Type: TABLE; Schema: ml_app; Owner: -
 --
 
 CREATE TABLE ml_app.users (
@@ -4361,6 +8455,39 @@ ALTER SEQUENCE ml_app.users_id_seq OWNED BY ml_app.users.id;
 
 
 --
+-- Name: tmbs_id_seq; Type: SEQUENCE; Schema: testmybrain; Owner: -
+--
+
+CREATE SEQUENCE testmybrain.tmbs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: tmbs_id_seq; Type: SEQUENCE OWNED BY; Schema: testmybrain; Owner: -
+--
+
+ALTER SEQUENCE testmybrain.tmbs_id_seq OWNED BY testmybrain.tmbs.id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_recruitment_ranks ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_recruitment_ranks_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.subjects ALTER COLUMN id SET DEFAULT nextval('ipa_ops.subjects_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
@@ -4378,7 +8505,98 @@ ALTER TABLE ONLY ml_app.accuracy_scores ALTER COLUMN id SET DEFAULT nextval('ml_
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_bhs_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignments ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_bhs_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ext_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignments ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ext_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.activity_log_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviation_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_assignment_minor_deviation_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviations ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_assignment_minor_deviations_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignments ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_survey_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_survey_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_surveys ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_surveys_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_test_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_new_test_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_tests ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_new_tests_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_emails ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_emails_id_seq'::regclass);
 
 
 --
@@ -4393,6 +8611,20 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history ALTER COLUMN i
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_contact_phones_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_info_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_info_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_infos ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_player_infos_id_seq'::regclass);
 
 
 --
@@ -4455,6 +8687,20 @@ ALTER TABLE ONLY ml_app.app_types ALTER COLUMN id SET DEFAULT nextval('ml_app.ap
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.bhs_assignment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.bhs_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignments_old ALTER COLUMN id SET DEFAULT nextval('ml_app.bhs_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.college_history ALTER COLUMN id SET DEFAULT nextval('ml_app.college_history_id_seq'::regclass);
 
 
@@ -4476,6 +8722,13 @@ ALTER TABLE ONLY ml_app.delayed_jobs ALTER COLUMN id SET DEFAULT nextval('ml_app
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.dl_addresses ALTER COLUMN id SET DEFAULT nextval('ml_app.dl_addresses_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.dynamic_model_history ALTER COLUMN id SET DEFAULT nextval('ml_app.dynamic_model_history_id_seq'::regclass);
 
 
@@ -4490,7 +8743,42 @@ ALTER TABLE ONLY ml_app.dynamic_models ALTER COLUMN id SET DEFAULT nextval('ml_a
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.emergency_contacts ALTER COLUMN id SET DEFAULT nextval('ml_app.emergency_contacts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.exception_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.exception_logs_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ext_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignments ALTER COLUMN id SET DEFAULT nextval('ml_app.ext_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ext_gen_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignments ALTER COLUMN id SET DEFAULT nextval('ml_app.ext_gen_assignments_id_seq'::regclass);
 
 
 --
@@ -4540,6 +8828,104 @@ ALTER TABLE ONLY ml_app.general_selections ALTER COLUMN id SET DEFAULT nextval('
 --
 
 ALTER TABLE ONLY ml_app.imports ALTER COLUMN id SET DEFAULT nextval('ml_app.imports_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_appointment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointments ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_appointments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailing_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_consent_mailing_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailings ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_consent_mailings_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotel_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_hotel_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotels ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_hotels_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payment_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_payment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payments ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_payments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screening_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_screening_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screenings ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_screenings_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_survey_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_survey_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_surveys ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_surveys_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportation_history ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_transportation_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportations ALTER COLUMN id SET DEFAULT nextval('ml_app.ipa_transportations_id_seq'::regclass);
 
 
 --
@@ -4603,6 +8989,34 @@ ALTER TABLE ONLY ml_app.message_templates ALTER COLUMN id SET DEFAULT nextval('m
 --
 
 ALTER TABLE ONLY ml_app.model_references ALTER COLUMN id SET DEFAULT nextval('ml_app.model_references_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_number_history ALTER COLUMN id SET DEFAULT nextval('ml_app.mrn_number_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_numbers ALTER COLUMN id SET DEFAULT nextval('ml_app.mrn_numbers_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_test_history ALTER COLUMN id SET DEFAULT nextval('ml_app.new_test_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_tests ALTER COLUMN id SET DEFAULT nextval('ml_app.new_tests_id_seq'::regclass);
 
 
 --
@@ -4714,6 +9128,20 @@ ALTER TABLE ONLY ml_app.sage_assignments ALTER COLUMN id SET DEFAULT nextval('ml
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.sage_two_history ALTER COLUMN id SET DEFAULT nextval('ml_app.sage_two_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.sage_twos ALTER COLUMN id SET DEFAULT nextval('ml_app.sage_twos_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.scantron_history ALTER COLUMN id SET DEFAULT nextval('ml_app.scantron_history_id_seq'::regclass);
 
 
@@ -4721,7 +9149,35 @@ ALTER TABLE ONLY ml_app.scantron_history ALTER COLUMN id SET DEFAULT nextval('ml
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.scantron_series_two_history ALTER COLUMN id SET DEFAULT nextval('ml_app.scantron_series_two_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_series_twos ALTER COLUMN id SET DEFAULT nextval('ml_app.scantron_series_twos_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.scantrons ALTER COLUMN id SET DEFAULT nextval('ml_app.scantrons_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_number_history ALTER COLUMN id SET DEFAULT nextval('ml_app.social_security_number_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_numbers ALTER COLUMN id SET DEFAULT nextval('ml_app.social_security_numbers_id_seq'::regclass);
 
 
 --
@@ -4736,6 +9192,111 @@ ALTER TABLE ONLY ml_app.sub_process_history ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY ml_app.sub_processes ALTER COLUMN id SET DEFAULT nextval('ml_app.sub_processes_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.sync_statuses ALTER COLUMN id SET DEFAULT nextval('ml_app.sync_statuses_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1_history ALTER COLUMN id SET DEFAULT nextval('ml_app.test1_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1s ALTER COLUMN id SET DEFAULT nextval('ml_app.test1s_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2_history ALTER COLUMN id SET DEFAULT nextval('ml_app.test2_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2s ALTER COLUMN id SET DEFAULT nextval('ml_app.test2s_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2_history ALTER COLUMN id SET DEFAULT nextval('ml_app.test_2_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2s ALTER COLUMN id SET DEFAULT nextval('ml_app.test_2s_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2_history ALTER COLUMN id SET DEFAULT nextval('ml_app.test_ext2_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2s ALTER COLUMN id SET DEFAULT nextval('ml_app.test_ext2s_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext_history ALTER COLUMN id SET DEFAULT nextval('ml_app.test_ext_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_exts ALTER COLUMN id SET DEFAULT nextval('ml_app.test_exts_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_item_history ALTER COLUMN id SET DEFAULT nextval('ml_app.test_item_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_items ALTER COLUMN id SET DEFAULT nextval('ml_app.test_items_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dl_history ALTER COLUMN id SET DEFAULT nextval('ml_app.testing_dl_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dls ALTER COLUMN id SET DEFAULT nextval('ml_app.testing_dls_id_seq'::regclass);
 
 
 --
@@ -4802,7 +9363,14 @@ ALTER TABLE ONLY ml_app.users ALTER COLUMN id SET DEFAULT nextval('ml_app.users_
 
 
 --
--- Name: accuracy_score_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: id; Type: DEFAULT; Schema: testmybrain; Owner: -
+--
+
+ALTER TABLE ONLY testmybrain.tmbs ALTER COLUMN id SET DEFAULT nextval('testmybrain.tmbs_id_seq'::regclass);
+
+
+--
+-- Name: accuracy_score_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_score_history
@@ -4810,7 +9378,7 @@ ALTER TABLE ONLY ml_app.accuracy_score_history
 
 
 --
--- Name: accuracy_scores_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: accuracy_scores_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.accuracy_scores
@@ -4818,7 +9386,39 @@ ALTER TABLE ONLY ml_app.accuracy_scores
 
 
 --
--- Name: activity_log_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_bhs_assignment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignment_history
+    ADD CONSTRAINT activity_log_bhs_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_bhs_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
+    ADD CONSTRAINT activity_log_bhs_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ext_assignment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignment_history
+    ADD CONSTRAINT activity_log_ext_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ext_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignments
+    ADD CONSTRAINT activity_log_ext_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_history
@@ -4826,7 +9426,79 @@ ALTER TABLE ONLY ml_app.activity_log_history
 
 
 --
--- Name: activity_log_player_contact_phone_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_ipa_assignment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_history
+    ADD CONSTRAINT activity_log_ipa_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT activity_log_ipa_assignment_minor_deviation_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviations
+    ADD CONSTRAINT activity_log_ipa_assignment_minor_deviations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignments
+    ADD CONSTRAINT activity_log_ipa_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_survey_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_survey_history
+    ADD CONSTRAINT activity_log_ipa_survey_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_surveys_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_surveys
+    ADD CONSTRAINT activity_log_ipa_surveys_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_new_test_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_test_history
+    ADD CONSTRAINT activity_log_new_test_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_new_tests_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_tests
+    ADD CONSTRAINT activity_log_new_tests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_player_contact_emails_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_contact_emails
+    ADD CONSTRAINT activity_log_player_contact_emails_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_player_contact_phone_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
@@ -4834,7 +9506,7 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
 
 
 --
--- Name: activity_log_player_contact_phones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_player_contact_phones_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
@@ -4842,7 +9514,23 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
--- Name: activity_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: activity_log_player_info_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_info_history
+    ADD CONSTRAINT activity_log_player_info_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_player_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_infos
+    ADD CONSTRAINT activity_log_player_infos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.activity_logs
@@ -4850,7 +9538,7 @@ ALTER TABLE ONLY ml_app.activity_logs
 
 
 --
--- Name: address_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: address_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.address_history
@@ -4858,7 +9546,7 @@ ALTER TABLE ONLY ml_app.address_history
 
 
 --
--- Name: addresses_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: addresses_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.addresses
@@ -4866,7 +9554,7 @@ ALTER TABLE ONLY ml_app.addresses
 
 
 --
--- Name: admin_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: admin_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_action_logs
@@ -4874,7 +9562,7 @@ ALTER TABLE ONLY ml_app.admin_action_logs
 
 
 --
--- Name: admin_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: admin_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admin_history
@@ -4882,7 +9570,7 @@ ALTER TABLE ONLY ml_app.admin_history
 
 
 --
--- Name: admins_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: admins_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.admins
@@ -4890,7 +9578,7 @@ ALTER TABLE ONLY ml_app.admins
 
 
 --
--- Name: app_configurations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: app_configurations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_configurations
@@ -4898,7 +9586,7 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 
 --
--- Name: app_types_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: app_types_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.app_types
@@ -4906,7 +9594,23 @@ ALTER TABLE ONLY ml_app.app_types
 
 
 --
--- Name: college_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: bhs_assignment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignment_history
+    ADD CONSTRAINT bhs_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: bhs_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignments_old
+    ADD CONSTRAINT bhs_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: college_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.college_history
@@ -4914,7 +9618,7 @@ ALTER TABLE ONLY ml_app.college_history
 
 
 --
--- Name: colleges_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: colleges_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.colleges
@@ -4922,7 +9626,7 @@ ALTER TABLE ONLY ml_app.colleges
 
 
 --
--- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.delayed_jobs
@@ -4930,7 +9634,7 @@ ALTER TABLE ONLY ml_app.delayed_jobs
 
 
 --
--- Name: dynamic_model_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: dynamic_model_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_model_history
@@ -4938,7 +9642,7 @@ ALTER TABLE ONLY ml_app.dynamic_model_history
 
 
 --
--- Name: dynamic_models_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: dynamic_models_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.dynamic_models
@@ -4946,7 +9650,15 @@ ALTER TABLE ONLY ml_app.dynamic_models
 
 
 --
--- Name: exception_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: emergency_contacts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.emergency_contacts
+    ADD CONSTRAINT emergency_contacts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: exception_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.exception_logs
@@ -4954,7 +9666,39 @@ ALTER TABLE ONLY ml_app.exception_logs
 
 
 --
--- Name: external_identifier_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: ext_assignment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignment_history
+    ADD CONSTRAINT ext_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ext_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignments
+    ADD CONSTRAINT ext_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ext_gen_assignment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignment_history
+    ADD CONSTRAINT ext_gen_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ext_gen_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignments
+    ADD CONSTRAINT ext_gen_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: external_identifier_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifier_history
@@ -4962,7 +9706,7 @@ ALTER TABLE ONLY ml_app.external_identifier_history
 
 
 --
--- Name: external_identifiers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: external_identifiers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_identifiers
@@ -4970,7 +9714,7 @@ ALTER TABLE ONLY ml_app.external_identifiers
 
 
 --
--- Name: external_link_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: external_link_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_link_history
@@ -4978,7 +9722,7 @@ ALTER TABLE ONLY ml_app.external_link_history
 
 
 --
--- Name: external_links_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: external_links_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.external_links
@@ -4986,7 +9730,7 @@ ALTER TABLE ONLY ml_app.external_links
 
 
 --
--- Name: general_selection_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: general_selection_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selection_history
@@ -4994,7 +9738,7 @@ ALTER TABLE ONLY ml_app.general_selection_history
 
 
 --
--- Name: general_selections_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: general_selections_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.general_selections
@@ -5002,7 +9746,7 @@ ALTER TABLE ONLY ml_app.general_selections
 
 
 --
--- Name: imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: imports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.imports
@@ -5010,7 +9754,127 @@ ALTER TABLE ONLY ml_app.imports
 
 
 --
--- Name: item_flag_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: ipa_appointment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointment_history
+    ADD CONSTRAINT ipa_appointment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_appointments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointments
+    ADD CONSTRAINT ipa_appointments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_appointments_visit_start_date_key; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointments
+    ADD CONSTRAINT ipa_appointments_visit_start_date_key UNIQUE (visit_start_date);
+
+
+--
+-- Name: ipa_consent_mailing_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailing_history
+    ADD CONSTRAINT ipa_consent_mailing_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_consent_mailings_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailings
+    ADD CONSTRAINT ipa_consent_mailings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_hotel_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotel_history
+    ADD CONSTRAINT ipa_hotel_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_hotels_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotels
+    ADD CONSTRAINT ipa_hotels_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_payment_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payment_history
+    ADD CONSTRAINT ipa_payment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_payments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payments
+    ADD CONSTRAINT ipa_payments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_screening_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screening_history
+    ADD CONSTRAINT ipa_screening_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_screenings_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screenings
+    ADD CONSTRAINT ipa_screenings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_survey_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_survey_history
+    ADD CONSTRAINT ipa_survey_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_surveys_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_surveys
+    ADD CONSTRAINT ipa_surveys_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_transportation_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportation_history
+    ADD CONSTRAINT ipa_transportation_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_transportations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportations
+    ADD CONSTRAINT ipa_transportations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: item_flag_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_history
@@ -5018,7 +9882,7 @@ ALTER TABLE ONLY ml_app.item_flag_history
 
 
 --
--- Name: item_flag_name_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: item_flag_name_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_name_history
@@ -5026,7 +9890,7 @@ ALTER TABLE ONLY ml_app.item_flag_name_history
 
 
 --
--- Name: item_flag_names_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: item_flag_names_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flag_names
@@ -5034,7 +9898,7 @@ ALTER TABLE ONLY ml_app.item_flag_names
 
 
 --
--- Name: item_flags_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: item_flags_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.item_flags
@@ -5042,7 +9906,7 @@ ALTER TABLE ONLY ml_app.item_flags
 
 
 --
--- Name: manage_users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: manage_users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.manage_users
@@ -5050,7 +9914,7 @@ ALTER TABLE ONLY ml_app.manage_users
 
 
 --
--- Name: masters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: masters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.masters
@@ -5058,7 +9922,7 @@ ALTER TABLE ONLY ml_app.masters
 
 
 --
--- Name: message_notifications_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: message_notifications_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_notifications
@@ -5066,7 +9930,7 @@ ALTER TABLE ONLY ml_app.message_notifications
 
 
 --
--- Name: message_templates_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: message_templates_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.message_templates
@@ -5074,7 +9938,7 @@ ALTER TABLE ONLY ml_app.message_templates
 
 
 --
--- Name: model_references_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: model_references_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.model_references
@@ -5082,7 +9946,39 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
--- Name: page_layouts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: mrn_number_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_number_history
+    ADD CONSTRAINT mrn_number_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: mrn_numbers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_numbers
+    ADD CONSTRAINT mrn_numbers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: new_test_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_test_history
+    ADD CONSTRAINT new_test_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: new_tests_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_tests
+    ADD CONSTRAINT new_tests_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: page_layouts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.page_layouts
@@ -5090,7 +9986,7 @@ ALTER TABLE ONLY ml_app.page_layouts
 
 
 --
--- Name: player_contact_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: player_contact_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contact_history
@@ -5098,7 +9994,7 @@ ALTER TABLE ONLY ml_app.player_contact_history
 
 
 --
--- Name: player_contacts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: player_contacts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_contacts
@@ -5106,7 +10002,7 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
--- Name: player_info_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: player_info_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_info_history
@@ -5114,7 +10010,7 @@ ALTER TABLE ONLY ml_app.player_info_history
 
 
 --
--- Name: player_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: player_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.player_infos
@@ -5122,7 +10018,7 @@ ALTER TABLE ONLY ml_app.player_infos
 
 
 --
--- Name: pro_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: pro_infos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.pro_infos
@@ -5130,7 +10026,7 @@ ALTER TABLE ONLY ml_app.pro_infos
 
 
 --
--- Name: protocol_event_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocol_event_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_event_history
@@ -5138,7 +10034,7 @@ ALTER TABLE ONLY ml_app.protocol_event_history
 
 
 --
--- Name: protocol_events_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocol_events_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_events
@@ -5146,7 +10042,7 @@ ALTER TABLE ONLY ml_app.protocol_events
 
 
 --
--- Name: protocol_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocol_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocol_history
@@ -5154,7 +10050,7 @@ ALTER TABLE ONLY ml_app.protocol_history
 
 
 --
--- Name: protocols_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: protocols_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.protocols
@@ -5162,7 +10058,7 @@ ALTER TABLE ONLY ml_app.protocols
 
 
 --
--- Name: rc_cis_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: rc_cis_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.rc_cis
@@ -5170,7 +10066,7 @@ ALTER TABLE ONLY ml_app.rc_cis
 
 
 --
--- Name: rc_stage_cif_copy_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: rc_stage_cif_copy_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.rc_stage_cif_copy
@@ -5178,7 +10074,7 @@ ALTER TABLE ONLY ml_app.rc_stage_cif_copy
 
 
 --
--- Name: report_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: report_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.report_history
@@ -5186,7 +10082,7 @@ ALTER TABLE ONLY ml_app.report_history
 
 
 --
--- Name: reports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: reports_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.reports
@@ -5194,7 +10090,7 @@ ALTER TABLE ONLY ml_app.reports
 
 
 --
--- Name: sage_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: sage_assignments_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sage_assignments
@@ -5202,7 +10098,23 @@ ALTER TABLE ONLY ml_app.sage_assignments
 
 
 --
--- Name: scantron_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: sage_two_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.sage_two_history
+    ADD CONSTRAINT sage_two_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sage_twos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.sage_twos
+    ADD CONSTRAINT sage_twos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scantron_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantron_history
@@ -5210,7 +10122,23 @@ ALTER TABLE ONLY ml_app.scantron_history
 
 
 --
--- Name: scantrons_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: scantron_series_two_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_series_two_history
+    ADD CONSTRAINT scantron_series_two_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scantron_series_twos_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.scantron_series_twos
+    ADD CONSTRAINT scantron_series_twos_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scantrons_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.scantrons
@@ -5218,7 +10146,23 @@ ALTER TABLE ONLY ml_app.scantrons
 
 
 --
--- Name: sub_process_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: social_security_number_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_number_history
+    ADD CONSTRAINT social_security_number_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: social_security_numbers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_numbers
+    ADD CONSTRAINT social_security_numbers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: sub_process_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_process_history
@@ -5226,7 +10170,7 @@ ALTER TABLE ONLY ml_app.sub_process_history
 
 
 --
--- Name: sub_processes_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: sub_processes_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_processes
@@ -5234,7 +10178,119 @@ ALTER TABLE ONLY ml_app.sub_processes
 
 
 --
--- Name: tracker_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: test1_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1_history
+    ADD CONSTRAINT test1_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test1s_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1s
+    ADD CONSTRAINT test1s_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test2_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2_history
+    ADD CONSTRAINT test2_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test2s_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2s
+    ADD CONSTRAINT test2s_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_2_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2_history
+    ADD CONSTRAINT test_2_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_2s_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2s
+    ADD CONSTRAINT test_2s_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_ext2_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2_history
+    ADD CONSTRAINT test_ext2_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_ext2s_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2s
+    ADD CONSTRAINT test_ext2s_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_ext_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext_history
+    ADD CONSTRAINT test_ext_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_exts_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_exts
+    ADD CONSTRAINT test_exts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_item_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_item_history
+    ADD CONSTRAINT test_item_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: test_items_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_items
+    ADD CONSTRAINT test_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: testing_dl_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dl_history
+    ADD CONSTRAINT testing_dl_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: testing_dls_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dls
+    ADD CONSTRAINT testing_dls_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tracker_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.tracker_history
@@ -5242,7 +10298,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
--- Name: trackers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: trackers_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.trackers
@@ -5250,39 +10306,7 @@ ALTER TABLE ONLY ml_app.trackers
 
 
 --
--- Name: unique_master_protocol; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY ml_app.trackers
-    ADD CONSTRAINT unique_master_protocol UNIQUE (master_id, protocol_id);
-
-
---
--- Name: unique_master_protocol_id; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY ml_app.trackers
-    ADD CONSTRAINT unique_master_protocol_id UNIQUE (master_id, protocol_id, id);
-
-
---
--- Name: unique_protocol_and_id; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY ml_app.sub_processes
-    ADD CONSTRAINT unique_protocol_and_id UNIQUE (protocol_id, id);
-
-
---
--- Name: unique_sub_process_and_id; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY ml_app.protocol_events
-    ADD CONSTRAINT unique_sub_process_and_id UNIQUE (sub_process_id, id);
-
-
---
--- Name: user_access_controls_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_access_controls_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_access_controls
@@ -5290,7 +10314,7 @@ ALTER TABLE ONLY ml_app.user_access_controls
 
 
 --
--- Name: user_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_action_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_action_logs
@@ -5298,7 +10322,7 @@ ALTER TABLE ONLY ml_app.user_action_logs
 
 
 --
--- Name: user_authorization_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_authorization_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_authorization_history
@@ -5306,7 +10330,7 @@ ALTER TABLE ONLY ml_app.user_authorization_history
 
 
 --
--- Name: user_authorizations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_authorizations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_authorizations
@@ -5314,7 +10338,7 @@ ALTER TABLE ONLY ml_app.user_authorizations
 
 
 --
--- Name: user_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_history
@@ -5322,7 +10346,7 @@ ALTER TABLE ONLY ml_app.user_history
 
 
 --
--- Name: user_roles_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: user_roles_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.user_roles
@@ -5330,7 +10354,7 @@ ALTER TABLE ONLY ml_app.user_roles
 
 
 --
--- Name: users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: users_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.users
@@ -5338,822 +10362,2117 @@ ALTER TABLE ONLY ml_app.users
 
 
 --
--- Name: delayed_jobs_priority; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: delayed_jobs_priority; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX delayed_jobs_priority ON ml_app.delayed_jobs USING btree (priority, run_at);
 
 
 --
--- Name: index_accuracy_score_history_on_accuracy_score_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_accuracy_score_history_on_accuracy_score_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_accuracy_score_history_on_accuracy_score_id ON ml_app.accuracy_score_history USING btree (accuracy_score_id);
 
 
 --
--- Name: index_accuracy_scores_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_accuracy_scores_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_accuracy_scores_on_admin_id ON ml_app.accuracy_scores USING btree (admin_id);
 
 
 --
--- Name: index_activity_log_history_on_activity_log_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_bhs_assignment_history_on_activity_log_bhs_a; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_bhs_assignment_history_on_activity_log_bhs_a ON ml_app.activity_log_bhs_assignment_history USING btree (activity_log_bhs_assignment_id);
+
+
+--
+-- Name: index_activity_log_bhs_assignment_history_on_bhs_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_bhs_assignment_history_on_bhs_assignment_id ON ml_app.activity_log_bhs_assignment_history USING btree (bhs_assignment_id);
+
+
+--
+-- Name: index_activity_log_bhs_assignment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_bhs_assignment_history_on_master_id ON ml_app.activity_log_bhs_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_bhs_assignment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_bhs_assignment_history_on_user_id ON ml_app.activity_log_bhs_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_bhs_assignments_on_bhs_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_bhs_assignments_on_bhs_assignment_id ON ml_app.activity_log_bhs_assignments USING btree (bhs_assignment_id);
+
+
+--
+-- Name: index_activity_log_bhs_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_bhs_assignments_on_master_id ON ml_app.activity_log_bhs_assignments USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_bhs_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_bhs_assignments_on_user_id ON ml_app.activity_log_bhs_assignments USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ext_assignment_history_on_activity_log_ext_a; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ext_assignment_history_on_activity_log_ext_a ON ml_app.activity_log_ext_assignment_history USING btree (activity_log_ext_assignment_id);
+
+
+--
+-- Name: index_activity_log_ext_assignment_history_on_ext_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ext_assignment_history_on_ext_assignment_id ON ml_app.activity_log_ext_assignment_history USING btree (ext_assignment_id);
+
+
+--
+-- Name: index_activity_log_ext_assignment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ext_assignment_history_on_master_id ON ml_app.activity_log_ext_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ext_assignment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ext_assignment_history_on_user_id ON ml_app.activity_log_ext_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ext_assignments_on_ext_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ext_assignments_on_ext_assignment_id ON ml_app.activity_log_ext_assignments USING btree (ext_assignment_id);
+
+
+--
+-- Name: index_activity_log_ext_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ext_assignments_on_master_id ON ml_app.activity_log_ext_assignments USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ext_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ext_assignments_on_user_id ON ml_app.activity_log_ext_assignments USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_history_on_activity_log_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_history_on_activity_log_id ON ml_app.activity_log_history USING btree (activity_log_id);
 
 
 --
--- Name: index_activity_log_player_contact_phone_history_on_activity_log; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_ipa_assignment_history_on_activity_log_ipa_a; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_history_on_activity_log_ipa_a ON ml_app.activity_log_ipa_assignment_history USING btree (activity_log_ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_history_on_ipa_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_history_on_ipa_assignment_id ON ml_app.activity_log_ipa_assignment_history USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_history_on_master_id ON ml_app.activity_log_ipa_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_history_on_user_id ON ml_app.activity_log_ipa_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_ac; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_ac ON ml_app.activity_log_ipa_assignment_minor_deviation_history USING btree (activity_log_ipa_assignment_minor_deviation_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_ip; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_ip ON ml_app.activity_log_ipa_assignment_minor_deviation_history USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_ma; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_ma ON ml_app.activity_log_ipa_assignment_minor_deviation_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviation_history_on_us; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviation_history_on_us ON ml_app.activity_log_ipa_assignment_minor_deviation_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviations_on_ipa_assig; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviations_on_ipa_assig ON ml_app.activity_log_ipa_assignment_minor_deviations USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviations_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviations_on_master_id ON ml_app.activity_log_ipa_assignment_minor_deviations USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_minor_deviations_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_minor_deviations_on_user_id ON ml_app.activity_log_ipa_assignment_minor_deviations USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignments_on_ipa_assignment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignments_on_ipa_assignment_id ON ml_app.activity_log_ipa_assignments USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignments_on_master_id ON ml_app.activity_log_ipa_assignments USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignments_on_user_id ON ml_app.activity_log_ipa_assignments USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ipa_survey_history_on_activity_log_ipa_surve; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_survey_history_on_activity_log_ipa_surve ON ml_app.activity_log_ipa_survey_history USING btree (activity_log_ipa_survey_id);
+
+
+--
+-- Name: index_activity_log_ipa_survey_history_on_ipa_survey_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_survey_history_on_ipa_survey_id ON ml_app.activity_log_ipa_survey_history USING btree (ipa_survey_id);
+
+
+--
+-- Name: index_activity_log_ipa_survey_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_survey_history_on_master_id ON ml_app.activity_log_ipa_survey_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_survey_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_survey_history_on_user_id ON ml_app.activity_log_ipa_survey_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_ipa_surveys_on_ipa_survey_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_surveys_on_ipa_survey_id ON ml_app.activity_log_ipa_surveys USING btree (ipa_survey_id);
+
+
+--
+-- Name: index_activity_log_ipa_surveys_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_surveys_on_master_id ON ml_app.activity_log_ipa_surveys USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_surveys_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_surveys_on_user_id ON ml_app.activity_log_ipa_surveys USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_new_test_history_on_activity_log_new_test_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_new_test_history_on_activity_log_new_test_id ON ml_app.activity_log_new_test_history USING btree (activity_log_new_test_id);
+
+
+--
+-- Name: index_activity_log_new_test_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_new_test_history_on_master_id ON ml_app.activity_log_new_test_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_new_test_history_on_new_test_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_new_test_history_on_new_test_id ON ml_app.activity_log_new_test_history USING btree (new_test_id);
+
+
+--
+-- Name: index_activity_log_new_test_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_new_test_history_on_user_id ON ml_app.activity_log_new_test_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_new_tests_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_new_tests_on_master_id ON ml_app.activity_log_new_tests USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_new_tests_on_new_test_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_new_tests_on_new_test_id ON ml_app.activity_log_new_tests USING btree (new_test_id);
+
+
+--
+-- Name: index_activity_log_new_tests_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_new_tests_on_user_id ON ml_app.activity_log_new_tests USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_master_id ON ml_app.activity_log_player_contact_emails USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_player_contact_id ON ml_app.activity_log_player_contact_emails USING btree (player_contact_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_protocol_id ON ml_app.activity_log_player_contact_emails USING btree (protocol_id);
+
+
+--
+-- Name: index_activity_log_player_contact_emails_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_contact_emails_on_user_id ON ml_app.activity_log_player_contact_emails USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_player_contact_phone_history_on_activity_log; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phone_history_on_activity_log ON ml_app.activity_log_player_contact_phone_history USING btree (activity_log_player_contact_phone_id);
 
 
 --
--- Name: index_activity_log_player_contact_phone_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phone_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phone_history_on_master_id ON ml_app.activity_log_player_contact_phone_history USING btree (master_id);
 
 
 --
--- Name: index_activity_log_player_contact_phone_history_on_player_conta; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phone_history_on_player_conta; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phone_history_on_player_conta ON ml_app.activity_log_player_contact_phone_history USING btree (player_contact_id);
 
 
 --
--- Name: index_activity_log_player_contact_phone_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phone_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phone_history_on_user_id ON ml_app.activity_log_player_contact_phone_history USING btree (user_id);
 
 
 --
--- Name: index_activity_log_player_contact_phones_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phones_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phones_on_master_id ON ml_app.activity_log_player_contact_phones USING btree (master_id);
 
 
 --
--- Name: index_activity_log_player_contact_phones_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phones_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phones_on_player_contact_id ON ml_app.activity_log_player_contact_phones USING btree (player_contact_id);
 
 
 --
--- Name: index_activity_log_player_contact_phones_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phones_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phones_on_protocol_id ON ml_app.activity_log_player_contact_phones USING btree (protocol_id);
 
 
 --
--- Name: index_activity_log_player_contact_phones_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_contact_phones_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_activity_log_player_contact_phones_on_user_id ON ml_app.activity_log_player_contact_phones USING btree (user_id);
 
 
 --
--- Name: index_address_history_on_address_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_activity_log_player_info_history_on_activity_log_player_i; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_info_history_on_activity_log_player_i ON ml_app.activity_log_player_info_history USING btree (activity_log_player_info_id);
+
+
+--
+-- Name: index_activity_log_player_info_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_info_history_on_master_id ON ml_app.activity_log_player_info_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_info_history_on_player_info_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_info_history_on_player_info_id ON ml_app.activity_log_player_info_history USING btree (player_info_id);
+
+
+--
+-- Name: index_activity_log_player_info_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_info_history_on_user_id ON ml_app.activity_log_player_info_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_player_infos_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_infos_on_master_id ON ml_app.activity_log_player_infos USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_player_infos_on_player_info_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_infos_on_player_info_id ON ml_app.activity_log_player_infos USING btree (player_info_id);
+
+
+--
+-- Name: index_activity_log_player_infos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_player_infos_on_user_id ON ml_app.activity_log_player_infos USING btree (user_id);
+
+
+--
+-- Name: index_address_history_on_address_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_address_history_on_address_id ON ml_app.address_history USING btree (address_id);
 
 
 --
--- Name: index_address_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_address_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_address_history_on_master_id ON ml_app.address_history USING btree (master_id);
 
 
 --
--- Name: index_address_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_address_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_address_history_on_user_id ON ml_app.address_history USING btree (user_id);
 
 
 --
--- Name: index_addresses_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_addresses_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_addresses_on_master_id ON ml_app.addresses USING btree (master_id);
 
 
 --
--- Name: index_addresses_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_addresses_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_addresses_on_user_id ON ml_app.addresses USING btree (user_id);
 
 
 --
--- Name: index_admin_action_logs_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_admin_action_logs_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_admin_action_logs_on_admin_id ON ml_app.admin_action_logs USING btree (admin_id);
 
 
 --
--- Name: index_admin_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_admin_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_admin_history_on_admin_id ON ml_app.admin_history USING btree (admin_id);
 
 
 --
--- Name: index_app_configurations_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_app_configurations_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_app_configurations_on_admin_id ON ml_app.app_configurations USING btree (admin_id);
 
 
 --
--- Name: index_app_configurations_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_app_configurations_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_app_configurations_on_app_type_id ON ml_app.app_configurations USING btree (app_type_id);
 
 
 --
--- Name: index_app_configurations_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_app_configurations_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_app_configurations_on_user_id ON ml_app.app_configurations USING btree (user_id);
 
 
 --
--- Name: index_app_types_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_app_types_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_app_types_on_admin_id ON ml_app.app_types USING btree (admin_id);
 
 
 --
--- Name: index_college_history_on_college_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_bhs_assignment_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_bhs_assignment_history_on_admin_id ON ml_app.bhs_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_bhs_assignment_history_on_bhs_assignment_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_bhs_assignment_history_on_bhs_assignment_table_id ON ml_app.bhs_assignment_history USING btree (bhs_assignment_table_id);
+
+
+--
+-- Name: index_bhs_assignment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_bhs_assignment_history_on_master_id ON ml_app.bhs_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_bhs_assignment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_bhs_assignment_history_on_user_id ON ml_app.bhs_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_bhs_assignments_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_bhs_assignments_on_admin_id ON ml_app.bhs_assignments_old USING btree (admin_id);
+
+
+--
+-- Name: index_bhs_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_bhs_assignments_on_master_id ON ml_app.bhs_assignments_old USING btree (master_id);
+
+
+--
+-- Name: index_bhs_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_bhs_assignments_on_user_id ON ml_app.bhs_assignments_old USING btree (user_id);
+
+
+--
+-- Name: index_college_history_on_college_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_college_history_on_college_id ON ml_app.college_history USING btree (college_id);
 
 
 --
--- Name: index_colleges_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_colleges_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_colleges_on_admin_id ON ml_app.colleges USING btree (admin_id);
 
 
 --
--- Name: index_colleges_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_colleges_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_colleges_on_user_id ON ml_app.colleges USING btree (user_id);
 
 
 --
--- Name: index_dynamic_model_history_on_dynamic_model_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_dynamic_model_history_on_dynamic_model_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_dynamic_model_history_on_dynamic_model_id ON ml_app.dynamic_model_history USING btree (dynamic_model_id);
 
 
 --
--- Name: index_dynamic_models_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_dynamic_models_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_dynamic_models_on_admin_id ON ml_app.dynamic_models USING btree (admin_id);
 
 
 --
--- Name: index_exception_logs_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_emergency_contacts_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_emergency_contacts_on_master_id ON ml_app.emergency_contacts USING btree (master_id);
+
+
+--
+-- Name: index_emergency_contacts_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_emergency_contacts_on_user_id ON ml_app.emergency_contacts USING btree (user_id);
+
+
+--
+-- Name: index_exception_logs_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_exception_logs_on_admin_id ON ml_app.exception_logs USING btree (admin_id);
 
 
 --
--- Name: index_exception_logs_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_exception_logs_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_exception_logs_on_user_id ON ml_app.exception_logs USING btree (user_id);
 
 
 --
--- Name: index_external_identifier_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_ext_assignment_history_on_ext_assignment_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_assignment_history_on_ext_assignment_table_id ON ml_app.ext_assignment_history USING btree (ext_assignment_table_id);
+
+
+--
+-- Name: index_ext_assignment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_assignment_history_on_master_id ON ml_app.ext_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_ext_assignment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_assignment_history_on_user_id ON ml_app.ext_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_ext_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_assignments_on_master_id ON ml_app.ext_assignments USING btree (master_id);
+
+
+--
+-- Name: index_ext_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_assignments_on_user_id ON ml_app.ext_assignments USING btree (user_id);
+
+
+--
+-- Name: index_ext_gen_assignment_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_gen_assignment_history_on_admin_id ON ml_app.ext_gen_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_ext_gen_assignment_history_on_ext_gen_assignment_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_gen_assignment_history_on_ext_gen_assignment_table_id ON ml_app.ext_gen_assignment_history USING btree (ext_gen_assignment_table_id);
+
+
+--
+-- Name: index_ext_gen_assignment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_gen_assignment_history_on_master_id ON ml_app.ext_gen_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_ext_gen_assignment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_gen_assignment_history_on_user_id ON ml_app.ext_gen_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_ext_gen_assignments_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_gen_assignments_on_admin_id ON ml_app.ext_gen_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_ext_gen_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_gen_assignments_on_master_id ON ml_app.ext_gen_assignments USING btree (master_id);
+
+
+--
+-- Name: index_ext_gen_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ext_gen_assignments_on_user_id ON ml_app.ext_gen_assignments USING btree (user_id);
+
+
+--
+-- Name: index_external_identifier_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_external_identifier_history_on_admin_id ON ml_app.external_identifier_history USING btree (admin_id);
 
 
 --
--- Name: index_external_identifier_history_on_external_identifier_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_external_identifier_history_on_external_identifier_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_external_identifier_history_on_external_identifier_id ON ml_app.external_identifier_history USING btree (external_identifier_id);
 
 
 --
--- Name: index_external_identifiers_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_external_identifiers_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_external_identifiers_on_admin_id ON ml_app.external_identifiers USING btree (admin_id);
 
 
 --
--- Name: index_external_link_history_on_external_link_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_external_link_history_on_external_link_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_external_link_history_on_external_link_id ON ml_app.external_link_history USING btree (external_link_id);
 
 
 --
--- Name: index_external_links_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_external_links_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_external_links_on_admin_id ON ml_app.external_links USING btree (admin_id);
 
 
 --
--- Name: index_general_selection_history_on_general_selection_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_general_selection_history_on_general_selection_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_general_selection_history_on_general_selection_id ON ml_app.general_selection_history USING btree (general_selection_id);
 
 
 --
--- Name: index_general_selections_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_general_selections_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_general_selections_on_admin_id ON ml_app.general_selections USING btree (admin_id);
 
 
 --
--- Name: index_imports_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_imports_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_imports_on_user_id ON ml_app.imports USING btree (user_id);
 
 
 --
--- Name: index_item_flag_history_on_item_flag_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_ipa_appointment_history_on_ipa_appointment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_appointment_history_on_ipa_appointment_id ON ml_app.ipa_appointment_history USING btree (ipa_appointment_id);
+
+
+--
+-- Name: index_ipa_appointment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_appointment_history_on_master_id ON ml_app.ipa_appointment_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_appointment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_appointment_history_on_user_id ON ml_app.ipa_appointment_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_appointments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_appointments_on_master_id ON ml_app.ipa_appointments USING btree (master_id);
+
+
+--
+-- Name: index_ipa_appointments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_appointments_on_user_id ON ml_app.ipa_appointments USING btree (user_id);
+
+
+--
+-- Name: index_ipa_consent_mailing_history_on_ipa_consent_mailing_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_consent_mailing_history_on_ipa_consent_mailing_id ON ml_app.ipa_consent_mailing_history USING btree (ipa_consent_mailing_id);
+
+
+--
+-- Name: index_ipa_consent_mailing_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_consent_mailing_history_on_master_id ON ml_app.ipa_consent_mailing_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_consent_mailing_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_consent_mailing_history_on_user_id ON ml_app.ipa_consent_mailing_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_consent_mailings_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_consent_mailings_on_master_id ON ml_app.ipa_consent_mailings USING btree (master_id);
+
+
+--
+-- Name: index_ipa_consent_mailings_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_consent_mailings_on_user_id ON ml_app.ipa_consent_mailings USING btree (user_id);
+
+
+--
+-- Name: index_ipa_hotel_history_on_ipa_hotel_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_hotel_history_on_ipa_hotel_id ON ml_app.ipa_hotel_history USING btree (ipa_hotel_id);
+
+
+--
+-- Name: index_ipa_hotel_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_hotel_history_on_master_id ON ml_app.ipa_hotel_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_hotel_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_hotel_history_on_user_id ON ml_app.ipa_hotel_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_hotels_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_hotels_on_master_id ON ml_app.ipa_hotels USING btree (master_id);
+
+
+--
+-- Name: index_ipa_hotels_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_hotels_on_user_id ON ml_app.ipa_hotels USING btree (user_id);
+
+
+--
+-- Name: index_ipa_payment_history_on_ipa_payment_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_payment_history_on_ipa_payment_id ON ml_app.ipa_payment_history USING btree (ipa_payment_id);
+
+
+--
+-- Name: index_ipa_payment_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_payment_history_on_master_id ON ml_app.ipa_payment_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_payment_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_payment_history_on_user_id ON ml_app.ipa_payment_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_payments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_payments_on_master_id ON ml_app.ipa_payments USING btree (master_id);
+
+
+--
+-- Name: index_ipa_payments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_payments_on_user_id ON ml_app.ipa_payments USING btree (user_id);
+
+
+--
+-- Name: index_ipa_screening_history_on_ipa_screening_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_screening_history_on_ipa_screening_id ON ml_app.ipa_screening_history USING btree (ipa_screening_id);
+
+
+--
+-- Name: index_ipa_screening_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_screening_history_on_master_id ON ml_app.ipa_screening_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_screening_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_screening_history_on_user_id ON ml_app.ipa_screening_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_screenings_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_screenings_on_master_id ON ml_app.ipa_screenings USING btree (master_id);
+
+
+--
+-- Name: index_ipa_screenings_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_screenings_on_user_id ON ml_app.ipa_screenings USING btree (user_id);
+
+
+--
+-- Name: index_ipa_survey_history_on_ipa_survey_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_survey_history_on_ipa_survey_id ON ml_app.ipa_survey_history USING btree (ipa_survey_id);
+
+
+--
+-- Name: index_ipa_survey_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_survey_history_on_master_id ON ml_app.ipa_survey_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_survey_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_survey_history_on_user_id ON ml_app.ipa_survey_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_surveys_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_surveys_on_master_id ON ml_app.ipa_surveys USING btree (master_id);
+
+
+--
+-- Name: index_ipa_surveys_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_surveys_on_user_id ON ml_app.ipa_surveys USING btree (user_id);
+
+
+--
+-- Name: index_ipa_transportation_history_on_ipa_transportation_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_transportation_history_on_ipa_transportation_id ON ml_app.ipa_transportation_history USING btree (ipa_transportation_id);
+
+
+--
+-- Name: index_ipa_transportation_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_transportation_history_on_master_id ON ml_app.ipa_transportation_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_transportation_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_transportation_history_on_user_id ON ml_app.ipa_transportation_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_transportations_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_transportations_on_master_id ON ml_app.ipa_transportations USING btree (master_id);
+
+
+--
+-- Name: index_ipa_transportations_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_ipa_transportations_on_user_id ON ml_app.ipa_transportations USING btree (user_id);
+
+
+--
+-- Name: index_item_flag_history_on_item_flag_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_item_flag_history_on_item_flag_id ON ml_app.item_flag_history USING btree (item_flag_id);
 
 
 --
--- Name: index_item_flag_name_history_on_item_flag_name_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_item_flag_name_history_on_item_flag_name_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_item_flag_name_history_on_item_flag_name_id ON ml_app.item_flag_name_history USING btree (item_flag_name_id);
 
 
 --
--- Name: index_item_flag_names_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_item_flag_names_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_item_flag_names_on_admin_id ON ml_app.item_flag_names USING btree (admin_id);
 
 
 --
--- Name: index_item_flags_on_item_flag_name_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_item_flags_on_item_flag_name_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_item_flags_on_item_flag_name_id ON ml_app.item_flags USING btree (item_flag_name_id);
 
 
 --
--- Name: index_item_flags_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_item_flags_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_item_flags_on_user_id ON ml_app.item_flags USING btree (user_id);
 
 
 --
--- Name: index_masters_on_msid; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_masters_on_msid; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_masters_on_msid ON ml_app.masters USING btree (msid);
 
 
 --
--- Name: index_masters_on_pro_info_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_masters_on_pro_info_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_masters_on_pro_info_id ON ml_app.masters USING btree (pro_info_id);
 
 
 --
--- Name: index_masters_on_proid; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_masters_on_proid; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_masters_on_proid ON ml_app.masters USING btree (pro_id);
 
 
 --
--- Name: index_masters_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_masters_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_masters_on_user_id ON ml_app.masters USING btree (user_id);
 
 
 --
--- Name: index_message_notifications_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_message_notifications_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_message_notifications_on_app_type_id ON ml_app.message_notifications USING btree (app_type_id);
 
 
 --
--- Name: index_message_notifications_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_message_notifications_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_message_notifications_on_master_id ON ml_app.message_notifications USING btree (master_id);
 
 
 --
--- Name: index_message_notifications_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_message_notifications_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_message_notifications_on_user_id ON ml_app.message_notifications USING btree (user_id);
 
 
 --
--- Name: index_message_notifications_status; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_message_notifications_status; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_message_notifications_status ON ml_app.message_notifications USING btree (status);
 
 
 --
--- Name: index_message_templates_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_message_templates_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_message_templates_on_admin_id ON ml_app.message_templates USING btree (admin_id);
 
 
 --
--- Name: index_model_references_on_from_record_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_model_references_on_from_record_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_model_references_on_from_record_master_id ON ml_app.model_references USING btree (from_record_master_id);
 
 
 --
--- Name: index_model_references_on_from_record_type_and_from_record_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_model_references_on_from_record_type_and_from_record_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_model_references_on_from_record_type_and_from_record_id ON ml_app.model_references USING btree (from_record_type, from_record_id);
 
 
 --
--- Name: index_model_references_on_to_record_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_model_references_on_to_record_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_model_references_on_to_record_master_id ON ml_app.model_references USING btree (to_record_master_id);
 
 
 --
--- Name: index_model_references_on_to_record_type_and_to_record_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_model_references_on_to_record_type_and_to_record_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_model_references_on_to_record_type_and_to_record_id ON ml_app.model_references USING btree (to_record_type, to_record_id);
 
 
 --
--- Name: index_model_references_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_model_references_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_model_references_on_user_id ON ml_app.model_references USING btree (user_id);
 
 
 --
--- Name: index_page_layouts_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_mrn_number_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_mrn_number_history_on_admin_id ON ml_app.mrn_number_history USING btree (admin_id);
+
+
+--
+-- Name: index_mrn_number_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_mrn_number_history_on_master_id ON ml_app.mrn_number_history USING btree (master_id);
+
+
+--
+-- Name: index_mrn_number_history_on_mrn_number_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_mrn_number_history_on_mrn_number_table_id ON ml_app.mrn_number_history USING btree (mrn_number_table_id);
+
+
+--
+-- Name: index_mrn_number_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_mrn_number_history_on_user_id ON ml_app.mrn_number_history USING btree (user_id);
+
+
+--
+-- Name: index_mrn_numbers_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_mrn_numbers_on_admin_id ON ml_app.mrn_numbers USING btree (admin_id);
+
+
+--
+-- Name: index_mrn_numbers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_mrn_numbers_on_master_id ON ml_app.mrn_numbers USING btree (master_id);
+
+
+--
+-- Name: index_mrn_numbers_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_mrn_numbers_on_user_id ON ml_app.mrn_numbers USING btree (user_id);
+
+
+--
+-- Name: index_new_test_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_new_test_history_on_admin_id ON ml_app.new_test_history USING btree (admin_id);
+
+
+--
+-- Name: index_new_test_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_new_test_history_on_master_id ON ml_app.new_test_history USING btree (master_id);
+
+
+--
+-- Name: index_new_test_history_on_new_test_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_new_test_history_on_new_test_table_id ON ml_app.new_test_history USING btree (new_test_table_id);
+
+
+--
+-- Name: index_new_test_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_new_test_history_on_user_id ON ml_app.new_test_history USING btree (user_id);
+
+
+--
+-- Name: index_new_tests_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_new_tests_on_admin_id ON ml_app.new_tests USING btree (admin_id);
+
+
+--
+-- Name: index_new_tests_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_new_tests_on_master_id ON ml_app.new_tests USING btree (master_id);
+
+
+--
+-- Name: index_new_tests_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_new_tests_on_user_id ON ml_app.new_tests USING btree (user_id);
+
+
+--
+-- Name: index_page_layouts_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_page_layouts_on_admin_id ON ml_app.page_layouts USING btree (admin_id);
 
 
 --
--- Name: index_page_layouts_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_page_layouts_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_page_layouts_on_app_type_id ON ml_app.page_layouts USING btree (app_type_id);
 
 
 --
--- Name: index_player_contact_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_contact_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_contact_history_on_master_id ON ml_app.player_contact_history USING btree (master_id);
 
 
 --
--- Name: index_player_contact_history_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_contact_history_on_player_contact_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_contact_history_on_player_contact_id ON ml_app.player_contact_history USING btree (player_contact_id);
 
 
 --
--- Name: index_player_contact_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_contact_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_contact_history_on_user_id ON ml_app.player_contact_history USING btree (user_id);
 
 
 --
--- Name: index_player_contacts_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_contacts_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_contacts_on_master_id ON ml_app.player_contacts USING btree (master_id);
 
 
 --
--- Name: index_player_contacts_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_contacts_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_contacts_on_user_id ON ml_app.player_contacts USING btree (user_id);
 
 
 --
--- Name: index_player_info_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_info_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_info_history_on_master_id ON ml_app.player_info_history USING btree (master_id);
 
 
 --
--- Name: index_player_info_history_on_player_info_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_info_history_on_player_info_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_info_history_on_player_info_id ON ml_app.player_info_history USING btree (player_info_id);
 
 
 --
--- Name: index_player_info_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_info_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_info_history_on_user_id ON ml_app.player_info_history USING btree (user_id);
 
 
 --
--- Name: index_player_infos_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_infos_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_infos_on_master_id ON ml_app.player_infos USING btree (master_id);
 
 
 --
--- Name: index_player_infos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_player_infos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_player_infos_on_user_id ON ml_app.player_infos USING btree (user_id);
 
 
 --
--- Name: index_pro_infos_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_pro_infos_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_pro_infos_on_master_id ON ml_app.pro_infos USING btree (master_id);
 
 
 --
--- Name: index_pro_infos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_pro_infos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_pro_infos_on_user_id ON ml_app.pro_infos USING btree (user_id);
 
 
 --
--- Name: index_protocol_event_history_on_protocol_event_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_protocol_event_history_on_protocol_event_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_protocol_event_history_on_protocol_event_id ON ml_app.protocol_event_history USING btree (protocol_event_id);
 
 
 --
--- Name: index_protocol_events_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_protocol_events_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_protocol_events_on_admin_id ON ml_app.protocol_events USING btree (admin_id);
 
 
 --
--- Name: index_protocol_events_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_protocol_events_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_protocol_events_on_sub_process_id ON ml_app.protocol_events USING btree (sub_process_id);
 
 
 --
--- Name: index_protocol_history_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_protocol_history_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_protocol_history_on_protocol_id ON ml_app.protocol_history USING btree (protocol_id);
 
 
 --
--- Name: index_protocols_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_protocols_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_protocols_on_admin_id ON ml_app.protocols USING btree (admin_id);
 
 
 --
--- Name: index_report_history_on_report_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_report_history_on_report_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_report_history_on_report_id ON ml_app.report_history USING btree (report_id);
 
 
 --
--- Name: index_reports_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_reports_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_reports_on_admin_id ON ml_app.reports USING btree (admin_id);
 
 
 --
--- Name: index_sage_assignments_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_sage_assignments_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_sage_assignments_on_admin_id ON ml_app.sage_assignments USING btree (admin_id);
 
 
 --
--- Name: index_sage_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_sage_assignments_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_sage_assignments_on_master_id ON ml_app.sage_assignments USING btree (master_id);
 
 
 --
--- Name: index_sage_assignments_on_sage_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_sage_assignments_on_sage_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE UNIQUE INDEX index_sage_assignments_on_sage_id ON ml_app.sage_assignments USING btree (sage_id);
 
 
 --
--- Name: index_sage_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_sage_assignments_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_sage_assignments_on_user_id ON ml_app.sage_assignments USING btree (user_id);
 
 
 --
--- Name: index_scantron_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_sage_two_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_sage_two_history_on_master_id ON ml_app.sage_two_history USING btree (master_id);
+
+
+--
+-- Name: index_sage_two_history_on_sage_two_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_sage_two_history_on_sage_two_id ON ml_app.sage_two_history USING btree (sage_two_id);
+
+
+--
+-- Name: index_sage_two_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_sage_two_history_on_user_id ON ml_app.sage_two_history USING btree (user_id);
+
+
+--
+-- Name: index_sage_twos_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_sage_twos_on_master_id ON ml_app.sage_twos USING btree (master_id);
+
+
+--
+-- Name: index_sage_twos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_sage_twos_on_user_id ON ml_app.sage_twos USING btree (user_id);
+
+
+--
+-- Name: index_scantron_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_scantron_history_on_master_id ON ml_app.scantron_history USING btree (master_id);
 
 
 --
--- Name: index_scantron_history_on_scantron_table_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_scantron_history_on_scantron_table_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_scantron_history_on_scantron_table_id ON ml_app.scantron_history USING btree (scantron_table_id);
 
 
 --
--- Name: index_scantron_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_scantron_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_scantron_history_on_user_id ON ml_app.scantron_history USING btree (user_id);
 
 
 --
--- Name: index_scantrons_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_scantron_series_two_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_series_two_history_on_master_id ON ml_app.scantron_series_two_history USING btree (master_id);
+
+
+--
+-- Name: index_scantron_series_two_history_on_scantron_series_two_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_series_two_history_on_scantron_series_two_id ON ml_app.scantron_series_two_history USING btree (scantron_series_two_id);
+
+
+--
+-- Name: index_scantron_series_two_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_series_two_history_on_user_id ON ml_app.scantron_series_two_history USING btree (user_id);
+
+
+--
+-- Name: index_scantron_series_twos_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_series_twos_on_master_id ON ml_app.scantron_series_twos USING btree (master_id);
+
+
+--
+-- Name: index_scantron_series_twos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_scantron_series_twos_on_user_id ON ml_app.scantron_series_twos USING btree (user_id);
+
+
+--
+-- Name: index_scantrons_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_scantrons_on_master_id ON ml_app.scantrons USING btree (master_id);
 
 
 --
--- Name: index_scantrons_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_scantrons_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_scantrons_on_user_id ON ml_app.scantrons USING btree (user_id);
 
 
 --
--- Name: index_sub_process_history_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_social_security_number_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_social_security_number_history_on_admin_id ON ml_app.social_security_number_history USING btree (admin_id);
+
+
+--
+-- Name: index_social_security_number_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_social_security_number_history_on_master_id ON ml_app.social_security_number_history USING btree (master_id);
+
+
+--
+-- Name: index_social_security_number_history_on_social_security_number_; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_social_security_number_history_on_social_security_number_ ON ml_app.social_security_number_history USING btree (social_security_number_table_id);
+
+
+--
+-- Name: index_social_security_number_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_social_security_number_history_on_user_id ON ml_app.social_security_number_history USING btree (user_id);
+
+
+--
+-- Name: index_social_security_numbers_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_social_security_numbers_on_admin_id ON ml_app.social_security_numbers USING btree (admin_id);
+
+
+--
+-- Name: index_social_security_numbers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_social_security_numbers_on_master_id ON ml_app.social_security_numbers USING btree (master_id);
+
+
+--
+-- Name: index_social_security_numbers_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_social_security_numbers_on_user_id ON ml_app.social_security_numbers USING btree (user_id);
+
+
+--
+-- Name: index_sub_process_history_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_sub_process_history_on_sub_process_id ON ml_app.sub_process_history USING btree (sub_process_id);
 
 
 --
--- Name: index_sub_processes_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_sub_processes_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_sub_processes_on_admin_id ON ml_app.sub_processes USING btree (admin_id);
 
 
 --
--- Name: index_sub_processes_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_sub_processes_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_sub_processes_on_protocol_id ON ml_app.sub_processes USING btree (protocol_id);
 
 
 --
--- Name: index_tracker_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_test1_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test1_history_on_admin_id ON ml_app.test1_history USING btree (admin_id);
+
+
+--
+-- Name: index_test1_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test1_history_on_master_id ON ml_app.test1_history USING btree (master_id);
+
+
+--
+-- Name: index_test1_history_on_test1_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test1_history_on_test1_table_id ON ml_app.test1_history USING btree (test1_table_id);
+
+
+--
+-- Name: index_test1_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test1_history_on_user_id ON ml_app.test1_history USING btree (user_id);
+
+
+--
+-- Name: index_test1s_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test1s_on_admin_id ON ml_app.test1s USING btree (admin_id);
+
+
+--
+-- Name: index_test1s_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test1s_on_master_id ON ml_app.test1s USING btree (master_id);
+
+
+--
+-- Name: index_test1s_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test1s_on_user_id ON ml_app.test1s USING btree (user_id);
+
+
+--
+-- Name: index_test2_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test2_history_on_admin_id ON ml_app.test2_history USING btree (admin_id);
+
+
+--
+-- Name: index_test2_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test2_history_on_master_id ON ml_app.test2_history USING btree (master_id);
+
+
+--
+-- Name: index_test2_history_on_test2_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test2_history_on_test2_table_id ON ml_app.test2_history USING btree (test2_table_id);
+
+
+--
+-- Name: index_test2_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test2_history_on_user_id ON ml_app.test2_history USING btree (user_id);
+
+
+--
+-- Name: index_test2s_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test2s_on_admin_id ON ml_app.test2s USING btree (admin_id);
+
+
+--
+-- Name: index_test2s_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test2s_on_master_id ON ml_app.test2s USING btree (master_id);
+
+
+--
+-- Name: index_test2s_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test2s_on_user_id ON ml_app.test2s USING btree (user_id);
+
+
+--
+-- Name: index_test_2_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_2_history_on_admin_id ON ml_app.test_2_history USING btree (admin_id);
+
+
+--
+-- Name: index_test_2_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_2_history_on_master_id ON ml_app.test_2_history USING btree (master_id);
+
+
+--
+-- Name: index_test_2_history_on_test_2_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_2_history_on_test_2_table_id ON ml_app.test_2_history USING btree (test_2_table_id);
+
+
+--
+-- Name: index_test_2_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_2_history_on_user_id ON ml_app.test_2_history USING btree (user_id);
+
+
+--
+-- Name: index_test_2s_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_2s_on_admin_id ON ml_app.test_2s USING btree (admin_id);
+
+
+--
+-- Name: index_test_2s_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_2s_on_master_id ON ml_app.test_2s USING btree (master_id);
+
+
+--
+-- Name: index_test_2s_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_2s_on_user_id ON ml_app.test_2s USING btree (user_id);
+
+
+--
+-- Name: index_test_ext2_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext2_history_on_master_id ON ml_app.test_ext2_history USING btree (master_id);
+
+
+--
+-- Name: index_test_ext2_history_on_test_ext2_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext2_history_on_test_ext2_table_id ON ml_app.test_ext2_history USING btree (test_ext2_table_id);
+
+
+--
+-- Name: index_test_ext2_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext2_history_on_user_id ON ml_app.test_ext2_history USING btree (user_id);
+
+
+--
+-- Name: index_test_ext2s_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext2s_on_master_id ON ml_app.test_ext2s USING btree (master_id);
+
+
+--
+-- Name: index_test_ext2s_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext2s_on_user_id ON ml_app.test_ext2s USING btree (user_id);
+
+
+--
+-- Name: index_test_ext_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext_history_on_master_id ON ml_app.test_ext_history USING btree (master_id);
+
+
+--
+-- Name: index_test_ext_history_on_test_ext_table_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext_history_on_test_ext_table_id ON ml_app.test_ext_history USING btree (test_ext_table_id);
+
+
+--
+-- Name: index_test_ext_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_ext_history_on_user_id ON ml_app.test_ext_history USING btree (user_id);
+
+
+--
+-- Name: index_test_exts_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_exts_on_master_id ON ml_app.test_exts USING btree (master_id);
+
+
+--
+-- Name: index_test_exts_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_exts_on_user_id ON ml_app.test_exts USING btree (user_id);
+
+
+--
+-- Name: index_test_item_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_item_history_on_master_id ON ml_app.test_item_history USING btree (master_id);
+
+
+--
+-- Name: index_test_item_history_on_test_item_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_item_history_on_test_item_id ON ml_app.test_item_history USING btree (test_item_id);
+
+
+--
+-- Name: index_test_item_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_item_history_on_user_id ON ml_app.test_item_history USING btree (user_id);
+
+
+--
+-- Name: index_test_items_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_items_on_master_id ON ml_app.test_items USING btree (master_id);
+
+
+--
+-- Name: index_test_items_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_test_items_on_user_id ON ml_app.test_items USING btree (user_id);
+
+
+--
+-- Name: index_testing_dl_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_testing_dl_history_on_master_id ON ml_app.testing_dl_history USING btree (master_id);
+
+
+--
+-- Name: index_testing_dl_history_on_testing_dl_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_testing_dl_history_on_testing_dl_id ON ml_app.testing_dl_history USING btree (testing_dl_id);
+
+
+--
+-- Name: index_testing_dl_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_testing_dl_history_on_user_id ON ml_app.testing_dl_history USING btree (user_id);
+
+
+--
+-- Name: index_testing_dls_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_testing_dls_on_master_id ON ml_app.testing_dls USING btree (master_id);
+
+
+--
+-- Name: index_testing_dls_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_testing_dls_on_user_id ON ml_app.testing_dls USING btree (user_id);
+
+
+--
+-- Name: index_tracker_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_tracker_history_on_master_id ON ml_app.tracker_history USING btree (master_id);
 
 
 --
--- Name: index_tracker_history_on_protocol_event_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_tracker_history_on_protocol_event_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_tracker_history_on_protocol_event_id ON ml_app.tracker_history USING btree (protocol_event_id);
 
 
 --
--- Name: index_tracker_history_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_tracker_history_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_tracker_history_on_protocol_id ON ml_app.tracker_history USING btree (protocol_id);
 
 
 --
--- Name: index_tracker_history_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_tracker_history_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_tracker_history_on_sub_process_id ON ml_app.tracker_history USING btree (sub_process_id);
 
 
 --
--- Name: index_tracker_history_on_tracker_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_tracker_history_on_tracker_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_tracker_history_on_tracker_id ON ml_app.tracker_history USING btree (tracker_id);
 
 
 --
--- Name: index_tracker_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_tracker_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_tracker_history_on_user_id ON ml_app.tracker_history USING btree (user_id);
 
 
 --
--- Name: index_trackers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_trackers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_trackers_on_master_id ON ml_app.trackers USING btree (master_id);
 
 
 --
--- Name: index_trackers_on_protocol_event_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_trackers_on_protocol_event_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_trackers_on_protocol_event_id ON ml_app.trackers USING btree (protocol_event_id);
 
 
 --
--- Name: index_trackers_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_trackers_on_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_trackers_on_protocol_id ON ml_app.trackers USING btree (protocol_id);
 
 
 --
--- Name: index_trackers_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_trackers_on_sub_process_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_trackers_on_sub_process_id ON ml_app.trackers USING btree (sub_process_id);
 
 
 --
--- Name: index_trackers_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_trackers_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_trackers_on_user_id ON ml_app.trackers USING btree (user_id);
 
 
 --
--- Name: index_user_access_controls_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_access_controls_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_access_controls_on_app_type_id ON ml_app.user_access_controls USING btree (app_type_id);
 
 
 --
--- Name: index_user_action_logs_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_action_logs_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_action_logs_on_app_type_id ON ml_app.user_action_logs USING btree (app_type_id);
 
 
 --
--- Name: index_user_action_logs_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_action_logs_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_action_logs_on_master_id ON ml_app.user_action_logs USING btree (master_id);
 
 
 --
--- Name: index_user_action_logs_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_action_logs_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_action_logs_on_user_id ON ml_app.user_action_logs USING btree (user_id);
 
 
 --
--- Name: index_user_authorization_history_on_user_authorization_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_authorization_history_on_user_authorization_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_authorization_history_on_user_authorization_id ON ml_app.user_authorization_history USING btree (user_authorization_id);
 
 
 --
--- Name: index_user_history_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_history_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_history_on_app_type_id ON ml_app.user_history USING btree (app_type_id);
 
 
 --
--- Name: index_user_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_history_on_user_id ON ml_app.user_history USING btree (user_id);
 
 
 --
--- Name: index_user_roles_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_roles_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_roles_on_admin_id ON ml_app.user_roles USING btree (admin_id);
 
 
 --
--- Name: index_user_roles_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_roles_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_roles_on_app_type_id ON ml_app.user_roles USING btree (app_type_id);
 
 
 --
--- Name: index_user_roles_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_user_roles_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_user_roles_on_user_id ON ml_app.user_roles USING btree (user_id);
 
 
 --
--- Name: index_users_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_users_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_users_on_admin_id ON ml_app.users USING btree (admin_id);
 
 
 --
--- Name: index_users_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_users_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE INDEX index_users_on_app_type_id ON ml_app.users USING btree (app_type_id);
 
 
 --
--- Name: index_users_on_email; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_users_on_email; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE UNIQUE INDEX index_users_on_email ON ml_app.users USING btree (email);
 
 
 --
--- Name: index_users_on_reset_password_token; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_users_on_reset_password_token; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE UNIQUE INDEX index_users_on_reset_password_token ON ml_app.users USING btree (reset_password_token);
 
 
 --
--- Name: index_users_on_unlock_token; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: index_users_on_unlock_token; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE UNIQUE INDEX index_users_on_unlock_token ON ml_app.users USING btree (unlock_token);
 
 
 --
--- Name: unique_schema_migrations; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+-- Name: unique_master_protocol; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX unique_master_protocol ON ml_app.trackers USING btree (master_id, protocol_id);
+
+
+--
+-- Name: unique_master_protocol_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX unique_master_protocol_id ON ml_app.trackers USING btree (master_id, protocol_id, id);
+
+
+--
+-- Name: unique_protocol_and_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX unique_protocol_and_id ON ml_app.sub_processes USING btree (protocol_id, id);
+
+
+--
+-- Name: unique_schema_migrations; Type: INDEX; Schema: ml_app; Owner: -
 --
 
 CREATE UNIQUE INDEX unique_schema_migrations ON ml_app.schema_migrations USING btree (version);
+
+
+--
+-- Name: unique_sub_process_and_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX unique_sub_process_and_id ON ml_app.protocol_events USING btree (sub_process_id, id);
 
 
 --
@@ -6171,6 +12490,48 @@ CREATE TRIGGER accuracy_score_history_update AFTER UPDATE ON ml_app.accuracy_sco
 
 
 --
+-- Name: activity_log_bhs_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_bhs_assignment_history_insert AFTER INSERT ON ml_app.activity_log_bhs_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_bhs_assignment_update();
+
+
+--
+-- Name: activity_log_bhs_assignment_history_insert_notification; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_bhs_assignment_history_insert_notification AFTER INSERT ON ml_app.activity_log_bhs_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.activity_log_bhs_assignment_insert_notification();
+
+
+--
+-- Name: activity_log_bhs_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_bhs_assignment_history_update AFTER UPDATE ON ml_app.activity_log_bhs_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_bhs_assignment_update();
+
+
+--
+-- Name: activity_log_bhs_testmybrain; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_bhs_testmybrain BEFORE INSERT ON ml_app.activity_log_bhs_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.activity_log_bhs_assignment_insert_testmybrain();
+
+
+--
+-- Name: activity_log_ext_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ext_assignment_history_insert AFTER INSERT ON ml_app.activity_log_ext_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_ext_assignment_update();
+
+
+--
+-- Name: activity_log_ext_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ext_assignment_history_update AFTER UPDATE ON ml_app.activity_log_ext_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_ext_assignment_update();
+
+
+--
 -- Name: activity_log_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -6185,6 +12546,62 @@ CREATE TRIGGER activity_log_history_update AFTER UPDATE ON ml_app.activity_logs 
 
 
 --
+-- Name: activity_log_ipa_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_history_insert AFTER INSERT ON ml_app.activity_log_ipa_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_update();
+
+
+--
+-- Name: activity_log_ipa_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_history_update AFTER UPDATE ON ml_app.activity_log_ipa_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_update();
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_minor_deviation_history_insert AFTER INSERT ON ml_app.activity_log_ipa_assignment_minor_deviations FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_minor_deviation_update();
+
+
+--
+-- Name: activity_log_ipa_assignment_minor_deviation_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_minor_deviation_history_update AFTER UPDATE ON ml_app.activity_log_ipa_assignment_minor_deviations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_minor_deviation_update();
+
+
+--
+-- Name: activity_log_ipa_survey_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_survey_history_insert AFTER INSERT ON ml_app.activity_log_ipa_surveys FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_ipa_survey_update();
+
+
+--
+-- Name: activity_log_ipa_survey_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_survey_history_update AFTER UPDATE ON ml_app.activity_log_ipa_surveys FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_ipa_survey_update();
+
+
+--
+-- Name: activity_log_new_test_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_new_test_history_insert AFTER INSERT ON ml_app.activity_log_new_tests FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_new_test_update();
+
+
+--
+-- Name: activity_log_new_test_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_new_test_history_update AFTER UPDATE ON ml_app.activity_log_new_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_new_test_update();
+
+
+--
 -- Name: activity_log_player_contact_phone_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -6196,6 +12613,20 @@ CREATE TRIGGER activity_log_player_contact_phone_history_insert AFTER INSERT ON 
 --
 
 CREATE TRIGGER activity_log_player_contact_phone_history_update AFTER UPDATE ON ml_app.activity_log_player_contact_phones FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_contact_phone_update();
+
+
+--
+-- Name: activity_log_player_info_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_info_history_insert AFTER INSERT ON ml_app.activity_log_player_infos FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_player_info_update();
+
+
+--
+-- Name: activity_log_player_info_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_player_info_history_update AFTER UPDATE ON ml_app.activity_log_player_infos FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_player_info_update();
 
 
 --
@@ -6241,6 +12672,20 @@ CREATE TRIGGER admin_history_update AFTER UPDATE ON ml_app.admins FOR EACH ROW W
 
 
 --
+-- Name: bhs_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER bhs_assignment_history_insert AFTER INSERT ON ml_app.bhs_assignments_old FOR EACH ROW EXECUTE PROCEDURE ml_app.log_bhs_assignment_update();
+
+
+--
+-- Name: bhs_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER bhs_assignment_history_update AFTER UPDATE ON ml_app.bhs_assignments_old FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_bhs_assignment_update();
+
+
+--
 -- Name: college_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -6266,6 +12711,34 @@ CREATE TRIGGER dynamic_model_history_insert AFTER INSERT ON ml_app.dynamic_model
 --
 
 CREATE TRIGGER dynamic_model_history_update AFTER UPDATE ON ml_app.dynamic_models FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_dynamic_model_update();
+
+
+--
+-- Name: ext_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ext_assignment_history_insert AFTER INSERT ON ml_app.ext_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ext_assignment_update();
+
+
+--
+-- Name: ext_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ext_assignment_history_update AFTER UPDATE ON ml_app.ext_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ext_assignment_update();
+
+
+--
+-- Name: ext_gen_assignment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ext_gen_assignment_history_insert AFTER INSERT ON ml_app.ext_gen_assignments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ext_gen_assignment_update();
+
+
+--
+-- Name: ext_gen_assignment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ext_gen_assignment_history_update AFTER UPDATE ON ml_app.ext_gen_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ext_gen_assignment_update();
 
 
 --
@@ -6311,6 +12784,104 @@ CREATE TRIGGER general_selection_history_update AFTER UPDATE ON ml_app.general_s
 
 
 --
+-- Name: ipa_appointment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_appointment_history_insert AFTER INSERT ON ml_app.ipa_appointments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_appointment_update();
+
+
+--
+-- Name: ipa_appointment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_appointment_history_update AFTER UPDATE ON ml_app.ipa_appointments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_appointment_update();
+
+
+--
+-- Name: ipa_consent_mailing_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_consent_mailing_history_insert AFTER INSERT ON ml_app.ipa_consent_mailings FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_consent_mailing_update();
+
+
+--
+-- Name: ipa_consent_mailing_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_consent_mailing_history_update AFTER UPDATE ON ml_app.ipa_consent_mailings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_consent_mailing_update();
+
+
+--
+-- Name: ipa_hotel_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_hotel_history_insert AFTER INSERT ON ml_app.ipa_hotels FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_hotel_update();
+
+
+--
+-- Name: ipa_hotel_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_hotel_history_update AFTER UPDATE ON ml_app.ipa_hotels FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_hotel_update();
+
+
+--
+-- Name: ipa_payment_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_payment_history_insert AFTER INSERT ON ml_app.ipa_payments FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_payment_update();
+
+
+--
+-- Name: ipa_payment_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_payment_history_update AFTER UPDATE ON ml_app.ipa_payments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_payment_update();
+
+
+--
+-- Name: ipa_screening_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_screening_history_insert AFTER INSERT ON ml_app.ipa_screenings FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_screening_update();
+
+
+--
+-- Name: ipa_screening_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_screening_history_update AFTER UPDATE ON ml_app.ipa_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_screening_update();
+
+
+--
+-- Name: ipa_survey_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_survey_history_insert AFTER INSERT ON ml_app.ipa_surveys FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_survey_update();
+
+
+--
+-- Name: ipa_survey_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_survey_history_update AFTER UPDATE ON ml_app.ipa_surveys FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_survey_update();
+
+
+--
+-- Name: ipa_transportation_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_transportation_history_insert AFTER INSERT ON ml_app.ipa_transportations FOR EACH ROW EXECUTE PROCEDURE ml_app.log_ipa_transportation_update();
+
+
+--
+-- Name: ipa_transportation_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER ipa_transportation_history_update AFTER UPDATE ON ml_app.ipa_transportations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_transportation_update();
+
+
+--
 -- Name: item_flag_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -6336,6 +12907,34 @@ CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_na
 --
 
 CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_item_flag_name_update();
+
+
+--
+-- Name: mrn_number_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER mrn_number_history_insert AFTER INSERT ON ml_app.mrn_numbers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_mrn_number_update();
+
+
+--
+-- Name: mrn_number_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER mrn_number_history_update AFTER UPDATE ON ml_app.mrn_numbers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_mrn_number_update();
+
+
+--
+-- Name: new_test_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER new_test_history_insert AFTER INSERT ON ml_app.new_tests FOR EACH ROW EXECUTE PROCEDURE ml_app.log_new_test_update();
+
+
+--
+-- Name: new_test_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER new_test_history_update AFTER UPDATE ON ml_app.new_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_new_test_update();
 
 
 --
@@ -6479,6 +13078,20 @@ CREATE TRIGGER scantron_history_update AFTER UPDATE ON ml_app.scantrons FOR EACH
 
 
 --
+-- Name: social_security_number_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER social_security_number_history_insert AFTER INSERT ON ml_app.social_security_numbers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_social_security_number_update();
+
+
+--
+-- Name: social_security_number_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER social_security_number_history_update AFTER UPDATE ON ml_app.social_security_numbers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_social_security_number_update();
+
+
+--
 -- Name: sub_process_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -6490,6 +13103,90 @@ CREATE TRIGGER sub_process_history_insert AFTER INSERT ON ml_app.sub_processes F
 --
 
 CREATE TRIGGER sub_process_history_update AFTER UPDATE ON ml_app.sub_processes FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_sub_process_update();
+
+
+--
+-- Name: test1_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test1_history_insert AFTER INSERT ON ml_app.test1s FOR EACH ROW EXECUTE PROCEDURE ml_app.log_test1_update();
+
+
+--
+-- Name: test1_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test1_history_update AFTER UPDATE ON ml_app.test1s FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_test1_update();
+
+
+--
+-- Name: test2_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test2_history_insert AFTER INSERT ON ml_app.test2s FOR EACH ROW EXECUTE PROCEDURE ml_app.log_test2_update();
+
+
+--
+-- Name: test2_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test2_history_update AFTER UPDATE ON ml_app.test2s FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_test2_update();
+
+
+--
+-- Name: test_2_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_2_history_insert AFTER INSERT ON ml_app.test_2s FOR EACH ROW EXECUTE PROCEDURE ml_app.log_test_2_update();
+
+
+--
+-- Name: test_2_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_2_history_update AFTER UPDATE ON ml_app.test_2s FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_test_2_update();
+
+
+--
+-- Name: test_ext2_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_ext2_history_insert AFTER INSERT ON ml_app.test_ext2s FOR EACH ROW EXECUTE PROCEDURE ml_app.log_test_ext2_update();
+
+
+--
+-- Name: test_ext2_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_ext2_history_update AFTER UPDATE ON ml_app.test_ext2s FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_test_ext2_update();
+
+
+--
+-- Name: test_ext_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_ext_history_insert AFTER INSERT ON ml_app.test_exts FOR EACH ROW EXECUTE PROCEDURE ml_app.log_test_ext_update();
+
+
+--
+-- Name: test_ext_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER test_ext_history_update AFTER UPDATE ON ml_app.test_exts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_test_ext_update();
+
+
+--
+-- Name: testing_dl_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER testing_dl_history_insert AFTER INSERT ON ml_app.testing_dls FOR EACH ROW EXECUTE PROCEDURE ml_app.log_testing_dl_update();
+
+
+--
+-- Name: testing_dl_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER testing_dl_history_update AFTER UPDATE ON ml_app.testing_dls FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_testing_dl_update();
 
 
 --
@@ -6564,6 +13261,182 @@ ALTER TABLE ONLY ml_app.accuracy_score_history
 
 
 --
+-- Name: fk_activity_log_bhs_assignment_history_activity_log_bhs_assignm; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignment_history
+    ADD CONSTRAINT fk_activity_log_bhs_assignment_history_activity_log_bhs_assignm FOREIGN KEY (activity_log_bhs_assignment_id) REFERENCES ml_app.activity_log_bhs_assignments(id);
+
+
+--
+-- Name: fk_activity_log_bhs_assignment_history_bhs_assignment_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignment_history
+    ADD CONSTRAINT fk_activity_log_bhs_assignment_history_bhs_assignment_id FOREIGN KEY (bhs_assignment_id) REFERENCES ml_app.bhs_assignments_old(id);
+
+
+--
+-- Name: fk_activity_log_bhs_assignment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignment_history
+    ADD CONSTRAINT fk_activity_log_bhs_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_bhs_assignment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignment_history
+    ADD CONSTRAINT fk_activity_log_bhs_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_activity_log_ext_assignment_history_activity_log_ext_assignm; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignment_history
+    ADD CONSTRAINT fk_activity_log_ext_assignment_history_activity_log_ext_assignm FOREIGN KEY (activity_log_ext_assignment_id) REFERENCES ml_app.activity_log_ext_assignments(id);
+
+
+--
+-- Name: fk_activity_log_ext_assignment_history_ext_assignment_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignment_history
+    ADD CONSTRAINT fk_activity_log_ext_assignment_history_ext_assignment_id FOREIGN KEY (ext_assignment_id) REFERENCES ml_app.ext_assignments(id);
+
+
+--
+-- Name: fk_activity_log_ext_assignment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignment_history
+    ADD CONSTRAINT fk_activity_log_ext_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_ext_assignment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignment_history
+    ADD CONSTRAINT fk_activity_log_ext_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_history_activity_log_ipa_assignm; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_history_activity_log_ipa_assignm FOREIGN KEY (activity_log_ipa_assignment_id) REFERENCES ml_app.activity_log_ipa_assignments(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_minor_deviation_history_activity; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_minor_deviation_history_activity FOREIGN KEY (activity_log_ipa_assignment_minor_deviation_id) REFERENCES ml_app.activity_log_ipa_assignment_minor_deviations(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_minor_deviation_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_minor_deviation_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_minor_deviation_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviation_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_minor_deviation_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_activity_log_ipa_survey_history_activity_log_ipa_surveys; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_survey_history
+    ADD CONSTRAINT fk_activity_log_ipa_survey_history_activity_log_ipa_surveys FOREIGN KEY (activity_log_ipa_survey_id) REFERENCES ml_app.activity_log_ipa_surveys(id);
+
+
+--
+-- Name: fk_activity_log_ipa_survey_history_ipa_survey_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_survey_history
+    ADD CONSTRAINT fk_activity_log_ipa_survey_history_ipa_survey_id FOREIGN KEY (ipa_survey_id) REFERENCES ml_app.ipa_surveys(id);
+
+
+--
+-- Name: fk_activity_log_ipa_survey_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_survey_history
+    ADD CONSTRAINT fk_activity_log_ipa_survey_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_ipa_survey_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_survey_history
+    ADD CONSTRAINT fk_activity_log_ipa_survey_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_activity_log_new_test_history_activity_log_new_tests; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_test_history
+    ADD CONSTRAINT fk_activity_log_new_test_history_activity_log_new_tests FOREIGN KEY (activity_log_new_test_id) REFERENCES ml_app.activity_log_new_tests(id);
+
+
+--
+-- Name: fk_activity_log_new_test_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_test_history
+    ADD CONSTRAINT fk_activity_log_new_test_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_new_test_history_new_test_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_test_history
+    ADD CONSTRAINT fk_activity_log_new_test_history_new_test_id FOREIGN KEY (new_test_id) REFERENCES ml_app.new_tests(id);
+
+
+--
+-- Name: fk_activity_log_new_test_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_test_history
+    ADD CONSTRAINT fk_activity_log_new_test_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_activity_log_player_contact_phone_history_activity_log_playe; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6593,6 +13466,38 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
 
 ALTER TABLE ONLY ml_app.activity_log_player_contact_phone_history
     ADD CONSTRAINT fk_activity_log_player_contact_phone_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_activity_log_player_info_history_activity_log_player_infos; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_info_history
+    ADD CONSTRAINT fk_activity_log_player_info_history_activity_log_player_infos FOREIGN KEY (activity_log_player_info_id) REFERENCES ml_app.activity_log_player_infos(id);
+
+
+--
+-- Name: fk_activity_log_player_info_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_info_history
+    ADD CONSTRAINT fk_activity_log_player_info_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_player_info_history_player_info_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_info_history
+    ADD CONSTRAINT fk_activity_log_player_info_history_player_info_id FOREIGN KEY (player_info_id) REFERENCES ml_app.player_infos(id);
+
+
+--
+-- Name: fk_activity_log_player_info_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_info_history
+    ADD CONSTRAINT fk_activity_log_player_info_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -6628,6 +13533,38 @@ ALTER TABLE ONLY ml_app.admin_history
 
 
 --
+-- Name: fk_bhs_assignment_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignment_history
+    ADD CONSTRAINT fk_bhs_assignment_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_bhs_assignment_history_bhs_assignments; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignment_history
+    ADD CONSTRAINT fk_bhs_assignment_history_bhs_assignments FOREIGN KEY (bhs_assignment_table_id) REFERENCES ml_app.bhs_assignments_old(id);
+
+
+--
+-- Name: fk_bhs_assignment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignment_history
+    ADD CONSTRAINT fk_bhs_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_bhs_assignment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignment_history
+    ADD CONSTRAINT fk_bhs_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_college_history_colleges; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6641,6 +13578,62 @@ ALTER TABLE ONLY ml_app.college_history
 
 ALTER TABLE ONLY ml_app.dynamic_model_history
     ADD CONSTRAINT fk_dynamic_model_history_dynamic_models FOREIGN KEY (dynamic_model_id) REFERENCES ml_app.dynamic_models(id);
+
+
+--
+-- Name: fk_ext_assignment_history_ext_assignments; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignment_history
+    ADD CONSTRAINT fk_ext_assignment_history_ext_assignments FOREIGN KEY (ext_assignment_table_id) REFERENCES ml_app.ext_assignments(id);
+
+
+--
+-- Name: fk_ext_assignment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignment_history
+    ADD CONSTRAINT fk_ext_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ext_assignment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignment_history
+    ADD CONSTRAINT fk_ext_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ext_gen_assignment_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignment_history
+    ADD CONSTRAINT fk_ext_gen_assignment_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_ext_gen_assignment_history_ext_gen_assignments; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignment_history
+    ADD CONSTRAINT fk_ext_gen_assignment_history_ext_gen_assignments FOREIGN KEY (ext_gen_assignment_table_id) REFERENCES ml_app.ext_gen_assignments(id);
+
+
+--
+-- Name: fk_ext_gen_assignment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignment_history
+    ADD CONSTRAINT fk_ext_gen_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ext_gen_assignment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignment_history
+    ADD CONSTRAINT fk_ext_gen_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -6660,6 +13653,174 @@ ALTER TABLE ONLY ml_app.general_selection_history
 
 
 --
+-- Name: fk_ipa_appointment_history_ipa_appointments; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointment_history
+    ADD CONSTRAINT fk_ipa_appointment_history_ipa_appointments FOREIGN KEY (ipa_appointment_id) REFERENCES ml_app.ipa_appointments(id);
+
+
+--
+-- Name: fk_ipa_appointment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointment_history
+    ADD CONSTRAINT fk_ipa_appointment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_appointment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointment_history
+    ADD CONSTRAINT fk_ipa_appointment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ipa_consent_mailing_history_ipa_consent_mailings; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailing_history
+    ADD CONSTRAINT fk_ipa_consent_mailing_history_ipa_consent_mailings FOREIGN KEY (ipa_consent_mailing_id) REFERENCES ml_app.ipa_consent_mailings(id);
+
+
+--
+-- Name: fk_ipa_consent_mailing_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailing_history
+    ADD CONSTRAINT fk_ipa_consent_mailing_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_consent_mailing_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailing_history
+    ADD CONSTRAINT fk_ipa_consent_mailing_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ipa_hotel_history_ipa_hotels; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotel_history
+    ADD CONSTRAINT fk_ipa_hotel_history_ipa_hotels FOREIGN KEY (ipa_hotel_id) REFERENCES ml_app.ipa_hotels(id);
+
+
+--
+-- Name: fk_ipa_hotel_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotel_history
+    ADD CONSTRAINT fk_ipa_hotel_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_hotel_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotel_history
+    ADD CONSTRAINT fk_ipa_hotel_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ipa_payment_history_ipa_payments; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payment_history
+    ADD CONSTRAINT fk_ipa_payment_history_ipa_payments FOREIGN KEY (ipa_payment_id) REFERENCES ml_app.ipa_payments(id);
+
+
+--
+-- Name: fk_ipa_payment_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payment_history
+    ADD CONSTRAINT fk_ipa_payment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_payment_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payment_history
+    ADD CONSTRAINT fk_ipa_payment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ipa_screening_history_ipa_screenings; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screening_history
+    ADD CONSTRAINT fk_ipa_screening_history_ipa_screenings FOREIGN KEY (ipa_screening_id) REFERENCES ml_app.ipa_screenings(id);
+
+
+--
+-- Name: fk_ipa_screening_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screening_history
+    ADD CONSTRAINT fk_ipa_screening_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_screening_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screening_history
+    ADD CONSTRAINT fk_ipa_screening_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ipa_survey_history_ipa_surveys; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_survey_history
+    ADD CONSTRAINT fk_ipa_survey_history_ipa_surveys FOREIGN KEY (ipa_survey_id) REFERENCES ml_app.ipa_surveys(id);
+
+
+--
+-- Name: fk_ipa_survey_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_survey_history
+    ADD CONSTRAINT fk_ipa_survey_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_survey_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_survey_history
+    ADD CONSTRAINT fk_ipa_survey_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ipa_transportation_history_ipa_transportations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportation_history
+    ADD CONSTRAINT fk_ipa_transportation_history_ipa_transportations FOREIGN KEY (ipa_transportation_id) REFERENCES ml_app.ipa_transportations(id);
+
+
+--
+-- Name: fk_ipa_transportation_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportation_history
+    ADD CONSTRAINT fk_ipa_transportation_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_transportation_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportation_history
+    ADD CONSTRAINT fk_ipa_transportation_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_item_flag_history_item_flags; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -6673,6 +13834,70 @@ ALTER TABLE ONLY ml_app.item_flag_history
 
 ALTER TABLE ONLY ml_app.item_flag_name_history
     ADD CONSTRAINT fk_item_flag_name_history_item_flag_names FOREIGN KEY (item_flag_name_id) REFERENCES ml_app.item_flag_names(id);
+
+
+--
+-- Name: fk_mrn_number_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_number_history
+    ADD CONSTRAINT fk_mrn_number_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_mrn_number_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_number_history
+    ADD CONSTRAINT fk_mrn_number_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_mrn_number_history_mrn_numbers; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_number_history
+    ADD CONSTRAINT fk_mrn_number_history_mrn_numbers FOREIGN KEY (mrn_number_table_id) REFERENCES ml_app.mrn_numbers(id);
+
+
+--
+-- Name: fk_mrn_number_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_number_history
+    ADD CONSTRAINT fk_mrn_number_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_new_test_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_test_history
+    ADD CONSTRAINT fk_new_test_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_new_test_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_test_history
+    ADD CONSTRAINT fk_new_test_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_new_test_history_new_tests; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_test_history
+    ADD CONSTRAINT fk_new_test_history_new_tests FOREIGN KEY (new_test_table_id) REFERENCES ml_app.new_tests(id);
+
+
+--
+-- Name: fk_new_test_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_test_history
+    ADD CONSTRAINT fk_new_test_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -6820,11 +14045,267 @@ ALTER TABLE ONLY ml_app.scantrons
 
 
 --
--- Name: fk_rails_1d67a3e7f2; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
-ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
-    ADD CONSTRAINT fk_rails_1d67a3e7f2 FOREIGN KEY (protocol_id) REFERENCES ml_app.protocols(id);
+ALTER TABLE ONLY ml_app.test_exts
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_infos
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_tests
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_tests
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_numbers
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignments_old
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_numbers
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailings
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screenings
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotels
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportations
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_surveys
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_surveys
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviations
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dls
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2s
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_tests
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_numbers
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignments_old
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_numbers
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
@@ -6865,14 +14346,6 @@ ALTER TABLE ONLY ml_app.player_infos
 
 ALTER TABLE ONLY ml_app.model_references
     ADD CONSTRAINT fk_rails_2d8072edea FOREIGN KEY (to_record_master_id) REFERENCES ml_app.masters(id);
-
-
---
--- Name: fk_rails_2de1cadfad; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
-    ADD CONSTRAINT fk_rails_2de1cadfad FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
 --
@@ -6920,6 +14393,214 @@ ALTER TABLE ONLY ml_app.trackers
 --
 
 ALTER TABLE ONLY ml_app.scantrons
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_exts
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2s
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ext_gen_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1s
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2s
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2s
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_infos
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.new_tests
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_tests
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_numbers
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.bhs_assignments_old
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.mrn_numbers
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_consent_mailings
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_screenings
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_hotels
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_transportations
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_payments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_surveys
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_surveys
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.ipa_appointments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_minor_deviations
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dls
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
@@ -6988,14 +14669,6 @@ ALTER TABLE ONLY ml_app.external_identifier_history
 
 
 --
--- Name: fk_rails_5ce1857310; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
-    ADD CONSTRAINT fk_rails_5ce1857310 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
-
-
---
 -- Name: fk_rails_623e0ca5ac; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7060,11 +14733,59 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ext_assignments
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ext_assignment_id) REFERENCES ml_app.ext_assignments(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_player_infos
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (player_info_id) REFERENCES ml_app.player_infos(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_new_tests
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (new_test_id) REFERENCES ml_app.new_tests(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_surveys
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_survey_id) REFERENCES ml_app.ipa_surveys(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (bhs_assignment_id) REFERENCES ml_app.bhs_assignments_old(id);
+
+
+--
 -- Name: fk_rails_7c10a99849; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_processes
     ADD CONSTRAINT fk_rails_7c10a99849 FOREIGN KEY (protocol_id) REFERENCES ml_app.protocols(id);
+
+
+--
+-- Name: fk_rails_8104b3f11d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.emergency_contacts
+    ADD CONSTRAINT fk_rails_8104b3f11d FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -7153,14 +14874,6 @@ ALTER TABLE ONLY ml_app.model_references
 
 ALTER TABLE ONLY ml_app.user_history
     ADD CONSTRAINT fk_rails_af2f6ffc55 FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
-
-
---
--- Name: fk_rails_b071294797; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
---
-
-ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
-    ADD CONSTRAINT fk_rails_b071294797 FOREIGN KEY (player_contact_id) REFERENCES ml_app.player_contacts(id);
 
 
 --
@@ -7332,6 +15045,14 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 
 --
+-- Name: fk_rails_f5033c91ed; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.emergency_contacts
+    ADD CONSTRAINT fk_rails_f5033c91ed FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_f62500107f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7380,11 +15101,211 @@ ALTER TABLE ONLY ml_app.scantron_history
 
 
 --
+-- Name: fk_social_security_number_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_number_history
+    ADD CONSTRAINT fk_social_security_number_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_social_security_number_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_number_history
+    ADD CONSTRAINT fk_social_security_number_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_social_security_number_history_social_security_numbers; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_number_history
+    ADD CONSTRAINT fk_social_security_number_history_social_security_numbers FOREIGN KEY (social_security_number_table_id) REFERENCES ml_app.social_security_numbers(id);
+
+
+--
+-- Name: fk_social_security_number_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.social_security_number_history
+    ADD CONSTRAINT fk_social_security_number_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_sub_process_history_sub_processes; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.sub_process_history
     ADD CONSTRAINT fk_sub_process_history_sub_processes FOREIGN KEY (sub_process_id) REFERENCES ml_app.sub_processes(id);
+
+
+--
+-- Name: fk_test1_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1_history
+    ADD CONSTRAINT fk_test1_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_test1_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1_history
+    ADD CONSTRAINT fk_test1_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_test1_history_test1s; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1_history
+    ADD CONSTRAINT fk_test1_history_test1s FOREIGN KEY (test1_table_id) REFERENCES ml_app.test1s(id);
+
+
+--
+-- Name: fk_test1_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test1_history
+    ADD CONSTRAINT fk_test1_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_test2_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2_history
+    ADD CONSTRAINT fk_test2_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_test2_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2_history
+    ADD CONSTRAINT fk_test2_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_test2_history_test2s; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2_history
+    ADD CONSTRAINT fk_test2_history_test2s FOREIGN KEY (test2_table_id) REFERENCES ml_app.test2s(id);
+
+
+--
+-- Name: fk_test2_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test2_history
+    ADD CONSTRAINT fk_test2_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_test_2_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2_history
+    ADD CONSTRAINT fk_test_2_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_test_2_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2_history
+    ADD CONSTRAINT fk_test_2_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_test_2_history_test_2s; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2_history
+    ADD CONSTRAINT fk_test_2_history_test_2s FOREIGN KEY (test_2_table_id) REFERENCES ml_app.test_2s(id);
+
+
+--
+-- Name: fk_test_2_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_2_history
+    ADD CONSTRAINT fk_test_2_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_test_ext2_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2_history
+    ADD CONSTRAINT fk_test_ext2_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_test_ext2_history_test_ext2s; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2_history
+    ADD CONSTRAINT fk_test_ext2_history_test_ext2s FOREIGN KEY (test_ext2_table_id) REFERENCES ml_app.test_ext2s(id);
+
+
+--
+-- Name: fk_test_ext2_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext2_history
+    ADD CONSTRAINT fk_test_ext2_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_test_ext_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext_history
+    ADD CONSTRAINT fk_test_ext_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_test_ext_history_test_exts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext_history
+    ADD CONSTRAINT fk_test_ext_history_test_exts FOREIGN KEY (test_ext_table_id) REFERENCES ml_app.test_exts(id);
+
+
+--
+-- Name: fk_test_ext_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.test_ext_history
+    ADD CONSTRAINT fk_test_ext_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_testing_dl_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dl_history
+    ADD CONSTRAINT fk_testing_dl_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_testing_dl_history_testing_dls; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dl_history
+    ADD CONSTRAINT fk_testing_dl_history_testing_dls FOREIGN KEY (testing_dl_id) REFERENCES ml_app.testing_dls(id);
+
+
+--
+-- Name: fk_testing_dl_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.testing_dl_history
+    ADD CONSTRAINT fk_testing_dl_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -7455,7 +15376,7 @@ ALTER TABLE ONLY ml_app.tracker_history
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app;
+SET search_path TO ml_app,ipa_ops,testmybrain;
 
 INSERT INTO schema_migrations (version) VALUES ('20150602181200');
 
@@ -7701,15 +15622,35 @@ INSERT INTO schema_migrations (version) VALUES ('20151208244917');
 
 INSERT INTO schema_migrations (version) VALUES ('20151208244918');
 
+INSERT INTO schema_migrations (version) VALUES ('20151215165127');
+
+INSERT INTO schema_migrations (version) VALUES ('20151215170733');
+
 INSERT INTO schema_migrations (version) VALUES ('20151216102328');
 
 INSERT INTO schema_migrations (version) VALUES ('20151218203119');
+
+INSERT INTO schema_migrations (version) VALUES ('20160203120436');
+
+INSERT INTO schema_migrations (version) VALUES ('20160203121701');
+
+INSERT INTO schema_migrations (version) VALUES ('20160203130714');
+
+INSERT INTO schema_migrations (version) VALUES ('20160203151737');
+
+INSERT INTO schema_migrations (version) VALUES ('20160203211330');
+
+INSERT INTO schema_migrations (version) VALUES ('20160204120512');
 
 INSERT INTO schema_migrations (version) VALUES ('20160210200918');
 
 INSERT INTO schema_migrations (version) VALUES ('20160210200919');
 
 INSERT INTO schema_migrations (version) VALUES ('20170823145313');
+
+INSERT INTO schema_migrations (version) VALUES ('20170830100037');
+
+INSERT INTO schema_migrations (version) VALUES ('20170830105123');
 
 INSERT INTO schema_migrations (version) VALUES ('20170901152707');
 
@@ -7751,7 +15692,11 @@ INSERT INTO schema_migrations (version) VALUES ('20180209152747');
 
 INSERT INTO schema_migrations (version) VALUES ('20180209171641');
 
+INSERT INTO schema_migrations (version) VALUES ('20180228111254');
+
 INSERT INTO schema_migrations (version) VALUES ('20180228145731');
+
+INSERT INTO schema_migrations (version) VALUES ('20180228174728');
 
 INSERT INTO schema_migrations (version) VALUES ('20180301114206');
 

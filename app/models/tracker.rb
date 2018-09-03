@@ -202,7 +202,7 @@ class Tracker < UserBase
     end
 
     unless self.protocol_event
-      raise "Bad protocol_event (#{rec_type}) for tracker #{record}"
+      raise "Bad protocol_event (#{rec_type}) for tracker #{record}. If you believe it should exist, check double spacing is correct in the definition for namespaced classes."
     end
   end
 

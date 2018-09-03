@@ -179,6 +179,27 @@
         return _fpa.utils.nl2br(text);
     });
 
+    Handlebars.registerHelper('quoteattr', function(text) {
+        var s = text;
+        var preserveCR = false;
+        preserveCR = preserveCR ? '&#13;' : '\n';
+        return ('' + s) /* Forces the conversion to string. */
+            .replace(/&/g, '&amp;') /* This MUST be the 1st replacement. */
+            .replace(/'/g, '&apos;') /* The 4 other predefined entities, required. */
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            /*
+            You may add other replacements here for HTML only
+            (but it's not necessary).
+            Or for XML, only if the named entities are defined in its DTD.
+            */
+            .replace(/\r\n/g, preserveCR) /* Must be before the next replacement. */
+            .replace(/[\r\n]/g, preserveCR);
+            ;
+    });
+
+
     Handlebars.registerHelper('timestamp', function(text) {
       if(text){
         return _fpa.utils.ISOdatetoTimestamp(text);

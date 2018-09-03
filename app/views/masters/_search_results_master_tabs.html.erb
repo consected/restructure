@@ -7,6 +7,11 @@
     prev_drop_down = nil
     tab_panels = panels.sort {|p, q| (p.tab && p.tab.parent) <=> (p.tab && p.tab.parent) }
     tab_panels.each do |panel|
+
+      if panel.contains&.resources
+        next if view?.stringify_keys.slice(*panel.contains&.resources).select{|k,v| v}.length == 0
+      end
+
       drop_down = panel.tab && panel.tab.parent
       if prev_drop_down && drop_down != prev_drop_down
       %>

@@ -17,6 +17,10 @@ RSpec.describe Admin::ExternalIdentifiersController, type: :controller do
       @edit_form_admin = "admin/common_templates/_form"
     end
 
+    def saved_item_template
+      'admin/common_templates/_item'
+    end
+
     before(:all) do
       seed_database
       @path_prefix = "/admin"

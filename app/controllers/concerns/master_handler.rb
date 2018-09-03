@@ -67,6 +67,9 @@ module MasterHandler
       end
     else
       logger.warn "Error creating #{human_name}: #{object_instance_errors}"
+      # Force an exception to show if no errors reported for the object instance because
+      # a related object failed to save
+      object_instance.save! unless object_instance.errors.present?
       render json: object_instance.errors, status: :unprocessable_entity
     end
   end
@@ -213,6 +216,10 @@ module MasterHandler
         @master
       end
 
+
+      def canceled?
+        params[:id] == 'cancel'
+      end
 
 
       def set_instance_from_id

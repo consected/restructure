@@ -80,6 +80,10 @@ module MasterSupport
     "admin/#{objects_short_name.pluralize}"
   end
 
+  def saved_item_template
+    '_index'
+  end
+
   def item_id
     item.to_param
   end

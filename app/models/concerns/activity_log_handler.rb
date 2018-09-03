@@ -24,7 +24,7 @@ module ActivityLogHandler
     validates :master_id, presence: true
 
     after_save :sync_set_related_fields
-    
+
     after_save :sync_tracker
 
     after_save :check_status

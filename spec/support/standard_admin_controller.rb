@@ -107,7 +107,7 @@ shared_examples 'a standard admin controller' do
       it "return success" do
         va = valid_attributes
         post :create, {object_param_symbol => va }
-        expect(response).to render_template("_index"), "Incorrect response from create #{object_symbol} with #{va} (#{response}). Expected render template _index.  #{assigns(object_symbol).errors.to_a.join("\n")}"
+        expect(response).to render_template(saved_item_template), "Incorrect response from create #{object_symbol} with #{va} (#{response}). Expected render template #{saved_item_template}.  #{assigns(object_symbol).errors.to_a.join("\n")}"
       end
     end
 
@@ -155,7 +155,7 @@ shared_examples 'a standard admin controller' do
         create_item
         put :update, {:id => item_id, object_param_symbol => new_attributes}
         expect(flash[:warning]).to_not be_present
-        expect(response).to render_template('_index')
+        expect(response).to render_template(saved_item_template)
       end
     end
 
