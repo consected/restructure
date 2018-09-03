@@ -6,13 +6,16 @@
     caption: 'Stored File',
     prevent_edit: false,
     prevent_create: true,
-    item_list: NfsStore::Manage::StoredFile.permitted_params
+    item_list: NfsStore::Manage::StoredFile.permitted_params,
+    edit_button_href: "/masters/{{master_id}}/filestore/classification/{{nfs_store_container_id}}/edit?download_id={{id}}&retrieval_type=stored_file"
   } %>
+
   <%= render partial: 'common_templates/search_results_template', locals: {
       name: 'filestore-classification-archived-file-full',
       with_data: 'nfs_store__manage__archived_file',
       caption: 'Archived File',
       prevent_edit: false,
       prevent_create: true,
-      item_list: NfsStore::Manage::StoredFile.permitted_params
+      item_list: NfsStore::Manage::StoredFile.permitted_params,
+      edit_button_href: "/masters/{{master_id}}/filestore/classification/{{nfs_store_container_id}}/edit?download_id={{id}}&retrieval_type=archived_file"
     } %>

@@ -8,12 +8,12 @@ module Filestore
     include NfsStore::InNfsStoreContainer
     include MasterHandler
 
-    helper_method :object_instance, :edit_form_hash, :edit_form_id, :inline_cancel_button
+    helper_method :object_instance, :edit_form_hash, :edit_form_id, :inline_cancel_button, :caption
 
 
     def edit
       prep_item_flags
-      render partial: 'filestore/classification/edit'
+      render partial: 'filestore/classification/edit', locals: {caption: @retrieval_type.humanize}
     end
 
     def create
@@ -65,7 +65,7 @@ module Filestore
       end
 
       def inline_cancel_button class_extras="pull-right"
-        "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign dropup\" title=\"cancel\" href=\"##{hyphenated_name}-edit-form--#{@container.id}\" data-toggle=\"collapse\"></a>".html_safe
+        "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign dropup\" title=\"cancel\" data-target=\"[data-subscription='#{hyphenated_name}-edit-form--#{@container.id}']\" data-toggle=\"clear-content\"></a>".html_safe
       end
 
 

@@ -3,9 +3,6 @@
     <span class="bem-class-title">
       {{#if title}}{{title}}{{else}}(no title){{/if}}
     </span>
-    <span class="bem-class-description">
-    {{#if description.length}}<a href="#" class="glyphicon glyphicon-align-left filtestore-show-description" title="click to view description" data-toggle="popover" data-trigger="click" data-placement="left" data-content="{{quoteattr description}}"></a>{{/if}}
-    </span>
     <span class="bem-class-flags">
       <% if Classification::ItemFlagName.enabled_for?(full_name, current_user) %>
       {{>item_flag_container item_type="<%=full_name%>" readonlyview=true}}

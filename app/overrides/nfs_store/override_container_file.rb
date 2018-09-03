@@ -49,5 +49,15 @@ module NfsStore
       super
     end
 
+    def master_id
+      container.master_id
+    end
+
+    def as_json extras={}
+      extras[:methods] ||= []
+      extras[:methods] << :master_id
+      super
+    end
+
   end
 end
