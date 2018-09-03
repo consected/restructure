@@ -1,7 +1,7 @@
 PATH
   remote: ../nfs_store
   specs:
-    nfs_store (0.0.13)
+    nfs_store (0.0.14)
       activerecord-import
       jquery-fileupload-rails
       jquery-rails
@@ -183,7 +183,7 @@ GEM
       rspec-mocks (~> 3.8.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
-    rubyzip (1.2.1)
+    rubyzip (1.2.2)
     sass (3.5.7)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
