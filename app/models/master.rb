@@ -17,8 +17,8 @@ class Master < ActiveRecord::Base
   has_many :latest_tracker_history, -> { order(id: :desc).limit(1)},  class_name: 'TrackerHistory', inverse_of: :master
 
   has_many :nfs_store__manage__containers, inverse_of: :master, class_name: 'NfsStore::Manage::Container'
-  has_many :nfs_store__manage__stored_files , inverse_of: :master, class_name: 'NfsStore::Manage::StoredFile'
-  has_many :nfs_store__manage__archived_files , inverse_of: :master, class_name: 'NfsStore::Manage::ArchivedFile'
+  has_many :nfs_store__manage__stored_files , through: :nfs_store__manage__containers, source: :master, class_name: 'NfsStore::Manage::StoredFile'
+  has_many :nfs_store__manage__archived_files , through: :nfs_store__manage__containers, source: :master, class_name: 'NfsStore::Manage::ArchivedFile'
 
   # Note that additional has_many associations are added dynamically by the external_id handlers,
   # such as Scantron, SageAssignment, etc. This is handled through the external_id_yyy_settings.rb call to Class.add_to_app_list

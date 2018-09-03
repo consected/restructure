@@ -22,6 +22,14 @@ module NfsStore
         container.master_id
       end
 
+      def master
+        container.master if container
+      end
+
+      def no_user_validation
+        validating?
+      end
+
 
     end
 
@@ -49,9 +57,6 @@ module NfsStore
       super
     end
 
-    def master_id
-      container.master_id
-    end
 
     def as_json extras={}
       extras[:methods] ||= []

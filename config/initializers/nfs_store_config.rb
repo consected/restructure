@@ -60,13 +60,14 @@ ActiveSupport.on_load(:nfs_store_container_file) do
 
     module Manage
       class ContainerFile < NfsStore::UserBase
+
+        def self.no_master_association
+          true
+        end
+
         include HandlesUserBase
         include UserHandler
         include NfsStore::OverrideContainerFile
-
-        def master
-          container.master
-        end
 
       end
     end

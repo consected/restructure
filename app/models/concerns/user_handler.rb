@@ -5,12 +5,15 @@ module UserHandler
 
   included do
     attr_accessor :no_track
-    # Standard associations
-    Rails.logger.debug "Associating master as inverse of #{assoc_inverse}"
 
     after_initialize :init_vars_user_handler
 
-    belongs_to :master, assoc_rules
+    # Ensure dynamic models without master as the foreign key and filestore files don't break associations
+    unless defined?(self.no_master_association) && self.no_master_association
+      # Standard associations
+      Rails.logger.debug "Associating master as inverse of #{assoc_inverse}"
+      belongs_to :master, assoc_rules
+    end
 
     has_many :item_flags,  -> { preload(:item_flag_name) }, as: :item, inverse_of: :item
 
