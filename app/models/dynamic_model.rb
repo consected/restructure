@@ -208,7 +208,15 @@ class DynamicModel < ActiveRecord::Base
           end
 
           def self.permitted_params
-            self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
+
+            field_list = definition.field_list
+            if field_list.blank?
+              field_list = self.attribute_names.map(&:to_sym) - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
+            else
+              field_list = field_list.split(',').map(&:strip).map(&:to_sym)
+            end
+
+            field_list
           end
 
           def option_type
