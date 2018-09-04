@@ -345,7 +345,6 @@ module CalcActions
               end
             end
             unless non_query_condition
-              @condition_values[table_name] ||= {}
               if val.is_a?(Hash) && val[:condition].in?(ValidExtraConditions)
 
                 if @extra_conditions[0].blank?
@@ -363,6 +362,7 @@ module CalcActions
                 if val == 'return_value'
                   @this_val_where = {assoc: ModelReference.record_type_to_ns_table_name(c_table).to_sym, field_name: field_name}
                 else
+                  @condition_values[table_name] ||= {}
                   @condition_values[table_name][field_name] = dynamic_value(val)
                 end
               end
