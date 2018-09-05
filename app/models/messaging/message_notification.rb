@@ -108,7 +108,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
   def from_user_email
     res = super()
     return res if res
-    res = self.user.email
+    res = self.user&.email
     self.from_user_email = res
     self.save
     res
