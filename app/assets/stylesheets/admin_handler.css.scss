@@ -35,6 +35,13 @@ table.admin-list tbody {
   margin-bottom: 1em;
 }
 
+
+#admin-edit- .admin-edit-form {
+  .form-inline input.form-control[name="dynamic_model[field_list]"] {
+    width: 400px;
+  }
+}
+
 .form-inline [data-out-attr-name="options"] textarea.form-control,
 textarea#activity_log_extra_log_types
 {

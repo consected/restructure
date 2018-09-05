@@ -2,9 +2,9 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_screenings eligible_for_study_blank_yes_no notes
+-- table_generators/generate.sh dynamic_models_table create ipa_screenings eligible_for_study_blank_yes_no requires_study_partner_blank_yes_no notes good_time_to_speak_blank_yes_no callback_date callback_time still_interested_blank_yes_no not_interested_notes ineligible_notes eligible_notes
 
-      CREATE FUNCTION log_ipa_screening_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_screening_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -12,7 +12,15 @@
                   (
                       master_id,
                       eligible_for_study_blank_yes_no,
+                      requires_study_partner_blank_yes_no,
                       notes,
+                      good_time_to_speak_blank_yes_no,
+                      callback_date,
+                      callback_time,
+                      still_interested_blank_yes_no,
+                      not_interested_notes,
+                      ineligible_notes,
+                      eligible_notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -22,6 +30,13 @@
                       NEW.master_id,
                       NEW.eligible_for_study_blank_yes_no,
                       NEW.notes,
+                      NEW.good_time_to_speak_blank_yes_no,
+                      NEW.callback_date,
+                      NEW.callback_time,
+                      NEW.still_interested_blank_yes_no,
+                      NEW.not_interested_notes,
+                      NEW.ineligible_notes,
+                      NEW.eligible_notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -36,6 +51,13 @@
           master_id integer,
           eligible_for_study_blank_yes_no varchar,
           notes varchar,
+          good_time_to_speak_blank_yes_no varchar,
+          callback_date date,
+          callback_time varchar,
+          still_interested_blank_yes_no varchar,
+          not_interested_notes varchar,
+          ineligible_notes varchar,
+          eligible_notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -56,6 +78,13 @@
           master_id integer,
           eligible_for_study_blank_yes_no varchar,
           notes varchar,
+          good_time_to_speak_blank_yes_no varchar,
+          callback_date date,
+          callback_time varchar,
+          still_interested_blank_yes_no varchar,
+          not_interested_notes varchar,
+          ineligible_notes varchar,
+          eligible_notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
