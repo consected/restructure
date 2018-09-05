@@ -29,6 +29,7 @@ else
   gs = alt_options
 end
 options = field_options_for(form_object_instance, field_name_sym)
+options[:include_blank] = true unless options.has_key?(:include_blank)
 %>
 <%= form.label field_name_sym, opt %>
 <%= form.select field_name_sym, gs, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
