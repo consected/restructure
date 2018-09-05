@@ -68,7 +68,7 @@ _fpa.show_if.methods = {
 
           btn.click();
 
-          btn.parents('.dialog-before').first().addClass('dialog-made-visible');
+          els.filter('.dialog-before').first().addClass('dialog-made-visible');
 
         }
       }
