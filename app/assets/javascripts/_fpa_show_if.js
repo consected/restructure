@@ -52,8 +52,21 @@ _fpa.show_if.methods = {
         var prev_vis = els.is(':visible');
         els.show();
         if(!prev_vis) {
-          var btn = els.find('.in-form-dialog-btn:visible')
+          var btn = els.find('.in-form-dialog-btn:visible');
+          var newel = els.get(0);
           btn.click();
+
+          // Scroll if necessary
+          window.setTimeout(function() {
+            if(!newel) return;
+            var rect = newel.getBoundingClientRect();
+            var wh = $(window).height();
+            var not_visible = !(rect.top >= 0 && rect.top <= wh/2);
+            if(not_visible) {
+              $(document).scrollTo($(newel), 200, {offset: -0.2 * wh});
+            }
+          }, 250);
+
         }
       }
       else {
