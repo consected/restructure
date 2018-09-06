@@ -20,4 +20,6 @@ class Settings
     use_dictionary: !Rails.env.test?
   }.freeze
 
+  NotificationsFromEmail = ENV['FPHS_FROM_EMAIL'] || 'test@localhost'
+
 end
