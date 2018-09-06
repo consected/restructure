@@ -108,7 +108,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
   def from_user_email
     res = super()
     return res if res
-    res = Settings::NotificationsFromEmail
+    res = Settings::NotificationsFromEmail || self.user&.email
     self.from_user_email = res
     self.save
     res
