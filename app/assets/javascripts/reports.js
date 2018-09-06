@@ -3,8 +3,8 @@ _fpa.loaded.reports = function(){
     _fpa.postprocessors.reports_form($('.report-criteria'));
     $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
-    if($('body').hasClass('user_page')) {
-      _fpa.reports.window_scrolling();      
+    if($('body').hasClass('user_page') && $('body').hasClass('show')) {
+      _fpa.reports.window_scrolling();
     }
 
 
