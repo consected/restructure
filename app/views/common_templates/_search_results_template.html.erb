@@ -311,6 +311,11 @@
           {{><%=name%>_edit_item_button}}
           <h4 class="list-group-item-heading"><%=caption%></h4>
         </li>
+        <% if caption_before[:all_fields] %>
+          <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
+            <%= show_caption_before :all_fields, caption_before %>
+          </li>
+        <% end %>
       <% elsif item_list.length == 1 && external_id_options %>
 
         <li class="list-group-item <%=name%>-<%=name%>_id is-heading compact-heading">
@@ -325,7 +330,11 @@
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
-
+        <% if caption_before[:all_fields] %>
+          <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
+            <%= show_caption_before :all_fields, caption_before %>
+          </li>
+        <% end %>
       <%else%>
         <li class="list-group-item is-heading object-results-header">
           {{><%=name%>_edit_item_button}}

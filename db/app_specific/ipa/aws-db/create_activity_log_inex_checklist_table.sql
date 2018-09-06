@@ -9,6 +9,7 @@
           master_id integer,
           ipa_assignment_id integer,
           ready_for_review_no_yes varchar,
+          select_subject_eligibility varchar,
           signed_no_yes varchar,
           extra_log_type varchar,
           user_id integer,
@@ -21,6 +22,7 @@
           master_id integer,
           ipa_assignment_id integer,
           ready_for_review_no_yes varchar,
+          select_subject_eligibility varchar,
           signed_no_yes varchar,
           extra_log_type varchar,
           user_id integer,
@@ -28,7 +30,7 @@
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_ipa_assignment_inex_checklist_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_activity_log_ipa_assignment_inex_checklist_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -37,6 +39,7 @@
                       master_id,
                       ipa_assignment_id,
                       ready_for_review_no_yes,
+                      select_subject_eligibility,
                       signed_no_yes,
                       extra_log_type,
                       user_id,
@@ -48,6 +51,7 @@
                       NEW.master_id,
                       NEW.ipa_assignment_id,
                       NEW.ready_for_review_no_yes,
+                      NEW.select_subject_eligibility,
                       NEW.signed_no_yes,
                       NEW.extra_log_type,
                       NEW.user_id,
