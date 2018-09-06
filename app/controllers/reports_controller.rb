@@ -16,7 +16,7 @@ class ReportsController < UserBaseController
   def index
     @no_create = true
     @no_masters = true
-    pm = Report.enabled.for_user(current_user)
+    pm = @all_reports_for_user = Report.enabled.for_user(current_user)
     pm = filtered_primary_model(pm)
 
     @reports = pm.order  auto: :desc, report_type: :asc, position: :asc
@@ -255,7 +255,17 @@ class ReportsController < UserBaseController
     end
 
     def filters
-      {item_type: Report.categories.map {|g| [g,g.to_s.humanize]}.to_h}
+
+      if @all_reports_for_user
+        cats = @all_reports_for_user.pluck(:item_type).compact.uniq
+      else
+        cats = Report.categories
+      end
+
+      r_cat = cats.map {|g| [g,g.to_s.humanize]}
+
+
+      {item_type: r_cat.to_h}
     end
 
 

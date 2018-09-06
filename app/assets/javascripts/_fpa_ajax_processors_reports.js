@@ -104,13 +104,13 @@ _fpa.postprocessors_reports = {
             $(this).parents('tr').first().addClass('item-selected');
           });
           $('td[data-col-type="master_id"]').on('click', function(){
-            window.open('/masters/'+$(this).html(), "msid");
+            window.open('/masters/'+$(this).html().trim(), "_blank");
             $('.item-selected').removeClass('item-selected');
             $(this).addClass('item-selected');
           }).addClass('hover-link');
 
           $('td[data-col-type="msid"]').on('click', function(){
-            window.open('/masters/'+$(this).html()+'?type=msid', "msid");
+            window.open('/masters/'+$(this).html().trim()+'?type=msid', "_blank");
             $('.item-selected').removeClass('item-selected');
             $(this).addClass('item-selected');
           }).addClass('hover-link');

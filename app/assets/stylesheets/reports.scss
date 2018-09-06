@@ -21,7 +21,7 @@ tr.report-auto {
     font-family: 'Glyphicons Halflings';
     font-size: 80%;
     padding-left:0.4em;
-    margin-right: -1.6em;    
+    margin-right: -1.6em;
     }
 
 }
@@ -62,4 +62,16 @@ table.table.report-table .report-el.report-el-object-id {
   margin: 0;
   padding: 2px 3px;
 
+}
+
+p.small.report-table-name {
+    max-width: 70px;
+    overflow: hidden;
+    font-weight: normal;
+    text-overflow: ellipsis;
+
+}
+
+.report-measure {
+  font-weight: bold;
 }

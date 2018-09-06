@@ -16,9 +16,11 @@ _fpa.loaded.reports = function(){
 _fpa.reports = {
 
     window_scrolling: function(){
-      $('html').css({overflow: 'hidden'}).on('wheel', function(){
-        _fpa.reports.report_position_buttons('go-to-results');
-        _fpa.reports.reset_window_scrolling();
+      $('html').css({overflow: 'hidden'}).on('wheel', function(e){
+        if(e.originalEvent.deltaY > 0) {
+          _fpa.reports.report_position_buttons('go-to-results');
+          _fpa.reports.reset_window_scrolling();
+        }
       });
     },
     reset_window_scrolling: function(){
@@ -105,7 +107,12 @@ _fpa.reports = {
                 //sa = JSON.stringify(data.search_attributes, null, '<div>  ').replace(/\{/g, '<div>  ').replace(/\}/g, '</div>').replace(/\"|\[|\]|/g, '').replace(/_/g ,' ');
               }
               if(data && data.results && data.results[0]){
-                res = JSON.stringify(data.results, null, '  ').replace(/\{/g, '<div>  ').replace(/\},?/g, '</div>').replace(/\"|\[|\]|/g, '');
+                // res = JSON.stringify(data.results, null, '  ').replace(/\{/g, '<div>  ').replace(/\},?/g, '</div>').replace(/\"|\[|\]|/g, '');
+                var rcount = data.results.length;
+                if(rcount == 1)
+                  res = rcount + ' result';
+                else
+                  res = rcount + ' results';
 
               }else{
                 res = '-';
