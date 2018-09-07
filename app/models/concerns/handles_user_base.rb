@@ -271,10 +271,10 @@ module HandlesUserBase
   def set_referring_record ref_record_type, ref_record_id
     @ref_record_type = ref_record_type
     @ref_record_id = ref_record_id
+    @referring_record = find_referring_record
   end
 
-
-  def create_referring_record
+  def find_referring_record
     if @ref_record_type
       ref_item_class_name = @ref_record_type.singularize.camelize
 
@@ -284,6 +284,14 @@ module HandlesUserBase
 
       # look up the item using the item_id parameter.
       @referring_record  = ic.find(@ref_record_id.to_i)
+    end
+  end
+
+
+  def create_referring_record
+    if @ref_record_type
+
+      @referring_record  = find_referring_record
 
       if @referring_record
         ModelReference.create_with @referring_record, self
