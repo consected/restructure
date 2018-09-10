@@ -24,7 +24,7 @@ end
 appdir = "db/app_specific/#{app_name}"
 
 appconfig = "db/app_configs/#{app_name}"
-appsyncdir = "db/app_specific/sync-process#{app_name}-sync"
+appsyncdir = "db/app_specific/sync-process/#{app_name}-sync"
 
 
 if Dir.exist? appdir

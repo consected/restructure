@@ -657,8 +657,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "pi",
-        "user_email": null
+        "role_name": null,
+        "user_email": "test_pi_user@app.fphs2.harvard.edu"
       },
       {
         "id": 55,
@@ -670,8 +670,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "pi",
-        "user_email": null
+        "role_name": null,
+        "user_email": "test_pi_user@app.fphs2.harvard.edu"
       },
       {
         "id": 56,
@@ -683,8 +683,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "pi",
-        "user_email": null
+        "role_name": null,
+        "user_email": "test_pi_user@app.fphs2.harvard.edu"
       },
       {
         "id": 57,
@@ -696,8 +696,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "ra",
-        "user_email": null
+        "role_name": null,
+        "user_email": "sarah_cohan@hms.harvard.edu"
       },
       {
         "id": 58,
@@ -709,8 +709,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "ra",
-        "user_email": null
+        "role_name": null,
+        "user_email": "sarah_cohan@hms.harvard.edu"
       },
       {
         "id": 59,
@@ -722,8 +722,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "ra",
-        "user_email": null
+        "role_name": null,
+        "user_email": "sarah_cohan@hms.harvard.edu"
       },
       {
         "id": 60,
@@ -735,8 +735,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "ra",
-        "user_email": null
+        "role_name": null,
+        "user_email": "sarah_cohan@hms.harvard.edu"
       },
       {
         "id": 61,
@@ -748,8 +748,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "ra",
-        "user_email": null
+        "role_name": null,
+        "user_email": "sarah_cohan@hms.harvard.edu"
       },
       {
         "id": 62,
@@ -761,8 +761,8 @@
         "disabled": false,
         "admin_id": 4,
         "app_type_id": 2,
-        "role_name": "ra",
-        "user_email": null
+        "role_name": null,
+        "user_email": "sarah_cohan@hms.harvard.edu"
       },
       {
         "id": 63,

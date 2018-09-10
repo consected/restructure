@@ -154,8 +154,4 @@ SET SEARCH_PATH={{app_schema}},ml_app;
       ALTER TABLE ONLY activity_log_{{app_name}}_assignment_history
           ADD CONSTRAINT fk_activity_log_{{app_name}}_assignment_history_activity_log_{{app_name}}_assignments FOREIGN KEY (activity_log_{{app_name}}_assignment_id) REFERENCES activity_log_{{app_name}}_assignments(id);
 
-      GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
-      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
-      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
-
       COMMIT;

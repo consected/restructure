@@ -154,5 +154,4 @@ SET SEARCH_PATH=persnet_schema,ml_app;
       ALTER TABLE ONLY activity_log_persnet_assignment_history
           ADD CONSTRAINT fk_activity_log_persnet_assignment_history_activity_log_persnet_assignments FOREIGN KEY (activity_log_persnet_assignment_id) REFERENCES activity_log_persnet_assignments(id);
 
-
       COMMIT;

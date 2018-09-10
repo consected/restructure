@@ -10,8 +10,10 @@ CREATE TEMPORARY TABLE temp_{{app_name}}_assignments (
 CREATE TEMPORARY TABLE temp_player_infos AS ( SELECT * FROM player_infos WHERE ID IS NULL);
 CREATE TEMPORARY TABLE temp_player_contacts AS ( SELECT * FROM player_contacts WHERE ID IS NULL);
 
-\copy temp_{{app_name}}_assignments from /tmp/zeus_{{app_name}}_assignments.csv with (header true, format csv)
-\copy temp_player_infos (id, master_id, first_name, last_name, middle_name, nick_name, birth_date, death_date, user_id, created_at, updated_at, start_year, rank, notes, college, end_year, source) from /tmp/zeus_{{app_name}}_player_infos.csv with (header true, format csv)
-\copy temp_player_contacts from /tmp/zeus_{{app_name}}_player_contacts.csv with (header true, format csv)
+\copy temp_{{app_name}}_assignments from ${{app_name_uc}}_ASSIGNMENTS_FILE with (header true, format csv)
+\copy temp_player_infos (id, master_id, first_name, last_name, middle_name, nick_name, birth_date, death_date, user_id, created_at, updated_at, start_year, rank, notes, college, end_year, source) from ${{app_name_uc}}_PLAYER_INFOS_FILE with (header true, format csv)
+\copy temp_player_contacts from ${{app_name_uc}}_PLAYER_CONTACTS_FILE with (header true, format csv)
 
 SELECT create_all_remote_{{app_name}}_records();
+
+\copy (SELECT * FROM temp_{{app_name}}_assignments) TO ${{app_name_uc}}_ASSIGNMENTS_RESULTS_FILE WITH (format csv, header true);

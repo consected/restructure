@@ -241,7 +241,7 @@ ELSE
   UPDATE activity_log_{{app_name}}_assignments
   SET
     select_record_from_player_contact_phones = phone,
-    results_link = ('https://{{app_schema}}.org?demotestid=' || found_{{app_name}}.{{app_name}}_id::varchar),
+    -- results_link = ('https://{{app_schema}}.org?id=' || found_{{app_name}}.{{app_name}}_id::varchar),
     updated_at = now()
   WHERE
     id = last_id;

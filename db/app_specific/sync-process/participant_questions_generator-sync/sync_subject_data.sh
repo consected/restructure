@@ -15,10 +15,15 @@
 #
 # Ensure that .pgpass is setup with the appropriate credentials
 #
-
-WORKINGDIR=/tmp
-
 cd $(dirname $0)
+
+BASEDIR=/FPHS/data/{{app_name}}-sync
+WORKINGDIR=${BASEDIR}/tmp
+LOGDIR=${BASEDIR}/log
+SCRDIR=${BASEDIR}/scripts
+LOGFL=${LOGDIR}/sync_subject_data.log
+PSQLRESFL=${WORKINGDIR}/.last_psql_error
+
 
 . ../sync_db_connections.sh
 
@@ -29,15 +34,17 @@ then
 fi
 
 # Main SQL scripts
-{{app_name_uc}}_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
-{{app_name_uc}}_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
+export {{app_name_uc}}_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
+export {{app_name_uc}}_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
+export {{app_name_uc}}_ZEUS_FPHS_RESULTS_SQL_FILE=${SCRDIR}/run_sync_results_fphs_db.sql
 
 # Temp files - can be anywhere - and will be cleaned up before and after use
-{{app_name_uc}}_SQL_FILE=$WORKINGDIR/temp_{{app_name}}.sql
-{{app_name_uc}}_IDS_FILE=$WORKINGDIR/remote_{{app_name}}_ids
-{{app_name_uc}}_ASSIGNMENTS_FILE=$WORKINGDIR/zeus_{{app_name}}_assignments.csv
-{{app_name_uc}}_PLAYER_INFOS_FILE=$WORKINGDIR/zeus_{{app_name}}_player_infos.csv
-{{app_name_uc}}_PLAYER_CONTACTS_FILE=$WORKINGDIR/zeus_{{app_name}}_player_contacts.csv
+export RUN_SQL_FILE=$WORKINGDIR/temp_{{app_name}}.sql
+export {{app_name_uc}}_IDS_FILE=$WORKINGDIR/remote_{{app_name}}_ids
+export {{app_name_uc}}_ASSIGNMENTS_FILE=$WORKINGDIR/zeus_{{app_name}}_assignments.csv
+export {{app_name_uc}}_PLAYER_INFOS_FILE=$WORKINGDIR/zeus_{{app_name}}_player_infos.csv
+export {{app_name_uc}}_PLAYER_CONTACTS_FILE=$WORKINGDIR/zeus_{{app_name}}_player_contacts.csv
+export {{app_name_uc}}_ASSIGNMENTS_RESULTS_FILE=${WORKINGDIR}/aws_{{app_name}}_assignments_results.csv
 
 # Initially set the default schema for psql to be the AWS schema. This way, we do not need
 # set search_path=... directly coded in the scripts
@@ -46,22 +53,53 @@ export PGOPTIONS=--search_path=$AWS_DB_SCHEMA
 function cleanup {
   echo "Cleanup"
   rm ${{app_name_uc}}_IDS_FILE
-  rm ${{app_name_uc}}_SQL_FILE
   rm ${{app_name_uc}}_ASSIGNMENTS_FILE
   rm ${{app_name_uc}}_PLAYER_INFOS_FILE
   rm ${{app_name_uc}}_PLAYER_CONTACTS_FILE
+  rm ${{app_name_uc}}_ASSIGNMENTS_RESULTS_FILE
+  rm $PSQLRESFL 2> /dev/null
+  rm $RUN_SQL_FILE 2> /dev/null
 }
+
+function log {
+  echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}
+}
+
+function log_last_error {
+  DATA=$(cat ${PSQLRESFL} 2> /dev/null)
+  if [ ! -z "${DATA}" ]
+  then
+    log "${DATA}"
+  fi
+}
+
 
 # ----> Cleanup from previous runs, just in case
 cleanup
+
+
+#================ Main Program ======================================
+
+log 'Starting subject data sync.'
 
 # ----> On Remote AWS DB
 # Run find_new_remote_{{app_name}}_records() and copy to a CSV file ({{app_name_uc}}_IDS_FILE)
 # This returns a list of {{app_name_uc}} IDs to be sync'd from the Zeus FPHS DB
 #
-echo "Find remote {{app_name_uc}} records"
-echo "\copy (select * from find_new_remote_{{app_name}}_records()) to ${{app_name_uc}}_IDS_FILE with (format csv, header true);" > ${{app_name_uc}}_SQL_FILE
-psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < ${{app_name_uc}}_SQL_FILE
+log "Find remote {{app_name_uc}} records"
+echo "\copy (select * from find_new_remote_{{app_name}}_records()) to ${{app_name_uc}}_IDS_FILE with (format csv, header true);" > $RUN_SQL_FILE 2> ${PSQLRESFL}
+psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $RUN_SQL_FILE
+log_last_error
+
+
+LINECOUNT="$(wc -l < ${{app_name_uc}}_ASSIGNMENTS_FILE)"
+if [ -z "$LINECOUNT" ] || [ "$LINECOUNT" == '1' ]
+then
+  log "Nothing to transfer. Exiting."
+  cleanup
+  exit
+fi
+
 
 
 # ----> On Zeus FPHS DB
@@ -76,8 +114,10 @@ psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < ${{app_name_uc}}_SQL_FILE
 #
 # Copy temp_{{app_name}}_assignments to {{app_name_uc}}_ASSIGNMENTS_FILE
 
-echo "Match and export Zeus records"
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < ${{app_name_uc}}_ZEUS_FPHS_SQL_FILE
+log "Match and export Zeus records"
+envsubst < ${{app_name_uc}}_ZEUS_FPHS_SQL_FILE > $RUN_SQL_FILE
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $RUN_SQL_FILE 2> ${PSQLRESFL}
+log_last_error
 
 # ----> On Remote AWS DB
 # Create temp tables for {{app_name}}_assignments, player_infos and player_contacts:
@@ -96,8 +136,17 @@ PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_H
 # AWS DB master_id and user_id as a substitution for the original values pulled from Zeus.
 #
 
-echo "Transfer matched records to remote DB"
-psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < ${{app_name_uc}}_AWS_SQL_FILE
+log "Transfer matched records to remote DB"
+envsubst < ${{app_name_uc}}_AWS_SQL_FILE > $RUN_SQL_FILE
+psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $RUN_SQL_FILE 2> ${PSQLRESFL}
+log_last_error
+
+# Mark the transferred records as completed
+log "Mark sync_statuses for transferred records"
+envsubst < ${{app_name_uc}}_ZEUS_FPHS_RESULTS_SQL_FILE > $RUN_SQL_FILE
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < ${{app_name_uc}}_SQL_FILE 2> ${PSQLRESFL}
+log_last_error
+
 
 # ----> Cleanup
 cleanup

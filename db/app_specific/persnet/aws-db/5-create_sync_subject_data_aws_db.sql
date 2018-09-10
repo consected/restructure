@@ -219,10 +219,10 @@ ELSE
   INTO last_id
   FROM activity_log_persnet_assignments
   WHERE
-  persnet_assignment_id IS NOT NULL
-  AND (select_record_from_player_contact_phones is null OR select_record_from_player_contact_phones = '')
-  AND master_id = found_persnet.master_id
-  AND extra_log_type = 'primary'
+    persnet_assignment_id IS NOT NULL
+    AND (select_record_from_player_contact_phones is null OR select_record_from_player_contact_phones = '')
+    AND master_id = found_persnet.master_id
+    AND extra_log_type = 'primary'
   ORDER BY id ASC
   LIMIT 1;
 
@@ -241,7 +241,7 @@ ELSE
   UPDATE activity_log_persnet_assignments
   SET
     select_record_from_player_contact_phones = phone,
-    -- results_link = ('https://persnet_schema.org?demotestid=' || found_persnet.persnet_id::varchar),
+    -- results_link = ('https://persnet_schema.org?id=' || found_persnet.persnet_id::varchar),
     updated_at = now()
   WHERE
     id = last_id;
