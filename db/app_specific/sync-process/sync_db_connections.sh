@@ -21,7 +21,7 @@ then
   export ZEUS_FPHS_DB_USER=fphsetl
   # Connection details for the demo AWS Elaine database
   export AWS_DB=fpa_development
-  export AWS_DB_SCHEMA=ml_app
+  export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet_schema
   export AWS_DB_HOST=localhost
   export AWS_DB_USER=fphsetl
 fi

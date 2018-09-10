@@ -241,7 +241,7 @@ ELSE
   UPDATE activity_log_persnet_assignments
   SET
     select_record_from_player_contact_phones = phone,
-    -- results_link = ('https://persnet_schema.org?id=' || found_persnet.persnet_id::varchar),
+    -- results_link = ('https://persnet_schema.org?demotestid=' || found_persnet.persnet_id::varchar),
     updated_at = now()
   WHERE
     id = last_id;

@@ -15,27 +15,66 @@
 #
 # Ensure that .pgpass is setup with the appropriate credentials
 #
+
+function cleanup {
+  echo "Cleanup"
+  rm $PERSNET_IDS_FILE 2> /dev/null
+  rm $PERSNET_ASSIGNMENTS_FILE 2> /dev/null
+  rm $PERSNET_PLAYER_INFOS_FILE 2> /dev/null
+  rm $PERSNET_PLAYER_CONTACTS_FILE 2> /dev/null
+  rm $PERSNET_ASSIGNMENTS_RESULTS_FILE 2> /dev/null
+  rm $PSQLRESFL 2> /dev/null
+  rm $RUN_SQL_FILE 2> /dev/null
+}
+
+function log {
+  if [ "$RAILS_ENV" = 'development' ]
+  then
+    echo "`date +%m%d%Y%H%M` - $(basename $0) - $1"
+  fi
+  echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}
+}
+
+function log_last_error {
+  DATA=$(cat ${PSQLRESFL} 2> /dev/null)
+  if [ ! -z "${DATA}" ]
+  then
+    log "${DATA}"
+  fi
+}
+
+
+
+
 cd $(dirname $0)
 
-BASEDIR=/FPHS/data/persnet-sync
+if [ "$RAILS_ENV" == 'development' ]
+then
+  BASEDIR='.'
+  SCRDIR=${BASEDIR}
+else
+  BASEDIR=/FPHS/data/persnet-sync
+  SCRDIR=${BASEDIR}/scripts
+fi
+
 WORKINGDIR=${BASEDIR}/tmp
 LOGDIR=${BASEDIR}/log
-SCRDIR=${BASEDIR}/scripts
 LOGFL=${LOGDIR}/sync_subject_data.log
 PSQLRESFL=${WORKINGDIR}/.last_psql_error
 
 
 . ../sync_db_connections.sh
 
+log "Running in $(pwd)"
 if [ -z "$ZEUS_DB" ]
 then
-  echo "No matching environment"
+  log "No matching environment"
   exit 1
 fi
 
 # Main SQL scripts
-export PERSNET_ZEUS_FPHS_SQL_FILE=run_sync_subject_data_fphs_db.sql
-export PERSNET_AWS_SQL_FILE=run_sync_subject_data_aws_db.sql
+export PERSNET_ZEUS_FPHS_SQL_FILE=${SCRDIR}/run_sync_subject_data_fphs_db.sql
+export PERSNET_AWS_SQL_FILE=${SCRDIR}/run_sync_subject_data_aws_db.sql
 export PERSNET_ZEUS_FPHS_RESULTS_SQL_FILE=${SCRDIR}/run_sync_results_fphs_db.sql
 
 # Temp files - can be anywhere - and will be cleaned up before and after use
@@ -49,29 +88,6 @@ export PERSNET_ASSIGNMENTS_RESULTS_FILE=${WORKINGDIR}/aws_persnet_assignments_re
 # Initially set the default schema for psql to be the AWS schema. This way, we do not need
 # set search_path=... directly coded in the scripts
 export PGOPTIONS=--search_path=$AWS_DB_SCHEMA
-
-function cleanup {
-  echo "Cleanup"
-  rm $PERSNET_IDS_FILE
-  rm $PERSNET_ASSIGNMENTS_FILE
-  rm $PERSNET_PLAYER_INFOS_FILE
-  rm $PERSNET_PLAYER_CONTACTS_FILE
-  rm $PERSNET_ASSIGNMENTS_RESULTS_FILE
-  rm $PSQLRESFL 2> /dev/null
-  rm $RUN_SQL_FILE 2> /dev/null
-}
-
-function log {
-  echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}
-}
-
-function log_last_error {
-  DATA=$(cat ${PSQLRESFL} 2> /dev/null)
-  if [ ! -z "${DATA}" ]
-  then
-    log "${DATA}"
-  fi
-}
 
 
 # ----> Cleanup from previous runs, just in case
@@ -92,7 +108,7 @@ psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $RUN_SQL_FILE
 log_last_error
 
 
-LINECOUNT="$(wc -l < $PERSNET_ASSIGNMENTS_FILE)"
+LINECOUNT="$(wc -l < $PERSNET_IDS_FILE)"
 if [ -z "$LINECOUNT" ] || [ "$LINECOUNT" == '1' ]
 then
   log "Nothing to transfer. Exiting."

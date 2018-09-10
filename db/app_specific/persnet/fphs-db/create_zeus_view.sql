@@ -25,7 +25,7 @@ For production:
 
 */
 
-  create view ml_app.persnet_assignments as select id, master_id, id persnet_id, now() created_at, now() updated_at from persnet_schema.tmbs;
+  create view ml_app.persnet_assignments as select id, master_id, persnet_id persnet_id, now() created_at, now() updated_at from persnet_schema.persnet_assignments;
 
   GRANT ALL ON ml_app.persnet_assignments TO fphs;
   GRANT SELECT ON ml_app.persnet_assignments TO fphsusr;
