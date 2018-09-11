@@ -1,7 +1,7 @@
 _fpa.postprocessors_admin = {
     admin_edit_form: function(block, data){
         var _admin = this;
-        $.scrollTo(block, 200, {offset:-50});
+        _fpa.utils.scrollTo(block, 200, -50);
 
         $('tr.new-record').before($('tr.admin-list-item').first());
 
@@ -59,7 +59,7 @@ _fpa.postprocessors_admin = {
       $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
       window.setTimeout(function() {
-        $.scrollTo(block, 200, {offset:-50});
+        _fpa.utils.scrollTo(block, 200, -50);
       }, 100);
       window.setTimeout(function() {
         $('prevent-scroll').removeClass('prevent-scroll');

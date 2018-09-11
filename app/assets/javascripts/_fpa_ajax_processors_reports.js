@@ -205,7 +205,7 @@ _fpa.postprocessors_reports = {
         // Format the block to ensure dates and masked fields, etc work as expected
         _fpa.form_utils.format_block(row);
 
-        $.scrollTo(row, 200, {offset:-50});
+        _fpa.utils.scrollTo(row, 200, -50);
         // Setup the cancel button
         row.find('#report-edit-cancel').click(function(ev){
             ev.preventDefault();

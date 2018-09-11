@@ -444,7 +444,7 @@ _fpa.form_utils = {
             else
                 a = block.parents('.panel-collapse').first();
 
-            $(document).scrollTo(a, 100, {offset: -60});
+            _fpa.utils.scrollTo(a, 100, -60);
 
 
         }).addClass('attached-datatoggle-stm');
@@ -512,7 +512,8 @@ _fpa.form_utils = {
 
                   var not_visible = !(rect.top >= 0 && rect.bottom < $(window).height());
                   if(not_visible)
-                      $(document).scrollTo(a, 100, {offset: -50});
+                    _fpa.utils.scrollTo(a, 200, -100);
+                      // $(document).scrollTo(a, 100, {offset: -50});
                 };
 
                 window.setTimeout(function(){ doscroll() }, 250);

@@ -27,9 +27,13 @@ _fpa.utils.jump_to_linked_item = function(target, offset) {
   var rect = h.get(0).getBoundingClientRect();
   var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
   if(not_visible)
-      $.scrollTo(h, 200, {offset: offset});
+      _fpa.utils.scrollTo(h, 200, offset);
 
   return block;
+};
+
+_fpa.utils.scrollTo = function(el, height, offset) {
+  $.scrollTo(el, height, {offset: offset});
 };
 
 _fpa.utils.pluralize = function(str) {
