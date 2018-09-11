@@ -48,7 +48,7 @@ function log_last_error {
 
 cd $(dirname $0)
 
-if [ "$RAILS_ENV" == 'development' ]
+if [ "$RAILS_ENV" == 'development' ] || [ "$EBENV" == 'DEV-fphs' ]
 then
   BASEDIR='.'
   SCRDIR=${BASEDIR}
