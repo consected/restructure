@@ -1,4 +1,5 @@
 #! /usr/bin/env ruby
+
 app_name = ARGV[0]
 app_short = ARGV[1]
 app_schema = ARGV[2]
@@ -10,7 +11,13 @@ app_label = ARGV[3]
 @app_label = app_label
 
 unless ARGV.length == 4
-  puts "Incorrect number of arguments. Remember to quote the app label arg."
+  puts <<EOF
+Usage:
+db/app_specific/participant_questions_generator/generate_app.rb [definition name] [app abbreviation] [schema] "[label]"
+
+Example:
+db/app_specific/participant_questions_generator/generate_app.rb persnet PersNet persnet "Personal Networks"
+EOF
   exit
 end
 

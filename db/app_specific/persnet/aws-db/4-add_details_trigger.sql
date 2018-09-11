@@ -1,6 +1,6 @@
-SET SEARCH_PATH=persnet_schema,ml_app;
+SET SEARCH_PATH=persnet,ml_app;
 
-DROP FUNCTION IF EXISTS activity_log_persnet_assignment_insert_persnet_schema() cascade;
+DROP FUNCTION IF EXISTS activity_log_persnet_assignment_insert_persnet() cascade;
 DROP FUNCTION IF EXISTS activity_log_persnet_assignment_insert_defaults() cascade;
 
 CREATE FUNCTION activity_log_persnet_assignment_insert_defaults() RETURNS trigger
@@ -29,7 +29,7 @@ CREATE FUNCTION activity_log_persnet_assignment_insert_defaults() RETURNS trigge
             END IF;
 
 
-            -- Generate the persnet_schema URL from the persnet ID
+            -- Generate the persnet URL from the persnet ID
             -- select * from persnet_assignments
             -- into found_persnet
             -- where master_id = NEW.master_id
@@ -37,7 +37,7 @@ CREATE FUNCTION activity_log_persnet_assignment_insert_defaults() RETURNS trigge
 
 
             -- IF found_persnet.persnet_id is not null THEN
-            --   NEW.results_link := ('https://persnet_schema.org/fphs/get_id.php?id=' || found_persnet.persnet_id::varchar);
+            --   NEW.results_link := ('https://persnet.org/fphs/get_id.php?id=' || found_persnet.persnet_id::varchar);
             -- END IF;
             RETURN NEW;
         END;

@@ -1,4 +1,4 @@
-SET SEARCH_PATH=persnet_schema,ml_app;
+SET SEARCH_PATH=persnet,ml_app;
 
 /* Simple support function to get app_type.id using a name */
 CREATE OR REPLACE FUNCTION get_app_type_id_by_name(app_type_name VARCHAR) RETURNS INTEGER

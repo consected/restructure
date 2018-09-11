@@ -114,6 +114,8 @@ then
   log "Nothing to transfer. Exiting."
   cleanup
   exit
+else
+  log "Number of records to transfer: $LINECOUNT"
 fi
 
 
@@ -160,7 +162,7 @@ log_last_error
 # Mark the transferred records as completed
 log "Mark sync_statuses for transferred records"
 envsubst < ${{app_name_uc}}_ZEUS_FPHS_RESULTS_SQL_FILE > $RUN_SQL_FILE
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < ${{app_name_uc}}_SQL_FILE 2> ${PSQLRESFL}
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $RUN_SQL_FILE 2> ${PSQLRESFL}
 log_last_error
 
 

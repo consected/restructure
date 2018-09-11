@@ -1,4 +1,4 @@
-SET SEARCH_PATH=persnet_schema,ml_app;
+SET SEARCH_PATH=persnet,ml_app;
 
       BEGIN;
 

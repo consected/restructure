@@ -25,7 +25,7 @@ For production:
 
 */
 
-  create view ml_app.{{app_name}}_assignments as select id, master_id, id {{app_name}}_id, now() created_at, now() updated_at from {{app_schema}}.tmbs;
+  create view ml_app.{{app_name}}_assignments as select id, master_id, id {{app_name}}_id, now() created_at, now() updated_at from {{app_schema}}.subjects;
 
   GRANT ALL ON ml_app.{{app_name}}_assignments TO fphs;
   GRANT SELECT ON ml_app.{{app_name}}_assignments TO fphsusr;

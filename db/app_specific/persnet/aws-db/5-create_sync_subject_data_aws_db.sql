@@ -4,7 +4,7 @@
 -- See sync_subject_data.sh for more information on usage
 
 
-set search_path=persnet_schema,ml_app;
+set search_path=persnet,ml_app;
 
 -------------------------------------------------------
 -- Find the persnet IDs that
@@ -241,7 +241,7 @@ ELSE
   UPDATE activity_log_persnet_assignments
   SET
     select_record_from_player_contact_phones = phone,
-    -- results_link = ('https://persnet_schema.org?demotestid=' || found_persnet.persnet_id::varchar),
+    -- results_link = ('https://persnet.org?id=' || found_persnet.persnet_id::varchar),
     updated_at = now()
   WHERE
     id = last_id;

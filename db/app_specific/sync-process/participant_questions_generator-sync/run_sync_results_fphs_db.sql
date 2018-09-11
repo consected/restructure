@@ -1,5 +1,4 @@
 set search_path=ml_app;
-
 CREATE TEMPORARY TABLE temp_{{app_name}}_assignments_results (
     master_id integer,
     {{app_name}}_id bigint,

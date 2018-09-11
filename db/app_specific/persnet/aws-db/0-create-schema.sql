@@ -1,1 +1,1 @@
-create schema persnet_schema;
+create schema persnet;
