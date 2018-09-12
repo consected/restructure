@@ -2311,7 +2311,8 @@ CREATE TABLE ml_app.app_configurations (
     disabled boolean,
     admin_id integer,
     user_id integer,
-    app_type_id integer
+    app_type_id integer,
+    role_name character varying
 );
 
 
