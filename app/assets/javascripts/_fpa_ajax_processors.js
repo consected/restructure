@@ -31,6 +31,19 @@ _fpa.postprocessors = {
 
         $('#master_results_block').addClass('search-status-done');
 
+        if($('body').hasClass('user_page') && $('body').hasClass('show') && $('#master_results_block #results-accordion').length == 0) {
+          $('body').addClass('table-results');
+          $('html').css({overflow: 'hidden'});
+          _fpa.reports.window_scrolling();
+        }
+        else {
+          $('body').removeClass('table-results');
+          $('html').css({overflow: 'auto'});
+          _fpa.reports.reset_window_scrolling();
+
+        }
+
+
         // Allow easy default processing where not already performed by the postprocessor
         if(!has_postprocessor){
             _fpa.form_utils.format_block(block);

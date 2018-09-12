@@ -3,9 +3,6 @@ _fpa.loaded.reports = function(){
     _fpa.postprocessors.reports_form($('.report-criteria'));
     $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
 
-    if($('body').hasClass('user_page') && $('body').hasClass('show')) {
-      _fpa.reports.window_scrolling();
-    }
 
 
     // If this an editable data form, automatically submit it if there are no criteria fields to enter
@@ -16,7 +13,7 @@ _fpa.loaded.reports = function(){
 _fpa.reports = {
 
     window_scrolling: function(){
-      $('html').css({overflow: 'hidden'}).on('wheel', function(e){
+      $('html').on('wheel', function(e){
         if(e.originalEvent.deltaY > 0) {
           _fpa.reports.report_position_buttons('go-to-results');
           _fpa.reports.reset_window_scrolling();
