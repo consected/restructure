@@ -50,10 +50,24 @@ _fpa.loaded.default = function(){
 
     // Finally, if a hash is set in the URL, jump to it:
     var target = window.location.hash;
+    // If no target provided, check if a login page previously cached one and use it instead
+    if (!target && !$('body.sessions').length) {
+      var hash_res = _fpa.cache('login-redirect-hash');
+      target = hash_res && hash_res.hash;
+      _fpa.set_cache('login-redirect-hash', {})
+    }
+
     if(target) {
-      window.setTimeout(function(){
-        _fpa.utils.jump_to_linked_item(target);
-      }, 1000);
+      // If we are on a login page, we need to store the hash, since it isn't passed to the server
+      if($('body.sessions').length) {
+        _fpa.set_cache('login-redirect-hash', {hash: target});
+      }
+      else {
+        window.setTimeout(function(){
+          console.log('Jumping to linked target based on hash')
+          _fpa.utils.jump_to_linked_item(target);
+        }, 1000);
+      }
 
     }
 };
