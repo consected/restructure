@@ -5,6 +5,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   include AdminHandler
   include SelectorCache
   include AppTyped
+  include UserAndRoles
 
   belongs_to :user
   before_validation :humanize_name
@@ -25,36 +26,18 @@ class Admin::AppConfiguration < Admin::AdminBase
       "menu research label", "notes field caption", "show activity log panel", "show ids in master result", "user session timeout"
     ]
   end
-  # Use `Admin::AppConfiguration.value_for name` to get a cached configuration value
 
-  # Allow the use of symbols to retrieve entries
-  # If a user is set, use it to override the default value
+  # Use `Admin::AppConfiguration.value_for name` to get a cached configuration value
+  # Allows the use of symbols to retrieve entries
+  # If a user is set, use it to override the default value with either the username or role names
   # Otherwise just return the default value if no user is set
   # user attribute can be a User or an id
   def self.value_for name, user=nil
     if name.is_a? Symbol
       name = sym_to_name(name)
     end
-
-    app_type_id = user.app_type_id if user
-
-    res = user_value_for(name, app_type_id: app_type_id)
-
-    if user.nil?
-      user_id = nil
-    elsif user.is_a? User
-      user_id = user.id
-    else
-      user_id = user
-    end
-
-    res_user = user_value_for(name, user_id: user_id, app_type_id: app_type_id) if user_id
-
-    # since results are returned as nil if there was no entry and blank if there was (but it was not set)
-    # we can return with a override expression
-
-    res_user || res
-
+    res = where(name: name)
+    res.scope_user_and_role(user).first&.value
   end
 
   def self.sym_to_name config_name
@@ -116,10 +99,10 @@ class Admin::AppConfiguration < Admin::AdminBase
     def valid_entry
       unless self.disabled
 
-        cond = {name: self.name, user: self.user, app_type: self.app_type}
+        cond = {name: self.name, user: self.user, role_name: self.role_name, app_type: self.app_type}
         res = self.class.active.where(cond).first
         raise FphsException.new "Invalid configuration name: #{self.name}" unless self.name.in? self.class.configurations
-        raise FphsException.new "This item already exists (#{self.name} user: #{self.user_id} app_type: #{self.app_type_id})" if res && ((persisted? && res.id != self.id) || !persisted?)
+        raise FphsException.new "This item already exists (#{self.name} user: #{self.user_id} role_name: #{self.role_name} app_type: #{self.app_type_id})" if res && ((persisted? && res.id != self.id) || !persisted?)
 
       end
     end

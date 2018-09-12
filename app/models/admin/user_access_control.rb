@@ -4,16 +4,13 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   include AdminHandler
   include AppTyped
+  include UserAndRoles
 
   belongs_to :user
 
   validate :correct_access
 
-  PermissionPriorityOrder = "CASE
-  WHEN user_id IS NOT NULL THEN user_id::varchar
-  WHEN (role_name IS NOT NULL AND role_name <> '') THEN role_name
-  ELSE user_id::varchar
-  END"
+
 
   def self.resource_types
     [:table, :general, :external_id_assignments, :report, :activity_log_type]
@@ -141,15 +138,13 @@ class Admin::UserAccessControl < ActiveRecord::Base
     end
 
 
-    primary_conditions = {resource_type: on_resource_type, resource_name: named, app_type_id: app_type_id}
-
-    conditions = generate_access_conditions(user, app_type_id, alt_role_name)
+    primary_conditions = {resource_type: on_resource_type, resource_name: named}
 
     # Get the user's own access first, roles next, and the fallback of null last. If the
-    # user does not have his own access, then if she is a member of role_name, that'll be used and finally
+    # user does not have her own access, then if she is a member of role_name, that'll be used and finally
     # the default for the app type will return instead,
     # so that .first is always the most appropriate value
-    res = self.active.where(primary_conditions).where(conditions).order(PermissionPriorityOrder)
+    res = self.where(primary_conditions).scope_user_and_role(user, app_type_id, alt_role_name)
 
     res = res.where(add_conditions) if add_conditions
     res = res.first
@@ -201,10 +196,9 @@ class Admin::UserAccessControl < ActiveRecord::Base
   # If there are no restrictions for this user in this app, just return nil
   def self.external_identifier_restrictions user
 
-    primary_conditions = {resource_type: :external_id_assignments, app_type_id: user.app_type_id}
+    primary_conditions = {resource_type: :external_id_assignments}
 
-    conditions = generate_access_conditions(user)
-    res = self.active.where(primary_conditions).where(conditions).order(PermissionPriorityOrder)
+    res = self.where(primary_conditions).scope_user_and_role(user)
 
     # res = Admin::UserAccessControl.active.where(app_type_id: user.app_type_id,  user: user_list, resource_type: :external_id_assignments).order('resource_name asc, user_id asc nulls last')
     res_length = res.length
@@ -265,37 +259,6 @@ class Admin::UserAccessControl < ActiveRecord::Base
           end
         end
       end
-
-    end
-
-    # Generate the access conditions for #access_for?
-    # @param user [User] the user to apply the access conditions to
-    # @param alt_app_type [Admin::AppType | Integer] app type or ID for the app type to apply to if the user does not have a current app_type set
-    # @param alt_role_name [String] role name for an Admin::UserRole when the role control is to override the default control4
-    # @return [Array] the where clause definition and values
-    def self.generate_access_conditions user, alt_app_type=nil, alt_role_name=nil
-      where_clause = ''
-      where_conditions = []
-      if user
-        where_clause << 'user_id = ?'
-        where_conditions << user.id
-        rn = Admin::UserRole.active_app_roles(user, app_type: alt_app_type).role_names
-      end
-
-      if alt_role_name
-        rn = alt_role_name
-        rn = [rn] unless rn.is_a? Array
-      end
-
-      if rn && rn.length > 0
-        where_clause << ' OR ' if where_clause.present?
-        where_clause << 'role_name IN (?)'
-        where_conditions << rn
-      end
-
-      where_clause << ' OR ' if where_clause.present?
-      where_clause << "(user_id IS NULL AND (role_name IS NULL OR role_name = ''))"
-      [where_clause] + where_conditions
 
     end
 

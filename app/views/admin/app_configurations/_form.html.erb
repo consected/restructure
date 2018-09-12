@@ -6,14 +6,14 @@
     <%= f.label :app_type_id %>
     <% select_item_type = {}
        select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'    %>
-    <%= f.select :app_type_id, Admin::AppType.active.map{|a| [a.label, a.id]}, select_item_type%>
+    <%= f.select :app_type_id, app_type_options, select_item_type%>
   </div>
   <div class="form-group">
     <%= f.label :name %>
     <% select_item_type = {}
        select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'name'    %>
 
-    <%= f.select :name, Admin::AppConfiguration.configurations, select_item_type %>
+    <%= f.select :name, app_configuration_options, select_item_type %>
   </div>
   <div class="form-group">
     <%= f.label :value %>
@@ -21,7 +21,7 @@
   </div>
   <div class="form-group">
     <%= f.label 'user override' %>
-    <%= f.select :user_id, options_from_collection_for_select(User.active, 'id', 'email', object_instance.user_id), include_blank: true %>
+    <%= f.select :user_id, active_user_options, include_blank: true %>
   </div>
   <div class="form-group">
     <%= f.check_box :disabled %>

@@ -128,8 +128,8 @@
       },
       {
         "id": 13,
-        "name": "hide master id in results",
-        "value": "true",
+        "name": "show ids in master result",
+        "value": "bhs_id",
         "disabled": false,
         "admin_id": 4,
         "user_id": null,
@@ -1138,7 +1138,7 @@
       },
       {
         "id": 20,
-        "name": "email",
+        "name": "Email",
         "value": "email",
         "item_type": "player_contacts_type",
         "created_at": "2018-03-14T18:53:28.655Z",
@@ -1155,7 +1155,7 @@
       },
       {
         "id": 21,
-        "name": "phone",
+        "name": "Phone",
         "value": "phone",
         "item_type": "player_contacts_type",
         "created_at": "2018-03-14T18:53:28.663Z",
