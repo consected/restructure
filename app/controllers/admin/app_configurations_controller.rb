@@ -18,6 +18,6 @@ class Admin::AppConfigurationsController < AdminController
 
   private
     def permitted_params
-        [:name, :value, :app_type_id, :user_id, :disabled]
+        [:name, :value, :app_type_id, :role_name, :user_id, :disabled]
     end
 end

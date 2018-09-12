@@ -20,6 +20,10 @@
     <%= f.text_field :value %>
   </div>
   <div class="form-group">
+    <%= f.label 'role override' %>
+    <%= f.text_field :role_name %>
+  </div>
+  <div class="form-group">
     <%= f.label 'user override' %>
     <%= f.select :user_id, active_user_options, include_blank: true %>
   </div>

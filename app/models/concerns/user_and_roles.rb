@@ -7,6 +7,15 @@ module UserAndRoles
 
     class_methods do
 
+      # Standard ordering clause for lists and evaluation of user and roles
+      def priority_order
+        "CASE
+WHEN user_id IS NOT NULL THEN user_id::varchar
+WHEN (role_name IS NOT NULL AND role_name <> '') THEN role_name
+ELSE user_id::varchar
+END"
+      end
+
       # Ordered scope of user and role conditions used in user access controls and app configurations
       # @param user [User] the user to apply the conditions to
       # @param alt_app_type [Admin::AppType | Integer] app type or ID for the app type to apply to if the user does not have a current app_type set
@@ -57,11 +66,7 @@ module UserAndRoles
       end
 
       def order_user_and_role
-        order("CASE
-WHEN user_id IS NOT NULL THEN user_id::varchar
-WHEN (role_name IS NOT NULL AND role_name <> '') THEN role_name
-ELSE user_id::varchar
-END")
+        order(self.priority_order)
       end
 
     end
