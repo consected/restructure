@@ -1,0 +1,13 @@
+<% if container_writable %>
+<!-- The fileinput-button span is used to style the file input field as button -->
+  <span class="fileinput-button btn btn-success<%= @directory_not_found ? ' disabled' : ''%>">
+    <i class="glyphicon glyphicon-plus"></i>
+    <span>files (or drag &amp; drop)</span>
+    <!-- The file input field used as target for the file upload widget -->
+    <input id="nfs-store-fileupload-<%=container_id%>" type="file" name="upload" class="nfs-store-fileupload <%= @directory_not_found ? 'hidden' : ''%>" multiple="true"/>
+  </span>
+  <input type="hidden" id="uploader_container_id" name="uploader[container_id]" value="<%= container_id %>">
+
+<% else %>
+  <span class="fileinput-button btn btn-success disabled">no upload available</span>
+<% end %>

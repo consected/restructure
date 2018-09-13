@@ -1,7 +1,7 @@
 PATH
   remote: ../nfs_store
   specs:
-    nfs_store (0.0.21)
+    nfs_store (0.0.24)
       activerecord-import
       jquery-fileupload-rails
       jquery-rails
