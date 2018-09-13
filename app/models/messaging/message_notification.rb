@@ -26,7 +26,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
   validate :item_type_valid?, if: :app_type
 
   scope :unhandled, -> { where status: nil }
-  scope :index, -> { limit 10 }
+  scope :index, -> { limit 20 }
 
   attr_accessor :generated_text, :disabled, :admin_id
 
@@ -108,7 +108,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
   def from_user_email
     res = super()
     return res if res
-    res = self.user.email
+    res = Settings::NotificationsFromEmail || self.user&.email
     self.from_user_email = res
     self.save
     res

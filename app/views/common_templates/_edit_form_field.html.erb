@@ -14,6 +14,7 @@
 
   if opt[:edit_as]
     curr_field_name = opt[:edit_as][:field_type] || curr_field_name
+    local_vars[:locals][:field_name] = curr_field_name
   end
 
   curr_field_name_sym = curr_field_name.to_sym

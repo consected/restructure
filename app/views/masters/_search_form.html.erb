@@ -64,6 +64,9 @@
 <span class="" data-sub-item="search_action" data-template="search-action-template"></span>
 
 <script>
+$(document).ready(function() {
+
+  window.setTimeout(function(){
 
   var panel = $('.searchable-report-panel .collapse.in');
   if(panel && panel.length == 1) {
@@ -87,4 +90,7 @@
   });
 
   $('#master-search-accordion').removeClass('loading-results');
+
+}, 1);
+});
 </script>

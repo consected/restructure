@@ -27,9 +27,13 @@ _fpa.utils.jump_to_linked_item = function(target, offset) {
   var rect = h.get(0).getBoundingClientRect();
   var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
   if(not_visible)
-      $.scrollTo(h, 200, {offset: offset});
+      _fpa.utils.scrollTo(h, 200, offset);
 
   return block;
+};
+
+_fpa.utils.scrollTo = function(el, height, offset) {
+  $.scrollTo(el, height, {offset: offset});
 };
 
 _fpa.utils.pluralize = function(str) {
@@ -154,6 +158,7 @@ _fpa.utils.ISOdatetoTimestamp = function(stre){
     return stre;
   }
 };
+
 // Typically returns m/d/yyyy
 _fpa.utils.YMDtoLocale = function(stre){
 
@@ -161,8 +166,11 @@ _fpa.utils.YMDtoLocale = function(stre){
     if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) || stre.length > 15){
         startTime = new Date(Date.parse(stre));
         startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
+        // This locale string includes time
+        // TODO: is this correct?
         var d = startTime.toLocaleString();
     } else {
+      // This locale string only includes the date
         var d = new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
     }
     if(d == 'Invalid Date') d = stre;
@@ -170,6 +178,7 @@ _fpa.utils.YMDtoLocale = function(stre){
     return d;
 };
 
+// Get locale string, only including the date and not the time portion
 Date.prototype.asLocale = function(){
     return this.toLocaleDateString(undefined, {timeZone: "UTC"});
 };

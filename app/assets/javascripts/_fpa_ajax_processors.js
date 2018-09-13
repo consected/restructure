@@ -31,6 +31,19 @@ _fpa.postprocessors = {
 
         $('#master_results_block').addClass('search-status-done');
 
+        if($('body').hasClass('user_page') && $('body').hasClass('show') && $('#master_results_block #results-accordion').length == 0) {
+          $('body').addClass('table-results');
+          $('html').css({overflow: 'hidden'});
+          _fpa.reports.window_scrolling();
+        }
+        else {
+          $('body').removeClass('table-results');
+          $('html').css({overflow: 'auto'});
+          _fpa.reports.reset_window_scrolling();
+
+        }
+
+
         // Allow easy default processing where not already performed by the postprocessor
         if(!has_postprocessor){
             _fpa.form_utils.format_block(block);
@@ -103,7 +116,7 @@ _fpa.postprocessors = {
           if(not_visible) {
             window.setTimeout(function() {
               if(!h.hasClass('prevent-scroll'))
-                $.scrollTo(h, 200, {offset: -50});
+                _fpa.utils.scrollTo(h, 200, -50);
             }, 300);
           }
 
@@ -139,7 +152,7 @@ _fpa.postprocessors = {
 
                 _fpa.form_utils.format_block($(this));
 
-                $.scrollTo($(this), 200, {offset:-50} );
+                _fpa.utils.scrollTo($(this), 200, -50);
 
                 $(this).off('shown.bs.collapse');
             });
@@ -215,7 +228,7 @@ _fpa.postprocessors = {
 
                 _fpa.postprocessors.extras_panel_handler($(this));
 
-                $.scrollTo($(this), 200, {offset:-50} );
+                _fpa.utils.scrollTo($(this), 200, -50);
 
                 $(this).off('shown.bs.collapse');
             });
@@ -287,13 +300,6 @@ _fpa.postprocessors = {
         _fpa.form_utils.format_block(block);
         if(d.update_action){
             var master_id = d.master_id;
-
-            // previously this was in here to handle scolling to updated data
-            // this now has a strange effect given that there are a lot of other
-            // panels showing in a master, before the player infos.
-            // Don't force this scroll to the top anymore
-            // if(!no_scroll)
-            //   $.scrollTo($('#master-'+ master_id), 250);
 
             // automatically open the trackers planel
             var t = '#trackers-' + master_id;

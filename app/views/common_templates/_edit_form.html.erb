@@ -149,10 +149,13 @@
             field_name = field_name.to_s
             field_name_sym = field_name.to_sym
 
-            col = form_object_instance.class.columns_hash[field_name]
-
-            raise FphsException.new "Column #{field_name} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
-            column_type = col.type
+            if field_name.start_with?('placeholder_')
+              column_type = :placeholder
+            else
+              col = form_object_instance.class.columns_hash[field_name]
+              raise FphsException.new "Column #{field_name} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
+              column_type = col.type
+            end
             local_vars = {locals: {
               form: form,
               field_name_sym: field_name_sym,

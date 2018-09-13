@@ -4,18 +4,19 @@ class Admin::MessageNotificationsController < AdminController
   protected
 
     def view_folder
-      'admin/common_templates'
+
     end
 
     def filters
       {
-        message_type: ['email'],
+        # message_type: ['email'],
+        app_type_id: Admin::AppType.all_by_name,
         status: ['IS NULL', Messaging::MessageNotification::StatusInProgress, Messaging::MessageNotification::StatusFailed, Messaging::MessageNotification::StatusComplete]
       }
     end
 
     def filters_on
-      [:message_type, :status]
+      [:app_type_id, :status]
     end
 
     def default_index_order

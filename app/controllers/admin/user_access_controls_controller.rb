@@ -5,7 +5,7 @@ class Admin::UserAccessControlsController < AdminController
   protected
 
     def default_index_order
-      "app_type_id asc, resource_type asc, translate(resource_name, '__', 'ZZZZ') asc, #{Admin::UserAccessControl::PermissionPriorityOrder}"
+      "app_type_id asc, resource_type asc, translate(resource_name, '__', 'ZZZZ') asc, #{Admin::UserAccessControl.priority_order}"
     end
 
     def filters

@@ -104,13 +104,13 @@ _fpa.postprocessors_reports = {
             $(this).parents('tr').first().addClass('item-selected');
           });
           $('td[data-col-type="master_id"]').on('click', function(){
-            window.open('/masters/'+$(this).html(), "msid");
+            window.open('/masters/'+$(this).html().trim(), "_blank");
             $('.item-selected').removeClass('item-selected');
             $(this).addClass('item-selected');
           }).addClass('hover-link');
 
           $('td[data-col-type="msid"]').on('click', function(){
-            window.open('/masters/'+$(this).html()+'?type=msid', "msid");
+            window.open('/masters/'+$(this).html().trim()+'?type=msid', "_blank");
             $('.item-selected').removeClass('item-selected');
             $(this).addClass('item-selected');
           }).addClass('hover-link');
@@ -205,7 +205,7 @@ _fpa.postprocessors_reports = {
         // Format the block to ensure dates and masked fields, etc work as expected
         _fpa.form_utils.format_block(row);
 
-        $.scrollTo(row, 200, {offset:-50});
+        _fpa.utils.scrollTo(row, 200, -50);
         // Setup the cancel button
         row.find('#report-edit-cancel').click(function(ev){
             ev.preventDefault();

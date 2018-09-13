@@ -16,12 +16,12 @@ if [ "$RAILS_ENV" == 'development' ]
 then
   # Connection details for the demo FPHS Zeus database
   export ZEUS_DB=fphs_demo
-  export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops
+  export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops,persnet
   export ZEUS_FPHS_DB_HOST=localhost
   export ZEUS_FPHS_DB_USER=fphsetl
   # Connection details for the demo AWS Elaine database
   export AWS_DB=fpa_development
-  export AWS_DB_SCHEMA=ml_app
+  export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
   export AWS_DB_HOST=localhost
   export AWS_DB_USER=fphsetl
 fi
@@ -30,7 +30,7 @@ if [ "$RAILS_ENV" == 'test' ]
 then
   # Connection details for the demo FPHS Zeus database
   export ZEUS_DB=fphs_demo
-  export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops
+  export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops,persnet
   export ZEUS_FPHS_DB_HOST=localhost
   export ZEUS_FPHS_DB_USER=fphsetl
   # Connection details for the remote AWS Elaine database
@@ -52,7 +52,7 @@ then
     export ZEUS_FPHS_DB_USER=fphs
     # Connection details for the remote AWS Elaine database for DEV-fphs
     export AWS_DB=ebdb
-    export AWS_DB_SCHEMA=ml_app,ipa_ops
+    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
     export AWS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
     export AWS_DB_USER=fphs
 
@@ -67,7 +67,7 @@ then
     export ZEUS_FPHS_DB_USER=fphsetl
     # Connection details for the remote AWS Elaine database for PROD-fphs
     export AWS_DB=fphs
-    export AWS_DB_SCHEMA=ml_app,ipa_ops
+    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
     export AWS_DB_HOST=fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com
     export AWS_DB_USER=fphsetl
   fi

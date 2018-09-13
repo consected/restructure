@@ -29,6 +29,13 @@ CREATE SCHEMA ml_app;
 
 
 --
+-- Name: persnet; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA persnet;
+
+
+--
 -- Name: testmybrain; Type: SCHEMA; Schema: -; Owner: -
 --
 
@@ -95,6 +102,40 @@ CREATE FUNCTION ipa_ops.log_activity_log_ipa_assignment_session_filestore_update
                       NEW.session_date,
                       NEW.session_time,
                       NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_ipa_ps_informant_detail_update(); Type: FUNCTION; Schema: ipa_ops; Owner: -
+--
+
+CREATE FUNCTION ipa_ops.log_ipa_ps_informant_detail_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO ipa_ps_informant_detail_history
+                  (
+                      master_id,
+                      informant_name,
+                      relationship_to_participant,
+                      contact_information_notes,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      ipa_ps_informant_detail_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.informant_name,
+                      NEW.relationship_to_participant,
+                      NEW.contact_information_notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -5750,6 +5791,591 @@ CREATE FUNCTION ml_app.update_player_contact_ranks(set_master_id integer, set_re
 
 
 --
+-- Name: activity_log_persnet_assignment_info_request_notification(integer); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.activity_log_persnet_assignment_info_request_notification(activity_id integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+        dl_users INTEGER[];
+        activity_record RECORD;
+        message_id INTEGER;
+        current_app_type_id INTEGER;
+    BEGIN
+
+        current_app_type_id := get_app_type_id_by_name('persnet');
+
+        dl_users := get_user_ids_for_app_type_role(current_app_type_id, 'pi');
+
+        SELECT * INTO activity_record FROM activity_log_persnet_assignments WHERE id = activity_id;
+
+        IF activity_record.persnet_assignment_id IS NOT NULL AND activity_record.extra_log_type = 'primary'
+        THEN
+
+          SELECT
+          INTO message_id
+            create_message_notification_email(
+              current_app_type_id,
+              activity_record.master_id,
+              activity_record.id,
+              'ActivityLog::PersnetAssignment'::VARCHAR,
+              activity_record.user_id,
+              dl_users,
+              'persnet notification layout'::VARCHAR,
+              'persnet pi notification content'::VARCHAR,
+              'New Personal Networks Info Request'::VARCHAR,
+              now()::TIMESTAMP
+            )
+          ;
+
+        END IF;
+        RETURN message_id;
+    END;
+$$;
+
+
+--
+-- Name: activity_log_persnet_assignment_insert_defaults(); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.activity_log_persnet_assignment_insert_defaults() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        DECLARE
+          found_persnet RECORD;
+          found_phone RECORD;
+        BEGIN
+
+            -- if there is no player contact phone set, try and set it
+            -- in case the sync from Zeus to Elaine happened between the time the
+            -- user opened the new form (with an empty drop down) and now.
+            -- This avoids missing the population of this field
+            IF NEW.select_record_from_player_contact_phones IS NULL THEN
+              SELECT * FROM player_contacts
+              INTO found_phone
+              WHERE master_id = NEW.master_id AND rec_type = 'phone'
+              ORDER BY rank desc
+              LIMIT 1;
+
+              IF found_phone.data is not null THEN
+                NEW.select_record_from_player_contact_phones := found_phone.data;
+              END IF;
+
+            END IF;
+
+
+            -- Generate the persnet_schema URL from the persnet ID
+            -- select * from persnet_assignments
+            -- into found_persnet
+            -- where master_id = NEW.master_id
+            -- limit 1;
+
+
+            -- IF found_persnet.persnet_id is not null THEN
+            --   NEW.results_link := ('https://persnet_schema.org/fphs/get_id.php?id=' || found_persnet.persnet_id::varchar);
+            -- END IF;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: activity_log_persnet_assignment_insert_notification(); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.activity_log_persnet_assignment_insert_notification() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+      message_id INTEGER;
+      to_user_ids INTEGER[];
+      num_primary_logs INTEGER;
+      current_app_type_id INTEGER;
+  BEGIN
+
+        current_app_type_id := get_app_type_id_by_name('persnet');
+
+        IF NEW.extra_log_type = 'contact_initiator' THEN
+
+            -- Get the most recent info request from the activity log records for this master_id
+            -- This gives us the user_id of the initiator of the request
+            select array_agg(user_id)
+            into to_user_ids
+            from
+            (select user_id
+            from activity_log_persnet_assignments
+            where
+              master_id = NEW.master_id
+              and extra_log_type = 'primary'
+            order by id desc
+            limit 1) t;
+
+            -- If nobody was set, send to all users in the RA role
+            IF to_user_ids IS NULL THEN
+              to_user_ids := get_user_ids_for_app_type_role(current_app_type_id, 'ra');
+            END IF;
+
+            SELECT
+            INTO message_id
+              create_message_notification_email(
+                current_app_type_id,
+                NEW.master_id,
+                NEW.id,
+                'ActivityLog::PersnetAssignment'::VARCHAR,
+                NEW.user_id,
+                to_user_ids,
+                'persnet notification layout'::VARCHAR,
+                'persnet message notification content'::VARCHAR,
+                'Personal Networks contact from PI'::VARCHAR,
+                now()::TIMESTAMP
+              )
+            ;
+
+            RETURN NEW;
+        END IF;
+
+        IF NEW.extra_log_type = 'respond_to_pi' THEN
+
+            -- Get the most recent contact_initiator from the activity log records for this master_id
+            -- This gives us the user_id of the PI making the Contact RA request
+            select array_agg(user_id)
+            into to_user_ids
+            from
+            (select user_id
+            from activity_log_persnet_assignments
+            where
+              master_id = NEW.master_id
+              and extra_log_type = 'contact_initiator'
+            order by id desc
+            limit 1) t;
+
+            -- If nobody was set, send to all users in the PI role
+            IF to_user_ids IS NULL THEN
+              to_user_ids := get_user_ids_for_app_type_role(current_app_type_id, 'pi');
+            END IF;
+
+
+            SELECT
+            INTO message_id
+              create_message_notification_email(
+                current_app_type_id,
+                NEW.master_id,
+                NEW.id,
+                'ActivityLog::PersnetAssignment'::VARCHAR,
+                NEW.user_id,
+                to_user_ids,
+                'persnet notification layout'::VARCHAR,
+                'persnet message notification content'::VARCHAR,
+                'Personal Networks contact from RA'::VARCHAR,
+                now()::TIMESTAMP
+              );
+
+            RETURN NEW;
+        END IF;
+
+        -- If this is a primary type (info request), and there are already
+        -- info request activities for this master
+        -- then send another info request notification
+        -- Don't do this otherwise, since the sync process is responsible for notifications
+        -- related to the initial info request only when the sync has completed
+        IF NEW.extra_log_type = 'primary' THEN
+          SELECT count(id)
+          INTO num_primary_logs
+          FROM activity_log_persnet_assignments
+          WHERE master_id = NEW.master_id AND id <> NEW.id AND extra_log_type = 'primary';
+
+          IF num_primary_logs > 0 THEN
+            PERFORM activity_log_persnet_assignment_info_request_notification(NEW.id);
+          END IF;
+        END IF;
+
+
+        RETURN NEW;
+    END;
+$$;
+
+
+--
+-- Name: create_all_remote_persnet_records(); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.create_all_remote_persnet_records() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  persnet_record RECORD;
+BEGIN
+
+  FOR persnet_record IN
+    SELECT * from temp_persnet_assignments
+  LOOP
+
+    PERFORM create_remote_persnet_record(
+      persnet_record.persnet_id,
+      (SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = persnet_record.master_id LIMIT 1),
+      ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = persnet_record.master_id)
+    );
+
+  END LOOP;
+
+  return 1;
+
+END;
+$$;
+
+
+--
+-- Name: create_remote_persnet_record(bigint, ml_app.player_infos, ml_app.player_contacts[]); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.create_remote_persnet_record(match_persnet_id bigint, new_player_info_record ml_app.player_infos, new_player_contact_records ml_app.player_contacts[]) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  found_persnet record;
+  player_contact record;
+  pc_length INTEGER;
+  found_pc record;
+  last_id INTEGER;
+  phone VARCHAR;
+BEGIN
+
+-- Find the persnet_assignments external identifier record for this master record and
+-- validate that it exists
+SELECT *
+INTO found_persnet
+FROM persnet_assignments persnet
+WHERE persnet.persnet_id = match_persnet_id
+LIMIT 1;
+
+-- At this point, if we found the above record, then the master record can be referred to with found_persnet.master_id
+-- We also create the new records setting the user_id to match that of the found_persnet record, rather than the original
+-- value from the source database, which probably would not match the user IDs in the remote database. The user_id of the
+-- found_persnet record is conceptually valid, since it is that user that has effectively kicked off the synchronization process
+-- and requested the new player_infos and player_contacts records be created.
+
+IF NOT FOUND THEN
+  RAISE EXCEPTION 'No persnet_assigments record found for persnet_ID --> %', (match_persnet_id);
+END IF;
+
+
+
+
+IF new_player_info_record.master_id IS NULL THEN
+  RAISE NOTICE 'No new_player_info_record found for persnet_ID --> %', (match_persnet_id);
+  RETURN NULL;
+ELSE
+
+  RAISE NOTICE 'Syncing player info record %', (new_player_info_record::varchar);
+
+  -- Create the player info record
+  INSERT INTO player_infos
+  (
+    master_id,
+    first_name,
+    last_name,
+    middle_name,
+    nick_name,
+    birth_date,
+    death_date,
+    user_id,
+    created_at,
+    updated_at,
+    contact_pref,
+    start_year,
+    rank,
+    notes,
+    contact_id,
+    college,
+    end_year,
+    source
+  )
+  SELECT
+    found_persnet.master_id,
+    new_player_info_record.first_name,
+    new_player_info_record.last_name,
+    new_player_info_record.middle_name,
+    new_player_info_record.nick_name,
+    new_player_info_record.birth_date,
+    new_player_info_record.death_date,
+    found_persnet.user_id,
+    new_player_info_record.created_at,
+    new_player_info_record.updated_at,
+    new_player_info_record.contact_pref,
+    new_player_info_record.start_year,
+    new_player_info_record.rank,
+    new_player_info_record.notes,
+    new_player_info_record.contact_id,
+    new_player_info_record.college,
+    new_player_info_record.end_year,
+    new_player_info_record.source
+
+    RETURNING id
+    INTO last_id
+    ;
+
+
+END IF;
+
+
+
+SELECT array_length(new_player_contact_records, 1)
+INTO pc_length;
+
+
+IF pc_length IS NULL THEN
+  RAISE NOTICE 'No new_player_contact_records found for persnet_ID --> %', (match_persnet_id);
+ELSE
+
+  RAISE NOTICE 'player contacts length %', (pc_length);
+
+  FOREACH player_contact IN ARRAY new_player_contact_records LOOP
+
+    SELECT * from player_contacts
+    INTO found_pc
+    WHERE
+      master_id = found_persnet.master_id AND
+      rec_type = player_contact.rec_type AND
+      data = player_contact.data
+    LIMIT 1;
+
+    IF found_pc.id IS NULL THEN
+
+      INSERT INTO player_contacts
+      (
+              master_id,
+              rec_type,
+              data,
+              source,
+              rank,
+              user_id,
+              created_at,
+              updated_at
+      )
+      SELECT
+          found_persnet.master_id,
+          player_contact.rec_type,
+          player_contact.data,
+          player_contact.source,
+          player_contact.rank,
+          found_persnet.user_id,
+          player_contact.created_at,
+          player_contact.updated_at
+      ;
+    END IF;
+
+  END LOOP;
+
+
+  SELECT id
+  INTO last_id
+  FROM activity_log_persnet_assignments
+  WHERE
+    persnet_assignment_id IS NOT NULL
+    AND (select_record_from_player_contact_phones is null OR select_record_from_player_contact_phones = '')
+    AND master_id = found_persnet.master_id
+    AND extra_log_type = 'primary'
+  ORDER BY id ASC
+  LIMIT 1;
+
+
+  -- Get the best phone number
+  SELECT data FROM player_contacts
+  INTO phone
+  WHERE rec_type='phone' AND rank is not null AND master_id = found_persnet.master_id
+  ORDER BY rank desc
+  LIMIT 1;
+
+  RAISE NOTICE 'best phone number %', (phone);
+  RAISE NOTICE 'AL ID %', (last_id);
+
+  -- Now update the activity log record.
+  UPDATE activity_log_persnet_assignments
+  SET
+    select_record_from_player_contact_phones = phone,
+    -- results_link = ('https://persnet_schema.org?demotestid=' || found_persnet.persnet_id::varchar),
+    updated_at = now()
+  WHERE
+    id = last_id;
+
+
+  -- Now send a notification to the PI
+  PERFORM activity_log_persnet_assignment_info_request_notification(last_id);
+
+
+END IF;
+
+return found_persnet.master_id;
+
+END;
+$$;
+
+
+--
+-- Name: find_new_remote_persnet_records(); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.find_new_remote_persnet_records() RETURNS TABLE(master_id integer, persnet_id bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  RETURN QUERY
+    SELECT distinct persnet.master_id, persnet.persnet_id
+    FROM masters m
+    LEFT JOIN player_infos pi
+    ON pi.master_id = m.id
+    INNER JOIN persnet_assignments persnet
+    ON m.id = persnet.master_id
+    INNER JOIN activity_log_persnet_assignments al
+    ON m.id = al.master_id AND al.extra_log_type = 'primary'
+    WHERE
+      pi.id IS NULL
+      AND persnet.persnet_id is not null
+      AND persnet.persnet_id <> 100000000
+      ;
+END;
+$$;
+
+
+--
+-- Name: get_app_type_id_by_name(character varying); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.get_app_type_id_by_name(app_type_name character varying) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    app_type_id INTEGER;
+  BEGIN
+
+    select id from app_types
+    into app_type_id
+    where name = app_type_name and (disabled is null or disabled = false)
+    order by id asc
+    limit 1;
+
+    RETURN app_type_id;
+
+  END;
+$$;
+
+
+--
+-- Name: get_user_ids_for_app_type_role(integer, character varying); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.get_user_ids_for_app_type_role(for_app_type_id integer, with_role_name character varying) RETURNS integer[]
+    LANGUAGE plpgsql
+    AS $$
+  DECLARE
+    user_ids INTEGER[];
+  BEGIN
+
+    select array_agg(ur.user_id)
+    from user_roles ur
+    inner join users u on ur.user_id = u.id
+    into user_ids
+    where
+      role_name = with_role_name AND
+      ur.app_type_id = for_app_type_id AND
+      (ur.disabled is null or ur.disabled = false) AND
+      (ur.disabled is null or u.disabled = false)
+    ;
+
+    RETURN user_ids;
+
+  END;
+$$;
+
+
+--
+-- Name: log_activity_log_persnet_assignment_update(); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.log_activity_log_persnet_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_persnet_assignment_history
+                  (
+                      master_id,
+                      persnet_assignment_id,
+                      select_record_from_player_contact_phones,
+                      return_call_availability_notes,
+                      questions_from_call_notes,
+                      results_link,
+                      select_result,
+                      pi_return_call_notes,
+                      completed_q1_no_yes,
+                      completed_teamstudy_no_yes,
+                      previous_contact_with_team_no_yes,
+                      previous_contact_with_team_notes,
+                      notes,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_persnet_assignment_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.persnet_assignment_id,
+                      NEW.select_record_from_player_contact_phones,
+                      NEW.return_call_availability_notes,
+                      NEW.questions_from_call_notes,
+                      NEW.results_link,
+                      NEW.select_result,
+                      NEW.pi_return_call_notes,
+                      NEW.completed_q1_no_yes,
+                      NEW.completed_teamstudy_no_yes,
+                      NEW.previous_contact_with_team_no_yes,
+                      NEW.previous_contact_with_team_notes,
+                      NEW.notes,
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_persnet_assignment_update(); Type: FUNCTION; Schema: persnet; Owner: -
+--
+
+CREATE FUNCTION persnet.log_persnet_assignment_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO persnet_assignment_history
+                  (
+                      master_id,
+                      persnet_id,
+                      user_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      persnet_assignment_table_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.persnet_id,
+                      NEW.user_id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: activity_log_ipa_assignment_adverse_event_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -7616,6 +8242,77 @@ ALTER SEQUENCE ipa_ops.ipa_ps_healths_id_seq OWNED BY ipa_ops.ipa_ps_healths.id;
 
 
 --
+-- Name: ipa_ps_informant_detail_history; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_ps_informant_detail_history (
+    id integer NOT NULL,
+    master_id integer,
+    informant_name character varying,
+    relationship_to_participant character varying,
+    contact_information_notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    ipa_ps_informant_detail_id integer
+);
+
+
+--
+-- Name: ipa_ps_informant_detail_history_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_ps_informant_detail_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_ps_informant_detail_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_ps_informant_detail_history_id_seq OWNED BY ipa_ops.ipa_ps_informant_detail_history.id;
+
+
+--
+-- Name: ipa_ps_informant_details; Type: TABLE; Schema: ipa_ops; Owner: -
+--
+
+CREATE TABLE ipa_ops.ipa_ps_informant_details (
+    id integer NOT NULL,
+    master_id integer,
+    informant_name character varying,
+    relationship_to_participant character varying,
+    contact_information_notes character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ipa_ps_informant_details_id_seq; Type: SEQUENCE; Schema: ipa_ops; Owner: -
+--
+
+CREATE SEQUENCE ipa_ops.ipa_ps_informant_details_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ipa_ps_informant_details_id_seq; Type: SEQUENCE OWNED BY; Schema: ipa_ops; Owner: -
+--
+
+ALTER SEQUENCE ipa_ops.ipa_ps_informant_details_id_seq OWNED BY ipa_ops.ipa_ps_informant_details.id;
+
+
+--
 -- Name: ipa_ps_initial_screening_history; Type: TABLE; Schema: ipa_ops; Owner: -
 --
 
@@ -8233,7 +8930,8 @@ CREATE TABLE ipa_ops.ipa_screenings (
     still_interested_blank_yes_no character varying,
     ineligible_notes character varying,
     eligible_notes character varying,
-    not_interested_notes character varying
+    not_interested_notes character varying,
+    requires_study_partner_blank_yes_no character varying
 );
 
 
@@ -9473,7 +10171,8 @@ CREATE TABLE ml_app.app_configurations (
     disabled boolean,
     admin_id integer,
     user_id integer,
-    app_type_id integer
+    app_type_id integer,
+    role_name character varying
 );
 
 
@@ -12937,6 +13636,166 @@ ALTER SEQUENCE ml_app.users_id_seq OWNED BY ml_app.users.id;
 
 
 --
+-- Name: activity_log_persnet_assignment_history; Type: TABLE; Schema: persnet; Owner: -
+--
+
+CREATE TABLE persnet.activity_log_persnet_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    persnet_assignment_id integer,
+    select_record_from_player_contact_phones character varying,
+    return_call_availability_notes character varying,
+    questions_from_call_notes character varying,
+    results_link character varying,
+    select_result character varying,
+    pi_return_call_notes character varying,
+    completed_q1_no_yes character varying,
+    completed_teamstudy_no_yes character varying,
+    previous_contact_with_team_no_yes character varying,
+    previous_contact_with_team_notes character varying,
+    notes character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_persnet_assignment_id integer
+);
+
+
+--
+-- Name: activity_log_persnet_assignment_history_id_seq; Type: SEQUENCE; Schema: persnet; Owner: -
+--
+
+CREATE SEQUENCE persnet.activity_log_persnet_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_persnet_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: persnet; Owner: -
+--
+
+ALTER SEQUENCE persnet.activity_log_persnet_assignment_history_id_seq OWNED BY persnet.activity_log_persnet_assignment_history.id;
+
+
+--
+-- Name: activity_log_persnet_assignments; Type: TABLE; Schema: persnet; Owner: -
+--
+
+CREATE TABLE persnet.activity_log_persnet_assignments (
+    id integer NOT NULL,
+    master_id integer,
+    persnet_assignment_id integer,
+    select_record_from_player_contact_phones character varying,
+    return_call_availability_notes character varying,
+    questions_from_call_notes character varying,
+    results_link character varying,
+    select_result character varying,
+    pi_return_call_notes character varying,
+    completed_q1_no_yes character varying,
+    completed_teamstudy_no_yes character varying,
+    previous_contact_with_team_no_yes character varying,
+    previous_contact_with_team_notes character varying,
+    notes character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_persnet_assignments_id_seq; Type: SEQUENCE; Schema: persnet; Owner: -
+--
+
+CREATE SEQUENCE persnet.activity_log_persnet_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_persnet_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: persnet; Owner: -
+--
+
+ALTER SEQUENCE persnet.activity_log_persnet_assignments_id_seq OWNED BY persnet.activity_log_persnet_assignments.id;
+
+
+--
+-- Name: persnet_assignment_history; Type: TABLE; Schema: persnet; Owner: -
+--
+
+CREATE TABLE persnet.persnet_assignment_history (
+    id integer NOT NULL,
+    master_id integer,
+    persnet_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    persnet_assignment_table_id integer
+);
+
+
+--
+-- Name: persnet_assignment_history_id_seq; Type: SEQUENCE; Schema: persnet; Owner: -
+--
+
+CREATE SEQUENCE persnet.persnet_assignment_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: persnet_assignment_history_id_seq; Type: SEQUENCE OWNED BY; Schema: persnet; Owner: -
+--
+
+ALTER SEQUENCE persnet.persnet_assignment_history_id_seq OWNED BY persnet.persnet_assignment_history.id;
+
+
+--
+-- Name: persnet_assignments; Type: TABLE; Schema: persnet; Owner: -
+--
+
+CREATE TABLE persnet.persnet_assignments (
+    id integer NOT NULL,
+    master_id integer,
+    persnet_id bigint,
+    user_id integer,
+    admin_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: persnet_assignments_id_seq; Type: SEQUENCE; Schema: persnet; Owner: -
+--
+
+CREATE SEQUENCE persnet.persnet_assignments_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: persnet_assignments_id_seq; Type: SEQUENCE OWNED BY; Schema: persnet; Owner: -
+--
+
+ALTER SEQUENCE persnet.persnet_assignments_id_seq OWNED BY persnet.persnet_assignments.id;
+
+
+--
 -- Name: tmbs; Type: TABLE; Schema: testmybrain; Owner: -
 --
 
@@ -13271,6 +14130,20 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_health_history ALTER COLUMN id SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY ipa_ops.ipa_ps_healths ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_ps_healths_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_detail_history ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_ps_informant_detail_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_details ALTER COLUMN id SET DEFAULT nextval('ipa_ops.ipa_ps_informant_details_id_seq'::regclass);
 
 
 --
@@ -14240,6 +15113,34 @@ ALTER TABLE ONLY ml_app.users ALTER COLUMN id SET DEFAULT nextval('ml_app.users_
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignment_history ALTER COLUMN id SET DEFAULT nextval('persnet.activity_log_persnet_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignments ALTER COLUMN id SET DEFAULT nextval('persnet.activity_log_persnet_assignments_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignment_history ALTER COLUMN id SET DEFAULT nextval('persnet.persnet_assignment_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignments ALTER COLUMN id SET DEFAULT nextval('persnet.persnet_assignments_id_seq'::regclass);
+
+
+--
 -- Name: id; Type: DEFAULT; Schema: testmybrain; Owner: -
 --
 
@@ -14604,6 +15505,22 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_health_history
 
 ALTER TABLE ONLY ipa_ops.ipa_ps_healths
     ADD CONSTRAINT ipa_ps_healths_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_ps_informant_detail_history_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_detail_history
+    ADD CONSTRAINT ipa_ps_informant_detail_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ipa_ps_informant_details_pkey; Type: CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_details
+    ADD CONSTRAINT ipa_ps_informant_details_pkey PRIMARY KEY (id);
 
 
 --
@@ -15679,6 +16596,38 @@ ALTER TABLE ONLY ml_app.users
 
 
 --
+-- Name: activity_log_persnet_assignment_history_pkey; Type: CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignment_history
+    ADD CONSTRAINT activity_log_persnet_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_persnet_assignments_pkey; Type: CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignments
+    ADD CONSTRAINT activity_log_persnet_assignments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: persnet_assignment_history_pkey; Type: CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignment_history
+    ADD CONSTRAINT persnet_assignment_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: persnet_assignments_pkey; Type: CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignments
+    ADD CONSTRAINT persnet_assignments_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: index_activity_log_ipa_assignment_adverse_events_on_ipa_assignm; Type: INDEX; Schema: ipa_ops; Owner: -
 --
 
@@ -16593,6 +17542,41 @@ CREATE INDEX index_ipa_ps_healths_on_master_id ON ipa_ops.ipa_ps_healths USING b
 --
 
 CREATE INDEX index_ipa_ps_healths_on_user_id ON ipa_ops.ipa_ps_healths USING btree (user_id);
+
+
+--
+-- Name: index_ipa_ps_informant_detail_history_on_ipa_ps_informant_detai; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX index_ipa_ps_informant_detail_history_on_ipa_ps_informant_detai ON ipa_ops.ipa_ps_informant_detail_history USING btree (ipa_ps_informant_detail_id);
+
+
+--
+-- Name: index_ipa_ps_informant_detail_history_on_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX index_ipa_ps_informant_detail_history_on_master_id ON ipa_ops.ipa_ps_informant_detail_history USING btree (master_id);
+
+
+--
+-- Name: index_ipa_ps_informant_detail_history_on_user_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX index_ipa_ps_informant_detail_history_on_user_id ON ipa_ops.ipa_ps_informant_detail_history USING btree (user_id);
+
+
+--
+-- Name: index_ipa_ps_informant_details_on_master_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX index_ipa_ps_informant_details_on_master_id ON ipa_ops.ipa_ps_informant_details USING btree (master_id);
+
+
+--
+-- Name: index_ipa_ps_informant_details_on_user_id; Type: INDEX; Schema: ipa_ops; Owner: -
+--
+
+CREATE INDEX index_ipa_ps_informant_details_on_user_id ON ipa_ops.ipa_ps_informant_details USING btree (user_id);
 
 
 --
@@ -18829,6 +19813,104 @@ CREATE UNIQUE INDEX unique_sub_process_and_id ON ml_app.protocol_events USING bt
 
 
 --
+-- Name: index_activity_log_persnet_assignment_history_on_activity_log_p; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_activity_log_persnet_assignment_history_on_activity_log_p ON persnet.activity_log_persnet_assignment_history USING btree (activity_log_persnet_assignment_id);
+
+
+--
+-- Name: index_activity_log_persnet_assignment_history_on_master_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_activity_log_persnet_assignment_history_on_master_id ON persnet.activity_log_persnet_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_persnet_assignment_history_on_persnet_assign; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_activity_log_persnet_assignment_history_on_persnet_assign ON persnet.activity_log_persnet_assignment_history USING btree (persnet_assignment_id);
+
+
+--
+-- Name: index_activity_log_persnet_assignment_history_on_user_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_activity_log_persnet_assignment_history_on_user_id ON persnet.activity_log_persnet_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_persnet_assignments_on_master_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_activity_log_persnet_assignments_on_master_id ON persnet.activity_log_persnet_assignments USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_persnet_assignments_on_persnet_assignment_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_activity_log_persnet_assignments_on_persnet_assignment_id ON persnet.activity_log_persnet_assignments USING btree (persnet_assignment_id);
+
+
+--
+-- Name: index_activity_log_persnet_assignments_on_user_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_activity_log_persnet_assignments_on_user_id ON persnet.activity_log_persnet_assignments USING btree (user_id);
+
+
+--
+-- Name: index_persnet_assignment_history_on_admin_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_persnet_assignment_history_on_admin_id ON persnet.persnet_assignment_history USING btree (admin_id);
+
+
+--
+-- Name: index_persnet_assignment_history_on_master_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_persnet_assignment_history_on_master_id ON persnet.persnet_assignment_history USING btree (master_id);
+
+
+--
+-- Name: index_persnet_assignment_history_on_persnet_assignment_table_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_persnet_assignment_history_on_persnet_assignment_table_id ON persnet.persnet_assignment_history USING btree (persnet_assignment_table_id);
+
+
+--
+-- Name: index_persnet_assignment_history_on_user_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_persnet_assignment_history_on_user_id ON persnet.persnet_assignment_history USING btree (user_id);
+
+
+--
+-- Name: index_persnet_assignments_on_admin_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_persnet_assignments_on_admin_id ON persnet.persnet_assignments USING btree (admin_id);
+
+
+--
+-- Name: index_persnet_assignments_on_master_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_persnet_assignments_on_master_id ON persnet.persnet_assignments USING btree (master_id);
+
+
+--
+-- Name: index_persnet_assignments_on_user_id; Type: INDEX; Schema: persnet; Owner: -
+--
+
+CREATE INDEX index_persnet_assignments_on_user_id ON persnet.persnet_assignments USING btree (user_id);
+
+
+--
 -- Name: activity_log_ipa_assignment_adverse_event_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
 --
 
@@ -19120,6 +20202,20 @@ CREATE TRIGGER ipa_ps_health_history_insert AFTER INSERT ON ipa_ops.ipa_ps_healt
 --
 
 CREATE TRIGGER ipa_ps_health_history_update AFTER UPDATE ON ipa_ops.ipa_ps_healths FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_ipa_ps_health_update();
+
+
+--
+-- Name: ipa_ps_informant_detail_history_insert; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER ipa_ps_informant_detail_history_insert AFTER INSERT ON ipa_ops.ipa_ps_informant_details FOR EACH ROW EXECUTE PROCEDURE ipa_ops.log_ipa_ps_informant_detail_update();
+
+
+--
+-- Name: ipa_ps_informant_detail_history_update; Type: TRIGGER; Schema: ipa_ops; Owner: -
+--
+
+CREATE TRIGGER ipa_ps_informant_detail_history_update AFTER UPDATE ON ipa_ops.ipa_ps_informant_details FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ipa_ops.log_ipa_ps_informant_detail_update();
 
 
 --
@@ -19956,6 +21052,48 @@ CREATE TRIGGER user_history_update AFTER UPDATE ON ml_app.users FOR EACH ROW WHE
 
 
 --
+-- Name: activity_log_persnet_assignment_history_insert; Type: TRIGGER; Schema: persnet; Owner: -
+--
+
+CREATE TRIGGER activity_log_persnet_assignment_history_insert AFTER INSERT ON persnet.activity_log_persnet_assignments FOR EACH ROW EXECUTE PROCEDURE persnet.log_activity_log_persnet_assignment_update();
+
+
+--
+-- Name: activity_log_persnet_assignment_history_update; Type: TRIGGER; Schema: persnet; Owner: -
+--
+
+CREATE TRIGGER activity_log_persnet_assignment_history_update AFTER UPDATE ON persnet.activity_log_persnet_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE persnet.log_activity_log_persnet_assignment_update();
+
+
+--
+-- Name: activity_log_persnet_assignment_insert_defaults; Type: TRIGGER; Schema: persnet; Owner: -
+--
+
+CREATE TRIGGER activity_log_persnet_assignment_insert_defaults BEFORE INSERT ON persnet.activity_log_persnet_assignments FOR EACH ROW EXECUTE PROCEDURE persnet.activity_log_persnet_assignment_insert_defaults();
+
+
+--
+-- Name: activity_log_persnet_assignment_insert_notification; Type: TRIGGER; Schema: persnet; Owner: -
+--
+
+CREATE TRIGGER activity_log_persnet_assignment_insert_notification AFTER INSERT ON persnet.activity_log_persnet_assignments FOR EACH ROW EXECUTE PROCEDURE persnet.activity_log_persnet_assignment_insert_notification();
+
+
+--
+-- Name: persnet_assignment_history_insert; Type: TRIGGER; Schema: persnet; Owner: -
+--
+
+CREATE TRIGGER persnet_assignment_history_insert AFTER INSERT ON persnet.persnet_assignments FOR EACH ROW EXECUTE PROCEDURE persnet.log_persnet_assignment_update();
+
+
+--
+-- Name: persnet_assignment_history_update; Type: TRIGGER; Schema: persnet; Owner: -
+--
+
+CREATE TRIGGER persnet_assignment_history_update AFTER UPDATE ON persnet.persnet_assignments FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE persnet.log_persnet_assignment_update();
+
+
+--
 -- Name: fk_activity_log_ipa_assignment_adverse_event_history_activity_l; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -20497,6 +21635,30 @@ ALTER TABLE ONLY ipa_ops.ipa_ps_health_history
 
 ALTER TABLE ONLY ipa_ops.ipa_ps_health_history
     ADD CONSTRAINT fk_ipa_ps_health_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_ipa_ps_informant_detail_history_ipa_ps_informant_details; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_detail_history
+    ADD CONSTRAINT fk_ipa_ps_informant_detail_history_ipa_ps_informant_details FOREIGN KEY (ipa_ps_informant_detail_id) REFERENCES ipa_ops.ipa_ps_informant_details(id);
+
+
+--
+-- Name: fk_ipa_ps_informant_detail_history_masters; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_detail_history
+    ADD CONSTRAINT fk_ipa_ps_informant_detail_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_ipa_ps_informant_detail_history_users; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_detail_history
+    ADD CONSTRAINT fk_ipa_ps_informant_detail_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
 --
@@ -21076,6 +22238,14 @@ ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_session_filestores
 
 
 --
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_details
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
 --
 
@@ -21344,6 +22514,14 @@ ALTER TABLE ONLY ipa_ops.ipa_adl_informant_screeners
 --
 
 ALTER TABLE ONLY ipa_ops.activity_log_ipa_assignment_session_filestores
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ipa_ops; Owner: -
+--
+
+ALTER TABLE ONLY ipa_ops.ipa_ps_informant_details
     ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
 
@@ -23204,10 +24382,122 @@ ALTER TABLE ONLY ml_app.tracker_history
 
 
 --
+-- Name: fk_activity_log_persnet_assignment_history_activity_log_persnet; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignment_history
+    ADD CONSTRAINT fk_activity_log_persnet_assignment_history_activity_log_persnet FOREIGN KEY (activity_log_persnet_assignment_id) REFERENCES persnet.activity_log_persnet_assignments(id);
+
+
+--
+-- Name: fk_activity_log_persnet_assignment_history_masters; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignment_history
+    ADD CONSTRAINT fk_activity_log_persnet_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_persnet_assignment_history_persnet_assignment_i; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignment_history
+    ADD CONSTRAINT fk_activity_log_persnet_assignment_history_persnet_assignment_i FOREIGN KEY (persnet_assignment_id) REFERENCES persnet.persnet_assignments(id);
+
+
+--
+-- Name: fk_activity_log_persnet_assignment_history_users; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignment_history
+    ADD CONSTRAINT fk_activity_log_persnet_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_persnet_assignment_history_admins; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignment_history
+    ADD CONSTRAINT fk_persnet_assignment_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_persnet_assignment_history_masters; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignment_history
+    ADD CONSTRAINT fk_persnet_assignment_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_persnet_assignment_history_persnet_assignments; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignment_history
+    ADD CONSTRAINT fk_persnet_assignment_history_persnet_assignments FOREIGN KEY (persnet_assignment_table_id) REFERENCES persnet.persnet_assignments(id);
+
+
+--
+-- Name: fk_persnet_assignment_history_users; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignment_history
+    ADD CONSTRAINT fk_persnet_assignment_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0admin FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.persnet_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignments
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: persnet; Owner: -
+--
+
+ALTER TABLE ONLY persnet.activity_log_persnet_assignments
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (persnet_assignment_id) REFERENCES persnet.persnet_assignments(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO ml_app,ipa_ops,testmybrain;
+SET search_path TO ml_app,ipa_ops,testmybrain,persnet;
 
 INSERT INTO schema_migrations (version) VALUES ('20150602181200');
 
@@ -23604,4 +24894,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180822093147');
 INSERT INTO schema_migrations (version) VALUES ('20180830144523');
 
 INSERT INTO schema_migrations (version) VALUES ('20180831132605');
+
+INSERT INTO schema_migrations (version) VALUES ('20180911153518');
 

@@ -25,6 +25,18 @@ _fpa.show_if.methods = {
       }
     }
 
+    window.setTimeout(function() {
+      var els = $('.dialog-made-visible');
+      if(!els.length) return;
+      var wh = $(window).height();
+      var rect = els.first().get(0).getBoundingClientRect();
+      var not_visible = !(rect.top >= 0 && rect.top <= wh/2);
+      if(not_visible) {
+        $(document).scrollTo(els.first(), 200, {offset: -0.2 * wh});
+      }
+      els.removeClass('dialog-made-visible');
+    }, 250);
+
   },
 
   show_item: function(block, data, form_name, field_name, form_key) {
@@ -52,8 +64,12 @@ _fpa.show_if.methods = {
         var prev_vis = els.is(':visible');
         els.show();
         if(!prev_vis) {
-          var btn = els.find('.in-form-dialog-btn:visible')
+          var btn = els.find('.in-form-dialog-btn:visible');
+
           btn.click();
+
+          els.filter('.dialog-before').first().addClass('dialog-made-visible');
+
         }
       }
       else {
