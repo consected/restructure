@@ -1,2 +1,0 @@
-<span class="bem-class-title"><%= download.title.present? ? download.title : '(no title)'  %></span>
-<%=link_to "", nfs_store.edit_classification_path(@container.id, download_id: download.id, retrieval_type: download.class.retrieval_type), class: 'glyphicon glyphicon-pencil', data: {remote: true, container_id: @container_id}%>

@@ -33,7 +33,6 @@ fphs-scripts/upversion.rb
 git add .
 
 echo Commit the changes
-git status
 git commit -a -m "Build for deployment"
 
 echo Ready to deploy? Hit enter to continue
