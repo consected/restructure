@@ -11,17 +11,7 @@ RSpec.describe Master, type: :model do
 
     create_data_set
 
-    ac = Admin::AppConfiguration.where(app_type: @user.app_type, name: 'create master with').first
-
-    if ac
-      ac.value = 'player_info'
-      ac.current_admin = @admin
-      ac.save!
-    else
-      Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
-    end
-
-
+    add_app_config @user.app_type, 'create master with', 'player_info'
 
   end
 

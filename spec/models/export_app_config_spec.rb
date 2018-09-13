@@ -45,12 +45,9 @@ RSpec.describe "Export an app configuration", type: :model do
 
 
     # Set some app configurations
-    unless @app_type.app_configurations.active.where(name: 'create master with').first
-      Admin::AppConfiguration.create!(app_type: @app_type, name: 'create master with', value: 'player_info', current_admin: @admin)
-    end
-    unless @app_type.app_configurations.active.where(name: 'hide pro info', user: @user).first
-      Admin::AppConfiguration.create!(app_type: @app_type, name: 'hide pro info', value: 'true', user: @user, current_admin: @admin)
-    end
+    add_app_config @app_type, 'create master with', 'player_info'
+    add_app_config @app_type, 'hide pro info', 'true', user: @user
+    add_app_config @app_type, 'menu research label', 'val1', role_name: 'role 1'
 
     # Set access to an activity log
     @activity_log = ActivityLog.active.first
@@ -144,7 +141,7 @@ RSpec.describe "Export an app configuration", type: :model do
     expect(res.label).to eq 'Test App 12'
 
     acs = Admin::AppConfiguration.where app_type: res
-    expect(acs.length).to eq 2
+    expect(acs.length).to eq 3
 
     ac = Admin::AppConfiguration.where(app_type: res, name: 'create master with').first
     expect(ac.value).to eq 'player_info'
@@ -152,6 +149,11 @@ RSpec.describe "Export an app configuration", type: :model do
     ac = Admin::AppConfiguration.where(app_type: res, name: 'hide pro info').first
     expect(ac.value).to eq 'true'
     expect(ac.user.id).to eq @user.id
+
+    ac = Admin::AppConfiguration.where(app_type: res, name: 'menu research label').first
+    expect(ac.value).to eq 'val1'
+    expect(ac.user).to be nil
+    expect(ac.role_name).to eq 'role 1'
 
     expect(@user.has_access_to? :create, :table, :player_infos).to be_truthy
 

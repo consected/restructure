@@ -1,0 +1,56 @@
+<div class="data-results container" data-subscription="admin-list" >
+  <div data-result="admin-list">
+<h1>Message Notifications</h1>
+<p>
+  <%= show_filters %>
+</p>
+<div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
+
+
+<table class="table tablesorter admin-list">
+  <thead>
+    <tr>
+      <th>Message</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% objects_instance.each do |list_item| %>
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+        <td>
+          <table>
+            <tr><td>from:</td><td><%= list_item.from_user_email %></td></tr>
+            <tr><td>to:</td><td><%= list_item.recipient_emails.join('; ') %></td></tr>
+            <tr><td>subject:</td><td><%= list_item.subject %></td></tr>
+            <tr><td>sent:</td><td data-format-date-local="true"><%= list_item.updated_at %></td></tr>
+          </table>
+          <p><button class="btn btn-small" data-toggle="unhide" data-target="#extra-attributes-<%=list_item.id%>">additional fields</button></p>
+          <table class="extra-attributes hidden" id="extra-attributes-<%=list_item.id%>">
+            <% %w(id app_type master_id user_id item message_type layout_template_name content_template_name data recipient_user_ids status created_at).each do |i| %>
+            <tr><td><%= i.humanize %>:</td><td><%= list_item.send(i) %></td></tr>
+            <% end %>
+          </table>
+          <iframe id="message-iframe-<%= list_item.id %>" src='javascript:void(0)' srcdoc="" style="width:100%; height: 400px;">
+          </iframe>
+
+          <script id="message-content-<%= list_item.id %>" class="hidden" type="x-html">
+            <%= list_item.generate_view.gsub('<head>', '<head><base target="_blank" />').html_safe %>
+          </script>
+          <script>
+          window.setTimeout(function() {
+            var c = $('#message-content-<%=list_item.id%>');
+            var html = c.html();
+
+            $('#message-iframe-<%=list_item.id%>').attr('srcdoc', html);
+          }, 100);
+          </script>
+
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%=  render partial: 'admin_handler/index_actions'  %>
+  </div>
+</div>

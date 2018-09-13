@@ -87,4 +87,22 @@ module ModelSupport
 
   end
 
+  def add_app_config app_type, name, value, user: nil, role_name: nil
+    @admin ||= create_admin
+
+    cond = {name: name}
+    cond[:role_name] = role_name if role_name
+    cond[:user] = user if user
+
+    ac = app_type.app_configurations.active.where(cond).first
+    if ac
+      cond[:current_admin] = @admin
+      ac.update! cond
+    else
+      cond = cond.merge(current_admin: @admin, app_type: app_type, value: value)
+      Admin::AppConfiguration.create! cond
+    end
+
+  end
+  
 end

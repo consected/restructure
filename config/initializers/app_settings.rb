@@ -20,4 +20,10 @@ class Settings
     use_dictionary: !Rails.env.test?
   }.freeze
 
+  # Force a 'from email' address for notifications
+  # If not set (nil), then the current user email address will be used,
+  # which may fail on some email servers if the domain name does not match
+  # a verified domain name.
+  NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
+
 end
