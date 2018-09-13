@@ -13612,7 +13612,8 @@ CREATE TABLE ml_app.users (
     locked_at timestamp without time zone,
     disabled boolean,
     admin_id integer,
-    app_type_id integer
+    app_type_id integer,
+    authentication_token character varying(30)
 );
 
 
@@ -19750,6 +19751,13 @@ CREATE INDEX index_users_on_app_type_id ON ml_app.users USING btree (app_type_id
 
 
 --
+-- Name: index_users_on_authentication_token; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX index_users_on_authentication_token ON ml_app.users USING btree (authentication_token);
+
+
+--
 -- Name: index_users_on_email; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -24896,4 +24904,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180830144523');
 INSERT INTO schema_migrations (version) VALUES ('20180831132605');
 
 INSERT INTO schema_migrations (version) VALUES ('20180911153518');
+
+INSERT INTO schema_migrations (version) VALUES ('20180913142103');
 

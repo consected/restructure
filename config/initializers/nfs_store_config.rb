@@ -79,6 +79,17 @@ end
 ActiveSupport.on_load(:nfs_store_container_list_controller) do
 
   module NfsStore
+
+    class ApplicationController < ActionController::Base
+      protect_from_forgery with: :exception, if: Proc.new { |c| c.params[:user_token].blank? }
+      protect_from_forgery with: :null_session, if: Proc.new { |c| !c.params[:user_token].blank? }
+
+      acts_as_token_authentication_handler_for User
+      before_action :authenticate_user!
+
+    end
+
+
     class ContainerListController < NfsStoreController
       include ModelNaming
       include ControllerUtils
@@ -87,6 +98,17 @@ ActiveSupport.on_load(:nfs_store_container_list_controller) do
       include MasterHandler
       include NfsStore::OverrideContainerListController
     end
+
+    class FsBaseController < ApplicationController
+      include AppExceptionHandler
+      include FsExceptionHandler
+      protect_from_forgery with: :exception, if: Proc.new { |c| c.params[:user_token].blank? }
+      protect_from_forgery with: :null_session, if: Proc.new { |c| !c.params[:user_token].blank? }
+
+      acts_as_token_authentication_handler_for User
+
+    end
+
   end
 
 end
