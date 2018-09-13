@@ -27,13 +27,13 @@ gem 'delayed_job_active_record'
 gem 'daemons'
 
 
-gem 'nfs_store', path: '../nfs_store'
+# gem 'nfs_store', path: '../nfs_store'
 # gem 'nfs_store', '0.0.1', path: '.'
 
 
 
 gem 'activerecord-import'
-
+gem 'mime-types'
 
 gem 'crass', '~> 1.0.4'
 

@@ -108,7 +108,7 @@ module Filestore
     private
 
       def secure_params
-        params.require("manage_#{object_name}".to_sym).permit(*permitted_params)
+        params.require("nfs_store_manage_#{object_name}".to_sym).permit(*permitted_params)
       end
 
 

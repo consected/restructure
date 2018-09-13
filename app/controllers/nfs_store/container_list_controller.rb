@@ -1,9 +1,29 @@
 module NfsStore
-  module OverrideContainerListController
+  class ContainerListController < NfsStoreController
+    include ModelNaming
+    include ControllerUtils
+    include AppExceptionHandler
+    include UserActionLogging
+    include MasterHandler
+    include InNfsStoreContainer
 
-    extend ActiveSupport::Concern
+    def show
 
-    included do
+      begin
+        if @container.readable?
+          @downloads = Browse.list_files_from @container
+          # Prep a download object to allow selection of downloads in the browse list
+          @download = Download.new(container: @container)
+        end
+
+      rescue FsException::NotFound
+        @directory_not_found = true
+      end
+      render partial: 'browse_list'
+
+    end
+
+    protected
 
       def find_container
         if action_name.in? ['create', 'update']
@@ -16,10 +36,6 @@ module NfsStore
         @master.current_user ||= current_user
         @container
       end
-
-    end
-
-    protected
 
 
       # return the class for the current item

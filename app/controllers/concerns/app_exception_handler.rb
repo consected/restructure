@@ -114,11 +114,20 @@ module AppExceptionHandler
         flash[:danger] = msg[0..2000]
         return true
       end
+      errors = { error: [msg] }
+      response.headers['X-Upload-Errors'] = errors.to_json
+
       respond_to do |type|
-        type.html { render 'layouts/error_page', locals: {text: msg, status: code}, status: code }
-        type.json  { render :json => {message: msg}, status: code }
+        type.html {
+          render 'layouts/error_page', locals: {text: msg, status: code}, status: code
+        }
+        type.json  {
+          render :json => {message: msg}, status: code
+        }
         # For some errors the request suddenly gets interpreted as Javascript and breaks the errors on the front end
-        type.js  { render :text => msg, status: code, content_type: 'text/plain'  }
+        type.js  {
+          render :text => msg, status: code, content_type: 'text/plain'
+        }
         # special handling for CSV failures as they open new windows
         flash[:danger] = msg[0..2000]
         type.csv { redirect_to child_error_reporter_path }

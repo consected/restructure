@@ -83,7 +83,14 @@ Rails.application.routes.draw do
   devise_for :users, :skip => [:registrations]
 
 
-  mount NfsStore::Engine, at: "/nfs_store"
+  #mount NfsStore::Engine, at: "/nfs_store"
+  namespace :nfs_store do
+    resources :browse, only: :show
+    resources :container_list, only: :show
+    resources :chunk, :only => [:create, :show]
+    resources :downloads, :only => [:show, :create]
+    resources :classification, only: [:edit, :create]
+  end
 
   as :admin do
     get 'admins/edit' => 'devise/registrations#edit', :as => 'edit_admin_registration'
