@@ -1,0 +1,11 @@
+<div class="container-heading-block">
+  <h4 class="container-name"><%=container_label%></h4>
+  <span class="container-id-label">ID <%=container_id%></span>
+  <%= link_to "", "/nfs_store/container_list/#{container_id}", class: "refresh-container-list glyphicon glyphicon-refresh", title: "refresh list", data: { remote: "true", container_id: container_id } %>
+  <p class="container-meta-controls">
+    <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-none" value="" class="ff" checked="checked"/> <label for="container-meta-controls-<%=container_id%>-none">no details</label>
+    <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-meta" value="meta" class="ff" /> <label for="container-meta-controls-<%=container_id%>-meta">file metadata</label>
+    <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-classifications" value="classifications" class="ff" /> <label for="container-meta-controls-<%=container_id%>-classifications">classifications</label>
+
+  </p>
+</div>
