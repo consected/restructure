@@ -46,9 +46,15 @@ module StandardAuthentication
     unlock_access!
     generate_password
   end
+
   def new_password
     @new_password
   end
+
+  def new_token
+    @new_token
+  end
+
 
   def disable!
     self.disabled = true
@@ -89,6 +95,9 @@ module StandardAuthentication
         Rails.logger.info "Took #{i} times to make password"
         puts "Took #{i} times to make password"
       end
+
+      @new_token = Devise.friendly_token(30)
+      self.authentication_token = @new_token
 
       @new_password = generated_password
       self.password = generated_password

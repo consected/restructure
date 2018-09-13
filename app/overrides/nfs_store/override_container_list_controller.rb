@@ -4,9 +4,6 @@ module NfsStore
     extend ActiveSupport::Concern
 
     included do
-      before_action :prevent_cache
-      before_action :authenticate_user!
-      protect_from_forgery with: :exception
 
       def find_container
         if action_name.in? ['create', 'update']

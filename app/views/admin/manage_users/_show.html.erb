@@ -1,6 +1,9 @@
-<div class="admin-edit-form alert" role="alert">  
+<div class="admin-edit-form alert" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       <p>Email: <%= @user.email %></p>
-      <% if @user.new_password %><p>New password: <%= @user.new_password %> </p><% end %>
+      <% if @user.new_password %>
+      <p>New password: <%= @user.new_password %> </p>
+      <p>New token: <%= @user.new_token %> </p>
+      <% end %>
       <p>Disabled:<%=!!@user.disabled%></p>
     </div>

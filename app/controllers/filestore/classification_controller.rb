@@ -1,10 +1,6 @@
 module Filestore
   class ClassificationController < UserBaseController
 
-    protect_from_forgery with: :exception
-    before_action :authenticate_user!
-    before_action :prevent_cache
-
     include NfsStore::InNfsStoreContainer
     include MasterHandler
 

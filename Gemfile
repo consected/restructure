@@ -9,6 +9,8 @@ gem 'jquery-rails'
 gem 'devise'
 gem 'strong_password', '~> 0.0.5'
 
+gem 'simple_token_authentication', '~> 1.0'
+
 gem 'dalli'
 
 gem 'country_select'

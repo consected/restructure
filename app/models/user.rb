@@ -3,6 +3,7 @@ class User < ActiveRecord::Base
   include AdminHandler
   include StandardAuthentication
 
+  acts_as_token_authenticatable
   devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
 
   belongs_to :admin
