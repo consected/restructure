@@ -13,6 +13,7 @@ module NfsStore
 
       @download = Download.new container: @container
       @master = @container.master
+      @id = @container.id
       retrieved_file = @download.retrieve_file_from id, retrieval_type
       if retrieved_file
         @download.save!
@@ -36,6 +37,7 @@ module NfsStore
 
       @download = Download.new container: @container, multiple_items: true
       @master = @container.master
+      @id = @container.id
       retrieved_files = @download.retrieve_files_from selected_items_info
       if retrieved_files&.length > 0
         filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"

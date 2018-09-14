@@ -16,6 +16,9 @@ module NfsStore
       end
 
       if @upload
+        @master = @upload.container.master
+        @id = @upload.container.id
+
         render json: {
           result: 'found',
           completed: @upload.completed,
@@ -41,6 +44,8 @@ module NfsStore
                             relative_path: params[:relative_path]
 
       if @upload
+        @master = @upload.container.master
+        @id = @upload.container.id
         @upload.consume_chunk upload: chunk, headers: request.headers, chunk_hash: params[:chunk_hash]
       else
         raise FsException::Upload.new "Upload could not be initialized"
@@ -66,5 +71,13 @@ module NfsStore
         end
       end
     end
+
+    private
+
+
+      def no_action_log
+        action_name == 'show' && !@upload
+      end
+
   end
 end

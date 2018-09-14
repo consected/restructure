@@ -1,6 +1,5 @@
 module NfsStore
-  class FsBaseController < ApplicationController
-    include AppExceptionHandler
+  class FsBaseController < UserBaseController
     include FsExceptionHandler
 
   end

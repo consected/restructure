@@ -38,6 +38,12 @@ class Admin < ActiveRecord::Base
     email
   end
 
+  def authentication_token=_
+  end
+
+  def authentication_token
+  end
+
   protected
 
     def unlock_account
