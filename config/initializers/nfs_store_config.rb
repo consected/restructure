@@ -20,20 +20,24 @@ ActiveSupport.on_load(:nfs_store_config) do
     end
   end
 
-  raise FsException::Config.new "nfs_store_directory not set" if self.nfs_store_directory.blank?
-  raise FsException::Config.new "temp_directory not set" if self.temp_directory.blank?
-  raise FsException::Config.new "group_id_range not set" if self.group_id_range.blank?
-  raise FsException::Config.new "containers_dirname not set" if self.containers_dirname.nil?
+  if self.nfs_store_directory.blank?
+    Rails.logger.info "NFS Store directory not set. Ignoring the rest of the configuration"
+  else
 
-  ares = Kernel.system 'which archivemount'
-  raise FsException::Config.new "archivemount not in the path" unless ares
+    raise FsException::Config.new "temp_directory not set" if self.temp_directory.blank?
+    raise FsException::Config.new "group_id_range not set" if self.group_id_range.blank?
+    raise FsException::Config.new "containers_dirname not set" if self.containers_dirname.nil?
 
-  raise FsException::Config.new "No App Type available" unless Admin::AppType.first
+    ares = Kernel.system 'which archivemount'
+    raise FsException::Config.new "archivemount not in the path" unless ares
 
-  unless File.exist? self.temp_directory
-    Rails.logger.info "Making the tmp upload directory"
-    FileUtils.mkdir_p self.temp_directory
+    raise FsException::Config.new "No App Type available" unless Admin::AppType.first
+
+    unless File.exist? self.temp_directory
+      Rails.logger.info "Making the tmp upload directory"
+      FileUtils.mkdir_p self.temp_directory
+    end
+
+    raise FsException::Config.new "action_dispatch.x_sendfile_header not set in production.rb" if Rails.env.production? && ! Rails.configuration.action_dispatch.x_sendfile_header
   end
 end
-
-raise FsException::Config.new "action_dispatch.x_sendfile_header not set in production.rb" if Rails.env.production? && ! Rails.configuration.action_dispatch.x_sendfile_header
