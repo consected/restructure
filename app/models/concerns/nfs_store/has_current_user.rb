@@ -10,7 +10,11 @@ module NfsStore
       # @param user [User] the user accessing the container
       # @return [NfsStore::Manage::Container] the container
       def open_container id:, user:
-        id = id.to_i if id
+        if id.is_a? NfsStore::Manage::Container
+          id = id.id
+        else
+          id = id.to_i
+        end
 
         raise FsException::Action.new "container id must be set" unless id && id > 0
         raise FsException::Action.new "user must be set" unless user

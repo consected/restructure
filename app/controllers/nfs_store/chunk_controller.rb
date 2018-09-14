@@ -10,7 +10,7 @@ module NfsStore
 
       result = 'not found'
       begin
-        @upload = Upload.find_upload container, file_hash, file_name, path: relative_path
+        @upload = Upload.find_upload container, file_hash, file_name, current_user, path: relative_path
       rescue FsException::Upload => e
         result = "cannot resume: #{e.inspect}"
       end

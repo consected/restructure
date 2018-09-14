@@ -31,11 +31,14 @@ module NfsStore
     # @param file_name [String] original filename of the file
     # @param completed [true, false, nil] if not nil filter by whether the upload was completed or not
     # @return [Upload, nil]
-    def self.find_upload container, file_hash, file_name, completed: nil, path: nil
+    def self.find_upload container, file_hash, file_name, user, completed: nil, path: nil
       conditions = {container: container, file_hash: file_hash, file_name: file_name}
       conditions[:completed] = completed unless completed.nil?
       path = NfsStore::Manage::Filesystem.clean_path(path)
       conditions[:path] = path
+
+      # Test the container is accessible
+      Browse.open_container(id: container, user: user)
 
       upload = Upload.where(conditions).order(id: :desc).first
       if upload
@@ -71,12 +74,12 @@ module NfsStore
     # @return [Upload] the existing or new Upload object
     def self.init container_id:, file_hash:, file_name:, content_type:, user:, relative_path: nil
 
-      container = Manage::Container.find(container_id)
+      container = Browse.open_container(id: container_id, user: user)
       #  Ensure the relative path is nil in case it is just an empty string
       relative_path = nil if relative_path.blank? || relative_path == '.'
 
       begin
-        me = find_upload container, file_hash, file_name, completed: false, path: relative_path
+        me = find_upload container, file_hash, file_name, user, completed: false, path: relative_path
       rescue FsException::Upload
         Rails.logger.info "Continuing with a new upload by resetting incomplete chunk files"
         # Cleanup happens in #initialize
