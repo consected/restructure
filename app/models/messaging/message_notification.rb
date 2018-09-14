@@ -160,7 +160,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
     def item_type_valid?
 
       res = item_type.constantize rescue nil
-      errors.add :item_type, 'is not a valid class name' unless res
+      errors.add :item_type, "is not a valid class name: '#{item_type}'" unless res
 
     end
 end

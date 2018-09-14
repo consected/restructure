@@ -53,7 +53,7 @@ then
   BASEDIR='.'
   SCRDIR=${BASEDIR}
 else
-  BASEDIR=/FPHS/data/persnet-sync
+  BASEDIR=/FPHS/data/persnet/sync-process/persnet-sync
   SCRDIR=${BASEDIR}/scripts
 fi
 
