@@ -13,12 +13,12 @@ export DB_PASSWORD=grownPelicanOrangeHeptathalon
 export DB_USERNAME=fphs
 export DB_HOST=aaefcispocyk5n.c9dljdsduksr.us-east-1.rds.amazonaws.com
 
-echo Building nfs_store gem
-cd ../nfs_store
-./build.sh
-git add .
-git commit -a -m "New release"
-cd -
+# echo Building nfs_store gem
+# cd ../nfs_store
+# ./build.sh
+# git add .
+# git commit -a -m "New release"
+# cd -
 
 echo Bundling
 bundle install --no-deployment
