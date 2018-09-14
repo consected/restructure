@@ -75,4 +75,4 @@ FPHS_POSTGRESQL_PORT=5432 \
 FPHS_POSTGRESQL_SCHEMA="ipa_ops,ml_app,persnet"
 
 
-#eb deploy $EBENV
+eb deploy $EBENV
