@@ -1,6 +1,7 @@
 CREATE TEMPORARY TABLE temp_persnet_assignments (
     master_id integer,
-    persnet_id bigint
+    persnet_id bigint,
+    container_id integer
 );
 
 -- variable substitution does not work for the filename

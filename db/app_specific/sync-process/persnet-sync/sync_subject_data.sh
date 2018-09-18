@@ -52,9 +52,13 @@ if [ "$RAILS_ENV" == 'development' ] || [ "$EBENV" == 'DEV-fphs' ]
 then
   BASEDIR='.'
   SCRDIR=${BASEDIR}
+  export PERSNET_PDF_DIR=${BASEDIR}/testfiles
+  export upload_app_type=28
 else
   BASEDIR=/FPHS/data/persnet/sync-process/persnet-sync
   SCRDIR=${BASEDIR}/scripts
+  export PERSNET_PDF_DIR=/FPHS/data/persnet/files
+  export upload_app_type=3
 fi
 
 WORKINGDIR=${BASEDIR}/tmp
@@ -117,6 +121,26 @@ then
 else
   log "Number of records to transfer: $LINECOUNT"
 fi
+
+
+#
+# For each transferred item, pick up its PDF file and save it in the appropriate container
+#
+lineno=0
+while read l
+do
+  if [ "$lineno" != '0' ]
+  then
+    export persnet_id=$(echo "$l"  | tr "," "\n" | head -2 | tail -1)
+    export container_id=$(echo "$l"  | tr "," "\n" | tail -1)
+    pdf_filename=${PERSNET_PDF_DIR}/${persnet_id}_persnet.pdf
+    log "transferring $pdf_filename to filestore container $container_id"
+    upload_filename=${persnet_id}_persnet.pdf \
+    upload_file="${pdf_filename}" \
+    ${SCRDIR}/upload-to-filestore.sh
+  fi
+  lineno=$((lineno + 1))
+done < $PERSNET_IDS_FILE
 
 
 

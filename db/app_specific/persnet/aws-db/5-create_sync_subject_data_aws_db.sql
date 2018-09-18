@@ -10,15 +10,17 @@ set search_path=persnet,ml_app;
 -- Find the persnet IDs that
 -- are not null or the default value of 100 000 000
 -- have a master record without a matching player_infos record
+-- Also return the associated filestore container if one exists
 CREATE OR REPLACE FUNCTION find_new_remote_persnet_records() RETURNS TABLE (
   master_id integer,
-  persnet_id bigint
+  persnet_id bigint,
+  container_id integer
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
   RETURN QUERY
-    SELECT distinct persnet.master_id, persnet.persnet_id
+    SELECT distinct persnet.master_id, persnet.persnet_id, mr.to_record_id container_id
     FROM masters m
     LEFT JOIN player_infos pi
     ON pi.master_id = m.id
@@ -26,6 +28,8 @@ BEGIN
     ON m.id = persnet.master_id
     INNER JOIN activity_log_persnet_assignments al
     ON m.id = al.master_id AND al.extra_log_type = 'primary'
+    LEFT JOIN model_references mr
+    ON m.id = mr.from_record_master_id AND to_record_type='NfsStore::Manage::Container'
     WHERE
       pi.id IS NULL
       AND persnet.persnet_id is not null

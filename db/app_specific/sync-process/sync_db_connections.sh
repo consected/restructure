@@ -24,6 +24,11 @@ then
   export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
   export AWS_DB_HOST=localhost
   export AWS_DB_USER=fphsetl
+
+  export upload_server="http://localhost:3001"
+  export upload_user_email="sync_service_file_upload_client@app.fphs2.harvard.edu"
+  export upload_user_token="c2PdFBzTs_DjqA3md-8n6Nxc5wtLFQ"
+
 fi
 
 if [ "$RAILS_ENV" == 'test' ]

@@ -4,7 +4,8 @@ CREATE TEMPORARY TABLE temp_persnet_assignments_results (
     master_id integer,
     persnet_id bigint,
     status varchar,
-    to_master_id integer
+    to_master_id integer,
+    container_id integer
 );
 
 \copy temp_persnet_assignments_results (master_id, persnet_id, status, to_master_id) from $PERSNET_ASSIGNMENTS_RESULTS_FILE with (header true, format csv)
