@@ -24,9 +24,9 @@
 
   <tbody>
     <%= render partial: view_path('item'), locals: {list_item: primary_model.new} %>
-    <% objects_instance.each do |list_item| %>
-      <%= render partial: view_path('item'), locals: {list_item: list_item} %>
-    <% end %>
+
+    <%= render partial: view_path('item'), collection: objects_instance, as: :list_item %>
+
   </tbody>
 </table>
 

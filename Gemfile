@@ -26,10 +26,6 @@ gem 'delayed_job'
 gem 'delayed_job_active_record'
 gem 'daemons'
 
-
-# gem 'nfs_store', path: '../nfs_store'
-# gem 'nfs_store', '0.0.1', path: '.'
-
 gem 'jquery-fileupload-rails'
 gem 'rubyzip'
 

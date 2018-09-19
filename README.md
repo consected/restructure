@@ -30,113 +30,54 @@ The development repository contains all code, including release-ready code. Rele
 The production-ready release repository contains only code that has been built and tested. It is tagged in the same form and with the same release numbers as the development repository. Deployments made by Ansible are from this repo.
 
 
-NfsStore
+Filestore
 ========
 
-NfsStore is a gem that provides upload, management and download of medical and project files, as a component of the FPHS Zeus-based projects.
-
-Installation
----
-
-Add the gem to the project Gemfile, referencing the Git repo, enforcing a a specific version.
-
-Then run:
-
-    bundle install
-
-Create a file `config/initializers/nfs_store_config.rb` with something like the following:
-
-    ActiveSupport.on_load(:nfs_store_config) do
-
-      self.group_id_range = 600..601
-
-      if Rails.env.production?
-        self.nfs_store_directory = ENV['FILESTORE_NFS_DIR']
-        self.temp_directory = ENV['FILESTORE_TEMP_UPLOADS_DIR']
-        self.containers_dirname = ENV['FILESTORE_CONTAINERS_DIRNAME']
-      else
-        self.nfs_store_directory = "/mnt/fphsfs"
-        # Notice the use of /var/tmp rather than /tmp, since we are trying to avoid consuming RAM
-        # when uploading and downloading large files
-        self.temp_directory = "/var/tmp/nfs_store_tmp"
-        self.containers_dirname = 'containers'
-
-        FileUtils.mkdir_p self.temp_directory
-        self.group_id_range.each do |i|
-          check_dir = File.join(self.nfs_store_directory, "#{NfsStore::Manage::Group::NfsMountNamePrefix}#{i}")
-          FsException::Config.new "Could not access: #{check_dir}" unless File.exist?(check_dir)
-        end
-      end
-
-      raise FsException::Config.new "nfs_store_directory not set" if self.nfs_store_directory.blank?
-      raise FsException::Config.new "temp_directory not set" if self.temp_directory.blank?
-      raise FsException::Config.new "group_id_range not set" if self.group_id_range.blank?
-      raise FsException::Config.new "containers_dirname not set" if self.containers_dirname.nil?
-
-      ares = Kernel.system 'which archivemount'
-      raise FsException::Config.new "archivemount not in the path" unless ares
-
-      raise FsException::Config.new "No App Type available" unless Admin::AppType.first
-
-      unless File.exist? self.temp_directory
-        Rails.logger.info "Making the tmp upload directory"
-        FileUtils.mkdir_p self.temp_directory
-      end
-    end
-
-    raise FsException::Config.new "action_dispatch.x_sendfile_header not set in production.rb" if Rails.env.production? && ! Rails.configuration.action_dispatch.x_sendfile_header
-
-Install **archivemount** either from the distro repositories, deploying to Elastic Beanstalk by creating a file
-**.ebextensions/setup-filestore.config**, or building following this as a template
-
-    container_commands:
-
-      00_setup_epel:
-        command: sudo yum-config-manager --enable epel
-      01_setup_filestore:
-        command: sudo yum install nfs-utils prcbind autoconf fuse fuse-libs fuse-devel libarchive libarchive-devel
-      02_make_archivemount:
-        command: |
-          cd /tmp
-          wget https://www.cybernoia.de/software/archivemount/archivemount-0.8.12.tar.gz
-          tar -xvzf archivemount-0.8.12.tar.gz
-          cd archivemount-0.8.12
-          autoreconf -i
-          ./configure && make && sudo make install
-          sudo ln -s /usr/local/bin/archivemount /usr/bin/archivemount
+Filestore is a component that provides upload, management and download of medical and project files.
 
 
+Edit the file `config/initializers/nfs_store_config.rb`
 
-To setup the nfs_store* database tables:
+Ensure that the following components are installed:
 
-    rake nfs_store:install:migrations
-    rake db:migrate
+* bindfs
+* fuse
+* archivemount
+
+If using a network filesystem mount, ensure it is mounted and appropriate bind mounts added, following this kind of pattern:
+
+    FS_ROOT=/efs1
+    FS_DIR=main
+    MOUNT_ROOT=/mnt/fphsfs
+    WEBAPP_USER=webapp
+    mkdir -p /efs1
+    getent group 599 || groupadd --gid 599 nfs_store_all_access
+    getent group 600 || groupadd --gid 600 nfs_store_group_0
+    getent group 601 || groupadd --gid 601 nfs_store_group_1
+    getent passwd 600 || useradd --user-group --uid 600 nfsuser
+    usermod -a --groups 599 $WEBAPP_USER
+    mkdir -p $FS_ROOT
+    mountpoint -q $FS_ROOT || mount -t efs -o tls fs-c302a188:/ $FS_ROOT
+    mkdir -p $MOUNT_ROOT/gid600
+    mkdir -p $MOUNT_ROOT/gid601
+    mountpoint -q $MOUNT_ROOT/gid600 || bindfs --map=@600/@599 --create-for-group=600 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid600
+    mountpoint -q $MOUNT_ROOT/gid601 || bindfs --map=@601/@599 --create-for-group=601 --create-for-user=600 --chown-ignore --chmod-ignore --create-with-perms='u=rwD:g=rwD:o=' $FS_ROOT/$FS_DIR $MOUNT_ROOT/gid601
+
 
 In production, consider creating a separate schema and moving the tables there, plus
 updating the app search path.
 
-To `config/routes.rb` add the line:
 
-    mount NfsStore::Engine => "/nfs_store"
-
-
-NFS setup
----
-
-To setup and test an NFS server or the NFS client, see:
-
-https://docs.google.com/document/d/18qcIBKVq43gYi5-0amlQKxbUF-42jX7oM9i9h5vZ2Vw/edit?usp=sharing
-
-
-Adding App Types
+Adding App Types to Filestore
 ---
 
 The NfsStore expects a specific structure for new App Types.
 
-    FS_ROOT=/opt/fphsfs
+    FS_ROOT=/efs1
+    FS_DIR=main
     APPTYPE_DIR=app-type-<app_type_id>
 
-    cd $FS_ROOT/main
+    cd $FS_ROOT/$FS_DIR
     mkdir -p $APPTYPE_DIR/containers
     chmod 770 $APPTYPE_DIR/containers
     chown nfsuser:<group_owner> $APPTYPE_DIR/containers
