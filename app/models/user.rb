@@ -75,6 +75,13 @@ class User < ActiveRecord::Base
     email
   end
 
+  # Validate the user's current app type, ensuring that access controls grant access to it
+  # @return [Boolean]
+  def app_type_valid?
+    app_type in? Admin::AppType.all_available_to(self)
+  end
+
+
   protected
 
     # Override included functionality that ensures an administrator has been set
@@ -119,10 +126,6 @@ class User < ActiveRecord::Base
           self.app_type_id = nil
         end
       end
-    end
-
-    def app_type_valid?
-      app_type in? Admin::AppType.all_available_to(self)
     end
 
 end

@@ -18,13 +18,20 @@ class UserBaseController < ApplicationController
 
     # If the current user does not have any app types available, logout and flash a message
     if all_apps.length == 0
+      msg = "You have not been granted access to any application types. Contact an administrator to continue use of the application."
+    elsif @current_user.app_type_valid?
+      current_user.app_type = all_apps.first
+      return current_user.save
+    end
+
+    if msg
       current_user.app_type = nil
 
-      msg = "You have not been granted access to any application types. Contact an administrator to continue use of the application."
       respond_to do |type|
         type.html {
-          flash[:error] = msg
           sign_out current_user
+          redirect_to '/'
+          raise FphsException.new msg
         }
         type.json  {
           render :json => {message: msg}, status: 401
