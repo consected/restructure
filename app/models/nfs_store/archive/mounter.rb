@@ -57,7 +57,9 @@ module NfsStore
           pn = Pathname.new(@mounted_path)
           FileUtils.mkdir_p @mounted_path unless pn.exist?
           unless pn.mountpoint?
-            cmd = ["archivemount", "-oumask=#{MountPerms},gid=#{stored_file.current_gid},readonly", @archive_path, @mounted_path]
+            raise FphsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
+
+            cmd = ["archivemount", "-oumask=#{MountPerms},gid=#{stored_file.current_gid.to_i},readonly", @archive_path, @mounted_path]
             Rails.logger.info "Command: #{cmd}"
             res = Kernel.system(*cmd)
             raise FsException::Action.new "Failed to mount the archive file: #{@archive_path}" unless res
