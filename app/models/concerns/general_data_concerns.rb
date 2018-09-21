@@ -9,7 +9,7 @@ module GeneralDataConcerns
   end
 
   def user_id= u
-    raise "can not set user_id="
+    raise "can not set user_id=" if attribute_names.include?('master_id')
   end
 
 

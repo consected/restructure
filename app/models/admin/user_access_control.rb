@@ -66,7 +66,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   def self.resource_names_for resource_type
     if resource_type == :table
-      return Master.get_all_associations + ['item_flags']
+      return (Master.get_all_associations + ['item_flags'] + DynamicModel.active.map(&:full_item_types_name)).uniq
     elsif resource_type == :general
       return ['app_type', 'create_master', 'export_csv', 'export_json', 'view_reports', 'view_external_links', 'edit_report_data', 'create_report_data', 'import_csv']
     elsif resource_type == :external_id_assignments

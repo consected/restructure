@@ -211,7 +211,9 @@ class ReportsController < UserBaseController
         @master.current_user = current_user if @master
       elsif @report_item.respond_to? :user_id
         @report_item.user_id = current_user.id
-      else
+      end
+
+      if @report_item.respond_to? :current_user= 
         @report_item.current_user = current_user
       end
     end
