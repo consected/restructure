@@ -514,6 +514,21 @@ tr.item-highlight {
   }
 }
 
+.list-group-item.typeof-object-field > p {
+  font-style: italic;
+}
+
+ul.view-object {
+  .list-group-item:first-child {
+    background-color: inherit;
+  }
+
+  .view-object-caret {
+    // display: none;
+  }
+}
+
+
 strong {
 
     word-break: break-word;

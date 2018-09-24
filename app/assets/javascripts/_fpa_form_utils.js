@@ -209,7 +209,7 @@ _fpa.form_utils = {
     // Resize all labels in a block for nice formatting without tables or fixed widths
     resize_labels : function(block, data){
         if(!block) block = $(document);
-        block.find('.list-group:visible').not('.attached-resize-labels').each(function(){
+        block.find('.list-group:visible, .view-object[aria-expanded="true"]').not('.attached-resize-labels').each(function(){
             // Cheap optimization to make the UI feel more responsive in large result sets
             var self = $(this);
 
@@ -234,7 +234,7 @@ _fpa.form_utils = {
 
 
                 var all = lgi.find('small, label');
-                all.addClass('label-resizer');
+                all.addClass('label-resizer').css({whiteSpace: 'nowrap', width: 'auto', minWidth: 'none', marginLeft: 'inherit'});
 
                 var block_width = lgi.first().width();
 
@@ -567,9 +567,13 @@ _fpa.form_utils = {
             var el = $(this);
             $(this).removeClass('glyphicon-triangle-bottom');
             $(this).addClass('glyphicon-triangle-top');
+            var t = $(this).attr('data-target');
+            var tel = t && $(t);
             window.setTimeout(function() {
               el.attr('disabled', true);
-
+              if(tel && tel.find('.list-group-item').length) {
+                _fpa.form_utils.format_block(tel.parent());
+              }
             }, 10);
           }
           else {

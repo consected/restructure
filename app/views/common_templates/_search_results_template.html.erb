@@ -188,115 +188,132 @@
 <% if item_list.length > 0 %>
 {{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
 
-{{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
-<li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-  {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption'}}}
-</li>
-{{/is}}
+  {{!-- Use an inline partial, since defining it here seems to avoid a context scoping bug that I have been unable to trace otherwise --}}
+  {{#*inline '<%=name%>_result_field'}}
 
-{{#is @key "notes"}}
-{{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
-{{else is @key "description"}}
-{{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
-{{else is @key 'includes' "_notes"}}
-{{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
-{{else is @key 'includes' "_description"}}
-{{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
-{{else is @key 'includes' "_details"}}
-{{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
-{{else is @key "data" }}
-  <li class="<%= field_result_class %>"><small>
-  {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}
-  </small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_url'}}
-  <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
-  <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
-  </span></strong></li>
-{{else is @key 'includes' '_link'}}
-  <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
-  <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
-  </span></strong></li>
-{{else is @key 'includes' '_rank' }}
-  <% if hide_rank_badge %>
-  <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
-  <% end %>
-{{else is @key '===' 'rank' }}
-  <% if hide_rank_badge %>
-  <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
-  <% end %>
-{{else is @key "protocol_id"}}
-  <li class="<%= field_result_class %>"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
-{{else is @key "sub_process_id"}}
-  <li class="<%= field_result_class %>"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
-{{else is @key "protocol_event_id"}}
-  <li class="<%= field_result_class %>"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
-{{else is @key "tracker_history_id"}}
-<% unless app_config_set(:hide_tracker_panel) %>
-  {{#if ../tracker_histories}}
-  <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories-caption tracker-histories-caption is-minor-heading">
-    <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" aria-expanded="false">Related tracker items <span class="caret"></span></a>
-  </li>
-  {{/if}}
-  <span id="<%=full_name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" class="collapse related-tracker-collapser">
-  {{#each ../tracker_histories}}
-    <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories in-item-tracker-histories is-full-width">
-      <span class="small">
-         <a href="/masters/{{master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{master_id}}-{{id}}" data-toggle="scrollto-target" data-target="#trackers-{{master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
-         {{pretty_string event_date}}
-         {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
-      </span>
+    {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
+      {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption'}}}
     </li>
-  {{/each}}
-  </span>
-  <% if implementation_class_name %>
-  {{#unless ../prevent_edit}}
-  <div class="results-caption-before <%=full_name.hyphenate%>-add-linked-tracker">
-    <div class="panel panel-default panel-body">
-      <p class="add-tracker-label">Add a specific tracker status record related to this item:</p>
-      <p class="text-center">
-      <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/<%=implementation_class_name%>&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
-      </p>
-    </div>
-  </div>
-  {{/unless}}
-  <% end %>
-<% end %>
-{{else is @key 'includes' '^select_record_from_' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '^select_' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_blank_yes_no_dont_know' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_yes_no_dont_know' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_blank_yes_no' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_yes_no' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_no_yes' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_no_yes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_time$' }}
-  <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{local_time this}}</strong></li>
-{{else is @key 'includes' '_notes' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '_description' }}
-  <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '^fixed_' }}
-  <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^fixed_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else is @key 'includes' '^placeholder_' }}
-  <li class="<%= field_result_class %> hidden"><small>{{humanize (replace @key '^placeholder_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{else}}
-  <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-{{/is}}
-<% if Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after %>
-{{#is @key '<%=item_flags_after%>'}}
-  <li class="list-group-item is-full-width <%=name.hyphenate%>-item-flags">
-  {{#with ..}}
-    {{>item_flag_container item_type="<%=full_name%>" readonlyview=<%= item_flags_readonly %> }}
-  {{/with}}
-  </li>
-{{/is}}
-<% end %>
+    {{/is}}
+    {{#is @key "notes"}}
+    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
+    {{else is @key "description"}}
+    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
+    {{else is @key 'includes' "_notes"}}
+    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
+    {{else is @key 'includes' "_description"}}
+    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
+    {{else is @key 'includes' "_details"}}
+    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
+    {{else is @key "data" }}
+      <li class="<%= field_result_class %>"><small>
+      {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}
+      </small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_url'}}
+      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+      <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
+      </span></strong></li>
+    {{else is @key 'includes' '_link'}}
+      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+      <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
+      </span></strong></li>
+    {{else is @key 'includes' '_rank' }}
+      <% if hide_rank_badge %>
+      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
+      <% end %>
+    {{else is @key '===' 'rank' }}
+      <% if hide_rank_badge %>
+      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
+      <% end %>
+    {{else is @key "protocol_id"}}
+      <li class="<%= field_result_class %>"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key "sub_process_id"}}
+      <li class="<%= field_result_class %>"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key "protocol_event_id"}}
+      <li class="<%= field_result_class %>"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key "tracker_history_id"}}
+    <% unless app_config_set(:hide_tracker_panel) %>
+      {{#if ../tracker_histories}}
+      <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories-caption tracker-histories-caption is-minor-heading">
+        <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" aria-expanded="false">Related tracker items <span class="caret"></span></a>
+      </li>
+      {{/if}}
+      <span id="<%=full_name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" class="collapse related-tracker-collapser">
+      {{#each ../tracker_histories}}
+        <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories in-item-tracker-histories is-full-width">
+          <span class="small">
+             <a href="/masters/{{../master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{../master_id}}-{{../id}}" data-toggle="scrollto-target" data-target="#trackers-{{../master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
+             {{pretty_string event_date}}
+             {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
+          </span>
+        </li>
+      {{/each}}
+      </span>
+      <% if implementation_class_name %>
+      {{#unless ../prevent_edit}}
+      <div class="results-caption-before <%=full_name.hyphenate%>-add-linked-tracker">
+        <div class="panel panel-default panel-body">
+          <p class="add-tracker-label">Add a specific tracker status record related to this item:</p>
+          <p class="text-center">
+          <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/<%=implementation_class_name%>&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
+          </p>
+        </div>
+      </div>
+      {{/unless}}
+      <% end %>
+    <% end %>
+    {{else is @key 'includes' '^select_record_from_' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '^select_' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_blank_yes_no_dont_know' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_yes_no_dont_know' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_blank_yes_no' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_yes_no' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_no_yes' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_no_yes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_time$' }}
+      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{local_time this}}</strong></li>
+    {{else is @key 'includes' '_notes' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_description' }}
+      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '^fixed_' }}
+      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^fixed_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '^placeholder_' }}
+      <li class="<%= field_result_class %> hidden"><small>{{humanize (replace @key '^placeholder_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is this 'typeof' 'object'}}
+
+        <li class="list-group-item typeof-object-field"><p>{{humanize @key}} <a data-target="#view-object-{{../master_id}}-{{../id}}-{{underscore @key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a></p>
+        <ul class="view-object collapse" id="view-object-{{../master_id}}-{{../id}}-{{underscore @key}}" aria-expanded="false">
+        {{#each this}}
+        {{><%=name%>_result_field}}
+        {{/each}}
+        </ul>
+
+        </li>
+    {{else}}
+      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{/is}}
+    <% if Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after %>
+    {{#is @key '<%=item_flags_after%>'}}
+      <li class="list-group-item is-full-width <%=name.hyphenate%>-item-flags">
+      {{#with ..}}
+        {{>item_flag_container item_type="<%=full_name%>" readonlyview=<%= item_flags_readonly %> }}
+      {{/with}}
+      </li>
+    {{/is}}
+    <% end %>
+
+
+  {{/inline}}
+  {{> <%=name%>_result_field}}
+
 
 {{/filter}}
 <% end %>

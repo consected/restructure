@@ -61,6 +61,13 @@
       var re = new RegExp(right);
       return left.search(right) !== -1;
     });
+    eR.add('typeof', function(left, right) {
+      if(!right) return;
+      if(right == 'object') {
+        return  (left !== null && !(left instanceof String) && !(left instanceof Number) && !(left instanceof Date) && (typeof left == 'object') && Object.keys(left).length);
+      }
+      return typeof left == right;
+    });
 
     var isHelper = function() {
         var args = arguments
@@ -173,6 +180,10 @@
 
     Handlebars.registerHelper('plain_object',function(obj){
       return obj;
+    });
+
+    Handlebars.registerHelper('typeof',function(obj){
+      return typeof obj;
     });
 
     Handlebars.registerHelper('nl2br', function(text) {

@@ -239,7 +239,8 @@ _fpa.utils.pretty_print = function(stre, options_hash){
               // otherwise it is empty, so return null, which is what it really should be
                 if(stre !== null && !(stre instanceof String) && !(stre instanceof Number) && (typeof stre == 'object')){
                     if(Object.keys(stre).length > 0){
-                      return JSON.stringify(stre, null, '<div>  ');
+
+                      return stre;
                     }
                     else {
                       return null;
