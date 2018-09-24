@@ -4,17 +4,19 @@ module NfsStore
     include InNfsStoreContainer
 
     def show
-      id = params[:download_id].to_i
+      @download_id = params[:download_id].to_i
       retrieval_type = params[:retrieval_type]
-      FsException::Download.new "id invalid" unless id > 0
+      FsException::Download.new "id invalid" unless @download_id > 0
       FsException::Download.new "retrieval_type invalid" unless retrieval_type.present?
-      retrieval_type = retrieval_type.to_sym
+      # Avoid brakeman issue
+      retrieval_type = ValidRetrievalTypes.select{|r| r == retrieval_type.to_sym}.first
+
       FsException::Download.new "Invalid retreival type specified" unless Download.valid_retrieval_type? retrieval_type
 
       @download = Download.new container: @container
       @master = @container.master
       @id = @container.id
-      retrieved_file = @download.retrieve_file_from id, retrieval_type
+      retrieved_file = @download.retrieve_file_from @download_id, retrieval_type
       if retrieved_file
         @download.save!
         send_file retrieved_file
