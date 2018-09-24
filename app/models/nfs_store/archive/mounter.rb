@@ -59,7 +59,9 @@ module NfsStore
           unless pn.mountpoint?
             raise FphsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
 
-            cmd = ["archivemount", "-oumask=#{MountPerms},gid=#{stored_file.current_gid.to_i},readonly", @archive_path, @mounted_path]
+            # No longer set gid=#{stored_file.current_gid.to_i} since this is handled by bindfs on retrieval.
+            # Avoids a brakeman test failure
+            cmd = ["archivemount", "-oumask=#{MountPerms},readonly", @archive_path, @mounted_path]
             Rails.logger.info "Command: #{cmd}"
             res = Kernel.system(*cmd)
             raise FsException::Action.new "Failed to mount the archive file: #{@archive_path}" unless res
