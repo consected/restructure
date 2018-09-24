@@ -177,6 +177,11 @@ class DynamicModel < ActiveRecord::Base
             @human_name
           end
 
+          def model_data_type
+            :dynamic_model
+          end
+
+
           self.definition = definition
           self.primary_key = tkn
           self.foreign_key_name = fkn

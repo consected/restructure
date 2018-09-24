@@ -27,6 +27,7 @@
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: main_log_full_name,
+    model_data_type: :activity_log,
     item_class_name: full_name,
     caption: main_log_caption,
     prevent_edit: prevent_edit,
@@ -53,6 +54,7 @@
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: blank_log_full_name,
+    model_data_type: :activity_log,
     item_class_name: full_name,
     caption: blank_log_label, # substitute the rec_type attribute (capitalized) as the block caption
     prevent_edit: prevent_edit,
@@ -80,6 +82,7 @@
 <% extra_log_type_configs.each do |c| %>
   <%= render partial: 'common_templates/search_results_template', locals: {
       name: "#{full_name}_#{c.name}",
+      model_data_type: :activity_log,
       item_class_name: full_name,
       caption: c.label,
       prevent_edit: prevent_edit,

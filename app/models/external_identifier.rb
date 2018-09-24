@@ -31,6 +31,28 @@ class ExternalIdentifier < ActiveRecord::Base
     name.ns_underscore.singularize
   end
 
+  # List of item types that can be used to define Classification::GeneralSelection drop downs
+  # This does not represent the actual item types that are valid for selection when defining a new external identifier model record
+  def self.item_types
+
+    list = []
+
+    implementation_classes.each do |c|
+
+      cn = c.attribute_names.select{|a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w(source rec_type rank)) }.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
+      cn.each do |a|
+        list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
+      end
+    end
+
+    list
+  end
+
+  # the list of defined activity log implementation classes
+  def self.implementation_classes
+    @implementation_classes = ExternalIdentifier.active.map{|a| "#{a.model_class_name.classify}".constantize }
+  end
+
 
   def self.routes_load
 
@@ -110,6 +132,7 @@ class ExternalIdentifier < ActiveRecord::Base
     external_id_range = self.external_id_range
     allow_to_generate_ids = self.pregenerate_ids
     prevent_edit = self.prevent_edit
+    extra_fields = self.extra_fields
     alphanumeric = self.alphanumeric
     label = self.label
     name = self.name
@@ -155,6 +178,14 @@ class ExternalIdentifier < ActiveRecord::Base
             @prevent_edit = v
           end
 
+          def self.extra_fields
+            @extra_fields
+          end
+
+          def self.extra_fields= v
+            @extra_fields = v
+          end
+
           def self.external_id_view_formatter= v
             @external_id_view_formatter = v
           end
@@ -175,12 +206,18 @@ class ExternalIdentifier < ActiveRecord::Base
             @definition
           end
 
+          def model_data_type
+            :external_identifier
+          end
+
+
           self.definition = definition
           self.external_id_attribute = external_id_attribute
           self.external_id_edit_pattern = external_id_edit_pattern
           self.external_id_range = external_id_range
           self.allow_to_generate_ids = allow_to_generate_ids
           self.prevent_edit = prevent_edit
+          self.extra_fields = extra_fields
           self.external_id_view_formatter = external_id_view_formatter
           self.label = label
           self.alphanumeric = alphanumeric

@@ -25,6 +25,7 @@
       caption: m.name,
       name: m.model_def_name.to_s,
       full_name: full_name,
+      model_data_type: :dynamic_model,
       prevent_edit: !(current_user.has_access_to? :edit, :table, m.full_item_type_name.pluralize),
       prevent_create: !(current_user.has_access_to? :create, :table, m.full_item_type_name.pluralize),
       item_list: l,

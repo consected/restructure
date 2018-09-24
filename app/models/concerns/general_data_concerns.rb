@@ -122,6 +122,8 @@ module GeneralDataConcerns
       extras[:methods] << :_created if respond_to? :_created
       extras[:methods] << :_updated if respond_to? :_updated
 
+      extras[:methods] << :model_data_type if respond_to? :model_data_type
+
       extras[:methods] << :model_references if respond_to? :model_references
       extras[:methods] << :creatable_model_references if respond_to? :creatable_model_references
       extras[:methods] << :referenced_from if respond_to? :referenced_from

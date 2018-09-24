@@ -19,6 +19,7 @@
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'player_info',
     caption: 'person',
+    model_data_type: :default,
     prevent_edit: !(current_user.has_access_to? :edit, :table, :player_infos),
     prevent_create: !(current_user.has_access_to? :create, :table, :player_infos),
     item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes tracker_history_id),
@@ -28,6 +29,7 @@
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'pro_info',
+    model_data_type: :default,
     prevent_edit: true,
     prevent_create: true,
     item_list: %w(pro_id first_name last_name middle_name nick_name birth_date death_date start_year end_year college),
@@ -39,6 +41,7 @@
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'player_contact',
     caption: '{{capitalize rec_type}}', # substitute the rec_type attribute (capitalized) as the block caption
+    model_data_type: :default,
     prevent_edit: !(current_user.has_access_to? :edit, :table, :player_contacts),
     prevent_create: !(current_user.has_access_to? :create, :table, :player_contacts),
     item_list: %w(data source tracker_history_id),
@@ -48,6 +51,7 @@
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'address',
+    model_data_type: :default,
     prevent_edit: !(current_user.has_access_to? :edit, :table, :addresses),
     prevent_create: !(current_user.has_access_to? :create, :table, :addresses),
     item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type tracker_history_id),
@@ -69,13 +73,19 @@
         formatter = 'pattern_mask "' + pattern.gsub('\\', '\\\\') + '"';
       end
 
+      field_list = [e.external_id_attribute.to_s]
+      if e.extra_fields.present?
+        field_list += e.extra_fields.split(',').map(&:strip)
+      end
+
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: e.name.underscore,
     caption: e.label,
+    model_data_type: :external_identifier,
     prevent_edit: e.prevent_edit? || !(current_user.has_access_to? :edit, :table, e.plural_name),
     prevent_create: e.prevent_create? || !(current_user.has_access_to? :create, :table, e.plural_name),
-    item_list: [e.external_id_attribute.to_s],
+    item_list: field_list,
     external_id_options: {label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s},
     data_sort: [:desc, "data-updated-at-ts"]
   } %>
@@ -85,6 +95,7 @@
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'nfs_store__manage__container',
     caption: '{{name}}', # substitute the rec_type attribute (capitalized) as the block caption
+    model_data_type: :nfs_store_container,
     prevent_edit: !(current_user.has_access_to? :edit, :table, :nfs_store__manage__containers),
     prevent_create: !(current_user.has_access_to? :create, :table, :nfs_store__manage__containers),
     item_list: %w(data),

@@ -4,6 +4,11 @@
     caption = nil
   end
 
+  unless defined? model_data_type
+    model_data_type = nil
+  end
+
+
   unless defined? category
     category = nil
   end
@@ -112,7 +117,7 @@
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
 
-  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',') }'}}has-caption-before{{/is}}".html_safe
+  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',') }'}}has-caption-before{{/is}} {{#is @key '#{external_id_options && external_id_options[:attribute]}'}}is_external_id_item{{/is}}".html_safe
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -322,7 +327,7 @@
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}
   <% if name != full_name %><div id="<%=full_name.hyphenate%>-{{master_id}}-{{id}}"> <% end %>
-  <div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%> <%= is_activity_log_class %>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-item-class="<%=item_class_name%>" data-sub-item="<%=full_name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
+  <div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%> <%= is_activity_log_class %>" data-model-data-type="<%=model_data_type %>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-item-class="<%=item_class_name%>" data-sub-item="<%=full_name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
   <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} <%= is_activity_log_class %>" data-item-id="{{id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.to_s.html_safe}\"" }.join(' ').html_safe%> >
       <% if item_list.length == 0 %>
         <li class="list-group-item <%=name%>-<%=name%>_id is-heading zero-item-heading">
@@ -334,25 +339,7 @@
             <%= show_caption_before :all_fields, caption_before %>
           </li>
         <% end %>
-      <% elsif item_list.length == 1 && external_id_options %>
 
-        <li class="list-group-item <%=name%>-<%=name%>_id is-heading compact-heading">
-          {{><%=name%>_edit_item_button}}
-          <small><%= external_id_options[:label] %></small> <strong>{{<%= external_id_options[:formatter].html_safe || 'pretty_string' %> <%= external_id_options[:attribute] %>}}</strong>
-          <% unless custom_activity_log == :none %>
-            <% if works_with_rec_types.blank? %>
-              {{> activity_log_<%=name%>_show_button_partial }}
-            <% end %>
-          <% end %>
-          <% if Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && !item_flags_after %>
-          {{>item_flag_container item_type="<%=full_name%>"}}
-          <% end %>
-        </li>
-        <% if caption_before[:all_fields] %>
-          <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
-            <%= show_caption_before :all_fields, caption_before %>
-          </li>
-        <% end %>
       <%else%>
         <li class="list-group-item is-heading object-results-header">
           {{><%=name%>_edit_item_button}}
@@ -368,7 +355,13 @@
               {{/is}}
             <% end %>
           <% end %>
+          <% if model_data_type == :external_identifier && external_id_options %>
+          <h4>
+          <span><%= external_id_options[:label] %></span> <strong>{{<%= external_id_options[:formatter].html_safe || 'pretty_string' %> <%= external_id_options[:attribute] %>}}</strong>
+          </h4>
+          <% else %>
             <h4 class="list-group-item-heading"><%=caption%></h4>
+          <% end %>
           <% if Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && !item_flags_after %>
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>

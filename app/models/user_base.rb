@@ -9,7 +9,8 @@ class UserBase < ActiveRecord::Base
   belongs_to :user
   include HandlesUserBase
 
-
-
+  def model_data_type
+    :default
+  end
 
 end

@@ -426,6 +426,10 @@ class ActivityLog < ActiveRecord::Base
             self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, "#{parent_type}_id".to_sym, parent_type, :tracker_id] + [:item_id] - fts
           end
 
+          def model_data_type
+            :activity_log
+          end
+
           self.definition = definition
           self.parent_type = parent_type
           self.parent_rec_type = parent_rec_type

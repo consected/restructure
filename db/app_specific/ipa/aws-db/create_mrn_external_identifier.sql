@@ -1,7 +1,7 @@
 
       BEGIN;
 
-      CREATE FUNCTION log_mrn_number_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_mrn_number_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -9,6 +9,7 @@
                   (
                       master_id,
                       mrn_id,
+                      select_organization,
                       user_id,
                       admin_id,
                       created_at,
@@ -18,6 +19,7 @@
                   SELECT
                       NEW.master_id,
                       NEW.mrn_id,
+                      NEW.select_organization,
                       NEW.user_id,
                       NEW.admin_id,
                       NEW.created_at,
@@ -31,6 +33,7 @@
           id integer NOT NULL,
           master_id integer,
           mrn_id varchar,
+          select_organization varchar,
           user_id integer,
           admin_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -51,6 +54,7 @@
           id integer NOT NULL,
           master_id integer,
           mrn_id varchar,
+          select_organization varchar,
           user_id integer,
           admin_id integer,
           created_at timestamp without time zone NOT NULL,
