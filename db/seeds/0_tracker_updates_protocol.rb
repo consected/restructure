@@ -32,7 +32,15 @@ module Seeds
         {name: "updated player contact", sub_process_id: sp.id},
         {name: "updated player info", sub_process_id: sp.id},
         {name: "updated scantron", sub_process_id: sp.id},
-        {name: "updated sage assignment", sub_process_id: sp.id}
+        {name: "updated sage assignment", sub_process_id: sp.id},
+
+        {name: "created nfs store  manage  container", sub_process_id: sp.id},
+        {name: "updated nfs store  manage  container", sub_process_id: sp.id},
+        {name: "created nfs store  manage  stored file", sub_process_id: sp.id},
+        {name: "updated nfs store  manage  stored file", sub_process_id: sp.id},
+        {name: "created nfs store  manage  archived file", sub_process_id: sp.id},
+        {name: "updated nfs store  manage  archived file", sub_process_id: sp.id}
+
       ]
 
       add_values values, sp

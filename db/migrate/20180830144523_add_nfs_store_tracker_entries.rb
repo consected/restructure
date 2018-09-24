@@ -4,6 +4,7 @@ class AddNfsStoreTrackerEntries < ActiveRecord::Migration
     admin = Admin.where(email: 'auto-admin@nodomain.com').first
 
     protocol = Classification::Protocol.active.where(name: 'Updates').first
+    return unless protocol
     sp = protocol.sub_processes.where(name: 'record updates').first
 
     values = [
