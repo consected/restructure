@@ -142,9 +142,12 @@ AS $$
       'phone screen review',
 
       --ix_consent_blank_yes_no
+      -- if the participant scores <= 19 on TMoCA, the ability to give informed consent should not be set
+      CASE WHEN tmoca.tmoca_score <= 19 THEN 'no' ELSE 'yes' END,
+
       initial_screening.select_still_interested,
       -- ix_consent_details
-'Responded "yes" to all questions including the final confirmation to continue in Start Phone Screening form',
+      'Responded "yes" to all questions including the final confirmation to continue in Start Phone Screening form. Scored "' || tmoca.tmoca_score || '" in T-MoCA.',
 
       --ix_not_pro_blank_yes_no
       CASE WHEN football_experience.played_in_nfl_blank_yes_no = 'no' THEN 'yes' ELSE 'no' END,
@@ -210,7 +213,7 @@ Responded "' || health.chronic_pain_meds_blank_yes_no_dont_know || '" to questio
       --ix_tmoca_score_blank_yes_no
       CASE WHEN tmoca.tmoca_score <= 19 THEN 'yes' ELSE 'no' END,
       --ix_tmoca_score_details
-'Scored "' || tmoca.tmoca_score || ' in T-MoCA.',
+'Scored "' || tmoca.tmoca_score || '" in T-MoCA.',
 
       --ix_no_hemophilia_blank_yes_no
       CASE WHEN health.hemophilia_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
