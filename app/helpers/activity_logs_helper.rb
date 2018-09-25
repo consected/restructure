@@ -62,6 +62,10 @@ module ActivityLogsHelper
     end
   end
 
+  def selectable_model_reference
+    params[:references] && params[:references][:allow_select] == 'true'
+  end
+
   def model_reference_fields f
     res = ""
     ref_params = params[:references]

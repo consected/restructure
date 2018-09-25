@@ -54,6 +54,21 @@ _fpa.postprocessors = {
             _fpa.form_utils.format_block($(this));
         }).addClass('attached-expander-format');
 
+        block.find('.select-ref-to-record').not('.attached-handler').change(function () {
+          var val = $(this).val();
+          var selform = $(this).parents('form').first();
+          var lg = selform.siblings().not('.new_select_reference').first();
+          if (!val || val == '') {
+            selform.find('.submit-action-container').addClass('hidden');
+            lg.slideDown('fast');
+          }
+          else {
+            selform.find('.submit-action-container').removeClass('hidden');
+            lg.slideUp('fast');
+          }
+        }).addClass('attached-handler');
+
+
         var item_key;
         for (item_key in data) {
           if(data.hasOwnProperty(item_key) && item_key != '_control')

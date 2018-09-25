@@ -93,7 +93,7 @@ module GeneralDataConcerns
   end
 
   def as_json extras={}
-
+    self.current_user ||= extras[:current_user] if self.class.no_master_association
     if self.allows_current_user_access_to?(:access)
 
       extras[:include] ||= {}

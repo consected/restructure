@@ -100,6 +100,33 @@
   <div data-result="<%= edit_form_id %>">
 <% end %>
     <div class="">
+      <% if selectable_model_reference %>
+      <%
+        edit_form_hash_for_ref = edit_form_hash.dup
+        edit_form_hash_for_ref[:html] ||= {}
+        edit_form_hash_for_ref[:html].merge! id: 'new_select_reference', class: 'new_select_reference form-inline'
+      %>
+        <%= form_for [form_object_instance.belongs_directly_to, form_object_instance], edit_form_hash_for_ref do |form|%>
+          <%= model_reference_fields form %>
+
+          <% if caption_before[:select_reference] %>
+            <li class="list-group-item caption-before <%=form_object_item_type_us.hyphenate%>-select_reference select-reference-caption">
+              <%= show_caption_before :select_reference, caption_before %>
+            </li>
+          <% end %>
+          <li class="list-group-item edit-select-ref-container">
+            <%= label_tag :ref_to_record_id,  "Select #{caption}" %>
+            <%= select_tag :ref_to_record_id, options_from_collection_for_select(@master_objects, :id, :data), include_blank: '(add new)', class: 'select-ref-to-record' %>
+          </li>
+
+          <li class="list-group-item submit-action-container hidden">
+            <%= form.submit class: "btn btn-primary", value: "Save" %>
+          </li>
+        <% end %>
+      <% end %>
+
+
+
       <%= form_block_object.send(*form_block) do |form|%>
       <% form_embed = form if @embedded_item && !embedded %>
       <% if @extra_log_type_config && !embedded %>

@@ -9,6 +9,7 @@ module MasterHandler
 
     before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
     before_action :set_instance_from_id, only: [:show]
+    before_action :set_instance_from_reference_id, only: [:create]
     before_action :set_instance_from_build, only: [:new, :create]
     before_action :check_showable?, only: [:show]
     before_action :check_editable?, only: [:edit, :update]
@@ -26,7 +27,7 @@ module MasterHandler
       s[:original_item] = object_instance
       s[objects_name] <<  object_instance
     end
-    s[:master_id] = @master.id
+    s[:master_id] = @master.id unless primary_model.no_master_association
 
     render json: s
   end
@@ -62,7 +63,11 @@ module MasterHandler
         index
       else
         object_instance.reload
-        object_instance.master.current_user = current_user
+        if object_instance.class.no_master_association
+          object_instance.current_user = current_user
+        else
+          object_instance.master.current_user = current_user
+        end
         show
       end
     else
@@ -198,19 +203,25 @@ module MasterHandler
         # @player_info  = PlayerInfo.find(params[:id])
         # This allows for us to retrieve the @master consistently, so that the master association
         # is not used repetitively (potentially breaking the current_user functionality and poor performance)
-        if UseMasterParam.include? action_name
-          @master = Master.find(params[:master_id])
+
+        if UseMasterParam.include?(action_name)
+          @master = Master.find(params[:master_id]) unless primary_model.no_master_association
         else
           object = primary_model.find(params[:id])
           set_object_instance object
-          @master = object.master
+          @master = object.master unless primary_model.no_master_association
           @id = object.id
         end
 
-        # Get the list of objects related to the master, in other words triggering the association
-        # off of the master object
-        @master_objects = @master.send(objects_name)
-
+        if @master&.respond_to? objects_name
+          # Get the list of objects related to the master, in other words triggering the association
+          # off of the master object
+          @master_objects = @master.send(objects_name)
+        else
+          klass = primary_model #DynamicModel.const_get(object_name.ns_camelize)
+          @master_objects = klass.all if klass.no_master_association
+        end
+        return unless @master
         @master.current_user = current_user
         @master.current_admin = current_admin
         @master
@@ -232,8 +243,21 @@ module MasterHandler
 
       end
 
-      def set_instance_from_build
+      def set_instance_from_reference_id
+        return if canceled? || params[:ref_to_record_id].blank?
+        set_object_instance primary_model.find(params[:ref_to_record_id])
+        if object_instance.respond_to?(:master) && object_instance.master
+          object_instance.master.current_user = current_user
+        else
+          object_instance.current_user = current_user
+        end
+        @id = @set_from_reference_id = object_instance.id
 
+      end
+
+
+      def set_instance_from_build
+        return if @set_from_reference_id
         if defined? set_item
           set_item
         end

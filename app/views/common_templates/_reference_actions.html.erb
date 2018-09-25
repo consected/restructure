@@ -32,7 +32,7 @@
       elt = ""
       elt = "-#{ref_config[:add_with][:extra_log_type].ns_hyphenate}" if ref_config[:add_with][:extra_log_type]
       data_target = "##{ name.ns_hyphenate}#{elt}-#{master_id}-"
-      
+
       data_toggle = "unhide scrollto-result"
       a_class = "btn btn-sm btn-primary embedded-add-item-button"
     else
@@ -43,7 +43,8 @@
     %>
     <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
       <p class="text-center">
-        <a href="/masters/<%= master_id %>/<%=ref_type.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%=add_extra_params_to_add_item_link ref_type, ref_config%>" data-toggle="<%=data_toggle%>" data-target-force="true" data-target="<%=data_target%>" data-remote="true" class="<%=a_class%>"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
+        <% path_pref ="/masters/#{master_id}" unless ref_config[:no_master_association] %>
+        <a href="<%=path_pref%>/<%=ref_type.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%= view_as_new == 'select_or_add' ? "&references[allow_select]=true" : "" %><%=add_extra_params_to_add_item_link ref_type, ref_config%>" data-toggle="<%=data_toggle%>" data-target-force="true" data-target="<%=data_target%>" data-remote="true" class="<%=a_class%>"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
       </p>
     </li>
   <% end %>

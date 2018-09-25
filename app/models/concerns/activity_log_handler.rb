@@ -354,7 +354,13 @@ module ActivityLogHandler
               elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
               o = mrc.new(extra_log_type: elt, master: master)
             else
-              o = mrc.new master: master
+              attrs = {}
+              if mrc.respond_to? :master
+                attrs[:master] = master
+              else
+                attrs[:current_user] = self.master_user
+              end
+              o = mrc.new attrs
             end
 
 

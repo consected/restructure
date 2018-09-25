@@ -56,6 +56,12 @@
         }
         return right.indexOf(left) !== -1;
     });
+    eR.add('!in', function(left, right) {
+        if ( ! isArray(right)) {
+            right = right.split(',');
+        }
+        return right.indexOf(left) === -1;
+    });
     eR.add('includes', function(left, right) {
       if(!left) return;
       var re = new RegExp(right);

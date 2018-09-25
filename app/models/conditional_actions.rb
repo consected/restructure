@@ -12,7 +12,11 @@ class ConditionalActions
     # For the lowest level, setup the query with the master record
     # If current_scope is specified, then we are at a sub condition level, and the
     # scope supplied should be used instead
-    @current_scope = current_scope || Master.select(:id).where(id: current_instance.master.id)
+    if current_instance.class.no_master_association
+      @current_scope = current_instance.class
+    else
+      @current_scope = current_scope || Master.select(:id).where(id: current_instance.master.id)
+    end
   end
 
   def calc_action_if

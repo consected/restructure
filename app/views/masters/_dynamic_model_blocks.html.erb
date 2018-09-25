@@ -12,7 +12,7 @@ category_models.each do |m|
       # Force the new dynamic models to load in the details panel, which they wouldn't do otherwise
 %>
     <div class="on-open-click hidden">
-      <a href="/masters/{{id}}/dynamic_model/<%=m.implementation_model_name.pluralize%>" data-result-target="#<%=m.full_item_types_name%>-{{id}}-" data-template="<%=m.implementation_model_name.hyphenate.pluralize%>-list-template" data-remote="true"  data-open-priority="<%= force_load == true ? 1000 : force_load %>"><%=m.name%></a>
+      <a href="<% if m.foreign_key_name.present? %>/masters/{{id}}<% end %>/dynamic_model/<%=m.implementation_model_name.pluralize%>" data-result-target="#<%=m.full_item_types_name%>-{{id}}-" data-template="<%=m.implementation_model_name.hyphenate.pluralize%>-list-template" data-remote="true"  data-open-priority="<%= force_load == true ? 1000 : force_load %>"><%=m.name%></a>
     </div>
 <%  end
   end

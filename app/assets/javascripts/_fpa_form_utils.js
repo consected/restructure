@@ -113,6 +113,7 @@ _fpa.form_utils = {
         }
 
         window.setTimeout(function() {
+          console.log(item);
           item.click();
         }, p);
       });

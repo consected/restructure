@@ -192,9 +192,14 @@ module HandlesUserBase
 
 
   def allows_current_user_access_to? perform, with_options=nil
-    raise FphsException.new "no master_user in allows_current_user_access_to?" unless master_user
+    if self.class.no_master_association
+      curr_user = self.current_user
+    else
+      curr_user = master_user
+    end
+    raise FphsException.new "no master_user in allows_current_user_access_to?" unless curr_user
 
-    res = self.class.allows_user_access_to? master_user, perform, with_options=nil
+    res = self.class.allows_user_access_to? curr_user, perform, with_options=nil
     return false unless res
 
     if self.class.no_master_association

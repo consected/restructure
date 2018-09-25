@@ -315,16 +315,24 @@ class DynamicModel < ActiveRecord::Base
 
   def self.routes_load
 
-    mn = model_names
-
     Rails.application.routes.draw do
-      resources :masters do
-        mn.each do |pg|
-          resources pg.to_s.pluralize.to_sym, except: [:destroy], controller: "dynamic_model/#{pg.to_s.pluralize}"
-        end
-        namespace :dynamic_model do
-          mn.each do |pg|
-            resources pg.to_s.pluralize.to_sym, except: [:destroy]
+      DynamicModel.active.each do |dm|
+
+        pg_name = dm.implementation_model_name.pluralize.to_sym
+        if dm.foreign_key_name.present?
+
+          resources :masters do
+            resources pg_name, except: [:destroy], controller: "dynamic_model/#{pg_name}"
+            namespace :dynamic_model do
+              resources pg_name, except: [:destroy]
+            end
+          end
+
+        else
+
+          resources pg_name, except: [:destroy], controller: "dynamic_model/#{pg_name}"
+          namespace :dynamic_model do
+            resources pg_name, except: [:destroy]
           end
         end
       end

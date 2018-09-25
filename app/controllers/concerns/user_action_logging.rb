@@ -29,7 +29,7 @@ module UserActionLogging
 
       master_id = master.id if master
 
-      Admin::UserActionLog.create! user_id: current_user.id, app_type_id: current_user.app_type_id, master_id: master_id, item_id: @id, item_type: action_log_item_type, action: action_name, url: request.original_fullpath
+      Admin::UserActionLog.create! user_id: current_user.id, app_type_id: current_user.app_type_id, master_id: master_id, item_id: @id, item_type: action_log_item_type, action: action_name, url: request.original_fullpath, no_master_association: object_instance.class.no_master_association
     end
 
     def log_user_index_action force_item_type: nil

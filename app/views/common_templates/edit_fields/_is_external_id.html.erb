@@ -1,4 +1,6 @@
-<% unless primary_model.prevent_edit? %>
+<%
+  primary_model = form_object_instance.class
+  unless primary_model.prevent_edit? %>
   <%= form.label primary_model.external_id_attribute %>
   <% form_object_instance.send("#{primary_model.external_id_attribute}=", (form_object_instance.attributes[primary_model.external_id_attribute] || '').to_s.upcase)  %>
   <% if primary_model.alphanumeric %>

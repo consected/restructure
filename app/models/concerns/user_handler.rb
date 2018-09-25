@@ -123,7 +123,7 @@ module UserHandler
 
 
     def belongs_directly_to
-      master
+      master unless self.class.no_master_association
     end
 
     def is_admin?

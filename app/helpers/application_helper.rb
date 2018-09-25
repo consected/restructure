@@ -46,17 +46,19 @@
 
     def common_inline_cancel_button class_extras="pull-right"
 
+      path_pref = "/masters/#{object_instance.master_id}" unless object_instance.class.no_master_association
+
       if object_instance.id
-        cancel_href = "/masters/#{object_instance.master_id}/#{controller_name}/#{object_instance.id}"
+        cancel_href = "#{path_pref}/#{controller_name}/#{object_instance.id}"
       else
-        cancel_href = "/masters/#{object_instance.master_id}/#{controller_name}/cancel"
+        cancel_href = "#{path_pref}/#{controller_name}/cancel"
       end
 
-      "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\" ></a>".html_safe
+      "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master&.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\" ></a>".html_safe
     end
 
     def common_edit_form_id
-      "#{hyphenated_name}-edit-form-#{@master.id}-#{@id}"
+      "#{hyphenated_name}-edit-form-#{@master&.id}-#{@id}"
     end
 
     def common_edit_form_hash extras={}
@@ -64,7 +66,7 @@
 
       res[:remote] = true
       res[:html] ||= {}
-      res[:html].merge!("data-result-target" => "##{hyphenated_name}-#{@master.id}-#{@id}, [form-res-id='#{hyphenated_name}-#{@master.id}-#{@id}']", "data-template" => "#{hyphenated_name}-result-template")
+      res[:html].merge!("data-result-target" => "##{hyphenated_name}-#{@master&.id}-#{@id}, [form-res-id='#{hyphenated_name}-#{@master&.id}-#{@id}']", "data-template" => "#{hyphenated_name}-result-template")
       res
     end
 

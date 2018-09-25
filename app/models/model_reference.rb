@@ -6,8 +6,8 @@ class ModelReference < ActiveRecord::Base
   validates :from_record_master_id, presence: true
   validates :from_record_type, presence: true
   validates :to_record_id, presence: true
-  validates :to_record_master_id, presence: true
   validates :to_record_type, presence: true
+  validates :to_record_master_id, presence: true, unless: ->{ to_record_class.no_master_association }
   validates :user_id, presence: true
 
   attr_accessor :current_user
