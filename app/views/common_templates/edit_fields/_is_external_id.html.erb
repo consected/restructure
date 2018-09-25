@@ -1,0 +1,12 @@
+<% unless primary_model.prevent_edit? %>
+  <%= form.label primary_model.external_id_attribute %>
+  <% form_object_instance.send("#{primary_model.external_id_attribute}=", (form_object_instance.attributes[primary_model.external_id_attribute] || '').to_s.upcase)  %>
+  <% if primary_model.alphanumeric %>
+    <%= form.text_field primary_model.external_id_attribute, class: 'form-control', pattern: primary_model.external_id_edit_pattern %>
+  <% else %>
+    <%= form.number_field primary_model.external_id_attribute, class: 'form-control', in: primary_model.external_id_range,  pattern: primary_model.external_id_edit_pattern %>
+  <% end %>
+<% else %>
+  <%= form.label "Assign #{primary_model.label}" %>
+  <%= form.hidden_field primary_model.external_id_attribute %>
+<% end %>

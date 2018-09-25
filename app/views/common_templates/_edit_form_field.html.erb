@@ -69,13 +69,21 @@
   end
 
   unless got
-    if Classification::GeneralSelection.item_types.include?("#{general_selection_name}_#{curr_field_name_sym}".to_sym)%>
+    if Classification::GeneralSelection.exists_for? form_object_instance, curr_field_name_sym %>
       <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
     <%
       got = true
     end
   end
 
+
+  unless got
+    if form_object_instance.model_data_type == :external_identifier %>
+      <%= render partial: "common_templates/edit_fields/is_external_id", locals: local_vars[:locals] %>
+    <%
+      got = true
+    end
+  end
 
   # Handle Brakeman issue with using column type directly to generate partial path
   unless got

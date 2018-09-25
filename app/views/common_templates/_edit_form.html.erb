@@ -94,13 +94,6 @@
 
   select_desc = {}
 
-
-  if form_object_item_type_us.start_with? 'activity_log_'
-    general_selection_name = form_object_item_type_us
-  else
-    general_selection_name = form_object_item_type_us.pluralize
-  end
-
 %>
 <% unless embedded %>
 <div class="data-results">
@@ -161,7 +154,7 @@
               field_name_sym: field_name_sym,
               field_name: field_name,
               column_type: column_type,
-              general_selection_name: general_selection_name,
+              general_selection_name: general_selection_prefix_name(form_object_instance),
               form_object_instance: form_object_instance,
               form_object_item_type_us: form_object_item_type_us,
               caption_before: caption_before,
@@ -227,7 +220,7 @@
 
     </div>
       <% if @has_source %>
-        <%= render partial: 'general_selections/definitions_block', locals: {item_type: "#{general_selection_name}_source", value: form_object_instance.source} %>
+        <%= render partial: 'general_selections/definitions_block', locals: {item_type: general_selection_source_name(form_object_instance), value: form_object_instance.source} %>
       <% end %>
 
       <% select_desc.each do |k,v| %>

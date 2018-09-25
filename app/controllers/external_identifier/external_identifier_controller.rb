@@ -3,10 +3,9 @@ class ExternalIdentifier::ExternalIdentifierController < UserBaseController
   include MasterHandler
 
   protected
-    # By default the external id edit form is handled through a common template. To provide a customized form, copy the content of
-    # "common_templates/external_id_edit_form.html.erb" to views/<name>/_edit_form.html.erb
+    # By default the external id edit form is handled through a common template. 
     def edit_form
-      'common_templates/external_id_edit_form'
+      'common_templates/edit_form'
     end
 
 

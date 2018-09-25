@@ -1,5 +1,5 @@
 class <%=class_name.pluralize%>Controller < ApplicationController
-  
+
   include MasterHandler
 
   protected
@@ -8,9 +8,9 @@ class <%=class_name.pluralize%>Controller < ApplicationController
     def edit_form
       'common_templates/external_id_edit_form'
     end
-    
+
   private
-    
+
     def secure_params
       params.require(:<%=singular_name%>).permit(:master_id, :external_id)
     end

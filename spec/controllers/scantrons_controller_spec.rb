@@ -18,7 +18,7 @@ RSpec.describe ScantronsController, type: :controller do
   end
 
   def edit_form_name
-    @edit_form_name = "_external_id_edit_form"
+    @edit_form_name = "_edit_form"
   end
 
   def edit_form_prefix
