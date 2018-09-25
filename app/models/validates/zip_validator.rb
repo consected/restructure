@@ -11,7 +11,7 @@ class Validates::ZipValidator < ActiveModel::EachValidator
     "a valid ZIP"
   end
 
-  def value_is_valid? value
+  def value_is_valid? value, record=nil
       value =~ /^[0-9]{5}(-[0-9]{4})?$/i
   end
 end

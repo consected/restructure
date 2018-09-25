@@ -11,7 +11,7 @@ class Validates::PhoneValidator < ActiveModel::EachValidator
     "a valid phone number"
   end
 
-  def value_is_valid? value
+  def value_is_valid? value, record=nil
     value =~ /\([0-9]{3}\)[0-9]{3}-[0-9]{4}.*/i
   end
 end

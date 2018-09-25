@@ -9,7 +9,7 @@ class PlayerContact < UserBase
   validates :data, "validates/email": true, if: :is_email?
   validates :data, "validates/phone": true, if: :is_phone?
   validate :valid_format_phone?, if: :is_phone?
-  validates :source, source: true, allow_blank: true
+  validates :source, 'validates/source' => true, allow_blank: true
   validates :rank, presence: true
   after_save :handle_primary_status
   scope :phone, ->{ where(rec_type: 'phone').order(rank: :desc)}

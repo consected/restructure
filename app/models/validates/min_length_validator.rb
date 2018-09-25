@@ -12,7 +12,7 @@ class Validates::MinLengthValidator < ActiveModel::EachValidator
     "minimum length: #{options[:min_length]}"
   end
 
-  def value_is_valid? value
+  def value_is_valid? value, record=nil
     value.length >= options[:min_length]
   end
 end

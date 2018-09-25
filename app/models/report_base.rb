@@ -11,6 +11,18 @@ class ReportBase < ActiveRecord::Base
     end
   end
 
+  def self.definition= d
+    @definition = d
+  end
+
+  def self.definition
+    @definition
+  end
+
+  def definition
+    self.class.definition
+  end
+
   def self.human_name
     cn = self.name
 
@@ -24,6 +36,10 @@ class ReportBase < ActiveRecord::Base
 
   def item_type
     self.class.name.singularize.ns_underscore
+  end
+
+  def model_data_type
+    :report
   end
 
 end

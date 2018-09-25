@@ -6,7 +6,7 @@ class Address < UserBase
   InactiveRank = 0
 
   validates :zip, "validates/zip": true, allow_blank: true
-  validates :source, source: true, allow_blank: true
+  validates :source, 'validates/source' => true, allow_blank: true
   validates :rank, presence: true
 
   before_save :handle_country

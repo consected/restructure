@@ -417,7 +417,7 @@ module CalcActions
       condition.each do |k, opts|
 
         v = new_validator k, value, options:{k=>opts}
-        test_res = v.value_is_valid? value
+        test_res = v.value_is_valid? value, current_instance
         res &&= test_res
       end
 

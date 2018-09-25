@@ -32,4 +32,12 @@ module CommonTemplatesHelper
     fopt
   end
 
+  def general_selection_prefix_name form_object_instance
+    Classification::GeneralSelection.prefix_name form_object_instance
+  end
+
+  def general_selection_source_name form_object_instance
+    "#{general_selection_prefix_name(form_object_instance)}_source"
+  end
+
 end

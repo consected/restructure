@@ -20,12 +20,10 @@ class Classification::GeneralSelection < ActiveRecord::Base
 
   # Format the item type source string for looking up different selection types from the general_selections table
   def self.item_type_source_for record, type=:source
-    if record.respond_to?(:class) && record.class != Class
-      klass = record.class
-    else
-      klass = record
+    unless record.respond_to?(:class) && record.class != Class
+      record = record.new
     end
-    "#{klass.name.pluralize.ns_underscore}_#{type}"
+    "#{prefix_name(record)}_#{type}"
   end
 
   # Get an array of name value pairs for a particular record, and the type of attribute it corresponds to
@@ -44,6 +42,27 @@ class Classification::GeneralSelection < ActiveRecord::Base
       return resn.first.first
     end
     return
+  end
+
+  # Prefix name for a form field in a record
+  # @param record [UserBase] a standard user record, typically a form_object_instance
+  # @return [String]
+  def self.prefix_name record
+    if record.model_data_type == :activity_log
+      record.item_type_us
+    elsif record.model_data_type == :report
+      "report_#{record.definition.name.id_underscore}"
+    else
+      record.item_type_us.pluralize
+    end
+  end
+
+  # Quick check if a field in a record is a general selection type
+  # @param record [UserBase] a standard UserBase instance, typically a form_object_instance in a view
+  # @param field_name [String | Symbol] field name to check
+  # @return [Boolean]
+  def self.exists_for? record, field_name
+    item_types.include?("#{prefix_name(record)}_#{field_name}".to_sym)
   end
 
   protected

@@ -12,7 +12,7 @@ class PlayerInfo < UserBase
 
   before_validation :prevent_user_changes, on: :update
   validate :dates_sensible
-  validates :source, presence: true, if: :rank?
+  validates :source, 'validates/source' => true, presence: true, if: :rank?
   before_save :check_college
 
   def self.human_name
