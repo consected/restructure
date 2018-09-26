@@ -79,8 +79,12 @@ class ActivityLog::ActivityLogsController < UserBaseController
       end
 
       if @embedded_item
-        @embedded_item.master ||= oi.master
-        @embedded_item.master.current_user ||= oi.master_user
+        if @embedded_item.class.no_master_association
+          @embedded_item.current_user ||= oi.master_user
+        else
+          @embedded_item.master ||= oi.master
+          @embedded_item.master.current_user ||= oi.master_user
+        end
 
         set_embedded_item_optional_params if action_name == 'new'
 

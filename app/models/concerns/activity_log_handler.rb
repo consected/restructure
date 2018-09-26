@@ -355,7 +355,8 @@ module ActivityLogHandler
               o = mrc.new(extra_log_type: elt, master: master)
             else
               attrs = {}
-              if mrc.respond_to? :master
+
+              unless mrc.no_master_association
                 attrs[:master] = master
               else
                 attrs[:current_user] = self.master_user

@@ -79,7 +79,7 @@
   end
 
   unless defined? edit_button_href
-    edit_button_href = "/masters/{{master_id}}/#{name.pluralize}/{{this.id}}/edit"
+    edit_button_href = "{{#if master_id}}/masters/{{master_id}}{{/if}}/#{name.pluralize}/{{this.id}}/edit"
   end
 
   # with_data provides an alternatively named set of data for a template to use, rather than just the name

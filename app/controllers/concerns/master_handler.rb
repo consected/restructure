@@ -87,7 +87,11 @@ module MasterHandler
         index
       else
         object_instance.reload
-        object_instance.master.current_user = current_user
+        if object_instance.class.no_master_association
+          object_instance.current_user = current_user
+        else
+          object_instance.master.current_user = current_user
+        end
         show
       end
 
