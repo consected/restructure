@@ -143,9 +143,8 @@ AS $$
 
       --ix_consent_blank_yes_no
       -- if the participant scores <= 19 on TMoCA, the ability to give informed consent should not be set
-      CASE WHEN tmoca.tmoca_score <= 19 THEN 'no' ELSE 'yes' END,
+      CASE WHEN tmoca.tmoca_score <= 19 THEN 'no' ELSE initial_screening.select_still_interested END,
 
-      initial_screening.select_still_interested,
       -- ix_consent_details
       'Responded "yes" to all questions including the final confirmation to continue in Start Phone Screening form. Scored "' || tmoca.tmoca_score || '" in T-MoCA.',
 

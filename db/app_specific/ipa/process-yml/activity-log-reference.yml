@@ -1,0 +1,143 @@
+---
+extras_log_type_name:
+  label: button label
+  fields:
+  - field_name_1
+  - field_name_2
+  references:
+    model_name:
+      from: this | master
+      add: many | one_to_master | one_to_this
+      add_with:
+        extra_log_type: type name
+        item_name:
+          embedded_item:
+            field_name: value
+      filter_by:
+        field_name: value to filter the referenced items by
+      view_as:
+        edit: hide|readonly|not_embedded
+        show: hide|readonly|see_presence
+        new: outside_this|not_embedded
+  save_trigger:
+    on_create:
+      notify:
+        type: email
+        role: "(optional) role name to notify"
+        users: "(optional) list of users to notify"
+        layout_template: name of layout template
+        content_template: name of content template
+        subject: subject text
+        if: 'ref: ** conditions reference **'
+      create_reference:
+        model_name:
+          if: 'ref: ** conditions reference **'
+          in: this | master
+          with:
+            field_name: now()
+            field_name_2: literal value
+            field_name_3:
+              this: field_name
+            field_name_4:
+              reference_name: field_name
+      create_filestore_container:
+        name: part of directory name or array of attribute names to use to generate
+          directory name (value used directly if attribute not found)
+        label: human name
+        create_with_role: role name
+        if: 'ref: ** conditions reference **'
+    on_update: {}
+    on_save:
+      notes: 'on_save: provides a shorthand for on_create and on_update. on_create
+        and on_update override on_save configurations.'
+  caption_before:
+    field_name: string caption to appear before field
+    all_fields: caption to appear before all fields
+    submit: caption to appear before submit button
+    field_to_retain_label:
+      keep_label: true
+      caption: caption to appear before label
+  show_if:
+    field_name:
+      depends_on_field_name: conditional value
+  view_options:
+    show_embedded_at_top: true | false to position a single auto loaded embedded item
+    hide_unless_creatable: true | false to hide add-item buttons in activity logs
+      if they are not creatable
+    data_attribute: string or list of fields to use as the data attribute
+    always_embed_reference: reference name to always show embedded
+    alt_order: string or list of date / time or integer fields to use for ordering
+  filestore:
+    container: {}
+  save_action:
+    label: button label
+    on_update:
+      create_next_creatable:
+        if: 'ref: ** conditions reference **'
+      show_panel:
+        value: panel / category name
+        if: 'ref: ** conditions reference **'
+      hide_panel:
+        value: panel / category name
+        if: 'ref: ** conditions reference **'
+    on_create: {}
+    on_save:
+      notes: 'on_save: provides a shorthand for on_create and on_update. on_create
+        and on_update override on_save configurations.'
+  field_options:
+    field_name:
+      include_blank: true or false to force a drop down field to include a selectable
+        blank
+      pattern: provide a mask for a text field
+      value: default value | now() | today()
+      edit_as:
+        field_type: alternative field name to use for selection of edit field
+        alt_options: optional specification of options for a select_ type field to
+          use instead of general selection specified list
+  dialog_before:
+    field_name:
+      name: message template name
+      label: show dialog button label
+    all_fields:
+      name: message template name
+      label: show dialog button label
+    submit:
+      name: message template name
+      label: show dialog button label
+  creatable_if: 'ref: ** conditions reference **'
+  editable_if: 'ref: ** conditions reference **'
+  showable_if: 'ref: ** conditions reference **'
+  valid_if:
+    on_save:
+      'ref: conditions': "** ref: conditions"
+      all:
+        model_table_name | this:
+          validation_field_name_5:
+            validation_type: validation options
+    on_create: {}
+    on_update: {}
+  "** conditions reference **":
+    all:
+      model_table_name | this:
+        field_name: all conditional values must be true in model_table_name (any matching
+          record unless id or other filters specified separately) or this (this record)
+        field_name_2: literal value | null
+        field_name_3:
+          this: attribute in this record
+        field_name_4:
+          this_references: attribute in any referenced record
+    any:
+      model_table_name:
+        field_name: any conditional value must be true
+      all|any|not_all|not_any:
+        nested conditions...: {}
+    not_any:
+      model_table_name:
+        field_name: all conditional values must be false
+    not_all:
+      model_table_name:
+        field_name: any conditional value must be false
+    all_2|not_any_3...: allows for repeat of the condition type
+    all|any|not_all|not_any:
+    - repeated_model_table_name: {}
+    - repeated_model_table_name: {}
