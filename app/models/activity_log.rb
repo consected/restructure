@@ -262,7 +262,6 @@ class ActivityLog < ActiveRecord::Base
     begin
       m = self.enabled
       return if m.length == 0
-
       Rails.application.routes.draw do
         resources :masters, only: [:show, :index, :new, :create] do
 
