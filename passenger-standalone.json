@@ -2,6 +2,7 @@
   "ssl" : true,
   "ssl_port" : 443,
   "ssl_certificate" : "/etc/pki/tls/certs/server.crt",
+  "ssl_trusted_certificate" : "/etc/pki/tls/certs/root_and_intermediates.crt",
   "ssl_certificate_key" : "/etc/pki/tls/certs/server.key",
 
 }
