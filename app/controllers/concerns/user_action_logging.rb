@@ -34,7 +34,17 @@ module UserActionLogging
 
       master_id = master.id if master
 
-      Admin::UserActionLog.create! user_id: current_user.id, app_type_id: current_user.app_type_id, master_id: master_id, item_id: @id, item_type: action_log_item_type, action: action_name, url: request.original_fullpath, no_master_association: nma
+      begin
+        Admin::UserActionLog.create! user_id: current_user.id, app_type_id: current_user.app_type_id, master_id: master_id, item_id: @id, item_type: action_log_item_type, action: action_name, url: request.original_fullpath, no_master_association: nma
+      rescue => e
+        Rails.logger.error "
+        ****************************************************************
+        *** Failed to create user action log in log_user_item_action ***
+        ****************************************************************
+        "
+        Rails.logger.error "#{e.inspect}\n#{e.backtrace.join("\n")}"
+        raise e
+      end
     end
 
     def log_user_index_action force_item_type: nil
@@ -62,8 +72,18 @@ module UserActionLogging
       action = :index
       it = force_item_type || action_log_item_type
 
+      begin
+        Admin::UserActionLog.create! user_id: current_user.id, app_type_id: current_user.app_type_id, master_id: master_id, item_type: it, index_action_ids: ids, action: action, url: request.original_fullpath, no_master_association: nma
+      rescue => e
+        Rails.logger.error "
+        *****************************************************************
+        *** Failed to create user action log in log_user_index_action ***
+        *****************************************************************
+        "
+        Rails.logger.error "#{e.inspect}\n#{e.backtrace.join("\n")}"
+        raise e
+      end
 
-      Admin::UserActionLog.create! user_id: current_user.id, app_type_id: current_user.app_type_id, master_id: master_id, item_type: it, index_action_ids: ids, action: action, url: request.original_fullpath, no_master_association: nma
     end
 
     # Overridable method. By default, action logging is enabled

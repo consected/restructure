@@ -1,0 +1,34 @@
+default:
+  view_options:
+    data_attribute:
+    - select_severity
+
+
+  caption_before:
+    all_fields: Enter information for the adverse event or other unanticipated problem. If necessary, upload files such as documentation of the event, corrective action and IRB reports.
+    select_problem_type: |
+      Select type of event:
+      <b>adverse event</b> - caused potential harm to subject <span class="glyphicon glyphicon-question-sign" data-toggle="popover" data-trigger="click hover" data-content="Adverse event means any untoward or unfavorable medical occurrence in a human subject, including any abnormal sign (for example, abnormal physical exam or laboratory finding), symptom, or disease, temporally associated with the subject’s participation in the research, whether or not considered related to the subject’s participation in the research (modified from the definition of adverse events in the 1996 International Conference on Harmonization E-6 Guidelines for Good Clinical Practice)." data-original-title="" title=""></span>
+      <b>other event</b> - other unanticipated problem that may increase risk of harm
+    event_occurred_when: Date event occurred
+    event_discovered_when: Date event was discovered
+
+    event_description: Describe in detail the event that occurred. If necessary, upload additional files after saving this form.
+    corrective_action_description: Describe in detail any corrective action taken. If necessary, upload additional files after saving this form.
+
+    select_expectedness: |
+      Was this event expected? If unsure, leave blank.
+      An event may be considered to be <b>expected</b> if it is described in the consent forms.
+
+    select_severity: Select severity of the event
+
+    select_relatedness: |
+      Select whether the event is related to the assessment
+      <b>related</b> - the event highly likely to be related to participation
+      <b>possibly related</b> - the event is more likely than not related to participation
+      <b>unrelated</b> - the event is highly unlikely to be related to participation
+
+    select_location: |
+      Select where the event was experienced.
+      <b>internal</b> - sites that are relying on FPHS IRB for review of research
+      <b>external</b> - sites not relying on FPHS IRB for review of research

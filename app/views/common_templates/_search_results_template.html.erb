@@ -198,7 +198,7 @@
 
     {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
     <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-      {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption'}}}
+      {{{replace (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption') "\n" "<br>" "g"}}}
     </li>
     {{/is}}
     {{#is @key "notes"}}

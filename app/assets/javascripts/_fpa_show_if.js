@@ -100,7 +100,9 @@ _fpa.show_if.methods = {
           var exp_field_value = data[cond_field];
           // to have value
           var exp_value = cond_def[cond_field];
-          if(typeof exp_value == 'string')
+          if(exp_value == null)
+            exp_value = [exp_value];
+          else if(typeof exp_value == 'string')
             exp_value = [exp_value];
           else if(typeof exp_value == 'boolean') {
             exp_value = [exp_value, (exp_value ? 'yes' : 'no')];
