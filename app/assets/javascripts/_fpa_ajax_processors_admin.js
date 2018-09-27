@@ -69,12 +69,15 @@ _fpa.postprocessors_admin = {
     handle_admin_report_config: function(block){
 
         $('#search_attrs_filter').val('all').attr('disabled', true);
+        $('#search_no_disabled').val('1').attr('checked', true).attr('disabled', true);
+
         $('#search_attr_instruction').hide();
           $('#search_attrs_type').change(function(){
             $('#search_attrs_filter').val('all');
 
             var d = ($(this).val()!=='general_selection');
             $('#search_attrs_filter').attr('disabled', d);
+            $('#search_no_disabled').attr('disabled', d);
           });
           $('#search_attrs_add').click(function(ev){
             ev.preventDefault();
@@ -82,6 +85,7 @@ _fpa.postprocessors_admin = {
             n = n.underscore();
             var t = $('#search_attrs_type').val();
             var f = $('#search_attrs_filter').val();
+            var nd = $('#search_no_disabled').is(':checked');
             var m = $('#search_attrs_multi').val();
             var l = $('#search_attrs_label').val();
             var d = $('#search_attrs_default').val();
@@ -117,6 +121,10 @@ _fpa.postprocessors_admin = {
                     }
 
                     add += "\n    default: " + d;
+                }
+                else {
+                  if(nd)
+                      add += "\n    disabled: false";
                 }
 
                 if(s) {
