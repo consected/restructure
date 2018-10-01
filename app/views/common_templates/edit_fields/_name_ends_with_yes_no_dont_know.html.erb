@@ -2,7 +2,7 @@
 <% options = field_options_for(form_object_instance, field_name_sym) %>
 <%
   if options[:include_blank]
-    sel_options = {'-': nil}
+    sel_options = {'(not set)': nil}
   else
     sel_options = {}
   end
