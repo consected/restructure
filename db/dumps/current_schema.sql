@@ -1065,6 +1065,7 @@ CREATE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
                         pregenerate_ids,
                         min_id,
                         max_id,
+                        extra_fields,
                         admin_id,
                         created_at,
                         updated_at,
@@ -1081,6 +1082,7 @@ CREATE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
                         NEW.pregenerate_ids,
                         NEW.min_id,
                         NEW.max_id,
+                        NEW.extra_fields,
                         NEW.admin_id,
                         NEW.created_at,
                         NEW.updated_at,
@@ -2647,7 +2649,8 @@ CREATE TABLE ml_app.external_identifier_history (
     disabled boolean,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    external_identifier_id integer
+    external_identifier_id integer,
+    extra_fields character varying
 );
 
 
@@ -2689,7 +2692,8 @@ CREATE TABLE ml_app.external_identifiers (
     disabled boolean,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    alphanumeric boolean
+    alphanumeric boolean,
+    extra_fields character varying
 );
 
 
