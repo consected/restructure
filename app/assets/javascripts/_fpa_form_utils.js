@@ -226,7 +226,7 @@ _fpa.form_utils = {
                 list_items.each(function() {
                   var this_caption_before = $(this).hasClass('caption-before') && !$(this).hasClass('caption-before-keep-label');
                   if(prev_caption_before && !this_caption_before) {
-                    $(this).find('small, label').remove();
+                    $(this).find('small, label').not('.radio-label').remove();
                   }
                   prev_caption_before = this_caption_before;
                 });
@@ -234,7 +234,7 @@ _fpa.form_utils = {
                 var lgi = self.find('.list-group-item.result-field-container, .list-group-item.edit-field-container').not('.is-heading, .is-sub-heading, .is-minor-heading, .is-full-width, .is-combo, .record-meta, .edit-form-header, .has-caption-before');
 
 
-                var all = lgi.find('small, label');
+                var all = lgi.find('small, label').not('.radio-label');
                 all.addClass('label-resizer').css({whiteSpace: 'nowrap', width: 'auto', minWidth: 'none', marginLeft: 'inherit'});
 
                 var block_width = lgi.first().width();
@@ -836,7 +836,7 @@ _fpa.form_utils = {
           var data_label = _fpa.utils.translate(val, 'field_labels');
           data_label = data_label ? _fpa.utils.capitalize(data_label) : 'Data'
 
-          input.parent().find('label').html(data_label);
+          input.parent().find('label').not('.radio-label').html(data_label);
         }
 
       };
