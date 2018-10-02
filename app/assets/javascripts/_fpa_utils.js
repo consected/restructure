@@ -189,7 +189,10 @@ _fpa.utils.parseLocaleDate = function(stre) {
 
 // Get locale string, only including the date and not the time portion
 Date.prototype.asLocale = function() {
-    return this.toLocaleDateString(undefined, {timeZone: "UTC"});
+  return _fpa.utils.isoDateStringToLocale(this.toISOString());
+  // Don't trust browser locale handling
+  //return this.toLocaleDateString(undefined, {timeZone: "UTC"});
+
 };
 
 // Take yyyy-mm-dd... and make it mm/dd/yyyy

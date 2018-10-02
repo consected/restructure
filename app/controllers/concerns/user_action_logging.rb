@@ -66,7 +66,7 @@ module UserActionLogging
         ids = @master_ids
       else
         masters = @masters || @master_objects
-        ids = masters.map(&:id)
+        ids = masters.map(&:id) if masters
       end
 
       action = :index
