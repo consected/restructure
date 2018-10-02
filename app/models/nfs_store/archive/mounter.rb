@@ -48,7 +48,7 @@ module NfsStore
       # Regardless, an attempt will be made to extract archive files to the DB if an
       # archive file was already, or has just been mounted.
       def mount
-        if stored_file.file_name.end_with?(*ArchiveExtensions)
+        if has_archive_extension?
 
           @archive_path = stored_file.retrieval_path
           @mounted_path = "#{@archive_path}#{ArchiveMountSuffix}"
@@ -59,9 +59,9 @@ module NfsStore
           unless pn.mountpoint?
             raise FphsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
 
-            # No longer set gid=#{stored_file.current_gid.to_i} since this is handled by bindfs on retrieval.
-            # Avoids a brakeman test failure
-            cmd = ["archivemount", "-oumask=#{MountPerms},readonly", @archive_path, @mounted_path]
+            # This call is structured to avoid Brakeman issues, but it still gives us a false positive. We have to
+            # handle this with a Brakeman whitelist entry
+            cmd = ["archivemount", "-oumask=#{MountPerms},gid=#{stored_file.current_gid.to_i},readonly", @archive_path, @mounted_path]
             Rails.logger.info "Command: #{cmd}"
             res = Kernel.system(*cmd)
             raise FsException::Action.new "Failed to mount the archive file: #{@archive_path}" unless res
@@ -70,6 +70,18 @@ module NfsStore
 
           extract_archived_files
         end
+      end
+
+      # Check the stored file has an archive file extension that matches files we want to mount
+      # @return [Boolean]
+      def has_archive_extension?
+        self.class.has_archive_extension? stored_file
+      end
+
+      # Check the stored file passed as an attribute has an archive file extension that matches files we want to mount
+      # @return [Boolean]
+      def self.has_archive_extension?(stored_file)
+        stored_file.file_name.end_with?(*ArchiveExtensions)
       end
 
 

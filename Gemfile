@@ -22,6 +22,9 @@ gem 'syslog-logger'
 #   gem 'sdoc', '~> 0.4.0', group: :doc
 # end
 
+gem 'dicom'
+
+
 gem 'delayed_job'
 gem 'delayed_job_active_record'
 gem 'daemons'

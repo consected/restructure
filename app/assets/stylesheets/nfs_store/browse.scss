@@ -119,6 +119,16 @@
       margin-left: 1em;
     }
   }
+
+  .browse-entry-classifications {
+    .bem-meta-link {
+      text-decoration: none;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
   .browse-entry-meta {
     .bem-mod-date {
         min-width: 150px;

@@ -83,7 +83,12 @@
 
 
   unless defined? item_list
-    item_list = form_object_instance.class.permitted_params - [:id, :master_id, :item_id, item_type_id]
+    if form_object_instance.class.respond_to? :readonly_params
+      readonly_params = form_object_instance.class.readonly_params
+    else
+      readonly_params = []
+    end
+    item_list = form_object_instance.class.permitted_params - [:id, :master_id, :item_id, item_type_id] - readonly_params
   end
 
   unless defined? item_flags_after

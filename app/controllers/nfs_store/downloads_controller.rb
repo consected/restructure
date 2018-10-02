@@ -9,7 +9,7 @@ module NfsStore
       FsException::Download.new "id invalid" unless @download_id > 0
       FsException::Download.new "retrieval_type invalid" unless retrieval_type.present?
       # Avoid brakeman issue
-      retrieval_type = ValidRetrievalTypes.select{|r| r == retrieval_type.to_sym}.first
+      retrieval_type = NfsStore::Download::ValidRetrievalTypes.select{|r| r == retrieval_type.to_sym}.first
 
       FsException::Download.new "Invalid retreival type specified" unless Download.valid_retrieval_type? retrieval_type
 

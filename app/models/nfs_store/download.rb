@@ -12,7 +12,7 @@ module NfsStore
 
     before_validation :store_retrieved_items
 
-    attr_accessor :retrieval_type, :selected_items, :multiple_items, :zip_file_path, :all_retrieved_items
+    attr_accessor :retrieval_type, :selected_items, :multiple_items, :zip_file_path, :all_retrieved_items, :file_metadata
     alias_attribute :container_id, :nfs_store_container_id
 
     # Check if requested retrieval type is one of a valid set
@@ -62,11 +62,13 @@ module NfsStore
           id: id,
           file_name: retrieved_file.file_name,
           container_path: retrieved_file.container_path(no_filename: true),
-          retrieval_path: retrieved_file.retrieval_path
+          retrieval_path: retrieved_file.retrieval_path,
+          file_metadata: retrieved_file.file_metadata
         }
       else
         self.retrieval_path = retrieved_file.retrieval_path
         self.retrieval_type = retrieval_type
+        self.file_metadata = retrieved_file.file_metadata
       end
 
       FsException::NotFound.new "file not found with available group access" unless self.retrieval_path

@@ -352,6 +352,15 @@ module MasterHandler
         full_object_name.gsub('__', '/').camelize.constantize.permitted_params
       end
 
+      def readonly_params
+        c = full_object_name.gsub('__', '/').camelize.constantize
+        if c.respond_to? :readonly_params
+          c.readonly_params
+        else
+          []
+        end
+      end
+
       def secure_params
         params.require(full_object_name.gsub('__', '_').to_sym).permit(*permitted_params)
       end

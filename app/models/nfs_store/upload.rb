@@ -21,7 +21,7 @@ module NfsStore
 
     after_save :finalize_upload, if: ->{ @ready_to_finalize }
 
-    attr_accessor :upload, :chunk_hash
+    attr_accessor :upload, :chunk_hash, :stored_file
 
     # Find an latest upload meeting the provided conditions
     # Raises FsException::Upload if the latest upload was incomplete, but the
@@ -307,7 +307,7 @@ module NfsStore
         raise FsException::Upload.new "Upload is invalid. Error: #{errors.first.join(' ')}" unless valid?
         raise FsException::Upload.new "Container user is not set." unless self.container.current_user
 
-        Manage::StoredFile.finalize_upload self, final_temp_path
+        self.stored_file = Manage::StoredFile.finalize_upload self, final_temp_path
 
         cleanup_chunk_files
       end

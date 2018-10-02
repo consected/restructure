@@ -4,6 +4,10 @@ module NfsStore
     # Abract class from which file metata that is stored in the database are subclassed
     class ContainerFile < UserBase
 
+      after_create :process_new_file
+
+
+
       self.abstract_class = true
       def self.no_master_association
         true
@@ -20,6 +24,10 @@ module NfsStore
 
       def self.permitted_params
         super - [:id, :file_hash, :file_name, :content_type, :file_size, :path, :file_updated_at, :nfs_store_container_id, :archive_file]
+      end
+
+      def self.readonly_params
+        [:file_metadata]
       end
 
       def self.retrieval_type
@@ -49,6 +57,17 @@ module NfsStore
         extras[:methods] << :master_id
         super
       end
+
+
+      private
+        # After creating a new container_file record we should process it.
+        # This will kick off the processing loop
+        def process_new_file
+
+          ph = NfsStore::Process::ProcessHandler.new(self)
+          ph.run_all
+
+        end
 
     end
   end
