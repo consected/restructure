@@ -138,7 +138,7 @@ _fpa.form_utils = {
         dates.each(function(){
           var v = $(this).val();
           if(v || v != ''){
-            var res = (new Date(v)).asYMD();
+            var res = _fpa.utils.parseLocaleDate(v).asYMD();
             if(res){
               $(this).val(res);
             }
@@ -657,7 +657,7 @@ _fpa.form_utils = {
           clearBtn: true,
           autoclose: true,
           todayHighlight: true,
-          format: 'm/d/yyyy'
+          format: _fpa.user_prefs.date_format
         });
 
         $(this).on('click', function(){

@@ -159,28 +159,46 @@ _fpa.utils.ISOdatetoTimestamp = function(stre){
   }
 };
 
-// Typically returns m/d/yyyy
+// Typically returns mm/dd/yyyy
+
 _fpa.utils.YMDtoLocale = function(stre){
 
     // Take special care to avoid issues with timezones and daylight savings time quirks
     if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) || stre.length > 15){
-        startTime = new Date(Date.parse(stre));
-        startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
-        // This locale string includes time
-        // TODO: is this correct?
-        var d = startTime.toLocaleString();
+        // startTime = new Date(Date.parse(stre));
+        // startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
+        // var d = startTime.asLocale();
+        var d = _fpa.utils.isoDateStringToLocale(stre);
     } else {
       // This locale string only includes the date
-        var d = new Date(stre).toLocaleDateString(undefined, {timeZone: "UTC"});
+        // var d = new Date(stre).asLocale();
+        var d = _fpa.utils.isoDateStringToLocale(stre);
     }
     if(d == 'Invalid Date') d = stre;
 
     return d;
 };
 
+_fpa.utils.parseLocaleDate = function(stre) {
+  stre = stre.trim();
+  if(stre == '') return '';
+  var str = stre.substring(6,10) + '-' + stre.substring(0,2) + '-' + stre.substring(3,5) + 'T00:00:00Z';
+  return new Date(str);
+
+};
+
 // Get locale string, only including the date and not the time portion
-Date.prototype.asLocale = function(){
+Date.prototype.asLocale = function() {
     return this.toLocaleDateString(undefined, {timeZone: "UTC"});
+};
+
+// Take yyyy-mm-dd... and make it mm/dd/yyyy
+// TODO: conform to _fpa.user_prefs.date_format
+_fpa.utils.isoDateStringToLocale = function(stre) {
+  stre = stre.trim();
+  if(stre == '') return '';
+  return stre.substring(5,7) + '/' + stre.substring(8,10) + '/' + stre.substring(0,4);
+
 };
 
 Date.prototype.asYMD = function(){

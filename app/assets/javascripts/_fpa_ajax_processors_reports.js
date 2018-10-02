@@ -157,7 +157,7 @@ _fpa.postprocessors_reports = {
         }, 50);
 
         window.setTimeout(function() {
-          $('td[data-col-type$="_at"], td[data-col-type$="_when"]').each(function() {
+          $('td[data-col-type$="_at"], td[data-col-type$="_when"], td[data-col-type$="_date"]').each(function() {
             var d = null;
             var val = $(this).html();
             if(val == 'Invalid Date')
