@@ -168,9 +168,10 @@ module NfsStore
                     path: archived_file_path,
                     archive_file: stored_file.path ? File.join(stored_file.path, @archive_file) : @archive_file,
                     file_name: pn.basename,
-                    stored_file_id: stored_file.id,
-                    user_id: stored_file.user_id
-
+                    nfs_store_stored_file_id: stored_file.id
+                    
+                  af.current_user ||= stored_file.user_id
+                  af.send :write_attribute, :user_id, stored_file.user_id
                   container.current_user ||= stored_file.user_id
                   af.current_role_name = stored_file.current_role_name
                   af.current_gid = stored_file.current_gid

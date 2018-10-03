@@ -179,6 +179,7 @@ module NfsStore
       end
 
       def clean_path
+        return true if persisted?
         self.path = NfsStore::Manage::Filesystem.clean_path self.path
       end
 

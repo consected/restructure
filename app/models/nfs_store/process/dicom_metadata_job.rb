@@ -8,7 +8,6 @@ module NfsStore
       # Check whether the job should be enqueued or just skipped
       around_enqueue do |job, block|
 
-        byebug
         container_file = job.arguments.first
 
         if container_file.content_type == 'application/dicom' || container_file.is_archive?
@@ -29,7 +28,6 @@ module NfsStore
 
         puts "Extracting DICOM metadata for #{container_file}"
 
-        byebug
         if container_file.is_archive?
           container_file.current_user = container_file.user
           afs = container_file.archived_files.all
@@ -50,7 +48,6 @@ module NfsStore
 
         mh = NfsStore::Dicom::MetadataHandler.new(file_path: full_path)
         metadata = mh.extract_metadata
-byebug
         container_file.file_metadata = metadata
         container_file.save!
 

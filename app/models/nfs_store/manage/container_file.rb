@@ -18,6 +18,7 @@ module NfsStore
       include HasCurrentUser
 
       validate :prevent_path_change
+      validates :user_id, presence: true
 
       def self.resource_name
         "nfs_store_containers"
