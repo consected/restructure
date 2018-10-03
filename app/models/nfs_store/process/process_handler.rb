@@ -3,11 +3,10 @@ module NfsStore
   module Process
     class ProcessHandler
 
-      attr_accessor :container_file, :no_chain
+      attr_accessor :container_file
 
-      def initialize container_file, no_chain: nil
+      def initialize container_file
         self.container_file = container_file
-        self.no_chain = no_chain
       end
 
       # List of valid processing jobs.
@@ -33,17 +32,19 @@ module NfsStore
         classname = "#{name}_job".camelize
         c = self.class.parents.first.const_get classname
         c.perform_later self.container_file
+
         container_file.last_process_name_run = name
         container_file.save!
+
       end
 
 
 
-      # Run the next job in the job_list, unless attribute @no_chain is set
+      # Run the next job in the job_list
       # @param current_name [String] name of the current job
       def run_next_job_after current_name
 
-        next_name = next_job_after current_name unless self.no_chain
+        next_name = next_job_after current_name
 
         unless next_name
           container_file.last_process_name_run = '_all_done_'

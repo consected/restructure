@@ -10,6 +10,9 @@ module NfsStore
         container_file = job.arguments.first
         if NfsStore::Archive::Mounter.has_archive_extension? container_file
           block.call
+        else
+          container_file = job.arguments.first
+          ProcessHandler.new(container_file).run_next_job_after 'mount_archive'
         end
       end
 

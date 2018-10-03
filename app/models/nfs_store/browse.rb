@@ -17,7 +17,7 @@ module NfsStore
       stored_files = container.stored_files
 
       # Make sure the archive files are mounted (this is idempotent)
-      # Archive::Mounter.mount_all stored_files
+      Archive::Mounter.mount_all stored_files    
       archived_files = container.archived_files
 
       # All database entered files are simply handled

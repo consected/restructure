@@ -8,8 +8,12 @@ module NfsStore
       # Check whether the job should be enqueued or just skipped
       around_enqueue do |job, block|
         container_file = job.arguments.first
+        
         if container_file.content_type == 'application/dicom'
           block.call
+        else
+          container_file = job.arguments.first
+          ProcessHandler.new(container_file).run_next_job_after 'dicom_metadata'
         end
       end
 

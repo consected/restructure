@@ -58,16 +58,15 @@ module NfsStore
         super
       end
 
+  
+      # After creating a new container_file record we should process it.
+      # This will kick off the processing loop
+      def process_new_file
 
-      private
-        # After creating a new container_file record we should process it.
-        # This will kick off the processing loop
-        def process_new_file
+        ph = NfsStore::Process::ProcessHandler.new(self)
+        ph.run_all
 
-          ph = NfsStore::Process::ProcessHandler.new(self)
-          ph.run_all
-
-        end
+      end
 
     end
   end
