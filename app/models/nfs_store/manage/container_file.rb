@@ -17,6 +17,8 @@ module NfsStore
       include UserHandler
       include HasCurrentUser
 
+      validate :prevent_path_change
+
       def self.resource_name
         "nfs_store_containers"
       end
@@ -58,7 +60,7 @@ module NfsStore
         super
       end
 
-  
+
       # After creating a new container_file record we should process it.
       # This will kick off the processing loop
       def process_new_file
@@ -67,6 +69,14 @@ module NfsStore
         ph.run_all
 
       end
+
+      private
+
+        def prevent_path_change
+          if persisted?
+            errors.add :path, "must not be changed" if self.path_changed?
+          end
+        end
 
     end
   end

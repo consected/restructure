@@ -11817,7 +11817,8 @@ CREATE TABLE ml_app.nfs_store_archived_files (
     user_id integer,
     title character varying,
     description character varying,
-    file_metadata jsonb
+    file_metadata jsonb,
+    nfs_store_stored_file_id integer
 );
 
 
@@ -19143,6 +19144,13 @@ CREATE INDEX index_nfs_store_archived_files_on_nfs_store_container_id ON ml_app.
 
 
 --
+-- Name: index_nfs_store_archived_files_on_nfs_store_stored_file_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_archived_files_on_nfs_store_stored_file_id ON ml_app.nfs_store_archived_files USING btree (nfs_store_stored_file_id);
+
+
+--
 -- Name: index_nfs_store_containers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -23654,6 +23662,14 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 
 --
+-- Name: fk_rails_2b59e23148; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_files
+    ADD CONSTRAINT fk_rails_2b59e23148 FOREIGN KEY (nfs_store_stored_file_id) REFERENCES ml_app.nfs_store_stored_files(id);
+
+
+--
 -- Name: fk_rails_2d8072edea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -25176,4 +25192,6 @@ INSERT INTO schema_migrations (version) VALUES ('20180924153547');
 INSERT INTO schema_migrations (version) VALUES ('20181002142656');
 
 INSERT INTO schema_migrations (version) VALUES ('20181002165822');
+
+INSERT INTO schema_migrations (version) VALUES ('20181003182428');
 

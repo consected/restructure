@@ -8,7 +8,7 @@ module NfsStore
       # Check whether the job should be enqueued or just skipped
       around_enqueue do |job, block|
         container_file = job.arguments.first
-        if NfsStore::Archive::Mounter.has_archive_extension? container_file
+        if container_file.is_archive?
           block.call
         else
           container_file = job.arguments.first

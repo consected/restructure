@@ -6,6 +6,7 @@ module NfsStore
 
       include HandlesContainerFile
 
+      has_many :archived_files, foreign_key: 'nfs_store_stored_file_id', inverse_of: :stored_file
       validate :not_named_like_archive
 
       # Finalize an upload, moving a file from its temporary upload location to the file location and mounting the archive if necessary
@@ -76,6 +77,11 @@ module NfsStore
         res
       end
 
+      # Shortcut way to check if a stored file is a compressed archive
+      # @return [Boolean] true if the file is an archive
+      def is_archive?
+        NfsStore::Archive::Mounter.has_archive_extension? self
+      end
 
       def not_named_like_archive
         if NfsStore::Archive::Mounter.path_is_archive?(self.file_name) || NfsStore::Archive::Mounter.path_is_archive?(self.path)

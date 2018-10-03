@@ -6,6 +6,8 @@ module NfsStore
 
       include HandlesContainerFile
 
+      belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', foreign_key: 'nfs_store_stored_file_id'
+
       # Analyze the file to complete its ArchivedFile attributes
       def analyze_file!
         rp = archive_retrieval_path

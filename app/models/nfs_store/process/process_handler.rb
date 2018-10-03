@@ -16,13 +16,18 @@ module NfsStore
         %w(mount_archive dicom_metadata)
       end
 
+      # File path for flag to indicate file is being processed
+      # @return [String] file path
+      def processing_flag_file_path
+        "#{container_file.retrieval_path}.__processing__"
+      end
+
       # Start running the processors by starting with the first
       # @todo extend to allow configuration of what runs, based on the container configuration
       # @return
       def run_all
-
+        FileUtils.touch processing_flag_file_path
         run job_list.first
-
       end
 
       # Run a specific job, based on its name
@@ -49,6 +54,7 @@ module NfsStore
         unless next_name
           container_file.last_process_name_run = '_all_done_'
           container_file.save!
+          FileUtils.rm_f processing_flag_file_path
           return
         end
 
