@@ -24,7 +24,6 @@ module NfsStore
         @master.current_user ||= current_user
 
         if alid.present? && altype.present?
-          byebug
           al_type = altype.ns_camelize
           al_class = ActivityLog.implementation_classes.select {|a| a.to_s == al_type}.first
           raise FsException::List.new "activity log type specified is invalid" unless al_class

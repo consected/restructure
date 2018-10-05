@@ -68,8 +68,6 @@ module NfsStore
 
         user ||= item.current_user
         filters = filters_for(item, user: user).pluck(:filter)
-        conds = [""] + filters
-        conds[0] = filters.map{|f| "(coalesce(path, '') || '/' || file_name) ~ ?"}.join(' OR ')
 
         if item.model_data_type == :activity_log
           container  = ModelReference.find_referenced_items(item, record_type: 'NfsStore::Manage::Container').first
@@ -77,7 +75,13 @@ module NfsStore
 
         raise FsException::Action.new "No filestore container provided to evaluate filter" unless container
 
+        conds = [""] + filters
+        conds[0] = filters.map{|f| "(coalesce(path, '') || '/' || file_name) ~ ?"}.join(' OR ')
         sf = container.stored_files.where(conds)
+
+        conds = [""] + filters
+        conds[0] = filters.map{|f| "('/' || archive_file || '/' ||  coalesce(path, '') || '/' || file_name) ~ ?"}.join(' OR ')
+
         af = container.archived_files.where(conds)
 
         sf + af
