@@ -6,7 +6,7 @@ module NfsStore
 
       after_create :process_new_file
 
-
+      attr_accessor :prevent_processing
 
       self.abstract_class = true
       def self.no_master_association
@@ -65,7 +65,7 @@ module NfsStore
       # After creating a new container_file record we should process it.
       # This will kick off the processing loop
       def process_new_file
-
+        return true if @prevent_processing
         ph = NfsStore::Process::ProcessHandler.new(self)
         ph.run_all
 

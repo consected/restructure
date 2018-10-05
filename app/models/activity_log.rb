@@ -59,6 +59,17 @@ class ActivityLog < ActiveRecord::Base
     self.enabled.where(item_type: item_type).all.map {|i| i.rec_type }
   end
 
+  # Get all the resource names for extra log types in all active activity log definitions
+  # Used by user access control definitions and filestore filters
+  # @return [Array] array of string names
+  def self.extra_log_type_resource_names
+    res = []
+    active.each do |a|
+      res += a.extra_log_type_configs.map(&:resource_name)
+    end
+    return res
+  end
+
   def blank_log_enabled?
     !blank_log_field_list.blank?
   end

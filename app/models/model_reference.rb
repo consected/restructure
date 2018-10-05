@@ -25,7 +25,7 @@ class ModelReference < ActiveRecord::Base
   end
 
   def self.find_referenced_items from_item_or_master, record_type: nil
-    mrs = self.find_references from_item_or_master, record_type: record_type
+    mrs = self.find_references from_item_or_master, to_record_type: record_type
     res = []
     mrs.each do |m|
       rec = m.to_record

@@ -36,6 +36,13 @@ Rails.application.routes.draw do
     end
     resources :protocol_events, except: [:show, :destroy]
     resources :sub_processes, except: [:show, :destroy]
+
+    namespace :nfs_store do
+      namespace :filter do
+        resources :filters, except: [:show, :destroy]
+      end
+    end
+
   end
 
 

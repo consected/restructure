@@ -43,8 +43,9 @@
       <% elsif p == :app_type_id %>
           <%= f.label p %>
           <% select_item_type = {}
-             select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'    %>
-          <%= f.select :app_type_id, app_type_options, select_item_type%>
+             select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'
+           %>
+          <%= f.select :app_type_id, app_type_options, select_item_type, extra_field_attributes[p.to_sym] %>
       <% elsif p == :user_id %>
           <%= f.label p %>
           <%= f.select :user_id, active_user_options, include_blank: true %>

@@ -74,11 +74,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     elsif resource_type == :report
       return Report.active.map(&:name) + ['_all_reports_']
     elsif resource_type == :activity_log_type
-      res = []
-      ActivityLog.active.each do |a|
-        res += a.extra_log_type_configs.map(&:resource_name)
-      end
-      return res
+      return ActivityLog.extra_log_type_resource_names
     else
       []
     end

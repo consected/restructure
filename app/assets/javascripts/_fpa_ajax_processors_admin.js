@@ -50,6 +50,17 @@ _fpa.postprocessors_admin = {
         block.on('change', '#admin_user_access_control_resource_type', function() {
           res_type_change($(this));
         });
+
+        block.find('select[data-filters-select]').not('.filters-select-attached').each(function() {
+          var $el = $(this);
+          var filter_sel = $el.attr('data-filters-select');
+          $el.on('change', function () {
+            var val = $el.val();
+            $(filter_sel + ' optgroup[label]').hide();
+            $(filter_sel + ' optgroup[label="'+val+'"]').show();
+          });
+
+        }).addClass('filters-select-attached');
     },
 
     admin_result: function(block, data) {

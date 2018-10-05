@@ -39,8 +39,23 @@ class Admin::UserRole < ActiveRecord::Base
     super
   end
 
+  # Get role names from, either unfiltered, or from a previous scope
+  # @return [Array] list of string role names
   def self.role_names
     select("role_name").distinct.pluck(:role_name)
+  end
+
+  # Get roles names in a hash, keyed by the app name. May be filtered by a previous scope
+  # @return [Hash] hash with string keys of app names and values as arrays of role names for each
+  def self.role_names_by_app_name
+    res = all
+    items = {}
+    res.each do |role|
+      n = role.app_type_id
+      items[n] ||= []
+      items[n] << role.role_name
+    end
+    items
   end
 
   def self.users

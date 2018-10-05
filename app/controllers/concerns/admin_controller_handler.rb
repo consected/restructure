@@ -158,6 +158,14 @@ module AdminControllerHandler
       nil
     end
 
+    # Additional option attributes to attach to forms
+    # For example: {app_type_id: {'data-attribute': 234}, ...}
+    # @return [Hash] symbolized keys for fields to match with Hash values representing the attributes to add
+    def extra_field_attributes
+      {}
+    end
+
+
   private
 
     # In order to clear up a multitude of Ruby warnings
