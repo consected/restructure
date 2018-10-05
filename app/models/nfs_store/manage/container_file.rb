@@ -21,7 +21,7 @@ module NfsStore
       validates :user_id, presence: true
 
       def self.resource_name
-        "nfs_store_containers"
+        "nfs_store__manage__containers"
       end
 
 

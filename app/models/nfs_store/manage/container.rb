@@ -20,7 +20,7 @@ module NfsStore
 
 
       def self.resource_name
-        'nfs_store_container'
+        'nfs_store__manage__containers'
       end
 
       def self.human_name
