@@ -646,6 +646,10 @@ module ActivityLogHandler
     res && super(perform, with_options)
   end
 
+  def current_user
+    master.current_user
+  end
+
   # An app specific DB trigger may have have created a message notification record.
   # Check for new records, and work from there.
   def check_for_notification_records

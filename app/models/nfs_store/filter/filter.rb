@@ -15,10 +15,12 @@ module NfsStore
       # It should be noted that a container can be referenced, and viewed, from within multiple activity logs.
       # This actually allows one extra log type to provide a view onto the container differently from another
       # for the same user and roles.
-      # @param user [User] user that has filter definitions through role membership or user override
       # @param activity_log [NfsStore::Manage::Container] the activity log the container is within
+      # @param user [User|nil] user that has filter definitions through role membership or user override
       # @return [ActiveRecord::Relation] resultset of filters
-      def self.filters_for user, activity_log
+      def self.filters_for activity_log, user: nil
+
+        user ||= activity_log.current_user
 
         rn = activity_log.extra_log_type_config.resource_name
         primary_conditions = {
@@ -43,8 +45,9 @@ module NfsStore
 
       # Evaluate all filters for the current user (and associated roles) in the activity log
       # @return [Boolean]
-      def self.evaluate text, user, activity_log
-        fs = filters_for user, activity_log
+      def self.evaluate text, activity_log, user: nil
+        user ||= activity_log.current_user
+        fs = filters_for activity_log, user: user
         fs.each do |f|
           return true if f.evaluate text
         end
@@ -54,11 +57,13 @@ module NfsStore
 
       # Evaluate a query directly in the database to produce a filtered set of records
       # Acts as a scope on ActiveRecord relations
-      # @param textfield [String|Symbol] set of arguments text field in records to evaluate against
+      # @param activity_log [ActivityLog::ActivityLog] activity log referencing the container
+      # @param user [User|nil]
       # @return [ActiveRecord::Relation] resultset of all matched records
-      def self.evaluate_container_files user, activity_log
+      def self.evaluate_container_files activity_log, user: nil
 
-        filters = filters_for(user, activity_log).pluck(:filter)
+        user ||= activity_log.current_user
+        filters = filters_for(activity_log, user: user).pluck(:filter)
         conds = [""] + filters
         conds[0] = filters.map{|f| "(coalesce(path, '') || '/' || file_name) ~ ?"}.join(' OR ')
 

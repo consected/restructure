@@ -118,13 +118,13 @@ EOF
     f = create_filter('^def', role_name: 'non user role')
 
 
-    fs = NfsStore::Filter::Filter.filters_for @user, @activity_log
+    fs = NfsStore::Filter::Filter.filters_for @activity_log
 
     expect(fs.length).to eq 2
 
     f = create_filter('^def', user: @user)
 
-    fs = NfsStore::Filter::Filter.filters_for @user, @activity_log
+    fs = NfsStore::Filter::Filter.filters_for @activity_log
 
     expect(fs.length).to eq 3
 
@@ -134,23 +134,32 @@ EOF
 
   it "applies filters for the current user to container" do
 
+    create_stored_file '.', 'not_abc_ is a test'
+    create_stored_file '.', 'abc_ is a test'
+
+    res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
+    expect(res.length).to eq 2
+
+    f = create_filter('^----nothing')
+
+    res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
+    expect(res.length).to eq 0
+
     f = create_filter('^\/abc')
     f = create_filter('^dir\/')
     f = create_filter('^\/ghi')
 
-    create_stored_file '.', 'not_abc_ is a test'
-    create_stored_file '.', 'abc_ is a test'
 
-    res = NfsStore::Filter::Filter.evaluate_container_files @user, @activity_log
+    res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
     expect(res.length).to eq 1
     expect(res.first.file_name).to eq 'abc_ is a test'
 
     create_stored_file 'dir1', 'abc_ is a test3'
-    res = NfsStore::Filter::Filter.evaluate_container_files @user, @activity_log
+    res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
     expect(res.length).to eq 1
 
     create_stored_file 'dir', 'abc_ is a test2'
-    res = NfsStore::Filter::Filter.evaluate_container_files @user, @activity_log
+    res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
     expect(res.length).to eq 2
     expect(res.first.file_name).to eq 'abc_ is a test'
     expect(res.last.file_name).to eq 'abc_ is a test2'

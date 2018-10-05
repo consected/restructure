@@ -14,11 +14,15 @@ module NfsStore
       raise FsException::NotFound.new "Container nfs_store storage is not found: #{container.name}" unless container.exists?
       raise FsException::NoAccess.new "User does not have access to this container" unless container.allows_current_user_access_to? :access
 
-      stored_files = container.stored_files
+      if activity_log
+        NfsStore::Filter::Filter.evaluate_container_files activity_log
+      else
 
-      # Make sure the archive files are mounted (this is idempotent), but not immediate
-      Archive::Mounter.mount_all stored_files
-      archived_files = container.archived_files
+        stored_files = container.stored_files
+        # Make sure the archive files are mounted (this is idempotent), but not immediate
+        Archive::Mounter.mount_all stored_files
+        archived_files = container.archived_files
+      end
 
       # All database entered files are simply handled
       all_db_files = stored_files + archived_files
