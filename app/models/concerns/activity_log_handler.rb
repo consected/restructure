@@ -650,6 +650,10 @@ module ActivityLogHandler
     master.current_user
   end
 
+  def current_user= cu
+    master.current_user = cu
+  end
+
   # An app specific DB trigger may have have created a message notification record.
   # Check for new records, and work from there.
   def check_for_notification_records
