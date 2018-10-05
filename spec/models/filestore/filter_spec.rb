@@ -21,9 +21,17 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     setup_access :activity_log__player_contact_phones
     create_item(data: rand(10000000000000000), rank: 10)
 
-    @activity_log = al = ActivityLog.enabled.first
+    aldef = ActivityLog.where(name: 'AL Filter Test').first
+    unless aldef
+      aldef = ActivityLog.new(
+        name: "AL Filter Test",
+        item_type: 'player_contact',
+        rec_type: 'phone',
+        action_when_attribute: "created_at"
+      )
+    end
 
-    al.extra_log_types =<<EOF
+    aldef.extra_log_types =<<EOF
     step_1:
       label: Step 1
       fields:
@@ -51,11 +59,8 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
 
 EOF
 
-    al.current_admin = @admin
-    al.save!
-
-    @container = NfsStore::Manage::Container.last
-    @container.master.current_user ||= @user
+    aldef.current_admin = @admin
+    aldef.save!
 
     @resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:step_1).resource_name
 
@@ -73,6 +78,8 @@ EOF
     al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1)
     al.save!
     @activity_log = al
+    @container = NfsStore::Manage::Container.last
+    @container.master.current_user ||= @user
 
 
   end
@@ -92,13 +99,11 @@ EOF
     )
   end
 
-  def create_stored_file  file_path, file_name, activity_log: nil
+  def create_stored_file  file_path, file_name, container: nil, activity_log: nil
 
     activity_log ||= @activity_log
 
-    container = ModelReference.find_referenced_items(activity_log, record_type: 'NfsStore::Manage::Container').first
-
-    container.current_user = @user
+    container ||= @container
 
     NfsStore::Manage::StoredFile.create!(
         container: container,
