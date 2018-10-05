@@ -9,23 +9,23 @@ module NfsStore
     # record entered in the database.
     # @param container [NfsStore::Manage::Container] the container to list
     # @return [Array(ContainerFile)] list of ContainerFile subclass instances sorted by path
-    def self.list_files_from container
+    def self.list_files_from container, activity_log: nil
 
       raise FsException::NotFound.new "Container nfs_store storage is not found: #{container.name}" unless container.exists?
       raise FsException::NoAccess.new "User does not have access to this container" unless container.allows_current_user_access_to? :access
 
-      if activity_log
-        NfsStore::Filter::Filter.evaluate_container_files activity_log
-      else
+      # Make sure the archive files are mounted (this is idempotent), but not immediate
+      Archive::Mounter.mount_all container.stored_files
 
-        stored_files = container.stored_files
-        # Make sure the archive files are mounted (this is idempotent), but not immediate
-        Archive::Mounter.mount_all stored_files
-        archived_files = container.archived_files
+      unless activity_log
+        res = ModelReference.find_where_referenced_from(container).first
+        raise FsException::NoAccess.new "Attempting to browse a container that is referenced by activity logs, without specifying which one" if res
       end
 
-      # All database entered files are simply handled
-      all_db_files = stored_files + archived_files
+      item_for_filter = activity_log || container
+
+      all_db_files = NfsStore::Filter::Filter.evaluate_container_files item_for_filter
+
 
       # Get the filesystem files, so we can find out if any don't have DB records
       fs_files = container.list_fs_files

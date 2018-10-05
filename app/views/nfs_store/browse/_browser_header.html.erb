@@ -1,7 +1,12 @@
+<%
+  unless defined? activity_log_id
+    activity_log_id = nil
+  end
+%>
 <div class="container-heading-block">
   <h4 class="container-name"><%=container_label%></h4>
   <span class="container-id-label">ID <%=container_id%></span>
-  <%= link_to "", "/nfs_store/container_list/#{container_id}", class: "refresh-container-list glyphicon glyphicon-refresh", title: "refresh list", data: { remote: "true", container_id: container_id } %>
+  <%= link_to "", "/nfs_store/container_list/#{container_id}#{activity_log_id ? "?activity_log_id=#{activity_log_id}&activity_log_type=#{activity_log_type}" : ""}", class: "refresh-container-list glyphicon glyphicon-refresh", title: "refresh list", data: { remote: "true", container_id: container_id, activity_log_id: activity_log_id, activity_log_type: activity_log_type } %>
   <div class="container-meta-controls">
     <div class="button-radio">
       <input type="radio" name="container-meta-controls-<%=container_id%>" id="container-meta-controls-<%=container_id%>-none" value="" class="ff" /> <label for="container-meta-controls-<%=container_id%>-none">no details</label>

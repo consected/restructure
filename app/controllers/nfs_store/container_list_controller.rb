@@ -11,7 +11,7 @@ module NfsStore
 
       begin
         if @container.readable?
-          @downloads = Browse.list_files_from @container
+          @downloads = Browse.list_files_from @container, activity_log: @activity_log
           # Prep a download object to allow selection of downloads in the browse list
           @download = Download.new(container: @container)
         end
@@ -25,17 +25,17 @@ module NfsStore
 
     protected
 
-      def find_container
-        if action_name.in? ['create', 'update']
-          cid = secure_params[:container_id]
-        else
-          cid = params[:id]
-        end
-        @container = Browse.open_container id: cid, user: current_user
-        @master = @container.master
-        @master.current_user ||= current_user
-        @container
-      end
+      # def find_container
+      #   if action_name.in? ['create', 'update']
+      #     cid = secure_params[:container_id]
+      #   else
+      #     cid = params[:id]
+      #   end
+      #   @container = Browse.open_container id: cid, user: current_user
+      #   @master = @container.master
+      #   @master.current_user ||= current_user
+      #   @container
+      # end
 
 
       # return the class for the current item

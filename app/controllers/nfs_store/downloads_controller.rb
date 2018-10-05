@@ -55,7 +55,7 @@ module NfsStore
     private
 
       def secure_params
-        params.require(:nfs_store_download).permit(:container_id, {selected_items: []})
+        params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, {selected_items: []})
       end
 
 
