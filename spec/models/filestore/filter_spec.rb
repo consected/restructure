@@ -54,6 +54,9 @@ EOF
     al.current_admin = @admin
     al.save!
 
+    @container = NfsStore::Manage::Container.last
+    @container.master.current_user ||= @user
+
     @resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:step_1).resource_name
 
 
@@ -61,7 +64,7 @@ EOF
     setup_access @resource_name, resource_type: :activity_log_type
     setup_access 'nfs_store__manage__containers'
     setup_access 'nfs_store__manage__stored_files'
-    setup_access 'nfs_store__manage__archied_files'
+    setup_access 'nfs_store__manage__archived_files'
 
     basedir = '/var/tmp/nfs_store_tmp'
     FileUtils.mkdir_p File.join(basedir, 'gid600', "app-type-#{@app_type.id}", "containers")
@@ -74,8 +77,9 @@ EOF
 
   end
 
-  def create_filter filter, role_name: DefaultRole, user: nil
+  def create_filter filter, role_name: DefaultRole, user: nil, resource_name: nil
 
+    resource_name ||= @resource_name
     role_name = nil if user
 
     f = NfsStore::Filter::Filter.create!(
@@ -83,7 +87,7 @@ EOF
       app_type: @app_type,
       role_name: role_name,
       user: user,
-      resource_name: @resource_name,
+      resource_name: resource_name,
       filter: filter
     )
   end
@@ -107,7 +111,33 @@ EOF
     )
   end
 
+
   it "creates filters for a user and role" do
+
+    f = create_filter('^contabc', resource_name: 'nfs_store__manage__containers')
+    expect(f).to be_a NfsStore::Filter::Filter
+
+    f = create_filter('^contdef', resource_name: 'nfs_store__manage__containers')
+    expect(f).to be_a NfsStore::Filter::Filter
+
+    f = create_filter('^contdef', role_name: 'non user role', resource_name: 'nfs_store__manage__containers')
+
+
+    fs = NfsStore::Filter::Filter.filters_for @container
+
+    expect(fs.length).to eq 2
+
+    f = create_filter('^contdef', user: @user, resource_name: 'nfs_store__manage__containers')
+
+    fs = NfsStore::Filter::Filter.filters_for @container
+
+    expect(fs.length).to eq 3
+
+
+
+  end
+
+  it "creates filters for a user and role in activity log" do
 
     f = create_filter('^abc')
     expect(f).to be_a NfsStore::Filter::Filter
