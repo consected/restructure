@@ -22,6 +22,10 @@
   font-style: italic;
   color: gray;
   padding-left: 0.6em; }
+.container-list-items .container-entry .file-processing-tag {
+  font-style: italic;
+  color: gray;
+  padding-left: 0.6em; }
 .container-list-items .container-list-file-count {
   font-style: italic;
   color: gray; }
@@ -67,6 +71,10 @@
   padding-right: 0.4em; }
   .container-entry .browse-entry-meta span, .container-entry .browse-entry-classifications span {
     margin-left: 1em; }
+.container-entry .browse-entry-classifications .bem-meta-link {
+  text-decoration: none; }
+  .container-entry .browse-entry-classifications .bem-meta-link:hover {
+    text-decoration: none; }
 .container-entry .browse-entry-meta .bem-mod-date {
   min-width: 150px;
   display: inline-block;

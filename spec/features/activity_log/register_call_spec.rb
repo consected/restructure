@@ -19,6 +19,9 @@ describe "Register an incoming call", driver: :app_firefox_driver do
 
   before :all do
     setup_database
+    seed_database
+    ::ActivityLog.define_models
+
     user_logs_in
   end
 
