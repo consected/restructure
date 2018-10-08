@@ -172,8 +172,9 @@ EOF
     create_stored_file '.', 'not_abc_ is a test'
     create_stored_file '.', 'abc_ is a test'
 
+    # No filter specified? No results returned
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
-    expect(res.length).to eq 2
+    expect(res.length).to eq 0
 
     f = create_filter('^----nothing')
 
