@@ -19,8 +19,28 @@
       "user_input": "params[:download_id]",
       "confidence": "Weak",
       "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "4f62a9fee0c59e344c6bba833b018c2b6624f4fa6fe1a2d9752c0a583c78abaf",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/nfs_store/archive/mounter.rb",
+      "line": 102,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Kernel.system(*[\"archivemount\", \"-oumask=#{\"227\"},gid=#{stored_file.current_gid.to_i},readonly\", stored_file.retrieval_path, \"#{stored_file.retrieval_path}#{\".__mounted-archive__\"}\"])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::Archive::Mounter",
+        "method": "mount"
+      },
+      "user_input": "stored_file.current_gid.to_i",
+      "confidence": "Medium",
+      "note": ""
     }
   ],
-  "updated": "2018-09-24 16:04:48 +0100",
+  "updated": "2018-10-08 11:26:22 +0100",
   "brakeman_version": "4.3.1"
 }
