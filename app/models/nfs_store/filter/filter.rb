@@ -40,13 +40,6 @@ module NfsStore
         return ActivityLog.extra_log_type_resource_names + [NfsStore::Manage::Container.resource_name]
       end
 
-      # Evaluate the text against the current filter
-      # @return [nil, MatchData] if the match is made, a MatchData object is returned, otherwise nil
-      def evaluate text
-        re = Regexp.new self.filter
-        re.match(text)
-      end
-
       # Evaluate all filters for the current user (and associated roles) in the activity log
       # @return [Boolean]
       def self.evaluate text, item, user: nil
@@ -69,6 +62,9 @@ module NfsStore
         user ||= item.current_user
         filters = filters_for(item, user: user).pluck(:filter)
 
+        # If no filters are defined, exit. At least one is required to return a sensible result.
+        return [] if filters.length == 0
+
         if item.model_data_type == :activity_log
           container  = ModelReference.find_referenced_items(item, record_type: 'NfsStore::Manage::Container').first
         end
@@ -86,6 +82,14 @@ module NfsStore
 
         sf + af
       end
+
+      # Evaluate the text against the current filter
+      # @return [nil, MatchData] if the match is made, a MatchData object is returned, otherwise nil
+      def evaluate text
+        re = Regexp.new self.filter
+        re.match(text)
+      end
+
 
       private
 

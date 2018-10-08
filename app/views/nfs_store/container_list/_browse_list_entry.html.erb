@@ -1,7 +1,17 @@
+<%
+  file_name = download.file_name
+
+  is_processing = false
+
+  if file_name.index /\.__processing__$/
+    file_name = file_name.sub(/\.__processing__$/, '')
+    is_processing = true
+  end
+%>
 <li class="container-entry" id="container-entry-<%=@container.id%>-<%= download.id %>-<%= download.class.retrieval_type%>" data-retrieval-type="<%= download.class.retrieval_type%>" data-download-id="<%= download.id %>">
   <%= form.check_box :selected_items, {multiple: true, title: "select item for download", class: "ff"}, {id: download.id, retrieval_type: download.class.retrieval_type}.to_json, nil %>
   <% if download.id %>
-    <%=link_to download.file_name, nfs_store_download_path(@container.id, download_id: download.id, retrieval_type: download.class.retrieval_type), class: "browse-filename" %>
+    <%=link_to file_name, nfs_store_download_path(@container.id, download_id: download.id, retrieval_type: download.class.retrieval_type), class: "browse-filename" %>
     <span class="browse-entry-meta">
       <span class="bem-mime-type"><%= download.mime_type_text %></span>
       <span class="bem-mime-type"><%= ((download.file_size.to_f / 1_000_000 * 10).to_i.to_f / 10)   %> MB</span>
@@ -11,7 +21,9 @@
       <%= render partial: 'browse_list_classification', locals: { download: download } %>
     </span>
   <% else %>
-    <span class="browse-filename missing-db-entry"><%= download.file_name %></span>
+    <span class="browse-filename missing-db-entry"><%= file_name %>
+      <% if is_processing %> <span class="file-processing-tag">(processing upload...)</span><% end %>
+    </span>
     <span class="browse-entry-meta missing-db-entry"></span>
     <span class="browse-entry-classifications missing-db-entry"></span>
   <% end %>

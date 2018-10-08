@@ -39,7 +39,10 @@ module NfsStore
       missing_db = []
       missing_db_files.each do |f|
         pn = Pathname.new f
-        missing_db << Manage::StoredFile.new(path: pn.dirname, file_name: pn.basename)
+
+        can_show = NfsStore::Filter::Filter.evaluate f, item_for_filter
+
+        missing_db << Manage::StoredFile.new(path: pn.dirname, file_name: pn.basename) if can_show
         # missing_db.analyze_file!
       end
 

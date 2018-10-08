@@ -41,7 +41,15 @@
   }
 
   .container-folder {
-    .file-archive-tag {
+    .file-archive-tag, {
+      font-style: italic;
+      color: gray;
+      padding-left: 0.6em;
+    }
+  }
+
+  .container-entry {
+    .file-processing-tag {
       font-style: italic;
       color: gray;
       padding-left: 0.6em;
