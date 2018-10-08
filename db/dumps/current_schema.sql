@@ -3258,7 +3258,8 @@ CREATE TABLE ml_app.nfs_store_archived_files (
     nfs_store_container_id integer,
     user_id integer,
     title character varying,
-    description character varying
+    description character varying,
+    nfs_store_stored_file_id integer
 );
 
 
@@ -3353,6 +3354,42 @@ ALTER SEQUENCE ml_app.nfs_store_downloads_id_seq OWNED BY ml_app.nfs_store_downl
 
 
 --
+-- Name: nfs_store_filters; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.nfs_store_filters (
+    id integer NOT NULL,
+    app_type_id integer,
+    role_name character varying,
+    user_id integer,
+    resource_name character varying,
+    filter character varying,
+    description character varying,
+    disabled boolean,
+    admin_id integer
+);
+
+
+--
+-- Name: nfs_store_filters_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_filters_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_filters_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_filters_id_seq OWNED BY ml_app.nfs_store_filters.id;
+
+
+--
 -- Name: nfs_store_stored_files; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -3369,7 +3406,8 @@ CREATE TABLE ml_app.nfs_store_stored_files (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     title character varying,
-    description character varying
+    description character varying,
+    last_process_name_run character varying
 );
 
 
@@ -3409,7 +3447,8 @@ CREATE TABLE ml_app.nfs_store_uploads (
     nfs_store_container_id integer,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    path character varying
+    path character varying,
+    nfs_store_stored_file_id integer
 );
 
 
@@ -4829,6 +4868,13 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads ALTER COLUMN id SET DEFAULT nextval(
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.nfs_store_filters ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_filters_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.nfs_store_stored_files ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_stored_files_id_seq'::regclass);
 
 
@@ -5337,6 +5383,14 @@ ALTER TABLE ONLY ml_app.nfs_store_containers
 
 ALTER TABLE ONLY ml_app.nfs_store_downloads
     ADD CONSTRAINT nfs_store_downloads_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nfs_store_filters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filters
+    ADD CONSTRAINT nfs_store_filters_pkey PRIMARY KEY (id);
 
 
 --
@@ -6018,6 +6072,13 @@ CREATE INDEX index_nfs_store_archived_files_on_nfs_store_container_id ON ml_app.
 
 
 --
+-- Name: index_nfs_store_archived_files_on_nfs_store_stored_file_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_archived_files_on_nfs_store_stored_file_id ON ml_app.nfs_store_archived_files USING btree (nfs_store_stored_file_id);
+
+
+--
 -- Name: index_nfs_store_containers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6032,10 +6093,38 @@ CREATE INDEX index_nfs_store_containers_on_nfs_store_container_id ON ml_app.nfs_
 
 
 --
+-- Name: index_nfs_store_filters_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_filters_on_admin_id ON ml_app.nfs_store_filters USING btree (admin_id);
+
+
+--
+-- Name: index_nfs_store_filters_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_filters_on_app_type_id ON ml_app.nfs_store_filters USING btree (app_type_id);
+
+
+--
+-- Name: index_nfs_store_filters_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_filters_on_user_id ON ml_app.nfs_store_filters USING btree (user_id);
+
+
+--
 -- Name: index_nfs_store_stored_files_on_nfs_store_container_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_nfs_store_stored_files_on_nfs_store_container_id ON ml_app.nfs_store_stored_files USING btree (nfs_store_container_id);
+
+
+--
+-- Name: index_nfs_store_uploads_on_nfs_store_stored_file_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_uploads_on_nfs_store_stored_file_id ON ml_app.nfs_store_uploads USING btree (nfs_store_stored_file_id);
 
 
 --
@@ -7072,6 +7161,14 @@ ALTER TABLE ONLY ml_app.app_configurations
 
 
 --
+-- Name: fk_rails_0208c3b54d; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filters
+    ADD CONSTRAINT fk_rails_0208c3b54d FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_0210618434; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7216,6 +7313,14 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 
 --
+-- Name: fk_rails_2b59e23148; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_files
+    ADD CONSTRAINT fk_rails_2b59e23148 FOREIGN KEY (nfs_store_stored_file_id) REFERENCES ml_app.nfs_store_stored_files(id);
+
+
+--
 -- Name: fk_rails_2d8072edea; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7336,6 +7441,14 @@ ALTER TABLE ONLY ml_app.message_templates
 
 
 --
+-- Name: fk_rails_4ff6d28f98; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_uploads
+    ADD CONSTRAINT fk_rails_4ff6d28f98 FOREIGN KEY (nfs_store_stored_file_id) REFERENCES ml_app.nfs_store_stored_files(id);
+
+
+--
 -- Name: fk_rails_51ae125c4f; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7437,6 +7550,14 @@ ALTER TABLE ONLY ml_app.external_identifiers
 
 ALTER TABLE ONLY ml_app.player_contacts
     ADD CONSTRAINT fk_rails_72b1afe72f FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_776e17eafd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filters
+    ADD CONSTRAINT fk_rails_776e17eafd FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
@@ -7741,6 +7862,14 @@ ALTER TABLE ONLY ml_app.nfs_store_archived_files
 
 ALTER TABLE ONLY ml_app.app_configurations
     ADD CONSTRAINT fk_rails_f0ac516fff FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_rails_f547361daa; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filters
+    ADD CONSTRAINT fk_rails_f547361daa FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
 
 
 --
