@@ -91,17 +91,16 @@ module NfsStore
             @archive_file = stored_file.file_name
 
             pn = Pathname.new(@mounted_path)
-            FileUtils.mkdir_p @mounted_path unless pn.exist?
-            unless pn.mountpoint?
+            unless pn.exist?
               raise FphsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
 
-              # This call is structured to avoid Brakeman issues, but it still gives us a false positive. We have to
-              # handle this with a Brakeman whitelist entry
-              cmd = ["archivemount", "-oumask=#{MountPerms},gid=#{stored_file.current_gid.to_i},readonly", @archive_path, @mounted_path]
+              cmd = ["unzip", @archive_path, "-d", @mounted_path]
               Rails.logger.info "Command: #{cmd}"
-              res = Kernel.system(*cmd)
-              raise FsException::Action.new "Failed to mount the archive file: #{@archive_path}" unless res
 
+              res = Kernel.system(*cmd)
+              raise FsException::Action.new "Failed to unzip the archive file: #{@archive_path}" unless res
+
+              FileUtils.chown_R nil, stored_file.current_gid.to_i, @mounted_path
             end
 
             res = extract_archived_files
@@ -169,7 +168,7 @@ module NfsStore
                     archive_file: stored_file.path ? File.join(stored_file.path, @archive_file) : @archive_file,
                     file_name: pn.basename,
                     nfs_store_stored_file_id: stored_file.id
-                    
+
                   af.current_user ||= stored_file.user_id
                   af.send :write_attribute, :user_id, stored_file.user_id
                   container.current_user ||= stored_file.user_id
