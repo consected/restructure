@@ -1,26 +1,6 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "Command Injection",
-      "warning_code": 14,
-      "fingerprint": "349c1064b5d4ac1568896e65cf3017f8880efdb76cf5a43f501ca1a7264018a7",
-      "check_name": "Execute",
-      "message": "Possible command injection",
-      "file": "app/models/nfs_store/archive/mounter.rb",
-      "line": 100,
-      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{stored_file.retrieval_path}#{\".__mounted-archive__\"}\"])",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "NfsStore::Archive::Mounter",
-        "method": "mount"
-      },
-      "user_input": "stored_file.retrieval_path",
-      "confidence": "Medium",
-      "note": ""
-    },
-    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "47ba85895ac936ce8cf27d55a558627330e68a702137c8a864e612f2f97fcc2d",
@@ -39,8 +19,28 @@
       "user_input": "params[:download_id]",
       "confidence": "Weak",
       "note": ""
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "edac64dedbf192ca033ca46a9c90399f18e187becdaebbc8db59a4de3843b437",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/nfs_store/archive/mounter.rb",
+      "line": 106,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")}/zip\"])",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::Archive::Mounter",
+        "method": "mount"
+      },
+      "user_input": "File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")",
+      "confidence": "Medium",
+      "note": ""
     }
   ],
-  "updated": "2018-10-09 10:22:29 +0100",
+  "updated": "2018-10-09 17:19:04 +0100",
   "brakeman_version": "4.3.1"
 }
