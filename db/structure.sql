@@ -3258,7 +3258,8 @@ CREATE TABLE ml_app.nfs_store_archived_files (
     user_id integer,
     title character varying,
     description character varying,
-    nfs_store_stored_file_id integer
+    nfs_store_stored_file_id integer,
+    file_metadata jsonb
 );
 
 
@@ -3406,7 +3407,8 @@ CREATE TABLE ml_app.nfs_store_stored_files (
     updated_at timestamp without time zone,
     title character varying,
     description character varying,
-    last_process_name_run character varying
+    last_process_name_run character varying,
+    file_metadata jsonb
 );
 
 
