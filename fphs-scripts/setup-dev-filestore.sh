@@ -12,7 +12,7 @@ getent group 599 || groupadd --gid 599 nfs_store_all_access
 getent group 600 || groupadd --gid 600 nfs_store_group_0
 getent group 601 || groupadd --gid 601 nfs_store_group_1
 getent passwd 600 || useradd --user-group --uid 600 nfsuser
-usermod -a --groups 599 $WEBAPP_USER
+usermod -a --groups=599,600,601 $WEBAPP_USER
 mkdir -p $FS_ROOT
 mkdir -p $MOUNT_ROOT/gid600
 mkdir -p $MOUNT_ROOT/gid601

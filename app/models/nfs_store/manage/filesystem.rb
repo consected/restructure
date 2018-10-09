@@ -133,6 +133,12 @@ module NfsStore
           if action == :write
             fs_test_path = nfs_store_path(role_name, container, extra_path, '.test_file')
             FileUtils.rm fs_test_path if File.exist? fs_test_path
+            # Avoid a strange NFS timing issue where touch hits a stale file handle
+            # Give rm time to complete cleanly
+            (0..9).each do
+              break unless File.exist? fs_test_path
+              sleep 0.1
+            end
             FileUtils.touch fs_test_path
             FileUtils.rm fs_test_path
           elsif action == :mkdir

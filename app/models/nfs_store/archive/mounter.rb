@@ -94,15 +94,30 @@ module NfsStore
             unless pn.exist?
               raise FphsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
 
-              cmd = ["unzip", @archive_path, "-d", @mounted_path]
-              Rails.logger.info "Command: #{cmd}"
+
+              dir = File.join(Manage::Filesystem.temp_directory, "__filestore__#{SecureRandom.hex}")
+
+              FileUtils.mkdir dir
+
+              tmpzipdir = "#{dir}/zip"
+              FileUtils.mkdir tmpzipdir
+              cmd = ["unzip", @archive_path, "-d", tmpzipdir]
 
               res = Kernel.system(*cmd)
+              puts "Command: #{cmd}\nRes: #{res}"
               raise FsException::Action.new "Failed to unzip the archive file: #{@archive_path}" unless res
 
-              FileUtils.chown_R nil, stored_file.current_gid.to_i, @mounted_path
-            end
+              puts "Setting permissions (gid=#{stored_file.current_gid.to_i}) on #{tmpzipdir}"
 
+              FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir
+              puts "Copying #{tmpzipdir} to #{@mounted_path}"
+              FileUtils.cp_r tmpzipdir, @mounted_path
+              puts "Cleaning directory"
+              FileUtils.rm_rf dir
+              puts "Done with #{@mounted_path}"
+
+            end
+            
             res = extract_archived_files
 
             extract_completed! if res
@@ -143,6 +158,8 @@ module NfsStore
         # @return [Boolean] result true if all the archived files were extracted and stored
         def extract_archived_files
 
+          puts "Start to extract files? (#{!archive_extracted?}) to DB for #{@mounted_path}"
+
           result = true
 
           unless archive_extracted?
@@ -152,7 +169,7 @@ module NfsStore
 
             files = Dir.glob("#{@mounted_path}/**/*")
 
-            Rails.logger.info "Starting extract_archived_files of #{files.length} files"
+            puts "Starting extract_archived_files of #{files.length} files"
 
             container = stored_file.container
 
