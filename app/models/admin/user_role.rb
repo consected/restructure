@@ -53,7 +53,7 @@ class Admin::UserRole < ActiveRecord::Base
     res.each do |role|
       n = role.app_type_id
       items[n] ||= []
-      items[n] << role.role_name
+      items[n] << role.role_name unless items[n].include? role.role_name
     end
     items
   end

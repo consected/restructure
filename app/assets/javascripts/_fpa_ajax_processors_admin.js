@@ -60,6 +60,10 @@ _fpa.postprocessors_admin = {
             $(filter_sel + ' optgroup[label="'+val+'"]').show();
           });
 
+          var val = $el.val();
+          $(filter_sel + ' optgroup[label]').hide();
+          $(filter_sel + ' optgroup[label="'+val+'"]').show();
+
         }).addClass('filters-select-attached');
     },
 

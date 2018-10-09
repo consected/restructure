@@ -37,7 +37,9 @@ module NfsStore
       # List of resource names for definitions of filters
       # @return [Array] list of full activity_log__type and container resource names
       def self.resource_names
-        return ActivityLog.extra_log_type_resource_names + [NfsStore::Manage::Container.resource_name]
+        # Get only the names that have an extra log type config with a reference to a container
+        names = ActivityLog.extra_log_type_resource_names{|e| e && e.references && e.references[:nfs_store__manage__container]}
+        return (names + [NfsStore::Manage::Container.resource_name]).uniq
       end
 
       # Evaluate all filters for the current user (and associated roles) in the activity log

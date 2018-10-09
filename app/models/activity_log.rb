@@ -61,11 +61,18 @@ class ActivityLog < ActiveRecord::Base
 
   # Get all the resource names for extra log types in all active activity log definitions
   # Used by user access control definitions and filestore filters
+  # @param [Proc] an optional block may be passed to allow filtering based on values in the extra log type config for each entry
+  # => for example: extra_log_type_resource_names {|e| e && e.references && e.references[:nfs_store__manage__container]}
   # @return [Array] array of string names
-  def self.extra_log_type_resource_names
+  def self.extra_log_type_resource_names &block
     res = []
     active.each do |a|
-      res += a.extra_log_type_configs.map(&:resource_name)
+      if block_given?
+        elts = a.extra_log_type_configs.select(&block)
+      else
+        elts = a.extra_log_type_configs
+      end
+      res += elts.map(&:resource_name)
     end
     return res
   end
