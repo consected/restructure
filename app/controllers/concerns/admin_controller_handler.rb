@@ -8,7 +8,7 @@ module AdminControllerHandler
     before_action :set_instance_from_id, only: [:edit, :update, :destroy]
 
 
-    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance, :objects_instance, :human_name, :no_edit, :primary_model, :view_path
+    helper_method :filters, :filters_on, :index_path, :index_params, :permitted_params, :object_instance, :objects_instance, :human_name, :no_edit, :primary_model, :view_path, :extra_field_attributes
 
   end
 
