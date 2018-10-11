@@ -14,7 +14,11 @@
                       user_id,
                       created_at,
                       updated_at,
-                      ipa_hotel_id
+                      ipa_hotel_id,
+                      check_in_date,
+                      check_in_time,
+                      check_out_date,
+                      check_out_time
                       )
                   SELECT
                       NEW.master_id,
@@ -24,7 +28,11 @@
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
-                      NEW.id
+                      NEW.id,
+                      NEW.check_in_date,
+                      NEW.check_in_time,
+                      NEW.check_out_date,
+                      NEW.check_out_time
                   ;
                   RETURN NEW;
               END;
@@ -34,7 +42,11 @@
           id integer NOT NULL,
           master_id integer,
           hotel varchar,
+          check_in_date date,
+          check_in_time time,
           room_number varchar,
+          check_out_date date,
+          check_out_time time,
           notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -55,7 +67,11 @@
           id integer NOT NULL,
           master_id integer,
           hotel varchar,
+          check_in_date date,
+          check_in_time time,
           room_number varchar,
+          check_out_date date,
+          check_out_time time,
           notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
