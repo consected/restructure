@@ -1,4 +1,4 @@
-set search_path=ipa_ops,ml_app;
+set search_path=filestore, filestore_admin;
 
       BEGIN;
 

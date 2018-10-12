@@ -12,6 +12,8 @@
           extra_log_type varchar,
           select_who varchar,
           done_when date,
+          notes varchar,
+
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -25,6 +27,8 @@
           extra_log_type varchar,
           select_who varchar,
           done_when date,
+          notes varchar,
+
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
@@ -42,6 +46,7 @@
                       extra_log_type,
                       select_who,
                       done_when,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -54,6 +59,7 @@
                       NEW.extra_log_type,
                       NEW.select_who,
                       NEW.done_when,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,

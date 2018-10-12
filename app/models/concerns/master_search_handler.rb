@@ -10,6 +10,7 @@ module MasterSearchHandler
     TrackerEventOrderClause = 'protocols.position asc, event_date DESC NULLS last, trackers.updated_at DESC NULLS last '
     TrackerHistoryEventOrderClause = 'event_date DESC NULLS last, tracker_history.updated_at DESC NULLS last '
 
+    #TODO
     # This association is provided to allow 'simple' search on names in player_infos OR pro_infos
     has_many :general_infos, class_name: 'ProInfo'
 
@@ -322,13 +323,6 @@ module MasterSearchHandler
       res
     end
 
-    def results_limit
-      r = nil
-      e = ENV['FPHS_RESULT_LIMIT']
-      r = e.to_i if e
-      r = nil if r == 0
-      r
-    end
 
 
   end

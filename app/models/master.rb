@@ -7,6 +7,7 @@ class Master < ActiveRecord::Base
 
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
+  #TODO
   has_many :pro_infos , inverse_of: :master
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
@@ -51,6 +52,7 @@ class Master < ActiveRecord::Base
   ActivityLog.enable_active_configurations
 
 
+  #TODO
   # Move all the simple and advance search form functionality out of the way, so the data functionality of the model can be clearly seen
   include MasterSearchHandler
 
@@ -200,6 +202,13 @@ class Master < ActiveRecord::Base
     end
   end
 
+  def self.results_limit
+    r = nil
+    e = ENV['FPHS_RESULT_LIMIT']
+    r = e.to_i if e
+    r = nil if r == 0
+    r
+  end
 
 
   def as_json extras={}

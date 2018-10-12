@@ -1,4 +1,4 @@
-set search_path=ipa_ops, ml_app;
+set search_path=filestore, filestore_admin;
       BEGIN;
 
 -- Command line:
@@ -116,18 +116,18 @@ set search_path=ipa_ops, ml_app;
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores
-          ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
+          ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestores
-          ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_assignments(id);
+          ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
 
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
           ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
 
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_ipa_assignment_session_filestore_id FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_assignments(id);
+          ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_ipa_assignment_session_filestore_id FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
 
       ALTER TABLE ONLY activity_log_ipa_assignment_session_filestore_history
           ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_activity_log_ipa_assignment_session_filestores FOREIGN KEY (activity_log_ipa_assignment_session_filestore_id) REFERENCES activity_log_ipa_assignment_session_filestores(id);

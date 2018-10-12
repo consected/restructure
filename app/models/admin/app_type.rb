@@ -204,9 +204,10 @@ class Admin::AppType < Admin::AdminBase
   # Select activity logs that have some kind of access, typically scoped to a specific app type
   # @return [ActiveRecord::Relation]
   def associated_activity_logs
-    names = user_access_controls.active.where(resource_type: :table)
+    get_names = user_access_controls.active.where(resource_type: :table)
       .select {|a| a.access && a.resource_name.start_with?( 'activity_log__')}
-      .map{|n| n.resource_name.singularize.sub('activity_log__', '')}.uniq
+    names = get_names.map{|n| n.resource_name.singularize.sub('activity_log__', '')}.uniq
+    names += get_names.map{|n| n.resource_name.sub('activity_log__', '')}.uniq
 
     ActivityLog.active.where("
          (rec_type is NULL OR rec_type = '') AND (process_name IS NULL OR process_name = '') AND item_type in (?)
