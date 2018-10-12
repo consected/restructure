@@ -1,0 +1,12 @@
+default:
+  view_options:
+    data_attribute:
+    - select_severity
+
+    caption_before:
+      all_fields: Enter information for the protocol deviation. If necessary, upload files such as documentation of the event, corrective action and IRB reports.
+      deviation_occurred_when: Date event occurred
+      deviation_discovered_when: Date event was discovered
+      select_severity: Select severity of the event
+      deviation_description: Describe in detail the event that occurred. If necessary, upload additional files after saving this form.
+      corrective_action_description: Describe in detail any corrective action taken. If necessary, upload additional files after saving this form.

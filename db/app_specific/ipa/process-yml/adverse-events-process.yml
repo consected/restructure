@@ -86,11 +86,6 @@ _default:
   view_options:
     hide_unless_creatable: true
     always_embed_reference: dynamic_model__ipa_adverse_event
-    data_attribute:
-      - event_occurred_when
-      - select_severity
-
-
 
 adverse_event_record:
   label: Record Adverse Event
@@ -105,21 +100,24 @@ adverse_event_record:
 
   save_trigger:
     on_create:
-
       <<: *create_filestore_container
 
       notify:
         type: email
-        role: clinical research coordinator
+        role: email - adverse event review
         layout_template: ipa notification layout
         content_template: ipa adverse event message
         subject: "IPA App: Adverse Event needs initial review"
 
   references:
+
+  # Always show the record that contains event details
   - dynamic_model__ipa_adverse_event:
       from: this
       add: one_to_this
 
+  # The initial review can be performed at any time until the PI review has been completed
+  # It does not block PI review
   - activity_log__ipa_assignment_adverse_event:
       label: Initial Review
       from: this
@@ -138,10 +136,14 @@ adverse_event_record:
 
         not_all:
           activity_log__ipa_assignment_adverse_events:
-            extra_log_type: initial_review
+            extra_log_type: pi_review
             id:
               this: id
 
+  # The PI review can be performed at any time until the event is reported to the IRB
+  # It is not blocked by initial review and can happen in place of it
+  # The rules around which type of events need PI review still stand, but are not enforced
+  # here, since the PI may select to just handle the items before initial review has classified them
   - activity_log__ipa_assignment_adverse_event:
       label: PI Review
       from: this
@@ -153,36 +155,13 @@ adverse_event_record:
       creatable_if:
         all:
           activity_log__ipa_assignment_adverse_events:
-            extra_log_type: initial_review
+            extra_log_type: adverse_event_record
             id:
-              this_references: id
-
-          any:
-            all:
-              dynamic_model__ipa_adverse_events:
-                select_location: internal
-                select_expectedness: unexpected
-                select_relatedness:
-                - related
-                - possibly related
-                id:
-                  this_references: id
-
-
-            all2:
-              dynamic_model__ipa_adverse_events:
-                select_severity: serious
-                select_expectedness: unexpected
-                select_relatedness:
-                - related
-                - possibly related
-                id:
-                  this_references: id
-
+              this: id
 
         not_all:
           activity_log__ipa_assignment_adverse_events:
-            extra_log_type: pi_review
+            extra_log_type: report_to_irb
             id:
               this_references: id
 
@@ -235,10 +214,13 @@ adverse_event_record:
       <<: *ref_nfs_store__manage__container
 
 
-
+# Initial review will be performed by a qualified person, such as an on-site RN, or an assigned person remotely
+# This activity does not block the PI review
 initial_review:
   label: Completed Initial Review
   caption_before:
+    select_who: Who performed the task (if recording this action for somebody else)?
+    done_when: When was this task performed?
     submit: Review the Adverse Event and update the details and severity if necessary. When complete, click <b>Complete</b>. If the incident is <b>internal</b> or <b>serious</b>, and <b>unexpected</b> and <b>related</b> / <b>possibly related</b> the PI will be notified.
   save_action:
     label: Complete
@@ -250,7 +232,7 @@ initial_review:
     on_create:
       notify:
         type: email
-        role: pi
+        role: email - adverse event pi
         layout_template: ipa notification layout
         content_template: ipa adverse event message
         subject: "IPA App: Adverse Event needs review"
@@ -281,6 +263,8 @@ initial_review:
 pi_review:
   label: Complete PI Review
   caption_before:
+    select_who: Who performed the task (if recording this action for somebody else)?
+    done_when: When was this task performed?
     submit: Review the Adverse Event. When complete, click <b>Complete</b>. If the incident is <b>internal</b> or <b>serious</b>, and <b>unexpected</b> and <b>related</b> / <b>possibly related</b>, a staff member will be notified and will complete the report for the IRB.
   save_action:
     label: Complete
@@ -293,7 +277,7 @@ pi_review:
     on_create:
       notify:
         type: email
-        role: clinical research coordinator
+        role: email - adverse event irb report
         layout_template: ipa notification layout
         content_template: ipa adverse event message
         subject: "IPA App: Adverse Event needs IRB report"
@@ -325,6 +309,8 @@ pi_review:
 report_to_irb:
   label: Completed Report to IRB
   caption_before:
+    select_who: Who performed the task (if recording this action for somebody else)?
+    done_when: When was this task performed?
     submit: When the <b>internal</b> or <b>serious</b>, and <b>unexpected</b> and <b>related</b> / <b>possibly related</b> Adverse Event has been reported to the IRB, click <b>Complete</b>.
   save_action:
     label: Complete

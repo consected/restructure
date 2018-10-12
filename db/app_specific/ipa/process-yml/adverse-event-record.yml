@@ -3,7 +3,6 @@ default:
     data_attribute:
     - select_severity
 
-
   caption_before:
     all_fields: Enter information for the adverse event or other unanticipated problem. If necessary, upload files such as documentation of the event, corrective action and IRB reports.
     select_problem_type: |
@@ -12,15 +11,15 @@ default:
       <b>other event</b> - other unanticipated problem that may increase risk of harm
     event_occurred_when: Date event occurred
     event_discovered_when: Date event was discovered
-
-    event_description: Describe in detail the event that occurred. If necessary, upload additional files after saving this form.
-    corrective_action_description: Describe in detail any corrective action taken. If necessary, upload additional files after saving this form.
-
     select_expectedness: |
       Was this event expected? If unsure, leave blank.
       An event may be considered to be <b>expected</b> if it is described in the consent forms.
 
     select_severity: Select severity of the event
+    select_location: |
+      Select where the event was experienced.
+      <b>internal</b> - sites that are relying on FPHS IRB for review of research
+      <b>external</b> - sites not relying on FPHS IRB for review of research
 
     select_relatedness: |
       Select whether the event is related to the assessment
@@ -28,7 +27,5 @@ default:
       <b>possibly related</b> - the event is more likely than not related to participation
       <b>unrelated</b> - the event is highly unlikely to be related to participation
 
-    select_location: |
-      Select where the event was experienced.
-      <b>internal</b> - sites that are relying on FPHS IRB for review of research
-      <b>external</b> - sites not relying on FPHS IRB for review of research
+    event_description: Describe in detail the event that occurred. If necessary, upload additional files after saving this form.
+    corrective_action_description: Describe in detail any corrective action taken. If necessary, upload additional files after saving this form.

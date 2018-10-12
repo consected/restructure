@@ -2,14 +2,16 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_protocol_deviations ipa_assignment 
+-- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_protocol_deviations ipa_assignment
 
       CREATE TABLE activity_log_ipa_assignment_protocol_deviation_history (
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
-          
+
           extra_log_type varchar,
+          select_who varchar,
+          done_when date,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -19,8 +21,10 @@
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
-          
+
           extra_log_type varchar,
+          select_who varchar,
+          done_when date,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
@@ -34,8 +38,10 @@
                   (
                       master_id,
                       ipa_assignment_id,
-                      
+
                       extra_log_type,
+                      select_who,
+                      done_when,
                       user_id,
                       created_at,
                       updated_at,
@@ -44,8 +50,10 @@
                   SELECT
                       NEW.master_id,
                       NEW.ipa_assignment_id,
-                      
+
                       NEW.extra_log_type,
+                      NEW.select_who,
+                      NEW.done_when,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,

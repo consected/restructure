@@ -102,7 +102,7 @@ deviation_record:
 
       notify:
         type: email
-        role: clinical research coordinator
+        role: email - protocol deviation review
         layout_template: ipa notification layout
         content_template: ipa protocol deviation message
         subject: "IPA App: Protocol Deviation needs initial review"
@@ -190,6 +190,8 @@ deviation_record:
 initial_review:
   label: Completed Initial Review
   caption_before:
+    select_who: Who performed the task (if recording this action for somebody else)?
+    done_when: When was this task performed?
     submit: Review the protocol deviation and update the details and severity if necessary. When complete, click <b>Complete</b>. If the <i>severity</i> is <b>Major</b>, the PI will be notified.
   save_action:
     label: Complete
@@ -201,7 +203,7 @@ initial_review:
     on_create:
       notify:
         type: email
-        role: pi
+        role: email - protocol deviation pi
         layout_template: ipa notification layout
         content_template: ipa protocol deviation message
         subject: "IPA App: Protocol Deviation needs review"
@@ -215,6 +217,8 @@ initial_review:
 pi_review:
   label: Complete PI Review
   caption_before:
+    select_who: Who performed the task (if recording this action for somebody else)?
+    done_when: When was this task performed?
     submit: Review the protocol deviation. When complete, click <b>Complete</b>. If the <i>severity</i> is <b>Major</b>, a staff member will be notified and will complete the report for the IRB.
   save_action:
     label: Complete
@@ -242,6 +246,8 @@ pi_review:
 report_to_irb:
   label: Completed Report to IRB
   caption_before:
+    select_who: Who performed the task (if recording this action for somebody else)?
+    done_when: When was this task performed?
     submit: When the major protocol deviation has been reported to the IRB, click <b>Complete</b>.
   save_action:
     label: Complete
