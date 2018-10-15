@@ -138,7 +138,7 @@ adverse_event_record:
           activity_log__ipa_assignment_adverse_events:
             extra_log_type: pi_review
             id:
-              this: id
+              this_references: id
 
   # The PI review can be performed at any time until the event is reported to the IRB
   # It is not blocked by initial review and can happen in place of it
@@ -217,10 +217,18 @@ adverse_event_record:
 # Initial review will be performed by a qualified person, such as an on-site RN, or an assigned person remotely
 # This activity does not block the PI review
 initial_review:
+  fields:
+    - select_who
+    - done_when
+    - notes
+
   label: Completed Initial Review
   caption_before:
-    select_who: Who performed the task (if recording this action for somebody else)?
+    all_fields: <b>Review the Event and update the details and severity if necessary before continuing.</b>
+    select_who: Who performed this review(if recording this action for somebody else)?
     done_when: When was this task performed?
+    notes: Record any notes related to the review. If necessary, files may be uploaded below to provide additional supporting information.
+
     submit: Review the Adverse Event and update the details and severity if necessary. When complete, click <b>Complete</b>. If the incident is <b>internal</b> or <b>serious</b>, and <b>unexpected</b> and <b>related</b> / <b>possibly related</b> the PI will be notified.
   save_action:
     label: Complete
@@ -262,9 +270,16 @@ initial_review:
 
 pi_review:
   label: Complete PI Review
+  fields:
+    - select_who
+    - done_when
+    - notes
+
   caption_before:
-    select_who: Who performed the task (if recording this action for somebody else)?
+    all_fields: <b>Review the Event and update the details and severity if necessary before continuing.</b>
+    select_who: Who performed this review (if recording this action for somebody else)?
     done_when: When was this task performed?
+    notes: Record any notes related to the review. If necessary, files may be uploaded below to provide additional supporting information.
     submit: Review the Adverse Event. When complete, click <b>Complete</b>. If the incident is <b>internal</b> or <b>serious</b>, and <b>unexpected</b> and <b>related</b> / <b>possibly related</b>, a staff member will be notified and will complete the report for the IRB.
   save_action:
     label: Complete
@@ -308,9 +323,16 @@ pi_review:
 
 report_to_irb:
   label: Completed Report to IRB
+  fields:
+    - select_who
+    - done_when
+    - notes
+
   caption_before:
-    select_who: Who performed the task (if recording this action for somebody else)?
+    select_who: Who performed this task (if recording this action for somebody else)?
     done_when: When was this task performed?
+    notes: Record any notes related to the review. If necessary, files may be uploaded below to provide additional supporting information.
+
     submit: When the <b>internal</b> or <b>serious</b>, and <b>unexpected</b> and <b>related</b> / <b>possibly related</b> Adverse Event has been reported to the IRB, click <b>Complete</b>.
   save_action:
     label: Complete
