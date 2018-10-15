@@ -169,7 +169,13 @@ _fpa.form_utils = {
           form_data[obj_name] = { item_type: obj_name };
           form_data[obj_name].full_option_type = full_option_type;
         }
-        form_data[obj_name][a_name] = e.val();
+        if(e[0] && e[0].type == 'radio') {
+          if (e.is(':checked'))
+            form_data[obj_name][a_name] = e.val();
+        }
+        else {
+          form_data[obj_name][a_name] = e.val();
+        }
       });
 
       return form_data;
