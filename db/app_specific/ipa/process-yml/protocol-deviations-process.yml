@@ -115,8 +115,8 @@ deviation_record:
       from: this
       add: one_to_this
 
-      # The initial review can be performed at any time until the PI review has been completed
-      # It does not block PI review
+  # The initial review can be performed at any time until the PI review has been completed
+  # It does not block PI review
   - activity_log__ipa_assignment_protocol_deviation:
       label: Initial Review
       from: this
@@ -137,7 +137,7 @@ deviation_record:
           activity_log__ipa_assignment_protocol_deviations:
             extra_log_type: pi_review
             id:
-              this: id
+              this_references: id
 
   # The PI review can be performed at any time until the event is reported to the IRB
   # It is not blocked by initial review and can happen in place of it
@@ -153,10 +153,10 @@ deviation_record:
         extra_log_type: pi_review
       creatable_if:
         all:
-        activity_log__ipa_assignment_protocol_deviations:
-          extra_log_type: deviation_record
-          id:
-            this: id
+          activity_log__ipa_assignment_protocol_deviations:
+            extra_log_type: deviation_record
+            id:
+              this: id
 
         not_all:
           activity_log__ipa_assignment_protocol_deviations:
@@ -196,7 +196,14 @@ deviation_record:
 
 initial_review:
   label: Completed Initial Review
+
+  fields:
+    - select_who
+    - done_when
+    - notes
+
   caption_before:
+    all_fields: <b>Review the protocol deviation and update the details and severity if necessary before continuing.</b>
     select_who: Who performed this review (if recording this action for somebody else)?
     done_when: When was this task performed?
     submit: Review the protocol deviation and update the details and severity if necessary. When complete, click <b>Complete</b>. If the <i>severity</i> is <b>Major</b>, the PI will be notified.
@@ -223,7 +230,13 @@ initial_review:
 
 pi_review:
   label: Complete PI Review
+  fields:
+    - select_who
+    - done_when
+    - notes
+
   caption_before:
+    all_fields: <b>Review the protocol deviation and update the details and severity if necessary before continuing.</b>
     select_who: Who performed this review (if recording this action for somebody else)?
     done_when: When was this task performed?
     submit: Review the protocol deviation. When complete, click <b>Complete</b>. If the <i>severity</i> is <b>Major</b>, a staff member will be notified and will complete the report for the IRB.
@@ -252,6 +265,11 @@ pi_review:
 
 report_to_irb:
   label: Completed Report to IRB
+  fields:
+    - select_who
+    - done_when
+    - notes
+
   caption_before:
     select_who: Who performed the task (if recording this action for somebody else)?
     done_when: When was this task performed?
