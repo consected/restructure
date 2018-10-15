@@ -8,6 +8,7 @@ class Admin::AppType < Admin::AdminBase
   has_many :app_configurations, -> { order id: :asc }, autosave: true, class_name: "Admin::AppConfiguration"
   has_many :page_layouts, -> { order id: :asc }, autosave: true, class_name: "Admin::PageLayout"
   has_many :user_roles, -> { order id: :asc }, autosave: true, class_name: "Admin::UserRole"
+  has_many :nfs_store_filters, -> { order id: :asc }, autosave: true, class_name: "NfsStore::Filter::Filter"
 
   validates :name, presence: true
   validates :label, presence: true
@@ -84,6 +85,7 @@ class Admin::AppType < Admin::AdminBase
 
       res['page_layouts'] = app_type.import_config_sub_items app_type_config, 'page_layouts', ['layout_name', 'panel_name']
       res['user_roles'] = app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
+      res['nfs_store_filters'] = app_type.import_config_sub_items app_type_config, 'nfs_store_filters', ['role_name', 'resource_name']
 
       res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
 
@@ -308,6 +310,7 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :associated_protocols
     options[:methods] << :associated_sub_processes
     options[:methods] << :associated_protocol_events
+    options[:methods] << :nfs_store_filters
 
     super(options)
   end
