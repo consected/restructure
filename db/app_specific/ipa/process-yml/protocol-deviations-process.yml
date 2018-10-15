@@ -81,6 +81,7 @@ _default:
   showable_if: *enabled_if
   creatable_if: *enabled_if
 
+
   view_options:
     hide_unless_creatable: true,
     always_embed_reference: dynamic_model__ipa_protocol_deviation
@@ -107,12 +108,15 @@ deviation_record:
         content_template: ipa protocol deviation message
         subject: "IPA App: Protocol Deviation needs initial review"
 
-
   references:
+
+  # Always show the record that contains event details
   - dynamic_model__ipa_protocol_deviation:
       from: this
       add: one_to_this
 
+      # The initial review can be performed at any time until the PI review has been completed
+      # It does not block PI review
   - activity_log__ipa_assignment_protocol_deviation:
       label: Initial Review
       from: this
@@ -128,12 +132,17 @@ deviation_record:
             extra_log_type: deviation_record
             id:
               this: id
+
         not_all:
           activity_log__ipa_assignment_protocol_deviations:
-            extra_log_type: initial_review
+            extra_log_type: pi_review
             id:
               this: id
 
+  # The PI review can be performed at any time until the event is reported to the IRB
+  # It is not blocked by initial review and can happen in place of it
+  # The rules around which type of events need PI review still stand, but are not enforced
+  # here, since the PI may select to just handle the items before initial review has classified them
   - activity_log__ipa_assignment_protocol_deviation:
       label: PI Review
       from: this
@@ -144,19 +153,17 @@ deviation_record:
         extra_log_type: pi_review
       creatable_if:
         all:
-          activity_log__ipa_assignment_protocol_deviations:
-            extra_log_type: initial_review
-            id:
-              this_references: id
-          dynamic_model__ipa_protocol_deviations:
-            select_severity: major
-            id:
-              this_references: id
+        activity_log__ipa_assignment_protocol_deviations:
+          extra_log_type: deviation_record
+          id:
+            this: id
+
         not_all:
           activity_log__ipa_assignment_protocol_deviations:
-            extra_log_type: pi_review
+            extra_log_type: report_to_irb
             id:
               this_references: id
+
 
   - activity_log__ipa_assignment_protocol_deviation:
       label: Report to IRB
@@ -190,7 +197,7 @@ deviation_record:
 initial_review:
   label: Completed Initial Review
   caption_before:
-    select_who: Who performed the task (if recording this action for somebody else)?
+    select_who: Who performed this review (if recording this action for somebody else)?
     done_when: When was this task performed?
     submit: Review the protocol deviation and update the details and severity if necessary. When complete, click <b>Complete</b>. If the <i>severity</i> is <b>Major</b>, the PI will be notified.
   save_action:
@@ -217,7 +224,7 @@ initial_review:
 pi_review:
   label: Complete PI Review
   caption_before:
-    select_who: Who performed the task (if recording this action for somebody else)?
+    select_who: Who performed this review (if recording this action for somebody else)?
     done_when: When was this task performed?
     submit: Review the protocol deviation. When complete, click <b>Complete</b>. If the <i>severity</i> is <b>Major</b>, a staff member will be notified and will complete the report for the IRB.
   save_action:
@@ -231,7 +238,7 @@ pi_review:
     on_create:
       notify:
         type: email
-        role: clinical research coordinator
+        role: email - protocol deviation irb report
         layout_template: ipa notification layout
         content_template: ipa protocol deviation message
         subject: "IPA App: Protocol Deviation needs IRB report"
