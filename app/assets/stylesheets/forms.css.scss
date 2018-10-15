@@ -308,6 +308,23 @@ fieldset.readonly-edit-fieldset
 
 }
 
+.list-group-item {
+  .button-radio[data-attr-name$="_blank_yes_no"]:first-of-type {
+    display: none;
+  }
+  .button-radio[data-attr-name$="_blank_no_yes"]:first-of-type {
+    display: none;
+  }
+  .button-radio[data-attr-name$="_blank_yes_no_dont_know"]:first-of-type {
+    display: none;
+  }
+  .button-radio[data-attr-name$="_blank_no_yes_dont_know"]:first-of-type {
+    display: none;
+  }
+}
+
+
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;

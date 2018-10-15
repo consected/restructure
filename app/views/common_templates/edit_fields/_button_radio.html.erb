@@ -13,7 +13,7 @@
     opt_val = opt.last || ''
     # opt_val_id = opt_val.hyphenate
   %>
-<div class="button-radio">
+<div class="button-radio" data-attr-name="<%=field_name_sym%>">
   <%= form.radio_button field_name_sym, opt_val, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
 
   <%= form.label field_name_sym, opt_label, value: opt_val, class: "radio-label"  %>
