@@ -1353,7 +1353,7 @@
       },
       {
         "id": 220,
-        "user_id": 1,
+        "user_id": null,
         "resource_type": "general",
         "resource_name": "app_type",
         "options": "",
@@ -1361,8 +1361,8 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
-        "user_email": "phil_ayres@hms.harvard.edu"
+        "role_name": "tracker",
+        "user_email": null
       },
       {
         "id": 221,
@@ -1379,7 +1379,7 @@
       },
       {
         "id": 222,
-        "user_id": 67,
+        "user_id": null,
         "resource_type": "general",
         "resource_name": "app_type",
         "options": "",
@@ -1387,8 +1387,8 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": null,
-        "user_email": "ipa_demo@fphs2.harvard.edu"
+        "role_name": "user - protocol deviation",
+        "user_email": null
       },
       {
         "id": 223,
@@ -1873,7 +1873,7 @@
       },
       {
         "id": 337,
-        "user_id": 72,
+        "user_id": null,
         "resource_type": "general",
         "resource_name": "app_type",
         "options": "",
@@ -1881,12 +1881,12 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "",
-        "user_email": "ipa_crc@fphs2.harvard.edu"
+        "role_name": "user - navigation",
+        "user_email": null
       },
       {
         "id": 338,
-        "user_id": 71,
+        "user_id": null,
         "resource_type": "general",
         "resource_name": "app_type",
         "options": "",
@@ -1894,12 +1894,12 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "",
-        "user_email": "ipa_nav@fphs2.harvard.edu"
+        "role_name": "clinical research coordinator",
+        "user_email": null
       },
       {
         "id": 339,
-        "user_id": 70,
+        "user_id": null,
         "resource_type": "general",
         "resource_name": "app_type",
         "options": "",
@@ -1907,12 +1907,12 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "",
-        "user_email": "ipa_pi@fphs2.harvard.edu"
+        "role_name": "phone screener",
+        "user_email": null
       },
       {
         "id": 340,
-        "user_id": 69,
+        "user_id": null,
         "resource_type": "general",
         "resource_name": "app_type",
         "options": "",
@@ -1920,8 +1920,8 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "",
-        "user_email": "ipa_ra@fphs2.harvard.edu"
+        "role_name": "user - inex",
+        "user_email": null
       },
       {
         "id": 341,
@@ -2120,7 +2120,7 @@
       },
       {
         "id": 501,
-        "user_id": 2,
+        "user_id": null,
         "resource_type": "general",
         "resource_name": "app_type",
         "options": "",
@@ -2128,8 +2128,8 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "",
-        "user_email": "james_drummey@hms.harvard.edu"
+        "role_name": "user - adverse event",
+        "user_email": null
       },
       {
         "id": 527,
@@ -2312,6 +2312,19 @@
         "app_type_id": 3,
         "role_name": "staff - inex",
         "user_email": null
+      },
+      {
+        "id": 541,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment__files",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "tracker",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -2363,12 +2376,12 @@
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-05-31T14:56:43.064Z",
-        "updated_at": "2018-09-24T15:22:34.097Z",
+        "updated_at": "2018-10-09T11:34:10.293Z",
         "action_when_attribute": "activity_date",
         "field_list": "",
         "blank_log_field_list": "",
         "blank_log_name": "",
-        "extra_log_types": "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n      any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak: not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested: 'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          created_at:\r\n            condition: <\r\n            value: -14 days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n    not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n          select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated: \r\n            - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes: 'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n        dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition: <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n        eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n      dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no: 'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14 days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n    not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type: exit survey     \r\n        created_at:\r\n          condition: <\r\n          value: -14 days\r\n\r\n\r\n  \r\n\r\n_default:\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n  showable_if: *enabled_if\r\n  creatable_if: *enabled_if\r\n  editable_if: *enabled_if\r\n\r\n\r\nschedule_screening:\r\n  label: Schedule Screening\r\n  fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n    - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n    select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts: Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time: Scheduled time (Eastern Time)\r\n    notes: Additional notes for the screener    \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: \r\n          - screening_follow_up\r\n\r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n      edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n  showable_if:\r\n    always: true\r\n\r\nscreening_follow_up:\r\n  label: Schedule Screening Follow Up\r\n  fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n    - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n    select_who: Who will perform the phone screening follow up?\r\n    select_record_from_player_contacts: Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time: Scheduled time (Eastern Time)\r\n    notes: Additional notes\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: screening_follow_up\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: \r\n          - appointment  \r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n      edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n      \r\nperform_screening_follow_up:\r\n  label: Perform Screening Follow Up\r\n  references:\r\n    ipa_screening:\r\n      from: this\r\n      add: one_to_this\r\n  caption_before:\r\n    all_fields: |\r\n      Record the eligibility of the participant and any additional notes needed to perform the phone screening follow up.\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: screening_follow_up\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: \r\n          - appointment\r\n\r\n  # Always show, so we know why a player's records may be locked down\r\n  showable_if: \r\n    always: true\r\n      \r\n\r\nappointment:\r\n  label: Appointment\r\n  fields:\r\n\r\n  references:\r\n    ipa_appointment:\r\n      from: master\r\n      add: one_to_master\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: perform_screening_follow_up\r\n      dynamic_model__ipa_screenings:\r\n        eligible_for_study_blank_yes_no: 'yes'\r\n        still_interested_blank_yes_no: 'yes'\r\n\r\n\r\ncontact_info:\r\n  label: Emergency Contacts\r\n  fields:\r\n\r\n  references:\r\n\r\n    emergency_contact:\r\n      from: master\r\n      add: many   \r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: appointment\r\n\r\n\r\nmrn:\r\n  label: MRN\r\n  fields:\r\n\r\n  references:\r\n    mrn_number:\r\n      from: master\r\n      add: many   \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: appointment\r\n\r\n  save_trigger:\r\n    on_create:\r\n      notify:\r\n        type: email\r\n        role: clinical research coordinator\r\n        layout_template: ipa notification layout\r\n        content_template: ipa message content\r\n        subject: \"IPA App: Subject MRN assigned\"\r\n \r\n\r\ntransportation_and_housing:\r\n  label: Transportation and Housing\r\n  fields:\r\n  references:\r\n    ipa_transportation:\r\n      from: master\r\n      add: many\r\n      view_as:\r\n        new: not_embedded\r\n        edit: not_embedded\r\n    ipa_hotel:\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n        new: not_embedded\r\n        edit: not_embedded\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: appointment\r\n\r\nconsent_mailing:\r\n  label: Consent Mailing\r\n  fields: \r\n  references:\r\n    ipa_consent_mailing:\r\n      from: master\r\n      add: one_to_this\r\n\r\npayments:\r\n  label: Payments\r\n  fields:\r\n  references:\r\n    ipa_payment:\r\n      from: master\r\n      add: many\r\n      limit: 2\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: screening_follow_up\r\n    \r\n\r\nwithdraw:\r\n  label: Withdraw\r\n  fields:\r\n  references:\r\n    ipa_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: schedule_screening\r\n\r\n  # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\nfollow_up_surveys:\r\n  label: Follow Up Surveys\r\n  fields: \r\n  references:\r\n    ipa_survey:\r\n      from: master\r\n      add: many\r\n      limit: 2\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:\r\n          - appointment\r\n  # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\ngeneral:\r\n  label: General Communications\r\n  fields:\r\n    - select_activity\r\n    - activity_date\r\n    - select_record_from_player_contacts\r\n    - select_record_from_addresses\r\n    - select_direction\r\n    - select_who\r\n    - select_result\r\n    - select_next_step\r\n    - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n\r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n\r\n  caption_before:\r\n    select_record_from_player_contacts: The phone or email address, or...\r\n    select_record_from_addresses: ... mailing address for the communication \r\n    select_result: Is a follow up required, or is this communication complete?\r\n    notes: Notes regarding this communication or to assist with the follow up\r\n  show_if:\r\n    select_next_step:\r\n      select_result: follow up\r\n    follow_up_when:\r\n      select_result: follow up\r\n    follow_up_time:\r\n      select_result: follow up\r\n",
+        "extra_log_types": "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n      any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak: not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested: 'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          created_at:\r\n            condition: <\r\n            value: -14 days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n    not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n          select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated: \r\n            - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes: 'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n        dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition: <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n        eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n      dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no: 'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14 days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n    not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type: exit survey     \r\n        created_at:\r\n          condition: <\r\n          value: -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container: \r\n      from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n  save_trigger:\r\n    on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container: \r\n        name: general files\r\n        label: General Files\r\n        create_with_role: nfs_store group 600\r\n\r\n\r\n  \r\n\r\n_default:\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n  showable_if: *enabled_if\r\n  creatable_if: *enabled_if\r\n  editable_if: *enabled_if\r\n\r\n\r\nschedule_screening:\r\n  label: Schedule Screening\r\n  fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n    - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n    select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts: Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time: Scheduled time (Eastern Time)\r\n    notes: Additional notes for the screener    \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: \r\n          - screening_follow_up\r\n\r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n      edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n  showable_if:\r\n    always: true\r\n\r\nscreening_follow_up:\r\n  label: Schedule Screening Follow Up\r\n  fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n    - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n    select_who: Who will perform the phone screening follow up?\r\n    select_record_from_player_contacts: Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time: Scheduled time (Eastern Time)\r\n    notes: Additional notes\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: screening_follow_up\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: \r\n          - appointment  \r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n      edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n      \r\nperform_screening_follow_up:\r\n  label: Perform Screening Follow Up\r\n  references:\r\n    ipa_screening:\r\n      from: this\r\n      add: one_to_this\r\n  caption_before:\r\n    all_fields: |\r\n      Record the eligibility of the participant and any additional notes needed to perform the phone screening follow up.\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: screening_follow_up\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: \r\n          - appointment\r\n\r\n  # Always show, so we know why a player's records may be locked down\r\n  showable_if: \r\n    always: true\r\n      \r\n\r\nappointment:\r\n  label: Appointment\r\n  fields:\r\n\r\n  references:\r\n    ipa_appointment:\r\n      from: master\r\n      add: one_to_master\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: perform_screening_follow_up\r\n      dynamic_model__ipa_screenings:\r\n        eligible_for_study_blank_yes_no: 'yes'\r\n        still_interested_blank_yes_no: 'yes'\r\n\r\n\r\ncontact_info:\r\n  label: Emergency Contacts\r\n  fields:\r\n\r\n  references:\r\n\r\n    emergency_contact:\r\n      from: master\r\n      add: many   \r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: appointment\r\n\r\n\r\nmrn:\r\n  label: MRN\r\n  fields:\r\n\r\n  references:\r\n    mrn_number:\r\n      from: master\r\n      add: many   \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: appointment\r\n\r\n  save_trigger:\r\n    on_create:\r\n      notify:\r\n        type: email\r\n        role: clinical research coordinator\r\n        layout_template: ipa notification layout\r\n        content_template: ipa message content\r\n        subject: \"IPA App: Subject MRN assigned\"\r\n \r\n\r\ntransportation_and_housing:\r\n  label: Transportation and Housing\r\n  fields:\r\n  references:\r\n    ipa_transportation:\r\n      from: master\r\n      add: many\r\n      view_as:\r\n        new: not_embedded\r\n        edit: not_embedded\r\n    ipa_hotel:\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n        new: not_embedded\r\n        edit: not_embedded\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: appointment\r\n\r\nconsent_mailing:\r\n  label: Consent Mailing\r\n  fields: \r\n  references:\r\n    ipa_consent_mailing:\r\n      from: master\r\n      add: one_to_this\r\n\r\npayments:\r\n  label: Payments\r\n  fields:\r\n  references:\r\n    ipa_payment:\r\n      from: master\r\n      add: many\r\n      limit: 2\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: screening_follow_up\r\n    \r\n\r\nwithdraw:\r\n  label: Withdraw\r\n  fields:\r\n  references:\r\n    ipa_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type: schedule_screening\r\n\r\n  # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\nfollow_up_surveys:\r\n  label: Follow Up Surveys\r\n  fields: \r\n  references:\r\n    ipa_survey:\r\n      from: master\r\n      add: many\r\n      limit: 2\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:\r\n          - appointment\r\n  # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\ngeneral:\r\n  label: General Communications\r\n  fields:\r\n    - select_activity\r\n    - activity_date\r\n    - select_record_from_player_contacts\r\n    - select_record_from_addresses\r\n    - select_direction\r\n    - select_who\r\n    - select_result\r\n    - select_next_step\r\n    - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n\r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n\r\n  caption_before:\r\n    select_record_from_player_contacts: The phone or email address, or...\r\n    select_record_from_addresses: ... mailing address for the communication \r\n    select_result: Is a follow up required, or is this communication complete?\r\n    notes: Notes regarding this communication or to assist with the follow up\r\n  show_if:\r\n    select_next_step:\r\n      select_result: follow up\r\n    follow_up_when:\r\n      select_result: follow up\r\n    follow_up_time:\r\n      select_result: follow up\r\n\r\nfiles:\r\n  label: Files\r\n\r\n  save_trigger:\r\n    on_create:\r\n      <<: *create_filestore_container \r\n\r\n  references:\r\n    <<: *ref_filestore_container\r\n",
         "hide_item_list_panel": true,
         "main_log_name": "",
         "process_name": "",
@@ -2638,6 +2651,26 @@
         "user_email": null
       },
       {
+        "id": 192,
+        "name": "Protocol Deviation",
+        "table_name": "ipa_protocol_deviations",
+        "schema_name": null,
+        "primary_key_name": "id",
+        "foreign_key_name": "master_id",
+        "description": "",
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-05-31T14:52:16.980Z",
+        "updated_at": "2018-10-15T13:08:08.231Z",
+        "position": null,
+        "category": "ipa-protocol-deviations-and-adverse-events",
+        "table_key_name": "",
+        "field_list": "",
+        "result_order": "",
+        "options": "default:\r\n  view_options:\r\n    data_attribute:\r\n    - select_severity\r\n\r\n  caption_before:\r\n    all_fields: Enter information for the protocol deviation. If necessary, upload files such as documentation of the event, corrective action and IRB reports.\r\n    deviation_occurred_when: Date event occurred\r\n    deviation_discovered_when: Date event was discovered\r\n    select_severity: Select severity of the event\r\n    deviation_description: Describe in detail the event that occurred. If necessary, upload additional files after saving this form.\r\n    corrective_action_description: Describe in detail any corrective action taken. If necessary, upload additional files after saving this form.\r\n",
+        "user_email": null
+      },
+      {
         "id": 191,
         "name": "Adverse Event",
         "table_name": "ipa_adverse_events",
@@ -2658,26 +2691,6 @@
         "user_email": null
       },
       {
-        "id": 192,
-        "name": "Protocol Deviation",
-        "table_name": "ipa_protocol_deviations",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 2,
-        "disabled": false,
-        "created_at": "2018-05-31T14:52:16.980Z",
-        "updated_at": "2018-05-31T14:52:16.980Z",
-        "position": null,
-        "category": "ipa-protocol-deviations-and-adverse-events",
-        "table_key_name": "",
-        "field_list": "",
-        "result_order": "",
-        "options": "default:\r\n  view_options:\r\n    data_attribute: \r\n    - select_severity\r\n",
-        "user_email": null
-      },
-      {
         "id": 193,
         "name": "IPA Appointment",
         "table_name": "ipa_appointments",
@@ -2688,13 +2701,13 @@
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-05-31T14:52:17.578Z",
-        "updated_at": "2018-05-31T14:52:17.578Z",
+        "updated_at": "2018-10-09T17:30:40.148Z",
         "position": 1,
         "category": "ipa-records",
         "table_key_name": "",
-        "field_list": "",
+        "field_list": "visit_start_date",
         "result_order": "updated_at desc",
-        "options": null,
+        "options": "",
         "user_email": null
       },
       {
@@ -2875,6 +2888,7 @@
         "created_at": "2018-05-31T14:52:23.403Z",
         "updated_at": "2018-05-31T14:52:23.403Z",
         "alphanumeric": true,
+        "extra_fields": null,
         "user_email": null
       },
       {
@@ -2893,6 +2907,7 @@
         "created_at": "2018-05-31T14:52:24.275Z",
         "updated_at": "2018-06-01T15:40:31.642Z",
         "alphanumeric": false,
+        "extra_fields": null,
         "user_email": null
       }
     ],
@@ -2981,12 +2996,12 @@
         "id": 52,
         "name": "IPA Outstanding Activities",
         "description": "Search for records where one activity has been performed and another hasn't been performed after it (optional).",
-        "sql": "SELECT \r\n   dt.master_id,\r\n   pi.first_name,\r\n   pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n   dt.checklist_signed,\r\n   dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n  SELECT\r\n    di.*,\r\n    rank()\r\n    OVER (\r\n    PARTITION BY di.master_id \r\n    ORDER BY di.created_at DESC\r\n    ) AS r\r\n  FROM  \r\n  (\r\n    SELECT      \r\n      al.master_id,\r\n      'tracker' \"source\",\r\n      al.extra_log_type,\r\n      al.select_result \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n      al.created_at\r\n      \r\n    FROM activity_log_ipa_assignments al\r\n    \r\n    WHERE\r\n    :activity_performed = 'general-follow-up' AND al.extra_log_type='general' AND select_result='follow up'\r\n    OR\r\n    :activity_performed = 'general-completed' AND al.extra_log_type='general' AND select_result='completed'\r\n    OR\r\n    :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND al.extra_log_type='general' \r\n    OR\r\n    :activity_outstanding is not null AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general' \r\n    OR\r\n    al.extra_log_type IN (:activity_performed, :activity_outstanding)\r\n\r\n    UNION\r\n\r\n    SELECT      \r\n      inex.master_id,\r\n      'inex' \"source\",\r\n      inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n      inex.signed_no_yes \"checklist_signed\",\r\n      inex.created_at\r\n      \r\n\r\n    FROM activity_log_ipa_assignment_inex_checklists inex\r\n    WHERE\r\n        \r\n    (:activity_performed = 'inex-complete' OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'inex-complete' )\r\n    AND extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') \r\n    \r\n\r\n      \r\n  ) AS di\r\n\r\n) AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\n\r\nWHERE\r\n(:activity_outstanding IS NULL OR :activity_outstanding IS NOT NULL AND r = 1)\r\nAND \r\n( \r\n  \r\n  :activity_performed = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'\r\n  OR\r\n    :activity_performed = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n  OR (   \r\n    :activity_performed = 'inex-complete'\r\n    AND (\r\n      dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND\r\n      checklist_signed = 'yes'\r\n    )\r\n  )  \r\n  OR :activity_performed <> 'inex-complete' AND dt.extra_log_type = :activity_performed \r\n)\r\nAND (\r\n  :activity_outstanding IS NULL \r\n  OR NOT (\r\n    r = 1\r\n    AND (\r\n      :activity_outstanding = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'\r\n      OR :activity_outstanding = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n      OR (\r\n          :activity_outstanding = 'inex-complete'\r\n          AND (\r\n            dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND\r\n            checklist_signed = 'yes'\r\n          )\r\n      )\r\n      OR :activity_outstanding <> 'inex-complete' AND dt.extra_log_type = :activity_outstanding\r\n    )\r\n  )\r\n\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n",
-        "search_attrs": "\r\nactivity_performed: \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default: general-follow-up\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      inclusion/exclusion screening complete: inex-complete\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label: Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n    default: general-completed\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      inclusion/exclusion screening complete: inex-complete\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n",
+        "sql": "SELECT\r\n   dt.master_id,\r\n   pi.first_name,\r\n   pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n   dt.checklist_signed,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n    rank()\r\n    OVER (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n    SELECT\r\n      al.master_id,\r\n      'tracker' \"source\",\r\n      al.extra_log_type,\r\n      al.select_result \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments al\r\n\r\n    WHERE\r\n    :activity_performed = 'general-follow-up' AND al.extra_log_type='general' AND select_result='follow up'\r\n    OR\r\n    :activity_performed = 'general-completed' AND al.extra_log_type='general' AND select_result='completed'\r\n    OR\r\n    :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND al.extra_log_type='general'\r\n    OR\r\n    :activity_outstanding is not null AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general'\r\n    OR\r\n    (\r\n      al.extra_log_type IN (:activity_performed, :activity_outstanding, 'withdraw', 'perform_screening_follow_up')\r\n    )\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      inex.master_id,\r\n      'inex' \"source\",\r\n      inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n      inex.signed_no_yes \"checklist_signed\",\r\n      inex.created_at\r\n\r\n\r\n    FROM activity_log_ipa_assignment_inex_checklists inex\r\n    WHERE\r\n\r\n    (:activity_performed = 'inex-complete' OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'inex-complete' )\r\n    AND extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff')\r\n\r\n\r\n\r\n    \r\n\r\n  ) AS di\r\n\r\n  LEFT OUTER JOIN (\r\n\r\n    SELECT\r\n      master_id,\r\n      'not interested or ineligible (follow up)' \"exit_type\"\r\n\r\n\r\n    FROM ipa_screenings ps\r\n    WHERE\r\n      still_interested_blank_yes_no = 'no' OR\r\n      eligible_for_study_blank_yes_no = 'no'\r\n\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'not interested (phone screening)' \"exit_type\"\r\n\r\n    FROM ipa_ps_initial_screenings inits\r\n    WHERE\r\n     select_is_good_time_to_speak = 'not interested' OR\r\n     select_may_i_begin = 'not interested' OR\r\n     select_still_interested = 'no'\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'withdrew' \"exit_type\"\r\n\r\n    FROM ipa_withdrawals wd\r\n    WHERE\r\n     select_subject_withdrew_reason = 'withdrew' OR\r\n     select_investigator_terminated IN ('yes - due to ae', 'yes - other reason') OR\r\n     lost_to_follow_up_no_yes = 'yes' OR\r\n     no_longer_participating_no_yes = 'yes'\r\n\r\n     UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'completed exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n    WHERE\r\n      select_survey_type = 'exit survey'\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n) AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\n\r\nWHERE\r\n(:activity_outstanding IS NULL OR :activity_outstanding IS NOT NULL AND r = 1)\r\nAND\r\n(\r\n\r\n  :activity_performed = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'\r\n  OR\r\n    :activity_performed = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n  OR (\r\n    :activity_performed = 'inex-complete'\r\n    AND (\r\n      dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND\r\n      checklist_signed = 'yes'\r\n    )\r\n  )\r\n  OR :activity_performed <> 'inex-complete' AND dt.extra_log_type = :activity_performed\r\n)\r\nAND (\r\n  :activity_outstanding IS NULL\r\n  OR NOT (\r\n    r = 1\r\n    AND (\r\n      :activity_outstanding = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'\r\n      OR :activity_outstanding = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n      OR (\r\n          :activity_outstanding = 'inex-complete'\r\n          AND (\r\n            dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND\r\n            checklist_signed = 'yes'\r\n          )\r\n      )\r\n      OR :activity_outstanding <> 'inex-complete' AND dt.extra_log_type = :activity_outstanding\r\n    )\r\n  )\r\n\r\n)\r\nAND (\r\n  :completed_or_withdrawn IS NULL \r\n  OR (\r\n    :completed_or_withdrawn = 'in_study' AND dt.exit_type IS NULL\r\n    OR\r\n    :completed_or_withdrawn = 'not_in_study' AND dt.exit_type IS NOT NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n",
+        "search_attrs": "\r\nactivity_performed: \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default: general-follow-up\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      inclusion/exclusion screening complete: inex-complete\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    label: Activity outstanding (optional)\r\n    all: true\r\n    multiple: single\r\n    default: general-completed\r\n    selections:\r\n      general communication - follow-up: general-follow-up\r\n      general communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n      payment made: payments\r\n      inclusion/exclusion screening complete: inex-complete\r\n      scheduled screening follow-up: screening_follow_up\r\n      performed screening follow-up: perform_screening_follow_up\r\n      set appointment: appointment\r\n      added emergency contacts: contact_info\r\n      transportation and housing: transportation_and_housing\r\n      consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n      withdraw: withdraw\r\n\r\n\r\ncompleted_or_withdrawn: \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default: in_study\r\n    selections: \r\n      in study: in_study\r\n      completed or withdrawn: not_in_study",
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-06-04T17:22:35.951Z",
-        "updated_at": "2018-07-04T11:51:08.524Z",
+        "updated_at": "2018-10-10T16:06:19.065Z",
         "report_type": "search",
         "auto": false,
         "searchable": true,
@@ -7328,6 +7343,28 @@
         "created_at": "2018-09-27T11:30:16.444Z",
         "updated_at": "2018-09-27T11:30:16.444Z",
         "user_email": "ipa_crc@fphs2.harvard.edu"
+      },
+      {
+        "id": 71,
+        "app_type_id": 3,
+        "role_name": "email - protocol deviation review",
+        "user_id": 72,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-10-11T17:34:37.290Z",
+        "updated_at": "2018-10-11T17:34:37.290Z",
+        "user_email": "ipa_crc@fphs2.harvard.edu"
+      },
+      {
+        "id": 72,
+        "app_type_id": 3,
+        "role_name": "email - protocol deviation pi",
+        "user_id": 70,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-10-11T19:06:40.167Z",
+        "updated_at": "2018-10-11T19:06:40.167Z",
+        "user_email": "ipa_pi@fphs2.harvard.edu"
       }
     ],
     "associated_message_templates": [
