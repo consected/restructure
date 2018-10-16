@@ -906,26 +906,6 @@
         "process_name": "session_filestore",
         "table_name": "activity_log_ipa_assignment_session_filestores",
         "user_email": null
-      },
-      {
-        "id": 9,
-        "name": "IPA MRI Files",
-        "item_type": "ipa_assignment",
-        "rec_type": "",
-        "admin_id": 2,
-        "disabled": false,
-        "created_at": "2018-09-21T10:29:09.609Z",
-        "updated_at": "2018-09-21T11:13:32.790Z",
-        "action_when_attribute": "created_at",
-        "field_list": "",
-        "blank_log_field_list": "",
-        "blank_log_name": "",
-        "extra_log_types": "_default:\r\n  fields: \r\n    - select_creator\r\n    - creation_date\r\n    - creation_time\r\n    - notes\r\n\r\n  field_options:\r\n    select_creator:\r\n      edit_as: \r\n        field_type: select_record_from_table_ipa_file_creators\r\n\r\n  caption_before:\r\n    select_creator: Data collection performed by\r\n    creation_date: Date collected\r\n    creation_time: Time collected\r\n    notes: Additional notes\r\n\r\n  references:\r\n    nfs_store__manage__container:\r\n      from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n\r\nbrain_mri:\r\n  label: Brain MRI\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container: \r\n        name: files\r\n        label: Files\r\n        create_with_role: nfs_store group 600\r\n\r\nliver_mri:\r\n  label: Liver MRI\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container: \r\n        name: files\r\n        label: Files\r\n        create_with_role: nfs_store group 600\r\n\r\nspectroscopy:\r\n  label: Spectroscopy\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container: \r\n        name: files\r\n        label: Files\r\n        create_with_role: nfs_store group 600\r\n\r\nelectrophysiology:\r\n  label: Electrophysiology\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container: \r\n        name: files\r\n        label: Files\r\n        create_with_role: nfs_store group 600\r\n",
-        "hide_item_list_panel": true,
-        "main_log_name": "",
-        "process_name": "mri_files",
-        "table_name": "activity_log_ipa_assignment_mri_files",
-        "user_email": null
       }
     ],
     "associated_dynamic_models": [
