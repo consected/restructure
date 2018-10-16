@@ -223,6 +223,24 @@
       }
     });
 
+    Handlebars.registerHelper('get', function(obj, key, key2, key3) {
+      if(!obj || !key) return;
+
+      var item = obj[key.toString()];
+      if(!key2 || !item) {
+        return item;
+      }
+      else {
+        item = item[key2];
+      }
+      if(!key3 || !item) {
+        return item;
+      }
+      else {
+        return item[key3];
+      }
+    });
+
     Handlebars.registerHelper('date_time', function(text) {
         if(text){
             var ds = new Date(Date.parse(text));

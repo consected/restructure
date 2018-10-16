@@ -271,7 +271,7 @@
     {{else is @key 'includes' '^select_record_from_' }}
       <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '^select_' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}"><small>{{humanize (replace @key '^select_' '')}}</small> <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
     {{else is @key 'includes' '_blank_yes_no_dont_know' }}
       <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_yes_no_dont_know' }}

@@ -1,4 +1,4 @@
-set search_path=filestore, filestore_admin;
+set search_path=filestore, filestore_admin, ml_app;
 BEGIN;
 
 -- Command line:

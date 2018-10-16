@@ -110,6 +110,8 @@ _fpa = {
 
     _fpa.do_preprocessors(template_name, block, data);
 
+    _fpa.form_utils.get_general_selections(data);
+
     // Render the result using the template and data
     var html = template(data);
     html = $(html).addClass('view-template-created');
@@ -763,6 +765,39 @@ _fpa = {
             }
         }
     }
+  },
+
+  // Get array of items from cached data (basically equivalent of .map function) based on attribute and value
+  get_items_by: function(attr, obj, evid){
+    var res = [];
+    for(var pi in obj){
+      if(obj.hasOwnProperty(pi)){
+        var p = obj[pi];
+        if(p[attr] == evid){
+            res.push(p);
+        }
+      }
+    }
+    return res;
+  },
+
+  // Get array of items from cached data based on attribute and value
+  // returning a hash array key set from the index_attr
+  // For example:
+  // _fpa.get_items_as_hash_by('item_type', pe, "activity_log__bhs_assignment_select_result", 'value');
+  // returns:
+  // {complete: {…}, in progress: {…}}
+  get_items_as_hash_by: function(attr, obj, evid, index_attr){
+    var res = {};
+    for(var pi in obj){
+      if(obj.hasOwnProperty(pi)){
+        var p = obj[pi];
+        if(p[attr] == evid){
+            res[p[index_attr]] = p;
+        }
+      }
+    }
+    return res;
   }
 
 };

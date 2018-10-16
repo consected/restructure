@@ -799,54 +799,6 @@
         "user_email": "dean_marengi@hms.harvard.edu"
       },
       {
-        "id": 71,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "bhs_assignments",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 1,
-        "app_type_id": 1,
-        "user_email": null
-      },
-      {
-        "id": 72,
-        "user_id": 38,
-        "resource_type": "table",
-        "resource_name": "bhs_assignments",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 1,
-        "app_type_id": 1,
-        "user_email": "sarah_cohan@hms.harvard.edu"
-      },
-      {
-        "id": 73,
-        "user_id": 23,
-        "resource_type": "table",
-        "resource_name": "bhs_assignments",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 1,
-        "app_type_id": 1,
-        "user_email": "phil_ayres@hms.harvard.edu"
-      },
-      {
-        "id": 74,
-        "user_id": 20,
-        "resource_type": "table",
-        "resource_name": "bhs_assignments",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 1,
-        "app_type_id": 1,
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
         "id": 65,
         "user_id": 36,
         "resource_type": "general",
@@ -917,18 +869,6 @@
         "admin_id": 1,
         "app_type_id": 1,
         "user_email": "jennifer_delahaye@hms.harvard.edu"
-      },
-      {
-        "id": 85,
-        "user_id": 15,
-        "resource_type": "table",
-        "resource_name": "bhs_assignments",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 1,
-        "app_type_id": 1,
-        "user_email": "bryan_cortez@hms.harvard.edu"
       },
       {
         "id": 75,
@@ -1168,24 +1108,6 @@
         "created_at": "2018-01-30T14:29:31.226Z",
         "updated_at": "2018-01-30T14:29:31.226Z",
         "alphanumeric": null,
-        "user_email": null
-      },
-      {
-        "id": 3,
-        "name": "bhs_assignments",
-        "label": "BHS ID",
-        "external_id_attribute": "bhs_id",
-        "external_id_view_formatter": "",
-        "external_id_edit_pattern": "",
-        "prevent_edit": true,
-        "pregenerate_ids": true,
-        "min_id": 1,
-        "max_id": 9999999999,
-        "admin_id": 1,
-        "disabled": false,
-        "created_at": "2018-04-30T10:52:28.908Z",
-        "updated_at": "2018-04-30T10:57:05.999Z",
-        "alphanumeric": false,
         "user_email": null
       }
     ],

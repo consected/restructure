@@ -181,6 +181,45 @@ _fpa.form_utils = {
       return form_data;
     },
 
+    get_general_selections: function(data) {
+
+      if(data.multiple_results) {
+        _fpa.form_utils.get_general_selections(data[data.multiple_results]);
+        return;
+      }
+
+      if(!data.item_type) {
+
+        var item_key;
+        for (item_key in data) {
+          if(data.hasOwnProperty(item_key) && item_key != '_control')
+          break;
+        }
+
+        var di = data[item_key];
+        if(!di) return;
+        data = di;
+      }
+
+      if(data.embedded_item) {
+        _fpa.form_utils.get_general_selections(data.embedded_item);
+      }
+
+      _fpa.set_definition('general_selections', function() {
+        var pe = _fpa.cache('general_selections');
+        data._general_selections = {};
+        for(var k in data) {
+          if(k.indexOf('select_') == 0 && data.hasOwnProperty(k)) {
+
+            var it = data.item_type + "s_" + k;
+            data._general_selections[k] = _fpa.get_items_as_hash_by('item_type', pe, it, 'value');
+          }
+        }
+      });
+
+    },
+
+
 
     // Setup the typeahead prediction for a specific text input element
     setup_typeahead: function(element, list, name){
