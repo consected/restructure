@@ -96,6 +96,8 @@ AS $$
       --  multi_select_pastimes,
       --  multi_select_pastimes,
       --  multi_select_pastimes,
+        multi_select_pastimes,
+
         pastime_other,
         pastimes_only_at_daycare_no_yes,
         select_pastimes_only_at_daycare_performance,
@@ -110,6 +112,7 @@ AS $$
       --  multi_select_household_appliances,
       --  multi_select_household_appliances,
       --  multi_select_household_appliances,
+        multi_select_household_appliances,
         household_appliance_other,
         select_household_appliance_performance,
       --
@@ -181,10 +184,13 @@ AS $$
         --  adl_hobls___golf,
         --  adl_hobls___fish,
         --  adl_hobls___oth,
+        array[NEW.adl_hobls___gam , NEW.adl_hobls___bing, NEW.adl_hobls___instr, NEW.adl_hobls___read, NEW.adl_hobls___tenn, NEW.adl_hobls___cword, NEW.adl_hobls___knit, NEW.adl_hobls___gard, NEW.adl_hobls___wshop, NEW.adl_hobls___art, NEW.adl_hobls___sew, NEW.adl_hobls___golf, NEW.adl_hobls___fish, NEW.adl_hobls___oth ],
+
         NEW.adl_hobls_oth,
-        NEW.adl_hobdc___1,
+        CASE WHEN NEW.adl_hobdc___1 = 0 THEN 'no' WHEN NEW.adl_hobdc___1 = 1 THEN 'yes' WHEN NEW.adl_hobdc___1 = 9 THEN 'don''t know' ELSE NEW.adl_hobdc___1::varchar END,
         NEW.adl_hob_perf,
         CASE WHEN NEW.adl_appl = 0 THEN 'no' WHEN NEW.adl_appl = 1 THEN 'yes' WHEN NEW.adl_appl = 9 THEN 'don''t know' ELSE NEW.adl_appl::varchar END,
+        array[NEW.adl_applls___wash,  NEW.adl_applls___dish, NEW.adl_applls___range, NEW.adl_applls___dry, NEW.adl_applls___toast, NEW.adl_applls___micro, NEW.adl_applls___vac, NEW.adl_applls___toven, NEW.adl_applls___fproc, NEW.adl_applls___oth],
         --  adl_applls___wash,
         --  adl_applls___dish,
         --  adl_applls___range,
