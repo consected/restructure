@@ -83,5 +83,5 @@ adl_applls___oth integer,
 adl_applls_oth varchar,
 adl_appl_perf integer,
 adl_comm varchar,
-subject_id integer
+redcap_survey_identifier integer
 );
