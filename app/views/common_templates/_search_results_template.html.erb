@@ -272,6 +272,22 @@
       <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '^select_' }}
       <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}"><small>{{humanize (replace @key '^select_' '')}}</small> <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    {{else is @key 'includes' '_selection$' }}
+      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}"><small>{{humanize (replace @key '_selection$' '')}}</small> <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    {{else is @key 'includes' '^multi_select_' }}
+      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}"><small>{{humanize (replace @key '^multi_select_' '')}}</small>
+        {{#* inline "iterateMultiSelect"}}
+          {{#each multi_vals}}
+            {{#is this '!in' "0,false,no" }}
+            <span data-field-array-el-val="{{this}}">{{#if (get ../../../_general_selections ../field_key @index 'name')}}{{get ../../../_general_selections ../field_key @index 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</span>
+            <br/>
+            {{/is}}
+          {{/each}}
+        {{/inline}}
+        <strong>
+          {{>iterateMultiSelect field_key=@key multi_vals=this}}
+        </strong>
+    </li>
     {{else is @key 'includes' '_blank_yes_no_dont_know' }}
       <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_yes_no_dont_know' }}

@@ -22,7 +22,7 @@ class DynamicModel < ActiveRecord::Base
 
     implementation_classes.each do |c|
 
-      cn = c.attribute_names.select{|a| a.start_with?('select_') || a.end_with?('_selection') || a.in?(%w(source rec_type rank)) }.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
+      cn = c.attribute_names.select{|a| a.start_with?('select_') || a.start_with?('multi_select_') || a.end_with?('_selection') || a.in?(%w(source rec_type rank)) }.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at]
       cn.each do |a|
         list << "#{c.name.ns_underscore.pluralize}_#{a}".to_sym
       end

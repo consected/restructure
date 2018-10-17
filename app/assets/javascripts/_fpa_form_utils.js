@@ -209,7 +209,7 @@ _fpa.form_utils = {
         var pe = _fpa.cache('general_selections');
         data._general_selections = {};
         for(var k in data) {
-          if(k.indexOf('select_') == 0 && data.hasOwnProperty(k)) {
+          if((k.indexOf('select_') == 0 || k.indexOf('multi_select_') == 0) && data.hasOwnProperty(k)) {
 
             var it = data.item_type + "s_" + k;
             data._general_selections[k] = _fpa.get_items_as_hash_by('item_type', pe, it, 'value');
