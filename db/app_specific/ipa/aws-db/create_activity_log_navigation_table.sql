@@ -10,6 +10,7 @@
           ipa_assignment_id integer,
           event_date date,
           select_station varchar,
+          select_navigator varchar,
           arrival_time time,
           start_time time,
           event_notes varchar,
@@ -32,6 +33,7 @@
           ipa_assignment_id integer,
           event_date date,
           select_station varchar,
+          select_navigator varchar,
           arrival_time time,
           start_time time,
           event_notes varchar,
@@ -48,7 +50,7 @@
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_ipa_assignment_navigation_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_activity_log_ipa_assignment_navigation_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -58,6 +60,7 @@
                       ipa_assignment_id,
                       event_date,
                       select_station,
+                      select_navigator,
                       arrival_time,
                       start_time,
                       event_notes,
@@ -79,6 +82,7 @@
                       NEW.ipa_assignment_id,
                       NEW.event_date,
                       NEW.select_station,
+                      NEW.select_navigator,
                       NEW.arrival_time,
                       NEW.start_time,
                       NEW.event_notes,
