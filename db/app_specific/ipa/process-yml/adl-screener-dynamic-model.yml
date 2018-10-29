@@ -9,11 +9,11 @@ default:
     select_regarding_grooming: Regarding <b>grooming</b>, in the past 4 weeks, which best describes his/her optimal performance
     select_regarding_dressing: |
       Regarding <b>dressing</b>, in the past 4 weeks
-      Did {{first_name}} setect his/her first set of clothes for the day?
+      Did {{first_name}} select his/her first set of clothes for the day?
     select_regarding_dressing_performance: <i>If yes</i>, which best describes his/her usual performance
     select_regarding_getting_dressed: Regarding physically getting dressed, which best describes his/her usual performance in the past 4 week
     used_telephone_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>use a telephone</b>
-    select_telephone_performance: fyes, which best describes his/her <b>highest</b> level of performance
+    select_telephone_performance: <i>If yes</i>, which best describes his/her <b>highest</b> level of performance
     watched_tv_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>watch television</b>?
     selected_programs_yes_no_dont_know: |
       <i>If yes</i>, ask all questions.
@@ -81,3 +81,66 @@ default:
     multi_select_household_appliances: <i>Ask about all of the following,</i> and check those that were used
     household_appliance_other: other appliance
     select_household_appliance_performance: <i>If yes,</i> for the most commonly used appliances, which best describes how {{first_name}} usually used them
+
+
+  show_if:
+    select_regarding_dressing_performance:
+      select_regarding_dressing: 'yes'
+    select_telephone_performance:
+      used_telephone_yes_no_dont_know: 'yes'
+    selected_programs_yes_no_dont_know:
+      watched_tv_yes_no_dont_know: 'yes'
+    talk_about_content_during_yes_no_dont_know:
+      watched_tv_yes_no_dont_know: 'yes'
+    talk_about_content_after_yes_no_dont_know:
+      watched_tv_yes_no_dont_know: 'yes'
+    select_degree_of_participation:
+      pay_attention_to_conversation_yes_no_dont_know: 'yes'
+    select_clear_dishes_performance:
+      clear_dishes_yes_no_dont_know: 'yes'
+    select_find_personal_belongings_performance:
+      find_personal_belongings_yes_no_dont_know: 'yes'
+    select_obtain_beverage_performance:
+      obtain_beverage_yes_no_dont_know: 'yes'
+    select_make_meal_performance:
+      make_meal_yes_no_dont_know: 'yes'
+    select_dispose_of_garbage_performance:
+      dispose_of_garbage_yes_no_dont_know: 'yes'
+    select_get_around_outside_performance:
+      get_around_outside_yes_no_dont_know: 'yes'
+    select_keep_appointments_performance:
+      keep_appointments_yes_no_dont_know: 'yes'
+    select_write_performance:
+      write_yes_no_dont_know: 'yes'
+    select_go_shopping_performance:
+      go_shopping_yes_no_dont_know: 'yes'
+    pay_for_items_yes_no_dont_know:
+      go_shopping_yes_no_dont_know: 'yes'
+    left_on_own_yes_no_dont_know:
+      institutionalized_no_yes: 'no'
+    away_from_home_yes_no_dont_know:
+      left_on_own_yes_no_dont_know: 'yes'
+    at_home_more_than_hour_yes_no_dont_know:
+      left_on_own_yes_no_dont_know: 'yes'
+    at_home_less_than_hour_yes_no_dont_know:
+      left_on_own_yes_no_dont_know: 'yes'
+    did_not_take_part_in_yes_no_dont_know:
+      talk_about_current_events_yes_no_dont_know: 'yes'
+    took_part_in_outside_home_yes_no_dont_know:
+      talk_about_current_events_yes_no_dont_know: 'yes'
+    took_part_in_at_home_yes_no_dont_know:
+      talk_about_current_events_yes_no_dont_know: 'yes'
+    multi_select_pastimes:
+      pastime_yes_no_dont_know: 'yes'
+    pastime_other:
+      pastime_yes_no_dont_know: 'yes'
+    pastimes_only_at_daycare_no_yes:
+      pastime_yes_no_dont_know: 'yes'
+    select_pastimes_only_at_daycare_performance:
+      pastimes_only_at_daycare_no_yes: 'yes'
+    multi_select_household_appliances:
+      use_household_appliance_yes_no_dont_know: 'yes'
+    household_appliance_other:
+      use_household_appliance_yes_no_dont_know: 'yes'
+    select_household_appliance_performance:
+      use_household_appliance_yes_no_dont_know: 'yes'
