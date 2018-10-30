@@ -146,7 +146,7 @@ default:
     pastimes_only_at_daycare_no_yes:
       pastime_yes_no_dont_know: 'yes'
     select_pastimes_only_at_daycare_performance:
-      pastimes_only_at_daycare_no_yes: 'yes'
+      pastime_yes_no_dont_know: 'yes'
     multi_select_household_appliances:
       use_household_appliance_yes_no_dont_know: 'yes'
     household_appliance_other:

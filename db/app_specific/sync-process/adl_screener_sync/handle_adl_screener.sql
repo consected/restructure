@@ -67,7 +67,7 @@ AS $$
         pay_for_items_yes_no_dont_know,
         keep_appointments_yes_no_dont_know,
         select_keep_appointments_performance,
-      --
+        institutionalized_no_yes,
         left_on_own_yes_no_dont_know,
         away_from_home_yes_no_dont_know,
         at_home_more_than_hour_yes_no_dont_know,
@@ -155,7 +155,7 @@ AS $$
         CASE WHEN NEW.adl_shop_pay = 0 THEN 'no' WHEN NEW.adl_shop_pay = 1 THEN 'yes' WHEN NEW.adl_shop_pay = 9 THEN 'don''t know' ELSE NEW.adl_shop_pay::varchar END,
         CASE WHEN NEW.adl_appt = 0 THEN 'no' WHEN NEW.adl_appt = 1 THEN 'yes' WHEN NEW.adl_appt = 9 THEN 'don''t know' ELSE NEW.adl_appt::varchar END,
         NEW.adl_appt_aware,
-        --  institutionalized___1,
+        CASE WHEN NEW.institutionalized___1 = 0 THEN 'no' WHEN NEW.institutionalized___1 = 1 THEN 'yes' WHEN NEW.institutionalized___1 = 9 THEN 'don''t know' ELSE NEW.institutionalized___1::varchar END,
         CASE WHEN NEW.adl_alone = 0 THEN 'no' WHEN NEW.adl_alone = 1 THEN 'yes' WHEN NEW.adl_alone = 9 THEN 'don''t know' ELSE NEW.adl_alone::varchar END,
         CASE WHEN NEW.adl_alone_15m = 0 THEN 'no' WHEN NEW.adl_alone_15m = 1 THEN 'yes' WHEN NEW.adl_alone_15m = 9 THEN 'don''t know' ELSE NEW.adl_alone_15m::varchar END,
         CASE WHEN NEW.adl_alone_gt1hr = 0 THEN 'no' WHEN NEW.adl_alone_gt1hr = 1 THEN 'yes' WHEN NEW.adl_alone_gt1hr = 9 THEN 'don''t know' ELSE NEW.adl_alone_gt1hr::varchar END,
