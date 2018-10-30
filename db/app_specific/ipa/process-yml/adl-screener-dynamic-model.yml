@@ -1,4 +1,9 @@
 default:
+  field_options:
+    select_regarding_dressing:
+      edit_as:
+        field_type: regarding_dressing_yes_no_dont_know
+
   caption_before:
     select_regarding_eating: |
       Regarding <b>eating</b>
@@ -130,6 +135,10 @@ default:
       talk_about_current_events_yes_no_dont_know: 'yes'
     took_part_in_at_home_yes_no_dont_know:
       talk_about_current_events_yes_no_dont_know: 'yes'
+    talk_about_reading_shortly_after_yes_no_dont_know:
+      read_yes_no_dont_know: 'yes'
+    talk_about_reading_later_yes_no_dont_know:
+      read_yes_no_dont_know: 'yes'
     multi_select_pastimes:
       pastime_yes_no_dont_know: 'yes'
     pastime_other:
