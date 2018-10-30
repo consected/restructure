@@ -54,6 +54,10 @@ _fpa.postprocessors = {
             _fpa.form_utils.format_block($(this));
         }).addClass('attached-expander-format');
 
+        if(block.hasClass('new-block') && !block.is(':visible')) {
+          block.show();
+        }
+
         block.find('.select-ref-to-record').not('.attached-handler').change(function () {
           var val = $(this).val();
           var selform = $(this).parents('form').first();

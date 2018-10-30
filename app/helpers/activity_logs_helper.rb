@@ -55,6 +55,9 @@ module ActivityLogsHelper
     else
       if @item
         "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\"></a>".html_safe
+      elsif params[:references] && params[:references][:record_id]
+        # An embedded new item
+        "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign in--embedded-new\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{params[:references][:record_type].ns_hyphenate.pluralize}-#{params[:references][:record_id]}- .new-block > div\"></a>".html_safe
       else
         extra_type ||= '-blank-log'
         "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\"></a>".html_safe
