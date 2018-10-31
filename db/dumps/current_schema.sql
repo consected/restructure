@@ -3205,7 +3205,8 @@ CREATE TABLE ml_app.model_references (
     to_record_master_id integer,
     user_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    disabled boolean
 );
 
 
