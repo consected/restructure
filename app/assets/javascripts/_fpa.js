@@ -160,8 +160,17 @@ _fpa = {
         block.html('');
     }
     else{
+      new_block = html;
+
+      // If the results has a root element with an id that matches the existing block,
+      // replace it rather than placing the result inside the current item
+      if(block.attr('id') ==  new_block.attr('id')){
+          block.replaceWith(new_block);
+      }
+      else {
         // Just replace the content of the specified block
         block.html(html);
+      }
     }
 
     // We handle the post processing in a timeout to give the UI the opportunity to render the

@@ -76,8 +76,13 @@ h4.results-divider{
       border-bottom: 0;
     }
   }
+
 }
 
+.model-reference-disabled {
+  color: rgb(128, 128, 128);
+  text-decoration: line-through silver;
+}
 
 li.list-group-item {
 

@@ -82,7 +82,7 @@ class ItemFlagsController < UserBaseController
 
       raise "Failed to get #{item_class_name}" unless item_class
 
-      @flag_item = item_class.find(params[:item_id])
+      @flag_item = parent_item_instance
       raise "Failed to get @flag_item for #{item_class_name}" unless @flag_item
 
       @master = @flag_item.master

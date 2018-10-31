@@ -77,6 +77,9 @@ Rails.application.routes.draw do
     get ':item_controller/:item_id/item_flags/:id', to: 'item_flags#show'
     post ':item_controller/:item_id/item_flags', to: 'item_flags#create'
 
+    get ':item_controller/:item_id/model_references/:id/edit', to: 'model_references#edit'
+    patch ':item_controller/:item_id/model_references/:id', to: 'model_references#update'
+
     namespace :filestore do
       resources :classification
     end

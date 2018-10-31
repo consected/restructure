@@ -7,8 +7,9 @@ class ModelReference < ActiveRecord::Base
   validates :from_record_type, presence: true
   validates :to_record_id, presence: true
   validates :to_record_type, presence: true
-  validates :to_record_master_id, presence: true, unless: ->{ to_record_class.no_master_association }
+  validates :to_record_master_id, presence: true, unless: ->{ to_record_class.no_master_association || self.disabled }
   validates :user_id, presence: true
+  validate :allows_disable, if: -> { self.disabled }
 
   attr_accessor :current_user
 
@@ -22,6 +23,32 @@ class ModelReference < ActiveRecord::Base
                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
                             user: to_item.master_user
     end
+  end
+
+  # Find the configuration of the creatable reference for the pair of records representing a ModelReference
+  # @return [Hash | nil] nil if there is no match or a Hash like
+  #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}
+  def self.find_config_for from_item, to_item
+    begin
+      fr = from_item
+      fr.current_user = to_item.master_user
+
+      cmr = fr.creatable_model_references
+      if cmr
+        cm = cmr.select {|k,v| v.first.last[:ref_type] == to_item.class.name.ns_underscore.to_sym}.first
+        config = cm.last.first.last[:ref_config]
+      end
+    rescue => e
+      Rails.logger.info "find_config_for raised an exception: #{e.inspect}\n#{e.backtrace.join("/n")}"
+      return nil
+    end
+    config
+  end
+
+  # Find the configuration of the creatable reference for this instance
+  # @return [Hash | nil]
+  def find_config
+    self.class.find_config_for from_record, to_record
   end
 
   def self.find_referenced_items from_item_or_master, record_type: nil
@@ -99,6 +126,10 @@ class ModelReference < ActiveRecord::Base
     else
       rt.name.ns_underscore.sub('dynamic_model__', '')
     end
+  end
+
+  def item_type
+    "model_reference"
   end
 
   def self.record_type_to_table_name rt
@@ -226,8 +257,16 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :from_record_viewable
     extras[:methods] << :to_record_result_key
     extras[:methods] << :to_record_template
-
+    extras[:methods] << :item_type
     # Don't return the full referenced object
     super(extras)
   end
+
+
+  private
+
+    def allows_disable
+      c = find_config || {}
+      !!c[:allow_disable]
+    end
 end

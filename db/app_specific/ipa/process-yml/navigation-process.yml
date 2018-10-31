@@ -98,13 +98,41 @@ _default:
 planned_event:
   label: Planned Event
   fields:
+  - select_event_type
+  - other_event_type
   - select_station
   - event_date
   - start_time
   - completion_time
   - select_status
+  - select_navigator
   - other_navigator_notes
 
+  field_options:
+    select_navigator:
+      edit_as:
+        field_type: select_user_with_role_user_-_navigation
+
+  show_if:
+    other_event_type:
+      select_event_type: other
+    select_station:
+      select_event_type: assessment
+
+
+  caption_before:
+    select_event_type:
+      caption: Select event type
+      keep_label: true
+    event_date:
+      caption: Enter planned date and time
+      keep_label: true
+    select_status:
+      caption: Select confirmation or cancellation status
+    select_navigator:
+      caption: Navigator assigned to coordinate
+    other_navigator_notes:
+      caption: Notes for navigator or planner
 
   references:
     dynamic_model__ipa_station_contact:
@@ -118,13 +146,16 @@ planned_event:
 
     activity_log__ipa_assignment_navigation:
       label: Event Feedback
-      from: master
+      from: this
       add: many
       add_with:
         extra_log_type: station_event
         event_date: "{{event_date}}"
         start_time: "{{start_time}}"
         select_station: "{{select_station}}"
+        select_event_type: "{{select_event_type}}"
+        other_event_type: "{{other_event_type}}"
+
       view_as:
         edit: hide
         show: hide
@@ -133,18 +164,41 @@ planned_event:
 
 
 station_event:
-  label: Station Event Feedback
+  label: Event Feedback
   fields:
+  - select_event_type
+  - other_event_type
   - select_station
   - event_date
   - arrival_time
   - start_time
-  - event_notes
   - completion_time
+  - event_notes
   - participant_feedback_notes
   - other_navigator_notes
 
+
+  show_if:
+    other_event_type:
+      select_event_type: other
+    select_station:
+      select_event_type: assessment
+
+
   caption_before:
+    select_event_type:
+      caption: Event type
+      keep_label: true
+    event_date:
+      caption: Event date and times
+      keep_label: true
+    participant_feedback_notes:
+      caption: Any feedback or notes from the participant
+    event_notes:
+      caption: Navigator's notes regarding the event
+    other_navigator_notes:
+      caption: Any other notes
+
     add_protocol_deviation_record_no_yes:
       keep_label: true
       caption: If the event involved a <i>protocol deviation</i> or <i>adverse event</i>, select <b>yes</b> and save this event, then complete the appropriate form.
@@ -235,3 +289,6 @@ general_event:
         extra_log_type: adverse_event_record
         event_occurred_when: "{{event_date}}"
         event_discovered_when: "{{event_date}}"
+
+  creatable_if:
+    never: true

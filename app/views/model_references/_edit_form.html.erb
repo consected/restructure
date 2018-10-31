@@ -1,0 +1,24 @@
+<div class="data-results">
+  <div data-result="<%= "model-reference-#{@master.id}-#{@from_item.item_type.hyphenate}-#{@from_item.id}-#{@id}-smrra" %>">
+    <div class="">
+
+      <%=form_for(:model_reference, {
+          url: "/masters/#{@master.id}/#{@from_item.item_type}/#{@from_item.id}/model_references/#{@id}",
+          method: :patch,
+          remote: true,
+          html: {
+            "data-result-target" => "#model-reference-#{@master.id}-#{@from_item.item_type.hyphenate}-#{@from_item.id}-#{@id}",
+            "data-template" => "model-references-#{@from_item.item_type}-result-template"
+          }
+        }) do |f|%>
+
+        <div class="form-group">
+            <%#= flag_inline_cancel_button %>
+          <%= f.hidden_field :disabled, value: true %>  
+          <%= f.submit class: "btn btn-primary", value: 'remove' %>
+        </div>
+      </ul>
+      <% end %>
+    </div>
+  </div>
+</div>

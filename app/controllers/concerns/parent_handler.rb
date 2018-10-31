@@ -9,4 +9,8 @@ module ParentHandler
     item_class_name.ns_constantize
   end
 
+  def parent_item_instance
+    item_class.find(params[:item_id])
+  end
+
 end

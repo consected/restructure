@@ -1044,6 +1044,13 @@ _fpa.form_utils = {
           console.log('format_block was provided no block.');
           block = $(document);
         }
+
+        // If the block has a class list-group we have gone one level too deep.
+        // Go up to the parent to allow all the following formatters to work
+        if(block.hasClass('list-group')) {
+          block = block.parent();
+        }
+
         // add an indicator (mostly for testing) that lengthy formatting is happening
         block.addClass('formatting-block');
 
