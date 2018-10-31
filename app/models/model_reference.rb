@@ -267,6 +267,10 @@ class ModelReference < ActiveRecord::Base
 
     def allows_disable
       c = find_config || {}
-      !!c[:allow_disable]
+      if !c[:prevent_disable]
+        errors.add :disable, "of this reference is not allowed"
+        return
+      end
+      true
     end
 end
