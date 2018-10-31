@@ -17,7 +17,13 @@ _fpa.form_utils = {
       for(var p in obj) {
         if(obj.hasOwnProperty(p)) {
           var v = obj[p];
-          var f = block.find("[data-attr-name='"+p+"']").parent();
+          var f = block.find("[data-attr-name='"+p.underscore()+"']").parent();
+
+          // In certain cases there may be more than one matching item (such as for radio buttons)
+          // If so, try to jump to the main .list-group-item container
+          if(f.length > 1) {
+            f = f.parents(".list-group-item").first();
+          }
           if(f.length == 1) {
             if(!first_field) first_field = f;
             f.addClass('has-error');

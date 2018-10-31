@@ -164,7 +164,7 @@ _fpa = {
 
       // If the results has a root element with an id that matches the existing block,
       // replace it rather than placing the result inside the current item
-      if(block.attr('id') ==  new_block.attr('id')){
+      if(block.attr('id') && block.attr('id') ==  new_block.attr('id')){
           block.replaceWith(new_block);
       }
       else {
