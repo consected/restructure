@@ -4,13 +4,12 @@
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create ipa_station_contacts first_name last_name role phone alt_phone email alt_email notes
 
-      CREATE FUNCTION log_ipa_station_contact_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_station_contact_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO ipa_station_contact_history
                   (
-                      master_id,
                       first_name,
                       last_name,
                       role,
@@ -26,7 +25,6 @@
                       ipa_station_contact_id
                       )
                   SELECT
-                      NEW.master_id,
                       NEW.first_name,
                       NEW.last_name,
                       NEW.role,
@@ -47,7 +45,6 @@
 
       CREATE TABLE ipa_station_contact_history (
           id integer NOT NULL,
-          master_id integer,
           first_name varchar,
           last_name varchar,
           role varchar,
@@ -74,7 +71,6 @@
 
       CREATE TABLE ipa_station_contacts (
           id integer NOT NULL,
-          master_id integer,
           first_name varchar,
           last_name varchar,
           role varchar,
@@ -106,13 +102,11 @@
       ALTER TABLE ONLY ipa_station_contacts
           ADD CONSTRAINT ipa_station_contacts_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_ipa_station_contact_history_on_master_id ON ipa_station_contact_history USING btree (master_id);
 
 
       CREATE INDEX index_ipa_station_contact_history_on_ipa_station_contact_id ON ipa_station_contact_history USING btree (ipa_station_contact_id);
       CREATE INDEX index_ipa_station_contact_history_on_user_id ON ipa_station_contact_history USING btree (user_id);
 
-      CREATE INDEX index_ipa_station_contacts_on_master_id ON ipa_station_contacts USING btree (master_id);
 
       CREATE INDEX index_ipa_station_contacts_on_user_id ON ipa_station_contacts USING btree (user_id);
 
@@ -122,16 +116,12 @@
 
       ALTER TABLE ONLY ipa_station_contacts
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-      ALTER TABLE ONLY ipa_station_contacts
-          ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 
       ALTER TABLE ONLY ipa_station_contact_history
           ADD CONSTRAINT fk_ipa_station_contact_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
-      ALTER TABLE ONLY ipa_station_contact_history
-          ADD CONSTRAINT fk_ipa_station_contact_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 

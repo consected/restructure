@@ -36,31 +36,34 @@ module ActivityLogsHelper
     res
   end
 
-  def activity_log_inline_cancel_button class_extras="pull-right"
+  def activity_log_inline_cancel_button class_extras=nil, link_text=nil
 
     if @extra_log_type_name
       extra_type_param = "?extra_type=#{@extra_log_type_name.hyphenate}"
       extra_type = "-#{@extra_log_type_name.hyphenate}"
     end
 
+    button_class = "glyphicon glyphicon-remove-sign"
+    class_extras ||= "pull-right" unless link_text
+
     if @id
       if @item
         cancel_href = "/masters/#{@master_id}/#{@item.item_type.pluralize}/#{@item_id}/#{primary_model.to_s.underscore.pluralize}/#{@id}#{extra_type_param}"
-        "<a class=\"show-entity show-#{full_object_name.hyphenate} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{full_object_name.hyphenate}-id=\"#{@id}\" data-result-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-#{@id}\" data-template=\"#{full_object_name.hyphenate}#{extra_type}-result-template\" data-toggle=\"scrollto-result\"}></a>".html_safe
+        "<a class=\"show-entity show-#{full_object_name.hyphenate} #{class_extras}  #{link_text ? '' : button_class}\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{full_object_name.hyphenate}-id=\"#{@id}\" data-result-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-#{@id}\" data-template=\"#{full_object_name.hyphenate}#{extra_type}-result-template\" data-toggle=\"scrollto-result\"}>#{link_text}</a>".html_safe
       else
         extra_type ||= '-blank-log'
         cancel_href = "/masters/#{@master_id}/#{primary_model.to_s.underscore.pluralize}/#{@id}"
-        "<a class=\"show-entity show-#{full_object_name.hyphenate} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{full_object_name.hyphenate}-id=\"#{@id}\" data-result-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-#{@id}\" data-template=\"#{full_object_name.hyphenate}#{extra_type}-result-template\" data-toggle=\"scrollto-result\" data-use-alt-result-key=\"#{full_object_name.underscore}#{extra_type.underscore}\"}></a>".html_safe
+        "<a class=\"show-entity show-#{full_object_name.hyphenate} #{class_extras}  #{link_text ? '' : button_class}\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{full_object_name.hyphenate}-id=\"#{@id}\" data-result-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-#{@id}\" data-template=\"#{full_object_name.hyphenate}#{extra_type}-result-template\" data-toggle=\"scrollto-result\" data-use-alt-result-key=\"#{full_object_name.underscore}#{extra_type.underscore}\"}>#{link_text}</a>".html_safe
       end
     else
       if @item
-        "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\"></a>".html_safe
+        "<a class=\"show-entity show-#{hyphenated_name} pull-right  #{link_text ? '' : button_class}\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\">#{link_text}</a>".html_safe
       elsif params[:references] && params[:references][:record_id]
         # An embedded new item
-        "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign in--embedded-new\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{params[:references][:record_type].ns_hyphenate.pluralize}-#{params[:references][:record_id]}- .new-block > div\"></a>".html_safe
+        "<a class=\"show-entity show-#{hyphenated_name} pull-right  #{link_text ? '' : button_class} in--embedded-new\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{params[:references][:record_type].ns_hyphenate.pluralize}-#{params[:references][:record_id]}- .new-block > div\">#{link_text}</a>".html_safe
       else
         extra_type ||= '-blank-log'
-        "<a class=\"show-entity show-#{hyphenated_name} pull-right glyphicon glyphicon-remove-sign\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\"></a>".html_safe
+        "<a class=\"show-entity show-#{hyphenated_name} pull-right  #{link_text ? '' : button_class}\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\">#{link_text}</a>".html_safe
       end
     end
   end

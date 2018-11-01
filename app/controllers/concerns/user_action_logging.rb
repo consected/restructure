@@ -28,8 +28,8 @@ module UserActionLogging
       master = @master
 
       if defined?(object_instance) && object_instance
-        master ||= object_instance.master
         nma = object_instance.class.no_master_association
+        master ||= object_instance.master unless nma
       end
 
       master_id = master.id if master
@@ -55,8 +55,8 @@ module UserActionLogging
       master = @master
 
       if defined?(object_instance) && object_instance
-        master ||= object_instance.master
         nma = object_instance.class.no_master_association
+        master ||= object_instance.master unless nma
       end
 
 

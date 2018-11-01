@@ -44,7 +44,7 @@
       " class=\"#{controller_name} #{action_name} #{env_name} #{current_app_type_id_class} #{admin_or_user_class}\"".html_safe
     end
 
-    def common_inline_cancel_button class_extras="pull-right"
+    def common_inline_cancel_button class_extras=nil, link_text=nil
 
       path_pref = "/masters/#{object_instance.master_id}" unless object_instance.class.no_master_association
 
@@ -54,7 +54,10 @@
         cancel_href = "#{path_pref}/#{controller_name}/cancel"
       end
 
-      "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} glyphicon glyphicon-remove-sign\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master&.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\" ></a>".html_safe
+      button_class = "glyphicon glyphicon-remove-sign"
+      class_extras ||= "pull-right" unless link_text
+
+      "<a class=\"show-entity show-#{hyphenated_name} #{class_extras} #{link_text ? '' : button_class}\" title=\"cancel\" href=\"#{cancel_href}\" data-remote=\"true\" data-#{hyphenated_name}-id=\"#{object_instance.id}\" data-result-target=\"##{hyphenated_name}-#{@master&.id}-#{@id}\" data-template=\"#{hyphenated_name}-result-template\" >#{link_text}</a>".html_safe
     end
 
     def common_edit_form_id
@@ -79,8 +82,8 @@
     end
 
 
-    def inline_cancel_button class_extras="pull-right"
-        send("#{edit_form_helper_prefix}_inline_cancel_button", class_extras)
+    def inline_cancel_button class_extras=nil, link_text=nil
+        send("#{edit_form_helper_prefix}_inline_cancel_button", class_extras, link_text)
     end
 
     def admin_edit_controls

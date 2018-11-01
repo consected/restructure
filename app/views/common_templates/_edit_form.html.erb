@@ -121,7 +121,7 @@
           <% end %>
           <li class="list-group-item edit-select-ref-container">
             <%= label_tag :ref_to_record_id,  "Select #{caption}" %>
-            <%= select_tag :ref_to_record_id, options_from_collection_for_select(@master_objects, :id, :data), include_blank: '(add new)', class: 'select-ref-to-record' %>
+            <%= select_tag :ref_to_record_id, options_from_collection_for_select(@master_objects, :id, :data), include_blank: '(add new)', class: 'select-ref-to-record'  %>
           </li>
 
           <li class="list-group-item submit-action-container hidden">
@@ -146,6 +146,14 @@
         <li class="list-group-item edit-form-header">
           <% unless embedded %><%= inline_cancel_button %><% end %>
           <h4 class="list-group-item-heading"><%=caption%></h4>
+          <%
+             rfl = object_instance.referenced_from.length
+             if rfl > 1
+          %>
+            <p class="edit-object-with-multiple-references">
+              This record is used by <%= rfl %> items. Editing it will affect all items. <%= inline_cancel_button(nil, "Cancel") %> if this is not what you want to do.
+            </p>
+          <% end %>
           <%= render partial: 'common_templates/item_flags_block', locals: {f: form} unless item_flags_after || item_flags_array.length == 0 %>
         </li>
 
