@@ -13,7 +13,8 @@ al.select_station,
 al.select_event_type,
 al.other_event_type,
 al.completion_time,
-al.arrival_time
+al.arrival_time,
+al.select_navigator
 from
 activity_log_ipa_assignment_navigations al
 inner join player_infos pi
@@ -51,48 +52,91 @@ on ipa.master_id = al.master_id
 
 
 where
-(:from_date IS NULL OR :from_date <= now())
-AND
-(:to_date IS NULL OR :to_date >= now())
+  (:from_date IS NULL OR :from_date <= now())
+  AND (:to_date IS NULL OR :to_date >= now())
+  AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)
 GROUP BY
 ap.master_id, visit_start_date, pi.first_name, pi.last_name, ipa.ipa_id
 ;
 
-select
-'assessment event' "-",
-al.event_date "date",
-al.start_time "start time",
-al.master_id,
-al.ipa_id "IPA ID",
-al.first_name "first name",
-al.last_name "last name",
-al.extra_log_type "type",
-al.select_status "status",
-al.select_station "station",
-al.select_event_type "event type",
-al.other_event_type "other event type",
-al.completion_time "planned or actual completion time",
-al.arrival_time "arrival time"
+create temp table scheduled_calls
+as select
+  dt.follow_up_when,
+  dt.follow_up_time,
+  dt.master_id,
+  ipa.ipa_id,
+  p.first_name,
+  p.last_name,
+  dt.extra_log_type,
+  dt.select_who
+from
+  (
+    select a.master_id,
+      a.extra_log_type,
+      a.select_who,
+      a.follow_up_when,
+      a.follow_up_time,
+      a.notes,
+      rank()
+    OVER (
+      PARTITION BY a.master_id, a.extra_log_type
+      ORDER BY a.created_at DESC
+    ) AS r
 
-from nav_events al
+    from activity_log_ipa_assignments a
+    where
+      follow_up_when is not null
+      AND (:from_date IS NULL OR follow_up_when >= :from_date)
+      AND (:to_date IS NULL OR follow_up_when <= :to_date )
+  ) dt
+inner join player_infos p
+  on dt.master_id = p.master_id
+
+inner join ipa_assignments ipa
+  on dt.master_id = ipa.master_id
+
+WHERE r = 1
+AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)
+;
+
+
+SELECT
+  al.event_date "date",
+  al.start_time "start time",
+  'assessment event' "-",
+  al.extra_log_type "type",
+  select_navigator "assigned to",
+  al.master_id,
+  al.ipa_id "IPA ID",
+  al.first_name "first name",
+  al.last_name "last name",
+  al.select_status "status",
+  al.select_station "station",
+  al.select_event_type "event type",
+  al.other_event_type "other event type",
+  al.completion_time "planned or actual completion time",
+  al.arrival_time "arrival time"
+
+FROM nav_events al
 
 UNION
 
 SELECT
-'week',
-date_trunc('week', dd)::date,
-NULL,
-NULL,
-NULL,
-'--------',
-'--------',
-'--------',
-'--------',
-'--------',
-'--------',
-'--------',
-NULL,
-NULL
+  date_trunc('week', dd)::date,
+  NULL,
+  '          ',
+  '          ',
+  '          ',
+  NULL,
+  NULL,
+  '          ',
+  '          ',
+  '          ',
+  '          ',
+  '          ',
+  '          ',
+  NULL,
+  NULL
 FROM generate_series
       ( (select min(event_date)::timestamp from nav_events)
       , (select max(event_date)::timestamp from nav_events)
@@ -101,26 +145,45 @@ FROM generate_series
 UNION
 
 SELECT
-'appointment start',
-visit_start_date event_date,
-NULL,
-master_id,
-ipa_id,cd
-first_name,
-last_name,
-'--------',
-'--------',
-'--------',
-'--------',
-'--------',
-NULL,
-NULL
-FROM
-appointments
+  visit_start_date event_date,
+  NULL,
+  'appointment start',
+  '',
+  '' "assigned to",
+  master_id,
+  ipa_id,
+  first_name,
+  last_name,
+  '',
+  '',
+  '',
+  '',
+  NULL,
+  NULL
+FROM appointments
+
+UNION
+
+SELECT
+  follow_up_when,
+  follow_up_time,
+  'scheduled call' "-",
+  extra_log_type,
+  select_who "assigned to",
+  master_id,
+  ipa_id,
+  first_name,
+  last_name,
+  '',
+  '',
+  '',
+  '',
+  NULL,
+  NULL
+FROM scheduled_calls
+
 
 order by
 "date",
 "start time"
-
-
 ;
