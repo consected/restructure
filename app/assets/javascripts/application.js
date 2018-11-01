@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require bootstrap
 //= require typeahead
+//= require jquery.timepicker
 //= require chosen.jquery
 //= require handlebars-v4.0.10
 //= require jquery-tablesorter

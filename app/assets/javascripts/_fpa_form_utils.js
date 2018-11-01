@@ -674,6 +674,20 @@ _fpa.form_utils = {
           el.val(res);
         }
       }).addClass('is-masked');
+
+
+      block.find('input.time-entry').not('is-time-masked').each(function() {
+        $(this).timepicker({
+            timeFormat: 'h:mm p',
+            interval: 15,
+            minTime: '12:00am',
+            maxTime: '11:59pm',
+            startTime: '12:00am',
+            dynamic: true,
+            dropdown: true,
+            scrollbar: true
+        });
+      });
     },
 
     setup_datepickers: function(block){

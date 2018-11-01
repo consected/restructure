@@ -2,7 +2,7 @@
 <%
   val = form_object_instance.attributes[field_name]
   if val.present? && val.is_a?(Time)
-    val = val.strftime('%l %M %p')
+    val = val.strftime('%l:%M%P')
   end
 %>
-<%= form.text_field field_name_sym, value: val  , placeholder: '__:__ am',  pattern: '\d{1,2}:\d{2} \D\D', data: {attr_name: field_name_sym, object_name: form_object_item_type_us} %>
+<%= form.text_field field_name_sym, value: val, data: {attr_name: field_name_sym, object_name: form_object_item_type_us}, class: "time-entry" %>

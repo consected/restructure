@@ -12,6 +12,7 @@
  *
  *= require bootstrap
  *= require bootstrap-theme
+ *= require jquery.timepicker
  *= require chosen
  *= require nfs_store/application
  *= require_tree .
