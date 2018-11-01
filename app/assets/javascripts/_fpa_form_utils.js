@@ -695,8 +695,8 @@ _fpa.form_utils = {
         if(v && v != ''){
           var d = _fpa.utils.YMDtoLocale(v);
           $(this).val(d);
-          $(this).addClass('date-is-local');
         }
+        $(this).addClass('date-is-local');
 
       });
 

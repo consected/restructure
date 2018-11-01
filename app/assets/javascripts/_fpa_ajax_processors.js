@@ -58,6 +58,7 @@ _fpa.postprocessors = {
           block.show();
         }
 
+        // Add handler for "select or add" model reference field
         block.find('.select-ref-to-record').not('.attached-handler').change(function () {
           var val = $(this).val();
           var selform = $(this).parents('form').first();
