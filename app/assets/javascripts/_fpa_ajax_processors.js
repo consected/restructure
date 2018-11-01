@@ -56,6 +56,9 @@ _fpa.postprocessors = {
 
         if(block.hasClass('new-block') && !block.is(':visible')) {
           block.show();
+          window.setTimeout(function() {
+            _fpa.form_utils.format_block(block);
+          }, 200);
         }
 
         // Add handler for "select or add" model reference field
