@@ -194,6 +194,13 @@ _fpa.form_utils = {
         return;
       }
 
+      if(data.length) {
+        for(var n = 0; n < data.length; n++) {
+          _fpa.form_utils.get_general_selections(data[n]);
+        }
+        return;
+      }
+
       if(!data.item_type) {
 
         var item_key;
