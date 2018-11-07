@@ -16,6 +16,13 @@
 //= require typeahead
 //= require jquery.timepicker
 //= require chosen.jquery
+//= require codemirror
+//= require codemirror-yaml
+//= require codemirror-markdown-fold
+//= require codemirror-comment
+//= require codemirror-foldcode
+//= require codemirror-foldgutter
+//= require codemirror-indent-fold
 //= require handlebars-v4.0.10
 //= require jquery-tablesorter
 //= require jquery-scrollto-min

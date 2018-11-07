@@ -49,14 +49,14 @@
   <div>
     <div class="form-group">
       <%= f.label :extra_log_types %><br>
-      <%= f.text_area :extra_log_types %>
+      <%= f.text_area :extra_log_types, class: "code-yml" %>
     </div>
     <div class="form-group" style="vertical-align: top">
-      <h4>Extra Log Options</h4>
+      <label>Extra Log Options</label>
       <% example = {'extras_log_type_name' => ExtraLogType.attr_defs.deep_stringify_keys} %>
-      <pre style="font-size: 12px">
+      <textarea style="font-size: 12px" class="extra-help-info">
 <%= example.to_yaml %>
-      </pre>
+      </textarea>
     </div>
     <div class="form-group" style="vertical-align: top">
       <div data-spy="affix" class="affixed-admin-edit-btns" >

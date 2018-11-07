@@ -14,6 +14,8 @@
  *= require bootstrap-theme
  *= require jquery.timepicker
  *= require chosen
+ *= require codemirror
+ *= require codemirror-foldgutter.css
  *= require nfs_store/application
  *= require_tree .
  *= require_self

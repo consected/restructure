@@ -76,6 +76,37 @@ _fpa.postprocessors_admin = {
           $(filter_sel + ' optgroup[data-group-num="'+val+'"]').show();
 
         }).addClass('filters-select-attached');
+
+
+        block.find('.code-yml').not('.code-yml-formatted').each(function () {
+            var code_el = $(this).get(0);
+            var cm = CodeMirror.fromTextArea(code_el, {
+              lineNumbers: true,
+              mode: "yaml",
+              foldGutter: true,
+              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+            var cme = cm.getWrapperElement();
+            cme.style.width = '800px';
+            cme.style.height = '80vh';
+            cm.refresh();
+
+            var code_el = $('.extra-help-info').get(0);
+            var cm = CodeMirror.fromTextArea(code_el, {
+              lineNumbers: true,
+              mode: "yaml",
+              readOnly: true,
+              foldGutter: true,
+              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+
+            var cme = cm.getWrapperElement();
+            cme.style.width = '800px';
+            cme.style.height = '80vh';
+            cme.style.backgroundColor = 'rgb(240, 240, 240)';
+            cm.refresh();
+
+        }).addClass('code-yml-formatted');
     },
 
     admin_result: function(block, data) {

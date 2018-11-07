@@ -65,16 +65,16 @@
     <div></div>
   <div class="form-group" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
     <h4><%= has_options.to_s.humanize %></h4>
-    <%= f.text_area has_options %>
+    <%= f.text_area has_options, class: "code-yml" %>
   </div>
   <% end %>
 
 <% if @show_extra_help_info %>
   <div class="form-group" style="vertical-align: top">
-    <h4><%= @show_extra_help_info[:title] %></h4>
-    <pre style="font-size: 12px">
+    <label><%= @show_extra_help_info[:title] %></label>
+    <textarea style="font-size: 12px" class="extra-help-info">
         <%= @show_extra_help_info[:text] %>
-    </pre>
+    </textarea>
   </div>
 <% end %>
 
