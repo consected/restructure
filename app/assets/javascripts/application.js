@@ -18,6 +18,7 @@
 //= require chosen.jquery
 //= require codemirror
 //= require codemirror-yaml
+//= require codemirror-sql
 //= require codemirror-markdown-fold
 //= require codemirror-comment
 //= require codemirror-foldcode

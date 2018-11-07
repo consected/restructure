@@ -48,7 +48,7 @@
               </td>
             </tr><tr>
               <td>config selections</td>
-              <td><textarea id="search_attrs_config_selections"></textarea>
+              <td><textarea id="search_attrs_config_selections" class="code-yml editor-size-small"></textarea>
                 <p class="help-block">add one line per option:</p>
                 <pre class="help-block">
 label 1: value 1
@@ -57,7 +57,7 @@ label 2: value 2</pre>
               </td>
             </tr><tr>
               <td>conditions</td>
-              <td><textarea id="search_attrs_conditions"></textarea>
+              <td><textarea id="search_attrs_conditions" class="code-yml editor-size-small"></textarea>
                 <p class="help-block">add one line per option:</p>
                 <pre class="help-block">
 field (equals): value 1
@@ -84,6 +84,6 @@ field2 (any of):
   </div>
   <div class="col-sm-10" style="text-align: left;">
     <%= f.label :search_attributes%>
-    <%= f.text_area  :search_attrs,  style: "width: 99%; height: 340px; font-family: monospace;" %>
+    <%= f.text_area  :search_attrs,  style: "width: 99%; height: 340px; font-family: monospace;", class: "code-yml editor-size-small"%>
   </div>
 </div>

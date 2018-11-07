@@ -78,6 +78,21 @@ _fpa.postprocessors_admin = {
         }).addClass('filters-select-attached');
 
 
+        block.find('.code-sql').not('.code-sql-formatted').each(function () {
+            var code_el = $(this).get(0);
+            var cm = CodeMirror.fromTextArea(code_el, {
+              lineNumbers: true,
+              mode: "sql",
+              foldGutter: true,
+              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            });
+            var cme = cm.getWrapperElement();
+            cme.style.width = '99%';
+            cme.style.height = '60vh';
+
+            cm.refresh();
+        }).addClass('code-sql-formatted');
+
         block.find('.code-yml').not('.code-yml-formatted').each(function () {
             var code_el = $(this).get(0);
             var cm = CodeMirror.fromTextArea(code_el, {
@@ -87,11 +102,20 @@ _fpa.postprocessors_admin = {
               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
             });
             var cme = cm.getWrapperElement();
-            cme.style.width = '800px';
-            cme.style.height = '80vh';
+            if($(this).hasClass('editor-size-small')) {
+              cme.style.width = '97.5%';
+              cme.style.height = '300px';
+
+            }
+            else {
+              cme.style.width = '800px';
+              cme.style.height = '80vh';
+
+            }
             cm.refresh();
 
             var code_el = $('.extra-help-info').get(0);
+            if(!code_el) return;
             var cm = CodeMirror.fromTextArea(code_el, {
               lineNumbers: true,
               mode: "yaml",
