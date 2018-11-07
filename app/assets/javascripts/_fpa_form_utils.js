@@ -371,7 +371,7 @@ _fpa.form_utils = {
     },
 
     // Provide a filtered set of options in a select field, based on the selection of
-    // another field
+    // another field. Used exclusively for protocol / sub-process / protocol-event forms at the moment
     // This handle both the initial setup and handling changes made to parent and dependent
     // select fields
     filtered_selector: function(block){
@@ -416,8 +416,6 @@ _fpa.form_utils = {
                     if(v)
                         $(this).addClass('prevent-submit');
 
-//                    else
-  //                      $(this).trigger('change'); // it was changed back to blank, therefore the form has changed enough to submit
                 }
                 do_filter($(this));
             });
@@ -429,6 +427,40 @@ _fpa.form_utils = {
         }).on('change', function(){
             do_filter($(this));
         }).addClass('attached-filter');
+    },
+
+
+    // Provide select filtering for select fields in user forms
+    // Drive on optgroup, where the label is initially id/name and is split out
+    // to just show the name and retain the id in an attribute
+    // The select item that drives the change must have an attribute data-filters-select
+    // with css selector pointing to the select element to be filtered on change
+    setup_form_filtered_select: function(block) {
+      block.find('select[data-filters-select]').not('.filters-select-attached').each(function() {
+        var $el = $(this);
+        var filter_sel = $el.attr('data-filters-select');
+        $el.on('change', function () {
+          var val = $el.val();
+          $(filter_sel + ' optgroup[data-group-num]').hide();
+          $(filter_sel + ' optgroup[data-group-num="'+val+'"]').show();
+        });
+
+        var val = $el.val();
+        $(filter_sel + ' optgroup[label]').each (function () {
+          if(!$(this).attr('data-group-num')) {
+            var l = $(this).attr('label');
+            var ls = l.split('/',2);
+            var last = ls.length - 1;
+            var first = 0;
+            console.log('got:'+ ls[last])
+            $(this).attr('label', ls[last]);
+            $(this).attr('data-group-num', ls[first]);
+          }
+
+        }).hide();
+        $(filter_sel + ' optgroup[data-group-num="'+val+'"]').show();
+
+      }).addClass('filters-select-attached');
     },
 
     // Use the tablesorter on profile blocks.
@@ -1095,6 +1127,8 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_textarea_autogrow(block);
         _fpa.form_utils.setup_contact_field_mask(block);
         _fpa.form_utils.setup_filestore(block);
+        // Not currently used or tested.
+        // _fpa.form_utils.setup_form_filtered_select(block);
 
         _fpa.form_utils.setup_error_clear(block);
         _fpa.form_utils.resize_children(block);

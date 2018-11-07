@@ -56,13 +56,24 @@ _fpa.postprocessors_admin = {
           var filter_sel = $el.attr('data-filters-select');
           $el.on('change', function () {
             var val = $el.val();
-            $(filter_sel + ' optgroup[label]').hide();
-            $(filter_sel + ' optgroup[label="'+val+'"]').show();
+            $(filter_sel + ' optgroup[data-group-num]').hide();
+            $(filter_sel + ' optgroup[data-group-num="'+val+'"]').show();
           });
 
           var val = $el.val();
-          $(filter_sel + ' optgroup[label]').hide();
-          $(filter_sel + ' optgroup[label="'+val+'"]').show();
+          $(filter_sel + ' optgroup[label]').each (function () {
+            if(!$(this).attr('data-group-num')) {
+              var l = $(this).attr('label');
+              var ls = l.split('/',2);
+              var last = ls.length - 1;
+              var first = 0;
+              console.log('got:'+ ls[last])
+              $(this).attr('label', ls[last]);
+              $(this).attr('data-group-num', ls[first]);
+            }
+
+          }).hide();
+          $(filter_sel + ' optgroup[data-group-num="'+val+'"]').show();
 
         }).addClass('filters-select-attached');
     },

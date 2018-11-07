@@ -45,13 +45,14 @@ class Admin::UserRole < ActiveRecord::Base
     select("role_name").distinct.pluck(:role_name)
   end
 
-  # Get roles names in a hash, keyed by the app name. May be filtered by a previous scope
+  # Get roles names in a hash, keyed by the "app.id/app.name". May be filtered by a previous scope
   # @return [Hash] hash with string keys of app names and values as arrays of role names for each
   def self.role_names_by_app_name
     res = all
     items = {}
     res.each do |role|
-      n = role.app_type_id
+      m = role.app_type
+      n = "#{m.id}/#{m.name}"
       items[n] ||= []
       items[n] << role.role_name unless items[n].include? role.role_name
     end

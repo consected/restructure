@@ -172,6 +172,7 @@ adl_informant_screener:
 sign_phone_screen_staff:
   label: Sign Phone Screen Review (Staff)
   fields:
+    - notes
     - signed_no_yes
   caption_before:
     all_fields: Sign the checklist by selecting <b>yes</b> in the <b>signed</b> field.
@@ -226,6 +227,7 @@ sign_phone_screen:
   label: Sign Phone Screen Review (PI)
   fields:
     - select_subject_eligibility
+    - notes
     - signed_no_yes
   caption_before:
     all_fields: Select the subject's eligibility and sign the checklist by selecting <b>yes</b> in the <b>signed</b> field.
@@ -290,6 +292,7 @@ baseline_review:
 sign_baseline_staff:
   label: Sign Baseline Review (Staff)
   fields:
+    - notes
     - signed_no_yes
   caption_before:
     all_fields: Sign the checklist by selecting <b>yes</b> in the <b>signed</b> field.
@@ -335,6 +338,7 @@ sign_baseline:
   label: Sign Baseline Review (PI)
   fields:
     - select_subject_eligibility
+    - notes
     - signed_no_yes
   caption_before:
     all_fields: Select the subject's eligibility and sign the checklist by selecting <b>yes</b> in the <b>signed</b> field.
@@ -373,7 +377,7 @@ ps_contact_creator:
     submit: After clicking <i>Send</i> the staff member will be notified.
 
   save_trigger:
-    on_save:
+    on_create:
       notify:
         <<: *notify_ps_checklist_initiator
 
@@ -395,7 +399,7 @@ baseline_contact_creator:
     submit: After clicking <i>Send</i> the staff member will be notified.
 
   save_trigger:
-    on_save:
+    on_create:
       notify:
         <<: *notify_baseline_checklist_initiator
 
@@ -419,7 +423,7 @@ contact_pi:
       Enter the message.
     submit: After clicking <i>Send</i> the PI will be notified.
   save_trigger:
-    on_save:
+    on_create:
       notify:
         <<: *notify_pi
   creatable_if:

@@ -2,13 +2,13 @@ set search_path=filestore, filestore_admin, ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_session_filestores ipa_assignment select_scanner operator notes session_date session_time
+-- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_session_filestores ipa_assignment select_type operator notes session_date session_time
 
       CREATE TABLE activity_log_ipa_assignment_session_filestore_history (
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
-          select_scanner varchar,
+          select_type varchar,
           operator varchar,
           session_date date,
           session_time time,
@@ -23,7 +23,7 @@ set search_path=filestore, filestore_admin, ml_app;
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
-          select_scanner varchar,
+          select_type varchar,
           operator varchar,
           session_date date,
           session_time time,
@@ -34,7 +34,7 @@ set search_path=filestore, filestore_admin, ml_app;
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_ipa_assignment_session_filestore_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_activity_log_ipa_assignment_session_filestore_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -42,7 +42,7 @@ set search_path=filestore, filestore_admin, ml_app;
                   (
                       master_id,
                       ipa_assignment_id,
-                      select_scanner,
+                      select_type,
                       operator,
                       notes,
                       session_date,
@@ -56,7 +56,7 @@ set search_path=filestore, filestore_admin, ml_app;
                   SELECT
                       NEW.master_id,
                       NEW.ipa_assignment_id,
-                      NEW.select_scanner,
+                      NEW.select_type,
                       NEW.operator,
                       NEW.notes,
                       NEW.session_date,

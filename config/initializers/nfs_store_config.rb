@@ -30,8 +30,8 @@ ActiveSupport.on_load(:nfs_store_config) do
     raise FsException::Config.new "group_id_range not set" if self.group_id_range.blank?
     raise FsException::Config.new "containers_dirname not set" if self.containers_dirname.nil?
 
-    ares = Kernel.system 'which archivemount'
-    raise FsException::Config.new "archivemount not in the path" unless ares
+    ares = Kernel.system 'which unzip'
+    raise FsException::Config.new "unzip not in the path" unless ares
 
     raise FsException::Config.new "No App Type available" unless Admin::AppType.first
 

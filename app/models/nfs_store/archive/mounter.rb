@@ -28,8 +28,8 @@ module NfsStore
             mounter = self.new
             mounter.stored_file = sf
             # How old is the file?
-            td = Time.now - File.ctime(sf.retrieval_path)
-            sf.process_new_file unless td < ProcessingRetryTime || mounter.archive_extracted?
+            td = Time.now - File.ctime(sf.retrieval_path) rescue nil
+            sf.process_new_file unless (td && td < ProcessingRetryTime) || mounter.archive_extracted?
           end
         end
       end
@@ -117,7 +117,7 @@ module NfsStore
               puts "Done with #{@mounted_path}"
 
             end
-            
+
             res = extract_archived_files
 
             extract_completed! if res
