@@ -9,7 +9,9 @@
     end
   end
 %>
+<% if found_options %>
 <tbody class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%> <%= list_item.persisted? ? '' : 'new-record hidden'%> <%= action_name.in?(['create', 'update']) ? 'saved-row postprocessed-scroll-here' : ''%>" id="admin-item-<%=list_item.id%>" data-result-position="<%= list_item.persisted? ? 'replace' : 'after'%>" data-preprocessor="admin_result">
+<% end %>
   <tr class="admin-list-item <%=list_item.disabled ? 'disabled-result' : ''%>">
     <td class="admin-field-<%=p%>"><%= admin_edit_btn list_item.id%> </td>
     <% index_params.each do |p|
@@ -36,5 +38,5 @@
       <td>&nbsp;</td>
       <td colspan="<%=num_fields%>" class="admin-field-<%=p%>"><strong><%=found_options%>:</strong> <pre style="font-size: 12px" class="shrinkable-block"><%= list_item.send(found_options) %></pre></td>
     </tr>
+  </tbody>
   <% end %>
-</tbody>
