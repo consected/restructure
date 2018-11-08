@@ -7,9 +7,9 @@ Ensure it references the original phone screen dynamic model record.
 */
 
 
-DROP FUNCTION IF EXISTS activity_log_ipa_assignment_phone_screens_callback_set() CASCADE;
+DROP FUNCTION IF EXISTS ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() CASCADE;
 
-CREATE OR REPLACE FUNCTION activity_log_ipa_assignment_phone_screens_callback_set() RETURNS trigger
+CREATE OR REPLACE FUNCTION ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
     DECLARE
@@ -285,6 +285,23 @@ Responded "' || health.raynauds_syndrome_severity_selection || '" to follow up q
       NEW.master_id
     );
 
+    INSERT INTO activity_log_ipa_assignment_inex_checklists
+    (
+      master_id,
+      created_at,
+      updated_at,
+      user_id,
+      extra_log_type
+    )
+    VALUES
+    (
+      NEW.master_id,
+      NOW(),
+      NOW(),
+      NEW.user_id,
+      'adl_informant_screener'
+    );
+
 
   END IF;
   RETURN NEW;
@@ -293,4 +310,4 @@ $$;
 
 
 
-CREATE TRIGGER ipa_ps_to_inex AFTER INSERT ON activity_log_ipa_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_ipa_assignment_phone_screens_callback_set();
+CREATE TRIGGER ipa_ps_to_inex AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_ipa_assignment_phone_screens_callback_set();
