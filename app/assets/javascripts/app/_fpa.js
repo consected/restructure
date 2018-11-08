@@ -83,6 +83,8 @@ _fpa = {
   // replace functionality within preprocessors
   view_template: function(block, template_name, data, options){
 
+    var process_block = block;
+
     // Prevent an attempt to render the template in a block that has already been rendered in this request
     if(block.hasClass('view-template-created') || block.parent().hasClass('view-template-created')) return;
 
@@ -138,6 +140,7 @@ _fpa = {
         else {
             beforeBlock.before(new_block);
         }
+        process_block = new_block;
         block.html('');
     } else if(options.position && options.position.indexOf('after') === 0){
 
@@ -158,6 +161,7 @@ _fpa = {
           afterBlock.after(new_block);
         }
         block.html('');
+        process_block = new_block;
     }
     else{
       new_block = html;
@@ -176,7 +180,7 @@ _fpa = {
     // We handle the post processing in a timeout to give the UI the opportunity to render the
     // template, providing for a more responsive, less jerky experience.
     window.setTimeout(function(){
-        _fpa.do_postprocessors(template_name, new_block, data);
+        _fpa.do_postprocessors(template_name, process_block, data);
         _fpa.reset_page_size();
         _fpa.ajax_done(block);
     }, 1);
