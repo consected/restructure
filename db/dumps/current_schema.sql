@@ -826,37 +826,51 @@ CREATE FUNCTION ml_app.log_activity_log_player_contact_phone_update() RETURNS tr
 CREATE FUNCTION ml_app.log_activity_log_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-                BEGIN
-                    INSERT INTO activity_log_history
-                    (
-                        name,
-                        activity_log_id,
-                        admin_id,
-                        created_at,
-                        updated_at,
-                        item_type,
-                        rec_type,
-                        disabled,
-                        action_when_attribute,
-                        field_list,
-                        blank_log_field_list
-                        )
-                    SELECT
-                        NEW.name,
-                        NEW.id,
-                        NEW.admin_id,
-                        NEW.created_at,
-                        NEW.updated_at,
-                        NEW.item_type,
-                        NEW.rec_type,
-                        NEW.disabled,
-                        NEW.action_when_attribute,
-                        NEW.field_list,
-                        NEW.blank_log_field_list
-                    ;
-                    RETURN NEW;
-                END;
-            $$;
+        BEGIN
+            INSERT INTO activity_log_history
+            (
+                name,
+                activity_log_id,
+                admin_id,
+                created_at,
+                updated_at,
+                item_type,
+                rec_type,
+                disabled,
+                action_when_attribute,
+                field_list,
+                blank_log_field_list,
+
+                blank_log_name,
+                extra_log_types,
+                hide_item_list_panel,
+                main_log_name,
+                process_name,
+                table_name
+                )
+            SELECT
+                NEW.name,
+                NEW.id,
+                NEW.admin_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.item_type,
+                NEW.rec_type,
+                NEW.disabled,
+                NEW.action_when_attribute,
+                NEW.field_list,
+                NEW.blank_log_field_list,
+
+                NEW.blank_log_name,
+                NEW.extra_log_types,
+                NEW.hide_item_list_panel,
+                NEW.main_log_name,
+                NEW.process_name,
+                NEW.table_name
+            ;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -1936,7 +1950,13 @@ CREATE TABLE ml_app.activity_log_history (
     updated_at timestamp without time zone NOT NULL,
     action_when_attribute character varying,
     field_list character varying,
-    blank_log_field_list character varying
+    blank_log_field_list character varying,
+    blank_log_name character varying,
+    extra_log_types character varying,
+    hide_item_list_panel boolean,
+    main_log_name character varying,
+    process_name character varying,
+    table_name character varying
 );
 
 
