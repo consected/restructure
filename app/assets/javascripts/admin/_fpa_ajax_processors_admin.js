@@ -80,13 +80,19 @@ _fpa.postprocessors_admin = {
 
         block.find('.code-editor').not('.code-editor-formatted').each(function () {
             var code_el = $(this).get(0);
+            var lint;
             var mode = $(this).attr('data-code-editor-type');
             if(!mode) mode = 'yaml';
+            // if(mode == 'yaml') {
+            //   lint = true;
+            //   mode = 'text/x-yaml';
+            // }
 
             var cm = CodeMirror.fromTextArea(code_el, {
               lineNumbers: true,
               mode: mode,
               foldGutter: true,
+              lint: lint,
               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
             });
             var cme = cm.getWrapperElement();

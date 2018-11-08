@@ -11,7 +11,9 @@
 // about supported directives.
 //
 //= require codemirror
+//= require codemirror-lint
 //= require codemirror-yaml
+//= require codemirror-yaml-lint
 //= require codemirror-sql
 //= require codemirror-markdown-fold
 //= require codemirror-comment
@@ -23,4 +25,5 @@
 //= require codemirror-javascript
 //= require codemirror-htmlembedded
 //= require codemirror-htmlmixed
+//= require js-yaml
 //= require_tree ./admin

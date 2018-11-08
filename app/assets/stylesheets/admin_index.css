@@ -11,6 +11,7 @@
  * file per style scope.
  *
  *= require codemirror
+ *= require codemirror-lint
  *= require codemirror-foldgutter.css
  *= require_self
  */
