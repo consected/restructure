@@ -78,59 +78,45 @@ _fpa.postprocessors_admin = {
         }).addClass('filters-select-attached');
 
 
-        block.find('.code-sql').not('.code-sql-formatted').each(function () {
+        block.find('.code-editor').not('.code-editor-formatted').each(function () {
             var code_el = $(this).get(0);
+            var mode = $(this).attr('data-code-editor-type');
+            if(!mode) mode = 'yaml';
+
             var cm = CodeMirror.fromTextArea(code_el, {
               lineNumbers: true,
-              mode: "sql",
+              mode: mode,
               foldGutter: true,
               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
             });
             var cme = cm.getWrapperElement();
-            cme.style.width = '99%';
-            cme.style.height = '60vh';
+            cme.style.width = '100%';
+            cme.style.height = '100%';
 
             cm.refresh();
-        }).addClass('code-sql-formatted');
+        }).addClass('code-editor-formatted');
 
-        block.find('.code-yml').not('.code-yml-formatted').each(function () {
+        block.find('.extra-help-info').not('.code-extra-help-info-formatted').each(function () {
+
             var code_el = $(this).get(0);
+            var mode = $(this).attr('data-code-editor-type');
+            if(!mode) mode = 'yaml';
+
             var cm = CodeMirror.fromTextArea(code_el, {
               lineNumbers: true,
-              mode: "yaml",
-              foldGutter: true,
-              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-            });
-            var cme = cm.getWrapperElement();
-            if($(this).hasClass('editor-size-small')) {
-              cme.style.width = '97.5%';
-              cme.style.height = '300px';
-
-            }
-            else {
-              cme.style.width = '800px';
-              cme.style.height = '80vh';
-
-            }
-            cm.refresh();
-
-            var code_el = $('.extra-help-info').get(0);
-            if(!code_el) return;
-            var cm = CodeMirror.fromTextArea(code_el, {
-              lineNumbers: true,
-              mode: "yaml",
+              mode: mode,
               readOnly: true,
               foldGutter: true,
               gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
             });
 
             var cme = cm.getWrapperElement();
-            cme.style.width = '800px';
-            cme.style.height = '80vh';
-            cme.style.backgroundColor = 'rgb(240, 240, 240)';
+            cme.style.width = '100%';
+            cme.style.height = '100%';
+            cme.style.backgroundColor = 'rgba(255,255,255, 0.2)';
             cm.refresh();
 
-        }).addClass('code-yml-formatted');
+        }).addClass('code-extra-help-info-formatted');
     },
 
     admin_result: function(block, data) {

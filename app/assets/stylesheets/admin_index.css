@@ -10,11 +10,7 @@
  * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
  * file per style scope.
  *
- *= require bootstrap
- *= require bootstrap-theme
- *= require jquery.timepicker
- *= require chosen
- *= require app/nfs_store/application
- *= require_tree ./app
+ *= require codemirror
+ *= require codemirror-foldgutter.css
  *= require_self
  */

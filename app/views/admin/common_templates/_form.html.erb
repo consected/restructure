@@ -64,17 +64,21 @@
   <% if has_options %>
     <div></div>
   <div class="form-group" data-out-attr-name="options" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">
-    <h4><%= has_options.to_s.humanize %></h4>
-    <%= f.text_area has_options, class: "code-yml" %>
+    <label><%= has_options.to_s.humanize %></label>
+    <div style="width: 800px; height: 80vh;">
+      <%= f.text_area has_options, class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type}%>
+    </div>
   </div>
   <% end %>
 
 <% if @show_extra_help_info %>
   <div class="form-group" style="vertical-align: top">
     <label><%= @show_extra_help_info[:title] %></label>
-    <textarea style="font-size: 12px" class="extra-help-info">
-        <%= @show_extra_help_info[:text] %>
-    </textarea>
+    <div style="width: 800px; height: 80vh;">
+      <textarea style="font-size: 12px" class="extra-help-info">
+          <%= @show_extra_help_info[:text] %>
+      </textarea>
+    </div>
   </div>
 <% end %>
 

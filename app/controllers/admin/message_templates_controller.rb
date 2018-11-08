@@ -30,6 +30,10 @@ class Admin::MessageTemplatesController < AdminController
       Admin::MessageTemplate.message_types
     end
 
+    def editor_code_type
+      "htmlmixed"
+    end
+
   private
     def permitted_params
         [:name, :message_type, :template_type, :template, :disabled]

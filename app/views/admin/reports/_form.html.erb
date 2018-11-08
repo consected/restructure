@@ -58,7 +58,9 @@
       </div>
       <div class="">
         <%= f.label :sql %>
-        <%= f.text_area :sql, style: "width: 99%; height: 270px; font-family: monospace;", class: "code-sql"%>
+        <div style="width: 99%; height: 60vh;">
+          <%= f.text_area :sql, style: "width: 99%; height: 270px; font-family: monospace;", class: "code-editor code-editor-#{editor_code_type}", data: {code_editor_type: editor_code_type} %>
+        </div>
       </div>
       <p>
         <%= f.submit class: "btn btn-primary" %> <%= link_to 'test report in new window', @report, target: 'testreport' %>

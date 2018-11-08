@@ -1,5 +1,5 @@
 <div class="row" id="search_attr_definer">
-  <div class="col-sm-14" style="text-align: left;">
+  <div class="col-sm-24" style="text-align: left;">
     <%= f.label :add_attribute %>
       <table>
           <tr>
@@ -48,7 +48,10 @@
               </td>
             </tr><tr>
               <td>config selections</td>
-              <td><textarea id="search_attrs_config_selections" class="code-yml editor-size-small"></textarea>
+              <td>
+                <div style="width: 97.5%; height: 240px;">
+                  <textarea id="search_attrs_config_selections" class="code-editor code-editor-yml" data-code-editor-type="yaml"></textarea>
+                </div>
                 <p class="help-block">add one line per option:</p>
                 <pre class="help-block">
 label 1: value 1
@@ -57,7 +60,10 @@ label 2: value 2</pre>
               </td>
             </tr><tr>
               <td>conditions</td>
-              <td><textarea id="search_attrs_conditions" class="code-yml editor-size-small"></textarea>
+              <td>
+                <div style="width: 97.5%; height: 240px;">
+                  <textarea id="search_attrs_conditions" class="code-editor code-editor-yml" data-code-editor-type="yaml"></textarea>
+                </div>
                 <p class="help-block">add one line per option:</p>
                 <pre class="help-block">
 field (equals): value 1
@@ -82,8 +88,13 @@ field2 (any of):
 
     <div id="search_attr_instruction">(reference in SQL with <strong id="search_attr_ex"></strong>)</div>
   </div>
-  <div class="col-sm-10" style="text-align: left;">
-    <%= f.label :search_attributes%>
-    <%= f.text_area  :search_attrs,  style: "width: 99%; height: 340px; font-family: monospace;", class: "code-yml editor-size-small"%>
+  <div class="row" id="search_attr_definer2">
+    <div class="col-sm-24" style="text-align: left;">
+      <%= f.label :search_attributes%>
+      <div style="width: 97.5%; height: 240px;">
+        <%= f.text_area  :search_attrs,  style: "width: 99%; height: 340px; font-family: monospace;", class: "code-editor code-editor-yml", data: {code_editor_type: "yaml"}%>
+      </div>
+    </div>
   </div>
+
 </div>

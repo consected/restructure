@@ -10,16 +10,17 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require jquery3
-//= require jquery_ujs
-//= require bootstrap
-//= require typeahead
-//= require jquery.timepicker
-//= require chosen.jquery
-//= require handlebars-v4.0.10
-//= require jquery-tablesorter
-//= require jquery-scrollto-min
-//= require jquery-mask
-//= require textarea-autogrow
-//= require app/nfs_store/application
-//= require_tree ./app
+//= require codemirror
+//= require codemirror-yaml
+//= require codemirror-sql
+//= require codemirror-markdown-fold
+//= require codemirror-comment
+//= require codemirror-foldcode
+//= require codemirror-foldgutter
+//= require codemirror-indent-fold
+//= require codemirror-xml
+//= require codemirror-css
+//= require codemirror-javascript
+//= require codemirror-htmlembedded
+//= require codemirror-htmlmixed
+//= require_tree ./admin
