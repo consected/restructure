@@ -1,6 +1,6 @@
 class Admin::UserAccessControlsController < AdminController
 
-  helper_method  :has_access_levels, :user_id_options
+  helper_method  :has_access_levels, :user_id_options, :role_name_options
 
   protected
 
@@ -34,6 +34,18 @@ class Admin::UserAccessControlsController < AdminController
 
     def user_id_options
       User.active.map {|u| [u.email, u.id]}
+    end
+
+    def role_name_options
+      Admin::UserRole.active.role_names_by_app_name
+    end
+
+    def extra_field_attributes
+      {
+        app_type_id: {
+          'data-filters-select': '#admin_user_access_control_role_name'
+        }
+      }
     end
 
 

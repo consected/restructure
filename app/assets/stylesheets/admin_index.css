@@ -13,5 +13,8 @@
  *= require codemirror
  *= require codemirror-lint
  *= require codemirror-foldgutter.css
+ *= require codemirror-dialog.css
+ *= require codemirror-matchesonscrollbar
+ *= require codemirror-simplescrollbars
  *= require_self
  */

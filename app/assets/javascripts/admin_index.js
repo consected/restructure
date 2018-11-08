@@ -25,5 +25,7 @@
 //= require codemirror-javascript
 //= require codemirror-htmlembedded
 //= require codemirror-htmlmixed
+//= require codemirror-dialog
 //= require js-yaml
+//= require_tree ../../../vendor/assets/javascripts/codemirror
 //= require_tree ./admin
