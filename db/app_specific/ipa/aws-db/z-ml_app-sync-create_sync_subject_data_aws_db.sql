@@ -67,7 +67,7 @@ BEGIN
 -- validate that it exists
 SELECT *
 INTO found_ipa
-FROM ipa_assignments ipa
+FROM ipa_ops.ipa_assignments ipa
 WHERE ipa.ipa_id = match_ipa_id
 LIMIT 1;
 
@@ -103,7 +103,7 @@ INTO new_master_id;
 
 RAISE NOTICE 'Creating external identifier record %', (match_ipa_id::varchar);
 
-INSERT INTO ipa_assignments
+INSERT INTO ipa_ops.ipa_assignments
 (ipa_id, master_id, user_id, created_at, updated_at)
 VALUES (match_ipa_id, new_master_id, etl_user_id, now(), now());
 

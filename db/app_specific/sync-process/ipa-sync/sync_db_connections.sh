@@ -1,0 +1,1 @@
+/home/phil/NetBeansProjects/fphs/zeus-with-filestore/db/app_specific/sync-process/sync_db_connections.sh

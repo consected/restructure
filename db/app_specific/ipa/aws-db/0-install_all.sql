@@ -8,10 +8,12 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/create_activity_log_ipa_protocol_deviations_table.sql
 \i db/app_specific/ipa/create_activity_log_navigation_table.sql
 \i db/app_specific/ipa/create_activity_log_post_visit_table.sql
+\i db/app_specific/ipa/create_adl_screener_data_table.sql
 \i db/app_specific/ipa/create_emergency_contacts.sql
 \i db/app_specific/ipa/create_ipa_adl_informant_screener.sql
 \i db/app_specific/ipa/create_ipa_adverse_events_table.sql
 \i db/app_specific/ipa/create_ipa_appointment_table.sql
+\i db/app_specific/ipa/create_ipa_assignments_table.sql
 \i db/app_specific/ipa/create_ipa_consent_mailings.sql
 \i db/app_specific/ipa/create_ipa_hotel_table.sql
 \i db/app_specific/ipa/create_ipa_inex_checklist_table.sql
@@ -21,6 +23,7 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/create_ipa_protocol_deviations_table.sql
 \i db/app_specific/ipa/create_ipa_ps_football_experience_table.sql
 \i db/app_specific/ipa/create_ipa_ps_health_table.sql
+\i db/app_specific/ipa/create_ipa_ps_informant_details_table.sql
 \i db/app_specific/ipa/create_ipa_ps_init_screening_table.sql
 \i db/app_specific/ipa/create_ipa_ps_size_table.sql
 \i db/app_specific/ipa/create_ipa_ps_tmocas_table.sql
@@ -35,12 +38,17 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/create_mrn_external_identifier.sql
 \i db/app_specific/ipa/create_station_contacts_table.sql
 \i db/app_specific/ipa/post_create_alter_activity_log_navigation_table.sql
-\i db/app_specific/ipa/post_create_alter_api_screenings_table.sql
+\i db/app_specific/ipa/post_create_alter_ipa_screenings_table.sql
 \i db/app_specific/ipa/post_create_alter_withdrawals_table.sql
 \i db/app_specific/ipa/prep_inex_checklist_from_ps.sql
+\i db/app_specific/ipa/trigger_adl_screener.sql
 \i db/app_specific/ipa/trigger_new_screening_schedule.sql
 \i db/app_specific/ipa/trigger_perform_screening_actions.sql
 \i db/app_specific/ipa/trigger_screening_follow_up.sql
+
+set search_path=ml_app;
+\i db/app_specific/ipa/z-ml_app-sync-create_sync_subject_data_aws_db.sql
+
 
 REVOKE ALL ON SCHEMA ipa_ops FROM fphs;
 GRANT ALL ON SCHEMA ipa_ops TO fphs;
@@ -77,7 +85,3 @@ END IF;
 
 END
 $body$;
-
-
-set search_path=ml_app;
-\i db/app_specific/ipa/sync-create_sync_subject_data_aws_db.sql
