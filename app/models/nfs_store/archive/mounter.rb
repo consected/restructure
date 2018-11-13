@@ -158,7 +158,7 @@ module NfsStore
         # @return [Boolean] result true if all the archived files were extracted and stored
         def extract_archived_files
 
-          puts "Start to extract files? (#{!archive_extracted?}) to DB for #{@mounted_path}"
+          puts "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{@mounted_path}"
 
           result = true
 
