@@ -91,16 +91,19 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   def self.all_resource_names
     a = []
+    resource_names = {}
     resource_types.each do |r|
-      a += resource_names_for r
+      rn = resource_names[r]
+      rn = resource_names[r] = resource_names_for(r) unless rn
+      a += rn
     end
     a
   end
 
   def self.resource_names_by_type
     rn = {}
-    Admin::UserAccessControl.resource_types.each do |k|
-      rn[k] = Admin::UserAccessControl.resource_names_for(k).sort
+    resource_types.each do |k|
+      rn[k] = resource_names_for(k).sort
     end
     rn
   end
@@ -222,8 +225,15 @@ class Admin::UserAccessControl < ActiveRecord::Base
     res
   end
 
-  def bad_resource_name
-    !disabled && (resource_name.nil? || !self.class.resource_names_for(self.resource_type.to_sym).include?(self.resource_name.to_s))
+  def bad_resource_name cache_resource_names_for_type = nil
+    return if disabled
+    return true if resource_name.nil?
+    if cache_resource_names_for_type
+      resource_name_for_type = cache_resource_names_for_type[self.resource_type.to_sym]
+    else
+      resource_name_for_type = self.class.resource_names_for(self.resource_type.to_sym)
+    end
+    !resource_name_for_type.include?(self.resource_name.to_s)
   end
 
   def allow_bad_resource_name= val

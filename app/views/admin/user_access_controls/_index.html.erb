@@ -4,6 +4,21 @@
 <p>
   <%= show_filters %>
 </p>
+<%
+  @app_type_names = {}
+  Admin::AppType.all.each do |a|
+    @app_type_names[a.id.to_s] = a.name
+  end
+
+  @user_emails = {}
+  User.all.each do |a|
+    @user_emails[a.id.to_s] = a.email
+  end
+
+  @resource_names_for_type = Admin::UserAccessControl.resource_names_by_type
+
+
+%>
 <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
 
 <table class="table tablesorter admin-list">
@@ -17,8 +32,6 @@
       <th>Resource Type</th>
       <th>Resource Name</th>
       <th>Options</th>
-      <th>Disabled</th>
-      <th>Last Admin Update</th>
     </tr>
   </thead>
 
