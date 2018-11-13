@@ -28,7 +28,6 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/create_ipa_ps_size_table.sql
 \i db/app_specific/ipa/create_ipa_ps_tmocas_table.sql
 \i db/app_specific/ipa/create_ipa_screenings_table.sql
-\i db/app_specific/ipa/create_ipa_screening_survey_activity_log_table.sql
 \i db/app_specific/ipa/create_ipa_sleeps_table.sql
 \i db/app_specific/ipa/create_ipa_survey_table.sql
 \i db/app_specific/ipa/create_ipa_tms_tests_table.sql
