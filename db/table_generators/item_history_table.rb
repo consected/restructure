@@ -9,7 +9,7 @@ module TableGenerators
   end
 
 
-  def self.admin_history_table *args
+  def self.item_history_table *args
 
     name=args[0]
     generate_table=args[1]
@@ -17,7 +17,7 @@ module TableGenerators
 
     if name.nil? || name == ''
       puts "Usage:
-      db/table_generators/generate.sh admin_history_table <pluralized_table_name> create|drop 'field1' 'field2'...
+      db/table_generators/generate.sh item_history_table <pluralized_table_name> create|drop 'field1' 'field2'...
       "
       return
     end
@@ -70,28 +70,26 @@ EOF
 
 execute <<EOF
 
-BEGIN;
-
 -- Command line:
--- table_generators/generate.sh admin_history_table create #{name} #{attrib.join(' ')}
+-- table_generators/generate.sh item_history_table create #{name} #{attrib.join(' ')}
 
-      CREATE OR REPLACE FUNCTION log_#{singular_name}_update() RETURNS trigger
+      CREATE FUNCTION log_#{singular_name}_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO #{singular_name}_history
                   (
+                      master_id,
                       #{attrib.join(",\n                      ")}#{attrib.length > 0 ? "," : ""}
-                      admin_id,
-                      disabled,
+                      user_id,
                       created_at,
                       updated_at,
                       #{singular_name}_id
                       )
                   SELECT
+                      NEW.master_id,
                       #{attrib.length > 0 ? "NEW." : ""}#{attrib.join(",\n                      NEW.")}#{attrib.length > 0 ? "," : ""}
-                      NEW.admin_id,
-                      NEW.disabled,
+                      NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
                       NEW.id
@@ -102,9 +100,9 @@ BEGIN;
 
       CREATE TABLE #{singular_name}_history (
           id integer NOT NULL,
+          master_id integer,
           #{attrib_pair.map{|a,f| "#{a} #{f}"}.join("\n          ")}
-          admin_id integer,
-          disabled boolean,
+          user_id integer,
           created_at timestamp without time zone,
           updated_at timestamp without time zone,
           #{singular_name}_id integer
@@ -119,20 +117,24 @@ BEGIN;
 
       ALTER SEQUENCE #{singular_name}_history_id_seq OWNED BY #{singular_name}_history.id;
 
-
       ALTER TABLE ONLY #{singular_name}_history ALTER COLUMN id SET DEFAULT nextval('#{singular_name}_history_id_seq'::regclass);
 
       ALTER TABLE ONLY #{singular_name}_history
           ADD CONSTRAINT #{singular_name}_history_pkey PRIMARY KEY (id);
 
+      CREATE INDEX index_#{singular_name}_history_on_master_id ON #{singular_name}_history USING btree (master_id);
+
       CREATE INDEX index_#{singular_name}_history_on_#{singular_name}_id ON #{singular_name}_history USING btree (#{singular_name}_id);
-      CREATE INDEX index_#{singular_name}_history_on_admin_id ON #{singular_name}_history USING btree (admin_id);
+      CREATE INDEX index_#{singular_name}_history_on_user_id ON #{singular_name}_history USING btree (user_id);
 
       CREATE TRIGGER #{singular_name}_history_insert AFTER INSERT ON #{name} FOR EACH ROW EXECUTE PROCEDURE log_#{singular_name}_update();
       CREATE TRIGGER #{singular_name}_history_update AFTER UPDATE ON #{name} FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_#{singular_name}_update();
 
       ALTER TABLE ONLY #{singular_name}_history
-          ADD CONSTRAINT fk_#{singular_name}_history_admins FOREIGN KEY (admin_id) REFERENCES admins(id);
+          ADD CONSTRAINT fk_#{singular_name}_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+
+      ALTER TABLE ONLY #{singular_name}_history
+          ADD CONSTRAINT fk_#{singular_name}_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
       ALTER TABLE ONLY #{singular_name}_history
           ADD CONSTRAINT fk_#{singular_name}_history_#{name} FOREIGN KEY (#{singular_name}_id) REFERENCES #{name}(id);
@@ -140,8 +142,6 @@ BEGIN;
       GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
       GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
       GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
-
-      COMMIT;
 
 EOF
     end

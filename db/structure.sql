@@ -3368,6 +3368,48 @@ CREATE FUNCTION ml_app.log_activity_log_ipa_assignment_protocol_deviation_update
 
 
 --
+-- Name: log_activity_log_ipa_assignment_session_filestore_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_ipa_assignment_session_filestore_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_ipa_assignment_session_filestore_history
+                  (
+                      master_id,
+                      ipa_assignment_id,
+                      select_type,
+                      operator,
+                      notes,
+                      session_date,
+                      session_time,
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_ipa_assignment_session_filestore_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.ipa_assignment_id,
+                      NEW.select_type,
+                      NEW.operator,
+                      NEW.notes,
+                      NEW.session_date,
+                      NEW.session_time,
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_activity_log_ipa_assignment_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -3926,49 +3968,49 @@ CREATE FUNCTION ml_app.log_college_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_dynamic_model_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO dynamic_model_history
-            (
-                    dynamic_model_id,
-                    name,                    
-                    table_name, 
+            BEGIN
+                INSERT INTO dynamic_model_history
+                (
+                    name,
+                    table_name,
                     schema_name,
                     primary_key_name,
                     foreign_key_name,
                     description,
-                    admin_id,
-                    disabled,                    
-                    created_at,
-                    updated_at,
                     position,
                     category,
                     table_key_name,
                     field_list,
-                    result_order
-                    
-                    
-                )                 
-            SELECT                 
-                NEW.id,
-                                    NEW.name,    
-                    NEW.table_name, 
+                    result_order,
+                    options,
+                    admin_id,
+                    disabled,
+                    created_at,
+                    updated_at,
+                    dynamic_model_id
+                    )
+                SELECT
+                    NEW.name,
+                    NEW.table_name,
                     NEW.schema_name,
                     NEW.primary_key_name,
                     NEW.foreign_key_name,
                     NEW.description,
-                    NEW.admin_id,
-                    NEW.disabled,
-                    NEW.created_at,
-                    NEW.updated_at,
                     NEW.position,
                     NEW.category,
                     NEW.table_key_name,
                     NEW.field_list,
-                    NEW.result_order
-            ;
-            RETURN NEW;
-        END;
-    $$;
+                    NEW.result_order,
+                    NEW.options,
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
 
 
 --
@@ -4040,45 +4082,47 @@ CREATE FUNCTION ml_app.log_ext_gen_assignment_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-                BEGIN
-                    INSERT INTO external_identifier_history
-                    (
-                        name,
-                        external_identifier_id,
-                        label,
-                        external_id_attribute,
-                        external_id_view_formatter,
-                        external_id_edit_pattern,
-                        prevent_edit,
-                        pregenerate_ids,
-                        min_id,
-                        max_id,
-                        extra_fields,
-                        admin_id,
-                        created_at,
-                        updated_at,
-                        disabled
-                        )
-                    SELECT
-                        NEW.name,
-                        NEW.id,
-                        NEW.label,
-                        NEW.external_id_attribute,
-                        NEW.external_id_view_formatter,
-                        NEW.external_id_edit_pattern,
-                        NEW.prevent_edit,
-                        NEW.pregenerate_ids,
-                        NEW.min_id,
-                        NEW.max_id,
-                        NEW.extra_fields,
-                        NEW.admin_id,
-                        NEW.created_at,
-                        NEW.updated_at,
-                        NEW.disabled
-                    ;
-                    RETURN NEW;
-                END;
-            $$;
+        BEGIN
+            INSERT INTO external_identifier_history
+            (
+                name,
+                label,
+                external_id_attribute,
+                external_id_view_formatter,
+                external_id_edit_pattern,
+                prevent_edit,
+                pregenerate_ids,
+                min_id,
+                max_id,
+                alphanumeric,
+                extra_fields,
+                admin_id,
+                disabled,
+                created_at,
+                updated_at,
+                external_identifier_id
+                )
+            SELECT
+                NEW.name,
+                NEW.label,
+                NEW.external_id_attribute,
+                NEW.external_id_view_formatter,
+                NEW.external_id_edit_pattern,
+                NEW.prevent_edit,
+                NEW.pregenerate_ids,
+                NEW.min_id,
+                NEW.max_id,
+                NEW.alphanumeric,
+                NEW.extra_fields,
+                NEW.admin_id,
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -5412,31 +5456,33 @@ CREATE FUNCTION ml_app.log_json_doc_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_message_template_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO message_template_history
-            (
-                name,
-                template_type,
-                template,
-                admin_id,
-                disabled,
-                created_at,
-                updated_at,
-                message_template_id
-                )
-            SELECT
-                NEW.name,
-                NEW.template_type,
-                NEW.template,
-                NEW.admin_id,
-                NEW.disabled,
-                NEW.created_at,
-                NEW.updated_at,
-                NEW.id
-            ;
-            RETURN NEW;
-        END;
-    $$;
+            BEGIN
+                INSERT INTO message_template_history
+                (
+                    name,
+                    template_type,
+                    message_type,
+                    template,
+                    admin_id,
+                    disabled,
+                    created_at,
+                    updated_at,
+                    message_template_id
+                    )
+                SELECT
+                    NEW.name,
+                    NEW.template_type,
+                    NEW.message_type,
+                    NEW.template,
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
 
 
 --
@@ -5506,32 +5552,118 @@ CREATE FUNCTION ml_app.log_new_test_update() RETURNS trigger
 
 
 --
--- Name: log_page_layout_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+-- Name: log_nfs_store_archived_file_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
-CREATE FUNCTION ml_app.log_page_layout_update() RETURNS trigger
+CREATE FUNCTION ml_app.log_nfs_store_archived_file_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
         BEGIN
-            INSERT INTO page_layout_history
+            INSERT INTO nfs_store_archived_file_history
             (
-                layout_name,
-                panel_name,
-                panel_label,
-                panel_position,
-                options,
+                file_hash,
+                file_name,
+                content_type,
+                archive_file,
+                path,
+                file_size,
+                file_updated_at,
+                nfs_store_container_id,
+                title,
+                description,
+                file_metadata,
+                nfs_store_stored_file_id,
+                user_id,
+                created_at,
+                updated_at,
+                nfs_store_archived_file_id
+                )
+            SELECT
+                NEW.file_hash,
+                NEW.file_name,
+                NEW.content_type,
+                NEW.archive_file,
+                NEW.path,
+                NEW.file_size,
+                NEW.file_updated_at,
+                NEW.nfs_store_container_id,
+                NEW.title,
+                NEW.description,
+                NEW.file_metadata,
+                NEW.nfs_store_stored_file_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_nfs_store_container_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_nfs_store_container_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO nfs_store_container_history
+            (
+                master_id,
+                name,
+                app_type_id,
+                orig_nfs_store_container_id,
+                user_id,
+                created_at,
+                updated_at,
+                nfs_store_container_id
+                )
+            SELECT
+                NEW.master_id,
+                NEW.name,
+                NEW.app_type_id,
+                NEW.nfs_store_container_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_nfs_store_filter_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_nfs_store_filter_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO nfs_store_filter_history
+            (
+                app_type_id,
+                role_name,
+                user_id,
+                resource_name,
+                filter,
+                description,
                 admin_id,
                 disabled,
                 created_at,
                 updated_at,
-                page_layout_id
+                nfs_store_filter_id
                 )
             SELECT
-                NEW.layout_name,
-                NEW.panel_name,
-                NEW.panel_label,
-                NEW.panel_position,
-                NEW.options,
+                NEW.app_type_id,
+                NEW.role_name,
+                NEW.user_id,
+                NEW.resource_name,
+                NEW.filter,
+                NEW.description,
                 NEW.admin_id,
                 NEW.disabled,
                 NEW.created_at,
@@ -5541,6 +5673,94 @@ CREATE FUNCTION ml_app.log_page_layout_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_nfs_store_stored_file_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO nfs_store_stored_file_history
+            (
+                file_hash,
+                file_name,
+                content_type,
+                path,
+                file_size,
+                file_updated_at,
+                nfs_store_container_id,
+                title,
+                description,
+                file_metadata,
+                last_process_name_run,
+                user_id,
+                created_at,
+                updated_at,
+                nfs_store_stored_file_id
+                )
+            SELECT
+                NEW.file_hash,
+                NEW.file_name,
+                NEW.content_type,
+                NEW.path,
+                NEW.file_size,
+                NEW.file_updated_at,
+                NEW.nfs_store_container_id,
+                NEW.title,
+                NEW.description,
+                NEW.file_metadata,
+                NEW.last_process_name_run,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_page_layout_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_page_layout_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                INSERT INTO page_layout_history
+                (
+                    app_type_id,
+                    layout_name,
+                    panel_name,
+                    panel_label,
+                    panel_position,
+                    options,
+                    admin_id,
+                    disabled,
+                    created_at,
+                    updated_at,
+                    page_layout_id
+                    )
+                SELECT
+                    NEW.app_type_id,
+                    NEW.layout_name,
+                    NEW.panel_name,
+                    NEW.panel_label,
+                    NEW.panel_position,
+                    NEW.options,
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
 
 
 --
@@ -6290,54 +6510,55 @@ CREATE FUNCTION ml_app.log_user_role_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_user_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-            BEGIN
-                INSERT INTO user_history
-                (
-                        user_id,
-        email,
-        encrypted_password,
-        reset_password_token,
-        reset_password_sent_at,
-        remember_created_at,
-        sign_in_count,
-        current_sign_in_at,
-        last_sign_in_at,
-        current_sign_in_ip ,
-        last_sign_in_ip ,
-        created_at ,
-        updated_at,
-        failed_attempts,
-        unlock_token,
-        locked_at,
-        disabled ,
-        admin_id,
-        app_type_id
-
-                    )
-                SELECT
-                    NEW.id,
-                    NEW.email,
-        NEW.encrypted_password,
-        NEW.reset_password_token,
-        NEW.reset_password_sent_at,
-        NEW.remember_created_at,
-        NEW.sign_in_count,
-        NEW.current_sign_in_at,
-        NEW.last_sign_in_at,
-        NEW.current_sign_in_ip ,
-        NEW.last_sign_in_ip ,
-        NEW.created_at ,
-        NEW.updated_at,
-        NEW.failed_attempts,
-        NEW.unlock_token,
-        NEW.locked_at,
-        NEW.disabled ,
-        NEW.admin_id,
-        NEW.app_type_id
-                ;
-                RETURN NEW;
-            END;
-        $$;
+        BEGIN
+            INSERT INTO user_history
+            (
+                email,
+                encrypted_password,
+                reset_password_token,
+                reset_password_sent_at,
+                remember_created_at,
+                sign_in_count,
+                current_sign_in_at,
+                last_sign_in_at,
+                current_sign_in_ip,
+                last_sign_in_ip,
+                failed_attempts,
+                unlock_token,
+                locked_at,
+                app_type_id,
+                authentication_token,
+                admin_id,
+                disabled,
+                created_at,
+                updated_at,
+                user_id
+                )
+            SELECT
+                NEW.email,
+                NEW.encrypted_password,
+                NEW.reset_password_token,
+                NEW.reset_password_sent_at,
+                NEW.remember_created_at,
+                NEW.sign_in_count,
+                NEW.current_sign_in_at,
+                NEW.last_sign_in_at,
+                NEW.current_sign_in_ip,
+                NEW.last_sign_in_ip,
+                NEW.failed_attempts,
+                NEW.unlock_token,
+                NEW.locked_at,
+                NEW.app_type_id,
+                NEW.authentication_token,
+                NEW.admin_id,
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -10624,6 +10845,85 @@ ALTER SEQUENCE ml_app.activity_log_history_id_seq OWNED BY ml_app.activity_log_h
 
 
 --
+-- Name: activity_log_ipa_assignment_session_filestore_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_assignment_session_filestore_history (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    select_type character varying,
+    operator character varying,
+    session_date date,
+    session_time time without time zone,
+    notes character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_ipa_assignment_session_filestore_id integer
+);
+
+
+--
+-- Name: activity_log_ipa_assignment_session_filestore_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_assignment_session_filestore_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignment_session_filestore_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_assignment_session_filestore_history_id_seq OWNED BY ml_app.activity_log_ipa_assignment_session_filestore_history.id;
+
+
+--
+-- Name: activity_log_ipa_assignment_session_filestores; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_ipa_assignment_session_filestores (
+    id integer NOT NULL,
+    master_id integer,
+    ipa_assignment_id integer,
+    select_type character varying,
+    operator character varying,
+    session_date date,
+    session_time time without time zone,
+    notes character varying,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_ipa_assignment_session_filestores_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_ipa_assignment_session_filestores_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_ipa_assignment_session_filestores_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_ipa_assignment_session_filestores_id_seq OWNED BY ml_app.activity_log_ipa_assignment_session_filestores.id;
+
+
+--
 -- Name: activity_log_new_test_history; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -11537,7 +11837,8 @@ CREATE TABLE ml_app.dynamic_model_history (
     result_order character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    dynamic_model_id integer
+    dynamic_model_id integer,
+    options character varying
 );
 
 
@@ -11796,7 +12097,8 @@ CREATE TABLE ml_app.external_identifier_history (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     external_identifier_id integer,
-    extra_fields character varying
+    extra_fields character varying,
+    alphanumeric boolean
 );
 
 
@@ -12447,7 +12749,8 @@ CREATE TABLE ml_app.message_template_history (
     disabled boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    message_template_id integer
+    message_template_id integer,
+    message_type character varying
 );
 
 
@@ -12701,6 +13004,50 @@ ALTER SEQUENCE ml_app.new_tests_id_seq OWNED BY ml_app.new_tests.id;
 
 
 --
+-- Name: nfs_store_archived_file_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_archived_file_history (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying,
+    content_type character varying,
+    archive_file character varying,
+    path character varying,
+    file_size character varying,
+    file_updated_at character varying,
+    nfs_store_container_id bigint,
+    title character varying,
+    description character varying,
+    file_metadata character varying,
+    nfs_store_stored_file_id bigint,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_archived_file_id integer
+);
+
+
+--
+-- Name: nfs_store_archived_file_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_archived_file_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_archived_file_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_archived_file_history_id_seq OWNED BY ml_app.nfs_store_archived_file_history.id;
+
+
+--
 -- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -12741,6 +13088,42 @@ CREATE SEQUENCE ml_app.nfs_store_archived_files_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_archived_files_id_seq OWNED BY ml_app.nfs_store_archived_files.id;
+
+
+--
+-- Name: nfs_store_container_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_container_history (
+    id integer NOT NULL,
+    master_id integer,
+    name character varying,
+    app_type_id bigint,
+    orig_nfs_store_container_id bigint,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_container_id integer
+);
+
+
+--
+-- Name: nfs_store_container_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_container_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
 
 
 --
@@ -12815,6 +13198,45 @@ ALTER SEQUENCE ml_app.nfs_store_downloads_id_seq OWNED BY ml_app.nfs_store_downl
 
 
 --
+-- Name: nfs_store_filter_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_filter_history (
+    id integer NOT NULL,
+    app_type_id bigint,
+    role_name character varying,
+    user_id bigint,
+    resource_name character varying,
+    filter character varying,
+    description character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_filter_id integer
+);
+
+
+--
+-- Name: nfs_store_filter_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_filter_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_filter_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_filter_history_id_seq OWNED BY ml_app.nfs_store_filter_history.id;
+
+
+--
 -- Name: nfs_store_filters; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -12827,7 +13249,9 @@ CREATE TABLE ml_app.nfs_store_filters (
     filter character varying,
     description character varying,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -12848,6 +13272,49 @@ CREATE SEQUENCE ml_app.nfs_store_filters_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_filters_id_seq OWNED BY ml_app.nfs_store_filters.id;
+
+
+--
+-- Name: nfs_store_stored_file_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_stored_file_history (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying,
+    content_type character varying,
+    path character varying,
+    file_size character varying,
+    file_updated_at character varying,
+    nfs_store_container_id bigint,
+    title character varying,
+    description character varying,
+    file_metadata character varying,
+    last_process_name_run character varying,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_stored_file_id integer
+);
+
+
+--
+-- Name: nfs_store_stored_file_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_stored_file_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_stored_file_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_stored_file_history_id_seq OWNED BY ml_app.nfs_store_stored_file_history.id;
 
 
 --
@@ -12948,7 +13415,8 @@ CREATE TABLE ml_app.page_layout_history (
     disabled boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    page_layout_id integer
+    page_layout_id integer,
+    app_type_id character varying
 );
 
 
@@ -14710,7 +15178,8 @@ CREATE TABLE ml_app.user_history (
     disabled boolean,
     admin_id integer,
     user_id integer,
-    app_type_id integer
+    app_type_id integer,
+    authentication_token character varying
 );
 
 
@@ -15625,6 +16094,20 @@ ALTER TABLE ONLY ml_app.activity_log_history ALTER COLUMN id SET DEFAULT nextval
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestore_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_assignment_session_filestore_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestores ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_ipa_assignment_session_filestores_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.activity_log_new_test_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_new_test_history_id_seq'::regclass);
 
 
@@ -15989,7 +16472,21 @@ ALTER TABLE ONLY ml_app.new_tests ALTER COLUMN id SET DEFAULT nextval('ml_app.ne
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_archived_file_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.nfs_store_archived_files ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_archived_files_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_container_history_id_seq'::regclass);
 
 
 --
@@ -16010,7 +16507,21 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads ALTER COLUMN id SET DEFAULT nextval(
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.nfs_store_filter_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_filter_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.nfs_store_filters ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_filters_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_stored_file_history_id_seq'::regclass);
 
 
 --
@@ -17083,6 +17594,22 @@ ALTER TABLE ONLY ml_app.activity_log_history
 
 
 --
+-- Name: activity_log_ipa_assignment_session_filestore_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestore_history
+    ADD CONSTRAINT activity_log_ipa_assignment_session_filestore_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_ipa_assignment_session_filestores_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestores
+    ADD CONSTRAINT activity_log_ipa_assignment_session_filestores_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_log_new_test_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -17491,11 +18018,27 @@ ALTER TABLE ONLY ml_app.new_tests
 
 
 --
+-- Name: nfs_store_archived_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT nfs_store_archived_file_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: nfs_store_archived_files_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
     ADD CONSTRAINT nfs_store_archived_files_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nfs_store_container_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT nfs_store_container_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -17515,11 +18058,27 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 
 --
+-- Name: nfs_store_filter_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT nfs_store_filter_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: nfs_store_filters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filters
     ADD CONSTRAINT nfs_store_filters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nfs_store_stored_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT nfs_store_stored_file_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -19540,6 +20099,27 @@ CREATE INDEX index_activity_log_history_on_activity_log_id ON ml_app.activity_lo
 
 
 --
+-- Name: index_activity_log_ipa_assignment_session_filestores_on_ipa_ass; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_ipa_ass ON ml_app.activity_log_ipa_assignment_session_filestores USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_session_filestores_on_master_; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_master_ ON ml_app.activity_log_ipa_assignment_session_filestores USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_ipa_assignment_session_filestores_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_ipa_assignment_session_filestores_on_user_id ON ml_app.activity_log_ipa_assignment_session_filestores USING btree (user_id);
+
+
+--
 -- Name: index_activity_log_new_test_history_on_activity_log_new_test_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -19768,6 +20348,34 @@ CREATE INDEX index_admin_action_logs_on_admin_id ON ml_app.admin_action_logs USI
 --
 
 CREATE INDEX index_admin_history_on_admin_id ON ml_app.admin_history USING btree (admin_id);
+
+
+--
+-- Name: index_al_ipa_assignment_session_filestore_history_on_activity_l; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_activity_l ON ml_app.activity_log_ipa_assignment_session_filestore_history USING btree (activity_log_ipa_assignment_session_filestore_id);
+
+
+--
+-- Name: index_al_ipa_assignment_session_filestore_history_on_ipa_assign; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_ipa_assign ON ml_app.activity_log_ipa_assignment_session_filestore_history USING btree (ipa_assignment_id);
+
+
+--
+-- Name: index_al_ipa_assignment_session_filestore_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_master_id ON ml_app.activity_log_ipa_assignment_session_filestore_history USING btree (master_id);
+
+
+--
+-- Name: index_al_ipa_assignment_session_filestore_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_ipa_assignment_session_filestore_history_on_user_id ON ml_app.activity_log_ipa_assignment_session_filestore_history USING btree (user_id);
 
 
 --
@@ -20324,6 +20932,20 @@ CREATE INDEX index_new_tests_on_user_id ON ml_app.new_tests USING btree (user_id
 
 
 --
+-- Name: index_nfs_store_archived_file_history_on_nfs_store_archived_fil; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_archived_file_history_on_nfs_store_archived_fil ON ml_app.nfs_store_archived_file_history USING btree (nfs_store_archived_file_id);
+
+
+--
+-- Name: index_nfs_store_archived_file_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_archived_file_history_on_user_id ON ml_app.nfs_store_archived_file_history USING btree (user_id);
+
+
+--
 -- Name: index_nfs_store_archived_files_on_nfs_store_container_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -20338,6 +20960,27 @@ CREATE INDEX index_nfs_store_archived_files_on_nfs_store_stored_file_id ON ml_ap
 
 
 --
+-- Name: index_nfs_store_container_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_container_history_on_master_id ON ml_app.nfs_store_container_history USING btree (master_id);
+
+
+--
+-- Name: index_nfs_store_container_history_on_nfs_store_container_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_container_history_on_nfs_store_container_id ON ml_app.nfs_store_container_history USING btree (nfs_store_container_id);
+
+
+--
+-- Name: index_nfs_store_container_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_container_history_on_user_id ON ml_app.nfs_store_container_history USING btree (user_id);
+
+
+--
 -- Name: index_nfs_store_containers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -20349,6 +20992,20 @@ CREATE INDEX index_nfs_store_containers_on_master_id ON ml_app.nfs_store_contain
 --
 
 CREATE INDEX index_nfs_store_containers_on_nfs_store_container_id ON ml_app.nfs_store_containers USING btree (nfs_store_container_id);
+
+
+--
+-- Name: index_nfs_store_filter_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_filter_history_on_admin_id ON ml_app.nfs_store_filter_history USING btree (admin_id);
+
+
+--
+-- Name: index_nfs_store_filter_history_on_nfs_store_filter_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_filter_history_on_nfs_store_filter_id ON ml_app.nfs_store_filter_history USING btree (nfs_store_filter_id);
 
 
 --
@@ -20370,6 +21027,20 @@ CREATE INDEX index_nfs_store_filters_on_app_type_id ON ml_app.nfs_store_filters 
 --
 
 CREATE INDEX index_nfs_store_filters_on_user_id ON ml_app.nfs_store_filters USING btree (user_id);
+
+
+--
+-- Name: index_nfs_store_stored_file_history_on_nfs_store_stored_file_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_stored_file_history_on_nfs_store_stored_file_id ON ml_app.nfs_store_stored_file_history USING btree (nfs_store_stored_file_id);
+
+
+--
+-- Name: index_nfs_store_stored_file_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_nfs_store_stored_file_history_on_user_id ON ml_app.nfs_store_stored_file_history USING btree (user_id);
 
 
 --
@@ -21976,6 +22647,20 @@ CREATE TRIGGER activity_log_history_update AFTER UPDATE ON ml_app.activity_logs 
 
 
 --
+-- Name: activity_log_ipa_assignment_session_filestore_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_session_filestore_history_insert AFTER INSERT ON ml_app.activity_log_ipa_assignment_session_filestores FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_session_filestore_update();
+
+
+--
+-- Name: activity_log_ipa_assignment_session_filestore_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_ipa_assignment_session_filestore_history_update AFTER UPDATE ON ml_app.activity_log_ipa_assignment_session_filestores FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_ipa_assignment_session_filestore_update();
+
+
+--
 -- Name: activity_log_new_test_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -22281,6 +22966,62 @@ CREATE TRIGGER new_test_history_insert AFTER INSERT ON ml_app.new_tests FOR EACH
 --
 
 CREATE TRIGGER new_test_history_update AFTER UPDATE ON ml_app.new_tests FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_new_test_update();
+
+
+--
+-- Name: nfs_store_archived_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_archived_file_history_insert AFTER INSERT ON ml_app.nfs_store_archived_files FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_archived_file_update();
+
+
+--
+-- Name: nfs_store_archived_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_archived_file_history_update AFTER UPDATE ON ml_app.nfs_store_archived_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_archived_file_update();
+
+
+--
+-- Name: nfs_store_container_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_container_history_insert AFTER INSERT ON ml_app.nfs_store_containers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_container_update();
+
+
+--
+-- Name: nfs_store_container_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_container_history_update AFTER UPDATE ON ml_app.nfs_store_containers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_container_update();
+
+
+--
+-- Name: nfs_store_filter_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_filter_history_insert AFTER INSERT ON ml_app.nfs_store_filters FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
+
+
+--
+-- Name: nfs_store_filter_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_filter_history_update AFTER UPDATE ON ml_app.nfs_store_filters FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
+
+
+--
+-- Name: nfs_store_stored_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_stored_file_history_insert AFTER INSERT ON ml_app.nfs_store_stored_files FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
+
+
+--
+-- Name: nfs_store_stored_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_stored_file_history_update AFTER UPDATE ON ml_app.nfs_store_stored_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
 
 
 --
@@ -24251,6 +24992,38 @@ ALTER TABLE ONLY ml_app.activity_log_ext_assignment_history
 
 
 --
+-- Name: fk_activity_log_ipa_assignment_session_filestore_history_activi; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestore_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_activi FOREIGN KEY (activity_log_ipa_assignment_session_filestore_id) REFERENCES ml_app.activity_log_ipa_assignment_session_filestores(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_session_filestore_history_ipa_as; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestore_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_ipa_as FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_session_filestore_history_master; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestore_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_master FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_ipa_assignment_session_filestore_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestore_history
+    ADD CONSTRAINT fk_activity_log_ipa_assignment_session_filestore_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_activity_log_new_test_history_activity_log_new_tests; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -24651,6 +25424,78 @@ ALTER TABLE ONLY ml_app.new_test_history
 
 
 --
+-- Name: fk_nfs_store_archived_file_history_nfs_store_archived_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT fk_nfs_store_archived_file_history_nfs_store_archived_files FOREIGN KEY (nfs_store_archived_file_id) REFERENCES ml_app.nfs_store_archived_files(id);
+
+
+--
+-- Name: fk_nfs_store_archived_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT fk_nfs_store_archived_file_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_nfs_store_container_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_nfs_store_container_history_nfs_store_containers; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_nfs_store_containers FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
+
+
+--
+-- Name: fk_nfs_store_container_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_nfs_store_filter_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT fk_nfs_store_filter_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_nfs_store_filter_history_nfs_store_filters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT fk_nfs_store_filter_history_nfs_store_filters FOREIGN KEY (nfs_store_filter_id) REFERENCES ml_app.nfs_store_filters(id);
+
+
+--
+-- Name: fk_nfs_store_stored_file_history_nfs_store_stored_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT fk_nfs_store_stored_file_history_nfs_store_stored_files FOREIGN KEY (nfs_store_stored_file_id) REFERENCES ml_app.nfs_store_stored_files(id);
+
+
+--
+-- Name: fk_nfs_store_stored_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT fk_nfs_store_stored_file_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_page_layout_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -24959,6 +25804,14 @@ ALTER TABLE ONLY ml_app.json_docs
 --
 
 ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestores
     ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
 
 
@@ -25275,6 +26128,14 @@ ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
 
 
 --
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestores
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_47b051d356; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -25456,6 +26317,14 @@ ALTER TABLE ONLY ml_app.activity_log_new_tests
 
 ALTER TABLE ONLY ml_app.activity_log_bhs_assignments
     ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (bhs_assignment_id) REFERENCES ml_app.bhs_assignments(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_ipa_assignment_session_filestores
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_ops.ipa_assignments(id);
 
 
 --
@@ -26665,4 +27534,24 @@ INSERT INTO schema_migrations (version) VALUES ('20181113154855');
 INSERT INTO schema_migrations (version) VALUES ('20181113154920');
 
 INSERT INTO schema_migrations (version) VALUES ('20181113154942');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113165948');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113170144');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113172429');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113175031');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113180608');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113183446');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113184022');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113184516');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113184920');
+
+INSERT INTO schema_migrations (version) VALUES ('20181113185315');
 
