@@ -14,9 +14,16 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     create_admin
     create_user
 
+
     @app_type = @user.app_type
     create_user_role DefaultRole, user: @user, app_type: @app_type
     create_user_role 'nfs_store group 600', user: @user, app_type: @app_type
+
+
+    test_dir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, "#{NfsStore::Manage::Group::NfsMountNamePrefix}600", "app-type-#{@app_type.id}", 'containers')
+    FileUtils.rm_rf test_dir
+    FileUtils.mkdir_p test_dir
+
     setup_access :player_contacts
     setup_access :activity_log__player_contact_phones
     create_item(data: rand(10000000000000000), rank: 10)

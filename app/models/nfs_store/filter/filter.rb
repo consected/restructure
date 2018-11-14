@@ -56,6 +56,12 @@ module NfsStore
 
       # Evaluate a query directly in the database to produce a filtered set of records
       # Acts as a scope on ActiveRecord relations
+      # NOTE: stored and archived files to be filtered against appear with an initial forward-slash (/)  character
+      # Filter definitions that use the regex ^ (start of line) character must take this into account.
+      # For example, a file in the root directory of the container named "00000.dcm"
+      # will match "^/0+\.dcm" or "/0+\.dcm"
+      # but will not match "^0+\.dcm" since it does not expect to see the initial slash
+      # To match any file, use the filter ".*"
       # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
       # @param user [User|nil]
       # @return [ActiveRecord::Relation] resultset of all matched records
