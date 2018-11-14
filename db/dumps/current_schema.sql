@@ -974,6 +974,76 @@ CREATE FUNCTION ml_app.log_admin_update() RETURNS trigger
 
 
 --
+-- Name: log_app_configuration_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_app_configuration_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO app_configuration_history
+                  (
+                      name,
+                      value,
+                      app_type_id,
+                      user_id,
+                      role_name,
+                      admin_id,
+                      disabled,
+                      created_at,
+                      updated_at,
+                      app_configuration_id
+                      )
+                  SELECT
+                      NEW.name,
+                      NEW.value,
+                      NEW.app_type_id,
+                      NEW.user_id,
+                      NEW.role_name,
+                      NEW.admin_id,
+                      NEW.disabled,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_app_type_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_app_type_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+             BEGIN
+                 INSERT INTO app_type_history
+                 (
+                     name,
+                     label,
+                     admin_id,
+                     disabled,
+                     created_at,
+                     updated_at,
+                     app_type_id
+                     )
+                 SELECT
+                     NEW.name,
+                     NEW.label,
+                     NEW.admin_id,
+                     NEW.disabled,
+                     NEW.created_at,
+                     NEW.updated_at,
+                     NEW.id
+                 ;
+                 RETURN NEW;
+             END;
+         $$;
+
+
+--
 -- Name: log_college_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1014,49 +1084,49 @@ CREATE FUNCTION ml_app.log_college_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_dynamic_model_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO dynamic_model_history
-            (
-                    dynamic_model_id,
-                    name,                    
-                    table_name, 
+            BEGIN
+                INSERT INTO dynamic_model_history
+                (
+                    name,
+                    table_name,
                     schema_name,
                     primary_key_name,
                     foreign_key_name,
                     description,
-                    admin_id,
-                    disabled,                    
-                    created_at,
-                    updated_at,
                     position,
                     category,
                     table_key_name,
                     field_list,
-                    result_order
-                    
-                    
-                )                 
-            SELECT                 
-                NEW.id,
-                                    NEW.name,    
-                    NEW.table_name, 
+                    result_order,
+                    options,
+                    admin_id,
+                    disabled,
+                    created_at,
+                    updated_at,
+                    dynamic_model_id
+                    )
+                SELECT
+                    NEW.name,
+                    NEW.table_name,
                     NEW.schema_name,
                     NEW.primary_key_name,
                     NEW.foreign_key_name,
                     NEW.description,
-                    NEW.admin_id,
-                    NEW.disabled,
-                    NEW.created_at,
-                    NEW.updated_at,
                     NEW.position,
                     NEW.category,
                     NEW.table_key_name,
                     NEW.field_list,
-                    NEW.result_order
-            ;
-            RETURN NEW;
-        END;
-    $$;
+                    NEW.result_order,
+                    NEW.options,
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
 
 
 --
@@ -1066,45 +1136,47 @@ CREATE FUNCTION ml_app.log_dynamic_model_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-                BEGIN
-                    INSERT INTO external_identifier_history
-                    (
-                        name,
-                        external_identifier_id,
-                        label,
-                        external_id_attribute,
-                        external_id_view_formatter,
-                        external_id_edit_pattern,
-                        prevent_edit,
-                        pregenerate_ids,
-                        min_id,
-                        max_id,
-                        extra_fields,
-                        admin_id,
-                        created_at,
-                        updated_at,
-                        disabled
-                        )
-                    SELECT
-                        NEW.name,
-                        NEW.id,
-                        NEW.label,
-                        NEW.external_id_attribute,
-                        NEW.external_id_view_formatter,
-                        NEW.external_id_edit_pattern,
-                        NEW.prevent_edit,
-                        NEW.pregenerate_ids,
-                        NEW.min_id,
-                        NEW.max_id,
-                        NEW.extra_fields,
-                        NEW.admin_id,
-                        NEW.created_at,
-                        NEW.updated_at,
-                        NEW.disabled
-                    ;
-                    RETURN NEW;
-                END;
-            $$;
+        BEGIN
+            INSERT INTO external_identifier_history
+            (
+                name,
+                label,
+                external_id_attribute,
+                external_id_view_formatter,
+                external_id_edit_pattern,
+                prevent_edit,
+                pregenerate_ids,
+                min_id,
+                max_id,
+                alphanumeric,
+                extra_fields,
+                admin_id,
+                disabled,
+                created_at,
+                updated_at,
+                external_identifier_id
+                )
+            SELECT
+                NEW.name,
+                NEW.label,
+                NEW.external_id_attribute,
+                NEW.external_id_view_formatter,
+                NEW.external_id_edit_pattern,
+                NEW.prevent_edit,
+                NEW.pregenerate_ids,
+                NEW.min_id,
+                NEW.max_id,
+                NEW.alphanumeric,
+                NEW.extra_fields,
+                NEW.admin_id,
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -1249,6 +1321,254 @@ CREATE FUNCTION ml_app.log_item_flag_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_message_template_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_message_template_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                INSERT INTO message_template_history
+                (
+                    name,
+                    template_type,
+                    message_type,
+                    template,
+                    admin_id,
+                    disabled,
+                    created_at,
+                    updated_at,
+                    message_template_id
+                    )
+                SELECT
+                    NEW.name,
+                    NEW.template_type,
+                    NEW.message_type,
+                    NEW.template,
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
+
+
+--
+-- Name: log_nfs_store_archived_file_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_nfs_store_archived_file_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO nfs_store_archived_file_history
+            (
+                file_hash,
+                file_name,
+                content_type,
+                archive_file,
+                path,
+                file_size,
+                file_updated_at,
+                nfs_store_container_id,
+                title,
+                description,
+                file_metadata,
+                nfs_store_stored_file_id,
+                user_id,
+                created_at,
+                updated_at,
+                nfs_store_archived_file_id
+                )
+            SELECT
+                NEW.file_hash,
+                NEW.file_name,
+                NEW.content_type,
+                NEW.archive_file,
+                NEW.path,
+                NEW.file_size,
+                NEW.file_updated_at,
+                NEW.nfs_store_container_id,
+                NEW.title,
+                NEW.description,
+                NEW.file_metadata,
+                NEW.nfs_store_stored_file_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_nfs_store_container_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_nfs_store_container_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO nfs_store_container_history
+            (
+                master_id,
+                name,
+                app_type_id,
+                orig_nfs_store_container_id,
+                user_id,
+                created_at,
+                updated_at,
+                nfs_store_container_id
+                )
+            SELECT
+                NEW.master_id,
+                NEW.name,
+                NEW.app_type_id,
+                NEW.nfs_store_container_id,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_nfs_store_filter_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_nfs_store_filter_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO nfs_store_filter_history
+            (
+                app_type_id,
+                role_name,
+                user_id,
+                resource_name,
+                filter,
+                description,
+                admin_id,
+                disabled,
+                created_at,
+                updated_at,
+                nfs_store_filter_id
+                )
+            SELECT
+                NEW.app_type_id,
+                NEW.role_name,
+                NEW.user_id,
+                NEW.resource_name,
+                NEW.filter,
+                NEW.description,
+                NEW.admin_id,
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_nfs_store_stored_file_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO nfs_store_stored_file_history
+            (
+                file_hash,
+                file_name,
+                content_type,
+                path,
+                file_size,
+                file_updated_at,
+                nfs_store_container_id,
+                title,
+                description,
+                file_metadata,
+                last_process_name_run,
+                user_id,
+                created_at,
+                updated_at,
+                nfs_store_stored_file_id
+                )
+            SELECT
+                NEW.file_hash,
+                NEW.file_name,
+                NEW.content_type,
+                NEW.path,
+                NEW.file_size,
+                NEW.file_updated_at,
+                NEW.nfs_store_container_id,
+                NEW.title,
+                NEW.description,
+                NEW.file_metadata,
+                NEW.last_process_name_run,
+                NEW.user_id,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_page_layout_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_page_layout_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                INSERT INTO page_layout_history
+                (
+                    app_type_id,
+                    layout_name,
+                    panel_name,
+                    panel_label,
+                    panel_position,
+                    options,
+                    admin_id,
+                    disabled,
+                    created_at,
+                    updated_at,
+                    page_layout_id
+                    )
+                SELECT
+                    NEW.app_type_id,
+                    NEW.layout_name,
+                    NEW.panel_name,
+                    NEW.panel_label,
+                    NEW.panel_position,
+                    NEW.options,
+                    NEW.admin_id,
+                    NEW.disabled,
+                    NEW.created_at,
+                    NEW.updated_at,
+                    NEW.id
+                ;
+                RETURN NEW;
+            END;
+        $$;
 
 
 --
@@ -1574,6 +1894,48 @@ CREATE FUNCTION ml_app.log_tracker_update() RETURNS trigger
 
 
 --
+-- Name: log_user_access_control_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_user_access_control_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO user_access_control_history
+            (
+                user_id,
+                resource_type,
+                resource_name,
+                options,
+                access,
+                app_type_id,
+                role_name,
+                admin_id,
+                disabled,
+                created_at,
+                updated_at,
+                user_access_control_id
+                )
+            SELECT
+                NEW.user_id,
+                NEW.resource_type,
+                NEW.resource_name,
+                NEW.options,
+                NEW.access,
+                NEW.app_type_id,
+                NEW.role_name,
+                NEW.admin_id,
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_user_authorization_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -1606,60 +1968,95 @@ CREATE FUNCTION ml_app.log_user_authorization_update() RETURNS trigger
 
 
 --
+-- Name: log_user_role_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_user_role_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO user_role_history
+            (
+                app_type_id,
+                role_name,
+                user_id,
+                admin_id,
+                disabled,
+                created_at,
+                updated_at,
+                user_role_id
+                )
+            SELECT
+                NEW.app_type_id,
+                NEW.role_name,
+                NEW.user_id,
+                NEW.admin_id,
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
 -- Name: log_user_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
 CREATE FUNCTION ml_app.log_user_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-            BEGIN
-                INSERT INTO user_history
-                (
-                        user_id,
-        email,
-        encrypted_password,
-        reset_password_token,
-        reset_password_sent_at,
-        remember_created_at,
-        sign_in_count,
-        current_sign_in_at,
-        last_sign_in_at,
-        current_sign_in_ip ,
-        last_sign_in_ip ,
-        created_at ,
-        updated_at,
-        failed_attempts,
-        unlock_token,
-        locked_at,
-        disabled ,
-        admin_id,
-        app_type_id
-
-                    )
-                SELECT
-                    NEW.id,
-                    NEW.email,
-        NEW.encrypted_password,
-        NEW.reset_password_token,
-        NEW.reset_password_sent_at,
-        NEW.remember_created_at,
-        NEW.sign_in_count,
-        NEW.current_sign_in_at,
-        NEW.last_sign_in_at,
-        NEW.current_sign_in_ip ,
-        NEW.last_sign_in_ip ,
-        NEW.created_at ,
-        NEW.updated_at,
-        NEW.failed_attempts,
-        NEW.unlock_token,
-        NEW.locked_at,
-        NEW.disabled ,
-        NEW.admin_id,
-        NEW.app_type_id
-                ;
-                RETURN NEW;
-            END;
-        $$;
+        BEGIN
+            INSERT INTO user_history
+            (
+                email,
+                encrypted_password,
+                reset_password_token,
+                reset_password_sent_at,
+                remember_created_at,
+                sign_in_count,
+                current_sign_in_at,
+                last_sign_in_at,
+                current_sign_in_ip,
+                last_sign_in_ip,
+                failed_attempts,
+                unlock_token,
+                locked_at,
+                app_type_id,
+                authentication_token,
+                admin_id,
+                disabled,
+                created_at,
+                updated_at,
+                user_id
+                )
+            SELECT
+                NEW.email,
+                NEW.encrypted_password,
+                NEW.reset_password_token,
+                NEW.reset_password_sent_at,
+                NEW.remember_created_at,
+                NEW.sign_in_count,
+                NEW.current_sign_in_at,
+                NEW.last_sign_in_at,
+                NEW.current_sign_in_ip,
+                NEW.last_sign_in_ip,
+                NEW.failed_attempts,
+                NEW.unlock_token,
+                NEW.locked_at,
+                NEW.app_type_id,
+                NEW.authentication_token,
+                NEW.admin_id,
+                NEW.disabled,
+                NEW.created_at,
+                NEW.updated_at,
+                NEW.id
+            ;
+            RETURN NEW;
+        END;
+    $$;
 
 
 --
@@ -2323,6 +2720,44 @@ ALTER SEQUENCE ml_app.admins_id_seq OWNED BY ml_app.admins.id;
 
 
 --
+-- Name: app_configuration_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.app_configuration_history (
+    id integer NOT NULL,
+    name character varying,
+    value character varying,
+    app_type_id bigint,
+    user_id bigint,
+    role_name character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    app_configuration_id integer
+);
+
+
+--
+-- Name: app_configuration_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.app_configuration_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: app_configuration_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.app_configuration_history_id_seq OWNED BY ml_app.app_configuration_history.id;
+
+
+--
 -- Name: app_configurations; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -2334,7 +2769,9 @@ CREATE TABLE ml_app.app_configurations (
     admin_id integer,
     user_id integer,
     app_type_id integer,
-    role_name character varying
+    role_name character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -2358,6 +2795,41 @@ ALTER SEQUENCE ml_app.app_configurations_id_seq OWNED BY ml_app.app_configuratio
 
 
 --
+-- Name: app_type_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.app_type_history (
+    id integer NOT NULL,
+    name character varying,
+    label character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    app_type_id integer
+);
+
+
+--
+-- Name: app_type_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.app_type_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: app_type_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.app_type_history_id_seq OWNED BY ml_app.app_type_history.id;
+
+
+--
 -- Name: app_types; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -2366,7 +2838,9 @@ CREATE TABLE ml_app.app_types (
     name character varying,
     label character varying,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -2547,7 +3021,8 @@ CREATE TABLE ml_app.dynamic_model_history (
     result_order character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    dynamic_model_id integer
+    dynamic_model_id integer,
+    options character varying
 );
 
 
@@ -2670,7 +3145,8 @@ CREATE TABLE ml_app.external_identifier_history (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     external_identifier_id integer,
-    extra_fields character varying
+    extra_fields character varying,
+    alphanumeric boolean
 );
 
 
@@ -3176,6 +3652,43 @@ ALTER SEQUENCE ml_app.message_notifications_id_seq OWNED BY ml_app.message_notif
 
 
 --
+-- Name: message_template_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.message_template_history (
+    id integer NOT NULL,
+    name character varying,
+    template_type character varying,
+    template character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    message_template_id integer,
+    message_type character varying
+);
+
+
+--
+-- Name: message_template_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.message_template_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: message_template_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.message_template_history_id_seq OWNED BY ml_app.message_template_history.id;
+
+
+--
 -- Name: message_templates; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -3262,6 +3775,50 @@ CREATE SEQUENCE ml_app.msid_seq
 
 
 --
+-- Name: nfs_store_archived_file_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.nfs_store_archived_file_history (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying,
+    content_type character varying,
+    archive_file character varying,
+    path character varying,
+    file_size character varying,
+    file_updated_at character varying,
+    nfs_store_container_id bigint,
+    title character varying,
+    description character varying,
+    file_metadata character varying,
+    nfs_store_stored_file_id bigint,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_archived_file_id integer
+);
+
+
+--
+-- Name: nfs_store_archived_file_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_archived_file_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_archived_file_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_archived_file_history_id_seq OWNED BY ml_app.nfs_store_archived_file_history.id;
+
+
+--
 -- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -3302,6 +3859,42 @@ CREATE SEQUENCE ml_app.nfs_store_archived_files_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_archived_files_id_seq OWNED BY ml_app.nfs_store_archived_files.id;
+
+
+--
+-- Name: nfs_store_container_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.nfs_store_container_history (
+    id integer NOT NULL,
+    master_id integer,
+    name character varying,
+    app_type_id bigint,
+    orig_nfs_store_container_id bigint,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_container_id integer
+);
+
+
+--
+-- Name: nfs_store_container_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_container_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_container_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_container_history_id_seq OWNED BY ml_app.nfs_store_container_history.id;
 
 
 --
@@ -3376,6 +3969,45 @@ ALTER SEQUENCE ml_app.nfs_store_downloads_id_seq OWNED BY ml_app.nfs_store_downl
 
 
 --
+-- Name: nfs_store_filter_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.nfs_store_filter_history (
+    id integer NOT NULL,
+    app_type_id bigint,
+    role_name character varying,
+    user_id bigint,
+    resource_name character varying,
+    filter character varying,
+    description character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_filter_id integer
+);
+
+
+--
+-- Name: nfs_store_filter_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_filter_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_filter_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_filter_history_id_seq OWNED BY ml_app.nfs_store_filter_history.id;
+
+
+--
 -- Name: nfs_store_filters; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -3388,7 +4020,9 @@ CREATE TABLE ml_app.nfs_store_filters (
     filter character varying,
     description character varying,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -3409,6 +4043,49 @@ CREATE SEQUENCE ml_app.nfs_store_filters_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_filters_id_seq OWNED BY ml_app.nfs_store_filters.id;
+
+
+--
+-- Name: nfs_store_stored_file_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.nfs_store_stored_file_history (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying,
+    content_type character varying,
+    path character varying,
+    file_size character varying,
+    file_updated_at character varying,
+    nfs_store_container_id bigint,
+    title character varying,
+    description character varying,
+    file_metadata character varying,
+    last_process_name_run character varying,
+    user_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    nfs_store_stored_file_id integer
+);
+
+
+--
+-- Name: nfs_store_stored_file_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_stored_file_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_stored_file_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_stored_file_history_id_seq OWNED BY ml_app.nfs_store_stored_file_history.id;
 
 
 --
@@ -3492,6 +4169,45 @@ CREATE SEQUENCE ml_app.nfs_store_uploads_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_uploads_id_seq OWNED BY ml_app.nfs_store_uploads.id;
+
+
+--
+-- Name: page_layout_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.page_layout_history (
+    id integer NOT NULL,
+    layout_name character varying,
+    panel_name character varying,
+    panel_label character varying,
+    panel_position character varying,
+    options character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    page_layout_id integer,
+    app_type_id character varying
+);
+
+
+--
+-- Name: page_layout_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.page_layout_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: page_layout_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.page_layout_history_id_seq OWNED BY ml_app.page_layout_history.id;
 
 
 --
@@ -4349,6 +5065,46 @@ ALTER SEQUENCE ml_app.trackers_id_seq OWNED BY ml_app.trackers.id;
 
 
 --
+-- Name: user_access_control_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.user_access_control_history (
+    id integer NOT NULL,
+    user_id bigint,
+    resource_type character varying,
+    resource_name character varying,
+    options character varying,
+    access character varying,
+    app_type_id bigint,
+    role_name character varying,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_access_control_id integer
+);
+
+
+--
+-- Name: user_access_control_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_access_control_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_access_control_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_access_control_history_id_seq OWNED BY ml_app.user_access_control_history.id;
+
+
+--
 -- Name: user_access_controls; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -4362,7 +5118,9 @@ CREATE TABLE ml_app.user_access_controls (
     disabled boolean,
     admin_id integer,
     app_type_id integer,
-    role_name character varying
+    role_name character varying,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
 );
 
 
@@ -4516,7 +5274,8 @@ CREATE TABLE ml_app.user_history (
     disabled boolean,
     admin_id integer,
     user_id integer,
-    app_type_id integer
+    app_type_id integer,
+    authentication_token character varying
 );
 
 
@@ -4537,6 +5296,42 @@ CREATE SEQUENCE ml_app.user_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.user_history_id_seq OWNED BY ml_app.user_history.id;
+
+
+--
+-- Name: user_role_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.user_role_history (
+    id integer NOT NULL,
+    app_type_id bigint,
+    role_name character varying,
+    user_id bigint,
+    admin_id integer,
+    disabled boolean,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    user_role_id integer
+);
+
+
+--
+-- Name: user_role_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.user_role_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user_role_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.user_role_history_id_seq OWNED BY ml_app.user_role_history.id;
 
 
 --
@@ -4702,7 +5497,21 @@ ALTER TABLE ONLY ml_app.admins ALTER COLUMN id SET DEFAULT nextval('ml_app.admin
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.app_configuration_history ALTER COLUMN id SET DEFAULT nextval('ml_app.app_configuration_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.app_configurations ALTER COLUMN id SET DEFAULT nextval('ml_app.app_configurations_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.app_type_history ALTER COLUMN id SET DEFAULT nextval('ml_app.app_type_history_id_seq'::regclass);
 
 
 --
@@ -4856,6 +5665,13 @@ ALTER TABLE ONLY ml_app.message_notifications ALTER COLUMN id SET DEFAULT nextva
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.message_template_history ALTER COLUMN id SET DEFAULT nextval('ml_app.message_template_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.message_templates ALTER COLUMN id SET DEFAULT nextval('ml_app.message_templates_id_seq'::regclass);
 
 
@@ -4870,7 +5686,21 @@ ALTER TABLE ONLY ml_app.model_references ALTER COLUMN id SET DEFAULT nextval('ml
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_archived_file_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.nfs_store_archived_files ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_archived_files_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_container_history_id_seq'::regclass);
 
 
 --
@@ -4891,7 +5721,21 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads ALTER COLUMN id SET DEFAULT nextval(
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.nfs_store_filter_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_filter_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.nfs_store_filters ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_filters_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_stored_file_history_id_seq'::regclass);
 
 
 --
@@ -4906,6 +5750,13 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_files ALTER COLUMN id SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_uploads_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.page_layout_history ALTER COLUMN id SET DEFAULT nextval('ml_app.page_layout_history_id_seq'::regclass);
 
 
 --
@@ -5059,6 +5910,13 @@ ALTER TABLE ONLY ml_app.trackers ALTER COLUMN id SET DEFAULT nextval('ml_app.tra
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.user_access_control_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_access_control_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.user_access_controls ALTER COLUMN id SET DEFAULT nextval('ml_app.user_access_controls_id_seq'::regclass);
 
 
@@ -5088,6 +5946,13 @@ ALTER TABLE ONLY ml_app.user_authorizations ALTER COLUMN id SET DEFAULT nextval(
 --
 
 ALTER TABLE ONLY ml_app.user_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_role_history ALTER COLUMN id SET DEFAULT nextval('ml_app.user_role_history_id_seq'::regclass);
 
 
 --
@@ -5193,11 +6058,27 @@ ALTER TABLE ONLY ml_app.admins
 
 
 --
+-- Name: app_configuration_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.app_configuration_history
+    ADD CONSTRAINT app_configuration_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: app_configurations_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY ml_app.app_configurations
     ADD CONSTRAINT app_configurations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: app_type_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.app_type_history
+    ADD CONSTRAINT app_type_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -5369,6 +6250,14 @@ ALTER TABLE ONLY ml_app.message_notifications
 
 
 --
+-- Name: message_template_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT message_template_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: message_templates_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -5385,11 +6274,27 @@ ALTER TABLE ONLY ml_app.model_references
 
 
 --
+-- Name: nfs_store_archived_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT nfs_store_archived_file_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: nfs_store_archived_files_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_archived_files
     ADD CONSTRAINT nfs_store_archived_files_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nfs_store_container_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT nfs_store_container_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -5409,11 +6314,27 @@ ALTER TABLE ONLY ml_app.nfs_store_downloads
 
 
 --
+-- Name: nfs_store_filter_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT nfs_store_filter_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: nfs_store_filters_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY ml_app.nfs_store_filters
     ADD CONSTRAINT nfs_store_filters_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nfs_store_stored_file_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT nfs_store_stored_file_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -5430,6 +6351,14 @@ ALTER TABLE ONLY ml_app.nfs_store_stored_files
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads
     ADD CONSTRAINT nfs_store_uploads_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: page_layout_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.page_layout_history
+    ADD CONSTRAINT page_layout_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -5633,6 +6562,14 @@ ALTER TABLE ONLY ml_app.protocol_events
 
 
 --
+-- Name: user_access_control_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.user_access_control_history
+    ADD CONSTRAINT user_access_control_history_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: user_access_controls_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -5670,6 +6607,14 @@ ALTER TABLE ONLY ml_app.user_authorizations
 
 ALTER TABLE ONLY ml_app.user_history
     ADD CONSTRAINT user_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_role_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.user_role_history
+    ADD CONSTRAINT user_role_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -5822,6 +6767,20 @@ CREATE INDEX index_admin_history_on_admin_id ON ml_app.admin_history USING btree
 
 
 --
+-- Name: index_app_configuration_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_configuration_history_on_admin_id ON ml_app.app_configuration_history USING btree (admin_id);
+
+
+--
+-- Name: index_app_configuration_history_on_app_configuration_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_configuration_history_on_app_configuration_id ON ml_app.app_configuration_history USING btree (app_configuration_id);
+
+
+--
 -- Name: index_app_configurations_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -5840,6 +6799,20 @@ CREATE INDEX index_app_configurations_on_app_type_id ON ml_app.app_configuration
 --
 
 CREATE INDEX index_app_configurations_on_user_id ON ml_app.app_configurations USING btree (user_id);
+
+
+--
+-- Name: index_app_type_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_type_history_on_admin_id ON ml_app.app_type_history USING btree (admin_id);
+
+
+--
+-- Name: index_app_type_history_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_app_type_history_on_app_type_id ON ml_app.app_type_history USING btree (app_type_id);
 
 
 --
@@ -6046,6 +7019,20 @@ CREATE INDEX index_message_notifications_status ON ml_app.message_notifications 
 
 
 --
+-- Name: index_message_template_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_template_history_on_admin_id ON ml_app.message_template_history USING btree (admin_id);
+
+
+--
+-- Name: index_message_template_history_on_message_template_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_message_template_history_on_message_template_id ON ml_app.message_template_history USING btree (message_template_id);
+
+
+--
 -- Name: index_message_templates_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6088,6 +7075,20 @@ CREATE INDEX index_model_references_on_user_id ON ml_app.model_references USING 
 
 
 --
+-- Name: index_nfs_store_archived_file_history_on_nfs_store_archived_fil; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_archived_file_history_on_nfs_store_archived_fil ON ml_app.nfs_store_archived_file_history USING btree (nfs_store_archived_file_id);
+
+
+--
+-- Name: index_nfs_store_archived_file_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_archived_file_history_on_user_id ON ml_app.nfs_store_archived_file_history USING btree (user_id);
+
+
+--
 -- Name: index_nfs_store_archived_files_on_nfs_store_container_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6102,6 +7103,27 @@ CREATE INDEX index_nfs_store_archived_files_on_nfs_store_stored_file_id ON ml_ap
 
 
 --
+-- Name: index_nfs_store_container_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_container_history_on_master_id ON ml_app.nfs_store_container_history USING btree (master_id);
+
+
+--
+-- Name: index_nfs_store_container_history_on_nfs_store_container_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_container_history_on_nfs_store_container_id ON ml_app.nfs_store_container_history USING btree (nfs_store_container_id);
+
+
+--
+-- Name: index_nfs_store_container_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_container_history_on_user_id ON ml_app.nfs_store_container_history USING btree (user_id);
+
+
+--
 -- Name: index_nfs_store_containers_on_master_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6113,6 +7135,20 @@ CREATE INDEX index_nfs_store_containers_on_master_id ON ml_app.nfs_store_contain
 --
 
 CREATE INDEX index_nfs_store_containers_on_nfs_store_container_id ON ml_app.nfs_store_containers USING btree (nfs_store_container_id);
+
+
+--
+-- Name: index_nfs_store_filter_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_filter_history_on_admin_id ON ml_app.nfs_store_filter_history USING btree (admin_id);
+
+
+--
+-- Name: index_nfs_store_filter_history_on_nfs_store_filter_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_filter_history_on_nfs_store_filter_id ON ml_app.nfs_store_filter_history USING btree (nfs_store_filter_id);
 
 
 --
@@ -6137,6 +7173,20 @@ CREATE INDEX index_nfs_store_filters_on_user_id ON ml_app.nfs_store_filters USIN
 
 
 --
+-- Name: index_nfs_store_stored_file_history_on_nfs_store_stored_file_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_stored_file_history_on_nfs_store_stored_file_id ON ml_app.nfs_store_stored_file_history USING btree (nfs_store_stored_file_id);
+
+
+--
+-- Name: index_nfs_store_stored_file_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_stored_file_history_on_user_id ON ml_app.nfs_store_stored_file_history USING btree (user_id);
+
+
+--
 -- Name: index_nfs_store_stored_files_on_nfs_store_container_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6148,6 +7198,20 @@ CREATE INDEX index_nfs_store_stored_files_on_nfs_store_container_id ON ml_app.nf
 --
 
 CREATE INDEX index_nfs_store_uploads_on_nfs_store_stored_file_id ON ml_app.nfs_store_uploads USING btree (nfs_store_stored_file_id);
+
+
+--
+-- Name: index_page_layout_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_page_layout_history_on_admin_id ON ml_app.page_layout_history USING btree (admin_id);
+
+
+--
+-- Name: index_page_layout_history_on_page_layout_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_page_layout_history_on_page_layout_id ON ml_app.page_layout_history USING btree (page_layout_id);
 
 
 --
@@ -6459,6 +7523,20 @@ CREATE INDEX index_trackers_on_user_id ON ml_app.trackers USING btree (user_id);
 
 
 --
+-- Name: index_user_access_control_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_access_control_history_on_admin_id ON ml_app.user_access_control_history USING btree (admin_id);
+
+
+--
+-- Name: index_user_access_control_history_on_user_access_control_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_access_control_history_on_user_access_control_id ON ml_app.user_access_control_history USING btree (user_access_control_id);
+
+
+--
 -- Name: index_user_access_controls_on_app_type_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6505,6 +7583,20 @@ CREATE INDEX index_user_history_on_app_type_id ON ml_app.user_history USING btre
 --
 
 CREATE INDEX index_user_history_on_user_id ON ml_app.user_history USING btree (user_id);
+
+
+--
+-- Name: index_user_role_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_role_history_on_admin_id ON ml_app.user_role_history USING btree (admin_id);
+
+
+--
+-- Name: index_user_role_history_on_user_role_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_user_role_history_on_user_role_id ON ml_app.user_role_history USING btree (user_role_id);
 
 
 --
@@ -6669,6 +7761,34 @@ CREATE TRIGGER admin_history_update AFTER UPDATE ON ml_app.admins FOR EACH ROW W
 
 
 --
+-- Name: app_configuration_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_configuration_history_insert AFTER INSERT ON ml_app.app_configurations FOR EACH ROW EXECUTE PROCEDURE ml_app.log_app_configuration_update();
+
+
+--
+-- Name: app_configuration_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_configuration_history_update AFTER UPDATE ON ml_app.app_configurations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_app_configuration_update();
+
+
+--
+-- Name: app_type_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_type_history_insert AFTER INSERT ON ml_app.app_types FOR EACH ROW EXECUTE PROCEDURE ml_app.log_app_type_update();
+
+
+--
+-- Name: app_type_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER app_type_history_update AFTER UPDATE ON ml_app.app_types FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_app_type_update();
+
+
+--
 -- Name: college_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -6764,6 +7884,90 @@ CREATE TRIGGER item_flag_name_history_insert AFTER INSERT ON ml_app.item_flag_na
 --
 
 CREATE TRIGGER item_flag_name_history_update AFTER UPDATE ON ml_app.item_flag_names FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_item_flag_name_update();
+
+
+--
+-- Name: message_template_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER message_template_history_insert AFTER INSERT ON ml_app.message_templates FOR EACH ROW EXECUTE PROCEDURE ml_app.log_message_template_update();
+
+
+--
+-- Name: message_template_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER message_template_history_update AFTER UPDATE ON ml_app.message_templates FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_message_template_update();
+
+
+--
+-- Name: nfs_store_archived_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_archived_file_history_insert AFTER INSERT ON ml_app.nfs_store_archived_files FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_archived_file_update();
+
+
+--
+-- Name: nfs_store_archived_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_archived_file_history_update AFTER UPDATE ON ml_app.nfs_store_archived_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_archived_file_update();
+
+
+--
+-- Name: nfs_store_container_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_container_history_insert AFTER INSERT ON ml_app.nfs_store_containers FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_container_update();
+
+
+--
+-- Name: nfs_store_container_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_container_history_update AFTER UPDATE ON ml_app.nfs_store_containers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_container_update();
+
+
+--
+-- Name: nfs_store_filter_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_filter_history_insert AFTER INSERT ON ml_app.nfs_store_filters FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
+
+
+--
+-- Name: nfs_store_filter_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_filter_history_update AFTER UPDATE ON ml_app.nfs_store_filters FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_filter_update();
+
+
+--
+-- Name: nfs_store_stored_file_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_stored_file_history_insert AFTER INSERT ON ml_app.nfs_store_stored_files FOR EACH ROW EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
+
+
+--
+-- Name: nfs_store_stored_file_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER nfs_store_stored_file_history_update AFTER UPDATE ON ml_app.nfs_store_stored_files FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_nfs_store_stored_file_update();
+
+
+--
+-- Name: page_layout_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER page_layout_history_insert AFTER INSERT ON ml_app.page_layouts FOR EACH ROW EXECUTE PROCEDURE ml_app.log_page_layout_update();
+
+
+--
+-- Name: page_layout_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER page_layout_history_update AFTER UPDATE ON ml_app.page_layouts FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_page_layout_update();
 
 
 --
@@ -6956,6 +8160,20 @@ CREATE TRIGGER tracker_upsert BEFORE INSERT ON ml_app.trackers FOR EACH ROW EXEC
 
 
 --
+-- Name: user_access_control_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER user_access_control_history_insert AFTER INSERT ON ml_app.user_access_controls FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_access_control_update();
+
+
+--
+-- Name: user_access_control_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER user_access_control_history_update AFTER UPDATE ON ml_app.user_access_controls FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_access_control_update();
+
+
+--
 -- Name: user_authorization_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -6981,6 +8199,20 @@ CREATE TRIGGER user_history_insert AFTER INSERT ON ml_app.users FOR EACH ROW EXE
 --
 
 CREATE TRIGGER user_history_update AFTER UPDATE ON ml_app.users FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_update();
+
+
+--
+-- Name: user_role_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER user_role_history_insert AFTER INSERT ON ml_app.user_roles FOR EACH ROW EXECUTE PROCEDURE ml_app.log_user_role_update();
+
+
+--
+-- Name: user_role_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER user_role_history_update AFTER UPDATE ON ml_app.user_roles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_role_update();
 
 
 --
@@ -7056,6 +8288,38 @@ ALTER TABLE ONLY ml_app.admin_history
 
 
 --
+-- Name: fk_app_configuration_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.app_configuration_history
+    ADD CONSTRAINT fk_app_configuration_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_app_configuration_history_app_configurations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.app_configuration_history
+    ADD CONSTRAINT fk_app_configuration_history_app_configurations FOREIGN KEY (app_configuration_id) REFERENCES ml_app.app_configurations(id);
+
+
+--
+-- Name: fk_app_type_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.app_type_history
+    ADD CONSTRAINT fk_app_type_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_app_type_history_app_types; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.app_type_history
+    ADD CONSTRAINT fk_app_type_history_app_types FOREIGN KEY (app_type_id) REFERENCES ml_app.app_types(id);
+
+
+--
 -- Name: fk_college_history_colleges; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7101,6 +8365,110 @@ ALTER TABLE ONLY ml_app.item_flag_history
 
 ALTER TABLE ONLY ml_app.item_flag_name_history
     ADD CONSTRAINT fk_item_flag_name_history_item_flag_names FOREIGN KEY (item_flag_name_id) REFERENCES ml_app.item_flag_names(id);
+
+
+--
+-- Name: fk_message_template_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT fk_message_template_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_message_template_history_message_templates; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.message_template_history
+    ADD CONSTRAINT fk_message_template_history_message_templates FOREIGN KEY (message_template_id) REFERENCES ml_app.message_templates(id);
+
+
+--
+-- Name: fk_nfs_store_archived_file_history_nfs_store_archived_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT fk_nfs_store_archived_file_history_nfs_store_archived_files FOREIGN KEY (nfs_store_archived_file_id) REFERENCES ml_app.nfs_store_archived_files(id);
+
+
+--
+-- Name: fk_nfs_store_archived_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_archived_file_history
+    ADD CONSTRAINT fk_nfs_store_archived_file_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_nfs_store_container_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_nfs_store_container_history_nfs_store_containers; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_nfs_store_containers FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
+
+
+--
+-- Name: fk_nfs_store_container_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_container_history
+    ADD CONSTRAINT fk_nfs_store_container_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_nfs_store_filter_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT fk_nfs_store_filter_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_nfs_store_filter_history_nfs_store_filters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_filter_history
+    ADD CONSTRAINT fk_nfs_store_filter_history_nfs_store_filters FOREIGN KEY (nfs_store_filter_id) REFERENCES ml_app.nfs_store_filters(id);
+
+
+--
+-- Name: fk_nfs_store_stored_file_history_nfs_store_stored_files; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT fk_nfs_store_stored_file_history_nfs_store_stored_files FOREIGN KEY (nfs_store_stored_file_id) REFERENCES ml_app.nfs_store_stored_files(id);
+
+
+--
+-- Name: fk_nfs_store_stored_file_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_stored_file_history
+    ADD CONSTRAINT fk_nfs_store_stored_file_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_page_layout_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.page_layout_history
+    ADD CONSTRAINT fk_page_layout_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_page_layout_history_page_layouts; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.page_layout_history
+    ADD CONSTRAINT fk_page_layout_history_page_layouts FOREIGN KEY (page_layout_id) REFERENCES ml_app.page_layouts(id);
 
 
 --
@@ -7952,6 +9320,22 @@ ALTER TABLE ONLY ml_app.sub_process_history
 
 
 --
+-- Name: fk_user_access_control_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_access_control_history
+    ADD CONSTRAINT fk_user_access_control_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_user_access_control_history_user_access_controls; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_access_control_history
+    ADD CONSTRAINT fk_user_access_control_history_user_access_controls FOREIGN KEY (user_access_control_id) REFERENCES ml_app.user_access_controls(id);
+
+
+--
 -- Name: fk_user_authorization_history_user_authorizations; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -7965,6 +9349,22 @@ ALTER TABLE ONLY ml_app.user_authorization_history
 
 ALTER TABLE ONLY ml_app.user_history
     ADD CONSTRAINT fk_user_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_user_role_history_admins; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_role_history
+    ADD CONSTRAINT fk_user_role_history_admins FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
+-- Name: fk_user_role_history_user_roles; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.user_role_history
+    ADD CONSTRAINT fk_user_role_history_user_roles FOREIGN KEY (user_role_id) REFERENCES ml_app.user_roles(id);
 
 
 --
