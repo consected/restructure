@@ -18,7 +18,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     @al0.master_id = @al.master_id
     @al0.save!
 
-    Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).delete_all
+    n = Admin::UserRole.order(id: :desc).limit(1).pluck(:id).first
+    Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).update_all(role_name: "test-old-#{n}")
     Admin::UserRole.create! app_type: u1.app_type, user: u1, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test', current_admin: @admin
 

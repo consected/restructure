@@ -22,7 +22,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
-    Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).delete_all
+    n = Admin::UserRole.order(id: :desc).limit(1).pluck(:id).first
+    Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).update_all(role_name: "test-old-#{n}")
+
     Admin::UserRole.create! app_type: u1.app_type, user: u1, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: ud, role_name: 'test', current_admin: @admin
