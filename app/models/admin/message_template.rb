@@ -31,7 +31,21 @@ class Admin::MessageTemplate < ActiveRecord::Base
   end
 
   def substitute all_content, data: {}, tag_subs: nil
+    self.class.substitute all_content, data: data, tag_subs: tag_subs
+  end
+
+
+  # Perform subsititions on the the text, using either a Hash of data or an object item.
+  # Provide a tag substitution to be used to enclose the substituted items
+  # Substitution text examples:
+  # {{select_who}} {{player_info.first_name}} {{user.email}}
+  # @param all_content [String] the text containing possible {{something.else}} to be substituted
+  # @param data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
+  # @param tag_subs [String] for example 'span class="someclass"'
+  def self.substitute all_content, data: {}, tag_subs:
     tags = all_content.scan(/{{[0-9a-zA-z_\.]+}}/)
+
+    data = setup_data(data) unless data.is_a? Hash
 
     tags.each do |tag_container|
       tag = tag_container[2..-3]
@@ -76,8 +90,29 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
 
   private
-    def get_tag_value data, tag
+    def self.get_tag_value data, tag
       data[tag] || data[tag.to_sym]
+    end
+
+    def self.setup_data item
+      data = item.attributes.dup
+
+      # if the referenced item has its own referenced item (much like an activity log might), then get it
+      if item.respond_to?(:item) && item.item.respond_to?(:attributes)
+        data[:item] = item.item.attributes
+      end
+
+      if item.respond_to?(:user) && item.user
+        data[:user_email] = item.user.email
+      end
+
+      if item.respond_to?(:current_user) && item.current_user
+        data[:user_email] ||= item.current_user.email
+      end
+
+      data[:player_info] = item.master.player_infos.first.attributes
+
+      data
     end
 
 end

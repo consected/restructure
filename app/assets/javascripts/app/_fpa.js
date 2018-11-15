@@ -570,9 +570,13 @@ _fpa = {
                 t.before(d);
               else if(pos == 'after')
                 t.after(d);
-              else
+              else {
                 t.html(d);
-              console.log('Done put in position');
+                t.removeClass('hidden');
+                t.show();
+              }
+              console.log('Done put in position. Visible? ' + t.is(':visible'));
+              console.log(t);
             };
 
             // Since the results was basic HTML rendered by a partial typically, just push it into the

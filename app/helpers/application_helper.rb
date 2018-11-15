@@ -115,6 +115,7 @@
       if caption.is_a?(Hash)
         caption = caption[:caption]
       end
+      caption = Admin::MessageTemplate.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"') if @form_object_instance 
       caption.gsub("\n","<br/>").html_safe
     end
 

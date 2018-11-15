@@ -3,6 +3,17 @@ module SpecSetup
 
   def setup_database
     puts 'setup database'
+
+    # Clean up old activity log definitions
+    a = ActivityLog.active
+    i = 1
+    a.each do |a1|
+      break if i == a.length
+      a.update(current_admin: @admin, disabled: true)
+      i += 1
+    end
+
+
     seed_database
 
     if ActivityLog.connection.table_exists? "activity_log_player_contact_phones"

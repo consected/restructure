@@ -73,12 +73,16 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     # We must test this edge case, since it has broken the UI in development
 
     have_css('form#new_master')
-    find('#create_empty_master').click
+    within 'form#new_master' do
+      all('input[type="submit"]').first.click
+    end
 
     has_css? ".tracker-tree-results"
 
+    sleep 0.5
+    
     within ".tracker-tree-results" do
-      click_link "add tracker record"
+      find('a.add-tracker-record').click
     end
 
 

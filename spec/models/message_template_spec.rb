@@ -8,9 +8,9 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     create_admin
     create_user
     seed_database
-
-    Admin::MessageTemplate.where(name: 'test email layout').delete_all
-    Admin::MessageTemplate.where(name: 'test email content').delete_all
+    l = Admin::MessageTemplate.last.id
+    Admin::MessageTemplate.where(name: 'test email layout').update_all(name: "test old layout #{l}")
+    Admin::MessageTemplate.where(name: 'test email content').update_all(name: "test old content #{l}")
   end
 
   it "generates a message" do

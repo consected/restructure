@@ -189,6 +189,8 @@ _fpa.form_utils = {
 
     get_general_selections: function(data) {
 
+      if (!data) return;
+
       if(data.multiple_results) {
         _fpa.form_utils.get_general_selections(data[data.multiple_results]);
         return;

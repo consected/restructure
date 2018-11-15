@@ -22,6 +22,7 @@
   if embedded
     form_object_instance = @embedded_item
   end
+  @form_object_instance = form_object_instance
 
   # If this object form is embedded in an outer form (an activity log), then use fields_for rather than form_for
   if embedded
