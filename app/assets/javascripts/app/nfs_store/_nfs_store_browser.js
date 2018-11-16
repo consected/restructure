@@ -62,6 +62,15 @@ _nfs_store.fs_browser = function ($outer) {
         $b.removeClass('browser-hide-' + val);
       }
 
+      var $el = $outer.parents('.common-template-item.is-activity-log').first();
+      $el.removeClass('col-md-8 col-lg-6 col-lg-8 col-md-12 col-lg-12');
+
+      if(val == 'classifications')
+        $el.addClass('col-md-12 col-lg-12');
+      else if(val == 'meta')
+        $el.addClass('col-md-8 col-lg-8');
+      else
+        $el.addClass('col-md-8 col-lg-6');
     };
 
     var count_downloads = function($this) {
@@ -128,7 +137,7 @@ _nfs_store.fs_browser = function ($outer) {
         set_metadata_views($(this));
     });
 
-    var classification_radio = $('input[name="container-meta-controls-'+container_id+'"][value="classifications"]');
+    var classification_radio = $('input[name="container-meta-controls-'+container_id+'"][value=""]');
     set_metadata_views(classification_radio);
     refresh($outer);
 

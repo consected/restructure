@@ -1031,7 +1031,6 @@ _fpa.form_utils = {
     setup_filestore: function(block) {
 
       block.find('.browse-container').not('.nfs-store-setup').each(function() {
-        $(this).parents('.common-template-item.is-activity-log').first().removeClass('col-md-8 col-lg-6').addClass('col-md-12 col-lg-12');
 
         var inblock = $(this);
         window.setTimeout(function() {
