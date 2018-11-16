@@ -343,7 +343,9 @@
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}
   <% if name != full_name %><div id="<%=full_name.hyphenate%>-{{master_id}}-{{id}}"> <% end %>
-  <div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%> <%= is_activity_log_class %>" data-model-data-type="<%=model_data_type %>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-item-class="<%=item_class_name%>" data-sub-item="<%=full_name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">{{/was}}
+  <div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%> <%= is_activity_log_class %>" data-model-data-type="<%=model_data_type %>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-item-class="<%=item_class_name%>" data-sub-item="<%=full_name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">
+  {{/was}}
+  {{#caption_before_substitutions this }}
   <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} <%= is_activity_log_class %>" data-item-id="{{id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.to_s.html_safe}\"" }.join(' ').html_safe%> >
       <% if item_list.length == 0 %>
         <li class="list-group-item <%=name%>-<%=name%>_id is-heading zero-item-heading">
@@ -434,6 +436,7 @@
     <% end %>
     <% unless defined?(exclude_metadata) && exclude_metadata %><li class="list-group-item record-meta">{{>update_metadata <% if show_created_at %>show_created_at=true<%end%> }}</li><%end%>
   </ul>
+  {{/caption_before_substitutions}}
   {{#was _created}}
   </div>
   <% if name != full_name %></div> <% end %>

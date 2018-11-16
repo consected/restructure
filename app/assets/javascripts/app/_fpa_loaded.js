@@ -57,7 +57,8 @@ _fpa.loaded.default = function(){
       _fpa.set_cache('login-redirect-hash', {})
     }
 
-    if(target) {
+    // Ensure a sensible target is passed
+    if(target && target.length > 5) {
       // If we are on a login page, we need to store the hash, since it isn't passed to the server
       if($('body.sessions').length) {
         _fpa.set_cache('login-redirect-hash', {hash: target});

@@ -141,6 +141,17 @@
         return fn(this);
     });
 
+
+    // Handle the substitution of caption-before labels in the block with
+    //  {{#caption_before_substitutions this}}...{{/caption_before_substitutions}}
+    Handlebars.registerHelper('caption_before_substitutions', function(data, options) {
+      var text = options.fn(this);
+      var block = $(text);
+      _fpa.form_utils.caption_before_substitutions(block, data);
+
+      return block[0].outerHTML;
+    });
+
     // Replace instance(s) of replace_str in orig_str, with with_str.
     // re_options represents zero or more standard regex options
     //   g: replace all

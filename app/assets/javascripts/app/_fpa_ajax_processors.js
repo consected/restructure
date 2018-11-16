@@ -231,6 +231,22 @@ _fpa.postprocessors = {
             _fpa.postprocessors.extras_panel_handler(block);
         }
 
+        // Capture the master data into state for later use around the application
+        // The layout of data is modelled partially on that provided by MessageTemplate.setup_data
+        // allowing caption-before to function in 'show' mode
+        if(data.masters && data.masters.length > 0) {
+          _fpa.state.masters = _fpa.state.masters || {}
+          data.masters.forEach(function(master) {
+            if(master && master.id) {
+              _fpa.state.masters[master.id] = Object.assign({}, master);
+              if (_fpa.state.masters[master.id].player_infos) {
+                _fpa.state.masters[master.id].player_info = _fpa.state.masters[master.id].player_infos[0];
+                _fpa.state.masters[master.id].item = _fpa.state.masters[master.id].embedded_item;
+              }
+            }
+          });
+
+        }
 
         $('a.master-expander').click(function(ev){
             ev.preventDefault();

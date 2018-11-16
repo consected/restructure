@@ -267,6 +267,49 @@ _fpa.form_utils = {
         });
     },
 
+    // Make subtitutions in moustaches, when in view mode.
+    // This function is called by a handlebars helper rather than in the postprocessor loop
+    caption_before_substitutions: function(block, data) {
+
+      block.find('.caption-before').not('.cb_subs_done').each (function () {
+        var text = $(this).html();
+        if(!text || text.length < 1) return;
+        var res = text.match(/{{[0-9a-zA-z_\.]+}}/g);
+        if(!res || res.length < 1) return;
+
+        var new_data = {};
+        if (data && data.master_id) {
+          var master_id = data.master_id;
+          new_data = Object.assign({}, data);
+        }
+        else {
+          var master_id = block.parents('.master-panel').first().attr('data-master-id');
+        }
+
+        var master = _fpa.state.masters[master_id];
+        if(master) {
+          new_data = Object.assign(new_data, master);
+        }
+
+        res.forEach(function(el) {
+          var elsplit = el.replace('{{','').replace('}}','').split('.');
+          var got = null;
+          if(elsplit[0])
+            got = new_data[elsplit[0]];
+
+          if(got && elsplit[1])
+            got = got[elsplit[1]];
+
+          if(got == null) got = '(?)';
+          got = '<em class="all_caps">' + got + '</em>';
+          text = text.replace(el, got);
+        });
+
+        $(this).html(text);
+
+      }).addClass('cb_subs_done');
+    },
+
     // Resize all labels in a block for nice formatting without tables or fixed widths
     resize_labels : function(block, data){
         if(!block) block = $(document);
