@@ -20,7 +20,9 @@ _fpa.utils.jump_to_linked_item = function(target, offset) {
 
   h = h.first();
 
-  h.addClass('item-highlight linked-item-highlight');
+  if(target != '#body-top') {
+    h.addClass('item-highlight linked-item-highlight');
+  }
 
   if(!h.is(':visible')){
       // Open up the block containing this item

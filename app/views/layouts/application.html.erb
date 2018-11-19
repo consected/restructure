@@ -21,6 +21,16 @@
     <%= render partial: 'admin_handler/status_bar' %>
 <%= yield %>
 
+  <div class="print-preparing">
+    <div class="print-preparing-banner">
+      <h4>
+        Loading full record information for printing
+      </h4>
+      <p>
+        <span class="print-running glyphicon glyphicon-refresh"></span>
+      </p>
+    </div>
+  </div>
   <script>
     _fpa.translations = <%= YAML.load_file(Rails.root.join('config', 'locales', "#{I18n.locale}.yml")).to_json.html_safe %>;
     _fpa.locale_t = _fpa.translations[_fpa.current_locale];

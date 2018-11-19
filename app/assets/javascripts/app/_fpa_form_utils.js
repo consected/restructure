@@ -1050,10 +1050,9 @@ _fpa.form_utils = {
       });
     },
 
-    resize_children: function(block){
+    resize_children: function(block, doNow){
 
-      window.setTimeout(function(){
-
+      var doResize = function() {
         var curr_top = -1;
         var maxh = -1;
 
@@ -1137,7 +1136,16 @@ _fpa.form_utils = {
           if(maxh>1)
             block.find('.ready-to-resize').removeClass('ready-to-resize').css({minHeight: maxh});
         });
-      }, 100);
+      };
+
+      if(doNow) {
+        doResize();
+      }
+      else {
+        window.setTimeout(function(){
+          doResize();
+        }, 100);
+      }
     },
 
     // Run through all the general formatters for a new block to show nicely

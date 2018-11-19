@@ -48,6 +48,30 @@ _fpa.loaded.default = function(){
         has_loaded_callback = true;
     }
 
+    // Trigger a warning if user tries to print without using the app functionality
+    window.onbeforeprint = _fpa.printing.beforePrintHandler;
+    window.onafterprint = _fpa.printing.afterPrintHandler;
+
+    // Allow Safari to handle onbeforeprint
+    var mediaQueryList = window.matchMedia('print');
+    mediaQueryList.addListener(function(mql) {
+      if(mql.matches) {
+        _fpa.printing.beforePrintHandler();
+      }
+    });
+    var mediaQueryList = window.matchMedia('screen');
+    mediaQueryList.addListener(function(mql) {
+      if(mql.matches) {
+        _fpa.printing.afterPrintHandler();
+      }
+    });
+
+    $('#print-action').click(function (){
+      _fpa.printing.appPrintHandler();
+    });
+
+
+
     // Finally, if a hash is set in the URL, jump to it:
     var target = window.location.hash;
     // If no target provided, check if a login page previously cached one and use it instead

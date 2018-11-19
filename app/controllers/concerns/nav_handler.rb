@@ -44,6 +44,7 @@ module NavHandler
 
     if current_user || admin_view
       @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'} if admin_view || current_user.can?(:view_reports)
+      @primary_navs << {label: 'Print', url: '#body-top', extras: {id: 'print-action', class: 'print-action-button'}} if admin_view || current_user.can?(:print)
       @primary_navs << {label: 'Import CSV', url: '/imports', route: 'imports#index'}  if admin_view || current_user.can?(:import_csv)
 
     end
