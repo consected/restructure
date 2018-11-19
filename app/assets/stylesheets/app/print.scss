@@ -67,17 +67,18 @@
     }
   }
 
-  // h1 {
-  //   font: 28px "Times New Roman", Times, serif;
-  // }
-  //
-  // h2 {
-  //   font: 24px "Times New Roman", Times, serif;
-  // }
-  //
-  // h3 {
-  //   font: 20px "Times New Roman", Times, serif;
-  // }
+  /* Fix printing of fancy radio buttons */
+  .button-radio input[type="radio"] + label:before {
+    content: '' !important;
+  }
+
+  .button-radio input[type="radio"]:checked + label:before {
+    content: '✔'  !important;
+  }
+
+  .download-actions, .refresh-container-list {
+    display: none !important;
+  }
 
   /* Improve colour contrast of links */
   a:link, a:visited {
