@@ -1,17 +1,16 @@
 class Address < UserBase
   include UserHandler
-
-  PrimaryRank = 10
-  SecondaryRank = 5
-  InactiveRank = 0
+  include RankHandler
 
   validates :zip, "validates/zip": true, allow_blank: true
   validates :source, 'validates/source' => true, allow_blank: true
   validates :rank, presence: true
 
   before_save :handle_country
-  after_save :handle_primary_status
 
+  def no_rec_type
+    true
+  end
 
   def data
     self.street
@@ -48,26 +47,6 @@ class Address < UserBase
 
 
   protected
-
-    # Only one address for a master can be set as Primary
-    # If a new item is added, or an existed item is updated with Primary rank
-    # update the existing record(s) with Primary status to be Secondary
-    def handle_primary_status
-
-      if self.rank.to_i == PrimaryRank
-        logger.info "Address rank set as primary in address #{self.id}. Setting other addresses for this master to secondary if they were primary."
-
-        self.master.addresses.where(rank: PrimaryRank).each do |a|
-          if a.id != self.id
-            logger.info "Address #{a.id} has primary rank currently. Setting it to secondary"
-            a.rank = SecondaryRank
-            a.save
-            multiple_results << a
-          end
-        end
-      end
-
-    end
 
     # Validate state and zip for US country and region / postal code for non-US
     def handle_country

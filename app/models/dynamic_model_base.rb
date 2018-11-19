@@ -2,6 +2,9 @@ class DynamicModelBase < UserBase
 
   self.abstract_class = true
 
+  include RankHandler
+
+
   # Use the view_options.data_attribute configuration option if it has been set,
   # otherwise use the data attribute from the table (if it has been set)
   def data

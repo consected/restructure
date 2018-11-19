@@ -20,6 +20,10 @@
     l = an
   end
 
+  if m.model_def.attribute_names.include? 'rank'
+    data_sort = [:desc, "data-rank"]
+  end
+
 %>
 <%= render partial: 'common_templates/search_results_template', locals: {
       caption: m.name,
@@ -31,6 +35,7 @@
       item_list: l,
       caption_before: m.default_options.caption_before,
       show_if: m.default_options.show_if,
+      data_sort: data_sort,
       category: m.category
     } %>
 <% end %>
