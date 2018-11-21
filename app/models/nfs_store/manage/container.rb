@@ -43,7 +43,15 @@ module NfsStore
       # Container-specific sub directory to place container directory into
       # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
       def parent_sub_dir
-        "master-#{self.master_id}" if Filesystem.use_parent_sub_dir
+        upsd = Filesystem.use_parent_sub_dir
+        if upsd
+          setting = Admin::AppConfiguration.find_default_app_config(self.app_type_id, 'filestore directory id')
+          if setting
+            return "#{setting.value.hyphenate}-#{self.master.send(setting.value)}"
+          else
+            return "master-#{self.master_id}"
+          end
+        end
       end
 
       # # Container-specific sub directory to place container directory into
