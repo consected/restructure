@@ -7,12 +7,18 @@ module SpecSetup
     # Clean up old activity log definitions
     a = ActivityLog.active
     i = 1
+
+    create_admin unless @admin
+
     a.each do |a1|
-      break if i == a.length
-      a.update(current_admin: @admin, disabled: true)
+      # break if i == a.length
+      a1.update!(current_admin: @admin, disabled: true)
       i += 1
     end
 
+
+    Seeds::ActivityLogPlayerContactPhone.setup
+    
 
     seed_database
 

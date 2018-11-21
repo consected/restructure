@@ -17,8 +17,8 @@ module RankHandler
   def handle_primary_status
 
     if self.rank.to_i == PrimaryRank
-      logger.info "Player Contact rank set as primary in contact #{self.id} for type #{self.rec_type}.
-                  Setting other player contacts for this master to secondary if they were primary and have the type #{self.rec_type}."
+      # logger.info "rank set as primary in contact #{self.id} for type #{self.rec_type}.
+      #             Setting other records for this master to secondary if they were primary and have the type #{self.rec_type}."
       conditions = {rank: PrimaryRank, master: master}
 
       unless defined?(no_rec_type) && no_rec_type
@@ -26,9 +26,9 @@ module RankHandler
       end
 
       self.class.where(conditions).each do |a|
-        logger.info "Player Contact #{a.id} has primary rank currently. Current ID is #{self.id}"
+        # logger.info "Record #{a.id} has primary rank currently. Current ID is #{self.id}"
         if a.id != self.id
-          logger.info "Player Contact #{a.id} has primary rank currently. Setting it to secondary"
+          # logger.info "Record #{a.id} has primary rank currently. Setting it to secondary"
           a.master = master
           a.rank = SecondaryRank
           a.save

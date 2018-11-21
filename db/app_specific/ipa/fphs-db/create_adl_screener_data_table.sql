@@ -1,6 +1,7 @@
 create table ipa_ops.adl_screener_data
 (
 record_id integer,
+redcap_survey_identifier integer,
 adcs_npiq_timestamp timestamp,
 adlnpi_consent___agree integer,
 informant integer,
@@ -83,7 +84,8 @@ adl_applls___oth integer,
 adl_applls_oth varchar,
 adl_appl_perf integer,
 adl_comm varchar,
-redcap_survey_identifier integer
+score integer,
+dk_count integer
 );
 
 GRANT ALL ON ipa_ops.adl_screener_data TO fphs;
