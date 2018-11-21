@@ -39,6 +39,15 @@ module NfsStore
         @containers_dirname
       end
 
+      def self.use_parent_sub_dir= res
+        @use_parent_sub_dir = res
+      end
+
+      def self.use_parent_sub_dir
+        @use_parent_sub_dir
+      end
+
+
       # Path to the 'containers' directory for the specified app type within the
       # mount point for the specified role name
       # @param app_type_id [Integer] ID for the app type

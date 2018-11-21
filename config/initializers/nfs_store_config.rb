@@ -6,6 +6,7 @@ ActiveSupport.on_load(:nfs_store_config) do
     self.nfs_store_directory = ENV['FILESTORE_NFS_DIR']
     self.temp_directory = ENV['FILESTORE_TEMP_UPLOADS_DIR']
     self.containers_dirname = ENV['FILESTORE_CONTAINERS_DIRNAME']
+    self.use_parent_sub_dir = (ENV['FILESTORE_USE_PARENT_SUB_DIR'] == 'TRUE')
   else
     self.nfs_store_directory = "/mnt/fphsfs"
     self.nfs_store_directory = "/var/tmp/nfs_store_test" if Rails.env.test?

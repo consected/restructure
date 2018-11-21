@@ -43,9 +43,14 @@ module NfsStore
       # Container-specific sub directory to place container directory into
       # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
       def parent_sub_dir
-        "master-#{self.master_id}"
+        "master-#{self.master_id}" if Filesystem.use_parent_sub_dir
       end
 
+      # # Container-specific sub directory to place container directory into
+      # # Override method in app implementations if required
+      # # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
+      # def parent_sub_dir
+      # end
 
       # All containers for the user's current app type. Returns an ActiveRecord::Relation that can be refined
       # @param user [User] the current user
@@ -80,13 +85,6 @@ module NfsStore
       # @return [User]
       def current_user
         master.current_user
-      end
-
-
-      # Container-specific sub directory to place container directory into
-      # Override method in app implementations if required
-      # @return [nil | String] set to a sub path string such as 'holder123' or 'parentdir/holder123'
-      def parent_sub_dir
       end
 
       # Name of directory for container. This must be a single name and not contain backslashes
