@@ -48,7 +48,7 @@ class ExtraOptions
       },
       filestore: {
         container: {
-          
+
         }
       },
       save_action: {

@@ -607,7 +607,14 @@ module ActivityLogHandler
     eltc = self.extra_log_type_config
 
     if eltc.editable_if.is_a?(Hash) && eltc.editable_if.first
-      res = eltc.calc_editable_if(self)
+
+      # Generate an old version of the object prior to changes
+      old_obj = self.dup
+      self.changes.each do |k,v|
+        old_obj.send("#{k}=", v.first)
+      end
+
+      res = eltc.calc_editable_if(old_obj)
       return unless res
     else
       @latest_item ||= master.send(self.class.assoc_inverse).unscope(:order).order(id: :desc).limit(1).first

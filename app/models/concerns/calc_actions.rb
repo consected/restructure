@@ -247,7 +247,15 @@ module CalcActions
             end
           else
             this_val = current_instance.attributes[field_name.to_s]
-            res &&= this_val == expected_val
+            if expected_val.is_a? Array
+              array_res = false
+              expected_val.each do |e|
+                array_res ||= (this_val == e)
+              end
+              res &&= array_res
+            else
+              res &&= this_val == expected_val
+            end
             @this_val = this_val if expected_val == 'return_value'
           end
         elsif table == :user

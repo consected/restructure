@@ -99,6 +99,20 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
 
+    # Check that an array of possible values evaluates correctly
+
+    conf = {
+      all: {
+        this: {
+            select_who: ["doesn't match", @al.select_who],
+            user_id: [@al.user_id, "doesn't match"]
+        }
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+
   end
 
   it "checks if any attributes have a certain value" do
