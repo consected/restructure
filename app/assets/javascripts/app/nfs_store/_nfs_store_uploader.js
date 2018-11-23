@@ -115,7 +115,7 @@ _nfs_store.uploader = function ($outer) {
       });
 
 
-      $block.find('.started-at').html(new Date().toLocaleString());
+      $block.find('.started-at').html(new Date().toLocaleTimeString());
 
       var $context = $outer.find('.data-context');
       $block.appendTo($context);
@@ -364,7 +364,7 @@ _nfs_store.uploader = function ($outer) {
       var that = this;
       $.each(data.files, function (index) {
         var $block = getFileBlock();
-        $block.find('.ended-at').text(new Date().toLocaleString());
+        $block.find('.ended-at').text(new Date().toLocaleTimeString());
         setBlockComplete($block);
 
         // blocks left to complete?

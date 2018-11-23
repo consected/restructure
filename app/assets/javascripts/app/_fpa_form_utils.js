@@ -1077,10 +1077,15 @@ _fpa.form_utils = {
               me = dc;
 
             var has_dialog = (me.find('.in-form-dialog').length > 0);
-            if(me.height() > 1200 || has_dialog) {
+            var cap_items = me.find('.list-group-item.caption-before, .list-group-item.dialog-before');
+            if(cap_items.length == 0) return;
+            var visible_cap = cap_items.filter(':visible');
+            var cap_height = visible_cap.last().position().top + visible_cap.last().outerHeight() - visible_cap.first().position().top
+
+            if(cap_height > 800 || has_dialog) {
               var c = _fpa.layout.item_blocks.regular;
               var max_h = 0;
-              me.find('.list-group-item.caption-before, .list-group-item.dialog-before').each(function() {
+              cap_items.each(function() {
                 var curr_h = $(this).height();
                 if(curr_h > max_h) max_h = curr_h;
               });
