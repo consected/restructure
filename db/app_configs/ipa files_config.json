@@ -1151,12 +1151,12 @@
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-10-16T13:53:22.646Z",
-        "updated_at": "2018-11-22T17:10:23.133Z",
+        "updated_at": "2018-11-23T15:57:41.557Z",
         "action_when_attribute": "created_at",
         "field_list": "select_type, notes, session_date, session_time",
         "blank_log_field_list": "",
         "blank_log_name": "",
-        "extra_log_types": "_default:\r\n\r\n  field_options:\r\n    operator:\r\n      edit_as: \r\n        field_type: select_record_from_table_ipa_file_creators\r\n\r\n    select_status:\r\n      value: open\r\n      edit_as:\r\n        alt_options:\r\n          open: open\r\n          closed: closed\r\n          delete: delete\r\n\r\n    select_confirm_status:\r\n      edit_as:\r\n        alt_options:\r\n          confirmed: confirmed\r\n\r\n  fields:\r\n    - session_date\r\n    - session_time\r\n    - select_status\r\n    - select_confirm_status\r\n    - notes\r\n        \r\n  caption_before:\r\n    session_date: \r\n      keep_label: true\r\n      caption: Select the date and time of the assessment session related to these files\r\n    select_status: |\r\n      Select the status of the container.\r\n      <b>open</b> container is open and files can be added\r\n      <b>closed</b> container is closed and no more files can be added\r\n      <b>delete</b> mark container and its files for deletion, due to an error with uploaded files or other reason. Add notes below indicating the reason.\r\n      Marking a container for deletion allows a new container of this type to be created to replace it.\r\n    select_confirm_status: |\r\n      Select <i>confirmed</i> to confirm that the container is to be closed or marked for deletion.\r\n      After saving, the container will be locked and additional changes will be prevented.\r\n    notes: Description and Notes      \r\n\r\n  show_if:\r\n    select_confirm_status:\r\n      select_status:\r\n        - closed\r\n        - delete\r\n\r\n  valid_if:\r\n    on_save:\r\n      any:\r\n        this:\r\n          select_status: open\r\n          select_confirm_status: confirmed\r\n  \r\n  editable_if:\r\n    not_any:\r\n      this:\r\n        select_status: \r\n          - closed\r\n          - delete\r\n\r\n  showable_if:\r\n    not_all:\r\n      this:\r\n        select_status: delete\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container: \r\n        name: session files\r\n        label: Session Files\r\n        create_with_role: nfs_store group 600\r\n\r\n  references:\r\n    nfs_store__manage__container:\r\n      from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n\r\n    dynamic_model__ipa_file_creator:\r\n      label: Operator\r\n      from: this\r\n      add: many\r\n      view_as:\r\n        show: not_embedded\r\n        edit: select_or_add\r\n        new: select_or_add\r\n      \r\nbaseline:\r\n  label: Baseline\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: baseline\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\n\r\npet:\r\n  label: PET\r\n  \r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: pet\r\n  \r\n\r\nolfactory:\r\n  label: Olfactory\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: olfactory\r\n\r\n\r\npain:\r\n  label: Pain\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: pain\r\n  \r\n\r\nbrain_behavior:\r\n  label: Brain / Behavior General\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: brain_behavior\r\n\r\nbrain_behavior_qs:\r\n  label: Brain / Behavior Qs\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: brain_behavior\r\n\r\nmri:\r\n  label: MRI / Liver MR\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: mri\r\n\r\n\r\nphysical_function:\r\n  label: Physical Function\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: physical_function\r\n\r\n\r\ntms_eeg:\r\n  label: TMS / EEG\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: tms_eef\r\n\r\n\r\nsleep:\r\n  label: Sleep\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: sleep\r\n\r\n\r\ncardiac:\r\n  label: Cardiac\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: cardiac\r\n\r\n\r\nxray:\r\n  label: X-Ray\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: xray\r\n\r\n\r\nsession:\r\n  label: Not Used\r\n  creatable_if:\r\n    never: true\r\n\r\n\r\nfiltered_session:\r\n  label: Not Used\r\n  creatable_if:\r\n    never: true\r\n\r\nfiltered:\r\n  label: Not Used\r\n  creatable_if:\r\n    never: true\r\n",
+        "extra_log_types": "_default:\r\n\r\n  field_options:\r\n    operator:\r\n      edit_as: \r\n        field_type: select_record_from_table_ipa_file_creators\r\n\r\n    select_status:\r\n      include_blank: false\r\n      edit_as:\r\n        alt_options:\r\n          open: open\r\n          closed: closed\r\n          delete: delete\r\n\r\n    select_confirm_status:\r\n      edit_as:\r\n        alt_options:\r\n          confirmed: confirmed\r\n\r\n  fields:\r\n    - session_date\r\n    - session_time\r\n    - select_status\r\n    - select_confirm_status\r\n    - notes\r\n        \r\n  caption_before:\r\n    session_date: \r\n      keep_label: true\r\n      caption: Date and time of the assessment session related to these files\r\n    select_status: |\r\n      Select the status of the container.\r\n      <b>open</b> - container is open and files can be added\r\n      <b>closed</b> - container is closed and made read-only\r\n      <b>delete</b> - mark container for deletion, allowing a new container of this type to be created to replace it\r\n    select_confirm_status: |\r\n      Confirm that the container is to be closed or marked for deletion.\r\n      After saving, the container will be locked and additional changes will be prevented.\r\n    notes: Description and Notes      \r\n\r\n  show_if:\r\n    select_confirm_status:\r\n      select_status:\r\n        - closed\r\n        - delete\r\n\r\n  valid_if:\r\n    on_save:\r\n      any:\r\n        this:\r\n          select_status: open\r\n          select_confirm_status: confirmed\r\n  \r\n  editable_if:\r\n    not_all:\r\n      this:\r\n        select_status: \r\n          - closed\r\n          - delete\r\n\r\n  showable_if:\r\n    not_all:\r\n      this:\r\n        select_status: delete\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container: \r\n        name: session files\r\n        label: Session Files\r\n        create_with_role: nfs_store group 600\r\n\r\n  references:\r\n    dynamic_model__ipa_file_creator:\r\n      label: Operator\r\n      from: this\r\n      add: many\r\n      view_as:\r\n        show: not_embedded\r\n        edit: select_or_add\r\n        new: select_or_add\r\n      \r\n    nfs_store__manage__container:\r\n      from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n\r\nbaseline:\r\n  label: Baseline\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: baseline\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\n\r\npet:\r\n  label: PET\r\n  \r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: pet\r\n        select_status:\r\n          - open\r\n          - closed\r\n  \r\n\r\nolfactory:\r\n  label: Olfactory\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: olfactory\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\npain:\r\n  label: Pain\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: pain\r\n        select_status:\r\n          - open\r\n          - closed  \r\n\r\nbrain_behavior:\r\n  label: Brain / Behavior General\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: brain_behavior\r\n        select_status:\r\n          - open\r\n          - closed\r\n          \r\n          \r\nbrain_behavior_qs:\r\n  label: Brain / Behavior Qs\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: brain_behavior\r\n        select_status:\r\n          - open\r\n          - closed\r\n          \r\nmri:\r\n  label: MRI / Liver MR\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: mri\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\nphysical_function:\r\n  label: Physical Function\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: physical_function\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\ntms_eeg:\r\n  label: TMS / EEG\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: tms_eeg\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\nsleep:\r\n  label: Sleep\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: sleep\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\ncardiac:\r\n  label: Cardiac\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: cardiac\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\nxray:\r\n  label: X-Ray\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_session_filestores:\r\n        extra_log_type: xray\r\n        select_status:\r\n          - open\r\n          - closed\r\n\r\nsession:\r\n  label: Not Used\r\n  creatable_if:\r\n    never: true\r\n\r\n\r\nfiltered_session:\r\n  label: Not Used\r\n  creatable_if:\r\n    never: true\r\n\r\nfiltered:\r\n  label: Not Used\r\n  creatable_if:\r\n    never: true\r\n",
         "hide_item_list_panel": true,
         "main_log_name": "",
         "process_name": "session_filestore",
@@ -1799,7 +1799,7 @@
         "disabled": false,
         "created_at": "2018-11-05T11:53:13.343Z",
         "updated_at": "2018-11-05T11:53:13.343Z",
-        "user_email": "filetest@hms.harvard.edu"
+        "user_email": "mri-files@fphs2.harvard.edu"
       },
       {
         "id": 9,
@@ -1810,7 +1810,7 @@
         "disabled": false,
         "created_at": "2018-11-05T11:53:25.791Z",
         "updated_at": "2018-11-05T11:53:25.791Z",
-        "user_email": "filetest@hms.harvard.edu"
+        "user_email": "mri-files@fphs2.harvard.edu"
       },
       {
         "id": 10,
@@ -1826,13 +1826,13 @@
       {
         "id": 12,
         "app_type_id": 3,
-        "role_name": "filtered - mri files - alex",
+        "role_name": "filtered - mri files - spectroscopy",
         "user_id": 3,
         "admin_id": 2,
         "disabled": false,
         "created_at": "2018-11-05T13:49:45.305Z",
-        "updated_at": "2018-11-06T18:13:03.129Z",
-        "user_email": "filefilter@hms.harvard.edu"
+        "updated_at": "2018-11-23T16:03:17.824Z",
+        "user_email": "mri-spec-files@fphs2.harvard.edu"
       },
       {
         "id": 13,
@@ -1843,7 +1843,7 @@
         "disabled": false,
         "created_at": "2018-11-05T13:50:36.632Z",
         "updated_at": "2018-11-06T18:10:59.792Z",
-        "user_email": "filetest@hms.harvard.edu"
+        "user_email": "mri-files@fphs2.harvard.edu"
       },
       {
         "id": 14,
@@ -1854,7 +1854,7 @@
         "disabled": false,
         "created_at": "2018-11-05T13:51:26.749Z",
         "updated_at": "2018-11-05T13:51:26.749Z",
-        "user_email": "filefilter@hms.harvard.edu"
+        "user_email": "mri-spec-files@fphs2.harvard.edu"
       },
       {
         "id": 15,
@@ -1865,7 +1865,7 @@
         "disabled": false,
         "created_at": "2018-11-05T13:51:40.425Z",
         "updated_at": "2018-11-05T13:51:40.425Z",
-        "user_email": "filefilter@hms.harvard.edu"
+        "user_email": "mri-spec-files@fphs2.harvard.edu"
       },
       {
         "id": 16,
@@ -1931,7 +1931,7 @@
         "disabled": false,
         "created_at": "2018-11-06T18:08:36.196Z",
         "updated_at": "2018-11-06T18:08:36.196Z",
-        "user_email": "filetest@hms.harvard.edu"
+        "user_email": "mri-files@fphs2.harvard.edu"
       },
       {
         "id": 22,
@@ -1942,7 +1942,7 @@
         "disabled": false,
         "created_at": "2018-11-06T18:09:38.894Z",
         "updated_at": "2018-11-06T18:09:38.894Z",
-        "user_email": "filefilter@hms.harvard.edu"
+        "user_email": "mri-spec-files@fphs2.harvard.edu"
       },
       {
         "id": 23,
@@ -1953,7 +1953,7 @@
         "disabled": false,
         "created_at": "2018-11-06T18:32:23.819Z",
         "updated_at": "2018-11-06T18:32:23.819Z",
-        "user_email": "filetest@hms.harvard.edu"
+        "user_email": "mri-files@fphs2.harvard.edu"
       },
       {
         "id": 24,
@@ -1987,6 +1987,61 @@
         "created_at": "2018-11-22T13:16:38.540Z",
         "updated_at": "2018-11-22T13:16:58.250Z",
         "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
+        "id": 27,
+        "app_type_id": 3,
+        "role_name": "user - mri files - brain structural",
+        "user_id": 4,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-11-23T16:06:50.790Z",
+        "updated_at": "2018-11-23T16:35:07.189Z",
+        "user_email": "mri-brain-structural-files@fphs2.harvard.edu"
+      },
+      {
+        "id": 28,
+        "app_type_id": 3,
+        "role_name": "user - mri files - tms-eeg",
+        "user_id": 5,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-11-23T16:24:06.971Z",
+        "updated_at": "2018-11-23T16:24:06.971Z",
+        "user_email": "mri-tms-eeg-files@fphs2.harvard.edu"
+      },
+      {
+        "id": 29,
+        "app_type_id": 3,
+        "role_name": "user - mri files - electrophysiology",
+        "user_id": 6,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-11-23T16:26:23.829Z",
+        "updated_at": "2018-11-23T16:26:35.702Z",
+        "user_email": "mri-electrophysiology-files@fphs2.harvard.edu"
+      },
+      {
+        "id": 30,
+        "app_type_id": 3,
+        "role_name": "user - mri files - liver",
+        "user_id": 7,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-11-23T16:29:53.836Z",
+        "updated_at": "2018-11-23T16:30:29.989Z",
+        "user_email": "mri-liver-files@fphs2.harvard.edu"
+      },
+      {
+        "id": 31,
+        "app_type_id": 3,
+        "role_name": "user - mri files - pet",
+        "user_id": 8,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-11-23T16:38:30.467Z",
+        "updated_at": "2018-11-23T16:38:40.962Z",
+        "user_email": "mri-pet-files@fphs2.harvard.edu"
       }
     ],
     "associated_message_templates": [
@@ -2047,7 +2102,7 @@
       {
         "id": 4,
         "app_type_id": 3,
-        "role_name": "filtered - mri files - alex",
+        "role_name": "filtered - mri files - spectroscopy",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
         "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
@@ -2055,13 +2110,13 @@
         "disabled": false,
         "admin_id": 2,
         "created_at": null,
-        "updated_at": null,
+        "updated_at": "2018-11-23T16:03:32.016Z",
         "user_email": null
       },
       {
         "id": 5,
         "app_type_id": 3,
-        "role_name": "filtered - mri files - alex",
+        "role_name": "filtered - mri files - spectroscopy",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
         "filter": ".+\\.zip/brain/svs_se_30_pcg.*",
@@ -2069,13 +2124,13 @@
         "disabled": false,
         "admin_id": 2,
         "created_at": null,
-        "updated_at": null,
+        "updated_at": "2018-11-23T16:03:45.558Z",
         "user_email": null
       },
       {
         "id": 6,
         "app_type_id": 3,
-        "role_name": "filtered - mri files - alex",
+        "role_name": "filtered - mri files - spectroscopy",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
         "filter": ".+\\.zip/brain/2D_csi_slaser.*",
@@ -2083,13 +2138,13 @@
         "disabled": false,
         "admin_id": 2,
         "created_at": null,
-        "updated_at": null,
+        "updated_at": "2018-11-23T16:03:51.204Z",
         "user_email": null
       },
       {
         "id": 7,
         "app_type_id": 3,
-        "role_name": "filtered - mri files - alex",
+        "role_name": "filtered - mri files - spectroscopy",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
         "filter": ".+\\.zip/twix/meas_­MID.*",
@@ -2097,13 +2152,13 @@
         "disabled": false,
         "admin_id": 2,
         "created_at": null,
-        "updated_at": null,
+        "updated_at": "2018-11-23T16:03:39.503Z",
         "user_email": null
       },
       {
         "id": 8,
         "app_type_id": 3,
-        "role_name": "user - ipa files",
+        "role_name": "user - baseline files",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__baseline",
         "filter": ".*",
@@ -2111,13 +2166,13 @@
         "disabled": false,
         "admin_id": 2,
         "created_at": "2018-11-15T11:18:48.794Z",
-        "updated_at": "2018-11-15T11:19:12.759Z",
+        "updated_at": "2018-11-23T12:29:35.756Z",
         "user_email": null
       },
       {
         "id": 9,
         "app_type_id": 3,
-        "role_name": "user - ipa files",
+        "role_name": "user - pet files",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__pet",
         "filter": ".*",
@@ -2125,7 +2180,203 @@
         "disabled": false,
         "admin_id": 2,
         "created_at": "2018-11-15T11:19:52.561Z",
-        "updated_at": "2018-11-15T11:19:52.561Z",
+        "updated_at": "2018-11-23T12:29:23.651Z",
+        "user_email": null
+      },
+      {
+        "id": 10,
+        "app_type_id": 3,
+        "role_name": "user - olfactory files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__olfactory",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:30:00.327Z",
+        "updated_at": "2018-11-23T12:30:00.327Z",
+        "user_email": null
+      },
+      {
+        "id": 11,
+        "app_type_id": 3,
+        "role_name": "user - brain-behavior files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__brain_behavior",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:30:25.975Z",
+        "updated_at": "2018-11-23T12:30:25.975Z",
+        "user_email": null
+      },
+      {
+        "id": 12,
+        "app_type_id": 3,
+        "role_name": "user - brain-behavior files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__brain_behavior_qs",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:30:41.579Z",
+        "updated_at": "2018-11-23T12:30:41.579Z",
+        "user_email": null
+      },
+      {
+        "id": 13,
+        "app_type_id": 3,
+        "role_name": "user - physical function files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__physical_function",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:30:57.649Z",
+        "updated_at": "2018-11-23T12:30:57.649Z",
+        "user_email": null
+      },
+      {
+        "id": 14,
+        "app_type_id": 3,
+        "role_name": "user - tms eeg files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__tms_eeg",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:31:07.778Z",
+        "updated_at": "2018-11-23T12:31:07.778Z",
+        "user_email": null
+      },
+      {
+        "id": 15,
+        "app_type_id": 3,
+        "role_name": "user - sleep files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__sleep",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:31:16.312Z",
+        "updated_at": "2018-11-23T12:31:16.312Z",
+        "user_email": null
+      },
+      {
+        "id": 16,
+        "app_type_id": 3,
+        "role_name": "user - cardiac files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__cardiac",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:31:24.396Z",
+        "updated_at": "2018-11-23T12:31:34.220Z",
+        "user_email": null
+      },
+      {
+        "id": 17,
+        "app_type_id": 3,
+        "role_name": "user - xray files",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__xray",
+        "filter": ".*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T12:31:52.183Z",
+        "updated_at": "2018-11-23T12:31:52.183Z",
+        "user_email": null
+      },
+      {
+        "id": 18,
+        "app_type_id": 3,
+        "role_name": "user - mri files - brain structural",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T16:09:59.764Z",
+        "updated_at": "2018-11-23T16:35:31.945Z",
+        "user_email": null
+      },
+      {
+        "id": 19,
+        "app_type_id": 3,
+        "role_name": "user - mri files - tms-eeg",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T16:24:38.543Z",
+        "updated_at": "2018-11-23T16:24:38.543Z",
+        "user_email": null
+      },
+      {
+        "id": 20,
+        "app_type_id": 3,
+        "role_name": "user - mri files - electrophysiology",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T16:27:07.069Z",
+        "updated_at": "2018-11-23T16:27:07.069Z",
+        "user_email": null
+      },
+      {
+        "id": 21,
+        "app_type_id": 3,
+        "role_name": "user - mri files - liver",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": ".+\\.zip/liver/.*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T16:28:07.612Z",
+        "updated_at": "2018-11-23T16:32:22.103Z",
+        "user_email": null
+      },
+      {
+        "id": 22,
+        "app_type_id": 3,
+        "role_name": "user - mri files - pet",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T16:39:04.912Z",
+        "updated_at": "2018-11-23T16:39:04.912Z",
+        "user_email": null
+      },
+      {
+        "id": 23,
+        "app_type_id": 3,
+        "role_name": "user - mri files - pet",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": ".+\\.zip/brain/DTI_MONO.*",
+        "description": "",
+        "disabled": false,
+        "admin_id": 2,
+        "created_at": "2018-11-23T16:39:58.313Z",
+        "updated_at": "2018-11-23T16:39:58.313Z",
         "user_email": null
       }
     ],
