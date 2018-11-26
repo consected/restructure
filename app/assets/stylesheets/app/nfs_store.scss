@@ -59,6 +59,10 @@
   }
 }
 
+li.list-group-item.filestore-classification-stored-file-full-title strong {
+  text-transform: capitalize;
+}
+
 .container-entry .browse-entry-classifications {
 
   span {
@@ -68,6 +72,10 @@
   .bem-classification-attrs > span {
     display: inline-block;
     margin-left: 1em;
+  }
+
+  .bem-class-title {
+    text-transform: capitalize;
   }
 
   .item-flags-block {

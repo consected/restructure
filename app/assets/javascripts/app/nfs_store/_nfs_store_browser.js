@@ -68,7 +68,7 @@ _nfs_store.fs_browser = function ($outer) {
       if(val == 'classifications')
         $el.addClass('col-md-12 col-lg-12');
       else if(val == 'meta')
-        $el.addClass('col-md-8 col-lg-8');
+        $el.addClass('col-md-12 col-lg-12');
       else
         $el.addClass('col-md-8 col-lg-6');
     };
