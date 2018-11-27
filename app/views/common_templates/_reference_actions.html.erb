@@ -21,6 +21,8 @@
       caption_before_ref_type = "reference_#{ref_type}".to_sym
       cb = caption_before[caption_before_ref_type]
   %>
+
+  {{#unless prevent_edit}}
     <% if cb %>
     <li class="list-group-item caption-before results-caption-before <%=caption_before_ref_type.to_s.hyphenate%> <%=caption_before_ref_type.to_s.hyphenate%>-caption">
       <%= show_caption_before caption_before_ref_type, caption_before %>
@@ -47,6 +49,7 @@
         <a href="<%=path_pref%>/<%=ref_type.ns_pathify.pluralize%>/new?references[record_type]=<%=name%>&references[record_id]=<%= id %><%= view_as_new == 'select_or_add' ? "&references[allow_select]=true" : "" %><%= view_as_new == 'outside_this' ? "&references[new_outside_this]=true" : "" %><%=add_extra_params_to_add_item_link ref_type, ref_config%>" data-toggle="<%=data_toggle%>" data-target-force="true" data-target="<%=data_target%>" data-remote="true" class="<%=a_class%>"><span class="glyphicon glyphicon-plus"></span> <%= caption %></a>
       </p>
     </li>
+  {{/unless}}
   <% end %>
 <% end %>
 <div id="<%=ref_type.ns_hyphenate.pluralize%>-<%= id %>-" data-sub-list="<%=ref_type.ns_underscore.pluralize%>" class="common-template-list model-reference-list alt-width">

@@ -10,18 +10,20 @@ class ModelReference < ActiveRecord::Base
   validates :to_record_master_id, presence: true, unless: ->{ to_record_class.no_master_association || self.disabled }
   validates :user_id, presence: true
   validate :allows_disable, if: -> { self.disabled }
+  validate :allows_create, if: -> { !persisted? }
 
   attr_accessor :current_user
 
   # TODO consider if there is a significant race condition that we should be concerned about
   def self.create_with from_item, to_item
+
     m = ModelReference.where from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id
 
     if m.limit(1).length == 0
       ModelReference.create! from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
-                            user: to_item.master_user
+                            user: to_item.master_user, current_user: to_item.master_user
     end
   end
 
@@ -187,7 +189,7 @@ class ModelReference < ActiveRecord::Base
     return @from_record if @from_record
     return unless from_record_type && from_record_id
     @from_record = from_record_type.ns_constantize.find(from_record_id)
-    @from_record.current_user = self.current_user
+    @from_record.current_user ||= self.current_user
     @from_record
   end
 
@@ -198,7 +200,7 @@ class ModelReference < ActiveRecord::Base
   def to_record
     return @to_record if @to_record
     @to_record = self.to_record_class.find(self.to_record_id)
-    @to_record.current_user = self.current_user
+    @to_record.current_user ||= self.current_user
     @to_record.parent_item = from_record if to_record.respond_to?(:parent_item)
     @to_record
   end
@@ -250,6 +252,15 @@ class ModelReference < ActiveRecord::Base
     res
   end
 
+  # The reference can be disabled it:
+  #  the prevent_disable option is not set
+  #  AND the from record can be edited (if the from record is set)
+  def can_disable
+    c = find_config || {}
+    return !!(c[:prevent_disable] || from_record && !from_record.can_edit?)
+
+  end
+
   def as_json extras={}
     extras[:methods] ||= []
     extras[:methods] << :to_record_id
@@ -270,6 +281,7 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :to_record_result_key
     extras[:methods] << :to_record_template
     extras[:methods] << :item_type
+    extras[:methods] << :can_disable
     # Don't return the full referenced object
     super(extras)
   end
@@ -278,11 +290,19 @@ class ModelReference < ActiveRecord::Base
   private
 
     def allows_disable
-      c = find_config || {}
-      if !c[:prevent_disable]
+      if can_disable
         errors.add :disable, "of this reference is not allowed"
         return
       end
       true
     end
+
+    def allows_create
+      return true unless from_record
+      unless from_record.can_edit?
+        errors.add :reference, 'can not be created from a read-only parent'
+      end
+      true
+    end
+
 end

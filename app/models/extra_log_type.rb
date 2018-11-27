@@ -40,7 +40,8 @@ class ExtraLogType < ExtraOptions
             edit: 'hide|readonly|not_embedded|select_or_add',
             show: 'hide|readonly|see_presence',
             new: 'outside_this|not_embedded|select_or_add'
-          }
+          },
+          prevent_disable: "true|false (default = false)"
         }
       },
       save_trigger: {

@@ -16,7 +16,9 @@
       {{#if disabled}}
         <span class="model-reference-removed-marker small">(removed)</span>
       {{else}}
+        {{#unless can_disable}}
         <a href="/masters/{{from_record_master_id}}/{{from_record_type_us}}/{{from_record_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item" data-remote="true"></a>
+        {{/unless}}
       {{/if}}
     {{/is}}
   </span>
