@@ -15,7 +15,7 @@ module NfsStore
 
       after_create :create_in_nfs_store
 
-      attr_accessor :current_user, :create_with_role
+      attr_accessor :current_user, :create_with_role, :parent_item
       alias_attribute :container_id, :nfs_store_container_id
 
 
@@ -177,6 +177,15 @@ module NfsStore
         false
       end
 
+
+      def can_edit?
+        res = self.allows_current_user_access_to? :edit
+        return unless res
+        if self.parent_item
+          res = self.parent_item.can_edit?
+        end
+        !!res
+      end
 
       # Method to provide checking of access controls. Can the user access the container
       # in a specific way. Easily overridden in applications to provide app specific functionality

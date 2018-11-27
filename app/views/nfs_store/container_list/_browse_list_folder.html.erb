@@ -10,9 +10,9 @@
 %>
 <li class="container-folder">
   <input type="checkbox" class="container-folder-selector ff" data-folder-path="<%= folder.join('/')%>" title="select all items in folder &amp; subfolders"/>
-  <span class="folder-icon glyphicon glyphicon-folder-open" title="shrink folder" data-toggle="collapse" href="#<%= item_id %>" aria-expanded="true" aria-controls="<%= item_id %>"></span>&nbsp;
+  <span class="folder-icon glyphicon glyphicon-folder-<%= folder_name == '.' ? 'open' : 'close'%>" title="shrink folder" data-toggle="collapse" href="#<%= item_id %>" aria-expanded="true" aria-controls="<%= item_id %>"></span>&nbsp;
   <%= folder_name %><% if is_archive %> <span class="file-archive-tag">(archive files)</span><% end %>
 </li>
-<ul class="container-folder-items collapse in" data-folder-items="<%= folder.join('/')%>" id="<%= item_id %>">
+<ul class="container-folder-items collapse <%= folder_name == '.' ? 'in' : ''%>" data-folder-items="<%= folder.join('/')%>" id="<%= item_id %>">
   <%= render partial: 'browse_list_folders', locals: {form: form, downloads: folder_downloads, level: level + 1, folder: folder} %>
 </ul>

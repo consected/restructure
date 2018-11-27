@@ -159,7 +159,13 @@ class ModelReference < ActiveRecord::Base
   end
 
   def to_record_editable
-    !!self.current_user.has_access_to?(:edit, :table, to_record_type_us.pluralize)
+    res = !!self.current_user.has_access_to?(:edit, :table, to_record_type_us.pluralize)
+    return unless res
+    if to_record.respond_to?(:can_edit?)
+      !!to_record.can_edit?
+    else
+      res
+    end
   end
 
   def from_record_type_us
@@ -178,8 +184,11 @@ class ModelReference < ActiveRecord::Base
   end
 
   def from_record
+    return @from_record if @from_record
     return unless from_record_type && from_record_id
-    from_record_type.ns_constantize.find(from_record_id)
+    @from_record = from_record_type.ns_constantize.find(from_record_id)
+    @from_record.current_user = self.current_user
+    @from_record
   end
 
   def to_record_data
@@ -189,6 +198,9 @@ class ModelReference < ActiveRecord::Base
   def to_record
     return @to_record if @to_record
     @to_record = self.to_record_class.find(self.to_record_id)
+    @to_record.current_user = self.current_user
+    @to_record.parent_item = from_record if to_record.respond_to?(:parent_item)
+    @to_record
   end
 
   def to_record_result_key

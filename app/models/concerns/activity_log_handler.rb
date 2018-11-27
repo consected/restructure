@@ -611,7 +611,9 @@ module ActivityLogHandler
       # Generate an old version of the object prior to changes
       old_obj = self.dup
       self.changes.each do |k,v|
-        old_obj.send("#{k}=", v.first)
+        if k.to_s != 'user_id'
+          old_obj.send("#{k}=", v.first)
+        end
       end
 
       res = eltc.calc_editable_if(old_obj)

@@ -137,7 +137,7 @@ _nfs_store.fs_browser = function ($outer) {
         set_metadata_views($(this));
     });
 
-    var classification_radio = $('input[name="container-meta-controls-'+container_id+'"][value=""]');
+    var classification_radio = $('input[name="container-meta-controls-'+container_id+'"]:checked');
     set_metadata_views(classification_radio);
     refresh($outer);
 

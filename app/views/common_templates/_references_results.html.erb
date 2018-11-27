@@ -85,7 +85,7 @@
       {{simple_log to_record_options_config}}
       {{#is to_record_options_config.view_as.show '!==' 'hide'}}
         {{#is to_record_options_config.view_as.show '===' 'filestore'}}
-          {{>filestore_<%=name%>_view}}
+          {{>filestore_<%=name%>_view prevent_edit=../prevent_edit}}
         {{/is}}
       {{/is}}
     {{/each}}

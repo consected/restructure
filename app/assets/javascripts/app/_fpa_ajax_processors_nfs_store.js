@@ -1,13 +1,30 @@
 _fpa.postprocessors_nfs_store = {
 
+  refresh_container_if_needed: function (block) {
+    var tel = block.find('.file-processing-tag');
+    if (tel.length) {
+      var c = tel.attr('data-refresh-count');
+      if (!c || parseInt(c) < 6) {
+        if(!c)
+          var new_c = 1;
+        else
+          var new_c = parseInt(c) + 1;
+
+        tel.attr('data-refresh-count', new_c);
+        window.setTimeout(function () {
+          block.parents('.browse-container').first().find('.refresh-container-list').click();
+        }, 10000);
+      }
+    }
+  },
+
   nfs_store_browse_list_results: function(block) {
     var container_block = block.parents('.nfs-store-container-block').first();
     container_block.fs_browser = _nfs_store.fs_browser;
     setTimeout(function() {
       container_block.fs_browser(container_block);
-      // _fpa.form_utils.setup_extra_actions(block);
-      // _fpa.form_utils.resize_children(block);
-      _fpa.form_utils.format_block(block);
+
+      _fpa.postprocessors_nfs_store.refresh_container_if_needed(block);
 
       var writable = block.find('.container-browser').attr('data-container-writable');
       var button = container_block.find('.fileinput-button');
@@ -19,6 +36,8 @@ _fpa.postprocessors_nfs_store = {
         button.show();
         container_block.parents('.upload-dropzone-disabled').removeClass('upload-dropzone-disabled').addClass('upload-dropzone');
       }
+
+      _fpa.form_utils.format_block(block);
     }, 100);
   },
 
