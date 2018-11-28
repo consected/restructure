@@ -121,6 +121,13 @@ module UserHandler
 
   public
 
+    def current_user
+      master.current_user
+    end
+
+    def current_user= cu
+      master.current_user = cu
+    end
 
     def belongs_directly_to
       master unless self.class.no_master_association
