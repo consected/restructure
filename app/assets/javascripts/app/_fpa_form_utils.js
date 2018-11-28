@@ -727,6 +727,13 @@ _fpa.form_utils = {
     },
 
     mask_inputs: function(block) {
+      block.find('[pattern]').each(function(){
+        var p = $(this).attr('pattern');
+        if (!p || p == '') {
+          $(this).removeAttr('pattern');
+        }
+      });
+
       block.find('[pattern]').not('.attached-datatoggle-pattern, [type="password"]').each(function(){
           var p = $(this).attr('pattern');
           var t = $(this).attr('type');
@@ -1080,7 +1087,12 @@ _fpa.form_utils = {
             var cap_items = me.find('.list-group-item.caption-before, .list-group-item.dialog-before');
             if(cap_items.length == 0) return;
             var visible_cap = cap_items.filter(':visible');
-            var cap_height = visible_cap.last().position().top + visible_cap.last().outerHeight() - visible_cap.first().position().top
+            if(visible_cap && visible_cap.length > 0) {
+              var cap_height = visible_cap.last().position().top + visible_cap.last().outerHeight() - visible_cap.first().position().top
+            }
+            else {
+              cap_height = 0;
+            }
 
             if(cap_height > 800 || has_dialog) {
               var c = _fpa.layout.item_blocks.regular;
@@ -1118,7 +1130,6 @@ _fpa.form_utils = {
               // the recent items that are marked ready to resize,
               // then reset the maxh variable to start again.
               if(el.offset().top > curr_top){
-                curr_top = el.offset().top
                 if(maxh>1)
                   var inc = 0;
                   // to resize the items go through each
@@ -1129,6 +1140,7 @@ _fpa.form_utils = {
                     inc++;
                   });
                 maxh = 1;
+                curr_top = el.offset().top;
               }
 
               // get the height of this item and see if it is larger

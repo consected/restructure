@@ -80,6 +80,10 @@ Rails.application.routes.draw do
     get ':item_controller/:item_id/model_references/:id/edit', to: 'model_references#edit'
     patch ':item_controller/:item_id/model_references/:id', to: 'model_references#update'
 
+    get 'model_references/:id/edit', to: 'model_references#edit'
+    patch 'model_references/:id', to: 'model_references#update'
+
+
     namespace :filestore do
       resources :classification
     end

@@ -93,6 +93,9 @@ class ModelReference < ActiveRecord::Base
         mu = from_item_or_master.current_user
       end
       r.current_user = mu
+
+      r.to_record.current_user = mu
+      r.from_record.current_user = mu if r.from_record
     end
     res
   end
@@ -164,6 +167,8 @@ class ModelReference < ActiveRecord::Base
     res = !!self.current_user.has_access_to?(:edit, :table, to_record_type_us.pluralize)
     return unless res
     if to_record.respond_to?(:can_edit?)
+      byebug unless to_record.current_user
+      byebug unless to_record.master_user
       !!to_record.can_edit?
     else
       res
@@ -189,7 +194,7 @@ class ModelReference < ActiveRecord::Base
     return @from_record if @from_record
     return unless from_record_type && from_record_id
     @from_record = from_record_type.ns_constantize.find(from_record_id)
-    @from_record.current_user ||= self.current_user
+    @from_record.current_user ||= self.current_user if self.current_user
     @from_record
   end
 
@@ -200,7 +205,7 @@ class ModelReference < ActiveRecord::Base
   def to_record
     return @to_record if @to_record
     @to_record = self.to_record_class.find(self.to_record_id)
-    @to_record.current_user ||= self.current_user
+    @to_record.current_user ||= self.current_user if self.current_user
     @to_record.parent_item = from_record if to_record.respond_to?(:parent_item)
     @to_record
   end
@@ -242,9 +247,7 @@ class ModelReference < ActiveRecord::Base
     cond.merge! filter_by if filter_by
 
     to_record_class_for_type(to_record_type).where(cond).each do |i|
-      # Instantiate temporary model reference objects to hold the results
-      # They cannot be accidentally persisted, since the validations will fail
-      rec = ModelReference.new from_record_master_id: master.id, to_record_type: to_record_type, to_record_id: i.id, to_record_master_id: i.master_id
+      rec = ModelReference.where( from_record_master_id: master.id, to_record_type: to_record_type, to_record_id: i.id, to_record_master_id: i.master_id).first
       rec.to_record = i
       res << rec
     end
@@ -257,7 +260,8 @@ class ModelReference < ActiveRecord::Base
   #  AND the from record can be edited (if the from record is set)
   def can_disable
     c = find_config || {}
-    return !!(c[:prevent_disable] || from_record && !from_record.can_edit?)
+
+    return (!c[:prevent_disable] && (!from_record || from_record.can_edit?))
 
   end
 
@@ -290,7 +294,7 @@ class ModelReference < ActiveRecord::Base
   private
 
     def allows_disable
-      if can_disable
+      unless can_disable
         errors.add :disable, "of this reference is not allowed"
         return
       end

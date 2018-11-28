@@ -4,15 +4,17 @@ _fpa.utils = {};
 // If necessary expand the block containing this item by uncollapsing and showing it
 // Finally scroll it onto the viewport if necessary
 // Returns the block that was linked if successful
-_fpa.utils.jump_to_linked_item = function(target, offset) {
+_fpa.utils.jump_to_linked_item = function(target, offset, options) {
 
   var block = h;
   if(offset == null) offset = -50;
+  if(options == null) options = {};
 
   $('.item-highlight, .linked-item-highlight').removeClass('item-highlight linked-item-highlight');
 
+  var isj = target instanceof jQuery;
   // Ensure the target is valid
-  if(!target || target.length < 2) return;
+  if(!isj && (!target || target.length < 2)) return;
 
   var h = $(target);
   if(!h || h.length == 0)
@@ -20,7 +22,7 @@ _fpa.utils.jump_to_linked_item = function(target, offset) {
 
   h = h.first();
 
-  if(target != '#body-top') {
+  if(target != '#body-top' && !options.no_highlight) {
     h.addClass('item-highlight linked-item-highlight');
   }
 

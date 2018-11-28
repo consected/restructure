@@ -273,10 +273,12 @@ module HandlesUserBase
     puts "Master does not respond to alternative_id_fields. Hopefully this is just during seeding"
   end
 
-  def set_referring_record ref_record_type, ref_record_id
+  def set_referring_record ref_record_type, ref_record_id, current_user
     @ref_record_type = ref_record_type
     @ref_record_id = ref_record_id
     @referring_record = find_referring_record
+    @referring_record.current_user = current_user
+    @referring_record
   end
 
   def find_referring_record

@@ -12,15 +12,17 @@
     <i>{{to_record_label}}</i> {{pretty_string to_record_data return_string=true}}
   </span>
   <span class="selectable-model-reference-result-action pull-right" id="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra" data-subscription="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra">
-    {{#is to_record_options_config.view_as.new 'select_or_add'}}
       {{#if disabled}}
         <span class="model-reference-removed-marker small">(removed)</span>
       {{else}}
-        {{#unless can_disable}}
-        <a href="/masters/{{from_record_master_id}}/{{from_record_type_us}}/{{from_record_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item" data-remote="true"></a>
-        {{/unless}}
+        {{#if can_disable}}
+          {{#if from_record_type_us}}
+          <a href="/masters/{{from_record_master_id}}/{{from_record_type_us}}/{{from_record_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item" data-remote="true"></a>
+          {{else}}
+          <a href="/masters/{{from_record_master_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item" data-remote="true"></a>
+          {{/if}}
+        {{/if}}
       {{/if}}
-    {{/is}}
   </span>
 </li>
 {{#if to_record_viewable}}

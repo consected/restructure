@@ -295,6 +295,10 @@ module MasterHandler
         instance_variable_get("@#{object_name}")
       end
 
+      def objects_instance
+        instance_variable_get("@#{objects_name}")
+      end
+
       def prep_item_flags
         # Handle the presentation of item flags, if enabled for this type of object
         if object_instance.class.uses_item_flags?(current_user)
@@ -333,7 +337,7 @@ module MasterHandler
           ref_record_id = pr[:ref_record_id]
           if ref_record_type.present? && ref_record_id.present? && object_instance.respond_to?(:set_referring_record)
 
-            object_instance.set_referring_record(ref_record_type, ref_record_id)
+            object_instance.set_referring_record(ref_record_type, ref_record_id, current_user)
             # The reference will actually get created when the object instance is saved
           end
         end

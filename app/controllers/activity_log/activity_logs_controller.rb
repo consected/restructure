@@ -39,6 +39,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       not_embedded_options = ['not_embedded', 'select_or_add']
 
       oi = use_object || object_instance
+      oi.current_user = current_user
       mrs = oi.model_references
 
       cmrs = oi.creatable_model_references only_creatables: true

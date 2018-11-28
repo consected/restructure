@@ -71,6 +71,11 @@ _nfs_store.fs_browser = function ($outer) {
         $el.addClass('col-md-12 col-lg-12');
       else
         $el.addClass('col-md-8 col-lg-6');
+
+      window.setTimeout(function(){
+        _fpa.utils.jump_to_linked_item($el, null, {no_highlight: true});
+        _fpa.form_utils.resize_children($outer);
+      }, 100);
     };
 
     var count_downloads = function($this) {

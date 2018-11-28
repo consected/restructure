@@ -197,11 +197,19 @@ class DynamicModel < ActiveRecord::Base
           end
 
           def current_user
-            @current_user
+            if self.class.no_master_association
+              @current_user
+            else
+              master.current_user
+            end
           end
 
           def current_user= cu
-            @current_user = cu
+            if self.class.no_master_association
+              @current_user = cu
+            else
+              master.current_user = cu
+            end
           end
 
           def self.find id
