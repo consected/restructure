@@ -5,7 +5,11 @@ RSpec.describe "Export an app configuration", type: :model do
   include ModelSupport
 
   before :all do
+
+    ActivityLog.active.update_all(disabled: true)
+
     seed_database
+    Seeds::ActivityLogPlayerContactPhone.setup
     ::ActivityLog.define_models
     create_admin
     create_user
@@ -200,8 +204,9 @@ RSpec.describe "Export an app configuration", type: :model do
     # The external identifier access can't be enabled if the underlying table doesn't exist.
     # The bhs table is created in other tests though
     expect(a.first).to be_a Admin::UserAccessControl
-
-    expect(ActivityLog.where(item_type: 'bhs_assignment').first).to be_a ActivityLog
+    al = ActivityLog.where(item_type: 'bhs_assignment').first
+    expect(al).to be_a ActivityLog
+    al.update(current_admin: @admin, disabled: false)
     a = Admin::UserAccessControl.where app_type: @app_type, resource_type: :table, resource_name: :activity_log__bhs_assignments
     # The Activity log definition can not be enabled if its table does not exist
     # It is created in other tests though

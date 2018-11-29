@@ -28,15 +28,15 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     setup_access :activity_log__player_contact_phones
     create_item(data: rand(10000000000000000), rank: 10)
 
-    aldef = ActivityLog.where(name: 'AL Filter Test').first
-    unless aldef
-      aldef = ActivityLog.new(
-        name: "AL Filter Test",
-        item_type: 'player_contact',
-        rec_type: 'phone',
-        action_when_attribute: "created_at"
-      )
-    end
+    aldef = ActivityLog.where(name: 'AL Filter Test').update_all(name: "AL Filter OLD #{rand(10000000)}")
+
+    aldef = ActivityLog.new(
+      name: "AL Filter Test",
+      item_type: 'player_contact',
+      rec_type: 'phone',
+      action_when_attribute: "created_at"
+    )
+
 
     aldef.extra_log_types =<<EOF
     step_1:
