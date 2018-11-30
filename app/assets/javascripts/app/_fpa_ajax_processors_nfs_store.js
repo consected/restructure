@@ -3,18 +3,26 @@ _fpa.postprocessors_nfs_store = {
   refresh_container_if_needed: function (block) {
     var tel = block.find('.file-processing-tag');
     if (tel.length) {
-      var c = tel.attr('data-refresh-count');
-      if (!c || parseInt(c) < 6) {
-        if(!c)
-          var new_c = 1;
-        else
-          var new_c = parseInt(c) + 1;
+      if(!tel.is(':visible')) return;
+      window.setTimeout(function () {
+        // If the block is not visible just set another poll and get out of here.
+        if(!_fpa.utils.inViewport(block)) {
+          _fpa.postprocessors_nfs_store.refresh_container_if_needed(block);
+          return;
+        }
+        // Since the block is visible, go ahead and refresh, until it either works or we run out of attempts
+        var $browse_container = block.parents('.browse-container');
+        var $browse_container.attr('data-refresh-count');
+        if (!c || parseInt(c) < 6) {
+          if(!c)
+            var new_c = 1;
+          else
+            var new_c = parseInt(c) + 1;
 
-        tel.attr('data-refresh-count', new_c);
-        window.setTimeout(function () {
-          block.parents('.browse-container').first().find('.refresh-container-list').click();
-        }, 10000);
-      }
+          $browse_container.attr('data-refresh-count', new_c);
+          $browse_container.first().find('.refresh-container-list').click();
+        }
+      }, 10000);
     }
   },
 

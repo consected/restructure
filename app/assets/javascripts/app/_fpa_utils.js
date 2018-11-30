@@ -35,12 +35,16 @@ _fpa.utils.jump_to_linked_item = function(target, offset, options) {
 
   }
   // Scroll if necessary
-  var rect = h.get(0).getBoundingClientRect();
-  var not_visible = !(rect.top >= 0 && rect.top <= $(window).height()/2);
-  if(not_visible)
+  if(!_fpa.utils.inViewport(h, true))
       _fpa.utils.scrollTo(h, 200, offset);
 
   return block;
+};
+
+_fpa.utils.inViewport = function(el, topHalf) {
+  topHalf  = topHalf ? 2 : 1;
+  var rect = el.get(0).getBoundingClientRect();
+  return (rect.top >= 0 && rect.top <= $(window).height()/topHalf);
 };
 
 _fpa.utils.scrollTo = function(el, height, offset) {

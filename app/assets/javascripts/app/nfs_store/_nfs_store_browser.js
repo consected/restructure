@@ -63,19 +63,28 @@ _nfs_store.fs_browser = function ($outer) {
       }
 
       var $el = $outer.parents('.common-template-item.is-activity-log').first();
+      var wasSmall = $el.hasClass('col-md-8');
+      var nowSmall = false;
       $el.removeClass('col-md-8 col-lg-6 col-lg-8 col-md-12 col-lg-12');
 
       if(val == 'classifications')
         $el.addClass('col-md-12 col-lg-12');
       else if(val == 'meta')
         $el.addClass('col-md-12 col-lg-12');
-      else
+      else {
+        nowSmall = true;
         $el.addClass('col-md-8 col-lg-6');
+      }
+      // Prevent scrolling and resizing if the block has not changed size
+      // This prevents the scroll position jumping up and down during load
+      // and prevents it shifting during the background refresh due to processing large zips
+      if (wasSmall != nowSmall) {
+        window.setTimeout(function(){
+          _fpa.utils.jump_to_linked_item($el, null, {no_highlight: true});
+          _fpa.form_utils.resize_children($outer);
+        }, 100);
+      }
 
-      window.setTimeout(function(){
-        _fpa.utils.jump_to_linked_item($el, null, {no_highlight: true});
-        _fpa.form_utils.resize_children($outer);
-      }, 100);
     };
 
     var count_downloads = function($this) {
