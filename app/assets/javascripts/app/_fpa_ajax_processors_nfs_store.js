@@ -12,12 +12,12 @@ _fpa.postprocessors_nfs_store = {
         }
         // Since the block is visible, go ahead and refresh, until it either works or we run out of attempts
         var $browse_container = block.parents('.browse-container');
-        var $browse_container.attr('data-refresh-count');
-        if (!c || parseInt(c) < 6) {
-          if(!c)
+        var req_count = $browse_container.attr('data-refresh-count');
+        if (!req_count || parseInt(req_count) < 6) {
+          if(!req_count)
             var new_c = 1;
           else
-            var new_c = parseInt(c) + 1;
+            var new_c = parseInt(req_count) + 1;
 
           $browse_container.attr('data-refresh-count', new_c);
           $browse_container.first().find('.refresh-container-list').click();
