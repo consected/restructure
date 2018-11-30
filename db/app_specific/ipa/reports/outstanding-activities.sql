@@ -58,8 +58,25 @@ FROM (
     FROM activity_log_ipa_assignment_inex_checklists inex
     WHERE
 
-    (:activity_performed = 'inex-complete' OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'inex-complete' )
-    AND extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff')
+    (:activity_performed IN ('inex-phone-screen-complete', 'inex-baseline-complete') OR :activity_outstanding IS NOT NULL AND :activity_outstanding IN ('inex-phone-screen-complete', 'inex-baseline-complete') )
+    AND extra_log_type IN ('sign_phone_screen', 'sign_baseline')
+
+    UNION
+
+    SELECT
+      ps.master_id,
+      'phone screen' "source",
+      'phone_screen_finalized' "extra_log_type",
+      NULL "communication_result",
+      NULL "checklist_signed",
+      ps.created_at
+
+
+    FROM activity_log_ipa_assignment_phone_screens ps
+    WHERE
+
+    (:activity_performed = 'phone-screen-complete' OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'phone-screen-complete' )
+    AND extra_log_type IN ('finalize')
 
 
 
@@ -128,13 +145,26 @@ AND
   OR
     :activity_performed = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'
   OR (
-    :activity_performed = 'inex-complete'
+    :activity_performed = 'inex-phone-screen-complete'
     AND (
-      dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND
+      dt.extra_log_type IN ('sign_phone_screen') AND
       checklist_signed = 'yes'
     )
   )
-  OR :activity_performed <> 'inex-complete' AND dt.extra_log_type = :activity_performed
+  OR (
+    :activity_performed = 'inex-baseline-complete'
+    AND (
+      dt.extra_log_type IN ('sign_baseline') AND
+      checklist_signed = 'yes'
+    )
+  )
+  OR (
+    :activity_performed = 'phone-screen-complete'
+    AND (
+      dt.extra_log_type IN ('phone_screen_finalized')
+    )
+  )
+  OR :activity_performed NOT IN ('inex-complete', 'phone-screen-complete') AND dt.extra_log_type = :activity_performed
 )
 AND (
   :activity_outstanding IS NULL
@@ -144,13 +174,27 @@ AND (
       :activity_outstanding = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'
       OR :activity_outstanding = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'
       OR (
-          :activity_outstanding = 'inex-complete'
+          :activity_outstanding = 'inex-phone-screen-complete'
           AND (
-            dt.extra_log_type IN ('sign_phone_screen_staff', 'sign_baseline_staff') AND
+            dt.extra_log_type IN ('sign_phone_screen') AND
             checklist_signed = 'yes'
           )
       )
-      OR :activity_outstanding <> 'inex-complete' AND dt.extra_log_type = :activity_outstanding
+      OR (
+          :activity_outstanding = 'inex-baseline-complete'
+          AND (
+            dt.extra_log_type IN ('sign_baseline') AND
+            checklist_signed = 'yes'
+          )
+      )
+
+      OR (
+        :activity_outstanding = 'phone-screen-complete'
+        AND (
+          dt.extra_log_type IN ('phone_screen_finalized')
+        )
+      )
+      OR :activity_outstanding NOT IN ('inex-complete', 'phone-screen-complete') AND dt.extra_log_type = :activity_outstanding
     )
   )
 

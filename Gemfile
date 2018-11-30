@@ -29,7 +29,7 @@ gem 'delayed_job'
 gem 'delayed_job_active_record'
 gem 'daemons'
 
-gem 'jquery-fileupload-rails'
+gem 'jquery-fileupload-rails', '0.4.7'
 gem 'rubyzip'
 
 
