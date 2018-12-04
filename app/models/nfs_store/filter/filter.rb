@@ -27,11 +27,20 @@ module NfsStore
         else
           rn = item.resource_name
         end
+        filters_for_resource_named rn, user
+      end
+
+      # Simply lookup the filters based on the resource name for the scoped user roles.
+      # Basic function used by those that have activity log and other item instances, or just
+      # naming in view templates
+      # @param name [String] standard resource name string
+      # @param user [User] allow roles and user settings to be applied to filters
+      # @return [ActiveRecord::Relation] resultset of filters
+      def self.filters_for_resource_named name, user
         primary_conditions = {
-          resource_name: rn
+          resource_name: name
         }
         self.where(primary_conditions).scope_user_and_role(user)
-
       end
 
       # List of resource names for definitions of filters
@@ -105,7 +114,7 @@ module NfsStore
 
           begin
             Regexp.new(self.filter)
-          rescue RegexpError => e
+          rescue RegexpError
             failed_regex = true
           end
 

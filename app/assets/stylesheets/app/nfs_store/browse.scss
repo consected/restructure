@@ -172,3 +172,30 @@
     padding-right: 0.6em;
   }
 }
+
+.nfs-store-valid-files.panel {
+    background: rgb(243, 243, 243);
+    padding-left: 16px;
+    border-bottom: 1px solid rgb(221, 221, 221);
+    border-top: 1px solid rgb(221, 221, 221);
+    padding-top: 1px;
+    margin: 12px -10px -11px;
+
+    .panel-header {
+      font-size: 95%;
+      font-style: italic;
+      padding-top: 0.4em;
+      padding-bottom: 0.4em;
+    }
+
+    ul {
+        padding-left: 2em;
+        margin: 0.4em;
+    }
+
+    li {
+        font-family: monospace;
+        font-size: 12px;
+        list-style: none;
+    }
+}

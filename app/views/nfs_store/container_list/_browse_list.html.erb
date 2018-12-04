@@ -25,6 +25,22 @@
           <%= form.submit value: 'Download', id: "container-browse-submit-in-form-#{@container.id}", class: 'hidden', data: {disable_with: 'select files to download'} %>
         <% end %>
       <% end %>
+      <% if @container.can_edit? %>
+      <div class="nfs-store-valid-files panel">
+        <div class="panel-header">
+          <a data-toggle-caret="true" data-toggle="collapse" class="glyphicon glyphicon-triangle-bottom" href="#valid-files-list-<%=@container.id%>" aria-expanded="false" aria-controls="valid-files-list-<%=@container.id%>" role="button"></a> valid upload files
+        </div>
+        <div id="valid-files-list-<%=@container.id%>" class="collapse">
+          <ul>
+          <% NfsStore::Filter::Filter.filters_for(@activity_log).pluck(:filter).each do |f| %>
+            <li>
+              <%= f.gsub('\.', '.').gsub('.*', '*').gsub('.+', '*').gsub(/^\*$/, '*.*').gsub('^/', '').gsub('^', '').gsub('$', '') %>
+            </li>
+          <% end %>
+        </ul>
+        </div>
+      </div>
+      <% end %>
     <% end %>
   </div>
 </div>

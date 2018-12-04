@@ -210,6 +210,14 @@ _nfs_store.uploader = function ($outer) {
       return $outer.find('#uploader_container_id').val();
     };
 
+    var getActivityLog = function() {
+      var b = $outer.find('.nfs-store-container-block');
+      return {
+        activity_log_id: b.attr('data-activity-log-id'),
+        activity_log_type: b.attr('data-activity-log-type')
+      }
+    };
+
     var submitNext = function (that, e) {
       var $block = getFileBlock();
       if($block.length == 0) return;
@@ -226,11 +234,16 @@ _nfs_store.uploader = function ($outer) {
           data.formData.relative_path = data.files[0].relativePath;
         if(chunk_hashes.length == 1)
           data.formData.chunk_hash = chunk_hashes.shift();
+
+        var al = getActivityLog()
         if(that) {
+
           var test_params = {
             file_name: data.files[0].name,
             file_hash: data.formData.file_hash,
-            relative_path: data.formData.relative_path
+            relative_path: data.formData.relative_path,
+            activity_log_id: al.activity_log_id,
+            activity_log_type: al.activity_log_type
           };
 
           $.getJSON(fileupload_config.url + '/' + getContainerId(), test_params, function (result) {
@@ -251,8 +264,9 @@ _nfs_store.uploader = function ($outer) {
 
           }).fail(function(result) {
             var error_array = ['The upload failed'];
-            if(result.responseJSON && result.responseJSON.message)
+            if(result.responseJSON && result.responseJSON.message) {
               error_array = result.responseJSON.message;
+            }
             setBlockFailed(error_array);
           });
 

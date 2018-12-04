@@ -2,11 +2,22 @@ module NfsStore
   class ChunkController < FsBaseController
     layout nil
 
+    include InNfsStoreContainer
+
     def show
       container = params[:id]
       file_hash = params[:file_hash]
       file_name = params[:file_name]
       relative_path = params[:relative_path]
+
+      unless Upload.filters_allow_upload? file_name, relative_path, @activity_log
+        render json: {
+          message: "The filters do not allow upload of this file. Ensure the file is named correctly.",
+          valid_filters: Upload.valid_filters(@activity_log),
+        }, status: 403
+        return
+      end
+
 
       result = 'not found'
       begin
@@ -77,6 +88,10 @@ module NfsStore
 
       def no_action_log
         action_name == 'show' && !@upload
+      end
+
+      def secure_params
+        params
       end
 
   end

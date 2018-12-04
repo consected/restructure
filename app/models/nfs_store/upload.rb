@@ -212,6 +212,15 @@ module NfsStore
     end
 
 
+    def self.filters_allow_upload? file_name, path, container
+      f = "#{path}/#{file_name}"
+      NfsStore::Filter::Filter.evaluate f, container
+    end
+
+    def self.valid_filters item_or_container
+      NfsStore::Filter::Filter.filters_for(item_or_container).pluck(:filter)
+    end
+
     private
 
       # Initializing of an upload is performed only by NfsStore::Upload.init
@@ -272,7 +281,7 @@ module NfsStore
       # @return [String] full path
       def chunk_path num
         tmp_dir = Manage::Filesystem.temp_directory
-        path = File.join(tmp_dir, chunk_filename(num))
+        File.join(tmp_dir, chunk_filename(num))
       end
 
       # Final path to the full file after all chunks have been uploaded and concatenated
