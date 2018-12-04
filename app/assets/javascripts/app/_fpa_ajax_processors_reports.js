@@ -147,6 +147,8 @@ _fpa.postprocessors_reports = {
             }
           }
           _fpa.reports.results_subsearch(block);
+          _fpa.reports.results_perform_action_link(block);
+          _fpa.reports.results_select_items_for_form(block);
 
           _fpa.form_utils.setup_tablesorter($('#report-results-block'));
           block.find('.expandable').not('.attached-exp').on('click', function(){

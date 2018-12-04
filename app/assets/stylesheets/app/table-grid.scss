@@ -57,6 +57,7 @@ table.import-grid, table.table.report-table {
     padding: 6px 8px 0 8px;
     border: 1px solid silver;
     background-color: #eee;
+    vertical-align: top;
     &[aria-sort="descending"], &[aria-sort="ascending"] {
       background-color: #ffb;
     }

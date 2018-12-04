@@ -521,8 +521,11 @@ _fpa.form_utils = {
                var i = 0;
                var h = {};
                ts.find('thead tr:first th').each(function(){
-                   if($(this).hasClass('no-sort'))
-                       h[i] = {sorter: false};
+                   if($(this).hasClass('no-sort')) {
+                     $(this).attr('title', null);
+                     $(this).attr('aria-label', null);
+                     h[i] = {sorter: false};
+                   }
                    i++;
                });
 

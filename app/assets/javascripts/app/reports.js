@@ -71,14 +71,102 @@ _fpa.reports = {
                     _fpa.show_modal(h, "Search results for " + dct_search, true);
 
                 });
-
-
-
             }
         });
+    },
+
+    results_perform_action_link: function(block){
+      block.find('td[data-col-type^="perform action:"]').not('.attached_report_search').each(function(){
+
+        var dct = $(this).attr('data-col-type');
+
+        var dct_parts = dct.split(':', 2);
+        var dct_action = dct_parts[1];
+        var dct_json = $(this).html();
+
+        if (!dct_json || dct_json == '') return;
+
+        var act_config = JSON.parse(dct_json);
+        var base_url = act_config.perform_action;
+        delete act_config.perform_action;
+
+        if (act_config.label) {
+          dct_action = act_config.label;
+          delete act_config.label;
+        }
+
+        var params = {};
+        for(var k in act_config) {
+          if (act_config.hasOwnProperty(k)) {
+            var v = act_config[k];
+            if(base_url.indexOf('!'+k) >= 0) {
+              base_url = base_url.replace('!'+k, v);
+            }
+            else {
+              params[k] = v
+            }
+          }
+        }
+
+        var pstring = $.param(params);
+
+        var new_html = '<a href="'+base_url+'?' + pstring + '" target="report-perform-action">'+dct_action+'</a>';
+
+        $(this).html(new_html);
+
+      });
+
+    },
+
+
+    results_select_items_for_form: function(block){
+
+      var dct;
+      var dct_parts;
+
+      block.find('td[data-col-type^="select items:"]').not('.attached_report_search').each(function(){
+
+        dct = $(this).attr('data-col-type');
+
+        dct_parts = dct.split(':', 2);
+
+        var dct_json = $(this).html();
+
+        if (!dct_json || dct_json == '') return;
+
+        var act_config = JSON.parse(dct_json);
+
+        var name = act_config.field_name;
+        var value = act_config.value;
+
+        var h = '<input type="checkbox" name="'+name+'"/>';
+        var $h = $(h);
+        $h.val(JSON.stringify(value));
+
+        var new_html = $h;
+
+        $(this).html(new_html);
+
+
+      });
+
+      var dct_action = dct_parts[1];
+      var b = '<input type="submit" value="' + dct_action + '" class="btn btn-primary"/>'
+      var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"></form>');
+      var $t = $('table.report-table');
+      $f.insertBefore($t);
+      $t.appendTo($('#itemselection-for-report'));
+
+      $t.find('thead th').each(function () {
+        if ($(this).find('p:first').html() == dct) {
+          $(this).addClass('no-sort');
+          $(this).append(b);
+        }
+      });
 
 
     },
+
     run_autos: function(sel){
         if(!sel) sel = '.report-auto';
         $(sel).each(function(){

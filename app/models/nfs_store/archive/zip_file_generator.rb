@@ -20,10 +20,14 @@ module NfsStore
         #Initialize the temp file as a zip file
         Zip::OutputStream.open(temp_file) { |zos| }
 
+
+        multi_containers = retrieved_items.map{|r| r[:container_id]}.uniq.length > 1
+
         #Add files to the zip file as usual
         Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
           retrieved_items.each do |f|
             parts = []
+            parts << "container-#{f[:container_id]}-#{f[:parent_name]}" if multi_containers
             parts << f[:container_path] if f[:container_path].present?
             parts << f[:file_name]
 

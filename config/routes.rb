@@ -102,6 +102,7 @@ Rails.application.routes.draw do
     resources :browse, only: :show
     resources :container_list, only: :show
     resources :chunk, :only => [:create, :show]
+    post 'downloads/multi', to: 'downloads#multi'
     resources :downloads, :only => [:show, :create]
     resources :classification, only: [:edit, :create]
   end

@@ -98,7 +98,7 @@ _fpa.postprocessors_admin = {
             var cme = cm.getWrapperElement();
             cme.style.width = '100%';
             cme.style.height = '100%';
-
+            code_el.CodeMirror = cm;
             cm.refresh();
         }).addClass('code-editor-formatted');
 
@@ -120,6 +120,7 @@ _fpa.postprocessors_admin = {
             cme.style.width = '100%';
             cme.style.height = '100%';
             cme.style.backgroundColor = 'rgba(255,255,255, 0.2)';
+            code_el.CodeMirror = cm;
             cm.refresh();
 
         }).addClass('code-extra-help-info-formatted');
@@ -217,8 +218,15 @@ _fpa.postprocessors_admin = {
 
 
             }
-            var v = $('#report_search_attrs').val();
-            $('#report_search_attrs').val(v+ "\n" + add);
+            var $attel = $('#report_search_attrs');
+            var attel = $attel[0];
+
+
+            attel.CodeMirror.save();
+            var v = $attel.val();
+            $attel.val(v+ "\n\n" + add);
+            attel.CodeMirror.setValue($attel.val());
+            attel.CodeMirror.refresh();
 
           });
     }

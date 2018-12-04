@@ -23,6 +23,23 @@ module NfsStore
 
     end
 
+    # def show_all
+    #
+    #   @master
+    #   begin
+    #     if @container.readable?
+    #       @downloads = Browse.list_files_from @container, activity_log: @activity_log
+    #       # Prep a download object to allow selection of downloads in the browse list
+    #       @download = Download.new(container: @container)
+    #     end
+    #
+    #   rescue FsException::NotFound
+    #     @directory_not_found = true
+    #   end
+    #   render partial: 'browse_list'
+    #
+    # end
+
     protected
 
       # def find_container

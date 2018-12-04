@@ -52,6 +52,33 @@ module NfsStore
 
     end
 
+
+    def multi
+
+      selected_items = secure_params[:selected_items]
+
+      unless selected_items.is_a?(Array) && selected_items.length > 0
+        redirect_to nfs_store_browse_path(@container)
+        return
+      end
+
+      selected_items_info = selected_items.map {|s| h = JSON.parse(s); {id: h['id'].to_i, container_id: h['container_id'].to_i, retrieval_type: h['retrieval_type'].to_sym} }
+
+      @download = Download.new multiple_items: true, current_user: current_user
+
+      retrieved_files = @download.retrieve_files_from selected_items_info
+      if retrieved_files&.length > 0
+        filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
+        @download.save!
+        send_file @download.zip_file_path, filename: filename
+        # Do not attempt to cleanup the temp file by unlinking, since this will cause the out of band download to fail
+      else
+        redirect_to nfs_store_browse_path(@container)
+      end
+
+    end
+
+
     private
 
       def secure_params

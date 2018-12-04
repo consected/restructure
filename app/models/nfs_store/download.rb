@@ -36,9 +36,14 @@ module NfsStore
     # Retrieve a file of a specific type (stored file or archived file) from a container
     # @param id [Integer] the ID of the object
     # @param retrieval_type [Symbol] the type of object referencing the file
+    # @param container [NfsStore::Manage::Container | nil] optionally provide a container to support multi container downloads
     # @return [String] filesystem path to the file to be retrieved
-    def retrieve_file_from id, retrieval_type
+    def retrieve_file_from id, retrieval_type, container_id=nil
 
+      if container_id
+        container = NfsStore::Manage::Container.find(id)
+        container.current_user = self.current_user
+      end
       raise FsException::NoAccess.new "user does not have access to this container" unless container.allows_current_user_access_to? :access
 
       if retrieval_type == :stored_file
@@ -59,8 +64,10 @@ module NfsStore
         self.all_retrieved_items ||= []
         self.all_retrieved_items << {
           retrieval_type: retrieval_type,
+          container_id: container.id,
           id: id,
           file_name: retrieved_file.file_name,
+          parent_name: container.parent.data,
           container_path: retrieved_file.container_path(no_filename: true),
           retrieval_path: retrieved_file.retrieval_path,
           file_metadata: retrieved_file.file_metadata
@@ -87,7 +94,9 @@ module NfsStore
     #  retrieval_path is the filesystem path from which the file can be retrieved
     def retrieve_files_from selected_items
 
-      selected_items.each {|s| retrieve_file_from(s[:id], s[:retrieval_type]) }
+      # Retrieve each file's details. The container_id will be passed if this is a
+      # multi container download, otherwise it will be ignored
+      selected_items.each {|s| retrieve_file_from(s[:id], s[:retrieval_type], s[:container_id]) }
       self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items self.all_retrieved_items
 
       self.all_retrieved_items
