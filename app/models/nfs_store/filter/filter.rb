@@ -64,7 +64,7 @@ module NfsStore
       end
 
       # Evaluate a query directly in the database to produce a filtered set of records
-      # Acts as a scope on ActiveRecord relations
+      # Returns an array of results
       # NOTE: stored and archived files to be filtered against appear with an initial forward-slash (/)  character
       # Filter definitions that use the regex ^ (start of line) character must take this into account.
       # For example, a file in the root directory of the container named "00000.dcm"
@@ -73,9 +73,18 @@ module NfsStore
       # To match any file, use the filter ".*"
       # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
       # @param user [User|nil]
-      # @return [ActiveRecord::Relation] resultset of all matched records
+      # @return [Array] all matched records of StoredFile and ArchivedFile types
       def self.evaluate_container_files item, user: nil
+        res = evaluate_container_files_as_scopes item, user: user
+        res[:stored_files] + res[:archived_files]
+      end
 
+      # Evaluate a query directly in the database to produce a filtered set of records
+      # Returns two scopes as a hash {stored_files: ActiveRecord::Relation, archived_files: ActiveRecord::Relation}
+      # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
+      # @param user [User|nil]
+      # @return [Hash{ActiveRecord::Relation}] resultset of all matched records
+      def self.evaluate_container_files_as_scopes item, user: nil
         user ||= item.current_user
         filters = filters_for(item, user: user).pluck(:filter)
 
@@ -97,7 +106,7 @@ module NfsStore
 
         af = container.archived_files.where(conds)
 
-        sf + af
+        return {stored_files: sf, archived_files: af}
       end
 
       # Evaluate the text against the current filter

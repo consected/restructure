@@ -13,7 +13,7 @@ module NfsStore
         if @container.readable?
           @downloads = Browse.list_files_from @container, activity_log: @activity_log
           # Prep a download object to allow selection of downloads in the browse list
-          @download = Download.new(container: @container)
+          @download = Download.new container: @container, activity_log: @activity_log
         end
 
       rescue FsException::NotFound

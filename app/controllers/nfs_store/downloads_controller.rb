@@ -13,7 +13,7 @@ module NfsStore
 
       FsException::Download.new "Invalid retreival type specified" unless Download.valid_retrieval_type? retrieval_type
 
-      @download = Download.new container: @container
+      @download = Download.new container: @container, activity_log: @activity_log
       @master = @container.master
       @id = @container.id
       retrieved_file = @download.retrieve_file_from @download_id, retrieval_type
@@ -37,7 +37,7 @@ module NfsStore
 
       selected_items_info = selected_items.map {|s| h = JSON.parse(s); {id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym} }
 
-      @download = Download.new container: @container, multiple_items: true
+      @download = Download.new container_id: @container, multiple_items: true, activity_log: @activity_log
       @master = @container.master
       @id = @container.id
       retrieved_files = @download.retrieve_files_from selected_items_info
@@ -62,9 +62,21 @@ module NfsStore
         return
       end
 
-      selected_items_info = selected_items.map {|s| h = JSON.parse(s); {id: h['id'].to_i, container_id: h['container_id'].to_i, retrieval_type: h['retrieval_type'].to_sym} }
+      selected_items_info = selected_items.map {|s|
+        h = JSON.parse(s)
+        {
+          id: h['id'].to_i,
+          container_id: h['container_id'].to_i,
+          retrieval_type: h['retrieval_type'].to_sym,
+          activity_log_type: h['activity_log_type'],
+          activity_log_id: h['activity_log_id'].to_i
+        }
+      }
 
-      @download = Download.new multiple_items: true, current_user: current_user
+      container_ids = selected_items_info.map {|s| s[:container_id]}.uniq
+
+      @download = Download.new multiple_items: true, container_ids: container_ids
+      @download.current_user = current_user
 
       retrieved_files = @download.retrieve_files_from selected_items_info
       if retrieved_files&.length > 0
@@ -85,7 +97,12 @@ module NfsStore
         params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, {selected_items: []})
       end
 
-
+      # Handle find container differently for multi container actions
+      # If not multi, just continue with the standard InNfsStoreContainer before_action callback
+      def find_container
+        return if action_name == 'multi'
+        super
+      end
 
   end
 end

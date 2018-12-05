@@ -28,15 +28,6 @@ module NfsStore
 
     end
 
-    # def current_user=user
-    #   container.current_user = user
-    #   container.user ||= user unless container.persisted?
-    # end
-    #
-    # def current_user
-    #   container.current_user
-    # end
-
     def current_user=user
       master.current_user = user
     end

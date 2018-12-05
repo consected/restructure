@@ -12,8 +12,9 @@ module NfsStore
 
     before_validation :store_retrieved_items
 
-    attr_accessor :retrieval_type, :selected_items, :multiple_items, :zip_file_path, :all_retrieved_items, :file_metadata
+    attr_accessor :retrieval_type, :selected_items, :multiple_items, :zip_file_path, :all_retrieved_items, :file_metadata, :activity_log
     alias_attribute :container_id, :nfs_store_container_id
+    alias_attribute :container_ids, :nfs_store_container_ids
 
     # Check if requested retrieval type is one of a valid set
     # @param retrieval_type [Symbol] retrieval type requested
@@ -32,27 +33,62 @@ module NfsStore
       super
     end
 
+    # Override the standard current_user setting to allow multiple containers / masters to be handled
+    def current_user=user
+      if container_ids
+        @current_user = user
+      else
+        master.current_user = user
+      end
+    end
+
+    def current_user
+      if container_ids
+        @current_user
+      else
+        master.current_user
+      end
+    end
+
+    # Memoize filtered container files, returning a hash for stored and archived files
+    # @param item_for_filter [NfsStore::Manage::Container | ActivityLog]
+    # @return [Hash {stored_files: ActiveRecord::Relation, archived_files: ActiveRecord::Relation}]
+    def filtered_files_as_scopes item_for_filter
+      rnid = "#{item_for_filter.class.to_s.ns_underscore}--#{item_for_filter.id}"
+      @filtered_files_as_scopes ||= {}
+      @filtered_files_as_scopes[rnid] ||= NfsStore::Filter::Filter.evaluate_container_files_as_scopes item_for_filter
+    end
 
     # Retrieve a file of a specific type (stored file or archived file) from a container
     # @param id [Integer] the ID of the object
     # @param retrieval_type [Symbol] the type of object referencing the file
     # @param container [NfsStore::Manage::Container | nil] optionally provide a container to support multi container downloads
     # @return [String] filesystem path to the file to be retrieved
-    def retrieve_file_from id, retrieval_type, container_id=nil
+    def retrieve_file_from id, retrieval_type, container: nil, activity_log: nil
 
-      if container_id
-        container = NfsStore::Manage::Container.find(id)
-        container.current_user = self.current_user
-      end
+      container ||= self.container
+      activity_log ||= self.activity_log
+
       raise FsException::NoAccess.new "user does not have access to this container" unless container.allows_current_user_access_to? :access
 
+      unless activity_log
+        res = ModelReference.find_where_referenced_from(container).first
+        raise FsException::NoAccess.new "Attempting to browse a container that is referenced by activity logs, without specifying which one" if res
+      end
+
+      item_for_filter = activity_log || container
+
+      filtered_files = filtered_files_as_scopes item_for_filter
+
       if retrieval_type == :stored_file
-        retrieved_file = container.stored_files.where(id: id).first
+        retrieved_file = filtered_files[:stored_files].select {|f| f.id == id }.first
       elsif retrieval_type == :archived_file
-        retrieved_file = container.archived_files.where(id: id).first
+        retrieved_file = filtered_files[:archived_files].select {|f| f.id == id }.first
       else
         raise FsException::Download.new "Invalid retrieval type requested for download: #{retrieval_type}"
       end
+
+      raise FsException::Download.new "The requested file either does not exist or you do not have access to it" unless retrieved_file
 
       # Save the list of gids this user has
       self.user_groups = retrieved_file.current_user_group_ids
@@ -67,7 +103,7 @@ module NfsStore
           container_id: container.id,
           id: id,
           file_name: retrieved_file.file_name,
-          parent_name: container.parent.data,
+          # parent_name: container.parent.data,
           container_path: retrieved_file.container_path(no_filename: true),
           retrieval_path: retrieved_file.retrieval_path,
           file_metadata: retrieved_file.file_metadata
@@ -96,7 +132,11 @@ module NfsStore
 
       # Retrieve each file's details. The container_id will be passed if this is a
       # multi container download, otherwise it will be ignored
-      selected_items.each {|s| retrieve_file_from(s[:id], s[:retrieval_type], s[:container_id]) }
+      selected_items.each do |s|
+        container = Browse.open_container id: s[:container_id], user: self.current_user
+        activity_log = ActivityLog.open_activity_log s[:activity_log_type], s[:activity_log_id], self.current_user
+        retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log)
+      end
       self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items self.all_retrieved_items
 
       self.all_retrieved_items

@@ -152,7 +152,7 @@ _fpa.reports = {
 
       var dct_action = dct_parts[1];
       var b = '<input type="submit" value="' + dct_action + '" class="btn btn-primary"/>'
-      var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"></form>');
+      var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"></form>');
       var $t = $('table.report-table');
       $f.insertBefore($t);
       $t.appendTo($('#itemselection-for-report'));

@@ -233,7 +233,28 @@ class ActivityLog < ActiveRecord::Base
     list
   end
 
+  # Open an activity log instance for a user, given a string activity log type and ID
+  # Verifies that the user has access to this activity log item
+  # @param activity_log_type [String] type string that can be converted to a namespaced camelized class name
+  # @param id [Integer] id for the activity log implementation instance
+  # @return [ActivityLogBase]
+  def self.open_activity_log activity_log_type, id, current_user
+    al_class = activity_log_class_from_type activity_log_type
+    activity_log = al_class.find(id)
+    activity_log.current_user = current_user
+    raise FsException::NoAccess.new "User does not have access to this activity log" unless activity_log.allows_current_user_access_to? :access
+    activity_log
+  end
 
+  # Get the implementation class based on a String type, validating it along the way
+  # @param activity_log_type [String] type string that can be converted to a namespaced camelized class name
+  # @return [Class]
+  def self.activity_log_class_from_type activity_log_type
+    al_type = activity_log_type.ns_camelize
+    al_class = ActivityLog.implementation_classes.select {|a| a.to_s == al_type}.first
+    raise FsException::List.new "activity log type specified is invalid" unless al_class
+    return al_class
+  end
 
   def add_master_association &association_block
 
