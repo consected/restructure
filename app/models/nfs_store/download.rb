@@ -98,12 +98,15 @@ module NfsStore
       # The details we save is dependent on whether we are downloading a single file, or a set of multiple items
       if multiple_items
         self.all_retrieved_items ||= []
+
         self.all_retrieved_items << {
+
           retrieval_type: retrieval_type,
           container_id: container.id,
           id: id,
           file_name: retrieved_file.file_name,
-          # parent_name: container.parent.data,
+          parent_name: retrieved_file.container.parent_sub_dir || "master-id-#{retrieved_file.container.master_id}",
+          container_name: retrieved_file.container.directory_name,
           container_path: retrieved_file.container_path(no_filename: true),
           retrieval_path: retrieved_file.retrieval_path,
           file_metadata: retrieved_file.file_metadata

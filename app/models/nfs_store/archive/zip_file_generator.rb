@@ -27,7 +27,11 @@ module NfsStore
         Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip|
           retrieved_items.each do |f|
             parts = []
-            parts << "container-#{f[:container_id]}-#{f[:parent_name]}" if multi_containers
+            if f[:parent_name].present?
+              psd_parts = f[:parent_name].split('/').reject(&:blank?)
+              parts += psd_parts
+            end
+            parts << f[:container_name] if f[:container_name].present?
             parts << f[:container_path] if f[:container_path].present?
             parts << f[:file_name]
 
