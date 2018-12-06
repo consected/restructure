@@ -109,6 +109,10 @@ class Report < ActiveRecord::Base
     sql.include?(':filter_previous') || sql.include?(':ids_filter_previous')
   end
 
+  def file_filtering_conditions resource_name
+    NfsStore::Filter::Filter.generate_filters_for resource_name, user: self.current_user
+  end
+
   def current_user= cu
     @current_user = cu
   end
@@ -207,6 +211,14 @@ class Report < ActiveRecord::Base
 
     if sql.include?(":filter_previous")
       sql.gsub!(":filter_previous", '')
+    end
+
+    sql.scan(/:file_filtering_conditions_for_[a-z_]+/) do |file_filter|
+      if file_filter.present?
+        resource_name = file_filter.sub(':file_filtering_conditions_for_', '')
+        ffcond = file_filtering_conditions resource_name
+        sql = sql.sub(file_filter, ffcond)
+      end
     end
 
     if options[:count_only]

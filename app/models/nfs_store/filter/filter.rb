@@ -109,6 +109,21 @@ module NfsStore
         return {stored_files: sf, archived_files: af}
       end
 
+      def self.generate_filters_for resource_name, user: nil
+
+        filters = filters_for_resource_named(resource_name, user)
+
+        conds_sf = filters.map{|f| "(coalesce(nfs_store_stored_files.path, '') || '/' || nfs_store_stored_files.file_name) ~ ?"}.join(' OR ')
+        conds_af = filters.map{|f| "('/' || nfs_store_archived_files.archive_file || '/' ||  coalesce(nfs_store_archived_files.path, '') || '/' || nfs_store_archived_files.file_name) ~ ?"}.join(' OR ')
+
+        filter_strings = filters.map(&:filter)
+
+        conds = ActiveRecord::Base.send(:sanitize_sql_array, [
+          "(nfs_store_archived_files.id IS NOT NULL AND (#{conds_af}) OR nfs_store_stored_files.id IS NOT NULL AND (#{conds_sf}))"
+        ] + filter_strings + filter_strings)
+
+      end
+
       # Evaluate the text against the current filter
       # @return [nil, MatchData] if the match is made, a MatchData object is returned, otherwise nil
       def evaluate text

@@ -2619,6 +2619,138 @@ CREATE FUNCTION ml_app.current_user_id() RETURNS integer
 
 
 --
+-- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_archived_files (
+    id integer NOT NULL,
+    file_hash character varying,
+    file_name character varying NOT NULL,
+    content_type character varying NOT NULL,
+    archive_file character varying NOT NULL,
+    path character varying NOT NULL,
+    file_size bigint NOT NULL,
+    file_updated_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    nfs_store_container_id integer,
+    user_id integer,
+    title character varying,
+    description character varying,
+    file_metadata jsonb,
+    nfs_store_stored_file_id integer
+);
+
+
+--
+-- Name: nfs_store_stored_files; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.nfs_store_stored_files (
+    id integer NOT NULL,
+    file_hash character varying NOT NULL,
+    file_name character varying NOT NULL,
+    content_type character varying NOT NULL,
+    file_size bigint NOT NULL,
+    path character varying,
+    file_updated_at timestamp without time zone,
+    user_id integer,
+    nfs_store_container_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    title character varying,
+    description character varying,
+    file_metadata jsonb,
+    last_process_name_run character varying
+);
+
+
+--
+-- Name: filestore_report_file_path(ml_app.nfs_store_stored_files, ml_app.nfs_store_archived_files); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.filestore_report_file_path(sf ml_app.nfs_store_stored_files, af ml_app.nfs_store_archived_files) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+    BEGIN
+
+      return CASE WHEN af.id IS NOT NULL THEN
+        coalesce(sf.path, '') || '/' || sf.file_name || '/' || af.path
+        ELSE sf.path
+      END;
+
+	END;
+$$;
+
+
+--
+-- Name: filestore_report_perform_action(integer, character varying, integer, ml_app.nfs_store_stored_files, ml_app.nfs_store_archived_files); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.filestore_report_perform_action(cid integer, altype character varying, alid integer, sf ml_app.nfs_store_stored_files, af ml_app.nfs_store_archived_files) RETURNS jsonb
+    LANGUAGE plpgsql
+    AS $$
+	DECLARE
+        jo jsonb;
+        rt varchar;
+        fn varchar;
+        alt varchar;
+    BEGIN
+
+        rt := '"' || (CASE WHEN af.id IS NOT NULL THEN 'archived_file' ELSE 'stored_file' END) || '"';
+        fn := '"' || (CASE WHEN af.id IS NOT NULL THEN af.file_name ELSE sf.file_name END) || '"';
+		alt := '"' || altype || '"';
+        jo := '{}';
+
+        jo := jsonb_set(jo, '{perform_action}', '"/nfs_store/downloads/!container_id"');
+        jo := jsonb_set(jo, '{container_id}', cid::varchar::jsonb);
+        jo := jsonb_set(jo, '{download_id}', coalesce(af.id, sf.id)::varchar::jsonb);
+        jo := jsonb_set(jo, '{activity_log_type}', alt::jsonb);
+        jo := jsonb_set(jo, '{activity_log_id}', alid::varchar::jsonb);
+        jo := jsonb_set(jo, '{retrieval_type}', rt::jsonb );
+        jo := jsonb_set(jo, '{label}', fn::jsonb);
+
+        return jo;
+
+	END;
+$$;
+
+
+--
+-- Name: filestore_report_select_fields(integer, character varying, integer, integer, integer); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.filestore_report_select_fields(cid integer, altype character varying, alid integer, sfid integer, afid integer) RETURNS jsonb
+    LANGUAGE plpgsql
+    AS $$
+	DECLARE
+        jo jsonb;
+        joid jsonb;
+        rt varchar;
+        alt varchar;
+    BEGIN
+
+    	rt := '"' || CASE WHEN afid IS NOT NULL THEN 'archived_file' ELSE 'stored_file' END || '"';
+    	alt := '"' || altype || '"';
+
+        joid := '{}'::jsonb;
+        joid := jsonb_set(joid, '{id}', coalesce(afid, sfid)::varchar::jsonb);
+        joid := jsonb_set(joid, '{retrieval_type}', rt::jsonb );
+        joid := jsonb_set(joid, '{container_id}', cid::varchar::jsonb);
+        joid := jsonb_set(joid, '{activity_log_type}', alt::jsonb);
+        joid := jsonb_set(joid, '{activity_log_id}', alid::varchar::jsonb);
+
+
+    	jo := '{}'::jsonb;
+  		jo := jsonb_set(jo, '{field_name}', '"nfs_store_download[selected_items][]"');
+    	jo := jsonb_set(jo, '{value}', joid);
+    	return jo;
+
+	END;
+$$;
+
+
+--
 -- Name: find_new_local_ipa_records(integer); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -13226,30 +13358,6 @@ ALTER SEQUENCE ml_app.nfs_store_archived_file_history_id_seq OWNED BY ml_app.nfs
 
 
 --
--- Name: nfs_store_archived_files; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_archived_files (
-    id integer NOT NULL,
-    file_hash character varying,
-    file_name character varying NOT NULL,
-    content_type character varying NOT NULL,
-    archive_file character varying NOT NULL,
-    path character varying NOT NULL,
-    file_size bigint NOT NULL,
-    file_updated_at timestamp without time zone,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL,
-    nfs_store_container_id integer,
-    user_id integer,
-    title character varying,
-    description character varying,
-    file_metadata jsonb,
-    nfs_store_stored_file_id integer
-);
-
-
---
 -- Name: nfs_store_archived_files_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
 --
 
@@ -13494,29 +13602,6 @@ CREATE SEQUENCE ml_app.nfs_store_stored_file_history_id_seq
 --
 
 ALTER SEQUENCE ml_app.nfs_store_stored_file_history_id_seq OWNED BY ml_app.nfs_store_stored_file_history.id;
-
-
---
--- Name: nfs_store_stored_files; Type: TABLE; Schema: ml_app; Owner: -
---
-
-CREATE TABLE ml_app.nfs_store_stored_files (
-    id integer NOT NULL,
-    file_hash character varying NOT NULL,
-    file_name character varying NOT NULL,
-    content_type character varying NOT NULL,
-    file_size bigint NOT NULL,
-    path character varying,
-    file_updated_at timestamp without time zone,
-    user_id integer,
-    nfs_store_container_id integer,
-    created_at timestamp without time zone,
-    updated_at timestamp without time zone,
-    title character varying,
-    description character varying,
-    file_metadata jsonb,
-    last_process_name_run character varying
-);
 
 
 --
@@ -27742,4 +27827,6 @@ INSERT INTO schema_migrations (version) VALUES ('20181113184920');
 INSERT INTO schema_migrations (version) VALUES ('20181113185315');
 
 INSERT INTO schema_migrations (version) VALUES ('20181205103333');
+
+INSERT INTO schema_migrations (version) VALUES ('20181206123849');
 
