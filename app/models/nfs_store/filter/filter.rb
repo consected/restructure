@@ -76,6 +76,7 @@ module NfsStore
       # @return [Array] all matched records of StoredFile and ArchivedFile types
       def self.evaluate_container_files item, user: nil
         res = evaluate_container_files_as_scopes item, user: user
+        return [] unless res
         res[:stored_files] + res[:archived_files]
       end
 
@@ -89,7 +90,7 @@ module NfsStore
         filters = filters_for(item, user: user).pluck(:filter)
 
         # If no filters are defined, exit. At least one is required to return a sensible result.
-        return [] if filters.length == 0
+        return if filters.length == 0
 
         if item.model_data_type == :activity_log
           container  = ModelReference.find_referenced_items(item, record_type: 'NfsStore::Manage::Container').first
