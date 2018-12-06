@@ -75,3 +75,25 @@ p.small.report-table-name {
 .report-measure {
   font-weight: bold;
 }
+
+
+.report-files-actions {
+
+  margin-bottom: 4px;
+  display: block;
+
+  input[type="submit"] {
+    float:right;
+    margin-bottom:4px;
+  }
+
+  #report-select-all-files {
+    vertical-align: text-bottom;
+  }
+
+  label {
+    padding-left: 6px;
+  }
+
+
+}

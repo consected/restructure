@@ -109,19 +109,37 @@ module NfsStore
         return {stored_files: sf, archived_files: af}
       end
 
-      def self.generate_filters_for resource_name, user: nil
+      def self.generate_filters_for activity_log_resource_name, user: nil
 
-        filters = filters_for_resource_named(resource_name, user)
+        if activity_log_resource_name.start_with? 'activity_log__'
+          res_class = ActivityLog.activity_log_class_from_type(activity_log_resource_name)
+          extra_log_types = res_class.definition.extra_log_type_configs.map(&:name)
+        else
+          raise FphsException.new "Generate Filters requires a resource name starting with activity_log"
+        end
 
-        conds_sf = filters.map{|f| "(coalesce(nfs_store_stored_files.path, '') || '/' || nfs_store_stored_files.file_name) ~ ?"}.join(' OR ')
-        conds_af = filters.map{|f| "('/' || nfs_store_archived_files.archive_file || '/' ||  coalesce(nfs_store_archived_files.path, '') || '/' || nfs_store_archived_files.file_name) ~ ?"}.join(' OR ')
+        sql_sets = []
 
-        filter_strings = filters.map(&:filter)
+        extra_log_types.each do |extra_log_type|
 
-        conds = ActiveRecord::Base.send(:sanitize_sql_array, [
-          "(nfs_store_archived_files.id IS NOT NULL AND (#{conds_af}) OR nfs_store_stored_files.id IS NOT NULL AND (#{conds_sf}))"
-        ] + filter_strings + filter_strings)
+          resource_name = "#{activity_log_resource_name}__#{extra_log_type}"
 
+          filters = filters_for_resource_named(resource_name, user)
+
+          next if filters.length == 0
+
+          conds_sf = filters.map{|f| "(coalesce(nfs_store_stored_files.path, '') || '/' || nfs_store_stored_files.file_name) ~ ?"}.join(' OR ')
+          conds_af = filters.map{|f| "('/' || nfs_store_archived_files.archive_file || '/' ||  coalesce(nfs_store_archived_files.path, '') || '/' || nfs_store_archived_files.file_name) ~ ?"}.join(' OR ')
+
+          filter_strings = filters.map(&:filter)
+
+          sql_sets << ActiveRecord::Base.send(:sanitize_sql_array, [
+            "extra_log_type = ? AND (nfs_store_archived_files.id IS NOT NULL AND (#{conds_af}) OR nfs_store_stored_files.id IS NOT NULL AND (#{conds_sf}))"
+          ] + [extra_log_type] + filter_strings + filter_strings)
+        end
+
+        res = sql_sets.join("\n  OR\n  ")
+        "(\n#{res}\n)"
       end
 
       # Evaluate the text against the current filter

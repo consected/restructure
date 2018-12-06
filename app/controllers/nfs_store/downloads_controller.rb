@@ -58,7 +58,7 @@ module NfsStore
       selected_items = secure_params[:selected_items]
 
       unless selected_items.is_a?(Array) && selected_items.length > 0
-        redirect_to nfs_store_browse_path(@container)
+        raise FsException::Download.new "No items were selected for download"
         return
       end
 
