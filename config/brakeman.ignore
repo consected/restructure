@@ -3,13 +3,13 @@
     {
       "warning_type": "File Access",
       "warning_code": 16,
-      "fingerprint": "47ba85895ac936ce8cf27d55a558627330e68a702137c8a864e612f2f97fcc2d",
+      "fingerprint": "e57186d1fbed424906dc536a6366cd20a1358353dfb74c8c577833f57b8ee6e3",
       "check_name": "SendFile",
       "message": "Parameter value used in file name",
       "file": "app/controllers/nfs_store/downloads_controller.rb",
       "line": 22,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(Download.new(:container => (@container)).retrieve_file_from(params[:download_id].to_i, [:stored_file, :archived_file].select do\n (r == params[:retrieval_type].to_sym)\n end.first))",
+      "code": "send_file(Download.new(:container => (@container), :activity_log => (@activity_log)).retrieve_file_from(params[:download_id].to_i, [:stored_file, :archived_file].select do\n (r == params[:retrieval_type].to_sym)\n end.first))",
       "render_path": null,
       "location": {
         "type": "method",
@@ -41,6 +41,6 @@
       "note": ""
     }
   ],
-  "updated": "2018-10-09 17:19:04 +0100",
+  "updated": "2018-12-06 16:18:45 +0000",
   "brakeman_version": "4.3.1"
 }
