@@ -38,6 +38,7 @@ module NfsStore
       if container_ids
         @current_user = user
       else
+        master ||= self.container.master
         master.current_user = user
       end
     end
@@ -46,6 +47,7 @@ module NfsStore
       if container_ids
         @current_user
       else
+        master ||= self.container.master
         master.current_user
       end
     end
@@ -136,8 +138,8 @@ module NfsStore
       # Retrieve each file's details. The container_id will be passed if this is a
       # multi container download, otherwise it will be ignored
       selected_items.each do |s|
-        container = Browse.open_container id: s[:container_id], user: self.current_user
-        activity_log = ActivityLog.open_activity_log s[:activity_log_type], s[:activity_log_id], self.current_user
+        container = self.container || Browse.open_container(id: s[:container_id], user: self.current_user)
+        activity_log = self.activity_log || ActivityLog.open_activity_log(s[:activity_log_type], s[:activity_log_id], self.current_user)
         retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log)
       end
       self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items self.all_retrieved_items

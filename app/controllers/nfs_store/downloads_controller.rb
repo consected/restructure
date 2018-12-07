@@ -37,7 +37,8 @@ module NfsStore
 
       selected_items_info = selected_items.map {|s| h = JSON.parse(s); {id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym} }
 
-      @download = Download.new container_id: @container, multiple_items: true, activity_log: @activity_log
+      @download = Download.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+      @download.current_user = current_user
       @master = @container.master
       @id = @container.id
       retrieved_files = @download.retrieve_files_from selected_items_info
