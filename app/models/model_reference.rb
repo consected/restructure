@@ -167,8 +167,6 @@ class ModelReference < ActiveRecord::Base
     res = !!self.current_user.has_access_to?(:edit, :table, to_record_type_us.pluralize)
     return unless res
     if to_record.respond_to?(:can_edit?)
-      byebug unless to_record.current_user
-      byebug unless to_record.master_user
       !!to_record.can_edit?
     else
       res
