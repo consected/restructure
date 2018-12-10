@@ -22,6 +22,7 @@ AS $$
 
     -- If a follow up was set, generate a new record in the IPA tracker log
     IF res.select_is_good_time_to_speak = 'not appropriate time'
+      OR res.select_is_good_time_to_speak = 'left voicemail'
       OR res.select_may_i_begin = 'not appropriate time'
       OR res.select_still_interested = 'yes - call back' THEN
 

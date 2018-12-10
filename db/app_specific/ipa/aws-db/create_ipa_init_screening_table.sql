@@ -4,7 +4,7 @@
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create ipa_initial_screenings select_is_good_time_to_speak select_may_i_begin any_questions_blank_yes_no select_still_interested follow_up_date follow_up_time notes
 
-      CREATE FUNCTION log_ipa_initial_screening_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_ipa_initial_screening_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
