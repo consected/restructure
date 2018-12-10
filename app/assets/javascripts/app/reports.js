@@ -150,6 +150,8 @@ _fpa.reports = {
 
       });
 
+      if (!dct_parts) return;
+
       var dct_action = dct_parts[1];
       var b = '<span class="report-files-actions"><input type="checkbox" id="report-select-all-files"><label for="report-select-all-files">select all</label> <input type="submit" value="' + dct_action + '" class="btn btn-primary"/></span>'
       var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"></form>');
