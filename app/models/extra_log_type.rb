@@ -99,7 +99,8 @@ class ExtraLogType < ExtraOptions
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)
           refitem[mn][:to_record_label] = conf[:label] || to_class&.human_name
-          refitem[mn][:no_master_association] = to_class.no_master_association if to_class && to_class.respond_to?(:no_master_association)
+          refitem[mn][:no_master_association] = to_class.no_master_association if to_class&.respond_to?(:no_master_association)
+          refitem[mn][:to_model_name_us] = to_class&.to_s.ns_underscore
         end
       end
 

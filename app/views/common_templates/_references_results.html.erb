@@ -42,11 +42,13 @@
 <% if references %>
   {{#each model_references}}
     {{#is ../embedded_item.id '===' to_record_id}}
-      {{#is to_record_options_config.view_as.show '!==' 'hide'}}
-        {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
-          {{#with ../embedded_item}}
-            {{><%= ModelReference.record_type_to_ns_table_name references.first.first %>_result_fields}}
-          {{/with}}
+      {{#is ../embedded_item.item_type '===' '<%= references.first.last.first.last[:to_model_name_us] %>'}}
+        {{#is to_record_options_config.view_as.show '!==' 'hide'}}
+          {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
+            {{#with ../embedded_item}}
+              {{><%= ModelReference.record_type_to_ns_table_name references.first.first %>_result_fields}}
+            {{/with}}
+          {{/is}}
         {{/is}}
       {{/is}}
     {{/is}}
