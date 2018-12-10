@@ -89,7 +89,6 @@ module UserActionLogging
         #{attrs}
         "
         Rails.logger.error "#{e.inspect}\n#{e.backtrace.join("\n")}"
-        byebug
         raise e
       end
 
