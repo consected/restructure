@@ -56,6 +56,7 @@ module MasterHandler
 
     set_additional_attributes object_instance
     if object_instance.save
+      reload_objects
       handle_additional_updates
       @id = object_instance.id
       if object_instance.has_multiple_results
@@ -81,6 +82,7 @@ module MasterHandler
 
   def update
     if object_instance.update(secure_params)
+      reload_objects
       handle_additional_updates
       if object_instance.has_multiple_results
         @master_objects = object_instance.multiple_results
@@ -114,6 +116,16 @@ module MasterHandler
 
   protected
 
+    # Before update and before insert triggers can lead update and create actions to return incorrect
+    # values, since column values may have changed in the database at the point of #save or #update
+    # being called. These changes are not reflected in the attributes of the object or embedded intem
+    # and therefore a careful reload must be performed.
+    def reload_objects
+      object_instance.reload
+      object_instance.embedded_item&.reload
+      object_instance.current_user = current_user
+      object_instance.embedded_item&.current_user = current_user
+    end
 
     def edit_form
       'edit_form'

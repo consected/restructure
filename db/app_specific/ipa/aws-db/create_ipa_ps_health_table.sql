@@ -26,18 +26,37 @@
                       raynauds_syndrome_blank_yes_no_dont_know,
                       raynauds_syndrome_severity_selection,
                       raynauds_syndrome_details,
-                      other_conditions_blank_yes_no_dont_know,
-                      other_conditions_details,
+
                       hypertension_diagnosis_blank_yes_no_dont_know,
                       hypertension_diagnosis_details,
+
+                      diabetes_diagnosis_blank_yes_no_dont_know,
+                      diabetes_diagnosis_details,
+                      high_cholesterol_diagnosis_blank_yes_no_dont_know,
+                      high_cholesterol_diagnosis_details,
+
                       other_heart_conditions_blank_yes_no_dont_know,
                       other_heart_conditions_details,
+
+                      heart_surgeries_blank_yes_no_dont_know,
+                      heart_surgeries_details,
+                      caridiac_pacemaker_blank_yes_no_dont_know,
+                      caridiac_pacemaker_details,
+
                       memory_problems_blank_yes_no_dont_know,
                       memory_problems_details,
                       mental_health_conditions_blank_yes_no_dont_know,
                       mental_health_conditions_details,
+
+                      mental_health_help_blank_yes_no_dont_know,
+                      mental_health_help_details,
+
                       neurological_problems_blank_yes_no_dont_know,
                       neurological_problems_details,
+
+                      neurological_surgeries_blank_yes_no_dont_know,
+                      neurological_surgeries_details,
+
                       user_id,
                       created_at,
                       updated_at,
@@ -60,18 +79,37 @@
                       NEW.raynauds_syndrome_blank_yes_no_dont_know,
                       NEW.raynauds_syndrome_severity_selection,
                       NEW.raynauds_syndrome_details,
-                      NEW.other_conditions_blank_yes_no_dont_know,
-                      NEW.other_conditions_details,
+
                       NEW.hypertension_diagnosis_blank_yes_no_dont_know,
                       NEW.hypertension_diagnosis_details,
+
+                      NEW.diabetes_diagnosis_blank_yes_no_dont_know,
+                      NEW.diabetes_diagnosis_details,
+                      NEW.high_cholesterol_diagnosis_blank_yes_no_dont_know,
+                      NEW.high_cholesterol_diagnosis_details,
+
                       NEW.other_heart_conditions_blank_yes_no_dont_know,
                       NEW.other_heart_conditions_details,
+
+                      NEW.heart_surgeries_blank_yes_no_dont_know,
+                      NEW.heart_surgeries_details,
+                      NEW.caridiac_pacemaker_blank_yes_no_dont_know,
+                      NEW.caridiac_pacemaker_details,
+
                       NEW.memory_problems_blank_yes_no_dont_know,
                       NEW.memory_problems_details,
                       NEW.mental_health_conditions_blank_yes_no_dont_know,
                       NEW.mental_health_conditions_details,
+
+                      NEW.mental_health_help_blank_yes_no_dont_know,
+                      NEW.mental_health_help_details,
+
                       NEW.neurological_problems_blank_yes_no_dont_know,
                       NEW.neurological_problems_details,
+
+                      NEW.neurological_surgeries_blank_yes_no_dont_know,
+                      NEW.neurological_surgeries_details,
+
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -99,18 +137,39 @@
           raynauds_syndrome_blank_yes_no_dont_know varchar,
           raynauds_syndrome_severity_selection varchar,
           raynauds_syndrome_details varchar,
-          other_conditions_blank_yes_no_dont_know varchar,
-          other_conditions_details varchar,
+          -- other_conditions_blank_yes_no_dont_know varchar,
+          -- other_conditions_details varchar,
           hypertension_diagnosis_blank_yes_no_dont_know varchar,
           hypertension_diagnosis_details varchar,
+
+
+          diabetes_diagnosis_blank_yes_no_dont_know varchar,
+          diabetes_diagnosis_details varchar,
+          high_cholesterol_diagnosis_blank_yes_no_dont_know varchar,
+          high_cholesterol_diagnosis_details varchar,
+
           other_heart_conditions_blank_yes_no_dont_know varchar,
           other_heart_conditions_details varchar,
+
+          heart_surgeries_blank_yes_no_dont_know varchar,
+          heart_surgeries_details varchar,
+          caridiac_pacemaker_blank_yes_no_dont_know varchar,
+          caridiac_pacemaker_details varchar,
+
           memory_problems_blank_yes_no_dont_know varchar,
           memory_problems_details varchar,
           mental_health_conditions_blank_yes_no_dont_know varchar,
           mental_health_conditions_details varchar,
+
+          mental_health_help_blank_yes_no_dont_know varchar,
+          mental_health_help_details varchar,
+
           neurological_problems_blank_yes_no_dont_know varchar,
           neurological_problems_details varchar,
+
+          neurological_surgeries_blank_yes_no_dont_know varchar,
+          neurological_surgeries_details varchar,
+
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -144,18 +203,39 @@
           raynauds_syndrome_blank_yes_no_dont_know varchar,
           raynauds_syndrome_severity_selection varchar,
           raynauds_syndrome_details varchar,
-          other_conditions_blank_yes_no_dont_know varchar,
-          other_conditions_details varchar,
+          -- other_conditions_blank_yes_no_dont_know varchar,
+          -- other_conditions_details varchar,
           hypertension_diagnosis_blank_yes_no_dont_know varchar,
           hypertension_diagnosis_details varchar,
+
+
+          diabetes_diagnosis_blank_yes_no_dont_know varchar,
+          diabetes_diagnosis_details varchar,
+          high_cholesterol_diagnosis_blank_yes_no_dont_know varchar,
+          high_cholesterol_diagnosis_details varchar,
+
           other_heart_conditions_blank_yes_no_dont_know varchar,
           other_heart_conditions_details varchar,
+
+          heart_surgeries_blank_yes_no_dont_know varchar,
+          heart_surgeries_details varchar,
+          caridiac_pacemaker_blank_yes_no_dont_know varchar,
+          caridiac_pacemaker_details varchar,
+
           memory_problems_blank_yes_no_dont_know varchar,
           memory_problems_details varchar,
           mental_health_conditions_blank_yes_no_dont_know varchar,
           mental_health_conditions_details varchar,
+
+          mental_health_help_blank_yes_no_dont_know varchar,
+          mental_health_help_details varchar,
+
           neurological_problems_blank_yes_no_dont_know varchar,
           neurological_problems_details varchar,
+
+          neurological_surgeries_blank_yes_no_dont_know varchar,
+          neurological_surgeries_details varchar,
+
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

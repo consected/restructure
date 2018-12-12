@@ -11,6 +11,8 @@
                   INSERT INTO ipa_ps_mri_history
                   (
                       master_id,
+                      past_mri_yes_no_dont_know,
+                      past_mri_details,
                       electrical_implants_blank_yes_no_dont_know,
                       electrical_implants_details,
                       metal_implants_blank_yes_no_dont_know,
@@ -24,6 +26,8 @@
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.past_mri_yes_no_dont_know,
+                      NEW.past_mri_details,
                       NEW.electrical_implants_blank_yes_no_dont_know,
                       NEW.electrical_implants_details,
                       NEW.metal_implants_blank_yes_no_dont_know,
@@ -42,6 +46,8 @@
       CREATE TABLE ipa_ps_mri_history (
           id integer NOT NULL,
           master_id integer,
+          past_mri_yes_no_dont_know varchar,
+          past_mri_details varchar,
           electrical_implants_blank_yes_no_dont_know varchar,
           electrical_implants_details varchar,
           metal_implants_blank_yes_no_dont_know varchar,
@@ -66,6 +72,8 @@
       CREATE TABLE ipa_ps_mris (
           id integer NOT NULL,
           master_id integer,
+          past_mri_yes_no_dont_know varchar,
+          past_mri_details varchar,
           electrical_implants_blank_yes_no_dont_know varchar,
           electrical_implants_details varchar,
           metal_implants_blank_yes_no_dont_know varchar,

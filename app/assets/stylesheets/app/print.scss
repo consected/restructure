@@ -73,7 +73,7 @@
   }
 
   .button-radio input[type="radio"]:checked + label:before {
-    content: '✔'  !important;
+    content: '\2714' !important;
   }
 
   .download-actions, .refresh-container-list {

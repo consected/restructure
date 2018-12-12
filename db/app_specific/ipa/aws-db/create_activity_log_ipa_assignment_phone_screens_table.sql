@@ -8,6 +8,7 @@
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
+          callback_required varchar,
           callback_date date,
           callback_time time,
           notes varchar,
@@ -21,6 +22,7 @@
           id integer NOT NULL,
           master_id integer,
           ipa_assignment_id integer,
+          callback_required varchar,
           callback_date date,
           callback_time time,
           notes varchar,
@@ -38,6 +40,7 @@
                   (
                       master_id,
                       ipa_assignment_id,
+                      callback_required,
                       callback_date,
                       callback_time,
                       notes,
@@ -50,6 +53,7 @@
                   SELECT
                       NEW.master_id,
                       NEW.ipa_assignment_id,
+                      NEW.callback_required,
                       NEW.callback_date,
                       NEW.callback_time,
                       NEW.notes,
