@@ -1,6 +1,26 @@
 {
   "ignored_warnings": [
     {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "ac595c8850eee26215d17aa6f507919dbf5e53b9742b2dded99540778d858366",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/calc_actions.rb",
+      "line": 231,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).pluck(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CalcActions",
+        "method": "calc_query"
+      },
+      "user_input": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
       "warning_type": "File Access",
       "warning_code": 16,
       "fingerprint": "e57186d1fbed424906dc536a6366cd20a1358353dfb74c8c577833f57b8ee6e3",
@@ -41,6 +61,6 @@
       "note": ""
     }
   ],
-  "updated": "2018-12-06 16:18:45 +0000",
+  "updated": "2018-12-13 19:12:24 +0000",
   "brakeman_version": "4.3.1"
 }
