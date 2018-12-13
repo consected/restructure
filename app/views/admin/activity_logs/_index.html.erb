@@ -33,7 +33,7 @@
 
   <tbody>
     <% @activity_logs.each do |list_item| %>
-      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
+      <tr class="<%=list_item.disabled ? 'disabled-result' : ''%> <%=list_item.extra_log_type_valid? ? '' : 'failed-parse'%>">
         <td><%= admin_edit_btn list_item.id%> </td>
         <td><%= list_item.name %></td>
         <td><%= list_item.item_type %></td>

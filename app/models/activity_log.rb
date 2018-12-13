@@ -86,6 +86,13 @@ class ActivityLog < ActiveRecord::Base
     @extra_log_type_configs ||= ExtraLogType.parse_config(self)
   end
 
+  def extra_log_type_valid?
+      ExtraLogType.parse_config(self)
+      return true 
+    rescue => e
+      return false
+  end
+
   def force_option_config_parse
     # extra_log_type_configs force:true
   end

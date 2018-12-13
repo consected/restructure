@@ -159,6 +159,9 @@
     //   etc
     Handlebars.registerHelper('replace', function(orig_str, replace_str, with_str, re_options, context){
       var reo;
+
+      if(!replace_str || replace_str == '') return orig_str;
+
       // Avoid using the context object if the last option was excluded from the call
       if(!re_options.hasOwnProperty('name'))
         reo = re_options;
@@ -275,7 +278,7 @@
         var res = _fpa.state[name];
         if(res && key)
           res = res[key];
-        if(res && sub_key)
+        if(res && sub_key && !sub_key.hash)
           res = res[sub_key];
         return res;
     });

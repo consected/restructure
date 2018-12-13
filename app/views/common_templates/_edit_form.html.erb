@@ -64,6 +64,15 @@
   end
   dialog_before ||= {}
 
+  unless defined? labels
+    if embedded
+      d = form_object_instance.class.default_options
+      labels = d.labels if d
+    else
+      labels = {}
+    end
+  end
+  labels ||= {}
 
   unless defined? view_options
     view_options = {}
@@ -199,7 +208,8 @@
               form_object_instance: form_object_instance,
               form_object_item_type_us: form_object_item_type_us,
               caption_before: caption_before,
-              dialog_before: dialog_before
+              dialog_before: dialog_before,
+              labels: labels
               }
             }
             local_vars[:locals][:locals] = local_vars[:locals]

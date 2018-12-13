@@ -71,6 +71,14 @@ class DynamicModel < ActiveRecord::Base
     @option_configs ||= DynamicModelOptions.parse_config(self)
   end
 
+  def option_configs_valid?
+      DynamicModelOptions.parse_config(self)
+      return true
+    rescue => e
+      return false
+  end
+
+
   def option_config_for name
     return unless option_configs
     option_configs.select{|s| s.name == name}.first

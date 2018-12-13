@@ -1,4 +1,4 @@
-<%= form.label field_name_sym, field_name.sub('_yes_no_dont_know', '').humanize %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, '_yes_no_dont_know') %>
 <% options = field_options_for(form_object_instance, field_name_sym) %>
 <%
   if options[:include_blank]

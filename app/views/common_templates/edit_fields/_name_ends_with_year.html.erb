@@ -1,4 +1,4 @@
-<%= form.label field_name_sym, t("field_names.#{field_name_sym}", default: field_name.humanize).capitalize %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
 <%
   h = {}
   r = Settings.const_get("#{field_name.camelize}Range")

@@ -6,7 +6,7 @@ class ExtraOptions
     [
       :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options,
       :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :valid_if,
-      :filestore
+      :filestore, :labels
     ]
   end
   def self.add_key_attributes
@@ -174,6 +174,9 @@ class ExtraOptions
 
     self.dialog_before ||= {}
     self.dialog_before = self.dialog_before.symbolize_keys
+
+    self.labels ||= {}
+    self.labels = self.labels.symbolize_keys
 
     self.show_if ||= {}
     self.show_if = self.show_if.symbolize_keys

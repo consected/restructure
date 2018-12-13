@@ -18,7 +18,6 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/create_ipa_hotel_table.sql
 \i db/app_specific/ipa/create_ipa_inex_checklist_table.sql
 \i db/app_specific/ipa/create_ipa_init_screening_table.sql
-\i db/app_specific/ipa/create_ipa_mris_table.sql
 \i db/app_specific/ipa/create_ipa_payment_table.sql
 \i db/app_specific/ipa/create_ipa_protocol_deviations_table.sql
 \i db/app_specific/ipa/create_ipa_ps_football_experience_table.sql
@@ -26,6 +25,7 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/create_ipa_ps_informant_details_table.sql
 \i db/app_specific/ipa/create_ipa_ps_init_screening_table.sql
 \i db/app_specific/ipa/create_ipa_ps_size_table.sql
+\i db/app_specific/ipa/create_ipa_ps_mris_table.sql
 \i db/app_specific/ipa/create_ipa_ps_tmocas_table.sql
 \i db/app_specific/ipa/create_ipa_screenings_table.sql
 \i db/app_specific/ipa/create_ipa_sleeps_table.sql

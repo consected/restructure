@@ -4,7 +4,7 @@
      raise FphsException.new "The general selection #{general_selection_name}_source has not been defined. Please inform the administrator of this error."
    end
 %>
-<%= form.label :source, 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{general_selection_name}_source".to_sym), title: 'original sources of data' %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels), 'data-add-icon' => 'question-sign', 'data-show-modal' => general_selection_block_id("#{general_selection_name}_source".to_sym), title: 'original sources of data' %>
 <% if gs %>
   <%= form.select :source, gs, {}, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
   <% @has_source = true %>

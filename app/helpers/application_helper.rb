@@ -115,8 +115,19 @@
       if caption.is_a?(Hash)
         caption = caption[:caption]
       end
-      caption = Admin::MessageTemplate.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"') if @form_object_instance 
+      caption = Admin::MessageTemplate.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"') if @form_object_instance
       caption.gsub("\n","<br/>").html_safe
+    end
+
+    def label_for key, labels, remove=nil, force_default: nil
+      res = labels && labels[key]
+      return res if res
+
+      key = key.to_s
+      return force_default if force_default
+
+      key = key.sub(remove, '') if remove
+      t("field_names.#{key}", default: key.humanize).capitalize
     end
 
     def layout_item_block_sizes

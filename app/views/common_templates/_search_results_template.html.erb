@@ -17,6 +17,10 @@
     caption_before = {}
   end
 
+  unless defined? labels
+    labels = {}
+  end
+
   unless defined? show_if
     show_if = {}
   end
@@ -121,6 +125,7 @@
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
+  _fpa.state.labels_<%=name.underscore%> = <%= labels.to_json.html_safe %>;
 </script>
 
 
@@ -180,7 +185,17 @@
 <% end %>
 </script>
 
-
+<script id="field_label" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <small>
+    {{#if (fpa_state_item labels @key )}}
+      {{fpa_state_item labels @key }}
+    {{else if force_default}}
+      {{force_default}}
+    {{else}}
+      {{humanize (replace @key replace '')}}
+    {{/if}}
+  </small>
+</script>
 
 
 <script id="<%=name%>_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -216,27 +231,27 @@
       {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}
       </small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_url'}}
-      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="url-link-value">
       <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
       </span></strong></li>
     {{else is @key 'includes' '_link'}}
-      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="url-link-value">
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="url-link-value">
       <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
       </span></strong></li>
     {{else is @key 'includes' '_rank' }}
       <% if hide_rank_badge %>
-      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="label label-default">{{this}}</span></strong></li>
       <% end %>
     {{else is @key '===' 'rank' }}
       <% if hide_rank_badge %>
-      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong><span class="label label-default">{{this}}</span></strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="label label-default">{{this}}</span></strong></li>
       <% end %>
     {{else is @key "protocol_id"}}
-      <li class="<%= field_result_class %>"><small>protocol</small> <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' force_default='protocol' }} <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
     {{else is @key "sub_process_id"}}
-      <li class="<%= field_result_class %>"><small>status</small> <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' force_default='status' }} <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
     {{else is @key "protocol_event_id"}}
-      <li class="<%= field_result_class %>"><small>method</small> <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' force_default='method' }} <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
     {{else is @key "tracker_history_id"}}
     <% unless app_config_set(:hide_tracker_panel) %>
       {{#if ../tracker_histories}}
@@ -269,13 +284,13 @@
       <% end %>
     <% end %>
     {{else is @key 'includes' '^select_record_from_' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^select_record_from_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^select_record_from_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '^select_' }}
-      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}"><small>{{humanize (replace @key '^select_' '')}}</small> <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
+      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^select_' }} <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
     {{else is @key 'includes' '_selection$' }}
-      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}"><small>{{humanize (replace @key '_selection$' '')}}</small> <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
+      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='_selection$' }} <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
     {{else is @key 'includes' '^multi_select_' }}
-      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}"><small>{{humanize (replace @key '^multi_select_' '')}}</small>
+      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^multi_select_' }}
         {{#* inline "iterateMultiSelect"}}
           {{#each multi_vals}}
             {{#is this '!in' "0,false,no" }}
@@ -289,25 +304,25 @@
         </strong>
     </li>
     {{else is @key 'includes' '_blank_yes_no_dont_know' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_yes_no_dont_know' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no_dont_know$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_yes_no_dont_know$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_blank_yes_no' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_blank_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_blank_yes_no$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_yes_no' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_yes_no$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_yes_no$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_no_yes' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_no_yes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_no_yes$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_time$' }}
-      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{local_time this}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong>{{local_time this}}</strong></li>
     {{else is @key 'includes' '_notes' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '_notes$' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_notes$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_description' }}
-      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '^fixed_' }}
-      <li class="<%= field_result_class %>"><small>{{humanize (replace @key '^fixed_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='^fixed_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '^placeholder_' }}
-      <li class="<%= field_result_class %> hidden"><small>{{humanize (replace @key '^placeholder_' '')}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %> hidden">{{> field_label labels='labels_<%=name.underscore%>' replace='^placeholder_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is this 'typeof' 'object'}}
 
         <li class="list-group-item typeof-object-field"><p>{{humanize @key}} <a data-target="#view-object-{{../master_id}}-{{../id}}-{{underscore @key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a></p>
@@ -319,7 +334,7 @@
 
         </li>
     {{else}}
-      <li class="<%= field_result_class %>"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{/is}}
     <% if Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after %>
     {{#is @key '<%=item_flags_after%>'}}
