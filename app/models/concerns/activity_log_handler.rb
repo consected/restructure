@@ -30,7 +30,8 @@ module ActivityLogHandler
     after_save :check_status
     after_save :track_record_update
 
-    after_save :handle_save_triggers
+    # Ensure that referenced items have also saved
+    after_commit :handle_save_triggers
 
     attr_reader :referring_record
     attr_writer :alt_order

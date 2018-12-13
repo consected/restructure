@@ -8,7 +8,7 @@ module DynamicModelHandler
     after_save :add_master_association
     after_save :add_user_access_controls
     after_save :check_implementation_class
-    after_save :update_tracker_events
+    after_commit :update_tracker_events
   end
 
   class_methods do

@@ -27,6 +27,15 @@ class ModelReference < ActiveRecord::Base
     end
   end
 
+  # Is this actually usable???
+  # Currently the validations don't allow a save without a from record, even though we are forcing this
+  # directly against the database for IpaAdlInformantScreener
+  def self.create_from_master_with from_master, to_item
+    ModelReference.create! from_record_type: nil, from_record_id: nil, from_record_master_id: from_master.id,
+                          to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
+                          user: to_item.master_user, current_user: to_item.master_user
+  end
+
   # Find the configuration of the creatable reference for the pair of records representing a ModelReference
   # @return [Hash | nil] nil if there is no match or a Hash like
   #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}

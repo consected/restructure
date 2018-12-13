@@ -53,55 +53,58 @@ module MasterHandler
   end
 
   def create
-
-    set_additional_attributes object_instance
-    if object_instance.save
-      reload_objects
-      handle_additional_updates
-      @id = object_instance.id
-      if object_instance.has_multiple_results
-        @master_objects = object_instance.multiple_results
-        index
-      else
-        object_instance.reload
-        if object_instance.class.no_master_association
-          object_instance.current_user = current_user
+    object_instance.transaction do
+      set_additional_attributes object_instance
+      if object_instance.save
+        reload_objects
+        handle_additional_updates
+        @id = object_instance.id
+        if object_instance.has_multiple_results
+          @master_objects = object_instance.multiple_results
+          index
         else
-          object_instance.master.current_user = current_user
+          object_instance.reload
+          if object_instance.class.no_master_association
+            object_instance.current_user = current_user
+          else
+            object_instance.master.current_user = current_user
+          end
+          show
         end
-        show
+      else
+        logger.warn "Error creating #{human_name}: #{object_instance_errors}"
+        # Force an exception to show if no errors reported for the object instance because
+        # a related object failed to save
+        object_instance.save! unless object_instance.errors.present?
+        render json: object_instance.errors, status: :unprocessable_entity
       end
-    else
-      logger.warn "Error creating #{human_name}: #{object_instance_errors}"
-      # Force an exception to show if no errors reported for the object instance because
-      # a related object failed to save
-      object_instance.save! unless object_instance.errors.present?
-      render json: object_instance.errors, status: :unprocessable_entity
     end
   end
 
   def update
-    if object_instance.update(secure_params)
-      reload_objects
-      handle_additional_updates
-      if object_instance.has_multiple_results
-        @master_objects = object_instance.multiple_results
-        index
-      else
-        object_instance.reload
-        if object_instance.class.no_master_association
-          object_instance.current_user = current_user
+
+    object_instance.transaction do
+      if object_instance.update(secure_params)
+        reload_objects
+        handle_additional_updates
+        if object_instance.has_multiple_results
+          @master_objects = object_instance.multiple_results
+          index
         else
-          object_instance.master.current_user = current_user
+          object_instance.reload
+          if object_instance.class.no_master_association
+            object_instance.current_user = current_user
+          else
+            object_instance.master.current_user = current_user
+          end
+          show
         end
-        show
+
+      else
+        logger.warn "Error updating #{human_name}: #{object_instance_errors}"
+        render json: object_instance.errors, status: :unprocessable_entity
       end
-
-    else
-      logger.warn "Error updating #{human_name}: #{object_instance_errors}"
-      render json: object_instance.errors, status: :unprocessable_entity
     end
-
   end
 
   def destroy

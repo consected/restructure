@@ -1,6 +1,6 @@
 module FieldDefaults
 
-  def self.calculate_default obj, default, type
+  def self.calculate_default obj, default, type=nil
     default ||= ''
 
     res = default
@@ -15,6 +15,8 @@ module FieldDefaults
         res = DateTime.now
       elsif default == 'current_user'
         res = obj.current_user.id
+      elsif default == 'current_user_email'
+        res = obj.current_user.email
       end
     end
 

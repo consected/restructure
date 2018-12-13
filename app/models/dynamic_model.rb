@@ -90,7 +90,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def force_option_config_parse
-    # option_configs force:true
+    option_configs force:true
   end
 
   def update_tracker_events

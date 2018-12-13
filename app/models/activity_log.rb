@@ -88,13 +88,13 @@ class ActivityLog < ActiveRecord::Base
 
   def extra_log_type_valid?
       ExtraLogType.parse_config(self)
-      return true 
+      return true
     rescue => e
       return false
   end
 
   def force_option_config_parse
-    # extra_log_type_configs force:true
+    extra_log_type_configs force:true
   end
 
   # return the activity log implementation class that corresponds to
@@ -414,9 +414,12 @@ class ActivityLog < ActiveRecord::Base
   # Dynamically generate the model and controller for this activity log implementation
   def generate_model
 
+    logger.info "---------------------------------------------------------------------------
+    ************** GENERATING ActivityLog MODEL #{self.name} ****************
+    ---------------------------------------------------------------------------"
+
     failed = false
 
-    logger.info "Generating ActivityLog model #{name}"
 
     if enabled? && !failed
       begin
@@ -526,7 +529,9 @@ class ActivityLog < ActiveRecord::Base
           # another dynamic implementation, such as external identifier
           klass.send(:remove_const, model_class_name) if implementation_class_defined?(klass, fail_without_exception: true)
         rescue => e
+          logger.info "*************************************************************************************"
           logger.info "Failed to remove the old definition of #{model_class_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
         end
 
         res = klass.const_set(model_class_name, a_new_class)
@@ -542,7 +547,9 @@ class ActivityLog < ActiveRecord::Base
           # another dynamic implementation, such as external identifier
           klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)
         rescue => e
+          logger.info "*************************************************************************************"
           logger.info "Failed to remove the old definition of #{c_name}. #{e.inspect}"
+          logger.info "*************************************************************************************"
         end
 
         res2 = klass.const_set(c_name, a_new_controller)
@@ -553,7 +560,9 @@ class ActivityLog < ActiveRecord::Base
       rescue=>e
         failed = true
         puts "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "*************************************************************************************"
         logger.info "Failure creating activity log model definition. #{e.inspect}\n#{e.backtrace.join("\n")}"
+        logger.info "*************************************************************************************"
 
       end
     end

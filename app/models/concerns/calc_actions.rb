@@ -223,7 +223,8 @@ module CalcActions
       end
       @condition_scope = @condition_scope.order(id: :desc).limit(1)
       if @this_val_where && @condition_scope.first
-        @this_val = @condition_scope.first&.send(@this_val_where[:assoc]).first&.attributes[@this_val_where[:field_name].to_s]
+        # @this_val = @condition_scope.first&.send(@this_val_where[:assoc]).first&.attributes[@this_val_where[:field_name].to_s]
+        @this_val = @condition_scope.pluck("#{@this_val_where[:table_name]}.#{@this_val_where[:field_name]}").first
       end
       @condition_scope
     end
@@ -368,7 +369,11 @@ module CalcActions
                 @extra_conditions << vv
               else
                 if val == 'return_value'
-                  @this_val_where = {assoc: ModelReference.record_type_to_ns_table_name(c_table).to_sym, field_name: field_name}
+                  @this_val_where = {
+                    assoc: c_table.to_sym,
+                    field_name: field_name,
+                    table_name: ModelReference.record_type_to_ns_table_name(c_table).to_sym
+                  }
                 else
                   @condition_values[table_name] ||= {}
                   @condition_values[table_name][field_name] = dynamic_value(val)

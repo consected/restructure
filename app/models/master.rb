@@ -131,7 +131,7 @@ class Master < ActiveRecord::Base
   end
 
   def create_master_with_assoc assoc_sym
-    raise FphsException.new "create master with configuration includes a non-existent model association" unless self.class.get_all_associations.include? assoc_sym
+    raise FphsException.new "create master with configuration includes a non-existent model association" unless self.class.get_all_associations.include? assoc_sym.to_s
     self.send(assoc_sym)
   end
 

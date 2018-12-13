@@ -6,8 +6,9 @@ class SaveTriggers::SaveTriggersBase
     @config = config
     raise FphsException.new "save_trigger configuration must be a Hash" unless config.is_a? Hash
     @item = item
+    @master = item.master
     raise FphsException.new "save_trigger item must be set" unless item
-    @user = item.master.current_user
+    @user = @master.current_user
     raise FphsException.new "save_trigger item master user must be set" unless item.master && item.master.current_user
   end
 

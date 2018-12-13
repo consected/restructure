@@ -1,10 +1,11 @@
 module RankHandler
   extend ActiveSupport::Concern
 
+  PrimaryRank = 10
+  SecondaryRank = 5
+  InactiveRank = 0
+  
   included do
-    PrimaryRank = 10
-    SecondaryRank = 5
-    InactiveRank = 0
 
     after_save :handle_primary_status, if: ->{respond_to? :rank}
 
