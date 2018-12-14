@@ -100,7 +100,7 @@ class ExtraLogType < ExtraOptions
           to_class = ModelReference.to_record_class_for_type(mn)
           refitem[mn][:to_record_label] = conf[:label] || to_class&.human_name
           refitem[mn][:no_master_association] = to_class.no_master_association if to_class&.respond_to?(:no_master_association)
-          refitem[mn][:to_model_name_us] = to_class&.to_s.ns_underscore
+          refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
         end
       end
 
@@ -145,7 +145,7 @@ class ExtraLogType < ExtraOptions
       # Neither create or update - so just return
       return true
     end
-    
+
     res = ca.calc_save_action_if
 
     if res.is_a?(Hash) && res[action]

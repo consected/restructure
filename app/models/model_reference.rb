@@ -41,6 +41,7 @@ class ModelReference < ActiveRecord::Base
   #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}
   def self.find_config_for from_item, to_item
     begin
+      return unless from_item
       fr = from_item
       fr.current_user = to_item.master_user
 
@@ -78,20 +79,31 @@ class ModelReference < ActiveRecord::Base
   # If belonging to a master record, the to_record_type must be specified.
   # These can be further limited by a filter_by condition on the to_record,
   # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
-  def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil
+  def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false
 
     if to_record_type
-      to_record_type = to_record_class_for_type(to_record_type).name
+      to_record_type_class = to_record_class_for_type(to_record_type)
+      to_record_type = to_record_type_class.name if to_record_type_class
     end
 
-    if from_item_or_master.is_a? Master
-      res = ModelReference.find_records_in_master to_record_type: to_record_type, master: from_item_or_master, filter_by: filter_by
+    if without_reference
+      recs = to_record_type_class.where(master: from_item_or_master)
+      res = []
+      recs.each do |r|
+        res << ModelReference.new( from_record_type: nil, from_record_id: nil, from_record_master_id: from_item_or_master.id,
+                            to_record_type: r.class.name, to_record_id: r.id, to_record_master_id: r.master_id,
+                            current_user: from_item_or_master.current_user)
+      end
     else
-      cond = {from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id}
-      cond[:to_record_type] = to_record_type if to_record_type
-      res = ModelReference.where cond
-      # Handle the filter_by clause
-      res = res.select {|mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v }   } if filter_by
+      if from_item_or_master.is_a? Master
+        res = ModelReference.find_records_in_master to_record_type: to_record_type, master: from_item_or_master, filter_by: filter_by
+      else
+        cond = {from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id}
+        cond[:to_record_type] = to_record_type if to_record_type
+        res = ModelReference.where cond
+        # Handle the filter_by clause
+        res = res.select {|mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v }   } if filter_by
+      end
     end
 
     # Set the current user, so that access controls can be correctly applied
@@ -161,6 +173,10 @@ class ModelReference < ActiveRecord::Base
 
   def to_record_type_us
     to_record_type.ns_underscore
+  end
+
+  def to_record_type_us_plural
+    to_record_type.ns_underscore.pluralize
   end
 
   def to_record_short_type_us
@@ -278,6 +294,7 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :to_record_master_id
     extras[:methods] << :to_record_type
     extras[:methods] << :to_record_type_us
+    extras[:methods] << :to_record_type_us_plural
     extras[:methods] << :to_record_short_type_us
     extras[:methods] << :to_record_label
     extras[:methods] << :to_record_viewable

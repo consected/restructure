@@ -303,6 +303,8 @@ module ActivityLogHandler
           res += ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config[:filter_by]
         elsif f == 'master'
           res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config[:filter_by]
+        elsif f == 'any'
+          res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config[:filter_by], without_reference: true
         end
       end
     end

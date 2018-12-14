@@ -1,7 +1,7 @@
 <%
   primary_model = form_object_instance.class
 
-  f_attr = f_attr
+  f_attr = primary_model.external_id_attribute
   unless primary_model.prevent_edit? %>
   <%= form.label f_attr, label_for(f_attr, labels) %>
   <% form_object_instance.send("#{f_attr}=", (form_object_instance.attributes[f_attr] || '').to_s.upcase)  %>
