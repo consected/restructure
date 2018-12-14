@@ -47,7 +47,7 @@ class ModelReference < ActiveRecord::Base
       cmr = fr.creatable_model_references
       if cmr
         cm = cmr.select {|k,v| v.first.last[:ref_type] == to_item.class.name.ns_underscore.to_sym}.first
-        config = cm.last.first.last[:ref_config]
+        config = cm.last.first.last[:ref_config] if cm
       end
     rescue => e
       Rails.logger.info "find_config_for raised an exception: #{e.inspect}\n#{e.backtrace.join("/n")}"

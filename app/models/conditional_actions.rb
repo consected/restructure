@@ -53,19 +53,28 @@ class ConditionalActions
       else
         sa.each do |on_act, conf|
           conf.each do |do_act, conf_act|
-            if conf_act[:if]
-              ca = ConditionalActions.new conf_act[:if], @current_instance
-              succ = ca.calc_action_if
-            else
-              succ = true
-            end
-            if succ
-              res[on_act] ||= {}
-              if conf_act[:value]
-                res[on_act].merge!( do_act => conf_act[:value] )
+            if conf_act.is_a? Hash
+              if conf_act[:if]
+                ca = ConditionalActions.new conf_act[:if], @current_instance
+                succ = ca.calc_action_if
               else
-                res[on_act][do_act] = true
+                succ = true
               end
+              if succ
+                res[on_act] ||= {}
+                if conf_act[:value]
+                  res[on_act].merge!( do_act => conf_act[:value] )
+                else
+                  res[on_act][do_act] = true
+                end
+              end
+            else
+              # Default if this was not a Hash definition
+              # For example, an array might be used in the create_reference, allowing
+              # multiple items to be performed with the same name. This just passes responsibility
+              # for checking the condition to the processor
+              res[on_act] ||= {}
+              res[on_act][do_act] = true
             end
           end
         end

@@ -145,7 +145,7 @@ class ExtraLogType < ExtraOptions
       # Neither create or update - so just return
       return true
     end
-
+    
     res = ca.calc_save_action_if
 
     if res.is_a?(Hash) && res[action]

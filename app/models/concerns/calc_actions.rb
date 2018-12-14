@@ -228,7 +228,7 @@ module CalcActions
         if first_res
           tn = first_res.class.table_name
           fn = first_res.class.attribute_names.select{|s| s == @this_val_where[:field_name].to_s}.first
-          @this_val = @condition_scope.pluck("#{tn}.#{fn}").first
+          @this_val = @condition_scope.reorder("#{tn}.id desc").pluck("#{tn}.#{fn}").first
         end
       end
       @condition_scope
