@@ -28,11 +28,15 @@
                       raynauds_syndrome_details,
 
                       hypertension_diagnosis_blank_yes_no_dont_know,
+                      hypertension_medications_blank_yes_no,
                       hypertension_diagnosis_details,
 
                       diabetes_diagnosis_blank_yes_no_dont_know,
+                      diabetes_medications_blank_yes_no,
                       diabetes_diagnosis_details,
+
                       high_cholesterol_diagnosis_blank_yes_no_dont_know,
+                      high_cholesterol_medications_blank_yes_no,
                       high_cholesterol_diagnosis_details,
 
                       other_heart_conditions_blank_yes_no_dont_know,
@@ -81,11 +85,15 @@
                       NEW.raynauds_syndrome_details,
 
                       NEW.hypertension_diagnosis_blank_yes_no_dont_know,
+                      NEW.hypertension_medications_blank_yes_no,
                       NEW.hypertension_diagnosis_details,
 
                       NEW.diabetes_diagnosis_blank_yes_no_dont_know,
+                      NEW.diabetes_medications_blank_yes_no,
                       NEW.diabetes_diagnosis_details,
+
                       NEW.high_cholesterol_diagnosis_blank_yes_no_dont_know,
+                      NEW.high_cholesterol_medications_blank_yes_no,
                       NEW.high_cholesterol_diagnosis_details,
 
                       NEW.other_heart_conditions_blank_yes_no_dont_know,
@@ -140,12 +148,15 @@
           -- other_conditions_blank_yes_no_dont_know varchar,
           -- other_conditions_details varchar,
           hypertension_diagnosis_blank_yes_no_dont_know varchar,
+          hypertension_medications_blank_yes_no varchar,
           hypertension_diagnosis_details varchar,
 
-
           diabetes_diagnosis_blank_yes_no_dont_know varchar,
+          diabetes_medications_blank_yes_no varchar,
           diabetes_diagnosis_details varchar,
+
           high_cholesterol_diagnosis_blank_yes_no_dont_know varchar,
+          high_cholesterol_medications_blank_yes_no varchar
           high_cholesterol_diagnosis_details varchar,
 
           other_heart_conditions_blank_yes_no_dont_know varchar,
@@ -206,12 +217,15 @@
           -- other_conditions_blank_yes_no_dont_know varchar,
           -- other_conditions_details varchar,
           hypertension_diagnosis_blank_yes_no_dont_know varchar,
+          hypertension_medications_blank_yes_no varchar,
           hypertension_diagnosis_details varchar,
 
-
           diabetes_diagnosis_blank_yes_no_dont_know varchar,
+          diabetes_medications_blank_yes_no varchar,
           diabetes_diagnosis_details varchar,
+
           high_cholesterol_diagnosis_blank_yes_no_dont_know varchar,
+          high_cholesterol_medications_blank_yes_no varchar
           high_cholesterol_diagnosis_details varchar,
 
           other_heart_conditions_blank_yes_no_dont_know varchar,

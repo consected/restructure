@@ -1,4 +1,4 @@
--- DROP FUNCTION IF EXISTS activity_log_ipa_assignment_perform_screening_callback() CASCADE;
+DROP FUNCTION IF EXISTS activity_log_ipa_assignment_perform_screening_callback() CASCADE;
 --
 -- CREATE OR REPLACE FUNCTION activity_log_ipa_assignment_perform_screening_callback() RETURNS trigger
 -- LANGUAGE plpgsql

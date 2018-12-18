@@ -271,8 +271,10 @@ class ModelReference < ActiveRecord::Base
 
     to_record_class_for_type(to_record_type).where(cond).each do |i|
       rec = ModelReference.where( from_record_master_id: master.id, to_record_type: to_record_type, to_record_id: i.id, to_record_master_id: i.master_id).first
-      rec.to_record = i
-      res << rec
+      if rec
+        rec.to_record = i
+        res << rec
+      end
     end
 
     res

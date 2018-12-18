@@ -11,17 +11,17 @@
 -- med_infusion_device_blank_yes_no_dont_know, med_infusion_device_details, metal_blank_yes_no_dont_know, metal_details, current_meds_blank_yes_no_dont_know, current_meds_details,
 -- other_chronic_problems_blank_yes_no_dont_know, other_chronic_problems_details, hospital_visits_blank_yes_no_dont_know, hospital_visits_details,
 -- dietary_restrictions_blank_yes_no_dont_know, dietary_restrictions_details, anything_else_blank_yes_no, anything_else_details,
--- 
+--
 
 
-      CREATE FUNCTION log_ipa_ps_tms_test_update() RETURNS trigger
+        CREATE or replace FUNCTION log_ipa_ps_tms_test_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO ipa_ps_tms_test_history
                   (
                       master_id,
-                      convulsion_or_seizue_blank_yes_no_dont_know,
+                      convulsion_or_seizure_blank_yes_no_dont_know,
                       epilepsy_blank_yes_no_dont_know,
                       fainting_blank_yes_no_dont_know,
                       concussion_blank_yes_no_dont_know,
@@ -53,7 +53,7 @@
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.convulsion_or_seizue_blank_yes_no_dont_know,
+                      NEW.convulsion_or_seizure_blank_yes_no_dont_know,
                       NEW.epilepsy_blank_yes_no_dont_know,
                       NEW.fainting_blank_yes_no_dont_know,
                       NEW.concussion_blank_yes_no_dont_know,
@@ -90,7 +90,7 @@
       CREATE TABLE ipa_ps_tms_test_history (
           id integer NOT NULL,
           master_id integer,
-          convulsion_or_seizue_blank_yes_no_dont_know varchar,
+          convulsion_or_seizure_blank_yes_no_dont_know varchar,
           epilepsy_blank_yes_no_dont_know varchar,
           fainting_blank_yes_no_dont_know varchar,
           concussion_blank_yes_no_dont_know varchar,
@@ -137,7 +137,7 @@
       CREATE TABLE ipa_ps_tms_tests (
           id integer NOT NULL,
           master_id integer,
-          convulsion_or_seizue_blank_yes_no_dont_know varchar,
+          convulsion_or_seizure_blank_yes_no_dont_know varchar,
           epilepsy_blank_yes_no_dont_know varchar,
           fainting_blank_yes_no_dont_know varchar,
           concussion_blank_yes_no_dont_know varchar,

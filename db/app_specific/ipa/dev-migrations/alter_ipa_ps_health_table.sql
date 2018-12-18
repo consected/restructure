@@ -28,11 +28,15 @@ set search_path = ml_app, ipa_ops;
                       raynauds_syndrome_details,
 
                       hypertension_diagnosis_blank_yes_no_dont_know,
+                      hypertension_medications_blank_yes_no,
                       hypertension_diagnosis_details,
 
                       diabetes_diagnosis_blank_yes_no_dont_know,
+                      diabetes_medications_blank_yes_no,
                       diabetes_diagnosis_details,
+
                       high_cholesterol_diagnosis_blank_yes_no_dont_know,
+                      high_cholesterol_medications_blank_yes_no,
                       high_cholesterol_diagnosis_details,
 
                       other_heart_conditions_blank_yes_no_dont_know,
@@ -81,11 +85,15 @@ set search_path = ml_app, ipa_ops;
                       NEW.raynauds_syndrome_details,
 
                       NEW.hypertension_diagnosis_blank_yes_no_dont_know,
+                      NEW.hypertension_medications_blank_yes_no,
                       NEW.hypertension_diagnosis_details,
 
                       NEW.diabetes_diagnosis_blank_yes_no_dont_know,
+                      NEW.diabetes_medications_blank_yes_no,
                       NEW.diabetes_diagnosis_details,
+
                       NEW.high_cholesterol_diagnosis_blank_yes_no_dont_know,
+                      NEW.high_cholesterol_medications_blank_yes_no,
                       NEW.high_cholesterol_diagnosis_details,
 
                       NEW.other_heart_conditions_blank_yes_no_dont_know,
@@ -162,6 +170,19 @@ set search_path = ml_app, ipa_ops;
 
         add column neurological_surgeries_blank_yes_no_dont_know varchar,
         add column neurological_surgeries_details varchar
+      ;
+
+
+      ALTER TABLE ipa_ps_health_history
+      add column hypertension_medications_blank_yes_no varchar,
+      add column diabetes_medications_blank_yes_no varchar,
+      add column high_cholesterol_medications_blank_yes_no varchar
+      ;
+
+      ALTER TABLE ipa_ps_healths
+      add column hypertension_medications_blank_yes_no varchar,
+      add column diabetes_medications_blank_yes_no varchar,
+      add column high_cholesterol_medications_blank_yes_no varchar
       ;
 
       COMMIT;
