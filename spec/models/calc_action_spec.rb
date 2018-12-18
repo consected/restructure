@@ -957,6 +957,71 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
+    # Special check to ensure that extra conditions like these work when there are no standard equality conditions
+    # included (this was previously a bug where the extra conditions were ignored)
+    conf = {
+      any: {
+        activity_log__player_contact_phones: {
+          id: @al.id
+        }
+      },
+      all: {
+        activity_log__player_contact_phones: {
+          created_at: {
+            condition: "<",
+            value: "#{@al.created_at + 1.second}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    conf = {
+      any: {
+        activity_log__player_contact_phones: {
+          id: @al.id
+        }
+      },
+      all: {
+        activity_log__player_contact_phones: {
+          created_at: {
+            condition: ">",
+            value: "#{@al.created_at + 1.second}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+
+    # Special conditions are not supported on any or not_any
+    # Ensure we get an obvious exception
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id
+        }
+      },
+      any: {
+        activity_log__player_contact_phones: {
+          created_at: {
+            condition: "<",
+            value: "#{@al.created_at + 1.second}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect {
+      res.calc_action_if
+    }.to raise_error(FphsException)
+
+
   end
 
   it "returns the last value from a condition as this_val attribute" do

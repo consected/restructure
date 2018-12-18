@@ -14,7 +14,7 @@ LANGUAGE plpgsql
 AS $$
     DECLARE
       initial_screening RECORD;
-      football_experience RECORD;
+      -- football_experience RECORD;
       subject_size RECORD;
       tms RECORD;
       mri RECORD;
@@ -36,13 +36,13 @@ AS $$
     LIMIT 1;
 
 
-    -- Get the latest football experience record
-    SELECT *
-    INTO football_experience
-    FROM ipa_ps_football_experiences
-    WHERE master_id = NEW.master_id
-    ORDER BY id DESC
-    LIMIT 1;
+    -- -- Get the latest football experience record
+    -- SELECT *
+    -- INTO football_experience
+    -- FROM ipa_ps_football_experiences
+    -- WHERE master_id = NEW.master_id
+    -- ORDER BY id DESC
+    -- LIMIT 1;
 
     -- Get the latest subject size record
     SELECT *
@@ -102,10 +102,10 @@ AS $$
 
       ix_consent_blank_yes_no,
       ix_consent_details,
-      ix_not_pro_blank_yes_no,
-      ix_not_pro_details,
-      ix_age_range_blank_yes_no,
-      ix_age_range_details,
+      -- ix_not_pro_blank_yes_no,
+      -- ix_not_pro_details,
+      -- ix_age_range_blank_yes_no,
+      -- ix_age_range_details,
       ix_weight_ok_blank_yes_no,
       ix_weight_ok_details,
       ix_no_seizure_blank_yes_no,
@@ -148,17 +148,17 @@ AS $$
       -- ix_consent_details
       'Responded "yes" to all questions including the final confirmation to continue in Start Phone Screening form. Scored "' || tmoca.tmoca_score || '" in T-MoCA.',
 
-      --ix_not_pro_blank_yes_no
-      CASE WHEN football_experience.played_in_nfl_blank_yes_no = 'no' THEN 'yes' ELSE 'no' END,
-      --ix_not_pro_details
-'Responded "' || football_experience.played_in_nfl_blank_yes_no || '" to question "Have you ever played in the National Football League (NFL)?" in Football Experience form.',
-
-      --ix_age_range_blank_yes_no
-      CASE WHEN football_experience.age >= 24
-        AND football_experience.age <= 55
-        THEN 'yes' ELSE 'no' END,
-      --ix_age_range_details
-'Stated age ' || football_experience.age || ' in Football Experience form',
+--       --ix_not_pro_blank_yes_no
+--       CASE WHEN football_experience.played_in_nfl_blank_yes_no = 'no' THEN 'yes' ELSE 'no' END,
+--       --ix_not_pro_details
+-- 'Responded "' || football_experience.played_in_nfl_blank_yes_no || '" to question "Have you ever played in the National Football League (NFL)?" in Football Experience form.',
+--
+--       --ix_age_range_blank_yes_no
+--       CASE WHEN football_experience.age >= 24
+--         AND football_experience.age <= 55
+--         THEN 'yes' ELSE 'no' END,
+--       --ix_age_range_details
+-- 'Stated age ' || football_experience.age || ' in Football Experience form',
 
       --ix_weight_ok_blank_yes_no
       CASE WHEN subject_size.weight <= 450 THEN 'yes' ELSE 'no' END,
@@ -171,10 +171,10 @@ AS $$
 'Responded "' || tms.convulsion_or_seizue_blank_yes_no_dont_know || '" to question "Have you ever had a convulsion or a seizure?" in TMS form.',
 
       --ix_no_device_impl_blank_yes_no
-      CASE WHEN mri.electrical_implants_blank_yes_no_dont_know = 'no' AND tms.pacemaker_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
+      CASE WHEN mri.electrical_implants_blank_yes_no_dont_know = 'no' AND health.caridiac_pacemaker_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,
       --ix_no_device_impl_details
 'Responded "' || mri.electrical_implants_blank_yes_no_dont_know || '" to question "Do you have any electrical or battery-powered implants such as a cardiac pacemaker or a perfusion pump?" in MRI form.
-Responded "' || tms.pacemaker_blank_yes_no_dont_know || '" to question "Do you have a cardiac pacemaker or intracardiac lines?" in TMS form.',
+Responded "' || health.caridiac_pacemaker_blank_yes_no_dont_know || '" to question "Do you have a cardiac pacemaker or intracardiac lines?" in Health form.',
 
       --ix_no_ferromagnetic_impl_blank_yes_no
       CASE WHEN tms.metal_blank_yes_no_dont_know = 'no'

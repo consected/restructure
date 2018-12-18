@@ -73,7 +73,7 @@ module CalcActions
             res_q = true
             # equivalent of (cond1 AND cond2 AND cond3 ...)
             # These conditions are easy to handle as a standard query
-            unless @condition_values.empty?
+            unless @condition_values.empty? && @extra_conditions.empty?
               calc_query @condition_values, @extra_conditions
               res_q = calc_query_conditions
               merge_failures({condition_type => @condition_config}) if !res_q
@@ -91,7 +91,7 @@ module CalcActions
             cond_res = true
             res_q = true
             # equivalent of NOT(cond1 AND cond2 AND cond3 ...)
-            unless @condition_values.empty?
+            unless @condition_values.empty? && @extra_conditions.empty?
               calc_query @condition_values, @extra_conditions
               res_q = calc_query_conditions
             end
@@ -110,6 +110,9 @@ module CalcActions
 
 
           elsif condition_type == :any
+
+            raise FphsException.new "@extra_conditions not supported with any / not_any conditions" unless @extra_conditions.empty?
+
             cond_res = false
             res_q = false
             # equivalent of (cond1 OR cond2 OR cond3 ...)
@@ -140,6 +143,9 @@ module CalcActions
 
 
           elsif condition_type == :not_any
+
+            raise FphsException.new "@extra_conditions not supported with any / not_any conditions" unless @extra_conditions.empty?
+
             cond_res = true
             # equivalent of NOT(cond1 OR cond2 OR cond3 ...)
             # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
@@ -208,7 +214,7 @@ module CalcActions
 
     def calc_query conditions, extra_conditions = [], bool = 'AND'
 
-      unless conditions.first.last.length == 0
+      unless conditions.first && conditions.first.last&.length == 0
         # Conditions are available - apply them as a where clause on top of the base query
         @condition_scope = @base_query.where(conditions)
       else

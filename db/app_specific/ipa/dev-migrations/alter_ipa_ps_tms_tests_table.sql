@@ -10,7 +10,7 @@ set search_path = ml_app, ipa_ops;
                   INSERT INTO ipa_ps_tms_test_history
                   (
                       master_id,
-                      convulsion_or_seizue_blank_yes_no_dont_know,
+                      convulsion_or_seizure_blank_yes_no_dont_know,
                       epilepsy_blank_yes_no_dont_know,
                       fainting_blank_yes_no_dont_know,
                       concussion_blank_yes_no_dont_know,
@@ -42,7 +42,7 @@ set search_path = ml_app, ipa_ops;
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.convulsion_or_seizue_blank_yes_no_dont_know,
+                      NEW.convulsion_or_seizure_blank_yes_no_dont_know,
                       NEW.epilepsy_blank_yes_no_dont_know,
                       NEW.fainting_blank_yes_no_dont_know,
                       NEW.concussion_blank_yes_no_dont_know,
@@ -93,5 +93,14 @@ set search_path = ml_app, ipa_ops;
         drop column past_mri_details,
         drop column neuro_history_details
       ;
+
+      alter TABLE ipa_ps_tms_test_history
+        rename column convulsion_or_seizue_blank_yes_no_dont_know to convulsion_or_seizure_blank_yes_no_dont_know
+        ;
+
+      alter TABLE ipa_ps_tms_tests
+      rename column convulsion_or_seizue_blank_yes_no_dont_know to convulsion_or_seizure_blank_yes_no_dont_know
+      ;
+
 
       COMMIT;
