@@ -98,7 +98,12 @@ class ExtraLogType < ExtraOptions
       self.references.each do |k, refitem|
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)
-          refitem[mn][:to_record_label] = conf[:label] || to_class&.human_name
+          elt = conf[:add_with] && conf[:add_with][:extra_log_type]
+          add_with_elt = nil
+          if elt && to_class.respond_to?(:human_name_for)
+            add_with_elt = to_class.human_name_for(elt)
+          end
+          refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class&.human_name
           refitem[mn][:no_master_association] = to_class.no_master_association if to_class&.respond_to?(:no_master_association)
           refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
         end

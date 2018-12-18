@@ -124,11 +124,16 @@ module ActivityLogHandler
     def extra_log_type_config_for name
       extra_log_type_configs.select{|s| s.name == name.to_s.underscore.to_sym}.first || extra_log_type_configs.first
     end
+
+    def human_name_for extra_log_type
+      extra_log_type.to_s.humanize
+    end
   end
 
 
   def human_name
-    self.class.activity_log_name
+    return extra_log_type_config.label || extra_log_type.to_s.humanize
+    # self.class.activity_log_name
   end
 
 
