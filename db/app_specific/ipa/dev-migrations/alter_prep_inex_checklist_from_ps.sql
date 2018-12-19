@@ -9,6 +9,7 @@ Ensure it references the original phone screen dynamic model record.
 
 -- DROP FUNCTION IF EXISTS ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() CASCADE;
 
+
 CREATE OR REPLACE FUNCTION ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
@@ -193,13 +194,17 @@ Responded "' || mri.metal_jewelry_blank_yes_no || '" to question "Do you have an
 'Responded "' || sleep.sleep_disorder_blank_yes_no_dont_know || '" to question "Have you ever been diagnosed with sleep apnea or any other sleep disorders (e.g. narcolepsy)" in Sleep form.',
 
       --ix_diagnosed_heart_stroke_or_meds_blank_yes_no
-      CASE WHEN health.other_heart_conditions_blank_yes_no_dont_know = 'yes'
-      THEN 'yes' ELSE '' END,
+      CASE WHEN health.other_heart_conditions_blank_yes_no_dont_know = 'yes' THEN 'yes'
+      WHEN health.hypertension_medications_blank_yes_no = 'yes' AND health.diabetes_medications_blank_yes_no = 'yes' THEN 'yes'
+      WHEN health.hypertension_medications_blank_yes_no = 'yes' AND health.high_cholesterol_medications_blank_yes_no = 'yes' THEN 'yes'
+      WHEN health.diabetes_medications_blank_yes_no = 'yes' AND health.high_cholesterol_medications_blank_yes_no = 'yes' THEN 'yes'
+      ELSE 'no' END,
 
       --ix_diagnosed_heart_stroke_or_meds_details
 'Responded "' || health.other_heart_conditions_blank_yes_no_dont_know || '" to question "Have you been diagnosed with any other heart conditions or problems (e.g. heart attack, stroke, irregular heart rhythms, heart failure)?" in Health form.
-Responded "' || health.hypertension_diagnosis_blank_yes_no_dont_know || '" to question "Have you been diagnosed with high blood pressure (hypertension), diabetes or high cholesterol?" in Health form.
-To the follow up question "IF YES Have you ever or are you currently taking medications to manage these? Please describe." responded "' || health.hypertension_diagnosis_details || '"',
+Responded "' || health.hypertension_medications_blank_yes_no || '" to question "Have you been diagnosed with high blood pressure (hypertension)? + IF YES Have you ever or are you currently taking medications to manage these?" in Health form.
+Responded "' || health.diabetes_medications_blank_yes_no || '" to question "Have you been diagnosed with diabetes?? + IF YES Have you ever or are you currently taking medications to manage these?" in Health form.
+Responded "' || health.high_cholesterol_medications_blank_yes_no || '" to question "Have you been diagnosed with high cholesterol? + IF YES Have you ever or are you currently taking medications to manage these?" in Health form.',
 
       --ix_chronic_pain_and_meds_blank_yes_no
       CASE WHEN health.chronic_pain_blank_yes_no = 'yes'
