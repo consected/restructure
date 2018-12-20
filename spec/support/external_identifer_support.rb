@@ -100,6 +100,8 @@ module ExternalIdentifierSupport
 
 
     @external_identifier = ExternalIdentifier.create! att
+    @external_identifier.update_tracker_events
+    @external_identifier
   end
 
 end
