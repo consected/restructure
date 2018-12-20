@@ -4,7 +4,7 @@ module AdminActionLogging
 
   included do
     before_action :capture_prev_value, only: [:update]
-    after_action :log_admin_item_action, only: [:create, :update]
+    after_action :log_admin_item_action, only: [:create, :update], unless: -> {object_instance.errors.present?}
 
     ExcludeClasses = ['Devise::SessionsController', 'Devise::RegistrationsController']
   end

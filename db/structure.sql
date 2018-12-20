@@ -15524,7 +15524,9 @@ CREATE TABLE ml_app.users_contact_infos (
     phone_number character varying,
     alt_email character varying,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    admin_id integer,
+    disabled boolean
 );
 
 
@@ -22145,6 +22147,13 @@ CREATE INDEX index_user_roles_on_user_id ON ml_app.user_roles USING btree (user_
 
 
 --
+-- Name: index_users_contact_infos_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_users_contact_infos_on_admin_id ON ml_app.users_contact_infos USING btree (admin_id);
+
+
+--
 -- Name: index_users_contact_infos_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -26564,6 +26573,14 @@ ALTER TABLE ONLY ml_app.nfs_store_filters
 
 
 --
+-- Name: fk_rails_7808f5fdb3; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.users_contact_infos
+    ADD CONSTRAINT fk_rails_7808f5fdb3 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -27836,4 +27853,6 @@ INSERT INTO schema_migrations (version) VALUES ('20181205103333');
 INSERT INTO schema_migrations (version) VALUES ('20181206123849');
 
 INSERT INTO schema_migrations (version) VALUES ('20181220131156');
+
+INSERT INTO schema_migrations (version) VALUES ('20181220160047');
 

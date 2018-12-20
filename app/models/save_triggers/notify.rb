@@ -5,8 +5,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   def self.config_def if_extras: {}
     {
       type: "email|sms",
-      role: "(optional) role name to notify",
-      users: "(optional) list of users to notify",
+      role: "(optional) role name to notify - or reference like {this: {user_id: return_value} }",
+      users: "(optional) list of users to notify - or reference this: {this: {role_names: return_value} }",
       layout_template: "name of layout template",
       content_template: "name of content template",
       subject: "subject text",

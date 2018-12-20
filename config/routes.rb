@@ -45,6 +45,9 @@ Rails.application.routes.draw do
 
   end
 
+  namespace :users do
+    resources :contact_infos, except: [:show, :destroy]
+  end
 
 
 

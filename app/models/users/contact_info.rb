@@ -1,15 +1,20 @@
 class Users::ContactInfo < Admin::AdminBase
+
+
+  include AdminHandler
+
   belongs_to :user
 
   before_validation :clean_sms_number
   validate :sms_number_valid
+  validates :user_id, presence: true, uniqueness: true
 
 
   def clean_sms_number
     res = ""
 
-    return unless sms_number && sms_number[0] == '+'
-    return unless sms_number.length > 6
+    return unless self.sms_number && self.sms_number[0] == '+'
+    return unless self.sms_number.length > 6
 
     res << '+'
     numbers = %w(0 1 2 3 4 5 6 7 8 9)
