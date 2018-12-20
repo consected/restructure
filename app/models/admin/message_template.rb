@@ -10,12 +10,14 @@ class Admin::MessageTemplate < ActiveRecord::Base
   scope :layout_templates, ->{ where template_type: 'layout' }
   scope :dialog_templates, ->{ where message_type: 'dialog' }
 
-  def self.named name
-    where(name: name).first
+  def self.named name, type: nil
+    res = where(name: name)
+    res = res.where(message_type: type) if type
+    res.first
   end
 
   def self.message_types
-    [:email, :dialog]
+    [:email, :dialog, :sms]
   end
 
   def self.template_types

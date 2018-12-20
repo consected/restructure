@@ -36,6 +36,8 @@ gem 'rubyzip'
 gem 'activerecord-import'
 gem 'mime-types'
 
+gem 'aws-sdk-sns'
+
 gem 'crass', '~> 1.0.4'
 
 group :development do

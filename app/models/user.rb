@@ -7,6 +7,7 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
 
   belongs_to :admin
+  has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id
 
   has_many :user_access_controls, autosave: true, class_name: "Admin::UserAccessControl"
   belongs_to :app_type, class_name: "Admin::AppType"

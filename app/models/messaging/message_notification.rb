@@ -31,11 +31,11 @@ class Messaging::MessageNotification < ActiveRecord::Base
   attr_accessor :generated_text, :disabled, :admin_id
 
   def layout_template
-    Admin::MessageTemplate.active.layout_templates.named layout_template_name
+    Admin::MessageTemplate.active.layout_templates.named layout_template_name, type: message_type
   end
 
   def content_template
-    Admin::MessageTemplate.active.content_templates.named content_template_name
+    Admin::MessageTemplate.active.content_templates.named content_template_name, type: message_type
   end
 
   # The message notification works with an underlying item (likely an activity log implementation)
@@ -100,10 +100,20 @@ class Messaging::MessageNotification < ActiveRecord::Base
     res = super()
     return res if res
     res = recipient_users.pluck(:email)
-    self.recipient_emails = res
+    self.recipient_emails = res.uniq
     self.save
     res
   end
+
+  def recipient_sms_numbers
+    return @recipient_numbers if @recipient_numbers
+    recipient_users.reject {|u| !u.contact_info || u.contact_info.sms_number.blank? }.map {|u| u.contact_info&.sms_number }.uniq
+  end
+
+  def recipient_sms_numbers= nums
+    @recipient_numbers = nums
+  end
+
 
   def from_user_email
     res = super()
@@ -114,24 +124,6 @@ class Messaging::MessageNotification < ActiveRecord::Base
     res
   end
 
-  # # Handle new notification records that may have been added by a DB trigger
-  # # Run each message notification in a job, to avoid blocking
-  # def self.handle_notification_records item
-  #
-  #   mns = Messaging::MessageNotification.where(item_id: item.id, item_type: item.class.name, status: nil).all
-  #
-  #   logger.info "Got message notifications #{mns.pluck(:id)}"
-  #
-  #   return if mns.length == 0
-  #
-  #   logger.info "Creating a job for each of #{mns.pluck(:id)}"
-  #   # Create a background job for each message notification
-  #   mns.each do |mn|
-  #     logger.info "Creating a new job for #{mn.id}"
-  #     HandleMessageNotificationJob.perform_later(mn)
-  #   end
-  #
-  # end
 
   # Process this Messaging::MessageNotification record
   def handle_notification_now logger: Rails.logger
@@ -143,7 +135,13 @@ class Messaging::MessageNotification < ActiveRecord::Base
       begin
         self.generate
 
-        NotificationMailer.send_message_notification(self, logger: logger).deliver_now
+        if message_type&.to_sym == :email
+          NotificationMailer.send_message_notification(self, logger: logger).deliver_now
+        elsif message_type&.to_sym == :sms
+          Messaging::NotificationSms.send_now(self, logger: logger)
+        else
+          raise FphsException.new "No recognized message type for message notification: #{message_type}"
+        end
         logger.info "Deliver now #{self.id}"
         self.update! status: StatusComplete
         logger.info "Handled item #{self.id}"
