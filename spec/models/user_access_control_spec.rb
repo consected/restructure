@@ -350,6 +350,8 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     }
 
     e = ExternalIdentifier.create! vals
+    e.update_tracker_events
+
 
     c = e.implementation_class
 

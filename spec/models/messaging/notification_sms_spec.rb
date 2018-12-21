@@ -7,6 +7,10 @@ RSpec.describe Messaging::NotificationSms, type: :model do
   include ModelSupport
   include ActivityLogSupport
 
+  before :all do
+    create_admin
+  end
+
   before :each do
 
     @message_notification = Messaging::MessageNotification.new
@@ -49,19 +53,19 @@ RSpec.describe Messaging::NotificationSms, type: :model do
 
     expect(nums.length).to eq 0
 
-    Users::ContactInfo.create! sms_number: '+1-202-555-0147', user: u2
+    Users::ContactInfo.create! sms_number: '+1-202-555-0147', user: u2, current_admin: @admin
 
     expect {
-      Users::ContactInfo.create! sms_number: '12025550147', user: u1
+      Users::ContactInfo.create! sms_number: '12025550147', user: u1, current_admin: @admin
     }.to raise_error ActiveRecord::RecordInvalid
 
-    Users::ContactInfo.create! sms_number: '+12025550147', user: u1
+    Users::ContactInfo.create! sms_number: '+12025550147', user: u1, current_admin: @admin
 
     nums = @message_notification.recipient_sms_numbers
     expect(nums.length).to eq 1
     expect(nums[0]).to eq '+12025550147'
 
-    Users::ContactInfo.create! sms_number: '+1-202-555-0156', user: u1
+    Users::ContactInfo.create! sms_number: '+1-202-555-0156', user: u3, current_admin: @admin
     nums = @message_notification.recipient_sms_numbers
     expect(nums.length).to eq 2
     expect(nums).to include '+12025550147'
