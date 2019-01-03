@@ -82,6 +82,13 @@ _definitions:
         user_id: return_value
 
 
+  notify_reviewer: &notify_reviewer
+    type: email
+    role: email - inex reviewer
+    layout_template: ipa notification layout
+    content_template: ipa inex message
+    subject: "IPA App: Inclusion / Exclusion checklist message"
+
   notify_pi: &notify_pi
     type: email
     role: email - inex pi
@@ -113,7 +120,10 @@ _default:
   showable_if: *enabled_if
   creatable_if: *enabled_if
 
-
+####
+# Phone Screen Review - checklist
+# Remains editable until PI has signed it
+####
 phone_screen_review:
   label: Fill Phone Screen Review
 
@@ -124,9 +134,16 @@ phone_screen_review:
       filter_by:
         fixed_checklist_type: phone screen review
   caption_before:
-    all_fields: Edit to review and correct the checklist.
+    all_fields: |
+      Edit to review and correct the checklist.
+      <i>Note: form changes are not saved until all fields are validated as being completed.
+      When Save is clicked you will be warned if any fields are not set. If necessary, set any that are blank and save again.</i>
+
+  # This activity is always created automatically by the completion of the
+  # phone screen being finalized
   creatable_if:
     never: true
+  # Editable until the PI has signed
   editable_if:
     <<: *enabled_if
     not_all:
@@ -139,7 +156,9 @@ phone_screen_review:
   save_action:
     on_create: create_next_creatable
 
-
+####
+# ADL Informant Screener - only if needed
+####
 adl_informant_screener:
   label: ADL Informant Screener
   references:
@@ -151,6 +170,10 @@ adl_informant_screener:
   caption_before:
     all_fields: Results of the Phone Screen T-MoCA indicate an ADL Informant Screener must be filled out. If the ADL Informant Screener has been received it will be shown after saving this item.
 
+  # We expect the informant screener activity to be created automatically during
+  # creation of the phone screen checklist (if necessary).
+  # For now, keep this as a placeholder to ensure the user is prompted if
+  # the appropriate trigger has not been updated
   creatable_if:
     <<: *enabled_if
     all:
@@ -165,10 +188,16 @@ adl_informant_screener:
   editable_if:
     never: true
 
-  # save_action:
-    # on_create: create_next_creatable
+  showable_if:
+    <<: *enabled_if
+    all_adl:
+      dynamic_model__ipa_inex_checklists:
+        fixed_checklist_type: phone screen review
+        ix_tmoca_score_blank_yes_no: 'yes'
 
-
+####
+# Staff Member Signs Phone Screen checklist
+####
 sign_phone_screen_staff:
   label: Sign Phone Screen Review (Staff)
   fields:
@@ -210,6 +239,58 @@ sign_phone_screen_staff:
               extra_log_type: sign_phone_screen_staff
               signed_no_yes: "yes"
 
+  # Notify the Reviewer that the checklist is ready for review and signature
+  save_trigger:
+    on_save:
+      notify:
+        <<: *notify_reviewer
+        subject: "IPA App: Inclusion / Exclusion checklist needs review"
+        if:
+          all:
+            this:
+              signed_no_yes: 'yes'
+
+
+####
+# Reviewer Signs Phone Screen checklist
+####
+sign_phone_screen_reviewer:
+  label: Sign Phone Screen Review (Reviewer)
+  fields:
+    - notes
+    - signed_no_yes
+  caption_before:
+    all_fields: Review the checklist. When ready, sign the checklist by selecting <b>yes</b> in the <b>signed</b> field.
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_phone_screen_reviewer
+        signed_no_yes: "yes"
+
+    all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_phone_screen_staff
+        signed_no_yes: "yes"
+
+
+  editable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_phone_screen_reviewer
+        signed_no_yes: "yes"
+
+  save_action:
+    on_create:
+      show_panel:
+        value: activity_log__ipa_assignments
+        if:
+          any:
+            activity_log__ipa_assignment_inex_checklists:
+              extra_log_type: sign_phone_screen_reviewer
+              signed_no_yes: "yes"
+
   # Notify the PI that the checklist is ready for review and signature
   save_trigger:
     on_save:
@@ -222,7 +303,11 @@ sign_phone_screen_staff:
               signed_no_yes: 'yes'
 
 
-
+####
+# PI Signs Phone Screen checklist
+# This has the side-effect of locking the checklist to prevent further edits
+# The creator of the checklist is notified at this point
+####
 sign_phone_screen:
   label: Sign Phone Screen Review (PI)
   fields:
@@ -230,7 +315,7 @@ sign_phone_screen:
     - notes
     - signed_no_yes
   caption_before:
-    all_fields: Select the subject's eligibility and sign the checklist by selecting <b>yes</b> in the <b>signed</b> field.
+    all_fields: "Review the checklist and confirm the subject's eligibility. When ready, select the subject's eligibility and sign the checklist by selecting <b>yes</b> in the <b>signed</b> field."
   creatable_if:
     <<: *enabled_if
 
@@ -240,7 +325,7 @@ sign_phone_screen:
         signed_no_yes: "yes"
     all:
       activity_log__ipa_assignment_inex_checklists:
-        extra_log_type: sign_phone_screen_staff
+        extra_log_type: sign_phone_screen_reviewer
         signed_no_yes: "yes"
 
   editable_if:
@@ -249,9 +334,21 @@ sign_phone_screen:
         extra_log_type: sign_phone_screen
         signed_no_yes: "yes"
 
+  save_trigger:
+    on_create:
+      notify:
+        <<: *notify_ps_checklist_initiator
+        subject: "IPA App: Inclusion / Exclusion checklist signed by PI"
+        if:
+          all:
+            this:
+              signed_no_yes: 'yes'
 
 
-
+####
+# Baseline review - checklist
+# Remains editable until PI has signed it
+####
 baseline_review:
   label: Fill Baseline Review
 
@@ -288,7 +385,9 @@ baseline_review:
 
 
 
-#
+####
+# Staff Member Signs Baseline checklist
+####
 sign_baseline_staff:
   label: Sign Baseline Review (Staff)
   fields:
@@ -334,6 +433,10 @@ sign_baseline_staff:
               signed_no_yes: 'yes'
 
 
+####
+# PI Signs Baseline checklist
+# This has the side-effect of locking the checklist to prevent further edits
+####
 sign_baseline:
   label: Sign Baseline Review (PI)
   fields:
