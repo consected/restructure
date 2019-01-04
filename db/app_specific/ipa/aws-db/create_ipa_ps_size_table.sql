@@ -11,6 +11,7 @@
                   INSERT INTO ipa_ps_size_history
                   (
                       master_id,
+                      birth_date,
                       weight,
                       height,
                       hat_size,
@@ -24,6 +25,7 @@
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.birth_date,
                       NEW.weight,
                       NEW.height,
                       NEW.hat_size,
@@ -42,6 +44,7 @@
       CREATE TABLE ipa_ps_size_history (
           id integer NOT NULL,
           master_id integer,
+          birth_date date,
           weight integer,
           height varchar,
           hat_size varchar,
@@ -66,6 +69,7 @@
       CREATE TABLE ipa_ps_sizes (
           id integer NOT NULL,
           master_id integer,
+          birth_date date,
           weight integer,
           height varchar,
           hat_size varchar,

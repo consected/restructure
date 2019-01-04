@@ -387,6 +387,15 @@
     });
 
 
+    Handlebars.registerHelper('substring', function(str, from, to){
+      if(str == null) return;
+      if(str.toString)  str = str.toString();
+      if(!str.substring) return str;
+      return str.substring(from, to);
+    });
+
+
+
     Handlebars.registerHelper('one_decimal', function(num){
       return num.toFixed(1);
     });

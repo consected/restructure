@@ -2,16 +2,19 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_ps_informant_details informant_name relationship_to_participant contact_information_notes
+-- table_generators/generate.sh dynamic_models_table create ipa_ps_informant_details first_name relationship_to_participant contact_information_notes
 
-      CREATE FUNCTION log_ipa_ps_informant_detail_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_ps_informant_detail_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO ipa_ps_informant_detail_history
                   (
                       master_id,
-                      informant_name,
+                      first_name,
+                      last_name,
+                      email,
+                      phone,
                       relationship_to_participant,
                       contact_information_notes,
                       user_id,
@@ -21,7 +24,10 @@
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.informant_name,
+                      NEW.first_name,
+                      NEW.last_name,
+                      NEW.email,
+                      NEW.phone,
                       NEW.relationship_to_participant,
                       NEW.contact_information_notes,
                       NEW.user_id,
@@ -36,7 +42,10 @@
       CREATE TABLE ipa_ps_informant_detail_history (
           id integer NOT NULL,
           master_id integer,
-          informant_name varchar,
+          first_name varchar,
+          last_name varchar,
+          email varchar,
+          phone varchar,
           relationship_to_participant varchar,
           contact_information_notes varchar,
           user_id integer,
@@ -57,7 +66,10 @@
       CREATE TABLE ipa_ps_informant_details (
           id integer NOT NULL,
           master_id integer,
-          informant_name varchar,
+          first_name varchar,
+          last_name varchar,
+          email varchar,
+          phone varchar,
           relationship_to_participant varchar,
           contact_information_notes varchar,
           user_id integer,

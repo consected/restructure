@@ -11,6 +11,7 @@
                   INSERT INTO ipa_ps_tmoca_history
                   (
                       master_id,
+                      tmoca_version,
                       attn_digit_span,
                       attn_digit_vigilance,
                       attn_digit_calculation,
@@ -27,6 +28,7 @@
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.tmoca_version,
                       NEW.attn_digit_span,
                       NEW.attn_digit_vigilance,
                       NEW.attn_digit_calculation,
@@ -48,6 +50,7 @@
       CREATE TABLE ipa_ps_tmoca_history (
           id integer NOT NULL,
           master_id integer,
+          tmoca_version varchar,
           attn_digit_span integer,
           attn_digit_vigilance integer,
           attn_digit_calculation integer,
@@ -75,6 +78,7 @@
       CREATE TABLE ipa_ps_tmocas (
           id integer NOT NULL,
           master_id integer,
+          tmoca_version varchar,
           attn_digit_span integer,
           attn_digit_vigilance integer,
           attn_digit_calculation integer,

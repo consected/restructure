@@ -22,8 +22,9 @@ module CommonTemplatesHelper
       fres = form_object_instance.attributes[field_name_sym.to_s]
       if !form_object_instance.persisted?  && fres.blank?
         fres = fopt[:value]
-        fres = DateTime.now.iso8601 if fres == 'now()'
-        fres = DateTime.now.iso8601.split('T').first if fres == 'today()'
+        # fres = DateTime.now.iso8601 if fres == 'now()'
+        # fres = DateTime.now.iso8601.split('T').first if fres == 'today()'
+        fres = FieldDefaults.calculate_default form_object_instance, fres
       end
 
       fopt[:value] = fres

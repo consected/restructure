@@ -30,6 +30,7 @@ set search_path=ipa_ops;
 \i db/app_specific/ipa/create_ipa_screenings_table.sql
 \i db/app_specific/ipa/create_ipa_sleeps_table.sql
 \i db/app_specific/ipa/create_ipa_survey_table.sql
+\i db/app_specific/ipa/create_ipa_tms_reviews_view.sql
 \i db/app_specific/ipa/create_ipa_tms_tests_table.sql
 \i db/app_specific/ipa/create_ipa_transportation_table.sql
 \i db/app_specific/ipa/create_ipa_withdrawals_table.sql

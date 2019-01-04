@@ -45,7 +45,8 @@ AS $$
     -- LIMIT 1;
 
     -- Get the latest subject size record
-    SELECT *
+    SELECT *,
+    extract(YEAR from age(birth_date)) age
     INTO subject_size
     FROM ipa_ps_sizes
     WHERE master_id = NEW.master_id
@@ -104,8 +105,8 @@ AS $$
       ix_consent_details,
       -- ix_not_pro_blank_yes_no,
       -- ix_not_pro_details,
-      -- ix_age_range_blank_yes_no,
-      -- ix_age_range_details,
+      ix_age_range_blank_yes_no,
+      ix_age_range_details,
       ix_weight_ok_blank_yes_no,
       ix_weight_ok_details,
       ix_no_seizure_blank_yes_no,
@@ -153,17 +154,17 @@ AS $$
 --       --ix_not_pro_details
 -- 'Responded "' || football_experience.played_in_nfl_blank_yes_no || '" to question "Have you ever played in the National Football League (NFL)?" in Football Experience form.',
 --
---       --ix_age_range_blank_yes_no
---       CASE WHEN football_experience.age >= 24
---         AND football_experience.age <= 55
---         THEN 'yes' ELSE 'no' END,
---       --ix_age_range_details
--- 'Stated age ' || football_experience.age || ' in Football Experience form',
+      --ix_age_range_blank_yes_no
+      CASE WHEN subject_size.age >= 24
+        AND subject_size.age <= 59
+        THEN 'yes' ELSE 'no' END,
+      --ix_age_range_details
+'Stated date of birth ' || to_char(subject_size.birth_date, 'Mon dd, YYYY') || ' (age ' || subject_size.age || ' years old) in General Info form',
 
       --ix_weight_ok_blank_yes_no
       CASE WHEN subject_size.weight <= 450 THEN 'yes' ELSE 'no' END,
       --ix_weight_ok_details
-'Stated weight ' || subject_size.weight || ' lbs in Size form.',
+'Stated weight ' || subject_size.weight || ' lbs in General Info form.',
 
       --ix_no_seizure_blank_yes_no
       CASE WHEN tms.convulsion_or_seizure_blank_yes_no_dont_know = 'no' THEN 'yes' ELSE 'no' END,

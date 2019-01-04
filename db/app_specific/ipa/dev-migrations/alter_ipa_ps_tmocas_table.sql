@@ -12,6 +12,7 @@ set search_path = ml_app, ipa_ops;
                   INSERT INTO ipa_ps_tmoca_history
                   (
                       master_id,
+                      tmoca_version,
                       attn_digit_span,
                       attn_digit_vigilance,
                       attn_digit_calculation,
@@ -28,6 +29,7 @@ set search_path = ml_app, ipa_ops;
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.tmoca_version,
                       NEW.attn_digit_span,
                       NEW.attn_digit_vigilance,
                       NEW.attn_digit_calculation,
@@ -43,7 +45,7 @@ set search_path = ml_app, ipa_ops;
                       NEW.id
                   ;
                   RETURN NEW;
-              END;
+            END;
           $$;
 
       alter TABLE ipa_ps_tmoca_history
@@ -67,5 +69,14 @@ set search_path = ml_app, ipa_ops;
       add column delayed_recall integer,
       add column orientation integer
         ;
+
+      alter TABLE ipa_ps_tmoca_history
+      add column tmoca_version varchar
+        ;
+
+      alter TABLE ipa_ps_tmocas
+      add column tmoca_version varchar
+        ;
+
 
       COMMIT;

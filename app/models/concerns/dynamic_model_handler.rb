@@ -9,6 +9,7 @@ module DynamicModelHandler
     after_save :add_user_access_controls
     after_save :check_implementation_class
     after_commit :update_tracker_events
+    after_commit :restart_server
   end
 
   class_methods do
@@ -263,6 +264,18 @@ module DynamicModelHandler
       rescue => e
         raise FphsException.new "The implementation of #{table_name} was not completed. Ensure the DB table #{table_name} has been created. #{e}" unless res
       end
+    end
+  end
+
+  def restart_server
+    begin
+      if Rails.env.production?
+        FileUtils.touch Rails.root.join('tmp', 'restart.txt')
+      else
+        FileUtils.touch Rails.root.join('config', 'dev_server.rb')
+      end
+    rescue => e
+      Rails.logger.warn "Failed to restart server: #{e.inspect}"
     end
   end
 end
