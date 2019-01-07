@@ -5,10 +5,17 @@ set search_path=ipa_ops;
 -- db/table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_inex_checklists ipa_assignments prev_activity_type signed_no_yes
 
       ALTER TABLE activity_log_ipa_assignment_inex_checklist_history
-        RENAME COLUMN ready_for_review_no_yes TO prev_activity_type 
+        RENAME COLUMN ready_for_review_no_yes TO prev_activity_type
       ;
       ALTER TABLE activity_log_ipa_assignment_inex_checklists
         RENAME COLUMN ready_for_review_no_yes TO prev_activity_type
+      ;
+
+      ALTER TABLE activity_log_ipa_assignment_inex_checklist_history
+        ADD COLUMN contact_role varchar
+      ;
+      ALTER TABLE activity_log_ipa_assignment_inex_checklists
+        ADD COLUMN contact_role varchar
       ;
 
       CREATE or REPLACE FUNCTION log_activity_log_ipa_assignment_inex_checklist_update() RETURNS trigger
@@ -23,6 +30,7 @@ set search_path=ipa_ops;
                       select_subject_eligibility,
                       signed_no_yes,
                       notes,
+                      contact_role,
                       extra_log_type,
                       user_id,
                       created_at,
@@ -36,6 +44,7 @@ set search_path=ipa_ops;
                       NEW.select_subject_eligibility,
                       NEW.signed_no_yes,
                       NEW.notes,
+                      NEW.contact_role,
                       NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,

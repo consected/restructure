@@ -68,6 +68,10 @@ _definitions:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: phone_screen_review
         user_id: return_value
+    if:
+      all:
+        this:
+          contact_role: staff member
 
   # Boilerplate for notifying the staff member that initiated the baseline checklist
   # Override the subject: and if: structures to refine operation
@@ -80,6 +84,10 @@ _definitions:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: baseline_review
         user_id: return_value
+    if:
+      all:
+        this:
+          contact_role: baseline initiator
 
 
   notify_reviewer: &notify_reviewer
@@ -88,6 +96,10 @@ _definitions:
     layout_template: ipa notification layout
     content_template: ipa inex message
     subject: "IPA App: Inclusion / Exclusion checklist message"
+    if:
+      all:
+        this:
+          contact_role: mednav reviewer
 
   notify_pi: &notify_pi
     type: email
@@ -95,6 +107,23 @@ _definitions:
     layout_template: ipa notification layout
     content_template: ipa inex message
     subject: "IPA App: Inclusion / Exclusion checklist message"
+    if:
+      all:
+        this:
+          contact_role: pi
+
+
+  notify_tms: &notify_tms
+    type: email
+    role: email - inex tms
+    layout_template: ipa notification layout
+    content_template: ipa inex message
+    subject: "IPA App: TMS eligibility review message"
+    if:
+      all:
+        this:
+          contact_role: tms
+
 
   ref_filestore_container: &ref_filestore_container
     nfs_store__manage__container: &ref_nfs_store__manage__container
@@ -113,6 +142,90 @@ _definitions:
         name: supporting documents
         label: Supporting Documents
         create_with_role: nfs_store group 600
+
+
+  contact_defaults: &contact_defaults
+    fields:
+      - notes
+      - prev_activity_type
+      - contact_role
+
+    field_options:
+      prev_activity_type:
+        edit_as:
+          field_type: fixed_type
+
+      contact_role:
+        edit_as:
+          field_type: select_contact
+          alt_options:
+            Staff Member: staff member
+            Baseline Initiator: baseline initiator
+            MedNav: mednav reviewer
+            PI: pi
+            TMS: tms
+
+    show_if:
+      prev_activity_type:
+        never: true
+    view_options:
+      data_attribute: notes
+
+    showable_if:
+      <<: *enabled_if
+      all:
+        this:
+          prev_activity_type: ''
+
+    editable_if: *enabled_if
+
+    save_trigger:
+      on_create:
+        notify:
+          - *notify_ps_checklist_initiator
+          - *notify_baseline_checklist_initiator
+          - *notify_reviewer
+          - *notify_pi
+          - *notify_tms
+
+
+  ps_contact_references: &ps_contact_references
+
+  - activity_log__ipa_assignment_inex_checklist:
+      label: Contact
+      from: this
+      creatable_if:
+        never: true
+
+  - activity_log__ipa_assignment_inex_checklist:
+      label: Contact Staff Member
+      from: this
+      add: one_to_this
+      add_with:
+        extra_log_type: ps_contact_creator
+        prev_activity_type: ps_contact_creator
+      filter_by:
+        extra_log_type: show none
+
+  - activity_log__ipa_assignment_inex_checklist:
+      label: Contact MedNav
+      from: this
+      add: one_to_this
+      add_with:
+        extra_log_type: ps_contact_reviewer
+        prev_activity_type: ps_contact_creator
+      filter_by:
+        extra_log_type: show none
+
+  - activity_log__ipa_assignment_inex_checklist:
+      label: Contact PI
+      from: this
+      add: one_to_this
+      add_with:
+        extra_log_type: contact_pi
+        prev_activity_type: ps_contact_creator
+      filter_by:
+        extra_log_type: show none
 
 
 
@@ -303,6 +416,8 @@ sign_phone_screen_reviewer:
               signed_no_yes: 'yes'
 
 
+
+
 ####
 # PI Signs Phone Screen checklist
 # This has the side-effect of locking the checklist to prevent further edits
@@ -343,6 +458,96 @@ sign_phone_screen:
           all:
             this:
               signed_no_yes: 'yes'
+
+
+
+
+
+####
+# TMS Review
+####
+tms_responses:
+  label: TMS Responses
+  references:
+    dynamic_model__ipa_tms_review:
+      from: any
+      view_as:
+        new: readonly
+        edit: readonly
+  caption_before:
+    all_fields: TMS responses from the participant's Phone Screener
+
+  # We expect the TMS Responses activity to be created automatically during
+  # creation of the phone screen checklist.
+  # For now, keep this as a placeholder to ensure the user is prompted if
+  # the appropriate trigger has not been updated
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: phone_screen_review
+    not_any:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: tms_responses
+  editable_if:
+    never: true
+
+
+
+####
+# TMS Signs TMS eligibility
+####
+sign_tms_eligibility:
+  label: TMS Eligibility
+  fields:
+    - select_subject_eligibility
+    - notes
+    - signed_no_yes
+
+
+  field_options:
+    select_subject_eligibility:
+      edit_as:
+        alt_options:
+          - eligible for TMS
+          - not eligible for TMS
+
+
+  caption_before:
+    all_fields: |
+      Review the participant's responses for TMS eligibility.
+      When ready, select the eligibility and sign your decision by selecting <b>yes</b> in the <b>signed</b> field.
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: tms_responses
+
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_tms_eligibility
+        signed_no_yes: "yes"
+
+  editable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_tms_eligibility
+        signed_no_yes: "yes"
+
+  # Notify the Reviewer that the TMS decision has been signed
+  save_trigger:
+    on_save:
+      notify:
+        <<: *notify_reviewer
+        subject: "IPA App: TMS eligibility review completed"
+        if:
+          all:
+            this:
+              signed_no_yes: 'yes'
+
+
 
 
 ####
@@ -464,31 +669,98 @@ sign_baseline:
         extra_log_type: sign_baseline
         signed_no_yes: "yes"
 
+##########################################
 
-
-#
+####
+# Phone Screen checklist review -
+# contact staff member that completed the phone screener
+####
 ps_contact_creator:
   label: Contact Staff Member
-  fields:
-    - notes
+
+  <<: *contact_defaults
+  references: *ps_contact_references
+
   save_action:
     label: Send to Staff Member
   caption_before:
     notes: |
       Use this activity to contact the original staff member about the phone screen checklist.
-      Enter the message to send to the staff member that created the phone screen checklist.
+      Note: messages are visible to all phone screen checklist users.
     submit: After clicking <i>Send</i> the staff member will be notified.
+
+
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: baseline_review
+
+
+
+####
+# Phone Screen checklist review -
+# contact MedNav reviewer
+####
+ps_contact_reviewer:
+  label: Contact MedNav re Checklist
+
+  <<: *contact_defaults
+  references: *ps_contact_references
+
+  save_action:
+    label: Send to Reviewer
+  caption_before:
+    notes: |
+      Use this activity to contact the reviewer about the phone screen checklist.
+      Note: messages are visible to all phone screen checklist users.
+    submit: After clicking <i>Send</i> the reviewer will be notified.
 
   save_trigger:
     on_create:
       notify:
-        <<: *notify_ps_checklist_initiator
+        <<: *notify_reviewer
 
   creatable_if:
     <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: baseline_review
 
 
-#
+
+####
+# Phone Screen checklist review -
+# contact PI
+####
+contact_pi:
+  label: Contact PI re Checklist
+
+  <<: *contact_defaults
+  references: *ps_contact_references
+
+  save_action:
+    label: Send to PI
+  caption_before:
+    notes: |
+      Use this activity to contact the PI about the the phone screen checklist.
+      Note: messages are visible to all phone screen checklist users.
+    submit: After clicking <i>Send</i> the PI will be notified.
+  save_trigger:
+    on_create:
+      notify:
+        <<: *notify_pi
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: baseline_review
+
+
+####
+# Baseline checklist review -
+# contact navigator that created the baseline checklist
+####
 baseline_contact_creator:
   label: Contact Navigator
   fields:
@@ -498,7 +770,7 @@ baseline_contact_creator:
   caption_before:
     notes: |
       Use this activity to contact the navigator about the baseline checklist.
-      Enter the message to send to the navigator that created the baseline checklist.
+      Note: messages are visible to all baseline checklist users.
     submit: After clicking <i>Send</i> the staff member will be notified.
 
   save_trigger:
@@ -513,17 +785,20 @@ baseline_contact_creator:
         extra_log_type: baseline_review
 
 
-#
-contact_pi:
-  label: Contact PI
+####
+# Baseline checklist review -
+# contact PI
+####
+baseline_contact_pi:
+  label: Contact PI re Checklist
   fields:
     - notes
   save_action:
     label: Send to PI
   caption_before:
     notes: |
-      Use this activity to contact the PI about the inclusion / exclusion checklists.
-      Enter the message.
+      Use this activity to contact the PI about the the baseline checklist.
+      Note: messages are visible to all baseline checklist users.
     submit: After clicking <i>Send</i> the PI will be notified.
   save_trigger:
     on_create:
@@ -531,9 +806,95 @@ contact_pi:
         <<: *notify_pi
   creatable_if:
     <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: baseline_review
 
-#
+####
+# TMS review process -
+# MedNav Reviewer or PI contact TMS group
+####
+tms_contact_tms:
+  label: Contact TMS
+  fields:
+    - notes
+  save_action:
+    label: Send to TMS
+  caption_before:
+    notes: |
+      Use this activity to contact the TMS group about the TMS eligibility review.
+      Enter the message to send.
+    submit: After clicking <i>Send</i> the TMS group will be notified.
 
+  save_trigger:
+    on_create:
+      notify:
+        <<: *notify_tms
+
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: baseline_review
+
+
+####
+# TMS review process -
+# contact PI
+####
+tms_contact_pi:
+  label: Contact PI re TMS
+  fields:
+    - notes
+  save_action:
+    label: Send to PI
+  caption_before:
+    notes: |
+      Use this activity to contact the PI about the the TMS review.
+      Note: messages are visible to all TMS review users.
+    submit: After clicking <i>Send</i> the PI will be notified.
+  save_trigger:
+    on_create:
+      notify:
+        <<: *notify_pi
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: baseline_review
+
+
+####
+# TMS review -
+# contact MedNav reviewer
+####
+tms_contact_reviewer:
+  label: Contact MedNav re TMS
+  fields:
+    - notes
+  save_action:
+    label: Send to MedNav
+  caption_before:
+    notes: |
+      Use this activity to contact the MedNav reviewer about the TMS review.
+      Note: messages are visible to all TMS review users.
+    submit: After clicking <i>Send</i> the reviewer will be notified.
+
+  save_trigger:
+    on_create:
+      notify:
+        <<: *notify_reviewer
+
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: baseline_review
+
+
+
+
+##########################
 supporting_files:
   label: Supporting Files
 
