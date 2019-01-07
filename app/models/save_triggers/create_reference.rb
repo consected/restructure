@@ -41,7 +41,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
         # on the outer processing in ExtraLogType#calc_save_trigger_if
         if config[:if]
           ca = ConditionalActions.new config[:if], @item
-          return unless ca.calc_action_if
+          next unless ca.calc_action_if
         end
 
         config[:with].each do |fn, def_val|

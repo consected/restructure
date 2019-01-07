@@ -14,7 +14,7 @@ class DynamicModelBase < UserBase
 
     if da
       da = [da] if da.is_a? String
-      res = da.map {|i| self.attributes[i]}
+      res = da.map {|i| self.attribute_names.include?(i) ? self.attributes[i] : i }
       return res.join(' ')
     elsif attribute_names.include?('data')
       return attributes['data']

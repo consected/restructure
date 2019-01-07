@@ -16,7 +16,7 @@
       # In new or edit mode we only list the items that can be created after saving. The _reference_actions partial
       # is responsible for the display of the list. The following line shows the caption that explains the list to the user
 %>
-    <li class="list-group-item is-full-width">
+    <li class="list-group-item is-full-width save-the-form-ref-message">
       <b>Save the form to be able to <%= creatable_count == 0 ? "view" : "create" %>:</b>
     </li>
     <% end %>
@@ -53,7 +53,7 @@
          # if there a no creatable items left to create and we are currently in the new or edit form
          if action_name.in?(['new', 'edit']) && creatable_count == 0
      %>
-          <li class="list-group-item <%= object_instance.class.name.ns_hyphenate%>-model-references in-item-model-references is-full-width">
+          <li class="list-group-item <%= object_instance.class.name.ns_hyphenate%>-model-references in-item-model-references is-full-width ref-new-edit ref-no-creatables">
             <span class="small">
               <%
                 # if this reference is viewable then view it

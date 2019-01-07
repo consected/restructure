@@ -14,6 +14,10 @@ class ModelReference < ActiveRecord::Base
 
   attr_accessor :current_user
 
+  def self.default_ref_order
+    {id: :asc}
+  end
+
   # TODO consider if there is a significant race condition that we should be concerned about
   def self.create_with from_item, to_item
 
@@ -79,7 +83,7 @@ class ModelReference < ActiveRecord::Base
   # If belonging to a master record, the to_record_type must be specified.
   # These can be further limited by a filter_by condition on the to_record,
   # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
-  def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false
+  def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false, ref_order: default_ref_order
 
     if to_record_type
       to_record_type_class = to_record_class_for_type(to_record_type)
@@ -87,7 +91,7 @@ class ModelReference < ActiveRecord::Base
     end
 
     if without_reference
-      recs = to_record_type_class.where(master: from_item_or_master)
+      recs = to_record_type_class.where(master: from_item_or_master).order(ref_order)
       res = []
       recs.each do |r|
         res << ModelReference.new( from_record_type: nil, from_record_id: nil, from_record_master_id: from_item_or_master.id,
@@ -100,7 +104,7 @@ class ModelReference < ActiveRecord::Base
       else
         cond = {from_record_type: from_item_or_master.class.name, from_record_id: from_item_or_master.id}
         cond[:to_record_type] = to_record_type if to_record_type
-        res = ModelReference.where cond
+        res = ModelReference.where(cond).order(ref_order)
         # Handle the filter_by clause
         res = res.select {|mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v }   } if filter_by
       end
@@ -264,12 +268,12 @@ class ModelReference < ActiveRecord::Base
     end
   end
 
-  def self.find_records_in_master master: nil, to_record_type: nil, filter_by: nil
+  def self.find_records_in_master master: nil, to_record_type: nil, filter_by: nil, ref_order: default_ref_order
     res = []
     cond = {master: master}
     cond.merge! filter_by if filter_by
 
-    to_record_class_for_type(to_record_type).where(cond).each do |i|
+    to_record_class_for_type(to_record_type).where(cond).order(ref_order).each do |i|
       rec = ModelReference.where( from_record_master_id: master.id, to_record_type: to_record_type, to_record_id: i.id, to_record_master_id: i.master_id).first
       if rec
         rec.to_record = i

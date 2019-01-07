@@ -34,6 +34,9 @@ class ExtraOptions
           caption: 'caption to appear before label'
         }
       },
+      labels: {
+        field_name: 'label to show'
+      },
       show_if: {
         field_name: {
           depends_on_field_name: 'conditional value'

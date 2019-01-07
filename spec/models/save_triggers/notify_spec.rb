@@ -52,14 +52,14 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     # Check that we only get users that are enabled for the role in this app type
     expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 2
 
-    @trigger = SaveTriggers::Notify.new config, @al
-
-    expect(@trigger.receiving_user_ids.sort).to eq @role_user_ids.sort
+    @trigger = SaveTriggers::Notify.new(config, @al)
 
     last_mn = MessageNotification.order(id: :desc).first
     # last_dj = Delayed::Job.order(id: :desc).first
 
     @trigger.perform
+
+    expect(@trigger.receiving_user_ids.sort).to eq @role_user_ids.sort
 
     new_mn = MessageNotification.order(id: :desc).first
     # new_dj = Delayed::Job.order(id: :desc).first
@@ -89,7 +89,56 @@ RSpec.describe SaveTriggers::Notify, type: :model do
       subject: "subject text"
     }
     @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id
+
+  end
+
+
+  it "uses an if select the correct notification" do
+    config = [
+      {
+        type: "email",
+        if: {
+          all: {
+            this: {
+              user_id: -1
+            }
+          }
+        },
+        users: -1,
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: "subject text 1"
+        },
+        {
+          type: "email",
+          if: {
+            all: {
+              this: {
+                user_id: @al.user_id
+              }
+            }
+          },
+          users: {
+            this: {
+              user_id: 'return_value'
+            }
+          } ,
+          layout_template: @layout.name,
+          content_template: @content.name,
+          subject: "subject text 2"
+        }
+    ]
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    byebug
+    @trigger.perform
+
+    expect(@trigger.receiving_user_ids.first).to eq @al.user_id
+    expect(@trigger.subject).to eq 'subject text 2'
 
   end
 

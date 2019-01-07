@@ -13,7 +13,7 @@
   <% if action_name.in? ['new', 'edit']
       # List the reference items that can be created after saving
   %>
-    <li class="list-group-item <%=block_id%> in-item-model-references is-full-width">
+    <li class="list-group-item <%=block_id%> in-item-model-references is-full-width ref-new-edit">
       <span class="small"><i><%= caption.humanize %></i></span>
     </li>
   <% else
