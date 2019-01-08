@@ -90,7 +90,7 @@ _fpa.loaded.default = function(){
       else {
         window.setTimeout(function(){
           console.log('Jumping to linked target based on hash')
-          _fpa.utils.jump_to_linked_item(target);
+          _fpa.utils.jump_to_linked_item(target, null, {no_highlight: true});
         }, 1000);
       }
 

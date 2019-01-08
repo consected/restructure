@@ -391,7 +391,15 @@
       if(str == null) return;
       if(str.toString)  str = str.toString();
       if(!str.substring) return str;
-      return str.substring(from, to);
+
+      var txt = document.createElement("textarea");
+      txt.innerHTML = str;
+      str = txt.value;
+      if(str.length > to + 10) {
+        str = str.substring(from, to);
+        str = str + '(...)';
+      }
+      return str;
     });
 
 

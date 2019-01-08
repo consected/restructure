@@ -22,6 +22,7 @@ AS $$
       sleep RECORD;
       health RECORD;
       tmoca RECORD;
+      player_info RECORD;
       inex_id INTEGER;
       act_id INTEGER;
   BEGIN
@@ -94,6 +95,15 @@ AS $$
     ORDER BY id DESC
     LIMIT 1;
 
+    -- Get the Player Info record
+    SELECT *
+    INTO player_info
+    FROM player_infos
+    WHERE master_id = NEW.master_id
+    ORDER BY id DESC
+    LIMIT 1;
+
+
     INSERT INTO ipa_inex_checklists
     (
       master_id,
@@ -160,7 +170,9 @@ AS $$
         AND subject_size.age <= 59
         THEN 'yes' ELSE 'no' END,
       --ix_age_range_details
-'Stated date of birth ' || to_char(subject_size.birth_date, 'Mon dd, YYYY') || ' (age ' || subject_size.age || ' years old) in General Info form',
+'Stated date of birth ' || to_char(subject_size.birth_date, 'Mon dd, YYYY') || ' (age ' || subject_size.age || ' years old) in General Info form.
+This ' || CASE WHEN subject_size.birth_date = player_info.birth_date THEN 'matches' ELSE 'does NOT match' END || ' the date of birth in the Participant Details / Person record
+(originally from Zeus, although may have been updated locally)',
 
       --ix_weight_ok_blank_yes_no
       CASE WHEN subject_size.weight <= 450 THEN 'yes' ELSE 'no' END,

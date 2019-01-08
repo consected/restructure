@@ -188,9 +188,7 @@ module ActivityLogHandler
       end
 
       if da
-        da = [da] if da.is_a? String
-        res = da.map {|i| self.attributes[i]}
-        return res.join(' ')
+        return DynamicModelBase.format_data_attribute da, self
       else
         n = extra_log_type_config.label || extra_log_type.to_s.humanize
         return "#{n}"

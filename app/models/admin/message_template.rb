@@ -99,6 +99,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
     def self.setup_data item
       data = item.attributes.dup
 
+      data[:base_url] = ENV['BASE_URL']
+
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       if item.respond_to?(:item) && item.item.respond_to?(:attributes)
         data[:item] = item.item.attributes
@@ -112,7 +114,9 @@ class Admin::MessageTemplate < ActiveRecord::Base
         data[:user_email] ||= item.current_user.email
       end
 
-      data[:player_info] = item.master.player_infos.first.attributes
+      if item.respond_to?(:player_info) && item.master.player_infos
+        data[:player_info] = item.master.player_infos.first.attributes
+      end
 
       data
     end

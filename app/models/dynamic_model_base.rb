@@ -13,12 +13,16 @@ class DynamicModelBase < UserBase
     da = dopt.view_options[:data_attribute]
 
     if da
-      da = [da] if da.is_a? String
-      res = da.map {|i| self.attribute_names.include?(i) ? self.attributes[i] : i }
-      return res.join(' ')
+      return self.class.format_data_attribute da, self
     elsif attribute_names.include?('data')
       return attributes['data']
     end
+  end
+
+  def self.format_data_attribute attr_conf, obj
+    attr_conf = [attr_conf] if attr_conf.is_a? String
+    res = attr_conf.map {|i| obj.attribute_names.include?(i) ? obj.attributes[i] : i }
+    return res.join(' ')
   end
 
 end
