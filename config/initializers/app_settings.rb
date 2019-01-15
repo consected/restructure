@@ -10,7 +10,7 @@ class Settings
 
 
   UserTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
-  AdminTimeout = (Rails.env.production? ? 15 : 60).minutes.freeze
+  AdminTimeout = (Rails.env.production? ? 30 : 60).minutes.freeze
 
   OsWordsFile = "/usr/share/dict/words"
   PasswordEntropyConfig = {

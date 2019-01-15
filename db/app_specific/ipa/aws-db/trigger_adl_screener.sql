@@ -20,7 +20,7 @@ BEGIN
 END;
 $$;
 
-create or replace function sync_new_adl_screener() returns trigger
+create or replace function ipa_ops.sync_new_adl_screener() returns trigger
 language plpgsql
 AS $$
   DECLARE
@@ -220,7 +220,7 @@ AS $$
     (from_record_master_id, to_record_type, to_record_id, to_record_master_id, created_at, updated_at)
     values
     (
-      matched_master_id, 'DynamicLog::IpaAdlInformantScreener', new_id, matched_master_id, now(), now()
+      matched_master_id, 'DynamicModel::IpaAdlInformantScreener', new_id, matched_master_id, now(), now()
     );
 
 

@@ -134,7 +134,6 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     ]
     @trigger = SaveTriggers::Notify.new config, @al
 
-    byebug
     @trigger.perform
 
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id

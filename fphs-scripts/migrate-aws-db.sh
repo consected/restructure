@@ -6,8 +6,28 @@
 
 echo "Migrate the AWS production database by running the current version locally against the remote database"
 echo "======================================================================================================"
-echo "Enter password for the production AWS database user FPHS:"
+echo "Enter app environment: stage or production"
+read TEMP_ENV
+
+if [ "$TEMP_ENV" == 'production' ]
+then
+  TEMP_DBNAME=fphs
+fi
+
+if [ "$TEMP_ENV" == 'stage' ]
+then
+  TEMP_DBNAME=fphs_test_ipa
+fi
+
+if [ -z "$TEMP_DBNAME" ]
+then
+  echo "Incorrect environment name: $TEMP_ENV"
+  exit
+fi
+
+echo "Enter password for the $TEMP_ENV AWS database user FPHS:"
 read -s -p "FPHS user password: " TEMP_DB_PW
+
 echo
 FPHS_POSTGRESQL_HOSTNAME=fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com \
 FPHS_POSTGRESQL_DATABASE=fphs \

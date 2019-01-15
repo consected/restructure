@@ -114,7 +114,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
         data[:user_email] ||= item.current_user.email
       end
 
-      if item.respond_to?(:player_info) && item.master.player_infos
+      if item.respond_to?(:master) && item.master.respond_to?(:player_infos) && item.master.player_infos&.first
         data[:player_info] = item.master.player_infos.first.attributes
       end
 
