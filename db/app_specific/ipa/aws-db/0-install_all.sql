@@ -38,13 +38,13 @@ set search_path=ipa_ops,ml_app;
 \i db/app_specific/ipa/aws-db/create_mrn_external_identifier.sql
 \i db/app_specific/ipa/aws-db/create_station_contacts_table.sql
 \i db/app_specific/ipa/aws-db/post_create_alter_activity_log_navigation_table.sql
--- \i db/app_specific/ipa/aws-db/post_create_alter_ipa_screenings_table.sql
 \i db/app_specific/ipa/aws-db/post_create_alter_withdrawals_table.sql
 \i db/app_specific/ipa/aws-db/prep_inex_checklist_from_ps.sql
 \i db/app_specific/ipa/aws-db/trigger_adl_screener.sql
 \i db/app_specific/ipa/aws-db/trigger_new_screening_schedule.sql
 \i db/app_specific/ipa/aws-db/trigger_perform_screening_actions.sql
 \i db/app_specific/ipa/aws-db/trigger_screening_follow_up.sql
+\i db/app_specific/ipa/aws-db/trigger_tmoca_score_calc.sql
 
 set search_path=ml_app;
 \i db/app_specific/ipa/aws-db/z-ml_app-sync-create_sync_subject_data_aws_db.sql

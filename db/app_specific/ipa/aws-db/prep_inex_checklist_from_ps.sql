@@ -170,7 +170,8 @@ AS $$
         THEN 'yes' ELSE 'no' END,
       --ix_age_range_details
 'Stated date of birth ' || to_char(subject_size.birth_date, 'Mon dd, YYYY') || ' (age ' || subject_size.age || ' years old) in General Info form.
-This ' || CASE WHEN subject_size.birth_date = player_info.birth_date THEN 'matches' ELSE 'does NOT match' END || ' the date of birth in the Participant Details / Person record.',
+This ' || CASE WHEN subject_size.birth_date = player_info.birth_date THEN 'matches' ELSE 'does NOT match' END || ' the date of birth in the Participant Details / Person record
+(originally from Zeus, although may have been updated locally)',
 
       --ix_weight_ok_blank_yes_no
       CASE WHEN subject_size.weight <= 450 THEN 'yes' ELSE 'no' END,

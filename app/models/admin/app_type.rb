@@ -273,6 +273,21 @@ class Admin::AppType < Admin::AdminBase
           res = Admin::MessageTemplate.active.where(name: v[:name], message_type: 'dialog', template_type: 'content').first
           ms << res
         end
+        c.save_trigger.each do |d, st|
+          ns = st[:notify] || []
+          ns = [ns] if ns.is_a? Hash
+
+          ns.each do |v|
+            lt = v[:layout_template]
+            ct = v[:content_template]
+            mt = v[:type]
+
+            res = Admin::MessageTemplate.active.where(name: lt, message_type: mt, template_type: 'layout').first
+            ms << res if res
+            res = Admin::MessageTemplate.active.where(name: ct, message_type: mt, template_type: 'content').first
+            ms << res if res
+          end
+        end
       end
     end
     associated_dynamic_models.all.each do |a|
@@ -283,7 +298,7 @@ class Admin::AppType < Admin::AdminBase
         end
       end
     end
-    ms.sort {|a, b| a.id <=> b.id}
+    ms.sort {|a, b| a.id <=> b.id}.uniq
   end
 
 

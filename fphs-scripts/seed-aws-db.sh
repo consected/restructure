@@ -30,7 +30,7 @@ read -s -p "FPHS user password: " TEMP_DB_PW
 
 echo
 FPHS_POSTGRESQL_HOSTNAME=fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com \
-FPHS_POSTGRESQL_DATABASE=fphs \
+FPHS_POSTGRESQL_DATABASE=$TEMP_DBNAME \
 RAILS_ENV=production \
 FPHS_POSTGRESQL_SCHEMA=ml_app \
 FPHS_POSTGRESQL_USERNAME=fphs \
@@ -39,4 +39,3 @@ FPHS_RAILS_SECRET_KEY_BASE=temp \
 FPHS_RAILS_DEVISE_SECRET_KEY=temp \
 FPHS_POSTGRESQL_PASSWORD="$TEMP_DB_PW" \
 rake db:seed
-
