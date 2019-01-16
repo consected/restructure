@@ -39,7 +39,7 @@ class ConditionalActions
   #   on_update: { action_name: <config hash or string>, ... }
   # }
   # Items that either have no 'if' condition, or are true are kept.
-  # Condional failures are not returned.
+  # Conditional failures are not returned.
 
   # Note that this is not just used by save_action, but also save_trigger
   def calc_save_action_if

@@ -53,6 +53,7 @@ module MasterHandler
   end
 
   def create
+    do_show = false
     object_instance.transaction do
       set_additional_attributes object_instance
       if object_instance.save
@@ -69,7 +70,7 @@ module MasterHandler
           else
             object_instance.master.current_user = current_user
           end
-          show
+          do_show = true
         end
       else
         logger.warn "Error creating #{human_name}: #{object_instance_errors}"
@@ -79,10 +80,12 @@ module MasterHandler
         render json: object_instance.errors, status: :unprocessable_entity
       end
     end
+    # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
+    show if do_show
   end
 
   def update
-
+    do_show = false
     object_instance.transaction do
       if object_instance.update(secure_params)
         reload_objects
@@ -97,7 +100,7 @@ module MasterHandler
           else
             object_instance.master.current_user = current_user
           end
-          show
+          do_show = true
         end
 
       else
@@ -105,6 +108,8 @@ module MasterHandler
         render json: object_instance.errors, status: :unprocessable_entity
       end
     end
+    # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
+    show if do_show    
   end
 
   def destroy
