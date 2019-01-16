@@ -156,7 +156,7 @@
           diabetes_diagnosis_details varchar,
 
           high_cholesterol_diagnosis_blank_yes_no_dont_know varchar,
-          high_cholesterol_medications_blank_yes_no varchar
+          high_cholesterol_medications_blank_yes_no varchar,
           high_cholesterol_diagnosis_details varchar,
 
           other_heart_conditions_blank_yes_no_dont_know varchar,
@@ -225,7 +225,7 @@
           diabetes_diagnosis_details varchar,
 
           high_cholesterol_diagnosis_blank_yes_no_dont_know varchar,
-          high_cholesterol_medications_blank_yes_no varchar
+          high_cholesterol_medications_blank_yes_no varchar,
           high_cholesterol_diagnosis_details varchar,
 
           other_heart_conditions_blank_yes_no_dont_know varchar,
