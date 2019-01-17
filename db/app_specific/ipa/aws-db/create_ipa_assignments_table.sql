@@ -1,4 +1,4 @@
-set search_path=ipa_ops, ml_app;
+
       BEGIN;
 
 -- Command line:
