@@ -291,6 +291,8 @@ module HandlesUserBase
 
       # look up the item using the item_id parameter.
       @referring_record  = ic.find(@ref_record_id.to_i)
+      @referring_record.current_user = current_user
+      @referring_record
     end
   end
 
