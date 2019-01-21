@@ -156,7 +156,7 @@ class Admin::AppType < Admin::AdminBase
             # Use the app type's admin as the current admin
             new_vals[:user] = user if has_user
             new_vals.merge! add_vals
-            i = parent.send(assoc_name).where(cond).order('disabled asc nulls first, id desc')
+            i = parent.send(assoc_name).where(cond).reorder('').order('disabled asc nulls first, id desc')
             i = filtered_results(i, filter) if filter
             i = i.first
             if i
@@ -171,7 +171,7 @@ class Admin::AppType < Admin::AdminBase
         else
           new_vals.merge! add_vals
 
-          i = cname.where(cond).order('disabled asc nulls first, id desc')
+          i = cname.where(cond).reorder('').order('disabled asc nulls first, id desc')
           i = filtered_results(i, filter) if filter
           i = i.first
 

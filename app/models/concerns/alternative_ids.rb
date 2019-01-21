@@ -54,7 +54,7 @@ module AlternativeIds
     # Start by attempting to match on a field in the master record
     raise "Can not match on this field. It is not an accepted alterative ID field. #{field_name}" unless self.class.alternative_id_fields.include?(field_name)
 
-    return self.attributes(field_name) if self.attribute_names.include?(field_name.to_s)
+    return self.attributes[field_name.to_s] if self.class.crosswalk_attrs.include?(field_name)
 
     assoc_name = self.class.external_id_definition(field_name).model_association_name
 
@@ -64,6 +64,12 @@ module AlternativeIds
       m.external_id
     end
 
+  end
+
+  def alternative_ids
+    res = {}
+    Master.alternative_id_fields.each {|f|  res[f] = self.alternative_id_value(f) }
+    res
   end
 
 end

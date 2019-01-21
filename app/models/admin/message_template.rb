@@ -118,6 +118,10 @@ class Admin::MessageTemplate < ActiveRecord::Base
         data[:player_info] = item.master.player_infos.first.attributes
       end
 
+      if item.respond_to?(:master)
+        data[:ids] = item.master.alternative_ids
+      end
+
       data
     end
 
