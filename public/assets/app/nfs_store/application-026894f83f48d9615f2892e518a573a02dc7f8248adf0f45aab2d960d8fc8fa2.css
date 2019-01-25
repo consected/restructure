@@ -1,0 +1,246 @@
+.container-list-items input[type="checkbox"] {
+  cursor: pointer;
+  vertical-align: top; }
+.container-list-items .glyphicon-folder-close, .container-list-items .glyphicon-folder-open {
+  cursor: pointer;
+  vertical-align: baseline;
+  color: #cf9c13; }
+.container-list-items .root-folder .glyphicon-folder-close, .container-list-items .root-folder .glyphicon-folder-open {
+  color: #3db553; }
+.container-list-items, .container-list-items ul {
+  list-style-type: none;
+  padding-left: 1.5em; }
+  .container-list-items li, .container-list-items ul li {
+    list-style-type: none;
+    white-space: nowrap; }
+.container-list-items .container-entry {
+  white-space: nowrap; }
+.container-list-items .container-entry.checked {
+  font-weight: bold; }
+.container-list-items .container-folder.checked {
+  font-weight: bold; }
+.container-list-items .container-folder .file-archive-tag {
+  font-style: italic;
+  color: gray;
+  padding-left: 0.6em; }
+.container-list-items .container-entry .file-processing-tag {
+  font-style: italic;
+  color: gray;
+  padding-left: 0.6em; }
+.container-list-items .container-list-file-count {
+  font-style: italic;
+  color: gray; }
+
+.container-browser {
+  display: block;
+  position: relative;
+  max-height: 60vh;
+  min-height: 50px;
+  overflow: auto;
+  margin-bottom: 10px;
+  border: 1px solid silver;
+  border-radius: 3px;
+  padding: 10px; }
+
+.container-browser.ajax-running .container-list-items, .container-browser.ajax-running .no-container-list-items {
+  filter: blur(2px); }
+.container-browser.ajax-running.ajax-running form.new_download {
+  overflow: hidden; }
+
+.container-entry:hover {
+  background-color: #fbfeb1; }
+  .container-entry:hover .browse-filename {
+    background-color: rgba(251, 254, 177, 0.8); }
+.container-entry .browse-filename {
+  position: absolute;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding-left: 0.5em;
+  padding-right: 1em; }
+.container-entry .browse-filename:hover {
+  background-color: rgba(251, 254, 177, 0.8); }
+.container-entry .browse-entry-meta:hover {
+  background-color: rgba(251, 254, 177, 0.8);
+  z-index: 100; }
+.container-entry .browse-entry-meta, .container-entry .browse-entry-classifications {
+  color: gray;
+  font-size: 93%;
+  margin-left: 0.7em;
+  z-index: 0;
+  position: absolute;
+  right: 0;
+  padding-right: 0.4em; }
+  .container-entry .browse-entry-meta span, .container-entry .browse-entry-classifications span {
+    margin-left: 1em; }
+.container-entry .browse-entry-classifications .bem-meta-link {
+  text-decoration: none; }
+  .container-entry .browse-entry-classifications .bem-meta-link:hover {
+    text-decoration: none; }
+.container-entry .browse-entry-meta .bem-mod-date {
+  min-width: 150px;
+  display: inline-block;
+  text-align: right; }
+
+.container-browser.browser-hide-meta .browse-entry-meta {
+  display: none; }
+
+.container-browser.browser-hide-classifications .browse-entry-classifications {
+  display: none; }
+
+.container-meta-controls {
+  text-align: right;
+  padding-right: 1em; }
+  .container-meta-controls input[type="radio"] {
+    vertical-align: text-bottom; }
+  .container-meta-controls .show-label {
+    color: gray;
+    font-style: italic;
+    padding-right: 0.6em; }
+
+.nfs-store-valid-files.panel {
+  background: #f3f3f3;
+  padding-left: 16px;
+  border-bottom: 1px solid #dddddd;
+  border-top: 1px solid #dddddd;
+  padding-top: 1px;
+  margin: 12px -10px -11px; }
+  .nfs-store-valid-files.panel .panel-header {
+    font-size: 95%;
+    font-style: italic;
+    padding-top: 0.4em;
+    padding-bottom: 0.4em; }
+  .nfs-store-valid-files.panel ul {
+    padding-left: 2em;
+    margin: 0.4em; }
+  .nfs-store-valid-files.panel li {
+    font-family: monospace;
+    font-size: 12px;
+    list-style: none; }
+.upload-dropzone {
+  position: relative;
+  min-height: 80vh;
+  padding: 0 30px;
+  border: 3px solid transparent;
+  border-radius: 3px; }
+  .upload-dropzone .drop-info {
+    display: none;
+    position: absolute;
+    top: 49%;
+    width: 100%;
+    left: 0;
+    text-align: center;
+    z-index: 10;
+    font-size: 117%;
+    font-weight: bold;
+    color: #aab; }
+  .upload-dropzone.on-drag {
+    background-color: #eef;
+    border: 3px solid #ccf;
+    border-radius: 3px; }
+    .upload-dropzone.on-drag .drop-info {
+      display: block; }
+
+.upload-dropzone-disabled .drop-info {
+  display: none; }
+
+.browse-container .file-name {
+  font-weight: bold;
+  font-size: 107%;
+  float: left;
+  width: 45%; }
+.browse-container .progress {
+  float: right;
+  width: 45%;
+  margin-bottom: 0;
+  position: relative;
+  background-image: linear-gradient(to bottom, #aaa 0%, #aaa 100%); }
+.browse-container .file-info-block {
+  float: none;
+  clear: both;
+  display: block;
+  position: relative;
+  overflow: hidden; }
+.browse-container .progress-info {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  color: white;
+  text-align: center; }
+  .browse-container .progress-info .started-at {
+    padding-left: 1em;
+    text-shadow: 1px 1px 1px black;
+    white-space: nowrap;
+    float: left; }
+  .browse-container .progress-info .progress-bar-status-text {
+    text-shadow: 1px 1px 1px black;
+    font-weight: bold;
+    width: 100%;
+    left: 0;
+    right: 0;
+    position: absolute; }
+  .browse-container .progress-info .ended-at {
+    float: right;
+    padding-right: 1em;
+    text-shadow: 1px 1px 1px black; }
+.browse-container .progress-bar-failed {
+  background-color: #a54444; }
+.browse-container .file-error {
+  margin-top: 10px; }
+.browse-container .button-upload-abort {
+  float: right;
+  margin-top: -10px;
+  display: none; }
+.browse-container .button-upload-resume {
+  float: right;
+  margin-top: -10px;
+  display: none; }
+.browse-container .progress-running .button-upload-abort {
+  display: inline-block; }
+/*
+ * jQuery File Upload Plugin CSS
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2013, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * https://opensource.org/licenses/MIT
+ */
+.fileinput-button {
+  position: relative;
+  overflow: hidden;
+  display: inline-block; }
+
+.fileinput-button input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  font-size: 200px !important;
+  direction: ltr;
+  cursor: pointer; }
+
+/* Fixes for IE < 8 */
+@media screen\9  {
+  .fileinput-button input {
+    filter: alpha(opacity=0);
+    font-size: 100%;
+    height: 100%; } }
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or any plugin's vendor/assets/stylesheets directory can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the bottom of the
+ * compiled file so the styles you add here take precedence over styles defined in any styles
+ * defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+ * file per style scope.
+ *
+
+
+ */
+
