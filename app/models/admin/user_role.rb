@@ -45,6 +45,12 @@ class Admin::UserRole < ActiveRecord::Base
     select("role_name").distinct.pluck(:role_name)
   end
 
+  def self.active_role_names filter=nil
+    q = active
+    q = q.where(filter) if filter
+    q.role_names
+  end
+
   # Get roles names in a hash, keyed by the "app.id/app.name". May be filtered by a previous scope
   # @return [Hash] hash with string keys of app names and values as arrays of role names for each
   def self.role_names_by_app_name

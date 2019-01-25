@@ -237,7 +237,7 @@ _fpa.form_utils = {
 
 
     // Setup the typeahead prediction for a specific text input element
-    setup_typeahead: function(element, list, name){
+    setup_typeahead: function(element, list, name, limit, options){
 
         if(typeof list === 'string')
           list = _fpa.cache(list);
@@ -248,16 +248,38 @@ _fpa.form_utils = {
           local: list
         });
 
-        $(element).typeahead({
+        var def = {
           hint: true,
           highlight: true,
           minLength: 1,
           autoselect: true
-        },
-        {
+        };
+
+        if(!options) options = {};
+
+        for(var i in def) {
+          if(def.hasOwnProperty(i)) {
+            if(!(i in options)) {
+              options[i] = def[i];
+            }
+          }
+        }
+
+        var dataset = {
           name: name,
           source: items
-        }).on('keypress', function(ev){
+        };
+
+        if(limit) {
+          dataset.limit = limit;
+        }
+
+
+
+        $(element).typeahead(
+          options,
+          dataset
+        ).on('keypress', function(ev){
             if(ev.keyCode != 13) return;
             var dnf = $(this).attr('data-next-field');
             if(dnf)

@@ -85,7 +85,7 @@ class Admin::AppType < Admin::AdminBase
 
       res['page_layouts'] = app_type.import_config_sub_items app_type_config, 'page_layouts', ['layout_name', 'panel_name']
       res['user_roles'] = app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']
-      res['nfs_store_filters'] = app_type.import_config_sub_items app_type_config, 'nfs_store_filters', ['role_name', 'resource_name']
+      res['nfs_store_filters'] = app_type.import_config_sub_items app_type_config, 'nfs_store_filters', ['role_name', 'resource_name', 'filter']
 
       res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
 
