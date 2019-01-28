@@ -10,6 +10,8 @@ class Admin::UserRole < ActiveRecord::Base
   validates :role_name, presence: true
   validates :user_id, uniqueness: {scope: [:app_type_id, :role_name]}
 
+  after_save :invalidate_cache
+
   # Scope used when user.user_roles association is called, effectively forcing the results
   # to the user's current app type
   scope :user_app_type, ->(user) { where user_roles: { app_type_id: user.app_type_id } }
@@ -99,4 +101,10 @@ class Admin::UserRole < ActiveRecord::Base
     res.with_admin(admin).disable! if res
   end
 
+  private
+    def invalidate_cache
+      logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
+      # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache
+      Rails.cache.clear
+    end
 end

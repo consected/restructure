@@ -622,6 +622,10 @@ module ActivityLogHandler
         end
       end
 
+      # Ensure the duplicate old_obj references the real master, ensuring current user can
+      # be referenced correctly in conditional calculations
+      old_obj.master = self.master
+
       res = eltc.calc_editable_if(old_obj)
       return unless res
     else
