@@ -16,9 +16,16 @@ module AdminSetup
         admin_obj.force_password_reset
         admin_obj.disabled = false
 
+        # if admin_obj.otp_secret.blank?
+        admin_obj.otp_required_for_login = true
+        otpsecret = admin_obj.otp_secret = User.generate_otp_secret
+        # end
+
         res = admin_obj.save
         if res
           op << "Existing Admin (#{admin}) updated with new password: #{admin_obj.new_password}\n"
+          op << "Two factor secret: #{otpsecret}"
+
         else
           success = false
           op << "Existing Admin (#{admin}) failed to update. #{admin_obj.errors.inspect}\n"
@@ -27,6 +34,7 @@ module AdminSetup
         admin_obj = Admin.create(email: admin)
         if admin_obj
           op << "Admin (#{admin}) password: #{admin_obj.new_password}\n"
+          op << "Two factor secret: #{otpsecret}"
         else
           success = false
           op << "New Admin (#{admin}) failed to be created.\n"

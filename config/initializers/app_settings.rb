@@ -26,4 +26,5 @@ class Settings
   # a verified domain name.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
 
+  TwoFactorAuthIssuer = 'FPHS Apps'
 end

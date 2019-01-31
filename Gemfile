@@ -32,6 +32,8 @@ gem 'daemons'
 gem 'jquery-fileupload-rails', '0.4.7'
 gem 'rubyzip'
 
+gem 'devise-two-factor'
+gem 'rqrcode'
 
 gem 'activerecord-import'
 gem 'mime-types'

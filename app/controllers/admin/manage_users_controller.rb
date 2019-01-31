@@ -9,6 +9,10 @@ class Admin::ManageUsersController < AdminController
       flash[:info] = "New password #{@user.new_password}"
     end
 
+    if params[:reset_two_factor_auth]
+      @user.reset_two_factor_auth
+    end
+
     @user.current_admin = current_admin
     if @user.update(secure_params)
       @users = User.all

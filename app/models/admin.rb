@@ -1,8 +1,13 @@
 class Admin < ActiveRecord::Base
 
+
   include StandardAuthentication
 
-  devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
+  devise :two_factor_authenticatable,
+         :otp_secret_encryption_key => otp_enc_key
+
+
+  devise :trackable, :timeoutable, :lockable, :validatable
 
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_reenabling_admin, on: :update

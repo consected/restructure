@@ -12,8 +12,12 @@
   </div>
   <% if object_instance.id %>
   <div class="form-group">
-    <%=check_box_tag :gen_new_pw%>
-    <%= f.label 'generate new password' %>
+    <%= check_box_tag :gen_new_pw%>
+    <%= label_tag :gen_new_pw, 'Generate new password' %>
+  </div>
+  <div class="form-group">
+    <%= check_box_tag :reset_two_factor_auth%>
+    <%= label_tag :reset_two_factor_auth, 'Reset two factor auth' %>
   </div>
   <%end%>
   <div class="form-group">

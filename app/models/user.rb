@@ -4,7 +4,9 @@ class User < ActiveRecord::Base
   include StandardAuthentication
 
   acts_as_token_authenticatable
-  devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
+  
+  devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
+         :otp_secret_encryption_key => otp_enc_key
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id

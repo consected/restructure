@@ -12,14 +12,13 @@
       <%= f.password_field :password, autocomplete: "off", class: 'form-control', required: true %>
     </div>
 
+    <div class="form-group-non">
+      <%= f.label :otp_attempt, 'One-Time Code' %><br />
+      <%= f.password_field :otp_attempt, autocomplete: "off", class: 'form-control', required: true %>
+    </div>
+
     <%= hidden_field_tag :secure_entry, params[:secure_entry] if request.path.start_with?('/admins/sign_in') %>
 
-    <% if devise_mapping.rememberable? -%>
-      <div class="form-group">
-        <%= f.check_box :remember_me, class: 'form-control' %>
-        <%= f.label :remember_me %>
-      </div>
-    <% end -%>
 
     <div class="" style="margin: 0.8em 0;">
         <%= f.submit "Log in", class: 'btn btn-primary' %>
