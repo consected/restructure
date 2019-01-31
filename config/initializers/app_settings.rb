@@ -26,5 +26,9 @@ class Settings
   # a verified domain name.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
 
-  TwoFactorAuthIssuer = 'FPHS Apps'
+  TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
+
+  CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'] || 5).to_i
+
+
 end

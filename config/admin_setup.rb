@@ -16,10 +16,10 @@ module AdminSetup
         admin_obj.force_password_reset
         admin_obj.disabled = false
 
-        # if admin_obj.otp_secret.blank?
-        admin_obj.otp_required_for_login = true
-        otpsecret = admin_obj.otp_secret = User.generate_otp_secret
-        # end
+        if admin_obj.otp_secret.blank? || ENV['reset_secret']=='yes'
+          admin_obj.otp_required_for_login = true
+          otpsecret = admin_obj.otp_secret = User.generate_otp_secret
+        end
 
         res = admin_obj.save
         if res

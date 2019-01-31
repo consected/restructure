@@ -9,6 +9,7 @@ module StandardAuthentication
     validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => false, :if => :email_changed?
 
     validate :new_password_changed?, if: :password
+    validate :no_matching_prev_passwords, if: :password
     validates :password, password_strength: password_config, if: :password_changed?
     validate :password_like_email, if: :password_changed?
     validate :check_strength, if: :password_changed?
@@ -146,15 +147,19 @@ module StandardAuthentication
     # bcrypt generates a new salt every time.
     # Instead, extract the salt from the old password, then generate a temp hash
     # of the new password to see if it matches the old hash
-    def password_changed?
+    # @param prev_password_hash (String)
+    # optionally specify a password hash to compare against, otherwise
+    # use the last saved password
+    def password_changed? prev_password_hash: nil
+      prev_password_hash ||= encrypted_password_was
       return false unless self.password
-      return true if encrypted_password_was.blank? && self.password.present?
+      return true if prev_password_hash.blank? && self.password.present?
       # Get salt from saved encrypted_password
-      salt = BCrypt::Password.new(encrypted_password_was).salt
+      salt = BCrypt::Password.new(prev_password_hash).salt
       # Recreate the new password with the old salt
       temp_password_hash = BCrypt::Engine.hash_secret(self.password, salt)
       # Compare
-      temp_password_hash != encrypted_password_was
+      temp_password_hash != prev_password_hash
     end
 
     def setup_two_factor_auth
@@ -169,6 +174,34 @@ module StandardAuthentication
       elsif password_changed?
         self.reset_password_sent_at = nil
       end
+    end
+
+    def no_matching_prev_passwords
+
+      num = Settings::CheckPrevPasswords
+
+      # If number is 1, this counts as the previous password, which we are checking anyway in default new_password_changed?
+      return true if num < 2
+
+      history_table = "#{self.class.name.downcase.singularize}_history"
+
+      # We limit to one more than the specified number in history table, since this contains the current one in addition to the previous
+      pwhs = self.class.joins("inner join #{history_table} on #{history_table}.user_id = users.id").
+              where(users: {id: self.id}).
+              order("#{history_table}.id desc").
+              limit(num + 1).
+              pluck("#{history_table}.encrypted_password")
+
+      # Skip the first one, which we've checked, as mentioned above
+      pwhs[1..-1].each do |pwh|
+        c = password_changed? prev_password_hash: pwh
+        # If not changed then we found a match
+        unless c
+          errors.add :new_password, "matches a previous password. #{num} previous passwords are checked."
+          return
+        end
+      end
+
     end
 
 end
