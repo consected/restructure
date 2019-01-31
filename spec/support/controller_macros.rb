@@ -11,7 +11,7 @@ module ControllerMacros
     admin, _ = create_admin
 
     user = User.create! email: good_email, current_admin: admin
-    good_password = user.password
+    good_password = user.new_password
 
     app_type = Admin::AppType.active.first
 
@@ -34,7 +34,7 @@ module ControllerMacros
     good_admin_email = "ctestadmin-tester#{r}@testing.com"
 
     admin = Admin.create! email: good_admin_email
-    good_admin_password = admin.password
+    good_admin_password = admin.new_password
 
     [admin, good_admin_password]
   end

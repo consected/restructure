@@ -15,7 +15,8 @@ module StandardAuthentication
     validate :check_strength, if: :password_changed?
     before_create :setup_two_factor_auth
     before_save :is_temp_password!
-    attr_accessor :new_two_factor_auth_code, :forced_password_reset
+    after_save :clear_plaintext_password
+    attr_accessor :new_two_factor_auth_code, :forced_password_reset, :new_password
   end
 
   class_methods do
@@ -64,10 +65,6 @@ module StandardAuthentication
 
   def has_temp_password?
     !!self.reset_password_sent_at
-  end
-
-  def new_password
-    @new_password
   end
 
   def new_token
@@ -186,14 +183,24 @@ module StandardAuthentication
       history_table = "#{self.class.name.downcase.singularize}_history"
 
       # We limit to one more than the specified number in history table, since this contains the current one in addition to the previous
-      pwhs = self.class.joins("inner join #{history_table} on #{history_table}.user_id = users.id").
-              where(users: {id: self.id}).
-              order("#{history_table}.id desc").
-              limit(num + 1).
-              pluck("#{history_table}.encrypted_password")
+      # Also, we have to pick only the distinct items, since the history table records logins, not just password changes
+      userid = self.id
+      tn = self.class.table_name
+
+      pwhs = self.class.unscope(:order).joins("inner join #{history_table} on #{history_table}.#{tn.singularize}_id = #{tn}.id").
+                    where(tn => {id: userid}).
+                    order("#{history_table}.id desc").
+                    limit(num + 1).
+                    pluck("distinct on (#{history_table}.id) #{history_table}.encrypted_password")
+
+
+      limited_pwhs = pwhs[1..-1]
+
+      # Nothing to check against. All ok
+      return true if limited_pwhs.nil?
 
       # Skip the first one, which we've checked, as mentioned above
-      pwhs[1..-1].each do |pwh|
+      limited_pwhs.each do |pwh|
         c = password_changed? prev_password_hash: pwh
         # If not changed then we found a match
         unless c
@@ -202,6 +209,10 @@ module StandardAuthentication
         end
       end
 
+    end
+
+    def clear_plaintext_password
+      self.password = nil
     end
 
 end
