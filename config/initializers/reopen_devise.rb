@@ -61,4 +61,14 @@ Rails.application.config.to_prepare do
     redirect_to '/'
   end
 
+
+  Warden::Manager.send(:after_authentication) do |record, warden, options|
+
+    if record.respond_to?(:need_change_password?) && record.need_change_password?
+      scope = options[:scope]
+      warden.logout(scope)
+      throw(:warden, :scope => scope, :reason => "Your password has expired.", :message => "Your password has expired. Contact the administrator to reset your account.")
+    end
+  end
+
 end

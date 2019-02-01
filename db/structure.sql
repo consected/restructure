@@ -12018,7 +12018,8 @@ CREATE TABLE ml_app.admins (
     encrypted_otp_secret_salt character varying,
     consumed_timestep integer,
     otp_required_for_login boolean,
-    reset_password_sent_at timestamp without time zone
+    reset_password_sent_at timestamp without time zone,
+    password_updated_at timestamp without time zone
 );
 
 
@@ -15846,7 +15847,8 @@ CREATE TABLE ml_app.users (
     encrypted_otp_secret_iv character varying,
     encrypted_otp_secret_salt character varying,
     consumed_timestep integer,
-    otp_required_for_login boolean
+    otp_required_for_login boolean,
+    password_updated_at timestamp without time zone
 );
 
 
@@ -28496,4 +28498,8 @@ INSERT INTO schema_migrations (version) VALUES ('20190130152053');
 INSERT INTO schema_migrations (version) VALUES ('20190130152208');
 
 INSERT INTO schema_migrations (version) VALUES ('20190131130024');
+
+INSERT INTO schema_migrations (version) VALUES ('20190201160559');
+
+INSERT INTO schema_migrations (version) VALUES ('20190201160606');
 

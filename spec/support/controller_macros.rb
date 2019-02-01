@@ -25,6 +25,7 @@ module ControllerMacros
     # Save a new password, as required to handle temp passwords
     user  = User.find(user.id)
     good_password = user.generate_password
+    user.current_admin = admin
     user.save!
 
     [user, good_password]

@@ -28,7 +28,6 @@ module ModelSupport
 
     admin, _ = create_admin
     user = User.create! email: good_email, current_admin: admin
-    good_password = user.new_password
     @user = user
 
     app_type = Admin::AppType.active.first
@@ -43,6 +42,7 @@ module ModelSupport
 
     # Save a new password, as required to handle temp passwords
     user  = User.find(user.id)
+    user.current_admin = admin
     good_password = user.generate_password
     user.save!
 
@@ -54,6 +54,7 @@ module ModelSupport
   end
 
   def create_admin  r=nil
+
     a = Admin.order(id: :desc).first
     unless r
       r = 1

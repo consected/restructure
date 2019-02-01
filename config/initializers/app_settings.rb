@@ -28,7 +28,7 @@ class Settings
 
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
 
-  CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'] || 5).to_i
-
+  CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'] || (Rails.env.development? ? 0 : 5)).to_i
+  PasswordAgeLimit = (ENV['FPHS_PASSWORD_AGE_LIMIT'] || 90).to_i
 
 end

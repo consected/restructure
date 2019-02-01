@@ -94,4 +94,25 @@ describe User do
     expect(@user.save).to be false
   end
 
+  it "expires a password if it is too old" do
+    create_admin
+
+    expect(Settings::PasswordAgeLimit).to eq 90
+
+    expect(@user.need_change_password?).to be false
+
+    @user.password_updated_at = DateTime.now - 89.days
+    @user.current_admin = @admin
+    @user.save
+
+    expect(@user.need_change_password?).to be false
+
+    @user.password_updated_at = DateTime.now - 91.days
+    @user.save
+
+    expect(@user.need_change_password?).to be true
+
+
+  end
+
 end

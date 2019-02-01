@@ -4,14 +4,9 @@ require './config/admin_setup.rb'
 describe Admin do
   include ModelSupport
   before(:each) do
-    @good_email = 'testadmin-model@testing.com'
-    @good_password = Devise.friendly_token.first(12)
-    @admin = Admin.create email: @good_email, password: @good_password
-
-    @admin = Admin.find(@admin.id)
-    @good_password = @admin.generate_password
-    @admin.save!
-
+    ENV['FPHS_ADMIN_SETUP']='yes'
+    @admin, @good_password = create_admin 'test-admin'
+    @good_email = @admin.email
   end
 
   it "creates a admin" do

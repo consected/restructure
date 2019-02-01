@@ -4,7 +4,7 @@ class User < ActiveRecord::Base
   include StandardAuthentication
 
   acts_as_token_authenticatable
-  
+
   devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
          :otp_secret_encryption_key => otp_enc_key
 
@@ -104,7 +104,7 @@ class User < ActiveRecord::Base
       end
 
       if disabled_changed? && self.persisted? && !admin_set?
-        errors.add(:disabled, "change not allowed!")
+        errors.add(:disabled, "change not allowed! (no admin set?)")
         return false
       end
 
