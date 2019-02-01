@@ -7,6 +7,11 @@ describe Admin do
     @good_email = 'testadmin-model@testing.com'
     @good_password = Devise.friendly_token.first(12)
     @admin = Admin.create email: @good_email, password: @good_password
+
+    @admin = Admin.find(@admin.id)
+    @good_password = @admin.generate_password
+    @admin.save!
+
   end
 
   it "creates a admin" do

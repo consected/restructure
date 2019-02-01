@@ -16,6 +16,7 @@ module FeatureSupport
     within '#new_user' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
+      fill_in "One-Time Code", with: @user.current_otp
       click_button "Log in"
     end
     already_signed_in = user_logged_in?

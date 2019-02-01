@@ -11,7 +11,6 @@ module ControllerMacros
     admin, _ = create_admin
 
     user = User.create! email: good_email, current_admin: admin
-    good_password = user.new_password
 
     app_type = Admin::AppType.active.first
 
@@ -21,6 +20,11 @@ module ControllerMacros
 
     # Set a default app_type to use to allow non-interactive tests to continue
     user.app_type = app_type
+    user.save!
+
+    # Save a new password, as required to handle temp passwords
+    user  = User.find(user.id)
+    good_password = user.generate_password
     user.save!
 
     [user, good_password]
@@ -34,7 +38,11 @@ module ControllerMacros
     good_admin_email = "ctestadmin-tester#{r}@testing.com"
 
     admin = Admin.create! email: good_admin_email
-    good_admin_password = admin.new_password
+
+    # Save a new password, as required to handle temp passwords
+    admin = Admin.find(admin.id)
+    good_admin_password = admin.generate_password
+    admin.save!
 
     [admin, good_admin_password]
   end

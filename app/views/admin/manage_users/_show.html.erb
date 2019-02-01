@@ -10,7 +10,7 @@
        <%
            html = render partial: 'credential_doc'
         %>
-        <a href="data:text/html;base64,<%=Base64.encode64(html)%>" download="qrcode-<%=@user.email.split('@').first%>" title="click to download">Download Credentials and One-Time Code</a>
+        <a href="data:text/html;base64,<%=Base64.encode64(html)%>" download="qrcode-<%=@user.email.split('@').first%>" title="click to download">Download Credentials Document</a>
       </p>
 
     </div>

@@ -4,7 +4,7 @@ module StandardAuthentication
   extend ActiveSupport::Concern
 
   included do
-    before_validation :generate_password, on: :create
+    before_validation :setup_new_password, on: :create
     validates_uniqueness_of :email, :case_sensitive => false, :allow_blank => false, :if => :email_changed?
     validates_format_of :email, :with  => Devise.email_regexp, :allow_blank => false, :if => :email_changed?
 
@@ -79,13 +79,44 @@ module StandardAuthentication
 
   def two_factor_auth_uri
     issuer = Settings::TwoFactorAuthIssuer
-    label = "#{issuer}:#{self.email}"
+    label = "#{issuer} (#{self.class.name.downcase}) #{self.email}"
     self.otp_provisioning_uri(label, issuer: issuer)
   end
 
   def reset_two_factor_auth
     setup_two_factor_auth
   end
+
+  def validate_one_time_code code
+    if code == self.current_otp
+      self.otp_required_for_login = true
+      self.save
+    end
+  end
+
+  # Generate a random password for a user
+  # Return the plain text password in the new_password attribute
+  def generate_password
+    res = false
+    i = 0
+    while !res
+      generated_password = Devise.friendly_token.first(16)
+      res = (self.class.calculate_strength(generated_password) >= self.class.password_config[:min_entropy])
+      i += 1
+    end
+
+    if i > 1
+      Rails.logger.info "Took #{i} times to make password"
+      puts "Took #{i} times to make password"
+    end
+
+    @new_token = Devise.friendly_token(30)
+    self.authentication_token = @new_token
+
+    @new_password = generated_password
+    self.password = generated_password
+  end
+
 
   protected
 
@@ -106,30 +137,12 @@ module StandardAuthentication
       end
     end
 
-    # Generate a random password for a new user
-    # Return the plain text password in the new_password attribute
-    def generate_password
-      res = false
-      i = 0
-      while !res
-        generated_password = Devise.friendly_token.first(16)
-        res = (self.class.calculate_strength(generated_password) >= self.class.password_config[:min_entropy])
-        i += 1
-      end
-
-      if i > 1
-        Rails.logger.info "Took #{i} times to make password"
-        puts "Took #{i} times to make password"
-      end
-
-      @new_token = Devise.friendly_token(30)
-      self.authentication_token = @new_token
-
+    # Setup password for new user
+    def setup_new_password
+      generate_password
       @forced_password_reset = true
-
-      @new_password = generated_password
-      self.password = generated_password
     end
+
 
     def word_list
       self.class.word_list
@@ -160,7 +173,8 @@ module StandardAuthentication
     end
 
     def setup_two_factor_auth
-      self.otp_required_for_login = true
+      # initially we say that otp is not required for login, so that on the first login we can show the QR code to users
+      self.otp_required_for_login = false
       self.otp_secret = User.generate_otp_secret
       self.new_two_factor_auth_code = true
     end
@@ -170,6 +184,8 @@ module StandardAuthentication
         self.reset_password_sent_at = DateTime.now
       elsif password_changed?
         self.reset_password_sent_at = nil
+        # Now the user has changed password, force the use of OTP at login
+        self.otp_required_for_login = true
       end
     end
 

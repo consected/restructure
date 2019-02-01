@@ -41,6 +41,10 @@ module ModelSupport
     user.app_type = app_type
     user.save!
 
+    # Save a new password, as required to handle temp passwords
+    user  = User.find(user.id)
+    good_password = user.generate_password
+    user.save!
 
     if opt[:create_master]
       Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
@@ -58,7 +62,12 @@ module ModelSupport
     good_admin_email = "e-testadmin-tester#{r}@testing.com"
 
     admin = Admin.create! email: good_admin_email
-    good_admin_password = admin.new_password
+
+    # Save a new password, as required to handle temp passwords
+    admin = Admin.find(admin.id)
+    good_admin_password = admin.generate_password
+    admin.save!
+
     @admin = admin
     [admin, good_admin_password]
   end

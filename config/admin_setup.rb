@@ -17,7 +17,7 @@ module AdminSetup
         admin_obj.disabled = false
 
         if admin_obj.otp_secret.blank? || ENV['reset_secret']=='yes'
-          admin_obj.otp_required_for_login = true
+          admin_obj.otp_required_for_login = false
           otpsecret = admin_obj.otp_secret = User.generate_otp_secret
         end
 

@@ -7,7 +7,12 @@ describe "admin sign in process", driver: :app_firefox_driver do
   def make_an_admin
     @good_email = "testuser#{rand(1000000000)}admin@testing.com"
     @admin = Admin.create! email: @good_email
-    @good_password = @admin.new_password
+    # Save a new password, as required to handle temp passwords
+    @admin = Admin.find(@admin.id)
+    @good_password = @admin.generate_password
+    @admin.save!
+
+    @good_password
   end
 
   before(:all) do
@@ -16,7 +21,10 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     @final_good_email = "testuser#{rand(1000000000)}admin@testing.com"
     @final_admin = Admin.create! email: @final_good_email
-    @final_good_password = @final_admin.new_password
+
+    @final_admin = Admin.find(@admin.id)
+    @final_good_password = @final_admin.generate_password
+    @final_admin.save!
 
 
     ENV['FPHS_ADMIN_SETUP']='yes'
@@ -26,7 +34,11 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
 
     @d_admin = Admin.create email: @d_email
-    @d_pw = @d_admin.new_password
+
+    # Save a new password, as required to handle temp passwords
+    @d_admin = Admin.find(@d_admin.id)
+    @d_pw = @d_admin.generate_password
+    @d_admin.save!
 
     expect(@d_admin).to be_persisted
     expect(@d_admin.active_for_authentication?).to be true
@@ -57,6 +69,8 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
+      fill_in "One-Time Code", with: @admin.current_otp
+
       click_button "Log in"
     end
 
@@ -76,6 +90,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ""
+      fill_in "One-Time Code", with: @admin.current_otp
       click_button "Log in"
     end
 
@@ -88,6 +103,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password + ' '
+      fill_in "One-Time Code", with: @admin.current_otp
       click_button "Log in"
     end
 
@@ -99,6 +115,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @final_good_email
       fill_in "Password", with: ' '+@final_good_password
+      fill_in "One-Time Code", with: @admin.current_otp
       click_button "Log in"
     end
 
@@ -109,6 +126,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @final_good_email
       fill_in "Password", with: @final_good_password
+      fill_in "One-Time Code", with: @admin.current_otp
       click_button "Log in"
     end
 
@@ -124,6 +142,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @d_email
       fill_in "Password", with: @d_pw
+      fill_in "One-Time Code", with: @admin.current_otp
       click_button "Log in"
     end
 

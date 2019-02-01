@@ -99,6 +99,15 @@ Rails.application.routes.draw do
   devise_for :admins, :skip => [:registrations]
   devise_for :users, :skip => [:registrations]
 
+  devise_scope :admin do
+    get "/admins/show_otp", to: "devise/registrations#show_otp"
+    post "/admins/test_otp", to: "devise/registrations#test_otp"
+  end
+
+  devise_scope :user do
+    get "/users/show_otp", to: "devise/registrations#show_otp"
+    post "/users/test_otp", to: "devise/registrations#test_otp"
+  end
 
   #mount NfsStore::Engine, at: "/nfs_store"
   namespace :nfs_store do
