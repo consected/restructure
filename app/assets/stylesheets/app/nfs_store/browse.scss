@@ -12,11 +12,14 @@
     color: #cf9c13;
   }
 
+  .glyphicon-exclamation-sign {
+    color: gray;
+  }
+
   .root-folder {
     .glyphicon-folder-close,  .glyphicon-folder-open {
       color: #3db553;
     }
-
   }
 
   &, ul {
