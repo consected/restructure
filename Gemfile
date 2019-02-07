@@ -9,7 +9,7 @@ gem 'jquery-rails'
 gem 'devise'
 gem 'strong_password', '~> 0.0.5'
 
-gem 'simple_token_authentication', '~> 1.0'
+gem 'simple_token_authentication', '~> 1.0', git: 'https://github.com/philayres/simple_token_authentication.git'
 
 gem 'dalli'
 
