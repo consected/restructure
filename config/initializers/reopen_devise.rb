@@ -38,10 +38,10 @@ Rails.application.config.to_prepare do
 
 
   DeviseController.send(:define_method, :show_otp) do
-    redirect_to '/' unless signed_in?
+    redirect_to '/' and return unless signed_in?
     @resource = current_admin || current_user
 
-    redirect_to '/' unless @resource.otp_secret.present? && !@resource.otp_required_for_login
+    redirect_to '/' and return unless @resource && @resource.otp_secret.present? && !@resource.otp_required_for_login
     @resource_name = @resource.class.name.downcase
     # A secret was previously generated, and the user has not yet confirmed it (so it is not set as "required for login")
     # Continue with the action

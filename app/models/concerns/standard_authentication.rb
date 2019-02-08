@@ -208,7 +208,7 @@ module StandardAuthentication
     def setup_two_factor_auth
       # initially we say that otp is not required for login, so that on the first login we can show the QR code to users
       self.otp_required_for_login = false
-      self.otp_secret = User.generate_otp_secret
+      self.otp_secret = self.class.generate_otp_secret
       self.new_two_factor_auth_code = true
     end
 
@@ -242,11 +242,11 @@ module StandardAuthentication
       userid = self.id
       tn = self.class.table_name
 
-      pwhs = self.class.unscope(:order).joins("inner join #{history_table} on #{history_table}.#{tn.singularize}_id = #{tn}.id").
+      pwhs = self.class.unscope(:order).joins(self.class.send :sanitize_sql_array, ["inner join #{history_table} on #{history_table}.#{tn.singularize}_id = #{tn}.id"]).
                     where(tn => {id: userid}).
-                    order("#{history_table}.id desc").
+                    order(self.class.send :sanitize_sql_array, ["#{history_table}.id desc"]).
                     limit(num + 1).
-                    pluck("distinct on (#{history_table}.id) #{history_table}.encrypted_password")
+                    pluck(self.class.send :sanitize_sql_array, ["distinct on (#{history_table}.id) #{history_table}.encrypted_password"])
 
 
       limited_pwhs = pwhs[1..-1]

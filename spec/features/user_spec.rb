@@ -16,6 +16,9 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     @d_email = @d_user.email
     create_admin
     @d_user.current_admin = @admin
+    @d_user.send :setup_two_factor_auth
+    @d_user.new_two_factor_auth_code = false
+    @d_user.otp_required_for_login = true
     @d_user.disabled = true
     @d_user.save!
     expect(@d_user.active_for_authentication?).to be false
@@ -52,7 +55,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     within '#new_user' do
       fill_in "Email", with: @d_email
       fill_in "Password", with: @d_pw
-      fill_in "One-Time Code", with: @user.current_otp
+      fill_in "One-Time Code", with: @d_user.current_otp
       click_button "Log in"
     end
 
@@ -77,7 +80,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
       click_button "Log in"
     end
 
-    fail_message = "× Invalid Email or password."
+    fail_message = "× Invalid email, password or one-time code."
 
     expect(page).to have_css "input:invalid"
 
@@ -97,7 +100,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ' '+@good_password
       fill_in "One-Time Code", with: @user.current_otp
-      
+
       click_button "Log in"
     end
 

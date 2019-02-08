@@ -26,6 +26,8 @@ module ControllerMacros
     user  = User.find(user.id)
     good_password = user.generate_password
     user.current_admin = admin
+    user.otp_required_for_login = true
+    user.new_two_factor_auth_code = true
     user.save!
 
     [user, good_password]
@@ -43,6 +45,11 @@ module ControllerMacros
     # Save a new password, as required to handle temp passwords
     admin = Admin.find(admin.id)
     good_admin_password = admin.generate_password
+    admin.otp_secret = Admin.generate_otp_secret
+
+    admin.otp_required_for_login = true
+    admin.new_two_factor_auth_code = true
+
     admin.save!
 
     [admin, good_admin_password]

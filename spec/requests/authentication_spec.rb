@@ -17,7 +17,10 @@ describe "user and admin authentication" do
 
     # Handle devise URLs explicitly as users and admins
     # Also handle explicit redirections to home with :redirect_home
-    special_urls = {"/admins/edit" => :admins, "/users/edit" => :users, "/admins/:id" => :admins, "/users/:id" => :users, "/admins/sign_out" => :redirect_home, "/users/sign_out" => :redirect_home }
+    special_urls = {"/admins/edit" => :admins, "/users/edit" => :users, "/admins/:id" => :admins,
+                    "/users/:id" => :users, "/admins/sign_out" => :redirect_home, "/users/sign_out" => :redirect_home,
+                    "/admins/test_otp" => :redirect_home, "/admins/show_otp" => :redirect_home,
+                    "/users/test_otp" => :redirect_home, "/users/show_otp" => :redirect_home }
 
     @url_list = Rails.application.routes.routes.map do |r|
       url = r.path.spec.to_s
