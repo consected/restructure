@@ -22,7 +22,7 @@ Rails.application.config.to_prepare do
     -> {
       return unless signed_in?
 
-      @resource = current_admin || current_user
+      @resource = resource_name == :user ? current_user : current_admin
       @resource_name = @resource.class.name.downcase
 
 
@@ -39,7 +39,7 @@ Rails.application.config.to_prepare do
 
   DeviseController.send(:define_method, :show_otp) do
     redirect_to '/' and return unless signed_in?
-    @resource = current_admin || current_user
+    @resource = resource_name == :user ? current_user : current_admin
 
     redirect_to '/' and return unless @resource && @resource.otp_secret.present? && !@resource.otp_required_for_login
     @resource_name = @resource.class.name.downcase
@@ -49,7 +49,7 @@ Rails.application.config.to_prepare do
 
   DeviseController.send(:define_method, :test_otp) do
     redirect_to '/' unless signed_in?
-    @resource = current_admin || current_user
+    @resource = resource_name == :user ? current_user : current_admin
     @resource_name = @resource.class.name.downcase
 
     code = params[:otp_attempt]
@@ -59,6 +59,22 @@ Rails.application.config.to_prepare do
     flash[:notice] = 'One-Time Code was incorrect. Please try again.' unless res
 
     redirect_to '/'
+  end
+
+
+  Devise::SessionsController.send(:after_filter) do
+
+    record = resource
+
+    if record && record.password_expiring_soon?
+      pe = record.password_expiring_soon?
+      if pe > 0
+        m = "Your password will expire in #{pe} #{'day'.pluralize(pe)}. Change your password to avoid being locked out of your account."
+      else
+        m = "Your password will expire in less than a day. Change your password to avoid being locked out of your account."
+      end
+      flash[:notice] = m
+    end
   end
 
 

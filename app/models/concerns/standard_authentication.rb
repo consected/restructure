@@ -66,7 +66,19 @@ module StandardAuthentication
 
   # Does the password need to be changed (due to being too old)?
   def need_change_password?
-    self.password_updated_at.nil? or self.password_updated_at < self.class.expire_password_after.days.ago
+    set_default_password_expiration
+    self.password_updated_at < self.class.expire_password_after.days.ago
+  end
+
+  # If the password is expiring soon, return the number of days
+  # Othewise return nil
+  def password_expiring_soon?
+    set_default_password_expiration
+    if self.password_updated_at < (self.class.expire_password_after - 5).days.ago
+      ((self.password_updated_at - self.class.expire_password_after.days.ago) / 1.day).to_i
+    else
+      nil
+    end
   end
 
   # Force a user password reset by an admin, and unlock the account if it was locked
@@ -269,6 +281,13 @@ module StandardAuthentication
     # Clear the plain text password after saving to avoid accidental leakage
     def clear_plaintext_password
       self.password = nil
+    end
+
+    def set_default_password_expiration
+      unless self.password_updated_at
+        self.password_updated_at = (self.class.expire_password_after - 5).days.ago
+        self.save
+      end
     end
 
 end

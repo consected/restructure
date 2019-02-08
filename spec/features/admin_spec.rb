@@ -25,8 +25,6 @@ describe "admin sign in process", driver: :app_firefox_driver do
   before(:all) do
     ENV['FPHS_ADMIN_SETUP']='yes'
 
-    Admin.update_all(disabled: true)
-
 
     @final_good_email = "test-final#{rand(1000000000)}admin@testing.com"
     @final_admin = Admin.create! email: @final_good_email
