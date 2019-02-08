@@ -2828,7 +2828,14 @@ CREATE TABLE ml_app.admins (
     locked_at timestamp without time zone,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
-    disabled boolean
+    disabled boolean,
+    encrypted_otp_secret character varying,
+    encrypted_otp_secret_iv character varying,
+    encrypted_otp_secret_salt character varying,
+    consumed_timestep integer,
+    otp_required_for_login boolean,
+    reset_password_sent_at timestamp without time zone,
+    password_updated_at timestamp without time zone
 );
 
 
@@ -5479,7 +5486,13 @@ CREATE TABLE ml_app.users (
     disabled boolean,
     admin_id integer,
     app_type_id integer,
-    authentication_token character varying(30)
+    authentication_token character varying(30),
+    encrypted_otp_secret character varying,
+    encrypted_otp_secret_iv character varying,
+    encrypted_otp_secret_salt character varying,
+    consumed_timestep integer,
+    otp_required_for_login boolean,
+    password_updated_at timestamp without time zone
 );
 
 
