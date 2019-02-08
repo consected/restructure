@@ -5,6 +5,8 @@ describe "admin sign in process", driver: :app_firefox_driver do
   include ModelSupport
 
   def make_an_admin
+    ENV['FPHS_ADMIN_SETUP']='yes'
+
     @good_email = "testuser#{rand(1000000000)}admin@testing.com"
     @admin = Admin.create! email: @good_email
     # Save a new password, as required to handle temp passwords
@@ -25,9 +27,8 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     Admin.update_all(disabled: true)
 
-    make_an_admin
 
-    @final_good_email = "testuser#{rand(1000000000)}admin@testing.com"
+    @final_good_email = "test-final#{rand(1000000000)}admin@testing.com"
     @final_admin = Admin.create! email: @final_good_email
 
     @final_admin = Admin.find(@final_admin.id)
@@ -61,6 +62,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     expect(@d_admin.disabled).to be true
     expect(@d_admin.active_for_authentication?).to be false
 
+    make_an_admin
 
   end
 
@@ -72,7 +74,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
   it "should sign in" do
 
-    make_an_admin
+    # make_an_admin
 
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
@@ -81,16 +83,17 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
+      expect(@admin.email).to eq @good_email
+      expect(@admin.valid_password?(@good_password)).to be true
+      expect(@admin.validate_one_time_code(@admin.current_otp)).to be true
+
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
       fill_in "One-Time Code", with: @admin.current_otp
 
-      expect(@admin.email).to eq @good_email
-      expect(@admin.valid_password?(@good_password)).to be true
-      expect(@admin.validate_one_time_code(@admin.current_otp)).to be true
       click_button "Log in"
     end
-    expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
+    expect(page).to have_css( ".flash .alert", text: "× Signed in successfully")
 
   end
 
@@ -113,7 +116,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     expect(page).to have_css "input:invalid"
 
     # make a new admin to avoid lockout
-    make_an_admin
+    # make_an_admin
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
