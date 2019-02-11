@@ -22,5 +22,7 @@
       <p><%= v %></p>
     <%end%>
   </div>
+  <% flash.discard(key) %>
   <% end %>
+  <% flash.clear %>
 </div>
