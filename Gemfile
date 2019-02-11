@@ -42,6 +42,8 @@ gem 'aws-sdk-sns'
 
 gem 'crass', '~> 1.0.4'
 
+gem 'kramdown'
+
 group :development do
 
   gem 'web-console', '~> 2.0'
