@@ -6,7 +6,7 @@ gem 'pg', '~> 0.15'
 
 gem 'jquery-rails'
 
-gem 'devise'
+gem 'devise', '4.5.0'
 gem 'strong_password', '~> 0.0.5'
 
 gem 'simple_token_authentication', '~> 1.0', git: 'https://github.com/philayres/simple_token_authentication.git'

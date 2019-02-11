@@ -3,7 +3,7 @@ if [ "$(whoami)" != 'root' ]; then
   echo Must be sudo to run
   exit
 fi
-FS_ROOT=${HOME}/test-fphsfs
+FS_ROOT=/media/phil/1081E6F600D5E861/test-fphsfs
 FS_DIR=main
 MOUNT_ROOT=/mnt/fphsfs
 WEBAPP_USER=${USER}

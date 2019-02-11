@@ -20,9 +20,8 @@ Rails.application.config.to_prepare do
   # Handle delivery of new 2FA token configuration
   DeviseController.send('before_action',
     -> {
-      return unless signed_in?
-
       @resource = resource_name == :user ? current_user : current_admin
+      return unless @resource
       @resource_name = @resource.class.name.downcase
 
 

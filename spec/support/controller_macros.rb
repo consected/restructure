@@ -29,7 +29,7 @@ module ControllerMacros
     user.otp_required_for_login = true
     user.new_two_factor_auth_code = true
     user.save!
-
+    user = user.reload
     [user, good_password]
 
   end
@@ -51,7 +51,7 @@ module ControllerMacros
     admin.new_two_factor_auth_code = true
 
     admin.save!
-
+    admin = admin.reload
     [admin, good_admin_password]
   end
 
