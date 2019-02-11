@@ -45,7 +45,7 @@ module ModelSupport
     user.current_admin = admin
     good_password = user.generate_password
     user.otp_required_for_login = true
-    user.new_two_factor_auth_code = true
+    user.new_two_factor_auth_code = false
 
     user.save!
 
@@ -73,7 +73,7 @@ module ModelSupport
     admin.otp_secret = Admin.generate_otp_secret
 
     admin.otp_required_for_login = true
-    admin.new_two_factor_auth_code = true
+    admin.new_two_factor_auth_code = false
 
     admin.save!
 
