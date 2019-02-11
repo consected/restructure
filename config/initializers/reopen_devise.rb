@@ -65,7 +65,7 @@ Rails.application.config.to_prepare do
 
     record = resource
 
-    if record && record.password_expiring_soon?
+    if record&.id && record.password_expiring_soon?
       pe = record.password_expiring_soon?
       if pe > 0
         m = "Your password will expire in #{pe} #{'day'.pluralize(pe)}. Change your password to avoid being locked out of your account."
