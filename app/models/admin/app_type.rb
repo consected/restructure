@@ -333,10 +333,10 @@ class Admin::AppType < Admin::AdminBase
   private
 
     def set_access_levels
-      if !persisted? || self.user_access_controls.length == 0
-        Admin::UserAccessControl.create_all_for self, current_admin
-        return true
-      end
+      # if !persisted? || self.user_access_controls.length == 0
+      #   Admin::UserAccessControl.create_all_for self, current_admin
+      #   return true
+      # end
     end
 
 end

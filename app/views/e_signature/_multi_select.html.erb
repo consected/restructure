@@ -1,0 +1,11 @@
+multi_vals.each do |mv|
+  <% unless mv.to_s.in? ['0', 'false', 'no']  %>
+  <span><% if get_from_objects general_selections, field_key, mv, 'name') %>
+    <%= get_from_objects general_selections, field_key, mv, 'name' %>
+  <% else %>
+    <%= pretty_string @record, return_string: true, capitalize: true %>
+    <% end %>
+  </span>
+  <br/>
+  <% else %>
+<% end %>

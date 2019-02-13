@@ -9,7 +9,7 @@ class ExtraLogType < ExtraOptions
 
 
   def self.add_key_attributes
-    [:fields, :references, :label, :save_trigger]
+    [:references, :label, :save_trigger, :e_sign]
   end
 
   attr_accessor(*self.key_attributes)
@@ -18,9 +18,6 @@ class ExtraLogType < ExtraOptions
 
     res = {
       label: "button label",
-      fields: [
-        'field_name_1', 'field_name_2'
-      ],
       references: {
         model_name: {
           from: "this | master",
@@ -56,6 +53,10 @@ class ExtraLogType < ExtraOptions
           notes: 'on_save: provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.'
         }
 
+      },
+      e_sign: {
+        document_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **")
+
       }
 
     }
@@ -65,7 +66,6 @@ class ExtraLogType < ExtraOptions
   def initialize name, config, parent_activity_log
     super(name, config, parent_activity_log)
 
-    self.fields ||= []
 
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
     raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
@@ -109,6 +109,22 @@ class ExtraLogType < ExtraOptions
         end
       end
 
+    end
+
+
+    if self.e_sign
+      # Set up the structure so that we can use the standard reference methods to parse the configuration
+      self.e_sign[:document_reference] = {item: self.e_sign[:document_reference]}
+      self.e_sign[:document_reference].each do |k, refitem|
+
+        refitem.each do |mn, conf|
+          to_class = ModelReference.to_record_class_for_type(mn)
+
+          refitem[mn][:to_record_label] = conf[:label] || to_class&.human_name
+          refitem[mn][:no_master_association] = to_class.no_master_association if to_class&.respond_to?(:no_master_association)
+          refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
+        end
+      end
     end
 
     self.save_trigger ||= {}

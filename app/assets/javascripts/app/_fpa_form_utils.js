@@ -1109,8 +1109,9 @@ _fpa.form_utils = {
               me = dc;
 
             var has_dialog = (me.find('.in-form-dialog').length > 0);
+            var has_e_sign = (me.find('#e_signature_document').length > 0);
             var cap_items = me.find('.list-group-item.caption-before, .list-group-item.dialog-before');
-            if(cap_items.length == 0) return;
+            if(!has_e_sign && cap_items.length == 0) return;
             var visible_cap = cap_items.filter(':visible');
             if(visible_cap && visible_cap.length > 0) {
               var cap_height = visible_cap.last().position().top + visible_cap.last().outerHeight() - visible_cap.first().position().top
@@ -1119,21 +1120,29 @@ _fpa.form_utils = {
               cap_height = 0;
             }
 
-            if(cap_height > 800 || has_dialog) {
+            if(cap_height > 800 || has_dialog || has_e_sign) {
               var c = _fpa.layout.item_blocks.regular;
               var max_h = 0;
               cap_items.each(function() {
                 var curr_h = $(this).height();
                 if(curr_h > max_h) max_h = curr_h;
               });
-              if(max_h > 60 || has_dialog) {
-                c = _fpa.layout.item_blocks.wide;
+              if(max_h > 60 || has_dialog || has_e_sign) {
+                if(has_e_sign) {
+                  c = _fpa.layout.item_blocks.e_signature;
+                }
+                else {
+                  c = _fpa.layout.item_blocks.wide;
+                }
                 me.first().removeClass(_fpa.layout.item_blocks.regular);
                 me.addClass(c).addClass('resized-width');
               }
               else {
-                if(me.hasClass('new-block'))
-                me.addClass(_fpa.layout.item_blocks.regular);
+                if(me.hasClass('new-block')) {
+                  me.first().removeClass(_fpa.layout.item_blocks.wide);
+                  me.first().removeClass(_fpa.layout.item_blocks.e_signature);
+                  me.addClass(_fpa.layout.item_blocks.regular);
+                }
               }
             }
 

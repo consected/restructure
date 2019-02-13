@@ -1,0 +1,3 @@
+  <span class="e-sign-meta-created-at">created at: <%= @e_sign_document.created_at %></span>
+  <span class="e-sign-meta-last-updated">updated at:<% unless @e_sign_document.updated_at == @e_sign_document.created_at %><%= @e_sign_document.updated_at %><% end %></span>
+  <span class="e-sign-meta-created-by">last updated by: <%= @e_sign_document.user_id ? "#{User.find(@e_sign_document.user_id).email} (id: #{@e_sign_document.user_id})" : '(unknown)'%></span>

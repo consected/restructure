@@ -296,10 +296,16 @@ module ActivityLogHandler
     res
   end
 
-  def model_references
+  def model_references reference_type: :references
     res = []
-    return res unless extra_log_type_config && extra_log_type_config.references
-    extra_log_type_config.references.each do |ref_key, refitem|
+    if reference_type == :references
+      refs = extra_log_type_config.references
+    elsif reference_type == :e_sign
+      refs = extra_log_type_config.e_sign && extra_log_type_config.e_sign[:document_reference]
+    end
+
+    return res unless extra_log_type_config && refs
+    refs.each do |ref_key, refitem|
       refitem.each do |ref_type, ref_config|
         f = ref_config[:from]
         if f == 'this'

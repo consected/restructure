@@ -41,6 +41,23 @@ class DynamicModel < ActiveRecord::Base
     table_name.singularize
   end
 
+
+  def all_implementation_fields ignore_errors: true
+    begin
+      fl = self.field_list.split(',').map {|f| f.strip}.compact if self.field_list
+      res = (fl || [])
+      res.uniq
+
+      if res.length == 0 && self.model_def
+        res = self.model_def.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
+      end
+      res
+    rescue FphsException => e
+      raise e unless ignore_errors
+      return []
+    end
+  end
+
   def self.orientation category
     return :horizontal if category.to_s.include?('history') || category.to_s.include?('-records')
     return :vertical
@@ -355,6 +372,9 @@ class DynamicModel < ActiveRecord::Base
     end
   end
 
+  def generator_script
+    "db/table_generators/generate.sh dynamic_models_table create  #{table_name} #{all_implementation_fields(ignore_errors: true).join(' ')}"
+  end
 
 end
 

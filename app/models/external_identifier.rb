@@ -56,21 +56,23 @@ class ExternalIdentifier < ActiveRecord::Base
 
   def self.routes_load
 
+    mn = nil
     begin
       m = self.active
       return if m.length == 0
-
       Rails.application.routes.draw do
         resources :masters, only: [:show, :index, :new, :create] do
 
             m.each do |pg|
+              mn = pg
+              Rails.logger.info "Setting up routes for #{mn}"
               resources pg.model_association_name, except: [:destroy]
             end
         end
       end
 
     rescue ActiveRecord::StatementInvalid => e
-      logger.warn "Not loading activity log routes. The table has probably not been created yet. #{e.backtrace.join("\n")}"
+      logger.warn "Not loading activity log routes. The table #{mn} has probably not been created yet. #{e.backtrace.join("\n")}"
     end
 
 

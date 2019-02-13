@@ -4,10 +4,10 @@ module DynamicModelHandler
 
   included do
     after_save :generate_model
+    after_save :check_implementation_class
     after_save :reload_routes
     after_save :add_master_association
     after_save :add_user_access_controls
-    after_save :check_implementation_class
     after_commit :update_tracker_events
     after_commit :restart_server
   end
@@ -243,13 +243,12 @@ module DynamicModelHandler
   def add_user_access_controls
 
     if !persisted? || disabled_changed?
-      admin = self.current_admin
       begin
         if ready?
           # Admin::UserAccessControl.create_control_for_all_apps admin, :table, model_association_name, disabled: disabled
         end
       rescue => e
-        raise FphsException.new "A failure occurred creating user access control for all apps with: #{model_association_name}"
+        raise FphsException.new "A failure occurred creating user access control for all apps with: #{model_association_name}.\n#{e}"
       end
     end
 
@@ -257,12 +256,34 @@ module DynamicModelHandler
 
   def check_implementation_class
 
-    if !disabled
-      raise FphsException.new "The implementation of #{table_name} is enabled but the table is not ready to use" unless ready?
+    if !disabled && errors.empty?
+
+      unless ready?
+        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
+          '#{generator_script}'
+        Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
+        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
+        "
+        errors.add :name, err
+        # Force exit of callbacks
+        raise  FphsException.new err
+      end
+
       begin
-        res = implementation_class.new
-      rescue => e
-        raise FphsException.new "The implementation of #{table_name} was not completed. Ensure the DB table #{table_name} has been created. #{e}" unless res
+        res =  implementation_class_defined?
+      rescue Exception => e
+        err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
+        logger.warn err
+        errors.add :name, err
+        # Force exit of callbacks
+        raise FphsException.new err
+      end
+      unless res
+        err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
+        logger.warn err
+        errors.add :name, err
+        # Force exit of callbacks
+        raise FphsException.new err
       end
     end
   end

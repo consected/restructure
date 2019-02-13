@@ -1,0 +1,28 @@
+<%
+
+unless defined? force_default
+  force_default = nil
+end
+
+unless defined? replace
+  replace = nil
+end
+
+key_sym = key.to_sym
+
+caption_before_keep_label = true
+  if caption_before[key_sym]
+    caption_before_keep_label = !!caption_before[key_sym][:keep_label]
+  end
+%>
+<% if caption_before_keep_label %>
+<small class="e-sign-small-label">
+  <% if labels == key %>
+    <%= labels[key] %>
+  <% elsif force_default %>
+    <%= force_default %>
+  <% else %>
+    <%= (key.gsub(/#{replace}/, '')).humanize %>
+  <% end %>
+</small>
+<% end %>

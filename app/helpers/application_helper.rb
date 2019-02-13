@@ -134,7 +134,8 @@
       {
         narrow: 'col-md-6 col-lg-4',
         regular: 'col-md-8 col-lg-6',
-        wide: 'col-md-12 col-lg-12'
+        wide: 'col-md-12 col-lg-12',
+        e_signature: 'col-md-24 col-lg-18'
       }
     end
   end

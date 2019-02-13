@@ -79,7 +79,13 @@
     show_if: blank_options.show_if
   } %>
 
-<% extra_log_type_configs.each do |c| %>
+<% extra_log_type_configs.each do |c|
+
+    cwc = col_width_classes
+    cwc = 'e-sign-doc col-md-24 col-lg-12' if c.e_sign
+
+%>
+
   <%= render partial: 'common_templates/search_results_template', locals: {
       name: "#{full_name}_#{c.name}",
       model_data_type: :activity_log,
@@ -88,7 +94,7 @@
       prevent_edit: prevent_edit,
       prevent_create: prevent_create,
       only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, c.resource_name),
-      extra_class: "alt-width #{col_width_classes}",
+      extra_class: "alt-width #{cwc}",
       item_list: c.fields,
       data_sort: [:desc, data_action_when],
       subsort_id: true,

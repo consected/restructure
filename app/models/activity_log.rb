@@ -306,6 +306,7 @@ class ActivityLog < ActiveRecord::Base
   # set up a route for each available activity log definition
   def self.routes_load
 
+    mn = nil
     begin
       m = self.enabled
       return if m.length == 0
@@ -314,6 +315,7 @@ class ActivityLog < ActiveRecord::Base
 
             m.each do |pg|
               mn = pg.model_def_name.to_s.pluralize.to_sym
+              Rails.logger.info "Setting up routes for #{mn}"
 
               ic = pg.item_type.pluralize
               get "#{ic}/:item_id/activity_log/#{mn}/new", to: "activity_log/#{mn}#new"
@@ -344,7 +346,7 @@ class ActivityLog < ActiveRecord::Base
       end
 
     rescue ActiveRecord::StatementInvalid => e
-      logger.warn "Not loading activity log routes. The table has probably not been created yet. #{e.backtrace.join("\n")}"
+      logger.warn "Not loading activity log routes for #{mn}. The table has probably not been created yet. \n#{e}\n#{e.backtrace.join("\n")}"
     end
   end
 
@@ -579,39 +581,6 @@ class ActivityLog < ActiveRecord::Base
   end
 
 
-  def check_implementation_class
-
-    if !disabled && errors.empty?
-
-      unless ready?
-        err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
-          '#{generator_script}'
-        Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
-        IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
-        "
-        errors.add :name, err
-        # Force exit of callbacks
-        raise  FphsException.new err
-      end
-
-      begin
-        res =  implementation_class_defined?
-      rescue Exception => e
-        err = "Failed to instantiate the class #{full_implementation_class_name}: #{e}"
-        logger.warn err
-        errors.add :name, err
-        # Force exit of callbacks
-        raise FphsException.new err
-      end
-      unless res
-        err = "The implementation of #{model_class_name} was not completed although the DB table #{table_name} has been created."
-        logger.warn err
-        errors.add :name, err
-        # Force exit of callbacks
-        raise FphsException.new err
-      end
-    end
-  end
 
   def item_type_exists
     return true if !errors.empty?

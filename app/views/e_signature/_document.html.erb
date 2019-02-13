@@ -1,0 +1,128 @@
+<%
+
+  unless defined? caption_before
+    caption_before = {}
+  end
+
+  unless defined? labels
+    labels = {}
+  end
+
+  unless defined? show_if
+    show_if = {}
+  end
+
+
+  field_result_class = "e-sign-group-item result-field-container"
+
+%>
+
+<ul class="e-sign-group" >
+
+  <% if caption_before[:all_fields] %>
+    <li class="e-sign-group-item caption-before results-caption-before all-fields-caption">
+      <%= show_caption_before :all_fields, caption_before %>
+    </li>
+  <% end %>
+
+  <% attributes.each do |key, field_val|
+       key_sym = key.to_sym
+       got_caption_before = false
+  %>
+
+
+    <% if caption_before.has_key? key_sym %>
+      <li class="e-sign-group-item caption-before results-caption-before">
+        <%= caption_before[key_sym] && (caption_before[key_sym][:caption] || '').gsub("\n", "<br>") %>
+      </li>
+    <% end %>
+
+    <% if key == "notes" %>
+    <%= render partial: 'e_signature/notes_block' , locals: { value: field_val, key: key, caption_before: caption_before }  %>
+    <% elsif key == "description" %>
+    <%= render partial: 'e_signature/notes_block' , locals: { value: field_val, key: key, caption_before: caption_before }  %>
+    <% elsif key.include? "_notes" %>
+    <%= render partial: 'e_signature/notes_block' , locals: { value: field_val, label: key.humanize, key: key, caption_before: caption_before }  %>
+    <% elsif key.include? "_description" %>
+    <%= render partial: 'e_signature/notes_block' , locals: { value: field_val, label: key.humanize, key: key, caption_before: caption_before }  %>
+    <% elsif key.include? "_details" %>
+    <%= render partial: 'e_signature/notes_block' , locals: { value: field_val, label: key.humanize, key: key, caption_before: caption_before }  %>
+    <% elsif key == "data"  %>
+      <li class="<%= field_result_class %>"><small>
+      <% if rec_type %><%= rec_type %><% else %><%= key.humanize %><% end %>
+      </small> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.include? '_url' %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><span class="url-link-value">
+      <a href="<%= field_val %>" target="_new" title="open link in new tab"><%= field_val %></a>
+      </span></strong></li>
+    <% elsif key.include? '_link' %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><span class="url-link-value">
+      <a href="<%= field_val %>" target="_new" title="open link in new tab"><%= field_val %></a>
+      </span></strong></li>
+    <% elsif key.include? '_rank'  %>
+
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><span class="label label-default"><%= field_val %></span></strong></li>
+
+    <% elsif key == 'rank'  %>
+
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><span class="label label-default"><%= field_val %></span></strong></li>
+
+    <% elsif key == "protocol_id" %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before, force_default: 'protocol'}  %> <strong><%= pretty_string field_val.protocol_name, return_string: true, capitalize: true %></strong></li>
+    <% elsif key == "sub_process_id" %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before, force_default: 'status' } %> <strong><%= pretty_string field_val.sub_process_name, return_string: true, capitalize: true %></strong></li>
+    <% elsif key == "protocol_event_id" %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before, force_default: 'method' } %> <strong><%= pretty_string field_val.protocol_event_name, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.index /^select_record_from_/  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^select_record_from_' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.index /^select_/  %>
+      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^select_' } %> <strong><% if get_from_objects general_selections, key, field_val, 'name' %><%= get_from_objects general_selections, key, field_val, 'name' %><% else %><%= pretty_string field_val, return_string: true, capitalize: true %><% end %></strong></li>
+    <% elsif key.index /_selection$/  %>
+      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_selection$' } %> <strong><% if get_from_objects general_selections, key, field_val, 'name' %><%= get_from_objects general_selections, key, field_val, 'name' %><% else %><%= pretty_string field_val, return_string: true, capitalize: true %><% end %></strong></li>
+    <% elsif key.index /^multi_select_/  %>
+      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^multi_select_' } %>
+        <strong>
+          <%= render partial: 'e_signature/multi_select', locals: {field_key: key, multi_vals: field_val} %>
+        </strong>
+    </li>
+    <% elsif key.include? '_blank_yes_no_dont_know'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_blank_yes_no_dont_know$' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.include? '_yes_no_dont_know'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_yes_no_dont_know$' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.include? '_blank_yes_no'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_blank_yes_no$' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.include? '_yes_no'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_yes_no$' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.include? '_no_yes'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_no_yes$' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.include? '_time$'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong>{{local_time field_val %></strong></li>
+    <% elsif key.include? '_notes'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_notes$' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.include? '_description'  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.index /^fixed_/  %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^fixed_' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% elsif key.index /^placeholder_/  %>
+      <li class="<%= field_result_class %> hidden"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^placeholder_' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% else %>
+      <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
+    <% end %>
+
+
+  <% end %>
+
+
+
+  <% if caption_before[:metadata]%>
+  <div class="results-caption-before">
+    <div class="panel panel-default panel-body">
+      <small><%= show_caption_before :metadata, caption_before %></small>
+    </div>
+  </div>
+  <% end %>
+
+  <li class="e-sign-group-item record-meta">Record ID: </li>
+  <li class="e-sign-group-item record-meta">Record Type: </li>
+  <li class="e-sign-group-item record-meta"><%= render partial: 'e_signature/update_metadata', locals: { show_created_at: true} %></li>
+</ul>

@@ -43,7 +43,6 @@ module FilterUtils
     return @filter_params if @filter_params
     has_disabled_field = primary_model.attribute_names.include?('disabled')
 
-    params[:filter] ||= filter_defaults
 
     if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
       if has_disabled_field
@@ -52,6 +51,9 @@ module FilterUtils
         return
       end
     end
+
+    params[:filter].merge! filter_defaults
+
     fo = filters_on
     fo << :disabled if has_disabled_field
     res = params.require(:filter).permit(fo)

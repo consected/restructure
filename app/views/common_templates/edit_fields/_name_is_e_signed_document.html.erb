@@ -1,0 +1,19 @@
+<%= form.label field_name_sym, label_for(field_name_sym, labels) %>
+<div style="width: 812px; margin: 0 auto; height: auto; overflow: hidden;">
+  <iframe id="e_signature_document_iframe" src='javascript:void(0)' srcdoc="" style="width: 810px; border: 0;"></iframe>
+</div>
+<textarea id="e_signature_document" class='hidden'><%= form_object_instance.attributes[field_name_sym.to_s].html_safe%></textarea>
+<script>
+  window.setTimeout(function() {
+    var c = $('#e_signature_document');
+    var html = c.val();
+
+    var i = $('#e_signature_document_iframe');
+    i.attr('srcdoc', html);
+    window.setTimeout(function () {
+      i.height(i[0].contentDocument.body.offsetHeight + 50);
+
+    }, 200);
+  }, 10);
+
+</script>

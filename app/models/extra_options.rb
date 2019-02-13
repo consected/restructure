@@ -6,7 +6,7 @@ class ExtraOptions
     [
       :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options,
       :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :valid_if,
-      :filestore, :labels
+      :filestore, :labels, :fields
     ]
   end
   def self.add_key_attributes
@@ -25,6 +25,10 @@ class ExtraOptions
   def self.attr_defs
     attr_for_conditions_marker = "ref: ** conditions reference **"
     {
+      fields: [
+        'field_name_1', 'field_name_2'
+      ],
+
       caption_before: {
         field_name: "string caption to appear before field",
         all_fields: "caption to appear before all fields",
@@ -224,6 +228,8 @@ class ExtraOptions
 
     self.filestore ||= {}
     self.filestore = self.filestore.symbolize_keys
+
+    self.fields ||= []
 
     self
   end

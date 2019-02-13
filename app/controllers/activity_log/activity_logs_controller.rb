@@ -7,6 +7,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   # before_action :handle_extra_log_type, only: [:edit, :new]
   before_action :handle_embedded_item, only: [:show, :edit, :new, :create, :update]
   before_action :handle_embedded_items, only: [:index]
+  before_action :prepare_new, only: [:new]
 
   attr_accessor :embedded_item
 
@@ -102,6 +103,32 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
 
       oi.embedded_item = @embedded_item
+    end
+
+    def prepare_new use_object=nil
+      oi = use_object || object_instance
+      oi.current_user = current_user
+
+      ref = oi.model_references(reference_type: :e_sign).first
+      return unless ref
+
+      @e_sign_document = ref.to_record
+      return unless @e_sign_document
+
+      elt = @e_sign_document.option_type_config
+      specified_fields = @extra_log_type_config.e_sign[:fields]
+      sign_fields = specified_fields || elt.fields
+
+
+      atts = @e_sign_document.attributes.select {|k,v| sign_fields.include? k}
+
+      oi.e_signed_document = render_to_string(template: 'e_signature/document', layout: 'e_signature', locals: {
+        attributes: atts,
+        caption_before: elt.caption_before,
+        labels: elt.caption_before,
+        show_if: elt.show_if
+      }).html_safe
+
     end
 
     def edit_form_extras
