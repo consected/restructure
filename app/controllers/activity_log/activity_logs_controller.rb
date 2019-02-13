@@ -109,26 +109,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       oi = use_object || object_instance
       oi.current_user = current_user
 
-      ref = oi.model_references(reference_type: :e_sign).first
-      return unless ref
-
-      @e_sign_document = ref.to_record
-      return unless @e_sign_document
-
-      elt = @e_sign_document.option_type_config
-      specified_fields = @extra_log_type_config.e_sign[:fields]
-      sign_fields = specified_fields || elt.fields
-
-
-      atts = @e_sign_document.attributes.select {|k,v| sign_fields.include? k}
-
-      oi.e_signed_document = render_to_string(template: 'e_signature/document', layout: 'e_signature', locals: {
-        attributes: atts,
-        caption_before: elt.caption_before,
-        labels: elt.caption_before,
-        show_if: elt.show_if
-      }).html_safe
-
+      ::ESignature::SignedDocument.prepare_activity_for_signature(oi, current_user)
     end
 
     def edit_form_extras

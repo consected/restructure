@@ -1,51 +1,102 @@
 require 'rails_helper'
 
-Rspec.describe 'electronic signature of records', type: 'model' do
+RSpec.describe 'electronic signature of records', type: 'model' do
 
   include ModelSupport
 
-  include ActivityLogSupport
+  include ESignatureSupport
+  include ESignImportConfig
 
   before :all do
+    @user_0, _ = create_user
     create_user
+
     create_master
+
+    import_config
+    setup_access_as :user
+
     @al = create_item
   end
 
   describe "generate a text field containing data to be signed" do
+    before :all do
+      ::ESignature::SignedDocument.prepare_activity_for_signature(@al, @user)
+    end
 
     it "generates a reference document for signature" do
-
+      expect(@al.e_signed_document).to start_with('<!doctype html>')
     end
 
-    it "removes the fields that are hidden based on conditional rules" do
-
-    end
-
-    it "adds some text about what is being signed" do
-
-    end
+    it "removes the fields that are hidden based on conditional rules"
 
     it "adds the user email address to the end of the document" do
+      expect(@al.e_signed_document).to include("<small>Signed by</small> <esignuser>#{@user.email} (id: #{@user.id})</esignuser>")
+    end
+  end
 
+  describe "validations performed to check integrity of the document and signer" do
+    before :all do
+      @signed_document = ::ESignature::SignedDocument.prepare_activity_for_signature(@al, @user)
     end
 
+    it "validates that the prepared document has a digest" do
+      expect(@signed_document.prepared_doc_digest).not_to be_blank
+    end
+
+    it "validates the user that prepared the document is the same one that signs it" do
+      expect {
+        @signed_document.sign!(@user_0, @good_password)
+      }.to raise_error(FphsException)
+    end
+
+    it "signs the document" do
+      expect {
+        @signed_document.sign!(@user, @good_password)
+      }.not_to raise_error(FphsException)
+    end
 
   end
 
   describe "at time of applying the signature" do
+    before :each do
+      @signed_document = ::ESignature::SignedDocument.prepare_activity_for_signature(@al, @user)
+    end
+
+    it "validates that the prepared document has not changed" do
+      expect {
+        @signed_document.sign!(@user, @good_password)
+      }.not_to raise_error
+    end
+
+    it "raises an error if the prepared document has changed" do
+      @signed_document.instance_variable_set(:@prepared_doc, @al.e_signed_document + ' ')
+      expect {
+        @signed_document.sign!(@user, @good_password)
+      }.to raise_error
+    end
+
 
     it "adds a date and time to end of the document and saves the timestamp for the salt" do
-
+      @signed_document.sign!(@user, @good_password)
+      "<small>Signed at</small> <strong></strong>"
+      expect(@al.e_signed_document).to include("")
     end
 
     it "adds document unique code to the end to act as a salt " do
-      # salt is user.id, record type being signed, field name being signed, record id and ms timestamp
+      @signed_document.sign!(@user, @good_password)
+      # salt is user.id, record type being signed, record id and ms timestamp
+      expect(@al.e_signed_document).to include("")
     end
 
     it "generates a hash digest using the whole document + a pepper, adds the hash to the document and its own field" do
-
+      @signed_document.sign!(@user, @good_password)
+      expect(@al.e_signed_document).to include("")
     end
+
+    it "saves the signed document back to the activity record"
+
+    it "pushes the signed document to the filestore"
 
   end
 
