@@ -109,7 +109,7 @@ module MasterHandler
       end
     end
     # Ensure that show happens outside of the commit, otherwise we get incomplete results from save triggers
-    show if do_show    
+    show if do_show
   end
 
   def destroy

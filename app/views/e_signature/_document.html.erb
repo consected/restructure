@@ -123,18 +123,17 @@
   </div>
   <% end %>
 
-  <li class="e-sign-group-item record-meta"><%= render partial: 'e_signature/update_metadata', locals: { show_created_at: true} %></li>
-
-  <li class="e-sign-signature-info">
+  <div class="e-sign-group-item record-meta">
+    <%= render partial: 'e_signature/update_metadata', locals: { show_created_at: true} %>
+  </div>
+  <div class="e-sign-signature-info">
     <li class="e-sign-group-item"><small>Record ID</small> <signdocid><%= @e_sign_document.id %></signdocid></li>
     <li class="e-sign-group-item"><small>Record Type</small> <signdoctype><%= @e_sign_document.class.table_name %></signdoctype></li>
-  </li>
-
+  </div>
   <li class="e-sign-signature-prep">
     <li class="e-sign-group-item"><small>Prepared Document Checksum</small> <signprepdoc></signprepdoc></li>
   </li>
-
-  <li class="e-sign-signature-signature">
+  <div class="e-sign-signature-signature">
     <li class="e-sign-signature-item">
       <small>Signed by</small> <esignuser><%= current_user.email %> (id: <%= current_user.id%>)</esignuser>
     </li>
@@ -147,6 +146,5 @@
     <li class="e-sign-signature-item">
       <small>Signature code</small> <esigncode>[signature code pending signature]</esigncode>
     </li>
-
-  </li>
+  </div>
 </ul>

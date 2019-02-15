@@ -152,6 +152,12 @@
       return block[0].outerHTML;
     });
 
+    Handlebars.registerHelper('join', function(list, with_str, context){
+
+      return list.join(with_str);
+    });
+
+
     // Replace instance(s) of replace_str in orig_str, with with_str.
     // re_options represents zero or more standard regex options
     //   g: replace all

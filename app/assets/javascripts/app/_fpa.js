@@ -721,6 +721,12 @@ _fpa = {
   flash_notice: function(msg, type){
       if(!type) type = 'info';
       if(!msg || msg == '') return;
+
+      if(msg.indexOf('password is not correct. Account has been locked.') > 0) {
+        window.location.href = '';
+        return;
+      }
+
       var a = '<div class="alert alert-'+type+'" role="alert">';
       a += '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>';
       if(type == 'error' || type == 'danger'){

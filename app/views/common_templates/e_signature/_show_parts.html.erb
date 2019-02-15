@@ -1,0 +1,20 @@
+<script id="e_signature_parts-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+{{#is @key 'e_signed_document'}}
+  {{#is e_signed_status 'signed'}}
+  <li class="list-group-item result-field-container has-caption-before">
+    <div style="width: 812px; margin: 0 auto; height: auto; overflow: hidden;" class="e-signature-container">
+      <iframe class="e_signature_document_iframe" src='javascript:void(0)' srcdoc="" style="width: 810px; border: 0;"></iframe>
+      <textarea class='hidden e_signature_document'>{{{value}}}</textarea>
+    </div>
+  </li>
+  {{/is}}
+{{else is @key 'includes' '^e_signed_'}}
+  {{#is e_signed_status 'signed'}}
+    <li class="list-group-item result-field-container">
+    {{> field_label labels='labels_{{@key}}' }} <strong>{{pretty_string value return_string="true" capitalize="true"}}</strong>
+    </li>
+  {{/is}}
+
+{{/is}}
+
+</script>

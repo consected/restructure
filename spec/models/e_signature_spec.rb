@@ -77,10 +77,17 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
 
 
-    it "adds a date and time to end of the document and saves the timestamp for the salt" do
+    it "adds a date and time to end of the document" do
+
       @signed_document.sign!(@user, @good_password)
-      "<small>Signed at</small> <strong></strong>"
-      expect(@al.e_signed_document).to include("")
+      res = @al.e_signed_document.match(/<small>Signed at<\/small> <esigntimestamp>(.+)<\/esigntimestamp>/)[1]
+      d = Time.parse(res)
+      expect(d).to be_a Time
+      expect(Time.now - d).to be < 100
+
+    end
+
+    it "adds a date and time to end of the document and saves the timestamp for the salt" do
     end
 
     it "adds document unique code to the end to act as a salt " do

@@ -152,7 +152,7 @@
       <%= model_reference_fields form %>
 
       <% if disabled_form %><fieldset disabled class="readonly-edit-fieldset"><% end %>
-      <ul class="list-group">
+      <ul class="list-group" data-item-id="<%= form_object_instance.id %>">
         <li class="list-group-item edit-form-header">
           <% unless embedded %><%= inline_cancel_button %><% end %>
           <h4 class="list-group-item-heading"><%=caption%></h4>

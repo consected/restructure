@@ -184,6 +184,13 @@ _fpa.form_utils = {
         }
       });
 
+      var obj_id = block.find('[data-item-id]').attr('data-item-id');
+      for(var fo in form_data) {
+        if(form_data.hasOwnProperty(fo))
+          if(!form_data[fo].id)
+            form_data[fo].id = obj_id;
+      }
+
       return form_data;
     },
 
@@ -1074,6 +1081,29 @@ _fpa.form_utils = {
 
     },
 
+    setup_e_signature: function (block) {
+
+      block.find('.e-signature-container').not('.e-signature-setup').each(function() {
+        var _this = this;
+        window.setTimeout(function() {
+          var c = $(_this).find('.e_signature_document');
+          var html = c.val();
+
+          var i = $(_this).find('.e_signature_document_iframe');
+          i.attr('srcdoc', html);
+          window.setTimeout(function () {
+            var body = i[0].contentDocument.body;
+            if(body)
+              i.height(body.offsetHeight + 50);
+            else
+              i.height(500);
+
+          }, 200);
+
+        }, 10);
+      }).addClass('e-signature-setup');
+    },
+
     setup_error_clear: function (block) {
       block.on('change', '.has-error .form-control', function() {
         var p = $(this).parent();
@@ -1230,6 +1260,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_textarea_autogrow(block);
         _fpa.form_utils.setup_contact_field_mask(block);
         _fpa.form_utils.setup_filestore(block);
+        _fpa.form_utils.setup_e_signature(block);
         // Not currently used or tested.
         // _fpa.form_utils.setup_form_filtered_select(block);
 

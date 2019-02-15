@@ -143,6 +143,7 @@
   end
 %>
 
+<%= render partial: 'common_templates/e_signature/show_parts', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
 <%= render partial: 'common_templates/references_results', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
 <%= render partial: 'filestore/common_template_view', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
 
@@ -323,6 +324,14 @@
       <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='^fixed_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '^placeholder_' }}
       <li class="<%= field_result_class %> hidden">{{> field_label labels='labels_<%=name.underscore%>' replace='^placeholder_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'e_signed_by'}}
+        <li class="list-group-item result-field-container text-center">
+          {{#with ..}}
+          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>" data-remote="true" data-result-target="">Review Document</a>
+          {{/with}}
+        </li>
+    {{else is @key 'includes' '^e_signed_' }}
+      {{> e_signature_parts name='<%=name.pluralize%>' master_id=../master_id id=../id value=this }}
     {{else is this 'typeof' 'object'}}
 
         <li class="list-group-item typeof-object-field"><p>{{humanize @key}} <a data-target="#view-object-{{../master_id}}-{{../id}}-{{underscore @key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a></p>

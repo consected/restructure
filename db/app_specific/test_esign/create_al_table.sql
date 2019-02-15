@@ -13,6 +13,7 @@
           e_signed_at varchar,
           e_signed_by varchar,
           e_signed_code varchar,
+          e_signed_status varchar,
           extra_log_type varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -28,13 +29,14 @@
           e_signed_at varchar,
           e_signed_by varchar,
           e_signed_code varchar,
+          e_signed_status varchar,
           extra_log_type varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_player_info_e_sign_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_activity_log_player_info_e_sign_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -47,6 +49,7 @@
                       e_signed_at,
                       e_signed_by,
                       e_signed_code,
+                      e_signed_status,
                       extra_log_type,
                       user_id,
                       created_at,
@@ -61,6 +64,7 @@
                       NEW.e_signed_at,
                       NEW.e_signed_by,
                       NEW.e_signed_code,
+                      NEW.e_signed_status,
                       NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,

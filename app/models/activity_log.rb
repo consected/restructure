@@ -543,6 +543,10 @@ class ActivityLog < ActiveRecord::Base
         res.include WorksWithItem
         res.include ActivityLogHandler
 
+        # Allow placeholder fields to pretend to be form fields
+        placeholder_fields = all_implementation_fields.select {|f| f.start_with? 'placeholder_'}.map(&:to_sym)
+        res.send :attr_accessor, *placeholder_fields
+
         c_name = full_implementation_controller_name
 
         begin

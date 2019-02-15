@@ -131,6 +131,7 @@ module GeneralDataConcerns
 
       # extras[:methods] << :creatables if respond_to? :creatables
       extras[:methods] << :prevent_edit if respond_to? :prevent_edit
+      extras[:methods] << :prevent_add_reference if respond_to? :prevent_add_reference
       extras[:methods] << :option_type if respond_to? :option_type
       extras[:methods] << :alt_order if respond_to? :alt_order
 

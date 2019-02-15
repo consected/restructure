@@ -22,6 +22,7 @@ module ActivityLogHandler
     # validates parent_type, presence: true
 
     validates :master_id, presence: true
+    validate :e_signature_password_correct
 
     after_save :sync_set_related_fields
 
@@ -35,6 +36,7 @@ module ActivityLogHandler
 
     attr_reader :referring_record
     attr_writer :alt_order
+    attr_reader :e_signed_authenticated
     # after_commit :check_for_notification_records, on: :create
   end
 
@@ -644,6 +646,16 @@ module ActivityLogHandler
     super()
   end
 
+  # @return [Boolean | nil] returns true or false based on the result of a conditional calculation,
+  #    or nil if there is no `add_reference_if` configuration
+  def can_add_reference?
+    eltc = self.extra_log_type_config
+    if eltc.add_reference_if.is_a?(Hash) && eltc.add_reference_if.first
+      res = eltc.calc_add_reference_if(self)
+      return !!res
+    end
+  end
+
   def can_create?
 
     res = master.current_user.has_access_to? :create, :activity_log_type, extra_log_type_config.resource_name
@@ -677,6 +689,45 @@ module ActivityLogHandler
 
   def current_user= cu
     master.current_user = cu
+  end
+
+  # Set the e signature password and evalutate it now so that the user
+  # failed attempts can be updated outside of the controller action
+  def e_signature_password= password
+    @e_signature_password = password
+  end
+
+  def e_signature_password_correct
+    return unless respond_to? :e_signed_how
+
+    unless @e_signature_password.present?
+      errors.add :password, 'is empty. Please try again.'
+      return
+    end
+
+    @e_signed_authenticated = current_user.valid_password?(@e_signature_password)
+
+    if @e_signed_authenticated
+      current_user.failed_attempts = 0
+      current_user.save!
+    else
+
+      current_user.increment_failed_attempts
+      current_user.save!
+
+      current_user.lock_access! if current_user.send :attempts_exceeded?
+
+      if current_user.access_locked?
+        errors.add :password, 'is not correct. Account has been locked.'
+        current_user.locked_at = Time.now
+      elsif current_user.send :last_attempt?
+        errors.add :password, 'is not correct. One more attempt before account is locked.'
+      else
+        errors.add :password, 'is not correct. Please try again.'
+      end
+
+    end
+    @e_signed_authenticated
   end
 
   # An app specific DB trigger may have have created a message notification record.

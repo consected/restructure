@@ -333,7 +333,7 @@ class ModelReference < ActiveRecord::Base
 
     def allows_create
       return true unless from_record
-      unless from_record.can_edit?
+      unless from_record.can_edit? || from_record.can_add_reference?
         errors.add :reference, 'can not be created from a read-only parent'
       end
       true

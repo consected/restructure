@@ -5,7 +5,7 @@ class ExtraOptions
   def self.base_key_attributes
     [
       :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options,
-      :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :valid_if,
+      :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :add_reference_if, :valid_if,
       :filestore, :labels, :fields
     ]
   end
@@ -97,6 +97,7 @@ class ExtraOptions
       creatable_if: attr_for_conditions_marker,
       editable_if: attr_for_conditions_marker,
       showable_if: attr_for_conditions_marker,
+      add_reference_if: attr_for_conditions_marker,
       valid_if: {
         on_save:  attr_for_validations,
         on_create: {},
@@ -282,6 +283,11 @@ class ExtraOptions
 
   def calc_editable_if obj
     ca = ConditionalActions.new self.editable_if, obj
+    ca.calc_action_if
+  end
+
+  def calc_add_reference_if obj
+    ca = ConditionalActions.new self.add_reference_if, obj
     ca.calc_action_if
   end
 

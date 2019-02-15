@@ -136,6 +136,14 @@ module DynamicModelHandler
     super()
   end
 
+  # Force the ability to add references even if can_edit? for the parent record returns false
+  def can_add_reference?
+    dopt = self.default_options
+    if dopt.can_add_reference_if.is_a?(Hash) && dopt.can_add_reference_if.first
+      res = dopt.calc_can_add_reference_if(self)
+      return unless res
+    end
+  end
 
   def ready?
     begin
@@ -293,7 +301,8 @@ module DynamicModelHandler
       if Rails.env.production?
         FileUtils.touch Rails.root.join('tmp', 'restart.txt')
       else
-        FileUtils.touch Rails.root.join('config', 'dev_server.rb')
+        FileUtils.touch Rails.root.join('app', 'models', 'dev_server.rb')
+        Rails.reload!
       end
     rescue => e
       Rails.logger.warn "Failed to restart server: #{e.inspect}"

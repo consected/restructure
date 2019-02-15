@@ -94,6 +94,17 @@ module HandlesUserBase
     !can_edit?
   end
 
+  def can_add_reference?
+    true
+  end
+
+  # Prevent add reference buttons appearing on results blocks
+  # If `add_reference_if` is specified then use it. Otherwise fall back to can_edit?
+  def prevent_add_reference
+    res = can_add_reference?
+    !(res.nil? ? can_edit? : res)
+  end
+
   def can_create?
     self.allows_current_user_access_to? :create
   end

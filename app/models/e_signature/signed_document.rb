@@ -1,6 +1,9 @@
 module ESignature
   class SignedDocument
 
+    # The following fields must be in the activity log table
+    ExpectedFields = ["e_signed_document", "e_signed_how", "e_signed_at", "e_signed_by", "e_signed_code"].freeze
+
     # @return [User] the current user signed in to the app
     attr_reader :current_user
     # @return [User] the current user at the time the document was prepared for signature
@@ -11,7 +14,7 @@ module ESignature
     # @return [ESignature::SignedDocument]
     def self.prepare_activity_for_signature activity_log, current_user
       sd = self.new activity_log, current_user
-      res = sd.prepare
+      res = sd.prepare_activity_for_signature
       return unless res
       sd
     end
@@ -22,38 +25,64 @@ module ESignature
       raise FphsException.new "The current user does not match the user that prepared the document for signature" unless current_user == @signing_user
 
       validate_prepared_doc_digest
-    end
-
-
-    def initialize activity_log, current_user
-      @activity_log = activity_log
-      @current_user = current_user
-      @signing_user = current_user
-    end
-
-
-    # Prepare the HTML document ready for signature
-    # It incorporates a prepared document digest (checksum) to allow verification that
-    # the document has not changed between preparation and signature execution
-    def prepare
-      find_reference_to_sign
-      return unless @e_sign_document
-      @prepared_doc = generate_doc_from_model
-      save_prepared_doc_digest
+      set_signature_timestamp
 
       @activity_log.e_signed_document = @prepared_doc
     end
 
-    def prepared_doc_digest
-      get_document_tag(:signprepdoc)
-    end
-
+    # Validate the prepared document is in a good state for signature
+    # Primarily it checks that the document has not changed since being prepared
+    # so that the user is not unknowingly applying a signature to an altered document
+    # Raises exceptions:
+    # @raise (see #validate_prepared_doc_digest)
+    # @return [True]
     def validate_prepared_doc
       validate_prepared_doc_digest
     end
 
+    #
+    # Internal methods
+    #
+
+    # Coordinate the preparation of an activity log record for signature
+    def prepare_activity_for_signature
+      validate_configuration
+      prepare
+    end
+
+    # Get the stored prepared document digest checksum
+    def prepared_doc_digest
+      get_document_tag(:signprepdoc)
+    end
+
     private
 
+      def initialize activity_log, current_user
+        @activity_log = activity_log
+        @current_user = current_user
+        @signing_user = current_user
+      end
+
+
+      # Check that the activity log configuration has appropriate fields and is ready for use
+      def validate_configuration
+        res = (ExpectedFields - @activity_log.attribute_names).empty?
+        raise FphsException.new "Missing the expected fields for e-signature (#{ExpectedFields.join(", ")})" unless res
+      end
+
+      # Prepare the HTML document ready for signature
+      # It incorporates a prepared document digest (checksum) to allow verification that
+      # the document has not changed between preparation and signature execution
+      def prepare
+        find_reference_to_sign
+        return unless @e_sign_document
+        @prepared_doc = generate_doc_from_model
+        save_prepared_doc_digest
+
+        @activity_log.e_signed_document = @prepared_doc
+      end
+
+      # @raise [FphsException] if the current document content does not match the original prepared document, based on the checksum
       def validate_prepared_doc_digest
         pdd = prepared_doc_digest
         set_document_tag(:signprepdoc, '')
@@ -109,11 +138,26 @@ module ESignature
       def set_document_tag tagname, value
         @prepared_doc.sub!(/<#{tagname}>.*<\/#{tagname}>/, "<#{tagname}>#{value}<\/#{tagname}>")
       end
+
       # Get the value from an esign tag in the document
       # @param tagname [Symbol|String] name of the HTML tag to get content from
       # @return [String] content from the tag
       def get_document_tag tagname
         @prepared_doc.match(/<#{tagname}>(.*)<\/#{tagname}>/)[1]
       end
+
+      # Adds the signature timestamp to the document and activity record
+      def set_signature_timestamp
+        time = Time.now
+
+        @signed_at_timestamp = TimeFormatting.printable_time time
+        @signed_at_timestamp_ms = TimeFormatting.ms_timestamp(time)
+        set_document_tag :esigntimestamp, @signed_at_timestamp
+
+        @activity_log.e_signed_at = time
+      end
+
+
+
     end
 end
