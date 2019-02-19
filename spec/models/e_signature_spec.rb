@@ -8,12 +8,17 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   include ESignImportConfig
 
   before :all do
-    @user_0, _ = create_user
-    create_user
+
+    import_config
+    @user_0, @good_password_0 = create_user
+    @user, @good_password = create_user
+
+    puts "@user #{@user.id} @good_password #{@good_password}"
+    raise "Password can not be blank for successful tests" if @good_password.blank?
+    raise "Password must be valid" unless @user.valid_password?(@good_password)
 
     create_master
 
-    import_config
     setup_access_as :user
 
     @al = create_item
@@ -21,7 +26,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
   describe "generate a text field containing data to be signed" do
     before :all do
-      ::ESignature::SignedDocument.prepare_activity_for_signature(@al, @user)
+      @al.prepare_activity_for_signature
     end
 
     it "generates a reference document for signature" do
@@ -37,7 +42,14 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
   describe "validations performed to check integrity of the document and signer" do
     before :all do
-      @signed_document = ::ESignature::SignedDocument.prepare_activity_for_signature(@al, @user)
+      raise "Password can not be blank for successful tests" if @good_password.blank?
+      raise "Password must be valid" unless @user.valid_password?(@good_password)
+      @al.current_user = @user
+      @signed_document = @al.prepare_activity_for_signature
+    end
+
+    before :each do
+      @al.current_user = @user
     end
 
     it "validates that the prepared document has a digest" do
@@ -45,41 +57,61 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
 
     it "validates the user that prepared the document is the same one that signs it" do
+      @al2 = create_item
+      @al2.current_user = @user_0
       expect {
-        @signed_document.sign!(@user_0, @good_password)
+        @al2.sign!(@good_password_0)
       }.to raise_error(FphsException)
     end
 
-    it "signs the document" do
+    it "signs the document with a good password" do
+      puts "@user #{@user.id} @good_password #{@good_password}"
+
+      expect(@user.valid_password?(@good_password)).to be true
+
       expect {
-        @signed_document.sign!(@user, @good_password)
+
+        @al.sign!(@good_password)
       }.not_to raise_error(FphsException)
+    end
+
+
+    it "prevents a signature with a bad password" do
+      @al.current_user = @user
+      expect {
+        @al.sign!(@good_password + '!')
+      }.to raise_error(FphsException)
     end
 
   end
 
   describe "at time of applying the signature" do
     before :each do
-      @signed_document = ::ESignature::SignedDocument.prepare_activity_for_signature(@al, @user)
+      raise "Password can not be blank for successful tests" if @good_password.blank?
+      @al = create_item
+      @signed_document = @al.prepare_activity_for_signature
+
     end
 
-    it "validates that the prepared document has not changed" do
-      expect {
-        @signed_document.sign!(@user, @good_password)
-      }.not_to raise_error
-    end
 
     it "raises an error if the prepared document has changed" do
-      @signed_document.instance_variable_set(:@prepared_doc, @al.e_signed_document + ' ')
+      @al2 = create_item
+      @al2.current_user = @user
+      @signed_document2 = @al2.prepare_activity_for_signature
+
+      @signed_document2.instance_variable_set(:@prepared_doc, @al2.e_signed_document + ' ')
       expect {
-        @signed_document.sign!(@user, @good_password)
-      }.to raise_error
+        @al2.sign! @good_password
+      }.to raise_error(FphsException)
     end
 
 
     it "adds a date and time to end of the document" do
 
-      @signed_document.sign!(@user, @good_password)
+      @al.sign! @good_password
+
+      @al = @al.class.find(@al.id)
+
       res = @al.e_signed_document.match(/<small>Signed at<\/small> <esigntimestamp>(.+)<\/esigntimestamp>/)[1]
       d = Time.parse(res)
       expect(d).to be_a Time
@@ -91,13 +123,13 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     end
 
     it "adds document unique code to the end to act as a salt " do
-      @signed_document.sign!(@user, @good_password)
+      @al.sign!(@good_password)
       # salt is user.id, record type being signed, record id and ms timestamp
       expect(@al.e_signed_document).to include("")
     end
 
     it "generates a hash digest using the whole document + a pepper, adds the hash to the document and its own field" do
-      @signed_document.sign!(@user, @good_password)
+      @al.sign!(@good_password)
       expect(@al.e_signed_document).to include("")
     end
 

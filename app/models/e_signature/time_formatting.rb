@@ -3,7 +3,7 @@ module ESignature
 
     # @return [String] with a human readable millisecond precision UTC time based
     def self.printable_time time
-      time.utc.strftime('%d %B %Y - %H:%M:%S.%L UTC')
+      time.utc.strftime('%B, %d %Y - %H:%M:%S.%L UTC')
     end
 
     # @return [Integer] millisecond timestamp

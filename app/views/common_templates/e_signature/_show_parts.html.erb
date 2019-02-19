@@ -8,6 +8,12 @@
     </div>
   </li>
   {{/is}}
+{{else is @key 'e_signed_status'}}
+
+    <li class="list-group-item result-field-container">
+    {{> field_label labels='labels_{{@key}}' }} <strong>{{pretty_string value return_string="true" capitalize="true"}}</strong>
+    </li>
+
 {{else is @key 'includes' '^e_signed_'}}
   {{#is e_signed_status 'signed'}}
     <li class="list-group-item result-field-container">

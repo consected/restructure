@@ -26,6 +26,8 @@ _fpa.show_if.methods = {
     }
 
     window.setTimeout(function() {
+      _fpa.form_utils.setup_e_signature(block, true);
+
       var els = $('.dialog-made-visible');
       if(!els.length) return;
       var wh = $(window).height();
@@ -35,6 +37,7 @@ _fpa.show_if.methods = {
         $(document).scrollTo(els.first(), 200, {offset: -0.2 * wh});
       }
       els.removeClass('dialog-made-visible');
+
     }, 250);
 
   },

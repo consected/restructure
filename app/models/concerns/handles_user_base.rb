@@ -373,7 +373,7 @@ module HandlesUserBase
     # introduction of filepaths with Filestore, the result was damaging.
     def downcase_attributes
 
-      ignore = /(item_type)?(notes)?(description)?(.+_notes)?(.+_description)?/
+      ignore = /(item_type)?(notes)?(description)?(.+_notes)?(.+_description)?(e_signed_document)?/
 
       self.attributes.select {|k,v| k.to_sym.in? self.class.permitted_params }.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
 

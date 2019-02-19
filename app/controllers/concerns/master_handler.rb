@@ -8,6 +8,7 @@ module MasterHandler
     before_action :init_vars_master_handler
 
     before_action :set_me_and_master, only: [:index, :new, :edit, :create, :update, :destroy]
+    before_action :set_fields_from_params, only: [:edit]
     before_action :set_instance_from_id, only: [:show]
     before_action :set_instance_from_reference_id, only: [:create]
     before_action :set_instance_from_build, only: [:new, :create]
@@ -252,6 +253,20 @@ module MasterHandler
       end
 
 
+      def set_fields_from_params
+        # Necessary to allow activity log to call permitted_params
+        if defined? implementation_class
+          @implementation_class = implementation_class
+        end
+
+        p = secure_params rescue nil
+        if p
+          p.each do |k,v|
+            object_instance.send("#{k}=", v)
+          end
+        end
+      end
+
       def canceled?
         params[:id] == 'cancel'
       end
@@ -385,8 +400,12 @@ module MasterHandler
         end
       end
 
+      def primary_params_name
+        full_object_name.gsub('__', '_').to_sym
+      end
+
       def secure_params
-        params.require(full_object_name.gsub('__', '_').to_sym).permit(*permitted_params)
+        params.require(primary_params_name).permit(*permitted_params)
       end
 
 end

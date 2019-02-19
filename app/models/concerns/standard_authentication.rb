@@ -280,7 +280,7 @@ module StandardAuthentication
 
     # Clear the plain text password after saving to avoid accidental leakage
     def clear_plaintext_password
-      self.password = nil
+      @password = nil
     end
 
     def set_default_password_expiration

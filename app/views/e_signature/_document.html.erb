@@ -16,29 +16,26 @@
 
   field_result_class = "e-sign-group-item result-field-container"
 
-%>
-
-<ul class="e-sign-group" >
-
-  <% if caption_before[:all_fields] %>
-    <li class="e-sign-group-item caption-before results-caption-before all-fields-caption">
+%><ul class="e-sign-group" ><%
+  if caption_before[:all_fields]
+    %><li class="e-sign-group-item caption-before results-caption-before all-fields-caption">
       <%= show_caption_before :all_fields, caption_before %>
-    </li>
-  <% end %>
+    </li><%
+  end
 
-  <% attributes.each do |key, field_val|
+  attributes.each do |key, field_val|
        key_sym = key.to_sym
        got_caption_before = false
-  %>
 
+     if caption_before.has_key? key_sym
 
-    <% if caption_before.has_key? key_sym %>
-      <li class="e-sign-group-item caption-before results-caption-before">
+%>      <li class="e-sign-group-item caption-before results-caption-before">
         <%= caption_before[key_sym] && (caption_before[key_sym][:caption] || '').gsub("\n", "<br>") %>
       </li>
-    <% end %>
+<%
+     end
 
-    <% if key == "notes" %>
+    if key == "notes" %>
     <%= render partial: 'e_signature/notes_block' , locals: { value: field_val, key: key, caption_before: caption_before }  %>
     <% elsif key == "description" %>
     <%= render partial: 'e_signature/notes_block' , locals: { value: field_val, key: key, caption_before: caption_before }  %>
@@ -61,13 +58,9 @@
       <a href="<%= field_val %>" target="_new" title="open link in new tab"><%= field_val %></a>
       </span></strong></li>
     <% elsif key.include? '_rank'  %>
-
       <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><span class="label label-default"><%= field_val %></span></strong></li>
-
     <% elsif key == 'rank'  %>
-
       <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><span class="label label-default"><%= field_val %></span></strong></li>
-
     <% elsif key == "protocol_id" %>
       <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before, force_default: 'protocol'}  %> <strong><%= pretty_string field_val.protocol_name, return_string: true, capitalize: true %></strong></li>
     <% elsif key == "sub_process_id" %>
@@ -108,32 +101,28 @@
       <li class="<%= field_result_class %> hidden"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^placeholder_' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
     <% else %>
       <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before }  %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
-    <% end %>
+    <%
+      end
+   end
 
-
-  <% end %>
-
-
-
-  <% if caption_before[:metadata]%>
-  <div class="results-caption-before">
+   if caption_before[:metadata]
+%><div class="results-caption-before">
     <div class="panel panel-default panel-body">
       <small><%= show_caption_before :metadata, caption_before %></small>
     </div>
-  </div>
-  <% end %>
+  </div><%
+ end
 
-  <div class="e-sign-group-item record-meta">
+%>
+  <div class="e-sign-record-meta">
     <%= render partial: 'e_signature/update_metadata', locals: { show_created_at: true} %>
-  </div>
-  <div class="e-sign-signature-info">
     <li class="e-sign-group-item"><small>Record ID</small> <signdocid><%= @e_sign_document.id %></signdocid></li>
     <li class="e-sign-group-item"><small>Record Type</small> <signdoctype><%= @e_sign_document.class.table_name %></signdoctype></li>
   </div>
-  <li class="e-sign-signature-prep">
-    <li class="e-sign-group-item"><small>Prepared Document Checksum</small> <signprepdoc></signprepdoc></li>
-  </li>
-  <div class="e-sign-signature-signature">
+  <div class="e-sign-signature-info">
+    <li class="e-sign-signature-prep">
+      <li class="e-sign-group-item"><small>Prepared Document Checksum</small> <signprepdoc></signprepdoc></li>
+    </li>
     <li class="e-sign-signature-item">
       <small>Signed by</small> <esignuser><%= current_user.email %> (id: <%= current_user.id%>)</esignuser>
     </li>

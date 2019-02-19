@@ -36,7 +36,12 @@ class ExtraOptions
         field_to_retain_label: {
           keep_label: true,
           caption: 'caption to appear before label'
+        },
+        field_with_different_views: {
+          show_caption: 'caption in show mode',
+          edit_caption: 'caption in edit mode'
         }
+
       },
       labels: {
         field_name: 'label to show'
@@ -178,7 +183,15 @@ class ExtraOptions
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
-    self.caption_before = self.caption_before.each {|k,v| self.caption_before[k] = {:caption => v} if v.is_a? String }
+    self.caption_before = self.caption_before.each do |k,v|
+      if v.is_a? String
+        self.caption_before[k] = {
+          caption: v,
+          edit_caption: v,
+          show_caption: v
+        }
+      end
+    end
 
     self.dialog_before ||= {}
     self.dialog_before = self.dialog_before.symbolize_keys

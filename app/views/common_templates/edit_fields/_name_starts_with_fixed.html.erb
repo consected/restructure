@@ -3,7 +3,7 @@
   options.merge! data: {attr_name: field_name_sym, object_name: form_object_item_type_us}
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels, /^fixed_/) %>
-<%= form.hidden_field field_name_sym, options %>
-<span class="fixed-field" data-attr-name="<%= field_name_sym %>"  data-object-name="<%=form_object_item_type_us%>">
+<span class="fixed-field">
+  <%= form.hidden_field field_name_sym, options %>
   <%= form_object_instance.attributes[field_name] %>
 </span>

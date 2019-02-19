@@ -329,6 +329,11 @@ fieldset.readonly-edit-fieldset
   }
 }
 
+.e-sign-doc {
+    min-width: 860px;
+}
+
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;

@@ -213,9 +213,11 @@
   {{#*inline '<%=name%>_result_field'}}
 
     {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
+    {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption')}}
     <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-      {{{replace (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption') "\n" "<br>" "g"}}}
+      {{{replace (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption') "\n" "<br>" "g"}}}
     </li>
+    {{/if}}
     {{/is}}
     {{#is @key "notes"}}
     {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
@@ -325,9 +327,14 @@
     {{else is @key 'includes' '^placeholder_' }}
       <li class="<%= field_result_class %> hidden">{{> field_label labels='labels_<%=name.underscore%>' replace='^placeholder_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'e_signed_by'}}
-        <li class="list-group-item result-field-container text-center">
+        <li class="<%= field_result_class %> text-center">
           {{#with ..}}
-          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>" data-remote="true" data-result-target="">Review Document</a>
+          {{#is e_signed_status 'signed'}}
+          {{> field_label labels='labels_{{@key}}' }} <strong>{{pretty_string value return_string="true" capitalize="true"}}</strong>
+          {{else}}
+          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>" data-remote="true" data-result-target="">Review and Sign</a>
+          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>?<%=item_class_name.gsub('__', '_')%>[e_signed_status]=cancel+and+unlock" data-remote="true" data-result-target="">Cancel and Unlock</a>
+          {{/is}}
           {{/with}}
         </li>
     {{else is @key 'includes' '^e_signed_' }}

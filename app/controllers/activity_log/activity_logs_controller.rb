@@ -2,13 +2,13 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
   include MasterHandler
   include ParentHandler
+  include ESignature::ESignatureHandler
+
   # Not for new or edit, since these are call elsewhere
   before_action :set_item, only: [:index, :create, :update, :destroy]
   # before_action :handle_extra_log_type, only: [:edit, :new]
   before_action :handle_embedded_item, only: [:show, :edit, :new, :create, :update]
   before_action :handle_embedded_items, only: [:index]
-  before_action :prepare_create, only: [:create]
-  before_action :e_signature_password, only: [:create, :update]
   after_action :check_authentication_still_valid
 
   attr_accessor :embedded_item
@@ -107,12 +107,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
       oi.embedded_item = @embedded_item
     end
 
-    def prepare_create use_object=nil
-      oi = use_object || object_instance
-      oi.current_user = current_user
-
-      ::ESignature::SignedDocument.prepare_activity_for_signature(oi, current_user)
-    end
 
     def edit_form_extras
       extras_caption_before = {}
@@ -311,20 +305,6 @@ class ActivityLog::ActivityLogsController < UserBaseController
       unless object_instance.allows_current_user_access_to? :create
         not_creatable
         return
-      end
-    end
-
-
-    def has_e_signature?
-      object_instance.respond_to? :e_signed_status
-    end
-
-    # Evaluate the password for esignature activities
-    def e_signature_password
-      if has_e_signature?
-        ufields = params[:user]
-        return unless ufields
-        object_instance.e_signature_password = ufields[:password]
       end
     end
 

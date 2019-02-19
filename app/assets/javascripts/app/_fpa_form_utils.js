@@ -1081,9 +1081,14 @@ _fpa.form_utils = {
 
     },
 
-    setup_e_signature: function (block) {
+    setup_e_signature: function (block, force) {
 
-      block.find('.e-signature-container').not('.e-signature-setup').each(function() {
+      var els = block.find('.e-signature-container');
+      if(!force) {
+        els = els.not('.e-signature-setup');
+      }
+      
+      els.each(function() {
         var _this = this;
         window.setTimeout(function() {
           var c = $(_this).find('.e_signature_document');

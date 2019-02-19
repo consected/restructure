@@ -168,6 +168,8 @@
 
       if(!replace_str || replace_str == '') return orig_str;
 
+      if(orig_str == null) return;
+
       // Avoid using the context object if the last option was excluded from the call
       if(!re_options.hasOwnProperty('name'))
         reo = re_options;

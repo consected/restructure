@@ -542,6 +542,8 @@ class ActivityLog < ActiveRecord::Base
         res.include TrackerHandler
         res.include WorksWithItem
         res.include ActivityLogHandler
+        ESignature::ESignatureManager.enable_e_signature_for res
+
 
         # Allow placeholder fields to pretend to be form fields
         placeholder_fields = all_implementation_fields.select {|f| f.start_with? 'placeholder_'}.map(&:to_sym)

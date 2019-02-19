@@ -1,23 +1,16 @@
 module ESignature
   class SignedDocument
 
-    # The following fields must be in the activity log table
-    ExpectedFields = ["e_signed_document", "e_signed_how", "e_signed_at", "e_signed_by", "e_signed_code"].freeze
 
     # @return [User] the current user signed in to the app
     attr_reader :current_user
     # @return [User] the current user at the time the document was prepared for signature
     attr_reader :signing_user
+    # @return [String] the prepared document HTML
+    attr_reader :prepared_doc
+    # @return [Time] timestamp for the signature action
+    attr_reader :signed_at_timestamp
 
-    # Setup  and run the document ready for signature, based on the activity configuration
-    # @param activity_log [String] the activity log item in which a user will be performing the e-signature
-    # @return [ESignature::SignedDocument]
-    def self.prepare_activity_for_signature activity_log, current_user
-      sd = self.new activity_log, current_user
-      res = sd.prepare_activity_for_signature
-      return unless res
-      sd
-    end
 
     # Sign the prepared document
     def sign! current_user, password
@@ -27,7 +20,7 @@ module ESignature
       validate_prepared_doc_digest
       set_signature_timestamp
 
-      @activity_log.e_signed_document = @prepared_doc
+      @prepared_doc
     end
 
     # Validate the prepared document is in a good state for signature
@@ -44,9 +37,8 @@ module ESignature
     # Internal methods
     #
 
-    # Coordinate the preparation of an activity log record for signature
-    def prepare_activity_for_signature
-      validate_configuration
+    # Coordinate the preparation document for signature
+    def prepare_for_signature
       prepare
     end
 
@@ -57,29 +49,24 @@ module ESignature
 
     private
 
-      def initialize activity_log, current_user
+      def initialize activity_log, e_sign_document
+        raise FphsException.new "Can not set up a signed document with nil activity_log" unless activity_log
+        raise FphsException.new "Can not set up a signed document with nil e_sign_document" unless e_sign_document
         @activity_log = activity_log
-        @current_user = current_user
-        @signing_user = current_user
+        @current_user = activity_log.current_user
+        @e_sign_document = e_sign_document
       end
 
 
-      # Check that the activity log configuration has appropriate fields and is ready for use
-      def validate_configuration
-        res = (ExpectedFields - @activity_log.attribute_names).empty?
-        raise FphsException.new "Missing the expected fields for e-signature (#{ExpectedFields.join(", ")})" unless res
-      end
 
       # Prepare the HTML document ready for signature
       # It incorporates a prepared document digest (checksum) to allow verification that
       # the document has not changed between preparation and signature execution
       def prepare
-        find_reference_to_sign
         return unless @e_sign_document
+        @signing_user = @current_user
         @prepared_doc = generate_doc_from_model
         save_prepared_doc_digest
-
-        @activity_log.e_signed_document = @prepared_doc
       end
 
       # @raise [FphsException] if the current document content does not match the original prepared document, based on the checksum
@@ -98,13 +85,7 @@ module ESignature
         set_document_tag(:signprepdoc, d)
       end
 
-      # Find the model reference and subsequently the record it points to,
-      # using the activity configuration for `e_sign`
-      def find_reference_to_sign
-        ref = @activity_log.model_references(reference_type: :e_sign).first
-        return unless ref
-        @e_sign_document = ref.to_record
-      end
+
 
       # Generate the HTML document from the model to be signed and additional configuration
       # in the activity configuration for `e_sign`
@@ -154,10 +135,8 @@ module ESignature
         @signed_at_timestamp_ms = TimeFormatting.ms_timestamp(time)
         set_document_tag :esigntimestamp, @signed_at_timestamp
 
-        @activity_log.e_signed_at = time
+
       end
 
-
-
-    end
+  end
 end
