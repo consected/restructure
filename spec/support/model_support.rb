@@ -28,10 +28,10 @@ module ModelSupport
 
     admin, _ = create_admin
     user = User.create! email: good_email, current_admin: admin
-    @user = user
+
 
     # Save a new password, as required to handle temp passwords
-    user  = user.reload
+    user = User.find(user.id)
     user.current_admin = admin
     good_password = user.generate_password
     user.otp_required_for_login = true
@@ -39,10 +39,10 @@ module ModelSupport
     user.save!
 
     # # Can't reload, as that doesn't clear non-db attributes
-    # user = User.find(user.id)
+    user = User.find(user.id)
 
     app_type = Admin::AppType.active.first
-
+    raise "No active app type!" unless app_type
     unless opt[:no_app_type_setup]
       Admin::UserAccessControl.create! user: user, app_type: app_type, access: :read, resource_type: :general, resource_name: :app_type, current_admin: admin
     end
@@ -53,9 +53,9 @@ module ModelSupport
 
 
     if opt[:create_master]
-      Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: @user
+      Admin::UserAccessControl.create! app_type_id: app_type.id, access: :read, resource_type: :general, resource_name: :create_master, current_admin: @admin, user: user
     end
-
+    @user = user
     [user, good_password]
   end
 
@@ -74,11 +74,12 @@ module ModelSupport
     admin = Admin.find(admin.id)
     good_admin_password = admin.generate_password
     admin.otp_secret = Admin.generate_otp_secret
-
     admin.otp_required_for_login = true
     admin.new_two_factor_auth_code = false
-
     admin.save!
+
+    # # Can't reload, as that doesn't clear non-db attributes
+    admin = Admin.find(admin.id)
 
     @admin = admin
     [admin, good_admin_password]

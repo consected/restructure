@@ -35,6 +35,7 @@ RSpec.describe "Export an app configuration", type: :model do
     # Make some items creatable
     [:player_infos, :player_contacts, :scantrons].each do |rn|
       uac = Admin::UserAccessControl.active.where(app_type: @app_type, resource_type: :table, resource_name: rn).first
+      uac = Admin::UserAccessControl.new(app_type: @app_type, resource_type: :table, resource_name: rn) unless uac
       uac.access = :create
       uac.current_admin = @admin
       uac.save!
@@ -42,6 +43,7 @@ RSpec.describe "Export an app configuration", type: :model do
 
     # Set a user specific control on sage_assignments
     uac = Admin::UserAccessControl.active.where(app_type: @app_type, resource_type: :table, resource_name: :sage_assignments).first
+    uac = Admin::UserAccessControl.new(app_type: @app_type, resource_type: :table, resource_name: :sage_assignments) unless uac
     uac.access = :read
     uac.user = @user
     uac.current_admin = @admin
@@ -197,17 +199,21 @@ RSpec.describe "Export an app configuration", type: :model do
     expect(res.name).to eq 'bhs'
     expect(res.label).to eq 'Brain Health Study'
 
+    @user.app_type = res
+    @user.save!
+    app_type = res
+
     expect(@user.has_access_to? :create, :table, :player_infos).to be_truthy
 
     expect(ExternalIdentifier.where(name: 'bhs_assignments').first).to be_a ExternalIdentifier
-    a = Admin::UserAccessControl.where app_type: @app_type, resource_type: :table, resource_name: :bhs_assignments
+    a = Admin::UserAccessControl.where app_type: app_type, resource_type: :table, resource_name: :bhs_assignments
     # The external identifier access can't be enabled if the underlying table doesn't exist.
     # The bhs table is created in other tests though
     expect(a.first).to be_a Admin::UserAccessControl
     al = ActivityLog.where(item_type: 'bhs_assignment').first
     expect(al).to be_a ActivityLog
     al.update(current_admin: @admin, disabled: false)
-    a = Admin::UserAccessControl.where app_type: @app_type, resource_type: :table, resource_name: :activity_log__bhs_assignments
+    a = Admin::UserAccessControl.where app_type: app_type, resource_type: :table, resource_name: :activity_log__bhs_assignments
     # The Activity log definition can not be enabled if its table does not exist
     # It is created in other tests though
     expect(a.first).to be_a Admin::UserAccessControl

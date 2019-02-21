@@ -20,7 +20,9 @@ module ESignature
       before_save :set_new_status
 
       attr_reader :e_signed_authenticated
-      # attr_writer :e_signature_password
+      attr_reader :signed_document
+      attr_accessor :e_signature_password
+
     end
 
     # Method called by classes wanting to include e-signature functionality based on the avaiability of appropriate fields
@@ -50,28 +52,37 @@ module ESignature
     end
 
     # Sign the record
-    def sign! password
-      raise FphsException.new("Signed document not prepared for signature") unless @signed_document
-      raise FphsException.new("password #{@authentication_error}") unless check_password(password)
-      @prepared_doc = @signed_document.sign! current_user, password
+    def sign! password=nil
 
+      password ||= self.e_signature_password
+      @signed_document = SignedDocument.new self, find_reference_to_sign
+
+      raise ESignatureException.new("Signed document not prepared for signature") unless @signed_document
+      raise ESignatureUserError.new("password #{@authentication_error}") unless check_password(password)
+      @prepared_doc = @signed_document.sign! current_user, password
       self.e_signed_document = @prepared_doc
       self.e_signed_at = @signed_document.signed_at_timestamp
+      self.e_signed_how = 'password'
+      self.e_signed_by = current_user
+      self.e_signed_code = @signed_document.signature_digest
+      self.e_signed_status = SignedStatus
 
-      save!
     end
 
     def e_signature_in_progress?
-      self.e_signed_status == InProgressStatus
+      self.e_signed_status == SignNowStatus
     end
 
     def set_status
       return unless self.e_signed_status.blank?
+      return unless self.extra_log_type_config.e_sign
+
       self.e_signed_status = InProgressStatus
     end
 
     def e_signature_password_correct
       return true unless e_signature_in_progress?
+      check_password self.e_signature_password
       unless @e_signed_authenticated
         errors.add :password, @authentication_error
       end
@@ -79,10 +90,12 @@ module ESignature
 
     def check_password password
 
+      return @e_signed_authenticated unless @e_signed_authenticated.nil?
+
       @e_signed_authenticated = false
 
       unless password.present?
-        errors.add :password, 'is empty. Please try again.'
+        @authentication_error = 'is empty. Please try again.'
         return
       end
 
@@ -112,8 +125,8 @@ module ESignature
     end
 
     def prevent_change
-      if e_signed_status_was.in? [CancelledStatus, SignedStatus]
-        raise FphsException.new "Record has already been #{e_signed_status_was}"
+      if e_signed_status.in?([CancelledStatus, SignedStatus]) && !e_signed_status_changed?
+        raise ESignatureUserError.new "Record has already been #{e_signed_status}"
       end
     end
 
@@ -123,7 +136,7 @@ module ESignature
       # Check that the activity log configuration has appropriate fields and is ready for use
       def validate_configuration
         res = (ExpectedFields - attribute_names).empty?
-        raise FphsException.new "Missing the expected fields for e-signature (#{ExpectedFields.join(", ")})" unless res
+        raise ESignatureException.new "Missing the expected fields for e-signature (#{ExpectedFields.join(", ")})" unless res
       end
 
 
@@ -140,7 +153,7 @@ module ESignature
         if self.e_signed_status == CancelStatus
           self.e_signed_status = CancelledStatus
         elsif self.e_signed_status == SignNowStatus
-          self.e_signed_status = SignedStatus
+          self.sign!
         end
       end
 

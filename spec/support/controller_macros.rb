@@ -23,13 +23,16 @@ module ControllerMacros
     user.save!
 
     # Save a new password, as required to handle temp passwords
-    user  = User.find(user.id)
-    good_password = user.generate_password
+    user = User.find(user.id)
     user.current_admin = admin
+    good_password = user.generate_password
     user.otp_required_for_login = true
-    user.new_two_factor_auth_code = true
+    user.new_two_factor_auth_code = false
     user.save!
-    user = user.reload
+
+    # # Can't reload, as that doesn't clear non-db attributes
+    user = User.find(user.id)
+
     [user, good_password]
 
   end
@@ -46,12 +49,13 @@ module ControllerMacros
     admin = Admin.find(admin.id)
     good_admin_password = admin.generate_password
     admin.otp_secret = Admin.generate_otp_secret
-
     admin.otp_required_for_login = true
-    admin.new_two_factor_auth_code = true
-
+    admin.new_two_factor_auth_code = false
     admin.save!
-    admin = admin.reload
+    
+    # # Can't reload, as that doesn't clear non-db attributes
+    admin = Admin.find(admin.id)
+
     [admin, good_admin_password]
   end
 
@@ -64,6 +68,7 @@ module ControllerMacros
 
       Rails.logger.info "Attempting to sign in new user with email #{user.email} and password #{pw}"
       res = sign_in user
+      raise "User not logged in" unless subject.current_user
       user.app_type = Admin::AppType.all_available_to(user).first
       user.save!
       @user = user
@@ -73,13 +78,12 @@ module ControllerMacros
 
   def before_each_login_admin
     before(:each) do
-
       admin, _ = ControllerMacros.create_admin
 
       @request.env["devise.mapping"] = Devise.mappings[:admin]
 
       sign_in admin
-
+      raise "Admin not logged in" unless subject.current_admin
       @admin = admin
     end
   end

@@ -34,14 +34,14 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     end
   end
 
-  it "should create default access controls for a new app type" do
+  it "should not create default access controls for a new app type" do
 
     create_admin
     (1..3).each do |i|
       a = create_app_type name: "app#{i}", label: "app#{i}"
 
       res = Admin::UserAccessControl.where(app_type_id: a.id)
-      expect(res.length).to eq Admin::UserAccessControl.resource_names_for(:table).length
+      expect(res.length).to eq 0
     end
   end
 

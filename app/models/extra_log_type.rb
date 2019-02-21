@@ -55,8 +55,9 @@ class ExtraLogType < ExtraOptions
 
       },
       e_sign: {
-        document_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **")
-
+        document_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **"),
+        title: 'title to appear at top of prepared document',
+        intro: 'text to appear at top of prepared document'
       }
 
     }

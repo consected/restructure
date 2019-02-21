@@ -36,6 +36,8 @@ module FilterUtils
       {
         app_type_id: app_type_id.to_s
       }
+    else
+      {}
     end
   end
 

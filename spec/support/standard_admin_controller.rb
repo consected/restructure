@@ -34,7 +34,7 @@ shared_examples 'a standard admin controller' do
     before_each_login_admin
     it "returns a result" do
       get :index
-      expect(response).to have_http_status(200), "Attempting #{@admin}"
+      expect(response).to have_http_status(200), "Attempting #{@admin} - got response code #{response.status}"
     end
   end
 

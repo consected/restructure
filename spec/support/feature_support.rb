@@ -9,18 +9,34 @@ module FeatureSupport
   ResultsMasterExpander = '.master-expander'
 
   def login
-    return if user_logged_in?
-    visit "/users/sign_in"
-    have_css('#new_user')
-    expect(page).to have_css('#new_user')
-    within '#new_user' do
-      fill_in "Email", with: @good_email
-      fill_in "Password", with: @good_password
-      fill_in "One-Time Code", with: @user.current_otp
-      click_button "Log in"
+
+    just_signed_in = false
+    alreadY_signed_in = false
+
+    3.times do
+      return if user_logged_in?
+      visit "/users/sign_in"
+      have_css('#new_user')
+      expect(page).to have_css('#new_user')
+      expect(@user.valid_password?(@good_password)).to be true
+      expect(@user.email).to eq @good_email
+
+      within '#new_user' do
+        fill_in "Email", with: @good_email
+        fill_in "Password", with: @good_password
+        fill_in "One-Time Code", with: @user.current_otp
+        click_button "Log in"
+      end
+
+      already_signed_in = user_logged_in?
+      unless already_signed_in
+        have_css ".flash .alert"
+        just_signed_in = has_css? ".flash .alert", text: "× Signed in successfully"
+        break if just_signed_in
+        puts "Attempting another login"
+        # has_css?(".flash .alert", text: "× Invalid email, password or one-time code.")
+      end
     end
-    already_signed_in = user_logged_in?
-    just_signed_in = has_css? ".flash .alert", text: "× Signed in successfully" unless already_signed_in
     expect(just_signed_in || already_signed_in).to be true
   end
 

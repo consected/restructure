@@ -3,7 +3,6 @@ require 'rails_helper'
 RSpec.describe 'electronic signature of records', type: 'model' do
 
   include ModelSupport
-
   include ESignatureSupport
   include ESignImportConfig
 
@@ -21,12 +20,15 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
     setup_access_as :user
 
-    @al = create_item
+    setup_access_as :user, for_user: @user_0
+
   end
 
   describe "generate a text field containing data to be signed" do
-    before :all do
+    before :each do
+      @al = create_item
       @al.prepare_activity_for_signature
+      @al.save!
     end
 
     it "generates a reference document for signature" do
@@ -44,43 +46,53 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     before :all do
       raise "Password can not be blank for successful tests" if @good_password.blank?
       raise "Password must be valid" unless @user.valid_password?(@good_password)
-      @al.current_user = @user
-      @signed_document = @al.prepare_activity_for_signature
     end
 
     before :each do
+      @al = create_item
       @al.current_user = @user
+      @signed_document = @al.prepare_activity_for_signature
     end
 
     it "validates that the prepared document has a digest" do
       expect(@signed_document.prepared_doc_digest).not_to be_blank
     end
 
-    it "validates the user that prepared the document is the same one that signs it" do
-      @al2 = create_item
-      @al2.current_user = @user_0
+    it "signs the document with a good password" do
+      expect(@user.valid_password?(@good_password)).to be true
       expect {
-        @al2.sign!(@good_password_0)
-      }.to raise_error(FphsException)
+        @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+        @al.e_signature_password = @good_password
+        @al.save!
+      }.not_to raise_error(ESignature::ESignatureUserError)
     end
 
-    it "signs the document with a good password" do
-      puts "@user #{@user.id} @good_password #{@good_password}"
 
-      expect(@user.valid_password?(@good_password)).to be true
 
+    it "validates the user that prepared the document is the same one that signs it" do
+      @al2 = create_item
+      @al2.prepare_activity_for_signature
+      @al2.save!
+      @al2 = @al2.class.find(@al2.id)
+      @al2.current_user = @user_0
       expect {
-
-        @al.sign!(@good_password)
-      }.not_to raise_error(FphsException)
+        @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+        @al2.e_signature_password = @good_password_0
+        @al2.save!
+      }.to raise_error(ESignature::ESignatureUserError)
     end
 
 
     it "prevents a signature with a bad password" do
-      @al.current_user = @user
+      @al2 = create_item
+      @al2.current_user = @user_0
+      @al2.prepare_activity_for_signature
       expect {
-        @al.sign!(@good_password + '!')
-      }.to raise_error(FphsException)
+        @al2.e_signature_password = @good_password + '!'
+        @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+        @al2.save!
+
+      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password is not correct. Please try again.")
     end
 
   end
@@ -90,7 +102,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       raise "Password can not be blank for successful tests" if @good_password.blank?
       @al = create_item
       @signed_document = @al.prepare_activity_for_signature
-
+      @al.save!
     end
 
 
@@ -98,17 +110,24 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       @al2 = create_item
       @al2.current_user = @user
       @signed_document2 = @al2.prepare_activity_for_signature
+      @al2.save!
 
-      @signed_document2.instance_variable_set(:@prepared_doc, @al2.e_signed_document + ' ')
+      @al2.e_signed_document += '!'
+
       expect {
-        @al2.sign! @good_password
-      }.to raise_error(FphsException)
+        @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+        @al2.e_signature_password = @good_password
+        @al2.save!
+      }.to raise_error(ESignature::ESignatureException)
     end
 
 
     it "adds a date and time to end of the document" do
 
-      @al.sign! @good_password
+      @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+      @al.e_signature_password = @good_password
+
+      @al.save!
 
       @al = @al.class.find(@al.id)
 
@@ -119,21 +138,43 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
     end
 
-    it "adds a date and time to end of the document and saves the timestamp for the salt" do
-    end
 
     it "adds document unique code to the end to act as a salt " do
-      @al.sign!(@good_password)
-      # salt is user.id, record type being signed, record id and ms timestamp
-      expect(@al.e_signed_document).to include("")
+      @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+      @al.e_signature_password = @good_password
+
+      @al.save!
+
+      res = @al.e_signed_document.match(/<small>Document unique code<\/small> <esignuniquecode>(.+)<\/esignuniquecode>/)[1]
+      expect(res.split('--').compact.length).to eq 5
+      expect(res).to eq @al.signed_document.document_salt
     end
 
-    it "generates a hash digest using the whole document + a pepper, adds the hash to the document and its own field" do
-      @al.sign!(@good_password)
-      expect(@al.e_signed_document).to include("")
+    it "generates a hash digest using the prepared document checksum, the salt + a pepper, adds the hash to the document and its own field" do
+      @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+      @al.e_signature_password = @good_password
+
+      @al.save!
+
+      res = @al.e_signed_document.match(/<small>Signature code<\/small> <esigncode>(.+)<\/esigncode>/)[1]
+      expect(res.length).to eq 64
+
+      expect {
+        @signed_document.validate_prepared_doc_digest
+      }.not_to raise_error ESignature::ESignatureException
     end
 
-    it "saves the signed document back to the activity record"
+    it "saves the signed document back to the activity record" do
+      @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+      @al.e_signature_password = @good_password
+
+      @al.save!
+
+      orig_sig = @al.signed_document.signature_digest
+      @al = @al.class.find(@al.id)
+      res = @al.e_signed_document.match(/<small>Signature code<\/small> <esigncode>(.+)<\/esigncode>/)[1]
+      expect(res).to eq orig_sig
+    end
 
     it "pushes the signed document to the filestore"
 
@@ -141,19 +182,59 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
   describe "after signing" do
 
-    it "prevents the signed record being edited" do
-      # check for signature digest field not null
+    before :each do
+      @al = create_item
+      @signed_document = @al.prepare_activity_for_signature
 
+      @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+      @al.e_signature_password = @good_password
+
+      @al.save!
+    end
+
+    it "validates a text document purely against its self-contained data" do
+
+      test_doc = @al.e_signed_document.dup
+
+      ESignature::SignedDocument.validate_text_document test_doc
+
+      # Mess up the signature digest
+      test_doc.gsub! @al.e_signed_code, @al.e_signed_code.reverse
+
+      expect {
+        ESignature::SignedDocument.validate_text_document test_doc
+      }.to raise_error ESignature::ESignatureUserError
+
+      test_doc = @al.e_signed_document.dup
+      ESignature::SignedDocument.validate_text_document test_doc
+
+      test_doc.gsub! @al.current_user.email, 'another_email@test.com'
+      expect {
+        ESignature::SignedDocument.validate_text_document test_doc
+      }.to raise_error ESignature::ESignatureException
+
+    end
+
+    it "prevents the signed record being edited" do
+
+      @al.e_signed_document = @al.e_signed_document + ' '
+      expect {
+        @al.save!
+      }.to raise_error ESignature::ESignatureUserError
+    end
+
+    it "prevents the signed record being signed again" do
+      # check for signature digest field not null
+      expect {
+        @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+        @al.e_signature_password = @good_password
+        @al.save!
+      }.to raise_error FphsException
     end
 
     it "sends a notification of the signature to the user with a signature summary and digest" do
       # salt and digest
     end
-
-    it "allows the signed document to be validated using its self-contained salt and digest" do
-      # Remembers to remove the digest line from the document before regenerating it for comparison
-    end
-
 
 
   end

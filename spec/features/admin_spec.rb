@@ -51,6 +51,20 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
     make_an_admin
 
+
+    @final_good_email = "test-final#{rand(1000000000)}admin@testing.com"
+    @final_admin = Admin.create! email: @final_good_email
+
+
+    @final_admin = Admin.find(@final_admin.id)
+    @final_good_password = @final_admin.generate_password
+    @final_admin.otp_secret = Admin.generate_otp_secret
+    @final_admin.otp_required_for_login = true
+    @final_admin.new_two_factor_auth_code = false
+    @final_admin.save!
+    @final_admin = Admin.find(@final_admin.id)
+
+
   end
 
   it "won't show the admin page unless using a secure URL param" do
@@ -119,38 +133,33 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
 
 
-    @final_good_email = "test-final#{rand(1000000000)}admin@testing.com"
-    @final_admin = Admin.create! email: @final_good_email
-
-
-    @final_admin = Admin.find(@final_admin.id)
-    @final_good_password = @final_admin.generate_password
-    @final_admin.otp_secret = Admin.generate_otp_secret
-    @final_admin.otp_required_for_login = true
-    @final_admin.new_two_factor_auth_code = false
-    @final_admin.save!
-
 
     visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
     within '#new_admin' do
       fill_in "Email", with: @final_good_email
-      fill_in "Password", with: ' '+@final_good_password
+      fill_in "Password", with: ' ' + @final_good_password
       fill_in "One-Time Code", with: @final_admin.current_otp
       click_button "Log in"
     end
 
     expect(page).to have_css ".flash .alert", text: fail_message
 
-
-    visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
-    within '#new_admin' do
-      fill_in "Email", with: @final_good_email
-      fill_in "Password", with: @final_good_password
-      fill_in "One-Time Code", with: @final_admin.current_otp
-      click_button "Log in"
+    just_signed_in = false
+    3.times do
+      visit "/admins/sign_in?secure_entry=#{SecureAdminEntry}"
+      within '#new_admin' do
+        fill_in "Email", with: @final_good_email
+        fill_in "Password", with: @final_good_password
+        fill_in "One-Time Code", with: @final_admin.current_otp
+        click_button "Log in"
+      end
+      have_css ".flash .alert"
+      puts all(".flash .alert")[0].text
+      just_signed_in = has_css?(".flash .alert", text: "× Signed in successfully")
+      break if just_signed_in
     end
 
-    expect(page).to have_css ".flash .alert", text: "× Signed in successfully"
+    expect(just_signed_in).to be true
 
   end
 

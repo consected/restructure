@@ -718,7 +718,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     all:
       addresses:
         city: 'portland'
-        zip: #{a1.zip}
+        zip: '#{a1.zip}'
         id:
           this_references: id
     "

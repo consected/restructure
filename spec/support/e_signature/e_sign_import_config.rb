@@ -44,14 +44,16 @@ module ESignImportConfig
   end
 
 
-  def setup_access_as role
+  def setup_access_as role, for_user: nil
+
+    for_user ||= @user
 
     app_name = 'test esign'
     @app_type = Admin::AppType.active.where(name: app_name).first
-    enable_user_app_access app_name, @user
-    @user.update!(app_type: @app_type)
+    enable_user_app_access app_name, for_user
+    for_user.update!(app_type: @app_type)
     # Ensure we have adequate access controls
-    add_user_to_role role
+    add_user_to_role role, for_user: for_user
 
   end
 

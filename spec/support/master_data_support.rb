@@ -111,11 +111,14 @@ module MasterDataSupport
     ActiveRecord::Base.connection.execute "update player_infos set rank = 11 where rank = 12;"
 
 
+    @app_type = Admin::AppType.active.first
 
     player_list.each do |l|
       # Create a user with a specific number embedded
       create_user(@master_count+@user_start, "mds1")
+      @user.app_type = @app_type
       setup_access :trackers
+      setup_access :player_infos
 
       #Create a master and use the created user as the current user
       @master = Master.new

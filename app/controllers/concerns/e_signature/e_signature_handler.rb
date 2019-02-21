@@ -4,13 +4,17 @@ module ESignature
     extend ActiveSupport::Concern
 
     included do
-      before_action :prepare_create, only: [:create]
-      before_action :e_signature_password, only: [:create, :update]
+      before_action :prepare_create, only: [:create], if: -> {has_e_signature?}
+      before_action :e_signature_password, only: [:create, :update], if: -> {has_e_signature?}
 
     end
 
 
     private
+
+      def has_e_signature?
+        object_instance.class.respond_to?(:has_e_signature?) && object_instance.class.has_e_signature?
+      end
 
       def prepare_create use_object=nil
         oi = use_object || object_instance
@@ -22,13 +26,13 @@ module ESignature
 
       # Evaluate the password for esignature activities
       def e_signature_password
-        if object_instance.class.has_e_signature?
-          if params[:e_signed_status] == ESignatureManager::SignNowStatus
-            ufields = params[:user]
-            return unless ufields
-            object_instance.e_signature_password = ufields[:password]
-          end
+
+        if secure_params[:e_signed_status] == ESignatureManager::SignNowStatus
+          ufields = params[:user]
+          return unless ufields.present?
+          object_instance.e_signature_password = ufields[:password]
         end
+
       end
 
   end

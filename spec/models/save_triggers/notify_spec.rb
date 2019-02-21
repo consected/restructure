@@ -32,9 +32,9 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     at2 = Admin::AppType.create! name: 'new-notify', label:'Test Notify App', current_admin: @admin
     Admin::UserRole.create! app_type: at2, user: u0, role_name: 'test', current_admin: @admin
 
-    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 2
+    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: u1.app_type).where("users.disabled is null or users.disabled = false").count).to eq 3
 
-    @role_user_ids = [u1.id, @user.id]
+    @role_user_ids = [u1.id, @user.id, ud.id]
 
   end
 
@@ -50,7 +50,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     }
 
     # Check that we only get users that are enabled for the role in this app type
-    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 2
+    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 3
 
     @trigger = SaveTriggers::Notify.new(config, @al)
 

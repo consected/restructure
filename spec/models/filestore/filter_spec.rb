@@ -188,9 +188,9 @@ EOF
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
     expect(res.length).to eq 0
 
-    f = create_filter('^\/abc')
+    f = create_filter('^/abc')
     f = create_filter('^dir\/')
-    f = create_filter('^\/ghi')
+    f = create_filter('^/ghi')
 
 
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log

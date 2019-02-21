@@ -16,7 +16,11 @@
 
   field_result_class = "e-sign-group-item result-field-container"
 
-%><ul class="e-sign-group" ><%
+%>
+<ul class="e-sign-group" >
+<li class="e-sign-group-item"><h1><%=@document_title%></h1></li>
+<li class="e-sign-group-item"><p><%=@document_intro.gsub("\n", '<br/>').html_safe%></p></li>
+<%
   if caption_before[:all_fields]
     %><li class="e-sign-group-item caption-before results-caption-before all-fields-caption">
       <%= show_caption_before :all_fields, caption_before %>
@@ -116,24 +120,27 @@
 %>
   <div class="e-sign-record-meta">
     <%= render partial: 'e_signature/update_metadata', locals: { show_created_at: true} %>
-    <li class="e-sign-group-item"><small>Record ID</small> <signdocid><%= @e_sign_document.id %></signdocid></li>
-    <li class="e-sign-group-item"><small>Record Type</small> <signdoctype><%= @e_sign_document.class.table_name %></signdoctype></li>
+    <li class="e-sign-group-item"><small>Record ID</small> <esigndocid><%= @e_sign_document.id %></esigndocid></li>
+    <li class="e-sign-group-item"><small>Record Type</small> <esigndoctype><%= @e_sign_document.class.table_name %></esigndoctype></li>
   </div>
   <div class="e-sign-signature-info">
-    <li class="e-sign-signature-prep">
-      <li class="e-sign-group-item"><small>Prepared Document Checksum</small> <signprepdoc></signprepdoc></li>
+    <li class="e-sign-signature-item">
+      <small>Document prepared at</small> <esignpreptimestamp><%= ESignature::TimeFormatting.printable_time Time.now %></esignpreptimestamp>
+    </li>
+    <li class="e-sign-group-item">
+      <small>Prepared Document Checksum</small> <esignprepdoc></esignprepdoc>
     </li>
     <li class="e-sign-signature-item">
       <small>Signed by</small> <esignuser><%= current_user.email %> (id: <%= current_user.id%>)</esignuser>
     </li>
     <li class="e-sign-signature-item">
-      <small>Signed at</small> <esigntimestamp>[date and time pending signature]</esigntimestamp>
+      <small>Signed at</small> <esigntimestamp><%=ESignature::SignedDocument::PendingSignatureCaption%></esigntimestamp>
     </li>
     <li class="e-sign-signature-item">
-      <small>Document unique code</small> <esignuniquecode>[unique code pending signature]</esignuniquecode>
+      <small>Document unique code</small> <esignuniquecode><%=ESignature::SignedDocument::PendingSignatureCaption%></esignuniquecode>
     </li>
     <li class="e-sign-signature-item">
-      <small>Signature code</small> <esigncode>[signature code pending signature]</esigncode>
+      <small>Signature code</small> <esigncode><%=ESignature::SignedDocument::PendingSignatureCaption%></esigncode>
     </li>
   </div>
 </ul>

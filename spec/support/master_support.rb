@@ -36,21 +36,25 @@ module MasterSupport
     Rails.logger.debug "Failed to create access for #{resource_name}"
   end
 
-  def add_user_to_role role_name
-    Admin::UserRole.add_to_role @user, @user.app_type, role_name, @admin
+  def add_user_to_role role_name, for_user: nil
+    for_user ||= @user
+    Admin::UserRole.add_to_role for_user, for_user.app_type, role_name, @admin
   end
 
-  def remove_user_from_role role_name
-    Admin::UserRole.remove_from_role @user, @user.app_type, role_name, @admin
+  def remove_user_from_role role_name, for_user: nil
+    for_user ||= @user
+    Admin::UserRole.remove_from_role for_user, for_user.app_type, role_name, @admin
   end
 
-  def add_user_config config_name, config_value
-    Admin::AppConfiguration.add_user_config @user, @user.app_type, config_name, config_value, @admin
+  def add_user_config config_name, config_value, for_user: nil
+    for_user ||= @user
+    Admin::AppConfiguration.add_user_config for_user, for_user.app_type, config_name, config_value, @admin
   end
 
 
-  def remove_user_config config_name
-    Admin::AppConfiguration.remove_user_config @user, @user.app_type, config_name, @admin
+  def remove_user_config config_name, for_user: nil
+    for_user ||= @user
+    Admin::AppConfiguration.remove_user_config for_user, for_user.app_type, config_name, @admin
   end
 
   def add_default_app_config app_type, config_name, config_value

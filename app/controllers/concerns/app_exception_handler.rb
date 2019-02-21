@@ -2,16 +2,17 @@ module AppExceptionHandler
   extend ActiveSupport::Concern
 
   included do
+    rescue_from Exception, with: :unhandled_exception_handler
     rescue_from ActiveRecord::RecordNotFound, with: :runtime_record_not_found_handler
     rescue_from ActionController::RoutingError, with: :routing_error_handler
     rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
     rescue_from FphsException, with: :fphs_app_exception_handler
+    rescue_from ESignature::ESignatureException, with: :fphs_app_exception_handler
+    rescue_from ESignature::ESignatureUserError, with: :user_error_handler
     rescue_from PG::RaiseException, with: :fphs_app_exception_handler
     rescue_from ActionDispatch::Cookies::CookieOverflow, with: :cookie_overflow_handler
     rescue_from PG::UniqueViolation, with: :db_unique_violation
     rescue_from RuntimeError, with: :runtime_error_handler
-    rescue_from Exception, with: :unhandled_exception_handler
-
   end
 
   def child_error_reporter
@@ -71,6 +72,12 @@ module AppExceptionHandler
     end
 
     def fphs_app_exception_handler e
+      msg = e.message
+      code = 400
+      return_and_log_error e, msg, code
+    end
+
+    def user_error_handler e
       msg = e.message
       code = 400
       return_and_log_error e, msg, code

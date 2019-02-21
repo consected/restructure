@@ -49,7 +49,13 @@ class DynamicModel < ActiveRecord::Base
       res.uniq
 
       if res.length == 0 && self.model_def
-        res = self.model_def.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
+        begin
+          res = self.model_def.attribute_names - ['id', 'created_at', 'updated_at', 'contactid', 'user_id', 'master_id']
+        rescue => e
+          puts "Failed to get all_implementation_fields for reason: #{e.inspect} \n#{e.backtrace.join("\n")}"
+          raise e unless ignore_errors
+          return []
+        end
       end
       res
     rescue FphsException => e

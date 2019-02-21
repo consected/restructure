@@ -1,3 +1,7 @@
-<% @e_sign_document = e_sign_document %>
-<% @prepared_document = prepared_document %>
+<%
+@e_sign_document = e_sign_document
+@prepared_document = prepared_document
+@document_intro = document_intro
+@document_title = document_title
+%>
 <%= render partial: 'e_signature/document', locals: {attributes: attributes, labels: labels, caption_before: caption_before, show_if: show_if, current_user: current_user} %>
