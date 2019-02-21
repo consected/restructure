@@ -327,18 +327,22 @@
     {{else is @key 'includes' '^placeholder_' }}
       <li class="<%= field_result_class %> hidden">{{> field_label labels='labels_<%=name.underscore%>' replace='^placeholder_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'e_signed_by'}}
-        <li class="<%= field_result_class %> text-center">
-          {{#with ..}}
-          {{#is e_signed_status 'signed'}}
-          {{> field_label labels='labels_{{@key}}' }} <strong>{{pretty_string value return_string="true" capitalize="true"}}</strong>
-          {{else}}
+      <li class="<%= field_result_class %>">
+        {{#with ..}}
+        {{#is e_signed_status 'signed'}}
+        {{> field_label labels='labels_{{@key}}' }} <strong>{{pretty_string ../this return_string="true" capitalize="true"}}</strong>
+        {{else}}
+        <div class="text-center">
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>" data-remote="true" data-result-target="">Review and Sign</a>
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>?<%=item_class_name.gsub('__', '_')%>[e_signed_status]=cancel+and+unlock" data-remote="true" data-result-target="">Cancel and Unlock</a>
-          {{/is}}
-          {{/with}}
-        </li>
+        </div>
+        {{/is}}
+        {{/with}}
+      </li>
     {{else is @key 'includes' '^e_signed_' }}
-      {{> e_signature_parts name='<%=name.pluralize%>' master_id=../master_id id=../id value=this }}
+      {{#with ..}}
+      {{> e_signature_parts name='<%=name.pluralize%>' value=../this }}
+      {{/with}}
     {{else is this 'typeof' 'object'}}
 
         <li class="list-group-item typeof-object-field"><p>{{humanize @key}} <a data-target="#view-object-{{../master_id}}-{{../id}}-{{underscore @key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a></p>

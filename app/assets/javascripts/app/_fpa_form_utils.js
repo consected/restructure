@@ -1087,9 +1087,15 @@ _fpa.form_utils = {
       if(!force) {
         els = els.not('.e-signature-setup');
       }
-      
+
       els.each(function() {
         var _this = this;
+
+        $(_this).find('.e-sign-print-frame').not('.click-ev-attached').on('click', function() {
+          var i = $(_this).find('.e_signature_document_iframe')[0];
+          i.contentWindow.print();
+        }).addClass('click-ev-attached');
+
         window.setTimeout(function() {
           var c = $(_this).find('.e_signature_document');
           var html = c.val();
