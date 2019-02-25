@@ -18,7 +18,9 @@ module ESignature
       raise FphsException.new "salt is blank for signing" unless salt.present?
       raise FphsException.new "pepper is blank for signing" unless pepper.present?
       raise FphsException.new "content is blank for signing" unless content.present?
-      Digest::SHA2.hexdigest("#{salt}--#{self.pepper}--#{content}")
+      # Note - the order here is important. The secret pepper must be on the end to avoid
+      # length extension attacks.
+      Digest::SHA2.hexdigest("#{salt}--#{content}--#{self.pepper}")
     end
 
 
