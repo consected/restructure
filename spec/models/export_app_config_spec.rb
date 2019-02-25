@@ -193,7 +193,7 @@ RSpec.describe "Export an app configuration", type: :model do
     config = File.read Rails.root.join('docs/config_tests/bhs_app_type_test_config.json')
 
     res, results = Admin::AppType.import_config(config, @admin, force_disable: true)
-
+byebug
     expect(res).to be_a Admin::AppType
 
     expect(res.name).to eq 'bhs'
