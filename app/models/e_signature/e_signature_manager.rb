@@ -60,6 +60,8 @@ module ESignature
       raise ESignatureException.new("Signed document not prepared for signature") unless @signed_document
       raise ESignatureUserError.new("password #{@authentication_error}") unless check_password(password)
       @prepared_doc = @signed_document.sign! current_user, password
+
+
       self.e_signed_document = @prepared_doc
       self.e_signed_at = @signed_document.signed_at_timestamp
       self.e_signed_how = 'password'
@@ -67,6 +69,7 @@ module ESignature
       self.e_signed_code = @signed_document.signature_digest
       self.e_signed_status = SignedStatus
 
+      send_document_to_filestore
     end
 
     def e_signature_in_progress?
@@ -157,6 +160,24 @@ module ESignature
         end
       end
 
+      def send_document_to_filestore
+
+        cont = container
+        raise ESignature::ESignatureException.new "No filestore container available to store the signed document" unless cont
+
+        temp_file = Tempfile.new
+        temp_file.write self.e_signed_document
+        
+        fn = "signed document by #{self.e_signed_by} at #{@signed_document.signed_at.iso8601}.html"
+
+        begin
+          NfsStore::Import.import_file cont.id, fn, temp_file.path, self.current_user
+        ensure
+          temp_file.close
+          temp_file.unlink
+        end
+
+      end
 
   end
 end

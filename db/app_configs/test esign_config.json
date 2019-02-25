@@ -1259,8 +1259,8 @@
       {
         "id": 2218,
         "user_id": null,
-        "resource_type": "activity_log_type",
-        "resource_name": "activity_log__player_info_e_sign__review",
+        "resource_type": "table",
+        "resource_name": "nfs_store__manage__containers",
         "options": "",
         "access": "create",
         "disabled": false,
@@ -1268,7 +1268,7 @@
         "app_type_id": 30,
         "role_name": "user",
         "created_at": "2019-02-14T14:12:58.026Z",
-        "updated_at": "2019-02-14T14:13:39.654Z",
+        "updated_at": "2019-02-22T16:31:11.032Z",
         "user_email": null
       },
       {
@@ -1300,6 +1300,21 @@
         "created_at": "2019-02-14T14:13:29.075Z",
         "updated_at": "2019-02-14T14:13:29.075Z",
         "user_email": null
+      },
+      {
+        "id": 2221,
+        "user_id": null,
+        "resource_type": "table",
+        "resource_name": "nfs_store__manage__stored_files",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 15,
+        "app_type_id": 30,
+        "role_name": "user",
+        "created_at": "2019-02-22T16:31:29.262Z",
+        "updated_at": "2019-02-22T16:31:29.262Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -1311,12 +1326,12 @@
         "admin_id": 15,
         "disabled": false,
         "created_at": "2019-02-12T09:16:57.709Z",
-        "updated_at": "2019-02-21T13:12:25.467Z",
+        "updated_at": "2019-02-22T18:45:49.202Z",
         "action_when_attribute": "created_at",
         "field_list": "e_signed_document, e_signed_how, e_signed_at, e_signed_by, e_signed_code",
         "blank_log_field_list": "",
         "blank_log_name": "",
-        "extra_log_types": "_default:\r\n  editable_if:\r\n    always: true\r\n    \r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n\r\nsetup:\r\n  label: Setup Data\r\n  references:\r\n    ipa_inex_checklist:\r\n      from: this\r\n      add: one_to_this\r\n      filter_by:\r\n        fixed_checklist_type: test document\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__player_info_e_signs:\r\n        extra_log_type: setup\r\n\r\n  editable_if:\r\n    not_all:\r\n      activity_log__player_info_e_signs:\r\n        e_signed_status: \r\n          - in progress\r\n          - signed\r\n        \r\n    \r\nsign:\r\n  label: Sign\r\n  fields:\r\n    - placeholder_get_started\r\n    - e_signed_document\r\n    - e_signed_status\r\n    - e_signed_how\r\n    - e_signed_at\r\n    - placeholder_in_progress\r\n    - e_signed_by\r\n    - e_signed_code\r\n    \r\n\r\n  field_options:\r\n    e_signed_status:\r\n      edit_as:\r\n        field_type: select_status\r\n        alt_options: \r\n          - cancel and unlock\r\n          - sign now\r\n\r\n  caption_before:\r\n    placeholder_get_started: |\r\n      The following steps will guide you through the process of reviewing and signing the document.\r\n\r\n      You will have the opportunity to review the document fully before signing.\r\n      \r\n      Note that once you start this process, the data you are signing will be locked, so that others can not inadvertantly make changes. If you find that you need to change data, you will have the opportunity to cancel this signing process and unlock the data so it can be changed.\r\n      \r\n      You do not have to complete the review or signature in a single session. The data will remain locked until you either sign or cancel, even if you have to logout and sign back in later.\r\n      \r\n      Be aware that signing the document in this process has the same legal weight as a signature in ink on a paper document.\r\n      \r\n      If you are NOT ready to continue, click the cancel button above.\r\n      \r\n      If you are ready to continue with the signature process, click Save.\r\n\r\n    e_signed_status: \r\n      edit_caption: Do you want to cancel and unlock the data so that changes can be made, or sign the document now?\r\n      show_caption: Signature Status\r\n    e_signed_how: \r\n      edit_caption: To sign the document, enter your password, then click Save\r\n\r\n    placeholder_in_progress:\r\n      show_caption: |\r\n        The document is ready for review. \r\n        Click <b>Review</b> to view the document and prepare to sign it.\r\n        Click <b>Cancel</b> to cancel and unlock the data in order to make changes.\r\n        \r\n    e_signed_document:\r\n      edit_caption: |\r\n        The following document has been prepared for review and signature.\r\n      show_caption: |\r\n        The following document was signed. Full details are provided below.\r\n\r\n\r\n  show_if:\r\n    placeholder_get_started:\r\n      all:\r\n        id: ''\r\n        \r\n    placeholder_in_progress:\r\n      e_signed_status: in progress\r\n        \r\n    e_signed_status:\r\n      not_any:\r\n        id: ''\r\n      \r\n    e_signed_document:\r\n      not_any:\r\n        id: ''\r\n        e_signed_status: \r\n          - cancelled\r\n          - cancel and unlock\r\n    e_signed_by:\r\n      e_signed_status: \r\n        - in progress\r\n#        - signed\r\n    e_signed_how:\r\n      e_signed_status: \r\n        - in progress\r\n        - sign now\r\n#        - signed\r\n        \r\n    e_signed_at:\r\n      never: true\r\n    e_signed_code:\r\n      never: true\r\n\r\n\r\n  creatable_if:\r\n    all:\r\n      activity_log__player_info_e_signs:\r\n        extra_log_type: setup\r\n      this:\r\n        not_any:\r\n          activity_log__player_info_e_signs:\r\n            e_signed_status: \r\n              - signed\r\n              - in progress\r\n\r\n\r\n  editable_if:\r\n    not_all: \r\n      this:\r\n        e_signed_status:\r\n          - signed\r\n          - cancelled\r\n\r\n\r\n  e_sign:\r\n    document_reference:\r\n      ipa_inex_checklist:\r\n        from: master\r\n        filter_by:\r\n          fixed_checklist_type: test document\r\n    title: Inclusion / Exclusion Checklist (Phone Screen)\r\n    intro: |\r\n      This document contains the full inclusion / exclusion checklist, based on data at the time stated in the final fields.\r\n      The electronic signature by the signer confirms the validity of the information presented.\r\n    \r\n\r\n",
+        "extra_log_types": "_default:\r\n  editable_if:\r\n    always: true\r\n    \r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n\r\nsetup:\r\n  label: Setup Data\r\n  references:\r\n    ipa_inex_checklist:\r\n      from: this\r\n      add: one_to_this\r\n      filter_by:\r\n        fixed_checklist_type: test document\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__player_info_e_signs:\r\n        extra_log_type: setup\r\n\r\n  editable_if:\r\n    not_all:\r\n      activity_log__player_info_e_signs:\r\n        e_signed_status: \r\n          - in progress\r\n          - signed\r\n        \r\n    \r\nsign:\r\n  label: Sign\r\n  fields:\r\n    - placeholder_get_started\r\n    - e_signed_document\r\n    - e_signed_status\r\n    - e_signed_how\r\n    - e_signed_at\r\n    - placeholder_in_progress\r\n    - e_signed_by\r\n    - e_signed_code\r\n    \r\n\r\n  field_options:\r\n    e_signed_status:\r\n      edit_as:\r\n        field_type: select_status\r\n        alt_options: \r\n          - cancel and unlock\r\n          - sign now\r\n\r\n  caption_before:\r\n    placeholder_get_started: |\r\n      The following steps will guide you through the process of reviewing and signing the document.\r\n\r\n      You will have the opportunity to review the document fully before signing.\r\n      \r\n      Note that once you start this process, the data you are signing will be locked, so that others can not inadvertantly make changes. If you find that you need to change data, you will have the opportunity to cancel this signing process and unlock the data so it can be changed.\r\n      \r\n      You do not have to complete the review or signature in a single session. The data will remain locked until you either sign or cancel, even if you have to logout and sign back in later.\r\n      \r\n      Be aware that signing the document in this process has the same legal weight as a signature in ink on a paper document.\r\n      \r\n      If you are NOT ready to continue, click the cancel button above.\r\n      \r\n      If you are ready to continue with the signature process, click Save.\r\n\r\n    e_signed_status: \r\n      edit_caption: Do you want to cancel and unlock the data so that changes can be made, or sign the document now?\r\n      show_caption: Signature Status\r\n    e_signed_how: \r\n      edit_caption: To sign the document, enter your password, then click Save\r\n\r\n    placeholder_in_progress:\r\n      show_caption: |\r\n        The document is ready for review. \r\n        Click <b>Review</b> to view the document and prepare to sign it.\r\n        Click <b>Cancel</b> to cancel and unlock the data in order to make changes.\r\n        \r\n    e_signed_document:\r\n      edit_caption: |\r\n        The following document has been prepared for review and signature.\r\n      show_caption: |\r\n        The following document was signed. Full details are provided below.\r\n\r\n\r\n  show_if:\r\n    placeholder_get_started:\r\n      all:\r\n        id: ''\r\n        \r\n    placeholder_in_progress:\r\n      e_signed_status: in progress\r\n        \r\n    e_signed_status:\r\n      not_any:\r\n        id: ''\r\n      \r\n    e_signed_document:\r\n      not_any:\r\n        id: ''\r\n        e_signed_status: \r\n          - cancelled\r\n          - cancel and unlock\r\n          - in progress\r\n    e_signed_by:\r\n      e_signed_status: \r\n        - in progress\r\n#        - signed\r\n    e_signed_how:\r\n      e_signed_status: \r\n        - in progress\r\n        - sign now\r\n#        - signed\r\n        \r\n    e_signed_at:\r\n      never: true\r\n    e_signed_code:\r\n      never: true\r\n\r\n\r\n  creatable_if:\r\n    all:\r\n      activity_log__player_info_e_signs:\r\n        extra_log_type: setup\r\n      this:\r\n        not_any:\r\n          activity_log__player_info_e_signs:\r\n            e_signed_status: \r\n              - signed\r\n              - in progress\r\n\r\n\r\n  editable_if:\r\n    not_all: \r\n      this:\r\n        e_signed_status:\r\n          - signed\r\n          - cancelled\r\n\r\n\r\n  e_sign:\r\n    document_reference:\r\n      ipa_inex_checklist:\r\n        from: master\r\n        filter_by:\r\n          fixed_checklist_type: test document\r\n    title: Inclusion / Exclusion Checklist (Phone Screen)\r\n    intro: |\r\n      This document contains the full inclusion / exclusion checklist, based on data at the time stated in the final fields.\r\n      The electronic signature by the signer confirms the validity of the information presented.\r\n    \r\n  references:\r\n    nfs_store__manage__container:\r\n      label: Signature Documents\r\n      from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show: hide\r\n        new: not_embedded\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_filestore_container:\r\n        label: Signature Documents\r\n        name: e-signature\r\n        create_with_role: nfs_store group 600\r\n\r\n",
         "hide_item_list_panel": true,
         "main_log_name": "Sign",
         "process_name": "e_sign",
@@ -1690,6 +1705,17 @@
         "disabled": false,
         "created_at": "2019-02-12T10:06:50.443Z",
         "updated_at": "2019-02-12T10:06:50.443Z",
+        "user_email": "phil_ayres@test.com"
+      },
+      {
+        "id": 47,
+        "app_type_id": 30,
+        "role_name": "nfs_store group 600",
+        "user_id": 44,
+        "admin_id": 15,
+        "disabled": false,
+        "created_at": "2019-02-22T16:30:31.998Z",
+        "updated_at": "2019-02-22T16:30:31.998Z",
         "user_email": "phil_ayres@test.com"
       }
     ],

@@ -22,6 +22,9 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
     setup_access_as :user, for_user: @user_0
 
+    add_user_to_role 'nfs_store group 600'
+    add_user_to_role 'nfs_store group 600', for_user: @user_0
+
   end
 
   describe "generate a text field containing data to be signed" do
@@ -176,7 +179,18 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect(res).to eq orig_sig
     end
 
-    it "pushes the signed document to the filestore"
+    it "pushes the signed document to the filestore" do
+      @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+      @al.e_signature_password = @good_password
+      @al.save!
+
+      expect(@al.container).to be_a NfsStore::Manage::Container
+      sf = @al.container.stored_files.first
+      expect(sf).to be_a NfsStore::Manage::StoredFile
+      content = ''
+      content = File.read sf.retrieval_path
+      expect(content).to eq @al.e_signed_document
+    end
 
   end
 

@@ -73,6 +73,7 @@ group :test do
   gem 'selenium-webdriver', '3.4.4'
   gem 'database_cleaner'
   gem 'simplecov', :require => false
+  gem 'test_after_commit'
 end
 
 group :assets do

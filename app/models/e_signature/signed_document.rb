@@ -8,12 +8,14 @@ module ESignature
     attr_reader :current_user
     # @return [String] the prepared document HTML
     attr_reader :prepared_doc
-    # @return [Time] timestamp for the signature action
+    # @return [String] printable timestamp for the signature action
     attr_reader :signed_at_timestamp
     # @return [String] salt generated at sign time
     attr_reader :document_salt
     # @return [String] signature digest generated for signature
     attr_reader :signature_digest
+    # @return [Time] timestamp for the signature action
+    attr_reader :signed_at
 
 
 
@@ -188,7 +190,7 @@ module ESignature
       # Adds the signature timestamp to the document and activity record
       def set_signature_timestamp
         time = Time.now
-
+        @signed_at = time
         @signed_at_timestamp = TimeFormatting.printable_time time
         @signed_at_timestamp_ms = TimeFormatting.ms_timestamp(time)
         set_document_tag :esigntimestamp, @signed_at_timestamp

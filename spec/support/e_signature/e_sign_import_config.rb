@@ -40,6 +40,9 @@ module ESignImportConfig
 
     new_app_type = Admin::AppType.where(name: 'test esign').first
     new_app_type.update!(disabled: false, current_admin: @admin)
+
+    FileUtils.mkdir_p File.join(NfsStore::Manage::Filesystem.nfs_store_directory, 'gid600', "app-type-#{new_app_type.id}", "containers")
+
     new_app_type
   end
 

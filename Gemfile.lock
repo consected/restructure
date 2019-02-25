@@ -239,6 +239,8 @@ GEM
       sprockets (>= 3.0.0)
     strong_password (0.0.6)
     syslog-logger (1.6.8)
+    test_after_commit (1.2.2)
+      activerecord (>= 3.2, < 5.0)
     therubyracer (0.12.3)
       libv8 (~> 3.16.14.15)
       ref
@@ -296,6 +298,7 @@ DEPENDENCIES
   spring
   strong_password (~> 0.0.5)
   syslog-logger
+  test_after_commit
   therubyracer
   uglifier (>= 1.3.0)
   web-console (~> 2.0)

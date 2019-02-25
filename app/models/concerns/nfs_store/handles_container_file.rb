@@ -19,7 +19,7 @@ module NfsStore
       before_validation :clean_path
 
       validates :user_id, presence: true
-        validates :file_hash, presence: { message: 'must be stored for file.' }
+      validates :file_hash, presence: { message: 'must be stored for file.' }
 
       validates :file_name, presence: true
       validates :file_size, presence: true
@@ -69,10 +69,12 @@ module NfsStore
       self.file_size = pn.size
       self.file_updated_at = pn.mtime
 
-      if self.is_a?(NfsStore::Manage::ArchivedFile) && (self.file_size < MaxSizeForArchiveFileHash || self.file_hash.nil?)
-        self.file_hash = self.class.hash_for_file(full_file_path)
-      else
-        Rails.logger.warn "Skipping file hash for large ArchivedFile"
+      if self.is_a?(NfsStore::Manage::ArchivedFile)
+        if (self.file_size < MaxSizeForArchiveFileHash || self.file_hash.nil?)
+          self.file_hash = self.class.hash_for_file(full_file_path)
+        else
+          Rails.logger.warn "Skipping file hash for large ArchivedFile"
+        end
       end
 
       ext = File.extname(self.file_name)

@@ -702,4 +702,12 @@ module ActivityLogHandler
     true
   end
 
+  # Get the container referenced from this activity log
+  # @return [NfsStore::Manage::Container | nil]
+  def container
+    mr = self.model_references.select {|mr| mr.to_record_type == "NfsStore::Manage::Container"}.first
+    return unless mr
+    mr.to_record
+  end
+
 end

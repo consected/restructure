@@ -14,7 +14,7 @@
 
     <div class="form-group-non">
       <%= f.label :otp_attempt, 'One-Time Code' %><br />
-      <%= f.password_field :otp_attempt, autocomplete: "off", class: 'form-control' %>
+      <%= f.password_field :otp_attempt, autocomplete: "off", class: 'form-control', value: '' %>
     </div>
 
     <%= hidden_field_tag :secure_entry, params[:secure_entry] if request.path.start_with?('/admins/sign_in') %>
