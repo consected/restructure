@@ -1069,43 +1069,57 @@ CREATE FUNCTION ml_app.log_address_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_admin_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO admin_history
-            (
-                    admin_id,
-    email,
-    encrypted_password,    
-    sign_in_count,
-    current_sign_in_at,
-    last_sign_in_at,
-    current_sign_in_ip ,
-    last_sign_in_ip ,
-    created_at ,
-    updated_at,
-    failed_attempts,
-    unlock_token,
-    locked_at,
-    disabled 
+    BEGIN
+      INSERT INTO admin_history
+      (
+        admin_id,
+        email,
+        encrypted_password,
+        sign_in_count,
+        current_sign_in_at,
+        last_sign_in_at,
+        current_sign_in_ip ,
+        last_sign_in_ip ,
+        created_at ,
+        updated_at,
+        failed_attempts,
+        unlock_token,
+        locked_at,
+        disabled,
+        encrypted_otp_secret,
+        encrypted_otp_secret_iv,
+        encrypted_otp_secret_salt,
+        consumed_timestep,
+        otp_required_for_login,
+        reset_password_sent_at,
+        password_updated_at
 
-                )                 
-            SELECT                 
-                NEW.id,
-                NEW.email,
-    NEW.encrypted_password,    
-    NEW.sign_in_count,
-    NEW.current_sign_in_at,
-    NEW.last_sign_in_at,
-    NEW.current_sign_in_ip ,
-    NEW.last_sign_in_ip ,
-    NEW.created_at ,
-    NEW.updated_at,
-    NEW.failed_attempts,
-    NEW.unlock_token,
-    NEW.locked_at,
-    NEW.disabled 
-            ;
-            RETURN NEW;
-        END;
+      )
+      SELECT
+        NEW.id,
+        NEW.email,
+        NEW.encrypted_password,
+        NEW.sign_in_count,
+        NEW.current_sign_in_at,
+        NEW.last_sign_in_at,
+        NEW.current_sign_in_ip ,
+        NEW.last_sign_in_ip ,
+        NEW.created_at ,
+        NEW.updated_at,
+        NEW.failed_attempts,
+        NEW.unlock_token,
+        NEW.locked_at,
+        NEW.disabled,
+        NEW.encrypted_otp_secret,
+        NEW.encrypted_otp_secret_iv,
+        NEW.encrypted_otp_secret_salt,
+        NEW.consumed_timestep,
+        NEW.otp_required_for_login,
+        NEW.reset_password_sent_at,
+        NEW.password_updated_at
+        ;
+        RETURN NEW;
+    END;
     $$;
 
 
@@ -2144,51 +2158,67 @@ CREATE FUNCTION ml_app.log_user_role_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_user_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO user_history
-            (
-                email,
-                encrypted_password,
-                reset_password_token,
-                reset_password_sent_at,
-                remember_created_at,
-                sign_in_count,
-                current_sign_in_at,
-                last_sign_in_at,
-                current_sign_in_ip,
-                last_sign_in_ip,
-                failed_attempts,
-                unlock_token,
-                locked_at,
-                app_type_id,
-                authentication_token,
-                admin_id,
-                disabled,
-                created_at,
-                updated_at,
-                user_id
-                )
-            SELECT
-                NEW.email,
-                NEW.encrypted_password,
-                NEW.reset_password_token,
-                NEW.reset_password_sent_at,
-                NEW.remember_created_at,
-                NEW.sign_in_count,
-                NEW.current_sign_in_at,
-                NEW.last_sign_in_at,
-                NEW.current_sign_in_ip,
-                NEW.last_sign_in_ip,
-                NEW.failed_attempts,
-                NEW.unlock_token,
-                NEW.locked_at,
-                NEW.app_type_id,
-                NEW.authentication_token,
-                NEW.admin_id,
-                NEW.disabled,
-                NEW.created_at,
-                NEW.updated_at,
-                NEW.id
+    BEGIN
+      INSERT INTO user_history
+      (
+            user_id,
+            email,
+            encrypted_password,
+            reset_password_token,
+            reset_password_sent_at,
+            remember_created_at,
+            sign_in_count,
+            current_sign_in_at,
+            last_sign_in_at,
+            current_sign_in_ip ,
+            last_sign_in_ip ,
+            created_at ,
+            updated_at,
+            failed_attempts,
+            unlock_token,
+            locked_at,
+            disabled ,
+            admin_id,
+            app_type_id,
+            authentication_token,
+            encrypted_otp_secret,
+            encrypted_otp_secret_iv,
+            encrypted_otp_secret_salt,
+            consumed_timestep,
+            otp_required_for_login,
+            password_updated_at,
+            first_name,
+            last_name
+      )
+      SELECT
+            NEW.id,
+            NEW.email,
+            NEW.encrypted_password,
+            NEW.reset_password_token,
+            NEW.reset_password_sent_at,
+            NEW.remember_created_at,
+            NEW.sign_in_count,
+            NEW.current_sign_in_at,
+            NEW.last_sign_in_at,
+            NEW.current_sign_in_ip ,
+            NEW.last_sign_in_ip ,
+            NEW.created_at ,
+            NEW.updated_at,
+            NEW.failed_attempts,
+            NEW.unlock_token,
+            NEW.locked_at,
+            NEW.disabled ,
+            NEW.admin_id,
+            NEW.app_type_id,
+            NEW.authentication_token,
+            NEW.encrypted_otp_secret,
+            NEW.encrypted_otp_secret_iv,
+            NEW.encrypted_otp_secret_salt,
+            NEW.consumed_timestep,
+            NEW.otp_required_for_login,
+            NEW.password_updated_at,
+            NEW.first_name,
+            NEW.last_name
             ;
             RETURN NEW;
         END;
@@ -2787,7 +2817,14 @@ CREATE TABLE ml_app.admin_history (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     disabled boolean,
-    admin_id integer
+    admin_id integer,
+    encrypted_otp_secret character varying,
+    encrypted_otp_secret_iv character varying,
+    encrypted_otp_secret_salt character varying,
+    consumed_timestep integer,
+    otp_required_for_login boolean,
+    reset_password_sent_at timestamp without time zone,
+    password_updated_at timestamp without time zone
 );
 
 
@@ -2835,7 +2872,9 @@ CREATE TABLE ml_app.admins (
     consumed_timestep integer,
     otp_required_for_login boolean,
     reset_password_sent_at timestamp without time zone,
-    password_updated_at timestamp without time zone
+    password_updated_at timestamp without time zone,
+    first_name character varying,
+    last_name character varying
 );
 
 
@@ -5402,7 +5441,15 @@ CREATE TABLE ml_app.user_history (
     admin_id integer,
     user_id integer,
     app_type_id integer,
-    authentication_token character varying
+    authentication_token character varying,
+    encrypted_otp_secret character varying,
+    encrypted_otp_secret_iv character varying,
+    encrypted_otp_secret_salt character varying,
+    consumed_timestep integer,
+    otp_required_for_login boolean,
+    password_updated_at timestamp without time zone,
+    first_name character varying,
+    last_name character varying
 );
 
 
@@ -5526,7 +5573,9 @@ CREATE TABLE ml_app.users (
     encrypted_otp_secret_salt character varying,
     consumed_timestep integer,
     otp_required_for_login boolean,
-    password_updated_at timestamp without time zone
+    password_updated_at timestamp without time zone,
+    first_name character varying,
+    last_name character varying
 );
 
 
