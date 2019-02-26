@@ -41,7 +41,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     it "removes the fields that are hidden based on conditional rules"
 
     it "adds the user email address to the end of the document" do
-      expect(@al.e_signed_document).to include("<small>Signed by</small> <esignuser>#{@user.email} (id: #{@user.id})</esignuser>")
+      expect(@al.e_signed_document).to include("<small>Signed by</small> <esignuser>#{@user.first_name} #{@user.last_name} - #{@user.email} (id: #{@user.id})</esignuser>")
     end
   end
 
@@ -61,11 +61,12 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect(@signed_document.prepared_doc_digest).not_to be_blank
     end
 
-    it "signs the document with a good password" do
+    it "signs the document with a good password and one-time code" do
       expect(@user.valid_password?(@good_password)).to be true
       expect {
         @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al.e_signature_password = @good_password
+        @al.e_signature_otp_attempt = @user.current_otp
         @al.save!
       }.not_to raise_error(ESignature::ESignatureUserError)
     end
@@ -81,6 +82,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect {
         @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al2.e_signature_password = @good_password_0
+        @al2.e_signature_otp_attempt = @user_0.current_otp
         @al2.save!
       }.to raise_error(ESignature::ESignatureUserError)
     end
@@ -92,10 +94,24 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       @al2.prepare_activity_for_signature
       expect {
         @al2.e_signature_password = @good_password + '!'
+        @al2.e_signature_otp_attempt = @user.current_otp
         @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al2.save!
 
-      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password is not correct. Please try again.")
+      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password or one-time code is not correct. Please try again.")
+    end
+
+    it "prevents a signature with a bad one-time code" do
+      @al2 = create_item
+      @al2.current_user = @user_0
+      @al2.prepare_activity_for_signature
+      expect {
+        @al2.e_signature_password = @good_password
+        @al2.e_signature_otp_attempt = '000000'
+        @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
+        @al2.save!
+
+      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password or one-time code is not correct. Please try again.")
     end
 
   end
@@ -120,6 +136,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect {
         @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al2.e_signature_password = @good_password
+        @al2.e_signature_otp_attempt = @user.current_otp
+
         @al2.save!
       }.to raise_error(ESignature::ESignatureException)
     end
@@ -129,6 +147,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
       @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
       @al.e_signature_password = @good_password
+      @al.e_signature_otp_attempt = @user.current_otp
 
       @al.save!
 
@@ -145,6 +164,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     it "adds document unique code to the end to act as a salt " do
       @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
       @al.e_signature_password = @good_password
+      @al.e_signature_otp_attempt = @user.current_otp
 
       @al.save!
 
@@ -156,6 +176,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     it "generates a hash digest using the prepared document checksum, the salt + a pepper, adds the hash to the document and its own field" do
       @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
       @al.e_signature_password = @good_password
+      @al.e_signature_otp_attempt = @user.current_otp
 
       @al.save!
 
@@ -170,6 +191,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     it "saves the signed document back to the activity record" do
       @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
       @al.e_signature_password = @good_password
+      @al.e_signature_otp_attempt = @user.current_otp
 
       @al.save!
 
@@ -182,6 +204,8 @@ RSpec.describe 'electronic signature of records', type: 'model' do
     it "pushes the signed document to the filestore" do
       @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
       @al.e_signature_password = @good_password
+      @al.e_signature_otp_attempt = @user.current_otp
+
       @al.save!
 
       expect(@al.container).to be_a NfsStore::Manage::Container
@@ -202,6 +226,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
       @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
       @al.e_signature_password = @good_password
+      @al.e_signature_otp_attempt = @user.current_otp
 
       @al.save!
     end
@@ -242,13 +267,13 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect {
         @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al.e_signature_password = @good_password
+        @al.e_signature_otp_attempt = @user.current_otp
+
         @al.save!
       }.to raise_error FphsException
     end
 
-    it "sends a notification of the signature to the user with a signature summary and digest" do
-      # salt and digest
-    end
+    it "sends a notification of the signature to the user with a signature summary and digest"
 
 
   end

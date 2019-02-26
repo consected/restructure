@@ -31,6 +31,7 @@ module ESignature
           ufields = params[:user]
           return unless ufields.present?
           object_instance.e_signature_password = ufields[:password]
+          object_instance.e_signature_otp_attempt = ufields[:otp_attempt]
         end
 
       end

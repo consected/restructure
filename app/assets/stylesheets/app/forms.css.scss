@@ -333,6 +333,18 @@ fieldset.readonly-edit-fieldset
     min-width: 860px;
 }
 
+.e-signature-otp-attempt, .e-signature-password {
+  min-width: 130px;
+  font-size: 13px;
+  display: inline-block;
+  font-weight: bold;
+}
+
+.e-signed-how-fields {
+  margin-top: 7px;
+  margin-bottom: 7px;
+}
+
 
 @media only screen and (min-width: 1180px) {
     form.search_master label{

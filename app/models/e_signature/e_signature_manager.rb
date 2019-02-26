@@ -21,7 +21,7 @@ module ESignature
 
       attr_reader :e_signed_authenticated
       attr_reader :signed_document
-      attr_accessor :e_signature_password
+      attr_accessor :e_signature_password, :e_signature_otp_attempt
 
     end
 
@@ -52,13 +52,14 @@ module ESignature
     end
 
     # Sign the record
-    def sign! password=nil
+    def sign! password=nil, otp_attempt=nil
 
       password ||= self.e_signature_password
+      otp_attempt ||= self.e_signature_otp_attempt
       @signed_document = SignedDocument.new self, find_reference_to_sign
 
       raise ESignatureException.new("Signed document not prepared for signature") unless @signed_document
-      raise ESignatureUserError.new("password #{@authentication_error}") unless check_password(password)
+      raise ESignatureUserError.new("password #{@authentication_error}") unless check_password(password, otp_attempt)
       @prepared_doc = @signed_document.sign! current_user, password
 
 
@@ -85,24 +86,24 @@ module ESignature
 
     def e_signature_password_correct
       return true unless e_signature_in_progress?
-      check_password self.e_signature_password
+      check_password(self.e_signature_password, self.e_signature_otp_attempt)
       unless @e_signed_authenticated
         errors.add :password, @authentication_error
       end
     end
 
-    def check_password password
+    def check_password password, otp_attempt
 
       return @e_signed_authenticated unless @e_signed_authenticated.nil?
 
       @e_signed_authenticated = false
 
-      unless password.present?
-        @authentication_error = 'is empty. Please try again.'
+      unless password.present? && otp_attempt.present?
+        @authentication_error = 'or one-time code is empty. Please try again.'
         return
       end
 
-      @e_signed_authenticated = current_user.valid_password?(password)
+      @e_signed_authenticated = current_user.valid_password?(password) && current_user.validate_one_time_code(otp_attempt)
 
       if @e_signed_authenticated
         current_user.failed_attempts = 0
@@ -115,12 +116,12 @@ module ESignature
         current_user.lock_access! if current_user.send :attempts_exceeded?
 
         if current_user.access_locked?
-          @authentication_error = 'is not correct. Account has been locked.'
+          @authentication_error = 'or one-time code is not correct. Account has been locked.'
           current_user.locked_at = Time.now
         elsif current_user.send :last_attempt?
-          @authentication_error = 'is not correct. One more attempt before account is locked.'
+          @authentication_error = 'or one-time code is not correct. One more attempt before account is locked.'
         else
-          @authentication_error = 'is not correct. Please try again.'
+          @authentication_error = 'or one-time code is not correct. Please try again.'
         end
 
       end
@@ -167,7 +168,7 @@ module ESignature
 
         temp_file = Tempfile.new
         temp_file.write self.e_signed_document
-        
+
         fn = "signed document by #{self.e_signed_by} at #{@signed_document.signed_at.iso8601}.html"
 
         begin

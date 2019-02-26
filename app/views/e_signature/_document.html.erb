@@ -131,7 +131,7 @@
       <small>Prepared Document Checksum</small> <esignprepdoc></esignprepdoc>
     </li>
     <li class="e-sign-signature-item">
-      <small>Signed by</small> <esignuser><%= current_user.email %> (id: <%= current_user.id%>)</esignuser>
+      <small>Signed by</small> <esignuser><%= current_user.first_name %> <%=current_user.last_name %> - <%= current_user.email %> (id: <%= current_user.id%>)</esignuser>
     </li>
     <li class="e-sign-signature-item">
       <small>Signed at</small> <esigntimestamp><%=ESignature::SignedDocument::PendingSignatureCaption%></esigntimestamp>
