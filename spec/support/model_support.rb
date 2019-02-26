@@ -27,7 +27,7 @@ module ModelSupport
 
 
     admin, _ = create_admin
-    user = User.create! email: good_email, current_admin: admin
+    user = User.create! email: good_email, current_admin: admin, first_name: "fn#{r}", last_name: "ln#{r}"
 
 
     # Save a new password, as required to handle temp passwords

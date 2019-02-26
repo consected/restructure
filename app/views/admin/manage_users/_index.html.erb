@@ -16,6 +16,8 @@
         <tr>
           <th class="no-sort"></th>
           <th>User</th>
+          <th>First Name</th>
+          <th>Last Name</th>
           <th>Disabled</th>
           <th>Admin</th>
         </tr>
@@ -27,6 +29,8 @@
 
             <td><%= admin_edit_btn list_item.id%> </td>
             <td><%= list_item.email %></td>
+            <td><%= list_item.first_name %></td>
+            <td><%= list_item.last_name %></td>
             <td><%= list_item.disabled ? 'disabled' : ''%></td>
             <td><%= list_item.admin_name %></td>
 

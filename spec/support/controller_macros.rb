@@ -10,7 +10,7 @@ module ControllerMacros
 
     admin, _ = create_admin
 
-    user = User.create! email: good_email, current_admin: admin
+    user = User.create! email: good_email, current_admin: admin, first_name: "fn#{r}", last_name: "ln#{r}"
 
     app_type = Admin::AppType.active.first
 
@@ -52,7 +52,7 @@ module ControllerMacros
     admin.otp_required_for_login = true
     admin.new_two_factor_auth_code = false
     admin.save!
-    
+
     # # Can't reload, as that doesn't clear non-db attributes
     admin = Admin.find(admin.id)
 
