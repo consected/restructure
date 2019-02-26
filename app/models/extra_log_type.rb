@@ -170,6 +170,9 @@ class ExtraLogType < ExtraOptions
 
     res = ca.calc_save_action_if
 
+    # Get a list of results from the triggers
+    results = []
+
     if res.is_a?(Hash) && res[action]
       res[action].each do |perform, pres|
         # Use the symbol from the list of valid items, to prevent manipulation that could cause Brakeman warnings
@@ -179,13 +182,22 @@ class ExtraLogType < ExtraOptions
           c = SaveTriggers.const_get(t.to_s.camelize)
 
           o = c.new config, obj
-          return o.perform
+          # Add the trigger result to the list
+          results << o.perform
         else
           raise FphsException.new "The save_trigger action #{action} is not valid when attempting to perform #{perform}"
         end
       end
     end
 
+    # If we had any results then check if they were all true. If they were then return true.
+    # Otherwise don't
+    if results.length > 0
+      return true if results.uniq.length == 1 && results.uniq.first
+      return nil
+    end
+
+    # No results - return true
     true
   end
 
