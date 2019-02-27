@@ -528,22 +528,6 @@ _definitions:
 
         By signing this document with an electronic signature, the signer confirms the validity of the information presented.
 
-    #
-    creatable_if:
-      <<: *enabled_if
-      not_all:
-        activity_log__ipa_assignment_inex_checklists:
-          e_signed_status:
-            - signed
-            - in progress
-          extra_log_type:
-            this: extra_log_type
-
-
-      all:
-        activity_log__ipa_assignment_inex_checklists:
-          extra_log_type: finalize_phone_screen_checklist
-
 
 
 _default:
@@ -670,6 +654,15 @@ finalize_phone_screen_checklist:
 sign_phone_screen_staff:
   <<: *e_signature_ps_checklist
   label: Sign Phone Screen Review (Staff)
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_phone_screen_staff
+    all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
+
 
 
 ####
@@ -678,6 +671,15 @@ sign_phone_screen_staff:
 sign_phone_screen_reviewer:
   <<: *e_signature_ps_checklist
   label: Sign Phone Screen Review (Reviewer)
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_phone_screen_reviewer
+    all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
+
 
 
 ####
@@ -688,6 +690,15 @@ sign_phone_screen_reviewer:
 sign_phone_screen:
   <<: *e_signature_ps_checklist
   label: Sign Phone Screen Review (PI)
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: sign_phone_screen
+    all:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
+
 
 
 ####
