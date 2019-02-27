@@ -446,9 +446,11 @@ _definitions:
 
       placeholder_in_progress:
         show_caption: |
-          The document is ready for review.
-          Click <b>Review</b> to view the document and prepare to sign it.
-          # Click <b>Cancel</b> to cancel and unlock the data in order to make changes.
+          The phone screen checklist review document has been prepared for signature. Each user is presented an identical counterpart for signature.
+
+          You may return here at any time to continue the review before you sign the document.
+
+          To start, click <b>Review and Sign</b> to view the document and prepare to sign it.
 
       e_signed_document:
         edit_caption: |

@@ -148,7 +148,7 @@ module ESignature
       # using the activity configuration for `e_sign`
       def find_reference_to_sign
         ref = self.model_references(reference_type: :e_sign).first
-        return unless ref
+        raise ESignatureException.new "Record referenced for signature can not be found" unless ref
         @e_sign_document = ref.to_record
       end
 

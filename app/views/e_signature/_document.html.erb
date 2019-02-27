@@ -1,5 +1,7 @@
 <%
   extend ESignatureHelper
+  extend CommonTemplatesHelper
+  extend GeneralSelectionsHelper
 
   unless defined? caption_before
     caption_before = {}
@@ -73,10 +75,24 @@
       <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before, force_default: 'method' } %> <strong><%= pretty_string field_val.protocol_event_name, return_string: true, capitalize: true %></strong></li>
     <% elsif key.index /^select_record_from_/  %>
       <li class="<%= field_result_class %>"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^select_record_from_' } %> <strong><%= pretty_string field_val, return_string: true, capitalize: true %></strong></li>
-    <% elsif key.index /^select_/  %>
-      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^select_' } %> <strong><% if get_from_objects general_selections, key, field_val, 'name' %><%= get_from_objects general_selections, key, field_val, 'name' %><% else %><%= pretty_string field_val, return_string: true, capitalize: true %><% end %></strong></li>
-    <% elsif key.index /_selection$/  %>
-      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '_selection$' } %> <strong><% if get_from_objects general_selections, key, field_val, 'name' %><%= get_from_objects general_selections, key, field_val, 'name' %><% else %><%= pretty_string field_val, return_string: true, capitalize: true %><% end %></strong></li>
+    <% elsif key.index(/^select_/) || key.index(/_selection$/)
+          fopt = field_options_for(@e_sign_document, key.to_sym)
+          alt_options = fopt[:edit_as] && fopt[:edit_as][:alt_options]
+          unless alt_options
+            general_selection_name = general_selection_prefix_name(@e_sign_document)
+            gs = general_selection("#{general_selection_name}_#{key}".to_sym, value: field_val) rescue nil
+            unless gs
+              raise FphsException.new "The general selection #{general_selection_name}_#{key} has not been defined. Please inform the administrator of this error."
+            end
+
+          else
+            gs = alt_options
+          end
+
+          show_value = gs.select {|label, value| value == field_val}.first&.first
+          show_value ||= field_val
+    %>
+      <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '(^select_|_selection$)' } %> <strong><%= show_value %></strong></li>
     <% elsif key.index /^multi_select_/  %>
       <li class="<%= field_result_class %> is--select-field"><%= render partial: 'e_signature/field_label', locals: { labels: labels, key: key, caption_before: caption_before , replace: '^multi_select_' } %>
         <strong>

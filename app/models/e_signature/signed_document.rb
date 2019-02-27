@@ -113,13 +113,13 @@ module ESignature
       # It incorporates a prepared document digest (checksum) to allow verification that
       # the document has not changed between preparation and signature execution
       def prepare
-        return unless @e_sign_document
+        raise ESignatureException.new "No document to prepare for signature" unless @e_sign_document
         @prepared_doc = generate_doc_from_model
         save_prepared_doc_digest
       end
 
       # @param test_doc [String | nil] optionally provide the document to test, otherwise use the @prepared_doc
-      # @raise [FphsException] if the current document content does not match the original prepared document, based on the checksum
+      # @raise [ESignatureException] if the current document content does not match the original prepared document, based on the checksum
       def validate_prepared_doc_digest test_doc=nil
         test_doc ||= @prepared_doc
         pdd = prepared_doc_digest from: test_doc

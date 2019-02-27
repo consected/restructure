@@ -115,7 +115,7 @@ class ExtraLogType < ExtraOptions
 
     if self.e_sign
       # Set up the structure so that we can use the standard reference methods to parse the configuration
-      self.e_sign[:document_reference] = {item: self.e_sign[:document_reference]}
+      self.e_sign[:document_reference] = {item: self.e_sign[:document_reference]} unless self.e_sign[:document_reference][:item]
       self.e_sign[:document_reference].each do |k, refitem|
 
         refitem.each do |mn, conf|

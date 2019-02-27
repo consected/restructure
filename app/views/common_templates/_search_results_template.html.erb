@@ -334,7 +334,6 @@
         {{else}}
         <div class="text-center">
           <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>" data-remote="true" data-result-target="">Review and Sign</a>
-          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>?<%=item_class_name.gsub('__', '_')%>[e_signed_status]=cancel+and+unlock" data-remote="true" data-result-target="">Cancel and Unlock</a>
         </div>
         {{/is}}
         {{/with}}

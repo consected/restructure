@@ -13,7 +13,8 @@ module ESignature
     private
 
       def has_e_signature?
-        object_instance.class.respond_to?(:has_e_signature?) && object_instance.class.has_e_signature?
+        return unless object_instance.class.respond_to?(:has_e_signature?) && object_instance.class.has_e_signature?
+        return !!object_instance.extra_log_type_config.e_sign
       end
 
       def prepare_create use_object=nil
