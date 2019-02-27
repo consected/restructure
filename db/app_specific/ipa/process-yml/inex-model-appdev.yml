@@ -33,7 +33,7 @@ default:
     ix_mi_ok_details: Notes
     ix_bicycle_ok_blank_yes_no: <p><b>Cardiac</b></p><p>Able to sit on and pedal a bicycle</p>
     ix_bicycle_ok_details: Notes
-
+    select_subject_eligibility: Subject's eligibility for the study
 
   valid_if:
     on_save:
@@ -54,3 +54,23 @@ default:
           ix_raynauds_ok_blank_yes_no: ''
           ix_mi_ok_blank_yes_no: ''
           ix_bicycle_ok_blank_yes_no: ''
+
+
+  show_if:
+    select_subject_eligibility:
+      not_any:
+        ix_consent_blank_yes_no: ''
+        ix_not_pro_blank_yes_no: ''
+        ix_age_range_blank_yes_no: ''
+        ix_weight_ok_blank_yes_no: ''
+        ix_no_seizure_blank_yes_no: ''
+        ix_no_device_impl_blank_yes_no: ''
+        ix_no_ferromagnetic_impl_blank_yes_no: ''
+        ix_diagnosed_sleep_apnea_blank_yes_no: ''
+        ix_diagnosed_heart_stroke_or_meds_blank_yes_no: ''
+        ix_chronic_pain_and_meds_blank_yes_no: ''
+        ix_tmoca_score_blank_yes_no: ''
+        ix_no_hemophilia_blank_yes_no: ''
+        ix_raynauds_ok_blank_yes_no: ''
+        ix_mi_ok_blank_yes_no: ''
+        ix_bicycle_ok_blank_yes_no: ''
