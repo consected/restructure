@@ -423,20 +423,25 @@ _definitions:
             # - cancel and unlock
             - sign now
 
+    view_options:
+      show_cancel: yes
+
 
     caption_before: &caption_before_e_sign
       placeholder_get_started: |
-        The following steps will guide you through the process of reviewing and signing the document.
+        The following steps will guide you through the process of  signing the document.
 
         You will have the opportunity to review the document fully before signing.
 
-        You do not have to complete the review or signature in a single session. The data will remain locked until you either sign or cancel, even if you have to logout and sign back in later.
+        You do not have to complete the review and signature in a single session. The data in the document you are signing can not change, even if you have to logout and sign back in later.
+
+        If you can not sign the document due to an error, inaccuracy or for any other reason, contact the Staff Member that created the document.
 
         Be aware that signing the document in this process has the same legal weight as a signature in ink on a paper document.
 
-        If you are NOT ready to continue, click the cancel button above.
+        If you are NOT ready to continue, click <b>Cancel</b>.
 
-        If you are ready to continue with the signature process, click Save.
+        If you are ready to continue with the signature process, click <b>Save</b>.
 
       e_signed_status:
         edit_caption: Do you want to sign the document now?
@@ -627,13 +632,13 @@ finalize_phone_screen_checklist:
       edit_as:
         field_type: select_finalized
         alt_options:
-          Finalized: finalized
+          Yes - Finalize: finalize
 
   valid_if:
     on_save:
       all:
         this:
-          signed_no_yes: finalized
+          signed_no_yes: finalize
 
   view_options:
     show_cancel: yes
@@ -641,7 +646,7 @@ finalize_phone_screen_checklist:
   caption_before:
     all_fields:
       edit_caption: |
-        If the Phone Screen Checklist is complete and ready for final signature select <b>Finalize</b> and click <b>Save</b>. This will lock the checklist to prevent additional changes and will notify reviewers that the checklist is final and ready for signature.
+        If the Phone Screen Checklist is complete and ready for final signature select <b>Yes - Finalize</b> and click <b>Save</b>. This will lock the checklist to prevent additional changes and will notify reviewers that the checklist is final and ready for signature.
 
         If you are not ready to finalize the checklist and lock it permanently, click <b>Cancel</b>.
       show_caption: The Phone Screen Checklist has been completed and locked.
@@ -663,10 +668,7 @@ finalize_phone_screen_checklist:
         extra_log_type: finalize_phone_screen_checklist
 
   editable_if:
-    <<: *enabled_if
-    not_any:
-      activity_log__ipa_assignment_inex_checklists:
-        extra_log_type: finalize_phone_screen_checklist
+    never: true
 
 
 
