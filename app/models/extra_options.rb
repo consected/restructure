@@ -56,7 +56,8 @@ class ExtraOptions
         hide_unless_creatable: 'true | false to hide add-item buttons in activity logs if they are not creatable',
         data_attribute: 'string or list of fields to use as the data attribute',
         always_embed_reference: 'reference name to always show embedded',
-        alt_order: 'string or list of date / time or integer fields to use for ordering'
+        alt_order: 'string or list of date / time or integer fields to use for ordering',
+        show_cancel: 'show cancel button alongside save button'
       },
       filestore: {
         container: {

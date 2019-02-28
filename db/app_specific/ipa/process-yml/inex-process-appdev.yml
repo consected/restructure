@@ -553,6 +553,11 @@ phone_screen_review:
       <i>Note: form changes are not saved until all fields are validated as being completed.
       When Save is clicked you will be warned if any fields are not set. If necessary, set any that are blank and save again.</i>
 
+      <b>When the checklist is complete ensure that the final field, <i>Subject's eligibility for the study</i> has been set. It is not possible to progress to finalizing and reviewing the checklist without setting this field.</b>
+
+    submit: The field <i>Subject's eligibility for the study</i> only appears when all other entries have been completed. The <i>Finalize</i> activity button will only appear if the eligibility has been set.
+
+
   # This activity is always created automatically by the completion of the
   # phone screen being finalized
   creatable_if:
@@ -613,13 +618,36 @@ adl_informant_screener:
 ####
 finalize_phone_screen_checklist:
   label: Finalize Phone Screen Checklist
-  caption_before:
-    submit:
-      edit_caption: |
-        If the Phone Screen Checklist is complete and ready for final signature, click <b>Save</b>. This will lock the checklist to prevent additional changes and will notify reviewers that the checklist is final and ready for signature.
 
-        If you are not ready to finalize the checklist and lock it permanently, click the cancel button above.
+  fields:
+    - signed_no_yes
+
+  field_options:
+    signed_no_yes:
+      edit_as:
+        field_type: select_finalized
+        alt_options:
+          Finalized: finalized
+
+  valid_if:
+    on_save:
+      all:
+        this:
+          signed_no_yes: finalized
+
+  view_options:
+    show_cancel: yes
+
+  caption_before:
+    all_fields:
+      edit_caption: |
+        If the Phone Screen Checklist is complete and ready for final signature select <b>Finalize</b> and click <b>Save</b>. This will lock the checklist to prevent additional changes and will notify reviewers that the checklist is final and ready for signature.
+
+        If you are not ready to finalize the checklist and lock it permanently, click <b>Cancel</b>.
       show_caption: The Phone Screen Checklist has been completed and locked.
+    signed_no_yes: Is the checklist ready to be permanently locked?
+    select_finalized: Is the checklist ready to be permanently locked?
+
 
   creatable_if:
     <<: *enabled_if
@@ -633,6 +661,14 @@ finalize_phone_screen_checklist:
     not_any:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: finalize_phone_screen_checklist
+
+  editable_if:
+    <<: *enabled_if
+    not_any:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
+
+
 
   # Notify the reviewers that the checklist is ready for signature
   save_trigger:

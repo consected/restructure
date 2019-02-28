@@ -57,13 +57,13 @@ module ActivityLogsHelper
       end
     else
       if @item
-        "<a class=\"show-entity show-#{hyphenated_name} pull-right  #{link_text ? '' : button_class}\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\">#{link_text}</a>".html_safe
+        "<a class=\"show-entity show-#{hyphenated_name} #{class_extras}  #{link_text ? '' : button_class}\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\">#{link_text}</a>".html_safe
       elsif params[:references] && params[:references][:record_id] && !params[:references][:new_outside_this]
         # An embedded new item
-        "<a class=\"show-entity show-#{hyphenated_name} pull-right  #{link_text ? '' : button_class} in--embedded-new\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{params[:references][:record_type].ns_hyphenate.pluralize}-#{params[:references][:record_id]}- .new-block > div\">#{link_text}</a>".html_safe
+        "<a class=\"show-entity show-#{hyphenated_name} #{class_extras}  #{link_text ? '' : button_class} in--embedded-new\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{params[:references][:record_type].ns_hyphenate.pluralize}-#{params[:references][:record_id]}- .new-block > div\">#{link_text}</a>".html_safe
       else
         extra_type ||= '-blank-log'
-        "<a class=\"show-entity show-#{hyphenated_name} pull-right  #{link_text ? '' : button_class}\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\">#{link_text}</a>".html_safe
+        "<a class=\"show-entity show-#{hyphenated_name} #{class_extras}  #{link_text ? '' : button_class}\" title=\"cancel\" data-master-id=\"#{@master_id}\" data-item-id=\"#{@item_id}\" data-toggle=\"clear\" data-target=\"##{full_object_name.hyphenate}#{extra_type}-#{@master_id}-\">#{link_text}</a>".html_safe
       end
     end
   end

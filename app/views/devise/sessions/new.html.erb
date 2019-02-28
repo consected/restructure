@@ -4,17 +4,17 @@
   <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
     <div class="form-group-non">
       <%= f.label :email %><br />
-      <%= f.email_field :email, autofocus: true, class: 'form-control', required: true %>
+      <%= f.email_field :email, autocomplete: "username", autofocus: true, class: 'form-control', required: true %>
     </div>
 
     <div class="form-group-non">
       <%= f.label :password %><br />
-      <%= f.password_field :password, autocomplete: "off", class: 'form-control', required: true %>
+      <%= f.password_field :password, autocomplete: "current-password", class: 'form-control', required: true %>
     </div>
 
     <div class="form-group-non">
       <%= f.label :otp_attempt, 'One-Time Code' %><br />
-      <%= f.password_field :otp_attempt, autocomplete: "off", class: 'form-control', value: '' %>
+      <%= f.password_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '' %>
     </div>
 
     <%= hidden_field_tag :secure_entry, params[:secure_entry] if request.path.start_with?('/admins/sign_in') %>

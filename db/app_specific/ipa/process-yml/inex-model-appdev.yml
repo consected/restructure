@@ -33,7 +33,7 @@ default:
     ix_mi_ok_details: Notes
     ix_bicycle_ok_blank_yes_no: <p><b>Cardiac</b></p><p>Able to sit on and pedal a bicycle</p>
     ix_bicycle_ok_details: Notes
-    select_subject_eligibility: Subject's eligibility for the study
+    select_subject_eligibility: <b>Subject's eligibility for the study</b>
 
   valid_if:
     on_save:

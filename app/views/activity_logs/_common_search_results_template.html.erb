@@ -49,7 +49,8 @@
     item_flags_readonly: true,
     extra_type: :primary,
     references: primary_options.references,
-    show_if: primary_options.show_if
+    show_if: primary_options.show_if,
+    view_options: primary_options.view_options
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -76,7 +77,8 @@
     item_flags_readonly: true,
     extra_type: :blank_log,
     references: blank_options.references,
-    show_if: blank_options.show_if
+    show_if: blank_options.show_if,
+    view_options: blank_options.view_options
   } %>
 
 <% extra_log_type_configs.each do |c|
@@ -110,7 +112,8 @@
       item_flags_readonly: true,
       extra_type: c.name,
       references: c.references,
-      show_if: c.show_if
+      show_if: c.show_if,
+      view_options: c.view_options
     } %>
 
   <% end %>

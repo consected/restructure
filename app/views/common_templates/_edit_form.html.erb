@@ -91,6 +91,13 @@
 
   save_label = save_action[:label] || 'Save'
 
+  unless defined? view_options
+    d = form_object_instance.class.default_options
+    view_options = d.view_options if d
+  end
+
+  show_cancel = view_options[:show_cancel] if view_options
+
 
   unless defined? item_list
     if form_object_instance.class.respond_to? :readonly_params
@@ -263,6 +270,7 @@
           <% end %>
           <li class="list-group-item submit-action-container">
             <%= form.submit class: "btn btn-primary", value: save_label %>
+            <% if show_cancel %><%= inline_cancel_button('btn btn-danger pull-right', "Cancel") %><% end %>
           </li>
         <% end %>
       </ul>
