@@ -575,6 +575,7 @@ phone_screen_review:
         extra_log_type: finalize_phone_screen_checklist
   view_options:
     show_embedded_at_top: true
+    hide_unless_creatable: yes
 
   save_action:
     on_create: create_next_creatable
@@ -584,6 +585,10 @@ phone_screen_review:
 ####
 adl_informant_screener:
   label: ADL Informant Screener
+
+  view_options:
+    hide_unless_creatable: yes
+
   references:
     dynamic_model__ipa_adl_informant_screener:
       from: master
@@ -683,8 +688,8 @@ finalize_phone_screen_checklist:
         - *notify_pi
         - *notify_pi_sms
 
-  save_action:
-    on_create: create_next_creatable
+  # save_action:
+  #   on_create: create_next_creatable
 
 ####
 # Staff Member Signs Phone Screen checklist
@@ -998,6 +1003,9 @@ contact_baseline_users:
   label: Create Baseline Discussion
 
   <<: *contact_defaults_baseline
+
+  view_options:
+    hide_unless_creatable: yes
 
   caption_before:
     notes: |
