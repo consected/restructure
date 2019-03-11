@@ -19,7 +19,7 @@ if [ "$RAILS_ENV" == 'development' ]
 then
   BASEDIR=..
 else
-  BASEDIR=/FPHS/data/adl-screener-sync
+  BASEDIR=/FPHS/data/ipa-adl-screener-sync
 fi
 
 WORKINGDIR=${BASEDIR}/tmp
