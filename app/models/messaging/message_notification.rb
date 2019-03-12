@@ -30,6 +30,12 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
   attr_accessor :generated_text, :disabled, :admin_id
 
+  # Get a layout template by name and optionally message type
+  # Useful as a quick check to see if a specific template has been defined before instantiating a full MessageNotification
+  def self.layout_template name, message_type: :email
+    Admin::MessageTemplate.active.layout_templates.named name, type: message_type
+  end
+
   def layout_template
     Admin::MessageTemplate.active.layout_templates.named layout_template_name, type: message_type
   end

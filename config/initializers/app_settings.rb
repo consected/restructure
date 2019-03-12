@@ -25,10 +25,18 @@ class Settings
   # which may fail on some email servers if the domain name does not match
   # a verified domain name.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
+  # Email address for admin contact
+  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'fphs-admin@hms.harvard.edu'
 
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
 
   CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'] || (Rails.env.development? ? 0 : 5)).to_i
   PasswordAgeLimit = (ENV['FPHS_PASSWORD_AGE_LIMIT'] || 90).to_i
+  PasswordReminderDays = (ENV['FPHS_PASSWORD_REMINDER_DAYS'] || 5).to_i
+
+  EnvironmentName = ENV['FPHS_ENV_NAME'] || 'unknown'
+  BaseUrl = ENV['BASE_URL']
+
+  SearchResultsLimit = ENV['FPHS_RESULT_LIMIT']
 
 end

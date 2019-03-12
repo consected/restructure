@@ -52,4 +52,4 @@ def log txt
   Rails.logger.info txt
 end
 
-Seeds.setup
+Seeds.setup unless $dont_seed

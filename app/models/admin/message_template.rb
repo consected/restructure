@@ -99,7 +99,11 @@ class Admin::MessageTemplate < ActiveRecord::Base
     def self.setup_data item
       data = item.attributes.dup
 
-      data[:base_url] = ENV['BASE_URL']
+      data[:base_url] = Settings::BaseUrl
+      data[:admin_email] = Settings::AdminEmail
+      data[:environment_name] = Settings::EnvironmentName
+      data[:password_age_limit] = Settings::PasswordAgeLimit
+      data[:password_reminder_days] = Settings::PasswordReminderDays
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       if item.respond_to?(:item) && item.item.respond_to?(:attributes)

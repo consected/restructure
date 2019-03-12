@@ -115,4 +115,53 @@ describe User do
 
   end
 
+  it "sets a password expiration reminder if the password is reset or changed" do
+
+    Messaging::MessageNotification.delete_all
+    expect(Messaging::MessageNotification.layout_template Users::Reminders.password_expiration_defaults[:layout]).to be_a Admin::MessageTemplate
+
+    create_admin
+
+    @user = User.new email: @user.email+'dj', current_admin: @admin, first_name: "fn", last_name: "ln"
+
+    @user.otp_required_for_login = false
+
+    # Can't just stub the password_updated_at method to test, since the object is reloaded in the delayed_job job
+    # So we create an alias, change the method, then use the alias to put the original method back afterwards.
+    @user.class.send :alias_method, :orig_password_updated_at, :password_updated_at
+
+    @user.class.send(:define_method, :password_updated_at) do
+      Time.now - 87.days
+    end
+    @user.save!
+
+
+    expect(Settings::PasswordAgeLimit).to eq 90
+
+    expect(Messaging::MessageNotification.count).to eq 1
+    expect(Messaging::MessageNotification.first.user).to eq @user
+    expect(Messaging::MessageNotification.first.layout_template_name).to eq Users::Reminders.password_expiration_defaults[:layout]
+
+    @user.password = 'some new password that needs notification'
+    @user.save!
+
+    expect(Messaging::MessageNotification.count).to eq 2
+    expect(Messaging::MessageNotification.last.user).to eq @user
+    expect(Messaging::MessageNotification.last.layout_template_name).to eq Users::Reminders.password_expiration_defaults[:layout]
+
+    @user.password = 'some new password that needs notification 2'
+
+    @user.class.send :alias_method, :password_updated_at, :orig_password_updated_at
+
+    @user.save!
+    expect(Messaging::MessageNotification.count).to eq 2
+
+  end
+
+  after :all do
+    if User.new.respond_to? :orig_password_updated_at
+      User.send :alias_method, :password_updated_at, :orig_password_updated_at
+    end
+  end
+
 end

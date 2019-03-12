@@ -1,4 +1,5 @@
-class Users::ContactInfo < Admin::AdminBase
+module Users
+  class ContactInfo < Admin::AdminBase
 
 
   include AdminHandler
@@ -36,4 +37,6 @@ class Users::ContactInfo < Admin::AdminBase
       end
       true
     end
+
+  end
 end

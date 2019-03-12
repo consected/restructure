@@ -1,7 +1,7 @@
 class NotificationMailer < ActionMailer::Base
 
   def send_message_notification mn, logger: Rails.logger
-    
+
     logger.info "Sending email for #{mn.id}"
 
     options = {

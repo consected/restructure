@@ -29,7 +29,7 @@
     end
 
     def env_name
-      (ENV['FPHS_ENV_NAME'] || 'unknown').gsub(' ','_').underscore.downcase
+      (Settings::EnvironmentName).gsub(' ','_').underscore.downcase
     end
 
     def admin_or_user_class

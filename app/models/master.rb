@@ -204,7 +204,7 @@ class Master < ActiveRecord::Base
 
   def self.results_limit
     r = nil
-    e = ENV['FPHS_RESULT_LIMIT']
+    e = Settings::SearchResultsLimit
     r = e.to_i if e
     r = nil if r == 0
     r
