@@ -1,6 +1,6 @@
 -- DROP FUNCTION IF EXISTS adl_screener_score_calc() CASCADE;
 
-CREATE OR REPLACE FUNCTION ipa_ops.adl_screener_score_dont_know(init_q INTEGER, VARIADIC scores INTEGER[]) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION ipa_ops.adl_screener_score_dont_know(init_q NUMERIC, VARIADIC scores NUMERIC[]) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
   DECLARE
@@ -11,12 +11,12 @@ AS $$
 
     l := array_upper(scores, 1);
 
-    init_q := COALESCE(init_q, 0);
+    init_q := COALESCE(init_q, 0)::integer;
 
 
     total := 0;
     FOR i in 1 .. l LOOP
-      total := total +  COALESCE(scores[i], 0);
+      total := total +  COALESCE(scores[i], 0)::integer;
     END LOOP;
 
     IF init_q = 9 THEN
@@ -28,7 +28,7 @@ AS $$
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION ipa_ops.adl_screener_one_dk(response INTEGER) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION ipa_ops.adl_screener_one_dk(response NUMERIC) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
   BEGIN
