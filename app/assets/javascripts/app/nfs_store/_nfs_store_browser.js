@@ -49,7 +49,7 @@ _nfs_store.fs_browser = function ($outer) {
       }
     };
 
-    var set_metadata_views = function($radio) {
+    var set_metadata_views = function($radio, preventJump) {
       var $b = $outer.find('.container-browser');
       $b.addClass('browser-hide-meta browser-hide-classifications')
 
@@ -80,7 +80,9 @@ _nfs_store.fs_browser = function ($outer) {
       // and prevents it shifting during the background refresh due to processing large zips
       if (wasSmall != nowSmall) {
         window.setTimeout(function(){
-          _fpa.utils.jump_to_linked_item($el, null, {no_highlight: true});
+          if(!preventJump) {
+            _fpa.utils.jump_to_linked_item($el, null, {no_highlight: true});
+          }
           _fpa.form_utils.resize_children($outer);
         }, 100);
       }
@@ -152,7 +154,7 @@ _nfs_store.fs_browser = function ($outer) {
     });
 
     var classification_radio = $('input[name="container-meta-controls-'+container_id+'"]:checked');
-    set_metadata_views(classification_radio);
+    set_metadata_views(classification_radio, true);
     refresh($outer);
 
 
