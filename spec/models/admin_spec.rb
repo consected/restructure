@@ -1,5 +1,5 @@
 require 'rails_helper'
-require './config/admin_setup.rb'
+require './fphs-scripts/supporting/admin_setup.rb'
 
 describe Admin do
   include ModelSupport

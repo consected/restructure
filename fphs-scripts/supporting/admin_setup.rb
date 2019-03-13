@@ -88,14 +88,14 @@ Add, update or remove admin users from the FPHS app
 Usage:
 
 Add / update admins:
-RAILS_ENV=production FPHS_ACTION=add FPHS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner config/admin_setup.rb
+RAILS_ENV=production FPHS_ACTION=add FPHS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner fphs-scripts/supporting/admin_setup.rb
 
 Will create any specified admins not already existing with a default password
 and update any specified admins that exist, assigning them a new password
 
 Remove admins:
 
-RAILS_ENV=production FPHS_ACTION=remove FPHS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner config/admin_setup.rb
+RAILS_ENV=production FPHS_ACTION=remove FPHS_ADMINS='admin1@ex.com;admin2@ex.com' rails runner fphs-scripts/supporting/admin_setup.rb
 
 Will remove any specified admins from the admin list.
 
