@@ -202,7 +202,7 @@
 <script id="<%=name%>_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
 <% if caption_before[:all_fields] %>
   <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
-    <%= show_caption_before :all_fields, caption_before %>
+    <%= show_caption_before :all_fields, caption_before, :show %>
   </li>
 <% end %>
 
@@ -216,6 +216,10 @@
     {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption')}}
     <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
       {{{replace (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption') "\n" "<br>" "g"}}}
+    </li>
+    {{else if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption')}}
+    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
+      {{{replace (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption') "\n" "<br>" "g"}}}
     </li>
     {{/if}}
     {{/is}}
@@ -388,7 +392,7 @@
         </li>
         <% if caption_before[:all_fields] %>
           <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
-            <%= show_caption_before :all_fields, caption_before %>
+            <%= show_caption_before :all_fields, caption_before, :show %>
           </li>
         <% end %>
 
@@ -464,7 +468,7 @@
       <% if caption_before[:metadata]%>
       <div class="results-caption-before <%=full_name.hyphenate%>-metadata">
         <div class="panel panel-default panel-body">
-          <small><%= show_caption_before :metadata, caption_before %></small>
+          <small><%= show_caption_before :metadata, caption_before, :show %></small>
         </div>
       </div>
     <% end %>

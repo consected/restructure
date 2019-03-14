@@ -109,11 +109,11 @@
     end
 
 
-    def show_caption_before key, captions
+    def show_caption_before key, captions, mode=:edit
       return unless captions && captions[key]
       caption = captions[key]
       if caption.is_a?(Hash)
-        caption = caption[:edit_caption] || ''
+        caption = caption["#{mode}_caption".to_sym] || caption[:caption] || ''
       end
       caption = Admin::MessageTemplate.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"') if @form_object_instance
       caption.gsub("\n","<br/>").html_safe

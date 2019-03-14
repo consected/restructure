@@ -58,7 +58,7 @@
 
   {{#if model_references}}
     {{#each model_references}}
-      {{simple_log to_record_options_config}}
+
       {{#is to_record_options_config.view_as.show '!==' 'hide'}}
         {{#is to_record_options_config.view_as.show '===' 'not_embedded'}}
           {{>activity_log_<%=name%>_references_list_item}}
@@ -90,7 +90,7 @@
 
   {{#if model_references}}
     {{#each model_references}}
-      {{simple_log to_record_options_config}}
+      
       {{#is to_record_options_config.view_as.show '!==' 'hide'}}
         {{#is to_record_options_config.view_as.show '===' 'filestore'}}
           {{>filestore_<%=name%>_view prevent_edit=../prevent_edit}}
