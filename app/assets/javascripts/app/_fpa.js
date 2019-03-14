@@ -45,7 +45,7 @@ _fpa = {
       options = {};
 
     options.url = url;
-    console.log('send_ajax_request: ' + url);
+    // console.log('send_ajax_request: ' + url);
     $.rails.ajax(options).done(function(data, status, xhr){
       var el = $('.temp-ajax-requester');
       if(el.length === 0) {
@@ -260,8 +260,8 @@ _fpa = {
         _fpa.remote_request = null;
         _fpa.remote_request_block = block;
 
-        console.log((new Date()).toLocaleString() +' event requested by:');
-        console.log(block);
+        // console.log((new Date()).toLocaleString() +' event requested by:');
+        // console.log(block);
 
         // Handle the special case where we don't want the request to continue if the
         // triggering element has the class prevent-on-collapse and it is collapsed.
@@ -309,7 +309,7 @@ _fpa = {
     }).on('ajax:beforeSend', sel, function(ev, xhr){
         // Save the current AJAX request so that we have the opportunity to cancel it before it completes
         _fpa.remote_request = xhr;
-        console.log(ev);
+        // console.log(ev);
 
     }).on("ajax:success", sel, function(e, data, status, xhr) {
         // Since the result was a success, reset the client-side session timeout counter
@@ -563,7 +563,7 @@ _fpa = {
 
             var put_in_position = function(t, d) {
               var pos = t.attr('data-result-position');
-              console.log('Put in position');
+              // console.log('Put in position');
               if(pos == 'replace')
                 t.replaceWith(d);
               else if(pos == 'before')
@@ -575,8 +575,8 @@ _fpa = {
                 t.removeClass('hidden');
                 t.show();
               }
-              console.log('Done put in position. Visible? ' + t.is(':visible'));
-              console.log(t);
+              // console.log('Done put in position. Visible? ' + t.is(':visible'));
+              // console.log(t);
             };
 
             // Since the results was basic HTML rendered by a partial typically, just push it into the

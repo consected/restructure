@@ -2,7 +2,7 @@ _fpa.cache = function(name){
     name = _fpa.cache_name(name);
     var res = localStorage.getItem(name);
     res = JSON.parse(res);
-    return res;    
+    return res;
 };
 
 _fpa.cache_name = function(name){
@@ -10,9 +10,9 @@ _fpa.cache_name = function(name){
 };
 
 _fpa.set_definition = function(name, callback){
-  
+
   var from_cache = true;
-  
+
   var get_def = function(name){
     $.ajax('/definitions/'+name, {
       success: function(data){
@@ -22,9 +22,9 @@ _fpa.set_definition = function(name, callback){
         if(callback) callback();
       }
     });
-  
+
   };
-  
+
   try{
       var res = _fpa.cache(name);
       if(!res)
@@ -35,15 +35,15 @@ _fpa.set_definition = function(name, callback){
   catch(e){
       get_def(name);
   }
-  
-  console.log("Got cache "+name+" from  cache? " + from_cache);
-    
+
+  // console.log("Got cache "+name+" from  cache? " + from_cache);
+
 };
 
 _fpa.set_cache = function(name, val){
     var basename = name + '--';
     name = _fpa.cache_name(name);
-    
+
     // Force removal of previous versions of the cached item.
     for(var i in localStorage){
         if(localStorage.hasOwnProperty(i)){
@@ -53,7 +53,7 @@ _fpa.set_cache = function(name, val){
             }
         }
     };
-        
+
     val = JSON.stringify(val);
     localStorage.setItem(name, val);
 };

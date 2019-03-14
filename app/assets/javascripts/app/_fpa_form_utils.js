@@ -119,7 +119,7 @@ _fpa.form_utils = {
         }
 
         window.setTimeout(function() {
-          console.log(item);
+          // console.log(item);
           item.click();
         }, p);
       });
@@ -340,9 +340,14 @@ _fpa.form_utils = {
     },
 
     // Resize all labels in a block for nice formatting without tables or fixed widths
-    resize_labels : function(block, data){
+    resize_labels : function(block, data, force){
         if(!block) block = $(document);
-        block.find('.list-group:visible, .view-object[aria-expanded="true"]').not('.attached-resize-labels').each(function(){
+
+        var block_list = block.find('.list-group:visible, .view-object[aria-expanded="true"]');
+        if(!force) {
+          block_list = block_list.not('.attached-resize-labels');
+        }
+        block_list.each(function(){
             // Cheap optimization to make the UI feel more responsive in large result sets
             var self = $(this);
 
@@ -526,7 +531,7 @@ _fpa.form_utils = {
             var ls = l.split('/',2);
             var last = ls.length - 1;
             var first = 0;
-            console.log('got:'+ ls[last])
+            // console.log('got:'+ ls[last])
             $(this).attr('label', ls[last]);
             $(this).attr('data-group-num', ls[first]);
           }
@@ -793,7 +798,7 @@ _fpa.form_utils = {
         var v = el.val();
         if(v && v !== '') {
           var res = el.masked(v);
-          console.log(res);
+          // console.log(res);
           el.val(res);
         }
       }).addClass('is-masked');
@@ -965,7 +970,7 @@ _fpa.form_utils = {
               return 0;
 
             }).prependTo(descp);
-            console.log('sorted!');
+            // console.log('sorted!');
         }
 
         //block.updatePolyfill();
@@ -1177,6 +1182,7 @@ _fpa.form_utils = {
                 }
                 me.first().removeClass(_fpa.layout.item_blocks.regular);
                 me.addClass(c).addClass('resized-width');
+                _fpa.form_utils.resize_labels(me, null, true);
               }
               else {
                 if(me.hasClass('new-block')) {
