@@ -54,7 +54,7 @@ AS $$
       COALESCE(NEW.adl_toilet, 0) +
       COALESCE(NEW.adl_bath, 0) +
       COALESCE(NEW.adl_groom, 0) +
-      adl_screener_score_dont_know(NEW.adl_dress_a, NEW.adl_dress_aperf, NEW.adl_dress_b) +
+      adl_screener_score_dont_know(NEW.adl_dressa, NEW.adl_dressa_perf, NEW.adl_dressb) +
       adl_screener_score_dont_know(NEW.adl_phone, NEW.adl_phone_perf) +
       adl_screener_score_dont_know(NEW.adl_tv,
         adl_screener_score_dont_know(NEW.adl_tva, 1),
@@ -98,7 +98,7 @@ AS $$
     ;
 
     dk :=
-      adl_screener_one_dk(NEW.adl_dress_a) +
+      adl_screener_one_dk(NEW.adl_dressa) +
       adl_screener_one_dk(NEW.adl_phone) +
       adl_screener_one_dk(NEW.adl_tv) +
       adl_screener_score_dont_know(NEW.adl_tv,

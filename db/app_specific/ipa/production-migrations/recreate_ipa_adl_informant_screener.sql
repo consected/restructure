@@ -1,5 +1,9 @@
+set search_path=ipa_ops, ml_app;
 
       BEGIN;
+
+      DROP TABLE ipa_adl_informant_screener_history CASCADE;
+      DROP TABLE ipa_adl_informant_screeners CASCADE;
 
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create ipa_adl_informant_screeners select_regarding_eating select_regarding_walking select_regarding_bowel_and_bladder select_regarding_bathing select_regarding_grooming select_regarding_dressing select_regarding_dressing_performance select_regarding_getting_dressed used_telephone_yes_no_dont_know select_telephone_performance watched_tv_yes_no_dont_know selected_programs_yes_no_dont_know talk_about_content_during_yes_no_dont_know talk_about_content_after_yes_no_dont_know pay_attention_to_conversation_yes_no_dont_know select_degree_of_participation clear_dishes_yes_no_dont_know select_clear_dishes_performance find_personal_belongings_yes_no_dont_know select_find_personal_belongings_performance obtain_beverage_yes_no_dont_know select_obtain_beverage_performance make_meal_yes_no_dont_know select_make_meal_performance dispose_of_garbage_yes_no_dont_know select_dispose_of_garbage_performance get_around_outside_yes_no_dont_know select_get_around_outside_performance go_shopping_yes_no_dont_know select_go_shopping_performance pay_for_items_yes_no_dont_know keep_appointments_yes_no_dont_know select_keep_appointments_performance left_on_own_yes_no_dont_know away_from_home_yes_no_dont_know at_home_more_than_hour_yes_no_dont_know at_home_less_than_hour_yes_no_dont_know talk_about_current_events_yes_no_dont_know did_not_take_part_in_yes_no_dont_know took_part_in_outside_home_yes_no_dont_know took_part_in_at_home_yes_no_dont_know read_yes_no_dont_know talk_about_reading_shortly_after_yes_no_dont_know talk_about_reading_later_yes_no_dont_know write_yes_no_dont_know select_write_performance pastime_yes_no_dont_know multi_select_pastimes pastime_other pastimes_only_at_daycare_no_yes select_pastimes_only_at_daycare_performance use_household_appliance_yes_no_dont_know multi_select_household_appliances household_appliance_other select_household_appliance_performance, npi_infor, npi_inforsp, npi_delus, npi_delussev, npi_hallu, npi_hallusev, npi_agita, npi_agitasev, npi_depre, npi_depresev, npi_anxie, npi_anxiesev, npi_elati, npi_elatisev, npi_apath, npi_apathsev, npi_disin, npi_disinsev, npi_irrit, npi_irritsev, npi_motor, npi_motorsev, npi_night, npi_nightsev, npi_appet, npi_appetsev
@@ -438,13 +442,11 @@
           ADD CONSTRAINT fk_ipa_adl_informant_screener_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
-
-
       ALTER TABLE ONLY ipa_adl_informant_screener_history
           ADD CONSTRAINT fk_ipa_adl_informant_screener_history_ipa_adl_informant_screeners FOREIGN KEY (ipa_adl_informant_screener_id) REFERENCES ipa_adl_informant_screeners(id);
 
-      GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
-      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
-      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
+      GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ipa_ops TO fphs;
+      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
+      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ipa_ops TO fphs;
 
       COMMIT;

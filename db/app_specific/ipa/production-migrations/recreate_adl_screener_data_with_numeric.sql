@@ -1,3 +1,5 @@
+DROP TABLE ipa_ops.adl_screener_data;
+
 CREATE TABLE ipa_ops.adl_screener_data
 (
 id serial NOT NULL,
@@ -119,3 +121,18 @@ CONSTRAINT adl_screener_data_pkey PRIMARY KEY (id)
 WITH (
   OIDS=FALSE
 );
+ALTER TABLE ipa_ops.adl_screener_data
+  OWNER TO fphs;
+GRANT ALL ON TABLE ipa_ops.adl_screener_data TO fphs;
+GRANT SELECT, UPDATE, INSERT ON TABLE ipa_ops.adl_screener_data TO fphsadm;
+GRANT ALL ON TABLE ipa_ops.adl_screener_data TO fphsetl;
+
+-- Trigger: adl_screener_score_trigger on ipa_ops.adl_screener_data
+
+-- DROP TRIGGER adl_screener_score_trigger ON ipa_ops.adl_screener_data;
+
+CREATE TRIGGER adl_screener_score_trigger
+  BEFORE INSERT
+  ON ipa_ops.adl_screener_data
+  FOR EACH ROW
+  EXECUTE PROCEDURE ipa_ops.adl_screener_score_calc();

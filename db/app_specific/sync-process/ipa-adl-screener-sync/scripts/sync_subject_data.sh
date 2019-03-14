@@ -30,6 +30,10 @@ export PSQLRESFL=${WORKINGDIR}/.last_psql_error
 
 . ${BASEDIR}/sync_db_connections.sh
 
+function log {
+  echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}
+}
+
 if [ -z "$ZEUS_DB" ]
 then
   log "No matching environment"
@@ -56,10 +60,6 @@ function cleanup {
   rm $IPA_ADL_SCREENERS_FILE 2> /dev/null
   rm $IPA_ASSIGNMENTS_RESULTS_FILE 2> /dev/null
   rm $PSQLRESFL 2> /dev/null
-}
-
-function log {
-  echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}
 }
 
 function log_last_error {
