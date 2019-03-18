@@ -12,7 +12,7 @@ class DefinitionsController < ApplicationController
     "external_links" => :selector_collection,
     "users" => :active_id_name_list,
     "user_roles" => :active_role_names,
-    "general_selections" => :selector_collection
+    "general_selections" => :selector_with_config_overrides
   }.freeze
 
   def show

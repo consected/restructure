@@ -233,6 +233,14 @@
     {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
     {{else is @key 'includes' "_details"}}
     {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
+
+
+
+    {{else if (get ../_general_selections @key this 'name')}}
+
+      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^select_' }} <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
+
+
     {{else is @key "data" }}
       <li class="<%= field_result_class %>"><small>
       {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}

@@ -65,6 +65,76 @@ class Classification::GeneralSelection < ActiveRecord::Base
     item_types.include?("#{prefix_name(record)}_#{field_name}".to_sym)
   end
 
+  def self.selector_with_config_overrides conditions=nil
+    res = selector_collection(conditions)
+    res = res.to_ary
+
+    implementation_classes = ActivityLog.implementation_classes + DynamicModel.implementation_classes
+    implementation_classes.each do |itc|
+      next unless itc.definition.ready?
+
+      # if itc == DynamicModel::IpaAdlInformantScreener
+      #   byebug
+      # end
+      ito = itc.new
+
+      it = prefix_name(ito)
+      oo = option_overrides ito
+      if oo
+
+
+        oo.each do |fn, fo|
+          n = fn
+          gsit = "#{it}_#{n}"
+
+          res.reject! {|r| r[:item_type] == gsit}
+
+          o = fo[:edit_as][:alt_options]
+
+
+          unless o.is_a? Hash
+            newo = {}
+            o.each do |oi|
+              newo[oi] = oi
+            end
+
+            o = newo
+          end
+
+          o.each do |k, v|
+
+            res << {
+              id: nil,
+              item_type: gsit,
+              name: k,
+              value: v,
+              create_with: nil,
+              edit_if_set: nil,
+              edit_always: true,
+              lock: nil
+            }
+          end
+        end
+      end
+    end
+
+
+    res
+  end
+
+
+  def self.option_overrides item_type_object
+
+
+    if item_type_object.model_data_type.in?([:activity_log, :dynamic_model])
+      fndefs = item_type_object.option_type_config.field_options.select {|fn, f| f[:edit_as] && f[:edit_as][:alt_options] }
+      return unless fndefs.length > 0
+      return fndefs
+    end
+
+    return
+  end
+
   protected
 
     def prevent_value_change
