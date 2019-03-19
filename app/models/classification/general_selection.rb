@@ -65,44 +65,74 @@ class Classification::GeneralSelection < ActiveRecord::Base
     item_types.include?("#{prefix_name(record)}_#{field_name}".to_sym)
   end
 
-  def self.selector_with_config_overrides conditions=nil
+  # Get the general selection configurations and override them with the form_options.edit_as.alt_options
+  # from dynamic model and activity log extra option type configurations.
+  # If alt_options override an existing select_... field, the general selection records for this will
+  # be removed from the results and the alt options will be used instead.
+  # If alt_options appear for a field that is not a select_... then the new options will just be added
+  # with the current field name. It is the responsibility of the client to see this.
+  # This is used on the client side for the display of form values.
+  # @param conditions [Hash] any conditions to be passed to retrieve the appropriate general selections
+  # @param extra_log_type [String] keyword param that states the extra log type in use if this is an activity log
+  # @return [Array] serializable array of general_selection and alt_options overrides
+  def self.selector_with_config_overrides conditions=nil, extra_log_type: nil, item_type: nil
+
+    # Get the underlying general selection data and make it into an array of results
     res = selector_collection(conditions)
     res = res.to_ary
 
+    # For each of the implementation classes that can provide form_options.edit_as.alt_options configurations
     implementation_classes = ActivityLog.implementation_classes + DynamicModel.implementation_classes
-    implementation_classes.each do |itc|
-      next unless itc.definition.ready?
 
-      # if itc == DynamicModel::IpaAdlInformantScreener
-      #   byebug
-      # end
+    # Check the definition is ready to use and prepare it for use
+    implementation_classes.reject! {|ic| !ic.definition.ready?}
+
+    if item_type
+      implementation_classes = implementation_classes.select {|ic| ic.new.item_type == item_type}
+    end
+    implementation_classes.each do |itc|
+
       ito = itc.new
 
+      # If an extra log type was specified, use it, since the overrides may be different than the defaults
+      if extra_log_type && ito.respond_to?(:extra_log_type)
+        ito.extra_log_type = extra_log_type
+      else
+        extra_log_type = nil
+      end
+
       it = prefix_name(ito)
+
+      if item_type
+        its = ito.attribute_names.map {|a| "#{it}_#{a}"}
+        res = res.select {|r| r[:item_type].in? its }
+      end
+
+      # Get the option overrides
       oo = option_overrides ito
+
       if oo
-
-
+        # Overrides were found for this implementation.
+        # Run through each field that has an override
+        # remove the existing general_selection results that match the item_type (if any)
+        # and add in the new options
         oo.each do |fn, fo|
           n = fn
-          gsit = "#{it}_#{n}"
 
+          gsit = "#{it}_#{n}"
           res.reject! {|r| r[:item_type] == gsit}
 
           o = fo[:edit_as][:alt_options]
-
-
+          # If the options are an array, make them into a hash for consistency
           unless o.is_a? Hash
             newo = {}
             o.each do |oi|
               newo[oi] = oi
             end
-
             o = newo
           end
 
           o.each do |k, v|
-
             res << {
               id: nil,
               item_type: gsit,
@@ -118,20 +148,20 @@ class Classification::GeneralSelection < ActiveRecord::Base
       end
     end
 
-
     res
   end
 
-
+  # Get the form_options.edit_as.alt_options configurations for a specific item type object
+  # which can be a simple new and uninitialized dynamic model or activity log.
+  # For activity logs, generally the extra_log_type attribute is set, allowing the appropriate
+  # configuration to be pulled.
+  # @return [Hash | nil] returns the edit_as configurations per field, or nil if there are none
   def self.option_overrides item_type_object
-
-
     if item_type_object.model_data_type.in?([:activity_log, :dynamic_model])
       fndefs = item_type_object.option_type_config.field_options.select {|fn, f| f[:edit_as] && f[:edit_as][:alt_options] }
       return unless fndefs.length > 0
       return fndefs
     end
-
     return
   end
 

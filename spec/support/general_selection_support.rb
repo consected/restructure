@@ -2,7 +2,7 @@ module GeneralSelectionSupport
   include MasterSupport
   def list_valid_attribs
     res = []
-    
+
     (1..5).each do |l|
       res << {
         name: "Score #{l}",
@@ -19,9 +19,9 @@ module GeneralSelectionSupport
         disabled: true
       }
     end
-    res
+    @list = res
   end
-  
+
   def list_invalid_attribs
     [
       {
@@ -31,22 +31,22 @@ module GeneralSelectionSupport
         value: nil
       },
       {
-        item_type: nil 
+        item_type: nil
       },
       {
         item_type: 'unknown'
       }
     ]
   end
-  
+
   def list_invalid_update_attribs
-    [      
-      
+    [
+
       {
         value: nil
       },
       {
-        value: 'any change'        
+        value: 'any change'
       },
       {
         item_type: nil
@@ -55,20 +55,20 @@ module GeneralSelectionSupport
         item_type: 'player_contacts_type'
       }
     ]
-  end  
-  
+  end
+
   def new_attribs
     @new_attribs = {
-      name: 'alt 1'      
+      name: 'alt 1'
     }
   end
-  
-  
-  
+
+
+
   def create_item att=nil, admin=nil
-    att ||= valid_attribs    
-    att[:current_admin] = admin||@admin 
+    att ||= valid_attribs
+    att[:current_admin] = admin||@admin
     @general_selection = Classification::GeneralSelection.create! att
   end
-  
+
 end

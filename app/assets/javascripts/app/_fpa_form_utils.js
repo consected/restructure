@@ -227,13 +227,23 @@ _fpa.form_utils = {
         _fpa.form_utils.get_general_selections(data.embedded_item);
       }
 
-      _fpa.set_definition('general_selections', function() {
-        var pe = _fpa.cache('general_selections');
+      var post = (data.item_type ? '-item_type+' + data.item_type : '');
+      post += (data.extra_log_type ? '-extra_log_type+' + data.extra_log_type : '');
+      var cname = 'general_selections' + post;
+
+      _fpa.set_definition(cname, function() {
+        var pe = _fpa.cache(cname);
         data._general_selections = {};
         for(var k in data) {
           if(data.hasOwnProperty(k)) {
 
-            var it = data.item_type + "s_" + k;
+            if(data.model_data_type == 'activity_log') {
+              var it = data.item_type + "_" + k;
+            }
+            else {
+              var it = data.item_type + "s_" + k;
+            }
+
             var ibh = _fpa.get_items_as_hash_by('item_type', pe, it, 'value');
 
             for(var ibhi in ibh) {

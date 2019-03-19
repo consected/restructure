@@ -131,6 +131,31 @@
 <%= render partial: 'item_flags/search_results_template' %>
 <%= render partial: 'filestore/result_templates' %>
 
+<script>
+  <%
+    # Preload all of the general selections into cache so they can be used
+    # This pulls dynamic model and activity log extra log types as separate items
+    implementation_classes = ActivityLog.implementation_classes + DynamicModel.implementation_classes
+    # Check the definition is ready to use and prepare it for use
+    implementation_classes.reject! {|ic| !ic.definition.ready?}
+    implementation_classes.each do |itc|
+      cnames = []
+      ito = itc.new
+      if itc.respond_to?(:extra_log_type_configs)
+        cnames = itc.extra_log_type_configs.map {|k|  "general_selections-item_type+#{ito.item_type}-extra_log_type+#{k.name}" }
+      else
+        cnames = ["general_selections-item_type+#{ito.item_type}"]
+      end
+
+      cnames.each do |cname|
+  %>
+  _fpa.set_definition('<%=cname%>');
+
+  <%  end
+    end
+  %>
+</script>
+
 
 <% # Display the set of search results in the "master search" format %>
 

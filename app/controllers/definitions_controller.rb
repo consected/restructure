@@ -51,11 +51,17 @@ class DefinitionsController < ApplicationController
       return nil unless def_type
 
       def_type_split = def_type.split('-')
-      filter = def_type_split[1]
-      if filter
-        fs = filter.split('+')
-        @filter = {fs.first => fs.last}
+      filters = def_type_split[1..-1]
+      @filter = {}
+      filters.each do |filter|
+        if filter
+          fs = filter.split('+')
+          @filter[fs.first] = fs.last
+        end
       end
+      @filter.symbolize_keys!
+      @filter = nil unless @filter.first
+
       @def_class = def_type_split.first
       Available[@def_class]
     end
