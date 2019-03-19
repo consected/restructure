@@ -1,3 +1,5 @@
+set search_path=ml_app, ipa_ops;
+
 CREATE OR REPLACE FUNCTION get_adl_screener_master_id(subject_id NUMERIC) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$

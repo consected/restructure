@@ -3658,6 +3658,26 @@
         "user_email": null
       },
       {
+        "id": 183,
+        "name": "IPA Initial Screening",
+        "table_name": "ipa_ps_initial_screenings",
+        "schema_name": null,
+        "primary_key_name": "id",
+        "foreign_key_name": "master_id",
+        "description": "",
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-05-31T14:52:12.427Z",
+        "updated_at": "2019-03-14T15:25:38.653Z",
+        "position": null,
+        "category": "ipa-phone-screen",
+        "table_key_name": "",
+        "field_list": "select_is_good_time_to_speak,looked_at_website_yes_no,any_questions_blank_yes_no,select_still_interested,placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes",
+        "result_order": "",
+        "options": "default:\r\n  dialog_before:\r\n    select_is_good_time_to_speak: \r\n      name: ipa ps intro\r\n\r\n    any_questions_blank_yes_no: \r\n      name: ipa ps intro overview\r\n      label: show script\r\n    select_still_interested: \r\n      name: ipa ps intro details\r\n      label: show script\r\n#    select_still_interested: \r\n#      name: ipa ps intro time to continue\r\n#      label: show script\r\n    placeholder_complete_intro: \r\n      name: ipa ps intro complete intro\r\n      label: show script\r\n\r\n  show_if:\r\n  \r\n  \r\n    looked_at_website_yes_no:  \r\n      select_is_good_time_to_speak: \"yes\"\r\n    any_questions_blank_yes_no:\r\n      looked_at_website_yes_no: \r\n        - \"yes\"\r\n        - \"no\"\r\n      \r\n    select_still_interested:\r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n      any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n    follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n          - not appropriate time\r\n          - left voicemail\r\n        select_still_interested: yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n          - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested: yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n        select_is_good_time_to_speak: not interested\r\n        select_still_interested: no\r\n        \r\n      \r\n\r\n  caption_before:\r\n    select_is_good_time_to_speak: Is this a good time to speak?\r\n#    looked_at_website_yes_no: \r\n#      keep_label: true\r\n#      caption: |\r\n    looked_at_website_yes_no: |\r\n        Okay great, thank you for expressing interest in our study.  Did you have a chance to look at the website that had more details about the In-Person Assessments?\r\n        <i>(yes)</i> Great, do you have any specific questions about it before I briefly go over the study?\r\n        <i>(no)</i> That is alright, I can tell you more about the study right now.\r\n#    select_may_i_begin: May I begin?\r\n#    any_questions_blank_yes_no: I am going to go over the study in some more detail. Do you have any questions so far?\r\n#    select_still_interested: Are you still interested in hearing more about the study or do you have any additional questions? (offer to mail materials and call them back if they want to review materials; offer to send them a link to the IPA webpage)\r\n\r\n    follow_up_date: Enter a follow up date and time if the subject wishes for a call back before continuing with the screening, or you left a voicemail. \r\n    follow_up_time: Follow up time\r\n    placeholder_not_interested: Thank and end call\r\n    notes: Notes, questions or other information for follow up\r\n    \r\n\r\n#    contact_details_notes: Contact details notes for gift card. After completing the call, ensure contact details recorded here are transferred to the subject's address record.",
+        "user_email": null
+      },
+      {
         "id": 186,
         "name": "IPA MRI",
         "table_name": "ipa_ps_mris",
@@ -3775,26 +3795,6 @@
         "field_list": "past_tms_blank_yes_no_dont_know, past_tms_details, convulsion_or_seizure_blank_yes_no_dont_know, epilepsy_blank_yes_no_dont_know, fainting_blank_yes_no_dont_know, concussion_blank_yes_no_dont_know, loss_of_conciousness_details, hearing_problems_blank_yes_no_dont_know, cochlear_implants_blank_yes_no_dont_know, neurostimulator_blank_yes_no_dont_know, neurostimulator_details, med_infusion_device_blank_yes_no_dont_know, med_infusion_device_details, metal_blank_yes_no_dont_know, metal_details, current_meds_blank_yes_no_dont_know, current_meds_details, other_chronic_problems_blank_yes_no_dont_know, other_chronic_problems_details, hospital_visits_blank_yes_no_dont_know, hospital_visits_details, dietary_restrictions_blank_yes_no_dont_know, dietary_restrictions_details, anything_else_blank_yes_no, anything_else_details",
         "result_order": "",
         "options": "default:\r\n  show_if:\r\n    past_tms_details:\r\n      past_tms_blank_yes_no_dont_know: \"yes\"\r\n    metal_details:\r\n      metal_blank_yes_no_dont_know: \"yes\"\r\n    neurostimulator_details:\r\n      neurostimulator_blank_yes_no_dont_know: \"yes\"\r\n    #past_mri_details:\r\n    #  past_mri_blank_yes_no_dont_know: \"yes\"\r\n    current_meds_details:\r\n      current_meds_blank_yes_no_dont_know: \"yes\"\r\n    other_chronic_problems_details:\r\n      other_chronic_problems_blank_yes_no_dont_know: \"yes\"\r\n    hospital_visits_details:\r\n      hospital_visits_blank_yes_no_dont_know: \"yes\"\r\n    dietary_restrictions_details:\r\n      dietary_restrictions_blank_yes_no_dont_know: \"yes\"\r\n    anything_else_details:\r\n      anything_else_blank_yes_no: \"yes\"\r\n    loss_of_conciousness_details:\r\n      concussion_blank_yes_no_dont_know: 'yes'\r\n    med_infusion_device_details:\r\n      med_infusion_device_blank_yes_no_dont_know: 'yes'\r\n\r\n  caption_before:\r\n    all_fields: I am now going to ask you some questions to see if it is safe for you to undergo one of the tests previously mentioned – TMS or transcranial magnetic stimulation. May I continue?\r\n    past_tms_blank_yes_no_dont_know: Did you ever undergo TMS in the past?\r\n    past_tms_details: <i>IF YES</i> , were there any problems?\r\n    convulsion_or_seizure_blank_yes_no_dont_know: Have you ever had a convulsion or a seizure?\r\n    epilepsy_blank_yes_no_dont_know: Do you or a family member have a history of epilepsy?\r\n    fainting_blank_yes_no_dont_know: Have you ever had a fainting spell?\r\n    concussion_blank_yes_no_dont_know: Have you ever had a head trauma that was diagnosed as a concussion or was associated with a loss of consciousness?\r\n    loss_of_conciousness_details: <i>IF YES for LOC</i> How long were you unconscious? \r\n    hearing_problems_blank_yes_no_dont_know: Do you have any hearing problems or ringing in your ears?\r\n    cochlear_implants_blank_yes_no_dont_know: Do you have cochlear implants or do you wear hearing aids?\r\n    neurostimulator_blank_yes_no_dont_know: Do you have an implanted neurostimulator in your body? This can include a vagal nerve stimulator, deep brain stimulator, epidural/subdural stimulator, etc.\r\n    neurostimulator_details: <i>IF YES</i> can you please specify the type of neurostimulator?\r\n    med_infusion_device_blank_yes_no_dont_know: Do you have a medication infusion device?\r\n    med_infusion_device_details: <i>IF YES</i> Can you please tell me more about this?\r\n\r\n    metal_blank_yes_no_dont_know: Do you have any metal in the brain, skull or elsewhere in the body? This can include splinters, fragments, clips, etc.\r\n    metal_details: <i>IF YES</i> Can you please tell me more about this?\r\n    #pacemaker_blank_yes_no_dont_know: Do you have a cardiac pacemaker or intracardiac lines?\r\n    #past_mri_blank_yes_no_dont_know: Did you ever undergo an MRI in the past?\r\n    #past_mri_details: <i>IF YES</i> , were there any problems? Please describe.\r\n    current_meds_blank_yes_no_dont_know: Are you currently taking any medications including over the counter medications?\r\n    current_meds_details: <i>IF YES</i> can you please list them.\r\n    #neuro_history_details: Please list all past neurological (relating to your brain or spinal cord) medical or surgical history.\r\n    other_chronic_problems_blank_yes_no_dont_know: Do you have a history of any other chronic health problems?\r\n    other_chronic_problems_details: <i>IF YES</i> Can you please tell me about them.\r\n    hospital_visits_blank_yes_no_dont_know: Have you experienced any hospitalizations or emergency room visits in the last six months?\r\n    hospital_visits_details: <i>IF YES</i> Can you please tell me what happened?\r\n    dietary_restrictions_blank_yes_no_dont_know: Do you have any dietary restrictions or allergies?\r\n    dietary_restrictions_details: <i>IF YES</i> Could you tell me what dietary restrictions/allergies you have?\r\n    anything_else_blank_yes_no: Is there anything else that you want to tell me about?\r\n    anything_else_details: <i>IF YES</i> Please tell me \r\n    ",
-        "user_email": null
-      },
-      {
-        "id": 183,
-        "name": "IPA Initial Screening",
-        "table_name": "ipa_ps_initial_screenings",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 2,
-        "disabled": false,
-        "created_at": "2018-05-31T14:52:12.427Z",
-        "updated_at": "2018-12-17T15:07:36.531Z",
-        "position": null,
-        "category": "ipa-phone-screen",
-        "table_key_name": "",
-        "field_list": "select_is_good_time_to_speak,looked_at_website_yes_no,any_questions_blank_yes_no,select_still_interested,placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes",
-        "result_order": "",
-        "options": "default:\r\n  dialog_before:\r\n    select_is_good_time_to_speak: \r\n      name: ipa ps intro\r\n\r\n    any_questions_blank_yes_no: \r\n      name: ipa ps intro overview\r\n      label: show script\r\n    select_still_interested: \r\n      name: ipa ps intro details\r\n      label: show script\r\n#    select_still_interested: \r\n#      name: ipa ps intro time to continue\r\n#      label: show script\r\n    placeholder_complete_intro: \r\n      name: ipa ps intro complete intro\r\n      label: show script\r\n\r\n  show_if:\r\n  \r\n  \r\n    looked_at_website_yes_no:  \r\n      select_is_good_time_to_speak: \"yes\"\r\n    any_questions_blank_yes_no:\r\n      looked_at_website_yes_no: \r\n        - \"yes\"\r\n        - \"no\"\r\n      \r\n    select_still_interested:\r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n      any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n    follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n          - not appropriate time\r\n          - left voicemail\r\n        select_still_interested: yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n          - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested: yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n        select_is_good_time_to_speak: not interested\r\n        select_still_interested: no\r\n        \r\n      \r\n\r\n  caption_before:\r\n    select_is_good_time_to_speak: Is this a good time to speak?\r\n    looked_at_website_yes_no: \r\n      keep_label: true\r\n      caption: |\r\n        Okay great, thank you for expressing interest in our study.  Did you have a chance to look at the website that had more details about the In-Person Assessments?\r\n        <i>(yes)</i> Great, do you have any specific questions about it before I briefly go over the study?\r\n        <i>(no)</i> That is alright, I can tell you more about the study right now.\r\n#    select_may_i_begin: May I begin?\r\n#    any_questions_blank_yes_no: I am going to go over the study in some more detail. Do you have any questions so far?\r\n#    select_still_interested: Are you still interested in hearing more about the study or do you have any additional questions? (offer to mail materials and call them back if they want to review materials; offer to send them a link to the IPA webpage)\r\n\r\n    follow_up_date: Enter a follow up date and time if the subject wishes for a call back before continuing with the screening, or you left a voicemail. \r\n    follow_up_time: Follow up time\r\n    placeholder_not_interested: Thank and end call\r\n    notes: Notes, questions or other information for follow up\r\n    \r\n\r\n#    contact_details_notes: Contact details notes for gift card. After completing the call, ensure contact details recorded here are transferred to the subject's address record.",
         "user_email": null
       },
       {
@@ -11100,6 +11100,17 @@
         "disabled": false,
         "created_at": "2019-01-15T16:35:23.632Z",
         "updated_at": "2019-01-15T16:35:23.632Z",
+        "user_email": "ipa_crc@fphs2.harvard.edu"
+      },
+      {
+        "id": 101,
+        "app_type_id": 3,
+        "role_name": "user - navigation",
+        "user_id": 72,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-15T09:01:17.834Z",
+        "updated_at": "2019-03-15T09:01:17.834Z",
         "user_email": "ipa_crc@fphs2.harvard.edu"
       }
     ],

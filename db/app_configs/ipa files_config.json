@@ -176,6 +176,19 @@
         "created_at": "2019-02-05T17:32:08.001Z",
         "updated_at": "2019-02-05T17:33:12.943Z",
         "user_email": null
+      },
+      {
+        "id": 26,
+        "name": "file browser default view",
+        "value": "file info",
+        "disabled": false,
+        "admin_id": 2,
+        "user_id": null,
+        "app_type_id": 3,
+        "role_name": "",
+        "created_at": "2019-03-13T11:13:31.907Z",
+        "updated_at": "2019-03-13T11:13:31.907Z",
+        "user_email": null
       }
     ],
     "user_access_controls": [
@@ -1453,6 +1466,21 @@
         "created_at": "2019-02-05T17:29:01.815Z",
         "updated_at": "2019-02-05T17:29:01.815Z",
         "user_email": null
+      },
+      {
+        "id": 143,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_session_filestore__physical_function",
+        "options": "",
+        "access": "update",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "user - physical function files - dual task only",
+        "created_at": "2019-03-14T17:27:01.496Z",
+        "updated_at": "2019-03-14T17:39:07.280Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -2357,23 +2385,23 @@
       {
         "id": 30,
         "app_type_id": 3,
-        "role_name": "user - mri files - liver",
-        "user_id": 7,
-        "admin_id": 2,
-        "disabled": false,
+        "role_name": "user - mri files - liver_1",
+        "user_id": null,
+        "admin_id": 3,
+        "disabled": true,
         "created_at": "2018-11-23T16:29:53.836Z",
-        "updated_at": "2018-11-23T16:30:29.989Z",
-        "user_email": "mri-liver-files@fphs2.harvard.edu"
+        "updated_at": "2019-03-09T01:40:41.154Z",
+        "user_email": null
       },
       {
         "id": 31,
         "app_type_id": 3,
-        "role_name": "user - mri files - pet",
+        "role_name": "user - mri files - mpr structural",
         "user_id": 8,
-        "admin_id": 2,
+        "admin_id": 3,
         "disabled": false,
         "created_at": "2018-11-23T16:38:30.467Z",
-        "updated_at": "2018-11-23T16:38:40.962Z",
+        "updated_at": "2019-03-12T17:55:28.980Z",
         "user_email": "mri-pet-files@fphs2.harvard.edu"
       },
       {
@@ -2825,7 +2853,7 @@
         "disabled": false,
         "created_at": "2019-01-30T14:40:53.583Z",
         "updated_at": "2019-02-11T15:08:05.897Z",
-        "user_email": "dmobley@partners.org"
+        "user_email": "sl_psg@partners.org"
       },
       {
         "id": 75,
@@ -2891,7 +2919,7 @@
         "disabled": false,
         "created_at": "2019-02-11T15:13:21.717Z",
         "updated_at": "2019-02-11T15:13:36.180Z",
-        "user_email": "dmobley@partners.org"
+        "user_email": "sl_psg@partners.org"
       },
       {
         "id": 81,
@@ -2902,7 +2930,7 @@
         "disabled": false,
         "created_at": "2019-02-11T15:22:22.368Z",
         "updated_at": "2019-02-11T15:22:22.368Z",
-        "user_email": "dmobley@partners.org"
+        "user_email": "sl_psg@partners.org"
       },
       {
         "id": 82,
@@ -2913,7 +2941,7 @@
         "disabled": false,
         "created_at": "2019-02-11T15:26:18.273Z",
         "updated_at": "2019-02-11T15:26:18.273Z",
-        "user_email": "dmobley@partners.org"
+        "user_email": "sl_psg@partners.org"
       },
       {
         "id": 83,
@@ -2980,6 +3008,369 @@
         "created_at": "2019-02-27T15:07:19.415Z",
         "updated_at": "2019-02-27T15:07:19.415Z",
         "user_email": "pf_bwh@test.org"
+      },
+      {
+        "id": 89,
+        "app_type_id": 3,
+        "role_name": "user - mri files - liver_2",
+        "user_id": null,
+        "admin_id": 3,
+        "disabled": true,
+        "created_at": "2019-03-09T01:03:21.561Z",
+        "updated_at": "2019-03-09T01:40:33.525Z",
+        "user_email": null
+      },
+      {
+        "id": 90,
+        "app_type_id": 3,
+        "role_name": "user - mri files - liver_1",
+        "user_id": 15,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-09T01:14:54.894Z",
+        "updated_at": "2019-03-09T01:14:54.894Z",
+        "user_email": "mr_liver@test.org"
+      },
+      {
+        "id": 91,
+        "app_type_id": 3,
+        "role_name": "user - mri files - liver_2",
+        "user_id": 15,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-09T01:15:14.885Z",
+        "updated_at": "2019-03-09T01:15:14.885Z",
+        "user_email": "mr_liver@test.org"
+      },
+      {
+        "id": 92,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 15,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-09T01:18:03.747Z",
+        "updated_at": "2019-03-09T01:18:03.747Z",
+        "user_email": "mr_liver@test.org"
+      },
+      {
+        "id": 93,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 15,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-09T01:18:35.947Z",
+        "updated_at": "2019-03-09T01:18:35.947Z",
+        "user_email": "mr_liver@test.org"
+      },
+      {
+        "id": 94,
+        "app_type_id": 3,
+        "role_name": "user - mri files readonly",
+        "user_id": 15,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-09T01:42:57.773Z",
+        "updated_at": "2019-03-09T01:42:57.773Z",
+        "user_email": "mr_liver@test.org"
+      },
+      {
+        "id": 95,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 16,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T16:41:12.702Z",
+        "updated_at": "2019-03-12T16:41:12.702Z",
+        "user_email": "mr_pet@test.org"
+      },
+      {
+        "id": 96,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 16,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T16:41:46.022Z",
+        "updated_at": "2019-03-12T16:41:46.022Z",
+        "user_email": "mr_pet@test.org"
+      },
+      {
+        "id": 97,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 17,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T16:42:48.681Z",
+        "updated_at": "2019-03-12T16:42:48.681Z",
+        "user_email": "mr_physio@test.org"
+      },
+      {
+        "id": 98,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 17,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T16:43:14.168Z",
+        "updated_at": "2019-03-12T16:43:14.168Z",
+        "user_email": "mr_physio@test.org"
+      },
+      {
+        "id": 99,
+        "app_type_id": 3,
+        "role_name": "user - mri files readonly",
+        "user_id": 16,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T16:43:52.688Z",
+        "updated_at": "2019-03-12T16:43:52.688Z",
+        "user_email": "mr_pet@test.org"
+      },
+      {
+        "id": 100,
+        "app_type_id": 3,
+        "role_name": "user - mri files readonly",
+        "user_id": 17,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T16:44:06.985Z",
+        "updated_at": "2019-03-12T16:44:06.985Z",
+        "user_email": "mr_physio@test.org"
+      },
+      {
+        "id": 101,
+        "app_type_id": 3,
+        "role_name": "user - mri files - pet",
+        "user_id": 16,
+        "admin_id": 3,
+        "disabled": true,
+        "created_at": "2019-03-12T16:55:59.458Z",
+        "updated_at": "2019-03-12T17:58:11.618Z",
+        "user_email": "mr_pet@test.org"
+      },
+      {
+        "id": 102,
+        "app_type_id": 3,
+        "role_name": "user - mri files - mpr structural",
+        "user_id": 16,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T17:56:53.871Z",
+        "updated_at": "2019-03-12T17:56:53.871Z",
+        "user_email": "mr_pet@test.org"
+      },
+      {
+        "id": 103,
+        "app_type_id": 3,
+        "role_name": "user - mri files - mpr structural",
+        "user_id": 19,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T19:25:32.487Z",
+        "updated_at": "2019-03-12T19:25:32.487Z",
+        "user_email": "mr_tms@test.org"
+      },
+      {
+        "id": 104,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 19,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T19:27:09.989Z",
+        "updated_at": "2019-03-12T19:27:09.989Z",
+        "user_email": "mr_tms@test.org"
+      },
+      {
+        "id": 105,
+        "app_type_id": 3,
+        "role_name": "user - mri files readonly",
+        "user_id": 19,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T19:27:27.568Z",
+        "updated_at": "2019-03-12T19:28:27.843Z",
+        "user_email": "mr_tms@test.org"
+      },
+      {
+        "id": 106,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 19,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-12T19:28:08.626Z",
+        "updated_at": "2019-03-12T19:28:08.626Z",
+        "user_email": "mr_tms@test.org"
+      },
+      {
+        "id": 107,
+        "app_type_id": 3,
+        "role_name": "user - mri files - electrophysiology",
+        "user_id": 17,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T15:53:32.644Z",
+        "updated_at": "2019-03-13T15:53:32.644Z",
+        "user_email": "mr_physio@test.org"
+      },
+      {
+        "id": 108,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 20,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T15:58:32.585Z",
+        "updated_at": "2019-03-13T15:58:32.585Z",
+        "user_email": "mr_upload@test.org"
+      },
+      {
+        "id": 109,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 20,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T15:58:53.688Z",
+        "updated_at": "2019-03-13T15:58:53.688Z",
+        "user_email": "mr_upload@test.org"
+      },
+      {
+        "id": 110,
+        "app_type_id": 3,
+        "role_name": "user - mri files upload",
+        "user_id": 20,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T15:59:17.253Z",
+        "updated_at": "2019-03-13T16:10:05.938Z",
+        "user_email": "mr_upload@test.org"
+      },
+      {
+        "id": 111,
+        "app_type_id": 3,
+        "role_name": "unfiltered - mri files",
+        "user_id": 20,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T16:06:10.976Z",
+        "updated_at": "2019-03-13T16:06:10.976Z",
+        "user_email": "mr_upload@test.org"
+      },
+      {
+        "id": 112,
+        "app_type_id": 3,
+        "role_name": "allow uploads",
+        "user_id": 20,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T16:10:42.629Z",
+        "updated_at": "2019-03-13T16:10:42.629Z",
+        "user_email": "mr_upload@test.org"
+      },
+      {
+        "id": 113,
+        "app_type_id": 3,
+        "role_name": "user - mri files - mpr structural",
+        "user_id": null,
+        "admin_id": 3,
+        "disabled": true,
+        "created_at": "2019-03-13T16:31:17.800Z",
+        "updated_at": "2019-03-13T16:45:12.298Z",
+        "user_email": null
+      },
+      {
+        "id": 114,
+        "app_type_id": 3,
+        "role_name": "user - mri files - no gre mapping",
+        "user_id": 17,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T17:12:43.012Z",
+        "updated_at": "2019-03-13T17:12:43.012Z",
+        "user_email": "mr_physio@test.org"
+      },
+      {
+        "id": 115,
+        "app_type_id": 3,
+        "role_name": "user - tms eeg files",
+        "user_id": 19,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T18:05:28.598Z",
+        "updated_at": "2019-03-13T18:05:28.598Z",
+        "user_email": "mr_tms@test.org"
+      },
+      {
+        "id": 116,
+        "app_type_id": 3,
+        "role_name": "allow uploads",
+        "user_id": 19,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-13T18:10:16.021Z",
+        "updated_at": "2019-03-13T18:10:16.021Z",
+        "user_email": "mr_tms@test.org"
+      },
+      {
+        "id": 117,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 21,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-14T15:00:25.098Z",
+        "updated_at": "2019-03-14T15:00:25.098Z",
+        "user_email": "pf_hsl@test.org"
+      },
+      {
+        "id": 118,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 21,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-14T15:00:36.578Z",
+        "updated_at": "2019-03-14T15:00:36.578Z",
+        "user_email": "pf_hsl@test.org"
+      },
+      {
+        "id": 119,
+        "app_type_id": 3,
+        "role_name": "allow uploads",
+        "user_id": 21,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-14T15:01:36.328Z",
+        "updated_at": "2019-03-14T15:01:36.328Z",
+        "user_email": "pf_hsl@test.org"
+      },
+      {
+        "id": 120,
+        "app_type_id": 3,
+        "role_name": "user - physical function files",
+        "user_id": 21,
+        "admin_id": 3,
+        "disabled": true,
+        "created_at": "2019-03-14T15:02:04.657Z",
+        "updated_at": "2019-03-14T15:59:42.565Z",
+        "user_email": "pf_hsl@test.org"
+      },
+      {
+        "id": 121,
+        "app_type_id": 3,
+        "role_name": "user - physical function files - dual task only",
+        "user_id": 21,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-14T15:02:57.528Z",
+        "updated_at": "2019-03-14T15:02:57.528Z",
+        "user_email": "pf_hsl@test.org"
       }
     ],
     "associated_message_templates": [
@@ -3085,12 +3476,12 @@
         "role_name": "filtered - mri files - spectroscopy",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
-        "filter": ".+\\.zip/twix/meas_­MID.*",
-        "description": "",
+        "filter": "^/+._mri/.*SVS.*",
+        "description": "MR spectroscopy - SVS directories",
         "disabled": false,
-        "admin_id": 2,
+        "admin_id": 3,
         "created_at": null,
-        "updated_at": "2018-11-23T16:03:39.503Z",
+        "updated_at": "2019-03-13T17:25:10.586Z",
         "user_email": null
       },
       {
@@ -3267,40 +3658,40 @@
         "role_name": "user - mri files - electrophysiology",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
-        "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
-        "description": "",
+        "filter": "^/.+_mri/(?!.*gre*).*RSF.*",
+        "description": "Electrophysiology data without gre mapping",
         "disabled": false,
-        "admin_id": 2,
+        "admin_id": 3,
         "created_at": "2018-11-23T16:27:07.069Z",
-        "updated_at": "2018-11-23T16:27:07.069Z",
+        "updated_at": "2019-03-13T17:22:35.704Z",
         "user_email": null
       },
       {
         "id": 21,
         "app_type_id": 3,
-        "role_name": "user - mri files - liver",
+        "role_name": "user - mri files - liver_1",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
-        "filter": ".+\\.zip/liver/.*",
-        "description": "",
+        "filter": "^/.+_mri/.*LOC.*",
+        "description": "LOC and LOC_LIV directories",
         "disabled": false,
-        "admin_id": 2,
+        "admin_id": 3,
         "created_at": "2018-11-23T16:28:07.612Z",
-        "updated_at": "2018-11-23T16:32:22.103Z",
+        "updated_at": "2019-03-13T16:43:16.277Z",
         "user_email": null
       },
       {
         "id": 22,
         "app_type_id": 3,
-        "role_name": "user - mri files - pet",
+        "role_name": "user - mri files - mpr structural",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
-        "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
-        "description": "",
+        "filter": "^/.+_mri/.*MPR.*",
+        "description": "MPR Directories [Brain Structural Scan]",
         "disabled": false,
-        "admin_id": 2,
+        "admin_id": 3,
         "created_at": "2018-11-23T16:39:04.912Z",
-        "updated_at": "2018-11-23T16:39:04.912Z",
+        "updated_at": "2019-03-12T17:56:22.576Z",
         "user_email": null
       },
       {
@@ -3623,6 +4014,48 @@
         "admin_id": 3,
         "created_at": "2019-02-05T22:00:33.834Z",
         "updated_at": "2019-02-05T22:00:33.834Z",
+        "user_email": null
+      },
+      {
+        "id": 46,
+        "app_type_id": 3,
+        "role_name": "user - mri files - liver_2",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": "^/.+_mri/.*T1_VIBE_DIXON_TRA_BH.*",
+        "description": "T1_VIBE_DIXON_TRA_BH_LIVER and\r\nT1_VIBE_DIXON_TRA_BH_L4 \r\n",
+        "disabled": false,
+        "admin_id": 3,
+        "created_at": "2019-03-09T01:05:40.081Z",
+        "updated_at": "2019-03-13T16:27:59.002Z",
+        "user_email": null
+      },
+      {
+        "id": 47,
+        "app_type_id": 3,
+        "role_name": "user - mri files - no gre mapping",
+        "user_id": 17,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
+        "filter": "^/.+_mri/(?!_gre.*)",
+        "description": "",
+        "disabled": true,
+        "admin_id": 3,
+        "created_at": "2019-03-13T17:15:37.104Z",
+        "updated_at": "2019-03-13T17:17:17.238Z",
+        "user_email": "mr_physio@test.org"
+      },
+      {
+        "id": 48,
+        "app_type_id": 3,
+        "role_name": "user - physical function files - dual task only",
+        "user_id": null,
+        "resource_name": "activity_log__ipa_assignment_session_filestore__physical_function",
+        "filter": "(^/.+_dtapdm.*)|(.+\\.zip/.+_dtapdm.*)|(^.*dtreport.*)",
+        "description": "",
+        "disabled": false,
+        "admin_id": 3,
+        "created_at": "2019-03-14T15:08:17.525Z",
+        "updated_at": "2019-03-15T18:20:58.279Z",
         "user_email": null
       }
     ],

@@ -1,92 +1,333 @@
+# Fields:
+# select_regarding_eating,select_regarding_walking,select_regarding_bowel_and_bladder,select_regarding_bathing,select_regarding_grooming,select_regarding_dressing,select_regarding_dressing_performance,select_regarding_getting_dressed,used_telephone_yes_no_dont_know,select_telephone_performance,watched_tv_yes_no_dont_know,selected_programs_yes_no_dont_know,talk_about_content_during_yes_no_dont_know,talk_about_content_after_yes_no_dont_know,pay_attention_to_conversation_yes_no_dont_know,select_degree_of_participation,clear_dishes_yes_no_dont_know,select_clear_dishes_performance,find_personal_belongings_yes_no_dont_know,select_find_personal_belongings_performance,obtain_beverage_yes_no_dont_know,select_obtain_beverage_performance,make_meal_yes_no_dont_know,select_make_meal_performance,dispose_of_garbage_yes_no_dont_know,select_dispose_of_garbage_performance,get_around_outside_yes_no_dont_know,select_get_around_outside_performance,go_shopping_yes_no_dont_know,select_go_shopping_performance,pay_for_items_yes_no_dont_know,keep_appointments_yes_no_dont_know,select_keep_appointments_performance,institutionalized_no_yes,left_on_own_yes_no_dont_know,away_from_home_yes_no_dont_know,at_home_more_than_hour_yes_no_dont_know,at_home_less_than_hour_yes_no_dont_know,talk_about_current_events_yes_no_dont_know,did_not_take_part_in_yes_no_dont_know,took_part_in_outside_home_yes_no_dont_know,took_part_in_at_home_yes_no_dont_know,read_yes_no_dont_know,talk_about_reading_shortly_after_yes_no_dont_know,talk_about_reading_later_yes_no_dont_know,write_yes_no_dont_know,select_write_performance,pastime_yes_no_dont_know,multi_select_pastimes,pastime_other,pastimes_only_at_daycare_no_yes,select_pastimes_only_at_daycare_performance,use_household_appliance_yes_no_dont_know,multi_select_household_appliances,household_appliance_other,select_household_appliance_performance,npi_infor,npi_inforsp,npi_delus,npi_delussev,npi_hallu,npi_hallusev,npi_agita,npi_agitasev,npi_depre,npi_depresev,npi_anxie,npi_anxiesev,npi_elati,npi_elatisev,npi_apath,npi_apathsev,npi_disin,npi_disinsev,npi_irrit,npi_irritsev,npi_motor,npi_motorsev,npi_night,npi_nightsev, npi_appet, npi_appetsev
+
+# Fields:
+# select_regarding_eating,select_regarding_walking,select_regarding_bowel_and_bladder,select_regarding_bathing,select_regarding_grooming,select_regarding_dressing,select_regarding_dressing_performance,select_regarding_getting_dressed,used_telephone_yes_no_dont_know,select_telephone_performance,watched_tv_yes_no_dont_know,selected_programs_yes_no_dont_know,talk_about_content_during_yes_no_dont_know,talk_about_content_after_yes_no_dont_know,pay_attention_to_conversation_yes_no_dont_know,select_degree_of_participation,clear_dishes_yes_no_dont_know,select_clear_dishes_performance,find_personal_belongings_yes_no_dont_know,select_find_personal_belongings_performance,obtain_beverage_yes_no_dont_know,select_obtain_beverage_performance,make_meal_yes_no_dont_know,select_make_meal_performance,dispose_of_garbage_yes_no_dont_know,select_dispose_of_garbage_performance,get_around_outside_yes_no_dont_know,select_get_around_outside_performance,go_shopping_yes_no_dont_know,select_go_shopping_performance,pay_for_items_yes_no_dont_know,keep_appointments_yes_no_dont_know,select_keep_appointments_performance,institutionalized_no_yes,left_on_own_yes_no_dont_know,away_from_home_yes_no_dont_know,at_home_more_than_hour_yes_no_dont_know,at_home_less_than_hour_yes_no_dont_know,talk_about_current_events_yes_no_dont_know,did_not_take_part_in_yes_no_dont_know,took_part_in_outside_home_yes_no_dont_know,took_part_in_at_home_yes_no_dont_know,read_yes_no_dont_know,talk_about_reading_shortly_after_yes_no_dont_know,talk_about_reading_later_yes_no_dont_know,write_yes_no_dont_know,select_write_performance,pastime_yes_no_dont_know,multi_select_pastimes,pastime_other,pastimes_only_at_daycare_no_yes,select_pastimes_only_at_daycare_performance,use_household_appliance_yes_no_dont_know,multi_select_household_appliances,household_appliance_other,select_household_appliance_performance,npi_infor,npi_inforsp,npi_delus,npi_delussev,npi_hallu,npi_hallusev,npi_agita,npi_agitasev,npi_depre,npi_depresev,npi_anxie,npi_anxiesev,npi_elati,npi_elatisev,npi_apath,npi_apathsev,npi_disin,npi_disinsev,npi_irrit,npi_irritsev,npi_motor,npi_motorsev,npi_night,npi_nightsev, npi_appet, npi_appetsev
+
 default:
   field_options:
     select_regarding_dressing:
       edit_as:
         field_type: regarding_dressing_yes_no_dont_know
+    npi_infor:
+      edit_as:
+        field_type: select_npi_infor
+        alt_options:
+          Spouse: 1
+          Child: 2
+          Other: 3
+    npi_delus:
+      edit_as:
+        field_type: select_npi_delus
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_delussev:
+      edit_as:
+        field_type: select_npi_delussev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+    npi_hallu:
+      edit_as:
+        field_type: select_npi_hallu
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+
+    npi_hallusev:
+      edit_as:
+        field_type: select_npi_hallussev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_agita:
+      edit_as:
+        field_type: select_npi_agita
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_agitasev:
+      edit_as:
+        field_type: select_npi_agitasev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_depre:
+      edit_as:
+        field_type: select_npi_depre
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_depresev:
+      edit_as:
+        field_type: select_npi_depresev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_anxie:
+      edit_as:
+        field_type: select_npi_anxie
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_anxiesev:
+      edit_as:
+        field_type: select_npi_anxiesev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_elati:
+      edit_as:
+        field_type: select_npi_elati
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_elatisev:
+      edit_as:
+        field_type: select_npi_elatisev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_apath:
+      edit_as:
+        field_type: select_npi_apath
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_apathsev:
+      edit_as:
+        field_type: select_npi_apathsev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_disin:
+      edit_as:
+        field_type: select_npi_disin
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_disinsev:
+      edit_as:
+        field_type: select_npi_disinsev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_irrit:
+      edit_as:
+        field_type: select_npi_irrit
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_irritsev:
+      edit_as:
+        field_type: select_npi_irritsev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_motor:
+      edit_as:
+        field_type: select_npi_motor
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_motorsev:
+      edit_as:
+        field_type: select_npi_motorsev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+    npi_night:
+      edit_as:
+        field_type: select_npi_night
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+
+    npi_nightsev:
+      edit_as:
+        field_type: select_npi_nightsev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
+
+    npi_appet:
+      edit_as:
+        field_type: select_npi_appet
+        alt_options:
+          "Yes": 1
+          "No": 0
+          Unknown: 9
+    npi_appetsev:
+      edit_as:
+        field_type: select_npi_appetsev
+        alt_options:
+          Mild: 1
+          Moderate: 2
+          Severe: 3
+          Unknown: 9
 
   caption_before:
     select_regarding_eating: |
       Regarding <b>eating</b>
-      Which best describes {{first_name}} usual performance during the past 4 weeks?
+      Which best describes {{player_info.first_name}}'s usual performance during the past 4 weeks?
     select_regarding_walking: Regarding <b>walking</b> (or getting around in a wheelchair), in the past 4 weeks, which best describes his/her <b>optimal</b> performance
     select_regarding_bowel_and_bladder: Regarding bowel and bladder function <b>at the toilet</b>, which best describes his/her <b>usual</b> performance in the past 4 weeks
     select_regarding_bathing: Regarding <b>bathing</b>, in the past 4 weeks, which best describes his/her usual performance
     select_regarding_grooming: Regarding <b>grooming</b>, in the past 4 weeks, which best describes his/her optimal performance
     select_regarding_dressing: |
       Regarding <b>dressing</b>, in the past 4 weeks
-      Did {{first_name}} select his/her first set of clothes for the day?
+      Did {{player_info.first_name}} select his/her first set of clothes for the day?
     select_regarding_dressing_performance: <i>If yes</i>, which best describes his/her usual performance
     select_regarding_getting_dressed: Regarding physically getting dressed, which best describes his/her usual performance in the past 4 week
-    used_telephone_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>use a telephone</b>
+    used_telephone_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} <b>use a telephone</b>
     select_telephone_performance: <i>If yes</i>, which best describes his/her <b>highest</b> level of performance
-    watched_tv_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>watch television</b>?
+    watched_tv_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} <b>watch television</b>?
     selected_programs_yes_no_dont_know: |
       <i>If yes</i>, ask all questions.
-      Did {{first_name}}
+      Did {{player_info.first_name}}
       usually select or ask for different programs or his/her favorite show?
     talk_about_content_during_yes_no_dont_know: usually talk about the content of a program while watching it?
     talk_about_content_after_yes_no_dont_know: talk about the content of a program within a day (24 hours) after watching it?
     pay_attention_to_conversation_yes_no_dont_know: |
-      In the past 4 weeks, did {{first_name}} ever appear to <b>pay attention to conversation or small talk</b> for at least 5 minutes?
-      Note: {{first_name}} did not need to initiate the conversation.
+      In the past 4 weeks, did {{player_info.first_name}} ever appear to <b>pay attention to conversation or small talk</b> for at least 5 minutes?
+      Note: {{player_info.first_name}} did not need to initiate the conversation.
     select_degree_of_participation: <i>If yes</i>, which best describes his/her usual degree of participation
-    clear_dishes_yes_no_dont_know: Did {{first_name}} clear the dishes from the table after a meal or snack?
+    clear_dishes_yes_no_dont_know: Did {{player_info.first_name}} clear the dishes from the table after a meal or snack?
     select_clear_dishes_performance: <i>If yes</i>, which best describes how he/she usually performed
-    find_personal_belongings_yes_no_dont_know: In the past 4 weeks, did {{first_name}} usually manage to <b>find his/her personal belongings</b> at home?
+    find_personal_belongings_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} usually manage to <b>find his/her personal belongings</b> at home?
     select_find_personal_belongings_performance: <i>If yes</i>, which best describes how he/she usually performed
-    obtain_beverage_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>obtain a hot or cold beverage</b> for him/herself? (A cold beverage includes a glass of water)
+    obtain_beverage_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} <b>obtain a hot or cold beverage</b> for him/herself? (A cold beverage includes a glass of water)
     select_obtain_beverage_performance: <i>If yes</i>, which describes his/her highest level of performance
-    make_meal_yes_no_dont_know: In the past 4 weeks, did {{first_name}} make him/herself a meal or snack at home?
+    make_meal_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} make him/herself a meal or snack at home?
     select_make_meal_performance: <i>If yes</i>, which best describes his/her highest level of food preparation
-    dispose_of_garbage_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>dispose</b> of garbage or litter in an appropriate place or container at home?
+    dispose_of_garbage_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} <b>dispose</b> of garbage or litter in an appropriate place or container at home?
     select_dispose_of_garbage_performance: <i>If yes</i>, which best describes how he/she usually performed
-    get_around_outside_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>get around</b> (or travel) <b>outside of his/her home</b>?
+    get_around_outside_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} <b>get around</b> (or travel) <b>outside of his/her home</b>?
     select_get_around_outside_performance: <i>If yes</i>, which best describes his/her <b>optimal</b> performance
-    go_shopping_yes_no_dont_know: In the past 4 weeks, did {{first_name}} ever <b>go shopping</b>?
-    select_go_shopping_performance: Which one best describes how {{first_name}} usually selects items
-    pay_for_items_yes_no_dont_know: Did {{first_name}} usually pay for items without supervision or physical help?
-    keep_appointments_yes_no_dont_know: In the past 4 week, did {{first_name}} keep appointments or meetings with other people such as relatives, a doctor, the hairdresser etc.?
+    go_shopping_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} ever <b>go shopping</b>?
+    select_go_shopping_performance: Which one best describes how {{player_info.first_name}} usually selects items
+    pay_for_items_yes_no_dont_know: Did {{player_info.first_name}} usually pay for items without supervision or physical help?
+    keep_appointments_yes_no_dont_know: In the past 4 week, did {{player_info.first_name}} keep appointments or meetings with other people such as relatives, a doctor, the hairdresser etc.?
     select_keep_appointments_performance: <i>If yes</i>, which best describes his/her awareness of the meeting ahead of time
     institutionalized_no_yes: Is the participant institutionalized?
     left_on_own_yes_no_dont_know: |
-      In the past 4 weeks, was {{first_name}} ever <b>left on his/her own</b>?
+      In the past 4 weeks, was {{player_info.first_name}} ever <b>left on his/her own</b>?
       </i>NOTE: Being taken to day care or having a sitter at home does not constitute being left alone.</i>
     away_from_home_yes_no_dont_know: |
-      Was {{first_name}} left:
+      Was {{player_info.first_name}} left:
       away from home, for 15 minutes or longer, during the day?
     at_home_more_than_hour_yes_no_dont_know: at home, for an hour or longer, during the day?
     at_home_less_than_hour_yes_no_dont_know: at home, for less than 1 hour, during the day?
     talk_about_current_events_yes_no_dont_know: |
-      In the past 4 weeks, did {{first_name}} talk about current events?
+      In the past 4 weeks, did {{player_info.first_name}} talk about current events?
       <i>This means events or incidents that occurred during the past month.</i>
     did_not_take_part_in_yes_no_dont_know: |
-      Did {{first_name}} talk about events that...
+      Did {{player_info.first_name}} talk about events that...
       he/she heard or read about or saw on TV but did not take part in?
-    took_part_in_outside_home_yes_no_dont_know: "{{first_name}} took part in <b>outside home</b> involving family, friends, or neighbors?"
+    took_part_in_outside_home_yes_no_dont_know: "{{player_info.first_name}} took part in <b>outside home</b> involving family, friends, or neighbors?"
     took_part_in_at_home_yes_no_dont_know: events that occurred <b>at home</b> that he/she took part in or watched?
-    read_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>read a magazine, newspaper or book</b> for more than 5 minutes at a time?
+    read_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} <b>read a magazine, newspaper or book</b> for more than 5 minutes at a time?
     talk_about_reading_shortly_after_yes_no_dont_know: |
-      Did {{first_name}} usually:
+      Did {{player_info.first_name}} usually:
       talk about details of what he/she read while or shortly (< than 1 hour) after reading?
     talk_about_reading_later_yes_no_dont_know:
       talk about what he/she read 1 hour or longer after reading?
     write_yes_no_dont_know: |
-      In the past 4 weeks, did {{first_name}} ever <b>write</b> things down?
-      <i>NOTE: lf {{first_name}} wrote things only after encouragement or with help, the response should still be 'yes'</i>
+      In the past 4 weeks, did {{player_info.first_name}} ever <b>write</b> things down?
+      <i>NOTE: If {{player_info.first_name}} wrote things only after encouragement or with help, the response should still be 'yes'</i>
     select_write_performance: <i>If yes</i>, which best describes the most complicated things that he/she wrote
-    pastime_yes_no_dont_know: In the past 4 week, did {{first_name}} perform a <b>pastime, hobby or game</b>?
+    pastime_yes_no_dont_know: In the past 4 week, did {{player_info.first_name}} perform a <b>pastime, hobby or game</b>?
     multi_select_pastimes: |
       <i>If yes</i>, which pastimes did he/she perform:
       Ask about all of the following, check all that apply:
       <i>NOTE: Walking does NOT count as a hobby/pastime for this scale</i>
     pastime_other: other pastimes
-    pastimes_only_at_daycare_no_yes: Did {{first_name}} perform hobbies/pastimes only at day care?
-    select_pastimes_only_at_daycare_performance: <i>If yes</i>, how did {{first_name}} usually perform his/her most common pastimes
-    use_household_appliance_yes_no_dont_know: In the past 4 weeks, did {{first_name}} <b>use a household appliance</b> to do chores?
+    pastimes_only_at_daycare_no_yes: Did {{player_info.first_name}} perform hobbies/pastimes only at day care?
+    select_pastimes_only_at_daycare_performance: <i>If yes</i>, how did {{player_info.first_name}} usually perform his/her most common pastimes
+    use_household_appliance_yes_no_dont_know: In the past 4 weeks, did {{player_info.first_name}} <b>use a household appliance</b> to do chores?
     multi_select_household_appliances: <i>Ask about all of the following,</i> and check those that were used
     household_appliance_other: other appliance
-    select_household_appliance_performance: <i>If yes,</i> for the most commonly used appliances, which best describes how {{first_name}} usually used them
+    select_household_appliance_performance: <i>If yes,</i> for the most commonly used appliances, which best describes how {{player_info.first_name}} usually used them
 
+    npi_infor: |
+      <b>NPIQ</b>
+      <hl/>
+      NPI Co-participant
+    npi_inforsp: If other, please specify
+    npi_delus: Delusions - Does the participant have false beliefs, such as thinking that others are stealing from him or planning to harm him in some way?
+    npi_delussev: Severity
+    npi_hallu: Hallucinations - Does the participant have hallucinations such as false visions or voices? Does he seem to hear or see things that are not present?
+    npi_hallusev: Severity
+    npi_agita: Agitation/aggression - Is the participant resistive to help from others at times, or hard to handle?
+    npi_agitasev: Severity
+    npi_depre: Depression/dysphoria - Does the participant seem sad or say that he is depressed?
+    npi_depresev: Severity
+
+    npi_anxie: Anxiety - Does the participant become upset when separated from you? Does he have any other signs of nervousness such as shortness of breath, sighing, being unable to relax, or feeling excessively tense?
+    npi_anxiesev: Severity
+
+    npi_elati: Elation/euphoria - Does the participant appear to feel too good or act excessively happy?
+    npi_elatisev: Severity
+
+    npi_apath: Apathy/indifference - Does the participant seem less interested in his usual activities or in the activities and plans of others?
+    npi_apathsev: Severity
+
+    npi_disin: Disinhibition - Does the participant seem to act impulsively, for example, talking to strangers as if he knows them, or saying things that may hurt people's feelings?
+    npi_disinsev: Severity
+
+    npi_irrit: Irritability/lability - Is the participant impatient and cranky? Does he have diffculty coping with delays or waiting for planned activities?
+    npi_irritsev: Severity
+
+    npi_motor: Motor disturbance - Does the participant engage in repetitive activities such as pacing around the house, handling buttons, wrapping string, or doing other things repeatedly?
+    npi_motorsev: Severity
+
+    npi_night: Nighttime behaviors - Does the participant awaken you during the night, rise too early in the morning, or take excessive naps during the day?
+    npi_nightsev: Severity
+
+    npi_appet: Appetite/eating - Has the participant lost or gained weight, or had a change in the type of food he likes?
+    npi_appetsev: Severity
 
   show_if:
     select_regarding_dressing_performance:
@@ -153,3 +394,34 @@ default:
       use_household_appliance_yes_no_dont_know: 'yes'
     select_household_appliance_performance:
       use_household_appliance_yes_no_dont_know: 'yes'
+    npi_inforsp:
+      npi_infor: 3
+    npi_delussev:
+      npi_delus: 1
+    npi_hallusev:
+      npi_hallu: 1
+    npi_agitasev:
+      npi_agita: 1
+    npi_depresev:
+      npi_depre: 1
+    npi_anxiesev:
+      npi_anxie: 1
+
+    npi_elatisev:
+      npi_elati: 1
+
+    npi_apathsev:
+      npi_apath: 1
+    npi_disinsev:
+      npi_disin: 1
+
+    npi_irritsev:
+      npi_irrit: 1
+    npi_motorsev:
+      npi_motor: 1
+
+    npi_nightsev:
+      npi_night: 1
+
+    npi_appetsev:
+      npi_appet: 1
