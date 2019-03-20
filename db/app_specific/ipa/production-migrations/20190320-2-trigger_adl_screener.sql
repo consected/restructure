@@ -270,13 +270,13 @@ AS $$
       )
       RETURNING id INTO new_id;
 
-    insert into activity_log_ipa_assignment_inex_checklists
-    (master_id, extra_log_type, created_at, updated_at)
-    values
-    (
-      matched_master_id, 'adl_informant_screener', now(), now()
-    );
-
+    -- insert into activity_log_ipa_assignment_inex_checklists
+    -- (master_id, extra_log_type, created_at, updated_at)
+    -- values
+    -- (
+    --   matched_master_id, 'adl_informant_screener', now(), now()
+    -- );
+    --
     insert into ml_app.model_references
     (from_record_master_id, to_record_type, to_record_id, to_record_master_id, created_at, updated_at)
     values
