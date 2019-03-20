@@ -1,6 +1,6 @@
-set search_path=ml_app, ipa_ops;
+set search_path=ipa_ops, ml_app;
 
-CREATE OR REPLACE FUNCTION get_adl_screener_master_id(subject_id NUMERIC) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION ipa_ops.get_adl_screener_master_id(subject_id NUMERIC) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -290,6 +290,6 @@ AS $$
 END;
 $$;
 
-CREATE TRIGGER on_adl_screener_data_insert
-AFTER INSERT ON adl_screener_data
-FOR EACH ROW EXECUTE PROCEDURE sync_new_adl_screener();
+-- CREATE TRIGGER on_adl_screener_data_insert
+-- AFTER INSERT ON adl_screener_data
+-- FOR EACH ROW EXECUTE PROCEDURE sync_new_adl_screener();

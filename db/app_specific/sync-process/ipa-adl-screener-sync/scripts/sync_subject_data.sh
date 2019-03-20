@@ -15,7 +15,7 @@
 #
 cd $(dirname $0)
 
-if [ "$RAILS_ENV" == 'development' ]
+if [ "$RAILS_ENV" == 'development' ] || [ "$TEST_USE_BASE" == 'yes' ]
 then
   BASEDIR=..
 else

@@ -1,6 +1,7 @@
+set search_path=ipa_ops;
 -- DROP FUNCTION IF EXISTS adl_screener_score_calc() CASCADE;
 
-CREATE OR REPLACE FUNCTION ipa_ops.adl_screener_score_dont_know(init_q NUMERIC, VARIADIC scores NUMERIC[]) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION adl_screener_score_dont_know(init_q NUMERIC, VARIADIC scores NUMERIC[]) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
   DECLARE
@@ -28,7 +29,7 @@ AS $$
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION ipa_ops.adl_screener_one_dk(response NUMERIC) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION adl_screener_one_dk(response NUMERIC) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
   BEGIN
@@ -40,7 +41,7 @@ AS $$
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION ipa_ops.adl_screener_score_calc() RETURNS trigger
+CREATE OR REPLACE FUNCTION adl_screener_score_calc() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
   DECLARE
@@ -160,4 +161,4 @@ END;
 $$;
 
 
-CREATE TRIGGER adl_screener_score_trigger BEFORE INSERT ON ipa_ops.adl_screener_data FOR EACH ROW EXECUTE PROCEDURE ipa_ops.adl_screener_score_calc();
+CREATE TRIGGER adl_screener_score_trigger BEFORE INSERT ON adl_screener_data FOR EACH ROW EXECUTE PROCEDURE adl_screener_score_calc();
