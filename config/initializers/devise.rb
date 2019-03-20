@@ -15,6 +15,10 @@ Devise.setup do |config|
   # Devise will use the `secret_key_base` on Rails 4+ applications as its `secret_key`
   # by default. You can change it below and use your own secret key.
   # config.secret_key = '9393279ede89fcc9ae3c10a52171856c8670eed8f2654448dc3585da26ce9690a0aa5113b10a3c4d1bc53d5f58b0bb018d0f8c48ae2ff324c42936106e40340b'
+
+  # Allow us to test against a production database in development mode
+  config.secret_key = ENV['FPHS_RAILS_DEVISE_SECRET_KEY'] || config.secret_key if Rails.env.development?
+
   config.secret_key = ENV['FPHS_RAILS_DEVISE_SECRET_KEY'] if Rails.env.production?
 
   # ==> Mailer Configuration
