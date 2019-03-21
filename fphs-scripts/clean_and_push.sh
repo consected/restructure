@@ -1,6 +1,6 @@
 bundle exec rake assets:clobber
 rm -rf vendor/cache/*
-commit -a -m "Cleanup"
+git commit -a -m "Cleanup"
 git pull
 bundle exec rake assets:clobber
 rm -rf vendor/cache/*
