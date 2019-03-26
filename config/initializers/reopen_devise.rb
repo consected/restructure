@@ -5,7 +5,7 @@ Rails.application.config.to_prepare do
   DeviseController.send('before_action',
     ->{
       flash[:info] = 'you must be logged in as a user to access this page' and
-      redirect_to '/' if request.path.start_with?('/admins/sign_in') &&
+      redirect_to '/users/sign_in?redirect_from_secure=true' if request.path.start_with?('/admins/sign_in') &&
                           (!current_user && !current_admin && params[:secure_entry]!=SecureAdminEntry)
     }
   )
