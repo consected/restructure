@@ -1095,6 +1095,12 @@ _fpa.form_utils = {
       block.find('.browse-container').not('.nfs-store-setup').each(function() {
 
         var inblock = $(this);
+
+        // Setup secure-view for the block
+        if ($(this).attr('data-container-use-secure-view') == 'true') {
+          _fpa.secure_view.setup_links($(this), 'a.browse-filename');
+        }
+
         window.setTimeout(function() {
           inblock.find('.refresh-container-list').click();
           (inblock.nfs_store_uploader = _nfs_store.uploader)(inblock);

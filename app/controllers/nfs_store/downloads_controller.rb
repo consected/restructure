@@ -2,6 +2,7 @@ module NfsStore
   class DownloadsController < FsBaseController
 
     include InNfsStoreContainer
+    include SecureView::Previewing
 
     def show
       @download_id = params[:download_id].to_i
@@ -19,7 +20,12 @@ module NfsStore
       retrieved_file = @download.retrieve_file_from @download_id, retrieval_type
       if retrieved_file
         @download.save!
-        send_file retrieved_file
+        if use_secure_view && secure_view_do_what
+          secure_view_action retrieved_file
+          return
+        else
+          send_file retrieved_file
+        end
       else
         FsException::NotFound.new "Requested file not found"
       end

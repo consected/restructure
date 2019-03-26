@@ -1,4 +1,4 @@
-<div class="browse-container <%= @container.writable? ? 'upload-dropzone' : ''%>">
+<div class="browse-container <%= @container.writable? ? 'upload-dropzone' : ''%>" data-container-use-secure-view="<%= !!use_secure_view %>">
   <div class="container-block" data-container-id="<%=@container.id%>">
     <div class="row">
       <%= render partial: 'nfs_store/browse/browser_header', locals: { container_id: @container.id, container_name: @container.name, activity_log_id: @activity_log&.id } %>

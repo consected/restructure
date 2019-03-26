@@ -35,5 +35,10 @@ module NfsStore
         @container
       end
 
+      def use_secure_view
+        current_user.can?(:view_files_as_image) || current_user.can?(:view_files_as_html)
+      end
+
+
   end
 end
