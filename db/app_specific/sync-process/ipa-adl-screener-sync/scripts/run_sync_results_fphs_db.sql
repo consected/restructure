@@ -21,4 +21,13 @@ WHERE
   from_master_id = t.master_id
   AND from_db = 'fphs-adl-screener'
   AND to_db = 'athena-adl-screener'
-  AND coalesce(select_status, '') NOT IN ('completed', 'already transferred');
+  AND coalesce(select_status, '') NOT IN ('completed', 'already transferred', 'permanently failed');
+
+
+UPDATE sync_statuses
+SET
+  select_status = 'no status returned'
+WHERE
+  from_db = 'fphs-adl-screener'
+  AND to_db = 'athena-adl-screener'
+  AND coalesce(select_status, '') NOT IN ('completed', 'already transferred', 'permanently failed', 'no status returned', 'unmatched athena master record');

@@ -28,7 +28,7 @@ SCRDIR=${BASEDIR}/scripts
 LOGFL=${LOGDIR}/sync_subject_data.log
 export PSQLRESFL=${WORKINGDIR}/.last_psql_error
 
-. ${BASEDIR}/sync_db_connections.sh
+. ${BASEDIR}/../sync_db_connections.sh
 
 function log {
   echo "`date +%m%d%Y%H%M` - $(basename $0) - $1" >> ${LOGFL}

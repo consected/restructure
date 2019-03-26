@@ -1,0 +1,46 @@
+<%
+  set_defaults
+%>
+<div class="secure-view" style="display: none;">
+  <div class="secure-view-control-panel">
+
+    <div class="secure-view-preview-selector">
+      <%= link_to "image", '#', id: "preview-as-png", data: {preview_as: 'png'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm ' + (@preview_as == :png ? 'focus' : '') %>
+      <%= link_to "html", '#', id: "preview-as-html", data: {preview_as: 'html'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm' + (@preview_as == :html ? 'focus' : '') %>
+    </div>
+
+    <% if @extra_actions&.first %>
+      <% @extra_actions.each do |k, v|
+          attrs = v[:attrs] || {}
+          attrs.merge!(id: "sv-extra-actions-#{k}", class: "secure-view-extra-actions btn btn-default btn-sm #{v[:extra_class]}" )
+      %>
+        <%= link_to v[:label], v[:link], attrs %>
+      <% end %>
+    <% end %>
+
+    <div class="secure-view-zoom-selector">
+      <% @zoom_factors.each do |zoom| %>
+      <%= link_to "#{zoom}#{zoom.is_a?(Integer) ? '%' : ''}", '#', id: "secure-view-zoom-factor-#{zoom}", data: {zoom_factor: zoom}, class: 'secure-view-zoom-factor-selector btn btn-default btn-sm ' + (zoom == @default_zoom ? 'focus' : '') %>
+      <% end %>
+    </div>
+
+    <div class="secure-view-page-controls">
+      <%= link_to "<", '#', id: "preview-prev-page", class: 'secure-view-page-control btn btn-default btn-sm' %>
+      <input id="secure-view-current-page" value="1"> of <span id="secure-view-page-count"><%=@page_count%></span>
+      <%= link_to ">", '#', id: "preview-next-page", class: 'secure-view-page-control btn btn-default btn-sm' %>
+    </div>
+
+    <div class="secure-view-close">
+      <a class="sv-close glyphicon glyphicon-remove-sign show-entity" data-dismiss="modal" aria-label="Close" id="secure-view-close-btn"></a>
+    </div>
+  </div>
+
+  <div class="secure-view-pages-container">
+    <div id="secure-view-pages">
+      <div class="secure-view-loading-page">
+        Waiting for page to load...
+      </div>
+    </div>
+  </div>
+
+</div>

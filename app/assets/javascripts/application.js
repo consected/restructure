@@ -22,4 +22,5 @@
 //= require jquery-mask
 //= require textarea-autogrow
 //= require app/nfs_store/application
+//= require app/secure_view/secure_view
 //= require_tree ./app
