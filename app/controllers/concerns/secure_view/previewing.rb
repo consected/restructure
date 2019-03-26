@@ -44,7 +44,8 @@ module SecureView
         j = {
           page_count: @secure_view_previewer.page_count,
           preview_as: secure_view_preview_as,
-          default_zoom: @secure_view_default_zoom
+          default_zoom: @secure_view_default_zoom,
+          can_preview: @secure_view_previewer.previewable?
         }
 
         render json: j

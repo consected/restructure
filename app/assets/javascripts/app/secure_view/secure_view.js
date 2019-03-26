@@ -82,6 +82,11 @@ var SecureView = function () {
     this.$loading_page_message = $('.secure-view-loading-page');
     this.$loading_page_message.show();
 
+
+    $('.sv-control-block').hide();
+    $('.secure-view-no-preview').hide();
+    _this.$loading_page_message.show();
+
     if (set_preview_as) {
       this.preview_as = set_preview_as;
     }
@@ -105,7 +110,7 @@ var SecureView = function () {
       this.$page_controls.show();
     }
 
-    $('#sv-download-link').attr('href', this.download_path);
+    $('.sv-download-link').attr('href', this.download_path);
 
     this.$preview_as_selector.not('.sv-added-click-ev').on('click', function(ev){
       _this.preview_as = $(this).attr('data-preview-as');
@@ -156,7 +161,9 @@ var SecureView = function () {
 
     this.$secure_view.fadeIn(400, 'swing', function () {
       window.setTimeout(function () {
-        _this.show_first_page();
+        if (_this.page_count) {
+          _this.show_first_page();
+        }
       }, 10);
 
     });
@@ -165,9 +172,19 @@ var SecureView = function () {
   };
 
   this.show_first_page = function () {
-    _this.set_current_page(1);
-    _this.show_page(_this.current_page);
-    _this.$pages.removeClass('.sv-pages-as-png, .sv-pages-as-html').addClass('sv-pages-as-' + _this.preview_as);
+    if (_this.can_preview) {
+      $('.sv-control-block').show();
+      $('.secure-view-no-preview').hide();
+      _this.set_current_page(1);
+      _this.show_page(_this.current_page);
+      _this.$pages.removeClass('.sv-pages-as-png, .sv-pages-as-html').addClass('sv-pages-as-' + _this.preview_as);
+    }
+    else {
+      $('.sv-control-block').hide();
+      $('.secure-view-no-preview').show();
+      _this.$loading_page_message.hide();
+    }
+
   };
 
 
@@ -193,6 +210,7 @@ var SecureView = function () {
     $.ajax({url:  url}).done(function (data) {
       _this.page_count = data.page_count;
       _this.current_zoom = data.default_zoom;
+      _this.can_preview = data.can_preview;
 
       $('#secure-view-page-count').html(_this.page_count);
 
@@ -252,7 +270,12 @@ var SecureView = function () {
 
       }
       else {
-        $item.width(_this.current_zoom + "%");
+        $item.width('auto');
+        var iw = $item.width();
+
+        var p = iw * parseInt(_this.current_zoom) / 100;
+
+        $item.width(p + "px");
       }
     });
 
@@ -401,6 +424,7 @@ var SecureView = function () {
     _this.$html.css({ overflow: _this.initial_html_overflow });
     _this.$body.css({ overflow: _this.initial_body_overflow });
     _this.clear();
+    _this.page_count = null;
   }
 
   return this;

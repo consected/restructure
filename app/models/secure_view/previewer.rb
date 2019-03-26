@@ -30,6 +30,10 @@ module SecureView
       end
     end
 
+    def previewable?
+      !!(document? || spreadsheet? || presentation? || pdf?)
+    end
+
     def self.open_tempfile
       tempfile = Tempfile.open("SecureView-", SecureView::Config.tempdir) do |f|
         yield f
@@ -107,15 +111,16 @@ module SecureView
       end
 
       def office_docs_to type, conv_attempts: 0
+        self.class.check_libreoffice_exists!
 
         type = type.to_s
         raise GeneralException.new "Invalid type to convert office doc type to: #{type}" unless type.in? OfficeDocTypesTo
 
-        self.path = Rails.cache.fetch(cache_key('renderedpath')) do
+        if previewable? || (pdf? && type != 'pdf')
           Rails.logger.info "Converting file #{self.orig_path}"
-          self.class.check_libreoffice_exists!
 
-          if document? || spreadsheet? || presentation? || (pdf? && type != 'pdf')
+          self.path = Rails.cache.fetch(cache_key('renderedpath')) do
+
             create_temp_dir
 
             res = system(SecureView::Config.libreoffice_path, "--headless", "--convert-to", type, "--outdir", self.temp_dir, self.orig_path, out: File::NULL, err: File::NULL)
@@ -125,14 +130,15 @@ module SecureView
             self.path = File.join(self.temp_dir, self.class.change_extension(File.basename(self.orig_path), type))
           end
 
-        end
+          unless self.path && File.exist?(self.path)
+            raise GeneralException.new "Failed to convert file to #{type} - too many attempts" if conv_attempts > 2
+            # Try again if the path was returned but the file does not exist
+            Rails.cache.delete(cache_key('renderedpath'))
+            office_docs_to type, conv_attempts: conv_attempts + 1
+          end
 
-        unless self.path && File.exist?(self.path)
-
-          raise GeneralException.new "Failed to convert file to #{type} - too many attempts" if conv_attempts > 2
-          # Try again if the path was returned but the file does not exist
-          Rails.cache.delete(cache_key('renderedpath'))
-          office_docs_to type, conv_attempts: conv_attempts + 1
+        else
+          Rails.logger.info "Did not convert the file. Not a previewable type"
         end
 
       end

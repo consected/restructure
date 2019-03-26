@@ -20,7 +20,7 @@
     z-index: 100;
 
 
-    .secure-view-page-controls, .secure-view-preview-selector, .secure-view-zoom-selector, .secure-view-extra-actions {
+    .sv-control-block {
       display: inline-block;
       margin-right: 24px;
     }
@@ -41,7 +41,7 @@
     text-align: center;
     padding-bottom: 6px;
 
-    .secure-view-loading-page {
+    .secure-view-loading-page, .secure-view-no-preview {
       position: relative;
       top: 40%;
       height: auto;
