@@ -17,6 +17,9 @@ var SecureView = function () {
     this.current_zoom = '';
     this.get_page_path = '';
     this.download_path = '';
+    this.allow_actions = {};
+    this.initial_html_overflow = null;
+    this.initial_body_overflow = null;
 
     this.$secure_view = null;
     this.$pages_block = null;
@@ -24,9 +27,8 @@ var SecureView = function () {
     this.$zoom_factor_selector = null;
     this.$page_controls = null;
     this.$zoom_selectors = null;
-    this.initial_html_overflow = null;
-    this.initial_body_overflow = null;
     this.$loading_page_message = null;
+    this.$download_link = null;
     this.$pages = null;
     this.$preview_item = null;
     this.$body = null;
@@ -35,17 +37,17 @@ var SecureView = function () {
   this.init();
 
   // This function can be called multiple times to set a different context for each container / block
-  this.setup_links = function (block, link_selector, set_preview_as, options) {
+  this.setup_links = function (block, link_selector, options) {
     var _this = this;
 
     if (block && link_selector) {
       $(block).not('.sv-added-setup-links').on('click', link_selector, function(ev){
-        var options = options || {};
+        options = options || {};
 
         options.page_path = $(this).attr('href');
         options.download_path = options.download_path || options.page_path;
 
-        _this.setup (set_preview_as, options);
+        _this.setup (options.set_preview_as, options);
         ev.preventDefault();
       }).addClass('sv-added-setup-links');
     }
@@ -59,8 +61,8 @@ var SecureView = function () {
     if (options) {
       this.get_page_path = options.page_path;
       this.download_path = options.download_path;
+      this.allow_actions = options.allow_actions || {};
     }
-
 
     this.set_current_page(1);
 
@@ -71,17 +73,16 @@ var SecureView = function () {
     this.$zoom_selectors = $('.secure-view-zoom-selector');
     this.$page_controls = $('.secure-view-page-controls');
     this.$pages_block = $('#secure-view-pages');
+    this.$secure_view = $('.secure-view');
+    this.$pages = $('#secure-view-pages');
+    this.$loading_page_message = $('.secure-view-loading-page');
+    this.$download_link = $('.sv-download-link');
 
-
+    this.$loading_page_message.show();
     this.initial_html_overflow = this.$html[0].style.overflow;
     this.initial_body_overflow = this.$body[0].style.overflow;
     this.$html.css({ overflow: 'hidden' });
     this.$body.css({ overflow: 'hidden' });
-    this.$secure_view = $('.secure-view');
-    this.$pages = $('#secure-view-pages');
-    this.$loading_page_message = $('.secure-view-loading-page');
-    this.$loading_page_message.show();
-
 
     $('.sv-control-block').hide();
     $('.secure-view-no-preview').hide();
@@ -93,6 +94,8 @@ var SecureView = function () {
     else if (!this.preview_as) {
       this.preview_as = 'png';
     }
+
+    $('.secure-view-preview-as-selector[data-preview-as="'+this.preview_as+'"]').addClass('focus');
 
     if(!this.page_count) {
       this.get_info(this.show_first_page);
@@ -110,7 +113,7 @@ var SecureView = function () {
       this.$page_controls.show();
     }
 
-    $('.sv-download-link').attr('href', this.download_path);
+    this.set_actions();
 
     this.$preview_as_selector.not('.sv-added-click-ev').on('click', function(ev){
       _this.preview_as = $(this).attr('data-preview-as');
@@ -170,6 +173,31 @@ var SecureView = function () {
 
 
   };
+
+  this.set_actions = function () {
+    if (this.allow_actions.download_files) {
+      this.$download_link.show().attr('href', this.download_path);
+    }
+    else {
+      this.$download_link.hide();
+    }
+
+    var $sel = $('.secure-view-preview-as-selector[data-preview-as="html"]');
+    if (this.allow_actions.view_files_as_html) {
+      $sel.show();
+    }
+    else {
+      $sel.hide();
+    }
+
+    var $sel = $('.secure-view-preview-as-selector[data-preview-as="png"]');
+    if (this.allow_actions.view_files_as_image) {
+      $sel.show();
+    }
+    else {
+      $sel.hide();
+    }
+  }
 
   this.show_first_page = function () {
     if (_this.can_preview) {
@@ -425,6 +453,8 @@ var SecureView = function () {
     _this.$body.css({ overflow: _this.initial_body_overflow });
     _this.clear();
     _this.page_count = null;
+    _this.preview_as = null;
+    _this.$preview_as_selector.removeClass('focus');
   }
 
   return this;

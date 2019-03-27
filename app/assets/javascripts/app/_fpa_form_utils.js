@@ -1097,8 +1097,15 @@ _fpa.form_utils = {
         var inblock = $(this);
 
         // Setup secure-view for the block
-        if ($(this).attr('data-container-use-secure-view') == 'true') {
-          _fpa.secure_view.setup_links($(this), 'a.browse-filename');
+        var usv = $(this).attr('data-container-use-secure-view');
+        if (!(usv == null || usv == 'false' || usv == 'download_files')) {
+          var acts = {};
+          var usvitems = usv.split(',');
+          for (var k in usvitems) {
+            acts[usvitems[k]] = true;              
+          }
+
+          _fpa.secure_view.setup_links($(this), 'a.browse-filename', {allow_actions: acts});
         }
 
         window.setTimeout(function() {
