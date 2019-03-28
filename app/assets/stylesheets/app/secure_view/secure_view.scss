@@ -27,12 +27,16 @@
 
     .secure-view-close {
       float: right;
+      margin-right: 10px;
     }
 
     .secure-view-file-name {
       font-weight: bold;
       text-overflow: ellipsis;
-      max-width: 300px;
+      max-width: 20%;
+      white-space: nowrap;
+      overflow: hidden;
+      vertical-align: middle;
     }
   }
 

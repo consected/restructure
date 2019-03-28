@@ -11,7 +11,7 @@ var SecureViewAppSpecific = function () {
 
     this.$show_files.not('.sv-added-click-ev').on('click', function(ev){
       var $owner_el = _this.secure_view.$owner_el;
-      var $el = $owner_el.find('.container-browser');
+      var $el = $owner_el;
 
       if ($el.hasClass('sv-file-listing')) {
         // The folder is shown - hide it
@@ -38,7 +38,7 @@ var SecureViewAppSpecific = function () {
 
   this.close_folder = function () {
     // Close the folder if it is open
-    this.secure_view.$owner_el.find('.container-browser').removeClass('sv-file-listing');
+    this.secure_view.$owner_el.removeClass('sv-file-listing');
     this.$show_files.addClass('glyphicon-folder-open');
     this.$show_files.removeClass('glyphicon-folder-close');
     this.secure_view.$owner_el.find('a.refresh-container-list').attr('disabled', false);

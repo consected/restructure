@@ -110,25 +110,23 @@ var SecureView = function () {
     this.$file_name = $('.secure-view-file-name');
 
     this.$loading_page_message.show();
-    this.initial_html_overflow = this.$html[0].style.overflow;
-    this.initial_body_overflow = this.$body[0].style.overflow;
-    this.$html.css({ overflow: 'hidden' });
-    this.$body.css({ overflow: 'hidden' }).addClass('fixed-overlay');
 
-    if (this.file_name) {
-
-      this.$file_name.html(this.file_name);
+    if (!this.$body.hasClass('fixed-overlay')) {
+      this.initial_html_overflow = this.$html[0].style.overflow;
+      this.initial_body_overflow = this.$body[0].style.overflow;
+      this.$html.css({ overflow: 'hidden' });
+      this.$body.css({ overflow: 'hidden' }).addClass('fixed-overlay');
     }
 
     this.$control_blocks.hide();
     this.$no_preview_possible.hide();
     this.$loading_page_message.show();
-
     this.close(true);
 
-    // this.clean_page();
-    this.$loading_page_message.show();
+    // Everything is clean and setup
 
+    this.$file_name.html(this.file_name);
+    this.$loading_page_message.show();
 
     if (set_preview_as) {
       this.preview_as = set_preview_as;
@@ -223,6 +221,7 @@ var SecureView = function () {
   this.set_controls = function () {
     this.$control_blocks.hide();
     this.$extra_actions.show();
+    this.$file_name.show();
 
     if (this.preview_as == 'html') {
       this.$zoom_selectors.show();
@@ -235,7 +234,7 @@ var SecureView = function () {
       this.$zoom_selector_fit.show();
     }
 
-    this.set_actions()
+    this.set_actions();
 
   }
 
@@ -566,9 +565,9 @@ var SecureView = function () {
 
     if (!keep_view) {
       _this.$secure_view.fadeOut();
+      _this.$html.css({ overflow: _this.initial_html_overflow });
+      _this.$body.css({ overflow: _this.initial_body_overflow }).removeClass('fixed-overlay');;
     }
-    _this.$html.css({ overflow: _this.initial_html_overflow });
-    _this.$body.css({ overflow: _this.initial_body_overflow }).removeClass('fixed-overlay');;
     _this.clear();
     _this.page_count = null;
     _this.preview_as = null;

@@ -5,13 +5,14 @@ _fpa.postprocessors_nfs_store = {
     if (tel.length) {
       if(!tel.is(':visible')) return;
       window.setTimeout(function () {
+        var $browse_container = block.parents('.browse-container');
+        var $refresh_btn = $browse_container.first().find('.refresh-container-list').not('[disabled="disabled"]');
         // If the block is not visible just set another poll and get out of here.
-        if(!_fpa.utils.inViewport(block)) {
+        if(!_fpa.utils.inViewport(block) || $refresh_btn.length == 0) {
           _fpa.postprocessors_nfs_store.refresh_container_if_needed(block);
           return;
         }
         // Since the block is visible, go ahead and refresh, until it either works or we run out of attempts
-        var $browse_container = block.parents('.browse-container');
         var req_count = $browse_container.attr('data-refresh-count');
         if (!req_count || parseInt(req_count) < 6) {
           if(!req_count)
@@ -20,7 +21,7 @@ _fpa.postprocessors_nfs_store = {
             var new_c = parseInt(req_count) + 1;
 
           $browse_container.attr('data-refresh-count', new_c);
-          $browse_container.first().find('.refresh-container-list').not('[disabled="disabled"]').click();
+          $refresh_btn.click();
         }
       }, 10000);
     }
