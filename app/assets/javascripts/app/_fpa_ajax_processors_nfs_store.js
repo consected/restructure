@@ -20,7 +20,7 @@ _fpa.postprocessors_nfs_store = {
             var new_c = parseInt(req_count) + 1;
 
           $browse_container.attr('data-refresh-count', new_c);
-          $browse_container.first().find('.refresh-container-list').click();
+          $browse_container.first().find('.refresh-container-list').not('[disabled="disabled"]').click();
         }
       }, 10000);
     }

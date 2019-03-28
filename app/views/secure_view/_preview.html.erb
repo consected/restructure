@@ -13,17 +13,6 @@
       <%= link_to '', '#', id: "sv-download-link", class: "sv-download-link btn btn-default btn-sm glyphicon glyphicon-download-alt", title: 'download', target: '_blank' %>
     </div>
 
-    <% if @secure_view_extra_controls&.first %>
-      <div class="secure-view-extra-actions sv-control-block">
-        <% @secure_view_extra_controls.each do |k, v|
-          attrs = v[:attrs] || {}
-          attrs.merge!(id: "sv-extra-actions-#{k}", class: "secure-view-extra-action btn btn-default btn-sm #{v[:extra_class]}" )
-          %>
-          <%= link_to v[:label], v[:link], attrs %>
-          <% end %>
-      </div>
-    <% end %>
-
     <div class="secure-view-zoom-selector sv-control-block">
       <% @secure_view_zoom_factors.each do |zoom| %>
       <%= link_to "#{zoom}#{zoom.is_a?(Integer) ? '%' : ''}", '#', id: "secure-view-zoom-factor-#{zoom}", data: {zoom_factor: zoom}, class: 'secure-view-zoom-factor-selector btn btn-default btn-sm ' + (zoom == @secure_view_default_zoom ? 'focus' : '') %>
@@ -35,6 +24,19 @@
       <input id="secure-view-current-page" value="1"> of <span id="secure-view-page-count"><%=@page_count%></span>
       <%= link_to ">", '#', id: "preview-next-page", class: 'secure-view-page-control btn btn-default btn-sm' %>
     </div>
+
+    <% if @secure_view_extra_controls&.first %>
+      <div class="secure-view-extra-actions sv-control-block">
+        <% @secure_view_extra_controls.each do |k, v|
+          attrs = v[:attrs] || {}
+          attrs.merge!(id: "sv-extra-actions-#{k}", class: "secure-view-extra-action btn btn-default btn-sm #{v[:extra_class]}" )
+          %>
+          <%= link_to v[:label], v[:link], attrs %>
+          <% end %>
+      </div>
+    <% end %>
+
+    <div class="secure-view-file-name sv-control-block"></div>
 
     <div class="secure-view-close">
       <a class="sv-close glyphicon glyphicon-remove-sign show-entity" data-dismiss="modal" aria-label="Close" id="secure-view-close-btn"></a>
@@ -51,7 +53,7 @@
           This file can't be viewed. Download it instead?
         </p>
         <p>
-          <%= link_to 'close', '#', class: "secure-view-extra-actions sv-close btn btn-danger"%> &nbsp; <%= link_to 'download', '#', id: "sv-download-link-no-preview", class: "secure-view-extra-actions sv-download-link btn btn-primary", target: '_blank' %>
+          <%= link_to 'close', '#', class: "secure-view-msg-action sv-close btn btn-danger"%> &nbsp; <%= link_to 'download', '#', id: "sv-download-link-no-preview", class: "secure-view-msg-action sv-download-link btn btn-primary", target: '_blank' %>
         </p>
       </div>
       <div class="secure-view-no-preview-no-download sv-full-page-message">
@@ -59,14 +61,14 @@
           This file can't be viewed. You are not authorized to download it.
         </p>
         <p>
-          <%= link_to 'close', '#', class: "secure-view-extra-actions sv-close btn btn-danger"%>
+          <%= link_to 'close', '#', class: "secure-view-msg-action sv-close btn btn-danger"%>
         </p>
       </div>
       <div class="secure-view-message-block sv-full-page-message">
         <p class="secure-view-message">
         </p>
         <p>
-          <%= link_to 'close', '#', class: "secure-view-extra-actions sv-close btn btn-danger"%>
+          <%= link_to 'close', '#', class: "secure-view-msg-action sv-close btn btn-danger"%>
         </p>
       </div>
     </div>

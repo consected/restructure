@@ -1111,6 +1111,8 @@ _fpa.form_utils = {
           else if (usvitems.indexOf('view_files_as_html') >= 0)
             spa = 'html';
 
+          var fn = $(this).html();
+
           _fpa.secure_view.setup_links($(this), 'a.browse-filename', {allow_actions: acts, set_preview_as: spa});
         }
         if (usv == null || usv == '' || usv == 'false') {

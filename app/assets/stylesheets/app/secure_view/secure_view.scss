@@ -28,6 +28,12 @@
     .secure-view-close {
       float: right;
     }
+
+    .secure-view-file-name {
+      font-weight: bold;
+      text-overflow: ellipsis;
+      max-width: 300px;
+    }
   }
 
 
