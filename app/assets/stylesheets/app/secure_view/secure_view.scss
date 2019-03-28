@@ -41,7 +41,7 @@
     text-align: center;
     padding-bottom: 6px;
 
-    .secure-view-loading-page, .secure-view-no-preview {
+    .sv-full-page-message {
       position: relative;
       top: 40%;
       height: auto;
@@ -70,7 +70,6 @@
 
     .secure-view-page {
       pointer-events: none;
-      transition: all 0.7s;
     }
 
     .secure-view-page-iframe {

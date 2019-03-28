@@ -187,6 +187,12 @@ module NfsStore
         !!res
       end
 
+      def can_download?
+        cu = current_user
+        !!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image))
+      end
+
+
       # Method to provide checking of access controls. Can the user access the container
       # in a specific way. Easily overridden in applications to provide app specific functionality
       # @param perform [Symbol(:list_files, :create_files)]

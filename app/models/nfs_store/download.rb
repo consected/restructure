@@ -72,6 +72,7 @@ module NfsStore
       activity_log ||= self.activity_log
 
       raise FsException::NoAccess.new "user does not have access to this container" unless container.allows_current_user_access_to? :access
+      raise FsException::NoAccess.new "user is not authorized to download" unless container.can_download?
 
       unless activity_log
         res = ModelReference.find_where_referenced_from(container).first

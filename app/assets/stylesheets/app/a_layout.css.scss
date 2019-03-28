@@ -21,6 +21,10 @@ a:hover {
   cursor: pointer;
 }
 
+a[disabled="disabled"] {
+  cursor: not-allowed;
+}
+
 a.open-in-new-window{
   white-space: nowrap;
 }

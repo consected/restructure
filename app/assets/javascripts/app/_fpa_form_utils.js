@@ -1098,14 +1098,25 @@ _fpa.form_utils = {
 
         // Setup secure-view for the block
         var usv = $(this).attr('data-container-use-secure-view');
-        if (!(usv == null || usv == 'false' || usv == 'download_files')) {
+        if (!(usv == null || usv == '' || usv == 'false' || usv == 'download_files')) {
           var acts = {};
           var usvitems = usv.split(',');
           for (var k in usvitems) {
-            acts[usvitems[k]] = true;              
+            acts[usvitems[k]] = true;
           }
 
-          _fpa.secure_view.setup_links($(this), 'a.browse-filename', {allow_actions: acts});
+          var spa = null;
+          if (usvitems.indexOf('view_files_as_image') >= 0)
+            spa = 'png';
+          else if (usvitems.indexOf('view_files_as_html') >= 0)
+            spa = 'html';
+
+          _fpa.secure_view.setup_links($(this), 'a.browse-filename', {allow_actions: acts, set_preview_as: spa});
+        }
+        if (usv == null || usv == '' || usv == 'false') {
+          $(this).find('a.browse-filename').on('click', function (ev) {
+            ev.preventDefault();
+          });
         }
 
         window.setTimeout(function() {

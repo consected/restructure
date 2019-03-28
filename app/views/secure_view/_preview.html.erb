@@ -1,10 +1,10 @@
 <%
   secure_view_defaults
 %>
-<div class="secure-view" style="display: none;">
+<div class="secure-view" style="display: none;" data-preview-as="">
   <div class="secure-view-control-panel">
 
-    <div class="secure-view-preview-selector sv-control-block">
+    <div class="secure-view-preview-as-selectors sv-control-block">
       <%= link_to "image", '#', id: "preview-as-png", data: {preview_as: 'png'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm ' + (@secure_view_preview_as == :png ? 'focus' : '') %>
       <%= link_to "html", '#', id: "preview-as-html", data: {preview_as: 'html'}, class: 'secure-view-preview-as-selector btn btn-default btn-sm' + (@secure_view_preview_as == :html ? 'focus' : '') %>
     </div>
@@ -43,15 +43,30 @@
 
   <div class="secure-view-pages-container">
     <div id="secure-view-pages">
-      <div class="secure-view-loading-page">
+      <div class="secure-view-loading-page sv-full-page-message">
         Waiting for page to load...
       </div>
-      <div class="secure-view-no-preview">
+      <div class="secure-view-no-preview sv-full-page-message">
         <p>
-          This file can't be viewed. Download instead?
+          This file can't be viewed. Download it instead?
         </p>
         <p>
-          <%= link_to 'download', '#', id: "sv-download-link-no-preview", class: "secure-view-extra-actions sv-download-link btn btn-primary", target: '_blank' %>
+          <%= link_to 'close', '#', class: "secure-view-extra-actions sv-close btn btn-danger"%> &nbsp; <%= link_to 'download', '#', id: "sv-download-link-no-preview", class: "secure-view-extra-actions sv-download-link btn btn-primary", target: '_blank' %>
+        </p>
+      </div>
+      <div class="secure-view-no-preview-no-download sv-full-page-message">
+        <p>
+          This file can't be viewed. You are not authorized to download it.
+        </p>
+        <p>
+          <%= link_to 'close', '#', class: "secure-view-extra-actions sv-close btn btn-danger"%>
+        </p>
+      </div>
+      <div class="secure-view-message-block sv-full-page-message">
+        <p class="secure-view-message">
+        </p>
+        <p>
+          <%= link_to 'close', '#', class: "secure-view-extra-actions sv-close btn btn-danger"%>
         </p>
       </div>
     </div>
