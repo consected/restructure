@@ -2,7 +2,7 @@ module SecureView
   module Config
 
     # class << self
-      mattr_accessor :tempdir, :pdftoppm_path, :pdfinfo_path, :libreoffice_path, :resolution
+      mattr_accessor :tempdir, :pdftoppm_path, :pdfinfo_path, :libreoffice_path, :dcmj2pnm_path, :resolution
     # end
 
 

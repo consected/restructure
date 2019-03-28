@@ -12,15 +12,23 @@ module SecureView
 
     def initialize options={}
       super
-      office_docs_to :pdf unless pdf?
+      office_docs_to :pdf unless pdf? || viewable_image?
+      dicom_to_jpg if viewable_dicom?
     end
 
     # Return the page preview as a PNG format file
     def preview page
-      File.open(self.path) do |input|
-        self.class.draw_page_from(input, page) do |output|
-          res =  {io: output, filename: "#{input.path}.png", content_type: :png}
+      if viewable_image? || viewable_dicom?
+        File.open(self.path) do |output|
+          res =  {io: output, filename: "#{output.path}", disposition: 'inline'}
           yield res
+        end
+      else
+        File.open(self.path) do |input|
+          self.class.draw_page_from(input, page) do |output|
+            res =  {io: output, filename: "#{input.path}.png", content_type: :png}
+            yield res
+          end
         end
       end
     end
@@ -28,6 +36,11 @@ module SecureView
     # Get the (possibly cached) page count for the PDF
     # @return [Integer | nil] the page count or nil if the info returns no page count information
     def page_count
+
+      if viewable_image?
+        return 1
+      end
+
       self.class.check_pdftoppm_exists!
 
       Rails.cache.fetch(cache_key(:page_count)) do

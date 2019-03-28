@@ -8,7 +8,7 @@ module SecureView
     OfficeDocTypesTo = %w(html pdf)
 
     class << self
-      attr_accessor :pdftoppm_exists, :libreoffice_exists
+      attr_accessor :pdftoppm_exists, :libreoffice_exists, :dcmj2pnm_exists
     end
 
     attr_accessor :path, :temp_dir, :orig_path
@@ -31,7 +31,7 @@ module SecureView
     end
 
     def previewable?
-      !!(document? || spreadsheet? || presentation? || pdf?)
+      !!(document? || spreadsheet? || presentation? || pdf? || viewable_image? )
     end
 
     def self.open_tempfile
@@ -57,6 +57,11 @@ module SecureView
       libreoffice_exists = !!system(SecureView::Config.libreoffice_path, "--version", out: File::NULL, err: File::NULL)
     end
 
+    def self.dcmj2pnm_exists?
+      return dcmj2pnm_exists unless dcmj2pnm_exists.nil?
+      dcmj2pnm_exists = !!system(SecureView::Config.dcmj2pnm_path, "--version", out: File::NULL, err: File::NULL)
+    end
+
     # Raise an error unless pdftoppm exists. Assume that other pdf utils are correctly accessible based on this
     def self.check_pdftoppm_exists!
       raise ConfigException.new "pdftoppm does not exist at path specified: #{SecureView::Config.pdftoppm_path}" unless pdftoppm_exists?
@@ -80,6 +85,23 @@ module SecureView
 
       def mime_type
         @mime_type ||= MIME::Types.type_for(self.path)&.first
+      end
+
+      def viewable_image?
+        mime_type == MIME::Type.new('image/png') ||
+        mime_type == MIME::Type.new('image/jpeg') ||
+        mime_type == MIME::Type.new('image/gif') ||
+        mime_type == MIME::Type.new('image/bmp') ||
+        viewable_dicom?
+      end
+
+      def dicom?
+        mime_type == MIME::Type.new('application/dicom')
+      end
+
+      # Is it a dicom image, and can we handle dicom image conversions?
+      def viewable_dicom?
+        dicom? && self.class.dcmj2pnm_exists?
       end
 
       def pdf?
@@ -140,6 +162,37 @@ module SecureView
         else
           Rails.logger.info "Did not convert the file. Not a previewable type"
         end
+
+      end
+
+      def dicom_to_jpg conv_attempts: 0
+        return unless self.class.dcmj2pnm_exists?
+
+        if viewable_dicom?
+          Rails.logger.info "Converting file #{self.orig_path}"
+
+          self.path = Rails.cache.fetch(cache_key('renderedpath')) do
+            create_temp_dir
+            self.path = File.join(self.temp_dir, self.class.change_extension(File.basename(self.orig_path), 'jpg'))
+
+            res = system(SecureView::Config.dcmj2pnm_path, "+oj", self.orig_path, self.path, out: File::NULL, err: File::NULL)
+
+            self.path
+          end
+
+
+          unless self.path && File.exist?(self.path)
+            raise GeneralException.new "Failed to convert dicom file to jpeg - too many attempts" if conv_attempts > 2
+            # Try again if the path was returned but the file does not exist
+            Rails.cache.delete(cache_key('renderedpath'))
+            dicom_to_jpg conv_attempts: conv_attempts + 1
+          end
+
+        else
+          Rails.logger.info "Did not convert the file. Not a previewable type"
+        end
+
+
 
       end
 
