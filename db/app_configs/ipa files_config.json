@@ -1481,6 +1481,51 @@
         "created_at": "2019-03-14T17:27:01.496Z",
         "updated_at": "2019-03-14T17:39:07.280Z",
         "user_email": null
+      },
+      {
+        "id": 144,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "download_files",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "",
+        "created_at": "2019-03-29T13:26:39.273Z",
+        "updated_at": "2019-03-29T13:26:39.273Z",
+        "user_email": null
+      },
+      {
+        "id": 145,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "view_files_as_html",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "secure view - viewer",
+        "created_at": "2019-03-29T13:30:43.439Z",
+        "updated_at": "2019-03-29T13:30:43.439Z",
+        "user_email": null
+      },
+      {
+        "id": 146,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "view_files_as_image",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "secure view - viewer",
+        "created_at": "2019-03-29T13:30:58.154Z",
+        "updated_at": "2019-03-29T13:30:58.154Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -2438,6 +2483,17 @@
         "user_email": "mri-pet-files@fphs2.harvard.edu"
       },
       {
+        "id": 35,
+        "app_type_id": 3,
+        "role_name": "user - zeus",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2018-11-26T17:24:14.882Z",
+        "updated_at": "2019-03-29T13:36:41.425Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
+      },
+      {
         "id": 36,
         "app_type_id": 3,
         "role_name": "user - ipa files",
@@ -3371,6 +3427,160 @@
         "created_at": "2019-03-14T15:02:57.528Z",
         "updated_at": "2019-03-14T15:02:57.528Z",
         "user_email": "pf_hsl@test.org"
+      },
+      {
+        "id": 122,
+        "app_type_id": 3,
+        "role_name": "user - mri files - mpr structural",
+        "user_id": 18,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-21T23:11:25.400Z",
+        "updated_at": "2019-03-21T23:11:25.400Z",
+        "user_email": "mr_spec@test.org"
+      },
+      {
+        "id": 123,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 18,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-21T23:12:16.902Z",
+        "updated_at": "2019-03-21T23:12:16.902Z",
+        "user_email": "mr_spec@test.org"
+      },
+      {
+        "id": 124,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 18,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-21T23:12:54.226Z",
+        "updated_at": "2019-03-21T23:12:54.226Z",
+        "user_email": "mr_spec@test.org"
+      },
+      {
+        "id": 125,
+        "app_type_id": 3,
+        "role_name": "user - mri files readonly",
+        "user_id": 18,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-21T23:13:18.755Z",
+        "updated_at": "2019-03-21T23:14:56.810Z",
+        "user_email": "mr_spec@test.org"
+      },
+      {
+        "id": 126,
+        "app_type_id": 3,
+        "role_name": "filtered - mri files - spectroscopy",
+        "user_id": 18,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-21T23:14:16.049Z",
+        "updated_at": "2019-03-21T23:14:16.049Z",
+        "user_email": "mr_spec@test.org"
+      },
+      {
+        "id": 127,
+        "app_type_id": 3,
+        "role_name": "user - mri files - mpr structural",
+        "user_id": 17,
+        "admin_id": 3,
+        "disabled": false,
+        "created_at": "2019-03-22T00:05:37.171Z",
+        "updated_at": "2019-03-22T00:05:37.171Z",
+        "user_email": "mr_physio@test.org"
+      },
+      {
+        "id": 128,
+        "app_type_id": 3,
+        "role_name": "secure view - viewer",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:29:07.697Z",
+        "updated_at": "2019-03-29T13:29:07.697Z",
+        "user_email": "viewer@test.org"
+      },
+      {
+        "id": 129,
+        "app_type_id": 3,
+        "role_name": "unfiltered - mri files",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:34:12.454Z",
+        "updated_at": "2019-03-29T13:36:56.466Z",
+        "user_email": "viewer@test.org"
+      },
+      {
+        "id": 130,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:34:22.925Z",
+        "updated_at": "2019-03-29T13:37:01.527Z",
+        "user_email": "viewer@test.org"
+      },
+      {
+        "id": 131,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:34:37.370Z",
+        "updated_at": "2019-03-29T13:37:10.382Z",
+        "user_email": "viewer@test.org"
+      },
+      {
+        "id": 132,
+        "app_type_id": 3,
+        "role_name": "user - baseline files",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:34:50.260Z",
+        "updated_at": "2019-03-29T13:37:16.109Z",
+        "user_email": "viewer@test.org"
+      },
+      {
+        "id": 133,
+        "app_type_id": 3,
+        "role_name": "user - pet files",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:34:59.744Z",
+        "updated_at": "2019-03-29T13:37:21.287Z",
+        "user_email": "viewer@test.org"
+      },
+      {
+        "id": 134,
+        "app_type_id": 3,
+        "role_name": "user - olfactory files",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:35:09.482Z",
+        "updated_at": "2019-03-29T13:37:26.897Z",
+        "user_email": "viewer@test.org"
+      },
+      {
+        "id": 135,
+        "app_type_id": 3,
+        "role_name": "user - brain-behavior files",
+        "user_id": 25,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-03-29T13:35:22.301Z",
+        "updated_at": "2019-03-29T13:37:32.352Z",
+        "user_email": "viewer@test.org"
       }
     ],
     "associated_message_templates": [
@@ -3437,9 +3647,9 @@
         "filter": ".+\\.zip/brain/MEMPRAGE_tfl_multiecho_1mm_iso RMS",
         "description": "",
         "disabled": false,
-        "admin_id": 2,
+        "admin_id": 3,
         "created_at": null,
-        "updated_at": "2018-11-23T16:03:32.016Z",
+        "updated_at": "2019-03-21T23:32:40.860Z",
         "user_email": null
       },
       {
@@ -3448,12 +3658,12 @@
         "role_name": "filtered - mri files - spectroscopy",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
-        "filter": ".+\\.zip/brain/svs_se_30_pcg.*",
+        "filter": "^/+._mri/TWIX",
         "description": "",
         "disabled": false,
-        "admin_id": 2,
+        "admin_id": 3,
         "created_at": null,
-        "updated_at": "2018-11-23T16:03:45.558Z",
+        "updated_at": "2019-03-21T23:33:46.601Z",
         "user_email": null
       },
       {
@@ -3462,12 +3672,12 @@
         "role_name": "filtered - mri files - spectroscopy",
         "user_id": null,
         "resource_name": "activity_log__ipa_assignment_session_filestore__mri",
-        "filter": ".+\\.zip/brain/2D_csi_slaser.*",
+        "filter": "^/+._mri/.*csi.*",
         "description": "",
         "disabled": false,
-        "admin_id": 2,
+        "admin_id": 3,
         "created_at": null,
-        "updated_at": "2018-11-23T16:03:51.204Z",
+        "updated_at": "2019-03-21T23:30:33.206Z",
         "user_email": null
       },
       {
