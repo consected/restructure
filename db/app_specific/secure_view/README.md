@@ -42,7 +42,8 @@ On the target server
     rm dcmtk-3.6.4-install.tar.gz
     cd dcmtk-3.6.4-install
     cp -R usr/local/* /usr/
-    dcmj2pnm --version
+    ln -s /usr/share/dcmtk /usr/local/share/dcmtk
+    sudo -u webapp dcmj2pnm --version
 
 
 ### LibreOffice and Poppler
@@ -56,3 +57,12 @@ On the target server
     cd LibreOffice_6.1.5.2_Linux_x86-64_rpm/RPMS/
     yum localinstall -y *.rpm
     ln -s /usr/bin/libreoffice6.1 /usr/bin/soffice
+
+    # Give webapp a home directory so libreoffice can store its config
+    # No need for shell access though
+    # chsh -s /bin/bash webapp
+    mkdir /home/webapp
+    chown webapp:webapp /home/webapp
+    chmod 700 /home/webapp/
+    echo hello > a.txt
+    sudo -u webapp libreoffice --headless --convert-to pdf a.txt

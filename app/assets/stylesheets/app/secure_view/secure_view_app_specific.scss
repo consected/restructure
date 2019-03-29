@@ -19,10 +19,24 @@
   z-index: 300;
 
   .container-browser {
-    max-height: 80vh;
+    max-height: 70vh;
     margin-bottom: 0;
     height: auto;
-    max-height: 80%;
+  }
+
+  .container-classifications-outer {
+    max-height: 23vh;
+    height: auto;
+    overflow: auto;
+  }
+
+  .container-entry.sv-selected {
+    font-weight: bold;
+    background-color: rgb(228, 248, 255);
+  }
+
+  .data-context {
+    display: none;
   }
 
   .nfs-store-valid-files.panel, .browse-controls, a.refresh-container-list {

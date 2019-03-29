@@ -37,6 +37,7 @@ var SecureView = function () {
     this.$control_blocks = null;
     this.$zoom_selector_fit = null;
     this.$extra_actions = null;
+    this.$download_actions = null;
     this.$pages = null;
     this.$preview_item = null;
     this.$body = null;
@@ -54,7 +55,7 @@ var SecureView = function () {
         options = options || {};
 
         options.page_path = $(this).attr('href');
-        options.download_path = options.download_path || options.page_path;
+
         options.$owner_el = block;
 
         var fn;
@@ -66,6 +67,9 @@ var SecureView = function () {
         }
 
         options.file_name = fn;
+
+        $('.sv-selected').removeClass('sv-selected');
+        $(this).parent().addClass("sv-selected");
 
         _this.setup (options.set_preview_as, options);
         ev.preventDefault();
@@ -80,7 +84,7 @@ var SecureView = function () {
 
     if (options) {
       this.get_page_path = options.page_path;
-      this.download_path = options.download_path;
+      this.download_path = options.download_path || options.page_path;
       this.allow_actions = options.allow_actions || {};
       this.$owner_el = options.$owner_el;
       this.file_name = options.file_name;
@@ -108,6 +112,7 @@ var SecureView = function () {
     this.$zoom_selector_fit = $('#secure-view-zoom-factor-fit');
     this.$extra_actions = $('.secure-view-extra-actions');
     this.$file_name = $('.secure-view-file-name');
+    this.$download_actions = $('.secure-download-actions');
 
     this.$loading_page_message.show();
 
@@ -243,9 +248,11 @@ var SecureView = function () {
 
     if (this.allow_actions.download_files) {
       this.$download_link.show().attr('href', this.download_path);
+      this.$download_actions.show();
     }
     else {
       this.$download_link.hide();
+      this.$download_actions.hide();
     }
 
     var $sel = $('.secure-view-preview-as-selector[data-preview-as="html"]');
@@ -450,9 +457,15 @@ var SecureView = function () {
 
   this.show_img_page = function (page) {
     _this.set_zoom();
-    _this.get_page(page + 1);
-    _this.get_page(page + 2);
-    _this.get_page(page + 3);
+    if (page + 1 <= _this.page_count)
+      _this.get_page(page + 1);
+    if (page + 2 <= _this.page_count)
+      _this.get_page(page + 2);
+    if (page + 3 <= _this.page_count)
+      _this.get_page(page + 3);
+    if (page - 1 >= 1)
+      _this.get_page(page -1);
+
   };
 
   this.show_html_page = function (page) {
@@ -567,6 +580,7 @@ var SecureView = function () {
       _this.$secure_view.fadeOut();
       _this.$html.css({ overflow: _this.initial_html_overflow });
       _this.$body.css({ overflow: _this.initial_body_overflow }).removeClass('fixed-overlay');;
+      $('.sv-selected').removeClass('sv-selected');
     }
     _this.clear();
     _this.page_count = null;

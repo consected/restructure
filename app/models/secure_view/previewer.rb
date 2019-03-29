@@ -175,7 +175,7 @@ module SecureView
             create_temp_dir
             self.path = File.join(self.temp_dir, self.class.change_extension(File.basename(self.orig_path), 'jpg'))
 
-            res = system(SecureView::Config.dcmj2pnm_path, "+oj", self.orig_path, self.path, out: File::NULL, err: File::NULL)
+            res = system(SecureView::Config.dcmj2pnm_path, "+oj", "+Wh", "1", self.orig_path, self.path, out: File::NULL, err: File::NULL)
 
             self.path
           end
