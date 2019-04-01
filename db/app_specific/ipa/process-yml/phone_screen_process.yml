@@ -65,6 +65,50 @@ _definitions:
         extra_log_type: finalize
 
 
+  ####
+  # Boilerplace for notifying roles
+  # Override the subject: and if: structures to refine operation
+  ####
+
+  # Default email - just add roles or users
+  notify_email_default: &notify_email_default
+    type: email
+    layout_template: ipa notification layout
+    content_template: ipa inex message
+    subject: "IPA App: Phone Screen Complete"
+
+
+  # Default SMS - just add roles or users
+  notify_sms_default: &notify_sms_default
+    type: sms
+    layout_template: standard sms layout
+    content_template: ipa sms notification
+    subject: "IPA Phone Screen Complete"
+
+
+
+  # MedNav reviewer
+  notify_reviewer: &notify_reviewer
+    <<: *notify_email_default
+    role: email - inex reviewer
+
+  # MedNav reviewer SMS
+  notify_reviewer_sms: &notify_reviewer_sms
+    <<: *notify_sms_default
+    role: sms - inex reviewer
+
+  # PI
+  notify_pi: &notify_pi
+    <<: *notify_email_default
+    role: email - inex pi
+
+
+  # PI SMS
+  notify_pi_sms: &notify_pi_sms
+    <<: *notify_sms_default
+    role: sms - inex pi
+
+
 _default:
   showable_if: *enabled_if
   creatable_if: *enabled_if
@@ -561,4 +605,9 @@ finalize:
               extra_log_type: tms_responses
 
 
-  
+  # Notify the reviewers that the phone screen has been completed
+      notify:
+        - *notify_reviewer
+        - *notify_reviewer_sms
+#        - *notify_pi
+#        - *notify_pi_sms
