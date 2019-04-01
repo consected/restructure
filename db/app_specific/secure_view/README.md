@@ -38,6 +38,7 @@ On the target server
     cd tmp
     mkdir dcmtk
     cd dcmtk/
+    wget https://s3.amazonaws.com/fphs-app-assets/dcmtk-3.6.4-install.tar.gz
     tar -xzf dcmtk-3.6.4-install.tar.gz
     rm dcmtk-3.6.4-install.tar.gz
     cd dcmtk-3.6.4-install
@@ -57,6 +58,7 @@ On the target server
     cd LibreOffice_6.1.5.2_Linux_x86-64_rpm/RPMS/
     yum localinstall -y *.rpm
     ln -s /usr/bin/libreoffice6.1 /usr/bin/soffice
+    ln -s /usr/bin/libreoffice6.1 /usr/bin/libreoffice
 
     # Give webapp a home directory so libreoffice can store its config
     # No need for shell access though
