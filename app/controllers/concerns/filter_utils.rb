@@ -13,7 +13,7 @@ module FilterUtils
 
       likes = [""]
       p.each do |k,v|
-        if v.end_with? '%'
+        if v && v.end_with?('%')
           likes[0] << ' AND ' if likes.length > 1
           likes[0] << "#{k} LIKE ?"
           likes << v
