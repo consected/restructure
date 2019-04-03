@@ -17,7 +17,7 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [Unreleased]
+## [7.2.3] - 2019-04-03
 
 ### Changed
 - [UI] Made the one-time code field for login and electronic signatures show the entered digits, to make entry more reliable and avoid issues with password managers attempting to save the code
