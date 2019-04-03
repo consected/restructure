@@ -11,7 +11,7 @@ module FeatureSupport
   def login
 
     just_signed_in = false
-    alreadY_signed_in = false
+    already_signed_in = false
 
     3.times do
       return if user_logged_in?
