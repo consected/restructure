@@ -1,4 +1,5 @@
 #!/bin/bash
+# General purpose script for uploading to the filestore if you know the container ID to be uploaded to
 
 if [ -z "${container_id}" ] || [ -z "${upload_file}" ]
 then
