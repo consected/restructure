@@ -3660,6 +3660,21 @@
         "created_at": "2019-04-04T11:38:23.755Z",
         "updated_at": "2019-04-04T11:38:23.755Z",
         "user_email": null
+      },
+      {
+        "id": 544,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "view_reports",
+        "options": "",
+        "access": null,
+        "disabled": false,
+        "admin_id": 4,
+        "app_type_id": 9,
+        "role_name": "reviewer - tms",
+        "created_at": "2019-04-04T11:54:43.406Z",
+        "updated_at": "2019-04-04T11:54:43.406Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
