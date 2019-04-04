@@ -687,6 +687,8 @@ finalize_phone_screen_checklist:
         - *notify_reviewer_sms
         - *notify_pi
         - *notify_pi_sms
+        - *notify_tms
+        - *notify_tms_sms
 
   # save_action:
   #   on_create: create_next_creatable

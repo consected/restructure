@@ -134,6 +134,15 @@ _definitions:
     <<: *notify_sms_default
     role: sms - inex pi
 
+  # Clinical research coordinator
+  notify_crc: &notify_crc
+    <<: *notify_email_default
+    role: email - inex crc
+
+  # Clinical research coordinator SMS
+  notify_crc_sms: &notify_crc_sms
+    <<: *notify_sms_default
+    role: sms - inex crc
 
 
   # TMS group
@@ -687,6 +696,8 @@ finalize_phone_screen_checklist:
         - *notify_reviewer_sms
         - *notify_pi
         - *notify_pi_sms
+        - *notify_tms
+        - *notify_tms_sms
 
   # save_action:
   #   on_create: create_next_creatable
@@ -742,6 +753,16 @@ sign_phone_screen:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: finalize_phone_screen_checklist
 
+  # Notify initiator, clinical research coordinator and mednav that PI has signed
+  save_trigger:
+    on_save:
+      notify:
+        - *notify_ps_checklist_initiator
+        - *notify_ps_checklist_initiator_sms
+        - *notify_reviewer
+        - *notify_reviewer_sms
+        - *notify_crc
+        - *notify_crc_sms
 
 
 ####
