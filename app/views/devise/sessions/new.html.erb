@@ -16,7 +16,7 @@
 
     <div class="form-group-non">
       <%= f.label :otp_attempt, 'One-Time Code' %><br />
-      <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "[0-9]{6}" %>
+      <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>
     </div>
 
     <%= hidden_field_tag :secure_entry, params[:secure_entry] if request.path.start_with?('/admins/sign_in') %>
