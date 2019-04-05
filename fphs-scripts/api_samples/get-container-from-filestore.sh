@@ -17,7 +17,7 @@ Change ipa_id to match the subject ID to upload to.
 EOF
   exit
 fi
-
+# echo "${upload_server}/reports/${report_id}.csv?search_attrs%5Bipa_id%5D=${ipa_id}&search_attrs%5Bsession_type%5D=${session_type}&use_app_type=${upload_app_type}&user_email=${upload_user_email}&user_token=${upload_user_token}"
 container_res="$(curl --fail -s "${upload_server}/reports/${report_id}.csv?search_attrs%5Bipa_id%5D=${ipa_id}&search_attrs%5Bsession_type%5D=${session_type}&use_app_type=${upload_app_type}&user_email=${upload_user_email}&user_token=${upload_user_token}")"
 
 if [ ! $? -eq 0 ]
@@ -31,6 +31,6 @@ then
   echo "${container_res}" | tail -n 1
   exit 0
 else
-  echo "no container found"
+  echo "No container found"
   exit 1
 fi

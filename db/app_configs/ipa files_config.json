@@ -847,9 +847,9 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "sync-upload",
+        "role_name": "api upload",
         "created_at": null,
-        "updated_at": null,
+        "updated_at": "2019-04-03T16:40:13.176Z",
         "user_email": null
       },
       {
@@ -862,9 +862,9 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "sync-upload",
+        "role_name": "api upload",
         "created_at": null,
-        "updated_at": null,
+        "updated_at": "2019-04-03T16:39:59.763Z",
         "user_email": null
       },
       {
@@ -877,9 +877,9 @@
         "disabled": false,
         "admin_id": 2,
         "app_type_id": 3,
-        "role_name": "sync-upload",
+        "role_name": "api upload",
         "created_at": null,
-        "updated_at": null,
+        "updated_at": "2019-04-03T16:39:52.140Z",
         "user_email": null
       },
       {
@@ -1526,6 +1526,81 @@
         "created_at": "2019-03-29T13:30:58.154Z",
         "updated_at": "2019-03-29T13:30:58.154Z",
         "user_email": null
+      },
+      {
+        "id": 147,
+        "user_id": null,
+        "resource_type": "report",
+        "resource_name": "IPA Find Container",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "api upload",
+        "created_at": "2019-04-03T16:40:51.313Z",
+        "updated_at": "2019-04-03T16:40:51.313Z",
+        "user_email": null
+      },
+      {
+        "id": 148,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "export_csv",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "api upload",
+        "created_at": "2019-04-03T16:43:26.183Z",
+        "updated_at": "2019-04-03T16:43:26.183Z",
+        "user_email": null
+      },
+      {
+        "id": 149,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "export_json",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "api upload",
+        "created_at": "2019-04-03T16:43:41.041Z",
+        "updated_at": "2019-04-03T16:43:41.041Z",
+        "user_email": null
+      },
+      {
+        "id": 150,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "view_reports",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "api upload",
+        "created_at": "2019-04-03T16:49:34.464Z",
+        "updated_at": "2019-04-03T16:49:34.464Z",
+        "user_email": null
+      },
+      {
+        "id": 151,
+        "user_id": null,
+        "resource_type": "table",
+        "resource_name": "activity_log__ipa_assignment_session_filestores",
+        "options": "",
+        "access": "create",
+        "disabled": false,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "api upload",
+        "created_at": "2019-04-03T17:32:38.172Z",
+        "updated_at": "2019-04-03T17:32:38.172Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -1672,6 +1747,26 @@
         "edit_field_names": "",
         "selection_fields": "",
         "item_type": "ipa-files",
+        "user_email": null
+      },
+      {
+        "id": 13,
+        "name": "IPA Find Container",
+        "description": "Get a single Container ID for a subject. Used by IPA script-based uploads.",
+        "sql": "select \r\n\r\n  mr.to_record_id \"container_id\",\r\n  al.id \"activity_log_id\",\r\n  'activity_log__ipa_assignment_session_filestore' \"activity_log_type\"\r\n--  , \r\n--  al.extra_log_type \"session_type\", \r\n--  al.session_date, \r\n--  al.session_time, \r\n--  al.select_status, \r\n--  ipa.ipa_id \r\nfrom activity_log_ipa_assignment_session_filestores al\r\ninner join ipa_assignments ipa \r\n  on \r\n    al.master_id = ipa.master_id\r\ninner join model_references mr\r\n  on \r\n    from_record_type = 'ActivityLog::IpaAssignmentSessionFilestore'\r\n    and from_record_id = al.id\r\n    and from_record_master_id = al.master_id\r\n    and to_record_type = 'NfsStore::Manage::Container'\r\n    and to_record_master_id = al.master_id\r\nwhere \r\n  ipa_id = :ipa_id\r\n  and extra_log_type = :session_type\r\n  ;\r\n  ",
+        "search_attrs": "\r\nipa_id:\r\n  number:\r\n    all: true\r\n    multiple: single\r\n\r\n\r\nsession_type: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n    disabled: false",
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-04-03T15:59:40.518Z",
+        "updated_at": "2019-04-03T17:59:08.738Z",
+        "report_type": "regular_report",
+        "auto": false,
+        "searchable": false,
+        "position": null,
+        "edit_model": "",
+        "edit_field_names": "",
+        "selection_fields": "",
+        "item_type": "ipa-files-api",
         "user_email": null
       }
     ],
@@ -3790,6 +3885,61 @@
         "created_at": "2019-04-03T15:05:16.307Z",
         "updated_at": "2019-04-03T15:05:16.307Z",
         "user_email": "test@ipa.edu"
+      },
+      {
+        "id": 155,
+        "app_type_id": 3,
+        "role_name": "nfs_store group 600",
+        "user_id": 28,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-04-03T16:35:48.457Z",
+        "updated_at": "2019-04-03T16:35:48.457Z",
+        "user_email": "api_file_upload_client@app.fphs2.harvard.edu"
+      },
+      {
+        "id": 156,
+        "app_type_id": 3,
+        "role_name": "unfiltered - mri files",
+        "user_id": 28,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-04-03T16:36:13.964Z",
+        "updated_at": "2019-04-03T16:36:13.964Z",
+        "user_email": "api_file_upload_client@app.fphs2.harvard.edu"
+      },
+      {
+        "id": 157,
+        "app_type_id": 3,
+        "role_name": "user - ipa files",
+        "user_id": 28,
+        "admin_id": 2,
+        "disabled": true,
+        "created_at": "2019-04-03T16:36:31.136Z",
+        "updated_at": "2019-04-03T16:37:47.077Z",
+        "user_email": "api_file_upload_client@app.fphs2.harvard.edu"
+      },
+      {
+        "id": 158,
+        "app_type_id": 3,
+        "role_name": "api upload",
+        "user_id": 28,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-04-03T16:37:42.452Z",
+        "updated_at": "2019-04-03T16:38:41.841Z",
+        "user_email": "api_file_upload_client@app.fphs2.harvard.edu"
+      },
+      {
+        "id": 159,
+        "app_type_id": 3,
+        "role_name": "user - mri files upload",
+        "user_id": 28,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-04-03T17:31:07.843Z",
+        "updated_at": "2019-04-03T17:31:07.843Z",
+        "user_email": "api_file_upload_client@app.fphs2.harvard.edu"
       }
     ],
     "associated_message_templates": [

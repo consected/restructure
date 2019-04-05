@@ -26,22 +26,20 @@ EOF
   exit 1
 fi
 
-# export upload_server
-# export upload_user_email
-# export upload_user_token
-# export upload_app_type
-# export ipa_id
-# export session_type=mri
+# Report number that returns container details for a subject and session type
+export report_id=13
 
 cd $(dirname $0)
 export container_res=$(./get-container-from-filestore.sh)
-if [ ! $? -eq 0 ]
+
+if [ "${container_res}" == "Request failed" ] || [ "${container_res}" == "No container found" ]
 then
-  echo "Request failed"
+  echo "Container request failed"
   exit 1
+else
+  echo "Uploading to container: ${container_res}"
 fi
 
-# echo "Got container_res: ${container_res}"
 
 IFS=','
 read -ra ADDR <<< "${container_res}"
