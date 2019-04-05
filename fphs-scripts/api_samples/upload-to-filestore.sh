@@ -19,6 +19,8 @@ EOF
   exit 1
 fi
 
+EXTRA_ARGS="--progress-bar --compressed"
+
 if [ ! -f "${upload_file}" ]
 then
   echo "File upload_file does not exist: ${upload_file}"
@@ -28,12 +30,13 @@ fi
 upload_md5=$(md5sum "${upload_file}" | awk '{print $1}')
 
 echo "Checking file ${upload_filename} with MD5 hash ${upload_md5}"
-upload_test="$(curl "${upload_server}/nfs_store/chunk/${container_id}.json?activity_log_id=${activity_log_id}&activity_log_type=${activity_log_type}&use_app_type=${upload_app_type}&user_email=${upload_user_email}&user_token=${upload_user_token}&file_name=${upload_filename}&file_hash=${upload_md5}")"
+upload_test="$(curl "${upload_server}/nfs_store/chunk/${container_id}.json?activity_log_id=${activity_log_id}&activity_log_type=${activity_log_type}&use_app_type=${upload_app_type}&user_email=${upload_user_email}&user_token=${upload_user_token}&file_name=${upload_filename}&file_hash=${upload_md5}" -s)"
 
 if [ ! -z "$(echo ${upload_test} | grep '"result":"not found"')" ]
 then
   echo "Uploading file ${upload_file}"
-
+  echo "Started at $(date)"
+  echo "Progress:"
   curl "${upload_server}/nfs_store/chunk.json?user_email=${upload_user_email}&user_token=${upload_user_token}" \
   -F "file_hash=${upload_md5}" \
   -F "container_id=${container_id}" \
@@ -41,7 +44,10 @@ then
   -F "activity_log_type=${activity_log_type}" \
   -F "chunk_hash=${upload_md5}" \
   -F "upload=@${upload_file}" \
-  --compressed
+  ${EXTRA_ARGS} > upload-log.txt
+
+
+  echo "Ended at $(date)"
   exit 0
 else
   echo "${upload_test}"

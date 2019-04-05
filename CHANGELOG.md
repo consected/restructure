@@ -19,6 +19,8 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 
 ## [Unreleased]
 
+- [Fixed] Bug preventing a user of Athena from accessing the default IPA Files app on Medusa
+
 ## [7.2.5] - 2019-04-05
 
 - [Fixed] Bug in one-time code pattern prevented correct entry in admin login and e-signature
@@ -54,5 +56,3 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 
 ### Added
 - [Secure-View] Provide a secure-viewer directly for users clicking a file link in a filestore container. Just view the pages of documents directly in the browser without having to worry about where files were downloaded, or cleaning them up afterwards.
-## [7.2.5] - 2019-04-05
-## [7.2.6] - 2019-04-05
