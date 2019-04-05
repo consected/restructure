@@ -17,6 +17,12 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+## [7.2.5] - 2019-04-05
+
+- [Fixed] Bug in one-time code pattern prevented correct entry in admin login and e-signature
+
 ## [7.2.4] - 2019-04-03
 
 ### Fixed
