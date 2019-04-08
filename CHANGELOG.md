@@ -17,7 +17,7 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [Unreleased]
+## [7.2.8] - 2019-04-08
 
 - [Fixed] [Filestore] Allow large file uploads through the API to complete without using all the server's memory
 - [Fixed] [Secure-View] Only count pages when the file is convertible to a PDF, avoiding unnecessary delays in viewing
