@@ -17,7 +17,7 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [Unreleased]
+## [7.2.7] - 2019-04-08
 
 - [Fixed] Bug preventing a user of Athena from accessing the default IPA Files app on Medusa
 
