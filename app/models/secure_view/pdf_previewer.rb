@@ -37,7 +37,7 @@ module SecureView
     # @return [Integer | nil] the page count or nil if the info returns no page count information
     def page_count
 
-      if viewable_image?
+      unless previewable? && !viewable_image?
         return 1
       end
 

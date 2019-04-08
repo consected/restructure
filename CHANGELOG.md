@@ -17,6 +17,11 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+- [Fixed] [Filestore] Allow large file uploads through the API to complete without using all the server's memory
+- [Fixed] [Secure-View] Only count pages when the file is convertible to a PDF, avoiding unnecessary delays in viewing
+
 ## [7.2.7] - 2019-04-08
 
 - [Fixed] Bug preventing a user of Athena from accessing the default IPA Files app on Medusa

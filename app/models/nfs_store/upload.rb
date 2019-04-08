@@ -292,16 +292,27 @@ module NfsStore
       end
 
       # Concatenate all the chunk files, generating the final file
+      # If there is only one chunk file just move it, since API
+      # uploads may send one massive chunk
       # Cleanup the chunk files
       def concat_chunks
         begin
           cleanup_chunk FinalFilenameSuffix
-          File.open(final_temp_path, 'wb') do |f|
+
+          if self.chunk_count == 1
             each_chunk_file_path(not_final: true) do |path|
-              # User copy_stream to efficiently copy from source path to open destination file
-              IO::copy_stream(path, f)
+              FileUtils.mv path, final_temp_path
+              break
+            end
+          else
+            File.open(final_temp_path, 'wb') do |f|
+              each_chunk_file_path(not_final: true) do |path|
+                # User copy_stream to efficiently copy from source path to open destination file
+                IO::copy_stream(path, f)
+              end
             end
           end
+
           cleanup_chunk_files not_final: true
         rescue => e
           cleanup_chunk FinalFilenameSuffix

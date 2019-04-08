@@ -55,4 +55,33 @@ RSpec.describe NfsStore::Upload, type: :model do
 
   end
 
+  it "uploads a single large chunk efficiently" do
+    c = @container
+
+    u = NfsStore::Upload.new container: c, user: @container.master.current_user, file_name: 'test-name.txt'
+
+    s1 = SecureRandom.hex
+    ioupload = StringIO.new(s1)
+
+    u.upload = ioupload
+    u.chunk_count = 0
+
+    res = u.send(:store_chunk)
+    expect(res).to eq 1
+
+    u.chunk_hash = Digest::MD5.hexdigest(s1)
+    expect(u.send(:chunk_hash_match)).to be true
+
+    u.send(:concat_chunks)
+
+    final_file = File.read(u.send(:final_temp_path))
+
+    totstring = s1
+    expect(final_file).to eq(totstring)
+
+
+    md5tot = Digest::MD5.hexdigest(totstring)
+    expect(u.hash_for_file).to eq md5tot
+
+  end
 end

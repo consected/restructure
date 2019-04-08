@@ -13,6 +13,10 @@ The procedure behind the scenes is:
     - the filename matches defined filters
     - the filename does not already exist in the container
 - Upload the file as a single chunk
+  - curl shows a progress bar for uploads
+  - Check MD5 hashes are correct
+  - Complete storage to secure filesystem
+- Return a success result and results file `upload-result.txt`
 
 Note that the command line script does not support chunked uploads. A failure during upload will require the file to be uploaded from the beginning, and does not support the restart feature that is provided in the web browser user interface.
 
