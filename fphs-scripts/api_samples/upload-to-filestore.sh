@@ -34,6 +34,7 @@ upload_test="$(curl "${upload_server}/nfs_store/chunk/${container_id}.json?activ
 
 if [ ! -z "$(echo ${upload_test} | grep '"result":"not found"')" ]
 then
+  rm -f upload-result.txt
   echo "Uploading file ${upload_file}"
   echo "Started at $(date)"
   echo "Progress:"
@@ -44,9 +45,9 @@ then
   -F "activity_log_type=${activity_log_type}" \
   -F "chunk_hash=${upload_md5}" \
   -F "upload=@${upload_file}" \
-  ${EXTRA_ARGS} > upload-log.txt
+  ${EXTRA_ARGS} > upload-result.txt
 
-
+  cat upload-result.txt
   echo "Ended at $(date)"
   exit 0
 else

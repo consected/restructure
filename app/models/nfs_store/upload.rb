@@ -256,11 +256,12 @@ module NfsStore
       # Relies on the @upload attribute for the file to be read
       # @return [Integer] number of chunks uploaded so far
       def store_chunk
-        @upload_chunk = @upload.read
+        # @upload_chunk = @upload.read
         new_chunk_num = chunk_count + 1
-        path = chunk_path new_chunk_num
-        FileUtil.rm path if File.exist? path
-        File.open(path, "wb") { |f| f.write(@upload_chunk) }
+        @chunk_path = chunk_path new_chunk_num
+        FileUtil.rm @chunk_path if File.exist? @chunk_path
+        # Efficiently copy from upload IO to chunk path without consuming too much memory
+        IO::copy_stream(@upload, @chunk_path)
         self.chunk_count = new_chunk_num
       end
 
@@ -297,8 +298,8 @@ module NfsStore
           cleanup_chunk FinalFilenameSuffix
           File.open(final_temp_path, 'wb') do |f|
             each_chunk_file_path(not_final: true) do |path|
-              data = File.read(path)
-              f.write(data)
+              # User copy_stream to efficiently copy from source path to open destination file
+              IO::copy_stream(path, f)
             end
           end
           cleanup_chunk_files not_final: true
@@ -346,8 +347,11 @@ module NfsStore
       def chunk_hash_match
         return if self.errors.present?
 
-        if @chunk_hash_match.nil? && @upload_chunk && @chunk_hash
-          uploaded_chunk_hash = Digest::MD5.hexdigest(@upload_chunk)
+        if @chunk_hash_match.nil? && @chunk_path && @chunk_hash
+          # Calculate MD5 in memory efficient chunks directly from the file
+          md5 = Digest::MD5.new
+          md5 = md5.file(@chunk_path)
+          uploaded_chunk_hash = md5.hexdigest()
           @chunk_hash_match = (@chunk_hash == uploaded_chunk_hash)
         end
 

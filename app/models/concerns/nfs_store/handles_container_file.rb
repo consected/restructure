@@ -42,14 +42,7 @@ module NfsStore
       # @return [String] MD5 hash
       def hash_for_file file_path
         md5 = Digest::MD5.new
-
-        File.open(file_path, 'rb') do |io|
-           pos = io.tell
-           while buffer = io.read(ChunkSize)
-             md5.update(buffer)
-             pos = io.tell
-           end
-        end
+        md5.file(file_path)
 
         md5.hexdigest
       end
