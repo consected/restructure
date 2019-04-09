@@ -17,6 +17,11 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+- [Fixed] [Filestore] Fixed bug checking for duplicate file uploads
+- [Added] [API] API samples for Filestore uploads and to create containers
+
 ## [7.2.8] - 2019-04-08
 
 - [Fixed] [Filestore] Allow large file uploads through the API to complete without using all the server's memory
