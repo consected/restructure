@@ -1601,6 +1601,21 @@
         "created_at": "2019-04-03T17:32:38.172Z",
         "updated_at": "2019-04-03T17:32:38.172Z",
         "user_email": null
+      },
+      {
+        "id": 152,
+        "user_id": null,
+        "resource_type": "activity_log_type",
+        "resource_name": "activity_log__ipa_assignment_session_filestore__xray",
+        "options": "",
+        "access": "update",
+        "disabled": true,
+        "admin_id": 2,
+        "app_type_id": 3,
+        "role_name": "api upload",
+        "created_at": "2019-04-05T14:37:26.816Z",
+        "updated_at": "2019-04-05T14:38:56.577Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -3940,6 +3955,28 @@
         "created_at": "2019-04-03T17:31:07.843Z",
         "updated_at": "2019-04-03T17:31:07.843Z",
         "user_email": "api_file_upload_client@app.fphs2.harvard.edu"
+      },
+      {
+        "id": 160,
+        "app_type_id": 3,
+        "role_name": "user - xray files",
+        "user_id": 28,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-04-05T14:39:31.597Z",
+        "updated_at": "2019-04-05T14:39:31.597Z",
+        "user_email": "api_file_upload_client@app.fphs2.harvard.edu"
+      },
+      {
+        "id": 161,
+        "app_type_id": 3,
+        "role_name": "secure view - viewer",
+        "user_id": 1,
+        "admin_id": 2,
+        "disabled": false,
+        "created_at": "2019-04-05T14:48:31.895Z",
+        "updated_at": "2019-04-05T14:48:31.895Z",
+        "user_email": "phil_ayres@hms.harvard.edu"
       }
     ],
     "associated_message_templates": [
