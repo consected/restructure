@@ -592,9 +592,11 @@
         $.applyDataMask();
     }
 
-    setInterval(function() {
-        if ($.jMaskGlobals.watchDataMask) {
-            $.applyDataMask();
-        }
-    }, globals.watchInterval);
+    if ($.jMaskGlobals.watchDataMask) {
+      setInterval(function() {
+          if ($.jMaskGlobals.watchDataMask) {
+              $.applyDataMask();
+          }
+      }, globals.watchInterval);
+    }
 }, window.jQuery, window.Zepto));
