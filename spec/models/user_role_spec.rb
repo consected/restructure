@@ -60,7 +60,16 @@ RSpec.describe Admin::UserRole, type: :model do
     user2.reload
 
     res = user2.has_access_to? :read, :table, :player_infos
+    expect(res).to be nil # since the user doesn't have access to the app
+
+    enable_user_app_access app_type_2.name, user2
+    user2.app_type = app_type_2
+    user2.save!
+    user2.reload
+
+    res = user2.has_access_to? :read, :table, :player_infos
     expect(res).to be_truthy # since the user's current app type has the role
+
 
   end
 
@@ -85,6 +94,9 @@ RSpec.describe Admin::UserRole, type: :model do
 
     expect(user1.user_roles.role_names).to eq [TestRoleName]
     expect(user2.user_roles.role_names).to eq []
+
+    enable_user_app_access app_type_2.name, user1
+    enable_user_app_access app_type_2.name, user2
 
     user1.update! app_type: app_type_2
     user2.update! app_type: app_type_2
