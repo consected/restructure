@@ -1,14 +1,11 @@
 #!/bin/bash
 # General purpose script for uploading to the filestore if you know the container ID to be uploaded to
+# Ensure credentials are set in file api_credentials.sh
 
 if [ -z "${container_id}" ] || [ -z "${upload_file}" ]
 then
   cat <<EOF
 Usage:
-upload_server="https://file-upload-dev.32vnp6pmmu.us-east-1.elasticbeanstalk.com" \\
-upload_user_email=sync_service_file_upload_client@app.fphs2.harvard.edu \\
-upload_user_token=<reset password to get a new token> \\
-upload_app_type=3 \\
 upload_filename=123457_persnet.pdf \\
 upload_file=/home/phil/Downloads/123457_persnet.pdf \\
 container_id=75 \\
@@ -21,6 +18,10 @@ fi
 
 EXTRA_ARGS="--progress-bar --compressed"
 
+cd $(dirname $0)
+source ./api_credentials.sh
+source ./supporting_fns.sh
+
 if [ ! -f "${upload_file}" ]
 then
   echo "File upload_file does not exist: ${upload_file}"
@@ -30,15 +31,15 @@ fi
 upload_md5=$(md5sum "${upload_file}" | awk '{print $1}')
 
 echo "Checking file ${upload_filename} with MD5 hash ${upload_md5}"
-upload_test="$(curl "${upload_server}/nfs_store/chunk/${container_id}.json?activity_log_id=${activity_log_id}&activity_log_type=${activity_log_type}&use_app_type=${upload_app_type}&user_email=${upload_user_email}&user_token=${upload_user_token}&file_name=${upload_filename}&file_hash=${upload_md5}" -s)"
+upload_test="$(curl -sS "${api_server}/nfs_store/chunk/${container_id}.json?activity_log_id=${activity_log_id}&activity_log_type=${activity_log_type}&use_app_type=${app_type}&user_email=${api_username}&user_token=${api_user_token}&file_name=${upload_filename}&file_hash=${upload_md5}")"
 
-if [ ! -z "$(echo ${upload_test} | grep '"result":"not found"')" ]
+if [ $? -eq 0 ] && [ ! -z "$(echo ${upload_test} | grep '"result":"not found"')" ]
 then
   rm -f upload-result.txt
   echo "Uploading file ${upload_file}"
   echo "Started at $(date)"
   echo "Progress:"
-  curl "${upload_server}/nfs_store/chunk.json?user_email=${upload_user_email}&user_token=${upload_user_token}" \
+  curl "${api_server}/nfs_store/chunk.json?user_email=${api_username}&user_token=${api_user_token}" \
   -F "file_hash=${upload_md5}" \
   -F "container_id=${container_id}" \
   -F "activity_log_id=${activity_log_id}" \
@@ -48,10 +49,18 @@ then
   ${EXTRA_ARGS} > upload-result.txt
 
   cat upload-result.txt
+  echo ""
   echo "Ended at $(date)"
   exit 0
-else
+fi
+
+if [ $? -eq 0 ] && [ ! -z "$(echo ${upload_test} | grep '"A matching stored file already exists"')" ]
+then
   echo "${upload_test}"
   echo "This file already exist in container ${container_id}: ${upload_file}"
+  exit 1
+else
+  echo "${upload_test}"
+  echo "Could not get file upload test result"
   exit 1
 fi
