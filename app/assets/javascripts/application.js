@@ -19,8 +19,8 @@
 //= require handlebars-v4.0.10
 //= require jquery-tablesorter
 //= require jquery-scrollto-min
-//= require jquery-mask
 //= require textarea-autogrow
 //= require app/nfs_store/application
 //= require app/secure_view/secure_view
+//= require app/jquery-mask/jquery-mask
 //= require_tree ./app
