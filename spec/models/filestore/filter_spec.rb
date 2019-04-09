@@ -33,7 +33,7 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
 
     activity_log ||= @activity_log
 
-    container ||= @container
+    container ||= activity_log&.container || @container
 
     NfsStore::Manage::StoredFile.create!(
         container: container,
