@@ -199,6 +199,8 @@ RSpec.describe "Export an app configuration", type: :model do
     expect(res.name).to eq 'bhs'
     expect(res.label).to eq 'Brain Health Study'
 
+    enable_user_app_access res.name, @user
+
     @user.app_type = res
     @user.save!
     app_type = res
