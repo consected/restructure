@@ -15,6 +15,7 @@ module BrowserHelper
     ENV['LC_NAME']='en_US.UTF-8'
     ENV['LC_LANG']='en_US.UTF-8'
     ENV['LANG']='en_US.UTF-8'
+    ENV['TZ']='US/Eastern'
 
     unless ENV['NOT_HEADLESS']=='true'
       puts "To disable headless mode, run rspec with environment variable `NOT_HEADLESS=true rspec`"

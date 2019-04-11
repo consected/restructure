@@ -223,10 +223,10 @@ Date.prototype.asYMD = function(){
 
     var now = this;
 
-    var day = ("0" + now.getDate()).slice(-2);
-    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+    var day = ("0" + now.getUTCDate()).slice(-2);
+    var month = ("0" + (now.getUTCMonth() + 1)).slice(-2);
 
-    var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+    var today = now.getUTCFullYear()+"-"+(month)+"-"+(day) ;
 
     return today;
 };
