@@ -160,11 +160,11 @@ module NfsStore
         # If a result was found then the file is possibly not unique.
         # To decide, check if the current ID matches the result ID
         # If it doesn't match then the result indicates it is a duplicate
-        # If it does match and the result indicates the previous upload was completed then it is a duplicate
+        # If it does match and the result indicates the previous upload was completed then it is a duplicate (only for uploads)
         # Otherwise the result is not a duplicate
         # This works correctly whether the record is persisted or not (no ID set)
         if res
-          res = (res.id != self.id) || self.completed
+          res = (res.id != self.id) || (self.respond_to?(:completed) && self.completed)
         end
         @file_uniqueness = !res
         unless @file_uniqueness
