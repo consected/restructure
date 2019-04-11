@@ -17,6 +17,7 @@
   <% (permitted_params - [:id]).each do |p| %>
       <%
         col = object_instance.class.columns_hash[p.to_s]
+        next unless col
         col_type = col.type
       %>
       <div class="form-group" data-out-attr-name="<%= p %>" data-out-object-name="<%= object_instance.class.name.ns_underscore %>">

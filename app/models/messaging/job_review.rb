@@ -12,4 +12,7 @@ class Messaging::JobReview < Delayed::Job
     end
   end
 
+  def current_admin= admin
+  end
+
 end

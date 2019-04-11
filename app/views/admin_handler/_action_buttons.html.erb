@@ -1,5 +1,7 @@
 <%= link_to 'logout', destroy_admin_session_path, method: :delete, class: 'btn btn-danger' %>
-<% no_create = false %>
+<%
+  no_create = no_edit rescue nil
+%>
 <% unless controller_name == 'pages' %>
   <%= link_to "admin menu", "/", class: "btn btn-warning" %>
 

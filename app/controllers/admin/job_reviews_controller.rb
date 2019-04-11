@@ -39,13 +39,17 @@ class Admin::JobReviewsController < AdminController
     end
 
     def no_edit
-      true
+      false
     end
 
 
   private
-    def permitted_params
+    def index_params
       [:id, :priority, :attempts, :handler, :last_error, :run_at, :locked_at, :failed, :failed_at, :locked_by, :queue, :created_at, :updated_at]
+    end
+
+    def permitted_params
+      [:priority, :attempts, :last_error, :run_at, :locked_at, :failed_at, :locked_by, :queue]
     end
 
     def human_name

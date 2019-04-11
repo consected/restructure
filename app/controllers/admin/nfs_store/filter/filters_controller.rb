@@ -14,6 +14,9 @@
             NfsStore::Filter::Filter
           end
 
+          def human_name
+            'File Filters'
+          end
 
           def default_index_order
             "app_type_id asc, translate(resource_name, '__', 'ZZZZ') asc, #{Admin::UserAccessControl.priority_order}"
