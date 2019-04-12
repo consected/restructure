@@ -118,6 +118,12 @@ RSpec.describe 'electronic signature of records', type: 'model' do
 
   describe "at time of applying the signature" do
     before :each do
+      # Recreate a new user for each test, since one time codes can' be reused
+      @user, @good_password = create_user
+      setup_access_as :user
+      add_user_to_role 'nfs_store group 600'
+      @master.current_user = @user
+
       raise "Password can not be blank for successful tests" if @good_password.blank?
       @al = create_item
       @signed_document = @al.prepare_activity_for_signature
@@ -221,6 +227,12 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   describe "after signing" do
 
     before :each do
+      # Recreate a new user for each test, since one time codes can' be reused
+      @user, @good_password = create_user
+      setup_access_as :user
+      add_user_to_role 'nfs_store group 600'
+      @master.current_user = @user
+
       @al = create_item
       @signed_document = @al.prepare_activity_for_signature
 

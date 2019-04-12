@@ -32,6 +32,11 @@ module ESignImportConfig
     create_admin
     create_user
 
+    al = ActivityLog.active.where(name: 'Test E Signature').first
+    if al.disabled?
+      al.update! current_admin: @admin, disabled: false
+    end
+
     Admin::AppType.import_config File.read(Rails.root.join('db', 'app_configs', 'test esign_config.json')), @admin
 
     # Make sure the activity log configuration is available
