@@ -3,19 +3,19 @@ default:
 
     ix_consent_blank_yes_no: Subject able to give informed consent and willing and able to comply with study procedures
     ix_consent_details: Notes
-    ix_not_pro_blank_yes_no: Not a former professional football player
+    ix_not_pro_blank_yes_no: Former professional football player
     ix_not_pro_details: Notes
     ix_age_range_blank_yes_no: Aged 24-55 at age of Q1 completion
     ix_age_range_details: Notes
     ix_weight_ok_blank_yes_no: Weight ≤450lbs
     ix_weight_ok_details: Notes
-    ix_no_seizure_blank_yes_no: No history of seizure disorder
+    ix_no_seizure_blank_yes_no: History of seizure disorder
     ix_no_seizure_details: Notes
-    ix_no_device_impl_blank_yes_no: No device implants such as cardiac pacemakers or perfusion pumps that cannot be removed.
+    ix_no_device_impl_blank_yes_no: Device implants such as cardiac pacemakers or perfusion pumps that cannot be removed.
     ix_no_device_impl_details: |
       <p>Additional Notes</p>
       </p><i>Documentation is required to assess MR safety. This should be obtained from the participant prior to the visit and scanned / uploaded in the Supporting Files activity to allow review.</i></p>
-    ix_no_ferromagnetic_impl_blank_yes_no: No ferromagnetic implants or objects that cannot be removed such as aneurysm clips, surgical clips, prostheses, artificial hearts, valves with steel parts, metal fragments, shrapnel, tattoos near the eye, or steel implants or jewelry
+    ix_no_ferromagnetic_impl_blank_yes_no: Ferromagnetic implants or objects that cannot be removed such as aneurysm clips, surgical clips, prostheses, artificial hearts, valves with steel parts, metal fragments, shrapnel, tattoos near the eye, or steel implants or jewelry
     ix_no_ferromagnetic_impl_details: Notes
     ix_diagnosed_sleep_apnea_blank_yes_no: <p><b>Afflictions</b></p><hr/><p>Self-report of having had a healthcare provider diagnose sleep apnea</p>
     ix_diagnosed_sleep_apnea_details: Notes
@@ -25,11 +25,11 @@ default:
     ix_chronic_pain_and_meds_details: Notes
     ix_tmoca_score_blank_yes_no: Telephone Montreal Cognitive Assessment (T-MoCA) score of ≤19 out of 22 total points
     ix_tmoca_score_details: Notes
-    ix_no_hemophilia_blank_yes_no: <p><b>QST</b></p><p>No history of hemophilia</p>
+    ix_no_hemophilia_blank_yes_no: <p><b>QST</b></p><p>History of hemophilia</p>
     ix_no_hemophilia_details: Notes
-    ix_raynauds_ok_blank_yes_no: No moderate to severe Raynaud’s disease
+    ix_raynauds_ok_blank_yes_no: Moderate to severe Raynaud’s disease
     ix_raynauds_ok_details: Notes
-    ix_mi_ok_blank_yes_no: No recent MI
+    ix_mi_ok_blank_yes_no: Recent MI
     ix_mi_ok_details: Notes
     ix_bicycle_ok_blank_yes_no: <p><b>Cardiac</b></p><p>Able to sit on and pedal a bicycle</p>
     ix_bicycle_ok_details: Notes

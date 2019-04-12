@@ -1,3 +1,4 @@
+set search_path=ipa_ops, ml_app;
 /*
 Prepare inclusion / exclusion checklist from phone screen
 
@@ -7,7 +8,7 @@ Ensure it references the original phone screen dynamic model record.
 */
 
 
-DROP FUNCTION IF EXISTS ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() CASCADE;
+-- DROP FUNCTION IF EXISTS ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() CASCADE;
 
 CREATE OR REPLACE FUNCTION ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() RETURNS trigger
 LANGUAGE plpgsql
@@ -327,4 +328,4 @@ $$;
 
 
 
-CREATE TRIGGER ipa_ps_to_inex AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_ipa_assignment_phone_screens_callback_set();
+-- CREATE TRIGGER ipa_ps_to_inex AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_ipa_assignment_phone_screens_callback_set();

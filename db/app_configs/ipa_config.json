@@ -3675,6 +3675,21 @@
         "created_at": "2019-04-04T11:54:43.406Z",
         "updated_at": "2019-04-04T11:54:43.406Z",
         "user_email": null
+      },
+      {
+        "id": 545,
+        "user_id": null,
+        "resource_type": "general",
+        "resource_name": "view_reports",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 4,
+        "app_type_id": 9,
+        "role_name": "user - participant details",
+        "created_at": "2019-04-10T15:54:41.229Z",
+        "updated_at": "2019-04-10T15:54:41.229Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -10231,12 +10246,12 @@
       {
         "id": 43,
         "app_type_id": 9,
-        "role_name": "reviewer - tms",
+        "role_name": "!reviewer - tms",
         "user_id": 1,
         "admin_id": 4,
         "disabled": false,
         "created_at": "2019-01-17T11:51:02.774Z",
-        "updated_at": "2019-01-25T16:54:19.110Z",
+        "updated_at": "2019-04-10T15:55:16.782Z",
         "user_email": "phil_ayres@hms.harvard.edu"
       },
       {
