@@ -17,6 +17,12 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+- [Changed] Allow configuration of one time code drift (to account for different authenticator apps and time drift between phones and server)
+- [Changed] Allow per-server configuration of number of password attempts before lockout
+- [Fixed] Ensure e-signature one time code accounts for time drift during signature
+
 ## [7.2.11] - 2019-04-11
 
 - [Fixed] [Filestore] Some archives didn't finish processing
