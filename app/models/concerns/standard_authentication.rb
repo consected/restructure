@@ -129,7 +129,7 @@ module StandardAuthentication
   # @return (Boolean)
   # true if valid
   def validate_one_time_code code
-    if code == self.current_otp
+    if validate_and_consume_otp!(code)
       self.otp_required_for_login = true
       self.save
     end

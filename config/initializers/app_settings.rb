@@ -29,10 +29,12 @@ class Settings
   AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'fphs-admin@hms.harvard.edu'
 
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
+  TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
 
   CheckPrevPasswords = (ENV['FPHS_CHECK_PREV_PASSWORDS'] || (Rails.env.development? ? 0 : 5)).to_i
   PasswordAgeLimit = (ENV['FPHS_PASSWORD_AGE_LIMIT'] || 90).to_i
   PasswordReminderDays = (ENV['FPHS_PASSWORD_REMINDER_DAYS'] || 5).to_i
+  PasswordMaxAttempts = (ENV['FPHS_PASSWORD_MAX_ATTEMPTS'] || 3).to_i
 
   EnvironmentName = ENV['FPHS_ENV_NAME'] || 'unknown'
   BaseUrl = ENV['BASE_URL']
