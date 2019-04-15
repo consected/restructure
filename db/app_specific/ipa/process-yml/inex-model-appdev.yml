@@ -13,8 +13,8 @@ default:
     ix_no_seizure_details: Notes
     ix_no_device_impl_blank_yes_no: Device implants such as cardiac pacemakers or perfusion pumps that cannot be removed.
     ix_no_device_impl_details: |
-      <p>Additional Notes</p>
-      </p><i>Documentation is required to assess MR safety. This should be obtained from the participant prior to the visit and scanned / uploaded in the Supporting Files activity to allow review.</i></p>
+      Additional Notes
+      <i>Documentation is required to assess MR safety. This should be obtained from the participant prior to the visit and scanned / uploaded in the Supporting Files activity to allow review.</i>
     ix_no_ferromagnetic_impl_blank_yes_no: Ferromagnetic implants or objects that cannot be removed such as aneurysm clips, surgical clips, prostheses, artificial hearts, valves with steel parts, metal fragments, shrapnel, tattoos near the eye, or steel implants or jewelry
     ix_no_ferromagnetic_impl_details: Notes
     ix_diagnosed_sleep_apnea_blank_yes_no: <p><b>Afflictions</b></p><hr/><p>Self-report of having had a healthcare provider diagnose sleep apnea</p>
