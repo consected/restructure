@@ -12332,6 +12332,17 @@
         "created_at": "2019-04-04T08:16:28.413Z",
         "updated_at": "2019-04-04T08:16:28.413Z",
         "user_email": "byates@partners.org"
+      },
+      {
+        "id": 345,
+        "app_type_id": 9,
+        "role_name": "allow uploads",
+        "user_id": 42,
+        "admin_id": 6,
+        "disabled": false,
+        "created_at": "2019-04-12T19:08:51.926Z",
+        "updated_at": "2019-04-12T19:08:51.926Z",
+        "user_email": "dterry@mgh.harvard.edu"
       }
     ],
     "associated_message_templates": [
