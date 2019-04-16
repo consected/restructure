@@ -17,6 +17,10 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+- [Fixed] Bug that allowed files with names that didn't match filters to be uploaded if the first file did match
+
 ## [7.2.12] - 2019-04-12
 
 - [Changed] Allow configuration of one time code drift (to account for different authenticator apps and time drift between phones and server)
