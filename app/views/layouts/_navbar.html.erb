@@ -18,7 +18,9 @@
         <li><span class="select"><%= select_tag :use_app_type, options_for_select( @app_type_switches, selected: current_user.app_type_id), id: 'use_app_type_select', data: {app_type_id: current_user.app_type_id}, class: 'has-value attached-has-value form-control input-sm ff' %></span></li>
         <% end %>
 
-        <% @primary_navs.reject{|a| a[:label].blank? }.each do |nav| %>
+        <%
+        if current_user && current_user.app_type_id
+          @primary_navs.reject{|a| a[:label].blank? }.each do |nav| %>
         <li <% if nav[:active] %>class="active"<% end %> ><%= link_to nav[:label].html_safe, nav[:url], nav[:extras] %>
           <% if nav[:sub] %>
           <ul class="dropdown-menu" role="menu">
@@ -28,9 +30,12 @@
           </ul>
           <% end %>
         </li>
-        <% end %>
+        <%
+          end
+        end
+        %>
       </ul>
-      <% if current_user && !app_config_set(:hide_navbar_search) %>
+      <% if current_user && !app_config_set(:hide_navbar_search) && current_user.app_type_id %>
         <%= form_tag msid_search_path, method: :get,  class: "navbar-form navbar-left", role: "search" do %>
           <div class="form-group">
             <%= text_field_tag :nav_q, params[:nav_q], class: "form-control", placeholder: "MSID Search" %>
