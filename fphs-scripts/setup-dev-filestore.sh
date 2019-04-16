@@ -3,7 +3,15 @@ if [ "$(whoami)" != 'root' ]; then
   echo Must be sudo to run
   exit
 fi
-FS_ROOT=/media/phil/1081E6F600D5E861/test-fphsfs
+MOUNTPOINT=/media/phil/1081E6F600D5E861
+
+if [ ! $(mountpoint "${MOUNTPOINT}") ]
+then
+  echo "${MOUNTPOINT} is not a real mount point. Check the file system is mounted correctly at this location"
+  exit 1
+fi
+
+FS_ROOT=${MOUNTPOINT}/test-fphsfs
 FS_DIR=main
 MOUNT_ROOT=/mnt/fphsfs
 WEBAPP_USER=${USER}

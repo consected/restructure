@@ -868,6 +868,7 @@ _fpa.form_utils = {
           clearBtn: true,
           autoclose: true,
           todayHighlight: true,
+          todayBtn: 'linked',
           format: _fpa.user_prefs.date_format
         });
 

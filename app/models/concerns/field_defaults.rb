@@ -15,6 +15,8 @@ module FieldDefaults
         res = DateTime.now
       elsif default == 'now()'
         res = DateTime.now
+      elsif default == 'today()'
+        res = DateTime.now.iso8601.split('T').first
       elsif default == 'user_email'
         res = obj.user&.email
       elsif default == 'current_user'
