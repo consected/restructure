@@ -331,6 +331,8 @@
       <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_yes_no$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
     {{else is @key 'includes' '_no_yes' }}
       <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_no_yes$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
+    {{else is @key 'includes' '_check$' }}
+        <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_check$' }} <strong>{{#is this true}}<i class="glyphicon glyphicon-ok"></i>{{/is}}</strong></li>
     {{else is @key 'includes' '_time$' }}
       <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong>{{local_time this}}</strong></li>
     {{else is @key 'includes' '_notes' }}

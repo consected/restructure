@@ -105,7 +105,14 @@ _fpa.postprocessors = {
             var e = $(this);
             var obj_name = e.attr('data-object-name');
             var a_name = e.attr('data-attr-name');
-            form_data[obj_name][a_name] = e.val();
+
+            if (e.attr('type') == 'checkbox') {
+              form_data[obj_name][a_name] = e.is(':checked');  
+            }
+            else {
+              form_data[obj_name][a_name] = e.val();
+            }
+
             _fpa.show_if.methods.show_items(block, form_data[obj_name]);
           });
           for(var fe in form_data) {
