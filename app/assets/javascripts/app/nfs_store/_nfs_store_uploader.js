@@ -384,7 +384,7 @@ _nfs_store.uploader = function ($outer) {
         // blocks left to complete?
         var next_block = getFileBlock();
         if(!abortClicked && next_block.length > 0) {
-          submitNext();
+          submitNext(that, e);
         }
         else {
           showAddFilesButton();

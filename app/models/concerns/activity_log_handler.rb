@@ -363,6 +363,7 @@ module ActivityLogHandler
             # Check if the user has access to create the item
 
             mrc = ModelReference.to_record_class_for_type(ref_type)
+            raise FphsException.new "Reference type is invalid: #{ref_type}" if mrc.nil?
             if mrc.parent == ActivityLog
               elt = ref_config[:add_with] && ref_config[:add_with][:extra_log_type]
               o = mrc.new(extra_log_type: elt, master: master)
