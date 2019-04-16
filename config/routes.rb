@@ -113,7 +113,7 @@ Rails.application.routes.draw do
   namespace :nfs_store do
     resources :browse, only: :show
     resources :container_list, only: :show
-    resources :chunk, :only => [:create, :show]
+    resources :chunk, :only => [:create, :show, :update]
     post 'downloads/multi', to: 'downloads#multi'
     resources :downloads, :only => [:show, :create]
     resources :classification, only: [:edit, :create]

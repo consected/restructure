@@ -139,6 +139,8 @@ class ExtraLogType < ExtraOptions
       self.save_trigger[:on_create] = os.merge(oc)
     end
 
+    self.save_trigger[:on_upload] ||= {}
+
   end
 
 
@@ -156,10 +158,12 @@ class ExtraLogType < ExtraOptions
     ca.calc_save_action_if
   end
 
-  def calc_save_trigger_if obj
+  def calc_save_trigger_if obj, alt_on: nil
     ca = ConditionalActions.new self.save_trigger, obj
 
-    if obj._created
+    if alt_on == :upload
+      action = :on_upload
+    elsif obj._created
       action = :on_create
     elsif obj._updated
       action = :on_update

@@ -206,6 +206,28 @@ _nfs_store.uploader = function ($outer) {
       $outer.find('.refresh-container-list').click();
     };
 
+    var uploadAllDone = function () {
+      var al = getActivityLog();
+      var containerId = getContainerId();
+
+
+      var test_params = {
+        activity_log_id: al.activity_log_id,
+        activity_log_type: al.activity_log_type,
+        container_id: containerId,
+        do: 'done'
+      };
+
+      $.ajax({
+        url:fileupload_config.url + '/' + containerId,
+        data: test_params,
+        type: 'PUT',
+        success: function (result) {
+            console.log('Sent all done message');
+        }
+      });
+    };
+
     var getContainerId = function() {
       return $outer.find('#uploader_container_id').val();
     };
@@ -235,7 +257,7 @@ _nfs_store.uploader = function ($outer) {
         if(chunk_hashes.length == 1)
           data.formData.chunk_hash = chunk_hashes.shift();
 
-        var al = getActivityLog()
+        var al = getActivityLog();
         if(that) {
 
           var test_params = {
@@ -389,6 +411,7 @@ _nfs_store.uploader = function ($outer) {
         else {
           showAddFilesButton();
           refreshContainerList();
+          uploadAllDone();
         }
       })
 

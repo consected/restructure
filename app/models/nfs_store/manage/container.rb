@@ -95,6 +95,14 @@ module NfsStore
         master.current_user
       end
 
+      # Inform the container that a set of uploads have completed
+      # This may cause notifications or other events to fire
+      def upload_done
+        if self.parent_item.can_edit? && self.parent_item
+          self.parent_item.extra_log_type_config.calc_save_trigger_if self, alt_on: :upload
+        end
+      end
+
       # Name of directory for container. This must be a single name and not contain backslashes
       # Can be overridden in app implementation, but beware not to change
       # after containers are created, since they will not be found

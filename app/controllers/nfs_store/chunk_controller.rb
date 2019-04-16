@@ -83,6 +83,23 @@ module NfsStore
       end
     end
 
+    def update
+
+      return not_found unless @container
+
+      act = params[:do]
+
+      if act == 'done'
+        @container.upload_done
+      else
+        return not_authorized
+      end
+
+      render json: {
+        result: 'done'
+      }
+    end
+
     private
 
 

@@ -248,17 +248,25 @@ module CalcActions
       # Allow a list of possible conditions to be used
       expected_vals = [expected_vals] unless expected_vals.is_a?(Array) && expected_vals.first.is_a?(Hash)
       expected_vals.each do |expected_val|
-        if table == :this
+        if table == :this || table == :parent
+          if table == :this
+            in_instance = current_instance
+          elsif table == :parent
+            in_instance = current_instance.parent_item
+          end
+
+          raise FphsException.new "Instance not found for #{table}" unless in_instance
+
           if expected_val.is_a?(Hash)
             if is_selection_type field_name
-              ca = ConditionalActions.new({field_name => expected_val}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
+              ca = ConditionalActions.new({field_name => expected_val}, in_instance, current_scope: @condition_scope, return_failures: return_failures)
               res &&= ca.calc_action_if
               @skip_merge = true
             elsif expected_val.keys.first == :validate
-              res &&= calc_complex_validation expected_val[:validate], current_instance.attributes[field_name.to_s]
+              res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
             end
           else
-            this_val = current_instance.attributes[field_name.to_s]
+            this_val = in_instance.attributes[field_name.to_s]
             if expected_val.is_a? Array
               array_res = false
               expected_val.each do |e|
@@ -316,12 +324,15 @@ module CalcActions
 
           t_conds.each do |field_name, val|
 
-            non_query_condition = table_name.in?([:this, :user])
+            non_query_condition = table_name.in?([:this, :user, :parent])
             if val.is_a? Hash
               val_item_key = val.first.first
               if val_item_key == :this && !val.first.last.is_a?(Hash)
                 # non_query_condition = true
                 val = @current_instance.attributes[val.first.last]
+              elsif val_item_key == :parent && !val.first.last.is_a?(Hash)
+                # non_query_condition = true
+                val = @current_instance.parent_item.attributes[val.first.last]
               elsif val_item_key == :this_references && !val.first.last.is_a?(Hash)
                 att = val.first.last
                 # non_query_condition = true
@@ -398,7 +409,7 @@ module CalcActions
           end
         end
       end
-      join_tables = (join_tables - [:this, :this_references, :parent_references, :user, :master, :condition, :value]).uniq
+      join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value]).uniq
 
       @base_query = @current_scope.joins(join_tables)
     end

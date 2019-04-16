@@ -21,8 +21,9 @@
           <table>
             <tr><td>from:</td><td><%= list_item.from_user_email %></td></tr>
             <tr><td>to:</td><td><%= list_item.recipient_emails.join('; ') %></td></tr>
+            <tr><td>role:</td><td><%= list_item.role_name %></td></tr>
             <tr><td>subject:</td><td><%= list_item.subject %></td></tr>
-            <tr><td>sent:</td><td data-format-date-local="true"><%= list_item.updated_at %></td></tr>
+            <tr><td>sent:</td><td data-format-date-local="false"><%= list_item.updated_at %></td></tr>
           </table>
           <p><button class="btn btn-small" data-toggle="unhide" data-target="#extra-attributes-<%=list_item.id%>">additional fields</button></p>
           <table class="extra-attributes hidden" id="extra-attributes-<%=list_item.id%>">
