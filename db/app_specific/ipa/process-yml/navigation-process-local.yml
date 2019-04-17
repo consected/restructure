@@ -101,17 +101,22 @@ planned_event:
   - select_event_type
   - other_event_type
   - select_station
+  - location
   - event_date
   - start_time
   - completion_time
   - select_status
   - select_navigator
+  - select_pi
   - other_navigator_notes
 
   field_options:
     select_navigator:
       edit_as:
         field_type: select_user_with_role_user_-_navigation
+    select_pi:
+      edit_as:
+        field_type: select_user_with_role_pi
 
   show_if:
     other_event_type:
@@ -122,7 +127,7 @@ planned_event:
 
   caption_before:
     select_event_type:
-      caption: Select event type
+      caption: Event type
       keep_label: true
     event_date:
       caption: Enter planned date and time
@@ -132,6 +137,8 @@ planned_event:
         Select whether all resources (including the assessment and clinical reads) have been <i>Confirmed</i>, scheduling is <i>In Progress</i>, or the event has been <i>Canceled</i>.
     select_navigator:
       caption: Navigator assigned to coordinate
+    select_pi:
+      caption: PI assigned to coordinate
     other_navigator_notes:
       caption: |
         Notes for navigator or planner. These notes can be added and amended at any time.
@@ -168,6 +175,7 @@ planned_event:
         select_station: "{{select_station}}"
         select_event_type: "{{select_event_type}}"
         other_event_type: "{{other_event_type}}"
+        location: "{{location}}"
 
       view_as:
         edit: hide
@@ -182,6 +190,7 @@ station_event:
   - select_event_type
   - other_event_type
   - select_station
+  - location
   - event_date
   - arrival_time
   - start_time
@@ -252,6 +261,7 @@ general_event:
   - event_date
   - select_event_type
   - other_event_type
+  - location
   - start_time
   - event_notes
   - completion_time
