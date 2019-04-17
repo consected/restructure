@@ -17,7 +17,7 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [Unreleased]
+## [7.2.14] - 2019-04-17
 
 - [Fixed] Bug preventing editable reports working correctly
 - [Fixed] Bug that showed the MSID style searches in the nav bar when requesting the two factor authentication QR code setup the first time
