@@ -33,7 +33,7 @@ module ESignImportConfig
     create_user
 
     al = ActivityLog.active.where(name: 'Test E Signature').first
-    if al.disabled?
+    if al&.disabled?
       al.update! current_admin: @admin, disabled: false
     end
 
