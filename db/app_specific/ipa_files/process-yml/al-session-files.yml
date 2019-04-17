@@ -1,0 +1,248 @@
+_default:
+
+  field_options:
+    operator:
+      edit_as:
+        field_type: select_record_from_table_ipa_file_creators
+
+    select_status:
+      include_blank: false
+      edit_as:
+        alt_options:
+          open: open
+          closed: closed
+          delete: delete
+
+    select_confirm_status:
+      edit_as:
+        alt_options:
+          confirmed: confirmed
+
+  fields:
+#    - session_date
+#    - session_time
+    - select_status
+    - select_confirm_status
+    - notes
+
+  caption_before:
+#    session_date:
+#      keep_label: true
+#      caption: Date and time of the assessment session related to these files
+    select_status: |
+      Select the status of the container.
+      <b>open</b> - container is open and files can be added
+      <b>closed</b> - container is closed and made read-only
+      <b>delete</b> - mark container for deletion, allowing a new container of this type to be created to replace it
+    select_confirm_status: |
+      Confirm that the container is to be closed or marked for deletion.
+      After saving, the container will be locked and additional changes will be prevented.
+    notes: Description and Notes
+
+  show_if:
+    select_confirm_status:
+      select_status:
+        - closed
+        - delete
+
+  valid_if:
+    on_save:
+      any:
+        this:
+          select_status: open
+          select_confirm_status: confirmed
+
+  editable_if:
+    any:
+      user:
+        role_name: admin - ipa files
+
+      this:
+        not_all:
+          this:
+            select_status:
+              - closed
+              - delete
+
+  showable_if:
+    not_all:
+      this:
+        select_status: delete
+
+  save_trigger:
+    on_create:
+      create_filestore_container:
+        name: session files
+        label: Session Files
+        create_with_role: nfs_store group 600
+
+  references:
+    dynamic_model__ipa_file_creator:
+      label: Operator
+      from: this
+      add: many
+      view_as:
+        show: not_embedded
+        edit: select_or_add
+        new: select_or_add
+
+    nfs_store__manage__container:
+      from: this
+      add: one_to_this
+      view_as:
+        edit: hide
+        show: filestore
+        new: not_embedded
+
+  view_options:
+    alt_order:
+      - session_date
+      - session_time
+      - name
+
+
+baseline:
+  label: Baseline
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: baseline
+        select_status:
+          - open
+          - closed
+
+
+pet:
+  label: PET
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: pet
+        select_status:
+          - open
+          - closed
+
+
+olfactory:
+  label: Olfactory
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: olfactory
+        select_status:
+          - open
+          - closed
+
+pain:
+  label: Pain
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: pain
+        select_status:
+          - open
+          - closed
+
+brain_behavior:
+  label: Brain / Behavior
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: brain_behavior
+        select_status:
+          - open
+          - closed
+
+
+
+mri:
+  label: MRI / Liver MR
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: mri
+        select_status:
+          - open
+          - closed
+
+physical_function:
+  label: Physical Function
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: physical_function
+        select_status:
+          - open
+          - closed
+
+tms_eeg:
+  label: TMS / EEG
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: tms_eeg
+        select_status:
+          - open
+          - closed
+
+sleep:
+  label: Sleep
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: sleep
+        select_status:
+          - open
+          - closed
+
+cardiac:
+  label: Cardiac
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: cardiac
+        select_status:
+          - open
+          - closed
+
+xray:
+  label: X-Ray
+
+  creatable_if:
+    not_all:
+      activity_log__ipa_assignment_session_filestores:
+        extra_log_type: xray
+        select_status:
+          - open
+          - closed
+
+session:
+  label: Not Used
+  creatable_if:
+    never: true
+
+
+filtered_session:
+  label: Not Used
+  creatable_if:
+    never: true
+
+filtered:
+  label: Not Used
+  creatable_if:
+    never: true
+
+
+brain_behavior_qs:
+  label: Not Used
+  creatable_if:
+    never: true
