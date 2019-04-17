@@ -19,12 +19,13 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 
 ## [7.2.14] - 2019-04-17
 
+- [Changes] [IPA] TMS review discussion to include Staff Member
+- [Changes] [IPA] Navigation Planned Events and Event Feedback adds PI Assigned to Coordinate, and Location
+- [Changes] [Filestore] Provide a mechanism for notifying users after a set of files has been uploaded successfully
 - [Fixed] Bug preventing editable reports working correctly
 - [Fixed] Bug that showed the MSID style searches in the nav bar when requesting the two factor authentication QR code setup the first time
 - [Fixed] [Filestore] Ensure that filenames are checked against filters for every file in a multiple upload
 - [Changes] Allow checkboxes to be used in editable forms
-- [Changes] [Filestore] Provide a mechanism for notifying users after a set of files has been uploaded successfully
-- [Changes] [IPA] TMS review discussion to include Staff Membergit st
 
 ## [7.2.13] - 2019-04-16
 
