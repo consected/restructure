@@ -1,6 +1,6 @@
 _default:
 
-  field_options:
+  field_options: &field_options
     operator:
       edit_as:
         field_type: select_record_from_table_ipa_file_creators
@@ -23,6 +23,7 @@ _default:
 #    - session_time
     - select_status
     - select_confirm_status
+    - select_notify_role_name
     - notes
 
   caption_before:
@@ -38,6 +39,8 @@ _default:
       Confirm that the container is to be closed or marked for deletion.
       After saving, the container will be locked and additional changes will be prevented.
     notes: Description and Notes
+
+    select_notify_role_name: To notify users when an upload has completed, select the role name
 
   show_if:
     select_confirm_status:
@@ -76,6 +79,29 @@ _default:
         label: Session Files
         create_with_role: nfs_store group 600
 
+
+    on_upload:
+      notify:
+#      - type: email
+#        users:
+#          this:
+#            user_id: return_value
+#        layout_template: ipa notification layout
+#        content_template: ipa message content
+#        subject: File Upload Complete
+      - type: email
+        role:
+          parent:
+            select_notify_role_name: return_value
+        layout_template: ipa notification layout
+        content_template: ipa message content
+        subject: File Upload Complete
+        if:
+          not_all:
+            this:
+              select_notify_role_name: ''
+
+
   references:
     dynamic_model__ipa_file_creator:
       label: Operator
@@ -103,6 +129,16 @@ _default:
 
 baseline:
   label: Baseline
+
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - baseline
+
+
+
   creatable_if:
     not_all:
       activity_log__ipa_assignment_session_filestores:
@@ -123,6 +159,14 @@ pet:
           - open
           - closed
 
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - pet
+
+
 
 olfactory:
   label: Olfactory
@@ -135,6 +179,13 @@ olfactory:
           - open
           - closed
 
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - olfactory
+
 pain:
   label: Pain
 
@@ -145,6 +196,14 @@ pain:
         select_status:
           - open
           - closed
+
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - pain
+
 
 brain_behavior:
   label: Brain / Behavior
@@ -157,6 +216,12 @@ brain_behavior:
           - open
           - closed
 
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - brain / behavior
 
 
 mri:
@@ -170,6 +235,14 @@ mri:
           - open
           - closed
 
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - mri
+
+
 physical_function:
   label: Physical Function
 
@@ -180,6 +253,14 @@ physical_function:
         select_status:
           - open
           - closed
+
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - physical function
+
 
 tms_eeg:
   label: TMS / EEG
@@ -192,6 +273,14 @@ tms_eeg:
           - open
           - closed
 
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - tms eeg
+
+
 sleep:
   label: Sleep
 
@@ -202,6 +291,14 @@ sleep:
         select_status:
           - open
           - closed
+
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - sleep
+
 
 cardiac:
   label: Cardiac
@@ -214,6 +311,14 @@ cardiac:
           - open
           - closed
 
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - cardiac
+
+
 xray:
   label: X-Ray
 
@@ -224,6 +329,14 @@ xray:
         select_status:
           - open
           - closed
+
+  field_options:
+    <<: *field_options
+    select_notify_role_name:
+      edit_as:
+        alt_options:
+          - email - xray
+
 
 session:
   label: Not Used
