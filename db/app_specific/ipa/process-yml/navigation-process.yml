@@ -128,11 +128,24 @@ planned_event:
       caption: Enter planned date and time
       keep_label: true
     select_status:
-      caption: Select confirmation or cancellation status
+      caption: |
+        Select whether all resources (including the assessment and clinical reads) have been <i>Confirmed</i>, scheduling is <i>In Progress</i>, or the event has been <i>Canceled</i>.
     select_navigator:
       caption: Navigator assigned to coordinate
     other_navigator_notes:
-      caption: Notes for navigator or planner
+      caption: |
+        Notes for navigator or planner. These notes can be added and amended at any time.
+    submit:
+      caption: |
+        After saving, add a Tech contact for each resource to be scheduled.
+    reference_dynamic_model__ipa_station_contact:
+      caption: |
+        Add a <i>Tech Contact</i> for each scheduled resource by clicking <b>+&nbsp;Tech&nbsp;Contact</b>, then select an existing <i>Tech Contact</i> from the drop-down below, or select <i>(add new)</i> to add a new contact.
+        For example, MRI will require a <i>Tech Contact</i> for the assessment, plus for liver and brain clinical reads.
+#    reference_activity_log__ipa_assignment_navigation:
+#      caption: |
+#        Add feedback for this event
+
 
   references:
     dynamic_model__ipa_station_contact:
