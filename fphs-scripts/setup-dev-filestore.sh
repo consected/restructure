@@ -5,7 +5,7 @@ if [ "$(whoami)" != 'root' ]; then
 fi
 MOUNTPOINT=/media/phil/1081E6F600D5E861
 
-if [ ! $(mountpoint "${MOUNTPOINT}") ]
+if [ ! "$(mountpoint "${MOUNTPOINT}")" ]
 then
   echo "${MOUNTPOINT} is not a real mount point. Check the file system is mounted correctly at this location"
   exit 1

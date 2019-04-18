@@ -3,10 +3,11 @@ module NfsStore
     class Mounter
 
       ArchiveExtensions = ['.zip', '.tar', '.gz', '.bz2'].freeze
-      ArchiveMountSuffix = '.__mounted-archive__'
-      ProcessingArchiveSuffix = '.__processing-archive__'
-      MountPerms = '227'
-      ExtractionTimeout = 300
+      ArchiveMountSuffix = '.__mounted-archive__'.freeze
+      ProcessingArchiveSuffix = '.__processing-archive__'.freeze
+      ProcessingIndexSuffix = '.__processing-index__'.freeze
+      MountPerms = '227'.freeze
+      ExtractionTimeout = 1800
       ProcessingRetryTime = ExtractionTimeout + 240
       attr_accessor :stored_file
 
@@ -19,6 +20,12 @@ module NfsStore
         mounter.mount
       end
 
+      def self.index stored_file
+        mounter = self.new
+        mounter.stored_file = stored_file
+        mounter.index
+      end
+
       # Attempt to mount all stored files from a query
       # @param stored_files [ActiveRecord::Relation] query results for stored files to attempt to mount
       def self.mount_all stored_files
@@ -29,7 +36,12 @@ module NfsStore
             mounter.stored_file = sf
             # How old is the file?
             td = Time.now - File.ctime(sf.retrieval_path) rescue nil
-            sf.process_new_file unless (td && td < ProcessingRetryTime) || mounter.archive_extracted?
+            unless (td && td < ProcessingRetryTime) || mounter.archive_extracted?
+              puts "Retrying extract and indexing"
+              mounter.extract_completed!
+              mounter.index_completed!
+              sf.process_new_file
+            end
           end
         end
       end
@@ -72,14 +84,31 @@ module NfsStore
         FileUtils.rm_f(processing_archive_flag_path)
       end
 
+      def processing_index_flag_path
+        "#{stored_file.retrieval_path}#{ProcessingIndexSuffix}"
+      end
+
+
+      def index_in_progress?
+        File.exist?(processing_index_flag_path) && (Time.now - File.mtime(processing_index_flag_path)) < ProcessingRetryTime
+      end
+
+      def index_in_progress!
+        FileUtils.touch(processing_index_flag_path)
+      end
+
+      def index_completed!
+        FileUtils.rm_f(processing_index_flag_path)
+      end
 
       # Perform the mount operation, if possible. This operation is idempotent and
       # only operates on archive files with file names with appropriate file extensions.
       # Any file that doesn't match ArchiveExtensions is skipped.
       # Any file that is already mounted will not be mounted again.
-      # Regardless, an attempt will be made to extract archive files to the DB if an
-      # archive file was already, or has just been mounted.
       def mount
+
+        res = true
+
         if has_archive_extension?
 
           unless extract_in_progress?
@@ -110,15 +139,20 @@ module NfsStore
               puts "Setting permissions (gid=#{stored_file.current_gid.to_i}) on #{tmpzipdir}"
 
               FileUtils.chown_R nil, stored_file.current_gid.to_i, tmpzipdir
+
+              # Need to check number of files in zip file against number on filesystem after unzip
+              # unzip -v zipname.zip | grep 'Defl:N' | wc -l
+              # find zipname.zip.__mounted-archive__ -type f -print | wc -l
+              #
+
               puts "Copying #{tmpzipdir} to #{@mounted_path}"
               FileUtils.cp_r tmpzipdir, @mounted_path
               puts "Cleaning directory"
               FileUtils.rm_rf dir
               puts "Done with #{@mounted_path}"
 
-            end
 
-            res = extract_archived_files
+            end
 
             extract_completed! if res
           end
@@ -144,11 +178,17 @@ module NfsStore
       #   true if the archive has been extracted leading to at least one entry in the database
       #   false if the archive has not been extracted
       #   :in_progess if the current request is in progress
-      # @todo - resolve race condition on separate requests by making a db entry or filesystem entry?
       def archive_extracted?
         return @archive_extracted unless @archive_extracted.nil?
         @archive_file ||= stored_file.file_name
         @archive_extracted = NfsStore::Manage::ArchivedFile.extracted? stored_file.container, stored_file.path, @archive_file
+      end
+
+
+      def index
+        index_in_progress!
+        res = extract_archived_files
+        index_completed! if res
       end
 
 
@@ -158,11 +198,16 @@ module NfsStore
         # @return [Boolean] result true if all the archived files were extracted and stored
         def extract_archived_files
 
+          @archive_path = stored_file.retrieval_path
+          @mounted_path = "#{@archive_path}#{ArchiveMountSuffix}"
+          @archive_file = stored_file.file_name
           puts "Start to extract files? (archive not extracted? #{!archive_extracted?}) to DB for #{@mounted_path}"
 
           result = true
+          return true if archive_extracted?
 
-          unless archive_extracted?
+
+          NfsStore::Manage::ArchivedFile.transaction do
             start_time = Time.now
             iterations = 0
             failures = 0
@@ -205,7 +250,7 @@ module NfsStore
               if Time.now - start_time > ExtractionTimeout
                 Rails.logger.warn "Timeout in extract_archived_files after #{iterations} iterations, with #{failures} failures."
                 result = false
-                break
+                raise ActiveRecord::Rollback
               end
             end
 

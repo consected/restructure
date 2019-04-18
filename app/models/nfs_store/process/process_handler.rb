@@ -13,7 +13,7 @@ module NfsStore
       # Can be extended to dynamically select jobs based on container configuration
       # in the future
       def job_list
-        %w(mount_archive dicom_metadata)
+        %w(mount_archive index_files dicom_metadata)
       end
 
       # File path for flag to indicate file is being processed

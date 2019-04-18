@@ -32,10 +32,10 @@ module NfsStore
           container_file.current_user = container_file.user
           afs = container_file.archived_files.all
           afs.each do |af|
-            extract_metadata af
+            extract_metadata af unless af.content_type.blank?
           end
         else
-          extract_metadata container_file
+          extract_metadata container_file unless container_file.content_type.blank?
         end
 
 
@@ -45,6 +45,7 @@ module NfsStore
 
         container_file.current_user = container_file.user
         full_path = container_file.retrieval_path
+        return if container_file.content_type.blank?
 
         mh = NfsStore::Dicom::MetadataHandler.new(file_path: full_path)
         metadata = mh.extract_metadata

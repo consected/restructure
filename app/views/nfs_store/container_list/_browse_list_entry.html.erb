@@ -8,6 +8,10 @@
     file_name = file_name.sub(/\.__processing-archive__$/, '')
     is_processing_arch = true
 
+  elsif file_name.index /\.__processing-index__$/
+      file_name = file_name.sub(/\.__processing-index__$/, '')
+      is_processing_index = true
+
   elsif file_name.index /\.__processing__$/
     file_name = file_name.sub(/\.__processing__$/, '')
     is_processing = true
@@ -33,6 +37,7 @@
     <span class="browse-filename missing-db-entry"><%= file_name %>
       <% if is_processing %> <span class="file-processing-tag">(processing upload...)</span><% end %>
       <% if is_processing_arch %> <span class="file-processing-tag">(processing archive...)</span><% end %>
+      <% if is_processing_index %> <span class="file-processing-tag">(processing index...)</span><% end %>
     </span>
     <span class="browse-entry-meta missing-db-entry"></span>
     <span class="browse-entry-classifications missing-db-entry"></span>

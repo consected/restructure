@@ -28,6 +28,8 @@
       <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc).to_s %></td>
     <% elsif test_assoc_ids && list_item.respond_to?(test_assoc_ids) %>
       <td class="admin-field-<%=p%>"><%= list_item.send(test_assoc_ids).map(&:to_s).join("; ") %></td>
+    <% elsif p.to_s.end_with?('_error') %>
+      <td class="admin-field-<%=p%>"><pre class="expandable"><%= list_item.send(p) %></pre></td>
     <% else %>
       <% unless p.to_s.end_with?('options') || p.to_s.end_with?('template') %>
         <td class="admin-field-<%=p%>"><%= list_item.send(p) %></td>

@@ -41,3 +41,12 @@
   <%=  render partial: 'admin_handler/index_actions'  %>
   </div>
 </div>
+
+<script>
+
+      $('.expandable').not('.attached-exp').on('click', function(){
+          if($(this).attr('disabled')) return;
+          _fpa.form_utils.toggle_expandable($(this));
+      }).addClass('attached-exp');
+
+</script>
