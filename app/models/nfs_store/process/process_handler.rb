@@ -38,6 +38,7 @@ module NfsStore
         c = self.class.parents.first.const_get classname
         c.perform_later self.container_file
 
+        container_file.current_user = container_file.user
         container_file.last_process_name_run = name
         container_file.save!
 
@@ -52,6 +53,7 @@ module NfsStore
         next_name = next_job_after current_name
 
         unless next_name
+          container_file.current_user = container_file.user
           container_file.last_process_name_run = '_all_done_'
           container_file.save!
           FileUtils.rm_f processing_flag_file_path

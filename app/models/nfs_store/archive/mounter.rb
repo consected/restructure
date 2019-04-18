@@ -36,7 +36,7 @@ module NfsStore
             mounter.stored_file = sf
             # How old is the file?
             td = Time.now - File.ctime(sf.retrieval_path) rescue nil
-            unless (td && td < ProcessingRetryTime) || mounter.archive_extracted?
+            unless (td && td < ProcessingRetryTime) || mounter.archive_extracted? || sf.last_process_name_run == '_all_done_'
               puts "Retrying extract and indexing"
               mounter.extract_completed!
               mounter.index_completed!
