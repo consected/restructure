@@ -1,0 +1,24 @@
+# Fields: provider_name,report_sent_date,report_delivery_date,reports_sent_notes,anthropometrics_check,lab_results_check,dexa_check,brain_mri_check,neuro_psych_check,sensory_testing_check,liver_mri_check,physical_function_check,eeg_check,sleep_check,cardiac_check,xray_check
+
+default:
+
+  labels:
+    anthropometrics_check: Anthropometrics
+    lab_results_check: Lab Results
+    dexa_check: Dexa
+    brain_mri_check: Brain MRI
+    neuro_psych_check: Neuro Psych
+    sensory_testing_check: Sensory Testing
+    liver_mri_check: Liver MRI
+    physical_function_check: Physical Function
+    eeg_check: EEG
+    sleep_check: Sleep
+    cardiac_check: Cardiac
+    xray_check: X-Ray
+
+  caption_before:
+    all_fields: Reports sent to provider
+    provider_name: Provider name
+    report_sent_date: Date report was sent
+    report_delivery_date: Date of delivery report confirmation
+    reports_sent_notes: Which reports were sent to the provider?

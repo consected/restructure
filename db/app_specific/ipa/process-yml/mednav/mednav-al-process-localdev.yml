@@ -74,6 +74,61 @@ _definitions:
         create_with_role: nfs_store group 600
 
 
+######################
+
+  communication_fields: &communication_fields
+    - select_activity
+    - activity_date
+    - contact
+    - select_direction
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
+
+  communication_show_if: &communication_show_if
+    select_result:
+      not_any:
+        select_activity:
+          - schedule follow up
+          - completed
+    select_next_step:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_when:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_time:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    select_direction:
+      not_any:
+        select_activity:
+          - schedule follow up
+          - completed
+    contact:
+      not_any:
+        select_activity:
+          - completed
+
+
+  communication_field_options: &communication_field_options
+    select_result:
+      edit_as:
+        alt_options:
+          "Completed": completed
+          "Follow up": follow up
+    select_next_step:
+      edit_as:
+        alt_options:
+          "More Info Requested": more info requested
+          "No Follow Up": no follow up
+          "Email Back": email back
+          "Call Back": call back
+
 
 
 _default:
@@ -110,19 +165,15 @@ four_wk_followup:
       add: one_to_this
 
 
+#################################################
+participant_communication:
+  label: Participant Communication
+#################################################
 
-general:
-  label: General Communications
-  fields:
-    - select_activity
-    - activity_date
-    - select_record_from_player_contacts
-    #- select_direction
-    - select_result
-    - select_next_step
-    - follow_up_when
-    - follow_up_time
-    #- notes
+  fields: *communication_fields
+
+  show_if:
+    <<: *communication_show_if
 
   references:
     dynamic_model__ipa_mednav_followup:
@@ -131,6 +182,11 @@ general:
       prevent_disable: true
 
   field_options:
+    <<: *communication_field_options
+    contact:
+      edit_as:
+        field_type: select_record_from_player_contacts
+
     select_activity:
       edit_as:
         alt_options:
@@ -138,68 +194,93 @@ general:
           "Incidental Finding": incidental finding
           "Schedule Follow Up": schedule follow up
           "Mark All Previous As Completed": completed
-    select_result:
-      edit_as:
-        alt_options:
-          "Completed": completed
-          "Follow up": follow up
     select_direction:
       edit_as:
         alt_options:
           "To Staff": to staff
           "To Subject": to subject
-    select_next_step:
-      edit_as:
-        alt_options:
-          "More Info Requested": more info requested
-          "No Follow Up": no follow up
-          "Email Back": email back
-          "Call Back": call back
 
   caption_before:
     select_activity: Select an action:<ul><li>record a general communication</li><li>record an incidental finding call</li><li>schedule a follow up</li><li>mark all previous follow-ups completed</li></ul>
     activity_date: Date
-    select_record_from_player_contacts: The phone or email address
+    contact: The phone or email address
+    select_direction: Was the communication received by FPHS staff or sent to the subject?
     select_result: Is a follow up required, or is this communication complete?
-#    select_direction: Was the communication received by FPHS staff or sent to the subject?
-#    notes: Notes regarding a communication or to assist with a follow up
+
+
+#################################################
+provider_communication:
+  label: Provider Communication
+#################################################
+
+  fields: *communication_fields
 
   show_if:
-    select_result:
-      select_activity: general communications
+    <<: *communication_show_if
 
-    select_next_step:
-      any:
-        select_result: follow up
-        select_activity: schedule follow up
-    follow_up_when:
-      any:
-        select_result: follow up
-        select_activity: schedule follow up
-    follow_up_time:
-      any:
-        select_result: follow up
-        select_activity: schedule follow up
+  references:
+    dynamic_model__ipa_mednav_provider_contact:
+      from: this
+      add: one_to_this
+      prevent_disable: true
 
+
+  field_options:
+    <<: *communication_field_options
+    select_activity:
+      edit_as:
+        alt_options:
+          "General Communications": general communications
+          "Schedule Follow Up": schedule follow up
+          "Mark All Previous As Completed": completed
     select_direction:
-      select_activity: general communications
-    activity_date:
-      select_activity: general communications
-    select_who:
-      select_activity: general communications
+      edit_as:
+        alt_options:
+          "To Staff": to staff
+          "To Subject": to provider
 
-    select_record_from_player_contacts:
-      select_activity:
-        - general communications
-        - schedule follow up
-    select_record_from_addresses:
-      select_activity:
-        - general communications
-        - schedule follow up
+  caption_before:
+    select_activity: Select an action
+    activity_date: Date
+    contact: Provider name
+    select_direction: Was the communication received by FPHS staff or to the provider?
+    select_result: Is a follow up required, or is this communication complete?
 
 
+#################################################
+provider_report:
+  label: Provider Report
+#################################################
+
+  fields:
+    - select_activity
+    - activity_date
+    - contact
+    # - select_result
+    # - select_next_step
+    # - follow_up_when
+    # - follow_up_time
+
+  show_if:
+    <<: *communication_show_if
+
+  field_options:
+    <<: *communication_field_options
+    select_activity:
+      value: Sent report to provider
+
+
+  caption_before:
+    select_activity: Action
+    activity_date: Date
+    contact: Provider name
+    # select_result: Is a follow up required, or is this communication complete?
+
+
+#################################################
 files:
   label: Files
+#################################################
 
   save_trigger:
     on_create:
