@@ -1,0 +1,55 @@
+default:
+
+  field_options:
+    select_all_results_returned:
+      edit_as:
+        alt_options:
+          "Yes": "yes"
+          "No - declined": no - declined
+          "No - not all": no - not all
+    interview_date:
+      value: today()
+
+  caption_before:
+    interview_date: Exit Interview date
+    select_all_results_returned: Have all results been returned?
+    notes: Notes
+    labs_returned_yes_no: Labs returned?
+    dexa_returned_yes_no: Dexa returned?
+    brain_mri_returned_yes_no: Brain MRI returned?
+    neuro_psych_returned_yes_no: Neuropsych returned?
+    labs_notes: Notes
+    dexa_notes: Notes
+    brain_mri_notes: Notes
+    neuro_psych_notes: Notes
+    other_notes: Other notes
+
+  show_if:
+    notes:
+      select_all_results_returned:
+        - no - declined
+        - no - not all
+    labs_returned_yes_no:
+      select_all_results_returned:
+        - no - declined
+        - no - not all
+    dexa_returned_yes_no:
+      select_all_results_returned:
+        - no - declined
+        - no - not all
+    brain_mri_returned_yes_no:
+      select_all_results_returned:
+        - no - declined
+        - no - not all
+    neuro_psych_returned_yes_no:
+      select_all_results_returned:
+        - no - declined
+        - no - not all
+    labs_notes:
+      labs_returned_yes_no: no
+    dexa_notes:
+      dexa_returned_yes_no: no
+    brain_mri_notes:
+      brain_mri_returned_yes_no: no
+    neuro_psych_notes:
+      neuro_psych_returned_yes_no: no
