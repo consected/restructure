@@ -196,8 +196,9 @@ module NfsStore
       end
 
       def can_download?
+        return @can_download unless @can_download.nil?
         cu = current_user
-        !!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image))
+        @can_download = !!(!!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image)))
       end
 
 
