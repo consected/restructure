@@ -44,7 +44,7 @@ class DynamicModel < ActiveRecord::Base
 
   def all_implementation_fields ignore_errors: true
     begin
-      fl = self.field_list.split(',').map {|f| f.strip}.compact if self.field_list
+      fl = self.field_list.split(/[,\s]/).map {|f| f.strip}.compact if self.field_list
       res = (fl || [])
       res.uniq
 

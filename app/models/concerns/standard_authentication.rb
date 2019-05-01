@@ -123,7 +123,7 @@ module StandardAuthentication
     setup_two_factor_auth
   end
 
-  # Validate that the provided one time code is valid for the user
+  # Validate that the provided two-factor authentication code is valid for the user
   # @param code (String)
   #  The code to check
   # @return (Boolean)

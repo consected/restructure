@@ -61,7 +61,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
       expect(@signed_document.prepared_doc_digest).not_to be_blank
     end
 
-    it "signs the document with a good password and one-time code" do
+    it "signs the document with a good password and two-factor authentication code" do
       expect(@user.valid_password?(@good_password)).to be true
       expect {
         @al.e_signed_status = ESignature::ESignatureManager::SignNowStatus
@@ -98,10 +98,10 @@ RSpec.describe 'electronic signature of records', type: 'model' do
         @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al2.save!
 
-      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password or one-time code is not correct. Please try again.")
+      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password or two-factor authentication code is not correct. Please try again.")
     end
 
-    it "prevents a signature with a bad one-time code" do
+    it "prevents a signature with a bad two-factor authentication code" do
       @al2 = create_item
       @al2.current_user = @user_0
       @al2.prepare_activity_for_signature
@@ -111,14 +111,14 @@ RSpec.describe 'electronic signature of records', type: 'model' do
         @al2.e_signed_status = ESignature::ESignatureManager::SignNowStatus
         @al2.save!
 
-      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password or one-time code is not correct. Please try again.")
+      }.to raise_error(ActiveRecord::RecordInvalid, "Validation failed: Password or two-factor authentication code is not correct. Please try again.")
     end
 
   end
 
   describe "at time of applying the signature" do
     before :each do
-      # Recreate a new user for each test, since one time codes can' be reused
+      # Recreate a new user for each test, since two-factor authentication codes can' be reused
       @user, @good_password = create_user
       setup_access_as :user
       add_user_to_role 'nfs_store group 600'
@@ -227,7 +227,7 @@ RSpec.describe 'electronic signature of records', type: 'model' do
   describe "after signing" do
 
     before :each do
-      # Recreate a new user for each test, since one time codes can' be reused
+      # Recreate a new user for each test, since two-factor authentication codes can' be reused
       @user, @good_password = create_user
       setup_access_as :user
       add_user_to_role 'nfs_store group 600'

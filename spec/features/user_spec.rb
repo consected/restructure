@@ -40,7 +40,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     within '#new_user' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
-      fill_in "One-Time Code", with: @user.current_otp
+      fill_in "Two-Factor Authentication Code", with: @user.current_otp
       click_button "Log in"
     end
 
@@ -55,7 +55,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     within '#new_user' do
       fill_in "Email", with: @d_email
       fill_in "Password", with: @d_pw
-      fill_in "One-Time Code", with: @d_user.current_otp
+      fill_in "Two-Factor Authentication Code", with: @d_user.current_otp
       click_button "Log in"
     end
 
@@ -75,12 +75,12 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ""
-      fill_in "One-Time Code", with: @user.current_otp
+      fill_in "Two-Factor Authentication Code", with: @user.current_otp
 
       click_button "Log in"
     end
 
-    fail_message = "× Invalid email, password or one-time code."
+    fail_message = "× Invalid email, password or two-factor authentication code."
 
     expect(page).to have_css "input:invalid"
 
@@ -88,7 +88,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password + ' '
-      fill_in "One-Time Code", with: @user.current_otp
+      fill_in "Two-Factor Authentication Code", with: @user.current_otp
 
       click_button "Log in"
     end
@@ -99,7 +99,7 @@ describe "user sign in process", js: true, driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ' '+@good_password
-      fill_in "One-Time Code", with: @user.current_otp
+      fill_in "Two-Factor Authentication Code", with: @user.current_otp
 
       click_button "Log in"
     end

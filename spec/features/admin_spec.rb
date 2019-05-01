@@ -90,7 +90,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password
-      fill_in "One-Time Code", with: @admin.current_otp
+      fill_in "Two-Factor Authentication Code", with: @admin.current_otp
 
       click_button "Log in"
     end
@@ -110,7 +110,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: ""
-      fill_in "One-Time Code", with: @admin.current_otp
+      fill_in "Two-Factor Authentication Code", with: @admin.current_otp
       click_button "Log in"
     end
 
@@ -123,11 +123,11 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @good_email
       fill_in "Password", with: @good_password + ' '
-      fill_in "One-Time Code", with: @admin.current_otp
+      fill_in "Two-Factor Authentication Code", with: @admin.current_otp
       click_button "Log in"
     end
 
-    fail_message = "× Invalid email, password or one-time code."
+    fail_message = "× Invalid email, password or two-factor authentication code."
 
     expect(page).to have_css ".flash .alert", text: fail_message
 
@@ -138,7 +138,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @final_good_email
       fill_in "Password", with: ' ' + @final_good_password
-      fill_in "One-Time Code", with: @final_admin.current_otp
+      fill_in "Two-Factor Authentication Code", with: @final_admin.current_otp
       click_button "Log in"
     end
 
@@ -150,7 +150,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
       within '#new_admin' do
         fill_in "Email", with: @final_good_email
         fill_in "Password", with: @final_good_password
-        fill_in "One-Time Code", with: @final_admin.current_otp
+        fill_in "Two-Factor Authentication Code", with: @final_admin.current_otp
         click_button "Log in"
       end
       have_css ".flash .alert"
@@ -171,7 +171,7 @@ describe "admin sign in process", driver: :app_firefox_driver do
     within '#new_admin' do
       fill_in "Email", with: @d_email
       fill_in "Password", with: @d_pw
-      fill_in "One-Time Code", with: @d_admin.current_otp
+      fill_in "Two-Factor Authentication Code", with: @d_admin.current_otp
       click_button "Log in"
     end
 

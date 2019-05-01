@@ -55,7 +55,7 @@ Rails.application.config.to_prepare do
 
     res = @resource.validate_one_time_code code
 
-    flash[:notice] = 'One-Time Code was incorrect. Please try again.' unless res
+    flash[:notice] = 'Two-Factor Authentication Code was incorrect. Please try again.' unless res
 
     redirect_to '/'
   end

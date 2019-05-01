@@ -15,7 +15,7 @@
     </div>
 
     <div class="form-group-non">
-      <%= f.label :otp_attempt, 'One-Time Code' %><br />
+      <%= f.label :otp_attempt, 'Two-Factor Authentication Code' %><br />
       <%= f.text_field :otp_attempt, autocomplete: "off", inputmode: "numeric", minlength: "6", maxlength: "6", class: 'form-control', value: '', pattern: "\\d{6}" %>
     </div>
 

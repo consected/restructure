@@ -190,8 +190,8 @@ Devise.setup do |config|
   # Time interval to unlock the account if :time is enabled as unlock_strategy.
   config.unlock_in = 1.hour
 
-  # Allow a longer drift on one time codes
-  config.otp_allowed_drift = Settings::TwoFactorAuthDrift 
+  # Allow a longer drift on two-factor authentication codes
+  config.otp_allowed_drift = Settings::TwoFactorAuthDrift
 
   # Warn on the last attempt before the account is locked.
   config.last_attempt_warning = true

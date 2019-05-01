@@ -99,7 +99,7 @@ module ESignature
       @e_signed_authenticated = false
 
       unless password.present? && otp_attempt.present?
-        @authentication_error = 'or one-time code is empty. Please try again.'
+        @authentication_error = 'or two-factor authentication code is empty. Please try again.'
         return
       end
 
@@ -116,12 +116,12 @@ module ESignature
         current_user.lock_access! if current_user.send :attempts_exceeded?
 
         if current_user.access_locked?
-          @authentication_error = 'or one-time code is not correct. Account has been locked.'
+          @authentication_error = 'or two-factor authentication code is not correct. Account has been locked.'
           current_user.locked_at = Time.now
         elsif current_user.send :last_attempt?
-          @authentication_error = 'or one-time code is not correct. One more attempt before account is locked.'
+          @authentication_error = 'or two-factor authentication code is not correct. One more attempt before account is locked.'
         else
-          @authentication_error = 'or one-time code is not correct. Please try again.'
+          @authentication_error = 'or two-factor authentication code is not correct. Please try again.'
         end
 
       end
