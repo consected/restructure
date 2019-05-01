@@ -75,8 +75,6 @@ describe "admin sign in process", driver: :app_firefox_driver do
 
   it "should sign in" do
 
-    # make_an_admin
-
     admin = Admin.where(email: @good_email).first
     expect(admin).to be_a Admin
     expect(admin.id).to equal @admin.id

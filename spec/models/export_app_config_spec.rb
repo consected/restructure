@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Export an app configuration", type: :model do
 
+  include MasterSupport
   include ModelSupport
 
   before :all do
@@ -200,6 +201,7 @@ RSpec.describe "Export an app configuration", type: :model do
     expect(res.label).to eq 'Brain Health Study'
 
     enable_user_app_access res.name, @user
+    setup_access :player_infos
 
     @user.app_type = res
     @user.save!
