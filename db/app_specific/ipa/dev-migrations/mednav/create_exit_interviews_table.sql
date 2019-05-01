@@ -2,16 +2,15 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_exit_interviews interview_date select_all_results_returned notes labs_returned_yes_no labs_notes dexa_returned_yes_no dexa_notes brain_mri_returned_yes_no brain_mri_notes neuro_psych_returned_yes_no neuro_psych_notes other_notes
+-- table_generators/generate.sh dynamic_models_table create ipa_exit_interviews select_all_results_returned notes labs_returned_yes_no labs_notes dexa_returned_yes_no dexa_notes brain_mri_returned_yes_no brain_mri_notes neuro_psych_returned_yes_no neuro_psych_notes other_notes
 
-      CREATE FUNCTION log_ipa_exit_interview_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_exit_interview_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO ipa_exit_interview_history
                   (
                       master_id,
-                      interview_date,
                       select_all_results_returned,
                       notes,
                       labs_returned_yes_no,
@@ -22,6 +21,8 @@
                       brain_mri_notes,
                       neuro_psych_returned_yes_no,
                       neuro_psych_notes,
+                      assisted_finding_provider_yes_no,
+                      assistance_notes,
                       other_notes,
                       user_id,
                       created_at,
@@ -30,7 +31,6 @@
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.interview_date,
                       NEW.select_all_results_returned,
                       NEW.notes,
                       NEW.labs_returned_yes_no,
@@ -41,6 +41,8 @@
                       NEW.brain_mri_notes,
                       NEW.neuro_psych_returned_yes_no,
                       NEW.neuro_psych_notes,
+                      NEW.assisted_finding_provider_yes_no,
+                      NEW.assistance_notes,
                       NEW.other_notes,
                       NEW.user_id,
                       NEW.created_at,
@@ -54,7 +56,6 @@
       CREATE TABLE ipa_exit_interview_history (
           id integer NOT NULL,
           master_id integer,
-          interview_date date,
           select_all_results_returned varchar,
           notes varchar,
           labs_returned_yes_no varchar,
@@ -65,6 +66,8 @@
           brain_mri_notes varchar,
           neuro_psych_returned_yes_no varchar,
           neuro_psych_notes varchar,
+          assisted_finding_provider_yes_no varchar,
+          assistance_notes varchar,
           other_notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -84,7 +87,6 @@
       CREATE TABLE ipa_exit_interviews (
           id integer NOT NULL,
           master_id integer,
-          interview_date date,
           select_all_results_returned varchar,
           notes varchar,
           labs_returned_yes_no varchar,
@@ -95,6 +97,8 @@
           brain_mri_notes varchar,
           neuro_psych_returned_yes_no varchar,
           neuro_psych_notes varchar,
+          assisted_finding_provider_yes_no varchar,
+          assistance_notes varchar,
           other_notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,

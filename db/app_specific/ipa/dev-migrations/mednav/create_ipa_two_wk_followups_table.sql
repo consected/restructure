@@ -2,24 +2,17 @@ set search_path=ipa_ops, ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_two_wk_followups call_date call_completed_yes_no call_completed_notes participant_had_qs_yes_no participant_qs_notes reports_sent_yes_no reports_sent_notes report_sent_date report_delivery_date assisted_finding_provider_yes_no assistance_notes other_notes
+-- table_generators/generate.sh dynamic_models_table create ipa_two_wk_followups participant_had_qs_yes_no participant_qs_notes assisted_finding_provider_yes_no assistance_notes other_notes
 
-      CREATE FUNCTION log_ipa_two_wk_followup_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_two_wk_followup_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO ipa_two_wk_followup_history
                   (
                       master_id,
-                      call_date,
-                      call_completed_yes_no,
-                      call_completed_notes,
                       participant_had_qs_yes_no,
                       participant_qs_notes,
-                      reports_sent_yes_no,
-                      reports_sent_notes,
-                      report_sent_date,
-                      report_delivery_date,
                       assisted_finding_provider_yes_no,
                       assistance_notes,
                       other_notes,
@@ -30,15 +23,8 @@ set search_path=ipa_ops, ml_app;
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.call_date,
-                      NEW.call_completed_yes_no,
-                      NEW.call_completed_notes,
                       NEW.participant_had_qs_yes_no,
                       NEW.participant_qs_notes,
-                      NEW.reports_sent_yes_no,
-                      NEW.reports_sent_notes,
-                      NEW.report_sent_date,
-                      NEW.report_delivery_date,
                       NEW.assisted_finding_provider_yes_no,
                       NEW.assistance_notes,
                       NEW.other_notes,
@@ -54,15 +40,8 @@ set search_path=ipa_ops, ml_app;
       CREATE TABLE ipa_two_wk_followup_history (
           id integer NOT NULL,
           master_id integer,
-          call_date date,
-          call_completed_yes_no varchar,
-          call_completed_notes varchar,
           participant_had_qs_yes_no varchar,
           participant_qs_notes varchar,
-          reports_sent_yes_no varchar,
-          reports_sent_notes varchar,
-          report_sent_date date,
-          report_delivery_date date,
           assisted_finding_provider_yes_no varchar,
           assistance_notes varchar,
           other_notes varchar,
@@ -84,15 +63,8 @@ set search_path=ipa_ops, ml_app;
       CREATE TABLE ipa_two_wk_followups (
           id integer NOT NULL,
           master_id integer,
-          call_date date,
-          call_completed_yes_no varchar,
-          call_completed_notes varchar,
           participant_had_qs_yes_no varchar,
           participant_qs_notes varchar,
-          reports_sent_yes_no varchar,
-          reports_sent_notes varchar,
-          report_sent_date date,
-          report_delivery_date date,
           assisted_finding_provider_yes_no varchar,
           assistance_notes varchar,
           other_notes varchar,

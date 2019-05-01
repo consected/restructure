@@ -1,4 +1,4 @@
-# Fields: provider_name,report_sent_date,report_delivery_date,reports_sent_notes,anthropometrics_check,lab_results_check,dexa_check,brain_mri_check,neuro_psych_check,sensory_testing_check,liver_mri_check,physical_function_check,eeg_check,sleep_check,cardiac_check,xray_check
+# Fields: report_delivery_date,anthropometrics_check,lab_results_check,dexa_check,brain_mri_check,neuro_psych_check,sensory_testing_check,liver_mri_check,physical_function_check,eeg_check,sleep_check,cardiac_check,xray_check
 
 default:
 
@@ -17,8 +17,8 @@ default:
     xray_check: X-Ray
 
   caption_before:
-    all_fields: Reports sent to provider
-    provider_name: Provider name
-    report_sent_date: Date report was sent
+    all_fields: Which reports were sent to the provider?
+    # provider_name: Provider name
+    # report_sent_date: Date report was sent
     report_delivery_date: Date of delivery report confirmation
-    reports_sent_notes: Which reports were sent to the provider?
+    # reports_sent_notes: Which reports were sent to the provider?

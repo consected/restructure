@@ -79,7 +79,7 @@ _definitions:
   communication_fields: &communication_fields
     - select_activity
     - activity_date
-    - contact
+    - select_contact
     - select_direction
     - select_result
     - select_next_step
@@ -109,7 +109,7 @@ _definitions:
         select_activity:
           - schedule follow up
           - completed
-    contact:
+    select_contact:
       not_any:
         select_activity:
           - completed
@@ -183,7 +183,7 @@ participant_communication:
 
   field_options:
     <<: *communication_field_options
-    contact:
+    select_contact:
       edit_as:
         field_type: select_record_from_player_contacts
 
@@ -203,7 +203,7 @@ participant_communication:
   caption_before:
     select_activity: Select an action:<ul><li>record a general communication</li><li>record an incidental finding call</li><li>schedule a follow up</li><li>mark all previous follow-ups completed</li></ul>
     activity_date: Date
-    contact: The phone or email address
+    select_contact: The phone or email address
     select_direction: Was the communication received by FPHS staff or sent to the subject?
     select_result: Is a follow up required, or is this communication complete?
 
@@ -242,7 +242,7 @@ provider_communication:
   caption_before:
     select_activity: Select an action
     activity_date: Date
-    contact: Provider name
+    select_contact: Provider name
     select_direction: Was the communication received by FPHS staff or to the provider?
     select_result: Is a follow up required, or is this communication complete?
 
@@ -255,11 +255,11 @@ provider_report:
   fields:
     - select_activity
     - activity_date
-    - contact
-    # - select_result
-    # - select_next_step
-    # - follow_up_when
-    # - follow_up_time
+    - select_contact
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
 
   show_if:
     <<: *communication_show_if
@@ -273,7 +273,7 @@ provider_report:
   caption_before:
     select_activity: Action
     activity_date: Date
-    contact: Provider name
+    select_contact: Provider name
     # select_result: Is a follow up required, or is this communication complete?
 
 

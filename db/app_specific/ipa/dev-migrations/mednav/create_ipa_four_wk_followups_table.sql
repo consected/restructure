@@ -3,16 +3,15 @@ set search_path=ipa_ops,ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_four_wk_followups call_date select_all_results_returned select_sensory_testing_returned sensory_testing_notes select_liver_mri_returned liver_mri_notes select_physical_function_returned physical_function_notes select_sleep_returned sleep_notes select_cardiology_returned cardiology_notes select_xray_returned xray_notes reports_sent_yes_no reports_sent_notes report_sent_date report_delivery_date assisted_finding_provider_yes_no assistance_notes other_notes
+-- table_generators/generate.sh dynamic_models_table create ipa_four_wk_followups select_all_results_returned select_sensory_testing_returned sensory_testing_notes select_liver_mri_returned liver_mri_notes select_physical_function_returned physical_function_notes select_sleep_returned sleep_notes select_cardiology_returned cardiology_notes select_xray_returned xray_notes assisted_finding_provider_yes_no assistance_notes other_notes
 
-      CREATE FUNCTION log_ipa_four_wk_followup_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_four_wk_followup_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO ipa_four_wk_followup_history
                   (
                       master_id,
-                      call_date,
                       select_all_results_returned,
                       select_sensory_testing_returned,
                       sensory_testing_notes,
@@ -26,10 +25,6 @@ set search_path=ipa_ops,ml_app;
                       cardiology_notes,
                       select_xray_returned,
                       xray_notes,
-                      reports_sent_yes_no,
-                      reports_sent_notes,
-                      report_sent_date,
-                      report_delivery_date,
                       assisted_finding_provider_yes_no,
                       assistance_notes,
                       other_notes,
@@ -40,7 +35,6 @@ set search_path=ipa_ops,ml_app;
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.call_date,
                       NEW.select_all_results_returned,
                       NEW.select_sensory_testing_returned,
                       NEW.sensory_testing_notes,
@@ -54,10 +48,6 @@ set search_path=ipa_ops,ml_app;
                       NEW.cardiology_notes,
                       NEW.select_xray_returned,
                       NEW.xray_notes,
-                      NEW.reports_sent_yes_no,
-                      NEW.reports_sent_notes,
-                      NEW.report_sent_date,
-                      NEW.report_delivery_date,
                       NEW.assisted_finding_provider_yes_no,
                       NEW.assistance_notes,
                       NEW.other_notes,
@@ -73,7 +63,6 @@ set search_path=ipa_ops,ml_app;
       CREATE TABLE ipa_four_wk_followup_history (
           id integer NOT NULL,
           master_id integer,
-          call_date date,
           select_all_results_returned varchar,
           select_sensory_testing_returned varchar,
           sensory_testing_notes varchar,
@@ -87,10 +76,6 @@ set search_path=ipa_ops,ml_app;
           cardiology_notes varchar,
           select_xray_returned varchar,
           xray_notes varchar,
-          reports_sent_yes_no varchar,
-          reports_sent_notes varchar,
-          report_sent_date date,
-          report_delivery_date date,
           assisted_finding_provider_yes_no varchar,
           assistance_notes varchar,
           other_notes varchar,
@@ -112,7 +97,6 @@ set search_path=ipa_ops,ml_app;
       CREATE TABLE ipa_four_wk_followups (
           id integer NOT NULL,
           master_id integer,
-          call_date date,
           select_all_results_returned varchar,
           select_sensory_testing_returned varchar,
           sensory_testing_notes varchar,
@@ -126,10 +110,6 @@ set search_path=ipa_ops,ml_app;
           cardiology_notes varchar,
           select_xray_returned varchar,
           xray_notes varchar,
-          reports_sent_yes_no varchar,
-          reports_sent_notes varchar,
-          report_sent_date date,
-          report_delivery_date date,
           assisted_finding_provider_yes_no varchar,
           assistance_notes varchar,
           other_notes varchar,

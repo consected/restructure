@@ -3,7 +3,7 @@ set search_path=ipa_ops, ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_med_navs ipa_assignment select_activity activity_date select_record_from_player_contacts select_direction select_result select_next_step follow_up_when follow_up_time notes
+-- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_med_navs ipa_assignment select_activity activity_date select_contact select_direction select_result select_next_step follow_up_when follow_up_time notes
 
       CREATE TABLE activity_log_ipa_assignment_med_nav_history (
           id integer NOT NULL,
@@ -11,7 +11,7 @@ set search_path=ipa_ops, ml_app;
           ipa_assignment_id integer,
           select_activity varchar,
           activity_date date,
-          select_record_from_player_contacts varchar,
+          select_contact varchar,
           select_direction varchar,
           select_result varchar,
           select_next_step varchar,
@@ -30,7 +30,7 @@ set search_path=ipa_ops, ml_app;
           ipa_assignment_id integer,
           select_activity varchar,
           activity_date date,
-          select_record_from_player_contacts varchar,
+          select_contact varchar,
           select_direction varchar,
           select_result varchar,
           select_next_step varchar,
@@ -53,7 +53,7 @@ set search_path=ipa_ops, ml_app;
                       ipa_assignment_id,
                       select_activity,
                       activity_date,
-                      select_record_from_player_contacts,
+                      select_contact,
                       select_direction,
                       select_result,
                       select_next_step,
@@ -71,7 +71,7 @@ set search_path=ipa_ops, ml_app;
                       NEW.ipa_assignment_id,
                       NEW.select_activity,
                       NEW.activity_date,
-                      NEW.select_record_from_player_contacts,
+                      NEW.select_contact,
                       NEW.select_direction,
                       NEW.select_result,
                       NEW.select_next_step,
