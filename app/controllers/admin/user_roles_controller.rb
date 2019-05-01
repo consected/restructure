@@ -9,7 +9,7 @@ class Admin::UserRolesController < AdminController
   def filters
     res = {
       app_type_id: Admin::AppType.all_by_name,
-      role_name: Admin::UserRole.active.role_names,
+      role_name: Admin::UserRole.active.role_names.sort,
       user_id: Admin::UserRole.active.users.pluck(:id, :email).to_h
     }
   end

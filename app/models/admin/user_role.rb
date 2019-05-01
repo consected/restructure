@@ -56,7 +56,7 @@ class Admin::UserRole < ActiveRecord::Base
   # Get roles names in a hash, keyed by the "app.id/app.name". May be filtered by a previous scope
   # @return [Hash] hash with string keys of app names and values as arrays of role names for each
   def self.role_names_by_app_name
-    res = all
+    res = all.order(role_name: :asc)
     items = {}
     res.each do |role|
       m = role.app_type

@@ -49,7 +49,7 @@
       <% elsif p == :app_type_id %>
           <%= f.label p %>
           <% select_item_type = {}
-             select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id'
+             select_item_type[:selected] = params[:filter].first.last if params[:filter] && params[:filter].first.first == 'app_type_id' && object_instance.app_type_id.blank?
            %>
           <%= f.select :app_type_id, app_type_options, select_item_type, extra_field_attributes[p.to_sym]||{} %>
       <% elsif p == :user_id %>

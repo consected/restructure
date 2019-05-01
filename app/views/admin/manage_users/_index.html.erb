@@ -27,7 +27,7 @@
         <% @users.each do |list_item| %>
           <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>">
 
-            <td><%= admin_edit_btn list_item.id%> </td>
+            <td><%= admin_edit_btn list_item.id%> &nbsp; <%= admin_edit_btn list_item.id, copy: list_item%> </td>
             <td><%= list_item.email %></td>
             <td><%= list_item.first_name %></td>
             <td><%= list_item.last_name %></td>

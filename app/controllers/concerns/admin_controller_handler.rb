@@ -23,7 +23,12 @@ module AdminControllerHandler
 
 
   def new options = {}
-    set_object_instance primary_model.new unless options[:use_current_object]
+    if params[:copy_with_id].present?
+      # Get the model with ID in the copy_with_id parameter and generate a hash that has only the permitted params for forms
+      # This hash will be used to initialize a new model
+      @copy_with = primary_model.find(params[:copy_with_id]).attributes.select {|k,v| permitted_params.include? k.to_sym}
+    end
+    set_object_instance primary_model.new(@copy_with) unless options[:use_current_object]
     render partial: view_path('form')
   end
 

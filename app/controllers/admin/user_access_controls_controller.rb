@@ -20,12 +20,13 @@ class Admin::UserAccessControlsController < AdminController
       {
         app_type_id: Admin::AppType.all_by_name,
         resource_name: rns,
-        user_id: User.active.pluck(:id, :email).to_h
+        user_id: User.active.pluck(:id, :email).to_h,
+        role_name: Admin::UserRole.active.role_names.sort
       }
     end
 
     def filters_on
-      [:app_type_id, :resource_name, :user_id]
+      [:app_type_id, :resource_name, :user_id, :role_name]
     end
 
     def has_access_levels

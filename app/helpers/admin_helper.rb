@@ -8,13 +8,25 @@ module AdminHelper
   end
 
 
+  def new_path opt={}
+    redir = {action: :new}
+    redir.merge! opt
+    url_for(redir)
+  end
+
   def admin_edit_cancel
      link_to 'cancel', "#", id: "admin-edit-cancel", class: "btn btn-danger"
   end
 
-  def admin_edit_btn id
+  def admin_edit_btn id, options={}
     return if no_edit
-    link_to '', edit_path(id, filter: params[:filter]), remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
+    if options[:copy]
+      path = new_path(copy_with_id: options[:copy]&.id)
+      link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-copy copy-icon'
+    else
+      path = edit_path(id, filter: params[:filter])
+      link_to '', path, remote: true, class: 'edit-entity glyphicon glyphicon-pencil'
+    end
   end
 
   # Use in forms where the object is not in the admin module (and so a specific path is needed)
