@@ -17,15 +17,24 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+- [Changed] Login and e-signature forms used the term "one-time code", which was confusing to users. Change to "two-factor authentication code" for clarity.
+- [Changed] [IPA] Fixed a bug in the configuration that was preventing PIs from e-signing phone screen checklist documents
+- [Added] [Admin] Allow admins to copy configuration entries in admin panel, to allow accurate duplication of templates and common configurations
+- [Changed] [Filestore] Added configuration option to notify roles when a set of file uploads has completed.
+- [Changed] [Filestore] Fixed issues with background processing of zip files based on testing in production with real MRI files
+- [Changed] [Filestore] Speed up browsing of containers with thousands of files
+
 ## [7.2.14] - 2019-04-17
 
-- [Changes] [IPA] TMS review discussion to include Staff Member
-- [Changes] [IPA] Navigation Planned Events and Event Feedback adds PI Assigned to Coordinate, and Location
-- [Changes] [Filestore] Provide a mechanism for notifying users after a set of files has been uploaded successfully
+- [Changed] [IPA] TMS review discussion to include Staff Member
+- [Changed] [IPA] Navigation Planned Events and Event Feedback adds PI Assigned to Coordinate, and Location
+- [Changed] [Filestore] Provide a mechanism for notifying users after a set of files has been uploaded successfully
 - [Fixed] Bug preventing editable reports working correctly
 - [Fixed] Bug that showed the MSID style searches in the nav bar when requesting the two factor authentication QR code setup the first time
 - [Fixed] [Filestore] Ensure that filenames are checked against filters for every file in a multiple upload
-- [Changes] Allow checkboxes to be used in editable forms
+- [Changed] Allow checkboxes to be used in editable forms
 
 ## [7.2.13] - 2019-04-16
 
@@ -95,4 +104,3 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 ### Added
 - [Secure-View] Provide a secure-viewer directly for users clicking a file link in a filestore container. Just view the pages of documents directly in the browser without having to worry about where files were downloaded, or cleaning them up afterwards.
 ## [7.2.15] - 2019-04-18
-## [7.2.16] - 2019-04-18
