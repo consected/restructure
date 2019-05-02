@@ -106,3 +106,11 @@ li.list-group-item.filestore-classification-stored-file-full-title strong {
 #nfs_store_manage_stored_file_title, #nfs_store_manage_archived_file_title {
   width: 98.7%;
 }
+
+.download-actions .dropdown-menu {
+
+  a[disabled] {
+    color: gray;
+  }
+
+}

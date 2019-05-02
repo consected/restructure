@@ -6,28 +6,11 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
   include ModelSupport
   include NfsStoreSupport
 
-
-  DefaultRole = 'file1'
-
   before :all do
     setup_nfs_store
 
   end
 
-  def create_filter filter, role_name: DefaultRole, user: nil, resource_name: nil
-
-    resource_name ||= @resource_name
-    role_name = nil if user
-
-    f = NfsStore::Filter::Filter.create!(
-      current_admin: @admin,
-      app_type: @app_type,
-      role_name: role_name,
-      user: user,
-      resource_name: resource_name,
-      filter: filter
-    )
-  end
 
   def create_stored_file  file_path, file_name, container: nil, activity_log: nil
 

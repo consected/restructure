@@ -14,6 +14,9 @@
       <%= render partial: 'filestore/classification/block', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}' } %>
       <div class="browse-controls">
         <div class="download-actions text-center">
+          {{#if to_record_editable}}
+          <%= render partial: 'nfs_store/browse/options_menu', locals: { container_id: '{{to_record_id}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}', can_send_to_trash: true } %>
+          {{/if}}
           <%= render partial: 'nfs_store/browse/download_button', locals: { container_id: '{{to_record_id}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}' } %>
           {{#if to_record_editable}}
           <%= render partial: 'nfs_store/uploader/add_files', locals: { container_id: '{{to_record_id}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}', container_writable: true } %>

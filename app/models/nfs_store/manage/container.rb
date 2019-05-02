@@ -201,6 +201,11 @@ module NfsStore
         @can_download = !!(!!(cu.can?(:download_files) || cu.can?(:view_files_as_html) || cu.can?(:view_files_as_image)))
       end
 
+      def can_send_to_trash?
+        return @can_send_to_trash unless @can_send_to_trash.nil?
+        cu = current_user
+        @can_send_to_trash = !!(can_edit? && cu.can?(:send_files_to_trash))
+      end
 
       # Method to provide checking of access controls. Can the user access the container
       # in a specific way. Easily overridden in applications to provide app specific functionality
@@ -210,6 +215,7 @@ module NfsStore
       end
 
       # List all the filesystem files in the container directory and sub-directories including files in the mounted archives too.
+      # It excludes .trash paths and hidden (dot) paths and files
       # Iterates through all the roles that the current user has, building a complete, unique set of files based on the
       # appropriate group file permissions for each role.
       # @return [Array(String)] a list of file paths relative to the container directory

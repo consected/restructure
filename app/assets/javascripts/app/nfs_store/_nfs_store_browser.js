@@ -16,19 +16,58 @@ _nfs_store.fs_browser = function ($outer) {
     };
 
     var disable_submit = function($this, disable) {
+      disable_submit_type('download', $this, disable);
+      disable_submit_type('trash', $this, disable);
+    };
+
+    var disable_submit_type = function(name, $this, disable) {
+
+      if (!disable) {
+        var can = $browser.attr('data-can-submit-'+name) == "true";
+        disable = !can;
+      }
+
       var disval =  disable ? 'disabled' : null;
-      $('#container-browse-submit-'+container_id).prop('disabled', disval);
-      $('#container-browse-submit-in-form-'+container_id).prop('disabled', disval);
+
+      $('#container-browse-'+name+'-'+container_id).attr('disabled', disval);
+      $('#container-browse-'+name+'-in-form-'+container_id).attr('disabled', disval);
     };
 
-    var set_submit_caption = function($this, caption) {
-      $('#container-browse-submit-'+container_id+' .btn-caption').html(caption);
+    var set_submit_download_caption = function($this, caption) {
+      $('#container-browse-download-'+container_id+' .btn-caption').html(caption);
     };
 
 
-    var submit_form = function($this) {
-      $('#container-browse-submit-in-form-'+container_id).click();
+    var submit_download_form = function($this) {
+
+      var btn = $('#container-browse-download-in-form-'+container_id);
+
+      var form = btn.parents('form').first();
+      form.removeAttr("data-remote");
+      form.removeData("remote");
+
+      btn.click();
     };
+
+    var submit_trash_form = function($this) {
+
+      var btn = $('#container-browse-trash-in-form-'+container_id);
+
+      var form = btn.parents('form').first();
+
+      form.attr('data-remote', 'true');
+      form[0].app_callback = function () {
+        refresh_browser($outer, container_id);
+      }
+
+      btn.click();
+    };
+
+    var refresh_browser = function(outer, container_id) {
+      $('.refresh-container-list[data-container-id="'+container_id+'"]').click();
+      refresh(outer);
+    };
+
 
     var refresh = function($this) {
       $outer.removeClass('ajax-running');
@@ -94,7 +133,7 @@ _nfs_store.fs_browser = function ($outer) {
       var all_checked_folders = $browser.find('.container-folder input[type="checkbox"]:checked');
       var total_checked = all_checked.length;
 
-      set_submit_caption($this, 'download ' + total_checked + ' ' + (total_checked != 1 ? 'files' : 'file') );
+      set_submit_download_caption($this, 'download ' + total_checked + ' ' + (total_checked != 1 ? 'files' : 'file') );
       disable_submit($this, !total_checked);
 
       $browser.find('.container-entry.checked').removeClass('checked');
@@ -140,11 +179,15 @@ _nfs_store.fs_browser = function ($outer) {
       folder_action($(this), e, true);
     }).on('shown.bs.collapse', '.container-browser .container-folder-items', function(e) {
       folder_action($(this), e, false);
-    }).on('click', '.container-browse-submit', function() {
+    }).on('click', '.container-browse-download', function() {
       var target = $($(this).attr('data-target-browser'));
-      submit_form(target);
+      submit_download_form(target);
       disable_submit(target, true);
-      set_submit_caption(target, "request submitted");
+      set_submit_download_caption(target, "request submitted");
+    }).on('click', '.container-browse-trash', function() {
+      var target = $($(this).attr('data-target-browser'));
+      submit_trash_form(target);
+      disable_submit(target, true);
     });
 
     $(document).on('click', '.refresh-container-list[data-container-id="'+container_id+'"]', function(e) {

@@ -34,29 +34,6 @@ module NfsStore
       end
 
 
-      # Move the file it its final location
-      # @param from_path [String] the temporary path to move the file from
-      # @return [Boolean] true if the file was moved successfully
-      def move_from from_path
-
-        res = false
-        current_user_role_names.each do |role_name|
-
-          if Filesystem.test_dir role_name, self.container, :write
-
-            # If a path is set, ensure we can make a directory for it if one doesn't exist
-            if !self.path.present? || Filesystem.test_dir(role_name, self.container, :mkdir, extra_path: self.path, ok_if_exists: true)
-              res = Filesystem.move_file_to_final_location role_name, from_path, self.container, self.path, self.file_name
-              break if res
-            end
-          end
-
-        end
-
-        raise FsException::NoAccess.new "User does not have permission to store file with any of the current groups" unless res
-        true
-      end
-
       # Mount an archive file, if necessary (idempotent)
       def mount_archive
         Archive::Mounter.mount self

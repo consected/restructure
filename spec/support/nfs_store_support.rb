@@ -1,5 +1,7 @@
 module NfsStoreSupport
 
+  DefaultRole = 'file1'
+
 
   def setup_nfs_store
     seed_database
@@ -71,6 +73,7 @@ EOF
     setup_access 'nfs_store__manage__containers'
     setup_access 'nfs_store__manage__stored_files'
     setup_access 'nfs_store__manage__archived_files'
+    setup_access :download_files, resource_type: :general, access: :read
 
     basedir = '/var/tmp/nfs_store_tmp'
     FileUtils.mkdir_p File.join(basedir, 'gid600', "app-type-#{@app_type.id}", "containers")
@@ -81,8 +84,38 @@ EOF
     @activity_log = al
     @container = NfsStore::Manage::Container.last
     @container.master.current_user ||= @user
-
+    @container.save!
 
   end
+
+  def upload_file filename='test-name.txt', content=nil
+
+    content ||= SecureRandom.hex
+    md5tot = Digest::MD5.hexdigest(content)
+    ioupload = StringIO.new(content)
+
+    u = NfsStore::Upload.new container: @container, user: @container.master.current_user, file_name: filename, file_hash: md5tot, content_type: MIME::Types.type_for(filename)&.first
+    u.upload = ioupload
+
+    u.consume_chunk upload: ioupload, headers: {}, chunk_hash: md5tot
+    u.save!
+    u
+  end
+
+  def create_filter filter, role_name: DefaultRole, user: nil, resource_name: nil
+
+    resource_name ||= @resource_name
+    role_name = nil if user
+
+    f = NfsStore::Filter::Filter.create!(
+      current_admin: @admin,
+      app_type: @app_type,
+      role_name: role_name,
+      user: user,
+      resource_name: resource_name,
+      filter: filter
+    )
+  end
+
 
 end

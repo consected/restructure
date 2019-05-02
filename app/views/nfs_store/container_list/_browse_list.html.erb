@@ -1,5 +1,5 @@
 <div>
-  <div data-result="nfs-store-container-list-items-<%=@container.id%>" class="container-browser browser-hide-meta browser-hide-classifications" id="container-browser-<%=@container.id%>"  data-container-writable="<%= @container.writable? %>" data-container-readable="<%= @container.readable? %>">
+  <div data-result="nfs-store-container-list-items-<%=@container.id%>" class="container-browser browser-hide-meta browser-hide-classifications" id="container-browser-<%=@container.id%>"  data-container-writable="<%= @container.writable? %>" data-container-readable="<%= @container.readable? %>" data-can-submit-download="<%= @container.can_download? %>" data-can-submit-trash="<%= @container.can_send_to_trash? %>">
     <% if @directory_not_found %>
     <p>Storage has not been initialized. This container is not usable.</p>
     <% elsif !@container.readable? %>
@@ -24,7 +24,8 @@
           <%= form.hidden_field :activity_log_type, value: @activity_log.class.to_s.ns_underscore %>
           <%= form.hidden_field :activity_log_id, value: @activity_log.id %>
           <%= form.hidden_field :container_id %>
-          <%= form.submit value: 'Download', id: "container-browse-submit-in-form-#{@container.id}", class: 'hidden', data: {disable_with: 'select files to download'} %>
+          <%= form.submit value: 'Download', id: "container-browse-download-in-form-#{@container.id}", class: 'hidden', data: {disable_with: 'select files to download'} %>
+          <%= form.submit value: 'Trash', id: "container-browse-trash-in-form-#{@container.id}", class: 'hidden', data: {disable_with: 'select files to send to trash'} %>
         <% end %>
       <% end %>
       <% if @container.can_edit? %>

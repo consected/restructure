@@ -8,6 +8,7 @@
 
     <div class="row browse-controls">
       <div class="download-actions well">
+        <%= render partial: 'nfs_store/browse/options_menu', locals: { container_id: @container.id, can_send_to_trash: @container.can_send_to_trash? } %>
         <%= render partial: 'nfs_store/browse/download_button', locals: { container_id: @container.id } %>
         <%= render partial: 'nfs_store/uploader/add_files', locals: { container_id: @container.id, container_writable: @container.writable? } %>
       </div>

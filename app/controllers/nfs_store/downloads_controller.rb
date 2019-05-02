@@ -34,6 +34,7 @@ module NfsStore
 
     def create
 
+      commit = params[:commit]
       selected_items = secure_params[:selected_items]
 
       unless selected_items.is_a?(Array) && selected_items.length > 0
@@ -43,20 +44,42 @@ module NfsStore
 
       selected_items_info = selected_items.map {|s| h = JSON.parse(s); {id: h['id'].to_i, retrieval_type: h['retrieval_type'].to_sym} }
 
-      @download = Download.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
-      @download.current_user = current_user
-      @master = @container.master
-      @id = @container.id
-      retrieved_files = @download.retrieve_files_from selected_items_info
-      if retrieved_files&.length > 0
-        filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
-        @download.save!
-        send_file @download.zip_file_path, filename: filename
-        # Do not attempt to cleanup the temp file by unlinking, since this will cause the out of band download to fail
-      else
-        redirect_to nfs_store_browse_path(@container)
-      end
+      if commit == 'Download'
 
+        @download = Download.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @download.current_user = current_user
+        @master = @container.master
+        @id = @container.id
+        retrieved_files = @download.retrieve_files_from selected_items_info
+        if retrieved_files&.length > 0
+          filename = "#{@download.container.name} - #{retrieved_files.length} #{'file'.pluralize(retrieved_files.length)}.zip"
+          @download.save!
+          send_file @download.zip_file_path, filename: filename
+          # Do not attempt to cleanup the temp file by unlinking, since this will cause the out of band download to fail
+        else
+          redirect_to nfs_store_browse_path(@container)
+        end
+
+      elsif commit == 'Trash'
+
+        @trash = Trash.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @trash.current_user = current_user
+        @master = @container.master
+        @id = @container.id
+        trashed_files = @trash.trash_all selected_items_info
+
+        if trashed_files&.length > 0
+          filename = "#{@trash.container.name} - #{trashed_files.length} #{'file'.pluralize(trashed_files.length)}.zip"
+          @trash.save!
+
+          render json: trashed_files
+        else
+          redirect_to nfs_store_browse_path(@container)
+        end
+
+      else
+        return not_found
+      end
     end
 
 
