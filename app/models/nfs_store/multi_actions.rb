@@ -68,13 +68,13 @@ module NfsStore
     # @param retrieval_type [Symbol] the type of object referencing the file
     # @param container [NfsStore::Manage::Container | nil] optionally provide a container to support multi container downloads
     # @return [String] filesystem path to the file to be retrieved
-    def retrieve_file_from id, retrieval_type, container: nil, activity_log: nil
+    def retrieve_file_from id, retrieval_type, container: nil, activity_log: nil, for_action:
 
       container ||= self.container
       activity_log ||= self.activity_log
 
       raise FsException::NoAccess.new "user does not have access to this container" unless container.allows_current_user_access_to? :access
-      raise FsException::NoAccess.new "user is not authorized to download" unless container.can_download?
+      raise FsException::NoAccess.new "user is not authorized to #{for_action.to_s.humanize}" unless container.send("can_#{for_action}?")
 
       unless activity_log
         res = ModelReference.find_where_referenced_from(container).first

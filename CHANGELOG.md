@@ -22,7 +22,8 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 - [Changed] Login and e-signature forms used the term "one-time code", which was confusing to users. Change to "two-factor authentication code" for clarity.
 - [Changed] [IPA] Fixed a bug in the configuration that was preventing PIs from e-signing phone screen checklist documents
 - [Added] [Admin] Allow admins to copy configuration entries in admin panel, to allow accurate duplication of templates and common configurations
-- [Changed] [Filestore] Added configuration option to notify roles when a set of file uploads has completed.
+- [Added] [Filestore] [Access-Controls] Uploaded files can be be sent to trash, which is a hidden directory and hidden stored / archived files paths
+- [Changed] [Filestore] Added configuration option to notify roles when a set of file uploads has completed
 - [Changed] [Filestore] Fixed issues with background processing of zip files based on testing in production with real MRI files
 - [Changed] [Filestore] Speed up browsing of containers with thousands of files
 

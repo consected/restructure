@@ -26,6 +26,10 @@ module NfsStoreSupport
 
     aldef = ActivityLog.where(name: 'AL Filter Test').update_all(name: "AL Filter OLD #{rand(10000000)}")
 
+    if ActivityLog::PlayerContactPhone
+      ActivityLog.send(:remove_const, "PlayerContactPhone")
+    end
+
     aldef = ActivityLog.new(
       name: "AL Filter Test",
       item_type: 'player_contact',
@@ -83,6 +87,9 @@ EOF
     al.save!
     @activity_log = al
     @container = NfsStore::Manage::Container.last
+
+    expect(@container).not_to be nil
+
     @container.master.current_user ||= @user
     @container.save!
 

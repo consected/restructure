@@ -22,7 +22,7 @@ module NfsStore
       selected_items.each do |s|
         container = self.container || Browse.open_container(id: s[:container_id], user: self.current_user)
         activity_log = self.activity_log || ActivityLog.open_activity_log(s[:activity_log_type], s[:activity_log_id], self.current_user)
-        retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log)
+        retrieve_file_from(s[:id], s[:retrieval_type], container: container, activity_log: activity_log, for_action: :download)
       end
       self.zip_file_path = NfsStore::Archive::ZipFileGenerator.zip_retrieved_items self.all_action_items
 
