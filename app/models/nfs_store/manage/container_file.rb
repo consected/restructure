@@ -103,7 +103,7 @@ module NfsStore
       end
 
       def move_to_trash!
-        sf_path = self.container_path
+        sf_path = self.container_path(no_filename: true)
         new_path = sf_path.blank? ? TrashPath : File.join(TrashPath, sf_path)
         move_to new_path
 
