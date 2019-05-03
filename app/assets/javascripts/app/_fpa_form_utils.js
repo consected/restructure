@@ -179,6 +179,10 @@ _fpa.form_utils = {
           if (e.is(':checked'))
             form_data[obj_name][a_name] = e.val();
         }
+        else if(e[0] && e[0].type == 'checkbox') {
+          if (e.is(':checked'))
+            form_data[obj_name][a_name] = true;
+        }
         else {
           form_data[obj_name][a_name] = e.val();
         }

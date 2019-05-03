@@ -38,6 +38,7 @@ module ReportsHelper
       end
 
       if type_val.has_key? 'disabled'
+        type_filter ||= {}
         type_filter[:disabled] = false
       end
 

@@ -1,5 +1,3 @@
-# Fields: report_delivery_date,anthropometrics_check,lab_results_check,dexa_check,brain_mri_check,neuro_psych_check,sensory_testing_check,liver_mri_check,physical_function_check,eeg_check,sleep_check,cardiac_check,xray_check
-
 default:
 
   labels:
@@ -22,3 +20,55 @@ default:
     # report_sent_date: Date report was sent
     report_delivery_date: Date of delivery report confirmation
     # reports_sent_notes: Which reports were sent to the provider?
+    anthropometrics_notes: Notes
+    lab_results_notes: Notes
+    dexa_notes: Notes
+    brain_mri_notes: Notes
+    neuro_psych_notes: Notes
+    sensory_testing_notes: Notes
+    liver_mri_notes: Notes
+    physical_function_notes: Notes
+    eeg_notes: Notes
+    sleep_notes: Notes
+    cardiac_notes: Notes
+    xray_notes: Notes
+    other_notes: Other notes
+
+
+
+  show_if:
+    anthropometrics_notes:
+      anthropometrics_check: yes
+
+    lab_results_notes:
+      lab_results_check: yes
+
+    dexa_notes:
+      dexa_check: yes
+
+    brain_mri_notes:
+      brain_mri_check: yes
+
+    neuro_psych_notes:
+      neuro_psych_check: yes
+
+    sensory_testing_notes:
+      sensory_testing_check: yes
+
+    liver_mri_notes:
+      liver_mri_check: yes
+
+    physical_function_notes:
+      physical_function_check: yes
+
+    eeg_notes:
+      eeg_check: yes
+
+    sleep_notes:
+      sleep_check: yes
+
+    cardiac_notes:
+      cardiac_check: yes
+
+    xray_notes:
+      xray_check: yes
