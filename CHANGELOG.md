@@ -106,3 +106,4 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 - [Secure-View] Provide a secure-viewer directly for users clicking a file link in a filestore container. Just view the pages of documents directly in the browser without having to worry about where files were downloaded, or cleaning them up afterwards.
 ## [7.2.15] - 2019-04-18
 ## [7.2.18] - 2019-05-03
+## [7.2.19] - 2019-05-03
