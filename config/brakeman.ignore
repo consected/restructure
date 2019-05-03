@@ -7,7 +7,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 231,
+      "line": 237,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\").pluck(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
       "render_path": null,
@@ -23,13 +23,13 @@
     {
       "warning_type": "File Access",
       "warning_code": 16,
-      "fingerprint": "e57186d1fbed424906dc536a6366cd20a1358353dfb74c8c577833f57b8ee6e3",
+      "fingerprint": "a55415f189807cef4fd10393ecf13a2d445e438d7f668d0e15a88d7b7a01f2f1",
       "check_name": "SendFile",
       "message": "Parameter value used in file name",
       "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 22,
+      "line": 27,
       "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(Download.new(:container => (@container), :activity_log => (@activity_log)).retrieve_file_from(params[:download_id].to_i, [:stored_file, :archived_file].select do\n (r == params[:retrieval_type].to_sym)\n end.first))",
+      "code": "send_file(Download.new(:container => (@container), :activity_log => (@activity_log)).retrieve_file_from(params[:download_id].to_i, [:stored_file, :archived_file].select do\n (r == params[:retrieval_type].to_sym)\n end.first, :for_action => :download))",
       "render_path": null,
       "location": {
         "type": "method",
@@ -47,7 +47,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/nfs_store/archive/mounter.rb",
-      "line": 106,
+      "line": 135,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")}/zip\"])",
       "render_path": null,
@@ -61,6 +61,6 @@
       "note": ""
     }
   ],
-  "updated": "2018-12-14 13:06:12 +0000",
-  "brakeman_version": "4.3.1"
+  "updated": "2019-05-03 21:02:03 +0100",
+  "brakeman_version": "4.5.0"
 }
