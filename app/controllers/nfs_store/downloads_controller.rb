@@ -17,7 +17,7 @@ module NfsStore
       @download = Download.new container: @container, activity_log: @activity_log
       @master = @container.master
       @id = @container.id
-      retrieved_file = @download.retrieve_file_from @download_id, retrieval_type
+      retrieved_file = @download.retrieve_file_from @download_id, retrieval_type, for_action: :download
       if retrieved_file
         @download.save!
         if use_secure_view && secure_view_do_what
