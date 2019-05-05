@@ -212,7 +212,12 @@ module NfsStore
             iterations = 0
             failures = 0
 
-            files = Dir.glob("#{@mounted_path}/**/*")
+            glob_path = "#{@mounted_path}/**/*"
+            %w([ ] { } ?).each do |c|
+              glob_path.gsub!(c, "\\#{c}")
+            end
+
+            files = Dir.glob(glob_path)
 
             puts "Starting extract_archived_files of #{files.length} files"
 
