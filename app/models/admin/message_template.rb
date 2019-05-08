@@ -45,7 +45,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
   # @param tag_subs [String] for example 'span class="someclass"'
   def self.substitute all_content, data: {}, tag_subs:
-    tags = all_content.scan(/{{[0-9a-zA-z_\.]+}}/)
+    tags = all_content.scan(/{{[0-9a-zA-Z_\.]+}}/)
 
     data = setup_data(data) unless data.is_a? Hash
 
