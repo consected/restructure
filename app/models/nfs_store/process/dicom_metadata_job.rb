@@ -47,8 +47,15 @@ module NfsStore
         full_path = container_file.retrieval_path
         return if container_file.content_type.blank?
 
-        mh = NfsStore::Dicom::MetadataHandler.new(file_path: full_path)
-        metadata = mh.extract_metadata
+        begin
+          # Extract the metadata
+          # This is not a reliable process, so catch exceptions and just store a readable error object that can be
+          # used offline to recover is desired
+          mh = NfsStore::Dicom::MetadataHandler.new(file_path: full_path)
+          metadata = mh.extract_metadata
+        rescue => e
+          metadata = {fphs_exception: {status: 'failed', info: 'failed to extract DICOM metadata.', exception: e.to_s } }
+        end
         container_file.file_metadata = metadata
         container_file.save!
 
