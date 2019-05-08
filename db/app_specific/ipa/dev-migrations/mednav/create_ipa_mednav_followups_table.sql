@@ -85,7 +85,7 @@ set search_path=ipa_ops,ml_app;
           id integer NOT NULL,
           master_id integer,
           anthropometrics_check boolean,
-          anthropometrics_notes varchar,\
+          anthropometrics_notes varchar,
           lab_results_check boolean,
           lab_results_notes varchar,
           dexa_check boolean,
