@@ -60,7 +60,7 @@ module NfsStore
         user ||= item.current_user
         fs = filters_for item, user: user
         fs.each do |f|
-          return true if f.evaluate text, item
+          return true if evaluate_with f, text, item
         end
 
         false
@@ -68,8 +68,11 @@ module NfsStore
 
       def filter_for item
         # Substitute filters
-        data = item.attributes
-        Admin::MessageTemplate.substitute self.filter, data: data, tag_subs: nil
+        self.class.filter_for self.filter, item
+      end
+
+      def self.filter_for filter, item
+        Admin::MessageTemplate.substitute filter, data: item, tag_subs: nil
       end
 
       # Evaluate a query directly in the database to produce a filtered set of records
@@ -160,10 +163,13 @@ module NfsStore
       # Evaluate the text against the current filter
       # @return [nil, MatchData] if the match is made, a MatchData object is returned, otherwise nil
       def evaluate text, item
-        re = Regexp.new self.filter_on(item)
-        re.match(text)
+        self.class.evaluate_with self.filter_for(item), text, item
       end
 
+      def self.evaluate_with filter, text, item
+        re = Regexp.new filter
+        re.match(text)
+      end
 
       private
 
