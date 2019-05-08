@@ -17,7 +17,8 @@ module NfsStore
       # for the same user and roles.
       # @param item [ActivityLog | NfsStore::Manage::Container] container or the activity log the container is within
       # @param user [User|nil] user that has filter definitions through role membership or user override
-      # @return [ActiveRecord::Relation] resultset of filters
+      # @return [Array] of filters
+      # [ActiveRecord::Relation] resultset of filters
       def self.filters_for item, user: nil
 
         user ||= item.current_user
@@ -27,7 +28,9 @@ module NfsStore
         else
           rn = item.resource_name
         end
-        filters_for_resource_named rn, user
+        fs = filters_for_resource_named rn, user
+
+        fs.map {|f| f.filter_for item }
       end
 
       # Simply lookup the filters based on the resource name for the scoped user roles.
@@ -57,10 +60,16 @@ module NfsStore
         user ||= item.current_user
         fs = filters_for item, user: user
         fs.each do |f|
-          return true if f.evaluate text
+          return true if f.evaluate text, item
         end
 
         false
+      end
+
+      def filter_for item
+        # Substitute filters
+        data = item.attributes
+        Admin::MessageTemplate.substitute self.filter, data: data, tag_subs: nil
       end
 
       # Evaluate a query directly in the database to produce a filtered set of records
@@ -87,7 +96,7 @@ module NfsStore
       # @return [Hash{ActiveRecord::Relation}] resultset of all matched records
       def self.evaluate_container_files_as_scopes item, user: nil
         user ||= item.current_user
-        filters = filters_for(item, user: user).pluck(:filter)
+        filters = filters_for(item, user: user)
 
         # If no filters are defined, exit. At least one is required to return a sensible result.
         return if filters.length == 0
@@ -110,6 +119,10 @@ module NfsStore
         return {stored_files: sf, archived_files: af}
       end
 
+
+      # Generate filters as SQL for use in reports
+      # Handles substitutions {{...}} by allowing any character sequence to match
+      # @return [String] SQL that can be used directly in a report for filtering results
       def self.generate_filters_for activity_log_resource_name, user: nil
 
         if activity_log_resource_name.start_with? 'activity_log__'
@@ -132,7 +145,8 @@ module NfsStore
           conds_sf = filters.map{|f| "(coalesce(nfs_store_stored_files.path, '') || '/' || nfs_store_stored_files.file_name) ~ ?"}.join(' OR ')
           conds_af = filters.map{|f| "('/' || nfs_store_archived_files.archive_file || '/' ||  coalesce(nfs_store_archived_files.path, '') || '/' || nfs_store_archived_files.file_name) ~ ?"}.join(' OR ')
 
-          filter_strings = filters.map(&:filter)
+          # Replace substitution {{...}} markers with .+ to match any character sequence, since we need to produce generic SQL
+          filter_strings = filters.map {|f| f.filter.gsub(/\{\{.+\}\}/, '.+') }
 
           sql_sets << ActiveRecord::Base.send(:sanitize_sql_array, [
             "extra_log_type = ? AND (nfs_store_archived_files.id IS NOT NULL AND (#{conds_af}) OR nfs_store_stored_files.id IS NOT NULL AND (#{conds_sf}))"
@@ -145,8 +159,8 @@ module NfsStore
 
       # Evaluate the text against the current filter
       # @return [nil, MatchData] if the match is made, a MatchData object is returned, otherwise nil
-      def evaluate text
-        re = Regexp.new self.filter
+      def evaluate text, item
+        re = Regexp.new self.filter_on(item)
         re.match(text)
       end
 

@@ -97,6 +97,7 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     f = create_filter('^/abc')
     f = create_filter('^dir\/')
     f = create_filter('^/ghi')
+    f = create_filter('^id\/{{id}} - id file')
 
 
     res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
@@ -113,8 +114,26 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     expect(res.first.file_name).to eq 'abc_ is a test'
     expect(res.last.file_name).to eq 'abc_ is a test2'
 
+    create_stored_file 'id', "#{@activity_log.id} - id file"
+    create_stored_file 'id', "000100 - id file"
+    res = NfsStore::Filter::Filter.evaluate_container_files @activity_log
+    expect(res.length).to eq 3
+    expect(res.first.file_name).to eq "#{@activity_log.id} - id file"
 
 
+  end
+
+  it "generates SQL to filter reports" do
+
+    f = create_filter('^/fabc')
+    f = create_filter('^fdir\/')
+    f = create_filter('^/fghi')
+    f = create_filter('^fid\/{{id}} - id file')
+
+    fs = NfsStore::Filter::Filter.generate_filters_for 'activity_log__player_contact_phones'
+
+    expect(fs.length).to be > 10
+    expect(fs).to include 'fid/.+ - id file'
 
   end
 

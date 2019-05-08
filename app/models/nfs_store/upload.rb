@@ -218,7 +218,7 @@ module NfsStore
     end
 
     def self.valid_filters item_or_container
-      NfsStore::Filter::Filter.filters_for(item_or_container).pluck(:filter)
+      NfsStore::Filter::Filter.filters_for(item_or_container)
     end
 
     private
