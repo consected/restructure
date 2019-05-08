@@ -159,13 +159,22 @@ _fpa.postprocessors_reports = {
         }, 50);
 
         window.setTimeout(function() {
-          $('td[data-col-type$="_at"], td[data-col-type$="_when"], td[data-col-type$="_date"]').each(function() {
+          $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"]').each(function() {
             var d = null;
             var val = $(this).html();
             if(val == 'Invalid Date')
               d = '';
             else if (val && val != '')
               d = _fpa.utils.YMDtoLocale(val);
+            $(this).html(d);
+          });
+          $('td[data-col-type$="_at"], td[data-col-type$=" at"]').each(function() {
+            var d = null;
+            var val = $(this).html();
+            if(val == 'Invalid Date')
+              d = '';
+            else if (val && val != '')
+              d = _fpa.utils.YMDtimeToLocale(val);
             $(this).html(d);
           });
 

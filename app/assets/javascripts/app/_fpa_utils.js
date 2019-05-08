@@ -194,6 +194,26 @@ _fpa.utils.YMDtoLocale = function(stre){
     return d;
 };
 
+
+// Typically returns mm/dd/yyyy hh:mm:ss a/pm
+_fpa.utils.YMDtimeToLocale = function(stre){
+
+    // Take special care to avoid issues with timezones and daylight savings time quirks
+    if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) || stre.length > 15){
+        // startTime = new Date(Date.parse(stre));
+        // startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
+        // var d = startTime.asLocale();
+        var d = _fpa.utils.isoDateTimeStringToLocale(stre);
+    } else {
+      // This locale string only includes the date
+        // var d = new Date(stre).asLocale();
+        var d = _fpa.utils.isoDateTimeStringToLocale(stre);
+    }
+    if(d == 'Invalid Date') d = stre;
+
+    return d;
+};
+
 _fpa.utils.parseLocaleDate = function(stre) {
   stre = stre.trim();
   if(stre == '') return '';
@@ -218,6 +238,19 @@ _fpa.utils.isoDateStringToLocale = function(stre) {
   return stre.substring(5,7) + '/' + stre.substring(8,10) + '/' + stre.substring(0,4);
 
 };
+
+// Take yyyy-mm-dd hh24:min:ss... and make it mm/dd/yyyy hh24:min:ss
+// TODO: conform to _fpa.user_prefs.date_format
+_fpa.utils.isoDateTimeStringToLocale = function(stre) {
+  stre = stre.trim();
+  if(stre == '') return '';
+
+  return stre.substring(5,7) + '/' + stre.substring(8,10) + '/' + stre.substring(0,4) + ' ' +
+  stre.substring(11,19)
+  ;
+
+};
+
 
 Date.prototype.asYMD = function(){
 
