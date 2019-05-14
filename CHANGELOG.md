@@ -17,6 +17,13 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+- [Added] [IPA] Added MRN activity to Navigation to allow viewing and adding of MRNs from the planning / scheduling process (plus associated 'scheduling' role)
+- [Added] [IPA] New search tab queues representing common Outstanding Activities searches, such as "Ready to Sign" phone screen checklist 
+- [Added] [Filestore] Allow record attributes to be substituted into filename filters, to enforce names like "{{ids.ipa_id}}-filename" to become "123123-filename"
+- [Fixed] Bug causing errors when referencing external IDs (such as IPA ID) from an activity
+
 ## [7.2.17] - 2019-05-03
 
 - [Changed] Login and e-signature forms used the term "one-time code", which was confusing to users. Change to "two-factor authentication code" for clarity.
