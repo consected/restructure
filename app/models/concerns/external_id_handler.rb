@@ -93,6 +93,10 @@ module ExternalIdHandler
       @label
     end
 
+    def human_name
+      self.label
+    end
+
     def prevent_edit?
       return @prevent_edit unless @prevent_edit.nil?
       false

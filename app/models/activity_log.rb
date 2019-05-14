@@ -90,7 +90,7 @@ class ActivityLog < ActiveRecord::Base
   def extra_log_type_valid?
       ExtraLogType.parse_config(self)
       return true
-    rescue => e
+    rescue
       return false
   end
 
