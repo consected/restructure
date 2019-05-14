@@ -353,6 +353,11 @@ fieldset.readonly-edit-fieldset
 
 .edit-field-container.done-label-resize input[type="text"].form-control:first-child {
     width: 100%;
+
+// Overrides
+    &.time-entry {
+      width: auto;
+    }
 }
 
 
