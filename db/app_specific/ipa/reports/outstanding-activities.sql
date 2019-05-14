@@ -65,7 +65,11 @@ FROM (
     FROM activity_log_ipa_assignment_inex_checklists inex
     WHERE
 
-    (:activity_performed IN ('inex-phone-screen-complete', 'inex-baseline-complete') OR :activity_outstanding IS NOT NULL AND :activity_outstanding IN ('inex-phone-screen-complete', 'inex-baseline-complete') )
+    (
+      :activity_performed IN ('inex-phone-screen-complete', 'inex-baseline-complete')
+      OR :activity_outstanding IS NOT NULL
+      AND :activity_outstanding IN ('inex-phone-screen-complete', 'inex-baseline-complete')
+    )
     AND extra_log_type IN ('sign_phone_screen', 'sign_baseline')
 
     UNION
