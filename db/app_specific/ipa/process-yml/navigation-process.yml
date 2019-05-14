@@ -93,7 +93,28 @@ _default:
           event_date: null
           start_time: null
 
+add_mrn:
+  label: MRNs
+  fields:
+  valid_if:
 
+  caption_before:
+    submit: Save activity to view / add participant MRNs
+
+  references:
+    mrn_number:
+      from: master
+      add: many
+      prevent_disable: true
+      view_as:
+        edit: not_embedded
+        new: not_embedded
+
+  creatable_if:
+    <<: *enabled_if
+    not_any:
+      activity_log__ipa_assignment_navigations:
+        extra_log_type: add_mrn
 
 planned_event:
   label: Planned Event
