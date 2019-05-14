@@ -1,7 +1,8 @@
 SELECT
    dt.master_id,
-   pi.first_name,
-   pi.last_name,
+   ipa.ipa_id,
+   --pi.first_name,
+   --pi.last_name,
    dt.source,
    dt.extra_log_type activity,
    dt.communication_result,
@@ -25,16 +26,22 @@ FROM (
       al.master_id,
       'tracker' "source",
       al.extra_log_type,
-      al.select_result "communication_result",
+      CASE WHEN
+        (select_result='follow up' OR select_activity = 'schedule follow up') THEN 'follow up'
+      WHEN
+        (select_result='completed' OR select_activity = 'completed') THEN 'completed'
+      ELSE
+        al.select_result
+      END "communication_result",
       NULL "checklist_signed",
       al.created_at
 
     FROM activity_log_ipa_assignments al
 
     WHERE
-    :activity_performed = 'general-follow-up' AND al.extra_log_type='general' AND select_result='follow up'
+    :activity_performed = 'general-follow-up' AND al.extra_log_type='general' AND (select_result='follow up' OR select_activity = 'schedule follow up')
     OR
-    :activity_performed = 'general-completed' AND al.extra_log_type='general' AND select_result='completed'
+    :activity_performed = 'general-completed' AND al.extra_log_type='general' AND (select_result='completed' OR select_activity = 'completed')
     OR
     :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND al.extra_log_type='general'
     OR
@@ -135,6 +142,7 @@ FROM (
 ) AS dt
 
 inner join player_infos pi on dt.master_id = pi.master_id
+inner join ipa_assignments ipa on dt.master_id = ipa.master_id
 
 WHERE
 (:activity_outstanding IS NULL OR :activity_outstanding IS NOT NULL AND r = 1)
