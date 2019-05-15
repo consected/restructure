@@ -56,6 +56,27 @@ FROM (
     UNION
 
     --
+    -- IPA Tracker process for appointments
+    --
+    SELECT
+      al.master_id,
+      'tracker' "source",
+      al.extra_log_type,
+      NULL "communication_result",
+      NULL "checklist_signed",
+      '1900-01-01 00:00:00'
+
+    FROM activity_log_ipa_assignments al
+
+    INNER JOIN ipa_appointments apt
+    ON al.master_id = apt.master_id
+
+    WHERE
+      :activity_performed = 'appointment-set' AND al.extra_log_type='appointment'
+      OR :activity_outstanding is not null AND :activity_outstanding = 'appointment-set' AND al.extra_log_type='appointment'
+
+    UNION
+    --
     -- Inclusion / Exclusion process
     --
     SELECT
@@ -115,6 +136,33 @@ FROM (
 
 
 
+    UNION
+
+    --
+    -- Navigation process
+    --
+    SELECT
+      master_id,
+      'navigation' "source",
+      extra_log_type,
+      NULL "communication_result",
+      NULL "checklist_signed",
+      coalesce(event_date + start_time, created_at) "created_at"
+
+    FROM activity_log_ipa_assignment_navigations nav
+
+    WHERE
+    (
+      (
+        :activity_performed = 'has-planned-event' AND extra_log_type = 'planned_event'
+        OR :activity_performed = 'has-event-feedback' AND extra_log_type = 'station_event'
+      )
+
+      OR :activity_outstanding IS NOT NULL AND (
+        :activity_outstanding  = 'has-planned-event' AND extra_log_type = 'planned_event'
+        OR :activity_outstanding = 'has-event-feedback' AND extra_log_type = 'station_event'
+      )
+    )
 
 
   ) AS di
@@ -212,6 +260,9 @@ AND
   OR :activity_performed = 'inex-tms-responses' AND extra_log_type = 'tms_responses'
   OR :activity_performed = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'
   OR :activity_performed = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'
+  OR :activity_performed = 'has-planned-event' AND extra_log_type = 'planned_event'
+  OR :activity_performed = 'has-event-feedback' AND extra_log_type = 'station_event'
+  OR :activity_performed = 'appointment-set' AND extra_log_type='appointment'
 
   OR (
     :activity_performed = 'inex-baseline-complete'
@@ -242,6 +293,9 @@ AND (
       OR :activity_outstanding = 'inex-tms-responses' AND extra_log_type = 'tms_responses'
       OR :activity_outstanding = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'
       OR :activity_outstanding = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'
+      OR :activity_outstanding = 'has-planned-event' AND extra_log_type = 'planned_event'
+      OR :activity_outstanding = 'has-event-feedback' AND extra_log_type = 'station_event'
+      OR :activity_outstanding = 'appointment-set' AND extra_log_type='appointment'
 
       OR (
           :activity_outstanding = 'inex-baseline-complete'
