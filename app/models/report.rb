@@ -360,7 +360,8 @@ class Report < ActiveRecord::Base
       search_attr_values[k.to_sym] = nil unless search_attr_values.has_key? k.to_sym
     end
 
-    ks = search_attributes.keys
+    ks = search_attributes.keys.map(&:to_sym)
+
     search_attr_values.slice!(*ks)
 
     search_attr_values.symbolize_keys! unless search_attr_values.is_a?(ActionController::Parameters)

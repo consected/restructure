@@ -174,19 +174,23 @@ a.add-icon{
   }
 }
 
-.advanced-form-selections .btn {
+.advanced-form-selections {
+    line-height: 2.8;
 
-    color: #2e6da4;
-    background: white;
-    &:active {color: #008;}
+    .btn {
+
+      color: #2e6da4;
+      background: white;
+      &:active {color: #008;}
 
 
 
-    &.collapsed {
+      &.collapsed {
         background: #2e6da4;
         color: white;
+      }
+      &.collapsed:active {color:white;}
     }
-    &.collapsed:active {color:white;}
 }
 
 
