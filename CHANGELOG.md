@@ -17,7 +17,7 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [Unreleased]
+## [7.2.23] - 2019-05-15
 
 - [Added] [IPA] Added MRN activity to Navigation to allow viewing and adding of MRNs from the planning / scheduling process (plus associated 'scheduling' role)
 - [Added] [IPA] New search tab queues representing common Outstanding Activities searches, such as "Ready to Sign" phone screen checklist 
