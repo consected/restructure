@@ -66,11 +66,27 @@ FROM (
     WHERE
 
     (
-      :activity_performed IN ('inex-phone-screen-complete', 'inex-baseline-complete')
-      OR :activity_outstanding IS NOT NULL
-      AND :activity_outstanding IN ('inex-phone-screen-complete', 'inex-baseline-complete')
+      (
+        :activity_performed = 'inex-phone-screen-finalized' AND extra_log_type = 'finalize_phone_screen_checklist'
+        OR :activity_performed = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'
+        OR :activity_performed = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'
+        OR :activity_performed = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'
+        OR :activity_performed = 'inex-baseline-complete' AND extra_log_type = 'sign_baseline'
+        OR :activity_performed = 'inex-tms-responses' AND extra_log_type = 'tms_responses'
+        OR :activity_performed = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'
+      )
+
+
+      OR :activity_outstanding IS NOT NULL AND (
+        :activity_outstanding = 'inex-phone-screen-finalized' AND extra_log_type = 'finalize_phone_screen_checklist'
+        OR :activity_outstanding = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'
+        OR :activity_outstanding = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'
+        OR :activity_outstanding = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'
+        OR :activity_outstanding = 'inex-baseline-complete' AND extra_log_type = 'sign_baseline'
+        OR :activity_outstanding = 'inex-tms-responses' AND extra_log_type = 'tms_responses'
+        OR :activity_outstanding = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'
+      )
     )
-    AND extra_log_type IN ('sign_phone_screen', 'sign_baseline')
 
     UNION
 
@@ -156,13 +172,18 @@ AND
   :activity_performed = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'
   OR
     :activity_performed = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'
-  OR (
-    :activity_performed = 'inex-phone-screen-complete'
-    AND (
-      dt.extra_log_type IN ('sign_phone_screen') AND
-      checklist_signed = 'yes'
-    )
-  )
+  OR
+    :activity_performed = 'inex-phone-screen-finalized' AND dt.extra_log_type = 'finalize_phone_screen_checklist'
+  OR
+    :activity_performed = 'inex-phone-screen-so-pi' AND dt.extra_log_type = 'sign_phone_screen'
+  OR
+    :activity_performed = 'inex-phone-screen-so-mednav' AND dt.extra_log_type = 'sign_phone_screen_reviewer'
+  OR
+    :activity_performed = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'
+
+  OR :activity_performed = 'inex-tms-responses' AND dt.extra_log_type = 'tms_responses'
+  OR :activity_performed = 'inex-tms-so' AND dt.extra_log_type = 'sign_tms_eligibility'
+
   OR (
     :activity_performed = 'inex-baseline-complete'
     AND (
@@ -185,13 +206,19 @@ AND (
     AND (
       :activity_outstanding = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'
       OR :activity_outstanding = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'
-      OR (
-          :activity_outstanding = 'inex-phone-screen-complete'
-          AND (
-            dt.extra_log_type IN ('sign_phone_screen') AND
-            checklist_signed = 'yes'
-          )
-      )
+
+      OR
+        :activity_outstanding = 'inex-phone-screen-finalized' AND dt.extra_log_type = 'finalize_phone_screen_checklist'
+      OR
+        :activity_outstanding = 'inex-phone-screen-so-pi' AND dt.extra_log_type = 'sign_phone_screen'
+      OR
+        :activity_outstanding = 'inex-phone-screen-so-mednav' AND dt.extra_log_type = 'sign_phone_screen_reviewer'
+      OR
+        :activity_outstanding = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'
+
+      OR :activity_outstanding = 'inex-tms-responses' AND dt.extra_log_type = 'tms_responses'
+      OR :activity_outstanding = 'inex-tms-so' AND dt.extra_log_type = 'sign_tms_eligibility'
+
       OR (
           :activity_outstanding = 'inex-baseline-complete'
           AND (
@@ -211,6 +238,7 @@ AND (
   )
 
 )
+
 AND (
   :completed_or_withdrawn IS NULL
   OR (
