@@ -11,6 +11,11 @@ SELECT
    dt.created_at,
    dt.r
 FROM (
+  -- Generate a resultset of ranked results
+  -- with most recently created items first
+  -- that include only the requested previous and outstanding activities
+  -- This allows us to see if an outstanding item appears more recently than
+  -- a previous item
 
   SELECT
     di.*,
@@ -22,6 +27,9 @@ FROM (
     ) AS r
   FROM
   (
+    --
+    -- IPA Tracker process
+    --
     SELECT
       al.master_id,
       'tracker' "source",
@@ -39,20 +47,17 @@ FROM (
     FROM activity_log_ipa_assignments al
 
     WHERE
-    :activity_performed = 'general-follow-up' AND al.extra_log_type='general' AND (select_result='follow up' OR select_activity = 'schedule follow up')
-    OR
-    :activity_performed = 'general-completed' AND al.extra_log_type='general' AND (select_result='completed' OR select_activity = 'completed')
-    OR
-    :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND al.extra_log_type='general'
-    OR
-    :activity_outstanding is not null AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general'
-    OR
-    (
-      al.extra_log_type IN (:activity_performed, :activity_outstanding, 'withdraw', 'perform_screening_follow_up')
-    )
+      :activity_performed = 'general-follow-up' AND al.extra_log_type='general' AND (select_result='follow up' OR select_activity = 'schedule follow up')
+      OR :activity_performed = 'general-completed' AND al.extra_log_type='general' AND (select_result='completed' OR select_activity = 'completed')
+      OR :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND al.extra_log_type='general'
+      OR :activity_outstanding is not null AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general'
+      OR al.extra_log_type IN (:activity_performed, :activity_outstanding, 'withdraw', 'perform_screening_follow_up')
 
     UNION
 
+    --
+    -- Inclusion / Exclusion process
+    --
     SELECT
       inex.master_id,
       'inex' "source",
@@ -63,6 +68,7 @@ FROM (
 
 
     FROM activity_log_ipa_assignment_inex_checklists inex
+
     WHERE
 
     (
@@ -90,6 +96,9 @@ FROM (
 
     UNION
 
+    --
+    -- Phone Screen process
+    --
     SELECT
       ps.master_id,
       'phone screen' "source",
@@ -98,12 +107,11 @@ FROM (
       NULL "checklist_signed",
       ps.created_at
 
-
     FROM activity_log_ipa_assignment_phone_screens ps
-    WHERE
 
-    (:activity_performed = 'phone-screen-complete' OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'phone-screen-complete' )
-    AND extra_log_type IN ('finalize')
+    WHERE
+      (:activity_performed = 'phone-screen-complete' OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'phone-screen-complete' )
+      AND extra_log_type IN ('finalize')
 
 
 
@@ -112,7 +120,12 @@ FROM (
   ) AS di
 
   LEFT OUTER JOIN (
+    -- Add an exit type column for those participants that have exited the study
+    -- NULL if they are still in the study
 
+    --
+    -- Phone Screen not interested or not eligible
+    --
     SELECT
       master_id,
       'not interested or ineligible (follow up)' "exit_type"
@@ -126,6 +139,9 @@ FROM (
 
     UNION
 
+    --
+    -- Phone screen not interested
+    --
     SELECT
       master_id,
       'not interested (phone screening)' "exit_type"
@@ -138,6 +154,9 @@ FROM (
 
     UNION
 
+    --
+    -- Withdrew
+    --
     SELECT
       master_id,
       'withdrew' "exit_type"
@@ -151,89 +170,89 @@ FROM (
 
      UNION
 
+    --
+    -- Completed study
+    --
     SELECT
       master_id,
       'completed exit survey' "exit_type"
     FROM ipa_surveys surv
     WHERE
       select_survey_type = 'exit survey'
+
+  -- End left outer join
   ) dlo ON dlo.master_id = di.master_id
 
+-- End ranked selection
 ) AS dt
 
+-- Include player details
 inner join player_infos pi on dt.master_id = pi.master_id
+-- Match IPA ID to master_id
 inner join ipa_assignments ipa on dt.master_id = ipa.master_id
 
 WHERE
-(:activity_outstanding IS NULL OR :activity_outstanding IS NOT NULL AND r = 1)
+(
+  -- Either:
+  -- no outstanding activity has been selected, so just perform a plain query
+  -- or:
+  -- we want the first record from the results based
+  -- on an order of most recently created appearing first (and therefore overriding older records)
+  :activity_outstanding IS NULL OR :activity_outstanding IS NOT NULL AND r = 1
+)
 AND
 (
-
-  :activity_performed = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'
-  OR
-    :activity_performed = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'
-  OR
-    :activity_performed = 'inex-phone-screen-finalized' AND dt.extra_log_type = 'finalize_phone_screen_checklist'
-  OR
-    :activity_performed = 'inex-phone-screen-so-pi' AND dt.extra_log_type = 'sign_phone_screen'
-  OR
-    :activity_performed = 'inex-phone-screen-so-mednav' AND dt.extra_log_type = 'sign_phone_screen_reviewer'
-  OR
-    :activity_performed = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'
-
-  OR :activity_performed = 'inex-tms-responses' AND dt.extra_log_type = 'tms_responses'
-  OR :activity_performed = 'inex-tms-so' AND dt.extra_log_type = 'sign_tms_eligibility'
+  -- Based on the activity performed selection pick the appropriate conditions
+  :activity_performed = 'general-follow-up' AND extra_log_type='general' AND dt.communication_result='follow up'
+  OR :activity_performed = 'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'
+  OR :activity_performed = 'inex-phone-screen-finalized' AND extra_log_type = 'finalize_phone_screen_checklist'
+  OR :activity_performed = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'
+  OR :activity_performed = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'
+  OR :activity_performed = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'
+  OR :activity_performed = 'inex-tms-responses' AND extra_log_type = 'tms_responses'
+  OR :activity_performed = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'
+  OR :activity_performed = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'
 
   OR (
     :activity_performed = 'inex-baseline-complete'
     AND (
-      dt.extra_log_type IN ('sign_baseline') AND
+      extra_log_type IN ('sign_baseline') AND
       checklist_signed = 'yes'
     )
   )
-  OR (
-    :activity_performed = 'phone-screen-complete'
-    AND (
-      dt.extra_log_type IN ('phone_screen_finalized')
-    )
-  )
-  OR :activity_performed NOT IN ('inex-complete', 'phone-screen-complete') AND dt.extra_log_type = :activity_performed
+
+  OR :activity_performed NOT IN ('inex-complete', 'phone-screen-complete') AND extra_log_type = :activity_performed
 )
 AND (
+  -- If no outstanding activity was selected then there are no conditions to apply
   :activity_outstanding IS NULL
   OR NOT (
+    -- An outstanding activity was selected
+    -- Based on the activity outstanding selection pick the appropriate conditions
+    -- that the first record in the results must match in order to correctly override the previous activities
+    -- If one was found, the NOT negation ensures a found record does not register as an activity outstanding
     r = 1
     AND (
-      :activity_outstanding = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow up'
-      OR :activity_outstanding = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'
-
-      OR
-        :activity_outstanding = 'inex-phone-screen-finalized' AND dt.extra_log_type = 'finalize_phone_screen_checklist'
-      OR
-        :activity_outstanding = 'inex-phone-screen-so-pi' AND dt.extra_log_type = 'sign_phone_screen'
-      OR
-        :activity_outstanding = 'inex-phone-screen-so-mednav' AND dt.extra_log_type = 'sign_phone_screen_reviewer'
-      OR
-        :activity_outstanding = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'
-
-      OR :activity_outstanding = 'inex-tms-responses' AND dt.extra_log_type = 'tms_responses'
-      OR :activity_outstanding = 'inex-tms-so' AND dt.extra_log_type = 'sign_tms_eligibility'
+      :activity_outstanding = 'general-follow-up' AND extra_log_type='general' AND dt.communication_result='follow up'
+      OR :activity_outstanding = 'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'
+      OR :activity_outstanding = 'inex-phone-screen-finalized' AND extra_log_type = 'finalize_phone_screen_checklist'
+      OR :activity_outstanding = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'
+      OR :activity_outstanding = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'
+      OR :activity_outstanding = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'
+      OR :activity_outstanding = 'inex-tms-responses' AND extra_log_type = 'tms_responses'
+      OR :activity_outstanding = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'
+      OR :activity_outstanding = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'
 
       OR (
           :activity_outstanding = 'inex-baseline-complete'
           AND (
-            dt.extra_log_type IN ('sign_baseline') AND
+            extra_log_type IN ('sign_baseline') AND
             checklist_signed = 'yes'
           )
       )
 
-      OR (
-        :activity_outstanding = 'phone-screen-complete'
-        AND (
-          dt.extra_log_type IN ('phone_screen_finalized')
-        )
-      )
-      OR :activity_outstanding NOT IN ('inex-complete', 'phone-screen-complete') AND dt.extra_log_type = :activity_outstanding
+
+      OR :activity_outstanding NOT IN ('inex-complete', 'phone-screen-complete') AND extra_log_type = :activity_outstanding
     )
   )
 
