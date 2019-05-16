@@ -16,6 +16,13 @@ app match, and have a predictable format indicating how much change from the pre
 version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
+
+
+## [Unreleased]
+
+- [Added] Define a prefix for master record header, based on data extracted from the record
+- [Added] Message field substitution allows data from any part of the master record to be used
+
 ## [7.2.24] - 2019-05-15
 
 - [Added] [IPA] Auto search tabs / queues showing participants with various statuses (such as Ready for Sign Off)
