@@ -37,6 +37,7 @@ _nfs_store.uploader = function ($outer) {
         spark = new SparkMD5.ArrayBuffer(),
         spark_chunk = new SparkMD5.ArrayBuffer();
     var abortClicked;
+    var uploadedIds;
 
     var frOnload = function(e) {
 
@@ -215,7 +216,8 @@ _nfs_store.uploader = function ($outer) {
         activity_log_id: al.activity_log_id,
         activity_log_type: al.activity_log_type,
         container_id: containerId,
-        do: 'done'
+        do: 'done',
+        uploaded_ids: uploadedIds.join(',')
       };
 
       $.ajax({
@@ -331,6 +333,7 @@ _nfs_store.uploader = function ($outer) {
         var first_file = getFileBlock().length == 0;
         var $block = addFileBlock(data, index, file, e, that);
         if(first_file) {
+          uploadedIds = [];
           submitNext(that, e);
         }
       });
@@ -378,6 +381,7 @@ _nfs_store.uploader = function ($outer) {
 
       if (file.url) {
           $block.find('.progress-bar-status-text').text('completed');
+          uploadedIds.push(file.id);
       } else if (file.error) {
           $block.find('.file-error').text(file.error);
       }

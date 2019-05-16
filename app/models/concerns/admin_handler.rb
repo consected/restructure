@@ -27,7 +27,8 @@ module AdminHandler
     !disabled
   end
 
-  def disable!
+  def disable! current_admin=nil
+    self.current_admin = current_admin if current_admin
     self.disabled = true
     self.save
   end

@@ -37,6 +37,11 @@ module NfsStoreSupport
       action_when_attribute: "created_at"
     )
 
+    t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
+    @layout = Admin::MessageTemplate.create! name: 'test email layout upload', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+    @content = Admin::MessageTemplate.create! name: 'test email content upload', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
     aldef.extra_log_types =<<EOF
     step_1:
@@ -53,6 +58,14 @@ module NfsStoreSupport
               - select_scanner
             label: Session Files
             create_with_role: nfs_store group 600
+
+        on_upload:
+          notify:
+            type: email
+            role: upload notify role
+            layout_template: test email layout upload
+            content_template: test email content upload
+            subject: Send test
 
       references:
         nfs_store__manage__container:
@@ -87,6 +100,7 @@ EOF
     al.save!
     @activity_log = al
     @container = NfsStore::Manage::Container.last
+    @container.parent_item ||= @activity_log
 
     expect(@container).not_to be nil
 
@@ -121,6 +135,23 @@ EOF
       user: user,
       resource_name: resource_name,
       filter: filter
+    )
+  end
+
+  def create_stored_file  file_path, file_name, container: nil, activity_log: nil
+
+    activity_log ||= @activity_log
+
+    container ||= activity_log&.container || @container
+
+    NfsStore::Manage::StoredFile.create!(
+        container: container,
+        file_name: file_name,
+        path: file_path,
+        content_type: 'application/dicom',
+        file_hash: 'dummy',
+        file_size: 0,
+        prevent_processing: true
     )
   end
 

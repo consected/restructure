@@ -12,23 +12,6 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
   end
 
 
-  def create_stored_file  file_path, file_name, container: nil, activity_log: nil
-
-    activity_log ||= @activity_log
-
-    container ||= activity_log&.container || @container
-
-    NfsStore::Manage::StoredFile.create!(
-        container: container,
-        file_name: file_name,
-        path: file_path,
-        content_type: 'application/dicom',
-        file_hash: 'dummy',
-        file_size: 0,
-        prevent_processing: true
-    )
-  end
-
 
   it "creates filters for a user and role" do
 

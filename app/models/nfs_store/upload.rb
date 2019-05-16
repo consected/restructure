@@ -188,7 +188,8 @@ module NfsStore
         "name" => self.file_name,
         "size" => self.file_size,
         "hash" => self.file_hash,
-        "url" => self.url
+        "url" => self.url,
+        "id" => self.id
       }
     end
 

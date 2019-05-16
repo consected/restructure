@@ -10,6 +10,11 @@ RSpec.describe NfsStore::Upload, type: :model do
   DefaultRole = 'file1'
 
   before :all do
+    @other_users = []
+    @other_users << create_user.first
+    @other_users << create_user.first
+    @other_users << create_user.first
+
     setup_nfs_store
   end
 
@@ -82,6 +87,64 @@ RSpec.describe NfsStore::Upload, type: :model do
 
     md5tot = Digest::MD5.hexdigest(totstring)
     expect(u.hash_for_file).to eq md5tot
+
+  end
+
+  it "filters notifications" do
+
+    role_name = 'upload test notify'
+
+    files = []
+    files << create_stored_file( '.', 'not_abc_ is a test')
+    files << create_stored_file( '.', 'abc_ is a test')
+    files << create_stored_file( '.', 'abc_2 is a test')
+
+    f0 = create_filter('^/abc_')
+    f = create_filter('^/fabc')
+    f = create_filter('^fdir\/')
+    f = create_filter('^/fghi')
+    f = create_filter('^fid\/{{id}} - id file')
+
+    @container.previous_upload_ids = files.map(&:id)
+
+    res = @container.filter_notifications(@other_users + [@user])
+
+    expect(res.length).to eq 1
+    expect(res.first).to eq @user
+
+    f0.disable!(@admin)
+
+    res = @container.filter_notifications(@other_users + [@user])
+
+    expect(res.length).to eq 0
+
+    u0 = @other_users.first
+    u1 = @other_users[1]
+
+    f1 = create_filter('^/abc_', user: u0)
+    f2 = create_filter('^/abc_', user: u1)
+
+    res = @container.filter_notifications(@other_users + [@user])
+
+    expect(res.length).to eq 2
+
+    @user.user_roles.create! current_admin: @admin, role_name: role_name
+
+    create_filter '^/abc_', role_name: role_name
+    f1.disable!(@admin)
+
+    res = @container.filter_notifications(@other_users + [@user])
+
+    expect(res.length).to eq 2
+    expect(res.last).to eq @user
+    expect(res.first).to eq u1
+
+    u1.user_roles.create! current_admin: @admin, role_name: role_name
+    res = @container.filter_notifications(@other_users + [@user])
+
+    expect(res.length).to eq 2
+    expect(res.last).to eq @user
+    expect(res.first).to eq u1
 
   end
 end

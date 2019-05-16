@@ -90,7 +90,12 @@ module NfsStore
       act = params[:do]
 
       if act == 'done'
-        @container.upload_done
+        ui = params[:uploaded_ids]
+        return bad_request if ui.blank?
+
+        uis = ui.split(',').map(&.to_i)
+
+        @container.upload_done uis
       else
         return not_authorized
       end

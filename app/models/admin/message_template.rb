@@ -60,7 +60,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
         tag = tagpair.last
       end
 
-      unless d && (d.key?(tag) || d.key?(tag.to_sym))
+      unless d && d.is_a?(Hash) && (d.key?(tag) || d.key?(tag.to_sym))
         if ignore_missing
           d = {}
         else

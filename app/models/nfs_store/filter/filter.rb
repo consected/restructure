@@ -19,7 +19,7 @@ module NfsStore
       # @param user [User|nil] user that has filter definitions through role membership or user override
       # @return [Array] of filters
       # [ActiveRecord::Relation] resultset of filters
-      def self.filters_for item, user: nil
+      def self.filters_for item, user: nil, alt_role: nil
 
         user ||= item.current_user
 
@@ -28,7 +28,7 @@ module NfsStore
         else
           rn = item.resource_name
         end
-        fs = filters_for_resource_named rn, user
+        fs = filters_for_resource_named rn, user, alt_role: alt_role
 
         fs.map {|f| f.filter_for item }
       end
@@ -38,12 +38,13 @@ module NfsStore
       # naming in view templates
       # @param name [String] standard resource name string
       # @param user [User] allow roles and user settings to be applied to filters
+      # @param alt_role [String|Array] use alternative role name (or names) instead of the user's defined set
       # @return [ActiveRecord::Relation] resultset of filters
-      def self.filters_for_resource_named name, user
+      def self.filters_for_resource_named name, user, alt_role: nil
         primary_conditions = {
           resource_name: name
         }
-        self.where(primary_conditions).scope_user_and_role(user)
+        self.where(primary_conditions).scope_user_and_role(user, nil, alt_role)
       end
 
       # List of resource names for definitions of filters
@@ -86,8 +87,8 @@ module NfsStore
       # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
       # @param user [User|nil]
       # @return [Array] all matched records of StoredFile and ArchivedFile types
-      def self.evaluate_container_files item, user: nil
-        res = evaluate_container_files_as_scopes item, user: user
+      def self.evaluate_container_files item, user: nil, alt_role: nil
+        res = evaluate_container_files_as_scopes item, user: user, alt_role: alt_role
         return [] unless res
         res[:stored_files] + res[:archived_files]
       end
@@ -97,9 +98,9 @@ module NfsStore
       # @param item [ActivityLog|NfsStore::ManageContainer] container or activity log referencing the container
       # @param user [User|nil]
       # @return [Hash{ActiveRecord::Relation}] resultset of all matched records
-      def self.evaluate_container_files_as_scopes item, user: nil
+      def self.evaluate_container_files_as_scopes item, user: nil, alt_role: nil
         user ||= item.current_user
-        filters = filters_for(item, user: user)
+        filters = filters_for(item, user: user, alt_role: alt_role)
 
         # If no filters are defined, exit. At least one is required to return a sensible result.
         return if filters.length == 0

@@ -47,17 +47,25 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       else
         raise FphsException.new "either role or users must be specified in save_trigger: notify: role: ..."
       end
-      @layout_template = config[:layout_template]
-      @content_template = config[:content_template]
-      @message_type = config[:type]
-      @subject = config[:subject]
-
-
 
       if @receiving_user_ids.length == 0
         Rails.logger.warn "No users assigned to role #{@role} in #{self.class.name}"
         return
       end
+
+      if @item.respond_to?(:filter_notifications)
+        @receiving_user_ids = filter_notifications @role, @receiving_user_ids
+        if @receiving_user_ids.length == 0
+          Rails.logger.info "No users assigned to role #{@role} after filtering"
+          return
+        end
+      end
+
+      @layout_template = config[:layout_template]
+      @content_template = config[:content_template]
+      @message_type = config[:type]
+      @subject = config[:subject]
+
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@receiving_user_ids], layout_template_name: @layout_template,
       content_template_name: @content_template, item_type: @item.class.name, item_id: @item.id, master_id: @item.master_id, message_type: @message_type, subject: @subject,

@@ -15,7 +15,7 @@ module NfsStore
 
       after_create :create_in_nfs_store
 
-      attr_accessor :current_user, :create_with_role, :parent_item
+      attr_accessor :current_user, :create_with_role, :parent_item, :previous_uploads, :previous_upload_ids
       alias_attribute :container_id, :nfs_store_container_id
 
 
@@ -97,10 +97,33 @@ module NfsStore
 
       # Inform the container that a set of uploads have completed
       # This may cause notifications or other events to fire
-      def upload_done
+      # @param ids [Array] integer IDs for the Upload records
+      def upload_done ids
+        self.previous_upload_ids = id
+        # Forces a check that the supplied info is correct
+        self.previous_uploads = ids.map {|id| NfsStore::Upload.find(id) }
+
         if self.parent_item.can_edit? && self.parent_item
           self.parent_item.extra_log_type_config.calc_save_trigger_if self, alt_on: :upload
         end
+      end
+
+      # Filter upload notification users based on file filters
+      def filter_notifications users
+
+        pi = self.parent_item
+        return unless pi
+
+        users.select do |user|
+          user_files = NfsStore::Filter::Filter.evaluate_container_files pi, user: user
+          # Get all the stored file IDs
+          tot_files = user_files.map {|f| f.is_a?(StoredFile) ? f.id : f.stored_file }.uniq
+
+          # The intersection of uploaded files with the available filtered files shows which of the uploaded files are visible to the user
+          up_files = self.previous_upload_ids & tot_files
+          up_files.length > 0
+        end
+
       end
 
       # Name of directory for container. This must be a single name and not contain backslashes
