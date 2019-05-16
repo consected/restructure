@@ -15,6 +15,11 @@
 <script id="empty-template" type="text/x-handlebars-template" class="hidden handlebars-template">
 </script>
 
+<script id="master_header_prefix-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <span class="master-header-prefix">{{header_prefix}}</span>
+</script>
+
+
 <script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <strong class="player-names">
     {{capitalize first_name}}
@@ -46,17 +51,24 @@
         {{>master_id_summary_result master_id=id}}
         <a class="master-expander one-time-only-ajax {{#is num_masters '!==' 1}}collapsed{{/is}}" data-toggle="collapse" data-parent="#results-accordion" href="/masters/{{id}}.json" data-remote="true" data-target="#master-{{id}}-main-container" data-result-target="#master-{{id}}-main-container" data-template="master-main-template" aria-expanded="false" aria-controls="master-{{id}}-main-container">
 
-          <div class="col-md-11 col-lg-11 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
+          {{#if header_prefix}}
+          <div class="col-md-3 col-lg-3 master-header-prefix-block">
+            {{>master_header_prefix}}
+          </div>
+          {{/if}}
+          <div class="{{#if header_prefix}}col-md-9 col-lg-9{{else}}col-md-11 col-lg-11{{/if}} player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
             <% if view?[:player_infos] %>
             {{#with player_infos.[0]}}
               {{>player_info_summary_result}}
             {{else}}
-            <strong class="no-player-info">(no player info)</strong>
+            <strong class="no-player-info">(no subject details)</strong>
             {{/with}}
+            <% else %>
+            <strong class="no-player-info">(no subject details)</strong>
             <% end %>
           </div>
           <% if view?[:pro_infos] %>
-          <div class="col-md-9 col-md-offset-1 pro-info-header">
+          <div class="{{#if header_prefix}}col-md-8{{else}}col-md-9{{/if}} col-md-offset-1 pro-info-header">
           {{#with pro_infos.[0]}}
             {{>pro_info_summary_result}}
           {{/with}}
@@ -112,7 +124,7 @@
 
             <div class="col-md-<%= !view?[:pro_infos] ? '24' : '12' %>">
               <div id="player-info-{{id}}-" data-subscription="player-info-edit-form-{{id}}-" class="new-block">
-                <h4>No player info</h4>
+                <h4>No subject details</h4>
                 <p>{{>player_info_create_button}}</p>
               </div>
             </div>

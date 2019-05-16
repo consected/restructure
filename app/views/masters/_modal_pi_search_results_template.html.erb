@@ -17,7 +17,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
                 {{#with player_infos.[0]}}
                   {{>player_info_summary_result}}
                 {{else}}
-                <strong class="no-player-info">(no player info)</strong>
+                <strong class="no-player-info">(no subject details)</strong>
                 {{/with}}
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
@@ -52,7 +52,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
 
                     <div class="col-md-12">
                       <div id="player-info-{{../id}}-" data-subscription="player-info-edit-form-{{../id}}-" class="new-block">
-                        <h4>No player info</h4>
+                        <h4>No subject details</h4>
                       </div>
                     </div>
 

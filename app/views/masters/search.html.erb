@@ -60,5 +60,9 @@ $(document).ready(function() {
     part = render partial: 'search_results_template'
     ActiveSupport::Gzip.compress(part)
   end
+  
+  if Rails.configuration.action_controller.perform_caching == false
+    Rails.cache.delete partial_cache_key(:master__search_results_template)
+  end
 %>
 <%= part || ActiveSupport::Gzip.decompress(cache_res).html_safe %>

@@ -44,7 +44,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param all_content [String] the text containing possible {{something.else}} to be substituted
   # @param data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
   # @param tag_subs [String] for example 'span class="someclass"'
-  def self.substitute all_content, data: {}, tag_subs:
+  def self.substitute all_content, data: {}, tag_subs:, ignore_missing: false
     tags = all_content.scan(/{{[0-9a-zA-Z_\.]+}}/)
 
     data = setup_data(data) unless data.is_a? Hash
@@ -60,7 +60,13 @@ class Admin::MessageTemplate < ActiveRecord::Base
         tag = tagpair.last
       end
 
-      raise FphsException.new "Data does not contain the tag #{tag} or :#{tag}\n#{d ? d : 'data is empty'}" unless d && (d.key?(tag) || d.key?(tag.to_sym))
+      unless d && (d.key?(tag) || d.key?(tag.to_sym))
+        if ignore_missing
+          d = {}
+        else
+          raise FphsException.new "Data does not contain the tag #{tag} or :#{tag}\n#{d ? d : 'data is empty'}"
+        end
+      end
 
       tag_value = get_tag_value d, tag
       if tag_subs
@@ -93,7 +99,14 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
   private
     def self.get_tag_value data, tag
-      data[tag] || data[tag.to_sym]
+      res = data[tag] || data[tag.to_sym] || ''
+
+      if res.is_a?(Date) && data[:current_user]
+        df = data[:current_user].user_preference.pattern_for_date_format
+        res = res.strftime(df)
+      end
+
+      res
     end
 
     def self.setup_data item
@@ -118,13 +131,38 @@ class Admin::MessageTemplate < ActiveRecord::Base
         data[:user_email] ||= item.current_user.email
       end
 
-      if item.respond_to?(:master) && item.master.respond_to?(:player_infos) && item.master.player_infos&.first
-        data[:player_info] = item.master.player_infos.first.attributes
+      if item.respond_to?(:master)
+        master = item.master
+      elsif item.is_a? Master
+        master = item
       end
 
-      if item.respond_to?(:master)
-        data[:ids] = item.master.alternative_ids
+
+
+      # if master && master.respond_to?(:player_infos) && master.player_infos&.first
+      #   data[:player_info] = item.master.player_infos.first.attributes
+      # end
+
+
+      if master
+        data[:current_user] = master.current_user
+
+        data[:ids] = master.alternative_ids
+
+        # Get all master associations into their respective items
+        # such as data[:ipa_appointments]
+        Master.get_all_associations.each do |an|
+          begin
+            data[an.to_sym] ||= master.send(an).first&.attributes
+            data[an.to_sym][:current_user] = data[:current_user] if data[an.to_sym]
+          rescue => e
+            Rails.logger.info "Get associations for #{an} failed: #{e}"
+          end
+        end
+
       end
+
+
 
       data
     end

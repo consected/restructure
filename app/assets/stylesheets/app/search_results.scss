@@ -9,6 +9,11 @@ span.disabled, a.disabled {color: #ccc !important;}
     }
 }
 
+span.master-header-prefix {
+    color: rgb(100, 100, 100);
+    font-size: 13px;
+}
+
 #master_results_block .panel-heading{
 
     .glyphicon-link {visibility: hidden;}

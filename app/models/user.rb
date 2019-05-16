@@ -39,6 +39,10 @@ class User < ActiveRecord::Base
     res.map{|u| ["#{u.email} #{u.disabled ? '[disabled]' : ''}", u.id]  }
   end
 
+  def user_preference
+    UserPreference.new
+  end
+
   def timeout_in
     ust = Admin::AppConfiguration.value_for(:user_session_timeout)
     if ust.blank?

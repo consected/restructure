@@ -303,6 +303,8 @@ class Master < ActiveRecord::Base
     extras.merge!({ include: included_tables })
     extras[:methods] ||= []
 
+    extras[:methods] << :header_prefix
+
     res = Admin::AppConfiguration.value_for(:show_ids_in_master_result, current_user)
     res = '' if res.blank?
     res = res.split(',').map {|i| i.strip.to_sym}
@@ -313,6 +315,12 @@ class Master < ActiveRecord::Base
     end
 
     super(extras)
+  end
+
+  def header_prefix
+    prefix = Admin::AppConfiguration.value_for(:master_header_prefix, current_user)
+    return unless prefix.present?
+    Admin::MessageTemplate.substitute prefix, data: self, tag_subs: nil, ignore_missing: true
   end
 
   # Validate that the external identifier restrictions do not prevent access to this item
