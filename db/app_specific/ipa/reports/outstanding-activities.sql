@@ -51,7 +51,7 @@ FROM (
       OR :activity_performed = 'general-completed' AND al.extra_log_type='general' AND (select_result='completed' OR select_activity = 'completed')
       OR :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up' AND al.extra_log_type='general'
       OR :activity_outstanding is not null AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general'
-      OR al.extra_log_type IN (:activity_performed, :activity_outstanding, 'withdraw', 'perform_screening_follow_up')
+      OR al.extra_log_type IN (:activity_performed, :activity_outstanding)
 
     UNION
 
@@ -68,8 +68,8 @@ FROM (
 
     FROM activity_log_ipa_assignments al
 
-    INNER JOIN ipa_appointments apt
-    ON al.master_id = apt.master_id
+    -- INNER JOIN ipa_appointments apt
+    -- ON al.master_id = apt.master_id
 
     WHERE
       :activity_performed = 'appointment-set' AND al.extra_log_type='appointment'
