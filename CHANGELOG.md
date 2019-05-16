@@ -18,7 +18,7 @@ version has occurred.
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
 
-## [Unreleased]
+## [7.2.25] - 2019-05-16
 
 - [Added] Define a prefix for master record header, based on data extracted from the record
 - [Added] Message field substitution allows data from any part of the master record to be used
