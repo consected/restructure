@@ -151,7 +151,9 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
         # Get all master associations into their respective items
         # such as data[:ipa_appointments]
-        Master.get_all_associations.each do |an|
+        aa = Master.get_all_associations - ['not_trackers', 'not_tracker_histories']
+
+        aa.each do |an|
           begin
             data[an.to_sym] ||= master.send(an).first&.attributes
             data[an.to_sym][:current_user] = data[:current_user] if data[an.to_sym]
