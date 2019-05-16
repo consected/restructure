@@ -15,7 +15,7 @@ module NfsStore
 
       after_create :create_in_nfs_store
 
-      attr_accessor :current_user, :create_with_role, :parent_item, :previous_uploads, :previous_upload_ids
+      attr_accessor :current_user, :create_with_role, :parent_item, :previous_uploads, :previous_upload_store_file_ids
       alias_attribute :container_id, :nfs_store_container_id
 
 
@@ -99,9 +99,9 @@ module NfsStore
       # This may cause notifications or other events to fire
       # @param ids [Array] integer IDs for the Upload records
       def upload_done ids
-        self.previous_upload_ids = id
         # Forces a check that the supplied info is correct
         self.previous_uploads = ids.map {|id| NfsStore::Upload.find(id) }
+        self.previous_upload_store_file_ids = self.previous_uploads.map(&:nfs_store_stored_file_id)
 
         if self.parent_item.can_edit? && self.parent_item
           self.parent_item.extra_log_type_config.calc_save_trigger_if self, alt_on: :upload
@@ -115,12 +115,14 @@ module NfsStore
         return unless pi
 
         users.select do |user|
+          user = User.find(user) if user.is_a? Integer
+
           user_files = NfsStore::Filter::Filter.evaluate_container_files pi, user: user
           # Get all the stored file IDs
           tot_files = user_files.map {|f| f.is_a?(StoredFile) ? f.id : f.stored_file }.uniq
 
           # The intersection of uploaded files with the available filtered files shows which of the uploaded files are visible to the user
-          up_files = self.previous_upload_ids & tot_files
+          up_files = self.previous_upload_store_file_ids & tot_files
           up_files.length > 0
         end
 

@@ -7,6 +7,8 @@ module NfsStore
       include HandlesContainerFile
 
       has_many :archived_files, foreign_key: 'nfs_store_stored_file_id', inverse_of: :stored_file
+      has_one :upload, foreign_key: 'nfs_store_stored_file_id', inverse_of: :stored_file
+
       validate :not_named_like_archive
 
       # Finalize an upload, moving a file from its temporary upload location to the file location and mounting the archive if necessary

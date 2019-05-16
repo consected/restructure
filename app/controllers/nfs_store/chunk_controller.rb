@@ -93,7 +93,7 @@ module NfsStore
         ui = params[:uploaded_ids]
         return bad_request if ui.blank?
 
-        uis = ui.split(',').map(&.to_i)
+        uis = ui.split(',').map(&:to_i)
 
         @container.upload_done uis
       else

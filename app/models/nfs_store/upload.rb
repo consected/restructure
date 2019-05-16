@@ -9,6 +9,8 @@ module NfsStore
 
     FinalFilenameSuffix = 'final'.freeze
 
+    belongs_to :stored_file, class_name: 'NfsStore::Manage::StoredFile', foreign_key: 'nfs_store_stored_file_id'
+
     scope :completed, ->{ where completed: true }
 
     validates :chunk_hash, presence: true
@@ -19,9 +21,9 @@ module NfsStore
     validate :content_length_match
     validate :upload_allowed?
 
-    after_save :finalize_upload, if: ->{ @ready_to_finalize }
+    before_create :finalize_upload, if: ->{ @ready_to_finalize }
 
-    attr_accessor :upload, :chunk_hash, :stored_file
+    attr_accessor :upload, :chunk_hash
 
     # Find an latest upload meeting the provided conditions
     # Raises FsException::Upload if the latest upload was incomplete, but the

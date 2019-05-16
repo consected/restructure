@@ -54,7 +54,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       end
 
       if @item.respond_to?(:filter_notifications)
-        @receiving_user_ids = filter_notifications @role, @receiving_user_ids
+        @receiving_user_ids = @item.filter_notifications @receiving_user_ids
         if @receiving_user_ids.length == 0
           Rails.logger.info "No users assigned to role #{@role} after filtering"
           return
