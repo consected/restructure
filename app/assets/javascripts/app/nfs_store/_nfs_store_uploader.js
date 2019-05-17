@@ -38,6 +38,7 @@ _nfs_store.uploader = function ($outer) {
         spark_chunk = new SparkMD5.ArrayBuffer();
     var abortClicked;
     var uploadedIds;
+    var uploadSet;
 
     var frOnload = function(e) {
 
@@ -254,6 +255,7 @@ _nfs_store.uploader = function ($outer) {
         if(!data.formData) data.formData = {};
         data.formData.file_hash = md5;
         data.formData.container_id = getContainerId();
+        data.formData.upload_set = uploadSet;
         if(data.files[0].relativePath && data.files[0].relativePath != '')
           data.formData.relative_path = data.files[0].relativePath;
         if(chunk_hashes.length == 1)
@@ -334,6 +336,7 @@ _nfs_store.uploader = function ($outer) {
         var $block = addFileBlock(data, index, file, e, that);
         if(first_file) {
           uploadedIds = [];
+          uploadSet = Date.now().toString() + '--' + Math.random().toString();
           submitNext(that, e);
         }
       });
@@ -341,6 +344,7 @@ _nfs_store.uploader = function ($outer) {
     }).on('fileuploadchunkbeforesend', function (e, data) {
       if(!data.formData) data.formData = {};
       data.formData.chunk_hash = chunk_hashes.shift();
+      data.formData.upload_set = uploadSet;
       var $block = getFileBlock();
       $block.find('.progress-bar-status-text').text('uploading');
 

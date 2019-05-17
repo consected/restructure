@@ -14,6 +14,7 @@ module NfsStore
     scope :completed, ->{ where completed: true }
 
     validates :chunk_hash, presence: true
+    validates :upload_set, presence: true
 
     validate :no_unexpected_errors
     validate :was_not_already_completed
@@ -74,7 +75,7 @@ module NfsStore
     # @param content_type [String] MIME type for the file
     # @param user [User] the current user performing the upload
     # @return [Upload] the existing or new Upload object
-    def self.init container_id:, file_hash:, file_name:, content_type:, user:, relative_path: nil
+    def self.init container_id:, file_hash:, file_name:, content_type:, user:, relative_path: nil, upload_set:
 
       container = Browse.open_container(id: container_id, user: user)
       #  Ensure the relative path is nil in case it is just an empty string
@@ -88,7 +89,7 @@ module NfsStore
       end
       unless me
         # Prepare the fresh upload
-        me = Upload.new(container: container, file_hash: file_hash, file_name: file_name, content_type: content_type, user: user, path: relative_path)
+        me = Upload.new(container: container, file_hash: file_hash, file_name: file_name, content_type: content_type, user: user, path: relative_path, upload_set: upload_set)
       end
 
       me.container.current_user = user if me

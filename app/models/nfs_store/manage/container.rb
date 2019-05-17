@@ -103,6 +103,11 @@ module NfsStore
         self.previous_uploads = ids.map {|id| NfsStore::Upload.find(id) }
         self.previous_upload_store_file_ids = self.previous_uploads.map(&:nfs_store_stored_file_id)
 
+        # Get any uploads that already have an upload_set, since it is invalid to reset it
+        if self.previous_uploads.map(&:upload_set).uniq.length != 1
+          raise FsException::Action.new "Upload set files don't match"
+        end
+
         if self.parent_item.can_edit? && self.parent_item
           self.parent_item.extra_log_type_config.calc_save_trigger_if self, alt_on: :upload
         end

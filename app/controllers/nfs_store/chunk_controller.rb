@@ -52,7 +52,8 @@ module NfsStore
                             file_hash: params[:file_hash],
                             container_id: params[:container_id],
                             user: current_user,
-                            relative_path: params[:relative_path]
+                            relative_path: params[:relative_path],
+                            upload_set: params[:upload_set]
 
       if @upload
         @master = @upload.container.master
