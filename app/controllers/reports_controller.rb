@@ -95,9 +95,9 @@ class ReportsController < UserBaseController
       end
 
 
+      return unless authorized? == true
       respond_to do |format|
         format.html {
-          return unless authorized? == true
           if params[:part] == 'results'
             @search_attrs = params[:search_attrs]
             render partial: 'results'
@@ -110,7 +110,6 @@ class ReportsController < UserBaseController
           render json: {results: @results, search_attributes: @report.search_attr_values}
         }
         format.csv {
-          return unless authorized? == true
           res_a = []
 
           blank_value = nil
@@ -131,6 +130,7 @@ class ReportsController < UserBaseController
 
       @master_ids = @results.map {|r| r['master_id']} if @results
     elsif params[:get_filter_previous]
+      return unless authorized? == true
       @no_masters = true
       render partial: 'filter_on'
     else
