@@ -151,7 +151,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
         # Get all master associations into their respective items
         # such as data[:ipa_appointments]
-        aa = Master.get_all_associations - ['not_trackers', 'not_tracker_histories']
+        aa = Master.get_all_associations - ['not_trackers', 'not_tracker_histories', 'trackers_item_flags']
 
         aa.each do |an|
           begin
