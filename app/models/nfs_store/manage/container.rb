@@ -15,7 +15,7 @@ module NfsStore
 
       after_create :create_in_nfs_store
 
-      attr_accessor :current_user, :create_with_role, :parent_item, :previous_uploads, :previous_upload_store_file_ids
+      attr_accessor :current_user, :create_with_role, :parent_item, :previous_uploads, :previous_upload_stored_file_ids
       alias_attribute :container_id, :nfs_store_container_id
 
 
@@ -101,7 +101,7 @@ module NfsStore
       def upload_done ids
         # Forces a check that the supplied info is correct
         self.previous_uploads = ids.map {|id| NfsStore::Upload.find(id) }
-        self.previous_upload_store_file_ids = self.previous_uploads.map(&:nfs_store_stored_file_id)
+        self.previous_upload_stored_file_ids = self.previous_uploads.map(&:nfs_store_stored_file_id)
 
         # Get any uploads that already have an upload_set, since it is invalid to reset it
         if self.previous_uploads.map(&:upload_set).uniq.length != 1
@@ -127,7 +127,7 @@ module NfsStore
           tot_files = user_files.map {|f| f.is_a?(StoredFile) ? f.id : f.stored_file }.uniq
 
           # The intersection of uploaded files with the available filtered files shows which of the uploaded files are visible to the user
-          up_files = self.previous_upload_store_file_ids & tot_files
+          up_files = self.previous_upload_stored_file_ids & tot_files
           up_files.length > 0
         end
 

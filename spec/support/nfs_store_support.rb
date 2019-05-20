@@ -112,10 +112,11 @@ EOF
   def upload_file filename='test-name.txt', content=nil
 
     content ||= SecureRandom.hex
+    upload_set = SecureRandom.hex
     md5tot = Digest::MD5.hexdigest(content)
     ioupload = StringIO.new(content)
 
-    u = NfsStore::Upload.new container: @container, user: @container.master.current_user, file_name: filename, file_hash: md5tot, content_type: MIME::Types.type_for(filename)&.first
+    u = NfsStore::Upload.new container: @container, user: @container.master.current_user, file_name: filename, file_hash: md5tot, upload_set: upload_set, content_type: MIME::Types.type_for(filename)&.first
     u.upload = ioupload
 
     u.consume_chunk upload: ioupload, headers: {}, chunk_hash: md5tot

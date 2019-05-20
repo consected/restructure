@@ -105,7 +105,7 @@ RSpec.describe NfsStore::Upload, type: :model do
     f = create_filter('^/fghi')
     f = create_filter('^fid\/{{id}} - id file')
 
-    @container.previous_upload_ids = files.map(&:id)
+    @container.previous_upload_stored_file_ids = files.map(&:id)
 
     res = @container.filter_notifications(@other_users + [@user])
 

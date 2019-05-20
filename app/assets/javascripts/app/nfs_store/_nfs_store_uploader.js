@@ -179,6 +179,10 @@ _nfs_store.uploader = function ($outer) {
       return $outer.find('.data-context .file-block.process-ready').first();
     };
 
+    var getFileBlocks = function() {
+      return $outer.find('.data-context .file-block');
+    };
+
     var errorFromResponse = function(data) {
       var error_array = [];
 
@@ -251,6 +255,9 @@ _nfs_store.uploader = function ($outer) {
       abortClicked = false;
       $block.addClass('progress-running');
       $block.find('.progress-bar-status-text').text('processing');
+
+      uploadSet = uploadSet || (getFileBlocks().length.toString() + '--' + Date.now().toString() + '--' + Math.random().toString());
+
       md5Chunk(data.files[0], function(md5){
         if(!data.formData) data.formData = {};
         data.formData.file_hash = md5;
@@ -336,8 +343,9 @@ _nfs_store.uploader = function ($outer) {
         var $block = addFileBlock(data, index, file, e, that);
         if(first_file) {
           uploadedIds = [];
-          uploadSet = Date.now().toString() + '--' + Math.random().toString();
-          submitNext(that, e);
+          setTimeout(function() {
+            submitNext(that, e);
+          }, 1000);
         }
       });
 

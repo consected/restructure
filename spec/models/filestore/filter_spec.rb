@@ -111,12 +111,13 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     f = create_filter('^/fabc')
     f = create_filter('^fdir\/')
     f = create_filter('^/fghi')
+
     f = create_filter('^fid\/{{id}} - id file')
 
-    fs = NfsStore::Filter::Filter.generate_filters_for 'activity_log__player_contact_phone'
+    fs = NfsStore::Filter::Filter.generate_filters_for 'activity_log__player_contact_phone', user: @user
 
     expect(fs.length).to be > 10
-    expect(fs).to include 'fid/.+ - id file'
+    expect(fs).to include 'fid\/.+ - id file'
 
   end
 
