@@ -74,7 +74,7 @@ class Admin::AppType < Admin::AdminBase
       res = results['app_type']
 
 
-      res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name']
+      res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name', 'role_name']
 
       res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name'], create_disabled: force_disable
       res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name'], create_disabled: force_disable
