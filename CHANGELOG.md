@@ -17,6 +17,10 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [7.2.28] - 2019-05-21
+
+- [Added] [IPA] Deployed Medical Navigation app to production
+- [Fixed] Accidentally allowed users to view reports page for a search they have, even if report viewing is disabled
 
 ## [7.2.25] - 2019-05-16
 
