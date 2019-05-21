@@ -4353,7 +4353,8 @@ CREATE TABLE ml_app.nfs_store_uploads (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     path character varying,
-    nfs_store_stored_file_id integer
+    nfs_store_stored_file_id integer,
+    upload_set character varying
 );
 
 
@@ -7500,6 +7501,13 @@ CREATE INDEX index_nfs_store_stored_files_on_nfs_store_container_id ON ml_app.nf
 --
 
 CREATE INDEX index_nfs_store_uploads_on_nfs_store_stored_file_id ON ml_app.nfs_store_uploads USING btree (nfs_store_stored_file_id);
+
+
+--
+-- Name: index_nfs_store_uploads_on_upload_set; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_nfs_store_uploads_on_upload_set ON ml_app.nfs_store_uploads USING btree (upload_set);
 
 
 --
