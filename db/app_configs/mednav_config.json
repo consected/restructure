@@ -470,9 +470,9 @@
         "role_name": "test",
         "user_id": 1,
         "admin_id": 2,
-        "disabled": false,
+        "disabled": true,
         "created_at": "2019-05-17T11:02:16.916Z",
-        "updated_at": "2019-05-17T11:19:48.555Z",
+        "updated_at": "2019-05-21T07:44:30.385Z",
         "user_email": "phil_ayres@hms.harvard.edu"
       }
     ],
