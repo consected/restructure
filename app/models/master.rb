@@ -7,9 +7,16 @@ class Master < ActiveRecord::Base
 
   # inverse_of required to ensure the current_user propagates between associated models correctly
   has_many :player_infos, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
-  #TODO
+  has_one :player_info, -> { order(PlayerInfoRankOrderClause)  } , inverse_of: :master
+
   has_many :pro_infos , inverse_of: :master
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
+  # Generate associations for each of the rec types, such as player_contact_phones
+  PlayerContact.valid_rec_types.each do |rt|
+    has_many "player_contact_#{rt.to_s.pluralize}".to_sym, -> { order(RankNotNullClause)}, inverse_of: :master
+  end
+
+
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
   has_many :trackers, -> { includes(:protocol).preload(:protocol, :sub_process, :protocol_event, :user).order(TrackerEventOrderClause)}, inverse_of: :master
   has_many :tracker_histories, -> { preload(:protocol, :sub_process, :protocol_event, :user).order(TrackerHistoryEventOrderClause) }, inverse_of: :master

@@ -138,10 +138,10 @@ class Admin::MessageTemplate < ActiveRecord::Base
       end
 
 
-
-      # if master && master.respond_to?(:player_infos) && master.player_infos&.first
-      #   data[:player_info] = item.master.player_infos.first.attributes
-      # end
+      # Keep the singular version of player_info for compatibility with existing templates
+      if master && master.respond_to?(:player_infos) && master.player_infos&.first
+        data[:player_info] = master.player_infos.first.attributes
+      end
 
 
       if master

@@ -32,7 +32,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     expect(al.player_contact).to eq @player_contact
     rn = al.extra_log_type_config.resource_name
 
- 
+
     uacs = Admin::UserAccessControl.where app_type: @user.app_type, resource_type: :activity_log_type, resource_name: rn
     uac = uacs.first
     if uac
@@ -61,7 +61,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     al.reload
     # We expect data to match, based on an automatic sync of related fields
 
-    expect(al.data).to eq PlayerContact.format_data(data)
+    expect(al.data).to eq PlayerContact.format_data(data, 'phone')
     expect(al.select_call_direction).to eq 'from player'
     expect(al.select_who).to eq 'user'
     expect(al.user_id).to eq user.id
