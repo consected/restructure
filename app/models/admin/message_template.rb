@@ -2,6 +2,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
   self.table_name = 'message_templates'
   include AdminHandler
+  include Formatter::Formatters
 
   validates :message_type, presence: true
   validates :template_type, presence: true
@@ -64,7 +65,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
         if ignore_missing
           d = {}
         else
-          raise FphsException.new "Data does not contain the tag #{tag} or :#{tag}\n#{d ? d : 'data is empty'}"
+          raise FphsException.new "Data (#{d.class.name}) does not contain the tag #{tag} or :#{tag}\n#{d ? d : 'data is empty'}"
         end
       end
 
@@ -84,7 +85,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   def generate content_template_name: nil, data: {}
 
     raise FphsException.new "Must use a layout template to generate from" unless layout_template?
-    raise FphsException.new "Must use a hash for data" unless !data || data.is_a?(Hash)
+    # raise FphsException.new "Must use a hash for data" unless !data || data.is_a?(Hash)
 
     content_template = Admin::MessageTemplate.active.content_templates.where(name: content_template_name).first
     raise FphsException.new "No content template found with name: #{content_template_name}" unless content_template
@@ -101,10 +102,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
     def self.get_tag_value data, tag
       res = data[tag] || data[tag.to_sym] || ''
 
-      if res.is_a?(Date) && data[:current_user]
-        df = data[:current_user].user_preference.pattern_for_date_format
-        res = res.strftime(df)
-      end
+      res = formatter_do(res.class, res, current_user: data[:current_user])
 
       res
     end
@@ -138,24 +136,26 @@ class Admin::MessageTemplate < ActiveRecord::Base
       end
 
 
-      # Keep the singular version of player_info for compatibility with existing templates
-      if master && master.respond_to?(:player_infos) && master.player_infos&.first
-        data[:player_info] = master.player_infos.first.attributes
-      end
-
-
       if master
+
+        data[:master_id] = master.id
         data[:current_user] = master.current_user
 
         data[:ids] = master.alternative_ids
 
         # Get all master associations into their respective items
         # such as data[:ipa_appointments]
-        aa = Master.get_all_associations - ['not_trackers', 'not_tracker_histories', 'trackers_item_flags']
+        aa = Master.get_all_associations + Master.get_all_associations(:has_one) - ['not_trackers', 'not_tracker_histories', 'trackers_item_flags']
 
         aa.each do |an|
           begin
-            data[an.to_sym] ||= master.send(an).first&.attributes
+            assoc = master.send(an)
+            if assoc.respond_to? :attributes
+              data[an.to_sym] ||= assoc.attributes
+            elsif assoc.respond_to? :first
+              data[an.to_sym] ||= assoc.first&.attributes
+            end
+
             data[an.to_sym][:current_user] = data[:current_user] if data[an.to_sym]
           rescue => e
             Rails.logger.info "Get associations for #{an} failed: #{e}"

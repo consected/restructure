@@ -33,6 +33,12 @@ Warden.test_mode!
 require "#{::Rails.root}/db/seeds.rb"
 Seeds.setup
 
+res = `#{::Rails.root}/fphs-scripts/setup-dev-filestore.sh`
+if res == "Failed to setup mountpoint\n"
+  puts res
+  exit
+end
+
 # The following line is provided for convenience purposes. It has the downside
 # of increasing the boot-up time by auto-requiring all files in the support
 # directory. Alternatively, in the individual `*_spec.rb` files, manually

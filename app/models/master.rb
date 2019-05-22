@@ -13,7 +13,7 @@ class Master < ActiveRecord::Base
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
   # Generate associations for each of the rec types, such as player_contact_phones
   PlayerContact.valid_rec_types.each do |rt|
-    has_many "player_contact_#{rt.to_s.pluralize}".to_sym, -> { order(RankNotNullClause)}, inverse_of: :master
+    has_many "player_contact_#{rt}".pluralize.to_sym, -> { where(rec_type: rt).order(RankNotNullClause)}, inverse_of: :master, class_name: 'PlayerContact'
   end
 
 
@@ -98,8 +98,9 @@ class Master < ActiveRecord::Base
     pi.accuracy_rank
   end
 
-  def self.get_all_associations
-    reflect_on_all_associations(:has_many).map{|a| a.name.to_s}
+  def self.get_all_associations alt_type=nil
+    alt_type ||= :has_many
+    reflect_on_all_associations(alt_type).map{|a| a.name.to_s}
   end
 
   # Current admin is not stored, but may be used in validations for administrative level changes
