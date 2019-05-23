@@ -85,9 +85,14 @@ class User < ActiveRecord::Base
   # Validate the user's current app type, ensuring that access controls grant access to it
   # @return [Boolean]
   def app_type_valid?
-    app_type.in? Admin::AppType.all_available_to(self)
+    app_type.in? accessible_app_types
   end
 
+  # App Types this user can access
+  # @return [Array]
+  def accessible_app_types
+    Admin::AppType.all_available_to(self)
+  end
 
   protected
 
