@@ -31,7 +31,7 @@ class Admin::PageLayout < ActiveRecord::Base
   end
 
   class ViewOptions
-    attr_accessor :initial_show
+    attr_accessor :initial_show, :orientation, :add_item_label
     def initialize(params)
       params.each { |key, value| send "#{key}=", value }
     end

@@ -3,5 +3,5 @@
   dm = dm.select {|m| m.model_association_name.in? @true_views}
 %>
 <div class="row panel-body">
-  <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: category, force_load: true } %>
+  <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: category, force_load: true, panel: panel } %>
 </div>

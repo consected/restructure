@@ -6,6 +6,9 @@ body.staging nav.navbar {
     background: #DBB1B1;
 }
 
+.hidden-if-empty:empty {
+    display: none;
+}
 
 a.glyphicon {
     &, &:hover, &:active, &:link {

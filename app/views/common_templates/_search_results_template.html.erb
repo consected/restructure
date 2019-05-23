@@ -121,6 +121,17 @@
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
 
+  if category
+    res = page_layout_panel(category: category)
+    add_item_label = caption.singularize
+    if res
+      orientation = res.view_options&.orientation || 'vertical'
+      add_item_label =  res.view_options&.add_item_label || add_item_label
+    end
+
+  end
+
+
   field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',') }'}}has-caption-before{{/is}} {{#is @key '#{external_id_options && external_id_options[:attribute]}'}}is_external_id_item{{/is}}".html_safe
 %>
 <script>
@@ -229,6 +240,8 @@
     {{#is @key "notes"}}
     {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
     {{else is @key "description"}}
+    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
+    {{else is @key "message"}}
     {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
     {{else is @key 'includes' "_notes"}}
     {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
@@ -513,6 +526,23 @@
 
 <script id="<%=name.pluralize%>_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
+  <% if orientation == 'horizontal' %>
+  <% unless prevent_create || !DynamicModel.show_add_button(category)%>
+    {{#unless prevent_create}}
+    <div class="new-button-container">
+    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= add_item_label %></a> </p>
+    </div>
+    {{/unless}}
+  <% end %>
+
+  <div class="col-md-8 new-block<% if name != full_name %> new-block new-after<% end %> hidden-if-empty" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">{{#unless <%=full_name.pluralize%>}}
+    <ul class="list-group">
+      <li class="list-group-item is-heading">
+        <h4>No <%=caption%> records</h4>
+      </li>
+    </ul>
+  {{/unless}}</div>
+  <% end %>
 
     {{#each <%=full_name.pluralize%>}}
 
@@ -521,6 +551,7 @@
     {{/each}}
 
     <% if name != full_name %><div id="<%=full_name.hyphenate%>-{{master_id}}-{{id}}"> <% end %>
+    <% if orientation == 'vertical' %>
     <div class="col-md-24 new-block<% if name != full_name %> new-before-parent<% end %>" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
       {{#unless <%=full_name.pluralize%>}}
       <ul class="list-group">
@@ -533,9 +564,10 @@
     <% unless prevent_create || !DynamicModel.show_add_button(category)%>
       {{#unless prevent_create}}
       <div class="new-button-container">
-      <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= caption %> record</a> </p>
+      <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= add_item_label %></a> </p>
       </div>
       {{/unless}}
+    <% end %>
     <% end %>
     <% if name != full_name %></div> <% end %>
 </script>

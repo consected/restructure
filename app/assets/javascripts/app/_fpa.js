@@ -423,6 +423,8 @@ _fpa = {
                       options.position = 'before parent';
                     else if(b.hasClass('new-below'))
                       options.position = 'after';
+                    else if(b.hasClass('new-after'))
+                      options.position = 'after';
                     else
                       options.position = 'before';
                 }

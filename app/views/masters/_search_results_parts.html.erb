@@ -61,10 +61,10 @@
             {{#with player_infos.[0]}}
               {{>player_info_summary_result}}
             {{else}}
-            <strong class="no-player-info">(no subject details)</strong>
+            <strong class="no-player-info"><%= app_config_text :header_no_subject_details_label, '(no subject details)' %></strong>
             {{/with}}
             <% else %>
-            <strong class="no-player-info">(no subject details)</strong>
+            <strong class="no-player-info"><%= app_config_text :header_no_subject_details_label, '(no subject details)' %></strong>
             <% end %>
           </div>
           <% if view?[:pro_infos] %>
@@ -187,7 +187,7 @@
         dm = DynamicModel.active.where(category: 'details')
         dm = dm.select {|m| m.model_association_name.in? @true_views}
       %>
-      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details', force_load: 1 } %>
+      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details', force_load: 1, panel: nil } %>
     </div>
    </div>
 

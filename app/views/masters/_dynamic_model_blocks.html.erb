@@ -1,14 +1,23 @@
 <%
+unless defined? panel
+  panel = nil
+end
+
+unless defined?(force_load)
+  force_load
+end
+
 category_models.each do |m|
   if viewable  [m.model_association_name]
-    if DynamicModel.orientation(category) == :vertical
+    orientation = panel && panel.view_options&.orientation == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : 'vertical'
+    if orientation
 %>
-      <div class="<%= layout_item_block_sizes[:regular] %> dynamic-container resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+      <div class="row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     <% else %>
-      <div class="row common-template-list dynamic-model-list resize-children" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+    <div class="<%= layout_item_block_sizes[:regular] %> dynamic-container resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
 <%
     end
-    if defined?(force_load) && force_load
+    if force_load
       # Force the new dynamic models to load in the details panel, which they wouldn't do otherwise
 %>
     <div class="on-open-click hidden">

@@ -17,7 +17,7 @@ external_id_types = ExternalIdentifier.active.map(&:implementation_class)
                 {{#with player_infos.[0]}}
                   {{>player_info_summary_result}}
                 {{else}}
-                <strong class="no-player-info">(no subject details)</strong>
+                <strong class="no-player-info"><%= app_config_text :header_no_subject_details_label, '(no subject details)' %></strong>
                 {{/with}}
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">

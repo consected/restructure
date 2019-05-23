@@ -107,7 +107,7 @@ _fpa.postprocessors = {
             var a_name = e.attr('data-attr-name');
 
             if (e.attr('type') == 'checkbox') {
-              form_data[obj_name][a_name] = e.is(':checked');  
+              form_data[obj_name][a_name] = e.is(':checked');
             }
             else {
               form_data[obj_name][a_name] = e.val();
@@ -127,7 +127,7 @@ _fpa.postprocessors = {
               if(di[i] && di[i].item_type) {
                 var dii = di[i];
                 var fit = dii.item_type;
-                if(dii.option_type) fit += '_' + dii.option_type;
+                if(dii.option_type && dii.option_type != 'default') fit += '_' + dii.option_type;
                 var sub_block = block.find('.common-template-item[data-sub-item="'+fit+'"][data-sub-id="'+dii.id+'"]')
                 _fpa.show_if.methods.show_items(sub_block, dii);
               }

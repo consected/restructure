@@ -11,7 +11,7 @@
   <% if category.in? special_categories %>
     {{>master_<%= category.underscore %>_panel}}
   <% else %>
-    <%= render partial: 'masters/search_results_dynamic_model_category', locals: {category: category} %>
+    <%= render partial: 'masters/search_results_dynamic_model_category', locals: {category: category, panel: panel} %>
   <% end %>
 
   </div>
