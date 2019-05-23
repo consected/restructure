@@ -123,7 +123,7 @@ module ExternalIdHandler
       unless defined? @external_id_range
         @external_id_range = nil
       end
-      @external_id_range || (1..9999999999)
+      @external_id_range || ExternalIdentifier::DefaultRange
     end
 
     def external_id_edit_pattern

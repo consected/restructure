@@ -3,6 +3,8 @@ class ExternalIdentifier < ActiveRecord::Base
   include DynamicModelHandler
   include AdminHandler
 
+  DefaultRange = (1..9999999999)
+
   validates :name, presence: {scope: :active}
   validates :label, presence: {scope: :active}
   validates :external_id_attribute, presence: {scope: :active}
@@ -79,7 +81,11 @@ class ExternalIdentifier < ActiveRecord::Base
   end
 
   def external_id_range
-    self.min_id..self.max_id
+    if self.min_id && self.max_id
+      self.min_id..self.max_id
+    else
+      DefaultRange
+    end
   end
 
   def usage_report rep_type

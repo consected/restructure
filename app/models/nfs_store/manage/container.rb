@@ -113,25 +113,25 @@ module NfsStore
         end
       end
 
-      # Filter upload notification users based on file filters
-      def filter_notifications users
-
-        pi = self.parent_item
-        return unless pi
-
-        users.select do |user|
-          user = User.find(user) if user.is_a? Integer
-
-          user_files = NfsStore::Filter::Filter.evaluate_container_files pi, user: user
-          # Get all the stored file IDs
-          tot_files = user_files.map {|f| f.is_a?(StoredFile) ? f.id : f.stored_file }.uniq
-
-          # The intersection of uploaded files with the available filtered files shows which of the uploaded files are visible to the user
-          up_files = self.previous_upload_stored_file_ids & tot_files
-          up_files.length > 0
-        end
-
-      end
+      # # Filter upload notification users based on file filters
+      # def filter_notifications users
+      #
+      #   pi = self.parent_item
+      #   return unless pi
+      #
+      #   users.select do |user|
+      #     user = User.find(user) if user.is_a? Integer
+      #
+      #     user_files = NfsStore::Filter::Filter.evaluate_container_files pi, user: user
+      #     # Get all the stored file IDs
+      #     tot_files = user_files.map {|f| f.is_a?(StoredFile) ? f.id : f.stored_file }.uniq
+      #
+      #     # The intersection of uploaded files with the available filtered files shows which of the uploaded files are visible to the user
+      #     up_files = self.previous_upload_stored_file_ids & tot_files
+      #     up_files.length > 0
+      #   end
+      #
+      # end
 
       # Name of directory for container. This must be a single name and not contain backslashes
       # Can be overridden in app implementation, but beware not to change
