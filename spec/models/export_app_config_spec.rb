@@ -175,25 +175,7 @@ RSpec.describe "Export an app configuration", type: :model do
 
   it "imports a test JSON config file" do
 
-    # Setup the triggers, functions, etc
-    files = %w(1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql)
-
-    files.each do |fn|
-
-      begin
-        sqlfn = Rails.root.join('db', 'app_specific', 'bhs', 'aws-db', fn)
-        puts "Running psql: #{sqlfn}"
-        `PGOPTIONS=--search_path=ml_app psql -d fpa_test < #{sqlfn}`
-      rescue ActiveRecord::StatementInvalid => e
-        puts "Exception due to PG error?... #{e}"
-      end
-    end
-
-
-
-    config = File.read Rails.root.join('docs/config_tests/bhs_app_type_test_config.json')
-
-    res, _ = Admin::AppType.import_config(config, @admin, force_disable: true)
+    res, _ = import_test_app
 
     expect(res).to be_a Admin::AppType
 

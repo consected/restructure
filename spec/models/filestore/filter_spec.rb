@@ -7,6 +7,7 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
   include NfsStoreSupport
 
   before :all do
+    import_test_app
     setup_nfs_store
 
   end

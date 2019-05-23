@@ -131,4 +131,29 @@ module ModelSupport
 
   end
 
+  def import_test_app
+    @admin, _ = create_admin unless @admin
+    # Setup the triggers, functions, etc
+    files = %w(1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql)
+
+    files.each do |fn|
+
+      begin
+        sqlfn = Rails.root.join('docs', 'config_tests', fn)
+        puts "Running psql: #{sqlfn}"
+        `PGOPTIONS=--search_path=ml_app psql -d fpa_test < #{sqlfn}`
+      rescue ActiveRecord::StatementInvalid => e
+        puts "Exception due to PG error?... #{e}"
+      end
+    end
+
+    config = File.read Rails.root.join('docs/config_tests/bhs_app_type_test_config.json')
+
+    unless ActivityLog.where(name: 'BHS Tracker').active.first
+      ActivityLog.where(name: 'BHS Tracker').all.first.update!(disabled: false, current_admin: @admin)
+    end
+
+    Admin::AppType.import_config(config, @admin)
+  end
+
 end
