@@ -42,6 +42,11 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     layout = @layout
     content = @content
 
+    expect {
+      Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+      item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email
+    }.to raise_error ActiveRecord::RecordInvalid # for no content template
+
     mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
     content_template_name: content.name, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email
 
@@ -51,6 +56,33 @@ RSpec.describe Messaging::MessageNotification, type: :model do
     expected_name = @activity_log.select_who
 
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
+
+    expect(res).to eq expected_text
+  end
+
+  it "generates a message from a text template" do
+
+    t = '<p>This is some content in a text template.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+
+    master = @activity_log.master
+
+    layout = @layout
+    content = @content
+
+    expect {
+      Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+      item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email
+    }.to raise_error ActiveRecord::RecordInvalid # for no content template
+
+    mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@rec_user], layout_template_name: layout.name,
+    content_template_text: t, item_type: @activity_log.class.name, item_id: @activity_log.id, master: master, message_type: :email
+
+    mn.generate
+
+    res = mn.generated_text
+    expected_name = @activity_log.select_who
+
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a text template.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end

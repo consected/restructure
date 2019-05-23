@@ -21,8 +21,8 @@ class Messaging::MessageNotification < ActiveRecord::Base
   # No minimum on recipient_user_ids, since recipient_emails may be used instead
   validates :recipient_user_ids, length: {maximum: MaxRecipients}, if: :app_type
   validates :layout_template_name, presence: true
-  validates :content_template_name, presence: true
   validates :message_type, presence: true
+  validate :content_template_specified?
   validate :item_type_valid?, if: :app_type
 
   scope :unhandled, -> { where status: nil }
@@ -69,26 +69,21 @@ class Messaging::MessageNotification < ActiveRecord::Base
     if data.blank?
       raise FphsException.new "Data is blank and item_type / item_id does not return an item" unless item
 
-      # data = item.attributes.dup
-      #
-      # # if the referenced item has its own referenced item (much like an activity log might), then get it
-      # if item.respond_to?(:item) && item.item.respond_to?(:attributes)
-      #   data[:item] = item.item.attributes
-      # end
-      #
-      # if item.respond_to? :user
-      #   data[:user_email] = user.email
-      # end
       data = Admin::MessageTemplate.setup_data item
       data[:_subject] = self.subject
 
-      self.save!
+      save!
     end
 
     raise FphsException.new "Layout template #{layout_template_name} was not found" unless layout_template
-    raise FphsException.new "Content template #{content_template_name} was not found" unless content_template
 
-    self.generated_text = layout_template.generate content_template_name: content_template_name, data: data
+    if content_template_name
+      raise FphsException.new "Content template #{content_template_name} was not found" unless content_template
+    elsif !content_template_text
+      raise FphsException.new "Content template name or text must be set"
+    end
+
+    self.generated_text = layout_template.generate content_template_name: content_template_name, content_template_text: content_template_text, data: data
 
   end
 
@@ -137,11 +132,11 @@ class Messaging::MessageNotification < ActiveRecord::Base
   def handle_notification_now logger: Rails.logger
 
     logger.info "Handling item #{self.id}"
-    self.update! status: StatusInProgress
+    update! status: StatusInProgress
 
     Messaging::MessageNotification.transaction do
       begin
-        self.generate
+        generate
 
         if message_type&.to_sym == :email
           NotificationMailer.send_message_notification(self, logger: logger).deliver_now
@@ -151,11 +146,11 @@ class Messaging::MessageNotification < ActiveRecord::Base
           raise FphsException.new "No recognized message type for message notification: #{message_type}"
         end
         logger.info "Deliver now #{self.id}"
-        self.update! status: StatusComplete
+        update! status: StatusComplete
         logger.info "Handled item #{self.id}"
       rescue => e
         Rails.logger.warn "handle_notification_now job failed (may retry?): #{e}\n#{e.backtrace[0..20].join("\n")}"
-        self.update! status: StatusFailed
+        update! status: StatusFailed
         raise FphsException.new "Exception captured in handle_notification_now: #{e}\n#{e.backtrace[0..20].join("\n")}"
       end
     end
@@ -164,9 +159,13 @@ class Messaging::MessageNotification < ActiveRecord::Base
   private
 
     def item_type_valid?
-
-      res = item_type.constantize rescue nil
+      res = item_type.safe_constantize
       errors.add :item_type, "is not a valid class name: '#{item_type}'" unless res
+    end
 
+    def content_template_specified?
+      unless self.content_template_text || self.content_template_name
+        errors.add :content_template_name, 'or content template text must be set'
+      end
     end
 end

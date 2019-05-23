@@ -1,6 +1,6 @@
 class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
-  attr_accessor :model_defs, :role, :users, :layout_template, :content_template, :message_type, :subject, :receiving_user_ids
+  attr_accessor :model_defs, :role, :users, :layout_template, :content_template, :content_template_text, :message_type, :subject, :receiving_user_ids
 
   def self.config_def if_extras: {}
     [
@@ -10,6 +10,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         users: "(optional) list of users to notify - or reference this: {this: {role_names: return_value} }",
         layout_template: "name of layout template",
         content_template: "name of content template",
+        content_template_text: "alternative content template text",
         subject: "subject text",
         if: if_extras
       }
@@ -63,12 +64,13 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
       @layout_template = config[:layout_template]
       @content_template = config[:content_template]
+      @content_template_text = config[:content_template_text]
       @message_type = config[:type]
       @subject = config[:subject]
 
 
       mn = Messaging::MessageNotification.create! app_type: @user.app_type, user: @user, recipient_user_ids: [@receiving_user_ids], layout_template_name: @layout_template,
-      content_template_name: @content_template, item_type: @item.class.name, item_id: @item.id, master_id: @item.master_id, message_type: @message_type, subject: @subject,
+      content_template_name: @content_template, content_template_text: @content_template_text, item_type: @item.class.name, item_id: @item.id, master_id: @item.master_id, message_type: @message_type, subject: @subject,
       role_name: role_name
 
       HandleMessageNotificationJob.perform_later(mn)

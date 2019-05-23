@@ -6,6 +6,7 @@ RSpec.describe Classification::GeneralSelection, type: :model do
 
   before :each do
     seed_database
+    import_test_app
     create_user
     create_admin
     create_master

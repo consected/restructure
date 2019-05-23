@@ -221,6 +221,21 @@ RSpec.describe PlayerContact, type: :model do
 
     end
 
+    it "generates rec type associations" do
+      pcs = []
+
+      pcs << @master.player_contacts.create(data: 'test@email.com', rec_type: 'email', rank: PlayerContact::SecondaryRank) #0
+      pcs << @master.player_contacts.create(data: 'test2@email.com', rec_type: 'email', rank: PlayerContact::PrimaryRank) #1
+      pcs << @master.player_contacts.create(data: '(617)794-1111', rec_type: 'phone', rank: PlayerContact::InactiveRank) #2
+      pcs << @master.player_contacts.create(data: '(617)794-1113', rec_type: 'phone', rank: PlayerContact::SecondaryRank) #3
+      pcs << @master.player_contacts.create(data: '(617)794-1115', rec_type: 'phone', rank: PlayerContact::PrimaryRank) #4
+
+
+      expect(@master.player_contact_phones.length).to eq 3
+      expect(@master.player_contact_emails.length).to eq 2
+
+      expect(@master.player_contact_phones.first.data).to eq pcs[4].data
+    end
 
   end
 

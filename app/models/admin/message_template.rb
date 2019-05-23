@@ -82,15 +82,20 @@ class Admin::MessageTemplate < ActiveRecord::Base
     all_content
   end
 
-  def generate content_template_name: nil, data: {}
+  def generate content_template_name: nil, content_template_text: nil, data: {}
 
     raise FphsException.new "Must use a layout template to generate from" unless layout_template?
     # raise FphsException.new "Must use a hash for data" unless !data || data.is_a?(Hash)
 
-    content_template = Admin::MessageTemplate.active.content_templates.where(name: content_template_name).first
-    raise FphsException.new "No content template found with name: #{content_template_name}" unless content_template
+    if content_template_name
+      content_template = Admin::MessageTemplate.active.content_templates.where(name: content_template_name).first
+      raise FphsException.new "No content template found with name: #{content_template_name}" unless content_template
+      content_template_text = content_template.template
+    elsif !content_template_text
+      raise FphsException.new "Either a content_template_name or content_template_text must be specified"
+    end
 
-    all_content = self.template.sub('{{main_content}}', content_template.template)
+    all_content = self.template.sub('{{main_content}}', content_template_text)
 
     substitute all_content, data: data
 

@@ -56,4 +56,21 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     expect(res).to eq expected_text
   end
 
+  it "generates a message with a text template" do
+
+    t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
+    layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}.</p>'
+    # Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
+    expect {
+      layout.generate data: {master_id: 123456, 'name' => 'test name'}
+    }.to raise_error FphsException
+
+    res = layout.generate content_template_text: t, data: {master_id: 12345678, 'name' => 'test name bob'}
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id 12345678. This is a name: test name bob.</p></div></body></html>"
+
+    expect(res).to eq expected_text
+  end
+
 end

@@ -53,7 +53,7 @@ class ExtraLogType < ExtraOptions
           notes: 'on_save: provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.'
         },
         on_upload: {
-          
+
         }
 
       },

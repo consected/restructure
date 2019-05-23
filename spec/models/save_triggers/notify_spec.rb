@@ -76,6 +76,44 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
   end
 
+  it "generates a message notification with text template and job" do
+    t = '<p>This is some content in a text template.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
+    config = {
+      type: "email",
+      role: "test",
+      layout_template: @layout.name,
+      content_template_text: t,
+      subject: "subject text"
+    }
+
+    # Check that we only get users that are enabled for the role in this app type
+    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 3
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+
+    last_mn = MessageNotification.order(id: :desc).first
+    # last_dj = Delayed::Job.order(id: :desc).first
+
+    @trigger.perform
+
+    expect(@trigger.receiving_user_ids.sort).to eq @role_user_ids.sort
+
+    new_mn = MessageNotification.order(id: :desc).first
+    # new_dj = Delayed::Job.order(id: :desc).first
+
+    expect(last_mn).not_to eq new_mn
+
+    new_mn.generate
+    res = new_mn.generated_text
+    expected_name = @al.select_who
+    master = @al.master
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content in a text template.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}.</p></div></body></html>"
+
+    expect(res).to eq expected_text
+
+  end
+
+
   it "uses a conditional field reference to get the users for a notification" do
     config = {
       type: "email",
