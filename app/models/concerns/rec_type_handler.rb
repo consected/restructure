@@ -12,6 +12,9 @@ module RecTypeHandler
         validates :data, "validates/#{rt}": true, if: is_rt
       end
       validates :rec_type, presence: true
+
+      Master.has_many "#{self.class.name.underscore}_#{rt}".pluralize.to_sym, -> { where(rec_type: rt).order(RankNotNullClause)}, inverse_of: :master, class_name: 'PlayerContact'
+
     end
 
     validate :valid_data_format?

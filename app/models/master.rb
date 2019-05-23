@@ -11,11 +11,6 @@ class Master < ActiveRecord::Base
 
   has_many :pro_infos , inverse_of: :master
   has_many :player_contacts, -> { order(RankNotNullClause)}, inverse_of: :master
-  # Generate associations for each of the rec types, such as player_contact_phones
-  PlayerContact.valid_rec_types.each do |rt|
-    has_many "player_contact_#{rt}".pluralize.to_sym, -> { where(rec_type: rt).order(RankNotNullClause)}, inverse_of: :master, class_name: 'PlayerContact'
-  end
-
 
   has_many :addresses, -> { order(RankNotNullClause)}  , inverse_of: :master
   has_many :trackers, -> { includes(:protocol).preload(:protocol, :sub_process, :protocol_event, :user).order(TrackerEventOrderClause)}, inverse_of: :master
