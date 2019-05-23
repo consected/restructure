@@ -13,7 +13,7 @@ module RecTypeHandler
       end
       validates :rec_type, presence: true
 
-      Master.has_many "#{self.class.name.underscore}_#{rt}".pluralize.to_sym, -> { where(rec_type: rt).order(RankNotNullClause)}, inverse_of: :master, class_name: 'PlayerContact'
+      Master.has_many "#{self.name.underscore}_#{rt}".pluralize.to_sym, -> { where(rec_type: rt).order(Master::RankNotNullClause)}, inverse_of: :master, class_name: self.name.to_s
 
     end
 
