@@ -2,6 +2,11 @@
   unless defined? data
     data = {}
   end
+
+  unless alt_options[:value].nil?
+    force_val = alt_options[:value]
+  end
+
   options.each do |opt|
     if opt.is_a? Hash
       opt = opt.flatten
@@ -12,9 +17,18 @@
     opt_label = opt.first
     opt_val = opt.last || ''
     # opt_val_id = opt_val.hyphenate
+
+    add_options = {
+      data: {
+        attr_name: field_name_sym,
+        object_name: form_object_item_type_us
+      }
+    }
+
+    add_options[:checked] = (opt_val == force_val) if force_val
   %>
 <div class="button-radio" data-attr-name="<%=field_name_sym%>">
-  <%= form.radio_button field_name_sym, opt_val, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
+  <%= form.radio_button field_name_sym, opt_val, add_options %>
 
   <%= form.label field_name_sym, opt_label, value: opt_val, class: "radio-label"  %>
 </div>

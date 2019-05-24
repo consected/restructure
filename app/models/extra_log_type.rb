@@ -76,6 +76,8 @@ class ExtraLogType < ExtraOptions
 
     init_caption_before
 
+    self.label ||= name.to_s.humanize 
+
     if self.references
       new_ref = {}
       if self.references.is_a? Array

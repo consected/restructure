@@ -165,7 +165,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
     end
 
     def items
-      @master.send(@item_type)
+      if @master.respond_to? @item_type
+        @master.send(@item_type)
+      elsif @master.respond_to? "dynamic_model__#{@item_type}"
+        @master.send("dynamic_model__#{@item_type}") 
+      end
     end
 
     def filter_records records

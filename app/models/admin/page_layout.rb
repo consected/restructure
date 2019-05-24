@@ -9,6 +9,7 @@ class Admin::PageLayout < ActiveRecord::Base
   validates :layout_name, presence: {scope: :active}
   validates :panel_name, presence: {scope: :active}, uniqueness: {scope: [:app_type_id, :layout_name]}
   validates :panel_label, presence: {scope: :active}
+  validate :access_options
 
   after_initialize :access_options
   before_save :set_position
@@ -16,25 +17,22 @@ class Admin::PageLayout < ActiveRecord::Base
   OptionTypes = [:contains, :tab, :view_options]
   attr_accessor(*OptionTypes)
 
-  class Contains
+  class Configuration
+    def initialize(params)
+      params.each { |key, value| send "#{key}=", value }
+    end
+  end
+
+  class Contains < Configuration
     attr_accessor :categories, :resources
-    def initialize(params)
-      params.each { |key, value| send "#{key}=", value }
-    end
   end
 
-  class Tab
+  class Tab < Configuration
     attr_accessor :parent
-    def initialize(params)
-      params.each { |key, value| send "#{key}=", value }
-    end
   end
 
-  class ViewOptions
+  class ViewOptions < Configuration
     attr_accessor :initial_show, :orientation, :add_item_label
-    def initialize(params)
-      params.each { |key, value| send "#{key}=", value }
-    end
   end
 
 

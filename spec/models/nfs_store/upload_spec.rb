@@ -92,6 +92,8 @@ RSpec.describe NfsStore::Upload, type: :model do
 
   it "filters notifications" do
 
+    break unless @container.respond_to? :filter_notifications 
+
     role_name = 'upload test notify'
 
     files = []

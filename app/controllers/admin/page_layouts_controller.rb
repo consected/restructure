@@ -6,11 +6,14 @@ class Admin::PageLayoutsController < AdminController
     end
 
     def filters_on
-      [:layout_name]
+      [:layout_name, :app_type_id]
     end
 
     def filters
-      { layout_name: Admin::PageLayout.active.pluck(:layout_name).uniq }
+      {
+        layout_name: Admin::PageLayout.active.pluck(:layout_name).uniq,
+        app_type_id: Admin::AppType.all_by_name
+      }
     end
 
     def view_folder

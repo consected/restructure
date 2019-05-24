@@ -27,6 +27,7 @@ module CommonTemplatesHelper
         fres = FieldDefaults.calculate_default form_object_instance, fres
       end
 
+      fopt[:selected] = fres
       fopt[:value] = fres
     end
 

@@ -213,14 +213,14 @@
         <% end %>
       <% end %>
 
-      <%= render partial: 'masters/search_results_category_panel', locals: {category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
-      <%= render partial: 'masters/search_results_category_panel', locals: {category: 'details', panel_name: 'details', panel_label: 'Details', initial_show: true} %>
-      <%= render partial: 'masters/search_results_category_panel', locals: {category: 'external-ids', panel_name: 'external-ids', panel_label: 'External IDs', initial_show: false} %>
+      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
+      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'details', panel_name: 'details', panel_label: 'Details', initial_show: true} %>
+      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'external-ids', panel_name: 'external-ids', panel_label: 'External IDs', initial_show: false} %>
 
       <%
         dmc = DynamicModel.categories - ['details', 'external-ids']
         dmc.each do |cat| %>
-        <%= render partial: 'masters/search_results_category_panel', locals: {category: cat, panel_name: cat, panel_label: cat.humanize.titleize, initial_show: false} %>
+        <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: cat, panel_name: cat, panel_label: cat.humanize.titleize, initial_show: false} %>
       <% end %>
     <% end %>
   </div>

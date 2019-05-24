@@ -10,6 +10,10 @@ RSpec.describe NfsStore::Filter::Filter, type: :model do
     import_test_app
     setup_nfs_store
 
+    res = defined? BhsAssignment
+    expect(res).to be_truthy
+
+
   end
 
 
