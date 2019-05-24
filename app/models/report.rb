@@ -241,7 +241,12 @@ class Report < ActiveRecord::Base
         raise Report::BadSearchCriteria
       end
       @clean_sql = clean_sql
-      res = self.class.connection.execute(clean_sql)
+      begin
+        res = self.class.connection.execute(clean_sql)
+      rescue => e
+        logger.info "Unabled to run sql: #{e.inspect}.\n#{clean_sql}"
+        raise FphsException.new "Unabled to run sql: #{e.inspect}"
+      end
       raise ActiveRecord::Rollback
     end
 

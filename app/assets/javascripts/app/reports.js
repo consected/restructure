@@ -128,7 +128,7 @@ _fpa.reports = {
 
         dct = $(this).attr('data-col-type');
 
-        dct_parts = dct.split(':', 2);
+        dct_parts = dct.split(':', 3);
 
         var dct_json = $(this).html();
 
@@ -152,9 +152,22 @@ _fpa.reports = {
 
       if (!dct_parts) return;
 
-      var dct_action = dct_parts[1];
+      var dct_action = dct_parts[1].trim();
+      if (dct_parts[2]) {
+        var extra_val = dct_parts[2].trim();
+      }
+
+      var report_id = $('#report-container').attr('data-report-id');
+
+
+      if (dct_action == 'download files') {
+        var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"></form>');
+      }
+      else if (dct_action == 'add to list') {
+        var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="' + extra_val + '"><input type="hidden" name="add_to_list[list_id]" value=""></form>');
+      }
+
       var b = '<span class="report-files-actions"><input type="checkbox" id="report-select-all-files"><label for="report-select-all-files">select all</label> <input type="submit" value="' + dct_action + '" class="btn btn-primary"/></span>'
-      var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"></form>');
       var $t = $('table.report-table');
       $f.insertBefore($t);
       $t.appendTo($('#itemselection-for-report'));

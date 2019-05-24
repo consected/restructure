@@ -1,6 +1,6 @@
 class ActivityLog < ActiveRecord::Base
 
-  include DynamicModelHandler
+  include DynamicModelDefHandler
   include AdminHandler
   include SelectorCache
 

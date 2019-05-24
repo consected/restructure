@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
 
-  resources :reports
+  resources :reports do
+    member do
+      post :add_to_list
+    end
+  end
+
+
   resources :imports
 
   namespace :admin do

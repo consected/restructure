@@ -335,6 +335,13 @@ _fpa = {
             var t;
             var t_force;
             var use_target = false;
+
+            if (data.flash_message_only) {
+              _fpa.flash_notice(data.flash_message_only);
+              return;
+            }
+
+
             // Identify whether to target the results at a single dom element or to handle data subscriptions
             // Check the first entry in the returned data to see if the record indicates it was created
             // This will not show if a result set of multiple items is returned

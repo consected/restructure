@@ -1,6 +1,6 @@
 class DynamicModel < ActiveRecord::Base
 
-  include DynamicModelHandler
+  include DynamicModelDefHandler
   include AdminHandler
 
   default_scope -> {order disabled: :asc, category: :asc, position: :asc,  updated_at: :desc }
@@ -315,6 +315,7 @@ class DynamicModel < ActiveRecord::Base
         res = klass.const_set(model_class_name, a_new_class)
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
+        res.include DynamicModelHandler
 
         # Create an alias in the main namespace to make dynamic model easier to refer to
 

@@ -1,6 +1,6 @@
 class ExternalIdentifier < ActiveRecord::Base
 
-  include DynamicModelHandler
+  include DynamicModelDefHandler
   include AdminHandler
 
   DefaultRange = (1..9999999999)

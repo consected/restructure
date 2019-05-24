@@ -144,7 +144,12 @@ class ReportsController < UserBaseController
             return unless authorized? == true
 
             @report_criteria = true
-            render :show
+
+            if params[:embed] == 'true'
+              render partial: 'show'
+            else
+              render :show
+            end
           end
         }
       end
@@ -195,6 +200,70 @@ class ReportsController < UserBaseController
       edit
     end
 
+
+  end
+
+  def add_to_list
+    atl_params = params[:add_to_list]
+    list_name = atl_params[:list_name]
+    items_text = atl_params[:items]
+    list_id = atl_params[:list_id]
+
+    return unless authorized? == true
+
+    ok = current_user.has_access_to?(:create, :table, list_name) || current_user.has_access_to?(:create, :table, "dynamic_model__#{list_name}")
+    return not_authorized unless ok
+
+    return general_error("no items selected") if items_text.blank? || items_text.length == 0
+    return general_error("no list id specified") if list_id.blank?
+
+    items = items_text.map {|i| JSON.parse(i)}
+    item_types = items.map {|i| i["type"]}.uniq
+    return bad_request unless item_types.length == 1
+    item_type = item_types.first
+
+    ok = current_user.has_access_to?(:access, :table, item_type) || current_user.has_access_to?(:access, :table, "dynamic_model__#{item_type}")
+    return not_authorized unless ok
+
+    item_ids = items.map {|i| i["id"]}
+
+    item_class = item_type.classify.constantize
+    item_attribs = item_class.permitted_params
+
+    list_class = list_name.classify.constantize
+    list_attribs = list_class.permitted_params
+    assoc_attr = (list_class.attribute_names.select {|a| a.end_with?('_id')} - ['id', 'master_id', 'item_id', 'user_id']).first
+
+    assoc_name = assoc_attr.gsub(/_id$/, '').pluralize
+    ok = current_user.has_access_to?(:access, :table, assoc_name) || current_user.has_access_to?(:access, :table, "dynamic_model__#{assoc_name}")
+    return not_authorized unless ok
+
+
+    items_in_list = list_class.where(assoc_attr => list_id).pluck(:item_id)
+    item_ids = item_ids - items_in_list
+    return general_error("all items already in the list") if item_ids.length == 0
+
+    matching_attribs = (list_attribs & item_attribs).map(&:to_s)
+    return general_error("no matching attributes") if matching_attribs.length == 0
+
+
+
+    list_class.transaction do
+      item_ids.each do |id|
+        item = item_class.find(id)
+        master = item.master
+        master.current_user = current_user
+        matched_vals = item.attributes.slice(*matching_attribs)
+        matched_vals[:item_id] = id
+        matched_vals[:master] = master
+        matched_vals[assoc_attr] = list_id
+        list_class.create! matched_vals
+      end
+    end
+
+    n = item_ids.length
+
+    render json: {flash_message_only: "Added #{n} #{"item".pluralize(n)} to the list"}
 
   end
 

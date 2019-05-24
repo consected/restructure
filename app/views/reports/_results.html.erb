@@ -1,6 +1,6 @@
 <% rt = @report.result_tables_by_index || []%>
 
-<div class="data-results" id="report-container">
+<div class="data-results" id="report-container" data-report-id="<%=@report.id%>">
   <div class="<%= @count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below no-processed-scroll"></div>
 
