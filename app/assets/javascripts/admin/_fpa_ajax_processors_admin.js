@@ -167,6 +167,7 @@ _fpa.postprocessors_admin = {
             var t = $('#search_attrs_type').val();
             var f = $('#search_attrs_filter').val();
             var nd = $('#search_no_disabled').is(':checked');
+            var hf = $('#search_hidden_field').is(':checked');
             var m = $('#search_attrs_multi').val();
             var l = $('#search_attrs_label').val();
             var d = $('#search_attrs_default').val();
@@ -207,6 +208,10 @@ _fpa.postprocessors_admin = {
                   if(nd)
                       add += "\n    disabled: false";
                 }
+
+
+                if(hf)
+                    add += "\n    hidden: true";
 
                 if(s) {
                   add += "\n    selections: ";
