@@ -30,7 +30,7 @@ class Admin::MessageNotificationsController < AdminController
 
   private
     def permitted_params
-      [:id, :app_type_id, :master_id, :user_id, :item_id, :message_type, :recipient_user_ids, :layout_template_name, :content_template_name, :subject, :data, :recipient_emails, :from_user_email, :generate_view, :status, :created_at, :updated_at]
+      [:id, :app_type_id, :master_id, :user_id, :item_id, :message_type, :recipient_user_ids, :layout_template_name, :content_template_name, :subject, :data, :recipient_emails, :recipient_sms_numbers, :from_user_email, :generate_view, :status, :created_at, :updated_at]
     end
 
 end

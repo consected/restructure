@@ -4701,6 +4701,40 @@ CREATE FUNCTION ml_app.log_activity_log_update() RETURNS trigger
 
 
 --
+-- Name: log_activity_log_zeus_bulk_message_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_activity_log_zeus_bulk_message_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO activity_log_zeus_bulk_message_history
+                  (
+                      master_id,
+                      zeus_bulk_message_id,
+
+                      extra_log_type,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      activity_log_zeus_bulk_message_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.zeus_bulk_message_id,
+
+                      NEW.extra_log_type,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
 -- Name: log_address_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
@@ -7675,6 +7709,90 @@ CREATE FUNCTION ml_app.log_user_update() RETURNS trigger
             RETURN NEW;
         END;
     $$;
+
+
+--
+-- Name: log_zeus_bulk_message_recipient_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_zeus_bulk_message_recipient_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO zeus_bulk_message_recipient_history
+                  (
+                      master_id,
+                      item_id,
+                      data,
+                      rec_type,
+                      rank,
+                      zeus_bulk_message_id,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      zeus_bulk_message_recipient_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.item_id,
+                      NEW.data,
+                      NEW.rec_type,
+                      NEW.rank,
+                      NEW.zeus_bulk_message_id,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
+
+
+--
+-- Name: log_zeus_bulk_message_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_zeus_bulk_message_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+              BEGIN
+                  INSERT INTO zeus_bulk_message_history
+                  (
+                      master_id,
+                      name,
+                      notes,
+                      channel,
+                      message,
+                      send_date,
+                      send_time,
+                      status,
+                      cancel,
+                      ready,
+                      user_id,
+                      created_at,
+                      updated_at,
+                      zeus_bulk_message_id
+                      )
+                  SELECT
+                      NEW.master_id,
+                      NEW.name,
+                      NEW.notes,
+                      NEW.channel,
+                      NEW.message,
+                      NEW.send_date,
+                      NEW.send_time,
+                      NEW.status,
+                      NEW.cancel,
+                      NEW.ready,
+                      NEW.user_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.id
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
 
 
 --
@@ -13686,6 +13804,75 @@ ALTER SEQUENCE ml_app.activity_log_player_infos_id_seq OWNED BY ml_app.activity_
 
 
 --
+-- Name: activity_log_zeus_bulk_message_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_zeus_bulk_message_history (
+    id integer NOT NULL,
+    master_id integer,
+    zeus_bulk_message_id integer,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    activity_log_zeus_bulk_message_id integer
+);
+
+
+--
+-- Name: activity_log_zeus_bulk_message_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_zeus_bulk_message_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_zeus_bulk_message_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_zeus_bulk_message_history_id_seq OWNED BY ml_app.activity_log_zeus_bulk_message_history.id;
+
+
+--
+-- Name: activity_log_zeus_bulk_messages; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.activity_log_zeus_bulk_messages (
+    id integer NOT NULL,
+    master_id integer,
+    zeus_bulk_message_id integer,
+    extra_log_type character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: activity_log_zeus_bulk_messages_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.activity_log_zeus_bulk_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: activity_log_zeus_bulk_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.activity_log_zeus_bulk_messages_id_seq OWNED BY ml_app.activity_log_zeus_bulk_messages.id;
+
+
+--
 -- Name: activity_logs; Type: TABLE; Schema: ml_app; Owner: -
 --
 
@@ -15265,7 +15452,7 @@ CREATE TABLE ml_app.message_notifications (
     status_changed character varying,
     subject character varying,
     data json,
-    recipient_emails character varying[],
+    recipient_data character varying[],
     from_user_email character varying,
     role_name character varying,
     content_template_text character varying
@@ -17954,6 +18141,164 @@ ALTER SEQUENCE ml_app.users_id_seq OWNED BY ml_app.users.id;
 
 
 --
+-- Name: zeus_bulk_message_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.zeus_bulk_message_history (
+    id integer NOT NULL,
+    master_id integer,
+    name character varying,
+    notes character varying,
+    channel character varying,
+    message character varying,
+    send_date date,
+    send_time character varying,
+    status character varying,
+    cancel character varying,
+    ready character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    zeus_bulk_message_id integer
+);
+
+
+--
+-- Name: zeus_bulk_message_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.zeus_bulk_message_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: zeus_bulk_message_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.zeus_bulk_message_history_id_seq OWNED BY ml_app.zeus_bulk_message_history.id;
+
+
+--
+-- Name: zeus_bulk_message_recipient_history; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.zeus_bulk_message_recipient_history (
+    id integer NOT NULL,
+    master_id integer,
+    item_id bigint,
+    data character varying,
+    rec_type character varying,
+    rank character varying,
+    zeus_bulk_message_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL,
+    zeus_bulk_message_recipient_id integer
+);
+
+
+--
+-- Name: zeus_bulk_message_recipient_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.zeus_bulk_message_recipient_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: zeus_bulk_message_recipient_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.zeus_bulk_message_recipient_history_id_seq OWNED BY ml_app.zeus_bulk_message_recipient_history.id;
+
+
+--
+-- Name: zeus_bulk_message_recipients; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.zeus_bulk_message_recipients (
+    id integer NOT NULL,
+    master_id integer,
+    item_id bigint,
+    data character varying,
+    rec_type character varying,
+    rank character varying,
+    zeus_bulk_message_id bigint,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: zeus_bulk_message_recipients_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.zeus_bulk_message_recipients_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: zeus_bulk_message_recipients_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.zeus_bulk_message_recipients_id_seq OWNED BY ml_app.zeus_bulk_message_recipients.id;
+
+
+--
+-- Name: zeus_bulk_messages; Type: TABLE; Schema: ml_app; Owner: -
+--
+
+CREATE TABLE ml_app.zeus_bulk_messages (
+    id integer NOT NULL,
+    master_id integer,
+    name character varying,
+    notes character varying,
+    channel character varying,
+    message character varying,
+    send_date date,
+    send_time character varying,
+    status character varying,
+    cancel character varying,
+    ready character varying,
+    user_id integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: zeus_bulk_messages_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.zeus_bulk_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: zeus_bulk_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.zeus_bulk_messages_id_seq OWNED BY ml_app.zeus_bulk_messages.id;
+
+
+--
 -- Name: activity_log_persnet_assignment_history; Type: TABLE; Schema: persnet; Owner: -
 --
 
@@ -18965,6 +19310,20 @@ ALTER TABLE ONLY ml_app.activity_log_player_infos ALTER COLUMN id SET DEFAULT ne
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_message_history ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_zeus_bulk_message_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_messages ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_log_zeus_bulk_messages_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.activity_logs ALTER COLUMN id SET DEFAULT nextval('ml_app.activity_logs_id_seq'::regclass);
 
 
@@ -19743,6 +20102,34 @@ ALTER TABLE ONLY ml_app.users ALTER COLUMN id SET DEFAULT nextval('ml_app.users_
 --
 
 ALTER TABLE ONLY ml_app.users_contact_infos ALTER COLUMN id SET DEFAULT nextval('ml_app.users_contact_infos_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_history ALTER COLUMN id SET DEFAULT nextval('ml_app.zeus_bulk_message_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipient_history ALTER COLUMN id SET DEFAULT nextval('ml_app.zeus_bulk_message_recipient_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipients ALTER COLUMN id SET DEFAULT nextval('ml_app.zeus_bulk_message_recipients_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_messages ALTER COLUMN id SET DEFAULT nextval('ml_app.zeus_bulk_messages_id_seq'::regclass);
 
 
 --
@@ -20709,6 +21096,22 @@ ALTER TABLE ONLY ml_app.activity_log_player_infos
 
 
 --
+-- Name: activity_log_zeus_bulk_message_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_message_history
+    ADD CONSTRAINT activity_log_zeus_bulk_message_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: activity_log_zeus_bulk_messages_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_messages
+    ADD CONSTRAINT activity_log_zeus_bulk_messages_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: activity_logs_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -21586,6 +21989,38 @@ ALTER TABLE ONLY ml_app.users_contact_infos
 
 ALTER TABLE ONLY ml_app.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: zeus_bulk_message_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_history
+    ADD CONSTRAINT zeus_bulk_message_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: zeus_bulk_message_recipient_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipient_history
+    ADD CONSTRAINT zeus_bulk_message_recipient_history_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: zeus_bulk_message_recipients_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipients
+    ADD CONSTRAINT zeus_bulk_message_recipients_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: zeus_bulk_messages_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_messages
+    ADD CONSTRAINT zeus_bulk_messages_pkey PRIMARY KEY (id);
 
 
 --
@@ -23819,6 +24254,27 @@ CREATE INDEX index_activity_log_player_infos_on_user_id ON ml_app.activity_log_p
 
 
 --
+-- Name: index_activity_log_zeus_bulk_messages_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_zeus_bulk_messages_on_master_id ON ml_app.activity_log_zeus_bulk_messages USING btree (master_id);
+
+
+--
+-- Name: index_activity_log_zeus_bulk_messages_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_zeus_bulk_messages_on_user_id ON ml_app.activity_log_zeus_bulk_messages USING btree (user_id);
+
+
+--
+-- Name: index_activity_log_zeus_bulk_messages_on_zeus_bulk_message_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_activity_log_zeus_bulk_messages_on_zeus_bulk_message_id ON ml_app.activity_log_zeus_bulk_messages USING btree (zeus_bulk_message_id);
+
+
+--
 -- Name: index_address_history_on_address_id; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -23949,6 +24405,34 @@ CREATE INDEX index_al_player_info_test_processe_history_on_player_info_test_ ON 
 --
 
 CREATE INDEX index_al_player_info_test_processe_history_on_user_id ON ml_app.activity_log_player_info_test_processe_history USING btree (user_id);
+
+
+--
+-- Name: index_al_zeus_bulk_message_history_on_activity_log_zeus_bulk_me; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_zeus_bulk_message_history_on_activity_log_zeus_bulk_me ON ml_app.activity_log_zeus_bulk_message_history USING btree (activity_log_zeus_bulk_message_id);
+
+
+--
+-- Name: index_al_zeus_bulk_message_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_zeus_bulk_message_history_on_master_id ON ml_app.activity_log_zeus_bulk_message_history USING btree (master_id);
+
+
+--
+-- Name: index_al_zeus_bulk_message_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_zeus_bulk_message_history_on_user_id ON ml_app.activity_log_zeus_bulk_message_history USING btree (user_id);
+
+
+--
+-- Name: index_al_zeus_bulk_message_history_on_zeus_bulk_message_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_al_zeus_bulk_message_history_on_zeus_bulk_message_id ON ml_app.activity_log_zeus_bulk_message_history USING btree (zeus_bulk_message_id);
 
 
 --
@@ -25555,6 +26039,76 @@ CREATE UNIQUE INDEX index_users_on_unlock_token ON ml_app.users USING btree (unl
 
 
 --
+-- Name: index_zeus_bulk_message_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_history_on_master_id ON ml_app.zeus_bulk_message_history USING btree (master_id);
+
+
+--
+-- Name: index_zeus_bulk_message_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_history_on_user_id ON ml_app.zeus_bulk_message_history USING btree (user_id);
+
+
+--
+-- Name: index_zeus_bulk_message_history_on_zeus_bulk_message_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_history_on_zeus_bulk_message_id ON ml_app.zeus_bulk_message_history USING btree (zeus_bulk_message_id);
+
+
+--
+-- Name: index_zeus_bulk_message_recipient_history_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_recipient_history_on_master_id ON ml_app.zeus_bulk_message_recipient_history USING btree (master_id);
+
+
+--
+-- Name: index_zeus_bulk_message_recipient_history_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_recipient_history_on_user_id ON ml_app.zeus_bulk_message_recipient_history USING btree (user_id);
+
+
+--
+-- Name: index_zeus_bulk_message_recipient_history_on_zeus_bulk_message_; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_recipient_history_on_zeus_bulk_message_ ON ml_app.zeus_bulk_message_recipient_history USING btree (zeus_bulk_message_recipient_id);
+
+
+--
+-- Name: index_zeus_bulk_message_recipients_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_recipients_on_master_id ON ml_app.zeus_bulk_message_recipients USING btree (master_id);
+
+
+--
+-- Name: index_zeus_bulk_message_recipients_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_message_recipients_on_user_id ON ml_app.zeus_bulk_message_recipients USING btree (user_id);
+
+
+--
+-- Name: index_zeus_bulk_messages_on_master_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_messages_on_master_id ON ml_app.zeus_bulk_messages USING btree (master_id);
+
+
+--
+-- Name: index_zeus_bulk_messages_on_user_id; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE INDEX index_zeus_bulk_messages_on_user_id ON ml_app.zeus_bulk_messages USING btree (user_id);
+
+
+--
 -- Name: nfs_store_stored_files_unique_file; Type: INDEX; Schema: ml_app; Owner: -
 --
 
@@ -25580,6 +26134,13 @@ CREATE UNIQUE INDEX unique_master_protocol_id ON ml_app.trackers USING btree (ma
 --
 
 CREATE UNIQUE INDEX unique_protocol_and_id ON ml_app.sub_processes USING btree (protocol_id, id);
+
+
+--
+-- Name: unique_recipient; Type: INDEX; Schema: ml_app; Owner: -
+--
+
+CREATE UNIQUE INDEX unique_recipient ON ml_app.zeus_bulk_message_recipients USING btree (zeus_bulk_message_id, item_id);
 
 
 --
@@ -26507,6 +27068,20 @@ CREATE TRIGGER activity_log_player_info_test_processe_history_update AFTER UPDAT
 
 
 --
+-- Name: activity_log_zeus_bulk_message_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_zeus_bulk_message_history_insert AFTER INSERT ON ml_app.activity_log_zeus_bulk_messages FOR EACH ROW EXECUTE PROCEDURE ml_app.log_activity_log_zeus_bulk_message_update();
+
+
+--
+-- Name: activity_log_zeus_bulk_message_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER activity_log_zeus_bulk_message_history_update AFTER UPDATE ON ml_app.activity_log_zeus_bulk_messages FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_activity_log_zeus_bulk_message_update();
+
+
+--
 -- Name: address_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -27183,6 +27758,34 @@ CREATE TRIGGER user_role_history_insert AFTER INSERT ON ml_app.user_roles FOR EA
 --
 
 CREATE TRIGGER user_role_history_update AFTER UPDATE ON ml_app.user_roles FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_user_role_update();
+
+
+--
+-- Name: zeus_bulk_message_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER zeus_bulk_message_history_insert AFTER INSERT ON ml_app.zeus_bulk_messages FOR EACH ROW EXECUTE PROCEDURE ml_app.log_zeus_bulk_message_update();
+
+
+--
+-- Name: zeus_bulk_message_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER zeus_bulk_message_history_update AFTER UPDATE ON ml_app.zeus_bulk_messages FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_zeus_bulk_message_update();
+
+
+--
+-- Name: zeus_bulk_message_recipient_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER zeus_bulk_message_recipient_history_insert AFTER INSERT ON ml_app.zeus_bulk_message_recipients FOR EACH ROW EXECUTE PROCEDURE ml_app.log_zeus_bulk_message_recipient_update();
+
+
+--
+-- Name: zeus_bulk_message_recipient_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER zeus_bulk_message_recipient_history_update AFTER UPDATE ON ml_app.zeus_bulk_message_recipients FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_zeus_bulk_message_recipient_update();
 
 
 --
@@ -29436,6 +30039,38 @@ ALTER TABLE ONLY ml_app.activity_log_player_info_test_processe_history
 
 
 --
+-- Name: fk_activity_log_zeus_bulk_message_history_activity_log_zeus_bul; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_message_history
+    ADD CONSTRAINT fk_activity_log_zeus_bulk_message_history_activity_log_zeus_bul FOREIGN KEY (activity_log_zeus_bulk_message_id) REFERENCES ml_app.activity_log_zeus_bulk_messages(id);
+
+
+--
+-- Name: fk_activity_log_zeus_bulk_message_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_message_history
+    ADD CONSTRAINT fk_activity_log_zeus_bulk_message_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_activity_log_zeus_bulk_message_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_message_history
+    ADD CONSTRAINT fk_activity_log_zeus_bulk_message_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_activity_log_zeus_bulk_message_history_zeus_bulk_message_id; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_message_history
+    ADD CONSTRAINT fk_activity_log_zeus_bulk_message_history_zeus_bulk_message_id FOREIGN KEY (zeus_bulk_message_id) REFERENCES ml_app.zeus_bulk_messages(id);
+
+
+--
 -- Name: fk_address_history_addresses; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -30204,6 +30839,30 @@ ALTER TABLE ONLY ml_app.activity_log_player_info_e_signs
 
 
 --
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_messages
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_messages
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_1a7e2b01e0; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipients
+    ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_1a7e2b01e0admin; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -30548,6 +31207,30 @@ ALTER TABLE ONLY ml_app.activity_log_player_info_e_signs
 
 
 --
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_messages
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_messages
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_45205ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipients
+    ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
 -- Name: fk_rails_47b051d356; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -30769,6 +31452,14 @@ ALTER TABLE ONLY ml_app.activity_log_player_info_test_processes
 
 ALTER TABLE ONLY ml_app.activity_log_player_info_e_signs
     ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (player_info_id) REFERENCES ml_app.player_infos(id);
+
+
+--
+-- Name: fk_rails_78888ed085; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.activity_log_zeus_bulk_messages
+    ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (zeus_bulk_message_id) REFERENCES ml_app.zeus_bulk_messages(id);
 
 
 --
@@ -31385,6 +32076,54 @@ ALTER TABLE ONLY ml_app.user_role_history
 
 ALTER TABLE ONLY ml_app.user_role_history
     ADD CONSTRAINT fk_user_role_history_user_roles FOREIGN KEY (user_role_id) REFERENCES ml_app.user_roles(id);
+
+
+--
+-- Name: fk_zeus_bulk_message_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_history
+    ADD CONSTRAINT fk_zeus_bulk_message_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_zeus_bulk_message_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_history
+    ADD CONSTRAINT fk_zeus_bulk_message_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_zeus_bulk_message_history_zeus_bulk_messages; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_history
+    ADD CONSTRAINT fk_zeus_bulk_message_history_zeus_bulk_messages FOREIGN KEY (zeus_bulk_message_id) REFERENCES ml_app.zeus_bulk_messages(id);
+
+
+--
+-- Name: fk_zeus_bulk_message_recipient_history_masters; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipient_history
+    ADD CONSTRAINT fk_zeus_bulk_message_recipient_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_zeus_bulk_message_recipient_history_users; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipient_history
+    ADD CONSTRAINT fk_zeus_bulk_message_recipient_history_users FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_zeus_bulk_message_recipient_history_zeus_bulk_message_recipi; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.zeus_bulk_message_recipient_history
+    ADD CONSTRAINT fk_zeus_bulk_message_recipient_history_zeus_bulk_message_recipi FOREIGN KEY (zeus_bulk_message_recipient_id) REFERENCES ml_app.zeus_bulk_message_recipients(id);
 
 
 --
@@ -32044,4 +32783,6 @@ INSERT INTO schema_migrations (version) VALUES ('20190502142561');
 INSERT INTO schema_migrations (version) VALUES ('20190517135351');
 
 INSERT INTO schema_migrations (version) VALUES ('20190523115611');
+
+INSERT INTO schema_migrations (version) VALUES ('20190528152006');
 

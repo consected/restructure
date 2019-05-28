@@ -43,8 +43,8 @@ module RecTypeHandler
     # A function for formatting data attributes.
     # Uses a naming convention that allows it to be called by a child model, such as activity log,
     # without an instantiated model, to format phone numbers.
-    def format_data value, rec_type=nil
-      formatter_do(rec_type, value)
+    def format_data value, rec_type=nil, options=nil
+      formatter_do(rec_type, value, options)
     end
   end
 
@@ -84,6 +84,10 @@ module RecTypeHandler
     d = self.class.format_data(self.data, self.rec_type)
     self.data = d || self.data
     true
+  end
+
+  def data_unformatted
+    self.class.format_data(self.data, self.rec_type, format: :unformatted)
   end
 
   private

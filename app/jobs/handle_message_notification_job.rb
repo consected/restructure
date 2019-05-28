@@ -1,3 +1,4 @@
+# Queue a message notification job, either email or sms
 class HandleMessageNotificationJob < ApplicationJob
 
   # retry_on FphsException

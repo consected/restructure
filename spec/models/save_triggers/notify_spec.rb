@@ -11,6 +11,7 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     u0, _ = create_user
     u1, _ = create_user
     create_user
+    let_user_create :player_contacts
     create_master
     @al = create_item
 
@@ -18,6 +19,8 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
     t = '<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div>{{main_content}}</div></body></html>'
     @layout = Admin::MessageTemplate.create! name: 'test email layout', message_type: :email, template_type: :layout, template: t, current_admin: @admin
+    t = '{{main_content}}'
+    @layout_sms = Admin::MessageTemplate.create! name: 'test sms layout', message_type: :sms, template_type: :layout, template: t, current_admin: @admin
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     @content = Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
@@ -113,6 +116,47 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
   end
 
+  it "generates an sms notification with phone numbers" do
+
+    phones = ['(617)794-2330', '+16177942331', '6177942332', '+44(020) 671 2532']
+    clean_phones = ['+16177942330', '+16177942331', '+16177942332', '+440206712532']
+
+    t = 'This is some content in a text template.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}'
+    config = {
+      type: "sms",
+      phones: phones,
+      default_country_code: '1',
+      layout_template: @layout_sms.name,
+      content_template_text: t,
+      subject: "subject text"
+    }
+
+
+    @trigger = SaveTriggers::Notify.new(config, @al)
+
+    last_mn = MessageNotification.order(id: :desc).first
+    # last_dj = Delayed::Job.order(id: :desc).first
+
+    @trigger.perform
+
+    expect(@trigger.phones.sort).not_to eq phones.sort
+
+    expect(@trigger.phones.sort).to eq clean_phones.sort
+
+    new_mn = MessageNotification.order(id: :desc).first
+    # new_dj = Delayed::Job.order(id: :desc).first
+
+    expect(last_mn).not_to eq new_mn
+
+    new_mn.generate
+    res = new_mn.generated_text
+    expected_name = @al.select_who
+    master = @al.master
+    expected_text = "This is some content in a text template.</p><p>Related to master_id #{master.id}. This is a name: #{expected_name}"
+
+    expect(res).to eq expected_text
+
+  end
 
   it "uses a conditional field reference to get the users for a notification" do
     config = {
@@ -131,6 +175,54 @@ RSpec.describe SaveTriggers::Notify, type: :model do
     @trigger.perform
 
     expect(@trigger.receiving_user_ids.first).to eq @al.user_id
+
+  end
+
+  it "sets the notification to send 1 day in the future" do
+    config = {
+      type: "email",
+      users: {
+        this: {
+          user_id: 'return_value'
+        }
+      } ,
+      when: {
+        wait: '1 day'
+      },
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: "subject text"
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    # The time should be close enough
+    expect(@trigger.when[:wait_until].to_i/10).to eq((DateTime.now + 1.day).to_i/10) || eq(((DateTime.now + 1.day).to_i - 1)/10)
+
+  end
+
+  it "sets the notification to send at a specific time in the future" do
+    config = {
+      type: "email",
+      users: {
+        this: {
+          user_id: 'return_value'
+        }
+      } ,
+      when: {
+        wait_until: (DateTime.now + 1.day).iso8601
+      },
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: "subject text"
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    # The time should be close enough
+    expect(@trigger.when[:wait_until].to_i/10).to eq((DateTime.now + 1.day).to_i/10) || eq(((DateTime.now + 1.day).to_i - 1)/10)
 
   end
 

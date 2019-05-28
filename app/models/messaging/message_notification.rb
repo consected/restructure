@@ -100,12 +100,16 @@ class Messaging::MessageNotification < ActiveRecord::Base
   end
 
   def recipient_emails
-    res = super()
-    return res if res
+    return @recipient_emails if @recipient_emails
     res = recipient_users.pluck(:email)
-    self.recipient_emails = res.uniq
+    self.recipient_data = res.uniq
     self.save
     res
+  end
+
+  def recipient_emails= emails
+    @recipient_emails = emails
+    self.recipient_data = emails
   end
 
   def recipient_sms_numbers
@@ -115,6 +119,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
   def recipient_sms_numbers= nums
     @recipient_numbers = nums
+    self.recipient_data = nums
   end
 
 
@@ -138,9 +143,9 @@ class Messaging::MessageNotification < ActiveRecord::Base
       begin
         generate
 
-        if message_type&.to_sym == :email
+        if is_email?
           NotificationMailer.send_message_notification(self, logger: logger).deliver_now
-        elsif message_type&.to_sym == :sms
+        elsif is_sms?
           Messaging::NotificationSms.send_now(self, logger: logger)
         else
           raise FphsException.new "No recognized message type for message notification: #{message_type}"
@@ -154,6 +159,14 @@ class Messaging::MessageNotification < ActiveRecord::Base
         raise FphsException.new "Exception captured in handle_notification_now: #{e}\n#{e.backtrace[0..20].join("\n")}"
       end
     end
+  end
+
+  def is_sms?
+    message_type&.to_sym == :sms
+  end
+
+  def is_email?
+    message_type&.to_sym == :email
   end
 
   private

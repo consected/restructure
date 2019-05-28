@@ -1,22 +1,23 @@
 module FieldDefaults
 
-  def self.calculate_default obj, default, type=nil
+  def self.calculate_default obj, default, type=nil, from_when: nil
     default ||= ''
 
     res = default
+    from_when ||= DateTime.now
     if default.is_a? String
       m = default.scan(/(-?+?\d+) (days|day|months|month|years|year)/)
       if m.first
         t = m.first.last
-        res = DateTime.now + m.first.first.to_i.send(t)
+        res = from_when + m.first.first.to_i.send(t)
       elsif default == 'id'
         res = obj&.id
       elsif default == 'now'
-        res = DateTime.now
+        res = from_when
       elsif default == 'now()'
-        res = DateTime.now
+        res = from_when
       elsif default == 'today()'
-        res = DateTime.now.iso8601.split('T').first
+        res = from_when.iso8601.split('T').first
       elsif default == 'user_email'
         res = obj.user&.email
       elsif default == 'current_user'
@@ -26,8 +27,10 @@ module FieldDefaults
       end
     end
 
-    if type == 'date'
+    if type&.to_sym == :date
       res = res.strftime('%Y-%m-%d') rescue nil
+    elsif type&.to_sym == :datetime_type && res.is_a?(String)
+      res = DateTime.parse(res)
     end
 
     res
