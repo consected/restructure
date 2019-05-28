@@ -24,10 +24,12 @@
       </div>
     </div>
     <div id="report-results-block" class="<%= @count_only ? 'hidden' : '' %>">
+      <% unless @embedded_report %>
       <p class="text-center back-to-search-form">
         <a href="#body-top" class="btn btn-default small back-to-search-form-btn"><i class="caret up"></i> back to search form</a>
         <a href="#report-results-block" class="btn btn-default small show-results-btn"><i class="caret"></i> show all results</a>
       </p>
+      <% end %>
       <div class="report-results-inner">
         <table class="report-table table tablesorter">
           <thead>

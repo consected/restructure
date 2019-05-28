@@ -610,6 +610,7 @@ _fpa = {
                   if(!t || t === '')
                     console.log('Failed due to no data-target attribute being set when data-target-force is true and the result is an HTML block');
                   var targets = $(t);
+                  e.stopPropagation();
                 }
                 else {
                   if(isform.length == 1 && formcontainer.length == 1) {
@@ -783,6 +784,10 @@ _fpa = {
         $('.modal-dialog').removeClass('modal-md').addClass('modal-lg');
     else
         $('.modal-dialog').removeClass('modal-lg').removeClass('modal-md');
+
+    pm.find('[data-dismiss="modal"]').click(function() {
+      $('.modal-body').html('');
+    });
 
     pm.modal('show');
   },

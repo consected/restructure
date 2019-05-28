@@ -16,6 +16,8 @@ class ReportsController < UserBaseController
   def index
     @no_create = true
     @no_masters = true
+    @embedded_report = (params[:embed] == 'true')
+
     pm = @all_reports_for_user = Report.enabled.for_user(current_user)
     pm = filtered_primary_model(pm)
 
@@ -33,8 +35,12 @@ class ReportsController < UserBaseController
 
     return not_authorized unless @report.can_access?(current_user) || current_admin
 
+    @results_target = "master_results_block"
+    @embedded_report = (params[:embed] == 'true')
+
     options = {}
     search_attrs = params[:search_attrs]
+    @search_attrs = search_attrs
 
     @view_context = params[:view_context]
     if @view_context.blank?
@@ -77,7 +83,8 @@ class ReportsController < UserBaseController
             if params[:part] == 'results'
               render plain: "Generated SQL invalid.\n#{@report.clean_sql}\n#{e.to_s}", status: 400
             else
-              render :show
+              @report.search_attr_values ||= search_attrs
+              show_report
             end
           }
           format.json {
@@ -99,11 +106,11 @@ class ReportsController < UserBaseController
       respond_to do |format|
         format.html {
           if params[:part] == 'results'
-            @search_attrs = params[:search_attrs]
             render partial: 'results'
           else
             @report_criteria = true
-            render :show
+            @report.search_attr_values ||= search_attrs
+            show_report
           end
         }
         format.json {
@@ -145,11 +152,7 @@ class ReportsController < UserBaseController
 
             @report_criteria = true
 
-            if params[:embed] == 'true'
-              render partial: 'show'
-            else
-              render :show
-            end
+            show_report
           end
         }
       end
@@ -207,7 +210,6 @@ class ReportsController < UserBaseController
     atl_params = params[:add_to_list]
     list_name = atl_params[:list_name]
     items_text = atl_params[:items]
-    list_id = atl_params[:list_id]
 
     return unless authorized? == true
 
@@ -215,12 +217,15 @@ class ReportsController < UserBaseController
     return not_authorized unless ok
 
     return general_error("no items selected") if items_text.blank? || items_text.length == 0
-    return general_error("no list id specified") if list_id.blank?
 
     items = items_text.map {|i| JSON.parse(i)}
     item_types = items.map {|i| i["type"]}.uniq
-    return bad_request unless item_types.length == 1
+    return general_error("item type not specified") unless item_types.length == 1 && item_types.first
     item_type = item_types.first
+
+    list_ids = items.map {|i| i["list_id"]}.uniq
+    list_id = list_ids.first
+    return general_error("list id not specified") unless list_ids.length == 1 && list_id
 
     ok = current_user.has_access_to?(:access, :table, item_type) || current_user.has_access_to?(:access, :table, "dynamic_model__#{item_type}")
     return not_authorized unless ok
@@ -242,6 +247,10 @@ class ReportsController < UserBaseController
     items_in_list = list_class.where(assoc_attr => list_id).pluck(:item_id)
     item_ids = item_ids - items_in_list
     return general_error("all items already in the list") if item_ids.length == 0
+
+    assoc_class = assoc_name.classify.constantize
+    assoc_item = assoc_class.where(id: list_id).first
+    return general_error("list id does not represent an associated list: #{list_id}") unless assoc_item
 
     matching_attribs = (list_attribs & item_attribs).map(&:to_s)
     return general_error("no matching attributes") if matching_attribs.length == 0
@@ -315,6 +324,17 @@ class ReportsController < UserBaseController
       @report = Report.find(id)
       @report.current_user = current_user
 
+    end
+
+    def show_report
+      @report_page = !@embedded_report
+
+      if @embedded_report
+        @results_target = "embed_results_block"
+        render partial: 'show'
+      else
+        render :show
+      end
     end
 
 

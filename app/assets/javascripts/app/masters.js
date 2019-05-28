@@ -7,6 +7,11 @@
 _fpa.masters = {
 
     max_results: 100,
+
+    get_results_block: function () {
+      return $('#embed_results_block,#master_results_block').last();
+    },
+
     switch_id_on_click: function(block){
         block.find('.switch_id').not('attached-switch-click').click(function(ev){
             ev.preventDefault();
@@ -101,7 +106,7 @@ _fpa.masters = {
             // When we submit the form, give the user a visual spinner so they know what's going on
             // This also clears existing search results to make it clear when a result is complete
             if($(this).data('remote'))
-                $('#master_results_block').html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
+                _fpa.masters.get_results_block().html('<h3 class="text-center"><span class="glyphicon glyphicon-search search-running"></span></h3>');
         });
 
     },

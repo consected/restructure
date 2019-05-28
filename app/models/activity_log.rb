@@ -549,6 +549,9 @@ class ActivityLog < ActiveRecord::Base
         placeholder_fields = all_implementation_fields.select {|f| f.start_with? 'placeholder_'}.map(&:to_sym)
         res.send :attr_accessor, *placeholder_fields
 
+        embedded_report_fields = all_implementation_fields.select {|f| f.start_with? 'embedded_report_'}.map(&:to_sym)
+        res.send :attr_accessor, *embedded_report_fields
+
         c_name = full_implementation_controller_name
 
         begin

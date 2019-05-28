@@ -3,7 +3,13 @@ _fpa.preprocessors_reports = {
 
     $('.report-item-edit').find('.report-edit-cancel').click();
 
-  }
+  },
+
+  embedded_report: function(block,data) {
+    var h = '<div id="modal_results_block" class=""></div>';
+    _fpa.show_modal(h, null, true);
+  },
+
 
 };
 
@@ -23,9 +29,15 @@ _fpa.postprocessors_reports = {
             {'general_selections-item_type+addresses_rank': 'rank', users: 'user_id'}
     },
 
+    embedded_report: function(block,data) {
+      _fpa.postprocessors_reports.reports_form (block, data);
+      block.find('input[type="submit"].auto-run').click();
+
+    },
+
     reports_form: function(block, data){
         _fpa.form_utils.format_block(block);
-        $('#master_results_block').html('');
+        _fpa.masters.get_results_block().html('');
 
 
         _fpa.masters.handle_search_form(block.find('form'));

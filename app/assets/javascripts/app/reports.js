@@ -25,11 +25,15 @@ _fpa.reports = {
     },
     report_position_buttons: function (to_loc) {
       var sb = $('.show-results-btn');
+      var rf = $('.back-to-search-form-btn');
+      if (sb.length == 0 && rf.length == 0) {
+        return;
+      }
+      
       sb.not('.has-rsf-clicks').click(function(e) {
         e.preventDefault();
         _fpa.reports.report_position_buttons('go-to-results');
       }).addClass('has-rsf-clicks');
-      var rf = $('.back-to-search-form-btn');
       rf.not('.has-rsf-clicks').click(function(e) {
         e.preventDefault();
         _fpa.reports.report_position_buttons('go-to-form');
@@ -164,7 +168,7 @@ _fpa.reports = {
         var $f = $('<form id="itemselection-for-report" method="post" action="/nfs_store/downloads/multi" target="download_files"><input type="hidden" name="nfs_store_download[container_id]" value="multi"></form>');
       }
       else if (dct_action == 'add to list') {
-        var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="' + extra_val + '"><input type="hidden" name="add_to_list[list_id]" value=""></form>');
+        var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="' + extra_val + '"></form>');
       }
 
       var b = '<span class="report-files-actions"><input type="checkbox" id="report-select-all-files"><label for="report-select-all-files">select all</label> <input type="submit" value="' + dct_action + '" class="btn btn-primary"/></span>'

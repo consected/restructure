@@ -201,6 +201,8 @@
 
             if field_name.start_with?('placeholder_')
               column_type = :placeholder
+            elsif field_name.start_with?('embedded_report_')
+              column_type = :embedded_report
             else
               col = form_object_instance.class.columns_hash[field_name]
               raise FphsException.new "Column #{field_name} does not appear in the columns #{form_object_instance.class.columns_hash.map{|k,v| k}}" unless col
