@@ -26,6 +26,7 @@ RSpec.describe "Delete stored files", type: :model do
     expect(sf).not_to be nil
     expect(sf.file_name).to eq delfn
 
+    dt = DateTime.now.to_i
     sf.move_to_trash!
     expect(sf.path).to eq trashdir
 
@@ -38,7 +39,7 @@ RSpec.describe "Delete stored files", type: :model do
       end
     end
 
-    expect(curr_path).to end_with "#{trashdir}/#{delfn}"
+    expect(curr_path).to end_with("#{trashdir}/#{delfn}--#{dt}") || end_with("#{trashdir}/#{delfn}--#{dt-1}")
 
     expect(NfsStore::Upload.hash_for_file(curr_path)).to eq u.file_hash
 
@@ -76,9 +77,11 @@ RSpec.describe "Delete stored files", type: :model do
       }
     }
 
+    f = create_filter('.*', resource_name: 'nfs_store__manage__containers')
+
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
     download.current_user = @user
-    
+
     download.retrieve_files_from all_sf_dl
 
     # Upload the generated zip
@@ -92,6 +95,7 @@ RSpec.describe "Delete stored files", type: :model do
     expect(sf).not_to be nil
     expect(sf.file_name).to eq delfn
 
+    dt = DateTime.now.to_i
     sf.move_to_trash!
     expect(sf.path).to eq trashdir
 
@@ -104,7 +108,8 @@ RSpec.describe "Delete stored files", type: :model do
       end
     end
 
-    expect(curr_path).to end_with "#{trashdir}/#{delfn}"
+    expect(curr_path).to end_with("#{trashdir}/#{delfn}--#{dt}") || end_with("#{trashdir}/#{delfn}--#{dt-1}")
+
     expect(NfsStore::Upload.hash_for_file(curr_path)).to eq u.file_hash
 
     non_trash_sf = @container.stored_files
@@ -118,4 +123,44 @@ RSpec.describe "Delete stored files", type: :model do
 
   end
 
+
+  it "delete a stored file from a container and allows new upload" do
+    u = upload_file 'test-name-7.txt'
+    upload_file 'test-name-8.txt'
+    upload_file 'test-name-9.txt'
+
+    delfn = 'test-name-7.txt'
+
+    sf = @container.stored_files.where(file_name: delfn).first
+
+    expect(sf).not_to be nil
+    expect(sf.file_name).to eq delfn
+
+    non_trash_sf = @container.stored_files
+    expect(non_trash_sf.count).to eq 3
+
+    expect {
+      NfsStore::Upload.find_upload @container, sf.file_hash, delfn, @user, path: sf.path
+    }.to raise_error(FsException::Action, "A matching stored file already exists")
+
+    sf.move_to_trash!
+
+    non_trash_sf = @container.stored_files
+    expect(non_trash_sf.count).to eq 2
+
+    again = NfsStore::Upload.find_upload @container, sf.file_hash, delfn, @user, path: sf.path
+    expect(again).to be nil
+
+
+    upload_file delfn
+    sf = @container.stored_files.where(file_name: delfn).first
+
+    expect {
+      NfsStore::Upload.find_upload @container, sf.file_hash, delfn, @user, path: sf.path
+    }.to raise_error(FsException::Action, "A matching stored file already exists")
+
+    sleep 2 # to ensure the move to trash timestamp is ok
+    sf.move_to_trash!
+
+  end
 end

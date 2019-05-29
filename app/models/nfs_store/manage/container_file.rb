@@ -93,8 +93,8 @@ module NfsStore
               move_from curr_path
               save!
               res = true
-              break
             end
+            break
           end
         end
 
@@ -105,7 +105,9 @@ module NfsStore
       def move_to_trash!
         sf_path = self.container_path(no_filename: true)
         new_path = sf_path.blank? ? TrashPath : File.join(TrashPath, sf_path)
-        move_to new_path
+        dt = DateTime.now.to_i
+        new_file_name = "#{self.file_name}--#{dt}"
+        move_to new_path, new_file_name
 
         if respond_to? :archived_files
           archived_files.each do |af|
@@ -115,7 +117,8 @@ module NfsStore
             path_parts << TrashPath
             path_parts << af.container_path(no_filename: true)
             new_path = File.join path_parts
-            af.move_to new_path
+            new_file_name = "#{af.file_name}--#{dt}"
+            af.move_to new_path, new_file_name
           end
         end
       end

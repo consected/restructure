@@ -92,61 +92,61 @@ RSpec.describe NfsStore::Upload, type: :model do
 
   it "filters notifications" do
 
-    break unless @container.respond_to? :filter_notifications 
+    if @container.respond_to? :filter_notifications
 
-    role_name = 'upload test notify'
+      role_name = 'upload test notify'
 
-    files = []
-    files << create_stored_file( '.', 'not_abc_ is a test')
-    files << create_stored_file( '.', 'abc_ is a test')
-    files << create_stored_file( '.', 'abc_2 is a test')
+      files = []
+      files << create_stored_file( '.', 'not_abc_ is a test')
+      files << create_stored_file( '.', 'abc_ is a test')
+      files << create_stored_file( '.', 'abc_2 is a test')
 
-    f0 = create_filter('^/abc_')
-    f = create_filter('^/fabc')
-    f = create_filter('^fdir\/')
-    f = create_filter('^/fghi')
-    f = create_filter('^fid\/{{id}} - id file')
+      f0 = create_filter('^/abc_')
+      f = create_filter('^/fabc')
+      f = create_filter('^fdir\/')
+      f = create_filter('^/fghi')
+      f = create_filter('^fid\/{{id}} - id file')
 
-    @container.previous_upload_stored_file_ids = files.map(&:id)
+      @container.previous_upload_stored_file_ids = files.map(&:id)
 
-    res = @container.filter_notifications(@other_users + [@user])
+      res = @container.filter_notifications(@other_users + [@user])
 
-    expect(res.length).to eq 1
-    expect(res.first).to eq @user
+      expect(res.length).to eq 1
+      expect(res.first).to eq @user
 
-    f0.disable!(@admin)
+      f0.disable!(@admin)
 
-    res = @container.filter_notifications(@other_users + [@user])
+      res = @container.filter_notifications(@other_users + [@user])
 
-    expect(res.length).to eq 0
+      expect(res.length).to eq 0
 
-    u0 = @other_users.first
-    u1 = @other_users[1]
+      u0 = @other_users.first
+      u1 = @other_users[1]
 
-    f1 = create_filter('^/abc_', user: u0)
-    f2 = create_filter('^/abc_', user: u1)
+      f1 = create_filter('^/abc_', user: u0)
+      f2 = create_filter('^/abc_', user: u1)
 
-    res = @container.filter_notifications(@other_users + [@user])
+      res = @container.filter_notifications(@other_users + [@user])
 
-    expect(res.length).to eq 2
+      expect(res.length).to eq 2
 
-    @user.user_roles.create! current_admin: @admin, role_name: role_name
+      @user.user_roles.create! current_admin: @admin, role_name: role_name
 
-    create_filter '^/abc_', role_name: role_name
-    f1.disable!(@admin)
+      create_filter '^/abc_', role_name: role_name
+      f1.disable!(@admin)
 
-    res = @container.filter_notifications(@other_users + [@user])
+      res = @container.filter_notifications(@other_users + [@user])
 
-    expect(res.length).to eq 2
-    expect(res.last).to eq @user
-    expect(res.first).to eq u1
+      expect(res.length).to eq 2
+      expect(res.last).to eq @user
+      expect(res.first).to eq u1
 
-    u1.user_roles.create! current_admin: @admin, role_name: role_name
-    res = @container.filter_notifications(@other_users + [@user])
+      u1.user_roles.create! current_admin: @admin, role_name: role_name
+      res = @container.filter_notifications(@other_users + [@user])
 
-    expect(res.length).to eq 2
-    expect(res.last).to eq @user
-    expect(res.first).to eq u1
-
+      expect(res.length).to eq 2
+      expect(res.last).to eq @user
+      expect(res.first).to eq u1
+    end
   end
 end
