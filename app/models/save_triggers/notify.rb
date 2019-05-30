@@ -15,6 +15,10 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         content_template: "name of content template",
         content_template_text: "alternative content template text",
         subject: "subject text",
+        when: {
+          wait_until: '(optional) ISO date',
+          wait: 'n seconds|minutes|hours|days|weeks|months|years'
+        },
         if: if_extras
       }
     ]

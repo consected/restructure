@@ -13,6 +13,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
     ::ActivityLog.define_models
     create_user
     setup_access :player_contacts
+    let_user_create_player_contacts
     create_item(data: rand(10000000000000000), rank: 10)
   end
 
@@ -54,6 +55,8 @@ RSpec.describe 'Activity Log implementation', type: :model do
     else
       uac = Admin::UserAccessControl.create! app_type: @user.app_type, access: :create, resource_type: :activity_log_type, resource_name: rn, current_admin: @admin
     end
+    let_user_create_player_contacts
+
     expect(al.save).to be true
 
 

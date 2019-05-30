@@ -156,7 +156,7 @@ module NfsStore
       def file_uniqueness
         return unless @file_uniqueness.nil?
 
-        res = self.container.stored_files.where(container: self.container, file_hash: self.file_hash, file_name: self.file_name, path: path).first
+        res = self.container.stored_files.where(file_hash: self.file_hash, file_name: self.file_name, path: path).first
         # If a result was found then the file is possibly not unique.
         # To decide, check if the current ID matches the result ID
         # If it doesn't match then the result indicates it is a duplicate

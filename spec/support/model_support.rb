@@ -99,6 +99,10 @@ module ModelSupport
     let_user_create :player_infos, in_app_type: in_app_type
   end
 
+  def let_user_create_player_contacts in_app_type: nil
+    let_user_create :player_contacts, in_app_type: in_app_type
+  end
+
   def let_user_create resource_name, in_app_type: nil
     res = @user.has_access_to? :access, :table, resource_name
     if res && res.user_id == @user.id
@@ -136,6 +140,15 @@ module ModelSupport
     # Setup the triggers, functions, etc
     files = %w(1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 6-grant_roles_access_to_ml_app.sql create_adders_table.sql)
 
+    ExternalIdentifier.where(name: 'bhs_assignments').update_all(disabled: true)
+    i = ExternalIdentifier.where(name: 'bhs_assignments').order(id: :desc).first
+    i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
+
+    ActivityLog.where(name: 'BHS Tracker').update_all(disabled: true)
+    i = ActivityLog.where(name: 'BHS Tracker').order(id: :desc).first
+    i.update! disabled: false, current_admin: @admin if i
+
+
     files.each do |fn|
 
       begin
@@ -149,7 +162,7 @@ module ModelSupport
 
     config = File.read Rails.root.join('docs/config_tests/bhs_app_type_test_config.json')
 
-    unless ActivityLog.where(name: 'BHS Tracker').active.first
+    if ActivityLog.where(name: 'BHS Tracker').all.first && !ActivityLog.where(name: 'BHS Tracker').active.first
       ActivityLog.where(name: 'BHS Tracker').all.first.update!(disabled: false, current_admin: @admin)
     end
 

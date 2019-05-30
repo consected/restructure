@@ -17,6 +17,14 @@ module BhsImportConfig
     # Setup the triggers, functions, etc
     files = %w(DROP-bhs_tables.sql 1-create_bhs_assignments_external_identifier.sql 2-create_activity_log.sql 3-add_notification_triggers.sql 4-add_testmybrain_trigger.sql 5-create_sync_subject_data_aws_db.sql 6-grant_roles_access_to_ml_app.sql)
 
+    ExternalIdentifier.where(name: 'bhs_assignments').update_all(disabled: true)
+    i = ExternalIdentifier.where(name: 'bhs_assignments').order(id: :desc).first
+    i.update! disabled: false, min_id: 0, external_id_edit_pattern: nil, current_admin: @admin if i
+
+    ActivityLog.where(table_name: 'activity_log_bhs_assignments').update_all(disabled: true)
+    i = ActivityLog.where(table_name: 'activity_log_bhs_assignments').order(id: :desc).first
+    i.update! disabled: false, current_admin: @admin if i
+
     files.each do |fn|
 
       begin

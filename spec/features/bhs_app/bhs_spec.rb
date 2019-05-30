@@ -21,7 +21,7 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
     @pi = {user: @user, email: @good_email, pw: @good_password}
 
     m = Master.create(current_user: @ra[:user])
-    b = m.bhs_assignments.build(bhs_id:'2523565')
+    b = m.bhs_assignments.build(bhs_id:'252356501')
     b.save!
   end
 
