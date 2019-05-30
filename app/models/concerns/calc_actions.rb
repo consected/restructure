@@ -227,15 +227,21 @@ module CalcActions
         extra_conditions[0].gsub(BoolTypeString, bool)
         @condition_scope = @condition_scope.where(extra_conditions)
       end
-      @condition_scope = @condition_scope.order(id: :desc).limit(1)
       if @this_val_where && @condition_scope.first
-        # @this_val = @condition_scope.first&.send(@this_val_where[:assoc]).first&.attributes[@this_val_where[:field_name].to_s]
-        first_res = @this_val = @condition_scope.first&.send(@this_val_where[:assoc]).first
+        @condition_scope = @condition_scope.order(id: :desc)
+        @condition_scope = @condition_scope.limit(1) if @this_val_where[:mode] == 'return_value'
+
+        all_res = @this_val = @condition_scope.first&.send(@this_val_where[:assoc])
+        first_res = all_res.first
         if first_res
           tn = first_res.class.table_name
           fn = first_res.class.attribute_names.select{|s| s == @this_val_where[:field_name].to_s}.first
-          @this_val = @condition_scope.reorder("#{tn}.id desc").pluck("#{tn}.#{fn}").first
+          rvals = @condition_scope.reorder("#{tn}.id desc").pluck("#{tn}.#{fn}")
+          @this_val = rvals.first if @this_val_where[:mode] == 'return_value'
+          @this_val = rvals if @this_val_where[:mode] == 'return_value_list'
         end
+      else
+        @condition_scope = @condition_scope.order(id: :desc).limit(1)
       end
       @condition_scope
     end
@@ -390,11 +396,12 @@ module CalcActions
                 @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
                 @extra_conditions << vv
               else
-                if val == 'return_value'
+                if val.in? ['return_value', 'return_value_list']
                   @this_val_where = {
                     assoc: c_table.to_sym,
                     field_name: field_name,
-                    table_name: ModelReference.record_type_to_ns_table_name(c_table).to_sym
+                    table_name: ModelReference.record_type_to_ns_table_name(c_table).to_sym,
+                    mode: val
                   }
                 else
                   @condition_values[table_name] ||= {}

@@ -5,11 +5,16 @@ RSpec.describe "Calculate conditional actions", type: :model do
   include ModelSupport
   include ActivityLogSupport
 
-
   before :all do
+
     u1, _ = create_user
+    @u1 = u1
     create_user
+    setup_access :activity_log__player_contact_phones
+    let_user_create_player_contacts
+
     create_master
+
     @al0 = create_item
     @al = create_item
 
@@ -1054,6 +1059,29 @@ RSpec.describe "Calculate conditional actions", type: :model do
     ca = ConditionalActions.new conf, @al
     res = ca.get_this_val
     expect(res).to eq @al.select_who
+
+
+  end
+
+  it "returns the all values as a list from a condition as this_val attribute" do
+
+    @al1 = create_item
+    @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
+
+    expect(@al.master_id).to eq @al0.master_id
+    expect(@al.master_id).to eq @al1.master_id
+
+    conf = {
+      activity_log__player_contact_phones: {
+        select_who: 'return_value_list',
+        id: [@al.id, @al0.id, @al1.id]
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+
+    res = ca.get_this_val
+    expect(res).to eq @al1.select_who, [@al.select_who, @al0.select_who]
 
 
   end
