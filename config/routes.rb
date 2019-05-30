@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :client_logs, only: [:create]
 
   resources :imports
 

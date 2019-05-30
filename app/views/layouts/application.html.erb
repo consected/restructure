@@ -6,6 +6,12 @@
   <%= javascript_include_tag 'application' %>
 
   <script>
+  window.onerror = function(message, source, lineno, colno, error) {
+    var details;
+    if (error) details = error.stack;
+    $.ajax({url: '/client_logs', type: 'POST', data: {msg: message, error: navigator.userAgent, details: details}});
+  };
+
   _fpa.status = {
     controller: '<%= controller_name %>',
     action: '<%= action_name %>'
