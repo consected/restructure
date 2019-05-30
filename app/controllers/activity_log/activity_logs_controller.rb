@@ -48,12 +48,22 @@ class ActivityLog::ActivityLogsController < UserBaseController
       cmrs = oi.creatable_model_references only_creatables: true
 
       always_embed_reference = oi.extra_log_type_config.view_options[:always_embed_reference]
+      always_embed_creatable = oi.extra_log_type_config.view_options[:always_embed_creatable_reference]
 
       always_embed_item = mrs.select{|m| m.to_record_type == always_embed_reference.ns_camelize}.first if always_embed_reference
 
       if always_embed_item
         # Always embed if instructed to do so by the options config
         @embedded_item = always_embed_item.to_record
+      end
+
+      if always_embed_item && @embedded_item
+        # Do nothing
+      elsif action_name.in?(['new', 'create']) && always_embed_creatable
+        # If creatable has been specified as always embedded, use this, unless the embeddable item is an activity log.
+        cmr_view_as = cmrs.first.last.first.last[:ref_config][:view_as] rescue nil
+        @embedded_item = oi.build_model_reference [always_embed_creatable.to_sym, cmrs[always_embed_creatable.to_sym]]
+        @embedded_item = nil if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new].in?(not_embedded_options)
       elsif action_name.in?(['new', 'create']) && cmrs.length == 1
         # If exactly one item is creatable, use this, unless the embeddable item is an activity log.
         cmr_view_as = cmrs.first.last.first.last[:ref_config][:view_as] rescue nil
@@ -168,7 +178,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
       if @master.respond_to? @item_type
         @master.send(@item_type)
       elsif @master.respond_to? "dynamic_model__#{@item_type}"
-        @master.send("dynamic_model__#{@item_type}") 
+        @master.send("dynamic_model__#{@item_type}")
       end
     end
 

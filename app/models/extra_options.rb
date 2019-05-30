@@ -56,6 +56,7 @@ class ExtraOptions
         hide_unless_creatable: 'true | false to hide add-item buttons in activity logs if they are not creatable',
         data_attribute: 'string or list of fields to use as the data attribute',
         always_embed_reference: 'reference name to always show embedded',
+        always_embed_creatable_reference: 'reference name to always show embedded during new/create',
         alt_order: 'string or list of date / time or integer fields to use for ordering',
         show_cancel: 'show cancel button alongside save button'
       },
@@ -118,7 +119,7 @@ class ExtraOptions
     {
 
       all: {
-        'model_table_name | this': {
+        'model_table_name | this | this_references | parent_references ': {
           field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)',
           field_name_2: 'literal value | null',
           field_name_3: { this: 'attribute in this record' },
