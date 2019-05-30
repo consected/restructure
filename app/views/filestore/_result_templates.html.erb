@@ -1,6 +1,6 @@
-<%= render partial: 'filestore/classification/result_template', locals: {full_name: 'nfs_store__manage__stored_file', name: 'stored_file'} %>
-<%= render partial: 'filestore/classification/result_template', locals: {full_name: 'nfs_store__manage__archived_file', name: 'archived_file'} %>
-<%= render partial: 'common_templates/search_results_template', locals: {
+<% if current_user.has_access_to?(:access, :table, :nfs_store__manage__stored_files) %>
+  <%= render partial: 'filestore/classification/result_template', locals: {full_name: 'nfs_store__manage__stored_file', name: 'stored_file'} %>
+  <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'filestore-classification-stored-file-full',
     with_data: 'nfs_store__manage__stored_file',
     caption: 'Stored File',
@@ -10,7 +10,10 @@
     item_list: NfsStore::Manage::StoredFile.permitted_params,
     edit_button_href: "/masters/{{master_id}}/filestore/classification/{{nfs_store_container_id}}/edit?download_id={{id}}&retrieval_type=stored_file"
   } %>
+<% end %>
 
+<% if current_user.has_access_to?(:access, :table, :nfs_store__manage__archived_files) %>
+  <%= render partial: 'filestore/classification/result_template', locals: {full_name: 'nfs_store__manage__archived_file', name: 'archived_file'} %>
   <%= render partial: 'common_templates/search_results_template', locals: {
       name: 'filestore-classification-archived-file-full',
       with_data: 'nfs_store__manage__archived_file',
@@ -21,3 +24,4 @@
       item_list: NfsStore::Manage::StoredFile.permitted_params,
       edit_button_href: "/masters/{{master_id}}/filestore/classification/{{nfs_store_container_id}}/edit?download_id={{id}}&retrieval_type=archived_file"
     } %>
+<% end %>

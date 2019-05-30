@@ -49,7 +49,7 @@
           main_log_label: (m.main_log_name.blank? ? 'Add Log' : m.main_log_name ),
           hide_item_list_panel: !!m.hide_item_list_panel
 
-        } %>
+        }  if current_user.has_access_to?(:access, :table, m.full_item_type_name.pluralize) %>
 
     <%
   end

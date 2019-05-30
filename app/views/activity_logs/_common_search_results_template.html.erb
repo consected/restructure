@@ -25,6 +25,8 @@
   main_log_caption = al_name if main_log_caption == 'Add Log'
 %>
 
+<% if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
+
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: main_log_full_name,
     model_data_type: :activity_log,
@@ -274,3 +276,5 @@
 <script>
   _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>', <%= extra_log_type_configs.to_json.html_safe %>)
 </script>
+
+<% end %>
