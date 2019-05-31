@@ -92,6 +92,10 @@ module GeneralDataConcerns
     self.created_at.to_i if self.created_at
   end
 
+  def user_preference
+    user&.user_preference.attributes
+  end
+
   def as_json extras={}
     self.current_user ||= extras[:current_user] if self.class.no_master_association
     if self.allows_current_user_access_to?(:access)
@@ -134,6 +138,7 @@ module GeneralDataConcerns
       extras[:methods] << :prevent_add_reference if respond_to? :prevent_add_reference
       extras[:methods] << :option_type if respond_to? :option_type
       extras[:methods] << :alt_order if respond_to? :alt_order
+      extras[:methods] << :user_preference if respond_to? :user_preference
 
       extras[:include][self.class.parent_type] = {methods: [:rank_name, :data]} if self.class.respond_to? :parent_type
       extras[:include][:item_flags] = {include: [:item_flag_name], methods: [:method_id, :item_type_us]} if self.class.respond_to?(:uses_item_flags?) && self.class.uses_item_flags?(master_user)
@@ -154,7 +159,7 @@ module GeneralDataConcerns
       extras[:methods] << :update_action if respond_to? :update_action
       extras[:methods] << :_created if respond_to? :_created
       extras[:methods] << :_updated if respond_to? :_updated
-
+      extras[:methods] << :user_preference if respond_to? :user_preference
 
     else
       return {}

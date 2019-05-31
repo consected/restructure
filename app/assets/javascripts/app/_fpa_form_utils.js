@@ -332,6 +332,7 @@ _fpa.form_utils = {
         if (data && data.master_id) {
           var master_id = data.master_id;
           new_data = Object.assign({}, data);
+          if(!new_data.user_preference) new_data.user_preference = _fpa.user_prefs;
         }
         else {
           var master_id = block.parents('.master-panel').first().attr('data-master-id');

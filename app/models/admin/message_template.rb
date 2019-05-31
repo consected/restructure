@@ -140,10 +140,12 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       if item.respond_to?(:user) && item.user
         data[:user_email] = item.user.email
+        data[:user_preference] = item.user.user_preference.attributes
       end
 
       if item.respond_to?(:current_user) && item.current_user
         data[:user_email] ||= item.current_user.email
+        data[:user_preference] ||= item.current_user.user_preference.attributes
       end
 
       if item.respond_to?(:master)
