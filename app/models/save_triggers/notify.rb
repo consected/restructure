@@ -146,7 +146,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         job = job.set(set_when)
       end
 
-      job.perform_later(mn)
+      job.perform_later(mn, for_item: @item, on_complete_config: config[:on_complete])
 
     end
 

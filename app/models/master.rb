@@ -133,7 +133,7 @@ class Master < ActiveRecord::Base
     raise "can not set user_id="
   end
 
-  def create_master_with_assoc assoc_sym
+  def assoc_named assoc_sym
     raise FphsException.new "create master with configuration includes a non-existent model association" unless self.class.get_all_associations.include? assoc_sym.to_s
     self.send(assoc_sym)
   end
@@ -161,7 +161,7 @@ class Master < ActiveRecord::Base
         with_embedded_params = nil  if i > 0
 
         init_data = { creating_master: true }
-        assoc = m.create_master_with_assoc(cw)
+        assoc = m.assoc_named(cw)
 
         if with_embedded_params
           init_data.merge! with_embedded_params.permit(assoc.permitted_params)
@@ -184,7 +184,7 @@ class Master < ActiveRecord::Base
 
     unless empty
       each_create_master_with_item(user) do |cw|
-        m.create_master_with_assoc(cw).build creating_master: true
+        m.assoc_named(cw).build creating_master: true
       end
     end
 

@@ -5,7 +5,7 @@
 
 class ExtraLogType < ExtraOptions
 
-  ValidSaveTriggers = [:notify, :create_reference, :create_filestore_container].freeze
+  ValidSaveTriggers = [:notify, :create_reference, :update_reference, :create_filestore_container].freeze
 
 
   def self.add_key_attributes
@@ -45,6 +45,7 @@ class ExtraLogType < ExtraOptions
         on_create: {
           notify: SaveTriggers::Notify.config_def(if_extras: "ref: ** conditions reference **"),
           create_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **"),
+          update_reference: SaveTriggers::UpdateReference.config_def(if_extras: "ref: ** conditions reference **"),
           create_filestore_container: SaveTriggers::CreateFilestoreContainer.config_def(if_extras: "ref: ** conditions reference **")
         },
         on_update: {
@@ -76,7 +77,7 @@ class ExtraLogType < ExtraOptions
 
     init_caption_before
 
-    self.label ||= name.to_s.humanize 
+    self.label ||= name.to_s.humanize
 
     if self.references
       new_ref = {}
@@ -198,6 +199,39 @@ class ExtraLogType < ExtraOptions
         end
       end
     end
+
+    # If we had any results then check if they were all true. If they were then return true.
+    # Otherwise don't
+    if results.length > 0
+      return true if results.uniq.length == 1 && results.uniq.first
+      return nil
+    end
+
+    # No results - return true
+    true
+  end
+
+
+  def self.calc_save_triggers obj, configs
+
+    # Get a list of results from the triggers
+    results = []
+
+    configs.each do |perform, pres|
+      # Use the symbol from the list of valid items, to prevent manipulation that could cause Brakeman warnings
+      t = ValidSaveTriggers.select {|vt| vt == perform}.first
+      if t
+        config = configs[t]
+        c = SaveTriggers.const_get(t.to_s.camelize)
+
+        o = c.new config, obj
+        # Add the trigger result to the list
+        results << o.perform
+      else
+        raise FphsException.new "on_complete is not valid when attempting to perform #{perform}"
+      end
+    end
+
 
     # If we had any results then check if they were all true. If they were then return true.
     # Otherwise don't

@@ -229,16 +229,25 @@ module CalcActions
       end
       if @this_val_where && @condition_scope.first
         @condition_scope = @condition_scope.order(id: :desc)
-        @condition_scope = @condition_scope.limit(1) if @this_val_where[:mode] == 'return_value'
-
+        @condition_scope = @condition_scope.limit(1) if @this_val_where[:mode].in? ['return_value', 'return_result']
         all_res = @this_val = @condition_scope.first&.send(@this_val_where[:assoc])
         first_res = all_res.first
         if first_res
           tn = first_res.class.table_name
           fn = first_res.class.attribute_names.select{|s| s == @this_val_where[:field_name].to_s}.first
-          rvals = @condition_scope.reorder("#{tn}.id desc").pluck("#{tn}.#{fn}")
-          @this_val = rvals.first if @this_val_where[:mode] == 'return_value'
-          @this_val = rvals if @this_val_where[:mode] == 'return_value_list'
+          if tn
+            rquery = @condition_scope.reorder("#{tn}.id desc")
+          elsif @this_val_where[:table_name]
+            rquery = @condition_scope.reorder("#{@this_val_where[:table_name]}.id desc")
+          end
+          if @this_val_where[:mode] == 'return_result'
+            rquery = rquery.select("#{@this_val_where[:table_name]}.*")
+            @this_val = first_res.class.find(rquery.first.id)
+          else
+            rvals = rquery.pluck("#{tn}.#{fn}")
+            @this_val = rvals.first if @this_val_where[:mode] == 'return_value'
+            @this_val = rvals if @this_val_where[:mode] == 'return_value_list'
+          end
         end
       else
         @condition_scope = @condition_scope.order(id: :desc).limit(1)
@@ -365,7 +374,7 @@ module CalcActions
                   parent_model_refs.each do |mr|
                     val << mr.to_record.attributes[att]
                   end
-                  
+
                 else
                   att = val.first.last
                   # non_query_condition = true
@@ -409,7 +418,7 @@ module CalcActions
                 @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
                 @extra_conditions << vv
               else
-                if val.in? ['return_value', 'return_value_list']
+                if val.in? ['return_value', 'return_value_list', 'return_result']
                   @this_val_where = {
                     assoc: c_table.to_sym,
                     field_name: field_name,

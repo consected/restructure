@@ -9,7 +9,7 @@
       if app_config_set(:create_master_with)
         Master.each_create_master_with_item(current_user) do |cw|
 
-          o = @master.create_master_with_assoc(cw).first
+          o = @master.assoc_named(cw).first
           @embedded_item = o
 
           unless defined? primary_model

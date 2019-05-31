@@ -1,11 +1,11 @@
-class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
+class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
 
   def self.config_def if_extras: {}
     [
       {
         model_name: {
           if: if_extras,
-          in: "this | master",
+          first: "matching reference, specifying {update: return_result}",
           with: {
             field_name: "now()",
             field_name_2: "literal value",
@@ -29,6 +29,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
   end
 
   def perform
+
 
     @model_defs = [@model_defs] unless @model_defs.is_a? Array
 
@@ -57,15 +58,12 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
         end
 
         @item.transaction do
-          new_item = @master.assoc_named(model_name.to_s.pluralize).create! vals
+          # new_item = @master.assoc_named(model_name.to_s.pluralize).first
 
-          if config[:in] == 'this'
-            ModelReference.create_with @item, new_item
-          elsif config[:in] == 'master'
-            # ModelReference.create_from_master_with @master, new_item
-          else
-            raise FphsException.new "Unknown 'in' value in create_reference"
-          end
+          ca = ConditionalActions.new config[:first], @item
+          res = ca.get_this_val
+
+          res.update! vals.merge(current_user: @item.user)
         end
 
       end

@@ -138,7 +138,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
 
   # Process this Messaging::MessageNotification record
-  def handle_notification_now logger: Rails.logger
+  def handle_notification_now logger: Rails.logger, for_item: nil, on_complete_config: nil
 
     logger.info "Handling item #{self.id}"
     update! status: StatusInProgress
@@ -195,6 +195,13 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
         logger.info "Deliver now #{self.id}"
         update! status: StatusComplete
+
+        if for_item
+          byebug
+          for_item.current_user = for_item.user
+          ExtraLogType.calc_save_triggers for_item, on_complete_config
+        end
+
         logger.info "Handled item #{self.id}"
       rescue => e
         Rails.logger.warn "handle_notification_now job failed (may retry?): #{e}\n#{e.backtrace[0..20].join("\n")}"
