@@ -1,7 +1,7 @@
 module Formatter
   module TimeWithZone
 
-    def self.format data, current_user: nil
+    def self.format data, current_user: nil, iso: nil, utc: nil, show_timezone: nil
       unless data.blank?
 
         if current_user
@@ -9,9 +9,9 @@ module Formatter
         else
           df = UserPreference.default_pattern_for_date_time_format
         end
-        data = data.strftime(df).gsub('  ', ' ')
+        res = data.strftime(df).gsub('  ', ' ')
 
-        return data
+        return res
       end
       nil
     end
