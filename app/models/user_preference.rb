@@ -4,6 +4,10 @@ class UserPreference
     'mm/dd/yyyy'
   end
 
+  def timezone
+    'Eastern Time (US & Canada)'
+  end
+
   def pattern_for_date_format
     '%m/%d/%Y'
   end

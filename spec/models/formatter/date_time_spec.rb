@@ -1,6 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe Formatter::DateTime, type: :model do
+  include ModelSupport
+  include PlayerContactSupport
+
 
   it "generates a date time string from Date and Time objects" do
 
@@ -29,6 +32,69 @@ RSpec.describe Formatter::DateTime, type: :model do
 
     expect(res).to eq '2015-03-07 14:56:04 UTC'
 
+
+    # Handle hash with specified timezone
+    date = Date.parse('2015-03-08')
+    time = Time.parse('13:56:04 GMT')
+    zone = 'London'
+
+    res = Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true)
+
+    expect(res).to eq '2015-03-08 13:56:04 UTC'
+
+
+    # Handle hash with specified timezone
+    date = Date.parse('2015-03-29')
+    time = Time.parse('14:56:04 +01:00')
+    zone = 'London'
+
+    res = Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true)
+
+    expect(res).to eq '2015-03-29 13:56:04 UTC'
+
+
+    # Handle daylight savings in other timezones
+    date = '2015-03-29'
+    time = '14:56:04'
+    zone = 'London'
+
+    res = Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true)
+
+    expect(res).to eq '2015-03-29 13:56:04 UTC'
+
+    # Handle other timezones
+    date = '2015-03-28'
+    time = '14:56:04'
+    zone = 'London'
+
+    res = Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true)
+
+    expect(res).to eq '2015-03-28 14:56:04 UTC'
+
+    # If a current user is specified and no current timezone, use the user's preference
+    create_user
+    date = '2015-03-28'
+    time = '14:56:04'
+    zone = nil
+    
+    res = Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true, current_user: @user)
+
+    expect(res).to eq '2015-03-28 18:56:04 UTC'
+
+  end
+
+  it "uses database dates and times correctly" do
+
+    seed_database
+    create_user
+    create_master
+    create_item
+
+    ca = @player_contact.created_at
+    date = ca
+    time = ca
+    zone = ca.zone
+    expect(Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true)).to eq ca.utc.to_s
   end
 
 end
