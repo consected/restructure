@@ -21,8 +21,8 @@
           <table>
             <tr><td>from:</td><td><%= list_item.from_user_email %></td></tr>
             <tr><td>to:</td><td>
-            <%= list_item.recipient_emails.join('; ') if list_item.message_type == 'email'%>
-            <%= list_item.recipient_sms_numbers.join('; ') if list_item.message_type == 'sms'%>
+            <%= list_item.recipient_emails&.join('; ') if list_item.message_type == 'email'%>
+            <%=  list_item.recipient_sms_numbers&.join('; ') if list_item.message_type == 'sms'%>
             </td></tr>
             <tr><td>role:</td><td><%= list_item.role_name %></td></tr>
             <tr><td>subject:</td><td><%= list_item.subject %></td></tr>
@@ -38,7 +38,7 @@
           </iframe>
 
           <script id="message-content-<%= list_item.id %>" class="hidden" type="x-html">
-            <%= list_item.generate_view.gsub('<head>', '<head><base target="_blank" />').html_safe %>
+            <%= list_item.generate_view(ignore_missing: :show_tag).gsub('<head>', '<head><base target="_blank" />').html_safe %>
           </script>
           <script>
           window.setTimeout(function() {

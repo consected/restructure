@@ -4,7 +4,7 @@ module RankHandler
   PrimaryRank = 10
   SecondaryRank = 5
   InactiveRank = 0
-  
+
   included do
 
     after_save :handle_primary_status, if: ->{respond_to? :rank}
@@ -16,7 +16,7 @@ module RankHandler
   # If a new player contact record is created or an existing record is updated with Primary rank
   # then update any other records for the master of that type (email or phone) to Secondary
   def handle_primary_status
-
+    return if self.class.no_master_association
     if self.rank.to_i == PrimaryRank
       # logger.info "rank set as primary in contact #{self.id} for type #{self.rec_type}.
       #             Setting other records for this master to secondary if they were primary and have the type #{self.rec_type}."

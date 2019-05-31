@@ -354,22 +354,35 @@ module CalcActions
                 mrs.each do |mr|
                   val << mr.to_record.attributes[att]
                 end
-              elsif val_item_key == :parent_references && !val.first.last.is_a?(Hash)
-                att = val.first.last
-                # non_query_condition = true
-                val = []
+              elsif val_item_key == :parent_references
+                if val.first.last.is_a?(Hash)
+                  att = val.first.last.first.last
+                  to_table_name = val.first.last.first.first
+                  val = []
+                  parent_model_refs = @current_instance.referring_record.model_references
+                  parent_model_refs = parent_model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
 
-                # Get the specified attribute's value from each of the parent model references
-                # Generate an array, allowing the conditions to be IN any of these
-                # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
-                parent_model_refs = @current_instance.referring_record.model_references
+                  parent_model_refs.each do |mr|
+                    val << mr.to_record.attributes[att]
+                  end
+                  
+                else
+                  att = val.first.last
+                  # non_query_condition = true
+                  val = []
 
-                unless join_table_name.in? %i(this this_references parent_references validate)
-                  parent_model_refs = parent_model_refs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
-                end
+                  # Get the specified attribute's value from each of the parent model references
+                  # Generate an array, allowing the conditions to be IN any of these
+                  # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
+                  parent_model_refs = @current_instance.referring_record.model_references
 
-                parent_model_refs.each do |mr|
-                  val << mr.to_record.attributes[att]
+                  unless join_table_name.in? %i(this this_references parent_references validate)
+                    parent_model_refs = parent_model_refs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
+                  end
+
+                  parent_model_refs.each do |mr|
+                    val << mr.to_record.attributes[att]
+                  end
                 end
               else
                 val.keys.each do |val_key|

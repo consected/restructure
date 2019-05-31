@@ -31,20 +31,37 @@ class Messaging::NotificationSms
     valid
   end
 
-
-  def self.send_now mn, logger: nil
-
+  # Send a series of SMS messages to a list of recipients with the same message
+  # @param mn [Messaging::MessageNotification] object describing the list of numbers and message
+  # @param recipient_sms_numbers [Array | nil] optional list of SMS numbers to override message notification
+  # @param generated_text [String | nil] optional message text to override message notification
+  def self.send_now mn=nil, recipient_sms_numbers: nil, generated_text: nil, logger: nil
     logger ||= Rails.logger
-    logger.info "Sending sms for #{mn.id}"
 
-    mn.recipient_sms_numbers.each do |sms_number|
+    resp = []
+    if recipient_sms_numbers
+      logger.info "Sending sms to a defined set of recipients"
+    elsif mn
+      logger.info "Sending sms for #{mn.id}"
+    else
+      raise FphsException.new "No message notification or recipient list set for SMS send"
+    end
+
+    recipient_sms_numbers ||= mn.recipient_sms_numbers
+    generated_text ||= mn.generated_text
+
+    raise FphsException.new "No recipients to SMS" unless recipient_sms_numbers
+
+    recipient_sms_numbers.each do |sms_number|
 
       validate_sms_number sms_number
 
+      sms_number = '+16177942330' unless Rails.env.production?
+
       client = Aws::SNS::Client.new(region: self.sms_aws_region)
-      resp = client.publish(
+      res = client.publish(
         phone_number: sms_number,
-        message: mn.generated_text,
+        message: generated_text,
         message_attributes: {
           "AWS.SNS.SMS.SenderID" => {
             data_type: "String",
@@ -56,8 +73,10 @@ class Messaging::NotificationSms
           }
         }
       )
+      resp << {aws_sns_sms_message_id: res.message_id} if res
     end
 
+    resp.to_json
 
   end
 

@@ -33,8 +33,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
     template_type == 'content'
   end
 
-  def substitute all_content, data: {}, tag_subs: nil
-    self.class.substitute all_content, data: data, tag_subs: tag_subs
+  def substitute all_content, data: {}, tag_subs: nil, ignore_missing: false
+    self.class.substitute all_content, data: data, tag_subs: tag_subs, ignore_missing: ignore_missing
   end
 
 
@@ -52,6 +52,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
     tags.each do |tag_container|
       tag = tag_container[2..-3]
+      missing = false
 
       tagpair = tag.split('.', 2)
 
@@ -64,12 +65,21 @@ class Admin::MessageTemplate < ActiveRecord::Base
       unless d && d.is_a?(Hash) && (d.key?(tag) || d.key?(tag.to_sym))
         if ignore_missing
           d = {}
+          missing = true
         else
           raise FphsException.new "Data (#{d.class.name}) does not contain the tag #{tag} or :#{tag}\n#{d ? d : 'data is empty'}"
         end
       end
 
-      tag_value = get_tag_value d, tag
+      unless missing
+        tag_value = get_tag_value d, tag
+      else
+        if ignore_missing == :show_tag
+          tag_value = "{{#{tag}}}"
+        else
+          tag_value = ''
+        end
+      end
       if tag_subs
         tag_subs_type = tag_subs.split(' ').first
         tag_value = "<#{tag_subs}>#{tag_value}</#{tag_subs_type}>"
@@ -78,11 +88,11 @@ class Admin::MessageTemplate < ActiveRecord::Base
       end
       all_content.gsub!(tag_container, tag_value)
     end
-    raise FphsException.new "Not all the tags were replaced. This suggests there was an error in the markup." if all_content.scan(/{{.*}}/).length > 0
+    raise FphsException.new "Not all the tags were replaced. This suggests there was an error in the markup." if ignore_missing != :show_tag && all_content.scan(/{{.*}}/).length > 0
     all_content
   end
 
-  def generate content_template_name: nil, content_template_text: nil, data: {}
+  def generate content_template_name: nil, content_template_text: nil, data: {}, ignore_missing: false
 
     raise FphsException.new "Must use a layout template to generate from" unless layout_template?
     # raise FphsException.new "Must use a hash for data" unless !data || data.is_a?(Hash)
@@ -95,9 +105,11 @@ class Admin::MessageTemplate < ActiveRecord::Base
       raise FphsException.new "Either a content_template_name or content_template_text must be specified"
     end
 
-    all_content = self.template.sub('{{main_content}}', content_template_text)
+    text = content_template_text.dup
 
-    substitute all_content, data: data
+    all_content = self.template.sub('{{main_content}}', text)
+
+    substitute all_content, data: data, ignore_missing: ignore_missing
 
     return all_content
   end

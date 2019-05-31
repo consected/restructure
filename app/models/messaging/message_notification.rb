@@ -63,7 +63,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
 
   # Generate the message text from the templates and data
-  def generate
+  def generate ignore_missing: false
 
     data = self.data
     if data.blank?
@@ -83,13 +83,13 @@ class Messaging::MessageNotification < ActiveRecord::Base
       raise FphsException.new "Content template name or text must be set"
     end
 
-    self.generated_text = layout_template.generate content_template_name: content_template_name, content_template_text: content_template_text, data: data
+    self.generated_text = layout_template.generate content_template_name: content_template_name, content_template_text: content_template_text, data: data, ignore_missing: ignore_missing
 
   end
 
-  def generate_view
+  def generate_view ignore_missing: false
     begin
-      generate
+      generate(ignore_missing: ignore_missing)
     rescue FphsException => e
       "EXCEPTION: #{e}"
     end
@@ -114,7 +114,11 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
   def recipient_sms_numbers
     return @recipient_numbers if @recipient_numbers
-    recipient_users.reject {|u| !u.contact_info || u.contact_info.sms_number.blank? }.map {|u| u.contact_info&.sms_number }.uniq
+    if recipient_users&.length > 0
+      recipient_users.reject {|u| !u.contact_info || u.contact_info.sms_number.blank? }.map {|u| u.contact_info&.sms_number }.uniq
+    else
+      self.recipient_data
+    end
   end
 
   def recipient_sms_numbers= nums
@@ -141,15 +145,54 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
     Messaging::MessageNotification.transaction do
       begin
-        generate
 
-        if is_email?
-          NotificationMailer.send_message_notification(self, logger: logger).deliver_now
-        elsif is_sms?
-          Messaging::NotificationSms.send_now(self, logger: logger)
-        else
-          raise FphsException.new "No recognized message type for message notification: #{message_type}"
+        # Check if recipient records have been set in the recipient_data
+        # If not, we just have a list of emails of phones
+        recipient_records = nil
+        rd = self.recipient_data&.first
+        if rd && rd.is_a?(String)
+          jrd = JSON.parse(rd) rescue nil
+          if jrd.is_a?(Hash) && jrd['list_type']
+            recipient_records = self.recipient_data.map {|r| JSON.parse(r)}
+          end
         end
+
+        # If we have been passed recipient records, use these to generate each message for sending
+        if recipient_records
+
+          recipient_data = []
+          recipient_records.each do |rec|
+            rec.symbolize_keys!
+            def_country_code = list_type = rec[:default_country_code]
+            list_type = rec[:list_type]
+            list_id = rec[:id]
+            list_type_class = ModelReference.to_record_class_for_type list_type.singularize
+            list_item = list_type_class.where(id: list_id).first
+
+            if list_item
+              # Get the referenced record item (such as live contact record)
+              ri = list_item.record_item no_exception: true
+              self.data = nil
+              # If a record_item is referenced from the list item, use that as data instead
+              self.item = ri || list_item
+              pn = Formatter::Phone.format list_item.data, format: :unformatted, default_country_code: def_country_code
+              recipient_sms_numbers = [pn]
+              message_text = self.content_template_text
+
+              resp = generate_and_send recipient_sms_numbers: recipient_sms_numbers
+
+              res = list_item.update(current_user: list_item.user, response: resp) if list_item.respond_to? :response
+              recipient_data << list_item.data
+            else
+              logger.warn "A recipient list item did not exist"
+            end
+          end
+          self.data = {bulk_message_data: "#{recipient_records.length} #{'records'.pluralize(recipient_records.length)}"}
+          self.recipient_data = recipient_data
+        else
+          generate_and_send
+        end
+
         logger.info "Deliver now #{self.id}"
         update! status: StatusComplete
         logger.info "Handled item #{self.id}"
@@ -160,6 +203,19 @@ class Messaging::MessageNotification < ActiveRecord::Base
       end
     end
   end
+
+  def generate_and_send recipient_sms_numbers: nil
+    generate
+
+    if is_email?
+      NotificationMailer.send_message_notification(self, logger: logger).deliver_now
+    elsif is_sms?
+      Messaging::NotificationSms.send_now(self, recipient_sms_numbers: recipient_sms_numbers, generated_text: generated_text, logger: logger)
+    else
+      raise FphsException.new "No recognized message type for message notification: #{message_type}"
+    end
+  end
+
 
   def is_sms?
     message_type&.to_sym == :sms

@@ -227,28 +227,34 @@ class ReportsController < UserBaseController
     list_id = list_ids.first
     return general_error("list id not specified") unless list_ids.length == 1 && list_id
 
+    from_master_id = items.map {|i| i["from_master_id"]}.first
+    return general_error("master id not specified") unless from_master_id
+    from_master = Master.find(from_master_id)
+    from_master.current_user = current_user
+    return not_authorized unless from_master.allows_user_access
+
     ok = current_user.has_access_to?(:access, :table, item_type) || current_user.has_access_to?(:access, :table, "dynamic_model__#{item_type}")
     return not_authorized unless ok
 
     item_ids = items.map {|i| i["id"]}
 
-    item_class = item_type.classify.constantize
+    item_class = ModelReference.to_record_class_for_type item_type.singularize
     item_attribs = item_class.permitted_params
 
-    list_class = list_name.classify.constantize
+    list_class = ModelReference.to_record_class_for_type list_name.singularize
     list_attribs = list_class.permitted_params
-    assoc_attr = (list_class.attribute_names.select {|a| a.end_with?('_id')} - ['id', 'master_id', 'item_id', 'user_id']).first
+    assoc_attr = (list_class.attribute_names.select {|a| a.end_with?('_id')} - ['id', 'master_id', 'record_id', 'user_id']).first
 
     assoc_name = assoc_attr.gsub(/_id$/, '').pluralize
     ok = current_user.has_access_to?(:access, :table, assoc_name) || current_user.has_access_to?(:access, :table, "dynamic_model__#{assoc_name}")
     return not_authorized unless ok
 
 
-    items_in_list = list_class.where(assoc_attr => list_id).pluck(:item_id)
+    items_in_list = list_class.where(assoc_attr => list_id).pluck(:record_id)
     item_ids = item_ids - items_in_list
     return general_error("all items already in the list") if item_ids.length == 0
 
-    assoc_class = assoc_name.classify.constantize
+    assoc_class = ModelReference.to_record_class_for_type assoc_name.singularize
     assoc_item = assoc_class.where(id: list_id).first
     return general_error("list id does not represent an associated list: #{list_id}") unless assoc_item
 
@@ -263,9 +269,11 @@ class ReportsController < UserBaseController
         master = item.master
         master.current_user = current_user
         matched_vals = item.attributes.slice(*matching_attribs)
-        matched_vals[:item_id] = id
-        matched_vals[:master] = master
+        matched_vals[:record_id] = id
+        matched_vals[:record_type] = item_type.singularize
+        matched_vals[:master_id] = from_master_id
         matched_vals[assoc_attr] = list_id
+        matched_vals[:current_user] = current_user
         list_class.create! matched_vals
       end
     end

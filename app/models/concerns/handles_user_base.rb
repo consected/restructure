@@ -201,6 +201,13 @@ module HandlesUserBase
     self.item_type.ns_underscore
   end
 
+  def record_item no_exception: false
+    raise FphsException.new("Does not have a record_type or record_id attribute") unless respond_to?(:record_type) && respond_to?(:record_id)
+    rc = ModelReference.to_record_class_for_type self.record_type
+    r = rc.find(self.record_id)
+    raise FphsException.new "User does not have access to record of type #{self.record_type}" unless no_exception || r.can_access?
+    r
+  end
 
   def allows_current_user_access_to? perform, with_options=nil
     if self.class.no_master_association

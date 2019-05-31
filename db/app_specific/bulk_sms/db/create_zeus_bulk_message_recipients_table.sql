@@ -3,20 +3,22 @@ set search_path=ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create zeus_bulk_message_recipients item_id data rec_type rank zeus_bulk_message_id
+-- table_generators/generate.sh dynamic_models_table create zeus_bulk_message_recipients record_id data rec_type rank zeus_bulk_message_id
 
-      CREATE FUNCTION log_zeus_bulk_message_recipient_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_zeus_bulk_message_recipient_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO zeus_bulk_message_recipient_history
                   (
                       master_id,
-                      item_id,
+                      record_type,
+                      record_id,
                       data,
                       rec_type,
                       rank,
                       zeus_bulk_message_id,
+                      response,
                       user_id,
                       created_at,
                       updated_at,
@@ -24,11 +26,13 @@ set search_path=ml_app;
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.item_id,
+                      NEW.record_type,
+                      NEW.record_id,
                       NEW.data,
                       NEW.rec_type,
                       NEW.rank,
                       NEW.zeus_bulk_message_id,
+                      NEW.response,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -41,11 +45,13 @@ set search_path=ml_app;
       CREATE TABLE zeus_bulk_message_recipient_history (
           id integer NOT NULL,
           master_id integer,
-          item_id bigint,
+          record_type varchar,
+          record_id bigint,
           data varchar,
           rec_type varchar,
           rank varchar,
           zeus_bulk_message_id bigint,
+          response varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -64,11 +70,13 @@ set search_path=ml_app;
       CREATE TABLE zeus_bulk_message_recipients (
           id integer NOT NULL,
           master_id integer,
-          item_id bigint,
+          record_type varchar,
+          record_id bigint,
           data varchar,
           rec_type varchar,
           rank varchar,
           zeus_bulk_message_id bigint,
+          response varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

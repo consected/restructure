@@ -60,6 +60,7 @@ Rails.application.configure do
   config.assets.raise_runtime_errors = true
 
 
+  #config.active_job.queue_adapter = :inline
   config.active_job.queue_adapter = :delayed_job
 
   # Raises error for missing translations

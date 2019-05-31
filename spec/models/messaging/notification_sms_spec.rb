@@ -75,7 +75,21 @@ RSpec.describe Messaging::NotificationSms, type: :model do
   end
 
   it "sends an sms" do
+    expect {
+      sms = Messaging::NotificationSms.send_now @message_notification
+    }.to raise_error(FphsException, "No recipients to SMS")
+
+    u1, _ = create_user
+    u2, _ = create_user
+    u3, _ = create_user
+
+    @message_notification.recipient_user_ids = [u1.id, u2.id, u3.id]
     sms = Messaging::NotificationSms.send_now @message_notification
+
+    @message_notification.recipient_sms_numbers = ['+12025550147']
+    sms = Messaging::NotificationSms.send_now @message_notification
+
+    expect(sms).not_to be nil
   end
 
 end
