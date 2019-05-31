@@ -105,7 +105,14 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         if @when[:wait]
           set_when[:wait_until] = FieldDefaults.calculate_default nil, @when[:wait], from_when: DateTime.now
         elsif @when[:wait_until]
-          wdate = Formatter::DateTime.format(@when[:wait_until], utc: true, iso: true)
+          wu = @when[:wait_until]
+          w = {
+            date: calc_field_or_return(wu[:date]),
+            time: calc_field_or_return(wu[:time]),
+            zone: calc_field_or_return(wu[:zone]) || :user
+          }
+
+          wdate = Formatter::DateTime.format(w, utc: true, iso: true, current_user: @item.user)
           if wdate
             set_when[:wait_until] = FieldDefaults.calculate_default nil, wdate, :datetime_type
           else

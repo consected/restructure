@@ -76,10 +76,24 @@ RSpec.describe Formatter::DateTime, type: :model do
     date = '2015-03-28'
     time = '14:56:04'
     zone = nil
-    
+
     res = Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true, current_user: @user)
 
     expect(res).to eq '2015-03-28 18:56:04 UTC'
+
+
+    # If we have date and time objects as they'd appear from the database, with UTC times, but
+    # we want to use the user's timezone preference, specify zone :user.
+    # This will take the zone from the user preference and replace what is on the time object
+    create_user
+    date = Date.parse('2015-03-08')
+    time = Time.parse('2001-01-01 13:56:04 UTC')
+    zone = :user
+
+    res = Formatter::DateTime.format( {date: date, time: time, zone: zone}, iso: true, utc: true, current_user: @user)
+
+    expect(res).to eq '2015-03-08 17:56:04 UTC'
+
 
   end
 
