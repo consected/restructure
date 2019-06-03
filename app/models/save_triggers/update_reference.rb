@@ -5,7 +5,7 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
       {
         model_name: {
           if: if_extras,
-          first: "matching reference, specifying {update: return_result}",
+          first: "update the first matching reference with this configuration, specifying {update: return_result}",
           with: {
             field_name: "now()",
             field_name_2: "literal value",
@@ -58,8 +58,6 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
         end
 
         @item.transaction do
-          # new_item = @master.assoc_named(model_name.to_s.pluralize).first
-
           ca = ConditionalActions.new config[:first], @item
           res = ca.get_this_val
 

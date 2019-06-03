@@ -196,8 +196,8 @@ class Messaging::MessageNotification < ActiveRecord::Base
         logger.info "Deliver now #{self.id}"
         update! status: StatusComplete
 
+        # Once the notifications have been sent, fire the on_complete triggers
         if for_item
-          byebug
           for_item.current_user = for_item.user
           ExtraLogType.calc_save_triggers for_item, on_complete_config
         end

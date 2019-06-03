@@ -33,7 +33,6 @@ module ActivityLogHandler
     # Ensure that referenced items have also saved
     after_commit :handle_save_triggers
 
-    attr_reader :referring_record
     attr_writer :alt_order
 
     # after_commit :check_for_notification_records, on: :create
@@ -709,6 +708,18 @@ module ActivityLogHandler
     mr = self.model_references.select {|mr| mr.to_record_type == "NfsStore::Manage::Container"}.first
     return unless mr
     mr.to_record
+  end
+
+  # A referring record is either set based on the the specific record that the controller say is being viewed
+  # when an action is performed, or
+  # if there is only one model reference we use that instead.
+  def referring_record
+    return @referring_record if @referring_record
+
+    res = ModelReference.find_where_referenced_from self
+    @referring_record = res.first.from_record
+    return @referring_record if res.length == 1
+    nil
   end
 
 end
