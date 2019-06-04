@@ -6,6 +6,7 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
         model_name: {
           if: if_extras,
           first: "update the first matching reference with this configuration, specifying {update: return_result}",
+          force_not_editable_save: 'true allows the update to succeed even if the referenced item is set as not_editable',
           with: {
             field_name: "now()",
             field_name_2: "literal value",
@@ -60,7 +61,7 @@ class SaveTriggers::UpdateReference < SaveTriggers::SaveTriggersBase
         @item.transaction do
           ca = ConditionalActions.new config[:first], @item
           res = ca.get_this_val
-
+          res.force_save! if config[:force_not_editable_save]
           res.update! vals.merge(current_user: @item.user)
         end
 

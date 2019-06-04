@@ -13,7 +13,7 @@ module HandlesUserBase
 
     before_validation :downcase_attributes
 
-    before_save :check_can_save
+    before_save :check_can_save, unless: -> {self.force_save?}
 
     # This validation ensures that the user ID has been set in the master object
     # It implicitly reinforces security, in that the user must be authenticated for
@@ -23,6 +23,7 @@ module HandlesUserBase
     validate :valid_embedded_item
 
     after_save :create_referring_record
+    after_save :handle_disabled, if: -> { respond_to?(:disabled?) && disabled? }
 
     attr_accessor :ignore_configurable_valid_if
 
@@ -238,6 +239,17 @@ module HandlesUserBase
   end
 
 
+  def model_reference_disable
+    if respond_to? :disabled
+      self.disabled = true
+      force_save!
+      save!
+    else
+      @was_disabled = 'disabled'
+      handle_save_triggers if respond_to? :handle_save_triggers
+    end
+  end
+
 
   def embedded_item
     @embedded_item
@@ -326,6 +338,26 @@ module HandlesUserBase
     end
   end
 
+  # If the model has an attribute background_job_ref then use this to find and cancel the background job
+  def cancel_associated_job!
+    if respond_to?(:background_job_ref) && background_job_ref.present?
+      ref_parts = background_job_ref.split('%')
+      valid_ref_cns = ['delayed__backend__active_record__job'].freeze
+      valid_ref_cn = valid_ref_cns.select {|s| s == ref_parts.first}.first
+      if valid_ref_cn
+        job = valid_ref_cn.ns_camelize.constantize.find(ref_parts.last.to_i)
+        job.delete if job
+      end
+    end
+  end
+
+  def force_save!
+    @force_save = true
+  end
+
+  def force_save?
+    @force_save
+  end
 
 
   protected
@@ -452,5 +484,12 @@ module HandlesUserBase
         end
       end
     end
+
+    def handle_disabled
+      @was_disabled = true
+
+      cancel_associated_job!
+    end
+
 
 end

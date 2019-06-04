@@ -295,6 +295,19 @@ class ExtraOptions
     ca.calc_action_if
   end
 
+  def calc_reference_prevent_disable_if ref_config, obj
+    ci = ref_config[:prevent_disable]
+    return false unless ci
+    ca = ConditionalActions.new ci, obj
+    ca.calc_action_if
+  end
+
+  def calc_reference_allow_disable_if_not_editable_if ref_config, obj
+    ci = ref_config[:allow_disable_if_not_editable]
+    return false unless ci
+    ca = ConditionalActions.new ci, obj
+    ca.calc_action_if
+  end
 
   def calc_editable_if obj
     ca = ConditionalActions.new self.editable_if, obj

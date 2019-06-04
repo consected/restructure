@@ -14,3 +14,18 @@ end
 
 # Make an alias of this class at the top level, to allow globalid to work
 MessageNotification = Messaging::MessageNotification
+
+
+ActiveJob::QueueAdapters::DelayedJobAdapter.singleton_class.prepend(Module.new do
+  def enqueue(job)
+    provider_job = super
+    job.provider_job = provider_job
+    provider_job
+  end
+
+  def enqueue_at(job, timestamp)
+    provider_job = super
+    job.provider_job = provider_job
+    provider_job
+  end
+end)

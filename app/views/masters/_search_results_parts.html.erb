@@ -1,7 +1,7 @@
 <script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <span>
   {{#with count}}
-  <span class="search_count">{{count}}</span> record{{#is count '!==' 1}}s{{/is}}
+  <span class="search_count">{{count}}</span> record{{#is count '!==' '1'}}s{{/is}}
   {{#is count '>' show_count }} - showing {{show_count}} results - refine search to show others{{/is}}
   </span>
   {{/with}}

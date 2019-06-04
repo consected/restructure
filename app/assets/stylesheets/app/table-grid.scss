@@ -10,6 +10,13 @@
   overflow-x: scroll;
 }
 
+#embed_results_block {
+  .import-edit-form, .report-results-inner {
+    height: auto;
+  }
+}
+
+
 
 #import-container.hide-blank-rows, #report-container.hide-blank-rows {
   tr.blank-row {

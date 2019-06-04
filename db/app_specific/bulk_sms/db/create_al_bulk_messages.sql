@@ -8,7 +8,8 @@ set search_path=ml_app;
           id integer NOT NULL,
           master_id integer,
           zeus_bulk_message_id integer,
-
+          background_job_ref integer,
+          disabled boolean not null default false,
           extra_log_type varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -19,14 +20,15 @@ set search_path=ml_app;
           id integer NOT NULL,
           master_id integer,
           zeus_bulk_message_id integer,
-
+          background_job_ref integer,
+          disabled boolean not null default false,
           extra_log_type varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_zeus_bulk_message_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_activity_log_zeus_bulk_message_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -34,7 +36,8 @@ set search_path=ml_app;
                   (
                       master_id,
                       zeus_bulk_message_id,
-
+                      background_job_ref,
+                      disabled,
                       extra_log_type,
                       user_id,
                       created_at,
@@ -44,7 +47,8 @@ set search_path=ml_app;
                   SELECT
                       NEW.master_id,
                       NEW.zeus_bulk_message_id,
-
+                      NEW.background_job_ref,
+                      NEW.disabled,
                       NEW.extra_log_type,
                       NEW.user_id,
                       NEW.created_at,

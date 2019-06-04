@@ -12,6 +12,9 @@ class ModelReference < ActiveRecord::Base
   validate :allows_disable, if: -> { self.disabled }
   validate :allows_create, if: -> { !persisted? }
 
+  after_save :handle_disabled, if: -> { self.disabled }
+  after_create :set_created
+
   attr_accessor :current_user
 
   def self.default_ref_order
@@ -43,7 +46,7 @@ class ModelReference < ActiveRecord::Base
   # Find the configuration of the creatable reference for the pair of records representing a ModelReference
   # @return [Hash | nil] nil if there is no match or a Hash like
   #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}
-  def self.find_config_for from_item, to_item
+  def self.find_creatable_config_for from_item, to_item
     begin
       return unless from_item
       fr = from_item
@@ -55,7 +58,26 @@ class ModelReference < ActiveRecord::Base
         config = cm.last.first.last[:ref_config] if cm
       end
     rescue => e
-      Rails.logger.info "find_config_for raised an exception: #{e.inspect}\n#{e.backtrace.join("/n")}"
+      Rails.logger.info "find_creatable_config_for raised an exception: #{e.inspect}\n#{e.backtrace.join("/n")}"
+      return nil
+    end
+    config
+  end
+
+  # Find the configuration of the reference for this instance
+  # @return [Hash | nil] nil if there is no match or a Hash like
+  #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}
+  def find_config
+    begin
+      mr = from_record.extra_log_type_config&.references
+
+      if mr && to_record
+        m = mr[to_record_result_key.to_sym]
+        m = m[from_record_type_us.to_sym] if m
+        config = m
+      end
+    rescue => e
+      Rails.logger.info "find_creatable_config_for raised an exception: #{e.inspect}\n#{e.backtrace.join("/n")}"
       return nil
     end
     config
@@ -63,9 +85,11 @@ class ModelReference < ActiveRecord::Base
 
   # Find the configuration of the creatable reference for this instance
   # @return [Hash | nil]
-  def find_config
-    self.class.find_config_for from_record, to_record
+  def find_creatable_config
+    self.class.find_creatable_config_for from_record, to_record
   end
+
+
 
   def self.find_referenced_items from_item_or_master, record_type: nil
     mrs = self.find_references from_item_or_master, to_record_type: record_type
@@ -83,7 +107,8 @@ class ModelReference < ActiveRecord::Base
   # If belonging to a master record, the to_record_type must be specified.
   # These can be further limited by a filter_by condition on the to_record,
   # allowing for specific records to be selected from the master (such as a specific 'type' of referenced record)
-  def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false, ref_order: default_ref_order
+  # The param active == true returns only results that are not disabled
+  def self.find_references from_item_or_master, to_record_type: nil, filter_by: nil, without_reference: false, ref_order: default_ref_order, active: nil
 
     if to_record_type
       to_record_type_class = to_record_class_for_type(to_record_type)
@@ -108,6 +133,10 @@ class ModelReference < ActiveRecord::Base
         # Handle the filter_by clause
         res = res.select {|mr| filter_by.all? { |k, v| mr.to_record.attributes[k.to_s] == v }   } if filter_by
       end
+    end
+
+    if active
+      res = res.select {|s| !s.disabled}
     end
 
     # Set the current user, so that access controls can be correctly applied
@@ -284,15 +313,45 @@ class ModelReference < ActiveRecord::Base
     res
   end
 
-  # The reference can be disabled it:
-  #  the prevent_disable option is not set
-  #  AND the from record can be edited (if the from record is set)
+  # The reference can be disabled if:
+  # the from record can be edited (if the from record is set) OR allow_disable_if_not_editable is set
+  # AND
+  #   the prevent_disable option is not set
+  #   OR
+  #   the prevent_disable options is a Hash and the calculated if resolves to false
   def can_disable
-    c = find_config || {}
 
-    return (!c[:prevent_disable] && (!from_record || from_record.can_edit?))
+    c = find_config || {}
+    if from_record && c.is_a?(Hash)
+      pd = from_record.extra_log_type_config.calc_reference_prevent_disable_if c, to_record
+      ane = from_record.extra_log_type_config.calc_reference_allow_disable_if_not_editable_if c, to_record
+    else
+      pd = false
+      ane = false
+    end
+
+    return (!pd && (!from_record || ane || from_record.can_edit?))
 
   end
+
+  # Ensures that parent records are updated in the UI if a change has been made to the reference, such as disabling it
+  def referenced_from
+    [{
+      from_record_master_id: from_record_master_id,
+      from_record_type_us: from_record_type_us,
+      from_record_id: from_record_id
+    }
+    ]
+  end
+
+  def _updated
+    @was_updated
+  end
+
+  def _created
+    @was_created
+  end
+
 
   def as_json extras={}
     extras[:methods] ||= []
@@ -316,12 +375,17 @@ class ModelReference < ActiveRecord::Base
     extras[:methods] << :to_record_template
     extras[:methods] << :item_type
     extras[:methods] << :can_disable
+    extras[:methods] << :referenced_from
+    extras[:methods] << :_updated
+    extras[:methods] << :_created
+
     # Don't return the full referenced object
     super(extras)
   end
 
 
   private
+
 
     def allows_disable
       unless can_disable
@@ -339,4 +403,13 @@ class ModelReference < ActiveRecord::Base
       true
     end
 
+    def handle_disabled
+      @was_updated = 'updated'
+      return true unless disabled_changed?
+      self.to_record.model_reference_disable if to_record_options_config[:also_disable_record]
+    end
+
+    def set_created
+      @was_created = 'created'
+    end
 end

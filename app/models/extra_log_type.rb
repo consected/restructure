@@ -38,7 +38,9 @@ class ExtraLogType < ExtraOptions
             show: 'hide|readonly|see_presence',
             new: 'outside_this|not_embedded|select_or_add'
           },
-          prevent_disable: "true|false (default = false)"
+          prevent_disable: "true|false (default = false) OR reference",
+          allow_disable_if_not_editable: "true|false (default = false) OR reference",
+          also_disable_record: "when disabled, also disable the referenced record"
         }
       },
       save_trigger: {
@@ -52,6 +54,9 @@ class ExtraLogType < ExtraOptions
         },
         on_save: {
           notes: 'on_save: provides a shorthand for on_create and on_update. on_create and on_update override on_save configurations.'
+        },
+        on_disable: {
+          notes: 'on_disable: is triggered for any item that has a field named disabled that is switched to true'
         },
         on_upload: {
 
@@ -171,6 +176,8 @@ class ExtraLogType < ExtraOptions
       action = :on_upload
     elsif obj._created
       action = :on_create
+    elsif obj._disabled
+      action = :on_disable
     elsif obj._updated
       action = :on_update
     else

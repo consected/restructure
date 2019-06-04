@@ -16,6 +16,7 @@ module GeneralDataConcerns
   def check_status
     @was_created = respond_to?(:id) && id_changed? ? 'created' : false
     @was_updated = respond_to?(:updated_at) && updated_at_changed? ? 'updated' : false
+    @was_disabled = respond_to?(:disabled) && disabled_changed? && disabled ? 'disabled' : false
   end
 
 
@@ -25,6 +26,10 @@ module GeneralDataConcerns
 
   def _updated
     @was_updated
+  end
+
+  def _disabled
+    @was_disabled
   end
 
   def multiple_results
@@ -159,6 +164,7 @@ module GeneralDataConcerns
       extras[:methods] << :update_action if respond_to? :update_action
       extras[:methods] << :_created if respond_to? :_created
       extras[:methods] << :_updated if respond_to? :_updated
+      extras[:methods] << :_disabled if respond_to? :_disabled
       extras[:methods] << :user_preference if respond_to? :user_preference
 
     else

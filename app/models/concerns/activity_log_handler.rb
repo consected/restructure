@@ -342,16 +342,16 @@ module ActivityLogHandler
             under_limit = true
 
             if l && l.is_a?(Integer)
-              under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: fb).length < l)
+              under_limit = (ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: fb, active: true).length < l)
             end
 
             ires = a if under_limit
           elsif a == 'one_to_master'
-            if ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: fb).length == 0
+            if ModelReference.find_references(self.master, to_record_type: ref_type, filter_by: fb, active: true).length == 0
               ires = a
             end
           elsif a == 'one_to_this'
-            if ModelReference.find_references(self, to_record_type: ref_type, filter_by: fb).length == 0
+            if ModelReference.find_references(self, to_record_type: ref_type, filter_by: fb, active: true).length == 0
               ires = a
             end
           elsif a.present?
@@ -716,7 +716,7 @@ module ActivityLogHandler
   def referring_record
     return @referring_record if @referring_record
 
-    res = ModelReference.find_where_referenced_from self
+    res = self.referenced_from
     @referring_record = res.first.from_record
     return @referring_record if res.length == 1
     nil

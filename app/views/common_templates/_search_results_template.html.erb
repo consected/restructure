@@ -273,7 +273,7 @@
 
     {{else is @key 'includes' 'embedded_report_'}}
       <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="url-link-value">
-        <a href="/reports/{{replace @key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{../../id}}" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-primary" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true">Show</a>
+        <a href="/reports/{{replace @key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{../../id}}" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
       </span></strong></li>
     {{else is @key 'includes' '_rank' }}
       <% if hide_rank_badge %>

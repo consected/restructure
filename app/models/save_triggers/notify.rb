@@ -146,20 +146,19 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         job = job.set(set_when)
       end
 
-      job.perform_later(mn, for_item: @item, on_complete_config: config[:on_complete])
+      res = job.perform_later(mn, for_item: @item, on_complete_config: config[:on_complete])
+
+      if @item.respond_to? :background_job_ref
+        @item.background_job_ref = "#{res.provider_job.class.name.ns_underscore}%#{res.provider_job.id}"
+        @item.save
+      end
 
     end
 
   end
 
   def calc_field_or_return cond
-    if cond.is_a? Hash
-      action_conf = cond
-      ca = ConditionalActions.new action_conf, item
-      return ca.get_this_val
-    else
-      return cond
-    end
+    ConditionalActions.calc_field_or_return cond, item
   end
 
 

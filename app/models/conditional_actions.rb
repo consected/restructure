@@ -31,6 +31,21 @@ class ConditionalActions
     return @this_val
   end
 
+  # If the condition supplied is a Hash, attempt to calculate the result_value
+  # Otherwise just return the provided value
+  # @param cond [Hash | Class] A condition definition with a result_value defined, or just a literal value
+  # @param item [UserBase] An object to test against
+  def self.calc_field_or_return cond, item
+    if cond.is_a? Hash
+      action_conf = cond
+      ca = ConditionalActions.new action_conf, item
+      return ca.get_this_val
+    else
+      return cond
+    end
+  end
+
+
   # Calculate the save actions to return for the front end to process
   # Returns a set of results like:
   # {
@@ -41,7 +56,7 @@ class ConditionalActions
   # Items that either have no 'if' condition, or are true are kept.
   # Conditional failures are not returned.
 
-  # Note that this is not just used by save_action, but also save_trigger
+  # Note that this is not just used by save_action, but also save_trigger and others
   def calc_save_action_if
     sa = @action_conf
 
