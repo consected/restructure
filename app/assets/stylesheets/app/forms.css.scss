@@ -365,6 +365,24 @@ fieldset.readonly-edit-fieldset
 }
 
 
+.model-ref-remove-form {
+  .form-group {
+    margin-bottom: 0;
+  }
+  .model-ref-remove-btn {
+    padding: 1px 6px;
+    margin-top: -2px;
+  }
+}
+
+.selectable-model-reference-result-action-form {
+  margin-right: -15px;
+}
+
+.selectable-model-reference-result-action-form:empty {
+  margin-right: 0;
+}
+
 @media only screen and (min-width: 1180px) {
     form.search_master label{
         font-weight: bold;

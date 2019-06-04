@@ -11,21 +11,22 @@
     {{/if}}
     <i>{{to_record_label}}</i> {{substring (pretty_string to_record_data return_string=true) 0 100 }}
   </span>
-  <span class="selectable-model-reference-result-action pull-right" id="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra" data-subscription="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra">
+  <span class="selectable-model-reference-result-action pull-right" id="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra-link" data-subscription="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra-linkholder"  data-preprocessor="model_references_item">
       {{#if disabled}}
         <span class="model-reference-removed-marker small">(removed)</span>
       {{else}}
         {{#if can_disable}}
           {{#if from_record_type_us}}
-          <a href="/masters/{{from_record_master_id}}/{{from_record_type_us}}/{{from_record_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item" data-remote="true"></a>
+          <a href="/masters/{{from_record_master_id}}/{{from_record_type_us}}/{{from_record_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove no-processed-scroll" title="remove reference to item" data-remote="true"></a>
           {{else}}
             {{#if id}}
-            <a href="/masters/{{from_record_master_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item" data-remote="true"></a>
+            <a href="/masters/{{from_record_master_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item no-processed-scroll" data-remote="true"></a>
             {{/if}}
           {{/if}}
         {{/if}}
       {{/if}}
   </span>
+  <span class="selectable-model-reference-result-action-form pull-right" id="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra" data-subscription="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra"  data-preprocessor="model_references_item"></span>
 </li>
 {{#if to_record_viewable}}
 <div class="model-reference-result {{#if ../_show_embedded_as_single_item}} single-model-reference-result model-reference-auto-shown{{/if}}" >
@@ -90,7 +91,7 @@
 
   {{#if model_references}}
     {{#each model_references}}
-      
+
       {{#is to_record_options_config.view_as.show '!==' 'hide'}}
         {{#is to_record_options_config.view_as.show '===' 'filestore'}}
           {{>filestore_<%=name%>_view prevent_edit=../prevent_edit}}
