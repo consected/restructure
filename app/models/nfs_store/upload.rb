@@ -71,7 +71,7 @@ module NfsStore
       # This ensure that a file was not renamed or trashed after completion
       # We can't just check the stored file association, since it is possible that this file had its name changed
       # and another file's name was changed to match this one.
-      if !upload || upload.complete
+      if !upload || upload.completed
         sf = NfsStore::Manage::StoredFile.where(container: container, file_name: file_name, path: path).first
         # If a matching stored file was found use its referenced upload
         upload = sf.upload if sf
