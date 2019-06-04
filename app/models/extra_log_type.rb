@@ -40,7 +40,8 @@ class ExtraLogType < ExtraOptions
           },
           prevent_disable: "true|false (default = false) OR reference",
           allow_disable_if_not_editable: "true|false (default = false) OR reference",
-          also_disable_record: "when disabled, also disable the referenced record"
+          also_disable_record: "when disabled, also disable the referenced record",
+          creatable_if: "conditional rules"
         }
       },
       save_trigger: {
@@ -151,6 +152,7 @@ class ExtraLogType < ExtraOptions
     end
 
     self.save_trigger[:on_upload] ||= {}
+    self.save_trigger[:on_disable] ||= {}
 
   end
 

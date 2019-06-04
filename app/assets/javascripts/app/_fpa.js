@@ -251,7 +251,7 @@ _fpa = {
     $(document).on('click', sel,  function(ev){
       // Clear flash notices by clicking an ajax enabled link or form
       if($(this).attr('disabled')) return;
-      if($(this).is(':visible')) {
+      if($(this).is(':visible') && !$(this).hasClass('keep-notices')) {
         _fpa.clear_flash_notices();
       }
 
@@ -319,7 +319,7 @@ _fpa = {
         _fpa.status.session.reset_timeout();
         var block = $(this);
         var data = xhr.responseJSON;
-        if($(this).is(':visible')) {
+        if($(this).is(':visible') && !$(this).hasClass('keep-notices')) {
           _fpa.clear_flash_notices();
         }
         _fpa.ajax_done(block);
@@ -787,9 +787,16 @@ _fpa = {
 
     pm.on('hidden.bs.modal', function() {
       $('.modal-body').html('');
+      var riomc = $('.refresh-item-on-modal-close').first();
+      if(riomc.length) {
+        riomc.parents('.common-template-item').last().find('a.refresh-item').click();
+        riomc.removeClass('refresh-item-on-modal-close');
+      }
     });
 
     pm.modal('show');
+
+    return pm;
   },
 
   get_item_by: function(attr, obj, evid){

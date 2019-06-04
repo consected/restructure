@@ -241,9 +241,7 @@ module HandlesUserBase
 
   def model_reference_disable
     if respond_to? :disabled
-      self.disabled = true
-      force_save!
-      save!
+      disable! force_save: true
     else
       @was_disabled = 'disabled'
       handle_save_triggers if respond_to? :handle_save_triggers
@@ -357,6 +355,12 @@ module HandlesUserBase
 
   def force_save?
     @force_save
+  end
+
+  def disable! current_user: nil, force_save: false
+    force_save! if force_save
+    self.current_user ||= current_user
+    self.update! disabled: true
   end
 
 
@@ -487,7 +491,6 @@ module HandlesUserBase
 
     def handle_disabled
       @was_disabled = true
-
       cancel_associated_job!
     end
 

@@ -1,7 +1,7 @@
 module Formatter
   module Date
 
-      def self.format data, current_user: nil, iso: nil, utc: nil
+      def self.format data, options=nil, current_user: nil, iso: nil, utc: nil
         unless data.blank?
 
           if iso

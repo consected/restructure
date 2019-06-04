@@ -1,7 +1,7 @@
 module FieldDefaults
 
   def self.calculate_default obj, default, type=nil, from_when: nil
-    default ||= ''
+    default = '' if default.nil?
 
     res = default
     from_when ||= DateTime.now

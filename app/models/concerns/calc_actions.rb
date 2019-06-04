@@ -348,26 +348,41 @@ module CalcActions
               elsif val_item_key == :parent && !val.first.last.is_a?(Hash)
                 # non_query_condition = true
                 val = @current_instance.parent_item.attributes[val.first.last]
-              elsif val_item_key == :this_references && !val.first.last.is_a?(Hash)
-                att = val.first.last
-                # non_query_condition = true
-                val = []
-                mrs = @current_instance.model_references
+              elsif val_item_key == :this_references
+                if val.first.last.is_a?(Hash)
+                  att = val.first.last.first.last
+                  to_table_name = val.first.last.first.first
+                  val = []
+                  model_refs = @current_instance.model_references
+                  model_refs = model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
 
-                unless join_table_name.in? %i(this this_references parent_references validate)
-                  mrs = mrs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
-                end
+                  model_refs.each do |mr|
+                    val << mr.to_record.attributes[att]
+                  end
 
-                # Get the specified attribute's value from each of the model references
-                # Generate an array, allowing the conditions to be IN any of these
-                mrs.each do |mr|
-                  val << mr.to_record.attributes[att]
+                else
+                  att = val.first.last
+                  # non_query_condition = true
+                  val = []
+                  byebug
+                  mrs = @current_instance.model_references
+
+                  unless join_table_name.in? %i(this this_references parent_references validate)
+                    mrs = mrs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
+                  end
+
+                  # Get the specified attribute's value from each of the model references
+                  # Generate an array, allowing the conditions to be IN any of these
+                  mrs.each do |mr|
+                    val << mr.to_record.attributes[att]
+                  end
                 end
               elsif val_item_key == :parent_references
                 if val.first.last.is_a?(Hash)
                   att = val.first.last.first.last
                   to_table_name = val.first.last.first.first
                   val = []
+                  raise FphsException.new "No referring record specified when using parent_references" unless @current_instance.referring_record
                   parent_model_refs = @current_instance.referring_record.model_references
                   parent_model_refs = parent_model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
 

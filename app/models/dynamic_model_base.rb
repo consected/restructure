@@ -3,6 +3,7 @@ class DynamicModelBase < UserBase
   self.abstract_class = true
 
   include RankHandler
+  include Formatter::Formatters
 
 
   # Use the view_options.data_attribute configuration option if it has been set,
@@ -21,7 +22,7 @@ class DynamicModelBase < UserBase
 
   def self.format_data_attribute attr_conf, obj
     attr_conf = [attr_conf] if attr_conf.is_a? String
-    res = attr_conf.map {|i| obj.attribute_names.include?(i) ? obj.attributes[i] : i }
+    res = attr_conf.map {|i| a = obj.attributes[i]; obj.attribute_names.include?(i) ? formatter_do(a.class, a) : i }
     return res.join(' ')
   end
 

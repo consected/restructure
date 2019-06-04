@@ -1,8 +1,9 @@
 module Reports
   class ReportList
 
-    attr_accessor :list_class, :list_id, :item_type, :item_ids, :from_master_id, :item_class, :items_in_list,
-                  :item_attribs, :assoc_attr, :list_attribs, :current_user, :current_admin
+    attr_accessor :list_class, :list_id, :item_type, :item_ids, :from_master_id, :item_class, :items_in_list, :item_ids_in_list,
+                  :item_attribs, :assoc_attr, :list_attribs, :new_item_ids,
+                  :current_user, :current_admin
 
     def self.setup atl_params, current_user, current_admin=nil
 
@@ -60,21 +61,24 @@ module Reports
       assoc_item = assoc_class.where(id: list_id).first
       return general_error("list id does not represent an associated list: #{list_id}") unless assoc_item
 
-      self.items_in_list = list_class.where(assoc_attr => list_id).pluck(:record_id)
-      self.item_ids = item_ids - items_in_list
+      self.items_in_list = list_class.where(disabled: false, assoc_attr => list_id)
+      items_in_list_record_ids = self.items_in_list.pluck(:record_id)
+      items_in_list_ids = self.items_in_list.pluck(:id)
+      self.item_ids_in_list = item_ids & items_in_list_ids
+      self.new_item_ids = item_ids - items_in_list_record_ids
 
       return self
     end
 
     def add_items_to_list
 
-      return general_error("all items already in the list") if item_ids.length == 0
+      return general_error("all items already in the list") if new_item_ids.length == 0
 
       matching_attribs = (list_attribs & item_attribs).map(&:to_s)
       return general_error("no matching attributes") if matching_attribs.length == 0
 
       list_class.transaction do
-        item_ids.each do |id|
+        new_item_ids.each do |id|
           item = item_class.find(id)
           master = item.master
           master.current_user = current_user
@@ -88,7 +92,22 @@ module Reports
         end
       end
 
-      n = item_ids.length
+      n = new_item_ids.length
+    end
+
+    def remove_items_from_list
+
+      return general_error("no items in the list can be removed") if self.item_ids_in_list.length == 0
+
+      list_class.transaction do
+        item_ids_in_list.each do |id|
+          item = list_class.find(id)
+
+          item.disable! current_user: current_user
+        end
+      end
+
+      return item_ids_in_list
     end
 
     protected

@@ -18,6 +18,10 @@ _fpa.preprocessors = {
           $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here');
           b.addClass('postprocessed-scroll-here');
         }
+
+        block.parent().find('[data-preprocessor="embedded_report"]').not('er-attached').on('ajax:success', function() {
+          $(this).addClass('refresh-item-on-modal-close');
+        }).addClass('er-attached');
     },
 
     default: function(block, data, has_preprocessor){

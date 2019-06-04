@@ -29,7 +29,7 @@ _fpa.reports = {
       if (sb.length == 0 && rf.length == 0) {
         return;
       }
-      
+
       sb.not('.has-rsf-clicks').click(function(e) {
         e.preventDefault();
         _fpa.reports.report_position_buttons('go-to-results');
@@ -169,6 +169,28 @@ _fpa.reports = {
       }
       else if (dct_action == 'add to list') {
         var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="' + extra_val + '"></form>');
+
+        $f.on('ajax:success', function (e, data, status, xhr) {
+          window.setTimeout(function() {
+            $f.parents('.common-template-item').last().find('a.refresh-item').addClass('keep-notices').click();
+          }, 200);
+        });
+
+      }
+      else if (dct_action == 'remove from list') {
+        var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/remove_from_list.json" class="report-remove-from-list" data-remote="true"><input type="hidden" name="remove_from_list[list_name]" value="' + extra_val + '"></form>');
+
+        var cblock = $('[data-result="#report-embedded"]');
+        if (cblock.length == 0) cblock = $('body');
+
+        cblock.find('#report_query_form').addClass('keep-notices');
+        $f.on('ajax:success', function (e, data, status, xhr) {
+          cblock.find('#report-form-submit-btn').addClass('keep-notices').click();
+          window.setTimeout(function() {
+            $f.parents('.common-template-item').last().find('a.refresh-item').addClass('keep-notices').click();
+          }, 200);
+        });
+
       }
 
       var b = '<span class="report-files-actions"><input type="checkbox" id="report-select-all-files"><label for="report-select-all-files">select all</label> <input type="submit" value="' + dct_action + '" class="btn btn-primary"/></span>'

@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :reports do
     member do
       post :add_to_list
+      post :remove_from_list
     end
   end
 

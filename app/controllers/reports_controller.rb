@@ -212,11 +212,19 @@ class ReportsController < UserBaseController
 
     n = list.add_items_to_list
 
-    render json: {flash_message_only: "Added #{n} #{"item".pluralize(n)} to the list"}
+    res = {flash_message_only: "Added #{n} #{"item".pluralize(n)} to the list"}
+    render json: res
 
   end
 
   def remove_from_list
+    atl_params = params[:remove_from_list]
+    list = Reports::ReportList.setup atl_params, current_user, current_admin
+
+    ids = list.remove_items_from_list
+    n = ids.length
+
+    render json: {flash_message_only: "Removed #{n} #{"item".pluralize(n)} from the list.", removed_id: ids}
   end
 
 

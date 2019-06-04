@@ -1,7 +1,7 @@
 module Formatter
   module TimeWithZone
 
-    def self.format data, current_user: nil, iso: nil, utc: nil, show_timezone: nil
+    def self.format data, options=nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil
       unless data.blank?
 
         if current_user

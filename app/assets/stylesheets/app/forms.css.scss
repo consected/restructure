@@ -376,11 +376,14 @@ fieldset.readonly-edit-fieldset
 }
 
 .selectable-model-reference-result-action-form {
-  margin-right: -15px;
+  margin-right: 0;
+  position: absolute;
+  display: inline-block;
+  right: 15px;
 }
 
 .selectable-model-reference-result-action-form:empty {
-  margin-right: 0;
+  display: none;
 }
 
 @media only screen and (min-width: 1180px) {

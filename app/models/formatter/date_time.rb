@@ -3,7 +3,7 @@ module Formatter
 
       # If a current_user is set and no data zone, the current_user's timezone will be used to interpret the date / time
       # @param data [Hash | Array] date and time as: {date: date, time: time, zone: timezone} | [date, time, zone]
-      def self.format data, current_user: nil, iso: nil, utc: nil, show_timezone: nil
+      def self.format data, options=nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil
         unless data.blank?
 
           if data.is_a? Array

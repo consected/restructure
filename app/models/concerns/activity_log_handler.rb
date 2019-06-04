@@ -717,8 +717,8 @@ module ActivityLogHandler
     return @referring_record if @referring_record
 
     res = self.referenced_from
-    @referring_record = res.first.from_record
-    return @referring_record if res.length == 1
+    @referring_record = res.first&.from_record
+    return @referring_record if @referring_record && res.length == 1
     nil
   end
 

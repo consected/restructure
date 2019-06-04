@@ -4,7 +4,7 @@ module Formatter
     IsoFormat = "%H:%M:%S"
 
     # If a current_user is set and no data zone, the current_user's timezone will be used to interpret the date / time
-    def self.format data, current_user: nil, iso: nil, utc: nil, show_timezone: nil, current_timezone: nil, current_date: nil
+    def self.format data, options=nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil, current_timezone: nil, current_date: nil
       unless data.blank?
 
         if current_timezone&.to_sym == :user
