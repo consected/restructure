@@ -785,7 +785,7 @@ _fpa = {
     else
         $('.modal-dialog').removeClass('modal-lg').removeClass('modal-md');
 
-    pm.find('[data-dismiss="modal"]').click(function() {
+    pm.on('hidden.bs.modal', function() {
       $('.modal-body').html('');
     });
 
