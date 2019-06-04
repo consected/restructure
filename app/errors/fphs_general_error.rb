@@ -1,0 +1,3 @@
+class FphsGeneralError < FphsException
+
+end

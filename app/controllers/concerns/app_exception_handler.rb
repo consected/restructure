@@ -7,6 +7,8 @@ module AppExceptionHandler
     rescue_from ActionController::RoutingError, with: :routing_error_handler
     rescue_from ActionController::InvalidAuthenticityToken, with: :bad_auth_token
     rescue_from FphsException, with: :fphs_app_exception_handler
+    rescue_from FphsNotAuthorized, with: :not_authorized
+    rescue_from FphsGeneralError, with: :general_error
     rescue_from ESignature::ESignatureException, with: :fphs_app_exception_handler
     rescue_from ESignature::ESignatureUserError, with: :user_error_handler
     rescue_from PG::RaiseException, with: :fphs_app_exception_handler
