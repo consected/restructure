@@ -1,0 +1,32 @@
+default:
+  caption_before:
+    call_date: Date of call
+    call_completed_yes_no: Call completed?
+    call_completed_notes: Notes
+    participant_had_qs_yes_no: Did the participant have questions from the exit interview?
+    participant_qs_notes: Notes
+    reports_sent_yes_no: Were any reports sent to a provider?
+    reports_sent_notes: Which reports were sent to the provider?
+    report_sent_date: Date report was sent
+    report_delivery_date: Date of delivery report confirmation
+    assisted_finding_provider_yes_no: Did you provide assistance finding a provider?
+    assistance_notes: Notes
+    other_notes: Other notes
+
+  show_if:
+    call_completed_notes:
+      call_completed_yes_no: no
+    participant_qs_notes:
+      participant_had_qs_yes_no: yes
+    reports_sent_notes:
+      reports_sent_yes_no: yes
+    report_sent_date:
+      reports_sent_yes_no: yes
+    report_delivery_date:
+      reports_sent_yes_no: yes
+    assistance_notes:
+      assisted_finding_provider_yes_no: yes
+
+  field_options:
+    call_date:
+      value: today()

@@ -1,0 +1,113 @@
+# Fields:
+# anthropometrics_check,anthropometrics_notes,lab_results_check,lab_results_notes,dexa_check,dexa_notes,brain_mri_check,brain_mri_notes,neuro_psych_check,neuro_psych_notes,sensory_testing_check,sensory_testing_notes,liver_mri_check,liver_mri_notes,physical_function_check,physical_function_notes,eeg_check,eeg_notes,sleep_check,sleep_notes,cardiac_check,cardiac_notes,xray_check,xray_notes,assisted_finding_provider_yes_no,assistance_notes,other_notes
+
+# Old fields:
+# anthropometrics_check,anthropometrics_notes,lab_results_check,lab_results_notes,dexa_check,dexa_notes,brain_mri_check,brain_mri_notes,neuro_psych_check,neuro_psych_notes,sensory_testing_check,sensory_testing_notes,liver_mri_check,liver_mri_notes,physical_function_check,physical_function_notes,eeg_check,eeg_notes,sleep_check,sleep_notes,cardiac_check,cardiac_notes,xray_check,xray_notes,
+#participant_call_yes_no,participant_call_date,participant_call_notes,provider_call_yes_no,provider_call_date,provider_call_notes,reports_sent_yes_no,reports_sent_notes,report_sent_date,report_delivery_date,
+#assisted_finding_provider_yes_no,assistance_notes,other_notes
+
+default:
+
+  labels:
+    anthropometrics_check: Anthropometrics
+    lab_results_check: Lab Results
+    dexa_check: Dexa
+    brain_mri_check: Brain MRI
+    neuro_psych_check: Neuro Psych
+    sensory_testing_check: Sensory Testing
+    liver_mri_check: Liver MRI
+    physical_function_check: Physical Function
+    eeg_check: EEG
+    sleep_check: Sleep
+    cardiac_check: Cardiac
+    xray_check: X-Ray
+
+  caption_before:
+    all_fields: Relevant assessments
+    # participant_call_yes_no: Did you have a phone call with the participant?
+    # participant_call_date: Date of call
+    # participant_call_notes: Notes
+    # provider_call_yes_no: Did you have a phone call with the provider?
+    # provider_call_date: Date of call
+    # provider_call_notes: Notes
+    # reports_sent_yes_no: Were any reports sent to a provider?
+    # reports_sent_notes: Which reports were sent to the provider?
+    # report_sent_date: Date report was sent
+    # report_delivery_date: Date of delivery report confirmation
+    assisted_finding_provider_yes_no: Did you provide assistance finding a provider?
+    assistance_notes: Notes
+    other_notes: Other notes
+
+    anthropometrics_notes: Notes
+    lab_results_notes: Notes
+    dexa_notes: Notes
+    brain_mri_notes: Notes
+    neuro_psych_notes: Notes
+    sensory_testing_notes: Notes
+    liver_mri_notes: Notes
+    physical_function_notes: Notes
+    eeg_notes: Notes
+    sleep_notes: Notes
+    cardiac_notes: Notes
+    xray_notes: Notes
+
+
+  show_if:
+    # participant_call_date:
+    #   participant_call_yes_no: yes
+    # participant_call_notes:
+    #   participant_call_yes_no: yes
+    # provider_call_date:
+    #   provider_call_yes_no: yes
+    # provider_call_notes:
+    #   provider_call_yes_no: yes
+
+    # reports_sent_notes:
+    #   reports_sent_yes_no: yes
+    # report_sent_date:
+    #   reports_sent_yes_no: yes
+    # report_delivery_date:
+    #   reports_sent_yes_no: yes
+    assistance_notes:
+      assisted_finding_provider_yes_no: yes
+
+    anthropometrics_notes:
+      anthropometrics_check: yes
+
+    lab_results_notes:
+      lab_results_check: yes
+
+    dexa_notes:
+      dexa_check: yes
+
+    brain_mri_notes:
+      brain_mri_check: yes
+
+    neuro_psych_notes:
+      neuro_psych_check: yes
+
+    sensory_testing_notes:
+      sensory_testing_check: yes
+
+    liver_mri_notes:
+      liver_mri_check: yes
+
+    physical_function_notes:
+      physical_function_check: yes
+
+    eeg_notes:
+      eeg_check: yes
+
+    sleep_notes:
+      sleep_check: yes
+
+    cardiac_notes:
+      cardiac_check: yes
+
+    xray_notes:
+      xray_check: yes
+
+
+#  field_options:
+#    call_date:
+#      value: today()
