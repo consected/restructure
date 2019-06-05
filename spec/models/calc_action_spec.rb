@@ -1081,7 +1081,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     ca = ConditionalActions.new conf, @al
 
     res = ca.get_this_val
-    expect(res).to eq @al1.select_who, [@al.select_who, @al0.select_who]
+    expect(res).to eq [@al1.select_who, @al.select_who, @al0.select_who]
 
 
   end

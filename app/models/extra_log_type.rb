@@ -223,6 +223,7 @@ class ExtraLogType < ExtraOptions
 
   def self.calc_save_triggers obj, configs
 
+    return if configs.nil?
     # Get a list of results from the triggers
     results = []
 

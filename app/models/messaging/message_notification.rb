@@ -138,7 +138,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
 
 
   # Process this Messaging::MessageNotification record
-  def handle_notification_now logger: Rails.logger, for_item: nil, on_complete_config: nil
+  def handle_notification_now logger: Rails.logger, for_item: nil, on_complete_config: {}
 
     logger.info "Handling item #{self.id}"
     update! status: StatusInProgress

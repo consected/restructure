@@ -226,6 +226,35 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
   end
 
+  it "sets the notification to send at a specific time in the future based on a date / time / zone definition" do
+
+    d = (DateTime.now + 1.day)
+    config = {
+      type: "email",
+      users: {
+        this: {
+          user_id: 'return_value'
+        }
+      } ,
+      when: {
+        wait_until: {
+          date: d.to_date,
+          time: d.to_time,
+          zone: 'Eastern Time (US & Canada)'
+        }
+      },
+      layout_template: @layout.name,
+      content_template: @content.name,
+      subject: "subject text"
+    }
+    @trigger = SaveTriggers::Notify.new config, @al
+
+    @trigger.perform
+
+    # The time should be close enough
+    expect(@trigger.when[:wait_until].to_i/10).to eq(d.to_i/10) || eq((d.to_i - 1)/10)
+
+  end
 
   it "uses an if select the correct notification" do
     config = [

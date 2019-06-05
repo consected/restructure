@@ -16,7 +16,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         content_template_text: "alternative content template text",
         subject: "subject text",
         when: {
-          wait_until: '(optional) ISO date',
+          wait_until: '(optional) ISO date or {date:..., time..., zone:... } where zone is one specified in MAPPINGS @ https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html',
           wait: 'n seconds|minutes|hours|days|weeks|months|years'
         },
         if: if_extras
@@ -106,13 +106,18 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
           set_when[:wait_until] = FieldDefaults.calculate_default nil, @when[:wait], from_when: DateTime.now
         elsif @when[:wait_until]
           wu = @when[:wait_until]
-          w = {
-            date: calc_field_or_return(wu[:date]),
-            time: calc_field_or_return(wu[:time]),
-            zone: calc_field_or_return(wu[:zone]) || :user
-          }
 
-          wdate = Formatter::DateTime.format(w, utc: true, iso: true, current_user: @item.user)
+          if wu.is_a? Hash
+            w = {
+              date: calc_field_or_return(wu[:date]),
+              time: calc_field_or_return(wu[:time]),
+              zone: calc_field_or_return(wu[:zone]) || :user
+            }
+            wdate = Formatter::DateTime.format(w, utc: true, iso: true, current_user: @item.user)
+          else
+            wdate = wu
+          end
+
           if wdate
             set_when[:wait_until] = FieldDefaults.calculate_default nil, wdate, :datetime_type
           else

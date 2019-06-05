@@ -77,7 +77,8 @@ RSpec.describe "Delete stored files", type: :model do
       }
     }
 
-    f = create_filter('.*', resource_name: 'nfs_store__manage__containers')
+    f = create_filter('.*', resource_name: 'nfs_store__manage__containers', role_name: nil)
+    create_filter('.*', resource_name: 'activity_log__player_contact_phones', role_name: nil)
 
     download = NfsStore::Download.new multiple_items: true, container_ids: [@container.id]
     download.current_user = @user

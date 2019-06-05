@@ -23,6 +23,7 @@ module Formatter
           data = data.strftime(IsoFormat) if data.respond_to?(:strftime)
           use_tz = current_timezone
           tz = ActiveSupport::TimeZone.new(use_tz)
+          raise FphsException.new "Unrecognized timezone '#{use_tz}'" unless tz
           data = tz.parse("#{current_date} #{data}")
         end
 

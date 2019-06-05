@@ -364,7 +364,7 @@ module CalcActions
                   att = val.first.last
                   # non_query_condition = true
                   val = []
-                  byebug
+
                   mrs = @current_instance.model_references
 
                   unless join_table_name.in? %i(this this_references parent_references validate)
