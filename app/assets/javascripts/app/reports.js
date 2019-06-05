@@ -170,11 +170,6 @@ _fpa.reports = {
       else if (dct_action == 'add to list') {
         var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="' + extra_val + '"></form>');
 
-        $f.on('ajax:success', function (e, data, status, xhr) {
-          window.setTimeout(function() {
-            $f.parents('.common-template-item').last().find('a.refresh-item').addClass('keep-notices').click();
-          }, 200);
-        });
 
       }
       else if (dct_action == 'remove from list') {
@@ -186,9 +181,6 @@ _fpa.reports = {
         cblock.find('#report_query_form').addClass('keep-notices');
         $f.on('ajax:success', function (e, data, status, xhr) {
           cblock.find('#report-form-submit-btn').addClass('keep-notices').click();
-          window.setTimeout(function() {
-            $f.parents('.common-template-item').last().find('a.refresh-item').addClass('keep-notices').click();
-          }, 200);
         });
 
       }

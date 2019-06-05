@@ -231,13 +231,15 @@ input.form-control.has-value, select.form-control.has-value {
     100% {background-color: rgba(240,240,255, 0.45);}
 }
 
-.ajax-running{
+.ajax-running {
     -webkit-animation: working 1s ease-in-out infinite;
     -moz-animation: working 1s ease-in-out infinite;
     animation: working 1s ease-in-out infinite;
-
 }
 
+div.ajax-running {
+  min-height: 20px !important;
+}
 
 .search-running.glyphicon {
 /*    position: absolute;

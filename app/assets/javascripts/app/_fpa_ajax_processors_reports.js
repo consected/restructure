@@ -94,6 +94,7 @@ _fpa.postprocessors_reports = {
             if(table_count.length === 1){
                 c = table_count.html();
             }
+            c = parseInt(c);
             data.count = {count: c, show_count: c};
             var h = _fpa.templates['search-count-template'](data);
             $('.search_count_reports').html(h);
@@ -102,7 +103,7 @@ _fpa.postprocessors_reports = {
 
         window.setTimeout(function(){
           var table_cell_types = _fpa.postprocessors_reports.table_cell_types;
-          if(data.count && data.count.count != '0') {
+          if(data.count && data.count.count != 0) {
             $('.postprocessed-scroll-here').removeClass('postprocessed-scroll-here').addClass('prevent-scroll');
             _fpa.reports.report_position_buttons('go-to-results');
           }

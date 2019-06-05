@@ -11,13 +11,21 @@ _fpa = {
   ajax_working: function(block){
 
     $(block).addClass('ajax-running').removeClass('ajax-canceled');
+    var d = $(block).attr('data-result-target');
+    if (d) $(d).addClass('ajax-running');
   },
   ajax_done: function(block){
     $(block).removeClass('ajax-running').removeClass('ajax-canceled');
+    var d = $(block).attr('data-result-target');
+    if (d) $(d).removeClass('ajax-running').removeClass('ajax-canceled');
+
     _fpa.remote_request = null;
   },
   ajax_canceled: function(block){
     $(block).removeClass('ajax-running').addClass('ajax-canceled');
+    var d = $(block).attr('data-result-target');
+    if (d) $(d).removeClass('ajax-running').addClass('ajax-canceled');
+
     _fpa.remote_request = null;
   },
   compile_templates: function(){
@@ -256,6 +264,11 @@ _fpa = {
       }
 
     }).on('ajax:before', sel, function(ev){
+
+        // Prevent this being handled in a parent, such as happens if we have a link in a form
+        if(ev.target != ev.currentTarget)
+          return;
+
         var block = $(this);
         _fpa.remote_request = null;
         _fpa.remote_request_block = block;
