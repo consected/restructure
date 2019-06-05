@@ -2,12 +2,12 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh activity_logs_table create activity_log_ipa_assignment_protocol_deviations ipa_assignment
+-- table_generators/generate.sh activity_logs_table create activity_log_${target_name_us}_assignment_protocol_deviations ${target_name_us}_assignment
 
-      CREATE TABLE activity_log_ipa_assignment_protocol_deviation_history (
+      CREATE TABLE activity_log_${target_name_us}_assignment_protocol_deviation_history (
           id integer NOT NULL,
           master_id integer,
-          ipa_assignment_id integer,
+          ${target_name_us}_assignment_id integer,
 
           extra_log_type varchar,
           select_who varchar,
@@ -17,12 +17,12 @@
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
-          activity_log_ipa_assignment_protocol_deviation_id integer
+          activity_log_${target_name_us}_assignment_protocol_deviation_id integer
       );
-      CREATE TABLE activity_log_ipa_assignment_protocol_deviations (
+      CREATE TABLE activity_log_${target_name_us}_assignment_protocol_deviations (
           id integer NOT NULL,
           master_id integer,
-          ipa_assignment_id integer,
+          ${target_name_us}_assignment_id integer,
 
           extra_log_type varchar,
           select_who varchar,
@@ -34,14 +34,14 @@
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_ipa_assignment_protocol_deviation_update() RETURNS trigger
+      CREATE FUNCTION log_activity_log_${target_name_us}_assignment_protocol_deviation_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
-                  INSERT INTO activity_log_ipa_assignment_protocol_deviation_history
+                  INSERT INTO activity_log_${target_name_us}_assignment_protocol_deviation_history
                   (
                       master_id,
-                      ipa_assignment_id,
+                      ${target_name_us}_assignment_id,
 
                       extra_log_type,
                       select_who,
@@ -50,11 +50,11 @@
                       user_id,
                       created_at,
                       updated_at,
-                      activity_log_ipa_assignment_protocol_deviation_id
+                      activity_log_${target_name_us}_assignment_protocol_deviation_id
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.ipa_assignment_id,
+                      NEW.${target_name_us}_assignment_id,
 
                       NEW.extra_log_type,
                       NEW.select_who,
@@ -69,66 +69,66 @@
               END;
           $$;
 
-      CREATE SEQUENCE activity_log_ipa_assignment_protocol_deviation_history_id_seq
+      CREATE SEQUENCE activity_log_${target_name_us}_assignment_protocol_deviation_history_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE activity_log_ipa_assignment_protocol_deviation_history_id_seq OWNED BY activity_log_ipa_assignment_protocol_deviation_history.id;
+      ALTER SEQUENCE activity_log_${target_name_us}_assignment_protocol_deviation_history_id_seq OWNED BY activity_log_${target_name_us}_assignment_protocol_deviation_history.id;
 
 
-      CREATE SEQUENCE activity_log_ipa_assignment_protocol_deviations_id_seq
+      CREATE SEQUENCE activity_log_${target_name_us}_assignment_protocol_deviations_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE activity_log_ipa_assignment_protocol_deviations_id_seq OWNED BY activity_log_ipa_assignment_protocol_deviations.id;
+      ALTER SEQUENCE activity_log_${target_name_us}_assignment_protocol_deviations_id_seq OWNED BY activity_log_${target_name_us}_assignment_protocol_deviations.id;
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviations ALTER COLUMN id SET DEFAULT nextval('activity_log_ipa_assignment_protocol_deviations_id_seq'::regclass);
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviation_history ALTER COLUMN id SET DEFAULT nextval('activity_log_ipa_assignment_protocol_deviation_history_id_seq'::regclass);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviations ALTER COLUMN id SET DEFAULT nextval('activity_log_${target_name_us}_assignment_protocol_deviations_id_seq'::regclass);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviation_history ALTER COLUMN id SET DEFAULT nextval('activity_log_${target_name_us}_assignment_protocol_deviation_history_id_seq'::regclass);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviation_history
-          ADD CONSTRAINT activity_log_ipa_assignment_protocol_deviation_history_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviation_history
+          ADD CONSTRAINT activity_log_${target_name_us}_assignment_protocol_deviation_history_pkey PRIMARY KEY (id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviations
-          ADD CONSTRAINT activity_log_ipa_assignment_protocol_deviations_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviations
+          ADD CONSTRAINT activity_log_${target_name_us}_assignment_protocol_deviations_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_al_ipa_assignment_protocol_deviation_history_on_master_id ON activity_log_ipa_assignment_protocol_deviation_history USING btree (master_id);
-      CREATE INDEX index_al_ipa_assignment_protocol_deviation_history_on_ipa_assignment_protocol_deviation_id ON activity_log_ipa_assignment_protocol_deviation_history USING btree (ipa_assignment_id);
+      CREATE INDEX index_al_${target_name_us}_assignment_protocol_deviation_history_on_master_id ON activity_log_${target_name_us}_assignment_protocol_deviation_history USING btree (master_id);
+      CREATE INDEX index_al_${target_name_us}_assignment_protocol_deviation_history_on_${target_name_us}_assignment_protocol_deviation_id ON activity_log_${target_name_us}_assignment_protocol_deviation_history USING btree (${target_name_us}_assignment_id);
 
-      CREATE INDEX index_al_ipa_assignment_protocol_deviation_history_on_activity_log_ipa_assignment_protocol_deviation_id ON activity_log_ipa_assignment_protocol_deviation_history USING btree (activity_log_ipa_assignment_protocol_deviation_id);
-      CREATE INDEX index_al_ipa_assignment_protocol_deviation_history_on_user_id ON activity_log_ipa_assignment_protocol_deviation_history USING btree (user_id);
+      CREATE INDEX index_al_${target_name_us}_assignment_protocol_deviation_history_on_activity_log_${target_name_us}_assignment_protocol_deviation_id ON activity_log_${target_name_us}_assignment_protocol_deviation_history USING btree (activity_log_${target_name_us}_assignment_protocol_deviation_id);
+      CREATE INDEX index_al_${target_name_us}_assignment_protocol_deviation_history_on_user_id ON activity_log_${target_name_us}_assignment_protocol_deviation_history USING btree (user_id);
 
-      CREATE INDEX index_activity_log_ipa_assignment_protocol_deviations_on_master_id ON activity_log_ipa_assignment_protocol_deviations USING btree (master_id);
-      CREATE INDEX index_activity_log_ipa_assignment_protocol_deviations_on_ipa_assignment_protocol_deviation_id ON activity_log_ipa_assignment_protocol_deviations USING btree (ipa_assignment_id);
-      CREATE INDEX index_activity_log_ipa_assignment_protocol_deviations_on_user_id ON activity_log_ipa_assignment_protocol_deviations USING btree (user_id);
+      CREATE INDEX index_activity_log_${target_name_us}_assignment_protocol_deviations_on_master_id ON activity_log_${target_name_us}_assignment_protocol_deviations USING btree (master_id);
+      CREATE INDEX index_activity_log_${target_name_us}_assignment_protocol_deviations_on_${target_name_us}_assignment_protocol_deviation_id ON activity_log_${target_name_us}_assignment_protocol_deviations USING btree (${target_name_us}_assignment_id);
+      CREATE INDEX index_activity_log_${target_name_us}_assignment_protocol_deviations_on_user_id ON activity_log_${target_name_us}_assignment_protocol_deviations USING btree (user_id);
 
-      CREATE TRIGGER activity_log_ipa_assignment_protocol_deviation_history_insert AFTER INSERT ON activity_log_ipa_assignment_protocol_deviations FOR EACH ROW EXECUTE PROCEDURE log_activity_log_ipa_assignment_protocol_deviation_update();
-      CREATE TRIGGER activity_log_ipa_assignment_protocol_deviation_history_update AFTER UPDATE ON activity_log_ipa_assignment_protocol_deviations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_ipa_assignment_protocol_deviation_update();
+      CREATE TRIGGER activity_log_${target_name_us}_assignment_protocol_deviation_history_insert AFTER INSERT ON activity_log_${target_name_us}_assignment_protocol_deviations FOR EACH ROW EXECUTE PROCEDURE log_activity_log_${target_name_us}_assignment_protocol_deviation_update();
+      CREATE TRIGGER activity_log_${target_name_us}_assignment_protocol_deviation_history_update AFTER UPDATE ON activity_log_${target_name_us}_assignment_protocol_deviations FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_activity_log_${target_name_us}_assignment_protocol_deviation_update();
 
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviations
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviations
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviations
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviations
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviations
-          ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_assignments(id);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviations
+          ADD CONSTRAINT fk_rails_78888ed085 FOREIGN KEY (${target_name_us}_assignment_id) REFERENCES ${target_name_us}_assignments(id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviation_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_protocol_deviation_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviation_history
+          ADD CONSTRAINT fk_activity_log_${target_name_us}_assignment_protocol_deviation_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviation_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_protocol_deviation_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviation_history
+          ADD CONSTRAINT fk_activity_log_${target_name_us}_assignment_protocol_deviation_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviation_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_protocol_deviation_history_ipa_assignment_protocol_deviation_id FOREIGN KEY (ipa_assignment_id) REFERENCES ipa_assignments(id);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviation_history
+          ADD CONSTRAINT fk_activity_log_${target_name_us}_assignment_protocol_deviation_history_${target_name_us}_assignment_protocol_deviation_id FOREIGN KEY (${target_name_us}_assignment_id) REFERENCES ${target_name_us}_assignments(id);
 
-      ALTER TABLE ONLY activity_log_ipa_assignment_protocol_deviation_history
-          ADD CONSTRAINT fk_activity_log_ipa_assignment_protocol_deviation_history_activity_log_ipa_assignment_protocol_deviations FOREIGN KEY (activity_log_ipa_assignment_protocol_deviation_id) REFERENCES activity_log_ipa_assignment_protocol_deviations(id);
+      ALTER TABLE ONLY activity_log_${target_name_us}_assignment_protocol_deviation_history
+          ADD CONSTRAINT fk_activity_log_${target_name_us}_assignment_protocol_deviation_history_activity_log_${target_name_us}_assignment_protocol_deviations FOREIGN KEY (activity_log_${target_name_us}_assignment_protocol_deviation_id) REFERENCES activity_log_${target_name_us}_assignment_protocol_deviations(id);
 
       GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
       GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;

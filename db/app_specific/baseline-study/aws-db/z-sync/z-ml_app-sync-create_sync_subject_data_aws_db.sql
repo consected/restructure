@@ -13,25 +13,25 @@ set search_path=ml_app;
 -------------------------------------------------------
 
 -------------------------------------------------------
--- Run through the entries in temporary temp_ipa_assignments table to create all the remote IPA records
--- Call create_remote_ipa_record() for each, pulling matched records from temp_player_infos and temp_player_contacts.
+-- Run through the entries in temporary temp_${target_name_us}_assignments table to create all the remote IPA records
+-- Call create_remote_${target_name_us}_record() for each, pulling matched records from temp_player_infos and temp_player_contacts.
 -- Temporary tables are used, since they will already be populated with data from the Zeus server via CSV files
-CREATE OR REPLACE FUNCTION create_all_remote_ipa_records() returns INTEGER
+CREATE OR REPLACE FUNCTION create_all_remote_${target_name_us}_records() returns INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-	ipa_record RECORD;
+	${target_name_us}_record RECORD;
 BEGIN
 
-	FOR ipa_record IN
-	  SELECT * from temp_ipa_assignments
+	FOR ${target_name_us}_record IN
+	  SELECT * from temp_${target_name_us}_assignments
 	LOOP
 
-		PERFORM create_remote_ipa_record(
-			ipa_record.ipa_id::BIGINT,
-			(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = ipa_record.master_id LIMIT 1),
-			ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = ipa_record.master_id),
-			ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ipa_record.master_id)
+		PERFORM create_remote_${target_name_us}_record(
+			${target_name_us}_record.${target_name_us}_id::BIGINT,
+			(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = ${target_name_us}_record.master_id LIMIT 1),
+			ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = ${target_name_us}_record.master_id),
+			ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ${target_name_us}_record.master_id)
 		);
 
 	END LOOP;
@@ -45,9 +45,9 @@ $$;
 -- Create player_infos record, multiple player_contacts records, multiple addresses records
 -- Pass in the IPA ID to be matched, a single row player info, and arrays of player_contacts and addresses records.
 -- Run tests with:
--- select ipa_ops.create_remote_ipa_record(364648868, (select pi from player_infos pi where master_id = 105029 limit 1), ARRAY(select pi from player_contacts pi where master_id = 105029), ARRAY(select pi from addresses pi where master_id = 105029) );
+-- select ${target_name_us}_ops.create_remote_${target_name_us}_record(364648868, (select pi from player_infos pi where master_id = 105029 limit 1), ARRAY(select pi from player_contacts pi where master_id = 105029), ARRAY(select pi from addresses pi where master_id = 105029) );
 -- Notice that player_contacts and addresses results are converted to an array, using the ARRAY() function, allowing them to be passed to the function.
-CREATE OR REPLACE FUNCTION create_remote_ipa_record(match_ipa_id BIGINT, new_player_info_record player_infos, new_player_contact_records player_contacts[], new_address_records addresses[]) returns INTEGER
+CREATE OR REPLACE FUNCTION create_remote_${target_name_us}_record(match_${target_name_us}_id BIGINT, new_player_info_record player_infos, new_player_contact_records player_contacts[], new_address_records addresses[]) returns INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -63,19 +63,19 @@ DECLARE
 	last_id INTEGER;
 BEGIN
 
--- Find the ipa_assignments external identifier record for this master record and
+-- Find the ${target_name_us}_assignments external identifier record for this master record and
 -- validate that it exists
 SELECT *
 INTO found_ipa
-FROM ipa_ops.ipa_assignments ipa
-WHERE ipa.ipa_id = match_ipa_id
+FROM ${target_name_us}_ops.${target_name_us}_assignments ipa
+WHERE ipa.${target_name_us}_id = match_${target_name_us}_id
 LIMIT 1;
 
 -- If the IPA external identifier already exists then the sync should fail.
 
 IF FOUND THEN
-	RAISE NOTICE 'Already transferred: ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
-	UPDATE temp_ipa_assignments SET status='already transferred', to_master_id=new_master_id WHERE ipa_id = match_ipa_id;
+	RAISE NOTICE 'Already transferred: ${target_name_us}_assigments record found for IPA_ID --> %', (match_${target_name_us}_id);
+	UPDATE temp_${target_name_us}_assignments SET status='already transferred', to_master_id=new_master_id WHERE ${target_name_us}_id = match_${target_name_us}_id;
   RETURN found_ipa.master_id;
 END IF;
 
@@ -91,7 +91,7 @@ IF NOT FOUND THEN
 	RAISE EXCEPTION 'No user with email fphsetl@hms.harvard.edu was found. Can not continue.';
 END IF;
 
-UPDATE temp_ipa_assignments SET status='started sync' WHERE ipa_id = match_ipa_id;
+UPDATE temp_${target_name_us}_assignments SET status='started sync' WHERE ${target_name_us}_id = match_${target_name_us}_id;
 
 
 RAISE NOTICE 'Creating master record with user_id %', (etl_user_id::varchar);
@@ -101,17 +101,17 @@ INSERT INTO masters
 RETURNING id
 INTO new_master_id;
 
-RAISE NOTICE 'Creating external identifier record %', (match_ipa_id::varchar);
+RAISE NOTICE 'Creating external identifier record %', (match_${target_name_us}_id::varchar);
 
-INSERT INTO ipa_ops.ipa_assignments
-(ipa_id, master_id, user_id, created_at, updated_at)
-VALUES (match_ipa_id, new_master_id, etl_user_id, now(), now());
+INSERT INTO ${target_name_us}_ops.${target_name_us}_assignments
+(${target_name_us}_id, master_id, user_id, created_at, updated_at)
+VALUES (match_${target_name_us}_id, new_master_id, etl_user_id, now(), now());
 
 
 
 IF new_player_info_record.master_id IS NULL THEN
-	RAISE NOTICE 'No new_player_info_record found for IPA_ID --> %', (match_ipa_id);
-	UPDATE temp_ipa_assignments SET status='failed - no player info provided' WHERE ipa_id = match_ipa_id;
+	RAISE NOTICE 'No new_player_info_record found for IPA_ID --> %', (match_${target_name_us}_id);
+	UPDATE temp_${target_name_us}_assignments SET status='failed - no player info provided' WHERE ${target_name_us}_id = match_${target_name_us}_id;
 	RETURN NULL;
 ELSE
 
@@ -173,7 +173,7 @@ INTO pc_length;
 
 
 IF pc_length IS NULL THEN
-	RAISE NOTICE 'No new_player_contact_records found for IPA_ID --> %', (match_ipa_id);
+	RAISE NOTICE 'No new_player_contact_records found for IPA_ID --> %', (match_${target_name_us}_id);
 ELSE
 
 	RAISE NOTICE 'player contacts length %', (pc_length);
@@ -225,7 +225,7 @@ INTO a_length;
 
 
 IF a_length IS NULL THEN
-	RAISE NOTICE 'No new_address_records found for IPA_ID --> %', (match_ipa_id);
+	RAISE NOTICE 'No new_address_records found for IPA_ID --> %', (match_${target_name_us}_id);
 ELSE
 
 	RAISE NOTICE 'addresses length %', (a_length);
@@ -281,7 +281,7 @@ END IF;
 
 RAISE NOTICE 'Setting results for master_id %', (new_master_id);
 
-UPDATE temp_ipa_assignments SET status='completed', to_master_id=new_master_id WHERE ipa_id = match_ipa_id;
+UPDATE temp_${target_name_us}_assignments SET status='completed', to_master_id=new_master_id WHERE ${target_name_us}_id = match_${target_name_us}_id;
 
 return new_master_id;
 

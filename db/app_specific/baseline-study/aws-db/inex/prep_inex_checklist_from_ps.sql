@@ -7,9 +7,9 @@ Ensure it references the original phone screen dynamic model record.
 */
 
 
-DROP FUNCTION IF EXISTS ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() CASCADE;
+DROP FUNCTION IF EXISTS ${target_name_us}_ops.activity_log_${target_name_us}_assignment_phone_screens_callback_set() CASCADE;
 
-CREATE OR REPLACE FUNCTION ipa_ops.activity_log_ipa_assignment_phone_screens_callback_set() RETURNS trigger
+CREATE OR REPLACE FUNCTION ${target_name_us}_ops.activity_log_${target_name_us}_assignment_phone_screens_callback_set() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
     DECLARE
@@ -31,7 +31,7 @@ AS $$
     -- Get the latest football experience record
     SELECT *
     INTO initial_screening
-    FROM ipa_ps_initial_screenings
+    FROM ${target_name_us}_ps_initial_screenings
     WHERE master_id = NEW.master_id
     ORDER BY id DESC
     LIMIT 1;
@@ -40,7 +40,7 @@ AS $$
     -- -- Get the latest football experience record
     -- SELECT *
     -- INTO football_experience
-    -- FROM ipa_ps_football_experiences
+    -- FROM ${target_name_us}_ps_football_experiences
     -- WHERE master_id = NEW.master_id
     -- ORDER BY id DESC
     -- LIMIT 1;
@@ -49,7 +49,7 @@ AS $$
     SELECT *,
     extract(YEAR from age(birth_date)) age
     INTO subject_size
-    FROM ipa_ps_sizes
+    FROM ${target_name_us}_ps_sizes
     WHERE master_id = NEW.master_id
     ORDER BY id DESC
     LIMIT 1;
@@ -57,7 +57,7 @@ AS $$
     -- Get the latest MRI record
     SELECT *
     INTO mri
-    FROM ipa_ps_mris
+    FROM ${target_name_us}_ps_mris
     WHERE master_id = NEW.master_id
     ORDER BY id DESC
     LIMIT 1;
@@ -65,7 +65,7 @@ AS $$
     -- Get the latest TMS record
     SELECT *
     INTO tms
-    FROM ipa_ps_tms_tests
+    FROM ${target_name_us}_ps_tms_tests
     WHERE master_id = NEW.master_id
     ORDER BY id DESC
     LIMIT 1;
@@ -73,7 +73,7 @@ AS $$
     -- Get the latest sleep record
     SELECT *
     INTO sleep
-    FROM ipa_ps_sleeps
+    FROM ${target_name_us}_ps_sleeps
     WHERE master_id = NEW.master_id
     ORDER BY id DESC
     LIMIT 1;
@@ -81,7 +81,7 @@ AS $$
     -- Get the latest health record
     SELECT *
     INTO health
-    FROM ipa_ps_healths
+    FROM ${target_name_us}_ps_healths
     WHERE master_id = NEW.master_id
     ORDER BY id DESC
     LIMIT 1;
@@ -89,7 +89,7 @@ AS $$
     -- Get the latest tmoca record
     SELECT *
     INTO tmoca
-    FROM ipa_ps_tmocas
+    FROM ${target_name_us}_ps_tmocas
     WHERE master_id = NEW.master_id
     ORDER BY id DESC
     LIMIT 1;
@@ -103,7 +103,7 @@ AS $$
     LIMIT 1;
 
 
-    INSERT INTO ipa_inex_checklists
+    INSERT INTO ${target_name_us}_inex_checklists
     (
       master_id,
       created_at,
@@ -259,7 +259,7 @@ Responded "' || health.raynauds_syndrome_severity_selection || '" to follow up q
     )
     RETURNING id INTO inex_id;
 
-    INSERT INTO activity_log_ipa_assignment_inex_checklists
+    INSERT INTO activity_log_${target_name_us}_assignment_inex_checklists
     (
       master_id,
       created_at,
@@ -302,7 +302,7 @@ Responded "' || health.raynauds_syndrome_severity_selection || '" to follow up q
       NEW.master_id
     );
 
-    INSERT INTO activity_log_ipa_assignment_inex_checklists
+    INSERT INTO activity_log_${target_name_us}_assignment_inex_checklists
     (
       master_id,
       created_at,
@@ -327,4 +327,4 @@ $$;
 
 
 
-CREATE TRIGGER ipa_ps_to_inex AFTER INSERT ON ipa_ops.activity_log_ipa_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_ipa_assignment_phone_screens_callback_set();
+CREATE TRIGGER ${target_name_us}_ps_to_inex AFTER INSERT ON ${target_name_us}_ops.activity_log_${target_name_us}_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_${target_name_us}_assignment_phone_screens_callback_set();

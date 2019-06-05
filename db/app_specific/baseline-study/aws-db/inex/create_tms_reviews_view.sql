@@ -1,6 +1,6 @@
 BEGIN;
 
-  create or replace view ipa_ops.ipa_tms_reviews
+  create or replace view ${target_name_us}_ops.${target_name_us}_tms_reviews
   as select
     tms.id,
     tms.master_id,
@@ -35,18 +35,18 @@ BEGIN;
     caridiac_pacemaker_blank_yes_no_dont_know,
     caridiac_pacemaker_details
   from
-    ipa_ps_tms_tests tms
+    ${target_name_us}_ps_tms_tests tms
   inner join
-    ipa_ps_mris mri
+    ${target_name_us}_ps_mris mri
   on tms.master_id = mri.master_id
   inner join
-    ipa_ps_healths health
+    ${target_name_us}_ps_healths health
   on tms.master_id = health.master_id;
 
 
-  GRANT SELECT ON ipa_ops.ipa_tms_reviews TO fphs;
-  GRANT SELECT ON ipa_ops.ipa_tms_reviews TO fphsusr;
-  GRANT SELECT ON ipa_ops.ipa_tms_reviews TO fphsadm;
-  GRANT SELECT ON ipa_ops.ipa_tms_reviews TO fphsrailsapp;
+  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphs;
+  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphsusr;
+  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphsadm;
+  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphsrailsapp;
 
 END;

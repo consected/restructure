@@ -1,15 +1,15 @@
-set search_path=ipa_ops,ml_app;
+set search_path=${target_name_us}_ops,ml_app;
 
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_incidental_findings anthropometrics_check anthropometrics_date anthropometrics_notes lab_results_check lab_results_date lab_results_notes dexa_check dexa_date dexa_notes brain_mri_check brain_mri_date brain_mri_notes neuro_psych_check neuro_psych_date neuro_psych_notes sensory_testing_check sensory_testing_date sensory_testing_notes liver_mri_check liver_mri_date liver_mri_notes physical_function_check physical_function_date physical_function_notes eeg_check eeg_date eeg_notes sleep_check sleep_date sleep_notes cardiac_check cardiac_date cardiac_notes xray_check xray_date xray_notes other_notes
+-- table_generators/generate.sh dynamic_models_table create ${target_name_us}_incidental_findings anthropometrics_check anthropometrics_date anthropometrics_notes lab_results_check lab_results_date lab_results_notes dexa_check dexa_date dexa_notes brain_mri_check brain_mri_date brain_mri_notes neuro_psych_check neuro_psych_date neuro_psych_notes sensory_testing_check sensory_testing_date sensory_testing_notes liver_mri_check liver_mri_date liver_mri_notes physical_function_check physical_function_date physical_function_notes eeg_check eeg_date eeg_notes sleep_check sleep_date sleep_notes cardiac_check cardiac_date cardiac_notes xray_check xray_date xray_notes other_notes
 
-      CREATE FUNCTION log_ipa_incidental_finding_update() RETURNS trigger
+      CREATE FUNCTION log_${target_name_us}_incidental_finding_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
-                  INSERT INTO ipa_incidental_finding_history
+                  INSERT INTO ${target_name_us}_incidental_finding_history
                   (
                       master_id,
                       anthropometrics_check,
@@ -52,7 +52,7 @@ set search_path=ipa_ops,ml_app;
                       user_id,
                       created_at,
                       updated_at,
-                      ipa_incidental_finding_id
+                      ${target_name_us}_incidental_finding_id
                       )
                   SELECT
                       NEW.master_id,
@@ -102,7 +102,7 @@ set search_path=ipa_ops,ml_app;
               END;
           $$;
 
-      CREATE TABLE ipa_incidental_finding_history (
+      CREATE TABLE ${target_name_us}_incidental_finding_history (
           id integer NOT NULL,
           master_id integer,
           anthropometrics_check boolean,
@@ -145,19 +145,19 @@ set search_path=ipa_ops,ml_app;
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
-          ipa_incidental_finding_id integer
+          ${target_name_us}_incidental_finding_id integer
       );
 
-      CREATE SEQUENCE ipa_incidental_finding_history_id_seq
+      CREATE SEQUENCE ${target_name_us}_incidental_finding_history_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_incidental_finding_history_id_seq OWNED BY ipa_incidental_finding_history.id;
+      ALTER SEQUENCE ${target_name_us}_incidental_finding_history_id_seq OWNED BY ${target_name_us}_incidental_finding_history.id;
 
-      CREATE TABLE ipa_incidental_findings (
+      CREATE TABLE ${target_name_us}_incidental_findings (
           id integer NOT NULL,
           master_id integer,
           anthropometrics_check boolean,
@@ -201,56 +201,56 @@ set search_path=ipa_ops,ml_app;
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
-      CREATE SEQUENCE ipa_incidental_findings_id_seq
+      CREATE SEQUENCE ${target_name_us}_incidental_findings_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_incidental_findings_id_seq OWNED BY ipa_incidental_findings.id;
+      ALTER SEQUENCE ${target_name_us}_incidental_findings_id_seq OWNED BY ${target_name_us}_incidental_findings.id;
 
-      ALTER TABLE ONLY ipa_incidental_findings ALTER COLUMN id SET DEFAULT nextval('ipa_incidental_findings_id_seq'::regclass);
-      ALTER TABLE ONLY ipa_incidental_finding_history ALTER COLUMN id SET DEFAULT nextval('ipa_incidental_finding_history_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_incidental_findings ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_incidental_findings_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_incidental_finding_history ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_incidental_finding_history_id_seq'::regclass);
 
-      ALTER TABLE ONLY ipa_incidental_finding_history
-          ADD CONSTRAINT ipa_incidental_finding_history_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_incidental_finding_history
+          ADD CONSTRAINT ${target_name_us}_incidental_finding_history_pkey PRIMARY KEY (id);
 
-      ALTER TABLE ONLY ipa_incidental_findings
-          ADD CONSTRAINT ipa_incidental_findings_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_incidental_findings
+          ADD CONSTRAINT ${target_name_us}_incidental_findings_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_ipa_incidental_finding_history_on_master_id ON ipa_incidental_finding_history USING btree (master_id);
-
-
-      CREATE INDEX index_ipa_incidental_finding_history_on_ipa_incidental_finding_id ON ipa_incidental_finding_history USING btree (ipa_incidental_finding_id);
-      CREATE INDEX index_ipa_incidental_finding_history_on_user_id ON ipa_incidental_finding_history USING btree (user_id);
-
-      CREATE INDEX index_ipa_incidental_findings_on_master_id ON ipa_incidental_findings USING btree (master_id);
-
-      CREATE INDEX index_ipa_incidental_findings_on_user_id ON ipa_incidental_findings USING btree (user_id);
-
-      CREATE TRIGGER ipa_incidental_finding_history_insert AFTER INSERT ON ipa_incidental_findings FOR EACH ROW EXECUTE PROCEDURE log_ipa_incidental_finding_update();
-      CREATE TRIGGER ipa_incidental_finding_history_update AFTER UPDATE ON ipa_incidental_findings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_incidental_finding_update();
+      CREATE INDEX index_${target_name_us}_incidental_finding_history_on_master_id ON ${target_name_us}_incidental_finding_history USING btree (master_id);
 
 
-      ALTER TABLE ONLY ipa_incidental_findings
+      CREATE INDEX index_${target_name_us}_incidental_finding_history_on_${target_name_us}_incidental_finding_id ON ${target_name_us}_incidental_finding_history USING btree (${target_name_us}_incidental_finding_id);
+      CREATE INDEX index_${target_name_us}_incidental_finding_history_on_user_id ON ${target_name_us}_incidental_finding_history USING btree (user_id);
+
+      CREATE INDEX index_${target_name_us}_incidental_findings_on_master_id ON ${target_name_us}_incidental_findings USING btree (master_id);
+
+      CREATE INDEX index_${target_name_us}_incidental_findings_on_user_id ON ${target_name_us}_incidental_findings USING btree (user_id);
+
+      CREATE TRIGGER ${target_name_us}_incidental_finding_history_insert AFTER INSERT ON ${target_name_us}_incidental_findings FOR EACH ROW EXECUTE PROCEDURE log_${target_name_us}_incidental_finding_update();
+      CREATE TRIGGER ${target_name_us}_incidental_finding_history_update AFTER UPDATE ON ${target_name_us}_incidental_findings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_${target_name_us}_incidental_finding_update();
+
+
+      ALTER TABLE ONLY ${target_name_us}_incidental_findings
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-      ALTER TABLE ONLY ipa_incidental_findings
+      ALTER TABLE ONLY ${target_name_us}_incidental_findings
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 
-      ALTER TABLE ONLY ipa_incidental_finding_history
-          ADD CONSTRAINT fk_ipa_incidental_finding_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+      ALTER TABLE ONLY ${target_name_us}_incidental_finding_history
+          ADD CONSTRAINT fk_${target_name_us}_incidental_finding_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
-      ALTER TABLE ONLY ipa_incidental_finding_history
-          ADD CONSTRAINT fk_ipa_incidental_finding_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
+      ALTER TABLE ONLY ${target_name_us}_incidental_finding_history
+          ADD CONSTRAINT fk_${target_name_us}_incidental_finding_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
-      ALTER TABLE ONLY ipa_incidental_finding_history
-          ADD CONSTRAINT fk_ipa_incidental_finding_history_ipa_incidental_findings FOREIGN KEY (ipa_incidental_finding_id) REFERENCES ipa_incidental_findings(id);
+
+
+      ALTER TABLE ONLY ${target_name_us}_incidental_finding_history
+          ADD CONSTRAINT fk_${target_name_us}_incidental_finding_history_${target_name_us}_incidental_findings FOREIGN KEY (${target_name_us}_incidental_finding_id) REFERENCES ${target_name_us}_incidental_findings(id);
 
       GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
       GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;

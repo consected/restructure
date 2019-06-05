@@ -1,4 +1,4 @@
-CREATE TABLE ipa_ops.adl_screener_data
+CREATE TABLE ${target_name_us}_ops.adl_screener_data
 (
 id serial NOT NULL,
 record_id numeric,

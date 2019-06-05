@@ -1,6 +1,6 @@
--- create schema #{app_schema} OWNER fphs;
+create schema ${app_schema} IF NOT EXISTS ${app_schema} AUTHORIZATION fphs;
 
-set search_path=#{app_schema},ml_app;
+set search_path=${app_schema},ml_app;
 
 -- # Tracker
 \i ${sql_dir}/${app_dirname}/aws-db/tracker/create_activity_log_assignments.sql
@@ -60,7 +60,7 @@ set search_path=#{app_schema},ml_app;
 -- \i ${sql_dir}/${app_dirname}/aws-db/trigger_tmoca_score_calc.sql
 
 
-# MedNav
+-- # MedNav
 \i ${sql_dir}/${app_dirname}/aws-db/mednav/create_al_exit_interviews.sql
 \i ${sql_dir}/${app_dirname}/aws-db/mednav/create_exit_interviews_table.sql
 \i ${sql_dir}/${app_dirname}/aws-db/mednav/create_four_wk_followups_table.sql
@@ -74,5 +74,5 @@ set search_path=#{app_schema},ml_app;
 set search_path=ml_app;
 \i ${sql_dir}/${app_dirname}/aws-db/z-sync/z-ml_app-sync-create_sync_subject_data_aws_db.sql
 
-set search_path=#{app_schema},ml_app;
+set search_path=${app_schema},ml_app;
 \i ${sql_dir}/${app_dirname}/aws-db/z_grant_roles.sql

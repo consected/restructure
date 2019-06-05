@@ -1,14 +1,14 @@
-set search_path=ipa_ops,ml_app;
+set search_path=${target_name_us}_ops,ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_mednav_provider_reports report_delivery_date anthropometrics_check anthropometrics_notes lab_results_check lab_results_notes dexa_check dexa_notes brain_mri_check brain_mri_notes neuro_psych_check neuro_psych_notes sensory_testing_check sensory_testing_notes liver_mri_check liver_mri_notes physical_function_check physical_function_notes eeg_check eeg_notes sleep_check sleep_notes cardiac_check cardiac_notes xray_check xray_notes
+-- table_generators/generate.sh dynamic_models_table create ${target_name_us}_mednav_provider_reports report_delivery_date anthropometrics_check anthropometrics_notes lab_results_check lab_results_notes dexa_check dexa_notes brain_mri_check brain_mri_notes neuro_psych_check neuro_psych_notes sensory_testing_check sensory_testing_notes liver_mri_check liver_mri_notes physical_function_check physical_function_notes eeg_check eeg_notes sleep_check sleep_notes cardiac_check cardiac_notes xray_check xray_notes
 
-      CREATE or REPLACE FUNCTION log_ipa_mednav_provider_report_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_${target_name_us}_mednav_provider_report_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
-                  INSERT INTO ipa_mednav_provider_report_history
+                  INSERT INTO ${target_name_us}_mednav_provider_report_history
                   (
                       master_id,
                       report_delivery_date,
@@ -40,7 +40,7 @@ set search_path=ipa_ops,ml_app;
                       user_id,
                       created_at,
                       updated_at,
-                      ipa_mednav_provider_report_id
+                      ${target_name_us}_mednav_provider_report_id
                       )
                   SELECT
                       NEW.master_id,
@@ -79,7 +79,7 @@ set search_path=ipa_ops,ml_app;
               END;
           $$;
 
-      CREATE TABLE ipa_mednav_provider_report_history (
+      CREATE TABLE ${target_name_us}_mednav_provider_report_history (
           id integer NOT NULL,
           master_id integer,
           report_delivery_date date,
@@ -111,19 +111,19 @@ set search_path=ipa_ops,ml_app;
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
-          ipa_mednav_provider_report_id integer
+          ${target_name_us}_mednav_provider_report_id integer
       );
 
-      CREATE SEQUENCE ipa_mednav_provider_report_history_id_seq
+      CREATE SEQUENCE ${target_name_us}_mednav_provider_report_history_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_mednav_provider_report_history_id_seq OWNED BY ipa_mednav_provider_report_history.id;
+      ALTER SEQUENCE ${target_name_us}_mednav_provider_report_history_id_seq OWNED BY ${target_name_us}_mednav_provider_report_history.id;
 
-      CREATE TABLE ipa_mednav_provider_reports (
+      CREATE TABLE ${target_name_us}_mednav_provider_reports (
           id integer NOT NULL,
           master_id integer,
           report_delivery_date date,
@@ -156,56 +156,56 @@ set search_path=ipa_ops,ml_app;
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
-      CREATE SEQUENCE ipa_mednav_provider_reports_id_seq
+      CREATE SEQUENCE ${target_name_us}_mednav_provider_reports_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_mednav_provider_reports_id_seq OWNED BY ipa_mednav_provider_reports.id;
+      ALTER SEQUENCE ${target_name_us}_mednav_provider_reports_id_seq OWNED BY ${target_name_us}_mednav_provider_reports.id;
 
-      ALTER TABLE ONLY ipa_mednav_provider_reports ALTER COLUMN id SET DEFAULT nextval('ipa_mednav_provider_reports_id_seq'::regclass);
-      ALTER TABLE ONLY ipa_mednav_provider_report_history ALTER COLUMN id SET DEFAULT nextval('ipa_mednav_provider_report_history_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_reports ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_mednav_provider_reports_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_report_history ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_mednav_provider_report_history_id_seq'::regclass);
 
-      ALTER TABLE ONLY ipa_mednav_provider_report_history
-          ADD CONSTRAINT ipa_mednav_provider_report_history_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_report_history
+          ADD CONSTRAINT ${target_name_us}_mednav_provider_report_history_pkey PRIMARY KEY (id);
 
-      ALTER TABLE ONLY ipa_mednav_provider_reports
-          ADD CONSTRAINT ipa_mednav_provider_reports_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_reports
+          ADD CONSTRAINT ${target_name_us}_mednav_provider_reports_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_ipa_mednav_provider_report_history_on_master_id ON ipa_mednav_provider_report_history USING btree (master_id);
-
-
-      CREATE INDEX index_ipa_mednav_provider_report_history_on_ipa_mednav_provider_report_id ON ipa_mednav_provider_report_history USING btree (ipa_mednav_provider_report_id);
-      CREATE INDEX index_ipa_mednav_provider_report_history_on_user_id ON ipa_mednav_provider_report_history USING btree (user_id);
-
-      CREATE INDEX index_ipa_mednav_provider_reports_on_master_id ON ipa_mednav_provider_reports USING btree (master_id);
-
-      CREATE INDEX index_ipa_mednav_provider_reports_on_user_id ON ipa_mednav_provider_reports USING btree (user_id);
-
-      CREATE TRIGGER ipa_mednav_provider_report_history_insert AFTER INSERT ON ipa_mednav_provider_reports FOR EACH ROW EXECUTE PROCEDURE log_ipa_mednav_provider_report_update();
-      CREATE TRIGGER ipa_mednav_provider_report_history_update AFTER UPDATE ON ipa_mednav_provider_reports FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_mednav_provider_report_update();
+      CREATE INDEX index_${target_name_us}_mednav_provider_report_history_on_master_id ON ${target_name_us}_mednav_provider_report_history USING btree (master_id);
 
 
-      ALTER TABLE ONLY ipa_mednav_provider_reports
+      CREATE INDEX index_${target_name_us}_mednav_provider_report_history_on_${target_name_us}_mednav_provider_report_id ON ${target_name_us}_mednav_provider_report_history USING btree (${target_name_us}_mednav_provider_report_id);
+      CREATE INDEX index_${target_name_us}_mednav_provider_report_history_on_user_id ON ${target_name_us}_mednav_provider_report_history USING btree (user_id);
+
+      CREATE INDEX index_${target_name_us}_mednav_provider_reports_on_master_id ON ${target_name_us}_mednav_provider_reports USING btree (master_id);
+
+      CREATE INDEX index_${target_name_us}_mednav_provider_reports_on_user_id ON ${target_name_us}_mednav_provider_reports USING btree (user_id);
+
+      CREATE TRIGGER ${target_name_us}_mednav_provider_report_history_insert AFTER INSERT ON ${target_name_us}_mednav_provider_reports FOR EACH ROW EXECUTE PROCEDURE log_${target_name_us}_mednav_provider_report_update();
+      CREATE TRIGGER ${target_name_us}_mednav_provider_report_history_update AFTER UPDATE ON ${target_name_us}_mednav_provider_reports FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_${target_name_us}_mednav_provider_report_update();
+
+
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_reports
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-      ALTER TABLE ONLY ipa_mednav_provider_reports
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_reports
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 
-      ALTER TABLE ONLY ipa_mednav_provider_report_history
-          ADD CONSTRAINT fk_ipa_mednav_provider_report_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_report_history
+          ADD CONSTRAINT fk_${target_name_us}_mednav_provider_report_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
-      ALTER TABLE ONLY ipa_mednav_provider_report_history
-          ADD CONSTRAINT fk_ipa_mednav_provider_report_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_report_history
+          ADD CONSTRAINT fk_${target_name_us}_mednav_provider_report_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
-      ALTER TABLE ONLY ipa_mednav_provider_report_history
-          ADD CONSTRAINT fk_ipa_mednav_provider_report_history_ipa_mednav_provider_reports FOREIGN KEY (ipa_mednav_provider_report_id) REFERENCES ipa_mednav_provider_reports(id);
+
+
+      ALTER TABLE ONLY ${target_name_us}_mednav_provider_report_history
+          ADD CONSTRAINT fk_${target_name_us}_mednav_provider_report_history_${target_name_us}_mednav_provider_reports FOREIGN KEY (${target_name_us}_mednav_provider_report_id) REFERENCES ${target_name_us}_mednav_provider_reports(id);
 
       GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
       GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;

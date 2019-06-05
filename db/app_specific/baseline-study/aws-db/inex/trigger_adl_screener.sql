@@ -9,10 +9,10 @@ BEGIN
 		SELECT ipa.master_id
     INTO matched_master_id
 		FROM ml_app.masters m
-		INNER JOIN ipa_ops.ipa_assignments ipa
+		INNER JOIN ${target_name_us}_ops.${target_name_us}_assignments ipa
 			ON m.id = ipa.master_id
 		WHERE
-      ipa.ipa_id = subject_id
+      ipa.${target_name_us}_id = subject_id
     LIMIT 1
 		;
 
@@ -20,7 +20,7 @@ BEGIN
 END;
 $$;
 
-create or replace function ipa_ops.sync_new_adl_screener() returns trigger
+create or replace function ${target_name_us}_ops.sync_new_adl_screener() returns trigger
 language plpgsql
 AS $$
   DECLARE
@@ -31,7 +31,7 @@ AS $$
     matched_master_id :=  get_adl_screener_master_id(new.redcap_survey_identifier);
 
 
-    insert into ipa_adl_informant_screeners
+    insert into ${target_name_us}_adl_informant_screeners
       (
         master_id,
         select_regarding_eating,
@@ -268,7 +268,7 @@ AS $$
       )
       RETURNING id INTO new_id;
 
-    insert into activity_log_ipa_assignment_inex_checklists
+    insert into activity_log_${target_name_us}_assignment_inex_checklists
     (master_id, extra_log_type, created_at, updated_at)
     values
     (

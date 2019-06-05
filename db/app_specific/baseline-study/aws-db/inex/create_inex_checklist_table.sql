@@ -2,13 +2,13 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh create dynamic_models_table ipa_inex_checklists false fixed_checklist_type ix_consent_blank_yes_no ix_consent_details ix_not_pro_blank_yes_no ix_not_pro_details ix_age_range_blank_yes_no ix_age_range_details ix_weight_ok_blank_yes_no ix_weight_ok_details ix_no_seizure_blank_yes_no ix_no_seizure_details ix_no_device_impl_blank_yes_no ix_no_device_impl_details ix_no_ferromagnetic_impl_blank_yes_no ix_no_ferromagnetic_impl_details ix_diagnosed_sleep_apnea_blank_yes_no ix_diagnosed_sleep_apnea_details ix_diagnosed_heart_stroke_or_meds_blank_yes_no ix_diagnosed_heart_stroke_or_meds_details ix_chronic_pain_and_meds_blank_yes_no ix_chronic_pain_and_meds_details ix_tmoca_score_blank_yes_no ix_tmoca_score_details ix_no_hemophilia_blank_yes_no ix_no_hemophilia_details ix_raynauds_ok_blank_yes_no ix_raynauds_ok_details ix_mi_ok_blank_yes_no ix_mi_ok_details ix_bicycle_ok_blank_yes_no ix_bicycle_ok_details
+-- table_generators/generate.sh create dynamic_models_table ${target_name_us}_inex_checklists false fixed_checklist_type ix_consent_blank_yes_no ix_consent_details ix_not_pro_blank_yes_no ix_not_pro_details ix_age_range_blank_yes_no ix_age_range_details ix_weight_ok_blank_yes_no ix_weight_ok_details ix_no_seizure_blank_yes_no ix_no_seizure_details ix_no_device_impl_blank_yes_no ix_no_device_impl_details ix_no_ferromagnetic_impl_blank_yes_no ix_no_ferromagnetic_impl_details ix_diagnosed_sleep_apnea_blank_yes_no ix_diagnosed_sleep_apnea_details ix_diagnosed_heart_stroke_or_meds_blank_yes_no ix_diagnosed_heart_stroke_or_meds_details ix_chronic_pain_and_meds_blank_yes_no ix_chronic_pain_and_meds_details ix_tmoca_score_blank_yes_no ix_tmoca_score_details ix_no_hemophilia_blank_yes_no ix_no_hemophilia_details ix_raynauds_ok_blank_yes_no ix_raynauds_ok_details ix_mi_ok_blank_yes_no ix_mi_ok_details ix_bicycle_ok_blank_yes_no ix_bicycle_ok_details
 
-      CREATE FUNCTION log_ipa_inex_checklist_update() RETURNS trigger
+      CREATE FUNCTION log_${target_name_us}_inex_checklist_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
-                  INSERT INTO ipa_inex_checklist_history
+                  INSERT INTO ${target_name_us}_inex_checklist_history
                   (
                       master_id,
                       fixed_checklist_type,
@@ -45,7 +45,7 @@
                       user_id,
                       created_at,
                       updated_at,
-                      ipa_inex_checklist_id
+                      ${target_name_us}_inex_checklist_id
                       )
                   SELECT
                       NEW.master_id,
@@ -89,7 +89,7 @@
               END;
           $$;
 
-      CREATE TABLE ipa_inex_checklist_history (
+      CREATE TABLE ${target_name_us}_inex_checklist_history (
           id integer NOT NULL,
           master_id integer,
           fixed_checklist_type varchar,
@@ -126,19 +126,19 @@
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
-          ipa_inex_checklist_id integer
+          ${target_name_us}_inex_checklist_id integer
       );
 
-      CREATE SEQUENCE ipa_inex_checklist_history_id_seq
+      CREATE SEQUENCE ${target_name_us}_inex_checklist_history_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_inex_checklist_history_id_seq OWNED BY ipa_inex_checklist_history.id;
+      ALTER SEQUENCE ${target_name_us}_inex_checklist_history_id_seq OWNED BY ${target_name_us}_inex_checklist_history.id;
 
-      CREATE TABLE ipa_inex_checklists (
+      CREATE TABLE ${target_name_us}_inex_checklists (
           id integer NOT NULL,
           master_id integer,
           fixed_checklist_type varchar,
@@ -176,56 +176,56 @@
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
-      CREATE SEQUENCE ipa_inex_checklists_id_seq
+      CREATE SEQUENCE ${target_name_us}_inex_checklists_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_inex_checklists_id_seq OWNED BY ipa_inex_checklists.id;
+      ALTER SEQUENCE ${target_name_us}_inex_checklists_id_seq OWNED BY ${target_name_us}_inex_checklists.id;
 
-      ALTER TABLE ONLY ipa_inex_checklists ALTER COLUMN id SET DEFAULT nextval('ipa_inex_checklists_id_seq'::regclass);
-      ALTER TABLE ONLY ipa_inex_checklist_history ALTER COLUMN id SET DEFAULT nextval('ipa_inex_checklist_history_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_inex_checklists ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_inex_checklists_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_inex_checklist_history ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_inex_checklist_history_id_seq'::regclass);
 
-      ALTER TABLE ONLY ipa_inex_checklist_history
-          ADD CONSTRAINT ipa_inex_checklist_history_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_inex_checklist_history
+          ADD CONSTRAINT ${target_name_us}_inex_checklist_history_pkey PRIMARY KEY (id);
 
-      ALTER TABLE ONLY ipa_inex_checklists
-          ADD CONSTRAINT ipa_inex_checklists_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_inex_checklists
+          ADD CONSTRAINT ${target_name_us}_inex_checklists_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_ipa_inex_checklist_history_on_master_id ON ipa_inex_checklist_history USING btree (master_id);
-
-
-      CREATE INDEX index_ipa_inex_checklist_history_on_ipa_inex_checklist_id ON ipa_inex_checklist_history USING btree (ipa_inex_checklist_id);
-      CREATE INDEX index_ipa_inex_checklist_history_on_user_id ON ipa_inex_checklist_history USING btree (user_id);
-
-      CREATE INDEX index_ipa_inex_checklists_on_master_id ON ipa_inex_checklists USING btree (master_id);
-
-      CREATE INDEX index_ipa_inex_checklists_on_user_id ON ipa_inex_checklists USING btree (user_id);
-
-      CREATE TRIGGER ipa_inex_checklist_history_insert AFTER INSERT ON ipa_inex_checklists FOR EACH ROW EXECUTE PROCEDURE log_ipa_inex_checklist_update();
-      CREATE TRIGGER ipa_inex_checklist_history_update AFTER UPDATE ON ipa_inex_checklists FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_inex_checklist_update();
+      CREATE INDEX index_${target_name_us}_inex_checklist_history_on_master_id ON ${target_name_us}_inex_checklist_history USING btree (master_id);
 
 
-      ALTER TABLE ONLY ipa_inex_checklists
+      CREATE INDEX index_${target_name_us}_inex_checklist_history_on_${target_name_us}_inex_checklist_id ON ${target_name_us}_inex_checklist_history USING btree (${target_name_us}_inex_checklist_id);
+      CREATE INDEX index_${target_name_us}_inex_checklist_history_on_user_id ON ${target_name_us}_inex_checklist_history USING btree (user_id);
+
+      CREATE INDEX index_${target_name_us}_inex_checklists_on_master_id ON ${target_name_us}_inex_checklists USING btree (master_id);
+
+      CREATE INDEX index_${target_name_us}_inex_checklists_on_user_id ON ${target_name_us}_inex_checklists USING btree (user_id);
+
+      CREATE TRIGGER ${target_name_us}_inex_checklist_history_insert AFTER INSERT ON ${target_name_us}_inex_checklists FOR EACH ROW EXECUTE PROCEDURE log_${target_name_us}_inex_checklist_update();
+      CREATE TRIGGER ${target_name_us}_inex_checklist_history_update AFTER UPDATE ON ${target_name_us}_inex_checklists FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_${target_name_us}_inex_checklist_update();
+
+
+      ALTER TABLE ONLY ${target_name_us}_inex_checklists
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-      ALTER TABLE ONLY ipa_inex_checklists
+      ALTER TABLE ONLY ${target_name_us}_inex_checklists
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 
-      ALTER TABLE ONLY ipa_inex_checklist_history
-          ADD CONSTRAINT fk_ipa_inex_checklist_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+      ALTER TABLE ONLY ${target_name_us}_inex_checklist_history
+          ADD CONSTRAINT fk_${target_name_us}_inex_checklist_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
-      ALTER TABLE ONLY ipa_inex_checklist_history
-          ADD CONSTRAINT fk_ipa_inex_checklist_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
+      ALTER TABLE ONLY ${target_name_us}_inex_checklist_history
+          ADD CONSTRAINT fk_${target_name_us}_inex_checklist_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
-      ALTER TABLE ONLY ipa_inex_checklist_history
-          ADD CONSTRAINT fk_ipa_inex_checklist_history_ipa_inex_checklists FOREIGN KEY (ipa_inex_checklist_id) REFERENCES ipa_inex_checklists(id);
+
+
+      ALTER TABLE ONLY ${target_name_us}_inex_checklist_history
+          ADD CONSTRAINT fk_${target_name_us}_inex_checklist_history_${target_name_us}_inex_checklists FOREIGN KEY (${target_name_us}_inex_checklist_id) REFERENCES ${target_name_us}_inex_checklists(id);
 
       GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
       GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;

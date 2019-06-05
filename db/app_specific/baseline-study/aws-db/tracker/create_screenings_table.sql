@@ -2,13 +2,13 @@
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create ipa_screenings eligible_for_study_blank_yes_no requires_study_partner_blank_yes_no notes good_time_to_speak_blank_yes_no callback_date callback_time still_interested_blank_yes_no not_interested_notes ineligible_notes eligible_notes
+-- table_generators/generate.sh dynamic_models_table create ${target_name_us}_screenings eligible_for_study_blank_yes_no requires_study_partner_blank_yes_no notes good_time_to_speak_blank_yes_no callback_date callback_time still_interested_blank_yes_no not_interested_notes ineligible_notes eligible_notes
 
-      CREATE or REPLACE FUNCTION log_ipa_screening_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_${target_name_us}_screening_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
-                  INSERT INTO ipa_screening_history
+                  INSERT INTO ${target_name_us}_screening_history
                   (
                       master_id,
                       eligible_for_study_blank_yes_no,
@@ -25,7 +25,7 @@
                       user_id,
                       created_at,
                       updated_at,
-                      ipa_screening_id
+                      ${target_name_us}_screening_id
                       )
                   SELECT
                       NEW.master_id,
@@ -49,7 +49,7 @@
               END;
           $$;
 
-      CREATE TABLE ipa_screening_history (
+      CREATE TABLE ${target_name_us}_screening_history (
           id integer NOT NULL,
           master_id integer,
           eligible_for_study_blank_yes_no varchar,
@@ -66,19 +66,19 @@
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
-          ipa_screening_id integer
+          ${target_name_us}_screening_id integer
       );
 
-      CREATE SEQUENCE ipa_screening_history_id_seq
+      CREATE SEQUENCE ${target_name_us}_screening_history_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_screening_history_id_seq OWNED BY ipa_screening_history.id;
+      ALTER SEQUENCE ${target_name_us}_screening_history_id_seq OWNED BY ${target_name_us}_screening_history.id;
 
-      CREATE TABLE ipa_screenings (
+      CREATE TABLE ${target_name_us}_screenings (
           id integer NOT NULL,
           master_id integer,
           eligible_for_study_blank_yes_no varchar,
@@ -96,56 +96,56 @@
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
       );
-      CREATE SEQUENCE ipa_screenings_id_seq
+      CREATE SEQUENCE ${target_name_us}_screenings_id_seq
           START WITH 1
           INCREMENT BY 1
           NO MINVALUE
           NO MAXVALUE
           CACHE 1;
 
-      ALTER SEQUENCE ipa_screenings_id_seq OWNED BY ipa_screenings.id;
+      ALTER SEQUENCE ${target_name_us}_screenings_id_seq OWNED BY ${target_name_us}_screenings.id;
 
-      ALTER TABLE ONLY ipa_screenings ALTER COLUMN id SET DEFAULT nextval('ipa_screenings_id_seq'::regclass);
-      ALTER TABLE ONLY ipa_screening_history ALTER COLUMN id SET DEFAULT nextval('ipa_screening_history_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_screenings ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_screenings_id_seq'::regclass);
+      ALTER TABLE ONLY ${target_name_us}_screening_history ALTER COLUMN id SET DEFAULT nextval('${target_name_us}_screening_history_id_seq'::regclass);
 
-      ALTER TABLE ONLY ipa_screening_history
-          ADD CONSTRAINT ipa_screening_history_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_screening_history
+          ADD CONSTRAINT ${target_name_us}_screening_history_pkey PRIMARY KEY (id);
 
-      ALTER TABLE ONLY ipa_screenings
-          ADD CONSTRAINT ipa_screenings_pkey PRIMARY KEY (id);
+      ALTER TABLE ONLY ${target_name_us}_screenings
+          ADD CONSTRAINT ${target_name_us}_screenings_pkey PRIMARY KEY (id);
 
-      CREATE INDEX index_ipa_screening_history_on_master_id ON ipa_screening_history USING btree (master_id);
-
-
-      CREATE INDEX index_ipa_screening_history_on_ipa_screening_id ON ipa_screening_history USING btree (ipa_screening_id);
-      CREATE INDEX index_ipa_screening_history_on_user_id ON ipa_screening_history USING btree (user_id);
-
-      CREATE INDEX index_ipa_screenings_on_master_id ON ipa_screenings USING btree (master_id);
-
-      CREATE INDEX index_ipa_screenings_on_user_id ON ipa_screenings USING btree (user_id);
-
-      CREATE TRIGGER ipa_screening_history_insert AFTER INSERT ON ipa_screenings FOR EACH ROW EXECUTE PROCEDURE log_ipa_screening_update();
-      CREATE TRIGGER ipa_screening_history_update AFTER UPDATE ON ipa_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_ipa_screening_update();
+      CREATE INDEX index_${target_name_us}_screening_history_on_master_id ON ${target_name_us}_screening_history USING btree (master_id);
 
 
-      ALTER TABLE ONLY ipa_screenings
+      CREATE INDEX index_${target_name_us}_screening_history_on_${target_name_us}_screening_id ON ${target_name_us}_screening_history USING btree (${target_name_us}_screening_id);
+      CREATE INDEX index_${target_name_us}_screening_history_on_user_id ON ${target_name_us}_screening_history USING btree (user_id);
+
+      CREATE INDEX index_${target_name_us}_screenings_on_master_id ON ${target_name_us}_screenings USING btree (master_id);
+
+      CREATE INDEX index_${target_name_us}_screenings_on_user_id ON ${target_name_us}_screenings USING btree (user_id);
+
+      CREATE TRIGGER ${target_name_us}_screening_history_insert AFTER INSERT ON ${target_name_us}_screenings FOR EACH ROW EXECUTE PROCEDURE log_${target_name_us}_screening_update();
+      CREATE TRIGGER ${target_name_us}_screening_history_update AFTER UPDATE ON ${target_name_us}_screenings FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE log_${target_name_us}_screening_update();
+
+
+      ALTER TABLE ONLY ${target_name_us}_screenings
           ADD CONSTRAINT fk_rails_1a7e2b01e0 FOREIGN KEY (user_id) REFERENCES users(id);
-      ALTER TABLE ONLY ipa_screenings
+      ALTER TABLE ONLY ${target_name_us}_screenings
           ADD CONSTRAINT fk_rails_45205ed085 FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
 
-      ALTER TABLE ONLY ipa_screening_history
-          ADD CONSTRAINT fk_ipa_screening_history_users FOREIGN KEY (user_id) REFERENCES users(id);
+      ALTER TABLE ONLY ${target_name_us}_screening_history
+          ADD CONSTRAINT fk_${target_name_us}_screening_history_users FOREIGN KEY (user_id) REFERENCES users(id);
 
-      ALTER TABLE ONLY ipa_screening_history
-          ADD CONSTRAINT fk_ipa_screening_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
-
-
+      ALTER TABLE ONLY ${target_name_us}_screening_history
+          ADD CONSTRAINT fk_${target_name_us}_screening_history_masters FOREIGN KEY (master_id) REFERENCES masters(id);
 
 
-      ALTER TABLE ONLY ipa_screening_history
-          ADD CONSTRAINT fk_ipa_screening_history_ipa_screenings FOREIGN KEY (ipa_screening_id) REFERENCES ipa_screenings(id);
+
+
+      ALTER TABLE ONLY ${target_name_us}_screening_history
+          ADD CONSTRAINT fk_${target_name_us}_screening_history_${target_name_us}_screenings FOREIGN KEY (${target_name_us}_screening_id) REFERENCES ${target_name_us}_screenings(id);
 
       GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
       GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
