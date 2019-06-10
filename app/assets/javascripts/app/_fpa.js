@@ -8,24 +8,32 @@ _fpa = {
   remote_request: null,
   remote_request_block: null,
 
-  ajax_working: function(block){
-
-    $(block).addClass('ajax-running').removeClass('ajax-canceled');
+  result_target: function(block) {
     var d = $(block).attr('data-result-target');
-    if (d) $(d).addClass('ajax-running');
+    if (d && d.length > 1) return d;
+    return null;
+  },
+  ajax_working: function(block){
+    try {
+      $(block).addClass('ajax-running').removeClass('ajax-canceled');
+      var d = _fpa.result_target(block);
+      if (d) $(d).addClass('ajax-running');
+    } catch(err) {}
   },
   ajax_done: function(block){
-    $(block).removeClass('ajax-running').removeClass('ajax-canceled');
-    var d = $(block).attr('data-result-target');
-    if (d) $(d).removeClass('ajax-running').removeClass('ajax-canceled');
-
+    try {
+      $(block).removeClass('ajax-running').removeClass('ajax-canceled');
+      var d = _fpa.result_target(block);
+      if (d) $(d).removeClass('ajax-running').removeClass('ajax-canceled');
+    } catch(err) {}
     _fpa.remote_request = null;
   },
   ajax_canceled: function(block){
-    $(block).removeClass('ajax-running').addClass('ajax-canceled');
-    var d = $(block).attr('data-result-target');
-    if (d) $(d).removeClass('ajax-running').addClass('ajax-canceled');
-
+    try {
+      $(block).removeClass('ajax-running').addClass('ajax-canceled');
+      var d = _fpa.result_target(block);
+      if (d) $(d).removeClass('ajax-running').addClass('ajax-canceled');
+    } catch(err) {}
     _fpa.remote_request = null;
   },
   compile_templates: function(){

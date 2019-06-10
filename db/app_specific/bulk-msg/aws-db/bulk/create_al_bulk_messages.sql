@@ -1,4 +1,5 @@
-set search_path=ml_app;
+set search_path=bulk_msg,ml_app;
+
       BEGIN;
 
 -- Command line:

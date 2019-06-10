@@ -1,0 +1,11 @@
+create schema ${app_schema} IF NOT EXISTS ${app_schema} AUTHORIZATION fphs;
+
+set search_path=${app_schema},ml_app;
+
+\i ${sql_dir}/${app_dirname}/aws-db/bulk/create_al_bulk_messages.sql
+\i ${sql_dir}/${app_dirname}/aws-db/bulk/create_zeus_bulk_message_recipients_table.sql
+\i ${sql_dir}/${app_dirname}/aws-db/bulk/create_zeus_bulk_messages_table.sql
+\i ${sql_dir}/${app_dirname}/aws-db/bulk/dup_check_recipients.sql
+
+set search_path=${app_schema},ml_app;
+\i ${sql_dir}/${app_dirname}/aws-db/z_grant_roles.sql

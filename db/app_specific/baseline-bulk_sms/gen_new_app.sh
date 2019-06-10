@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Example:
-# target_name=test1 app_schema=test_1 db/app_specific/baseline-study/gen_new_study.sh
+# target_name=bulk-msg app_schema=bulk_msg db/app_specific/baseline-bulk_sms/gen_new_app.sh
 
 export org_upper=FPHS
 export target_initials_upper=$(echo "${target_name}" | tr a-z A-Z)
@@ -34,11 +34,11 @@ if [ -d "${target_dir}" ]; then
   # exit
 else
   echo "Creating '${target_dir}'"
+  mkdir -p ${target_dir}
 fi
 
-mkdir -p ${target_dir}
 
-module_list="0-scripts adverse-events inex mednav navigation phone-screen protocol-deviations tracker z-sync"
+module_list="0-scripts bulk"
 
 modules=$(echo ${module_list} | tr " " "\n")
 
@@ -48,8 +48,12 @@ do
   for curr_file in ./aws-db/${module}/*
   do
     mkdir -p ${target_dir}/aws-db/${module}
+    echo "New directory: ${target_dir}/aws-db/${module}"
     envsubst < ${curr_file} > ${target_dir}/${curr_file}
+    echo "File: ${target_dir}/${curr_file}"
   done
 done
 
-envsubst < "${app_configs}/baseline study_config.json" > "${app_configs}/${target_name}_config.json"
+
+envsubst < "${app_configs}/baseline bulk msg_config.json" > "${app_configs}/${target_name}_config.json"
+echo "Created config file: ${app_configs}/${target_name}_config.json"

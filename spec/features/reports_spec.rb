@@ -32,6 +32,9 @@ describe "reports", js: true, driver: :app_firefox_driver do
     else
       r = rl.first
     end
+
+    Report.active.where('id != :id', id: r.id).update_all(disabled: true, admin_id: @admin.id)
+
     @report = r
   end
 
