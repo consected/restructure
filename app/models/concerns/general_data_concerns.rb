@@ -98,7 +98,7 @@ module GeneralDataConcerns
   end
 
   def user_preference
-    user&.user_preference.attributes
+    user&.user_preference&.attributes
   end
 
   def as_json extras={}
