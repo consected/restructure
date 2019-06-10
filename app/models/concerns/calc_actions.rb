@@ -235,13 +235,15 @@ module CalcActions
         if first_res
           tn = first_res.class.table_name
           fn = first_res.class.attribute_names.select{|s| s == @this_val_where[:field_name].to_s}.first
+
+          tv_tn = UserBase.clean_table_name(ModelReference.record_type_to_ns_table_name(@this_val_where[:table_name]))
           if tn
             rquery = @condition_scope.reorder("#{tn}.id desc")
-          elsif @this_val_where[:table_name]
-            rquery = @condition_scope.reorder("#{@this_val_where[:table_name]}.id desc")
+          elsif tv_tn
+            rquery = @condition_scope.reorder("#{tv_tn}.id desc")
           end
           if @this_val_where[:mode] == 'return_result'
-            rquery = rquery.select("#{@this_val_where[:table_name]}.*")
+            rquery = rquery.select("#{tv_tn}.*")
             @this_val = first_res.class.find(rquery.first.id)
           else
             rvals = rquery.pluck("#{tn}.#{fn}")

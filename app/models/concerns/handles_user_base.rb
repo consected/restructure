@@ -40,6 +40,15 @@ module HandlesUserBase
       all_subclasses.select {|s| s.name == class_name}.first
     end
 
+    def class_from_table_name table_name
+      UserBase.descendants.reject(&:abstract_class).select {|c| c.table_name == table_name.to_s}.first
+    end
+
+    # Ensure that a provided table_name is clean and can be used safely without SQL injection warnings
+    def clean_table_name table_name
+      class_from_table_name(table_name)&.table_name
+    end
+
     def is_external_identifier?
       false
     end
