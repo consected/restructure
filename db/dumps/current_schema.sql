@@ -3806,9 +3806,10 @@ CREATE TABLE ml_app.message_notifications (
     status_changed character varying,
     subject character varying,
     data json,
-    recipient_emails character varying[],
+    recipient_data character varying[],
     from_user_email character varying,
-    role_name character varying
+    role_name character varying,
+    content_template_text character varying
 );
 
 
