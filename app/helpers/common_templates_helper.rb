@@ -13,7 +13,7 @@ module CommonTemplatesHelper
 
   def field_options_for form_object_instance, field_name_sym
     if form_object_instance.respond_to?(:option_type_config) && form_object_instance.option_type_config
-      fopt = form_object_instance.option_type_config.field_options[field_name_sym]
+      fopt = form_object_instance.option_type_config.field_options[field_name_sym].dup
     end
 
     fopt ||= {}

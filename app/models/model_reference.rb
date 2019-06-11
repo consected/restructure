@@ -179,12 +179,33 @@ class ModelReference < ActiveRecord::Base
     end
   end
 
-  def self.record_type_to_ns_table_name rt
+  # Params are provided for singularize and pluralize to highlight the fact that otherwise we rely on the data that is
+  # passed in and don't enforce it one way or another.
+  # This means that if a singular rt is passed in, the result is not truly a table name, since the result will be singular
+  # unless explicitly pluralized
+  def self.record_type_to_ns_table_name rt, pluralize: nil, singularize: nil
     if rt.is_a?(String) || rt.is_a?(Symbol)
-      rt.to_s.sub('dynamic_model__', '')
-    else
-      rt.name.ns_underscore.sub('dynamic_model__', '')
+      res = rt.to_s
+    elsif rt.respond_to? :name
+      res = rt.name.ns_underscore
+    elsif rt.respond_to? :class
+      res = rt.class.name.ns_underscore
     end
+
+    return unless res
+
+    res = res.sub('dynamic_model__', '')
+
+    if pluralize
+      return res.pluralize
+    end
+
+    if singularize
+      return res.singularize
+    end
+
+    res
+
   end
 
   def item_type

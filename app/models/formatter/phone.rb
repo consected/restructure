@@ -2,11 +2,11 @@ module Formatter
   module Phone
 
     # Format a phone number to US format: "(aaa)bbb-cccc[ optional-freetext]"
-    def self.format data, options=nil
+    def self.format data, format: nil, default_country_code: nil, current_user: nil
       unless data.blank?
 
-        if options && options[:format] == :unformatted
-          default_country_code = options[:default_country_code]
+        if format == :unformatted
+          default_country_code = default_country_code
           if default_country_code
             if default_country_code.is_a?(String)
               default_country_code = default_country_code.gsub('+', '')

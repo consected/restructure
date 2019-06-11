@@ -11,6 +11,7 @@ module Formatter
       end
 
       def formatter_do type, data, options=nil
+        options ||= {}
         ff = formatter_for(type)
         if ff
           ff.format(data, options)

@@ -1,10 +1,11 @@
 <%
   panel_name = panel.panel_name
   panel_name_us = panel_name.underscore
-  panel_label = panel.panel_label.downcase
-  categories = panel.contains && panel.contains.categories
-  resources = panel.contains && panel.contains.resources
-  initial_show = panel.view_options && panel.view_options.initial_show
+  panel_label = panel.panel_label&.downcase
+  categories = panel.contains&.categories
+  resources = panel.contains&.resources
+  initial_show = panel.view_options&.initial_show
+  limit = panel.view_options&.limit
   %>
   <% if categories && categories.include?('trackers') %>
   <li role="presentation">
@@ -24,7 +25,7 @@
       template_postfix = '-main-result-template' if resource.start_with?('activity_log__')
   %>
   <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-    <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= resource.gsub('__', '/') %>"  data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" aria-expanded="<%=(!!initial_show).to_s%>" class="scroll-to-expanded  <%=initial_show ? '' : 'collapsed'%>"  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= resource.hyphenate %><%= template_postfix %>"><span class="caret"></span> <%= panel_label %></a>
+    <a id="tab-activity-log-<%= panel_name %>" href="/masters/{{id}}/<%= resource.gsub('__', '/') %>?limit=<%=limit%>"  data-panel-tab="<%=resource%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= resource.hyphenate %>-{{id}}" aria-expanded="<%=(!!initial_show).to_s%>" class="scroll-to-expanded  <%=initial_show ? '' : 'collapsed'%>"  data-result-target="#<%= resource.hyphenate %>-{{id}}" data-template="<%= resource.hyphenate %><%= template_postfix %>"><span class="caret"></span> <%= panel_label %></a>
   </li>
   <%
     end

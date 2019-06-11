@@ -32,7 +32,7 @@ class Admin::PageLayout < ActiveRecord::Base
   end
 
   class ViewOptions < Configuration
-    attr_accessor :initial_show, :orientation, :add_item_label
+    attr_accessor :initial_show, :orientation, :add_item_label, :limit
   end
 
 

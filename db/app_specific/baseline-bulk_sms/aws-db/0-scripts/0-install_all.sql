@@ -6,6 +6,7 @@ set search_path=${app_schema},ml_app;
 \i ${sql_dir}/${app_dirname}/aws-db/bulk/create_zeus_bulk_message_recipients_table.sql
 \i ${sql_dir}/${app_dirname}/aws-db/bulk/create_zeus_bulk_messages_table.sql
 \i ${sql_dir}/${app_dirname}/aws-db/bulk/dup_check_recipients.sql
+\i ${sql_dir}/${app_dirname}/aws-db/bulk/setup_master.sql
 
 set search_path=${app_schema},ml_app;
 \i ${sql_dir}/${app_dirname}/aws-db/z_grant_roles.sql

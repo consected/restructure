@@ -34,7 +34,7 @@ module ActivityLogHandler
     after_commit :handle_save_triggers
 
     attr_writer :alt_order
-
+    attr_accessor :action_name
     # after_commit :check_for_notification_records, on: :create
   end
 
@@ -720,6 +720,79 @@ module ActivityLogHandler
     @referring_record = res.first&.from_record
     return @referring_record if @referring_record && res.length == 1
     nil
+  end
+
+
+  def embedded_item
+
+    return @embedded_item if @embedded_item
+
+    action_name = self.action_name || 'index'
+
+    oi = self
+
+    not_embedded_options = ['not_embedded', 'select_or_add']
+
+    mrs = oi.model_references
+
+    cmrs = oi.creatable_model_references only_creatables: true
+
+    always_embed_reference = oi.extra_log_type_config.view_options[:always_embed_reference]
+    always_embed_creatable = oi.extra_log_type_config.view_options[:always_embed_creatable_reference]
+
+    always_embed_item = mrs.select{|m| m.to_record_type == always_embed_reference.ns_camelize}.first if always_embed_reference
+
+    if always_embed_item
+      # Always embed if instructed to do so by the options config
+      @embedded_item = always_embed_item.to_record
+    end
+
+    if always_embed_item && @embedded_item
+      # Do nothing
+    elsif action_name.in?(['new', 'create']) && always_embed_creatable
+      # If creatable has been specified as always embedded, use this, unless the embeddable item is an activity log.
+      cmr_view_as = cmrs.first.last.first.last[:ref_config][:view_as] rescue nil
+      @embedded_item = oi.build_model_reference [always_embed_creatable.to_sym, cmrs[always_embed_creatable.to_sym]]
+      @embedded_item = nil if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new].in?(not_embedded_options)
+    elsif action_name.in?(['new', 'create']) && cmrs.length == 1
+      # If exactly one item is creatable, use this, unless the embeddable item is an activity log.
+      cmr_view_as = cmrs.first.last.first.last[:ref_config][:view_as] rescue nil
+      @embedded_item = oi.build_model_reference cmrs.first
+      @embedded_item = nil if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new].in?(not_embedded_options)
+    elsif action_name.in?( ['new', 'create']) && cmrs.length > 1
+      # If more than one item is creatable, don't use it
+      @embedded_item = nil
+    elsif action_name.in?( ['new', 'create']) && cmrs.length == 0 && mrs.length == 1
+      # Nothing is creatable, but one has been created. Use the existing one.
+      @embedded_item = mrs.first.to_record
+    elsif action_name.in?(['edit', 'update', 'show', 'index']) && mrs.length == 0
+      # If nothing has been embedded, there is nothing to show
+      @embedded_item = nil
+    elsif action_name.in?(['edit', 'update']) && mrs.length == 1
+      # A referenced record exists - the form expects this to be embedded
+      # Therefore just use this existing item
+      @embedded_item = mrs.first.to_record
+      mr_view_as = mrs.first.to_record_options_config[:view_as] rescue nil
+      @embedded_item = nil if mr_view_as && mr_view_as[:edit].in?(not_embedded_options)
+
+    elsif action_name.in?(['show', 'index']) && mrs.length == 1 && cmrs.length == 0
+      # A referenced record exists and no more are creatable
+      # Therefore just use this existing item
+      @embedded_item = mrs.first.to_record
+
+    end
+
+    if @embedded_item
+      if @embedded_item.class.no_master_association
+        @embedded_item.current_user ||= oi.master_user
+      else
+        @embedded_item.master ||= oi.master
+        @embedded_item.master.current_user ||= oi.master_user
+      end
+    end
+
+    @embedded_item
+
   end
 
 end

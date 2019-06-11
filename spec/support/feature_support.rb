@@ -31,9 +31,16 @@ module FeatureSupport
       already_signed_in = user_logged_in?
       unless already_signed_in
         have_css ".flash .alert"
-        just_signed_in = has_css? ".flash .alert", text: "× Signed in successfully"
+
+        fa = all(".flash .alert")[0]
+        if fa
+          just_signed_in = (fa.text == "× Signed in successfully.")
+          puts fa.text unless just_signed_in
+        end
+
         break if just_signed_in
-        puts "Attempting another login"
+        sleep 35
+        # puts "Attempting another login"
         # has_css?(".flash .alert", text: "× Invalid email, password or two-factor authentication code.")
       end
     end

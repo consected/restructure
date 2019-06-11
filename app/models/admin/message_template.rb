@@ -46,7 +46,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
   # @param tag_subs [String] for example 'span class="someclass"'
   def self.substitute all_content, data: {}, tag_subs:, ignore_missing: false
-    tags = all_content.scan(/{{[0-9a-zA-Z_\.]+}}/)
+    tags = all_content.scan(/{{[0-9a-zA-Z_\.\:]+}}/)
 
     data = setup_data(data) unless data.is_a? Hash
 
@@ -62,12 +62,14 @@ class Admin::MessageTemplate < ActiveRecord::Base
         tag = tagpair.last
       end
 
-      unless d && d.is_a?(Hash) && (d.key?(tag) || d.key?(tag.to_sym))
+      tag_name = tag.split('::').first
+
+      unless d && d.is_a?(Hash) && (d.key?(tag_name) || d.key?(tag_name.to_sym))
         if ignore_missing
           d = {}
           missing = true
         else
-          raise FphsException.new "Data (#{d.class.name}) does not contain the tag #{tag} or :#{tag}\n#{d ? d : 'data is empty'}"
+          raise FphsException.new "Data (#{d.class.name}) does not contain the tag #{tag_name} or :#{tag_name}\n#{d ? d : 'data is empty'}"
         end
       end
 
@@ -116,10 +118,29 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
 
   private
-    def self.get_tag_value data, tag
+    def self.get_tag_value data, tag_and_operator
+
+      tagp = tag_and_operator.split('::')
+      tag = tagp.first
+      op = tagp[1]
       res = data[tag] || data[tag.to_sym] || ''
 
       res = formatter_do(res.class, res, current_user: data[:current_user])
+
+      return if res.nil?
+
+      # Automatically titleize names
+      op ||= 'titleize'  if tag == 'name' || tag.end_with?('_name')
+
+      if op == 'capitalize'
+        res = res.capitalize
+      elsif op == 'titleize'
+        res = res.titleize
+      elsif op == 'uppercase'
+        res = res.upcase
+      elsif op == 'lowercase'
+        res = res.downcase
+      end
 
       res
     end

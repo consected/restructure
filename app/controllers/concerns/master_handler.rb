@@ -23,7 +23,7 @@ module MasterHandler
 
   def index
     set_objects_instance @master_objects
-    s = {objects_name => filter_records(@master_objects).as_json(current_user: current_user), multiple_results: objects_name}
+    s = {objects_name => filter_records.as_json(current_user: current_user), multiple_results: objects_name}
     s.merge!(extend_result)
     if object_instance
       s[:original_item] = object_instance
@@ -244,7 +244,7 @@ module MasterHandler
           # off of the master object
           @master_objects = @master.send(objects_name)
         else
-          klass = primary_model #DynamicModel.const_get(object_name.ns_camelize)
+          klass = primary_model
           @master_objects = klass.all if klass.no_master_association
         end
         return unless @master
@@ -382,8 +382,20 @@ module MasterHandler
         end
       end
 
-      def filter_records records
-        records
+      def filter_records
+        limit_results
+      end
+
+      def requested_limit
+        @requested_limit ||= params[:limit].to_i if params[:limit].present?
+      end
+
+      def limit_results
+        if requested_limit
+          @master_objects = @master_objects.limit(requested_limit)
+        else
+          @master_objects
+        end
       end
 
       def extend_result

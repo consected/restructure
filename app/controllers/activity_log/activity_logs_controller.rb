@@ -8,7 +8,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
   before_action :set_item, only: [:index, :create, :update, :destroy]
   # before_action :handle_extra_log_type, only: [:edit, :new]
   before_action :handle_embedded_item, only: [:show, :edit, :new, :create, :update]
-  before_action :handle_embedded_items, only: [:index]
+  # before_action :handle_embedded_items, only: [:index]
   after_action :check_authentication_still_valid
 
   attr_accessor :embedded_item
@@ -33,72 +33,19 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     end
 
-    def handle_embedded_items
-      @master_objects.each {|o| handle_embedded_item o}
-    end
+    # def handle_embedded_items
+    #   @master_objects.each {|o| handle_embedded_item o}
+    # end
 
     def handle_embedded_item use_object=nil
 
-      not_embedded_options = ['not_embedded', 'select_or_add']
-
       oi = use_object || object_instance
       oi.current_user = current_user
-      mrs = oi.model_references
+      oi.action_name = action_name
+      @embedded_item = oi.embedded_item
 
-      cmrs = oi.creatable_model_references only_creatables: true
-
-      always_embed_reference = oi.extra_log_type_config.view_options[:always_embed_reference]
-      always_embed_creatable = oi.extra_log_type_config.view_options[:always_embed_creatable_reference]
-
-      always_embed_item = mrs.select{|m| m.to_record_type == always_embed_reference.ns_camelize}.first if always_embed_reference
-
-      if always_embed_item
-        # Always embed if instructed to do so by the options config
-        @embedded_item = always_embed_item.to_record
-      end
-
-      if always_embed_item && @embedded_item
-        # Do nothing
-      elsif action_name.in?(['new', 'create']) && always_embed_creatable
-        # If creatable has been specified as always embedded, use this, unless the embeddable item is an activity log.
-        cmr_view_as = cmrs.first.last.first.last[:ref_config][:view_as] rescue nil
-        @embedded_item = oi.build_model_reference [always_embed_creatable.to_sym, cmrs[always_embed_creatable.to_sym]]
-        @embedded_item = nil if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new].in?(not_embedded_options)
-      elsif action_name.in?(['new', 'create']) && cmrs.length == 1
-        # If exactly one item is creatable, use this, unless the embeddable item is an activity log.
-        cmr_view_as = cmrs.first.last.first.last[:ref_config][:view_as] rescue nil
-        @embedded_item = oi.build_model_reference cmrs.first
-        @embedded_item = nil if @embedded_item.class.parent == ActivityLog || cmr_view_as && cmr_view_as[:new].in?(not_embedded_options)
-      elsif action_name.in?( ['new', 'create']) && cmrs.length > 1
-        # If more than one item is creatable, don't use it
-        @embedded_item = nil
-      elsif action_name.in?( ['new', 'create']) && cmrs.length == 0 && mrs.length == 1
-        # Nothing is creatable, but one has been created. Use the existing one.
-        @embedded_item = mrs.first.to_record
-      elsif action_name.in?(['edit', 'update', 'show', 'index']) && mrs.length == 0
-        # If nothing has been embedded, there is nothing to show
-        @embedded_item = nil
-      elsif action_name.in?(['edit', 'update']) && mrs.length == 1
-        # A referenced record exists - the form expects this to be embedded
-        # Therefore just use this existing item
-        @embedded_item = mrs.first.to_record
-        mr_view_as = mrs.first.to_record_options_config[:view_as] rescue nil
-        @embedded_item = nil if mr_view_as && mr_view_as[:edit].in?(not_embedded_options)
-
-      elsif action_name.in?(['show', 'index']) && mrs.length == 1 && cmrs.length == 0
-        # A referenced record exists and no more are creatable
-        # Therefore just use this existing item
-        @embedded_item = mrs.first.to_record
-
-      end
 
       if @embedded_item
-        if @embedded_item.class.no_master_association
-          @embedded_item.current_user ||= oi.master_user
-        else
-          @embedded_item.master ||= oi.master
-          @embedded_item.master.current_user ||= oi.master_user
-        end
 
         set_embedded_item_optional_params if action_name == 'new'
 
@@ -113,10 +60,7 @@ class ActivityLog::ActivityLogsController < UserBaseController
         end
       end
 
-
-      oi.embedded_item = @embedded_item
     end
-
 
     def edit_form_extras
       extras_caption_before = {}
@@ -174,15 +118,23 @@ class ActivityLog::ActivityLogsController < UserBaseController
       @item_type.singularize.ns_underscore
     end
 
+    # Get associated items for the activity log list, based on the @item_type, which is specified in the request route
+    # as /masters/1/item_type/2/activity_log_self/3
+    # If the left-hand item list panel for activity logs is hidden, don't return everything, just get the items that are in the filtered objects as embedded items
+    # Otherwise get all items for this master
     def items
-      if @master.respond_to? @item_type
-        @master.send(@item_type)
-      elsif @master.respond_to? "dynamic_model__#{@item_type}"
-        @master.send("dynamic_model__#{@item_type}")
+      if @implementation_class.definition.hide_item_list_panel
+        @master_objects.select {|o| o.respond_to?(:embedded_item) && ModelReference.record_type_to_ns_table_name(o.embedded_item, pluralize: true) == @item_type }.map(&:embedded_item)
+      else
+        if @master.respond_to? @item_type
+          @master.send(@item_type)
+        elsif @master.respond_to? "dynamic_model__#{@item_type}"
+          @master.send("dynamic_model__#{@item_type}")
+        end
       end
     end
 
-    def filter_records records
+    def filter_records
       # Remove items that are not showable, based on showable_if in the extra log type config
       # This is a soft filtering of items, rather than a secure approach to avoiding them being seen,
       # since we are using showable_if only to filter in the activity log list, but continue to show the
@@ -191,7 +143,9 @@ class ActivityLog::ActivityLogsController < UserBaseController
       # being retrieved to be the underlying parent items that activity log records belong to
       # For example, in a phone log, the log records belong to player contacts, and these are retrieved
       # through the activity log controller
-      records.select { |i| i.extra_log_type_config && i.extra_log_type_config.calc_showable_if(i) }
+      @filtered_ids = @master_objects.select { |i| i.extra_log_type_config && i.extra_log_type_config.calc_showable_if(i) }.map(&:id)
+      @master_objects = @master_objects.where(id: @filtered_ids)
+      limit_results
     end
 
 

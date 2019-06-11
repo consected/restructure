@@ -69,7 +69,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         force_phones = calc_field_or_return(@phones)
 
         @phones = force_phones = force_phones.map {|p|
-          Formatter::Phone.format p, format: :unformatted, default_country_code: @default_country_code
+          Formatter::Phone.format p, format: :unformatted, default_country_code: @default_country_code, current_user: @item.user
         }
       elsif @phone_records
 

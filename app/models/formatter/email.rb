@@ -2,7 +2,7 @@ module Formatter
   module Email
 
     # Ensure an email is nil if blank
-    def self.format data, options=nil
+    def self.format data, options=nil, current_user: nil
       unless data.blank?
         return data
       end
