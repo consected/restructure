@@ -87,7 +87,9 @@
     prevent_create: e.prevent_create? || !(current_user.has_access_to? :create, :table, e.plural_name),
     item_list: field_list,
     external_id_options: {label: e.label, formatter: formatter, attribute: e.external_id_attribute.to_s},
-    data_sort: [:desc, "data-updated-at-ts"]
+    data_sort: [:desc, "data-updated-at-ts"],
+    orientation: 'vertical',
+    add_item_label: e.label
   } if current_user.has_access_to?(:access, :table, e.name.underscore.pluralize) %>
 <% end %>
 

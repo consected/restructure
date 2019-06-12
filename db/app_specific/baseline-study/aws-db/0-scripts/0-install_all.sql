@@ -75,4 +75,4 @@ set search_path=ml_app;
 \i ${sql_dir}/${app_dirname}/aws-db/z-sync/z-ml_app-sync-create_sync_subject_data_aws_db.sql
 
 set search_path=${app_schema},ml_app;
-\i ${sql_dir}/${app_dirname}/aws-db/z_grant_roles.sql
+\i ${sql_dir}/${app_dirname}/aws-db/0-scripts/z_grant_roles.sql

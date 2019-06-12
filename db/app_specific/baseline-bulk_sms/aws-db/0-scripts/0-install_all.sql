@@ -9,4 +9,4 @@ set search_path=${app_schema},ml_app;
 \i ${sql_dir}/${app_dirname}/aws-db/bulk/setup_master.sql
 
 set search_path=${app_schema},ml_app;
-\i ${sql_dir}/${app_dirname}/aws-db/z_grant_roles.sql
+\i ${sql_dir}/${app_dirname}/aws-db/0-scripts/z_grant_roles.sql

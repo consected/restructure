@@ -170,7 +170,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
   end
 
   # Add a new resource for all configured app types
-  # Make its defaul access nil to avoid exposing it to existing apps by accident
+  # Make its default access nil to avoid exposing it to existing apps by accident
   def self.create_control_for_all_apps admin, resource_type, resource_name, default_access: nil, disabled: nil
 
     Admin::AppType.active.all.each do |app_type|
@@ -257,7 +257,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
         errors.add :resource_name, "is an invalid value (#{resource_name} in #{resource_type})"
       elsif !self.disabled
         res = self.class.access_for? self.user, nil, self.resource_type, self.resource_name, alt_role_name: self.role_name, alt_app_type_id: self.app_type_id
-        if res  && res.id != self.id # If we have a result and it is not this record
+        if res && res.id != self.id # If we have a result and it is not this record
           if self.user_id && self.user_id == res.user_id # If the user has the authorization set
             errors.add :user, "already has the access control #{self.access} on #{self.resource_type} #{self.resource_name} #{self.app_type ? self.app_type.name : ''} #{self.options}"
           elsif !self.user_id && res.user_id.nil? && self.role_name == res.role_name # If the new record has no user set and has a matching role _name

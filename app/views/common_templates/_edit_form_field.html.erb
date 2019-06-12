@@ -76,15 +76,14 @@
     end
   end
 
-
   unless got
     if form_object_instance.model_data_type == :external_identifier %>
-      <%= render partial: "common_templates/edit_fields/is_external_id", locals: local_vars[:locals] %>
+      <%= render partial: "common_templates/edit_fields/is_external_id", locals: local_vars[:locals] unless @already_shown_external_id%>
     <%
+      @already_shown_external_id = true
       got = true
     end
   end
-
   # Handle Brakeman issue with using column type directly to generate partial path
   unless got
 
