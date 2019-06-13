@@ -16,6 +16,8 @@ module ActivityLogSupport
 
 
     unless @player_contact
+      @user = @master.current_user
+      let_user_create :player_contacts
       @player_contact = @master.player_contacts.create!(
       {
         data: "(516)262-1289",
