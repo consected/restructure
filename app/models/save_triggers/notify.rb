@@ -57,6 +57,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       @content_template_text = config[:content_template_text]
       @message_type = config[:type]
       @subject = config[:subject]
+      @importance = config[:importance]
 
 
       if @role
@@ -65,6 +66,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       elsif @users
         user_ids = calc_field_or_return(@users)
         @receiving_user_ids = User.where(id: user_ids).active.pluck(:id)
+      elsif @importance
+        force_importance = calc_field_or_return(@importance)
       elsif @phones
         force_phones = calc_field_or_return(@phones)
 
@@ -142,6 +145,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       setup_data[:recipient_sms_numbers] = force_phones if force_phones
       setup_data[:recipient_emails] = force_emails if force_emails
       setup_data[:recipient_data] = force_recip_recs if force_recip_recs
+      setup_data[:importance] = force_importance if force_importance
 
       mn = Messaging::MessageNotification.create! setup_data
 

@@ -163,6 +163,7 @@ module MasterSupport
       end
     end
 
+    @created_items
   end
 
   def check_all_records_failed

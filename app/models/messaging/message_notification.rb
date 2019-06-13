@@ -7,6 +7,7 @@ class Messaging::MessageNotification < ActiveRecord::Base
   StatusComplete = 'complete'
   StatusInProgress = 'in progress'
   StatusFailed = 'failed'
+  ValidImportance = ['Promotional', 'Transactional']
 
   include WorksWithItem
 
@@ -59,6 +60,12 @@ class Messaging::MessageNotification < ActiveRecord::Base
     @item = new_item
     self.item_id = @item.id
     self.item_type = new_item.class.name.classify
+  end
+
+  def importance= i
+    i = i.to_s.capitalize
+    raise FphsException.new "Incorrect importance: #{i}" unless i.in?(ValidImportance)
+    super(i)
   end
 
 
@@ -177,11 +184,10 @@ class Messaging::MessageNotification < ActiveRecord::Base
               self.item = ri || list_item
               pn = Formatter::Phone.format list_item.data, format: :unformatted, default_country_code: def_country_code
               recipient_sms_numbers = [pn]
-              message_text = self.content_template_text
 
               resp = generate_and_send recipient_sms_numbers: recipient_sms_numbers
 
-              res = list_item.update(current_user: list_item.user, response: resp) if list_item.respond_to? :response
+              list_item.update(current_user: list_item.user, response: resp) if list_item.respond_to? :response
               recipient_data << list_item.data
             else
               logger.warn "A recipient list item did not exist"
@@ -217,7 +223,8 @@ class Messaging::MessageNotification < ActiveRecord::Base
     if is_email?
       NotificationMailer.send_message_notification(self, logger: logger).deliver_now
     elsif is_sms?
-      Messaging::NotificationSms.send_now(self, recipient_sms_numbers: recipient_sms_numbers, generated_text: generated_text, logger: logger)
+      sms = Messaging::NotificationSms.new
+      sms.send_now(self, recipient_sms_numbers: recipient_sms_numbers, generated_text: generated_text, importance: importance, logger: logger)
     else
       raise FphsException.new "No recognized message type for message notification: #{message_type}"
     end

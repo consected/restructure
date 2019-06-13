@@ -71,12 +71,14 @@ RSpec.describe Messaging::NotificationSms, type: :model do
     expect(nums).to include '+12025550147'
     expect(nums).to include '+12025550156'
 
-    Messaging::NotificationSms.send_now @message_notification
+    sms = Messaging::NotificationSms.new
+    sms.send_now @message_notification
   end
 
   it "sends an sms" do
     expect {
-      sms = Messaging::NotificationSms.send_now @message_notification
+      sms = Messaging::NotificationSms.new
+    sms.send_now @message_notification
     }.to raise_error(FphsException, "No recipients to SMS")
 
     u1, _ = create_user
@@ -84,10 +86,22 @@ RSpec.describe Messaging::NotificationSms, type: :model do
     u3, _ = create_user
 
     @message_notification.recipient_user_ids = [u1.id, u2.id, u3.id]
-    sms = Messaging::NotificationSms.send_now @message_notification
+    sms = sms = Messaging::NotificationSms.new
+    sms.send_now @message_notification
 
     @message_notification.recipient_sms_numbers = ['+12025550147']
-    sms = Messaging::NotificationSms.send_now @message_notification
+    sms = sms = Messaging::NotificationSms.new
+    sms.send_now @message_notification
+
+    expect(sms).not_to be nil
+  end
+
+  it "sends an sms with promotional importance" do
+
+    @message_notification.importance = 'Promotional'
+    @message_notification.recipient_sms_numbers = ['+12025550147']
+    sms = sms = Messaging::NotificationSms.new
+    sms.send_now @message_notification
 
     expect(sms).not_to be nil
   end

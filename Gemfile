@@ -39,6 +39,7 @@ gem 'activerecord-import'
 gem 'mime-types'
 
 gem 'aws-sdk-sns'
+gem 'aws-sdk-cloudwatchlogs'
 
 gem 'crass', '~> 1.0.4'
 

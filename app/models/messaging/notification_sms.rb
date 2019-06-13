@@ -1,12 +1,6 @@
 class Messaging::NotificationSms
 
-  def self.sms_aws_region=r
-    @sms_aws_region = r
-  end
-
-  def self.sms_aws_region
-    @sms_aws_region
-  end
+  include AwsApi::SmsHandler
 
   def self.sender_id=s
     @sender_id = s
@@ -35,8 +29,10 @@ class Messaging::NotificationSms
   # @param mn [Messaging::MessageNotification] object describing the list of numbers and message
   # @param recipient_sms_numbers [Array | nil] optional list of SMS numbers to override message notification
   # @param generated_text [String | nil] optional message text to override message notification
-  def self.send_now mn=nil, recipient_sms_numbers: nil, generated_text: nil, logger: nil
+  def send_now mn=nil, recipient_sms_numbers: nil, generated_text: nil, importance: nil, logger: nil
     logger ||= Rails.logger
+
+    importance ||= self.class.importance
 
     resp = []
     if recipient_sms_numbers
@@ -54,25 +50,10 @@ class Messaging::NotificationSms
 
     recipient_sms_numbers.each do |sms_number|
 
-      validate_sms_number sms_number
+      self.class.validate_sms_number sms_number
 
-      sms_number = '+16177942330' unless Rails.env.production?
+      res = send_sms sms_number, generated_text, importance
 
-      client = Aws::SNS::Client.new(region: self.sms_aws_region)
-      res = client.publish(
-        phone_number: sms_number,
-        message: generated_text,
-        message_attributes: {
-          "AWS.SNS.SMS.SenderID" => {
-            data_type: "String",
-            string_value: self.sender_id
-          },
-          "AWS.SNS.SMS.SMSType" => {
-            data_type: "String",
-            string_value: self.importance
-          }
-        }
-      )
       resp << {aws_sns_sms_message_id: res.message_id} if res
     end
 

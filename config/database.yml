@@ -22,7 +22,7 @@ development:
 test: &test
   <<: *default
   database: fpa_test
-  schema_search_path: 'ml_app,ipa_ops,testmybrain,persnet'
+  schema_search_path: 'ml_app,ipa_ops,testmybrain,persnet,bulk_msg'
 
 production:
   <<: *default

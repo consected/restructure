@@ -334,6 +334,21 @@
         "created_at": "2019-05-31T12:19:38.753Z",
         "updated_at": "2019-05-31T12:19:38.753Z",
         "user_email": null
+      },
+      {
+        "id": 2356,
+        "user_id": null,
+        "resource_type": "table",
+        "resource_name": "dynamic_model__zeus_bulk_message_statuses",
+        "options": "",
+        "access": "read",
+        "disabled": false,
+        "admin_id": 15,
+        "app_type_id": 32,
+        "role_name": "user - bulk sms",
+        "created_at": "2019-06-13T15:05:35.544Z",
+        "updated_at": "2019-06-13T15:05:35.544Z",
+        "user_email": null
       }
     ],
     "associated_activity_logs": [
@@ -359,6 +374,26 @@
       }
     ],
     "associated_dynamic_models": [
+      {
+        "id": 109,
+        "name": "Bulk Message Statuses",
+        "table_name": "zeus_bulk_message_statuses",
+        "schema_name": null,
+        "primary_key_name": "id",
+        "foreign_key_name": "master_id",
+        "description": "",
+        "admin_id": 15,
+        "disabled": false,
+        "created_at": "2019-06-12T17:21:47.750Z",
+        "updated_at": "2019-06-12T17:34:17.077Z",
+        "position": null,
+        "category": "bulk-messages",
+        "table_key_name": "",
+        "field_list": "res_timestamp message_id status status_reason zeus_bulk_message_recipient_id",
+        "result_order": "",
+        "options": "",
+        "user_email": null
+      },
       {
         "id": 100,
         "name": "Bulk Messages",

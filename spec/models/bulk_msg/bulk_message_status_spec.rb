@@ -1,0 +1,196 @@
+# Test the underlying SMS sending capability
+# Actual notify functionality for any method of delivery is tested by SaveTriggers::NotifySpec
+require 'rails_helper'
+
+RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
+
+  include MasterSupport
+  include ModelSupport
+  include PlayerContactSupport
+  include BulkMsgSupport
+
+
+  before :all do
+    create_admin
+    create_user
+    import_bulk_msg_app
+
+    @bulk_master = Master.find(-1)
+    @bulk_master.current_user = @user
+
+    @bms = DynamicModel::ZeusBulkMessageStatus.new
+    let_user_create :player_contacts
+    let_user_create :dynamic_model__zeus_bulk_message_recipients
+    let_user_create :dynamic_model__zeus_bulk_message_statuses
+
+    @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)
+
+  end
+
+  it "associates with the recipient list" do
+
+    pcs = []
+    max_num = 3
+
+    recips = []
+    9.times do |n|
+      m = create_master
+      # We need a range of timestamps
+      sleep 1.2 if n == max_num - 1 || n == max_num
+      pcs << m.player_contacts.create(data: "(123)123-123#{n}", rank: 10, rec_type: :phone)
+      pc = pcs[n]
+      restext = "[{\"aws_sns_sms_message_id\":\"#{rand(199999999999)}\"}]"
+
+      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext)
+    end
+
+    num = 0
+    statuses = []
+
+    #Ensure status dates are later than recipient dates
+    sleep 2
+    #Skip the first one
+    pcs.each do |pc|
+      num += 1
+      statuses << @bulk_master.dynamic_model__zeus_bulk_message_statuses.create!(status: 'success', zeus_bulk_message_recipient_id: recips[num].id)
+      break if num == max_num
+    end
+
+    # Ensure the date comes from the database, not the Rails time, since they can be slightly different
+    r0 = recips[0].reload
+    not_done = DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp
+    expect(r0.created_at).to eq not_done
+
+    # Now fill the first one
+    statuses << @bulk_master.dynamic_model__zeus_bulk_message_statuses.create!(status: 'success', zeus_bulk_message_recipient_id: recips[0].id)
+
+    not_done = DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp
+    not_done_id = DynamicModel::ZeusBulkMessageStatus.incomplete_recipients.first.id
+
+    # Ensure the date comes from the database, not the Rails time
+    r0 = recips[num+1].reload
+    expect(r0.id).to eq not_done_id
+    expect(r0.created_at).to eq not_done
+
+    # Fill the remaining items
+
+    (9 - max_num - 1).times do |n|
+      statuses << @bulk_master.dynamic_model__zeus_bulk_message_statuses.create!(status: 'success', zeus_bulk_message_recipient_id: recips[n + max_num + 1].id)
+    end
+
+    not_done = DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp
+
+    expect(not_done).to be nil
+
+  end
+
+  it "can access log groups" do
+
+    lg = @bms.aws_log_groups
+    expect(lg.length).to be > 0
+
+    expect(lg[:failure]).not_to be nil
+    expect(lg[:success]).not_to be nil
+
+    puts lg
+
+  end
+
+  it "can pull logs" do
+
+    # Limit 1 to test paging
+    res = @bms.delivery_responses :success, limit: 10
+    expect(res[:raw_events].length).to be == 10
+    expect(res[:events].length).to be == 10
+    expect(res[:more_results]).to be true
+
+    first_ts = res[:raw_events].first.timestamp
+    expect(first_ts).not_to be nil
+    last_ts = res[:raw_events].last.timestamp
+    expect(last_ts).to eq res[:max_timestamp]
+
+    e1 = res[:events].first
+    expect(e1[:status]).to eq :success
+    mids = res[:events].map {|r| r[:message_id]}
+
+    # Pull a second page
+    res = @bms.delivery_responses :success, limit: 10
+    expect(res[:raw_events].length).to be > 0
+
+    if res[:raw_events].length < 10
+      expect(res[:more_results]).to be false
+    else
+      expect(res[:more_results]).to be true
+    end
+
+    new_mids = res[:events].map {|r| r[:message_id]}
+    expect(mids).not_to eq new_mids
+
+    # Ensure nothing is returned
+    res = @bms.delivery_responses :success, limit: 10, start_timestamp: (DateTime.now + 1000.seconds)
+    expect(res[:events].length).to be == 0
+    expect(res[:more_results]).to be false
+
+    # Erroneously attempt to pull another next page
+    res = @bms.delivery_responses :success, limit: 10
+    expect(res).to be nil
+
+  end
+
+  it "matches a delivery log to a recipient message id" do
+
+    res = @bms.delivery_responses :success, limit: 9, next_page: false
+
+    mids = res[:events].map {|r| r[:message_id]}
+
+    pcs = []
+    recips = []
+    9.times do |n|
+      m = create_master
+      pcs << m.player_contacts.create(data: "(123)123-123#{n}", rank: 10, rec_type: :phone)
+      pc = pcs[n]
+      expect(mids[n]).not_to be nil
+      restext = "[{\"aws_sns_sms_message_id\":\"#{mids[n]}\"}]"
+      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext)
+    end
+
+    r = DynamicModel::ZeusBulkMessageStatus.find_matching_recipient_by_message_id('junk')
+    expect(r).to be nil
+
+    n = 0
+    res[:events].each do |ev|
+      r = DynamicModel::ZeusBulkMessageStatus.find_matching_recipient_by_message_id(ev[:message_id])
+      expect(r.id).to eq recips[n].id
+      n+=1
+    end
+  end
+
+  it "add status records from logged delivery events" do
+
+    res = @bms.delivery_responses :success, limit: 9, next_page: false
+    mids = res[:events].map {|r| r[:message_id]}
+
+    res = @bms.delivery_responses :failure, limit: 9, next_page: false
+    mids += res[:events].map {|r| r[:message_id]}
+
+    pcs = []
+    recips = []
+    mids.length.times do |n|
+      m = create_master
+      pcs << m.player_contacts.create(data: "(123)123-1234 ext #{n}", rank: 10, rec_type: :phone)
+      pc = pcs[n]
+      expect(mids[n]).not_to be nil
+      restext = "[{\"aws_sns_sms_message_id\":\"#{mids[n]}\"}]"
+      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext)
+    end
+
+    DynamicModel::ZeusBulkMessageRecipient.update_all(created_at: DateTime.now - 10.years)
+
+    res = DynamicModel::ZeusBulkMessageStatus.add_status_from_log limit: 9
+
+    expect(res.length).to be > 0
+
+
+  end
+
+end

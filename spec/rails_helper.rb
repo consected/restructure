@@ -2,6 +2,24 @@
 ENV['RAILS_ENV'] ||= 'test'
 ENV['FPHS_ADMIN_SETUP']='yes'
 ENV['FPHS_USE_LOGGER']='TRUE'
+
+# Ensure that we have access to the AWS client when working with AWS MFA
+# Relies on aws-mfa-login, which is a Python wheel. To install:
+#   pip install aws-mfa-login
+# To avoid needing this, get an STS security token and set the environment variables
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+# AWS_SESSION_TOKEN
+#
+
+
+res = `aws sts get-caller-identity | grep "756598248234"`
+if res == ''
+  puts "AWS MFA is needed. Run\n  fphs-scripts/aws_mfa_set.rb"
+  exit
+end
+
+
 require 'simplecov'
 SimpleCov.start 'rails'
 

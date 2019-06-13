@@ -437,8 +437,8 @@ module HandlesUserBase
 
     def check_can_save
 
-      raise FphsException.new "This item is not editable (#{self.class.name}) #{self.id}" if persisted? && !can_edit?
-      raise FphsException.new "This item can not be created (#{self.class.name})" if !persisted? && !can_create?
+      raise FphsException.new "This item is not editable (#{self.respond_to?(:human_name) ? self.human_name : self.class.name}) #{self.id}" if persisted? && !can_edit?
+      raise FphsException.new "This item can not be created (#{self.respond_to?(:human_name) ? self.human_name : self.class.name})" if !persisted? && !can_create?
       true
 
     end

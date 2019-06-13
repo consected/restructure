@@ -12,3 +12,10 @@ ActiveSupport.on_load(:messaging_notification_sms) do
 
 
 end
+
+
+ActiveSupport.on_load(:bulk_messaging_status) do
+
+  self.sms_aws_region = ENV['SMS_AWS_REGION'] || 'us-east-1'
+
+end

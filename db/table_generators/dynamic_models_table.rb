@@ -3,6 +3,8 @@ module TableGenerators
   def self.singularize str
     if str.end_with? 'ies'
       return str[0..-4] + 'y'
+    elsif str.end_with? 'es'
+        return str[0..-3]
     elsif str.end_with? 's'
       return str[0..-2]
     end
@@ -60,6 +62,7 @@ EOF
         f = 'integer' if a == 'age'
         f = 'integer' if a.start_with?('number_')
         f = 'integer' if a.end_with?('_number')
+        f = 'integer' if a.end_with?('_timestamp')
         f += ','
         attrib_pair[a] = f
       end

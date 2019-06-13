@@ -317,6 +317,14 @@ class DynamicModel < ActiveRecord::Base
         res.include UserHandler
         res.include DynamicModelHandler
 
+        ext = Rails.root.join('app', 'models', 'dynamic_model_extension', "#{model_class_name.underscore}.rb")
+
+        if File.exist? ext
+          require_dependency ext
+          res.include "DynamicModelExtension::#{model_class_name}".constantize
+          res.extension_setup if res.respond_to? :extension_setup
+        end
+
         # Create an alias in the main namespace to make dynamic model easier to refer to
 
         begin
