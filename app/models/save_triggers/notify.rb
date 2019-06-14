@@ -1,7 +1,7 @@
 class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
   attr_accessor :model_defs, :role, :users, :layout_template, :content_template, :content_template_text, :message_type, :subject,
-                :receiving_user_ids, :phones, :emails, :default_country_code, :when
+                :receiving_user_ids, :phones, :emails, :default_country_code, :when, :importance
 
   def self.config_def if_extras: {}
     [
@@ -15,6 +15,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         content_template: "name of content template",
         content_template_text: "alternative content template text",
         subject: "subject text",
+        importance: "transactional (default) | promotional",
         when: {
           wait_until: '(optional) ISO date or {date:..., time..., zone:... } where zone is one specified in MAPPINGS @ https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html',
           wait: 'n seconds|minutes|hours|days|weeks|months|years'

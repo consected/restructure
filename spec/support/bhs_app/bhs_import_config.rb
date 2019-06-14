@@ -97,7 +97,7 @@ module BhsImportConfig
     elsif role == :ra
       add_user_to_role :ra
       add_user_config :hide_player_tabs, 'false'
-
+      setup_access :player_contacts
       setup_access :create_master, resource_type: :general, access: :read, user: @user
       setup_access 'BHS Subjects Pending Sync', resource_type: :report, access: :read, user: @user
       setup_access 'Contact from PI', resource_type: :report, access: :read, user: @user

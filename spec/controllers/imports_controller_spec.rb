@@ -26,7 +26,7 @@ require 'rails_helper'
 RSpec.describe ImportsController, type: :controller do
 
   include ModelSupport
-
+  include MasterSupport
 
   # This should return the minimal set of attributes required to create a valid
   # Import. As you add validations to Import, be sure to

@@ -14,6 +14,7 @@ RSpec.describe 'Alternative ID implementation', type: :model do
 
     setup_access :scantrons
     setup_access :player_contacts
+    let_user_create :player_contacts
 
     @master = create_master
     @scantron = Scantron.unscoped.order(scantron_id: :desc).first
