@@ -67,8 +67,6 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       elsif @users
         user_ids = calc_field_or_return(@users)
         @receiving_user_ids = User.where(id: user_ids).active.pluck(:id)
-      elsif @importance
-        force_importance = calc_field_or_return(@importance)
       elsif @phones
         force_phones = calc_field_or_return(@phones)
 
@@ -88,6 +86,10 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         force_emails = calc_field_or_return(@emails)
       else
         raise FphsException.new "role, users or phones must be specified in save_trigger: notify: role: ..."
+      end
+
+      if @importance
+        force_importance = calc_field_or_return(@importance)
       end
 
       if (!@receiving_user_ids || @receiving_user_ids.length == 0) && !force_phones && !force_emails && !force_recip_recs

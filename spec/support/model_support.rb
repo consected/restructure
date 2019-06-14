@@ -57,7 +57,7 @@ module ModelSupport
     end
     @user = user
     let_user_create :player_contacts
-    
+
     [user, good_password]
   end
 
@@ -115,8 +115,10 @@ module ModelSupport
     end
 
     in_app_type ||= @user.app_type
-    Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create, resource_type: :table, resource_name: resource_name
-
+    if in_app_type
+      Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create, resource_type: :table, resource_name: resource_name
+    end
+    
   end
 
   def add_app_config app_type, name, value, user: nil, role_name: nil

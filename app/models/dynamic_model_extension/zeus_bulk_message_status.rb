@@ -66,6 +66,7 @@ module DynamicModelExtension
         from_ts = earliest_incomplete_timestamp
 
         set_recips = []
+        limit ||= 10000
 
 
         [:success, :failure].each do |status|

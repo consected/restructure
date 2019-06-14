@@ -27,6 +27,7 @@ gem 'dicom'
 
 gem 'delayed_job'
 gem 'delayed_job_active_record'
+gem 'delayed_job_recurring'
 gem 'daemons'
 
 gem 'jquery-fileupload-rails', '0.4.7'
