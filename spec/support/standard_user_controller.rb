@@ -71,6 +71,7 @@ shared_examples 'a standard user controller' do
 
       it "creates a new item" do
         create_master
+        setup_access :player_contacts, user: @master.current_user
         va = valid_attributes
         expect {
 
@@ -80,6 +81,7 @@ shared_examples 'a standard user controller' do
 
       it "assigns a newly created item as @var" do
         create_master
+        setup_access :player_contacts, user: @master.current_user
         va = valid_attributes
         post :create, {object_symbol => va, master_id: @master_id}
         expect(assigns(object_symbol)).to be_a(object_class)
@@ -88,6 +90,7 @@ shared_examples 'a standard user controller' do
 
       it "return success" do
         create_master
+        setup_access :player_contacts, user: @master.current_user
         va = valid_attributes
         post :create, {object_symbol => va, master_id: @master_id}
         expect(response).to have_http_status(200), "Didn't get a 200 response with atts #{va.inspect}. Got #{response.status}"
@@ -97,6 +100,7 @@ shared_examples 'a standard user controller' do
     context "with invalid params" do
       it "assigns a newly created but unsaved item as @var" do
         create_master
+        setup_access :player_contacts, user: @master.current_user
         ia = invalid_attributes
         post :create, {object_symbol => ia, master_id: @master_id}
         expect(assigns(object_symbol)).to be_a_new(object_class), "Create should have item with no id using attribs #{ia.inspect}"
@@ -105,6 +109,7 @@ shared_examples 'a standard user controller' do
       it "re-renders the 'new' template" do
         list_invalid_attributes.each do |inv|
           create_master
+          setup_access :player_contacts, user: @master.current_user
           post :create, {object_symbol => inv, master_id: @master_id}
           expect(response).to have_http_status(422), "expected #{response.status} to be 422 with data #{inv}"
           j = JSON.parse(response.body)

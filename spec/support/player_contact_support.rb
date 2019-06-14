@@ -66,6 +66,7 @@ module PlayerContactSupport
     att ||= valid_attribs
     master ||= create_master
     create_sources 'player_contacts'
+    setup_access :player_contacts, user: master.current_user
 
     att[:rec_type] ||= :phone
     @player_contact = master.player_contacts.create! att

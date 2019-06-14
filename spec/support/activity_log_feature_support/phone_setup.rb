@@ -45,6 +45,8 @@ module PhoneSetup
 
   def create_player_phone master, num=1
     master.current_user = @user
+    let_user_create :player_contacts
+
     res = []
     if num == 1
       attr = pick_one_from(phone_attribs)

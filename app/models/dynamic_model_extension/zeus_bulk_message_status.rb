@@ -24,7 +24,7 @@ module DynamicModelExtension
         ZeusBulkMessageRecipient
           .select('zeus_bulk_message_recipients.*')
           .joins('LEFT OUTER JOIN zeus_bulk_message_statuses ON zeus_bulk_message_statuses.zeus_bulk_message_recipient_id = zeus_bulk_message_recipients.id')
-          .where("zeus_bulk_message_recipients.response is not null")
+          .where("zeus_bulk_message_recipients.response is not null and zeus_bulk_message_recipients.disabled = false")
           .where(zeus_bulk_message_statuses: {id: nil})
           .order('zeus_bulk_message_recipients.created_at asc')
       end
@@ -78,7 +78,14 @@ module DynamicModelExtension
               recip = find_matching_recipient_by_message_id r[:message_id]
               if recip
                 recip.master.current_user = recip.user
-                set_recips << create!(status: r[:status], status_reason: r[:status_reason], zeus_bulk_message_recipient_id: recip.id, master: recip.master)
+                set_recips << create!(
+                  status: r[:status],
+                  status_reason: r[:status_reason],
+                  zeus_bulk_message_recipient_id: recip.id,
+                  master: recip.master,
+                  res_timestamp: r[:timestamp],
+                  message_id: r[:message_id]
+                )
                 total += 1
               else
                 puts "Recipient not found: #{r[:message_id]}"

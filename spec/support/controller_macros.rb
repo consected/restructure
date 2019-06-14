@@ -72,6 +72,7 @@ module ControllerMacros
       user.app_type = Admin::AppType.all_available_to(user).first
       user.save!
       @user = user
+      setup_access :player_contacts
       Rails.logger.info "Result: #{res}"
     end
   end
