@@ -4981,7 +4981,9 @@ CREATE TABLE ml_app.reports (
     edit_model character varying,
     edit_field_names character varying,
     selection_fields character varying,
-    item_type character varying
+    item_type character varying,
+    short_name character varying,
+    options character varying
 );
 
 
