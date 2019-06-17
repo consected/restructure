@@ -157,17 +157,17 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       if item.respond_to?(:item) && item.item.respond_to?(:attributes)
-        data[:item] = item.item
+        data[:item] = item.item.attributes
       end
 
       if item.respond_to?(:user) && item.user
         data[:user_email] = item.user.email
-        data[:user_preference] = item.user.user_preference
+        data[:user_preference] = item.user.user_preference.attributes
       end
 
       if item.respond_to?(:current_user) && item.current_user
         data[:user_email] ||= item.current_user.email
-        data[:user_preference] ||= item.current_user.user_preference
+        data[:user_preference] ||= item.current_user.user_preference.attributes
       end
 
       if item.respond_to?(:master)

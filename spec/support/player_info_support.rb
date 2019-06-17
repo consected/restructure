@@ -82,7 +82,7 @@ module PlayerInfoSupport
     att ||= valid_attribs
     master ||= create_master
     create_sources 'player_infos'
-    let_user_create_player_infos
+    setup_access :player_infos
     @player_info = master.player_infos.create! att
   end
 
