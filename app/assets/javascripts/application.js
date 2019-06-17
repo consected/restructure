@@ -23,4 +23,5 @@
 //= require app/nfs_store/application
 //= require app/secure_view/secure_view
 //= require app/jquery-mask/jquery-mask
+//= require chart.min.js
 //= require_tree ./app

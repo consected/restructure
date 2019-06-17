@@ -2,22 +2,27 @@ class Report < ActiveRecord::Base
 
   include AdminHandler
   include SelectorCache
+  include OptionsHandler
+
 
   after_initialize :init_vars
   before_validation :check_attr_def
+  before_validation :gen_short_name
   validates :report_type, presence: true
   validates :name, presence: true
+  validate :valid_short_name?, unless: ->{self.disabled}
 
 
 
   scope :counts, -> {where report_type: 'count'}
   scope :regular, -> {where report_type: 'regular_report'}
   scope :searchable, -> {where(searchable: true).order(position: :asc)}
-
   scope :editable_data_reports, -> {where("edit_model IS NOT NULL AND edit_model <> ''") }
 
   ReportTypes = [:count, :regular_report, :search]
   ReportIdAttribName = '_report_id_'
+
+  configure :view_options, with: [:hide_table_names, :humanize_column_names, :hide_result_count, :hide_export_buttons, :hide_criteria_panel]
 
   class BadSearchCriteria < FphsException
     def message
@@ -426,5 +431,22 @@ class Report < ActiveRecord::Base
     instance_var_init :result_tables
     instance_var_init :result_tables_oid
     instance_var_init :filtering_on
+  end
+
+  def alt_resource_name
+    "#{self.item_type || '_default'}__#{self.short_name}".underscore
+  end
+
+  def gen_short_name
+    if self.short_name.blank?
+      self.short_name = self.name.gsub(' ', '_').downcase.underscore
+    end
+  end
+
+  def valid_short_name?
+    res = self.class.active.where(short_name: self.short_name, item_type: self.item_type)
+    if (res.map(&:id) - [self.id]).length > 0
+      errors.add :short_name, 'is a duplicate of another record'
+    end
   end
 end

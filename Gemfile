@@ -41,6 +41,7 @@ gem 'mime-types'
 
 gem 'aws-sdk-sns'
 gem 'aws-sdk-cloudwatchlogs'
+gem 'aws-sdk-pinpoint'
 
 gem 'crass', '~> 1.0.4'
 

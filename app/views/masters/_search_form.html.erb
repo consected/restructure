@@ -52,7 +52,7 @@
      %>
     <div class="panel panel-default searchable-report-panel">
       <div id="master-report-<%=r.report_identifier%>" class="panel-collapse collapse <%= @report ? 'in' : '' %>" role="tabpanel">
-        <div class="panel-body searchable-report"  data-report-id="<%=r.id%>">
+        <div class="panel-body searchable-report" style="<%= r.view_options.hide_criteria_panel ? 'max-height: 0; padding: 0 !important' : ''%>"  data-report-id="<%=r.id%>">
           <%= render partial: "reports/form"  if @report%>
         </div>
       </div>

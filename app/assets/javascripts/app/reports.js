@@ -128,6 +128,72 @@ _fpa.reports = {
       var dct;
       var dct_parts;
 
+      block.find('td[data-col-type^="chart:"]').not('.attached_report_chart').each(function(){
+
+        var row = $(this).parent();
+        var chart_dct = $(this).attr('data-col-type');
+
+        // chart_dct_parts = chart_dct.split(':', 3);
+
+        var chart_dct_json = $(this).html();
+
+        if (!chart_dct_json || chart_dct_json == '') return;
+
+        // Get values like "colval.xyz" for substitution
+        var cols = chart_dct_json.match(/colval\.[a-zA-Z0-9_]+/g);
+
+        for(var i = 0; i < cols.length; i++) {
+          var c = cols[i];
+          var cname = c.split('.')[1];
+          var colval = row.find('td[data-col-type="'+cname+'"]').html();
+          if(colval) {
+            colval = colval.trim()
+          } else {
+            colval = null;
+          }
+
+          chart_dct_json = chart_dct_json.replace(c, colval);
+        }
+
+
+        var chart_act_config = JSON.parse(chart_dct_json);
+
+        chart_act_config.options = chart_act_config.options || {};
+        // chart_act_config.options.legend = chart_act_config.options.legend || {display: false};
+
+        var name = chart_act_config.label;
+        var value = chart_act_config;
+
+        var width = chart_act_config.width;
+        var height = chart_act_config.height;
+
+        if(width || height) {
+          var fixed_size = true;
+        }
+
+        width = width || 100;
+        height = height || 100;
+
+        chart_act_config.options.responsive = !fixed_size;
+
+        var new_html = $('<canvas width="'+width+'" height="'+height+'"></canvas>');
+
+        $(this).html(new_html);
+
+        var ctx = $(this).find('canvas');
+        var myPieChart = new Chart(ctx, value);
+
+        var head = $('th[data-col-type="'+chart_dct+'"]').not('.added-chart-legend');
+        if(head.length > 0) {
+          var headp = head.find('p.table-header-col-type');
+          headp.html(name);
+          head.addClass('no-sort added-chart-legend');
+        }
+
+
+
+      }).addClass('attached_report_chart');
+
       block.find('td[data-col-type^="select items:"]').not('.attached_report_search').each(function(){
 
         dct = $(this).attr('data-col-type');
@@ -169,8 +235,6 @@ _fpa.reports = {
       }
       else if (dct_action == 'add to list') {
         var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/add_to_list.json" class="report-add-to-list" data-remote="true"><input type="hidden" name="add_to_list[list_name]" value="' + extra_val + '"></form>');
-
-
       }
       else if (dct_action == 'remove from list') {
         var $f = $('<form id="itemselection-for-report" method="post" action="/reports/'+report_id+'/remove_from_list.json" class="report-remove-from-list" data-remote="true"><input type="hidden" name="remove_from_list[list_name]" value="' + extra_val + '"></form>');

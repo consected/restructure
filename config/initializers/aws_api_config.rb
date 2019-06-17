@@ -10,7 +10,7 @@ ActiveSupport.on_load(:messaging_notification_sms) do
     self.importance = 'Transactional'
   end
 
-
+  self.test_sms_number = '+16177942330'
 end
 
 

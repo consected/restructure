@@ -14,6 +14,7 @@
  *= require bootstrap-theme
  *= require jquery.timepicker
  *= require chosen
+ *= require chart.min
  *= require app/nfs_store/application
  *= require app/secure_view/secure_view
  *= require_tree ./app

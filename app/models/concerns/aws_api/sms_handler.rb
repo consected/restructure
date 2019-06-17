@@ -14,6 +14,14 @@ module AwsApi
         @sms_aws_region
       end
 
+      def test_sms_number=n
+        @test_sms_number = n
+      end
+
+      def test_sms_number
+        @test_sms_number
+      end
+
     end
 
 
@@ -27,10 +35,14 @@ module AwsApi
       @aws_sns_client = Aws::SNS::Client.new(region: self.class.sms_aws_region)
     end
 
+    def aws_pinpoint_client
+      return @aws_pinpoint_client if @aws_pinpoint_client
+      @aws_pinpoint_client = Aws::Pinpoint::Client.new(region: self.class.sms_aws_region)
+    end
 
     def send_sms sms_number, generated_text, importance
 
-      sms_number = '+16177942330' unless Rails.env.production?
+      sms_number = self.class.test_sms_number unless Rails.env.production?
 
       aws_sns_client.publish(
         phone_number: sms_number,
@@ -47,6 +59,18 @@ module AwsApi
         }
       )
     end
+
+
+
+    def pp_phone_validate phone_number
+      aws_pinpoint_client.phone_number_validate(
+        number_validate_request: { # required
+          # iso_country_code: "__string",
+          phone_number: phone_number,
+        }
+      )
+    end
+
 
   end
 end

@@ -61,10 +61,12 @@ btn = !click_to_search && !@embedded_report ? "btn btn-default btn-sm pull-right
               <% end %>
               <% unless @report.editable_data? || @embedded_report %>
               <%= submit_tag :count, class: "#{btn}" unless @report.report_type == 'count' || @view_context==:search%>
+              <% unless @report.view_options.hide_export_buttons %>
               <%= submit_tag "CSV", name: :format, value: "csv", class: "#{btn}" if current_admin || current_user && current_user.can?(:export_csv) %>
               <%= submit_tag "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "#{btn} target_new_window" if current_admin || current_user && current_user.can?(:export_json) %>
               <% end %>
-              <% if @report.report_type != 'count' %>
+              <% end %>
+              <% if @report.report_type != 'count' && !@report.view_options.hide_result_count%>
                 <span class="search_count_reports search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
               <%end%>
             </div>

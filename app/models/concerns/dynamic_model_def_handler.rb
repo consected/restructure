@@ -241,16 +241,17 @@ module DynamicModelDefHandler
   end
 
   def check_implementation_class
-
     if !disabled && errors.empty?
 
       unless ready?
         err = "The implementation of #{model_class_name} was not completed. Ensure the DB table #{table_name} has been created. Run:
-          '#{generator_script}'
+
+          #{generator_script} > db/app_specific/create_#{table_name}.sql
+
         Then edit the result to change the field-type for the two CREATE TABLE statements at the top of the results.
         IMPORTANT: to save this configuration, check the Disabled checkbox and re-submit.
         "
-        errors.add :name, err
+        # errors.add :name, err
         # Force exit of callbacks
         raise  FphsException.new err
       end

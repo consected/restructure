@@ -44,10 +44,12 @@
               <% @results.fields.each do |col|
 
               %>
-                <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort.">
-                  <p><%=col%></p>
+                <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="<%=col%>">
+                  <p class="table-header-col-type"><%=@report.view_options.humanize_column_names ? col.humanize : col%></p>
                   <% unless num_tables == 1 %>
+                  <% unless @report.view_options.hide_table_names %>
                   <p class="small report-table-name" title="<%=rt[i] %>"><%=rt[i] %></p>
+                  <% end %>
                   <% end %>
                 </th>
               <%  i += 1%>
