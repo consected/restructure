@@ -58,6 +58,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       d = data
       if tagpair.length == 2
+        get_assoc(data[:master], tagpair.first, data)
         d = get_tag_value data, tagpair.first
         tag = tagpair.last
       end
@@ -156,17 +157,17 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       # if the referenced item has its own referenced item (much like an activity log might), then get it
       if item.respond_to?(:item) && item.item.respond_to?(:attributes)
-        data[:item] = item.item.attributes
+        data[:item] = item.item
       end
 
       if item.respond_to?(:user) && item.user
         data[:user_email] = item.user.email
-        data[:user_preference] = item.user.user_preference.attributes
+        data[:user_preference] = item.user.user_preference
       end
 
       if item.respond_to?(:current_user) && item.current_user
         data[:user_email] ||= item.current_user.email
-        data[:user_preference] ||= item.current_user.user_preference.attributes
+        data[:user_preference] ||= item.current_user.user_preference
       end
 
       if item.respond_to?(:master)
@@ -178,35 +179,51 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       if master
 
+        data[:master] = master
         data[:master_id] = master.id
         data[:current_user] = master.current_user
-
-        data[:ids] = master.alternative_ids
-
-        # Get all master associations into their respective items
-        # such as data[:ipa_appointments]
-        aa = Master.get_all_associations + Master.get_all_associations(:has_one) - ['not_trackers', 'not_tracker_histories', 'trackers_item_flags']
-
-        aa.each do |an|
-          begin
-            assoc = master.send(an)
-            if assoc.respond_to? :attributes
-              data[an.to_sym] ||= assoc.attributes
-            elsif assoc.respond_to? :first
-              data[an.to_sym] ||= assoc.first&.attributes
-            end
-
-            data[an.to_sym][:current_user] = data[:current_user] if data[an.to_sym]
-          rescue => e
-            Rails.logger.info "Get associations for #{an} failed: #{e}"
-          end
-        end
+        # Alternative ids are evaluated as needed
+        # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
 
       end
 
 
 
       data
+    end
+
+    def self.allowable_associations
+      Master.get_all_associations + Master.get_all_associations(:has_one) - ['not_trackers', 'not_tracker_histories', 'trackers_item_flags']
+    end
+
+    # Get requested master association into its own data item
+    # such as data[:ipa_appointments]
+    def self.get_assoc master, name, data
+      an = name.to_s
+      return nil unless master
+
+      if an == 'ids'
+        return data[:ids] = master.alternative_ids
+      end
+
+
+      return nil unless an.in? allowable_associations
+
+      begin
+        assoc = master.send(an)
+        if assoc.respond_to? :attributes
+          data[an.to_sym] ||= assoc.attributes
+        elsif assoc.respond_to? :first
+          data[an.to_sym] ||= assoc.first.attributes
+        end
+
+        data[an.to_sym][:current_user] = data[:current_user] if data[an.to_sym]
+      rescue => e
+        Rails.logger.info "Get associations for #{an} failed: #{e}"
+      end
+
+      data[an.to_sym]
+
     end
 
 end
