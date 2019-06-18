@@ -6,8 +6,8 @@ module FilterUtils
   def filtered_primary_model pm=nil
     pm ||= primary_model
     if filter_params
-      pm = pm.active if filter_params[:disabled] == 'enabled'
-      pm = pm.disabled if filter_params[:disabled] == 'disabled'
+      pm = pm.active if filter_params[:disabled] == 'enabled' || !current_admin
+      pm = pm.disabled if filter_params[:disabled] == 'disabled' && current_admin
       p = filter_params
       p.delete(:disabled)
 
@@ -44,18 +44,18 @@ module FilterUtils
 
   def filter_params
     return @filter_params if @filter_params
-    has_disabled_field = primary_model.attribute_names.include?('disabled')
+    has_disabled_field = primary_model.attribute_names.include?('disabled') && current_admin
 
 
     if params[:filter].blank? || (params[:filter].is_a?( Array) && params[:filter][0].blank?)
       if has_disabled_field
         params[:filter] = {disabled: 'enabled'}
-      else
-        return
       end
     end
 
-    params[:filter].merge! filter_defaults
+    params[:filter] ||= {}
+
+    params[:filter] = filter_defaults.merge(params[:filter])
 
     fo = filters_on
     fo << :disabled if has_disabled_field

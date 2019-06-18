@@ -89,7 +89,7 @@ module MasterSearch
 
         mlen = @masters.length
 
-        if search_type == 'MSID' && mlen > 0
+        if search_type == 'MSID' && mlen > 0 && @masters.first.id >= 0
           @result_message = "Displaying results for a list of #{mlen} record #{'ID'.pluralize(mlen)}."
         end
 

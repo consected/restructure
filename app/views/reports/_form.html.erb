@@ -1,6 +1,4 @@
 <div class="report-criteria container-fluid">
-  <% (@report.description || "").split("\n").each do |l| %>
-  <p><%= l %></p>
-  <% end %>
+  <%= Kramdown::Document.new(@report.description).to_html.html_safe %>
   <%= render partial: 'reports/criteria' %>
 </div>

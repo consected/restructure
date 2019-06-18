@@ -22,7 +22,8 @@ class Report < ActiveRecord::Base
   ReportTypes = [:count, :regular_report, :search]
   ReportIdAttribName = '_report_id_'
 
-  configure :view_options, with: [:hide_table_names, :humanize_column_names, :hide_result_count, :hide_export_buttons, :hide_criteria_panel]
+  configure :view_options, with: [:hide_table_names, :humanize_column_names, :hide_result_count, :hide_export_buttons, :hide_criteria_panel, :prevent_collapse_for_list]
+  configure :list_options, with: [:hide_in_list]
 
   class BadSearchCriteria < FphsException
     def message

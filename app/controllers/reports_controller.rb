@@ -22,6 +22,7 @@ class ReportsController < UserBaseController
     pm = filtered_primary_model(pm)
 
     @reports = pm.order  auto: :desc, report_type: :asc, position: :asc
+    @reports = @reports.reject {|r| r.list_options.hide_in_list}
 
     respond_to do |format|
       format.html { render :index }

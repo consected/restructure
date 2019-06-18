@@ -201,7 +201,7 @@ _fpa.postprocessors = {
       // If we show a list of IDs rather than actual search results then collapse the forms to avoid confusion.
       // We don't just click though, since that hides flash messages too fast
       if(data.search_action == 'MSID') {
-        var dtte = $('.advanced-form-selections [data-toggle="collapse"]').not('.collapsed');
+        var dtte = $('.advanced-form-selections [data-toggle="collapse"]').not('.collapsed, .prevent-list-collapse');
         // dtte.click();
 
         var dtt = dtte.attr('data-target');

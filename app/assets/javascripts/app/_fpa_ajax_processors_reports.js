@@ -64,11 +64,12 @@ _fpa.postprocessors_reports = {
         }).addClass('attached-complete-listener');
 
         var cb = $('#search_attrs__filter_previous_').not('.attached-click-listener');
-
+        var show_fob;
         if(cb.length === 1 && cb.is(':checked')){
             window.setTimeout(function(){
                 $('a#get_filter_previous').click();
             }, 100);
+            show_fob = true;
         }
 
         cb.on('change',function(){
@@ -81,6 +82,8 @@ _fpa.postprocessors_reports = {
             }
             return false;
         }).addClass('attached-click-listener');
+
+        if(!show_fob) block.find('input[type="submit"].auto-run').click();
 
     },
 

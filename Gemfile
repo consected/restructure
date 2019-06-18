@@ -45,7 +45,7 @@ gem 'aws-sdk-pinpoint'
 
 gem 'crass', '~> 1.0.4'
 
-# gem 'kramdown'
+gem 'kramdown'
 
 group :development do
 
