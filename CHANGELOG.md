@@ -143,3 +143,4 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 ## [7.3.4] - 2019-06-14
 ## [7.3.5] - 2019-06-17
 ## [7.3.6] - 2019-06-18
+## [7.3.7] - 2019-06-18
