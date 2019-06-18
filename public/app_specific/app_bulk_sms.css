@@ -138,3 +138,13 @@ table.import-grid td, table.table.report-table td {
 .common-template-item ul.list-group.expandable:after {
   top: 268px;
 }
+
+.notes-block .notes-text {
+    font-weight: bold;
+}
+
+.dynamic-model--zeus-bulk-message-message .notes-text {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: normal;
+}
