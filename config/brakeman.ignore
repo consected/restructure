@@ -21,6 +21,37 @@
       "note": ""
     },
     {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "7f8e1f887eb34d705a9f86f9c92796a8db3722969fda8c91cce24116dcf5c464",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/reports/_form.html.erb",
+      "line": 2,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "Kramdown::Document.new(Report.find(params[:id].to_i).description).to_html",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "ReportsController",
+          "method": "show",
+          "line": 150,
+          "file": "app/controllers/reports_controller.rb",
+          "rendered": {
+            "name": "reports/_form",
+            "file": "app/views/reports/_form.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "reports/_form"
+      },
+      "user_input": "Report.find(params[:id].to_i).description",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "987bf199a01bcfc5be06c25ad49064d1ed508c92272cf72466d85247ea0aba4b",
@@ -81,6 +112,6 @@
       "note": ""
     }
   ],
-  "updated": "2019-06-10 15:01:20 +0100",
+  "updated": "2019-06-18 10:54:21 +0100",
   "brakeman_version": "4.5.1"
 }
