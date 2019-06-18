@@ -1089,7 +1089,7 @@ _fpa.form_utils = {
       });
 
       setTimeout(function(){
-        var notes = block.find('.notes-block .list-group-item strong, .notes-block  .panel-body')
+        var notes = block.find('.notes-block .list-group-item strong, .notes-block  .panel-body, .al-shrinkable > ul.list-group')
         _fpa.utils.make_readable_notes_expandable(notes, 100, _fpa.form_utils.resize_children);
 
       }, 10);

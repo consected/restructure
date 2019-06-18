@@ -83,6 +83,10 @@
       caption = object_instance.human_name
   end
 
+  caption.scan(/\{\{.+\}\}/).each do |c|
+    caption.sub!(c, '')
+  end
+
   unless defined? save_action
     d = form_object_instance.class.default_options
     save_action = d.save_action if d

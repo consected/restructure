@@ -1,0 +1,140 @@
+body {
+  font-size: 16px;
+}
+
+#master--1.panel-heading {
+  display: none;
+}
+
+.panel-body.master-main-panel {
+    padding-top: 0;
+}
+
+div#master-search-accordion {
+    margin-bottom: 0;
+}
+
+.is-heading.activity-logs-header {
+    background: none;
+    width: 75%;
+    margin-left: 12.5%;
+}
+
+.activity-logs-header .action-buttons {
+    text-align: left;
+}
+
+
+
+.panel.panel-default.activity-logs-item-block {
+    border: 0;
+}
+
+h4.list-group-item-heading.al-label-zeus-bulk-message-item {
+    font-size: 36px;
+    font-family: serif;
+}
+
+ul.list-group.is-activity-log {
+    border: 1px solid rgb(216, 216, 216);
+}
+
+
+ul.list-group.is-activity-log > li.list-group-item,
+form ul.list-group > li.list-group-item
+{
+    border: 0;
+    background: none;
+    font-size: 110%;
+}
+
+
+ul.list-group.is-activity-log h4.list-group-item-heading,
+li.edit-form-header  h4.list-group-item-heading
+ {
+    padding: 15px 0;
+    font-size: 25px;
+}
+
+li.list-group-item.caption-before {
+    padding: 10px 15px 0 15px;
+}
+
+.new-block.new-after-parent.alr-new-block {
+    width: 75%;
+    margin-left: 12.5%;
+}
+
+form > ul.list-group {
+    box-shadow: none;
+    border: 1px solid rgb(216, 216, 216);
+}
+
+form .list-group-item:first-child {
+  background: none;
+}
+
+.edit_activity_log_zeus_bulk_message.form-inline .input-sm {
+    height: 36px;
+    padding: 5px 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+
+input.form-control.has-value, select.form-control.has-value {
+    background-color: rgb(251, 251, 232) !important;
+}
+
+.report-description {
+    color: rgb(84, 84, 84);
+    margin-left: 12.5%;
+    width: 75%;
+    color: rgb(84, 84, 84);
+}
+
+.advanced-form-selections {display: none;}
+
+li.list-group-item em.all_caps {
+    text-transform: none;
+    font-style: normal;
+    font-weight: normal;
+}
+
+#report-container >div >p.text-center>a {
+    display: none;
+}
+
+.report-criteria .well {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    /* border-bottom: 1px solid rgb(192, 192, 192);
+    border-radius: 0; */
+    padding-top: 0;
+}
+
+table.import-grid td, table.table.report-table td {
+  font-size: 14px;
+}
+
+.report-description h1, .report-description h2, .report-description h3, .report-description h4 {
+    font-family: serif;
+}
+
+.al-shrinkable {
+    min-height: 10px !important;
+}
+
+.common-template-item ul.list-group.expandable {
+  max-height: 264px;
+}
+
+.common-template-item ul.list-group.expandable.expanded {
+    max-height: none;
+    border-bottom: 0;
+}
+
+.common-template-item ul.list-group.expandable:after {
+  top: 268px;
+}

@@ -1,4 +1,6 @@
 <div class="report-criteria container-fluid">
-  <%= Kramdown::Document.new(@report.description).to_html.html_safe %>
+  <div class="report-description">
+    <%= Kramdown::Document.new(@report.description).to_html.html_safe %>
+  </div>
   <%= render partial: 'reports/criteria' %>
 </div>
