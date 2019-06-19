@@ -163,6 +163,19 @@
         "created_at": "2019-03-19T17:31:31.624Z",
         "updated_at": "2019-03-19T17:31:31.624Z",
         "user_email": null
+      },
+      {
+        "id": 64,
+        "name": "master header prefix",
+        "value": "Scheduled: {{dynamic_model__ipa_appointments.visit_start_date}}",
+        "disabled": false,
+        "admin_id": 4,
+        "user_id": null,
+        "app_type_id": 9,
+        "role_name": "",
+        "created_at": "2019-05-21T12:34:14.721Z",
+        "updated_at": "2019-05-21T12:36:09.968Z",
+        "user_email": null
       }
     ],
     "user_access_controls": [
@@ -4461,6 +4474,26 @@
         "user_email": null
       },
       {
+        "id": 31,
+        "name": "Incidental Findings",
+        "table_name": "ipa_incidental_findings",
+        "schema_name": null,
+        "primary_key_name": "id",
+        "foreign_key_name": "master_id",
+        "description": "",
+        "admin_id": 4,
+        "disabled": false,
+        "created_at": "2019-05-21T07:48:05.149Z",
+        "updated_at": "2019-05-21T17:17:11.439Z",
+        "position": null,
+        "category": "ipa-follow-up",
+        "table_key_name": "",
+        "field_list": "anthropometrics_check,anthropometrics_date,anthropometrics_notes,lab_results_check,lab_results_date,lab_results_notes,dexa_check,dexa_date,dexa_notes,brain_mri_check,brain_mri_date,brain_mri_notes,neuro_psych_check,neuro_psych_date,neuro_psych_notes,sensory_testing_check,sensory_testing_date,sensory_testing_notes,liver_mri_check,liver_mri_date,liver_mri_notes,physical_function_check,physical_function_date,physical_function_notes,eeg_check,eeg_date,eeg_notes,sleep_check,sleep_date,sleep_notes,cardiac_check,cardiac_date,cardiac_notes,xray_check,xray_date,xray_notes,other_notes",
+        "result_order": "",
+        "options": "default:\r\n\r\n  labels:\r\n    anthropometrics_check: Anthropometrics\r\n    lab_results_check: Lab Results\r\n    dexa_check: Dexa\r\n    brain_mri_check: Brain MRI\r\n    neuro_psych_check: Neuro Psych\r\n    sensory_testing_check: Sensory Testing\r\n    liver_mri_check: Liver MRI\r\n    physical_function_check: Physical Function\r\n    eeg_check: EEG\r\n    sleep_check: Sleep\r\n    cardiac_check: Cardiac\r\n    xray_check: X-Ray\r\n    anthropometrics_date: Date found\r\n    lab_results_date: Date found\r\n    dexa_date: Date found\r\n    brain_mri_date: Date found\r\n    neuro_psych_date: Date found\r\n    sensory_testing_date: Date found\r\n    liver_mri_date: Date found\r\n    physical_function_date: Date found\r\n    eeg_date: Date found\r\n    sleep_date: Date found\r\n    cardiac_date: Date found\r\n    xray_date: Date found\r\n\r\n  caption_before:\r\n    all_fields: Mark all assessments that had incidental findings\r\n    report_delivery_date: Date of delivery report confirmation\r\n    anthropometrics_notes: Notes\r\n    lab_results_notes: Notes\r\n    dexa_notes: Notes\r\n    brain_mri_notes: Notes\r\n    neuro_psych_notes: Notes\r\n    sensory_testing_notes: Notes\r\n    liver_mri_notes: Notes\r\n    physical_function_notes: Notes\r\n    eeg_notes: Notes\r\n    sleep_notes: Notes\r\n    cardiac_notes: Notes\r\n    xray_notes: Notes\r\n    other_notes: Other notes\r\n\r\n\r\n  show_if:\r\n    anthropometrics_notes:\r\n      anthropometrics_check: yes\r\n\r\n    lab_results_notes:\r\n      lab_results_check: yes\r\n\r\n    dexa_notes:\r\n      dexa_check: yes\r\n\r\n    brain_mri_notes:\r\n      brain_mri_check: yes\r\n\r\n    neuro_psych_notes:\r\n      neuro_psych_check: yes\r\n\r\n    sensory_testing_notes:\r\n      sensory_testing_check: yes\r\n\r\n    liver_mri_notes:\r\n      liver_mri_check: yes\r\n\r\n    physical_function_notes:\r\n      physical_function_check: yes\r\n\r\n    eeg_notes:\r\n      eeg_check: yes\r\n\r\n    sleep_notes:\r\n      sleep_check: yes\r\n\r\n    cardiac_notes:\r\n      cardiac_check: yes\r\n\r\n    xray_notes:\r\n      xray_check: yes\r\n\r\n    anthropometrics_date:\r\n      anthropometrics_check: yes\r\n\r\n    lab_results_date:\r\n      lab_results_check: yes\r\n\r\n    dexa_date:\r\n      dexa_check: yes\r\n\r\n    brain_mri_date:\r\n      brain_mri_check: yes\r\n\r\n    neuro_psych_date:\r\n      neuro_psych_check: yes\r\n\r\n    sensory_testing_date:\r\n      sensory_testing_check: yes\r\n\r\n    liver_mri_date:\r\n      liver_mri_check: yes\r\n\r\n    physical_function_date:\r\n      physical_function_check: yes\r\n\r\n    eeg_date:\r\n      eeg_check: yes\r\n\r\n    sleep_date:\r\n      sleep_check: yes\r\n\r\n    cardiac_date:\r\n      cardiac_check: yes\r\n\r\n    xray_date:\r\n      xray_check: yes\r\n",
+        "user_email": null
+      },
+      {
         "id": 32,
         "name": "Four Week Follow-Up",
         "table_name": "ipa_four_wk_followups",
@@ -4578,26 +4611,6 @@
         "field_list": "anthropometrics_check,anthropometrics_notes,lab_results_check,lab_results_notes,dexa_check,dexa_notes,brain_mri_check,brain_mri_notes,neuro_psych_check,neuro_psych_notes,sensory_testing_check,sensory_testing_notes,liver_mri_check,liver_mri_notes,physical_function_check,physical_function_notes,eeg_check,eeg_notes,sleep_check,sleep_notes,cardiac_check,cardiac_notes,xray_check,xray_notes,assisted_finding_provider_yes_no,assistance_notes,other_notes",
         "result_order": "",
         "options": "default:\r\n\r\n  labels:\r\n    anthropometrics_check: Anthropometrics\r\n    lab_results_check: Lab Results\r\n    dexa_check: Dexa\r\n    brain_mri_check: Brain MRI\r\n    neuro_psych_check: Neuro Psych\r\n    sensory_testing_check: Sensory Testing\r\n    liver_mri_check: Liver MRI\r\n    physical_function_check: Physical Function\r\n    eeg_check: EEG\r\n    sleep_check: Sleep\r\n    cardiac_check: Cardiac\r\n    xray_check: X-Ray\r\n\r\n  caption_before:\r\n    all_fields: Relevant assessments\r\n    # participant_call_yes_no: Did you have a phone call with the participant?\r\n    # participant_call_date: Date of call\r\n    # participant_call_notes: Notes\r\n    # provider_call_yes_no: Did you have a phone call with the provider?\r\n    # provider_call_date: Date of call\r\n    # provider_call_notes: Notes\r\n    # reports_sent_yes_no: Were any reports sent to a provider?\r\n    # reports_sent_notes: Which reports were sent to the provider?\r\n    # report_sent_date: Date report was sent\r\n    # report_delivery_date: Date of delivery report confirmation\r\n    assisted_finding_provider_yes_no: Did you provide assistance finding a provider?\r\n    assistance_notes: Notes\r\n    other_notes: Other notes\r\n\r\n    anthropometrics_notes: Notes\r\n    lab_results_notes: Notes\r\n    dexa_notes: Notes\r\n    brain_mri_notes: Notes\r\n    neuro_psych_notes: Notes\r\n    sensory_testing_notes: Notes\r\n    liver_mri_notes: Notes\r\n    physical_function_notes: Notes\r\n    eeg_notes: Notes\r\n    sleep_notes: Notes\r\n    cardiac_notes: Notes\r\n    xray_notes: Notes\r\n\r\n\r\n  show_if:\r\n    # participant_call_date:\r\n    #   participant_call_yes_no: yes\r\n    # participant_call_notes:\r\n    #   participant_call_yes_no: yes\r\n    # provider_call_date:\r\n    #   provider_call_yes_no: yes\r\n    # provider_call_notes:\r\n    #   provider_call_yes_no: yes\r\n\r\n    # reports_sent_notes:\r\n    #   reports_sent_yes_no: yes\r\n    # report_sent_date:\r\n    #   reports_sent_yes_no: yes\r\n    # report_delivery_date:\r\n    #   reports_sent_yes_no: yes\r\n    assistance_notes:\r\n      assisted_finding_provider_yes_no: yes\r\n\r\n    anthropometrics_notes:\r\n      anthropometrics_check: yes\r\n\r\n    lab_results_notes:\r\n      lab_results_check: yes\r\n\r\n    dexa_notes:\r\n      dexa_check: yes\r\n\r\n    brain_mri_notes:\r\n      brain_mri_check: yes\r\n\r\n    neuro_psych_notes:\r\n      neuro_psych_check: yes\r\n\r\n    sensory_testing_notes:\r\n      sensory_testing_check: yes\r\n\r\n    liver_mri_notes:\r\n      liver_mri_check: yes\r\n\r\n    physical_function_notes:\r\n      physical_function_check: yes\r\n\r\n    eeg_notes:\r\n      eeg_check: yes\r\n\r\n    sleep_notes:\r\n      sleep_check: yes\r\n\r\n    cardiac_notes:\r\n      cardiac_check: yes\r\n\r\n    xray_notes:\r\n      xray_check: yes\r\n\r\n\r\n#  field_options:\r\n#    call_date:\r\n#      value: today()\r\n",
-        "user_email": null
-      },
-      {
-        "id": 31,
-        "name": "Incidental Findings",
-        "table_name": "ipa_incidental_findings",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-05-21T07:48:05.149Z",
-        "updated_at": "2019-05-21T07:48:05.149Z",
-        "position": null,
-        "category": "ipa-follow-up",
-        "table_key_name": "",
-        "field_list": "anthropometrics_check,anthropometrics_date,anthropometrics_notes,lab_results_check,lab_results_date,lab_results_notes,dexa_check,dexa_date,dexa_notes,brain_mri_check,brain_mri_date,brain_mri_notes,neuro_psych_check,neuro_psych_date,neuro_psych_notes,sensory_testing_check,sensory_testing_date,sensory_testing_notes,liver_mri_check,liver_mri_date,liver_mri_notes,physical_function_check,physical_function_date,physical_function_notes,eeg_check,eeg_date,eeg_notes,sleep_check,sleep_date,sleep_notes,cardiac_check,cardiac_date,cardiac_notes,xray_check,xray_date,xray_notes,other_notes",
-        "result_order": "",
-        "options": "default:\r\n\r\n  labels:\r\n    anthropometrics_check: Anthropometrics\r\n    lab_results_check: Lab Results\r\n    dexa_check: Dexa\r\n    brain_mri_check: Brain MRI\r\n    neuro_psych_check: Neuro Psych\r\n    sensory_testing_check: Sensory Testing\r\n    liver_mri_check: Liver MRI\r\n    physical_function_check: Physical Function\r\n    eeg_check: EEG\r\n    sleep_check: Sleep\r\n    cardiac_check: Cardiac\r\n    xray_check: X-Ray\r\n    anthropometrics_date: Date found\r\n    lab_results_date: Date found\r\n    dexa_date: Date found\r\n    brain_mri_date: Date found\r\n    neuro_psych_date: Date found\r\n    sensory_testing_date: Date found\r\n    liver_mri_date: Date found\r\n    physical_function_date: Date found\r\n    eeg_date: Date found\r\n    sleep_date: Date found\r\n    cardiac_date: Date found\r\n    xray_date: Date found\r\n\r\n  caption_before:\r\n    all_fields: Which reports were sent to the provider?\r\n    report_delivery_date: Date of delivery report confirmation\r\n    anthropometrics_notes: Notes\r\n    lab_results_notes: Notes\r\n    dexa_notes: Notes\r\n    brain_mri_notes: Notes\r\n    neuro_psych_notes: Notes\r\n    sensory_testing_notes: Notes\r\n    liver_mri_notes: Notes\r\n    physical_function_notes: Notes\r\n    eeg_notes: Notes\r\n    sleep_notes: Notes\r\n    cardiac_notes: Notes\r\n    xray_notes: Notes\r\n    other_notes: Other notes\r\n\r\n\r\n  show_if:\r\n    anthropometrics_notes:\r\n      anthropometrics_check: yes\r\n\r\n    lab_results_notes:\r\n      lab_results_check: yes\r\n\r\n    dexa_notes:\r\n      dexa_check: yes\r\n\r\n    brain_mri_notes:\r\n      brain_mri_check: yes\r\n\r\n    neuro_psych_notes:\r\n      neuro_psych_check: yes\r\n\r\n    sensory_testing_notes:\r\n      sensory_testing_check: yes\r\n\r\n    liver_mri_notes:\r\n      liver_mri_check: yes\r\n\r\n    physical_function_notes:\r\n      physical_function_check: yes\r\n\r\n    eeg_notes:\r\n      eeg_check: yes\r\n\r\n    sleep_notes:\r\n      sleep_check: yes\r\n\r\n    cardiac_notes:\r\n      cardiac_check: yes\r\n\r\n    xray_notes:\r\n      xray_check: yes\r\n\r\n    anthropometrics_date:\r\n      anthropometrics_check: yes\r\n\r\n    lab_results_date:\r\n      lab_results_check: yes\r\n\r\n    dexa_date:\r\n      dexa_check: yes\r\n\r\n    brain_mri_date:\r\n      brain_mri_check: yes\r\n\r\n    neuro_psych_date:\r\n      neuro_psych_check: yes\r\n\r\n    sensory_testing_date:\r\n      sensory_testing_check: yes\r\n\r\n    liver_mri_date:\r\n      liver_mri_check: yes\r\n\r\n    physical_function_date:\r\n      physical_function_check: yes\r\n\r\n    eeg_date:\r\n      eeg_check: yes\r\n\r\n    sleep_date:\r\n      sleep_check: yes\r\n\r\n    cardiac_date:\r\n      cardiac_check: yes\r\n\r\n    xray_date:\r\n      xray_check: yes\r\n",
         "user_email": null
       },
       {
@@ -7696,11 +7709,11 @@
       },
       {
         "id": 142,
-        "name": "No",
+        "name": "No, not interested (opt out)",
         "value": "no",
         "item_type": "dynamic_model__ipa_ps_initial_screenings_select_still_interested",
         "created_at": "2019-01-17T11:51:01.808Z",
-        "updated_at": "2019-01-17T11:51:01.808Z",
+        "updated_at": "2019-05-21T17:27:07.883Z",
         "disabled": false,
         "admin_id": 4,
         "create_with": true,
@@ -7713,11 +7726,11 @@
       },
       {
         "id": 143,
-        "name": "Yes",
+        "name": "Yes, interested and have time to continue",
         "value": "yes",
         "item_type": "dynamic_model__ipa_ps_initial_screenings_select_still_interested",
         "created_at": "2019-01-17T11:51:01.812Z",
-        "updated_at": "2019-01-17T11:51:01.812Z",
+        "updated_at": "2019-05-21T17:27:28.317Z",
         "disabled": false,
         "admin_id": 4,
         "create_with": true,
@@ -7730,11 +7743,11 @@
       },
       {
         "id": 144,
-        "name": "Yes, but call me back",
+        "name": "Interested, but call me back",
         "value": "yes - call back",
         "item_type": "dynamic_model__ipa_ps_initial_screenings_select_still_interested",
         "created_at": "2019-01-17T11:51:01.817Z",
-        "updated_at": "2019-01-17T11:51:01.817Z",
+        "updated_at": "2019-05-21T17:27:45.293Z",
         "disabled": false,
         "admin_id": 4,
         "create_with": true,
@@ -13722,7 +13735,7 @@
         "admin_id": 4,
         "disabled": false,
         "created_at": "2019-05-21T07:48:21.874Z",
-        "updated_at": "2019-05-21T07:48:21.874Z",
+        "updated_at": "2019-05-21T17:19:17.745Z",
         "user_email": "phil_ayres@hms.harvard.edu"
       },
       {
@@ -13744,7 +13757,73 @@
         "admin_id": 4,
         "disabled": false,
         "created_at": "2019-05-21T09:15:56.189Z",
-        "updated_at": "2019-05-21T09:15:56.189Z",
+        "updated_at": "2019-05-21T17:19:08.979Z",
+        "user_email": "linda.pitler@mgh.harvard.edu"
+      },
+      {
+        "id": 542,
+        "app_type_id": 9,
+        "role_name": "user - mednav",
+        "user_id": 14,
+        "admin_id": 4,
+        "disabled": false,
+        "created_at": "2019-05-21T16:14:24.143Z",
+        "updated_at": "2019-05-21T17:19:00.279Z",
+        "user_email": "sarah_kim@hms.harvard.edu"
+      },
+      {
+        "id": 549,
+        "app_type_id": 9,
+        "role_name": "user - protocol exception",
+        "user_id": 14,
+        "admin_id": 5,
+        "disabled": false,
+        "created_at": "2019-05-29T15:21:31.357Z",
+        "updated_at": "2019-05-29T15:21:31.357Z",
+        "user_email": "sarah_kim@hms.harvard.edu"
+      },
+      {
+        "id": 550,
+        "app_type_id": 9,
+        "role_name": "user - participant details",
+        "user_id": 10,
+        "admin_id": 5,
+        "disabled": false,
+        "created_at": "2019-05-30T17:49:38.768Z",
+        "updated_at": "2019-05-30T17:49:38.768Z",
+        "user_email": "chelsea_valdivia@hms.harvard.edu"
+      },
+      {
+        "id": 551,
+        "app_type_id": 9,
+        "role_name": "user - reports",
+        "user_id": 23,
+        "admin_id": 5,
+        "disabled": false,
+        "created_at": "2019-05-31T17:41:29.271Z",
+        "updated_at": "2019-05-31T17:41:29.271Z",
+        "user_email": "aconnor@bidmc.harvard.edu"
+      },
+      {
+        "id": 552,
+        "app_type_id": 9,
+        "role_name": "user - reports",
+        "user_id": 10,
+        "admin_id": 5,
+        "disabled": false,
+        "created_at": "2019-05-31T17:41:41.532Z",
+        "updated_at": "2019-05-31T17:41:41.532Z",
+        "user_email": "chelsea_valdivia@hms.harvard.edu"
+      },
+      {
+        "id": 553,
+        "app_type_id": 9,
+        "role_name": "user - reports",
+        "user_id": 16,
+        "admin_id": 5,
+        "disabled": false,
+        "created_at": "2019-05-31T17:41:52.300Z",
+        "updated_at": "2019-05-31T17:41:52.300Z",
         "user_email": "linda.pitler@mgh.harvard.edu"
       }
     ],
@@ -13830,7 +13909,7 @@
         "admin_id": 4,
         "disabled": false,
         "created_at": "2019-01-17T11:51:03.040Z",
-        "updated_at": "2019-01-17T11:51:03.040Z",
+        "updated_at": "2019-05-21T17:47:06.800Z",
         "user_email": null
       },
       {
