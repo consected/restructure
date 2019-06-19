@@ -236,7 +236,7 @@ tmoca_scores:
 
     not_any:
       activity_log__ipa_assignment_phone_screens:
-        extra_log_type: tmoca_1
+        extra_log_type: tmoca_scores
 
 ###############################
 # Continue after T-MoCA?
@@ -290,10 +290,10 @@ tmoca_continue:
     <<: *enabled_if
     all:
       activity_log__ipa_assignment_phone_screens:
-        extra_log_type: tmoca_1
+        extra_log_type: tmoca_scores
     not_all:
       activity_log__ipa_assignment_phone_screens:
-        extra_log_type: tmoca_0
+        extra_log_type: tmoca_continue
         callback_required:
           - ok to continue
           - not ok to continue
@@ -451,7 +451,9 @@ tms_1:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: tms_1
 
-
+#######################
+# T-MoCA has moved
+#######################
 tmoca_0:
   label: Continue?
   fields:
@@ -552,7 +554,9 @@ tmoca_0:
                   extra_log_type: schedule_screening
                   select_record_from_player_contacts: return_value
 
-
+#######################
+# T-MoCA has moved
+#######################
 tmoca_1:
   label: T-MoCA
 
@@ -588,6 +592,35 @@ tmoca_1:
         extra_log_type: tmoca_1
 
 
+completed_questions:
+  label: Review Details
+  fields:
+    - notes
+
+  caption_before:
+   all_fields: |
+      <p>Thank you for your patience and for answering the previous questions.  Do you have any questions about any of the questions I asked?</p>
+      <p>I'd like to ask you some questions about the details that we discussed earlier to make sure that I provided you with a good review of the study. </p>
+      <br/>
+      <ul>
+      <li>How long will you be participating in the study?</li>
+      <li>Will you be provided with clinical care or is this a research study?</li>
+      <li>Can you tell me one or two assessments that will occur during this study (for example, a test of your sense of smell)?</li>
+      <li>Can you tell me a potential risk of participating in this research study?</li>
+      <li>Will you have to take any study drugs not including your own medication?</li>
+      <li>Will you be compensated/paid for taking part in this study?</li>
+      <li>Where does this study take place?</li>
+      </ul>
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: tms_1
+    not_any:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: completed_questions
+
 
 #cognitive_screening_completed:
 #  label: Cognitive Screening Completed
@@ -608,7 +641,9 @@ tmoca_1:
 #      activity_log__ipa_assignment_phone_screens:
 #        extra_log_type: cognitive_screening_completed
 
-
+###############################
+# Informant Details - V1
+###############################
 informant_details:
   label: Informant Details
   caption_before:
@@ -648,7 +683,9 @@ informant_details:
               notes: ADL Informant Screener required based on T-MoCA result. Schedule a call with the informant.
 
 
-
+#######################
+# Schedule Callback - V1
+#######################
 schedule_callback:
   label: Schedule Callback
   fields:
@@ -701,7 +738,101 @@ schedule_callback:
                   extra_log_type: schedule_screening
                   select_record_from_player_contacts: return_value
 
+###############################
+# Informant Details - V2
+###############################
+informant_details_v2:
+  label: Informant Details
+  caption_before:
+    all_fields: |
+      <i>[For those who scored &lt;17 on the T-MoCA ONLY]</i>
 
+      The next step of this screening process is to speak to a close family member who knows you well or someone who can legally make decisions for you to ask them questions about how you are doing with day-to-day activities. For example, we will ask them to tell us if you need help with activities such as keeping track of appointments, household chores and personal care. We will also ask them to tell us about your mood – for example, if you get anxious or irritated. This will entail a brief phone call with the individual you decide to provide contact information for. Following the phone call, we will send them an individualized link via email which will contain a 23 -question survey. This survey will not contain any identifiable information – for instance, it will not contain your name, address, or birthdate and your family member will not be asked to provide this information either.
+
+      Do we have your permission to speak to someone that knows you well?
+
+  references:
+    dynamic_model__ipa_ps_informant_detail:
+      from: master
+      add: one_to_master
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: completed_questions
+      dynamic_model__ipa_ps_tmocas:
+        tmoca_score:
+          condition: <
+          value: 17
+
+    not_any:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: informant_details_v2
+
+  save_trigger:
+    on_create:
+      create_reference:
+        - activity_log__ipa_assignment:
+            in: master
+            with:
+              extra_log_type: schedule_informant_screener
+              notes: ADL Informant Screener required based on T-MoCA result. Schedule a call with the informant.
+
+#######################
+# Schedule Callback - V2
+#######################
+schedule_callback_v2:
+  label: Schedule Callback
+  fields:
+    - callback_date
+    - callback_time
+    - notes
+  caption_before:
+    all_fields: |
+       Thank you for your patience and for answering these previous questions.
+
+       Our study physician and study nurse will be reviewing the answers to the questions we just discussed.  [It is possible that you will OR You will] receive a follow-up phone call from me or from our study nurse to get clarification on some of the questions that I asked you today. I will be contacting you to let you know if you are eligible or not. If you are eligible, we will let you know the next steps.
+
+       Do you have any questions?
+
+       We will call you back to inform you of your eligibility status. What is a good day/time to call you? It may take up to 10 days for us to make a determination.
+
+
+    submit: If you have any questions in the meantime, please do not hesitate to contact us. Thank you again for your time.
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: completed_questions
+    not_any:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: schedule_callback_v2
+
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+        - activity_log__ipa_assignment:
+
+            in: master
+            with:
+              extra_log_type: screening_follow_up
+              select_who: current_user_email
+              follow_up_when:
+                this:
+                  callback_date: return_value
+              follow_up_time:
+                this:
+                  callback_time: return_value
+              notes: Participant phone screening completed. Follow-up has been scheduled.
+              select_record_from_player_contacts:
+                activity_log__ipa_assignments:
+                  extra_log_type: schedule_screening
+                  select_record_from_player_contacts: return_value
 
 finalize:
   label: Finalize Entries
@@ -715,7 +846,9 @@ finalize:
     <<: *enabled_if
     all:
       activity_log__ipa_assignment_phone_screens:
-        extra_log_type: schedule_callback
+        extra_log_type:
+          - schedule_callback
+          - schedule_callback_v2
     not_any:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: finalize
