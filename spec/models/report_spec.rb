@@ -27,4 +27,15 @@ RSpec.describe Report, type: :model do
 
   end
 
+  it "references reports by an item_type__short_name alternative resource name" do
+
+    first_rep = Report.active.searchable.first
+    expect(first_rep).to be_a Report
+    expect(first_rep.short_name).to be_present
+    expect(first_rep.item_type).to be_present
+
+    Report.find_category_short_name "#{first_rep.item_type}__#{first_rep.short_name}"
+
+  end
+
 end

@@ -31,7 +31,7 @@ class ReportsController < UserBaseController
   end
 
 
-
+  # Run report
   def show
 
     return not_authorized unless @report.can_access?(current_user) || current_admin
@@ -267,15 +267,20 @@ class ReportsController < UserBaseController
 
     end
 
-    def set_report
-      id = params[:id]
+    # :id parameter can be either an integer ID, or a string, which looks up a item_type__short_name
+    # By default it uses the params[:id] for the id, but specifying id as the argument will use this instead
+    # @param id [(optional) Intger | String]
+    def set_report id=nil
+      id ||= params[:id]
       redirect_to :index if id.blank?
-      id = id.to_i
-      redirect_to :index unless id > 0
+      num_id = id.to_i
+      if num_id > 0
+        @report = Report.find(num_id)
+      else
+        @report = Report.find_category_short_name id
+      end
 
-      @report = Report.find(id)
       @report.current_user = current_user
-
     end
 
     def show_report
@@ -362,9 +367,8 @@ class ReportsController < UserBaseController
 
     def set_editable_instance_from_id
       id = params[:report_id]
-      id = id.to_i
-      @report = Report.find(id)
-      @report.current_user = current_user
+      set_report id
+
       return if params[:id] == 'cancel' || params[:id].blank?
       id = params[:id]
       id = id.to_i

@@ -45,6 +45,18 @@ class Report < ActiveRecord::Base
     end
   end
 
+  # Find a report based on an alt_resource_name style of "item_type__short_name" where a double underscore
+  # acts as the divider between item_type "category" and short_name
+  # @param csn [String] must match the pattern yyy__zzz
+  # @return [Report] or raises an exception if not found
+  def self.find_category_short_name csn
+    parts = csn.split('__')
+    raise FphsException.new "Bad item_type__short_name identifier" unless parts.length == 2
+    res = where(item_type: parts.first, short_name: parts.last).first
+    raise ActiveRecord::RecordNotFound unless res
+    res
+  end
+
   def can_access? user
     return true if user.has_access_to?(:read, :report, self.name)
     return user.has_access_to?(:read, :report, :_all_reports_)
@@ -435,12 +447,12 @@ class Report < ActiveRecord::Base
   end
 
   def alt_resource_name
-    "#{self.item_type || '_default'}__#{self.short_name}".underscore
+    "#{self.item_type || '_default'}__#{self.short_name}".downcase.id_underscore
   end
 
   def gen_short_name
     if self.short_name.blank?
-      self.short_name = self.name.gsub(' ', '_').downcase.underscore
+      self.short_name = self.name.downcase.id_underscore
     end
   end
 
