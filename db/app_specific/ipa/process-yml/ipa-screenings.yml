@@ -1,0 +1,108 @@
+default:
+
+
+  field_options:
+    good_time_to_speak_blank_yes_no:
+      edit_as:
+        field_type: select_is_good_time_to_speak
+        alt_options:
+          Left Voicemail: left voicemail
+          'No': 'no'
+          'Yes': 'yes'
+
+
+  show_if:
+
+    requires_study_partner_blank_yes_no:
+        eligible_for_study_blank_yes_no:
+          - yes
+
+    good_time_to_speak_blank_yes_no:
+      any:
+        eligible_for_study_blank_yes_no: 'no'
+        requires_study_partner_blank_yes_no:
+          - 'yes'
+          - 'no'
+
+
+    callback_date:
+        good_time_to_speak_blank_yes_no:
+          - 'no'
+          - 'left voicemail'
+    callback_time:
+        good_time_to_speak_blank_yes_no:
+          - 'no'
+          - 'left voicemail'
+
+
+    placeholder_requires_partner:
+        eligible_for_study_blank_yes_no: yes
+        requires_study_partner_blank_yes_no: yes
+        good_time_to_speak_blank_yes_no: yes
+
+    placeholder_eligible:
+        eligible_for_study_blank_yes_no: yes
+        good_time_to_speak_blank_yes_no: yes
+        requires_study_partner_blank_yes_no: no
+
+    still_interested_blank_yes_no:
+        eligible_for_study_blank_yes_no: yes
+        good_time_to_speak_blank_yes_no: yes
+
+
+    eligible_notes:
+        eligible_for_study_blank_yes_no: yes
+        good_time_to_speak_blank_yes_no: yes
+        still_interested_blank_yes_no: yes
+
+
+    ineligible_notes:
+        eligible_for_study_blank_yes_no: no
+        good_time_to_speak_blank_yes_no: yes
+
+    contact_in_future_yes_no:
+        eligible_for_study_blank_yes_no: no
+        good_time_to_speak_blank_yes_no: yes
+
+    not_interested_notes:
+        eligible_for_study_blank_yes_no: yes
+        good_time_to_speak_blank_yes_no: yes
+        still_interested_blank_yes_no: no
+
+  labels:
+    good_time_to_speak_blank_yes_no: 'Response'
+
+  caption_before:
+    eligible_for_study_blank_yes_no:
+      keep_label: true
+      caption: Select if the subject is eligible for the study. Then start the call and follow the script.
+    good_time_to_speak_blank_yes_no: "Is this a good time to speak?"
+    callback_date:
+      keep_label: true
+      caption: |
+        <i>Enter date and time to call back</i>
+        Thanks and end call
+    #still_interested_blank_yes_no: Are you still interested in participating? Do you have any questions?
+    eligible_notes: Record any notes from the call
+    ineligible_notes: Record any notes from the call
+    not_interested_notes: |
+      Thank you for your time today.
+      <i>END CALL and complete call notes</i>
+
+    contact_in_future_yes_no: Did the participant give permission to contact in future?
+
+  dialog_before:
+    good_time_to_speak_blank_yes_no:
+      name: ipa eligibility call intro
+
+    ineligible_notes:
+      name: ipa eligibility call not eligible
+
+    placeholder_eligible:
+      name: ipa eligibility call eligible 1
+
+    placeholder_requires_partner:
+      name: ipa eligibility call needs partner
+
+    eligible_notes:
+      name: ipa eligibility call eligible 2

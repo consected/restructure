@@ -22,8 +22,10 @@ class Report < ActiveRecord::Base
   ReportTypes = [:count, :regular_report, :search]
   ReportIdAttribName = '_report_id_'
 
-  configure :view_options, with: [:hide_table_names, :humanize_column_names, :hide_result_count, :hide_export_buttons, :hide_criteria_panel, :prevent_collapse_for_list]
+  configure :view_options, with: [:hide_table_names, :humanize_column_names, :hide_result_count, :hide_export_buttons, :hide_criteria_panel, :prevent_collapse_for_list,
+                                  :view_as, :search_button_label]
   configure :list_options, with: [:hide_in_list]
+  configure :view_css, with: [:classes]
 
   class BadSearchCriteria < FphsException
     def message
@@ -260,7 +262,12 @@ class Report < ActiveRecord::Base
       end
       @clean_sql = clean_sql
       begin
-        res = self.class.connection.execute(clean_sql)
+        pg = self.class.connection
+        # This is needed to get real return values for JSON
+        @type_map ||= PG::BasicTypeMapForResults.new(pg.raw_connection)
+        res = pg.execute(clean_sql)
+        res.type_map = @type_map
+
       rescue => e
         logger.info "Unabled to run sql: #{e.inspect}.\n#{clean_sql}"
         raise FphsException.new "Unabled to run sql: #{e.inspect}"

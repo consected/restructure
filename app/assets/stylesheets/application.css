@@ -17,6 +17,9 @@
  *= require chart.min
  *= require app/nfs_store/application
  *= require app/secure_view/secure_view
+ *= require fullcalendar/core/main
+ *= require fullcalendar/daygrid/main
+ *= require fullcalendar/timegrid/main
  *= require_tree ./app
  *= require_self
  */

@@ -196,6 +196,21 @@ a.close-entity, a.glyphicon.glyphicon-remove-sign {
     }
 }
 
+hr {
+  border-top: 1px solid rgb(213, 213, 213);
+}
+
+ul.list-group ul {
+  list-style-type: disc;
+  padding-inline-end: 40px;
+  margin-bottom: 10px;
+}
+
+ul.list-group ul.list-group {
+  padding-inline-end: 0;
+  margin-bottom: 0;
+
+}
 
 .nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
     background-color: rgb(238, 238, 238);

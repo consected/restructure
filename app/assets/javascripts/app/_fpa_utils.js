@@ -160,7 +160,7 @@ _fpa.utils.ISOdatetoTimestamp = function(stre){
   if(stre == null) return null;
 
   if(typeof stre == 'number') return stre;
-
+  stre = stre.trim();
   if( (stre.indexOf('t')>=0 && stre.indexOf('z')>=0) ||
       (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) ||
       (stre.indexOf('t')>=0 && stre.indexOf('+')>=0) ||
@@ -177,7 +177,7 @@ _fpa.utils.ISOdatetoTimestamp = function(stre){
 // Typically returns mm/dd/yyyy
 
 _fpa.utils.YMDtoLocale = function(stre){
-
+    stre = stre.trim();
     // Take special care to avoid issues with timezones and daylight savings time quirks
     if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) || stre.length > 15){
         // startTime = new Date(Date.parse(stre));
@@ -197,14 +197,18 @@ _fpa.utils.YMDtoLocale = function(stre){
 
 // Typically returns mm/dd/yyyy hh:mm:ss a/pm
 _fpa.utils.YMDtimeToLocale = function(stre){
-
+    stre = stre.trim();
     // Take special care to avoid issues with timezones and daylight savings time quirks
     if((stre.indexOf('t')>=0 && stre.indexOf('z')>=0) || (stre.indexOf('T')>=0 && stre.indexOf('Z')>=0) || stre.length > 15){
         // startTime = new Date(Date.parse(stre));
         // startTime =   new Date( startTime.getTime() + ( startTime.getTimezoneOffset() * 60000 ) );
         // var d = startTime.asLocale();
         var d = _fpa.utils.isoDateTimeStringToLocale(stre);
-    } else {
+    }
+    else if(stre.indexOf(':') == 2) {
+      return stre;
+    }
+    else {
       // This locale string only includes the date
         // var d = new Date(stre).asLocale();
         var d = _fpa.utils.isoDateTimeStringToLocale(stre);

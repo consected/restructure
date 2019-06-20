@@ -17,6 +17,10 @@
     caption_before = {}
   end
 
+  unless defined? dialog_before
+    dialog_before = {}
+  end
+
   unless defined? labels
     labels = {}
   end
@@ -137,9 +141,6 @@
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
   _fpa.state.labels_<%=name.underscore%> = <%= labels.to_json.html_safe %>;
-
-
-
 </script>
 
 
@@ -228,13 +229,15 @@
   {{#*inline '<%=name%>_result_field'}}
 
     {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
-    {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption')}}
+    {{#if (fpa_state_item 'dialog_before_<%=name.underscore%>' @key)}}
+      {{{fpa_state_item 'dialog_before_<%=name.underscore%>' @key}}}
+    {{else if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption')}}
     <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-      {{{replace (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption') "\n" "<br>" "g"}}}
+      {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption'}}}
     </li>
     {{else if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption')}}
     <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-      {{{replace (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption') "\n" "<br>" "g"}}}
+      {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption'}}}
     </li>
     {{/if}}
     {{/is}}

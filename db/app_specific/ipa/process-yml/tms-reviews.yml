@@ -1,5 +1,5 @@
 # Fields:
-# convulsion_or_seizure_blank_yes_no_dont_know, epilepsy_blank_yes_no_dont_know, fainting_blank_yes_no_dont_know, concussion_blank_yes_no_dont_know, loss_of_conciousness_details, hearing_problems_blank_yes_no_dont_know, cochlear_implants_blank_yes_no_dont_know, metal_blank_yes_no_dont_know, metal_details, neurostimulator_blank_yes_no_dont_know, neurostimulator_details, caridiac_pacemaker_blank_yes_no_dont_know, caridiac_pacemaker_details, med_infusion_device_blank_yes_no_dont_know, med_infusion_device_details, past_tms_blank_yes_no_dont_know, past_tms_details, past_mri_yes_no_dont_know, past_mri_details, current_meds_blank_yes_no_dont_know, current_meds_details
+# convulsion_or_seizure_blank_yes_no_dont_know, convulsion_or_seizure_details, epilepsy_blank_yes_no_dont_know, epilepsy_details, fainting_blank_yes_no_dont_know, fainting_details, concussion_blank_yes_no_dont_know, loss_of_conciousness_details, hairstyle_scalp_blank_yes_no_dont_know, hairstyle_scalp_details, hearing_problems_blank_yes_no_dont_know, cochlear_implants_blank_yes_no_dont_know, metal_blank_yes_no_dont_know, metal_details, neurostimulator_blank_yes_no_dont_know, neurostimulator_details, caridiac_pacemaker_blank_yes_no_dont_know, caridiac_pacemaker_details, med_infusion_device_blank_yes_no_dont_know, med_infusion_device_details, past_tms_blank_yes_no_dont_know, past_tms_details, past_mri_yes_no_dont_know, past_mri_details, current_meds_blank_yes_no_dont_know, current_meds_details
 
 default:
 
@@ -10,6 +10,12 @@ default:
     # From TMS form
     past_tms_details:
       past_tms_blank_yes_no_dont_know: "yes"
+    convulsion_or_seizure_details:
+      convulsion_or_seizure_blank_yes_no_dont_know: 'yes'
+    epilepsy_details:
+      epilepsy_blank_yes_no_dont_know: 'yes'
+    fainting_details:
+      fainting_blank_yes_no_dont_know: 'yes'
     metal_details:
       metal_blank_yes_no_dont_know: "yes"
     neurostimulator_details:
@@ -18,6 +24,8 @@ default:
       current_meds_blank_yes_no_dont_know: "yes"
     loss_of_conciousness_details:
       concussion_blank_yes_no_dont_know: 'yes'
+    hairstyle_scalp_details:
+      hairstyle_scalp_blank_yes_no_dont_know: 'yes'
     med_infusion_device_details:
       med_infusion_device_blank_yes_no_dont_know: 'yes'
     # From MRI form
@@ -33,10 +41,15 @@ default:
     past_tms_blank_yes_no_dont_know: Did you ever undergo TMS in the past?
     past_tms_details: <i>IF YES</i> , were there any problems?
     convulsion_or_seizure_blank_yes_no_dont_know: Have you ever had a convulsion or a seizure?
+    convulsion_or_seizure_details: <i>IF YES</i>, how long ago, did you go to the hospital, were you put on medication, was it determined why?
     epilepsy_blank_yes_no_dont_know: Do you or a family member have a history of epilepsy?
+    epilepsy_details: <i>IF YES</i>, can you please explain?
     fainting_blank_yes_no_dont_know: Have you ever had a fainting spell?
+    fainting_details: <i>IF YES</i>, can you please tell me what happened?
     concussion_blank_yes_no_dont_know: Have you ever had a head trauma that was diagnosed as a concussion or was associated with a loss of consciousness?
     loss_of_conciousness_details: <i>IF YES for LOC</i> How long were you unconscious?
+    hairstyle_scalp_blank_yes_no_dont_know: Do you have a hairstyle that would make it difficult to access your scalp?
+    hairstyle_scalp_details: <i>IF YES</i>, please explain?
     hearing_problems_blank_yes_no_dont_know: Do you have any hearing problems or ringing in your ears?
     cochlear_implants_blank_yes_no_dont_know: Do you have cochlear implants or do you wear hearing aids?
     neurostimulator_blank_yes_no_dont_know: Do you have an implanted neurostimulator in your body? This can include a vagal nerve stimulator, deep brain stimulator, epidural/subdural stimulator, etc.

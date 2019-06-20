@@ -175,7 +175,7 @@ _fpa.postprocessors_reports = {
         }, 50);
 
         window.setTimeout(function() {
-          $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"]').each(function() {
+          $('td[data-col-type$="_when"], td[data-col-type$=" when"], td[data-col-type$="_date"], td[data-col-type$=" date"], td[data-col-type="date"]').not('.td-date-formatted').each(function() {
             var d = null;
             var val = $(this).html();
             if(val == 'Invalid Date')
@@ -183,8 +183,9 @@ _fpa.postprocessors_reports = {
             else if (val && val != '')
               d = _fpa.utils.YMDtoLocale(val);
             $(this).html(d);
-          });
-          $('td[data-col-type$="_at"], td[data-col-type$=" at"]').each(function() {
+          }).addClass('td-date-formatted');
+
+          $('td[data-col-type$="_at"], td[data-col-type$="_time"], td[data-col-type$=" time"], td[data-col-type$=" at"]').not('.td-time-formatted').each(function() {
             var d = null;
             var val = $(this).html();
             if(val == 'Invalid Date')
@@ -192,7 +193,7 @@ _fpa.postprocessors_reports = {
             else if (val && val != '')
               d = _fpa.utils.YMDtimeToLocale(val);
             $(this).html(d);
-          });
+          }).addClass('td-time-formatted');
 
         }, 500);
 

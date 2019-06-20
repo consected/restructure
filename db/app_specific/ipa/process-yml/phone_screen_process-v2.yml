@@ -232,7 +232,8 @@ tmoca_scores:
     all:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: start_phone_screen
-        callback_required: "ok to continue"
+      dynamic_model__ipa_ps_initial_screenings:
+        select_still_interested: "yes"
 
     not_any:
       activity_log__ipa_assignment_phone_screens:
@@ -251,11 +252,9 @@ tmoca_continue:
     - notes
 
   caption_before:
-    all_fields: |
+    callback_required: |
       Now I am going to ask you to answer some medical questions and  to see if you qualify for the study.
       Is it OK for me to continue?
-
-    callback_required: Do you have still have time to complete this right now or would you like me to call you back at a more convenient time?
     notes: Enter any notes from the end of the call. If the subject no longer wishes to participate, enter a Withdraw record in the IPA Tracker.
     placeholder_callback: When calling back the participant, click <b>Continue?</b> in the menu above to restart the screener process.
 
@@ -294,9 +293,6 @@ tmoca_continue:
     not_all:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: tmoca_continue
-        callback_required:
-          - ok to continue
-          - not ok to continue
 
 
   save_action:
@@ -362,7 +358,9 @@ tmoca_continue:
 #      activity_log__ipa_assignment_phone_screens:
 #        extra_log_type: section_1
 
-
+###############################
+#  General info (size, etc) V1
+###############################
 section_2:
   label: General Info
   fields:
@@ -382,6 +380,29 @@ section_2:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: section_2
 
+###############################
+#  General info (size, etc) V2
+###############################
+section_2_v2:
+  label: General Info
+  fields:
+  references:
+    dynamic_model__ipa_ps_size:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: tmoca_continue
+        callback_required:
+          - ok to continue
+          - call me back
+    not_any:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: section_2_v2
+
 
 health_1:
   label: Health
@@ -394,7 +415,9 @@ health_1:
     <<: *enabled_if
     all:
       activity_log__ipa_assignment_phone_screens:
-        extra_log_type: section_2
+        extra_log_type:
+          - section_2
+          - section_2_v2
     not_any:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: health_1

@@ -1,4 +1,4 @@
-<% rt = @report.result_tables_by_index || []%>
+<% result_tables = @report.result_tables_by_index || []%>
 
 <div class="data-results" id="report-container" data-report-id="<%=@report.id%>">
   <div class="<%= @count_only ? 'count-only' : '' %>">
@@ -31,78 +31,15 @@
       </p>
       <% end %>
       <div class="report-results-inner">
-        <table class="report-table table tablesorter">
-          <thead>
-            <tr>
-              <% if editable? %><th class="no-sort edit-button-column"></th><% end %>
-              <%
-                i = 0
-
-                table_names = rt.uniq
-                num_tables = table_names.length
-              %>
-              <% @results.fields.each do |col|
-
-              %>
-                <th title="Click to sort. Shift+Click for sub-sort(s). Click again for descending sort." data-col-type="<%=col%>">
-                  <p class="table-header-col-type"><%=@report.view_options.humanize_column_names ? col.humanize : col%></p>
-                  <% unless num_tables == 1 %>
-                  <% unless @report.view_options.hide_table_names %>
-                  <p class="small report-table-name" title="<%=rt[i] %>"><%=rt[i] %></p>
-                  <% end %>
-                  <% end %>
-                </th>
-              <%  i += 1%>
-              <% end %>
-            </tr>
-          </thead>
-          <tbody>
-
-            <% @results.each_row do |list_item| %>
-
-
-              <tr class="" id="report-item-<%=list_item[0]%>">
-               <% if editable? %>
-               <td class="report-el report-edit-btn-cell"><%= report_edit_btn list_item[0]%> </td>
-               <% end %>
-                <% i = 0 %>
-
-                <% list_item.each do |col| %>
-                <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=rt[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %>">
-                  <%  l = col&.scan("\n")&.length || 0
-                      got_nl = l > 2 %>
-                  <% if got_nl%><pre class="expandable"><% end %><%= col %><% if got_nl%></pre><% end %>
-                </td>
-                <%  i += 1 %>
-                <% end %>
-
-              </tr>
-            <% end %>
-            <tr class="<%= editable? ? '' : 'hidden' %>" id="report-item-new">
-
-              <% if editable? %>
-              <td class="report-el report-edit-btn-cell"><%= report_edit_btn 'new'%>
-                <% if creatable? %>
-                  <div class="">
-                    <%= link_to "", new_report_path(report_id: @report.id), remote: true, class: "btn btn-primary report-new-item-btn glyphicon glyphicon-plus", title: 'add new report item' %>
-                  </div>
-                <% end %>
-              </td>
-              <% end %>
-               <% i = 0 %>
-
-               <% @results.fields.each do |field| %>
-               <td data-col-type="<%=field %>" data-col-table="<%=rt[i] %>" class="report-el-was-from-new report-el <%= field == 'id' ? 'report-el-object-id' : '' %>"></td>
-               <%  i += 1 %>
-               <% end %>
-
-              </tr>
-            </tr>
-          </tbody>
-        </table>
+        <%
+          render_as = @report.view_options.view_as || 'table'
+          render_as = render_as.gsub(/[^a-z_]/, '')
+        %>
+        <%= render partial: "results_#{render_as}", locals: {result_tables: result_tables} %>
       </div>
     </div>
 
 
   </div>
 </div>
+<%= render partial: 'result_view_css' %>

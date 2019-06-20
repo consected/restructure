@@ -187,6 +187,12 @@ class ExtraOptions
     self.caption_before = self.caption_before.symbolize_keys
     self.caption_before = self.caption_before.each do |k,v|
       if v.is_a? String
+
+        has_html = v.scan(/<(p ?.*|br ?.*|div ?.*|ul ?.*)>/).length > 0
+        unless has_html
+          v = v.gsub("\n", "<br/>")
+        end
+
         self.caption_before[k] = {
           caption: v,
           edit_caption: v,

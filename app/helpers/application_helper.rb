@@ -116,7 +116,7 @@
         caption = caption["#{mode}_caption".to_sym] || caption[:caption] || ''
       end
       caption = Admin::MessageTemplate.substitute(caption, data: @form_object_instance, tag_subs: 'em class="all_caps"') if @form_object_instance
-      caption.gsub("\n","<br/>").html_safe
+      caption.html_safe
     end
 
     def label_for key, labels, remove=nil, force_default: nil

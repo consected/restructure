@@ -652,6 +652,11 @@ _fpa.form_utils = {
           _fpa.utils.jump_to_linked_item(a);
         }).addClass('attached-datatoggle-stt');
 
+        block.find('[data-toggle~="show-modal"]').not('.attached-datatoggle-show-modal').on('click', function(){
+          if($(this).attr('disabled')) return;
+          var a = $(this).attr('data-target');
+          _fpa.show_modal(a);
+        }).addClass('attached-datatoggle-show-modal');
 
         block.find('[data-prevent-on-collapse="true"]').not('.attached-prevent-on-collapse').on('click', function(ev){
           if($(this).attr('disabled')) return;
@@ -706,7 +711,7 @@ _fpa.form_utils = {
                     return;
                   }
 
-                  var not_visible = !(rect.top >= 0 && rect.bottom < $(window).height());
+                  var not_visible = !(rect.top >= 0 && 1.25 * rect.bottom < $(window).height());
                   if(not_visible)
                     _fpa.utils.scrollTo(a, 200, -100);
                       // $(document).scrollTo(a, 100, {offset: -50});
@@ -891,6 +896,86 @@ _fpa.form_utils = {
 
     },
 
+    list_view: function(block) {
+
+      var all_blocks = block.parents('.common-template-list').first().find('.common-template-item');
+      all_blocks.removeClass('col-lg-6').addClass('col-lg-12 col-lg-offset-6')
+      _fpa.form_utils.resize_children(block);
+    },
+
+    sort_blocks: function(block, sort_rev) {
+      // Sort dom elements within the block's parent,
+      // based on the value of the data attribute specified by data-sort-desc in a child of the current block
+      // For example:
+      // data-sort-desc="data-item-rank"
+      // will sort all blocks in the parent of this block with the attribute data-sort-desc, using the
+      // value from a child of each block with the data attribute data-item-rank, for example
+      // data-item-rank="10"
+      // The sort will automatically sort on string, numeric or date/time values
+      var sort_block = block;
+      var s = sort_block.attr('data-sort-desc');
+      if(!s) {
+        sort_block = sort_block.children().first();
+        if (sort_block.length)
+          s = sort_block.attr('data-sort-desc');
+      }
+      if(!s) {
+        sort_block = sort_block.find('[data-sub-list]');
+        sort_block = sort_block.children().first();
+        if (sort_block.length)
+          s = sort_block.attr('data-sort-desc');
+      }
+
+      if(s){
+          var descp = sort_block.parent();
+          sort_rev = sort_rev || descp.attr('data-sort-reverse');
+
+          descp.find('[data-sort-desc]').sort(function(a,b){
+            var bres = $(b).find('['+s+']').attr(s);
+            var ares = $(a).find('['+s+']').attr(s);
+
+            if(bres == null) bres = $(b).attr(s);
+            if(ares == null) ares = $(a).attr(s);
+
+            if(bres){
+              var bboth = bres.split('--');
+              if(bboth[1] == null) bboth[1] = "";
+              bres = _fpa.utils.ISOdatetoTimestamp(bboth[0]) + bboth[1];
+            }
+
+            if(ares){
+              var aboth = ares.split('--');
+              if(aboth[1] == null) aboth[1] = "";
+              ares = _fpa.utils.ISOdatetoTimestamp(aboth[0]) + aboth[1];
+            }
+
+
+            if(ares == null || ares == '') return -1;
+            if(bres == null || bres == '') return 1;
+            // Force to a number if it is equivalent to the original string
+            var n = parseFloat(ares);
+            if(ares == n)
+              ares = n;
+            n = parseFloat(bres);
+            if(bres == n)
+                bres = n;
+
+            var retdir = sort_rev ? -1 : 1;
+
+            if(bres > ares) {
+              return retdir;
+            }
+            if(bres < ares) {
+              return -1 * retdir;
+            }
+            return 0;
+
+          }).prependTo(descp);
+          // console.log('sorted!');
+      }
+
+    },
+
     setup_extra_actions: function(block){
 
         block.find('.collapse').not('.attached-force-collapse').each(function(){
@@ -930,72 +1015,7 @@ _fpa.form_utils = {
             }
         }).addClass('attached-add-icon');
 
-
-        // Sort dom elements within the block's parent,
-        // based on the value of the data attribute specified by data-sort-desc in a child of the current block
-        // For example:
-        // data-sort-desc="data-item-rank"
-        // will sort all blocks in the parent of this block with the attribute data-sort-desc, using the
-        // value from a child of each block with the data attribute data-item-rank, for example
-        // data-item-rank="10"
-        // The sort will automatically sort on string, numeric or date/time values
-        var sort_block = block;
-        var s = sort_block.attr('data-sort-desc');
-        if(!s) {
-          sort_block = sort_block.children().first();
-          if (sort_block.length)
-            s = sort_block.attr('data-sort-desc');
-        }
-        if(!s) {
-          sort_block = sort_block.find('[data-sub-list]');
-          sort_block = sort_block.children().first();
-          if (sort_block.length)
-            s = sort_block.attr('data-sort-desc');
-        }
-
-        if(s){
-            var descp = sort_block.parent();
-            descp.find('[data-sort-desc]').sort(function(a,b){
-              var bres = $(b).find('['+s+']').attr(s);
-              var ares = $(a).find('['+s+']').attr(s);
-
-              if(bres == null) bres = $(b).attr(s);
-              if(ares == null) ares = $(a).attr(s);
-
-              if(bres){
-                var bboth = bres.split('--');
-                if(bboth[1] == null) bboth[1] = "";
-                bres = _fpa.utils.ISOdatetoTimestamp(bboth[0]) + bboth[1];
-              }
-
-              if(ares){
-                var aboth = ares.split('--');
-                if(aboth[1] == null) aboth[1] = "";
-                ares = _fpa.utils.ISOdatetoTimestamp(aboth[0]) + aboth[1];
-              }
-
-
-              if(ares == null || ares == '') return -1;
-              if(bres == null || bres == '') return 1;
-              // Force to a number if it is equivalent to the original string
-              var n = parseFloat(ares);
-              if(ares == n)
-                ares = n;
-              n = parseFloat(bres);
-              if(bres == n)
-                  bres = n;
-
-              if(bres > ares) {
-                return 1;
-              }
-              if(bres < ares) {
-                return -1;
-              }
-              return 0;
-
-            }).prependTo(descp);
-            // console.log('sorted!');
-        }
+        _fpa.form_utils.sort_blocks(block);
 
         //block.updatePolyfill();
 
