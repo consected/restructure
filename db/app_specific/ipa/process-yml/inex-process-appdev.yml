@@ -392,6 +392,7 @@ _definitions:
         edit_as:
           field_type: select_contact
           alt_options:
+            Phone Screen Interviewer: staff member
             MedNav: mednav reviewer
             PI: pi
             TMS: tms
@@ -755,6 +756,8 @@ sign_phone_screen:
 
   # Notify initiator, clinical research coordinator and mednav that PI has signed
   save_trigger:
+    on_create: *on_create_e_sign
+
     on_save:
       notify:
         - *notify_ps_checklist_initiator
@@ -880,7 +883,6 @@ baseline_review:
     all:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: sign_phone_screen
-        signed_no_yes: "yes"
     not_any:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: baseline_review
@@ -1056,7 +1058,7 @@ contact_tms_users:
   caption_before:
     notes: |
       Use this activity to contact the selected role about the TMS eligibility review.
-      Note: messages are visible to all baseline checklist users.
+      Note: messages are visible to all TMS eligibility review users.
     submit: After clicking <i>Send</i> the selected role will be notified.
 
   creatable_if:

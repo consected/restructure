@@ -756,6 +756,8 @@ sign_phone_screen:
 
   # Notify initiator, clinical research coordinator and mednav that PI has signed
   save_trigger:
+    on_create: *on_create_e_sign
+
     on_save:
       notify:
         - *notify_ps_checklist_initiator
@@ -881,7 +883,6 @@ baseline_review:
     all:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: sign_phone_screen
-        signed_no_yes: "yes"
     not_any:
       activity_log__ipa_assignment_inex_checklists:
         extra_log_type: baseline_review
