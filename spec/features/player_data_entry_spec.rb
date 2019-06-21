@@ -43,8 +43,8 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     setup_access :addresses
     setup_access :player_contacts
     setup_access :player_infos, access: :edit
-    setup_access :item_flags, access: :create
-    setup_access :player_infos_item_flags, access: :create
+    setup_access :item_flags
+    setup_access :player_infos_item_flags
     setup_access :not_tracker_histories
     setup_access :not_trackers
     setup_access :trackers
@@ -309,6 +309,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     expect(user.id).to equal @user.id
 
     #login_as @user, scope: :user
+    expect(user.has_access_to? :create, :table, :player_contacts)
 
     login
 
@@ -317,6 +318,8 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
 
   it "should allow a new MSID and player information to be added" do
+
+    expect(@user.has_access_to? :create, :table, :player_contacts)
 
     visit "/masters/search"
 

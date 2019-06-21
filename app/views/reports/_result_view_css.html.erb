@@ -1,11 +1,13 @@
 <%
-outer = '#report-results-block'
-res = @report.view_css.classes.map {|c, v|
-  styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
-  "#{outer} .#{c} \{  #{styles.join(' ')}\}"
-}
-res = res.join("\n")
+if @report.view_css.classes
+  outer = '#report-results-block'
+  res = @report.view_css.classes.map {|c, v|
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{outer} .#{c} \{  #{styles.join(' ')}\}"
+  }
+  res = res.join("\n")
 %>
 <style>
 <%= res.html_safe %>
 </style>
+<% end %>

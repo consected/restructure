@@ -4,6 +4,7 @@ describe "reports", js: true, driver: :app_firefox_driver do
 
   include ModelSupport
   include MasterDataSupport
+  include ItemFlagSupport
   include FeatureSupport
 
   before(:all) do
@@ -25,13 +26,18 @@ describe "reports", js: true, driver: :app_firefox_driver do
     expect(@user.has_access_to?(:read, :report, :_all_reports_)).to be_truthy
 
     rl = Report.where(name: "Item Flags types")
+
+    sql = "select * from item_flags if1\r\ninner join item_flag_names ifn\r\non if1.item_flag_name_id = ifn.id"
     unless rl.count > 0
-      r = Report.create(current_admin: @admin, name: "Item Flags types", description: "", sql: "select * from item_flags if1\r\ninner join item_flag_names ifn\r\non if1.item_flag_name_id = ifn.id", search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: false, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+      r = Report.create(current_admin: @admin, name: "Item Flags types", description: "", sql: sql, search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: false, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
       r.save!
       expect(r.can_access? @user).to be_truthy
     else
       r = rl.first
     end
+
+    5.times {create_item}
+    expect(Report.connection.execute(sql).first).not_to be nil
 
     Report.active.where('id != :id', id: r.id).update_all(disabled: true, admin_id: @admin.id)
 
