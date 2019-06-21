@@ -43,7 +43,7 @@ _fpa.reports = {
         sb.hide();
         rf.show();
         _fpa.reports.reset_window_scrolling();
-        $.scrollTo('#report-results-block', 200);
+        $.scrollTo('.report-results-block', 200);
       }
       else if(to_loc == 'go-to-form'){
         sb.show();
@@ -227,7 +227,7 @@ _fpa.reports = {
         var extra_val = dct_parts[2].trim();
       }
 
-      var report_id = $('#report-container').attr('data-report-id');
+      var report_id = $('.report-container').attr('data-report-id');
 
 
       if (dct_action == 'download files') {

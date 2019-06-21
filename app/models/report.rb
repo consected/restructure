@@ -26,6 +26,7 @@ class Report < ActiveRecord::Base
                                   :view_as, :search_button_label]
   configure :list_options, with: [:hide_in_list]
   configure :view_css, with: [:classes]
+  configure :component, with: [:options]
 
   class BadSearchCriteria < FphsException
     def message

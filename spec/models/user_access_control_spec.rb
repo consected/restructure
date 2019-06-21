@@ -264,7 +264,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
     res.save!
 
     expect {
-      create_item
+      create_item no_access_change: true
     }.to raise_error FphsException
 
   end

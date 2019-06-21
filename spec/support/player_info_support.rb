@@ -78,11 +78,11 @@ module PlayerInfoSupport
     @new_attribs
   end
 
-  def create_item  att=nil, master=nil
+  def create_item  att=nil, master=nil, no_access_change: false
     att ||= valid_attribs
     master ||= create_master
     create_sources 'player_infos'
-    setup_access :player_infos
+    setup_access :player_infos unless no_access_change
     @player_info = master.player_infos.create! att
   end
 

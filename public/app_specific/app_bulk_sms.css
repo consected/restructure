@@ -101,7 +101,7 @@ li.list-group-item em.all_caps {
     font-weight: normal;
 }
 
-#report-container >div >p.text-center>a {
+.report-container >div >p.text-center>a {
     display: none;
 }
 

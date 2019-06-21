@@ -1,15 +1,19 @@
-<% result_tables = @report.result_tables_by_index || []%>
+<%
+  result_tables = @report.result_tables_by_index || []
+  @outer_block_id = "report-container-#{SecureRandom.hex}"
 
-<div class="data-results" id="report-container" data-report-id="<%=@report.id%>">
+%>
+
+<div class="data-results report-container" id="<%=@outer_block_id%>" data-report-id="<%=@report.id%>">
   <div class="<%= @count_only ? 'count-only' : '' %>">
     <div id="report-edit-" data-preprocessor="report-edit-form" data-subscription="report-edit-form-" class="new-block new-below no-processed-scroll"></div>
 
     <p class="text-center"><%= link_to "link to report", report_path(id: @report.id, search_attrs: @search_attrs.merge(no_run: 'true')) if current_admin || current_user.can?(:view_reports)%> </p>
     <%= render partial: 'filter_on'  if @report.filtering_on %>
     <% if current_admin && @report.clean_sql%>
-    <p class="text-center"><a href="#clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
+    <p class="text-center"><a href="#<%=@outer_block_id%>-clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
     <div class="row">
-        <div class="col-md-20 col-md-offset-2 collapse" id="clean-sql">
+        <div class="col-md-20 col-md-offset-2 collapse clean-sql" id="<%=@outer_block_id%>-clean-sql">
           <pre><%=@report.clean_sql%>
           </pre>
         </div>
@@ -23,11 +27,11 @@
         <div id="admin-edit-" data-preprocessor="admin-edit-form" data-subscription="admin-edit-form-" class="new-block new-below"></div>
       </div>
     </div>
-    <div id="report-results-block" class="<%= @count_only ? 'hidden' : '' %>">
+    <div id="<%=@outer_block_id%>-results-block" class="report-results-block <%= @count_only ? 'hidden' : '' %>">
       <% unless @embedded_report %>
       <p class="text-center back-to-search-form">
         <a href="#body-top" class="btn btn-default small back-to-search-form-btn"><i class="caret up"></i> back to search form</a>
-        <a href="#report-results-block" class="btn btn-default small show-results-btn"><i class="caret"></i> show all results</a>
+        <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn"><i class="caret"></i> show all results</a>
       </p>
       <% end %>
       <div class="report-results-inner">
@@ -35,7 +39,7 @@
           render_as = @report.view_options.view_as || 'table'
           render_as = render_as.gsub(/[^a-z_]/, '')
         %>
-        <%= render partial: "results_#{render_as}", locals: {result_tables: result_tables} %>
+        <%= render partial: "reports/result_template/#{render_as}", locals: {result_tables: result_tables} %>
       </div>
     </div>
 

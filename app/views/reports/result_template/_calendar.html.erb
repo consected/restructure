@@ -1,0 +1,38 @@
+<%
+  json = @results.to_json
+  block_id = "#{@outer_block_id}-component-block"
+  component_options = @report.component.options || {}
+%>
+<div id="<%=block_id%>" class="report-calendar" >
+</div>
+<script>
+window.setTimeout(function() {
+
+  var $block = $('#<%=block_id%>');
+  $('#<%=@outer_block_id%> .report-results-inner').css({overflow: 'auto'});
+  var component_options = <%=component_options.to_json.html_safe %>;
+  var json = <%= json.html_safe %>;
+
+  var calendarEl = document.getElementById('<%=block_id%>');
+
+  var opts = {
+    plugins: ['interaction', 'dayGrid', 'timeGrid'],
+    defaultView: 'dayGridMonth',
+    defaultDate: (new Date).toISOString(),
+    height: 650,
+    header: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    }
+  };
+
+  $.extend(opts, component_options);
+
+  opts.events = json;
+
+  var calendar = new FullCalendar.Calendar(calendarEl, opts);
+  calendar.render();
+}, 100);
+
+</script>

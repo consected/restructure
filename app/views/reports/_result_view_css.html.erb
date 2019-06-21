@@ -1,6 +1,6 @@
 <%
 if @report.view_css.classes
-  outer = '#report-results-block'
+  outer = "##{@outer_block_id}-results-block"
   res = @report.view_css.classes.map {|c, v|
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} .#{c} \{  #{styles.join(' ')}\}"
