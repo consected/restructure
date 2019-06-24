@@ -29,10 +29,18 @@ RSpec.describe Report, type: :model do
 
   it "references reports by an item_type__short_name alternative resource name" do
 
+    create_admin
     first_rep = Report.active.searchable.first
     expect(first_rep).to be_a Report
     expect(first_rep.short_name).to be_present
     expect(first_rep.item_type).to be_present
+
+    # check downcasing of category in the DB
+    first_rep.item_type = first_rep.item_type.titleize
+    first_rep.current_admin = @admin
+    first_rep.save!
+    first_rep = first_rep.reload
+    expect(first_rep.item_type).to eq first_rep.item_type.downcase
 
     Report.find_category_short_name "#{first_rep.item_type}__#{first_rep.short_name}"
 

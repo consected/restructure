@@ -92,11 +92,11 @@ describe "reports", js: true, driver: :app_firefox_driver do
     end
 
     expect(page).to have_css('.search-status-done')
-    expect(page).to have_css('#report-results-block table.tablesorter')
-    results = all('#report-results-block table.tablesorter tr')
+    expect(page).to have_css('.report-results-block table.tablesorter')
+    results = all('.report-results-block table.tablesorter tr')
     expect(results.length).to be > 1
 
-    within '#report-results-block' do
+    within '.report-results-block' do
       table = find('table.tablesorter')
       # sort the item_flag_name_id column
       ifn_id = all('th.tablesorter-header')[0]

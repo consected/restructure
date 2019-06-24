@@ -6,6 +6,19 @@ RSpec.describe ReportsController, type: :controller do
   include ModelSupport
   include MasterSupport
 
+  before :all do
+    create_admin
+    create_user
+    sql = "select * from item_flags if1\r\ninner join item_flag_names ifn\r\non if1.item_flag_name_id = ifn.id"
+
+    r = Report.create(current_admin: @admin, name: "New Report #{SecureRandom.hex}", description: "", sql: sql, search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: true, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: r.name, current_admin: @admin
+
+    Report.create(current_admin: @admin, name: "New Report #{SecureRandom.hex}", description: "", sql: sql, search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: true, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: r.name, current_admin: @admin
+
+  end
+
   before_each_login_user
 
   def setup_report_access
@@ -27,7 +40,7 @@ RSpec.describe ReportsController, type: :controller do
   end
 
   it "gets a report by numeric or string ID" do
-    
+
     setup_report_access
 
     get :show, {:id => @test_report.id}

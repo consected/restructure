@@ -6,6 +6,7 @@ class Report < ActiveRecord::Base
 
 
   after_initialize :init_vars
+  before_validation :downcase_item_type
   before_validation :check_attr_def
   before_validation :gen_short_name
   validates :report_type, presence: true
@@ -456,6 +457,10 @@ class Report < ActiveRecord::Base
 
   def alt_resource_name
     "#{self.item_type || '_default'}__#{self.short_name}".downcase.id_underscore
+  end
+
+  def downcase_item_type
+    self.item_type = self.item_type.downcase if self.item_type
   end
 
   def gen_short_name
