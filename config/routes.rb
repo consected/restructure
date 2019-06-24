@@ -61,13 +61,13 @@ Rails.application.routes.draw do
 
 
 
-  resources :pages do
+  resources :pages, only: [:index, :show] do
     member do
       get :template
     end
   end
 
-  resources :pages, only: [:index, :show]
+  # resources :pages, only: [:index, :show]
 
   post 'masters/create' => 'masters#create'
   post 'masters/' => 'masters#index'

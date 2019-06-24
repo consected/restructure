@@ -96,8 +96,10 @@ EOF
     FileUtils.mkdir_p File.join(basedir, 'gid600', "app-type-#{@app_type.id}", "containers")
 
     @player_contact.master.current_user = @user
-    al = @player_contact.activity_log__player_contact_phones.build(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1)
+    al = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
     al.save!
+    expect(al).to be_a ActivityLog::PlayerContactPhone
+    expect(al.model_references.length).to eq 1
     @activity_log = al
     @container = NfsStore::Manage::Container.last
     @container.parent_item ||= @activity_log

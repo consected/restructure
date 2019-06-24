@@ -8,10 +8,9 @@
 
 
 <% # We attempt to load these cached definitions here, to speed up future forms and results that rely on them.
-  if current_email %>
+  if current_user %>
     //_fpa.set_definition('colleges');
     //_fpa.set_definition('protocol_events');
-<% end %>
 
   $('html').ready(function(){
     $.get('/pages/<%= template_version %>/template').done(function(data) {
@@ -25,4 +24,5 @@
 
     });
   });
+  <% end %>
 </script>
