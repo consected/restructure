@@ -61,6 +61,11 @@ Rails.application.routes.draw do
 
 
 
+  resources :pages do
+    member do
+      get :template
+    end
+  end
 
   resources :pages, only: [:index, :show]
 

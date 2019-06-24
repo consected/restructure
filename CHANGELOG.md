@@ -17,6 +17,16 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [7.3.10] - 2019-06-24
+
+- [Added] [IPA] Changed flow and script of Phone Screener, added specific fields to TMS and updated eligibility call
+- [Added] View specific reports with a chart view, such as pie or histogram
+- [Added] Calendar view on specific reports
+- [Added] [Bulk-SMS] An app configuration (and associated code changes) to allow sending bulk SMS messages to player contacts
+- [Added] Changes to support better modularization of apps and generating baseline components as building blocks for new apps
+- [Fixed] Performance and admin configuration bugs
+- [Fixed] [Filestore] Issue uploading under certain circumstances 
+
 ## [7.2.28] - 2019-05-21
 
 - [Added] [IPA] Deployed Medical Navigation app to production

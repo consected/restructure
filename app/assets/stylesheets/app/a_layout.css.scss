@@ -6,6 +6,26 @@ body.staging nav.navbar {
     background: #DBB1B1;
 }
 
+body {
+  a, .btn {
+    transition: filter 0.6s;
+  }
+}
+body.page-loading {
+  // filter: grayscale(100%);
+  // opacity: 0.2;
+  a[data-remote], .btn {
+    filter: blur(1px);
+  }
+
+  .navbar-default {
+      a, .btn {
+        filter: blur(0);
+      }
+  }
+
+}
+
 .hidden-if-empty:empty {
     display: none;
 }

@@ -1,8 +1,7 @@
 <script>
 
   _fpa.version = '<%=Application.version%>-<%=Application.server_cache_version%>';
-  _fpa.status['session'] = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
-
+  _fpa.status.session = new _fpa.session(<%= current_user ? current_user.timeout_in :  "null" %>);
   _fpa.current_locale = 'en';
 
   _fpa.layout = {item_blocks: <%= layout_item_block_sizes.to_json.html_safe %> };
@@ -15,10 +14,15 @@
 <% end %>
 
   $('html').ready(function(){
-    _fpa.compile_templates();
-    _fpa.reset_page_size();
+    $.get('/pages/<%= template_version %>/template').done(function(data) {
+      $('body').append(data);
+      $('body').removeClass('page-loading');
+      _fpa.compile_templates();
+      _fpa.reset_page_size();
 
-    _fpa.handle_remotes();
-    _fpa.loaded.default();
+      _fpa.handle_remotes();
+      _fpa.loaded.default();
+
+    });
   });
 </script>

@@ -27,5 +27,6 @@
 //= require fullcalendar/interaction/main
 //= require fullcalendar/daygrid/main
 //= require fullcalendar/timegrid/main
+//= require moment.min.js
 //= require chart.min.js
 //= require_tree ./app

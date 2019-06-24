@@ -54,15 +54,4 @@ $(document).ready(function() {
   <div id="master_results_block" class="" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results" ></div>
 </div>
 
-<%
-  part = nil
-  cache_res = Rails.cache.fetch partial_cache_key(:master__search_results_template) do
-    part = render partial: 'search_results_template'
-    ActiveSupport::Gzip.compress(part)
-  end
-  
-  if Rails.configuration.action_controller.perform_caching == false
-    Rails.cache.delete partial_cache_key(:master__search_results_template)
-  end
-%>
-<%= part || ActiveSupport::Gzip.decompress(cache_res).html_safe %>
+<%#= render partial: 'cache_search_results_template' %>
