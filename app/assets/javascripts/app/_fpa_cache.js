@@ -44,17 +44,16 @@ _fpa.set_cache = function(name, val){
     var basename = name + '--';
     name = _fpa.cache_name(name);
 
-    // Force removal of previous versions of the cached item. Doesn't need to be done immediately.
-    window.setTimeout(function() {
-      for(var i in localStorage){
-        if(localStorage.hasOwnProperty(i)){
-          if(i.indexOf(basename)===0){
-            localStorage.removeItem(i);
-            console.log("removed cache item: " +i);
-          }
+    // Force removal of previous versions of the cached item.
+    // This must be done synchronously, otherwise the item downloaded in a moment is also removed
+    for(var i in localStorage){
+      if(localStorage.hasOwnProperty(i)){
+        if(i.indexOf(basename)===0){
+          localStorage.removeItem(i);
+          console.log("removed cache item: " +i);
         }
-      };
-    }, 10);
+      }
+    };
 
     val = JSON.stringify(val);
     localStorage.setItem(name, val);
