@@ -15,6 +15,7 @@ class Admin::PageLayout < ActiveRecord::Base
   configure :contains, with: [:categories, :resources]
   configure :tab, with: [:parent]
   configure :view_options, with: [:initial_show, :orientation, :add_item_label, :limit]
+  configure :nav, with: [:links, :resources]
 
   def to_s
     "#{layout_name}: #{panel_label}"

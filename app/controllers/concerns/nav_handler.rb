@@ -1,6 +1,8 @@
 module NavHandler
   extend ActiveSupport::Concern
 
+  include PageLayoutsHelper
+
   def setup_navs
 
     return true if request.xhr?
@@ -40,6 +42,28 @@ module NavHandler
     if current_user
       @primary_navs << {label: app_config_text(:menu_research_label, "Research"), url: '/masters/', route: 'masters#index'} unless app_config_text(:menu_research_label) == 'none'
       @primary_navs << {label: app_config_text(:menu_create_master_record_label, "Create Master"), url: '/masters/new', route: 'masters#new'}  if current_user.can? :create_master
+
+      nav_conf = page_layout_panel layout_name: :nav, panel_name: :all
+
+      if nav_conf && nav_conf.nav&.links
+        nav_conf.nav.links.each do |l|
+          if l.is_a? String
+            url = l
+          elsif l.is_a? Hash
+            l = l.symbolize_keys
+            if l[:resource_type]
+              rt = l[:resource_type].to_sym
+              rn = l[:resource_name]
+              next unless current_user.has_access_to? :access, rt, rn
+            end
+            url = l[:url]
+            label = l[:label]
+            @primary_navs << {label: label, url: url}
+          end
+
+        end
+
+      end
     end
 
     if current_user || admin_view
