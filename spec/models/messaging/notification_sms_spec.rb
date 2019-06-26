@@ -21,20 +21,20 @@ RSpec.describe Messaging::NotificationSms, type: :model do
   it "validates an sms number" do
     @message_notification.recipient_sms_numbers = ['+12025550147']
     expect {
-      Messaging::NotificationSms.validate_sms_number('87236476234')
+      Messaging::PhoneValidation.validate_sms_number_format('87236476234')
     }.to raise_error FphsException
 
     expect {
-      Messaging::NotificationSms.validate_sms_number('+87236476234')
+      Messaging::PhoneValidation.validate_sms_number_format('+87236476234')
     }.not_to raise_error
 
-    res = Messaging::NotificationSms.validate_sms_number('+87236476234', no_exception: true)
+    res = Messaging::PhoneValidation.validate_sms_number_format('+87236476234', no_exception: true)
     expect(res).to be true
 
-    res = Messaging::NotificationSms.validate_sms_number('87236476234', no_exception: true)
+    res = Messaging::PhoneValidation.validate_sms_number_format('87236476234', no_exception: true)
     expect(res).to be false
 
-    res = Messaging::NotificationSms.validate_sms_number('+872.364.76234', no_exception: true)
+    res = Messaging::PhoneValidation.validate_sms_number_format('+872.364.76234', no_exception: true)
     expect(res).to be false
 
   end

@@ -31,7 +31,7 @@ module Users
   private
 
     def sms_number_valid
-      unless Messaging::NotificationSms.validate_sms_number self.sms_number, no_exception: true
+      unless Messaging::PhoneValidation.validate_sms_number_format self.sms_number, no_exception: true
         errors.add :sms_number, "is not valid. Ensure it has the correct format including +nnn country code"
         return false
       end

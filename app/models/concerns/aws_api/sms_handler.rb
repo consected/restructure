@@ -3,23 +3,28 @@ module AwsApi
 
     extend ActiveSupport::Concern
 
+    MobileTypes = ['MOBILE', 'PREPAID'].freeze
+    LandlineTypes = ['LANDLINE'].freeze
+    VoipTypes = ['VOIP'].freeze
+    InvalidPhoneTypes = ['INVALID'].freeze
+    OtherPhoneTypes = ['OTHER'].freeze
 
     class_methods do
 
-      def sms_aws_region=r
-        @sms_aws_region = r
-      end
-
       def sms_aws_region
-        @sms_aws_region
-      end
-
-      def test_sms_number=n
-        @test_sms_number = n
+        Messaging.sms_aws_region
       end
 
       def test_sms_number
-        @test_sms_number
+        Messaging.test_sms_number
+      end
+
+      def sender_id
+        Messaging.sender_id
+      end
+
+      def importance
+        Messaging.importance
       end
 
     end

@@ -14,9 +14,6 @@ module DynamicModelExtension
 
       def extension_setup
         include AwsApi::SmsHandler
-
-        # Ensure that the configurations are loaded from initializers
-        ActiveSupport.run_load_hooks(:bulk_messaging_status, self)
       end
 
       # Get

@@ -69,7 +69,7 @@ class ModelReference < ActiveRecord::Base
   #         {:label=>"Tech Contacts", :from=>"this", :add=>"many", :view_as=>{:show=>"not_embedded", :edit=>"select_or_add", :new=>"select_or_add"}, :to_record_label=>"Tech Contacts", :no_master_association=>false}
   def find_config
     begin
-      mr = from_record.extra_log_type_config&.references
+      mr = from_record&.extra_log_type_config&.references
 
       if mr && to_record
         m = mr[to_record_result_key.to_sym]

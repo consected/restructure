@@ -1,6 +1,4 @@
-
-ActiveSupport.on_load(:messaging_notification_sms) do
-
+ActiveSupport.on_load(:messaging_setup) do
   self.sms_aws_region = ENV['SMS_AWS_REGION'] || 'us-east-1'
   if Rails.env.production?
     self.sender_id = ENV['SMS_SENDER_ID']
@@ -11,11 +9,5 @@ ActiveSupport.on_load(:messaging_notification_sms) do
   end
 
   self.test_sms_number = '+16177942330'
-end
-
-
-ActiveSupport.on_load(:bulk_messaging_status) do
-
-  self.sms_aws_region = ENV['SMS_AWS_REGION'] || 'us-east-1'
 
 end
