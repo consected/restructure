@@ -132,8 +132,8 @@ module MasterHandler
     # and therefore a careful reload must be performed.
     def reload_objects
       object_instance.reload
-      object_instance.embedded_item&.reload
       object_instance.current_user = current_user
+      object_instance.embedded_item&.reload
       object_instance.embedded_item&.current_user = current_user
     end
 
