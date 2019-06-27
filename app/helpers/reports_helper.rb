@@ -15,7 +15,7 @@ module ReportsHelper
       return nil
     elsif type.is_a? Hash
       type_string = type.first.first
-      type_val = type.first.last
+      type_val = type.first.last || {}
       if type_string == 'config_selector'
         use_dropdown = true
       else

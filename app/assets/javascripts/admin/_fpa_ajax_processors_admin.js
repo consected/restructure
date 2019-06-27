@@ -171,8 +171,8 @@ _fpa.postprocessors_admin = {
             var m = $('#search_attrs_multi').val();
             var l = $('#search_attrs_label').val();
             var d = $('#search_attrs_default').val();
-            var s = $('#search_attrs_config_selections').val();
-            var c = $('#search_attrs_conditions').val();
+            var s = $('#search_attrs_config_selections')[0].CodeMirror.getValue();
+            var c = $('#search_attrs_conditions')[0].CodeMirror.getValue();
             $('#search_attr_ex').html(":"+n);
             $('#search_attr_instruction').show();
 

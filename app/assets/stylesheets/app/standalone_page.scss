@@ -1,0 +1,17 @@
+#standalone-page {
+  .report-results-inner {
+    overflow-x: auto;
+    overflow-y: auto;
+    height: auto;
+  }
+}
+
+.standalone-page-col {
+  .result-target {
+    margin: 2%;
+  }
+
+  .sp-col-label {
+    text-align: center;
+  }
+}

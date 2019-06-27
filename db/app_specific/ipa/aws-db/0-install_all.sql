@@ -32,6 +32,7 @@ set search_path=ipa_ops,ml_app;
 \i db/app_specific/ipa/aws-db/create_ipa_survey_table.sql
 \i db/app_specific/ipa/aws-db/create_ipa_tms_tests_table.sql
 \i db/app_specific/ipa/aws-db/create_ipa_tms_reviews_view.sql
+\i db/app_specific/ipa/aws-db/create_ipa_ps_comp_reviews.sql
 \i db/app_specific/ipa/aws-db/create_ipa_transportation_table.sql
 \i db/app_specific/ipa/aws-db/create_ipa_withdrawals_table.sql
 \i db/app_specific/ipa/aws-db/create_minor_deviations_activity_log.sql

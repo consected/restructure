@@ -18,7 +18,7 @@ module SpecSetup
 
 
     Seeds::ActivityLogPlayerContactPhone.setup
-    
+
 
     seed_database
 
@@ -68,9 +68,10 @@ module SpecSetup
 
     puts "cleanup player contacts"
 
-    ActiveRecord::Base.connection.execute("delete from player_contact_history;
-                           -- delete from activity_log_player_contact_phone_history;
+    ActiveRecord::Base.connection.execute("
+                           delete from activity_log_player_contact_phone_history;
                            delete from activity_log_player_contact_phones;
+                           delete from player_contact_history;
                            delete from player_contacts;
                            delete from tracker_history where item_type = 'ActivityLog::PlayerContactPhone';
                            delete from trackers where item_type = 'ActivityLog::PlayerContactPhone';")

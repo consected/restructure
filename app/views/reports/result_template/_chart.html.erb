@@ -25,6 +25,12 @@ window.setTimeout(function() {
 
   $.extend(opts, component_options);
 
+  <% if @embedded_report%>
+  opts.width = '100%';
+  opts.height = '66%';
+  opts.options.responsive = true;
+  <% end %>
+
   var width = opts.width;
   var height = opts.height;
 
@@ -32,7 +38,10 @@ window.setTimeout(function() {
     var fixed_size = true;
   }
 
-  opts.options.responsive = !fixed_size;
+  if(opts.options.responsive == null)
+    opts.options.responsive = !fixed_size;
+
+
   opts.data = {};
 
   opts.data.datasets = [];

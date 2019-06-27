@@ -1,0 +1,63 @@
+<%
+container = @page_layout.container
+rows = container.rows || []
+@outer_block_id = "standalone-page-container-#{SecureRandom.hex}"
+%>
+<%
+if @page_layout.view_css.classes
+  outer = "##{@outer_block_id}"
+  res = @page_layout.view_css.classes.map {|c, v|
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{outer} .#{c} \{  #{styles.join(' ')}\}"
+  }
+  res = res.join("\n")
+%>
+<style>
+<%= res.html_safe %>
+</style>
+<% end %>
+
+<div id="standalone-page">
+  <div class="standalone-page-container container-fluid" id="<%=@outer_block_id%>" data-page-layout-id="<%=@page_layout.id%>">
+    <div class="sp-main">
+    <% rows.each do |row|
+        row_classes = row['classes']
+        cols = row['cols'] || []
+        row_styles = (row['styles'] || {}).map {|k,v| "#{k}: #{v};"}.join(' ');
+    %>
+    <div class="standalone-page-row row <%=row_classes%>" style="<%= row_styles %>">
+      <% cols.each do |col|
+          col_label = col['label']
+          col_classes = col['classes']
+          col_id = col['id']
+          col_block_id = "sp-col-#{col_id || col_label.id_underscore}"
+          col_url = col['url']
+          unless col_url
+            report = col['report']
+            report_id = report['id']
+            report_defaults = (report['defaults'] || {}).symbolize_keys
+            report_defaults[:search_attrs] ||= {}
+            report_defaults[:search_attrs][:_report_id_] = report_id
+            report_defaults[:part] = 'results'
+            report_defaults[:embed] = 'true'
+            report_defaults[:commit] = 'table'
+            report_defaults[:id] = report_id
+            col_url = report_path(report_defaults)
+          end
+      %>
+        <div class="standalone-page-col <%=col_classes%> ajax-loading" id="<%=col_block_id%>">
+          <h2 class="sp-col-label"><%=col_label%></h2>
+          <div class="result-target">
+            <script>
+            $.get('<%=col_url%>').done(function(data) {
+              $('#<%=col_block_id%> .result-target').html(data).removeClass('ajax-loading');
+            });
+            </script>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    <% end %>
+    </div>
+  </div>
+</div>

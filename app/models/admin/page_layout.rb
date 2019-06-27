@@ -16,11 +16,18 @@ class Admin::PageLayout < ActiveRecord::Base
   configure :tab, with: [:parent]
   configure :view_options, with: [:initial_show, :orientation, :add_item_label, :limit]
   configure :nav, with: [:links, :resources]
+  configure :container, with: [:rows, :options]
+  configure :view_css, with: [:classes]
+
+  scope :standalone, -> { where layout_name: 'standalone' }
 
   def to_s
     "#{layout_name}: #{panel_label}"
   end
 
+  def self.no_master_association
+    true
+  end
 
   protected
     # Force a sensible position, and shuffle items down if necessary

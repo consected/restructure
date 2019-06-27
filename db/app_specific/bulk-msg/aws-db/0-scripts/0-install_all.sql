@@ -1,4 +1,4 @@
-create schema bulk_msg IF NOT EXISTS bulk_msg AUTHORIZATION fphs;
+create schema IF NOT EXISTS bulk_msg AUTHORIZATION fphs;
 
 set search_path=bulk_msg,ml_app;
 
@@ -6,6 +6,7 @@ set search_path=bulk_msg,ml_app;
 \i db/app_specific/bulk-msg/aws-db/bulk/create_zeus_bulk_message_recipients_table.sql
 \i db/app_specific/bulk-msg/aws-db/bulk/create_zeus_bulk_message_statuses.sql
 \i db/app_specific/bulk-msg/aws-db/bulk/create_al_bulk_messages.sql
+\i db/app_specific/bulk-msg/aws-db/bulk/create_player_contact_phone_infos.sql
 \i db/app_specific/bulk-msg/aws-db/bulk/dup_check_recipients.sql
 \i db/app_specific/bulk-msg/aws-db/bulk/setup_master.sql
 

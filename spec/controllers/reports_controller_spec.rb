@@ -14,8 +14,8 @@ RSpec.describe ReportsController, type: :controller do
     r = Report.create(current_admin: @admin, name: "New Report #{SecureRandom.hex}", description: "", sql: sql, search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: true, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
     Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: r.name, current_admin: @admin
 
-    Report.create(current_admin: @admin, name: "New Report #{SecureRandom.hex}", description: "", sql: sql, search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: true, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
-    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: r.name, current_admin: @admin
+    r2 = Report.create(current_admin: @admin, name: "New Report #{SecureRandom.hex}", description: "", sql: sql, search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: true, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
+    Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: r2.name, current_admin: @admin
 
   end
 
@@ -34,7 +34,7 @@ RSpec.describe ReportsController, type: :controller do
     end
 
     res = Report.active.searchable.for_user(@user)
-    expect(res.length).to eq 1
+    expect(res.length).to be >= 1
     expect(res.first).to eq first_rep
     @test_report = first_rep
   end

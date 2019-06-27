@@ -21,7 +21,7 @@ RSpec.describe Classification::GeneralSelection, type: :model do
     expect(l).to be > 10
 
     res = Classification::GeneralSelection.selector_with_config_overrides
-    expect(res.length).to eq l
+    expect(res.length).to be >= l
 
   end
 

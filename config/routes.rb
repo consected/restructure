@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  resources :page_layouts, only: [:show, :index]
+
   resources :reports do
     member do
       post :add_to_list
