@@ -36,24 +36,22 @@ if @page_layout.view_css.classes
             report = col['report']
             report_id = report['id']
             report_defaults = (report['defaults'] || {}).symbolize_keys
-            report_defaults[:search_attrs] ||= {}
-            report_defaults[:search_attrs][:_report_id_] = report_id
-            report_defaults[:part] = 'results'
-            report_defaults[:embed] = 'true'
-            report_defaults[:commit] = 'table'
-            report_defaults[:id] = report_id
-            col_url = report_path(report_defaults)
+            report_params = {}
+            report_params[:search_attrs] = report_defaults
+            report_params[:search_attrs][:_report_id_] = report_id
+            report_params[:part] = 'results'
+            report_params[:embed] = 'true'
+            report_params[:commit] = 'table'
+            report_params[:id] = report_id
+            col_url = report_path(report_params).html_safe
           end
       %>
-        <div class="standalone-page-col <%=col_classes%> ajax-loading" id="<%=col_block_id%>">
+        <div class="standalone-page-col <%=col_classes%> ajax-running" id="<%=col_block_id%>" data-url="<%=col_url%>">
           <h2 class="sp-col-label"><%=col_label%></h2>
+          <div class="sp-col-header"></div>
           <div class="result-target">
-            <script>
-            $.get('<%=col_url%>').done(function(data) {
-              $('#<%=col_block_id%> .result-target').html(data).removeClass('ajax-loading');
-            });
-            </script>
           </div>
+          <div class="sp-col-footer"></div>
         </div>
       <% end %>
     </div>
