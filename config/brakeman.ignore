@@ -56,7 +56,7 @@
         {
           "type": "template",
           "name": "reports/_results",
-          "line": 49,
+          "line": 51,
           "file": "app/views/reports/_results.html.erb",
           "rendered": {
             "name": "reports/_result_view_css",
@@ -69,6 +69,37 @@
         "template": "reports/_result_view_css"
       },
       "user_input": "Report.find(params[:id].to_i)",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 2,
+      "fingerprint": "59518accaa8f10b97de459d49e488486e16c8e16dc680f5baa6b8006ef1ecb8f",
+      "check_name": "CrossSiteScripting",
+      "message": "Unescaped model attribute",
+      "file": "app/views/page_layouts/show.html.erb",
+      "line": 16,
+      "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
+      "code": "(Admin::PageLayout.active.standalone.where(:app_type_id => current_user.app_type_id).find(params[:id]) or Admin::PageLayout.active.standalone.where(:app_type_id => current_user.app_type_id).where(:panel_name => params[:id]).first).view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end.join(\"\\n\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "PageLayoutsController",
+          "method": "show",
+          "line": 12,
+          "file": "app/controllers/page_layouts_controller.rb",
+          "rendered": {
+            "name": "page_layouts/show",
+            "file": "app/views/page_layouts/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "page_layouts/show"
+      },
+      "user_input": "Admin::PageLayout.active.standalone",
       "confidence": "Weak",
       "note": ""
     },
@@ -153,6 +184,6 @@
       "note": ""
     }
   ],
-  "updated": "2019-06-21 12:27:47 +0100",
+  "updated": "2019-06-27 13:52:01 +0100",
   "brakeman_version": "4.5.1"
 }
