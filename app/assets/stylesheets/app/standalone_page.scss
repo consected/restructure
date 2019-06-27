@@ -1,8 +1,16 @@
+body.page_layouts {
+  background: rgb(245, 245, 245);
+}
+
 #standalone-page {
   .report-results-inner {
     overflow-x: auto;
     overflow-y: auto;
     height: auto;
+  }
+
+  .report-results-block {
+        margin: 20px;
   }
 }
 
@@ -18,4 +26,13 @@
   .sp-col-label {
     text-align: center;
   }
+}
+
+.sp-col-inner {
+    background: rgb(255, 255, 255);
+    border: 1px solid rgb(219, 219, 219);
+}
+
+h2.sp-col-label {
+    font-size: 24px;
 }

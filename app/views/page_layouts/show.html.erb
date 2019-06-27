@@ -47,11 +47,13 @@ if @page_layout.view_css.classes
           end
       %>
         <div class="standalone-page-col <%=col_classes%> ajax-running" id="<%=col_block_id%>" data-url="<%=col_url%>">
-          <h2 class="sp-col-label"><%=col_label%></h2>
-          <div class="sp-col-header"></div>
-          <div class="result-target">
+          <div class="sp-col-inner">
+            <h2 class="sp-col-label"><%=col_label%></h2>
+            <div class="sp-col-header"></div>
+            <div class="result-target">
+            </div>
+            <div class="sp-col-footer"></div>
           </div>
-          <div class="sp-col-footer"></div>
         </div>
       <% end %>
     </div>
