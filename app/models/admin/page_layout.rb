@@ -17,7 +17,7 @@ class Admin::PageLayout < ActiveRecord::Base
   configure :view_options, with: [:initial_show, :orientation, :add_item_label, :limit]
   configure :nav, with: [:links, :resources]
   configure :container, with: [:rows, :options]
-  configure :view_css, with: [:classes]
+  configure :view_css, with: [:classes, :selectors]
 
   scope :standalone, -> { where layout_name: 'standalone' }
 

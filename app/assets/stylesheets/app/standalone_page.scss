@@ -1,3 +1,9 @@
+.page-layout-index .data-results {
+  background-color: white;
+  border: 1px solid rgb(219, 219, 219);
+  padding: 10px 30px;
+}
+
 body.page_layouts {
   background: rgb(245, 245, 245);
 }
@@ -15,7 +21,7 @@ body.page_layouts {
 }
 
 .standalone-page-row {
-  margin-bottom: 2%;
+  // margin-bottom: 2%;
 }
 
 .standalone-page-col {
@@ -31,8 +37,18 @@ body.page_layouts {
 .sp-col-inner {
     background: rgb(255, 255, 255);
     border: 1px solid rgb(219, 219, 219);
+    margin-bottom: 2%;
 }
 
 h2.sp-col-label {
     font-size: 24px;
+}
+
+.sp-col-header, .sp-col-footer {
+    margin: 0;
+    padding: 12px 24px;
+    border-top: 1px solid rgb(238, 238, 238);
+}
+.sp-col-header:empty, .sp-col-footer:empty  {
+    display: none;
 }

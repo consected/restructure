@@ -27,7 +27,7 @@ window.setTimeout(function() {
 
   <% if @embedded_report%>
   opts.width = '100%';
-  opts.height = '66%';
+  opts.height = '50%';
   opts.options.responsive = true;
   <% end %>
 
@@ -38,9 +38,11 @@ window.setTimeout(function() {
     var fixed_size = true;
   }
 
+<% unless @embedded_report%>
+
   if(opts.options.responsive == null)
     opts.options.responsive = !fixed_size;
-
+<% end %>
 
   opts.data = {};
 

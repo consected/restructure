@@ -23,6 +23,6 @@ class Admin::PageLayoutsController < AdminController
 
   private
     def permitted_params
-        [:app_type_id, :layout_name, :panel_name, :panel_label, :panel_position, :options, :disabled]
+        [:app_type_id, :layout_name, :panel_name, :panel_label, :panel_position, :description, :options, :disabled]
     end
 end

@@ -10,6 +10,15 @@ if @page_layout.view_css.classes
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} .#{c} \{  #{styles.join(' ')}\}"
   }
+end
+if @page_layout.view_css.selectors
+  res ||= []
+  res += @page_layout.view_css.selectors.map {|c, v|
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{outer} #{c} \{  #{styles.join(' ')}\}"
+  }
+end
+if res
   res = res.join("\n")
 %>
 <style>
@@ -20,44 +29,7 @@ if @page_layout.view_css.classes
 <div id="standalone-page">
   <div class="standalone-page-container container-fluid" id="<%=@outer_block_id%>" data-page-layout-id="<%=@page_layout.id%>">
     <div class="sp-main">
-    <% rows.each do |row|
-        row_classes = row['classes']
-        cols = row['cols'] || []
-        row_styles = (row['styles'] || {}).map {|k,v| "#{k}: #{v};"}.join(' ');
-    %>
-    <div class="standalone-page-row row <%=row_classes%>" style="<%= row_styles %>">
-      <% cols.each do |col|
-          col_label = col['label']
-          col_classes = col['classes']
-          col_id = col['id']
-          col_block_id = "sp-col-#{col_id || col_label.id_underscore}"
-          col_url = col['url']
-          unless col_url
-            report = col['report']
-            report_id = report['id']
-            report_defaults = (report['defaults'] || {}).symbolize_keys
-            report_params = {}
-            report_params[:search_attrs] = report_defaults
-            report_params[:search_attrs][:_report_id_] = report_id
-            report_params[:part] = 'results'
-            report_params[:embed] = 'true'
-            report_params[:commit] = 'table'
-            report_params[:id] = report_id
-            col_url = report_path(report_params).html_safe
-          end
-      %>
-        <div class="standalone-page-col <%=col_classes%> ajax-running" id="<%=col_block_id%>" data-url="<%=col_url%>">
-          <div class="sp-col-inner">
-            <h2 class="sp-col-label"><%=col_label%></h2>
-            <div class="sp-col-header"></div>
-            <div class="result-target">
-            </div>
-            <div class="sp-col-footer"></div>
-          </div>
-        </div>
-      <% end %>
-    </div>
-    <% end %>
+      <%= render partial: 'show_row', locals: {rows: rows, container: container} %>
     </div>
   </div>
 </div>

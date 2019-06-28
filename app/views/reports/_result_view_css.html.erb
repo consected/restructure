@@ -5,6 +5,11 @@ if @report.view_css.classes
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} .#{c} \{  #{styles.join(' ')}\}"
   }
+
+  res += @report.view_css.selectors.map {|c, v|
+    styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
+    "#{outer} #{c} \{  #{styles.join(' ')}\}"
+  }
   res = res.join("\n")
 %>
 <style>

@@ -26,7 +26,7 @@ class Report < ActiveRecord::Base
   configure :view_options, with: [:hide_table_names, :humanize_column_names, :hide_result_count, :hide_export_buttons, :hide_criteria_panel, :prevent_collapse_for_list,
                                   :view_as, :search_button_label]
   configure :list_options, with: [:hide_in_list]
-  configure :view_css, with: [:classes]
+  configure :view_css, with: [:classes, :selectors]
   configure :component, with: [:options]
 
   class BadSearchCriteria < FphsException

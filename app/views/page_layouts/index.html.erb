@@ -1,0 +1,33 @@
+<div class="page-layout-index">
+
+  <div class="data-results  col-md-offset-2 col-md-20 col-lg-offset-4 col-lg-16" data-subscription="admin-list" >
+    <div data-result="admin-list">
+  <h1>Dashboards</h1>
+
+  <table class="table tablesorter admin-list">
+    <thead>
+      <tr>
+
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @page_layouts.each do |list_item| %>
+        <tr class="<%=list_item.disabled ? 'disabled-result' : ''%>" data-report-id="<%=list_item.id %>">
+
+
+          <td style="width: 15%"><%= link_to  list_item.panel_label, page_layout_path(list_item.panel_name) %></td>
+
+          <td style="width: 30%"><%= list_item.description %></td>
+
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+    </div>
+  </div>
+
+</div>
