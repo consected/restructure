@@ -1,15 +1,18 @@
 <%
+outer = "##{@outer_block_id}-results-block"
 if @report.view_css.classes
-  outer = "##{@outer_block_id}-results-block"
   res = @report.view_css.classes.map {|c, v|
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} .#{c} \{  #{styles.join(' ')}\}"
   }
-
+end
+if @report.view_css.selectors
   res += @report.view_css.selectors.map {|c, v|
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} #{c} \{  #{styles.join(' ')}\}"
   }
+end
+if res
   res = res.join("\n")
 %>
 <style>

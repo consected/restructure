@@ -9,7 +9,7 @@
 window.setTimeout(function() {
 
   var $block = $('#<%=block_id%>');
-  $('#<%=@outer_block_id%> .report-results-inner').css({overflow: 'auto'});
+  $('#<%=@outer_block_id%> .report-results-inner').css({overflow: 'hidden'});
   var component_options = <%=component_options.to_json.html_safe %>;
   var json = <%= json.html_safe %>;
 
@@ -26,9 +26,10 @@ window.setTimeout(function() {
   $.extend(opts, component_options);
 
   <% if @embedded_report%>
-  opts.width = '100%';
-  opts.height = '50%';
-  opts.options.responsive = true;
+    opts.height = '30%';
+    opts.width = '100%';
+    opts.options.maintainAspectRatio = false;
+    opts.options.responsive = true;
   <% end %>
 
   var width = opts.width;
@@ -85,11 +86,6 @@ window.setTimeout(function() {
     row_iter++;
   }
 
-
-  console.log(datasets);
-  console.log(opts);
-
-
   var new_html = $('<canvas width="'+width+'" height="'+height+'" class="report-chart-canvas"></canvas>');
 
   $block.html(new_html);
@@ -97,7 +93,7 @@ window.setTimeout(function() {
 
   var myPieChart = new Chart(ctx, opts);
 
-
+  console.log(myPieChart);
 
   }, 100);
 

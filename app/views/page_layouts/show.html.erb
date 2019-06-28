@@ -4,8 +4,8 @@ rows = container.rows || []
 @outer_block_id = "standalone-page-container-#{SecureRandom.hex}"
 %>
 <%
+outer = "##{@outer_block_id}"
 if @page_layout.view_css.classes
-  outer = "##{@outer_block_id}"
   res = @page_layout.view_css.classes.map {|c, v|
     styles = v.map{|s,v| "#{s.to_s.hyphenate}: #{v};"}
     "#{outer} .#{c} \{  #{styles.join(' ')}\}"
