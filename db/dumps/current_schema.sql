@@ -4433,7 +4433,8 @@ CREATE TABLE ml_app.page_layouts (
     disabled boolean,
     admin_id integer,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    description character varying
 );
 
 
