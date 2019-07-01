@@ -246,6 +246,7 @@ echo become user? $BECOME_USER_CMD
 $BECOME_USER_CMD
 cd /tmp
 mkdir -p migrate-$EXTNAME
+mkdir -p $EXPORTLOC/migrate-$EXTNAME
 cd migrate-$EXTNAME
 echo -d $EXTDB $EXTDBCONN
 pg_dump -O -d $EXTDB $EXTDBCONN --clean --create --schema-only --schema=$SCHEMA -T $SCHEMA.jd_tmp  -x > "db-schema.sql"

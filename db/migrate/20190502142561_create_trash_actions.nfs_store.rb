@@ -2,7 +2,7 @@
 class CreateTrashActions < ActiveRecord::Migration
   def change
     create_table :nfs_store_trash_actions do |t|
-      t.integer :user_groups, array: true, default: []
+      t.integer :user_groups, array: true #, default: []
       t.string :path, null: true
       t.string :retrieval_path
       t.string :trashed_items
