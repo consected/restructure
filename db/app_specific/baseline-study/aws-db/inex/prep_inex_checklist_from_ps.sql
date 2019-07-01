@@ -7,9 +7,9 @@ Ensure it references the original phone screen dynamic model record.
 */
 
 
-DROP FUNCTION IF EXISTS ${target_name_us}_ops.activity_log_${target_name_us}_assignment_phone_screens_callback_set() CASCADE;
+DROP FUNCTION IF EXISTS ${app_schema}.activity_log_${target_name_us}_assignment_phone_screens_callback_set() CASCADE;
 
-CREATE OR REPLACE FUNCTION ${target_name_us}_ops.activity_log_${target_name_us}_assignment_phone_screens_callback_set() RETURNS trigger
+CREATE OR REPLACE FUNCTION ${app_schema}.activity_log_${target_name_us}_assignment_phone_screens_callback_set() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
     DECLARE
@@ -327,4 +327,4 @@ $$;
 
 
 
-CREATE TRIGGER ${target_name_us}_ps_to_inex AFTER INSERT ON ${target_name_us}_ops.activity_log_${target_name_us}_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_${target_name_us}_assignment_phone_screens_callback_set();
+CREATE TRIGGER ${target_name_us}_ps_to_inex AFTER INSERT ON ${app_schema}.activity_log_${target_name_us}_assignment_phone_screens FOR EACH ROW EXECUTE PROCEDURE activity_log_${target_name_us}_assignment_phone_screens_callback_set();

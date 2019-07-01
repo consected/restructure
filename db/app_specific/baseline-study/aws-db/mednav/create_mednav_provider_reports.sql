@@ -1,4 +1,4 @@
-set search_path=${target_name_us}_ops,ml_app;
+set search_path=${app_schema},ml_app;
       BEGIN;
 
 -- Command line:

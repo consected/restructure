@@ -1,3 +1,4 @@
+set search_path=${app_schema}, ml_app;
 
       BEGIN;
 

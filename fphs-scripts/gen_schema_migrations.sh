@@ -371,3 +371,14 @@ echo Pushed results to $EXPORTSVR:$EXPORTLOC/migrate-$EXTNAME/
 echo ===============
 touch 'complete'
 fi
+
+
+echo '====================================='
+echo 'To test the migrations locally, do the following'
+echo cd `pwd`
+echo "sudo -u postgres dropdb fpa_test"
+echo "sudo -u postgres psql -c \"create database fpa_test owner `whoami`;\""
+echo 'psql -d fpa_test < db-schema.sql'
+echo 'psql -d fpa_test < db-schema-migrations.sql'
+echo 'psql -d fpa_test < upgrade.sql'
+echo 'rspec'

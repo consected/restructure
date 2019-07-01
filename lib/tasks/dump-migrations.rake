@@ -21,14 +21,18 @@ namespace :db do
             # alias the adapter's execute for later use
             alias :old_execute :execute
 
-            RUN_SQL = sql_task.name.ends_with?("with_sql")
+            # It is necessary to run the SQL, otherwise the actual results generated
+            # may not actually reflect a real schema, especially if there is hand crafted
+            # SQL that checks for the existence of tables (for example) created earlier in the
+            # set of migrations.
+            RUN_SQL = true #sql_task.name.ends_with?("with_sql")
 
             # define our own execute
             def execute(sql, name = nil)
               # check for some DDL and DML statements
               puts "Running sql? #{RUN_SQL}"
 
-              if /^(create|alter|drop|insert|delete|update)/i.match sql.squish
+              if /(create |alter |drop |insert |delete |update )/i.match sql.squish
                 File.open(SQL_FILENAME, 'a') { |f| f.puts "#{sql};\n" }
                 puts "Rails.env: #{Rails.env} - #{ENV['FPHS_POSTGRESQL_SCHEMA']}"
                 old_execute sql, name if RUN_SQL

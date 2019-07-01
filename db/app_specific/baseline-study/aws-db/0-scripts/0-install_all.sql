@@ -1,6 +1,9 @@
-create schema ${app_schema} IF NOT EXISTS ${app_schema} AUTHORIZATION fphs;
+create schema IF NOT EXISTS ${app_schema} AUTHORIZATION fphs;
 
 set search_path=${app_schema},ml_app;
+
+-- # External Identifier
+\i ${sql_dir}/${app_dirname}/aws-db/external-id/create_ext_id_assignments.sql
 
 -- # Tracker
 \i ${sql_dir}/${app_dirname}/aws-db/tracker/create_activity_log_assignments.sql
@@ -18,6 +21,7 @@ set search_path=${app_schema},ml_app;
 -- # Phone Screen
 \i ${sql_dir}/${app_dirname}/aws-db/phone-screen/create_activity_log_assignment_phone_screens_table.sql
 \i ${sql_dir}/${app_dirname}/aws-db/phone-screen/create_ps_init_screening_table.sql
+\i ${sql_dir}/${app_dirname}/aws-db/phone-screen/create_ps_informant_details_table.sql
 
 -- # InEx
 \i ${sql_dir}/${app_dirname}/aws-db/inex/create_activity_log_inex_checklist_table.sql
@@ -51,7 +55,6 @@ set search_path=${app_schema},ml_app;
 -- # Phone Screen Backups
 -- \i ${sql_dir}/${app_dirname}/aws-db/create_ps_football_experience_table.sql
 -- \i ${sql_dir}/${app_dirname}/aws-db/create_ps_health_table.sql
--- \i ${sql_dir}/${app_dirname}/aws-db/create_ps_informant_details_table.sql
 -- \i ${sql_dir}/${app_dirname}/aws-db/create_ps_size_table.sql
 -- \i ${sql_dir}/${app_dirname}/aws-db/create_ps_mris_table.sql
 -- \i ${sql_dir}/${app_dirname}/aws-db/create_ps_sleeps_table.sql

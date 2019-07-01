@@ -54,6 +54,5 @@ do
   done
 done
 
-
 envsubst < "${app_configs}/baseline bulk msg_config.json" > "${app_configs}/${target_name}_config.json"
 echo "Created config file: ${app_configs}/${target_name}_config.json"

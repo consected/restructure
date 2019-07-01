@@ -9,7 +9,7 @@ BEGIN
 		SELECT ipa.master_id
     INTO matched_master_id
 		FROM ml_app.masters m
-		INNER JOIN ${target_name_us}_ops.${target_name_us}_assignments ipa
+		INNER JOIN ${app_schema}.${target_name_us}_assignments ipa
 			ON m.id = ipa.master_id
 		WHERE
       ipa.${target_name_us}_id = subject_id
@@ -20,7 +20,7 @@ BEGIN
 END;
 $$;
 
-create or replace function ${target_name_us}_ops.sync_new_adl_screener() returns trigger
+create or replace function ${app_schema}.sync_new_adl_screener() returns trigger
 language plpgsql
 AS $$
   DECLARE
@@ -289,5 +289,5 @@ END;
 $$;
 
 CREATE TRIGGER on_adl_screener_data_insert
-AFTER INSERT ON adl_screener_data
+AFTER INSERT ON ${target_name_us}_adl_screener_data
 FOR EACH ROW EXECUTE PROCEDURE sync_new_adl_screener();

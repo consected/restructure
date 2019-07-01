@@ -17,6 +17,7 @@ RSpec.describe ReportsController, type: :controller do
     r2 = Report.create(current_admin: @admin, name: "New Report #{SecureRandom.hex}", description: "", sql: sql, search_attrs: "",  disabled: false, report_type: "regular_report", auto: false, searchable: true, position: nil, edit_model: nil, edit_field_names: nil, selection_fields: nil, item_type: nil)
     Admin::UserAccessControl.create! app_type: @user.app_type, access: :read, resource_type: :report, resource_name: r2.name, current_admin: @admin
 
+    setup_report_access
   end
 
   before_each_login_user

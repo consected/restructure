@@ -45,7 +45,7 @@ $$;
 -- Create player_infos record, multiple player_contacts records, multiple addresses records
 -- Pass in the IPA ID to be matched, a single row player info, and arrays of player_contacts and addresses records.
 -- Run tests with:
--- select ${target_name_us}_ops.create_remote_${target_name_us}_record(364648868, (select pi from player_infos pi where master_id = 105029 limit 1), ARRAY(select pi from player_contacts pi where master_id = 105029), ARRAY(select pi from addresses pi where master_id = 105029) );
+-- select ${app_schema}.create_remote_${target_name_us}_record(364648868, (select pi from player_infos pi where master_id = 105029 limit 1), ARRAY(select pi from player_contacts pi where master_id = 105029), ARRAY(select pi from addresses pi where master_id = 105029) );
 -- Notice that player_contacts and addresses results are converted to an array, using the ARRAY() function, allowing them to be passed to the function.
 CREATE OR REPLACE FUNCTION create_remote_${target_name_us}_record(match_${target_name_us}_id BIGINT, new_player_info_record player_infos, new_player_contact_records player_contacts[], new_address_records addresses[]) returns INTEGER
 LANGUAGE plpgsql
@@ -67,7 +67,7 @@ BEGIN
 -- validate that it exists
 SELECT *
 INTO found_ipa
-FROM ${target_name_us}_ops.${target_name_us}_assignments ipa
+FROM ${app_schema}.${target_name_us}_assignments ipa
 WHERE ipa.${target_name_us}_id = match_${target_name_us}_id
 LIMIT 1;
 
@@ -103,7 +103,7 @@ INTO new_master_id;
 
 RAISE NOTICE 'Creating external identifier record %', (match_${target_name_us}_id::varchar);
 
-INSERT INTO ${target_name_us}_ops.${target_name_us}_assignments
+INSERT INTO ${app_schema}.${target_name_us}_assignments
 (${target_name_us}_id, master_id, user_id, created_at, updated_at)
 VALUES (match_${target_name_us}_id, new_master_id, etl_user_id, now(), now());
 

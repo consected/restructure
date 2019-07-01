@@ -8,11 +8,11 @@ module BulkMsgSupport
 
 
     files.each do |fn|
-
+      `psql -d fpa_test -c "create schema if not exists bulk_msg;"`
       begin
         sqlfn = Rails.root.join('db', 'app_specific', 'bulk-msg', 'aws-db', fn)
         puts "Running psql: #{sqlfn}"
-        `PGOPTIONS=--search_path=ml_app psql -d fpa_test < #{sqlfn}`
+        `PGOPTIONS=--search_path=bulk_msg,ml_app psql -d fpa_test < #{sqlfn}`
       rescue ActiveRecord::StatementInvalid => e
         puts "Exception due to PG error?... #{e}"
       end

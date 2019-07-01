@@ -34,11 +34,11 @@ if [ -d "${target_dir}" ]; then
   # exit
 else
   echo "Creating '${target_dir}'"
+  mkdir -p ${target_dir}
 fi
 
-mkdir -p ${target_dir}
 
-module_list="0-scripts adverse-events inex mednav navigation phone-screen protocol-deviations tracker z-sync"
+module_list="0-scripts external-id adverse-events inex mednav navigation phone-screen protocol-deviations tracker z-sync"
 
 modules=$(echo ${module_list} | tr " " "\n")
 
@@ -48,8 +48,11 @@ do
   for curr_file in ./aws-db/${module}/*
   do
     mkdir -p ${target_dir}/aws-db/${module}
+    echo "New directory: ${target_dir}/aws-db/${module}"
     envsubst < ${curr_file} > ${target_dir}/${curr_file}
+    echo "File: ${target_dir}/${curr_file}"
   done
 done
 
 envsubst < "${app_configs}/baseline study_config.json" > "${app_configs}/${target_name}_config.json"
+echo "Created config file: ${app_configs}/${target_name}_config.json"

@@ -1,6 +1,6 @@
 BEGIN;
 
-  create or replace view ${target_name_us}_ops.${target_name_us}_tms_reviews
+  create or replace view ${app_schema}.${target_name_us}_tms_reviews
   as select
     tms.id,
     tms.master_id,
@@ -44,9 +44,9 @@ BEGIN;
   on tms.master_id = health.master_id;
 
 
-  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphs;
-  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphsusr;
-  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphsadm;
-  GRANT SELECT ON ${target_name_us}_ops.${target_name_us}_tms_reviews TO fphsrailsapp;
+  GRANT SELECT ON ${app_schema}.${target_name_us}_tms_reviews TO fphs;
+  GRANT SELECT ON ${app_schema}.${target_name_us}_tms_reviews TO fphsusr;
+  GRANT SELECT ON ${app_schema}.${target_name_us}_tms_reviews TO fphsadm;
+  GRANT SELECT ON ${app_schema}.${target_name_us}_tms_reviews TO fphsrailsapp;
 
 END;

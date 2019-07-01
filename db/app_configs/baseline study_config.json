@@ -542,51 +542,6 @@
         "user_email": null
       },
       {
-        "id": 224,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_tms_reviews",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:31.066Z",
-        "updated_at": "2019-01-17T11:50:31.066Z",
-        "user_email": null
-      },
-      {
-        "id": 229,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_tmocas",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:31.738Z",
-        "updated_at": "2019-01-17T11:50:31.738Z",
-        "user_email": null
-      },
-      {
-        "id": 234,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_sizes",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:32.401Z",
-        "updated_at": "2019-01-17T11:50:32.401Z",
-        "user_email": null
-      },
-      {
         "id": 239,
         "user_id": null,
         "resource_type": "table",
@@ -602,51 +557,6 @@
         "user_email": null
       },
       {
-        "id": 244,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_healths",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:33.776Z",
-        "updated_at": "2019-01-17T11:50:33.776Z",
-        "user_email": null
-      },
-      {
-        "id": 249,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_tms_tests",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:34.509Z",
-        "updated_at": "2019-01-17T11:50:34.509Z",
-        "user_email": null
-      },
-      {
-        "id": 254,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_mris",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:35.246Z",
-        "updated_at": "2019-01-17T11:50:35.246Z",
-        "user_email": null
-      },
-      {
         "id": 259,
         "user_id": null,
         "resource_type": "table",
@@ -659,36 +569,6 @@
         "role_name": null,
         "created_at": "2019-01-17T11:50:36.044Z",
         "updated_at": "2019-01-17T11:50:36.044Z",
-        "user_email": null
-      },
-      {
-        "id": 264,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_sleeps",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:36.921Z",
-        "updated_at": "2019-01-17T11:50:36.921Z",
-        "user_email": null
-      },
-      {
-        "id": 269,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_football_experiences",
-        "options": null,
-        "access": null,
-        "disabled": null,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": null,
-        "created_at": "2019-01-17T11:50:37.738Z",
-        "updated_at": "2019-01-17T11:50:37.738Z",
         "user_email": null
       },
       {
@@ -1019,111 +899,6 @@
         "role_name": "phone screener",
         "created_at": "2019-01-17T11:51:03.483Z",
         "updated_at": "2019-01-17T11:51:03.483Z",
-        "user_email": null
-      },
-      {
-        "id": 368,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_tmocas",
-        "options": "",
-        "access": "create",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-17T11:51:03.489Z",
-        "updated_at": "2019-01-17T11:51:03.489Z",
-        "user_email": null
-      },
-      {
-        "id": 369,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_tms_tests",
-        "options": "",
-        "access": "create",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-17T11:51:03.495Z",
-        "updated_at": "2019-01-17T11:51:03.495Z",
-        "user_email": null
-      },
-      {
-        "id": 370,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_mris",
-        "options": "",
-        "access": "create",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-17T11:51:03.500Z",
-        "updated_at": "2019-01-17T11:51:03.500Z",
-        "user_email": null
-      },
-      {
-        "id": 371,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_sleeps",
-        "options": "",
-        "access": "create",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-17T11:51:03.507Z",
-        "updated_at": "2019-01-17T11:51:03.507Z",
-        "user_email": null
-      },
-      {
-        "id": 372,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_healths",
-        "options": "",
-        "access": "create",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-17T11:51:03.513Z",
-        "updated_at": "2019-01-17T11:51:03.513Z",
-        "user_email": null
-      },
-      {
-        "id": 373,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_sizes",
-        "options": "",
-        "access": "create",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-17T11:51:03.519Z",
-        "updated_at": "2019-01-17T11:51:03.519Z",
-        "user_email": null
-      },
-      {
-        "id": 374,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_football_experiences",
-        "options": "",
-        "access": "create",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-17T11:51:03.525Z",
-        "updated_at": "2019-01-17T11:51:03.525Z",
         "user_email": null
       },
       {
@@ -2882,36 +2657,6 @@
         "user_email": null
       },
       {
-        "id": 492,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_tms_reviews",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "reviewer - tms",
-        "created_at": "2019-01-17T11:51:04.288Z",
-        "updated_at": "2019-01-17T11:51:04.288Z",
-        "user_email": null
-      },
-      {
-        "id": 493,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_tms_reviews",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - inex",
-        "created_at": "2019-01-17T11:51:04.294Z",
-        "updated_at": "2019-01-17T11:51:04.294Z",
-        "user_email": null
-      },
-      {
         "id": 494,
         "user_id": null,
         "resource_type": "activity_log_type",
@@ -3182,21 +2927,6 @@
         "user_email": null
       },
       {
-        "id": 512,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_tms_reviews",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "created_at": "2019-01-25T10:44:52.676Z",
-        "updated_at": "2019-01-25T10:44:52.676Z",
-        "user_email": null
-      },
-      {
         "id": 513,
         "user_id": null,
         "resource_type": "activity_log_type",
@@ -3377,36 +3107,6 @@
         "user_email": null
       },
       {
-        "id": 525,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_football_experiences",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - phone screen",
-        "created_at": "2019-01-25T17:37:52.909Z",
-        "updated_at": "2019-01-25T17:37:52.909Z",
-        "user_email": null
-      },
-      {
-        "id": 526,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_healths",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - phone screen",
-        "created_at": "2019-01-25T17:38:05.385Z",
-        "updated_at": "2019-01-25T17:38:05.385Z",
-        "user_email": null
-      },
-      {
         "id": 527,
         "user_id": null,
         "resource_type": "table",
@@ -3434,81 +3134,6 @@
         "role_name": "user - phone screen",
         "created_at": "2019-01-25T17:38:46.073Z",
         "updated_at": "2019-01-25T17:38:46.073Z",
-        "user_email": null
-      },
-      {
-        "id": 529,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_mris",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - phone screen",
-        "created_at": "2019-01-25T17:39:03.857Z",
-        "updated_at": "2019-01-25T17:39:03.857Z",
-        "user_email": null
-      },
-      {
-        "id": 530,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_sizes",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - phone screen",
-        "created_at": "2019-01-25T17:39:15.333Z",
-        "updated_at": "2019-01-25T17:39:15.333Z",
-        "user_email": null
-      },
-      {
-        "id": 531,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_sleeps",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - phone screen",
-        "created_at": "2019-01-25T17:39:26.189Z",
-        "updated_at": "2019-01-25T17:39:26.189Z",
-        "user_email": null
-      },
-      {
-        "id": 532,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_tmocas",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - phone screen",
-        "created_at": "2019-01-25T17:39:40.845Z",
-        "updated_at": "2019-01-25T17:39:40.845Z",
-        "user_email": null
-      },
-      {
-        "id": 533,
-        "user_id": null,
-        "resource_type": "table",
-        "resource_name": "dynamic_model__${target_name_us}_ps_tms_tests",
-        "options": "",
-        "access": "read",
-        "disabled": false,
-        "admin_id": 4,
-        "app_type_id": 9,
-        "role_name": "user - phone screen",
-        "created_at": "2019-01-25T17:40:10.453Z",
-        "updated_at": "2019-01-25T17:40:10.453Z",
         "user_email": null
       },
       {
@@ -4621,26 +4246,6 @@
         "user_email": null
       },
       {
-        "id": 9,
-        "name": "${target_initials_upper} TMS Review",
-        "table_name": "${target_name_us}_tms_reviews",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:30.412Z",
-        "updated_at": "2019-01-17T11:50:30.412Z",
-        "position": null,
-        "category": "${target_initials_lower}-in-ex-records",
-        "table_key_name": "",
-        "field_list": "convulsion_or_seizure_blank_yes_no_dont_know, epilepsy_blank_yes_no_dont_know, fainting_blank_yes_no_dont_know, concussion_blank_yes_no_dont_know, loss_of_conciousness_details, hearing_problems_blank_yes_no_dont_know, cochlear_implants_blank_yes_no_dont_know, metal_blank_yes_no_dont_know, metal_details, neurostimulator_blank_yes_no_dont_know, neurostimulator_details, caridiac_pacemaker_blank_yes_no_dont_know, caridiac_pacemaker_details, med_infusion_device_blank_yes_no_dont_know, med_infusion_device_details, past_tms_blank_yes_no_dont_know, past_tms_details, past_mri_yes_no_dont_know, past_mri_details, current_meds_blank_yes_no_dont_know, current_meds_details",
-        "result_order": "",
-        "options": "default:\r\n\r\n  show_if:\r\n    # From Health form\r\n    caridiac_pacemaker_details: \r\n      caridiac_pacemaker_blank_yes_no_dont_know: 'yes'\r\n    # From TMS form\r\n    past_tms_details:\r\n      past_tms_blank_yes_no_dont_know: \"yes\"\r\n    metal_details:\r\n      metal_blank_yes_no_dont_know: \"yes\"\r\n    neurostimulator_details:\r\n      neurostimulator_blank_yes_no_dont_know: \"yes\"\r\n    current_meds_details:\r\n      current_meds_blank_yes_no_dont_know: \"yes\"\r\n    loss_of_conciousness_details:\r\n      concussion_blank_yes_no_dont_know: 'yes'\r\n    med_infusion_device_details:\r\n      med_infusion_device_blank_yes_no_dont_know: 'yes'\r\n    # From MRI form\r\n    past_mri_details:\r\n      past_mri_yes_no_dont_know: 'yes'\r\n\r\n\r\n  caption_before:\r\n    # From MRI form\r\n    past_mri_yes_no_dont_know: Did you ever undergo an MRI in the past?\r\n    past_mri_details: <i>IF YES</i> Were there any problems? \r\n    # From TMS form\r\n    past_tms_blank_yes_no_dont_know: Did you ever undergo TMS in the past?\r\n    past_tms_details: <i>IF YES</i> , were there any problems?\r\n    convulsion_or_seizure_blank_yes_no_dont_know: Have you ever had a convulsion or a seizure?\r\n    epilepsy_blank_yes_no_dont_know: Do you or a family member have a history of epilepsy?\r\n    fainting_blank_yes_no_dont_know: Have you ever had a fainting spell?\r\n    concussion_blank_yes_no_dont_know: Have you ever had a head trauma that was diagnosed as a concussion or was associated with a loss of consciousness?\r\n    loss_of_conciousness_details: <i>IF YES for LOC</i> How long were you unconscious? \r\n    hearing_problems_blank_yes_no_dont_know: Do you have any hearing problems or ringing in your ears?\r\n    cochlear_implants_blank_yes_no_dont_know: Do you have cochlear implants or do you wear hearing aids?\r\n    neurostimulator_blank_yes_no_dont_know: Do you have an implanted neurostimulator in your body? This can include a vagal nerve stimulator, deep brain stimulator, epidural/subdural stimulator, etc.\r\n    neurostimulator_details: <i>IF YES</i> can you please specify the type of neurostimulator?\r\n    med_infusion_device_blank_yes_no_dont_know: Do you have a medication infusion device?\r\n    med_infusion_device_details: <i>IF YES</i> Can you please tell me more about this?\r\n    metal_blank_yes_no_dont_know: Do you have any metal in the brain, skull or elsewhere in the body? This can include splinters, fragments, clips, etc.\r\n    metal_details: <i>IF YES</i> Can you please tell me more about this?\r\n    current_meds_blank_yes_no_dont_know: Are you currently taking any medications including over the counter medications?\r\n    current_meds_details: <i>IF YES</i> can you please list them.\r\n    # From Health form\r\n    caridiac_pacemaker_blank_yes_no_dont_know: Do you have a cardiac pacemaker or intracardiac lines? epidural/subdural stimulator, etc.\r\n    caridiac_pacemaker_details: Details\r\n    \r\n\r\n ",
-        "user_email": null
-      },
-      {
         "id": 16,
         "name": "${target_initials_upper} Initial Screening",
         "table_name": "${target_name_us}_ps_initial_screenings",
@@ -4661,106 +4266,6 @@
         "user_email": null
       },
       {
-        "id": 15,
-        "name": "${target_initials_upper} MRI",
-        "table_name": "${target_name_us}_ps_mris",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:34.514Z",
-        "updated_at": "2019-03-01T16:56:59.474Z",
-        "position": null,
-        "category": "${target_initials_lower}-phone-screen",
-        "table_key_name": "",
-        "field_list": "past_mri_yes_no_dont_know, past_mri_details, metal_implants_blank_yes_no_dont_know, metal_implants_details, electrical_implants_blank_yes_no_dont_know, electrical_implants_details, metal_jewelry_blank_yes_no, hearing_aid_blank_yes_no,radiation_blank_yes_no,radiation_details",
-        "result_order": "",
-        "options": "default:\r\n  show_if:\r\n    past_mri_details:\r\n      past_mri_yes_no_dont_know: 'yes'\r\n    electrical_implants_details:\r\n      electrical_implants_blank_yes_no_dont_know: \"yes\"\r\n    metal_implants_details:\r\n      metal_implants_blank_yes_no_dont_know: \"yes\"\r\n    radiation_details:\r\n      radiation_blank_yes_no: \"yes\"\r\n\r\n  caption_before:\r\n    all_fields: I am now going to ask you some questions to see if it is safe for you to have the MRI Scans. Can I continue?\r\n    past_mri_yes_no_dont_know: Did you ever undergo an MRI in the past?\r\n    past_mri_details: <i>IF YES</i> Were there any problems? \r\n    metal_implants_blank_yes_no_dont_know: Do you have any metal implants such as surgical clips, heart valves with steel parts, metal fragments, shrapnel or steel implants?\r\n    metal_implants_details: <i>IF YES</i> Do you have a doctor card?\r\n    electrical_implants_blank_yes_no_dont_know: Do you have any electrical or battery-powered implants such as a cardiac pacemaker or a perfusion pump?\r\n    electrical_implants_details: <i>IF YES</i> Do you have a doctor card?\r\n    metal_jewelry_blank_yes_no: Do you have any piercings or other metal jewelry that would not be able to be easily removed before an MRI scan?\r\n    hearing_aid_blank_yes_no: Do you wear a hearing aid?\r\n    radiation_blank_yes_no: Have you participated in other research studies (not including this study) involving radiation exposure within the last 12 months?\r\n    radiation_details: IF YES, can you please tell me what type of radiation research assessments you have undergone?",
-        "user_email": null
-      },
-      {
-        "id": 18,
-        "name": "${target_initials_upper} Football Experience",
-        "table_name": "${target_name_us}_ps_football_experiences",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:36.926Z",
-        "updated_at": "2019-01-17T11:50:36.926Z",
-        "position": null,
-        "category": "${target_initials_lower}-phone-screen",
-        "table_key_name": "",
-        "field_list": "played_in_nfl_blank_yes_no,age",
-        "result_order": "",
-        "options": "default:\r\n  caption_before:\r\n    all_fields: |\r\n      I am now going to ask you to answer some questions and do some tasks to see if you qualify for the study.  Some of these questions pertain to your medical history. \r\n      \r\n      Is it OK for me to continue? ________\r\n      \r\n      Please answer the following questions with honesty and to the best of your knowledge, as we will use your responses to determine whether it is safe for you to participate in the study.\r\n    age: Could you please tell me your age\r\n\r\n    played_in_nfl_blank_yes_no: Have you ever played in the National Football League (NFL)? <em>Explain to the subject that training camp, practice squad, and injured reserve qualify as NFL experience.</em>\r\n\r\n#    played_before_nfl_blank_yes_no: Did you ever play youth, high school or college football?\r\n#    football_experience_notes: If yes, ask about their football experience\r\n  \r\n  ",
-        "user_email": null
-      },
-      {
-        "id": 17,
-        "name": "${target_initials_upper} Sleep",
-        "table_name": "${target_name_us}_ps_sleeps",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:36.050Z",
-        "updated_at": "2019-01-17T11:50:36.050Z",
-        "position": null,
-        "category": "${target_initials_lower}-phone-screen",
-        "table_key_name": "",
-        "field_list": "",
-        "result_order": "",
-        "options": "default:\r\n  show_if:\r\n    sleep_disorder_details:\r\n      sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n    sleep_apnea_device_no_yes:\r\n      sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n    sleep_apnea_device_details:\r\n      sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n      sleep_apnea_device_no_yes: \"yes\"\r\n\r\n  caption_before:\r\n    all_fields: As previously mentioned, one of the tests to be done is an overnight sleep study, so I would like to ask you some questions about your sleep. Can I continue?\r\n    sleep_disorder_blank_yes_no_dont_know: Have you ever been diagnosed with sleep apnea or any other sleep disorders (e.g. narcolepsy)\r\n    sleep_disorder_details: <i>IF YES</i> Can you please tell me more about this?\r\n    sleep_apnea_device_no_yes: IF THEY HAVE SLEEP APNEA<br/>Do you use a CPAP machine or another device for your sleep apnea?\r\n    sleep_apnea_device_details: <i>IF YES</i> How many nights a week?  Do you take it with you when you travel?\r\n    bed_and_wake_time_details: What is your usual bed and wake time during the week?<br/><br/>IF NECESSARY, ask if participant works night shifts.\r\n",
-        "user_email": null
-      },
-      {
-        "id": 14,
-        "name": "${target_initials_upper} TMS",
-        "table_name": "${target_name_us}_ps_tms_tests",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:33.782Z",
-        "updated_at": "2019-01-17T11:50:33.782Z",
-        "position": null,
-        "category": "${target_initials_lower}-phone-screen",
-        "table_key_name": "",
-        "field_list": "past_tms_blank_yes_no_dont_know, past_tms_details, convulsion_or_seizure_blank_yes_no_dont_know, epilepsy_blank_yes_no_dont_know, fainting_blank_yes_no_dont_know, concussion_blank_yes_no_dont_know, loss_of_conciousness_details, hearing_problems_blank_yes_no_dont_know, cochlear_implants_blank_yes_no_dont_know, neurostimulator_blank_yes_no_dont_know, neurostimulator_details, med_infusion_device_blank_yes_no_dont_know, med_infusion_device_details, metal_blank_yes_no_dont_know, metal_details, current_meds_blank_yes_no_dont_know, current_meds_details, other_chronic_problems_blank_yes_no_dont_know, other_chronic_problems_details, hospital_visits_blank_yes_no_dont_know, hospital_visits_details, dietary_restrictions_blank_yes_no_dont_know, dietary_restrictions_details, anything_else_blank_yes_no, anything_else_details",
-        "result_order": "",
-        "options": "default:\r\n  show_if:\r\n    past_tms_details:\r\n      past_tms_blank_yes_no_dont_know: \"yes\"\r\n    metal_details:\r\n      metal_blank_yes_no_dont_know: \"yes\"\r\n    neurostimulator_details:\r\n      neurostimulator_blank_yes_no_dont_know: \"yes\"\r\n    #past_mri_details:\r\n    #  past_mri_blank_yes_no_dont_know: \"yes\"\r\n    current_meds_details:\r\n      current_meds_blank_yes_no_dont_know: \"yes\"\r\n    other_chronic_problems_details:\r\n      other_chronic_problems_blank_yes_no_dont_know: \"yes\"\r\n    hospital_visits_details:\r\n      hospital_visits_blank_yes_no_dont_know: \"yes\"\r\n    dietary_restrictions_details:\r\n      dietary_restrictions_blank_yes_no_dont_know: \"yes\"\r\n    anything_else_details:\r\n      anything_else_blank_yes_no: \"yes\"\r\n    loss_of_conciousness_details:\r\n      concussion_blank_yes_no_dont_know: 'yes'\r\n    med_infusion_device_details:\r\n      med_infusion_device_blank_yes_no_dont_know: 'yes'\r\n\r\n  caption_before:\r\n    all_fields: I am now going to ask you some questions to see if it is safe for you to undergo one of the tests previously mentioned – TMS or transcranial magnetic stimulation. May I continue?\r\n    past_tms_blank_yes_no_dont_know: Did you ever undergo TMS in the past?\r\n    past_tms_details: <i>IF YES</i> , were there any problems?\r\n    convulsion_or_seizure_blank_yes_no_dont_know: Have you ever had a convulsion or a seizure?\r\n    epilepsy_blank_yes_no_dont_know: Do you or a family member have a history of epilepsy?\r\n    fainting_blank_yes_no_dont_know: Have you ever had a fainting spell?\r\n    concussion_blank_yes_no_dont_know: Have you ever had a head trauma that was diagnosed as a concussion or was associated with a loss of consciousness?\r\n    loss_of_conciousness_details: <i>IF YES for LOC</i> How long were you unconscious? \r\n    hearing_problems_blank_yes_no_dont_know: Do you have any hearing problems or ringing in your ears?\r\n    cochlear_implants_blank_yes_no_dont_know: Do you have cochlear implants or do you wear hearing aids?\r\n    neurostimulator_blank_yes_no_dont_know: Do you have an implanted neurostimulator in your body? This can include a vagal nerve stimulator, deep brain stimulator, epidural/subdural stimulator, etc.\r\n    neurostimulator_details: <i>IF YES</i> can you please specify the type of neurostimulator?\r\n    med_infusion_device_blank_yes_no_dont_know: Do you have a medication infusion device?\r\n    med_infusion_device_details: <i>IF YES</i> Can you please tell me more about this?\r\n\r\n    metal_blank_yes_no_dont_know: Do you have any metal in the brain, skull or elsewhere in the body? This can include splinters, fragments, clips, etc.\r\n    metal_details: <i>IF YES</i> Can you please tell me more about this?\r\n    #pacemaker_blank_yes_no_dont_know: Do you have a cardiac pacemaker or intracardiac lines?\r\n    #past_mri_blank_yes_no_dont_know: Did you ever undergo an MRI in the past?\r\n    #past_mri_details: <i>IF YES</i> , were there any problems? Please describe.\r\n    current_meds_blank_yes_no_dont_know: Are you currently taking any medications including over the counter medications?\r\n    current_meds_details: <i>IF YES</i> can you please list them.\r\n    #neuro_history_details: Please list all past neurological (relating to your brain or spinal cord) medical or surgical history.\r\n    other_chronic_problems_blank_yes_no_dont_know: Do you have a history of any other chronic health problems?\r\n    other_chronic_problems_details: <i>IF YES</i> Can you please tell me about them.\r\n    hospital_visits_blank_yes_no_dont_know: Have you experienced any hospitalizations or emergency room visits in the last six months?\r\n    hospital_visits_details: <i>IF YES</i> Can you please tell me what happened?\r\n    dietary_restrictions_blank_yes_no_dont_know: Do you have any dietary restrictions or allergies?\r\n    dietary_restrictions_details: <i>IF YES</i> Could you tell me what dietary restrictions/allergies you have?\r\n    anything_else_blank_yes_no: Is there anything else that you want to tell me about?\r\n    anything_else_details: <i>IF YES</i> Please tell me \r\n    ",
-        "user_email": null
-      },
-      {
-        "id": 13,
-        "name": "${target_initials_upper} Health",
-        "table_name": "${target_name_us}_ps_healths",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:33.102Z",
-        "updated_at": "2019-01-17T11:50:33.102Z",
-        "position": null,
-        "category": "${target_initials_lower}-phone-screen",
-        "table_key_name": "",
-        "field_list": "physical_limitations_blank_yes_no,physical_limitations_details,sit_back_blank_yes_no,sit_back_details,cycle_blank_yes_no,cycle_details,chronic_pain_blank_yes_no,chronic_pain_details,chronic_pain_meds_blank_yes_no_dont_know,chronic_pain_meds_details,hemophilia_blank_yes_no_dont_know,hemophilia_details,raynauds_syndrome_blank_yes_no_dont_know,raynauds_syndrome_severity_selection,raynauds_syndrome_details,hypertension_diagnosis_blank_yes_no_dont_know,hypertension_medications_blank_yes_no,hypertension_diagnosis_details,diabetes_diagnosis_blank_yes_no_dont_know,diabetes_medications_blank_yes_no,diabetes_diagnosis_details,high_cholesterol_diagnosis_blank_yes_no_dont_know,high_cholesterol_medications_blank_yes_no,high_cholesterol_diagnosis_details,other_heart_conditions_blank_yes_no_dont_know,other_heart_conditions_details,heart_surgeries_blank_yes_no_dont_know,heart_surgeries_details,caridiac_pacemaker_blank_yes_no_dont_know,caridiac_pacemaker_details,memory_problems_blank_yes_no_dont_know,memory_problems_details,mental_health_conditions_blank_yes_no_dont_know,mental_health_conditions_details,mental_health_help_blank_yes_no_dont_know,mental_health_help_details,neurological_problems_blank_yes_no_dont_know,neurological_problems_details,neurological_surgeries_blank_yes_no_dont_know,neurological_surgeries_details",
-        "result_order": "",
-        "options": "default:\r\n\r\n  show_if:\r\n    physical_limitations_details:\r\n      physical_limitations_blank_yes_no: 'yes'    \r\n    sit_back_details:\r\n      sit_back_blank_yes_no: 'no'\r\n    cycle_details:\r\n      cycle_blank_yes_no: 'no'\r\n    chronic_pain_details:\r\n      chronic_pain_blank_yes_no: 'yes'\r\n    chronic_pain_meds_blank_yes_no_dont_know:\r\n      chronic_pain_blank_yes_no: 'yes'\r\n    chronic_pain_meds_details:\r\n      chronic_pain_meds_blank_yes_no_dont_know: 'yes'\r\n    hemophilia_details:\r\n      hemophilia_blank_yes_no_dont_know: 'yes'\r\n    raynauds_syndrome_severity_selection:\r\n      raynauds_syndrome_blank_yes_no_dont_know: 'yes'\r\n    raynauds_syndrome_details:\r\n      raynauds_syndrome_blank_yes_no_dont_know: 'yes'\r\n    other_conditions_details:\r\n      other_conditions_blank_yes_no_dont_know: 'yes'\r\n    \r\n    hypertension_medications_blank_yes_no:\r\n      hypertension_diagnosis_blank_yes_no_dont_know: 'yes'\r\n      \r\n    hypertension_diagnosis_details:\r\n      hypertension_medications_blank_yes_no: 'yes'\r\n\r\n    diabetes_medications_blank_yes_no:\r\n      diabetes_diagnosis_blank_yes_no_dont_know: 'yes'\r\n      \r\n    diabetes_diagnosis_details:\r\n      diabetes_medications_blank_yes_no: 'yes'\r\n\r\n\r\n    high_cholesterol_medications_blank_yes_no:\r\n      high_cholesterol_diagnosis_blank_yes_no_dont_know: 'yes'\r\n      \r\n    high_cholesterol_diagnosis_details:\r\n      high_cholesterol_medications_blank_yes_no: 'yes'\r\n\r\n      \r\n    other_heart_conditions_details:\r\n      other_heart_conditions_blank_yes_no_dont_know: 'yes'\r\n    heart_surgeries_blank_yes_no_dont_know:\r\n      other_heart_conditions_blank_yes_no_dont_know: 'yes'\r\n    heart_surgeries_details: \r\n      heart_surgeries_blank_yes_no_dont_know: 'yes'\r\n    caridiac_pacemaker_details: \r\n      caridiac_pacemaker_blank_yes_no_dont_know: 'yes'\r\n\r\n    memory_problems_details:\r\n      memory_problems_blank_yes_no_dont_know: 'yes'\r\n    mental_health_conditions_details:\r\n      mental_health_conditions_blank_yes_no_dont_know: 'yes'\r\n      \r\n    mental_health_help_details: \r\n      mental_health_help_blank_yes_no_dont_know: 'yes'\r\n    \r\n    neurological_problems_details:\r\n      neurological_problems_blank_yes_no_dont_know: 'yes'\r\n    neurological_surgeries_blank_yes_no_dont_know:\r\n      neurological_problems_blank_yes_no_dont_know: 'yes'\r\n    neurological_surgeries_details:\r\n      neurological_surgeries_blank_yes_no_dont_know: 'yes'\r\n    \r\n  caption_before:\r\n    all_fields: I am going to ask you some questions about your health. Please answer to the best of your ability. Please let me know if you need to stop or if you are not comfortable answering any of the questions.\r\n    physical_limitations_blank_yes_no: Do you have any physical limitations or trouble walking?\r\n    physical_limitations_details: <i>IF YES</i> Do you use any assistive devices, such as a cane or walker?\r\n    sit_back_blank_yes_no: Are you able to sit without back support?\r\n    sit_back_details: Details\r\n    cycle_blank_yes_no: Are you able to sit on and pedal a bicycle?\r\n    cycle_details: Details\r\n    chronic_pain_blank_yes_no: Do you have chronic pain?\r\n    chronic_pain_details: <i>IF YES</i> Please describe how often and how intense.\r\n    chronic_pain_meds_blank_yes_no_dont_know: <i>IF YES TO CHRONIC PAIN</i><br/>Do you currently take any medication (prescription or over the counter) or utilize alternative therapies to manage your chronic pain?\r\n    chronic_pain_meds_details: <i>IF YES</i> Can you please tell me more about this?\r\n    hemophilia_blank_yes_no_dont_know: Do you have any blood clotting disorders?\r\n    hemophilia_details: <i>IF YES</i> Do you currently take medication to control it?\r\n    raynauds_syndrome_blank_yes_no_dont_know: |\r\n      Do you suffer from Raynaud's syndrome?\r\n      (A condition where your fingers or toes become white or red in cold weather.  They may burn or itch.)\r\n    raynauds_syndrome_severity_selection: |\r\n      Would you say that it is mild, moderate or severe?\r\n    raynauds_syndrome_details: Has that been diagnosed by a medical professional?\r\n    #other_conditions_blank_yes_no_dont_know: Do you have any other physical conditions or problems to tell me about?\r\n    #other_conditions_details: Details\r\n    hypertension_diagnosis_blank_yes_no_dont_know: Have you been diagnosed with high blood pressure (hypertension)?\r\n    hypertension_medications_blank_yes_no: <i>IF YES</i> Have you ever or are you currently taking medications to manage these? \r\n    hypertension_diagnosis_details: Can you please tell me what medications?\r\n    diabetes_diagnosis_blank_yes_no_dont_know: Have you ever been diagnosed with diabetes\r\n    diabetes_medications_blank_yes_no: <i>IF YES</i> Have you ever or are you currently taking medications to manage these? \r\n    diabetes_diagnosis_details: Can you please tell me what medications?\r\n    high_cholesterol_diagnosis_blank_yes_no_dont_know: Have you ever been diagnosed with high cholesterol?\r\n    high_cholesterol_medications_blank_yes_no: <i>IF YES</i> Have you ever or are you currently taking medications to manage these? \r\n    high_cholesterol_diagnosis_details: Can you please tell me what medications?\r\n    other_heart_conditions_blank_yes_no_dont_know: Have you been diagnosed with any other heart conditions or problems (e.g. heart attack, irregular heartbeat, heart failure)?\r\n    other_heart_conditions_details: <i>IF YES</i> Please describe. \r\n    heart_surgeries_blank_yes_no_dont_know: Have you had any heart related surgeries?\r\n    heart_surgeries_details: <i>IF YES</i> please explain.\r\n    caridiac_pacemaker_blank_yes_no_dont_know: Do you have a cardiac pacemaker or intracardiac lines? epidural/subdural stimulator, etc.\r\n    caridiac_pacemaker_details: Details\r\n    memory_problems_blank_yes_no_dont_know: Do you have any problems with your memory?\r\n    memory_problems_details: <i>IF YES</i> Please describe and tell me how long you have noticed a problem.\r\n    mental_health_conditions_blank_yes_no_dont_know: Have you ever been diagnosed with depression, anxiety, bipolar disorder, or another mental health condition?\r\n    mental_health_conditions_details: <i>IF YES</i> Can you please tell me more about this?\r\n    mental_health_help_blank_yes_no_dont_know: Have you ever sought help from a mental health professional in the past?\r\n    mental_health_help_details: <i>IF YES</i> Can you please tell me more about this?\r\n    neurological_problems_blank_yes_no_dont_know: Do you have a history of any neurological problems, such as history of stroke, head injury, Parkinson’s Disease, MS?\r\n    neurological_problems_details: Please describe.\r\n    neurological_surgeries_blank_yes_no_dont_know: <i>IF YES</i> Have you needed surgery for any of these conditions?\r\n    neurological_surgeries_details: Please describe.\r\n    \r\n    \r\n    ",
-        "user_email": null
-      },
-      {
         "id": 12,
         "name": "${target_initials_upper} Informant Details",
         "table_name": "${target_name_us}_ps_informant_details",
@@ -4778,46 +4283,6 @@
         "field_list": "first_name,last_name,email,phone, relationship_to_participant, contact_information_notes",
         "result_order": "",
         "options": "",
-        "user_email": null
-      },
-      {
-        "id": 11,
-        "name": "${target_initials_upper} Subject Info",
-        "table_name": "${target_name_us}_ps_sizes",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:31.743Z",
-        "updated_at": "2019-01-17T11:50:31.743Z",
-        "position": null,
-        "category": "${target_initials_lower}-phone-screen",
-        "table_key_name": "",
-        "field_list": "birth_date, weight, height, hat_size, shirt_size, jacket_size, waist_size",
-        "result_order": "",
-        "options": "default:\r\n  caption_before:\r\n    all_fields: |\r\n      I am now going to ask you to answer some questions and do some tasks to see if you qualify for the study.  Some of these questions pertain to your medical history. \r\n      \r\n      Is it OK for me to continue? ________\r\n      \r\n      Please answer the following questions with honesty and to the best of your knowledge, as we will use your responses to determine whether it is safe for you to participate in the study.\r\n    birth_date: What is your date of birth?\r\n    weight: How much do you weigh (in pounds)?\r\n    height: How tall are you?\r\n    hat_size: What size hat do you wear?\r\n    shirt_size: What is your shirt size?\r\n    jacket_size: What size jacket do you wear?\r\n    waist_size: What is your waist size (in inches)?\r\n\r\n  field_options:\r\n    height:\r\n      edit_as: \r\n        field_type: select_height\r\n        alt_options:\r\n          5'0\" or 60 inches: 60\r\n          5'1\" or 61 inches: 61\r\n          5'2\" or 62 inches: 62\r\n          5'3\" or 63 inches: 63\r\n          5'4\" or 64 inches: 64\r\n          5'5\" or 65 inches: 65\r\n          5'6\" or 66 inches: 66\r\n          5'7\" or 67 inches: 67\r\n          5'8\" or 68 inches: 68\r\n          5'9\" or 69 inches: 69\r\n          5'10\" or 70 inches: 70\r\n          5'11\" or 71 inches: 71\r\n          6'0\" or 72 inches: 72\r\n          6'1\" or 73 inches: 73\r\n          6'2\" or 74 inches: 74\r\n          6'3\" or 75 inches: 75\r\n          6'4\" or 76 inches: 76\r\n          6'5\" or 77 inches: 77\r\n          6'6\" or 78 inches: 78\r\n          6'7\" or 79 inches: 79\r\n          6'8\" or 80 inches: 80\r\n          6'9\" or 81 inches: 81\r\n          6'10\" or 82 inches: 82\r\n          6'11\" or 83 inches: 83\r\n          7'1\" or 84 inches: 84\r\n          7'1\" or 85 inches: 85\r\n          7'2\" or 86 inches: 86\r\n          7'3\" or 87 inches: 87\r\n          7'4\" or 88 inches: 88\r\n          7'5\" or 89 inches: 89\r\n          7'6\" or 90 inches: 90\r\n          7'7\" or 91 inches: 91\r\n          7'8\" or 92 inches: 92\r\n          7'9\" or 93 inches: 93\r\n          7'10\" or 94 inches: 94\r\n          7'11\" or 95 inches: 95\r\n",
-        "user_email": null
-      },
-      {
-        "id": 10,
-        "name": "T-MoCA",
-        "table_name": "${target_name_us}_ps_tmocas",
-        "schema_name": null,
-        "primary_key_name": "id",
-        "foreign_key_name": "master_id",
-        "description": "",
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:50:31.071Z",
-        "updated_at": "2019-01-17T11:50:31.071Z",
-        "position": null,
-        "category": "${target_initials_lower}-phone-screen",
-        "table_key_name": "",
-        "field_list": "tmoca_version, attn_digit_span, attn_digit_vigilance, attn_digit_calculation, language_repeat, language_fluency, abstraction, delayed_recall, orientation, tmoca_score",
-        "result_order": "",
-        "options": "default:\r\n\r\n  field_options:\r\n    tmoca_score:\r\n      edit_as:\r\n        field_type: fixed_tmoca_score\r\n    tmoca_version:\r\n      edit_as:\r\n        field_type: select_tmoca_version\r\n        alt_options:\r\n          - A\r\n          - B\r\n          - C\r\n    \r\n  labels:\r\n    tmoca_version: 'T-MoCA Version'\r\n    attn_digit_span: 'Forward Digit Span/Backward Digit Span'\r\n    attn_digit_vigilance: 'Vigilance'\r\n    attn_digit_calculation: 'Calculation'\r\n    language_repeat: 'Language - repeat'\r\n    language_fluency: 'Verbal fluency'\r\n    abstraction:  'Abstraction'\r\n    delayed_recall: 'Delayed Recall'\r\n    orientation: 'Orientation'\r\n\r\n  caption_before:\r\n  \r\n    attn_digit_span:\r\n      keep_label: true\r\n      caption: '<b>Attention</b>'\r\n    \r\n    language_repeat:\r\n      keep_label: true\r\n      caption: '<b>Language</b>'\r\n    \r\n    tmoca_score: '<b>Total Score</b>'\r\n\r\n\r\n  valid_if:\r\n    on_save:\r\n      not_any:\r\n        this:\r\n          attn_digit_span: ''\r\n          attn_digit_vigilance: ''\r\n          attn_digit_calculation: ''\r\n          language_repeat: ''\r\n          language_fluency: ''\r\n          abstraction:  ''\r\n          delayed_recall: ''\r\n          orientation: ''\r\n",
         "user_email": null
       },
       {
@@ -7508,57 +6973,6 @@
         "user_email": null
       },
       {
-        "id": 131,
-        "name": "moderate",
-        "value": "moderate",
-        "item_type": "dynamic_model__${target_name_us}_ps_healths_raynauds_syndrome_severity_selection",
-        "created_at": "2019-01-17T11:51:01.766Z",
-        "updated_at": "2019-01-17T11:51:01.766Z",
-        "disabled": false,
-        "admin_id": 4,
-        "create_with": true,
-        "edit_if_set": false,
-        "edit_always": true,
-        "position": 3,
-        "description": "",
-        "lock": false,
-        "user_email": null
-      },
-      {
-        "id": 132,
-        "name": "mild",
-        "value": "mild",
-        "item_type": "dynamic_model__${target_name_us}_ps_healths_raynauds_syndrome_severity_selection",
-        "created_at": "2019-01-17T11:51:01.770Z",
-        "updated_at": "2019-01-17T11:51:01.770Z",
-        "disabled": false,
-        "admin_id": 4,
-        "create_with": true,
-        "edit_if_set": false,
-        "edit_always": true,
-        "position": 2,
-        "description": "",
-        "lock": false,
-        "user_email": null
-      },
-      {
-        "id": 133,
-        "name": "severe",
-        "value": "severe",
-        "item_type": "dynamic_model__${target_name_us}_ps_healths_raynauds_syndrome_severity_selection",
-        "created_at": "2019-01-17T11:51:01.774Z",
-        "updated_at": "2019-01-17T11:51:01.774Z",
-        "disabled": false,
-        "admin_id": 4,
-        "create_with": true,
-        "edit_if_set": false,
-        "edit_always": true,
-        "position": 4,
-        "description": "",
-        "lock": false,
-        "user_email": null
-      },
-      {
         "id": 134,
         "name": "Phone Screen Review",
         "value": "phone screen review",
@@ -7962,23 +7376,6 @@
         "edit_if_set": false,
         "edit_always": true,
         "position": 2,
-        "description": "",
-        "lock": false,
-        "user_email": null
-      },
-      {
-        "id": 158,
-        "name": "none",
-        "value": "none",
-        "item_type": "dynamic_model__${target_name_us}_ps_healths_raynauds_syndrome_severity_selection",
-        "created_at": "2019-01-17T11:51:01.870Z",
-        "updated_at": "2019-01-17T11:51:01.870Z",
-        "disabled": false,
-        "admin_id": 4,
-        "create_with": true,
-        "edit_if_set": false,
-        "edit_always": true,
-        "position": 1,
         "description": "",
         "lock": false,
         "user_email": null
@@ -11196,94 +10593,6 @@
         "user_email": "phil_ayres@hms.harvard.edu"
       },
       {
-        "id": 46,
-        "app_type_id": 9,
-        "role_name": "ra",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:51:02.818Z",
-        "updated_at": "2019-01-17T11:51:02.818Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
-        "id": 47,
-        "app_type_id": 9,
-        "role_name": "tracker",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:51:02.825Z",
-        "updated_at": "2019-01-17T11:51:02.825Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
-        "id": 48,
-        "app_type_id": 9,
-        "role_name": "phone screener",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:51:02.832Z",
-        "updated_at": "2019-01-17T11:51:02.832Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
-        "id": 49,
-        "app_type_id": 9,
-        "role_name": "staff - inex",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": true,
-        "created_at": "2019-01-17T11:51:02.838Z",
-        "updated_at": "2019-01-25T14:49:40.631Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
-        "id": 50,
-        "app_type_id": 9,
-        "role_name": "user - inex",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:51:02.845Z",
-        "updated_at": "2019-01-17T11:51:02.845Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
-        "id": 51,
-        "app_type_id": 9,
-        "role_name": "user - adverse event",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:51:02.852Z",
-        "updated_at": "2019-01-17T11:51:02.852Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
-        "id": 52,
-        "app_type_id": 9,
-        "role_name": "user - navigation",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:51:02.858Z",
-        "updated_at": "2019-01-17T11:51:02.858Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
-        "id": 53,
-        "app_type_id": 9,
-        "role_name": "user - protocol deviation",
-        "user_id": 2,
-        "admin_id": 4,
-        "disabled": false,
-        "created_at": "2019-01-17T11:51:02.865Z",
-        "updated_at": "2019-01-17T11:51:02.865Z",
-        "user_email": "james_drummey@hms.harvard.edu"
-      },
-      {
         "id": 54,
         "app_type_id": 9,
         "role_name": "pi",
@@ -11292,7 +10601,7 @@
         "disabled": false,
         "created_at": "2019-01-17T11:51:02.872Z",
         "updated_at": "2019-01-17T11:51:02.872Z",
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 55,
@@ -11303,7 +10612,7 @@
         "disabled": false,
         "created_at": "2019-01-17T11:51:02.879Z",
         "updated_at": "2019-01-17T11:51:02.879Z",
-        "user_email": "james_drummey@hms.harvard.edu"
+        "user_email": "template@template@hms.harvard.edu"
       },
       {
         "id": 56,
@@ -11853,7 +11162,7 @@
         "disabled": false,
         "created_at": "2019-01-25T14:44:31.311Z",
         "updated_at": "2019-01-25T14:44:31.311Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 138,
@@ -11864,7 +11173,7 @@
         "disabled": false,
         "created_at": "2019-01-25T14:45:00.124Z",
         "updated_at": "2019-01-25T14:45:00.124Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 139,
@@ -11875,7 +11184,7 @@
         "disabled": false,
         "created_at": "2019-01-25T14:49:09.117Z",
         "updated_at": "2019-01-25T14:49:09.117Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 140,
@@ -11886,7 +11195,7 @@
         "disabled": false,
         "created_at": "2019-01-25T14:50:41.296Z",
         "updated_at": "2019-01-25T14:50:41.296Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 141,
@@ -11897,7 +11206,7 @@
         "disabled": false,
         "created_at": "2019-01-25T14:58:19.094Z",
         "updated_at": "2019-01-25T14:59:48.812Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 142,
@@ -11908,7 +11217,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:00:30.225Z",
         "updated_at": "2019-01-25T15:00:30.225Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 143,
@@ -11919,7 +11228,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:00:38.947Z",
         "updated_at": "2019-01-25T15:00:38.947Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 144,
@@ -11930,7 +11239,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:00:53.457Z",
         "updated_at": "2019-01-25T15:00:53.457Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 145,
@@ -11941,7 +11250,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:01:14.426Z",
         "updated_at": "2019-01-25T15:01:14.426Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 146,
@@ -11952,7 +11261,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:01:27.396Z",
         "updated_at": "2019-01-25T15:01:27.396Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 147,
@@ -11963,7 +11272,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:02:42.864Z",
         "updated_at": "2019-01-25T15:02:42.864Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 148,
@@ -11974,7 +11283,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:02:52.917Z",
         "updated_at": "2019-01-25T15:02:52.917Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 149,
@@ -11985,7 +11294,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:03:35.347Z",
         "updated_at": "2019-01-25T15:03:35.347Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 150,
@@ -11996,7 +11305,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:03:46.580Z",
         "updated_at": "2019-01-25T15:03:46.580Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 151,
@@ -12007,7 +11316,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:04:02.632Z",
         "updated_at": "2019-01-25T15:04:02.632Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 152,
@@ -12018,7 +11327,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:04:11.685Z",
         "updated_at": "2019-01-25T15:04:11.685Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 153,
@@ -12029,7 +11338,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:04:21.417Z",
         "updated_at": "2019-01-25T15:04:21.417Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 154,
@@ -12040,7 +11349,7 @@
         "disabled": false,
         "created_at": "2019-01-25T15:04:29.464Z",
         "updated_at": "2019-01-25T15:04:29.464Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 155,
@@ -12964,7 +12273,7 @@
         "disabled": false,
         "created_at": "2019-01-25T16:15:31.394Z",
         "updated_at": "2019-01-25T16:15:31.394Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 239,
@@ -13041,7 +12350,7 @@
         "disabled": false,
         "created_at": "2019-01-25T17:03:25.683Z",
         "updated_at": "2019-01-25T17:03:25.683Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 246,
@@ -13140,7 +12449,7 @@
         "disabled": false,
         "created_at": "2019-03-19T17:08:32.924Z",
         "updated_at": "2019-03-19T17:08:32.924Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 255,
@@ -13195,7 +12504,7 @@
         "disabled": false,
         "created_at": "2019-03-27T17:36:43.808Z",
         "updated_at": "2019-03-27T17:36:43.808Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 260,
@@ -13327,7 +12636,7 @@
         "disabled": false,
         "created_at": "2019-04-15T08:56:54.733Z",
         "updated_at": "2019-04-15T08:56:54.733Z",
-        "user_email": "dylan_keating@hms.harvard.edu"
+        "user_email": "template@template"
       },
       {
         "id": 354,
