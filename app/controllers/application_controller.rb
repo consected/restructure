@@ -31,6 +31,9 @@ class ApplicationController < ActionController::Base
 
     # If either user or admin has a temp password, force them to change it
     def check_temp_passwords
+
+      return true if defined?(ignore_temp_password_for) && ignore_temp_password_for.include?(action_name)
+
       return true if controller_name.in?(['registrations', 'sessions'])
 
       if current_user && current_user.has_temp_password?

@@ -14,16 +14,24 @@ class PagesController < ApplicationController
   # template
   def template
     return not_authorized unless current_user || current_admin
-    response.headers["Cache-Control"] = "max-age=604800"
-    response.headers["Pragma"] = ""
-    response.headers["Expires"] = "Fri, 01 Jan 2090 00:00:00 GMT"
 
-    render partial: 'masters/cache_search_results_template'
+    if current_user
+      response.headers["Cache-Control"] = "max-age=604800"
+      response.headers["Pragma"] = ""
+      response.headers["Expires"] = "Fri, 01 Jan 2090 00:00:00 GMT"
+      render partial: 'masters/cache_search_results_template'
+    else
+      render text: ''
+    end
   end
 
   private
 
     def no_action_log
       true
+    end
+
+    def ignore_temp_password_for
+      ['show', 'template']
     end
 end

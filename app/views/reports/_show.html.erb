@@ -23,7 +23,7 @@
     </div>
   </div>
 </div>
-<div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results">
+<div id="<%=@results_target%>" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results" class="report-results-outer">
 <% if @results %>
   <%= render partial: 'results' %>
 <% end %>

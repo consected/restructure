@@ -7,10 +7,8 @@
   _fpa.layout = {item_blocks: <%= layout_item_block_sizes.to_json.html_safe %> };
 
 
-<% # We attempt to load these cached definitions here, to speed up future forms and results that rely on them.
-  if current_user %>
-    //_fpa.set_definition('colleges');
-    //_fpa.set_definition('protocol_events');
+<% # 
+  if current_user || current_admin %>
 
   $('html').ready(function(){
     $.get('/pages/<%= template_version %>/template').done(function(data) {

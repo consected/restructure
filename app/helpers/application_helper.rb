@@ -140,7 +140,9 @@
     end
 
     def partial_cache_key partial
-      "#{partial}-partial-#{Application.server_cache_version}-#{current_user.id}-#{current_user.updated_at}-#{Admin::UserAccessControl.order(updated_at: :desc).limit(1).first&.updated_at}-#{Admin::UserRole.order(updated_at: :desc).limit(1).first&.updated_at}"
+      u = current_user || current_admin
+
+      "#{partial}-partial2-#{Application.server_cache_version}-#{u.class.name}-#{u&.id}-#{u&.updated_at}-#{Admin::UserAccessControl.order(updated_at: :desc).limit(1).first&.updated_at}-#{Admin::UserRole.order(updated_at: :desc).limit(1).first&.updated_at}"
     end
 
     def template_version
