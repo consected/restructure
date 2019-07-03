@@ -9,13 +9,13 @@ body.reports {
 }
 
 .report-results-outer .report-results-block {
-  background: rgb(255, 255, 255);
-  border: 1px solid rgb(219, 219, 219);
+  // background: rgb(255, 255, 255);
+  // border: 1px solid rgb(219, 219, 219);
 }
 
 .back-to-search-form-btn, .show-results-btn {
-    border-radius: 0 0 5px 5px;
-    border-top: 0;
+    border-radius: 5px 5px 0 0;
+    border-bottom: 0;
 }
 
 tr.report-auto {

@@ -31,10 +31,10 @@
     </div>
     <div id="<%=@outer_block_id%>-results-block" class="report-results-block <%= @count_only ? 'hidden' : '' %>">
       <% unless @embedded_report %>
-      <p class="text-center back-to-search-form">
+      <div class="text-center back-to-search-form">
         <a href="#body-top" class="btn btn-default small back-to-search-form-btn"><i class="caret up"></i> back to search form</a>
-        <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn"><i class="caret"></i> show all results</a>
-      </p>
+        <a href="#<%=@outer_block_id%>-results-block" class="btn btn-default small show-results-btn" style="display: none;"><i class="caret"></i> show all results</a>
+      </div>
       <% end %>
       <div class="report-results-inner">
         <%

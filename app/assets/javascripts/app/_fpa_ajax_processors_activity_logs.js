@@ -41,16 +41,18 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log
       var master_id = link.attr('data-master-id');
       _fpa.send_ajax_request('/masters/'+master_id+'/activity_log/'+item_type_name_plural, {
           try_app_callback: function(){
-            if($(href).length === 0) {
-              var n = item_type_name.replace(/_/g, '-');
-              href = href.replace(n, n + '-blank-log');
-            }
+            // if($(href).length === 0) {
+            //   var n = item_type_name.replace(/_/g, '-');
+            //   href = href.replace(n, n + '-blank-log');
+            // }
 
             // handling the success of the ajax call, but since we are relying on a subscription to get fired that this has no control over,
             // just put in a delay to allow the templates time to render.
             // this will probably be sufficient in most cases.
+
             window.setTimeout(function(){
               var target_block = _fpa.utils.jump_to_linked_item(href);
+              _fpa.form_utils.format_block(target_block);
               _fpa.activity_logs.unselect_all(target_block, master_id)
             }, 1000)
           }

@@ -113,7 +113,7 @@ _fpa.masters = {
 
     // Function called when the main search page loads, initializing seach form specific functionality
     set_fields_to_search: function(){
-        var forms = $('.search_master');
+        var forms = $('.search_master, form.search_report');
 
         _fpa.masters.handle_search_form(forms);
 

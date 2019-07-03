@@ -15,15 +15,21 @@ body.page-loading {
   // filter: grayscale(100%);
   // opacity: 0.2;
   a[data-remote], .btn {
-    filter: blur(1px);
+    // filter: blur(1px);
+    color: silver;
   }
 
   .navbar-default {
       a, .btn {
-        filter: blur(0);
+        // filter: blur(1px);
+        color: silver;
       }
   }
 
+}
+
+h2.no-results-msg {
+  text-align: center;
 }
 
 .hidden-if-empty:empty {

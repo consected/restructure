@@ -6,7 +6,6 @@ _fpa.utils = {};
 // Returns the block that was linked if successful
 _fpa.utils.jump_to_linked_item = function(target, offset, options) {
 
-  var block = h;
   if(offset == null) offset = -50;
   if(options == null) options = {};
 
@@ -17,6 +16,18 @@ _fpa.utils.jump_to_linked_item = function(target, offset, options) {
   if(!isj && (!target || target.length < 2)) return;
 
   var h = $(target);
+  if(!h || h.length == 0) {
+    var tparts = target.split('-');
+    var l = tparts.length;
+    var dii = tparts[l - 1];
+    var dm = tparts[l - 2];
+    if(!dii || !dm) return;
+    var dic = target.replace('#', '').replace('-' + dm + '-' + dii, '').replace(/-/g, '_');
+
+    h = $('[data-item-class="'+dic+'"][data-sub-id="'+dii+'"]');
+    console.log(h);
+  }
+
   if(!h || h.length == 0)
     return;
 
@@ -38,7 +49,7 @@ _fpa.utils.jump_to_linked_item = function(target, offset, options) {
   if(!_fpa.utils.inViewport(h, true))
       _fpa.utils.scrollTo(h, 200, offset);
 
-  return block;
+  return h;
 };
 
 _fpa.utils.inViewport = function(el, topHalf) {
