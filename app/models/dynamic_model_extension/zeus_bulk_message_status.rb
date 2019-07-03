@@ -3,8 +3,9 @@ module DynamicModelExtension
 
     extend ActiveSupport::Concern
 
+    ValidStatuses = [:success, :failure]
+    
     included do
-      ValidStatuses = [:success, :failure]
       belongs_to :zeus_bulk_message_recipients
 
       validates :zeus_bulk_message_recipient_id, presence: true

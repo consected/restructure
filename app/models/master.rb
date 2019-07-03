@@ -308,10 +308,7 @@ class Master < ActiveRecord::Base
 
     extras[:methods] << :header_prefix
 
-    res = Admin::AppConfiguration.value_for(:show_ids_in_master_result, current_user)
-    res = '' if res.blank?
-    res = res.split(',').map {|i| i.strip.to_sym}
-    res = res - self.class.crosswalk_attrs
+    res = Admin::AppConfiguration.values_for(:show_ids_in_master_result, current_user) - self.class.crosswalk_attrs
 
     res.each do |id_attr|
       extras[:methods] << id_attr

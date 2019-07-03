@@ -41,6 +41,13 @@ class Admin::AppConfiguration < Admin::AdminBase
     res.scope_user_and_role(user).first&.value
   end
 
+  # Get an array of comma separated values from an app config value
+  def self.values_for name, user=nil
+    res = value_for(name, user)
+    res = '' if res.blank?
+    res.split(',').map {|i| i.strip.to_sym}
+  end
+
   def self.sym_to_name config_name
     config_name.to_s.humanize.downcase
   end
