@@ -149,4 +149,8 @@
       Digest::SHA256.hexdigest partial_cache_key(:loaded)
     end
 
+    def markdown_to_html md
+      Kramdown::Document.new(md).to_html.html_safe if md
+    end
+
   end

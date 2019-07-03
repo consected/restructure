@@ -135,8 +135,13 @@
 
   end
 
-
-  field_result_class = "list-group-item result-field-container #{full_name.hyphenate}-{{@key}} {{#is @key 'in' '#{caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',') }'}}has-caption-before{{/is}} {{#is @key '#{external_id_options && external_id_options[:attribute]}'}}is_external_id_item{{/is}}".html_safe
+  caption_before_keys = caption_before.keys.join(',')
+  caption_before_keys_without_keep_label = caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',')
+  external_id_attr = external_id_options && external_id_options[:attribute]
+  hide_tracker_panel = app_config_set(:hide_tracker_panel)
+  show_item_type_flags_after = Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after
+  field_result_class = "list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#is key \"in\" caption_before_keys_without_keep_label}}has-caption-before{{/is}} {{#is key external_id_attr}}is_external_id_item{{/is}}".html_safe
+  item_list = item_list.is_a?(Array) ? item_list.join(',') : item_list
 %>
 <script>
   _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
@@ -158,22 +163,8 @@
   end
 %>
 
-<%= render partial: 'common_templates/e_signature/show_parts', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
-<%= render partial: 'common_templates/references_results', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} %>
-<%= render partial: 'filestore/common_template_view', locals: { name: name,  references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before} if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
+<%= render partial: 'common_templates/references_results', locals: { name: name, full_name: full_name, references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before, field_result_class: field_result_class, external_id_attr: external_id_attr, caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, caption_before_keys: caption_before_keys, item_flags_readonly: item_flags_readonly, hide_tracker_panel: hide_tracker_panel, hide_rank_badge: hide_rank_badge, edit_button_href: edit_button_href, show_item_type_flags_after: show_item_type_flags_after, item_flags_after: item_flags_after } %>
 
-<script id="activity_log_<%=name%>_data_template_name_partial"  type="text/x-handlebars-template" class="hidden handlebars-partial"><%= al_full_name.hyphenate %>{{#if rec_type}}-{{rec_type}}{{/if}}s-main-result-template</script>
-
-<script id="search_results_notes_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{@key}} notes-block {{#unless value}}notes-empty{{/unless}}{{#is value ''}}notes-empty{{/is}}">
-    {{#if label}}
-    <small class="notes-block-label">{{label}}</small>
-    {{/if}}
-    <div class="notes-text">
-    {{pretty_string value return_string="true"}}
-    </div>
-  </li>
-</script>
 
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
@@ -186,233 +177,15 @@
 
   if controls %>
   {{#if rec_type}}
-  <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_<%=name%>_data_template_name_partial}}"></a>
+  <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_data_template_name_partial al_full_name='<%=al_full_name%>'}}"></a>
   {{else}}
-  <a data-toggle="uncollapse" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="{{> activity_log_<%=name%>_data_template_name_partial}}"></a>
+  <a data-toggle="uncollapse" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="{{> activity_log_data_template_name_partial al_full_name='<%=al_full_name%>'}}"></a>
   {{/if}}
   <% end %>
 </script>
 
-<script id="<%=name%>_edit_item_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<% unless prevent_edit %>
-{{#unless prevent_edit }}
-  <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-<%=name.hyphenate%> pull-right glyphicon glyphicon-edit" href="<%= edit_button_href %>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target=""></a>
-  <a data-remote="true" title="refresh" class="hidden refresh-item" href="<%= edit_button_href.gsub(/\/edit$/, '') %>">&nbsp;</a>
-{{/unless}}
-<% end %>
-</script>
-
-<script id="field_label" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <small>
-    {{#if (fpa_state_item labels @key )}}
-      {{fpa_state_item labels @key }}
-    {{else if force_default}}
-      {{force_default}}
-    {{else}}
-      {{humanize (replace @key replace '')}}
-    {{/if}}
-  </small>
-</script>
 
 
-<script id="<%=name%>_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
-<% if caption_before[:all_fields] %>
-  <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
-    <%= show_caption_before :all_fields, caption_before, :show %>
-  </li>
-<% end %>
-
-<% if item_list.length > 0 %>
-{{#filter this "<%= item_list.is_a?(Array) ? item_list.join(',') : item_list  %>" }}
-
-  {{!-- Use an inline partial, since defining it here seems to avoid a context scoping bug that I have been unable to trace otherwise --}}
-  {{#*inline '<%=name%>_result_field'}}
-
-    {{#is @key 'in' '<%= caption_before.keys.join(',') %>'}}
-    {{#if (fpa_state_item 'dialog_before_<%=name.underscore%>' @key)}}
-      {{{fpa_state_item 'dialog_before_<%=name.underscore%>' @key}}}
-    {{else if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-      {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'show_caption'}}}
-    </li>
-    {{else if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption')}}
-    <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before_<%=name.underscore%>' @key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before <%=full_name.hyphenate%>-{{@key}}">
-      {{{fpa_state_item 'caption_before_<%=name.underscore%>' @key 'caption'}}}
-    </li>
-    {{/if}}
-    {{/is}}
-    {{#is @key "notes"}}
-    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
-    {{else is @key "description"}}
-    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
-    {{else is @key "message"}}
-    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" }}
-    {{else is @key 'includes' "_notes"}}
-    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
-    {{else is @key 'includes' "_description"}}
-    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
-    {{else is @key 'includes' "_details"}}
-    {{> search_results_notes_block value=this full_name_hyphenated="<%=full_name.hyphenate%>" label=(humanize @key) }}
-
-
-
-    {{else if (get ../_general_selections @key this 'name')}}
-
-      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^select_' }} <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
-
-
-    {{else is @key "data" }}
-      <li class="<%= field_result_class %>"><small>
-      {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize @key}}{{/if}}
-      </small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '_url'}}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="url-link-value">
-      <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
-      </span></strong></li>
-    {{else is @key 'includes' '_link'}}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="url-link-value">
-      <a href="{{this}}" target="_new" title="open link in new tab">{{this}}</a>
-      </span></strong></li>
-
-
-    {{else is @key 'includes' 'embedded_report_'}}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="url-link-value">
-        <a href="/reports/{{replace @key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{../../id}}" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
-      </span></strong></li>
-    {{else is @key 'includes' '_rank' }}
-      <% if hide_rank_badge %>
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="label label-default">{{this}}</span></strong></li>
-      <% end %>
-    {{else is @key '===' 'rank' }}
-      <% if hide_rank_badge %>
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong><span class="label label-default">{{this}}</span></strong></li>
-      <% end %>
-    {{else is @key "protocol_id"}}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' force_default='protocol' }} <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key "sub_process_id"}}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' force_default='status' }} <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key "protocol_event_id"}}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' force_default='method' }} <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key "tracker_history_id"}}
-    <% unless app_config_set(:hide_tracker_panel) %>
-      {{#if ../tracker_histories}}
-      <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories-caption tracker-histories-caption is-minor-heading">
-        <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#<%=name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" aria-expanded="false">Related tracker items <span class="caret"></span></a>
-      </li>
-      {{/if}}
-      <span id="<%=full_name.hyphenate%>-tracker-histories-{{../master_id}}-{{../id}}" class="collapse related-tracker-collapser">
-      {{#each ../tracker_histories}}
-        <li class="list-group-item <%=full_name.hyphenate%>-tracker-histories in-item-tracker-histories is-full-width">
-          <span class="small">
-             <a href="/masters/{{../master_id}}/tracker_histories" data-remote="true" data-result-target="#trackers-{{../master_id}}" data-template="tracker-chron-result-template" data-result-callback="form_utils.highlight_tracker_history_item" data-tracker-history-item="#tracker-{{../master_id}}-{{../id}}" data-toggle="scrollto-target" data-target="#trackers-{{../master_id}}" title="show tracker" class="glyphicon glyphicon-align-justify"></a>
-             {{pretty_string event_date}}
-             {{protocol_name}} / {{sub_process_name}} / {{protocol_event_name}}
-          </span>
-        </li>
-      {{/each}}
-      </span>
-      <% if implementation_class_name %>
-      {{#unless ../prevent_edit}}
-      <div class="results-caption-before <%=full_name.hyphenate%>-add-linked-tracker">
-        <div class="panel panel-default panel-body">
-          <p class="add-tracker-label">Add a specific tracker status record related to this item:</p>
-          <p class="text-center">
-          <a href="/masters/{{../master_id}}/trackers/new?record_type=activity_log/<%=implementation_class_name%>&record_id={{../id}}&tracker[protocol_id]={{../protocol_id}}&tracker[event_date]={{../called_when}}" data-toggle="scrollto-result" data-remote="true" class="btn btn-sm btn-primary add-tracker-record" title="add related tracker record" data-target="#trackers-{{../master_id}}"><span class="glyphicon glyphicon-plus"></span> Related Tracker record</a>
-          </p>
-        </div>
-      </div>
-      {{/unless}}
-      <% end %>
-    <% end %>
-    {{else is @key 'includes' '^select_record_from_' }}
-      <li class="<%= field_result_class %>" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^select_record_from_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '^select_' }}
-      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^select_' }} <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
-    {{else is @key 'includes' '_selection$' }}
-      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='_selection$' }} <strong>{{#if (get ../_general_selections @key this 'name')}}{{get ../_general_selections @key this 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</strong></li>
-    {{else is @key 'includes' '^multi_select_' }}
-      <li class="<%= field_result_class %> is--select-field" data-field-val="{{this}}">{{> field_label labels='labels_<%=name.underscore%>' replace='^multi_select_' }}
-        {{#* inline "iterateMultiSelect"}}
-          {{#each multi_vals}}
-            {{#is this '!in' "0,false,no" }}
-            <span data-field-array-el-val="{{this}}">{{#if (get ../../../_general_selections ../field_key @index 'name')}}{{get ../../../_general_selections ../field_key @index 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</span>
-            <br/>
-            {{/is}}
-          {{/each}}
-        {{/inline}}
-        <strong>
-          {{>iterateMultiSelect field_key=@key multi_vals=this}}
-        </strong>
-    </li>
-    {{else is @key 'includes' '_blank_yes_no_dont_know' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '_yes_no_dont_know' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_yes_no_dont_know$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '_blank_yes_no' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_blank_yes_no$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '_yes_no' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_yes_no$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '_no_yes' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_no_yes$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '_check$' }}
-        <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_check$' }} <strong>{{#is this true}}<i class="glyphicon glyphicon-ok"></i>{{/is}}</strong></li>
-    {{else is @key 'includes' '_time$' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong>{{local_time this}}</strong></li>
-    {{else is @key 'includes' '_notes' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='_notes$' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '_description' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '^fixed_' }}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' replace='^fixed_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'includes' '^placeholder_' }}
-      <li class="<%= field_result_class %> hidden">{{> field_label labels='labels_<%=name.underscore%>' replace='^placeholder_' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{else is @key 'e_signed_by'}}
-      <li class="<%= field_result_class %>">
-        {{#with ..}}
-        {{#is e_signed_status 'signed'}}
-        {{> field_label labels='labels_{{@key}}' }} <strong>{{pretty_string ../this return_string="true" capitalize="true"}}</strong>
-        {{else}}
-        <div class="text-center">
-          <a data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="<%= edit_button_href %>" data-remote="true" data-result-target="">Review and Sign</a>
-        </div>
-        {{/is}}
-        {{/with}}
-      </li>
-    {{else is @key 'includes' '^e_signed_' }}
-      {{#with ..}}
-      {{> e_signature_parts name='<%=name.pluralize%>' value=../this }}
-      {{/with}}
-    {{else is this 'typeof' 'object'}}
-
-        <li class="list-group-item typeof-object-field"><p>{{humanize @key}} <a data-target="#view-object-{{../master_id}}-{{../id}}-{{underscore @key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a></p>
-        <ul class="view-object collapse" id="view-object-{{../master_id}}-{{../id}}-{{underscore @key}}" aria-expanded="false">
-        {{#each this}}
-        {{><%=name%>_result_field}}
-        {{/each}}
-        </ul>
-
-        </li>
-    {{else}}
-      <li class="<%= field_result_class %>">{{> field_label labels='labels_<%=name.underscore%>' }} <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-    {{/is}}
-    <% if Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after %>
-    {{#is @key '<%=item_flags_after%>'}}
-      <li class="list-group-item is-full-width <%=name.hyphenate%>-item-flags">
-      {{#with ..}}
-        {{>item_flag_container item_type="<%=full_name%>" readonlyview=<%= item_flags_readonly %> }}
-      {{/with}}
-      </li>
-    {{/is}}
-    <% end %>
-
-
-  {{/inline}}
-  {{> <%=name%>_result_field}}
-
-
-{{/filter}}
-<% end %>
-</script>
 
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#was _created}}
@@ -423,7 +196,7 @@
   <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} <%= is_activity_log_class %>" data-item-id="{{id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.to_s.html_safe}\"" }.join(' ').html_safe%> >
       <% if item_list.length == 0 %>
         <li class="list-group-item <%=name%>-<%=name%>_id is-heading zero-item-heading">
-          {{><%=name%>_edit_item_button}}
+          {{>edit_item_button resource='<%=name%>' edit_button_href='<%=edit_button_href%>'}}
           <h4 class="list-group-item-heading"><%=caption%></h4>
         </li>
         <% if caption_before[:all_fields] %>
@@ -434,7 +207,7 @@
 
       <%else%>
         <li class="list-group-item is-heading object-results-header">
-          {{><%=name%>_edit_item_button}}
+          {{>edit_item_button resource='<%=name%>'  edit_button_href='<%=edit_button_href%>'}}
           <% unless hide_rank_badge %>
           {{> rank_button name_h="<%= name.hyphenate %>"}}
           <% end %>
@@ -458,7 +231,7 @@
           {{>item_flag_container item_type="<%=full_name%>"}}
           <% end %>
         </li>
-        {{><%=name%>_result_fields}}
+        {{>common_template_result_fields name='<%=name%>' full_name='<%=full_name%>' field_result_class=(compile_template '<%=field_result_class%>') item_list='<%=item_list%>' hide_rank_badge=<%=hide_rank_badge%> hide_tracker_panel=<%=hide_tracker_panel%> implementation_class_name='<%=implementation_class_name%>' edit_button_href='<%=edit_button_href%>' show_item_type_flags_after='<%=show_item_type_flags_after%>' item_flags_after='<%=item_flags_after%>' item_flags_readonly=<%=item_flags_readonly%> caption_before_keys='<%=caption_before_keys%>' caption_before_keys_without_keep_label='<%=caption_before_keys_without_keep_label%>' external_id_attr='<%=external_id_attr%>'}}
 
         <% if defined?(item_blocks)
             item_blocks.each do |item_name_sym, item_attrs|
@@ -582,11 +355,6 @@
     <% if name != full_name %></div> <% end %>
 </script>
 
-<script id="<%=name%>_create_button-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <% unless prevent_create %>
-  <a href="/masters/{{id}}/<%=name.pluralize%>/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="<%=name.hyphenate%>-{{id}}-"><span class="glyphicon glyphicon-plus"></span> {{#if label}}{{label}}{{else}}<%= name.titleize %>{{/if}} record</a>
-  <% end %>
-</script>
 
 <script>
   _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;

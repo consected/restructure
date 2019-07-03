@@ -7,51 +7,17 @@
 
       <%= hidden_field_tag :mode, "MSID" %>
       <div class="form-group col-sm-3">
-        <%= f.text_field :id, id: 'simple_m_id', class: 'form-control', min: 0 %>
-        <%= f.text_field :msid, id: 'simple_master_id', class: 'form-control', min: 0 %>
-        <%= f.text_field :pro_id, id: 'simple_master_pro_id', class: 'form-control', min: 0 %>
+        <%= f.text_field :id, id: 'simple_m_id', class: 'form-control', min: 0, value: @master_id %>
+        <%= f.text_field :msid, id: 'simple_master_id', class: 'form-control', min: 0, value: @msid %>
+        <%= f.text_field :pro_id, id: 'simple_master_pro_id', class: 'form-control', min: 0, value: @master_pro_id %>
       </div>
-    <%= f.submit :search, id: 'msid_search_reg', class: "btn btn-default btn-sm pull-right auto-submitter" %>
-    <%= f.submit "CSV", id: 'msid_search_csv', name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " %>
-    <%= f.submit "JSON", id: 'msid_search_json', name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" %>
+    <%= f.submit :search, id: 'msid_search_reg', class: "btn btn-default btn-sm pull-right auto-submitter #{@master_req_format == 'reg' ? 'run-master-search' : ''}" %>
+    <%= f.submit "CSV", id: 'msid_search_csv', name: :format, value: "csv", class: "btn btn-default pull-right btn-sm #{@master_req_format == 'csv' ? 'run-master-search' : ''}" %>
+    <%= f.submit "JSON", id: 'msid_search_json', name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right #{@master_req_format == 'json' ? 'run-master-search' : ''}" %>
 
   <% end %>
-<script>
-  $(document).ready(function() {
-    _fpa.masters.handle_search_form($('form.auto_search_master'));
-
-    $('#simple_master_id').val('<%=@msid%>');
-    $('#simple_m_id').val('<%=@master_id%>');
-    $('#simple_master_pro_id').val('<%=@master_pro_id%>');
-    window.setTimeout(function(){
-
-      console.log('loading: <%=@master_req_format%>' );
-      $('#msid_search_<%=@master_req_format%>').click();
-    }, 500);
-  });
-
-</script>
-
-<% end %>
-
-<% if @do_search %>
-<script>
-$(document).ready(function() {
-
-  window.setTimeout(function(){
-    if($('#advanced_search_master').is(':visible')){
-      $('form#advanced_search_master').submit();
-    }
-    else{
-      $('form#simple_search_master').submit();
-    }
-  },1);
-});
-</script>
 <% end %>
 
 <div  class="container-fluid">
   <div id="master_results_block" class="" data-sub-item="masters" data-template="search-results-template" data-preprocessor="master_search_results" ></div>
 </div>
-
-<%#= render partial: 'cache_search_results_template' %>

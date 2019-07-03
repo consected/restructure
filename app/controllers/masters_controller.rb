@@ -111,7 +111,6 @@ class MastersController < UserBaseController
     def init_vars
       instance_var_init :master
       instance_var_init :id
-      instance_var_init :do_search
     end
 
     def search_params

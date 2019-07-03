@@ -184,4 +184,12 @@ _fpa.loaded.masters = function(){
       _fpa.preprocessors.before_all($(this));
     });
 
+    _fpa.masters.handle_search_form($('form.auto_search_master'));
+
+    window.setTimeout(function(){
+      $('.run-master-search').first().click();
+    }, 500);
+
+
+
 };

@@ -125,7 +125,7 @@
             <div class="col-md-<%= !view?[:pro_infos] ? '24' : '12' %>">
               <div id="player-info-{{id}}-" data-subscription="player-info-edit-form-{{id}}-" class="new-block">
                 <h4>No subject details</h4>
-                <p>{{>player_info_create_button}}</p>
+                <p>{{>common_template_create_button resource='player_info' prevent_create=<%=@prevent_creates[:player_infos]%>}}</p>
               </div>
             </div>
 
@@ -162,7 +162,7 @@
         <div class="new-block" id="address-{{id}}-" data-subscription="address-edit-form-{{id}}-" data-preprocessor="address_edit_form">
           {{#unless addresses}}<h4>No addresses</h4>{{/unless}}
         </div>
-        <p class="text-center">{{>address_create_button}}</p>
+        <p class="text-center">{{>common_template_create_button resource='address' prevent_create=<%=@prevent_creates[:addresses]%>}}</p>
 
       </div>
       <% end %>
@@ -178,7 +178,7 @@
         <div class="new-block" id="player-contact-{{id}}-" data-subscription="player-contact-edit-form-{{id}}-" data-preprocessor="player_contact_edit_form">
           {{#unless player_contacts}}<h4>No Contact Records</h4>{{/unless}}
         </div>
-        <p class="text-center">{{>player_contact_create_button}}</p>
+        <p class="text-center">{{>common_template_create_button resource='player_contact' prevent_create=<%=@prevent_creates[:player_contacts]%>}}</p>
 
       </div>
       <% end %>

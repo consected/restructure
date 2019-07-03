@@ -49,7 +49,8 @@
         {{#is to_record_options_config.view_as.show '!==' 'hide'}}
           {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
             {{#with ../embedded_item}}
-              {{><%= ModelReference.record_type_to_ns_table_name references.first.first %>_result_fields}}
+              <% mr_name = ModelReference.record_type_to_ns_table_name references.first.first %>
+              {{>common_template_result_fields name='<%=mr_name%>' full_name='<%=full_name%>' field_result_class=(compile_template '<%=field_result_class%>') item_list='<%=item_list%>' hide_rank_badge=<%=hide_rank_badge%> hide_tracker_panel=<%=hide_tracker_panel%> implementation_class_name='<%=implementation_class_name%>' edit_button_href='<%=edit_button_href%>' show_item_type_flags_after='<%=show_item_type_flags_after%>' item_flags_after='<%=item_flags_after%>' item_flags_readonly=<%=item_flags_readonly%> caption_before_keys='<%=caption_before_keys%>' caption_before_keys_without_keep_label='<%=caption_before_keys_without_keep_label%>' external_id_attr='<%=external_id_attr%>'}}
             {{/with}}
           {{/is}}
         {{/is}}
@@ -94,7 +95,7 @@
 
       {{#is to_record_options_config.view_as.show '!==' 'hide'}}
         {{#is to_record_options_config.view_as.show '===' 'filestore'}}
-          {{>filestore_<%=name%>_view prevent_edit=../prevent_edit}}
+          {{>filestore_common_template_view prevent_edit=../prevent_edit}}
         {{/is}}
       {{/is}}
     {{/each}}

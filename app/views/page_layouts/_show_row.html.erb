@@ -43,10 +43,10 @@
     <div class="standalone-page-col <%=col_classes%> ajax-running" id="<%=col_block_id%>" data-url="<%=col_url%>">
       <div class="sp-col-inner">
         <h2 class="sp-col-label"><%=col_label%></h2>
-        <div class="sp-col-header"><%= Kramdown::Document.new(col_header).to_html.html_safe if col_header.present?%></div>
+        <div class="sp-col-header"><%= markdown_to_html(col_header) if col_header.present?%></div>
         <div class="result-target">
         </div>
-        <div class="sp-col-footer"><%= Kramdown::Document.new(col_footer).to_html.html_safe if col_footer.present?%></div>
+        <div class="sp-col-footer"><%= markdown_to_html(col_footer) if col_footer.present?%></div>
       </div>
     </div>
     <% end %>

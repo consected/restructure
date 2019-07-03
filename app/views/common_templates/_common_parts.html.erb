@@ -1,3 +1,5 @@
+<%= render partial: 'common_templates/common_template_result_fields' %>
+
 <script id="rank_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
 <span class="pull-right label label-info general-rank-{{rank}} {{name_h}}-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
 </script>
@@ -11,3 +13,41 @@
   {{#if updated_at}}  &nbsp; {{#is updated_at_ts '===' created_at_ts }}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="not updated"></span>{{else}}<span class="meta-last-updated glyphicon glyphicon-pencil"></span>&nbsp;<span class="meta-last-updated" data-toggle="popover" data-trigger="click hover" data-content="last updated {{date_time updated_at}}" >{{pretty_string updated_at}}</span>{{/is}}{{else}}<span class="meta-last-updated glyphicon glyphicon-unchecked" data-toggle="popover" data-trigger="click hover" data-content="no update information available"></span>{{/if}}
   {{#if user_name}} &nbsp; <span class="meta-created-by glyphicon glyphicon-user"></span>&nbsp;<span class="meta-created-by-shown" data-toggle="popover" data-trigger="click hover" data-content="edited by">{{user_name}}</span>{{/if}}
 </script>
+
+<script id="common_template_create_button-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#unless prevent_create}}
+  <a href="/masters/{{id}}/{{pluralize resource}}/new" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="scrollto-result" data-target="{{hyphenate resource}}-{{id}}-"><span class="glyphicon glyphicon-plus"></span> {{#if label}}{{label}}{{else}}{{titleize resource}}{{/if}} record</a>
+  {{/unless}}
+</script>
+
+<script id="field_label" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <small>
+    {{#if (fpa_state_item labels @key )}}
+      {{fpa_state_item labels @key }}
+    {{else if force_default}}
+      {{force_default}}
+    {{else}}
+      {{humanize (replace @key replace '')}}
+    {{/if}}
+  </small>
+</script>
+
+<script id="edit_item_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
+{{#unless prevent_edit }}
+  <a data-toggle="scrollto-result" data-target="#{{hyphenate resource}}-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-{{hyphenate resource}} pull-right glyphicon glyphicon-edit" href="{{template edit_button_href}}" data-remote="true" data-{{hyphenate resource}}-id="{{this.id}}" data-result-target=""></a>
+  <a data-remote="true" title="refresh" class="hidden refresh-item" href="{{replace (template edit_button_href) '\/edit$' ''}}">&nbsp;</a>
+{{/unless}}
+</script>
+
+<script id="search_results_notes_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{@key}} notes-block {{#unless value}}notes-empty{{/unless}}{{#is value ''}}notes-empty{{/is}}">
+    {{#if label}}
+    <small class="notes-block-label">{{label}}</small>
+    {{/if}}
+    <div class="notes-text">
+    {{pretty_string value return_string="true"}}
+    </div>
+  </li>
+</script>
+
+<script id="activity_log_data_template_name_partial"  type="text/x-handlebars-template" class="hidden handlebars-partial">{{hyphenate al_full_name}}{{#if rec_type}}-{{rec_type}}{{/if}}s-main-result-template</script>

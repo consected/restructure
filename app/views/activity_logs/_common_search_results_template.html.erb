@@ -277,7 +277,13 @@
 </script>
 
 <script>
-  _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>', <%= extra_log_type_configs.to_json.html_safe %>)
+  <%
+    eltcn = []
+    extra_log_type_configs.each do |elt|
+      eltcn << {name: elt.name}
+    end
+  %>
+  _fpa.activity_logs.generate_postprocessors('<%=item_type_name%>', <%= eltcn.to_json.html_safe %>)
 </script>
 
 <% end %>

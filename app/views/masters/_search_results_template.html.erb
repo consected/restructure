@@ -12,6 +12,12 @@
 
   panels = page_layout_panels
 
+  @prevent_creates = {}
+  @prevent_edits = {}
+  %i(player_infos player_contacts addresses).each do |res|
+    @prevent_creates[res] = !(current_user.has_access_to? :create, :table, res)
+    @prevent_edits[res] = !(current_user.has_access_to? :create, :table, res)
+  end
 %>
 
 
@@ -20,8 +26,8 @@
     name: 'player_info',
     caption: 'person',
     model_data_type: :default,
-    prevent_edit: !(current_user.has_access_to? :edit, :table, :player_infos),
-    prevent_create: !(current_user.has_access_to? :create, :table, :player_infos),
+    prevent_edit: @prevent_edits[:player_infos],
+    prevent_create: @prevent_creates[:player_infos],
     item_list: %w(first_name last_name middle_name nick_name birth_date death_date start_year end_year college source_name notes tracker_history_id),
     data_sort: [:desc, "data-item-id"],
     hide_rank_badge: app_config_set(:hide_player_accuracy)
@@ -42,8 +48,8 @@
     name: 'player_contact',
     caption: '{{capitalize rec_type}}', # substitute the rec_type attribute (capitalized) as the block caption
     model_data_type: :default,
-    prevent_edit: !(current_user.has_access_to? :edit, :table, :player_contacts),
-    prevent_create: !(current_user.has_access_to? :create, :table, :player_contacts),
+    prevent_edit: @prevent_edits[:player_contacts],
+    prevent_create: @prevent_creates[:player_contacts],
     item_list: %w(data source tracker_history_id),
     data_sort: [:desc, "data-rank"],
     extra_class: '{{rec_type}}-type'
@@ -52,8 +58,8 @@
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'address',
     model_data_type: :default,
-    prevent_edit: !(current_user.has_access_to? :edit, :table, :addresses),
-    prevent_create: !(current_user.has_access_to? :create, :table, :addresses),
+    prevent_edit: @prevent_edits[:addresses],
+    prevent_create: @prevent_creates[:addresses],
     item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type tracker_history_id),
     data_sort: [:desc, "data-item-rank"],
     # add custom markup data attribute to allow country to be processed in Javascript formatting
@@ -134,6 +140,10 @@
 <%= render partial: 'filestore/result_templates' if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
 
 <%=render partial: 'secure_view/preview' if current_user.can?(:view_files_as_html) || current_user.can?(:view_files_as_image) %>
+
+<%= render partial: 'filestore/common_template_view', locals: {} if current_user.has_access_to?(:access, :table, :nfs_store__manage__containers) %>
+<%= render partial: 'common_templates/e_signature/show_parts', locals: {} %>
+
 
 <script>
   <%

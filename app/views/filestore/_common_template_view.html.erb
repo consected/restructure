@@ -3,7 +3,7 @@
     acts = [:view_files_as_image, :view_files_as_html, :download_files]
     use_secure_view_actions = acts.select {|act| current_user.can?(act)}
 %>
-<script id="filestore_<%=name%>_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
+<script id="filestore_common_template_view"  type="text/x-handlebars-template" class="hidden handlebars-partial">
 
 <div class="browse-container" data-container-use-secure-view="<%= use_secure_view_actions.join(',') %>">
   <%= render partial: 'nfs_store/browse/browser_header', locals: { container_id: '{{to_record_id}}', container_name: '{{to_record_data}}', container_label: '{{to_record_label}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}' } %>

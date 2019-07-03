@@ -63,11 +63,34 @@ _fpa.utils.scrollTo = function(el, height, offset) {
 };
 
 _fpa.utils.pluralize = function(str) {
-  if(str[str.length - 1] == 'y')
-    str = str.slice(0,-1) + 'ies';
-  else
-    str = str + 's';
+  if(!str) return;
+  orig_str = str;
+  str = str.replace(/ss$/, 'sses');
+  str = str.replace(/ey$/, 'ies');
+  str = str.replace(/ay$/, 'ays');
+  if (orig_str == str) str = str.replace(/y$/, 'ies');
+  if (orig_str == str) str = str + 's';
   return str;
+}
+
+_fpa.utils.singularize = function(str) {
+  if(!str) return;
+  orig_str = str;
+  str = str.replace(/ies$/, 'y');
+  str = str.replace(/ays$/, 'ay');
+  str = str.replace(/sses$/, 'ss');
+  if (orig_str == str) str = str.replace(/s$/, '');
+  return str;
+}
+
+_fpa.utils.titleize = function(str) {
+  if(!str) return;
+  str = str.replace(/_/g, ' ')
+  str = str.toLowerCase().split(' ');
+  for (var i = 0; i < str.length; i++) {
+    str[i] = str[i].charAt(0).toUpperCase() + str[i].slice(1);
+  }
+  return str.join(' ');
 }
 
 _fpa.utils.make_readable_notes_expandable = function(block, max_height, click_callback) {

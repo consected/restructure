@@ -153,7 +153,7 @@
     });
 
     Handlebars.registerHelper('join', function(list, with_str, context){
-
+      if(!list.join) return list;
       return list.join(with_str);
     });
 
@@ -295,6 +295,11 @@
         return String(value).padStart(num, padstr);
     });
 
+    Handlebars.registerHelper('concat', function(str1, str2) {
+      str1 = str1 || '';
+      str2 = str2 || '';
+      return str1 + str2;
+    });
 
 
     Handlebars.registerHelper('simple_log', function(t) {
@@ -388,12 +393,16 @@
 
 
     Handlebars.registerHelper('pluralize', function(str){
-      if(!str) return;
-      if(str[str.length - 1] == 'y')
-        return str.substring(0, str.length - 1) + 'ies';
-      return str + 's';
+      return _fpa.utils.pluralize(str);
     });
 
+    Handlebars.registerHelper('singularize', function(str){
+      return _fpa.utils.singularize(str);
+    });
+
+    Handlebars.registerHelper('titleize', function(str){
+      return _fpa.utils.titleize(str);
+    });
 
     Handlebars.registerHelper('substring', function(str, from, to){
       if(str == null) return;
@@ -411,6 +420,18 @@
     });
 
 
+    Handlebars.registerHelper('template', function(source){
+      return Handlebars.compile(source)(this);
+    });
+
+
+    Handlebars.registerHelper('compile_template', function(source){
+      return Handlebars.compile(source);
+    });
+
+    Handlebars.registerHelper('run_template', function(template){
+      return template(this);
+    });
 
     Handlebars.registerHelper('one_decimal', function(num){
       return num.toFixed(1);
