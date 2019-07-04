@@ -5,8 +5,13 @@ class User < ActiveRecord::Base
 
   acts_as_token_authenticatable
 
-  devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
-         :otp_secret_encryption_key => otp_enc_key
+  # A configuration allows two factor authentication to be disabled for the app server
+  if self.two_factor_auth_disabled
+    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
+  else
+    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
+           :otp_secret_encryption_key => otp_enc_key
+  end
 
   belongs_to :admin
   has_one :contact_info, class_name: 'Users::ContactInfo', foreign_key: :user_id

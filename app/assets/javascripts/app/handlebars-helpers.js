@@ -276,18 +276,15 @@
     });
 
 
-    Handlebars.registerHelper('format_10_digit_external_id', function(text) {
-        text = "" + text; // force text type
-        var d = text.substring(0,3) + ' ' + text.substring(3,6) + ' ' + text.substring(6,10);
-        return new Handlebars.SafeString(d);
-    });
 
-    Handlebars.registerHelper('fpa_state_item', function(name, key, sub_key) {
+    Handlebars.registerHelper('fpa_state_item', function(name, key, sub_key, sub_key2) {
         var res = _fpa.state[name];
         if(res && key)
           res = res[key];
         if(res && sub_key && !sub_key.hash)
           res = res[sub_key];
+        if(res && sub_key2 && !sub_key2.hash)
+          res = res[sub_key2];
         return res;
     });
 
@@ -295,10 +292,11 @@
         return String(value).padStart(num, padstr);
     });
 
-    Handlebars.registerHelper('concat', function(str1, str2) {
+    Handlebars.registerHelper('concat', function(str1, str2, str3) {
       str1 = str1 || '';
       str2 = str2 || '';
-      return str1 + str2;
+      str3 = str3 || '';
+      return str1 + str2 + str3;
     });
 
 
@@ -358,6 +356,17 @@
         if(!stre) return null;
         return stre.toLowerCase().replace(/ /g, '_');
     });
+
+    Handlebars.registerHelper('ns_underscore', function(stre, options) {
+        if(!stre) return null;
+        return stre.toLowerCase().replace(/::/g, '__').replace(/ /g, '_').replace(/\//g, '__').replace(/-/g, '_');
+    });
+
+    Handlebars.registerHelper('ns_hyphenate', function(stre, options) {
+        if(!stre) return null;
+        return stre.toLowerCase().replace(/::/g, '--').replace(/ /g, '-').replace(/\//g, '--').replace(/_/g, '-');
+    });
+
 
     Handlebars.registerHelper('pretty_string', function(stre, options) {
         if(options && !options.hash) options.hash = {};

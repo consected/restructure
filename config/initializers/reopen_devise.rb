@@ -29,7 +29,7 @@ Rails.application.config.to_prepare do
         return
       elsif controller_name == 'sessions' && action_name == 'destroy'
         return
-      else
+      elsif !@resource.two_factor_auth_disabled
         redirect_to "/#{@resource_name.pluralize}/show_otp" if @resource.otp_secret.present? && !@resource.otp_required_for_login
       end
     }
@@ -40,7 +40,7 @@ Rails.application.config.to_prepare do
     redirect_to '/' and return unless signed_in?
     @resource = resource_name == :user ? current_user : current_admin
 
-    redirect_to '/' and return unless @resource && @resource.otp_secret.present? && !@resource.otp_required_for_login
+    redirect_to '/' and return unless @resource && !@resource.two_factor_auth_disabled && @resource.otp_secret.present? && !@resource.otp_required_for_login
     @resource_name = @resource.class.name.downcase
     # A secret was previously generated, and the user has not yet confirmed it (so it is not set as "required for login")
     # Continue with the action

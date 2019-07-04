@@ -187,7 +187,7 @@
         dm = DynamicModel.active.where(category: 'details')
         dm = dm.select {|m| m.model_association_name.in? @true_views}
       %>
-      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details', force_load: 1, panel: nil } %>
+      <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: 'details', force_load: 1, panel: nil, orientation: 'none' } %>
     </div>
    </div>
 

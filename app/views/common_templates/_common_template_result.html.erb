@@ -1,0 +1,124 @@
+<script id="custom_block_attrs_html" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#each custom_block_attrs}}{{hyphenate @key}}={{{template this}}} {{/each}}</script>
+
+<script id="show_result_caption" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{run_template ../caption}}{{/with}}</script>
+<script id="result_extra_class" type="text/x-handlebars-template" class="hidden handlebars-partial">{{#with result_data}}{{run_template ../extra_class}}{{/with}}</script>
+
+
+<script id="result_item_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
+
+  <div class="{{hyphenate name}}-{{item_name}} sr-item-block">
+    <div class="">
+    {{#with (lookup result_data item_name)}}
+      {{#is ../item_list 'includes' ',' }}
+        <li class="list-group-item is-sub-heading {{hyphenate ../name}}-{{hyphenate ../item_name}}">
+          {{humanize ../item_name}} {{rec_type}}
+          {{> rank_button name_h=(hyphenate ../item_name) }}
+        </li>
+        {{#filter this ../item_list }}
+          {{#is @key "notes"}}
+          <div class="notes-block {{hyphenate ../../name}}-{{hyphenate ../../item_name}}-notes {{#is this ''}}notes-empty{{/is}}">
+            <div class="panel panel-default panel-body">
+            {{pretty_string this return_string="true"}}
+            </div>
+          </div>
+          {{else}}
+            <li class="list-group-item result-field-container {{hyphenate ../../name}}-{{hyphenate ../../item_name}}-{{@key}}">
+              <small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong>
+            </li>
+          {{/is}}
+        {{/filter}}
+      {{else}}
+      <li class="list-group-item  result-field-container {{hyphenate ../../name}}-{{hyphenate ../../item_name}}">
+        {{#filter this ../item_list }}
+        <small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong>
+        {{/filter}}
+      </li>
+      {{/is}}
+    {{/with}}
+
+    </div>
+  </div>
+
+</script>
+
+<script id="common_template_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#was result_data._created}}
+  {{#is name '!==' full_name }}<div id="{{ hyphenate full_name }}-{{result_data.master_id}}-{{result_data.id}}" {{ data_sort_str }}> {{/is}}
+  <div class="common-template-item index-{{result_data._created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}}" data-model-data-type="{{model_data_type}}" id="{{hyphenate name}}-{{result_data.master_id}}-{{result_data.id}}" data-subscription="{{hyphenate name}}-edit-form-{{result_data.master_id}}-{{result_data.id}}" data-template="{{hyphenate name}}-result-template" data-item-class="{{item_class_name}}" data-sub-item="{{full_name}}" data-sub-id="{{result_data.id}}" data-item-id="{{result_data.item_id}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{{ data_sort_str }}} data-preprocessor="{{name}}_edit_form">
+  {{/was}}
+  {{#caption_before_substitutions result_data }}
+
+  <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" data-item-rank="{{result_data.rank}}" {{> custom_block_attrs_html }} >
+    {{#unless item_list.length}}
+      <li class="list-group-item {{name}}-{{name}}_id is-heading zero-item-heading">
+        {{#with result_data}}{{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}{{/with}}
+        <h4 class="list-group-item-heading">{{>show_result_caption result_data=result_data}}</h4>
+      </li>
+      {{#with (fpa_state_item 'caption_before' (underscore name) 'all_fields')}}
+        <li class="list-group-item caption-before results-caption-before {{ hyphenate full_name }}-all_fields all-fields-caption">
+          {{{this.show_caption}}}
+        </li>
+      {{/with}}
+
+    {{else}}
+      <li class="list-group-item is-heading object-results-header">
+        {{#with result_data}}{{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}{{/with}}
+        {{#unless hide_rank_badge }}
+          {{> rank_button name_h=(hyphenate name) }}
+        {{/unless}}
+        {{#is custom_activity_log '!==' 'none' }}
+          {{#unless works_with_rec_types }}
+            {{> (concat 'activity_log_' name '_show_button_partial') }}
+          {{else}}
+            {{#is result_data.rec_type 'in' works_with_rec_types }}
+              {{> (concat 'activity_log_' name '_show_button_partial') rec_type=result_data.rec_type}}
+            {{/is}}
+          {{/unless}}
+        {{/is}}
+        {{#is model_data_type 'external_identifier' }}
+          {{#if external_id_options}}
+          <h4>
+            <span>{{external_id_options.label}}</span> <strong>{{#if external_id_options.formatter}}{{{format_with external_id_options.formatter (lookup result_data external_id_options.attribute)}}}{{else}}{{{pretty_string (lookup result_data external_id_options.attribute) }}}{{/if}} </strong>
+          </h4>
+          {{else}}
+          <h4 class="list-group-item-heading">{{>show_result_caption result_data=result_data}}</h4>
+          {{/if}}
+        {{else}}
+          <h4 class="list-group-item-heading">{{>show_result_caption result_data=result_data}}</h4>
+        {{/is}}
+
+        {{#if show_item_type_flags_before}}
+        {{>item_flag_container item_type=full_name}}
+        {{/if}}
+      </li>
+
+      {{> common_template_result_fields result_data=result_data name=name template_config=(fpa_state_item 'template_config' (underscore name))}}
+
+      {{#each item_blocks}}
+        {{> result_item_block name=../name item_name=@key item_list=this result_data=../result_data}}
+      {{/each}}
+
+    {{/unless}}
+
+    {{#with result_data}}
+    {{>(concat 'activity_log_' (underscore ../name) '_references') }}
+    {{/with}}
+
+    {{#with (fpa_state_item 'caption_before' (underscore name) 'metadata')}}
+    <div class="results-caption-before {{ hyphenate full_name }}-metadata">
+      <div class="panel panel-default panel-body">
+        <small>{{{this.show_caption}}}</small>
+      </div>
+    </div>
+    {{/with}}
+
+    {{#unless exclude_metadata }}
+      <li class="list-group-item record-meta">{{>update_metadata show_created_at=show_created_at }}</li>
+    {{/unless}}
+  </ul>
+  {{/caption_before_substitutions}}
+  {{#was result_data._created}}
+  </div>
+  {{#is name '!==' full_name }}</div> {{/is}}
+  {{/was}}
+</script>

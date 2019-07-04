@@ -22,6 +22,10 @@ module StandardAuthentication
 
   class_methods do
 
+    def two_factor_auth_disabled
+      Settings::TwoFactorAuthDisabled
+    end
+
     def expire_password_after
       Settings::PasswordAgeLimit
     end
@@ -67,6 +71,10 @@ module StandardAuthentication
       return words
     end
 
+  end
+
+  def two_factor_auth_disabled
+    self.class.two_factor_auth_disabled
   end
 
   # Does the password need to be changed (due to being too old)?

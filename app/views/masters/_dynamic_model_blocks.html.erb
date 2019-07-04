@@ -7,10 +7,14 @@ unless defined?(force_load)
   force_load
 end
 
+unless defined? orientation
+  orientation = nil
+end
+
 category_models.each do |m|
   if viewable  [m.model_association_name]
-    orientation = panel && panel.view_options&.orientation == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : 'vertical'
-    if orientation
+    orientation ||= panel && panel.view_options&.orientation == 'horizontal' || (DynamicModel.orientation(category) == :horizontal) ? 'horizontal' : 'vertical'
+    if orientation && orientation != 'none'
 %>
       <div class="row common-template-list dynamic-model-list resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     <% else %>

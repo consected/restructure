@@ -1,71 +1,74 @@
+<script id="field_result_class" type="text/x-handlebars-template" class="hidden handlebars-partial">list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#is key "in" caption_before_keys_without_keep_label}}has-caption-before{{/is}} {{#is key external_id_attr}}is_external_id_item{{/is}}</script>
+
 <script id="common_template_result_field" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
-
   {{#is key 'in' caption_before_keys}}
-  {{#if (fpa_state_item (concat 'dialog_before_' (underscore name)) key)}}
-    {{{fpa_state_item (concat 'dialog_before_' (underscore name)) key}}}
-  {{else if (fpa_state_item (concat 'caption_before_' (underscore name)) key 'show_caption')}}
-  <li class="list-group-item caption-before {{#if (fpa_state_item (concat 'caption_before_' (underscore name)) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}}">
-    {{{fpa_state_item (concat 'caption_before_' (underscore name)) key 'show_caption'}}}
+  {{#if (fpa_state_item 'dialog_before' (underscore name) key)}}
+    {{{fpa_state_item 'dialog_before' (underscore name) key}}}
+  {{else if (fpa_state_item 'caption_before' (underscore name) key 'show_caption')}}
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}}">
+    {{{fpa_state_item 'caption_before' (underscore name) key 'show_caption'}}}
   </li>
-  {{else if (fpa_state_item (concat 'caption_before_' (underscore name)) key 'caption')}}
-  <li class="list-group-item caption-before {{#if (fpa_state_item (concat 'caption_before_' (underscore name)) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}}">
-    {{{fpa_state_item (concat 'caption_before_' (underscore name)) key 'caption'}}}
+  {{else if (fpa_state_item 'caption_before' (underscore name) key 'caption')}}
+  <li class="list-group-item caption-before {{#if (fpa_state_item 'caption_before' (underscore name) key 'keep_label')}}caption-before-keep-label{{/if}} results-caption-before {{hyphenate full_name}}-{{key}}">
+    {{{fpa_state_item 'caption_before' (underscore name) key 'caption'}}}
   </li>
   {{/if}}
   {{/is}}
   {{#is key "notes"}}
-  {{> search_results_notes_block value=this_value full_name_hyphenated="{{hyphenate full_name}}" }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) }}
   {{else is key "description"}}
-  {{> search_results_notes_block value=this_value full_name_hyphenated="{{hyphenate full_name}}" }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) }}
   {{else is key "message"}}
-  {{> search_results_notes_block value=this_value full_name_hyphenated="{{hyphenate full_name}}" }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) }}
   {{else is key 'includes' "_notes"}}
-  {{> search_results_notes_block value=this_value full_name_hyphenated="{{hyphenate full_name}}" label=(humanize key) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) }}
   {{else is key 'includes' "_description"}}
-  {{> search_results_notes_block value=this_value full_name_hyphenated="{{hyphenate full_name}}" label=(humanize key) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) }}
   {{else is key 'includes' "_details"}}
-  {{> search_results_notes_block value=this_value full_name_hyphenated="{{hyphenate full_name}}" label=(humanize key) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) }}
 
 
 
   {{else if (get ../_general_selections key this_value 'name')}}
 
-    <li class="{{run_template field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get ../_general_selections key this_value 'name')}}{{get ../_general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get ../_general_selections key this_value 'name')}}{{get ../_general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
 
 
   {{else is key "data" }}
-    <li class="{{run_template field_result_class}}"><small>
+    <li class="{{> field_result_class}}"><small>
     {{#if ../rec_type}}{{../rec_type}}{{else}}{{humanize key}}{{/if}}
     </small> <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_url'}}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
     <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
     </span></strong></li>
   {{else is key 'includes' '_link'}}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
     <a href="{{this_value}}" target="_new" title="open link in new tab">{{this_value}}</a>
     </span></strong></li>
 
 
   {{else is key 'includes' 'embedded_report_'}}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="url-link-value">
       <a href="/reports/{{replace key 'embedded_report_' ''}}?embed=true&search_attrs[list_id]={{../../id}}" data-remote="true" data-preprocessor="embedded_report" data-parent="primary-modal" class="btn btn-sm btn-default glyphicon glyphicon-list" type="button" data-result-target="#modal_results_block" data-target="#modal_results_block" data-target-force="true"></a>
     </span></strong></li>
   {{else is key 'includes' '_rank' }}
     {{#if hide_rank_badge }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
     {{/if}}
   {{else is key '===' 'rank' }}
     {{#if hide_rank_badge }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong><span class="label label-default">{{this_value}}</span></strong></li>
     {{/if}}
   {{else is key "protocol_id"}}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='protocol' }} <strong>{{pretty_string ../protocol_name return_string="true" capitalize="true"}}</strong></li>
+  {{log this}}
+  {{log result_data}}
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='protocol' }} <strong>{{pretty_string result_data.protocol_name return_string="true" capitalize="true"}}</strong></li>
   {{else is key "sub_process_id"}}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='status' }} <strong>{{pretty_string ../sub_process_name return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='status' }} <strong>{{pretty_string result_data.sub_process_name return_string="true" capitalize="true"}}</strong></li>
   {{else is key "protocol_event_id"}}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='method' }} <strong>{{pretty_string ../protocol_event_name return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) force_default='method' }} <strong>{{pretty_string result_data.protocol_event_name return_string="true" capitalize="true"}}</strong></li>
   {{else is key "tracker_history_id"}}
   {{#unless hide_tracker_panel}}
     {{#if ../tracker_histories}}
@@ -98,13 +101,13 @@
     {{/if}}
   {{/unless}}
   {{else is key 'includes' '^select_record_from_' }}
-    <li class="{{run_template field_result_class}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '^select_' }}
-    <li class="{{run_template field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get ../_general_selections key this_value 'name')}}{{get ../_general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }} <strong>{{#if (get ../_general_selections key this_value 'name')}}{{get ../_general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is key 'includes' '_selection$' }}
-    <li class="{{run_template field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_selection$' }} <strong>{{#if (get ../_general_selections key this_value 'name')}}{{get ../_general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_selection$' }} <strong>{{#if (get ../_general_selections key this_value 'name')}}{{get ../_general_selections key this_value 'name'}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{else is key 'includes' '^multi_select_' }}
-    <li class="{{run_template field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^multi_select_' }}
       {{#* inline "iterateMultiSelect"}}
         {{#each multi_vals}}
           {{#is this_value '!in' "0,false,no" }}
@@ -118,35 +121,35 @@
       </strong>
   </li>
   {{else is key 'includes' '_blank_yes_no_dont_know' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_yes_no_dont_know' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no_dont_know$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_blank_yes_no' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_blank_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_yes_no' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_yes_no$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_no_yes' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_no_yes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_no_yes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_check$' }}
-      <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_check$' }} <strong>{{#is this_value true}}<i class="glyphicon glyphicon-ok"></i>{{/is}}</strong></li>
+      <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_check$' }} <strong>{{#is this_value true}}<i class="glyphicon glyphicon-ok"></i>{{/is}}</strong></li>
   {{else is key 'includes' '_time$' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{local_time this_value}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{local_time this_value}}</strong></li>
   {{else is key 'includes' '_notes' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_notes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='_notes$' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '_description' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '^fixed_' }}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '^placeholder_' }}
-    <li class="{{run_template field_result_class}} hidden">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}} hidden">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'e_signed_by'}}
-    <li class="{{run_template field_result_class}}">
+    <li class="{{> field_result_class}}">
       {{#with ..}}
       {{#is e_signed_status 'signed'}}
       {{> field_label labels=(concat 'labels_' key) }} <strong>{{pretty_string ../this_value return_string="true" capitalize="true"}}</strong>
       {{else}}
       <div class="text-center">
-        <a data-toggle="scrollto-result" data-target="#{{hyphenate name}}-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="{{edit_button_href}}" data-remote="true" data-result-target="">Review and Sign</a>
+        <a data-toggle="scrollto-result" data-target="#{{hyphenate name}}-{{master_id}}-{{id}}" title="edit" class="start-signature btn btn-sm btn-primary " href="{{run_template edit_button_href}}" data-remote="true" data-result-target="">Review and Sign</a>
       </div>
       {{/is}}
       {{/with}}
@@ -160,14 +163,16 @@
       <ul class="view-object collapse" id="view-object-{{../master_id}}-{{../id}}-{{underscore key}}" aria-expanded="false">
       {{#each this_value}}
 
-      {{> common_template_result_field this_value=this key=../key name=../name full_name=../full_name field_result_class=../field_result_class item_list=../item_list hide_rank_badge=../hide_rank_badge hide_tracker_panel=../hide_tracker_panel implementation_class_name=../implementation_class_name edit_button_href=../edit_button_href show_item_type_flags_after=../show_item_type_flags_after item_flags_after=../item_flags_after item_flags_readonly=../item_flags_readonly caption_before_keys=../caption_before_keys caption_before_keys_without_keep_label=../caption_before_keys_without_keep_label external_id_attr=../external_id_attr}}
+      {{#with ../template_config}}
+      {{> common_template_result_field this_value=../this key=../key name=../name template_config=this result_data=../result_data}}
+      {{/with}}
 
       {{/each}}
       </ul>
 
       </li>
   {{else}}
-    <li class="{{run_template field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{/is}}
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}
@@ -182,17 +187,18 @@
 </script>
 
 <script id="common_template_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
-{{#is 'all_fields' 'in' caption_before_keys}}
+{{#is 'all_fields' 'in' template_config.caption_before_keys}}
   <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">
-    {{{fpa_state_item (concat 'caption_before_' (underscore name)) @key 'show_caption'}}}
+    {{{fpa_state_item 'caption_before' (underscore name) @key 'show_caption'}}}
   </li>
 {{/is}}
 
+{{#if template_config.item_list.length}}
+{{#filter result_data (join template_config.item_list ',') }}
 
-{{#if item_list.length}}
-{{#filter this (join item_list ',') }}
-
-  {{> common_template_result_field this_value=this key=@key name=../name full_name=../full_name field_result_class=../field_result_class item_list=../item_list hide_rank_badge=../hide_rank_badge hide_tracker_panel=../hide_tracker_panel implementation_class_name=../implementation_class_name edit_button_href=../edit_button_href show_item_type_flags_after=../show_item_type_flags_after item_flags_after=../item_flags_after item_flags_readonly=../item_flags_readonly caption_before_keys=../caption_before_keys caption_before_keys_without_keep_label=../caption_before_keys_without_keep_label external_id_attr=../external_id_attr}}
+  {{#with (fpa_state_item 'template_config' (underscore ../name))}}
+  {{> common_template_result_field this_value=../this key=@key name=../../name template_config=this result_data=../../result_data}}
+  {{/with}}
 
 {{/filter}}
 {{/if}}

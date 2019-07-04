@@ -119,11 +119,20 @@
     only_see_presence = false
   end
 
+  unless defined? item_blocks
+    item_blocks = {}
+  end
+
+  unless defined? exclude_metadata
+    exclude_metadata = nil
+  end
+
   item_list = [] if only_see_presence
 
   al_full_name = "activity_log__#{full_name.underscore}"
   al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
+  show_item_type_flags = Classification::ItemFlagName.enabled_for?(item_class_name, current_user)
 
   if category
     res = page_layout_panel(category: category)
@@ -139,17 +148,19 @@
   caption_before_keys_without_keep_label = caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',')
   external_id_attr = external_id_options && external_id_options[:attribute]
   hide_tracker_panel = app_config_set(:hide_tracker_panel)
-  show_item_type_flags_after = Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && item_flags_after
-  field_result_class = "list-group-item result-field-container {{hyphenate full_name}}-{{key}} {{#is key \"in\" caption_before_keys_without_keep_label}}has-caption-before{{/is}} {{#is key external_id_attr}}is_external_id_item{{/is}}".html_safe
+  show_item_type_flags_after = show_item_type_flags && item_flags_after
+  show_item_type_flags_before = show_item_type_flags && !item_flags_after
+
   item_list = item_list.is_a?(Array) ? item_list.join(',') : item_list
-%>
-<script>
-  _fpa.state.caption_before_<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
-  _fpa.state.labels_<%=name.underscore%> = <%= labels.to_json.html_safe %>;
-</script>
 
+  formatted_item_blocks = {}
+  item_blocks.each do |item_name_sym, item_attrs|
+    ia = item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs
+    ia ||= ""
+    formatted_item_blocks[item_name_sym] = ia
+  end
 
-<% unless custom_activity_log == :none
+  unless custom_activity_log == :none
 
     # get a list of rec_types that an activity log of this type is constrained to use
     # create a button for all item type / rec type combos
@@ -163,7 +174,49 @@
   end
 %>
 
-<%= render partial: 'common_templates/references_results', locals: { name: name, full_name: full_name, references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before, field_result_class: field_result_class, external_id_attr: external_id_attr, caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, caption_before_keys: caption_before_keys, item_flags_readonly: item_flags_readonly, hide_tracker_panel: hide_tracker_panel, hide_rank_badge: hide_rank_badge, edit_button_href: edit_button_href, show_item_type_flags_after: show_item_type_flags_after, item_flags_after: item_flags_after } %>
+<script>
+  _fpa.state.caption_before = _fpa.state.caption_before || {};
+  _fpa.state.dialog_before = _fpa.state.dialog_before || {};
+
+  _fpa.state.caption_before.<%=name.underscore%> = <%= caption_before.to_json.html_safe %>;
+  _fpa.state.labels_<%=name.underscore%> = <%= labels.to_json.html_safe %>;
+
+  _fpa.state.template_config = _fpa.state.template_config || {};
+  _fpa.state.template_config.<%=name.underscore%>  = {
+    name: '<%=name%>',
+    full_name: '<%=full_name%>',
+    caption: Handlebars.compile('<%=caption%>'),
+    item_class_name: '<%=item_class_name%>',
+    item_list: '<%=item_list%>',
+    hide_rank_badge: <%=!!hide_rank_badge%>,
+    hide_tracker_panel: <%=!!hide_tracker_panel%>,
+    implementation_class_name: '<%=implementation_class_name%>',
+    edit_button_href: Handlebars.compile('<%=edit_button_href%>'),
+    show_item_type_flags_after: <%=!!show_item_type_flags_after%>,
+    show_item_type_flags_before: <%=!!show_item_type_flags_before%>,
+    item_flags_after: '<%=item_flags_after%>',
+    item_flags_readonly: <%=!!item_flags_readonly%>,
+    caption_before_keys: '<%=caption_before_keys%>',
+    caption_before_keys_without_keep_label: '<%=caption_before_keys_without_keep_label%>',
+    external_id_attr: '<%=external_id_attr%>',
+    external_id_options: <%=external_id_options.to_json.html_safe%>,
+    subsort_id: <%=subsort_id%>,
+    data_sort_attr: '<%=data_sort_attr%>',
+    data_sort_str: "<%=data_sort_str%>",
+    custom_activity_log: '<%=custom_activity_log%>',
+    works_with_rec_types: '<%=works_with_rec_types%>',
+    model_data_type: '<%=model_data_type%>',
+    item_blocks: <%=formatted_item_blocks.to_json.html_safe%>,
+    extra_class: Handlebars.compile('<%=extra_class%>'),
+    is_activity_log_class: '<%=is_activity_log_class%>',
+    custom_block_attrs: <%=custom_block_attrs.to_json.html_safe%>,
+    exclude_metadata: <%=!!exclude_metadata%>,
+    show_created_at: <%=!!show_created_at%>
+  }
+</script>
+
+
+<%= render partial: 'common_templates/references_results', locals: { name: name, full_name: full_name, references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before, external_id_attr: external_id_attr, caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, caption_before_keys: caption_before_keys, item_flags_readonly: item_flags_readonly, hide_tracker_panel: hide_tracker_panel, hide_rank_badge: hide_rank_badge, edit_button_href: edit_button_href, show_item_type_flags_after: show_item_type_flags_after, item_flags_after: item_flags_after } %>
 
 
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -188,106 +241,9 @@
 
 
 <script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  {{#was _created}}
-  <% if name != full_name %><div id="<%=full_name.hyphenate%>-{{master_id}}-{{id}}" <%= data_sort_str %>> <% end %>
-  <div class="common-template-item index-{{_created}} <%=name.hyphenate%>-item <%=extra_class%> <%= is_activity_log_class %>" data-model-data-type="<%=model_data_type %>" id="<%=name.hyphenate%>-{{master_id}}-{{id}}" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-{{id}}" data-template="<%=name.hyphenate%>-result-template" data-item-class="<%=item_class_name%>" data-sub-item="<%=full_name%>" data-sub-id="{{id}}" data-item-id="{{item_id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" <%= data_sort_str %> data-preprocessor="<%= name %>_edit_form">
-  {{/was}}
-  {{#caption_before_substitutions this }}
-  <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} <%= is_activity_log_class %>" data-item-id="{{id}}" data-<%=data_sort_attr%>="{{<%=data_sort_attr.underscore%>}}<% if subsort_id %>--{{pad_start id 10 '0'}}<% end %>" data-item-rank="{{rank}}" <%=custom_block_attrs.map{|k,v| "#{k.to_s.hyphenate}=\"#{v.to_s.html_safe}\"" }.join(' ').html_safe%> >
-      <% if item_list.length == 0 %>
-        <li class="list-group-item <%=name%>-<%=name%>_id is-heading zero-item-heading">
-          {{>edit_item_button resource='<%=name%>' edit_button_href='<%=edit_button_href%>'}}
-          <h4 class="list-group-item-heading"><%=caption%></h4>
-        </li>
-        <% if caption_before[:all_fields] %>
-          <li class="list-group-item caption-before results-caption-before <%=full_name.hyphenate%>-all_fields all-fields-caption">
-            <%= show_caption_before :all_fields, caption_before, :show %>
-          </li>
-        <% end %>
-
-      <%else%>
-        <li class="list-group-item is-heading object-results-header">
-          {{>edit_item_button resource='<%=name%>'  edit_button_href='<%=edit_button_href%>'}}
-          <% unless hide_rank_badge %>
-          {{> rank_button name_h="<%= name.hyphenate %>"}}
-          <% end %>
-          <% unless custom_activity_log == :none %>
-            <% if works_with_rec_types.blank? %>
-              {{> activity_log_<%=name%>_show_button_partial }}
-            <% else %>
-              {{#is rec_type 'in' '<%= works_with_rec_types %>' }}
-                {{> activity_log_<%=name%>_show_button_partial rec_type=rec_type}}
-              {{/is}}
-            <% end %>
-          <% end %>
-          <% if model_data_type == :external_identifier && external_id_options %>
-          <h4>
-          <span><%= external_id_options[:label] %></span> <strong>{{<%= external_id_options[:formatter].html_safe || 'pretty_string' %> <%= external_id_options[:attribute] %>}}</strong>
-          </h4>
-          <% else %>
-            <h4 class="list-group-item-heading"><%=caption%></h4>
-          <% end %>
-          <% if Classification::ItemFlagName.enabled_for?(item_class_name, current_user) && !item_flags_after %>
-          {{>item_flag_container item_type="<%=full_name%>"}}
-          <% end %>
-        </li>
-        {{>common_template_result_fields name='<%=name%>' full_name='<%=full_name%>' field_result_class=(compile_template '<%=field_result_class%>') item_list='<%=item_list%>' hide_rank_badge=<%=hide_rank_badge%> hide_tracker_panel=<%=hide_tracker_panel%> implementation_class_name='<%=implementation_class_name%>' edit_button_href='<%=edit_button_href%>' show_item_type_flags_after='<%=show_item_type_flags_after%>' item_flags_after='<%=item_flags_after%>' item_flags_readonly=<%=item_flags_readonly%> caption_before_keys='<%=caption_before_keys%>' caption_before_keys_without_keep_label='<%=caption_before_keys_without_keep_label%>' external_id_attr='<%=external_id_attr%>'}}
-
-        <% if defined?(item_blocks)
-            item_blocks.each do |item_name_sym, item_attrs|
-              item_name = item_name_sym.to_s
-              item_list = item_attrs.is_a?(Array) ? item_attrs.join(',') : item_attrs
-        %>
-        <div class="<%=name.hyphenate%>-<%=item_name%> sr-item-block">
-          <div class="">
-          {{#with <%= item_name %>}}
-          <% if item_list.include?(',') %>
-          <li class="list-group-item is-sub-heading <%=name.hyphenate%>-<%=item_name.hyphenate%>">
-            <%=item_name.humanize%> {{rec_type}}
-            {{> rank_button name_h="<%= item_name.hyphenate %>"}}
-          </li>
-          {{#filter this "<%= item_list %>" }}
-            {{#is @key "notes"}}
-            <div class="notes-block <%=name.hyphenate%>-<%=item_name.hyphenate%>-notes {{#is this ''}}notes-empty{{/is}}">
-              <div class="panel panel-default panel-body">
-              {{pretty_string this return_string="true"}}
-              </div>
-            </div>
-            {{else}}
-              <li class="list-group-item result-field-container <%=name.hyphenate%>-<%=item_name.hyphenate%>-{{@key}}"><small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong></li>
-            {{/is}}
-          {{/filter}}
-          <% else %>
-          <li class="list-group-item  result-field-container <%=name.hyphenate%>-<%=item_name.hyphenate%>">
-            {{#filter this "<%= item_list %>" }}
-            <small>{{humanize @key}}</small> <strong>{{pretty_string this return_string="true" capitalize="true"}}</strong>
-            {{/filter}}
-          </li>
-          <% end %>
-          {{/with}}
-
-          </div>
-        </div>
-        <%  end
-          end
-        end %>
-
-      {{>activity_log_<%=name%>_references }}
-
-      <% if caption_before[:metadata]%>
-      <div class="results-caption-before <%=full_name.hyphenate%>-metadata">
-        <div class="panel panel-default panel-body">
-          <small><%= show_caption_before :metadata, caption_before, :show %></small>
-        </div>
-      </div>
-    <% end %>
-    <% unless defined?(exclude_metadata) && exclude_metadata %><li class="list-group-item record-meta">{{>update_metadata <% if show_created_at %>show_created_at=true<%end%> }}</li><%end%>
-  </ul>
-  {{/caption_before_substitutions}}
-  {{#was _created}}
-  </div>
-  <% if name != full_name %></div> <% end %>
-  {{/was}}
+{{# with (fpa_state_item 'template_config' '<%=name.underscore%>')}}
+  {{> common_template_result name='<%=name%>' template_config=this result_data=../this}}
+{{/with}}
 </script>
 
 

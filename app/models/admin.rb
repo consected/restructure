@@ -3,11 +3,13 @@ class Admin < ActiveRecord::Base
 
   include StandardAuthentication
 
-  devise :two_factor_authenticatable,
-         :otp_secret_encryption_key => otp_enc_key
-
-
-  devise :trackable, :timeoutable, :lockable, :validatable
+  # A configuration allows two factor authentication to be disabled for the app server
+  if self.two_factor_auth_disabled
+    devise :database_authenticatable, :trackable, :timeoutable, :lockable, :validatable
+  else
+    devise :trackable, :timeoutable, :lockable, :validatable, :two_factor_authenticatable,
+           :otp_secret_encryption_key => otp_enc_key
+  end
 
   before_validation :prevent_email_change, on: :update
   before_validation :prevent_reenabling_admin, on: :update

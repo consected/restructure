@@ -28,6 +28,7 @@ class Settings
   # Email address for admin contact
   AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'fphs-admin@hms.harvard.edu'
 
+  TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'
   TwoFactorAuthDrift = (ENV['FPHS_2FA_DRIFT'] || 30).to_i
 

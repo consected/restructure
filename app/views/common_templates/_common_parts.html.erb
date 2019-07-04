@@ -1,4 +1,6 @@
+<%= render partial: 'common_templates/common_template_result' %>
 <%= render partial: 'common_templates/common_template_result_fields' %>
+<%= render partial: 'common_templates/common_template_references' %>
 
 <script id="rank_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
 <span class="pull-right label label-info general-rank-{{rank}} {{name_h}}-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
@@ -34,13 +36,13 @@
 
 <script id="edit_item_button" type="text/x-handlebars-template" class="hidden handlebars-partial">
 {{#unless prevent_edit }}
-  <a data-toggle="scrollto-result" data-target="#{{hyphenate resource}}-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-{{hyphenate resource}} pull-right glyphicon glyphicon-edit" href="{{template edit_button_href}}" data-remote="true" data-{{hyphenate resource}}-id="{{this.id}}" data-result-target=""></a>
-  <a data-remote="true" title="refresh" class="hidden refresh-item" href="{{replace (template edit_button_href) '\/edit$' ''}}">&nbsp;</a>
+  <a data-toggle="scrollto-result" data-target="#{{hyphenate resource}}-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-{{hyphenate resource}} pull-right glyphicon glyphicon-edit" href="{{run_template edit_button_href}}" data-remote="true" data-{{hyphenate resource}}-id="{{this.id}}" data-result-target=""></a>
+  <a data-remote="true" title="refresh" class="hidden refresh-item" href="{{replace (run_template edit_button_href) '\/edit$' ''}}">&nbsp;</a>
 {{/unless}}
 </script>
 
 <script id="search_results_notes_block" type="text/x-handlebars-template" class="hidden handlebars-partial">
-  <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{@key}} notes-block {{#unless value}}notes-empty{{/unless}}{{#is value ''}}notes-empty{{/is}}">
+  <li class="list-group-item result-notes-container {{full_name_hyphenated}}-{{key}} notes-block {{#unless value}}notes-empty{{/unless}}">
     {{#if label}}
     <small class="notes-block-label">{{label}}</small>
     {{/if}}

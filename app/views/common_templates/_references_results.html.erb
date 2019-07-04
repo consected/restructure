@@ -1,43 +1,7 @@
-<%
-  # Handle the display of referenced items in search results.
-%>
-<script id="activity_log_<%=name%>_references_list_item"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-<li class="list-group-item <%=name.hyphenate%>-model-references rr-mr in-item-model-references is-full-width {{#if to_record_viewable}}{{#if ../_show_embedded_as_single_item}} single-model-reference model-reference-auto-shown-caption{{/if}}{{/if}} {{#if disabled}}model-reference-disabled{{/if}} " data-template="model-references-<%=name%>-result-template" data-sub-item="model_reference" data-sub-id="{{id}}">
-  <span class="small" data-result-target-for-child="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}">
-    {{#if to_record_viewable}}
-    <a href="{{#if to_record_master_id}}/masters/{{to_record_master_id}}{{/if}}/{{pathify to_record_type_us_plural}}/{{to_record_id}}" data-template="{{hyphenate to_record_template}}-result-template" data-result-target-force="true" data-result-target="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}" data-remote="true" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-item <% unless item_list.include?(',') %>{{#if ../_show_embedded_as_single_item}}on-postprocess-click{{/if}}<% end %>" data-use-alt-result-key="{{to_record_result_key}}"></a>
-    {{else}}
-    <span class="glyphicon glyphicon-ban-circle"></span>
-    {{/if}}
-    <i>{{to_record_label}}</i> {{substring (pretty_string to_record_data return_string=true) 0 100 }}
-  </span>
-  <span class="selectable-model-reference-result-action pull-right" id="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra-link" data-subscription="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra-linkholder"  data-preprocessor="model_references_item">
-      {{#if disabled}}
-        <span class="model-reference-removed-marker small">(removed)</span>
-      {{else}}
-        {{#if can_disable}}
-          {{#if from_record_type_us}}
-          <a href="/masters/{{from_record_master_id}}/{{from_record_type_us}}/{{from_record_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove no-processed-scroll" title="remove reference to item" data-remote="true"></a>
-          {{else}}
-            {{#if id}}
-            <a href="/masters/{{from_record_master_id}}/model_references/{{id}}/edit" class="glyphicon glyphicon-remove" title="remove reference to item no-processed-scroll" data-remote="true"></a>
-            {{/if}}
-          {{/if}}
-        {{/if}}
-      {{/if}}
-  </span>
-  <span class="selectable-model-reference-result-action-form pull-right" id="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra" data-subscription="model-reference-{{from_record_master_id}}-{{hyphenate from_record_type_us}}-{{from_record_id}}-{{id}}-smrra"  data-preprocessor="model_references_item"></span>
-</li>
-{{#if to_record_viewable}}
-<div class="model-reference-result {{#if ../_show_embedded_as_single_item}} single-model-reference-result model-reference-auto-shown{{/if}}" >
-  <div id="<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}" class="model-reference-result" data-result-target-for-child="#<%= name.ns_hyphenate%>-{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}, #{{hyphenate to_record_type_us}}-{{from_record_master_id}}-{{id}}-{{to_record_id}}"  data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-subscription="{{hyphenate to_record_template}}-edit-form-{{to_record_master_id}}-{{to_record_id}}" data-preprocessor="{{hyphenate to_record_type_us}}_edit_form" data-form-container="{{hyphenate to_record_type_us}}_edit_form" ></div>
-</div>
-{{/if}}
-</script>
 
 <script id="model-references-<%=name%>-result-template"  type="text/x-handlebars-template" class="hidden handlebars-template">
 {{#with model_reference}}
-  {{>activity_log_<%=name%>_references_list_item}}
+  {{>activity_log_common_template_references_list_item name='<%=name%>'}}
 {{/with}}
 </script>
 
@@ -50,7 +14,7 @@
           {{#is to_record_options_config.view_as.show '!==' 'not_embedded'}}
             {{#with ../embedded_item}}
               <% mr_name = ModelReference.record_type_to_ns_table_name references.first.first %>
-              {{>common_template_result_fields name='<%=mr_name%>' full_name='<%=full_name%>' field_result_class=(compile_template '<%=field_result_class%>') item_list='<%=item_list%>' hide_rank_badge=<%=hide_rank_badge%> hide_tracker_panel=<%=hide_tracker_panel%> implementation_class_name='<%=implementation_class_name%>' edit_button_href='<%=edit_button_href%>' show_item_type_flags_after='<%=show_item_type_flags_after%>' item_flags_after='<%=item_flags_after%>' item_flags_readonly=<%=item_flags_readonly%> caption_before_keys='<%=caption_before_keys%>' caption_before_keys_without_keep_label='<%=caption_before_keys_without_keep_label%>' external_id_attr='<%=external_id_attr%>'}}
+              {{> common_template_result_fields result_data=this name='<%=mr_name%>' template_config=(fpa_state_item 'template_config' '<%=mr_name.underscore%>')}}
             {{/with}}
           {{/is}}
         {{/is}}
@@ -63,11 +27,11 @@
 
       {{#is to_record_options_config.view_as.show '!==' 'hide'}}
         {{#is to_record_options_config.view_as.show '===' 'not_embedded'}}
-          {{>activity_log_<%=name%>_references_list_item}}
+          {{>activity_log_common_template_references_list_item name='<%=name%>'}}
         {{else is to_record_options_config.view_as.show '===' 'filestore'}}
         {{else}}
           {{#is ../embedded_item.id '!==' to_record_id}}
-            {{>activity_log_<%=name%>_references_list_item}}
+            {{>activity_log_common_template_references_list_item name='<%=name%>'}}
           {{/is}}
         {{/is}}
       {{/is}}
