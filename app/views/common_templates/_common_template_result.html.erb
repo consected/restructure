@@ -74,15 +74,15 @@
         {{#with result_data}}
 
         {{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}
-        {{#unless hide_rank_badge }}
+        {{#unless ../hide_rank_badge }}
           {{> rank_button name_h=(hyphenate ../name) }}
         {{/unless}}
         {{#is ../custom_activity_log '!==' 'none' }}
           {{#unless ../works_with_rec_types }}
-            {{> (concat 'activity_log_' ../name '_show_button_partial')}}
+            {{> activity_log_common_template_show_button name=../name result_data=this template_config=../this}}
           {{else}}
             {{#is rec_type 'in' ../works_with_rec_types }}
-              {{> (concat 'activity_log_' ../name '_show_button_partial') rec_type=rec_type }}
+              {{> activity_log_common_template_show_button name=../name result_data=this template_config=../this rec_type=rec_type}}
             {{/is}}
           {{/unless}}
         {{/is}}

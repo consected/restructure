@@ -134,7 +134,6 @@
   item_list = [] if only_see_presence
 
   al_full_name = "activity_log__#{full_name.underscore}"
-  al_full_names = "activity_log__#{full_name.underscore}".pluralize
 
   show_item_type_flags = Classification::ItemFlagName.enabled_for?(item_class_name, current_user)
 
@@ -174,6 +173,14 @@
     works_with_rec_types = works_with_rec_types_array.join(',') || ''
     activity_log_template_name = custom_activity_log ? name.hyphenate : 'generic'
     works_with_rec_types_array << '' if works_with_rec_types_array.length == 0
+
+    # Work out if the user has access to the activity log, and therefore
+    # should we show the link (for example at the top of a player_contact phone item)
+    supports_activity_log = true
+    (works_with_rec_types_array||[]).each do |r|
+      supports_activity_log &&= !!current_user.has_access_to?(:access, :table, [al_full_name, r].join('_').pluralize)
+    end
+
 
   end
 %>
@@ -218,42 +225,21 @@
     show_created_at: <%=!!show_created_at%>,
     orientation: '<%=orientation%>',
     view_options: <%=view_options.to_json.html_safe%>,
-    add_item_label: '<%=add_item_label%>'
+    add_item_label: '<%=add_item_label%>',
+    supports_activity_log: <%=!!supports_activity_log%>
   }
 
   <% if full_name.to_s.end_with?('_primary') %>_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <% end %>
     _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;
-
 
 </script>
 
 
 <%= render partial: 'common_templates/references_results', locals: { name: name.underscore, full_name: full_name, references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before, external_id_attr: external_id_attr, caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, caption_before_keys: caption_before_keys, item_flags_readonly: item_flags_readonly, hide_tracker_panel: hide_tracker_panel, hide_rank_badge: hide_rank_badge, edit_button_href: edit_button_href, show_item_type_flags_after: show_item_type_flags_after, item_flags_after: item_flags_after } %>
 
-
-<script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-  <%
-  # Work out if the user has access to the activity log, and therefore should we show the link
-  controls = true
-  (works_with_rec_types_array||[]).each do |r|
-    controls &&= !!current_user.has_access_to?(:access, :table, [al_full_name, r].join('_').pluralize)
-  end
-
-  if controls %>
-  {{#if rec_type}}
-  <a data-toggle="uncollapse" data-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= al_full_name.hyphenate %>-{{rec_type}}-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore%>_{{rec_type}}s" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_name.hyphenate %>-{{rec_type}}s-{{master_id}}" data-template="{{> activity_log_data_template_name_partial al_full_name='<%=al_full_name%>'}}"></a>
-  {{else}}
-  <a data-toggle="uncollapse" data-target="#<%= al_full_names.hyphenate %>-{{master_id}}" title="open <%= caption %> log" style="margin-right:1em" class="activity-log-entity-link <%= full_name.hyphenate %>-link pull-right glyphicon glyphicon-th-list always-scroll-to-expanded" href="/masters/{{master_id}}/<%= name.pluralize %>/{{this.id}}/activity_log/<%=name.underscore.pluralize%>" data-remote="true" data-<%=name.hyphenate%>-id="{{this.id}}" data-result-target="#<%= al_full_names.hyphenate %>-{{master_id}}" data-template="{{> activity_log_data_template_name_partial al_full_name='<%=al_full_name%>'}}"></a>
-  {{/if}}
-  <% end %>
-</script>
-
 <script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}
-
     {{> common_template_result name='<%=name%>' result_data=this}}
-
   {{/with}}
 </script>
 
