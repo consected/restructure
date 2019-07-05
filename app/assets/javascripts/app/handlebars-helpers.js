@@ -249,13 +249,13 @@
       if(!obj || !key) return;
 
       var item = obj[key.toString()];
-      if(!key2 || !item) {
+      if(!item) {
         return item;
       }
       else {
         item = item[key2];
       }
-      if(!key3 || !item) {
+      if(!item) {
         return item;
       }
       else {
@@ -279,7 +279,7 @@
 
     Handlebars.registerHelper('fpa_state_item', function(name, key, sub_key, sub_key2) {
         var res = _fpa.state[name];
-        if(res && key)
+        if(res && key && !key.hash )
           res = res[key];
         if(res && sub_key && !sub_key.hash)
           res = res[sub_key];
@@ -352,19 +352,31 @@
 
     });
 
+    Handlebars.registerHelper('and', function(a, b, options) {
+      return a && b;
+    });
+
+    Handlebars.registerHelper('or', function(a, b, options) {
+      return a || b;
+    });
+
+    Handlebars.registerHelper('not', function(a, options) {
+      return !a;
+    });
+
     Handlebars.registerHelper('underscore', function(stre, options) {
         if(!stre) return null;
-        return stre.toLowerCase().replace(/ /g, '_');
+        return stre.underscore()
     });
 
     Handlebars.registerHelper('ns_underscore', function(stre, options) {
         if(!stre) return null;
-        return stre.toLowerCase().replace(/::/g, '__').replace(/ /g, '_').replace(/\//g, '__').replace(/-/g, '_');
+        return stre.ns_underscore();
     });
 
     Handlebars.registerHelper('ns_hyphenate', function(stre, options) {
         if(!stre) return null;
-        return stre.toLowerCase().replace(/::/g, '--').replace(/ /g, '-').replace(/\//g, '--').replace(/_/g, '-');
+        return stre.ns_hyphenate();
     });
 
 
@@ -400,17 +412,19 @@
       return str.pathify();
     });
 
-
     Handlebars.registerHelper('pluralize', function(str){
-      return _fpa.utils.pluralize(str);
+      if(!str) return;
+      return str.pluralize();
     });
 
     Handlebars.registerHelper('singularize', function(str){
-      return _fpa.utils.singularize(str);
+      if(!str) return;
+      return str.singularize();
     });
 
     Handlebars.registerHelper('titleize', function(str){
-      return _fpa.utils.titleize(str);
+      if(!str) return;
+      return str.titleize();
     });
 
     Handlebars.registerHelper('substring', function(str, from, to){

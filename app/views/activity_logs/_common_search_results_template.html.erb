@@ -262,7 +262,7 @@
             {{#if extra_log_type}}
             <% all_extra_log_type_configs.each do |c| %>
               {{#is extra_log_type '===' '<%=c.name%>'}}
-              {{><%= full_name %>_<%=c.name%>_result _created=@index}}
+                {{> common_template_result name='<%= full_name %>_<%=c.name%>' result_data=this _created=@index}}
               {{/is}}
             <% end %>
 

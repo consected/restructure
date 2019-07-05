@@ -127,6 +127,10 @@
     exclude_metadata = nil
   end
 
+  unless defined? view_options
+    view_options = {}
+  end
+
   item_list = [] if only_see_presence
 
   al_full_name = "activity_log__#{full_name.underscore}"
@@ -211,12 +215,20 @@
     is_activity_log_class: '<%=is_activity_log_class%>',
     custom_block_attrs: <%=custom_block_attrs.to_json.html_safe%>,
     exclude_metadata: <%=!!exclude_metadata%>,
-    show_created_at: <%=!!show_created_at%>
+    show_created_at: <%=!!show_created_at%>,
+    orientation: '<%=orientation%>',
+    view_options: <%=view_options.to_json.html_safe%>,
+    add_item_label: '<%=add_item_label%>'
   }
+
+  <% if full_name.to_s.end_with?('_primary') %>_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <% end %>
+    _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;
+
+
 </script>
 
 
-<%= render partial: 'common_templates/references_results', locals: { name: name, full_name: full_name, references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before, external_id_attr: external_id_attr, caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, caption_before_keys: caption_before_keys, item_flags_readonly: item_flags_readonly, hide_tracker_panel: hide_tracker_panel, hide_rank_badge: hide_rank_badge, edit_button_href: edit_button_href, show_item_type_flags_after: show_item_type_flags_after, item_flags_after: item_flags_after } %>
+<%= render partial: 'common_templates/references_results', locals: { name: name.underscore, full_name: full_name, references: references, item_list: item_list, implementation_class_name: implementation_class_name, caption_before: caption_before, external_id_attr: external_id_attr, caption_before_keys_without_keep_label: caption_before_keys_without_keep_label, caption_before_keys: caption_before_keys, item_flags_readonly: item_flags_readonly, hide_tracker_panel: hide_tracker_panel, hide_rank_badge: hide_rank_badge, edit_button_href: edit_button_href, show_item_type_flags_after: show_item_type_flags_after, item_flags_after: item_flags_after } %>
 
 
 <script id="activity_log_<%=name%>_show_button_partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
@@ -237,84 +249,18 @@
   <% end %>
 </script>
 
-
-
-
-<script id="<%=name%>_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-{{# with (fpa_state_item 'template_config' '<%=name.underscore%>')}}
-  {{> common_template_result name='<%=name%>' template_config=this result_data=../this}}
-{{/with}}
-</script>
-
-
 <script id="<%=name.hyphenate%>-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   {{#with <%=with_data || full_name%>}}
 
-      {{><%=name%>_result }}
+    {{> common_template_result name='<%=name%>' result_data=this}}
 
   {{/with}}
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{><%=name.pluralize%>_list }}
+  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name))}}
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{><%=name.pluralize%>_list compact=true prevent_create=true }}
-</script>
-
-<script id="<%=name.pluralize%>_list-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
-
-  <% if orientation == 'horizontal' %>
-  <% unless prevent_create || !DynamicModel.show_add_button(category)%>
-    {{#unless prevent_create}}
-    <div class="new-button-container">
-    <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= add_item_label %></a> </p>
-    </div>
-    {{/unless}}
-  <% end %>
-
-  <div class="col-md-8 new-block<% if name != full_name %> new-block new-after<% end %> hidden-if-empty" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">{{#unless <%=full_name.pluralize%>}}
-    <ul class="list-group">
-      <li class="list-group-item is-heading">
-        <h4>No <%=caption%> records</h4>
-      </li>
-    </ul>
-  {{/unless}}</div>
-  <% end %>
-
-    {{#each <%=full_name.pluralize%>}}
-
-        {{><%=name%>_result _created=@index compact=compact}}
-
-    {{/each}}
-
-    <% if name != full_name %><div id="<%=full_name.hyphenate%>-{{master_id}}-{{id}}"> <% end %>
-    <% if orientation == 'vertical' %>
-    <div class="col-md-24 new-block<% if name != full_name %> new-before-parent<% end %>" id="<%=name.hyphenate%>-{{master_id}}-" data-subscription="<%=name.hyphenate%>-edit-form-{{master_id}}-">
-      {{#unless <%=full_name.pluralize%>}}
-      <ul class="list-group">
-        <li class="list-group-item is-heading">
-          <h4>No <%=caption%> records</h4>
-        </li>
-      </ul>
-      {{/unless}}
-    </div>
-    <% unless prevent_create || !DynamicModel.show_add_button(category)%>
-      {{#unless prevent_create}}
-      <div class="new-button-container">
-      <p class="text-center"><a href="/masters/{{master_id}}/<%=name.pluralize%>/new" data-toggle="scrollto-result" data-target="#<%=name.hyphenate%>-{{master_id}}-" data-remote="true" class="btn btn-sm btn-primary add-item-button"><span class="glyphicon glyphicon-plus"></span> <%= add_item_label %></a> </p>
-      </div>
-      {{/unless}}
-    <% end %>
-    <% end %>
-    <% if name != full_name %></div> <% end %>
-</script>
-
-
-<script>
-  _fpa.show_if.forms['<%=full_name%>'] = <%= show_if.to_json.html_safe %>;
-  <% if full_name.to_s.end_with?('_primary') %>
-  _fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <%= show_if.to_json.html_safe %>;
-  <% end %>
+  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name)) compact=true prevent_create=true }}
 </script>

@@ -156,7 +156,15 @@ String.prototype.capitalize = function(){
 };
 
 String.prototype.underscore = function(){
-    return this.replace(/[^a-zA-z0-9]/g,'_');
+    return this.toLowerCase().replace(/( |-)/g, '_');
+};
+
+String.prototype.ns_underscore = function(){
+    return this.toLowerCase().replace(/::/g, '__').replace(/( |\/|-)/g, '_')
+};
+
+String.prototype.ns_hyphenate = function(){
+  return this.toLowerCase().replace(/::/g, '--').replace(/( |\/|_)/g, '-');
 };
 
 String.prototype.hyphenate = function(){
@@ -167,6 +175,21 @@ String.prototype.hyphenate = function(){
 String.prototype.pathify = function(){
     return this.replace(/__/g, '/');
 };
+
+String.prototype.pluralize = function(){
+    return _fpa.utils.pluralize(this);
+};
+
+String.prototype.singularize = function(){
+    return _fpa.utils.singularize(this);
+};
+
+
+String.prototype.titleize = function(){
+    return _fpa.utils.titleize(this);
+};
+
+
 
 _fpa.utils.is_blank = function(i){
   return (i === null || i === '');

@@ -58,7 +58,8 @@ class ExtraOptions
         always_embed_reference: 'reference name to always show embedded',
         always_embed_creatable_reference: 'reference name to always show embedded during new/create',
         alt_order: 'string or list of date / time or integer fields to use for ordering',
-        show_cancel: 'show cancel button alongside save button'
+        show_cancel: 'show cancel button alongside save button',
+        only_create_as_reference: 'prevent creation as a standalone item, only embedded / referenced within another'
       },
       filestore: {
         container: {

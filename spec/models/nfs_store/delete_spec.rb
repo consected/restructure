@@ -7,7 +7,9 @@ RSpec.describe "Delete stored files", type: :model do
   include ModelSupport
   include NfsStoreSupport
 
-  DefaultRole = 'file1'
+  def default_role
+    'file1'
+  end
 
   before :all do
     setup_nfs_store

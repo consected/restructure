@@ -69,12 +69,6 @@ class DynamicModel < ActiveRecord::Base
     return :vertical
   end
 
-  def self.show_add_button category
-    return true unless category
-    return false if category.to_s.include?('history') || category.to_s.include?('-records') || category.to_s.include?('ipa-phone-screen')
-    return true
-  end
-
 
 
   def add_master_association &association_block

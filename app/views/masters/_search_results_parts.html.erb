@@ -117,7 +117,7 @@
         {{#with player_infos.[0]}}
 
             <div class="col-md-<%= !view?[:pro_infos] ? '24' : '12' %>">
-              {{>player_info_result _created=0}}
+                {{> common_template_result name='player_info' result_data=this _created=@index}}
             </div>
 
         {{else}}
@@ -134,7 +134,9 @@
         <% if view?[:pro_infos] %>
         {{#with pro_infos.[0]}}
             <div class="col-md-<%= !view?[:player_infos] ? '24' : '12' %>">
-              {{>pro_info_result _created=0}}
+
+              {{> common_template_result name='pro_info' result_data=this _created=@index}}
+
             </div>
         {{else}}
 
@@ -155,7 +157,7 @@
       <div class="<%= layout_item_block_sizes[:regular] %>" id="addresses-{{id}}-" data-sub-list="addresses">
         {{#each addresses}}
 
-            {{>address_result _created=@index}}
+          {{> common_template_result name='address' result_data=this _created=@index}}
 
         {{/each}}
 
@@ -171,7 +173,7 @@
       <div class="<%= layout_item_block_sizes[:regular] %>" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
         {{#each player_contacts}}
 
-          {{>player_contact_result _created=@index}}
+          {{> common_template_result name='player_contact' result_data=this _created=@index}}
 
         {{/each}}
 

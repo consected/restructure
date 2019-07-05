@@ -2,7 +2,7 @@
 <%= form_for @master, method: :get, remote: true, html: {id: 'simple_search_master', class: 'search_master form-formatted'} do |f| %>
 
   <div class="row">
-    <%= hidden_field_tag :mode, "SIMPLE" %>
+    <%= hidden_field_tag :mode, "SIMPLE", id: nil %>
 
     <%= f.fields_for :general_infos do |pif| %>
       <div class="form-group col-sm-4">
@@ -12,7 +12,7 @@
       <div class="form-group col-sm-3">
         <%= pif.label :last_name, 'data-add-icon' => 'info-sign', title: 'search for last name in player or pro info' %>
         <%= pif.text_field :last_name, class: 'form-control'  %>
-      </div>      
+      </div>
       <div class="form-group col-sm-3">
         <%= pif.label :birth_date, 'data-add-icon' => 'info-sign', title: 'search for birth date in player or pro info' %>
         <%= pif.date_field :birth_date, class: 'form-control'  %>
@@ -39,17 +39,17 @@
       </div>
       <div class="col-sm-1 text-right">
           <br/>
-          <p style="font-size: 18px;">                          
+          <p style="font-size: 18px;">
             <a href="#" class="clear-fields glyphicon glyphicon-erase" title="clear fields"></a>
           </p>
-      </div>      
+      </div>
     <% end %>
   </div>
   <div class="form-group form-actions clearfix">
     <%= f.submit :search, class: "btn btn-default btn-sm pull-right auto-submitter" %>
     <%= f.submit "CSV", name: :format, value: "csv", class: "btn btn-default pull-right btn-sm " if current_user.can? :export_csv %>
     <%= f.submit "JSON", id: "submit_query_to_json", name: :format, value: "json", class: "btn btn-default btn-sm  target_new_window pull-right" if current_user.can? :export_json %>
-          
+
     <span id="search_count_simple" class="search-results-count pull-right" data-sub-item="count" data-template="search-count-template" ></span>
   </div>
 <%end%>
@@ -57,9 +57,7 @@
   _fpa.set_definition('colleges', function(){
     _fpa.form_utils.setup_typeahead('input.simple-college-input', 'colleges', "colleges");
   });
-  
+
 </script>
 
 </div>
-  
-  

@@ -1,7 +1,8 @@
+SecureAdminEntry = ENV['FPHS_SECURE_ADMIN_ENTRY'] || 'iuwqeryljksdajfghsdfj2382346ywdkjhf'
+
 Rails.application.config.to_prepare do
 
   # Avoid URL guessing to get at the admin login page
-  SecureAdminEntry = ENV['FPHS_SECURE_ADMIN_ENTRY'] || 'iuwqeryljksdajfghsdfj2382346ywdkjhf'
   DeviseController.send('before_action',
     ->{
       flash[:info] = 'you must be logged in as a user to access this page' and

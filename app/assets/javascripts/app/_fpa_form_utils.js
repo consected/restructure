@@ -250,7 +250,8 @@ _fpa.form_utils = {
 
             var ibh = _fpa.get_items_as_hash_by('item_type', pe, it, 'value');
 
-            for(var ibhi in ibh) {
+            var ibhi = null;
+            for(ibhi in ibh) {
               break;
             }
 

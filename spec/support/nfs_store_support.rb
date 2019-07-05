@@ -1,6 +1,8 @@
 module NfsStoreSupport
 
-  DefaultRole = 'file1'
+  def default_role
+    'file1'
+  end
 
 
   def setup_nfs_store
@@ -12,7 +14,7 @@ module NfsStoreSupport
 
 
     @app_type = @user.app_type
-    create_user_role DefaultRole, user: @user, app_type: @app_type
+    create_user_role default_role, user: @user, app_type: @app_type
     create_user_role 'nfs_store group 600', user: @user, app_type: @app_type
 
 
@@ -126,7 +128,7 @@ EOF
     u
   end
 
-  def create_filter filter, role_name: DefaultRole, user: nil, resource_name: nil
+  def create_filter filter, role_name: default_role, user: nil, resource_name: nil
 
     resource_name ||= @resource_name
     role_name = nil if user
