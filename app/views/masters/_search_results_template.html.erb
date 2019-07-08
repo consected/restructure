@@ -134,6 +134,7 @@
 %>
 <%= render partial: 'masters/search_results_master_tabs_default', locals: {external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
 <% end %>
+<%= render partial: 'masters/master_panels', locals: {external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
 <%= render partial: 'masters/search_results_parts', locals: {external_id_types: external_id_types, viewable_external_ids: viewable_external_ids} %>
 <%= render partial: 'common_templates/common_parts' %>
 <%= render partial: 'item_flags/search_results_template' %>
