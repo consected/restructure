@@ -149,6 +149,7 @@
 
   caption_before_keys = caption_before.keys.join(',')
   caption_before_keys_without_keep_label = caption_before.select {|k,v| v && !v[:keep_label]}.keys.map(&:to_s).join(',')
+  external_id_options ||= {}
   external_id_attr = external_id_options && external_id_options[:attribute]
   hide_tracker_panel = app_config_set(:hide_tracker_panel)
   show_item_type_flags_after = show_item_type_flags && item_flags_after
@@ -244,7 +245,7 @@
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore name))}}
+  {{>common_template_list name='<%=name%>' list_data=this template_config=(fpa_state_item 'template_config' (underscore '<%=name%>'))}}
 </script>
 
 <script id="<%=name.pluralize.hyphenate%>-compact-list-template" type="text/x-handlebars-template" class="hidden handlebars-template">

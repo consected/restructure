@@ -7,6 +7,11 @@ RSpec.describe Report, type: :model do
 
     create_admin
     create_user
+
+    # Ensure general report usage is not allowed
+    rs = Admin::UserAccessControl.active.where resource_type: :report
+    rs.update_all(disabled: true)
+
     res = Report.active.searchable.for_user(@user)
     expect(res.length).to eq 0
 

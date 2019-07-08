@@ -6,15 +6,18 @@
   Where options.formatter_var might have a value like 'format_10_digit_external_id'
 */
 Handlebars.registerHelper('format_with', function(formatter, text) {
-  var fs = formatter.split(' ', 2);
+  var fs = formatter.split(' ');
+  var ffn = null;
   if(fs[1]) {
-    var arg0 = fs[1].replace(/"/g, '');
+    ffn = fs.shift();
+    var arg0 = fs.join(' ').replace(/"/g, '');
     var arg1 = text;
   }
   else {
+    ffn = fs[0];
     var arg0 = text;
   }
-  var d = Handlebars.helpers[fs[0]](arg0, arg1);
+  var d = Handlebars.helpers[ffn](arg0, arg1);
   return new Handlebars.SafeString(d);
 });
 

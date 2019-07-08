@@ -12,6 +12,9 @@ module NfsStoreSupport
     create_admin
     create_user
 
+    trash_master = create_master
+    trash_pc = create_item(data: rand(10000000000000000), rank: 0)
+
 
     @app_type = @user.app_type
     create_user_role default_role, user: @user, app_type: @app_type
@@ -98,9 +101,15 @@ EOF
     FileUtils.mkdir_p File.join(basedir, 'gid600', "app-type-#{@app_type.id}", "containers")
 
     @player_contact.master.current_user = @user
+
+    # Make sure the tests will run cleanly
+    mrs = ModelReference.all
+    mrs.update_all from_record_master_id: trash_master.id, from_record_id: nil
+
     al = ActivityLog::PlayerContactPhone.new(select_call_direction: 'from player', select_who: 'user', extra_log_type: :step_1, player_contact: @player_contact, master: @player_contact.master)
     al.save!
     expect(al).to be_a ActivityLog::PlayerContactPhone
+
     expect(al.model_references.length).to eq 1
     @activity_log = al
     @container = NfsStore::Manage::Container.last

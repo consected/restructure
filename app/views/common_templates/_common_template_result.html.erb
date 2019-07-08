@@ -89,8 +89,8 @@
         {{/with}}
         {{#is model_data_type 'external_identifier' }}
           {{#if external_id_options}}
-          <h4>
-            <span>{{external_id_options.label}}</span> <strong>{{#if external_id_options.formatter}}{{{format_with external_id_options.formatter (lookup result_data external_id_options.attribute)}}}{{else}}{{{pretty_string (lookup result_data external_id_options.attribute) }}}{{/if}} </strong>
+          <h4 class="list-group-item-heading external-id-heading">
+            <span>{{external_id_options.label}}</span> <strong>{{#if external_id_options.formatter}}{{{format_with external_id_options.formatter (lookup result_data external_id_options.attribute)}}}{{else}}{{pretty_string (lookup result_data external_id_options.attribute) return_string="true"}}{{/if}} </strong>
           </h4>
           {{else}}
           <h4 class="list-group-item-heading">{{>show_result_caption result_data=result_data}}</h4>
