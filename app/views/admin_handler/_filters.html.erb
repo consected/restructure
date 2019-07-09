@@ -38,12 +38,12 @@ fo.each do |filter_on|
       <%= filter_btn('all', filter_on, nil) %>
 <%
       if vals.is_a? Hash
-        vals.each do |k,v|
+        vals.sort_by{|k, v| v}.each do |k,v|
 %>
         <%= filter_btn(v, filter_on, k) %>
 <%      end
       else
-        vals.each do |v|
+        vals.sort.each do |v|
 %>
        <%= filter_btn(v, filter_on, v) %>
 <%

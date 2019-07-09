@@ -4,7 +4,7 @@ module TableGenerators
     if str.end_with? 'ies'
       return str[0..-4] + 'y'
     elsif str.end_with? 'es'
-        return str[0..-3]
+        return str[0..-2]
     elsif str.end_with? 's'
       return str[0..-2]
     end

@@ -7,6 +7,10 @@
     <%= f.text_field :name %>
   </div>
   <div class="form-group">
+    <%= f.label :category %>
+    <%= f.text_field :category %>
+  </div>
+  <div class="form-group">
     <%= f.label :item_type, 'data-add-icon' => 'info-sign', title: "#{object_instance.id ? 'item type for existing records can not be changed.' : 'Set item type'}" %>
     <%= f.select :item_type, item_types_array, {}, disabled: !!object_instance.id  %>
   </div>

@@ -25,6 +25,8 @@ set search_path=sleep,ml_app;
 -- # Sleep Screening
 \i db/app_specific/sleep/aws-db/screening/create_sleep_isi_questions.sql
 \i db/app_specific/sleep/aws-db/screening/trigger_isi_score_calc.sql
+\i db/app_specific/sleep/aws-db/screening/create_sleep_ps_basic_responses.sql
+\i db/app_specific/sleep/aws-db/screening/create_sleep_ps_screener_responses.sql
 
 -- # InEx
 \i db/app_specific/sleep/aws-db/inex/create_activity_log_inex_checklist_table.sql
