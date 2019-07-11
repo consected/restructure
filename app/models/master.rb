@@ -134,7 +134,8 @@ class Master < ActiveRecord::Base
   end
 
   def assoc_named assoc_sym
-    raise FphsException.new "create master with configuration includes a non-existent model association" unless self.class.get_all_associations.include? assoc_sym.to_s
+    aa = self.class.get_all_associations
+    raise FphsException.new "non-existent model association (#{assoc_sym}) requested" unless aa.include? assoc_sym.to_s
     self.send(assoc_sym)
   end
 
@@ -144,7 +145,7 @@ class Master < ActiveRecord::Base
     if create_master_with
       create_master_with.split(',').each do |cw|
         cw = cw.strip.pluralize
-        raise FphsException.new "create master with configuration includes a non-existent model association" unless get_all_associations.include? cw
+        raise FphsException.new "create master with configuration includes a non-existent model association (#{cw})" unless get_all_associations.include? cw
         yield cw
       end
     end
