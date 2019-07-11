@@ -2650,7 +2650,8 @@ CREATE TABLE ml_app.activity_logs (
     hide_item_list_panel boolean,
     main_log_name character varying,
     process_name character varying,
-    table_name character varying
+    table_name character varying,
+    category character varying
 );
 
 
@@ -3883,7 +3884,8 @@ CREATE TABLE ml_app.message_templates (
     admin_id integer,
     disabled boolean,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    category character varying
 );
 
 
