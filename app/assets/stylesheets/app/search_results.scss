@@ -93,19 +93,23 @@ li.list-group-item {
 
     min-height: 36px;
 
-    strong {
-        text-transform: capitalize;
-        text-transform: none;
-        visibility: hidden;
-    }
-
     .tt-suggestion  strong{
-        visibility: visible;
+      visibility: visible;
     }
+    
+    &:not(.caption-before) {
 
-    small {
-        /* Required to prevent a weird spacing issue with long lines in strong results */
-        position: absolute;
+      strong {
+          text-transform: capitalize;
+          text-transform: none;
+          visibility: hidden;
+      }
+
+
+      small {
+          /* Required to prevent a weird spacing issue with long lines in strong results */
+          position: absolute;
+      }
     }
 
 }

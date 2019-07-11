@@ -89,6 +89,13 @@ class ExtraLogType < ExtraOptions
       new_ref = {}
       if self.references.is_a? Array
         self.references.each do |refitem|
+          # Make all keys singular, to simplify configurations
+          refitem.each do |k,v|
+            if k.to_s != k.to_s.singularize
+              new_k = k.to_s.singularize.to_sym
+              refitem[new_k] = refitem.delete(k)
+            end
+          end
           refitem.each do |k,v|
             vi = v[:add_with] && v[:add_with][:extra_log_type]
             ckey = k.to_s
@@ -98,6 +105,14 @@ class ExtraLogType < ExtraOptions
         end
       else
         new_ref = {}
+        # Make all keys singular, to simplify configurations
+        self.references.each do |k,v|
+          if k.to_s != k.to_s.singularize
+            new_k = k.to_s.singularize.to_sym
+            self.references[new_k] = self.references.delete(k)
+          end
+        end
+
         self.references.each do |k, v|
           vi = v[:add_with] && v[:add_with][:extra_log_type]
           ckey = k.to_s
@@ -129,6 +144,14 @@ class ExtraLogType < ExtraOptions
       # Set up the structure so that we can use the standard reference methods to parse the configuration
       self.e_sign[:document_reference] = {item: self.e_sign[:document_reference]} unless self.e_sign[:document_reference][:item]
       self.e_sign[:document_reference].each do |k, refitem|
+
+        # Make all keys singular, to simplify configurations
+        refitem.each do |k,v|
+          if k.to_s != k.to_s.singularize
+            new_k = k.to_s.singularize.to_sym
+            refitem[new_k] = refitem.delete(k)
+          end
+        end
 
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)

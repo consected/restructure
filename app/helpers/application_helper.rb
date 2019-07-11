@@ -142,7 +142,13 @@
     def partial_cache_key partial
       u = current_user || current_admin
       apptype = u&.app_type_id if u.is_a? User
-      "#{partial}-partial2-#{Application.server_cache_version}-#{u.class.name}-#{u&.id}-#{apptype}-#{Admin::UserAccessControl.order(updated_at: :desc).limit(1).first&.updated_at}-#{Admin::UserRole.order(updated_at: :desc).limit(1).first&.updated_at}"
+
+      unless @item_updates
+        cs = [Admin::UserAccessControl, Admin::UserRole, Admin::MessageTemplate, DynamicModel, ActivityLog, ExternalIdentifier]
+        @item_updates = cs.map {|c| c.reorder(updated_at: :desc).limit(1).first&.updated_at.to_i.to_s }.join('-')
+      end
+
+      "#{partial}-partial2-#{Application.server_cache_version}-#{u.class.name}-#{u&.id}-#{apptype}-#{@item_updates}"
     end
 
     def template_version

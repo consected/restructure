@@ -19,6 +19,8 @@ describe "external id (bhs_assignments)", js: true, driver: :app_firefox_driver 
     @good_email  = @user.email
     Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: :bhs_assignments, current_admin: @admin, user: @user
 
+    BhsAssignment.external_id_edit_pattern = '\\d{3} \\d{3} \\d{3}'
+
     @master.current_user = @user
     @master.bhs_assignments.create! bhs_id: rand(100000000..999999999)
 

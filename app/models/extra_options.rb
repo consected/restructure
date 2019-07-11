@@ -186,12 +186,15 @@ class ExtraOptions
     self.resource_name = "#{config_obj.full_implementation_class_name.ns_underscore}__#{self.name}"
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
+
+    html_reg = /<(p ?.*|br ?.*|div ?.*|ul ?.*|hr ?.*)>/
     self.caption_before = self.caption_before.each do |k,v|
+
       if v.is_a? String
 
-        has_html = v.scan(/<(p ?.*|br ?.*|div ?.*|ul ?.*)>/).length > 0
+        has_html = v.scan(html_reg).length > 0
         unless has_html
-          v = v.gsub("\n", "<br/>")
+          v =  Kramdown::Document.new(v).to_html.html_safe
         end
 
         self.caption_before[k] = {
@@ -199,7 +202,17 @@ class ExtraOptions
           edit_caption: v,
           show_caption: v
         }
+      elsif v.is_a? Hash
+        v.each do |mode, modeval|
+          if modeval.is_a? String
+            has_html = modeval.scan(html_reg).length > 0
+            unless has_html
+              v[mode] = Kramdown::Document.new(modeval).to_html.html_safe
+            end
+          end
+        end
       end
+
     end
 
     self.dialog_before ||= {}

@@ -28,6 +28,13 @@
 
 }
 
+.list-group-item {
+  p:last-child {
+    margin: 0 0 0 0;
+  }
+}
+
+
 span.related-tracker-collapser .list-group-item:first-child {
   background-color: white;
 }
