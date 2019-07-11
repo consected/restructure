@@ -172,9 +172,9 @@ execute <<EOF
                           template_type,
                           message_type,
                           template,
-                          disabled,
-                          admin_id,
                           category,
+                          admin_id,
+                          disabled,
                           created_at,
                           updated_at,
                           message_template_id
