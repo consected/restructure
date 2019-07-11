@@ -88,6 +88,7 @@ class Admin::AppType < Admin::AdminBase
       res['nfs_store_filters'] = app_type.import_config_sub_items app_type_config, 'nfs_store_filters', ['role_name', 'resource_name', 'filter']
 
       res['associated_message_templates'] = app_type.import_config_sub_items app_type_config, 'associated_message_templates', ['name', 'message_type', 'template_type']
+      res['associated_config_libraries'] = app_type.import_config_sub_items app_type_config, 'associated_config_libraries', ['name', 'category', 'format']
 
       res['associated_protocols'] = app_type.import_config_sub_items app_type_config, 'associated_protocols', ['name']
       res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'], filter_on: ['protocol_name']
@@ -301,6 +302,20 @@ class Admin::AppType < Admin::AdminBase
     ms.sort {|a, b| a.id <=> b.id}.uniq
   end
 
+  def associated_config_libraries
+    ms = []
+
+    associated_activity_logs.all.each do |a|
+      ms += ExtraLogType.config_libraries a
+    end
+
+    associated_dynamic_models.all.each do |a|
+      ms += ExtraOptions.config_libraries a
+    end
+
+    ms.sort {|a, b| a.id <=> b.id}.uniq
+
+  end
 
   def export_config
     JSON.pretty_generate(JSON.parse self.to_json)
@@ -322,6 +337,7 @@ class Admin::AppType < Admin::AdminBase
     options[:methods] << :page_layouts
     options[:methods] << :user_roles
     options[:methods] << :associated_message_templates
+    options[:methods] << :associated_config_libraries
     options[:methods] << :associated_protocols
     options[:methods] << :associated_sub_processes
     options[:methods] << :associated_protocol_events

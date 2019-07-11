@@ -277,6 +277,7 @@ class ExtraOptions
     configs = []
     begin
       if c.present?
+        include_libraries c
         res = YAML.load(c)
       else
         res = {}
@@ -285,8 +286,10 @@ class ExtraOptions
 
       set_defaults config_obj, res
 
+
       opt_default = res.delete(:_default)
-      res.delete(:_definitions)
+
+      res.delete_if {|k,v| k.to_s.start_with? '_definitions'}
 
       res.each do |name, value|
         # If defined, use the optional _default entry as the basis for all individual options,
@@ -350,14 +353,56 @@ class ExtraOptions
     ca.calc_action_if
   end
 
+  # Get an array of ConfigLibrary objects from the options text
+  def self.config_libraries config_obj
+    c = options_text(config_obj)
+    return [] unless c.present?
+
+    reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+
+    res = c.match reg
+
+    all_libs = []
+
+    while res
+
+      category = res[1].strip
+      name = res[2].strip
+      all_libs << Admin::ConfigLibrary.where(category: category, name: name, format: :yaml).first
+
+      c.gsub!(res[0], '')
+      res = c.match reg
+
+    end
+
+    all_libs
+  end
 
   protected
 
     def self.options_text config_obj
-      config_obj.options
+      config_obj.options.dup
     end
 
     def self.set_defaults config_obj, all_options={}
+
+    end
+
+    def self.include_libraries c
+
+      reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+
+      res = c.match reg
+
+      while res
+
+        category = res[1].strip
+        name = res[2].strip
+        lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
+        lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
+        c.gsub!(res[0], lib)
+        res = c.match reg
+      end
 
     end
 
