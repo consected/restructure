@@ -963,51 +963,51 @@ CREATE FUNCTION ml_app.log_activity_log_player_contact_phone_update() RETURNS tr
 CREATE FUNCTION ml_app.log_activity_log_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-        BEGIN
-            INSERT INTO activity_log_history
-            (
-                name,
-                activity_log_id,
-                admin_id,
-                created_at,
-                updated_at,
-                item_type,
-                rec_type,
-                disabled,
-                action_when_attribute,
-                field_list,
-                blank_log_field_list,
-
-                blank_log_name,
-                extra_log_types,
-                hide_item_list_panel,
-                main_log_name,
-                process_name,
-                table_name
-                )
-            SELECT
-                NEW.name,
-                NEW.id,
-                NEW.admin_id,
-                NEW.created_at,
-                NEW.updated_at,
-                NEW.item_type,
-                NEW.rec_type,
-                NEW.disabled,
-                NEW.action_when_attribute,
-                NEW.field_list,
-                NEW.blank_log_field_list,
-
-                NEW.blank_log_name,
-                NEW.extra_log_types,
-                NEW.hide_item_list_panel,
-                NEW.main_log_name,
-                NEW.process_name,
-                NEW.table_name
-            ;
-            RETURN NEW;
-        END;
-    $$;
+              BEGIN
+                  INSERT INTO activity_log_history
+                  (
+                      name,
+                      activity_log_id,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      item_type,
+                      rec_type,
+                      disabled,
+                      action_when_attribute,
+                      field_list,
+                      blank_log_field_list,
+                      blank_log_name,
+                      extra_log_types,
+                      hide_item_list_panel,
+                      main_log_name,
+                      process_name,
+                      table_name,
+                      category
+                      )
+                  SELECT
+                      NEW.name,
+                      NEW.id,
+                      NEW.admin_id,
+                      NEW.created_at,
+                      NEW.updated_at,
+                      NEW.item_type,
+                      NEW.rec_type,
+                      NEW.disabled,
+                      NEW.action_when_attribute,
+                      NEW.field_list,
+                      NEW.blank_log_field_list,
+                      NEW.blank_log_name,
+                      NEW.extra_log_types,
+                      NEW.hide_item_list_panel,
+                      NEW.main_log_name,
+                      NEW.process_name,
+                      NEW.table_name,
+                      NEW.category
+                  ;
+                  RETURN NEW;
+              END;
+          $$;
 
 
 --
@@ -1222,6 +1222,42 @@ CREATE FUNCTION ml_app.log_college_update() RETURNS trigger
                     NEW.disabled ,
                     NEW.admin_id,
                     NEW.user_id
+            ;
+            RETURN NEW;
+        END;
+    $$;
+
+
+--
+-- Name: log_config_library_update(); Type: FUNCTION; Schema: ml_app; Owner: -
+--
+
+CREATE FUNCTION ml_app.log_config_library_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+        BEGIN
+            INSERT INTO config_library_history
+            (
+                    config_library_id,
+                    category,
+                    name,
+                    options,
+                    format,
+                    disabled,
+                    admin_id,
+                    updated_at,
+                    created_at
+                )
+            SELECT
+                NEW.id,
+                NEW.category,
+                NEW.name,
+                NEW.options,
+                NEW.format,
+                NEW.disabled,
+                NEW.admin_id,
+                NEW.updated_at,
+                NEW.created_at
             ;
             RETURN NEW;
         END;
@@ -1481,33 +1517,35 @@ CREATE FUNCTION ml_app.log_item_flag_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_message_template_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-            BEGIN
-                INSERT INTO message_template_history
-                (
-                    name,
-                    template_type,
-                    message_type,
-                    template,
-                    admin_id,
-                    disabled,
-                    created_at,
-                    updated_at,
-                    message_template_id
-                    )
-                SELECT
-                    NEW.name,
-                    NEW.template_type,
-                    NEW.message_type,
-                    NEW.template,
-                    NEW.admin_id,
-                    NEW.disabled,
-                    NEW.created_at,
-                    NEW.updated_at,
-                    NEW.id
-                ;
-                RETURN NEW;
-            END;
-        $$;
+                  BEGIN
+                      INSERT INTO message_template_history
+                      (
+                          name,
+                          template_type,
+                          message_type,
+                          template,
+                          category,
+                          admin_id,
+                          disabled,
+                          created_at,
+                          updated_at,
+                          message_template_id
+                          )
+                      SELECT
+                          NEW.name,
+                          NEW.template_type,
+                          NEW.message_type,
+                          NEW.template,
+                          NEW.category,
+                          NEW.admin_id,
+                          NEW.disabled,
+                          NEW.created_at,
+                          NEW.updated_at,
+                          NEW.id
+                      ;
+                      RETURN NEW;
+                  END;
+              $$;
 
 
 --
@@ -1689,37 +1727,40 @@ CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
 CREATE FUNCTION ml_app.log_page_layout_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-            BEGIN
-                INSERT INTO page_layout_history
-                (
-                    app_type_id,
-                    layout_name,
-                    panel_name,
-                    panel_label,
-                    panel_position,
-                    options,
-                    admin_id,
-                    disabled,
-                    created_at,
-                    updated_at,
-                    page_layout_id
-                    )
-                SELECT
-                    NEW.app_type_id,
-                    NEW.layout_name,
-                    NEW.panel_name,
-                    NEW.panel_label,
-                    NEW.panel_position,
-                    NEW.options,
-                    NEW.admin_id,
-                    NEW.disabled,
-                    NEW.created_at,
-                    NEW.updated_at,
-                    NEW.id
-                ;
-                RETURN NEW;
-            END;
-        $$;
+          BEGIN
+              INSERT INTO page_layout_history
+              (
+                      page_layout_id,
+                      app_type_id,
+                      layout_name,
+                      panel_name,
+                      panel_label,
+                      panel_position,
+                      options,
+                      disabled,
+                      admin_id,
+                      created_at,
+                      updated_at,
+                      description
+                  )
+              SELECT
+                  NEW.id,
+                  NEW.page_layout_id,
+                  NEW.app_type_id,
+                  NEW.layout_name,
+                  NEW.panel_name,
+                  NEW.panel_label,
+                  NEW.panel_position,
+                  NEW.options,
+                  NEW.disabled,
+                  NEW.admin_id,
+                  NEW.created_at,
+                  NEW.updated_at,
+                  NEW.description
+              ;
+              RETURN NEW;
+          END;
+      $$;
 
 
 --
@@ -1894,7 +1935,7 @@ CREATE FUNCTION ml_app.log_report_update() RETURNS trigger
             INSERT INTO report_history
             (
                     report_id,
-                    name,                    
+                    name,
                     description,
                     sql,
                     search_attrs,
@@ -1908,25 +1949,29 @@ CREATE FUNCTION ml_app.log_report_update() RETURNS trigger
                     updated_at,
                     edit_field_names,
                     selection_fields,
-                    item_type
-                )                 
-            SELECT                 
+                    item_type,
+                    short_name,
+                    options
+                )
+            SELECT
                 NEW.id,
-                NEW.name,                
+                NEW.name,
                 NEW.description,
                 NEW.sql,
                 NEW.search_attrs,
-                NEW.admin_id,                
+                NEW.admin_id,
                 NEW.disabled,
                 NEW.report_type,
                 NEW.auto,
                 NEW.searchable,
-                NEW.position,                
+                NEW.position,
                 NEW.created_at,
                 NEW.updated_at,
                 NEW.edit_field_names,
                 NEW.selection_fields,
-                NEW.item_type
+                NEW.item_type,
+                NEW.short_name,
+                NEW.options
             ;
             RETURN NEW;
         END;
@@ -2516,7 +2561,8 @@ CREATE TABLE ml_app.activity_log_history (
     hide_item_list_panel boolean,
     main_log_name character varying,
     process_name character varying,
-    table_name character varying
+    table_name character varying,
+    category character varying
 );
 
 
@@ -3112,6 +3158,79 @@ CREATE SEQUENCE ml_app.colleges_id_seq
 --
 
 ALTER SEQUENCE ml_app.colleges_id_seq OWNED BY ml_app.colleges.id;
+
+
+--
+-- Name: config_libraries; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.config_libraries (
+    id integer NOT NULL,
+    category character varying,
+    name character varying,
+    options character varying,
+    format character varying,
+    disabled boolean DEFAULT false,
+    admin_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: config_libraries_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.config_libraries_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: config_libraries_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.config_libraries_id_seq OWNED BY ml_app.config_libraries.id;
+
+
+--
+-- Name: config_library_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.config_library_history (
+    id integer NOT NULL,
+    category character varying,
+    name character varying,
+    options character varying,
+    format character varying,
+    disabled boolean DEFAULT false,
+    admin_id integer,
+    config_library_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: config_library_history_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.config_library_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: config_library_history_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.config_library_history_id_seq OWNED BY ml_app.config_library_history.id;
 
 
 --
@@ -3848,7 +3967,8 @@ CREATE TABLE ml_app.message_template_history (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     message_template_id integer,
-    message_type character varying
+    message_type character varying,
+    category character varying
 );
 
 
@@ -4397,7 +4517,8 @@ CREATE TABLE ml_app.page_layout_history (
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     page_layout_id integer,
-    app_type_id character varying
+    app_type_id character varying,
+    description character varying
 );
 
 
@@ -4940,7 +5061,9 @@ CREATE TABLE ml_app.report_history (
     item_type character varying,
     edit_model character varying,
     edit_field_names character varying,
-    selection_fields character varying
+    selection_fields character varying,
+    short_name character varying,
+    options character varying
 );
 
 
@@ -5804,6 +5927,20 @@ ALTER TABLE ONLY ml_app.colleges ALTER COLUMN id SET DEFAULT nextval('ml_app.col
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.config_libraries ALTER COLUMN id SET DEFAULT nextval('ml_app.config_libraries_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.config_library_history ALTER COLUMN id SET DEFAULT nextval('ml_app.config_library_history_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.delayed_jobs ALTER COLUMN id SET DEFAULT nextval('ml_app.delayed_jobs_id_seq'::regclass);
 
 
@@ -6389,6 +6526,22 @@ ALTER TABLE ONLY ml_app.college_history
 
 ALTER TABLE ONLY ml_app.colleges
     ADD CONSTRAINT colleges_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: config_libraries_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.config_libraries
+    ADD CONSTRAINT config_libraries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: config_library_history_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.config_library_history
+    ADD CONSTRAINT config_library_history_pkey PRIMARY KEY (id);
 
 
 --
@@ -7151,6 +7304,27 @@ CREATE INDEX index_colleges_on_admin_id ON ml_app.colleges USING btree (admin_id
 --
 
 CREATE INDEX index_colleges_on_user_id ON ml_app.colleges USING btree (user_id);
+
+
+--
+-- Name: index_config_libraries_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_config_libraries_on_admin_id ON ml_app.config_libraries USING btree (admin_id);
+
+
+--
+-- Name: index_config_library_history_on_admin_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_config_library_history_on_admin_id ON ml_app.config_library_history USING btree (admin_id);
+
+
+--
+-- Name: index_config_library_history_on_config_library_id; Type: INDEX; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_config_library_history_on_config_library_id ON ml_app.config_library_history USING btree (config_library_id);
 
 
 --
@@ -8134,6 +8308,20 @@ CREATE TRIGGER college_history_update AFTER UPDATE ON ml_app.colleges FOR EACH R
 
 
 --
+-- Name: config_library_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER config_library_history_insert AFTER INSERT ON ml_app.config_libraries FOR EACH ROW EXECUTE PROCEDURE ml_app.log_config_library_update();
+
+
+--
+-- Name: config_library_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER config_library_history_update AFTER UPDATE ON ml_app.config_libraries FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_config_library_update();
+
+
+--
 -- Name: dynamic_model_history_insert; Type: TRIGGER; Schema: ml_app; Owner: -
 --
 
@@ -9011,6 +9199,14 @@ ALTER TABLE ONLY ml_app.activity_log_player_contact_phones
 
 
 --
+-- Name: fk_rails_1ec40f248c; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.config_library_history
+    ADD CONSTRAINT fk_rails_1ec40f248c FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
+
+
+--
 -- Name: fk_rails_1fc7475261; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9355,6 +9551,14 @@ ALTER TABLE ONLY ml_app.pro_infos
 
 
 --
+-- Name: fk_rails_88664b466b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.config_library_history
+    ADD CONSTRAINT fk_rails_88664b466b FOREIGN KEY (config_library_id) REFERENCES ml_app.config_libraries(id);
+
+
+--
 -- Name: fk_rails_8be93bcf4b; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9552,6 +9756,14 @@ ALTER TABLE ONLY ml_app.message_notifications
 
 ALTER TABLE ONLY ml_app.player_contacts
     ADD CONSTRAINT fk_rails_d3c0ddde90 FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+
+
+--
+-- Name: fk_rails_da3ba4f850; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.config_libraries
+    ADD CONSTRAINT fk_rails_da3ba4f850 FOREIGN KEY (admin_id) REFERENCES ml_app.admins(id);
 
 
 --
