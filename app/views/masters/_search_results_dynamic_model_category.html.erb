@@ -2,6 +2,6 @@
   dm = DynamicModel.active.where(category: category)
   dm = dm.select {|m| m.model_association_name.in? @true_views}
 %>
-<div class="row panel-body">
+<div class="row panel-body panel-with-sublists">
   <%= render partial: 'masters/dynamic_model_blocks', locals: { category_models: dm, viewable: view?, category: category, force_load: true, panel: panel } %>
 </div>

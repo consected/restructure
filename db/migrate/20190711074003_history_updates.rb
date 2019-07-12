@@ -85,7 +85,6 @@ execute <<EOF
                   )
               SELECT
                   NEW.id,
-                  NEW.page_layout_id,
                   NEW.app_type_id,
                   NEW.layout_name,
                   NEW.panel_name,

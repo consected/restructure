@@ -105,7 +105,7 @@ _fpa.form_utils = {
     },
 
     on_open_click: function(block, timeout) {
-      var res = block.find('.on-open-click a[data-remote="true"], .on-open-click a[data-target]').not('.auto-clicked').addClass('auto-clicked');
+      var res = block.find('.on-open-click a[data-remote="true"], .on-open-click a[data-target]').not('.auto-clicked').addClass('auto-clicked prevent-autoclick-scroll');
       res.each(function() {
         var item = $(this);
 
@@ -264,6 +264,67 @@ _fpa.form_utils = {
 
     },
 
+    handle_sub_list_filters: function ($control, init) {
+      var $a = $control;
+      // var $parent = $a.parent();
+      var sl = $a.attr('data-filter-sub-list');
+      var attr = $a.attr('data-filter-sub-list-attr');
+      var val = $a.attr('data-filter-val');
+      var ac = null;
+      var rc = null;
+      var $targets = $('[data-sub-list="'+sl+'"] [data-sub-item][data-'+attr+'="'+val+'"]');
+
+      if(!init) {
+        var filter_out = $a.hasClass('active');
+        if(filter_out) {
+          $a.removeClass('active');
+        }
+        else {
+          $a.addClass('active');
+        }
+      }
+
+      filter_out = !$a.hasClass('active');
+
+      if(filter_out) {
+        $targets.slideUp().addClass('filtered-out');
+      }
+      else {
+        $targets.slideDown().removeClass('filtered-out');
+        $targets.each (function(){
+          _fpa.form_utils.format_block($(this));
+        });
+      }
+
+
+    },
+
+    handle_sub_list_order: function ($control, init) {
+      var $a = $control;
+      // var $parent = $a.parent();
+      var sl = $a.attr('data-order-sub-list');
+      // var attr = $a.attr('data-filter-sub-list-attr');
+      var val = $a.attr('data-order-val');
+      var ac = null;
+      var rc = null;
+      var $targets = $('[data-sub-list="'+sl+'"]');
+
+      if(!init) {
+        var order_alt = $a.hasClass('active');
+        if(order_alt) {
+          $a.removeClass('active');
+        }
+        else {
+          $a.addClass('active');
+        }
+      }
+
+      order_alt = $a.hasClass('active');
+
+      _fpa.form_utils.sort_blocks($targets, order_alt);
+
+
+    },
 
 
     // Setup the typeahead prediction for a specific text input element
@@ -673,6 +734,11 @@ _fpa.form_utils = {
             if($(this).hasClass('scroll-to-expanded') && !$(this).hasClass('collapsed') || $(this).hasClass('no-scroll-on-collapse'))
               return;
 
+            if($(this).hasClass('prevent-autoclick-scroll') && $(this).hasClass('auto-clicked')) {
+              $(this).removeClass('prevent-autoclick-scroll');
+              return;
+            }
+
             var a;
             var f = $(this).parents('[data-form-container]');
             if(f.length == 1) {
@@ -916,13 +982,13 @@ _fpa.form_utils = {
       var sort_block = block;
       var s = sort_block.attr('data-sort-desc');
       if(!s) {
-        sort_block = sort_block.children().first();
+        sort_block = sort_block.find('[data-sort-desc]').first();
         if (sort_block.length)
           s = sort_block.attr('data-sort-desc');
       }
       if(!s) {
         sort_block = sort_block.find('[data-sub-list]');
-        sort_block = sort_block.children().first();
+        sort_block = sort_block.find('[data-sort-desc]').first();
         if (sort_block.length)
           s = sort_block.attr('data-sort-desc');
       }
@@ -931,7 +997,16 @@ _fpa.form_utils = {
           var descp = sort_block.parent();
           sort_rev = sort_rev || descp.attr('data-sort-reverse');
 
-          descp.find('[data-sort-desc]').sort(function(a,b){
+          var $sort_els = descp.find('[data-sort-desc]');
+          var $sort_marker = descp.find('.sort-marker').first();
+
+          if($sort_marker.length == 0) {
+            $sort_els.first().before($('<div class="sort-marker"></div>'));
+            $sort_marker = descp.find('.sort-marker').first();
+          }
+
+
+          $sort_els.sort(function(a,b){
             var bres = $(b).find('['+s+']').attr(s);
             var ares = $(a).find('['+s+']').attr(s);
 
@@ -971,7 +1046,7 @@ _fpa.form_utils = {
             }
             return 0;
 
-          }).prependTo(descp);
+          }).insertAfter($sort_marker);
           // console.log('sorted!');
       }
 
@@ -1047,6 +1122,30 @@ _fpa.form_utils = {
           var d = _fpa.utils.YMDtoLocale(text);
           $(this).html(d);
         }).addClass('formatted-date-local')
+    },
+
+    setup_sub_lists: function (block) {
+
+      block.find('.sublist-filter-selectors').not('.formatted-slfs').each(function() {
+        $(this).on('click', '.filter-switch', function(ev) {
+          ev.preventDefault();
+          _fpa.form_utils.handle_sub_list_filters($(this));
+        });
+
+        $(this).find('.filter-switch').each(function () {
+           _fpa.form_utils.handle_sub_list_filters($(this), true);
+        });
+      }).addClass('formatted-slfs');
+
+
+      block.find('.sublist-order-selector').not('.formatted-slfs').each(function() {
+        $(this).on('click', '.order-switch', function(ev) {
+          ev.preventDefault();
+          _fpa.form_utils.handle_sub_list_order($(this));
+        });
+      }).addClass('formatted-slfs');
+
+
     },
 
     setup_contact_field_mask: function(block) {
@@ -1354,6 +1453,7 @@ _fpa.form_utils = {
 
         _fpa.form_utils.setup_error_clear(block);
         _fpa.form_utils.resize_children(block);
+        _fpa.form_utils.setup_sub_lists(block);
         block.removeClass('formatting-block');
     }
 };

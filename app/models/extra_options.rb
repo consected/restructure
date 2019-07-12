@@ -272,13 +272,13 @@ class ExtraOptions
 
   def self.parse_config config_obj
 
-    c = options_text(config_obj)
+    config_text = options_text(config_obj)
 
     configs = []
     begin
-      if c.present?
-        include_libraries c
-        res = YAML.load(c)
+      if config_text.present?
+        config_text = include_libraries(config_text)
+        res = YAML.load(config_text)
       else
         res = {}
       end
@@ -365,14 +365,11 @@ class ExtraOptions
     all_libs = []
 
     while res
-
       category = res[1].strip
       name = res[2].strip
       all_libs << Admin::ConfigLibrary.where(category: category, name: name, format: :yaml).first
-
       c.gsub!(res[0], '')
       res = c.match reg
-
     end
 
     all_libs
@@ -388,22 +385,22 @@ class ExtraOptions
 
     end
 
-    def self.include_libraries c
+    def self.include_libraries content_to_update
 
+      content_to_update = content_to_update.dup
       reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
-
-      res = c.match reg
+      res = content_to_update.match reg
 
       while res
-
         category = res[1].strip
         name = res[2].strip
         lib = Admin::ConfigLibrary.content_named category, name, format: :yaml
         lib.gsub!(/^_definitions:.*/, "_definitions__#{category}_#{name}:")
-        c.gsub!(res[0], lib)
-        res = c.match reg
+        content_to_update.gsub!(res[0], lib)
+        res = content_to_update.match reg
       end
 
+      content_to_update
     end
 
 end

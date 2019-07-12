@@ -5,7 +5,7 @@
 </script>
 
 <script id="master_external_ids_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
-    <div class="row panel-body">
+    <div class="row panel-body panel-with-sublists">
       <div class="on-open-click hidden">
       <%  external_id_types.each do |e|%>
         <% if view?[e.plural_name.to_sym] %>
@@ -25,7 +25,7 @@
 
 <script id="master_details_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
 
-   <div class="panel-body">
+   <div class="panel-body panel-with-sublists ">
     <div class="row">
       <% if view?[:player_infos] || view?[:pro_infos] %>
       <div class="<%= app_config_set(:hide_pro_info) || !current_user.has_access_to?(:access, :table, :player_infos) || !current_user.has_access_to?( :access, :table, :pro_infos)  ? layout_item_block_sizes[:regular] : 'col-md-16 col-lg-12' %>">
@@ -34,6 +34,8 @@
         {{#with player_infos.[0]}}
 
             <div class="col-md-<%= !view?[:pro_infos] ? '24' : '12' %>">
+              {{>sublist_controls}}
+
                 {{> common_template_result name='player_info' result_data=this _created=0}}
             </div>
 
@@ -51,6 +53,8 @@
         <% if view?[:pro_infos] %>
         {{#with pro_infos.[0]}}
             <div class="col-md-<%= !view?[:player_infos] ? '24' : '12' %>">
+              {{>sublist_controls}}
+
 
               {{> common_template_result name='pro_info' result_data=this _created=0}}
 
@@ -72,6 +76,8 @@
 
       <% if view?[:addresses] %>
       <div class="<%= layout_item_block_sizes[:regular] %>" id="addresses-{{id}}-" data-sub-list="addresses">
+        {{>sublist_controls sub_list="addresses" filter_attr='rank' filter_name="rank_name" order='asc' }}
+
         {{#each addresses}}
 
           {{> common_template_result name='address' result_data=this _created=@index}}
@@ -88,6 +94,8 @@
 
       <% if view?[:player_contacts] %>
       <div class="<%= layout_item_block_sizes[:regular] %>" id="player_contacts-{{id}}-" data-sub-list="player_contacts">
+        {{>sublist_controls sub_list="player_contacts" filter_attr='rank' filter_name="rank_name" order='asc' }}
+
         {{#each player_contacts}}
 
           {{> common_template_result name='player_contact' result_data=this _created=@index}}
@@ -114,7 +122,7 @@
 
 <script id="master_trackers_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <% unless app_config_set(:hide_tracker_panel) %>
-    <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse {{#is trackers.length '>' 0}}in{{/is}} tracker-block panel panel-default">
+    <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse tracker-block panel panel-default">
     {{#with trackers}}
       {{>tracker_tree_results master_id=id}}
     {{else}}

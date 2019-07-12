@@ -56,8 +56,7 @@
   <div class="common-template-item index-{{_created}} {{hyphenate name}}-item {{>result_extra_class}} {{is_activity_log_class}}" data-model-data-type="{{model_data_type}}" id="{{hyphenate name}}-{{result_data.master_id}}-{{result_data.id}}" data-subscription="{{hyphenate name}}-edit-form-{{result_data.master_id}}-{{result_data.id}}" data-template="{{hyphenate name}}-result-template" data-item-class="{{item_class_name}}" data-sub-item="{{full_name}}" data-sub-id="{{result_data.id}}" data-item-id="{{result_data.item_id}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{{ data_sort_str }}} data-preprocessor="{{name}}_edit_form">
   {{/was}}
   {{#caption_before_substitutions result_data }}
-
-  <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" data-item-rank="{{result_data.rank}}" {{> custom_block_attrs_html }} >
+  <ul class="list-group {{#if prevent_edit }}prevent-edit{{else}}allow-edit{{/if}} {{is_activity_log_class}}" data-item-id="{{result_data.id}}" data-item-rank="{{result_data.rank}}" data-{{data_sort_attr}}="{{lookup result_data (underscore data_sort_attr)}}{{#if subsort_id }}--{{pad_start result_data.id 10 '0'}}{{/if}}" {{> custom_block_attrs_html }} >
     {{#unless item_list.length}}
       <li class="list-group-item {{name}}-{{name}}_id is-heading zero-item-heading">
         {{#with result_data}}{{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}{{/with}}

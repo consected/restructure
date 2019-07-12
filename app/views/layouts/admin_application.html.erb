@@ -29,6 +29,10 @@
     _fpa.user_prefs = {
       date_format: 'mm/dd/yyyy'
     };
+
+    window.setTimeout(function() {
+      _fpa.admin.index_loaded();
+    },10);
   </script>
   <%= render partial: 'layouts/bootstrap_modal' %>
   <script id="flash_template" type="text/x-handlebars-template" class="handlebars-template">

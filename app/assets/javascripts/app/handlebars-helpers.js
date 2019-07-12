@@ -125,6 +125,50 @@
       return res;
     });
 
+    Handlebars.registerHelper('sort', function(obj, dir, on_attr){
+      if(dir == 'desc') {
+        if(on_attr) {
+          return obj.sort(function(a,b){ return b[on_attr] - a[on_attr] });
+        }
+        return obj.reverse();
+      }
+      else {
+        if(on_attr) {
+          return obj.sort(function(a,b){ return a[on_attr] - b[on_attr] });
+        }
+        return obj.sort();
+      }
+    });
+
+    Handlebars.registerHelper('unique', function(obj){
+      var res = [];
+      var done = [];
+      for (var i in obj) {
+        var item = obj[i];
+        var strItem = item.toString();
+        if(done.indexOf(strItem) < 0) {
+          res.push(item);
+          done.push(strItem);
+        }
+      }
+
+      return res;
+    });
+
+    Handlebars.registerHelper('pluck', function(obj, attr, attr2){
+      var res = [];
+      for(var i in obj) {
+        if(obj.hasOwnProperty(i)) {
+          var item = obj[i];
+          var val = [item[attr]];
+          if(attr2) val.push(item[attr2]);
+          res.push(val);
+        }
+      }
+
+      return res;
+    });
+
     // if all are true
     // From: https://stackoverflow.com/a/14840042/483133
     Handlebars.registerHelper('if_all', function() {

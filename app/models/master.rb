@@ -214,6 +214,9 @@ class Master < ActiveRecord::Base
     r
   end
 
+  def trackers_length
+    trackers.count
+  end
 
   def as_json extras={}
     included_tables = {}
@@ -308,6 +311,7 @@ class Master < ActiveRecord::Base
     extras[:methods] ||= []
 
     extras[:methods] << :header_prefix
+    extras[:methods] << :trackers_length
 
     res = Admin::AppConfiguration.values_for(:show_ids_in_master_result, current_user) - self.class.crosswalk_attrs
 

@@ -61,7 +61,7 @@
     prevent_edit: @prevent_edits[:addresses],
     prevent_create: @prevent_creates[:addresses],
     item_list: %w(country_name,street,street2,street3,city,state_name,zip,region,postal_code,source_name,rec_type tracker_history_id),
-    data_sort: [:desc, "data-item-rank"],
+    data_sort: [:desc, "data-rank"],
     # add custom markup data attribute to allow country to be processed in Javascript formatting
     custom_block_attrs: {data_address_is_us: "{{#is country 'us'}}true{{else is country ''}}true{{else is country null}}true{{else}}false{{/is}}"}
   } if current_user.has_access_to?(:access, :table, :addresses) %>

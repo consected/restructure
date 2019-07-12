@@ -100,7 +100,11 @@ _fpa.postprocessors_admin = {
               mode: mode,
               foldGutter: true,
               lint: lint,
-              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+              extraKeys: {
+                Tab: function(cm) {cm.execCommand("indentMore")},
+                "Shift-Tab": function(cm) {cm.execCommand("indentLess")}
+              }
             });
             var cme = cm.getWrapperElement();
             cme.style.width = '100%';
@@ -110,26 +114,7 @@ _fpa.postprocessors_admin = {
         }).addClass('code-editor-formatted');
 
         block.find('.extra-help-info').not('.code-extra-help-info-formatted').each(function () {
-
-            var code_el = $(this).get(0);
-            var mode = $(this).attr('data-code-editor-type');
-            if(!mode) mode = 'yaml';
-
-            var cm = CodeMirror.fromTextArea(code_el, {
-              lineNumbers: true,
-              mode: mode,
-              readOnly: true,
-              foldGutter: true,
-              gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-            });
-
-            var cme = cm.getWrapperElement();
-            cme.style.width = '100%';
-            cme.style.height = '100%';
-            cme.style.backgroundColor = 'rgba(255,255,255, 0.2)';
-            code_el.CodeMirror = cm;
-            cm.refresh();
-
+          _fpa.admin.setup_yaml_viewer($(this));
         }).addClass('code-extra-help-info-formatted');
     },
 
