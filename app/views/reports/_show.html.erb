@@ -12,7 +12,7 @@
 <div class="report-criteria container-fluid" id="report-criteria-form">
   <div class="row" data-result="#report-embedded">
     <div class="col-sm-22 col-sm-offset-1">
-      <div class="well">
+      <div class="well report-criteria-block">
         <%= link_to "report library", reports_path, class: 'btn btn-info pull-right' unless @embedded_report %><h1><%=@report.name%></h1>
         <%= markdown_to_html @report.description %>
         <p>&nbsp;</p>

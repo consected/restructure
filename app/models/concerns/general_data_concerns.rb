@@ -130,6 +130,7 @@ module GeneralDataConcerns
       extras[:methods] << :update_action if respond_to? :update_action
       extras[:methods] << :_created if respond_to? :_created
       extras[:methods] << :_updated if respond_to? :_updated
+      extras[:methods] << :human_name if respond_to? :human_name
 
       extras[:methods] << :model_data_type if respond_to? :model_data_type
 
@@ -162,6 +163,7 @@ module GeneralDataConcerns
       extras[:methods] << :user_name if respond_to? :user_name
       # update_action can be used by requestor to identify whether the record was just updated (saved) or not
       extras[:methods] << :update_action if respond_to? :update_action
+      extras[:methods] << :human_name if respond_to? :human_name
       extras[:methods] << :_created if respond_to? :_created
       extras[:methods] << :_updated if respond_to? :_updated
       extras[:methods] << :_disabled if respond_to? :_disabled

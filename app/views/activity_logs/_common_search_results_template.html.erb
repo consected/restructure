@@ -53,7 +53,8 @@
     extra_type: :primary,
     references: primary_options.references,
     show_if: primary_options.show_if,
-    view_options: primary_options.view_options
+    view_options: primary_options.view_options,
+    extra_data_attribs: [:extra_log_type]
   } %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {
@@ -82,7 +83,8 @@
     extra_type: :blank_log,
     references: blank_options.references,
     show_if: blank_options.show_if,
-    view_options: blank_options.view_options
+    view_options: blank_options.view_options,
+    extra_data_attribs: [:extra_log_type]
   } %>
 
 <% extra_log_type_configs.each do |c|
@@ -118,7 +120,8 @@
       extra_type: c.name,
       references: c.references,
       show_if: c.show_if,
-      view_options: c.view_options
+      view_options: c.view_options,
+      extra_data_attribs: [:extra_log_type]
     } %>
 
   <% end %>
@@ -250,6 +253,7 @@
 
 
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
+          {{>sublist_controls sub_list="<%=item_type_name%>_logs" sub_list_data_name="activity_log__<%=item_type_name.pluralize%>" filter_attr='extra_log_type' filter_name="human_name" order='asc' all_active=true layout=true}}
           <div data-sort-desc="<%= data_action_when.hyphenate %>" <%= data_action_when.hyphenate %>="">
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-primary-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
             </div>

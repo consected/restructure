@@ -150,11 +150,21 @@
   <div class="sublist-controls">
     {{#if filter_attr}}
     <div class="sublist-filter-selectors">
-      {{#each (sort (unique (pluck (lookup this sub_list) filter_attr filter_name)) 'desc')}}
-      <button class="btn btn-default btn-sm filter-switch {{#is @key 0}}active{{/is}}" data-filter-sub-list="{{../sub_list}}" data-filter-sub-list-attr="{{../filter_attr}}" data-filter-val="{{this.[0]}}">{{#is this.[1]}}{{this.[1]}}{{else}}(none){{/is}}</button>
+      {{#each (sort (unique (pluck (lookup this (or sub_list_data_name sub_list)) filter_attr filter_name)) 'desc')}}
+      {{#is this.[1] 'includes' '{{' }}
+      {{else}}
+      <button class="btn btn-default btn-sm filter-switch {{#if ../all_active}}active{{else}}{{#is @key 0}}active{{/is}}{{/if}}" data-filter-sub-list="{{../sub_list}}" data-filter-sub-list-attr="{{hyphenate ../filter_attr}}" data-filter-val="{{this.[0]}}">{{#is this.[1]}}{{this.[1]}}{{else}}(none){{/is}}</button>
+      {{/is}}
       {{/each}}
     </div>
     {{/if}}
+
+    {{#if layout}}
+    <div class="sublist-layout-selectors">
+      <button class="btn btn-default btn-sm layout-switch glyphicon glyphicon-th active" data-layout-sub-list="{{sub_list}}" data-force-layout="card-block"></button><button class="btn btn-default btn-sm layout-switch glyphicon glyphicon-align-justify" data-layout-sub-list="{{sub_list}}" data-force-layout="wide-block"></button>
+    </div>
+    {{/if}}
+
     {{#if order}}
     <div class="sublist-order-selector">
       <button class="btn btn-default btn-sm order-switch glyphicon glyphicon-sort-by-attributes" data-order-sub-list="{{sub_list}}" data-order-val="{{order}}"></button>

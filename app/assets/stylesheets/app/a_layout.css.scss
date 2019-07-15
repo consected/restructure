@@ -397,8 +397,8 @@ div.popover {
 .common-template-item {
   .expandable {
     max-height: 100px;
-    padding-bottom: 20px;
-    margin-bottom:26px;
+    // padding-bottom: 20px;
+    margin-bottom: 18px;
     border-bottom: 2px dotted gray;
     display: block;
     overflow: hidden;
@@ -408,17 +408,17 @@ div.popover {
       cursor: s-resize;
     }
 
-    &:after {
-      content: '(click to expand)';
-      font-size: 90%;
-      font-weight: normal;
-      font-style: italic;
-      display: block;
-      padding-top: 0;
-      color: rgb(128, 128, 128);
-      position: absolute;
-      top: 104px;
-    }
+    // &:after {
+    //   content: '(click to expand)';
+    //   font-size: 90%;
+    //   font-weight: normal;
+    //   font-style: italic;
+    //   display: block;
+    //   padding-top: 0;
+    //   color: rgb(128, 128, 128);
+    //   position: absolute;
+    //   top: 104px;
+    // }
   }
   .expanded {
       max-height: none;
@@ -427,14 +427,14 @@ div.popover {
       &:hover {
           cursor: n-resize;
       }
-      &:after {
-        content: '(click to shrink)';
-        font-size: 90%;
-        font-weight: normal;
-        font-style: italic;
-        position: relative;
-        top: 4px;
-      }
+      // &:after {
+      //   content: '(click to shrink)';
+      //   font-size: 90%;
+      //   font-weight: normal;
+      //   font-style: italic;
+      //   position: relative;
+      //   top: 4px;
+      // }
   }
 }
 

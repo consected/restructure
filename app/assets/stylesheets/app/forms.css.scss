@@ -169,7 +169,10 @@ a.add-icon{
 }
 
 
-#master-search-accordion .panel-default {border: 0;}
+#master-search-accordion .panel-default {
+  border: 0;
+  box-shadow: silver 0px 2px 4px;
+}
 
 .btn-primary.disabled, .btn-primary[disabled] {
   background-color: gray;

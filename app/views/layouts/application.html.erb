@@ -5,7 +5,7 @@
   <%= stylesheet_link_tag    'application', media: 'all' %>
   <%
   if current_user && current_user.app_type_id
-    fn = "app_#{current_user.app_type.name.gsub(' ', '_')}.css"
+    fn = "app_#{current_user.app_type.name.id_underscore}.css"
     if Rails.root.join("public", "app_specific", fn).exist? %>
   <link rel="stylesheet" media="all" href="/app_specific/<%=fn%>">
   <% end %>

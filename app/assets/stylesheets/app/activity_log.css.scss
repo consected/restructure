@@ -16,6 +16,11 @@
 }
 
 .activity-logs-header {
+  box-shadow: silver 0px 2px 4px;
+  background-color: rgb(242, 242, 242);
+}
+
+.activity-logs-header {
   .action-buttons {
     margin-top: 0em;
     margin-bottom: -0.4em;
@@ -54,6 +59,12 @@ span.related-tracker-collapser .list-group-item:first-child {
     font-weight: bold;
     color: black;
   }
+
+  .sub-list-item .list-group {
+    box-shadow: 0 4px 4px 0px #d6d6d6;
+    border-radius: 4px;
+    border: 1px solid rgb(221, 221, 221);
+}
 
 }
 
@@ -151,3 +162,9 @@ a.related-tracker-histories-link {
 
 
 .activity-logs-generic-block .common-template-item {margin-bottom: 40px;}
+
+
+.wide-block {
+  width: 75%;
+  margin-left: 12.5%;
+}

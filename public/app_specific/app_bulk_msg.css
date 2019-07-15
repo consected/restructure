@@ -18,6 +18,7 @@ div#master-search-accordion {
     background: none;
     width: 75%;
     margin-left: 12.5%;
+    box-shadow: none;
 }
 
 .activity-logs-header .action-buttons {
@@ -149,4 +150,8 @@ table.import-grid td, table.table.report-table td {
     font-family: monospace;
     font-size: 16px;
     font-weight: normal;
+}
+
+#master-search-accordion .panel-default {
+  margin-bottom: 5px;
 }

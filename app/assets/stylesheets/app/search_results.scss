@@ -649,8 +649,10 @@ div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
   }
 }
 
-.common-template-item {
-    box-shadow: 0 4px 4px -3px silver;
+.common-template-item .list-group {
+    box-shadow: 0 2px 3px 1px #e8e8e8;
+    border-radius: 4px;
+
 }
 
 .master-result:hover {
@@ -730,8 +732,9 @@ li.list-group-item.is_external_id_item {
     .filter-switch {
       background: none;
       box-shadow: none;
-      background-color: rgb(232, 232, 232);
-      color: rgb(101, 100, 100);
+      background-color: rgb(208, 208, 208);
+      color: rgb(255, 255, 255);
+      text-shadow: 1px 1px 1px grey;
       font-weight: bold;
       border-radius: 30px;
     }
@@ -740,6 +743,7 @@ li.list-group-item.is_external_id_item {
       background-color: rgb(230, 213, 176);
       box-shadow: none;
       color: rgb(127, 90, 9);
+      text-shadow: 1px 1px 1px white;
       border-color: rgb(199, 181, 142);
     }
 
@@ -751,19 +755,58 @@ li.list-group-item.is_external_id_item {
     .order-switch {
         border-radius: 50%;
         background: none;
+        background-color: rgb(208, 208, 208);
         box-shadow: none;
-        background-color: rgb(232, 232, 232);
-        color: rgb(101, 100, 100);
+        color: rgb(255, 255, 255);
+        text-shadow: 1px 1px 1px grey;
     }
 
     .order-switch.active {
       background-color: rgb(230, 213, 176);
       box-shadow: none;
       color: rgb(127, 90, 9);
+      text-shadow: 1px 1px 1px white;
       border-color: rgb(199, 181, 142);
     }
 
   }
+
+
+    .sublist-layout-selectors {
+      display: inline-block;
+      position: relative;
+      margin-left: -7%;
+      float: right;
+      right: 5%;
+
+
+      .layout-switch {
+        background: none;
+        box-shadow: none;
+        background-color: rgb(208, 208, 208);
+        color: rgb(255, 255, 255);
+        text-shadow: 1px 1px 1px grey;
+        margin-right: -1px;
+      }
+
+      .layout-switch.active {
+        background-color: rgb(230, 213, 176);
+        box-shadow: none;
+        color: rgb(127, 90, 9);
+        border-color: rgb(199, 181, 142);
+        text-shadow: 1px 1px 1px white;
+        z-index: 100;
+      }
+
+      .layout-switch:first-of-type {
+        border-radius: 3px 0 0 3px;
+      }
+      .layout-switch:last-of-type {
+
+        border-radius: 0 3px 3px 0;
+      }
+    }
+
 }
 
 

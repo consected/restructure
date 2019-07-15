@@ -131,6 +131,10 @@
     view_options = {}
   end
 
+  unless defined? extra_data_attribs
+    extra_data_attribs = []
+  end
+
   item_list = [] if only_see_presence
 
   al_full_name = "activity_log__#{full_name.underscore}"
@@ -227,7 +231,8 @@
     orientation: '<%=orientation%>',
     view_options: <%=view_options.to_json.html_safe%>,
     add_item_label: '<%=add_item_label%>',
-    supports_activity_log: <%=!!supports_activity_log%>
+    supports_activity_log: <%=!!supports_activity_log%>,
+    extra_data_attribs: <%= extra_data_attribs.to_json.html_safe %>
   }
 
   <% if full_name.to_s.end_with?('_primary') %>_fpa.show_if.forms['<%=full_name.sub(/_primary$/, '')%>'] = <% end %>

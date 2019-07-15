@@ -132,8 +132,8 @@ module ActivityLogHandler
 
 
   def human_name
-    return extra_log_type_config.label || extra_log_type.to_s.humanize
-    # self.class.activity_log_name
+    return extra_log_type_config.label if extra_log_type_config.label.present?
+    return extra_log_type.to_s.humanize
   end
 
 
