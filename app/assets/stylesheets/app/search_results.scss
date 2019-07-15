@@ -112,6 +112,10 @@ li.list-group-item {
       visibility: visible;
     }
 
+    &.caption-before:empty {
+      display: none;
+    }
+
     &:not(.caption-before) {
 
       strong {
@@ -529,7 +533,7 @@ ul[data-address-is-us="false"]{
 .item-highlight, .selected-item {
   .list-group-item:first-child {
     &:not(.is-sub-heading){
-    background-color: #ffc;
+    background-color: #fff6e2;
     }
   }
 }
@@ -537,7 +541,7 @@ ul[data-address-is-us="false"]{
 tr.item-highlight {
 
   border: solid 1px gray;
-  background: #deffae;
+  background: #fff6e2;
 
 }
 
@@ -552,8 +556,8 @@ tr.item-highlight {
 .activity-log-list .linked-item-highlight {
   .list-group-item:first-child {
     &:not(.is-sub-heading){
-    border-color: #abcc8c;
-    background: #deffae;
+    border-color: #e6d5b0;
+    background: #f6e9cc;
     }
   }
 }
@@ -656,7 +660,7 @@ div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
 }
 
 .master-result:hover {
-    background: #deefd3;
+    background: #f6e9cc;
 }
 
 span.alt_id {
@@ -807,6 +811,80 @@ li.list-group-item.is_external_id_item {
       }
     }
 
+}
+
+.common-template-item[data-rec-type="phone"] .list-group-item-heading::before {
+
+    content: "\e145";
+    position: relative;
+    top: 2px;
+    display: inline-block;
+    font-family: 'Glyphicons Halflings';
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin-right: 4px;
+    color: #929191;
+}
+
+.common-template-item[data-rec-type="email"] {
+
+  .list-group-item-heading {
+    font-size: 16px;
+  }
+
+  .list-group-item-heading::before {
+
+    content: "@";
+    margin-right: 4px;
+    vertical-align: baseline;
+    font-size: 87%;
+    font-weight: bold;
+    font-family: monospace;
+    color: #929191;
+  }
+}
+
+.common-template-item[data-model-data-type="default"] {
+
+  .list-group-item.tracker-histories-caption.is-minor-heading {
+
+    display: inline-block;
+    width: 16px;
+    background: none;
+    height: 30px;
+    overflow: hidden;
+    float: right;
+    padding: 0;
+    margin-right: 12px;
+    border: 0;
+    box-shadow: none;
+    z-index: 100;
+    white-space: nowrap;
+
+    a::before {
+      content: '\e137';
+      width: 10px;
+      display: inline-block;
+      float: none;
+      margin: 0;
+      padding: 0 46px 0 0px;
+      height: auto;
+      z-index: 100;
+      position: relative;
+      top: 7px;
+      display: inline-block;
+      font-family: 'Glyphicons Halflings';
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color: rgb(51, 122, 183);
+    }
+  }
 }
 
 

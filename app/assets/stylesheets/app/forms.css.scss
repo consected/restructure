@@ -171,7 +171,15 @@ a.add-icon{
 
 #master-search-accordion .panel-default {
   border: 0;
-  box-shadow: silver 0px 2px 4px;
+  box-shadow: none;
+  margin-top: 0px;
+}
+
+#master-search-accordion .panel-collapse.collapse.in {
+    box-shadow: silver 0px 2px 4px;
+    border: 1px solid rgb(192, 192, 192);
+    margin-bottom: 6px;
+    border-radius: 4px;
 }
 
 .btn-primary.disabled, .btn-primary[disabled] {

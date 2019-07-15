@@ -246,7 +246,7 @@ ul.list-group ul.list-group {
 li.search-field input.default {width: 100% !important;}
 
 input.form-control.has-value, select.form-control.has-value {
-    background-color: #f2dede !important;
+    background-color: #fff6e2 !important;
 }
 
 input.form-control.has-value, select.form-control.has-value {
@@ -396,9 +396,9 @@ div.popover {
 
 .common-template-item {
   .expandable {
-    max-height: 100px;
+    max-height: 174px;
     // padding-bottom: 20px;
-    margin-bottom: 18px;
+    margin-bottom: 0px;
     border-bottom: 2px dotted gray;
     display: block;
     overflow: hidden;
@@ -443,6 +443,10 @@ div.popover {
     margin-top: 0;
 }
 
+
+.label {
+  border-radius: 1em;
+}
 
 button.btn.hamburger {
     &:active, &:focus {

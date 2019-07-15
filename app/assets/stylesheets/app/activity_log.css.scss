@@ -60,6 +60,10 @@ span.related-tracker-collapser .list-group-item:first-child {
     color: black;
   }
 
+  .sub-list-item {
+    box-shadow: none;
+  }
+
   .sub-list-item .list-group {
     box-shadow: 0 4px 4px 0px #d6d6d6;
     border-radius: 4px;

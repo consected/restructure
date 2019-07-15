@@ -202,7 +202,6 @@ _fpa.postprocessors = {
       // We don't just click though, since that hides flash messages too fast
       if(data.search_action == 'MSID') {
         var dtte = $('.advanced-form-selections [data-toggle="collapse"]').not('.collapsed, .prevent-list-collapse');
-        // dtte.click();
 
         var dtt = dtte.attr('data-target');
         if(dtt && dtt != '') {

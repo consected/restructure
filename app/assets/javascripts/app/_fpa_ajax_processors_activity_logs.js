@@ -52,7 +52,7 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log
 
             window.setTimeout(function(){
               var target_block = _fpa.utils.jump_to_linked_item(href);
-              _fpa.form_utils.format_block(target_block);
+              _fpa.form_utils.format_block(target_block.parents('.activity-log-list'));
               _fpa.activity_logs.unselect_all(target_block, master_id)
             }, 1000)
           }

@@ -5,13 +5,13 @@
 %>
 
 
-<div class="panel-group <%= @requested_master ? 'loading-results' : '' %>" id="master-search-accordion" role="tablist" aria-multiselectable="true">
+<div class="panel-group <%= @requested_master ? 'loading-results' : '' %>" id="master-search-accordion" role="tablist" aria-multiselectable="false">
   <div class="advanced-form-selections">
     <% unless app_config_set(:hide_search_form_simple) %>
-    <button id="expand-simple-form" class="btn btn-primary" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="true" aria-controls="master-search-advanced-form">Simple Search</button>
+    <button id="expand-simple-form" class="btn btn-primary search-selector-btn" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-simple-form" aria-expanded="true" aria-controls="master-search-simple-form">Simple Search</button>
     <% end %>
     <% unless app_config_set(:hide_search_form_advanced) %>
-    <button id="expand-adv-form" class="btn btn-primary collapsed" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="false" aria-controls="master-search-advanced-form">Advanced Search</button>
+    <button id="expand-adv-form" class="btn btn-primary collapsed search-selector-btn" type="button" data-parent="#master-search-accordion" data-toggle="collapse" data-target="#master-search-advanced-form" aria-expanded="false" aria-controls="master-search-advanced-form">Advanced Search</button>
     <% end %>
     <% Report.active.searchable.for_user(current_user).each do |r|%>
       <%  # Hide the searchable reports, except for if one of those reports is the default.
@@ -20,7 +20,7 @@
           add_class = (is_default ? 'is_default_report' : 'collapsed')
           add_class += ' prevent-list-collapse' if r.view_options.prevent_collapse_for_list
       %>
-          <a href="<%= report_path(id: r.id, part: :form, format: :html, view_context: :search) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse <%= add_class %> one-time-only-ajax <%=hide_searchable_reports ? 'hidden' : ''%>" type="button" data-toggle="collapse" data-result-target="#master-report-<%=r.report_identifier%> .searchable-report" data-target="#master-report-<%=r.report_identifier%>" aria-expanded="<%= is_default ? 'true' : 'false' %>" aria-controls="master-report-<%=r.report_identifier%>" id="expand-searchable-report-<%=r.report_identifier%>" ><%=r.name%></a>
+          <a href="<%= report_path(id: r.id, part: :form, format: :html, view_context: :search) %>" data-preprocessor="reports_form" data-parent="#master-search-accordion" data-remote="true" class="btn btn-primary prevent-on-collapse  search-selector-btn <%= add_class %> one-time-only-ajax <%=hide_searchable_reports ? 'hidden' : ''%>" type="button" data-toggle="collapse" data-result-target="#master-report-<%=r.report_identifier%> .searchable-report" data-target="#master-report-<%=r.report_identifier%>" aria-expanded="<%= is_default ? 'true' : 'false' %>" aria-controls="master-report-<%=r.report_identifier%>" id="expand-searchable-report-<%=r.report_identifier%>" ><%=r.name%></a>
       <% end %>
     <% end %>
 
@@ -78,6 +78,14 @@ $(document).ready(function() {
       }
     }
   }
+
+  $(document).on('show.bs.collapse', '#master-search-simple-form', function(){
+    var $dtte = $('#master-search-accordion .panel-collapse.in').not('#master-search-simple-form');
+    console.log($dtte);
+    $dtte.removeClass('in');
+    $('.search-selector-btn').not('#expand-simple-form').addClass('collapsed').removeClass('active');
+
+  });
 
   $('.searchable-report-panel').on('shown.bs.collapse', function(){
     $('#master_results_block').html('');

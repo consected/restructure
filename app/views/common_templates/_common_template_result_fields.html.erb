@@ -71,7 +71,7 @@
   {{#unless hide_tracker_panel}}
     {{#if result_data.tracker_histories}}
     <li class="list-group-item {{hyphenate full_name}}-tracker-histories-caption tracker-histories-caption is-minor-heading">
-      <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#{{hyphenate name}}-tracker-histories-{{result_data.master_id}}-{{result_data.id}}" aria-expanded="false">Related tracker items <span class="caret"></span></a>
+      <a class="collapsed related-tracker-histories-link" data-toggle="collapse" href="#{{hyphenate name}}-tracker-histories-{{result_data.master_id}}-{{result_data.id}}" aria-expanded="false" title="Related tracker items">Related tracker items <span class="caret"></span></a>
     </li>
     {{/if}}
     <span id="{{hyphenate full_name}}-tracker-histories-{{result_data.master_id}}-{{result_data.id}}" class="collapse related-tracker-collapser">
@@ -186,9 +186,7 @@
 
 <script id="common_template_result_fields" type="text/x-handlebars-template" class="hidden handlebars-partial">
 {{#is 'all_fields' 'in' template_config.caption_before_keys}}
-  <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">
-    {{{fpa_state_item 'caption_before' (underscore name) @key 'show_caption'}}}
-  </li>
+  <li class="list-group-item caption-before results-caption-before {{hyphenate full_name}}-all_fields all-fields-caption">{{{fpa_state_item 'caption_before' (underscore name) 'all_fields' 'show_caption'}}}</li>
 {{/is}}
 
 {{#if template_config.item_list.length}}

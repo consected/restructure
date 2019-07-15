@@ -46,13 +46,14 @@
 
 <%= render partial: 'common_templates/search_results_template', locals: {
     name: 'player_contact',
-    caption: '{{capitalize rec_type}}', # substitute the rec_type attribute (capitalized) as the block caption
+    caption: '{{data}}', # substitute the rec_type attribute (capitalized) as the block caption
     model_data_type: :default,
     prevent_edit: @prevent_edits[:player_contacts],
     prevent_create: @prevent_creates[:player_contacts],
-    item_list: %w(data source tracker_history_id),
+    item_list: %w(source tracker_history_id),
     data_sort: [:desc, "data-rank"],
-    extra_class: '{{rec_type}}-type'
+    extra_class: '{{rec_type}}-type',
+    extra_data_attribs: [:rec_type]
   } if current_user.has_access_to?(:access, :table, :player_contacts) %>
 
 <%= render partial: 'common_templates/search_results_template', locals: {

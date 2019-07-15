@@ -43,6 +43,9 @@ _fpa.utils.jump_to_linked_item = function(target, offset, options) {
       if(h.hasClass('collapse')) {
         $('[data-toggle="collapse"][data-target="'+target+'"]:visible').first().click()
       }
+      else {
+        _fpa.form_utils.format_block(h);
+      }
 
   }
   // Scroll if necessary
