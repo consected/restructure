@@ -78,7 +78,7 @@ Rails.application.routes.draw do
   get 'masters/search', as: 'masters_search'
   get 'masters/search' => 'masters#search'
 
-  resources :definitions, only: [:show]
+  resources :definitions, only: [:show, :create]
 
   resources :masters, only: [:show, :index, :new, :create] do
     resources :tracker_histories, only: [:index]

@@ -19,7 +19,7 @@ class Admin::AppConfiguration < Admin::AdminBase
 
   def self.configurations
     [
-      "create master with",
+      "create master with", "completion sub processes",
       "default search form", "default report tab", "file browser default view", "header no subject details label", "hide navbar search", "hide player accuracy",
       "hide player tabs", "hide pro info", "hide search form advanced", "hide search form searchable reports",
       "hide search form simple", "hide tracker panel", "heading create master record label", "filestore directory id",
@@ -42,10 +42,10 @@ class Admin::AppConfiguration < Admin::AdminBase
   end
 
   # Get an array of comma separated values from an app config value
-  def self.values_for name, user=nil
+  def self.values_for name, user=nil, to: :to_sym
     res = value_for(name, user)
     res = '' if res.blank?
-    res.split(',').map {|i| i.strip.to_sym}
+    res.split(',').map {|i| i.strip.send(to)}
   end
 
   def self.sym_to_name config_name

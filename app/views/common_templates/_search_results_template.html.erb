@@ -160,6 +160,7 @@
   show_item_type_flags_before = show_item_type_flags && !item_flags_after
 
   item_list = item_list.is_a?(Array) ? item_list.join(',') : item_list
+  item_list = item_list.gsub(/,\s*,/, ',')
 
   formatted_item_blocks = {}
   item_blocks.each do |item_name_sym, item_attrs|

@@ -253,7 +253,7 @@
 
 
         <div class="row common-template-list activity-log-list resize-children" id="activity-logs-master-{{master_id}}-" data-sub-list="<%=item_type_name%>_logs">
-          {{>sublist_controls sub_list="<%=item_type_name%>_logs" sub_list_data_name="activity_log__<%=item_type_name.pluralize%>" filter_attr='extra_log_type' filter_name="human_name" order='asc' all_active=true layout=true}}
+          {{>sublist_controls sub_list="<%=item_type_name%>_logs" sub_list_data_name="activity_log__<%=item_type_name.pluralize%>" filter_attr='extra_log_type' filter_name="human_name" filter_all=true order='asc' all_active=true layout=true}}
           <div data-sort-desc="<%= data_action_when.hyphenate %>" <%= data_action_when.hyphenate %>="">
             <div class="new-block new-after-parent alr-new-block <%=col_width_classes%> hidden" id="activity-log--<%=item_type_name_hyphenated%>-primary-{{master_id}}-" data-subscription="activity-log--<%=item_type_name_hyphenated%>-primary-edit-form-{{master_id}}-" data-preprocessor="activity_log_edit_form">
             </div>

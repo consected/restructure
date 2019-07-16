@@ -218,6 +218,10 @@ class Master < ActiveRecord::Base
     trackers.count
   end
 
+  def tracker_completions
+    TrackerHistory.completions self
+  end
+
   def as_json extras={}
     included_tables = {}
 
@@ -237,6 +241,7 @@ class Master < ActiveRecord::Base
 
     style = extras[:style]
     extras.delete(:style) if extras[:style]
+    extras[:methods] ||= []
 
 
     raise FphsException.new "current_user not set for master when getting results" unless self.current_user
@@ -305,10 +310,11 @@ class Master < ActiveRecord::Base
         included_tables[:latest_tracker_history] = {
           methods: [:protocol_name, :protocol_position, :sub_process_name, :event_name, :user_name, :record_type_us, :record_type, :record_id, :event_description, :event_milestone]
         }
+
+        extras[:methods] << :tracker_completions
       end
     end
     extras.merge!({ include: included_tables })
-    extras[:methods] ||= []
 
     extras[:methods] << :header_prefix
     extras[:methods] << :trackers_length

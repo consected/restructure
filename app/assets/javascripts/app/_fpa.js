@@ -27,6 +27,7 @@ _fpa = {
       if (d) $(d).removeClass('ajax-running').removeClass('ajax-canceled');
     } catch(err) {}
     _fpa.remote_request = null;
+    _fpa.state.search_running = false;
   },
   ajax_canceled: function(block){
     try {
@@ -35,6 +36,7 @@ _fpa = {
       if (d) $(d).removeClass('ajax-running').addClass('ajax-canceled');
     } catch(err) {}
     _fpa.remote_request = null;
+    _fpa.state.search_running = false;
   },
   compile_templates: function(){
     $('script.handlebars-partial').each(function(){
@@ -743,6 +745,7 @@ _fpa = {
         _fpa.ajax_canceled(_fpa.remote_request_block);
         _fpa.remote_request_block = null;
         _fpa.remote_request = null;
+        _fpa.state.search_running = false;
     }
   },
 

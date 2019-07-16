@@ -166,13 +166,10 @@
         cnames = ["general_selections-item_type+#{ito.item_type}"]
       end
 
-      cnames.each do |cname|
   %>
-  _fpa.set_definition('<%=cname%>');
+  _fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
 
-  <%  end
-    end
-  %>
+  <% end %>
 </script>
 
 
@@ -222,6 +219,8 @@
     <% else # no panels defined %>
       {{>master_external_links_panel}}
 
+      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
+
       <% ActivityLog.enabled.each do |a| %>
         <% if view?[a.full_item_types_name.to_sym] %>
         <div id="<%= a.full_item_types_name.hyphenate %>-{{id}}" class="activity-logs-generic-block <%= a.full_item_types_name.hyphenate %>-block collapse" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="<%= a.full_item_types_name %>" data-template="<%= a.model_data_template_name %>-main-result-template"  >
@@ -230,7 +229,6 @@
         <% end %>
       <% end %>
 
-      <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'trackers', panel_name: 'trackers', panel_label: 'Tracker', initial_show: true} %>
       <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'details', panel_name: 'details', panel_label: 'Details', initial_show: true} %>
       <%= render partial: 'masters/search_results_category_panel', locals: {panel: nil, category: 'external-ids', panel_name: 'external-ids', panel_label: 'External IDs', initial_show: false} %>
 

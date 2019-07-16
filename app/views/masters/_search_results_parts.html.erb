@@ -150,6 +150,9 @@
   <div class="sublist-controls">
     {{#if filter_attr}}
     <div class="sublist-filter-selectors">
+      {{#if filter_all}}
+      <button class="btn btn-default btn-sm filter-switch-all glyphicon glyphicon-minus" data-filter-all="true"></button>
+      {{/if}}
       {{#each (sort (unique (pluck (lookup this (or sub_list_data_name sub_list)) filter_attr filter_name)) 'desc')}}
       {{#is this.[1] 'includes' '{{' }}
       {{else}}

@@ -27,7 +27,7 @@
         prev_drop_down = drop_down
         %>
         <li role="presentation" class="dropdown">
-          <a href="#" class="dropdown-toggle" id="dm-tag-drop-<%=dd_name%>" data-toggle="dropdown" aria-controls="dm-tag-drop-contents-<%=dd_name%>" aria-expanded="false"><%= dd_label%></a>
+          <a href="#" class="dropdown-toggle" id="dm-tag-drop-<%=dd_name%>" data-toggle="dropdown" aria-controls="dm-tag-drop-contents-<%=dd_name%>" aria-expanded="false"><span class="caret"></span> <%= dd_label%></a>
           <ul class="dropdown-menu" aria-labelledby="dm-tag-drop-<%=dd_name%>" id="dm-tag-drop-contents-<%=dd_name%>">
       <% end %>
     <%= render partial: 'masters/search_results_master_tabs_item', locals: {panel: panel} %>

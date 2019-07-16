@@ -169,6 +169,7 @@
       </ul>
 
       </li>
+  {{else is this_value '===' null}}
   {{else}}
     <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{/is}}

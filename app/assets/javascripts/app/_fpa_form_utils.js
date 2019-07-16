@@ -284,12 +284,18 @@ _fpa.form_utils = {
       filter_out = !$a.hasClass('active');
 
       if(filter_out) {
-        $targets.slideUp().addClass('filtered-out');
+        $targets.slideUp().addClass('filtered-out', function(){
+          $targets.each (function(){
+            _fpa.form_utils.format_block($(this));
+          });
+
+        });
       }
       else {
-        $targets.slideDown().removeClass('filtered-out');
-        $targets.each (function(){
-          _fpa.form_utils.format_block($(this));
+        $targets.slideDown().removeClass('filtered-out', function(){
+          $targets.each (function(){
+            _fpa.form_utils.format_block($(this));
+          });
         });
       }
 
@@ -1161,6 +1167,22 @@ _fpa.form_utils = {
         $(this).find('.filter-switch').each(function () {
            _fpa.form_utils.handle_sub_list_filters($(this), true);
         });
+
+        $(this).on('click', '.filter-switch-all', function(ev) {
+          if ($(this).hasClass('filter-all-active')) {
+            $(this).parent().find('.filter-switch').not('.active').click();
+            $(this).removeClass('filter-all-active');
+            $(this).removeClass('glyphicon-plus');
+            $(this).addClass('glyphicon-minus');
+          }
+          else {
+            $(this).parent().find('.filter-switch.active').click();
+            $(this).addClass('filter-all-active');
+            $(this).addClass('glyphicon-plus');
+            $(this).removeClass('glyphicon-minus');
+          }
+        });
+
       }).addClass('formatted-slfs');
 
 

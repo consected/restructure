@@ -16,7 +16,7 @@
       </div>
       <%  external_id_types.each do |e|%>
         <% if view?[e.plural_name.to_sym] %>
-        <div class="<%= layout_item_block_sizes[:regular] %>" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
+        <div class="<%= layout_item_block_sizes[:narrow] %>" id="<%=e.hyphenated_plural_name%>-{{id}}-" data-sub-list="<%=e.plural_name%>"></div>
         <% end %>
       <% end %>
     </div>
@@ -120,18 +120,43 @@
 
 </script>
 
+
+<script id="tracker_completions" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with tracker}}
+    {{>tracker_completions}}
+  {{/with}}
+</script>
+
+<script id="tracker_completions-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  {{#each tracker_completions}}
+    <span class="label label-primary" title="{{protocol_name}} {{sub_process_name}}" data-sub-item="{{sub_process_id}}"><i class="glyphicon glyphicon-ok"></i>&nbsp;{{protocol_name}}</span>
+  {{/each}}
+</script>
+
+
 <script id="master_trackers_panel" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <% unless app_config_set(:hide_tracker_panel) %>
-    <div id="trackers-{{id}}" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="collapse tracker-block panel panel-default">
-    {{#with trackers}}
-      {{>tracker_tree_results master_id=id}}
-    {{else}}
-      {{>empty_tracker_tree_results master_id=id}}
-    {{/with}}
+    <div id="trackers-{{id}}" class="panel panel-default section-panel page-layout-panel contains-categories collapse trackers-block format-block-on-expand">
+      <div class="is-header default-header section-panel-header">
+        <a href="#trackers-{{id}}" data-toggle="collapse" class="dropup scroll-to-master pull-right glyphicon glyphicon-remove-sign show-entity" title="close panel"></a>
+        <h4 class="list-group-item-heading">Tracker</h4>
 
-    {{#with latest_tracker_history.[0]}}
-      <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>
-    {{/with}}
+        <div id="trackers-{{id}}-completions" class="tracker-completions" data-sub-list="tracker_completions" data-template="tracker-completions">
+          {{>tracker_completions}}
+        </div>
+      </div>
+
+      <div id="trackers-{{id}}-inner" data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-tree-result-template" class="tracker-inner">
+      {{#with trackers}}
+        {{>tracker_tree_results master_id=id}}
+      {{else}}
+        {{>empty_tracker_tree_results master_id=id}}
+      {{/with}}
+
+      {{#with latest_tracker_history.[0]}}
+        <div class="latest-tracker-history" id="latest-tracker-history-{{master_id}}" data-lth-protocol="{{protocol_name}}" data-lth-process="{{sub_process_name}}" data-lth-event-id="{{protocol_event_id}}" data-lth-event="{{event_name}}" data-lth-event-milestone="{{event_milestone}}"></div>
+      {{/with}}
+      </div>
     </div>
   <% end %>
 </script>

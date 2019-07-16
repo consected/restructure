@@ -2,10 +2,9 @@
   background-color: white;
   border: 1px solid rgb(219, 219, 219);
   padding: 10px 30px;
-}
+  border-radius: 4px;
+  box-shadow: 0 3px 4px 1px #e9e9e9;
 
-body.reports {
-  background: rgb(245, 245, 245);
 }
 
 .report-results-outer .report-results-block {
@@ -125,5 +124,5 @@ p.small.report-table-name {
 .report-criteria-block {
   background: rgb(255, 255, 255);
   box-shadow: 0 5px 4px 2px #e4e4e4;
-  
+
 }

@@ -235,7 +235,7 @@ li.list-group-item.dialog-before {
 
 li.list-group-item small.notes-block-label {
   display: block;
-  position: relative;
+  position: relative !important;
 }
 
 input[type='checkbox'] {

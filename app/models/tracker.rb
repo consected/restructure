@@ -244,7 +244,12 @@ class Tracker < UserBase
     errors.add(:status, ' must be selected') if sub_process_id.nil? && protocol
   end
 
+  def tracker_completions
+    self.master.tracker_completions
+  end
+
   def as_json extras={}
+    extras[:include] ||= {}
     extras[:methods] ||= []
     extras[:methods] << :protocol_name
     extras[:methods] << :protocol_position
@@ -256,6 +261,9 @@ class Tracker < UserBase
     extras[:methods] << :record_type
     extras[:methods] << :record_id
     extras[:methods] << :_merged
+
+    extras[:methods] << :tracker_completions
+
 
     super(extras)
   end

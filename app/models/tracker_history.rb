@@ -19,6 +19,14 @@ class TrackerHistory < UserBase
     return true unless master_user
   end
 
+  # Get completions for a specific master (which must have current_user set)
+  def self.completions master
+    completion_sub_processes = Admin::AppConfiguration.values_for :completion_sub_processes, master.current_user, to: :to_i
+    res = master.tracker_histories.joins(:protocol, :sub_process).where(sub_process_id: completion_sub_processes).reorder("protocols.name asc")
+    res.all.map {|r| {protocol_id: r.protocol_id,  sub_process_id: r.sub_process_id, protocol_name: r.protocol_name, sub_process_name: r.sub_process_name}}.uniq
+  end
+
+
   def as_json extras={}
     extras[:methods] ||= []
     extras[:methods] << :protocol_name

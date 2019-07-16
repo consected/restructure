@@ -136,6 +136,10 @@ _fpa.postprocessors_trackers = {
             t.html(v);
         }
 
+        // Refresh the completions list
+        var $completions = $('#trackers-'+data.tracker.master_id+'-completions');
+        _fpa.view_template($completions, 'tracker_completions', data);
+
         // if we are viewing in chronological mode when an item is added,
         //force a refresh of the list
         var chronres = $('table.tracker-chron-results');

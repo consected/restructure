@@ -1,3 +1,13 @@
+
+html{
+  min-height: 100%;
+  background: rgb(248, 248, 248);
+}
+
+body {
+  background: rgb(248, 248, 248);
+}
+
 body.development nav.navbar {
     background: #B1DBB1;
 }
@@ -11,6 +21,7 @@ body {
     transition: filter 0.6s;
   }
 }
+
 body.page-loading {
   // filter: grayscale(100%);
   // opacity: 0.2;
@@ -26,6 +37,19 @@ body.page-loading {
       }
   }
 
+}
+
+.panel {
+    box-shadow: 0 2px 4px 0px rgba(0, 0, 0, 0.1);
+}
+
+.navbar.navbar-default {
+  background: rgb(238, 238, 238);
+  box-shadow: 0 2px 4px 1px silver;
+
+  .navbar-nav > li > a {
+      color: rgb(69, 69, 69);
+  }
 }
 
 h2.no-results-msg {
@@ -211,14 +235,17 @@ a.close-entity, a.glyphicon.glyphicon-remove-sign {
 
 
         }
-        > a > .caret {
+        > a > .caret, &.dropdown.open .caret {
           visibility: visible;
           transform: rotate(180deg);
         }
-        > a.collapsed > .caret {
+
+        > a.collapsed > .caret, &.dropdown .caret {
             visibility: visible;
             transform: none;
         }
+
+
     }
 }
 

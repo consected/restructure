@@ -18,24 +18,36 @@ class DefinitionsController < ApplicationController
   def show
 
     def_type = params[:id]
-
-    item_selector = available def_type
-    # We will return a 404 if either the def_type requested by a user is nil, or
-    # the def_type does not appear in the Available list
-    # This protects against insecure requests
-    return not_found unless item_selector
-
-    item = Admin::AdminBase.class_from_name @def_class#.classify.constantize
-
-    j = item.send(item_selector, @filter)
+    j = get_def def_type
 
     render json: j
+  end
 
+  def create
+
+    dts = params[:names].split(',')
+    j = {}
+    dts.each do |dt|
+      j[dt] = get_def(dt)
+    end
+
+    render json: j
   end
 
 
-
   private
+
+    def get_def def_type
+      item_selector = available def_type
+      # We will return a 404 if either the def_type requested by a user is nil, or
+      # the def_type does not appear in the Available list
+      # This protects against insecure requests
+      return not_found unless item_selector
+
+      item = Admin::AdminBase.class_from_name @def_class#.classify.constantize
+
+      item.send(item_selector, @filter)
+    end
 
     def no_action_log
       true

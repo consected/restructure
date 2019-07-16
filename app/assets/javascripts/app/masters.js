@@ -35,13 +35,22 @@ _fpa.masters = {
         // There are currently two search forms available. Step through each of these in turn
         forms.each(function(){
             var f = $(this);
-            // For every input and drop down on the form that is not a \
+
+            f.find('input[type="submit"]').on('click', function(e) {
+              if (_fpa.state.search_running) {
+                e.preventDefault();
+                return;
+              }
+            });
+
+            // For every input and drop down on the form that is not a
             // typeahead field and is not already processed
             // check for changes
             // We add a class attached-change at the end to indicate that this field has been
             // has been processed and should not have another listener attached. Can avoid hard to debug
             // issues and provide extra information when looking at what has and hasn't been changed in the DOM
-            f.find('input, select, textarea').not('.no-auto-submit, .tt-input, .attached-change').on('change', function(e){
+            f.find('input, select, textarea').not('.no-auto-submit, .tt-input, .attached-change, [type="submit"]').on('change', function(e){
+
                 // Cancel any search-related Ajax requests that are still running
                 _fpa.cancel_remote();
 
@@ -66,6 +75,7 @@ _fpa.masters = {
                     // otherwise the result is a very jerky experience
                     window.setTimeout(function(){
                         f.find('input[type="submit"].auto-submitter').click();
+                        _fpa.state.search_running = true;
                     },1);
                 }
                 // Clean up after ourselves
@@ -185,6 +195,37 @@ _fpa.loaded.masters = function(){
     });
 
     _fpa.masters.handle_search_form($('form.auto_search_master'));
+
+
+    // Prevent auto run reports under certain circumstances
+    window.setTimeout(function(){
+
+      var panel = $('.searchable-report-panel .collapse.in');
+      if(panel && panel.length == 1) {
+        if($('#search-action').html() != ('MSID')) {
+          // Prevent an auto run report if the page is refreshing with a requested master or result set
+          if(!$('#master-search-accordion').hasClass('loading-results')) {
+            panel.find('input[type="submit"].auto-run').click();
+          }
+        }
+      }
+
+      $('.searchable-report-panel').on('shown.bs.collapse', function(){
+        $('#master_results_block').html('');
+        var data = {count: {count: 0, show_count: 0}};
+        var h = _fpa.templates['search-count-template'](data);
+        $('.search_count_reports').html(h);
+        // Prevent an auto run report if the page is refreshing with a requested master or result set
+        if(!$('#master-search-accordion').hasClass('loading-results')) {
+          $(this).find('input[type="submit"].auto-run').click();
+        }
+      });
+
+      $('#master-search-accordion').removeClass('loading-results');
+
+    }, 300);
+
+
 
     window.setTimeout(function(){
       $('.run-master-search').first().click();
