@@ -78,6 +78,10 @@ a[disabled="disabled"] {
   cursor: not-allowed;
 }
 
+a[data-toggle-caret][disabled="disabled"] {
+  cursor: pointer;
+}
+
 a.open-in-new-window{
   white-space: nowrap;
 }
@@ -247,6 +251,10 @@ a.close-entity, a.glyphicon.glyphicon-remove-sign {
 
 
     }
+}
+
+.dropdown-menu li {
+  list-style-type: none;
 }
 
 hr {

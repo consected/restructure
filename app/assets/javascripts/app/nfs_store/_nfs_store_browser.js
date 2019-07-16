@@ -55,6 +55,8 @@ _nfs_store.fs_browser = function ($outer) {
 
       var form = btn.parents('form').first();
 
+      if (!form || form.length === 0) return;
+
       form.attr('data-remote', 'true');
       form[0].app_callback = function () {
         refresh_browser($outer, container_id);

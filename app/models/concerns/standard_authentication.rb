@@ -231,6 +231,7 @@ module StandardAuthentication
     # A secret is generated, ready to be communicated to the user in the form of a QR code
     # the next time they login.
     def setup_two_factor_auth
+      return true if self.class.two_factor_auth_disabled
       # initially we say that otp is not required for login, so that on the first login we can show the QR code to users
       self.otp_required_for_login = false
       self.otp_secret = self.class.generate_otp_secret
