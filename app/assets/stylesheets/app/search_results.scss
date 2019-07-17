@@ -286,9 +286,15 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
     padding: 3px 18px 3px 8px;
 }
 
+.panel-heading.master-result {
+  background-color: rgb(238, 238, 239);
+  box-shadow: 0 7px 5px -5px silver;
+}
+
 .details-tabs {
     background-color: rgb(238, 238, 239);
     box-shadow: 0 7px 5px -5px silver;
+    z-index: 10;
 }
 
 .nav-pills.details-tabs > li > a {

@@ -90,7 +90,7 @@ RSpec.describe Tracker, type: :model do
     res = master.tracker_completions
     expect(res.length).to eq 1
 
-    expect( master.as_json["tracker_completions"].first["sub_process_name"]).to eq @sp1_1.name
+    expect( master.as_json["tracker_completions"].first[:sub_process_name]).to eq @sp1_1.name
 
   end
 

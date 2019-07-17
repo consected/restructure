@@ -1,7 +1,7 @@
 module PhoneLogActions
 
-  OpenPhoneLogLinkCss = "a[title='open Phone log']"
-  PlayerContactPhoneNumberCss = '.player-contact-data strong'
+  OpenPhoneLogLinkCss = "a[title='open phone log']"
+  PlayerContactPhoneNumberCss = 'h4.list-group-item-heading'
   PhoneLogBlockCss ='.activity-log--player-contact-phones-block.in'
 
 

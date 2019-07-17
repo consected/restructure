@@ -8,7 +8,7 @@ RSpec.describe DefinitionsController, type: :routing do
     end
 
     it "does not route to #new" do
-      expect(:get => "/definitions/new").to route_to("definitions#show", id: 'new')      
+      expect(:get => "/definitions/new").to route_to("definitions#show", id: 'new')
     end
 
     it "does not route to #show" do
@@ -20,7 +20,7 @@ RSpec.describe DefinitionsController, type: :routing do
     end
 
     it "does not route to #create" do
-      expect(:post => "/definitions").not_to be_routable
+      expect(:post => "/definitions").to route_to("definitions#create")
     end
 
     it "does not route to #update" do
