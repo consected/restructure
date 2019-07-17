@@ -285,16 +285,12 @@ _fpa.form_utils = {
 
       if(filter_out) {
         $targets.slideUp(function(){
-          $targets.each (function(){
-            _fpa.form_utils.format_block($(this));
-          });
+          _fpa.form_utils.format_block($(this));
         }).addClass('filtered-out');
       }
       else {
         $targets.slideDown(function(){
-          $targets.each (function(){
-            _fpa.form_utils.format_block($(this));
-          });
+          _fpa.form_utils.format_block($(this));
         }).removeClass('filtered-out');
       }
 

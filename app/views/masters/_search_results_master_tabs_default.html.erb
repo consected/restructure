@@ -5,40 +5,44 @@
 
     <% unless app_config_set(:hide_tracker_panel) %>
     <li role="presentation" class="default-tracker-tab <%= (default_panels.length == 0 ||  'trackers'.in?(default_panels)) ? '{{#is trackers_length}}on-open-click{{/is}}' : '' %>">
-      <a href="/masters/{{id}}/trackers" data-panel-tab="tracker" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker collapsed"><span class="caret"></span> tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
+      <a href="/masters/{{id}}/trackers" data-panel-tab="tracker" data-toggle="collapse" data-target="#trackers-{{id}}" data-remote="true" class="scroll-to-expanded open-tracker collapsed">tracker <span data-sub-for-root="master_id" data-sub-id="{{id}}" data-sub-item="trackers" data-template="tracker-badge-template" class="tracker-count">{{>tracker_badge master_id=id}}</span></a>
     </li>
     <% end %>
     <li role="presentation" class="<%= (default_panels.length == 0 ||  'details'.in?(default_panels)) ? 'on-open-click' : '' %>">
-      <a href="#/" data-panel-tab="details" data-toggle="collapse" data-target="#details-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> details</a>
+      <a href="#/" data-panel-tab="details" data-toggle="collapse" data-target="#details-{{id}}" class="collapsed scroll-to-expanded ">details</a>
     </li>
     <%
     if viewable_external_ids.length > 0
     %>
     <li role="presentation" class="<%= 'external_ids'.in?(default_panels) ? 'on-open-click' : '' %>">
-      <a href="#/" data-panel-tab="external_ids" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> external ids</a>
+      <a href="#/" data-panel-tab="external_ids" data-toggle="collapse" data-target="#external-ids-{{id}}" class="collapsed scroll-to-expanded ">external ids</a>
     </li>
     <% end %>
 
-    <% if (DynamicModel.categories - ['details']).length > 1 %>
+    <%
+    showdyncats = (DynamicModel.categories - ['details']).length > 1
+    showdyncats &&= (DynamicModel.categories - ['details']).map{|cat| DynamicModel.active.where(category: cat).all.select {|d| @true_views.include? d.model_association_name }.length }.sum > 0
+    if showdyncats
+    %>
     <li role="presentation" class="dropdown">
-      <a href="#" class="dropdown-toggle" id="dm-tag-drop" data-toggle="dropdown" aria-controls="dm-tag-drop-contents" aria-expanded="false">records</a>
+      <a href="#" class="dropdown-toggle" id="dm-tag-drop" data-toggle="dropdown" aria-controls="dm-tag-drop-contents" aria-expanded="false"><span class="caret"></span> records</a>
       <ul class="dropdown-menu" aria-labelledby="dm-tag-drop" id="dm-tag-drop-contents">
     <%end%>
     <% (DynamicModel.categories - ['details']).each do |cat| %>
       <% if DynamicModel.active.where(category: cat).all.select {|d| @true_views.include? d.model_association_name }.length  > 0 %>
     <li role="presentation" class="<%= cat.underscore.in?(default_panels) ? 'on-open-click' : '' %>">
-      <a href="#/" data-toggle="collapse" data-panel-tab="<%=cat.underscore%>" data-target="#<%=cat%>-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> <%= cat.underscore.humanize.downcase %></a>
+      <a href="#/" data-toggle="collapse" data-panel-tab="<%=cat.underscore%>" data-target="#<%=cat%>-{{id}}" class="collapsed scroll-to-expanded "><%= cat.underscore.humanize.downcase %></a>
     </li>
       <% end %>
     <% end %>
-    <% if (DynamicModel.categories - ['details']).length > 1 %>
+    <% if showdyncats %>
       </ul>
     </li>
     <% end %>
 
     <% if current_user && current_user.can?(:view_external_links) %>
     <li role="presentation" class="<%= 'external_links'.in?(default_panels) ? 'on-open-click' : '' %>">
-      <a href="#/"  data-panel-tab="view_external_links" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed scroll-to-expanded "><span class="caret"></span> web links</a>
+      <a href="#/"  data-panel-tab="view_external_links" data-toggle="collapse" data-target="#external-links-{{id}}" class="collapsed scroll-to-expanded ">web links</a>
     </li>
     <% end %>
 
@@ -47,7 +51,7 @@
         initial_show = (default_panels.length == 0 && app_config_text(:show_activity_log_panel) == a.item_type_name) || a.item_type_name.in?(default_panels)
       %>
       <li role="presentation" class="<%= initial_show ? 'on-open-click' : '' %>">
-        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="activity_log__<%=a.item_type_name.pluralize%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_data_template_name %>-main-result-template"><span class="caret"></span> <%= a.name.downcase %></a>
+        <a id="tab-activity-log-<%= a.item_type_name %>" href="/masters/{{id}}/activity_log/<%= a.item_type_name.pluralize %>"  data-panel-tab="activity_log__<%=a.item_type_name.pluralize%>" data-remote="true" data-prevent-on-collapse="true" data-toggle="collapse" data-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" class="collapsed scroll-to-expanded "  data-result-target="#<%= a.full_item_types_name.hyphenate %>-{{id}}" data-template="<%= a.model_data_template_name %>-main-result-template"><%= a.name.downcase %></a>
       </li>
       <% end %>
     <% end %>
