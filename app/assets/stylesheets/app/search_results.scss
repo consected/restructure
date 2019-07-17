@@ -287,12 +287,12 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
 }
 
 .panel-heading.master-result {
-  background-color: rgb(238, 238, 239);
+  background-color: $master_header_bg;
   box-shadow: 0 7px 5px -5px silver;
 }
 
 .details-tabs {
-    background-color: rgb(238, 238, 239);
+    background-color: $master_header_bg;
     box-shadow: 0 7px 5px -5px silver;
     z-index: 10;
 }
@@ -302,7 +302,7 @@ a.glyphicon.edit-entity.edit-tracker {margin-top: 0;}
   border: 0;
   border-radius: 0;
   margin: 0 4px;
-  background-color: rgb(238, 238, 239);
+  background-color: $master_header_bg;
   border-bottom: 3px solid rgb(51, 122, 183);
 
   &.collapsed, &.dropdown-toggle {
@@ -537,9 +537,9 @@ a[data-toggle="scrollto-target"]:hover {
 
 .panel-default > .panel-heading {
 
-    background: rgb(239, 239, 239);
+    background: $master_header_bg;
     &.selected-result {
-      background: #eee;
+      background: $master_header_bg;
     }
 }
 
@@ -678,8 +678,8 @@ div[data-sub-list="sage_assignments"] .sage-assignment-item:nth-of-type(1) {
 .master-result span.alt_id, .master-result span.master_id { color: gray;}
 
 .panel-heading.master-result {
-  border-bottom: 2px solid rgb(238, 238, 238);
-  border-top: 2px solid rgb(238, 238, 238);
+  border-bottom: 2px solid $master_header_bg;
+  border-top: 2px solid $master_header_bg;
   margin-top: -2px;
   background: white;
 
@@ -771,6 +771,9 @@ li.list-group-item.is_external_id_item {
     background: $switch_bg_off;
     color: rgb(255, 255, 255);
     text-shadow: 1px 1px 1px grey;
+    padding: 3px 6px;
+    font-size: 90%;
+    font-weight: normal;
   }
 
 
@@ -788,6 +791,10 @@ li.list-group-item.is_external_id_item {
       text-shadow: 1px 1px 1px grey;
       font-weight: bold;
       border-radius: 30px;
+
+      padding: 3px 5px;
+      font-size: 90%;
+      font-weight: normal;
     }
 
     .filter-switch.active {
@@ -802,13 +809,17 @@ li.list-group-item.is_external_id_item {
 
   .sublist-order-selector {
     display: inline-block;
-    float: right;
+    float: none;
+
     .order-switch {
         border-radius: 50%;
         background: $switch_bg_off;
         box-shadow: none;
         color: rgb(255, 255, 255);
         text-shadow: 1px 1px 1px grey;
+        padding: 3px 6px;
+        font-size: 90%;
+        font-size: normal;
     }
 
     .order-switch.active {
@@ -823,11 +834,11 @@ li.list-group-item.is_external_id_item {
 
 
     .sublist-layout-selectors {
-      display: inline-block;
+      display: none;
       position: relative;
-      margin-left: -7%;
+      margin-left: -66px;
       float: right;
-      right: 5%;
+      right: 50px;
 
 
       .layout-switch {
@@ -856,6 +867,18 @@ li.list-group-item.is_external_id_item {
       }
     }
 
+}
+
+.activity-log-list {
+  .sublist-controls {
+    .sublist-order-selector {
+      float: right;
+      .order-switch {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+    }
+  }
 }
 
 .common-template-item[data-rec-type="phone"] .list-group-item-heading::before {
@@ -888,7 +911,10 @@ li.list-group-item.is_external_id_item {
     font-size: 87%;
     font-weight: bold;
     font-family: monospace;
-    color: #929191;
+    background-color: rgb(146, 145, 145);
+    color: rgb(255, 255, 255);
+    border-radius: 17px;
+    padding: 1px 4px 3px;
   }
 }
 
@@ -932,7 +958,13 @@ li.list-group-item.is_external_id_item {
   }
 }
 
-
+@media only screen and (min-width: 992px) {
+  .sublist-controls {
+    .sublist-layout-selectors {
+      display: inline-block;
+    }
+  }
+}
 
 @media only screen and (min-width: 1023px) {
 
@@ -964,15 +996,56 @@ li.list-group-item.is_external_id_item {
             max-width: 400px;
         }
     }
+
+    .sublist-controls {
+      .sublist-order-selector {
+        float: right;
+      }
+    }
+
+    .activity-log-list {
+      .sublist-controls {
+        .sublist-order-selector {
+          float: right;
+          .order-switch {
+            font-size: 12px;
+            padding: 5px 10px;
+          }
+        }
+      }
+    }
 }
 
 @media only screen and (min-width: 1600px) {
 
-    td.tracker-notes , td.tracker-history-notes{
-        .cell-holder {
-            max-width: 500px;
-        }
+  .sublist-controls {
+    .btn.filter-switch-all {
+      font-size: 12px;
+      padding: 5px 10px;
     }
+    .sublist-filter-selectors {
+      .filter-switch {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+    }
+    .sublist-order-selector {
+      float: right;
+      .order-switch {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+    }
+
+
+  }
+
+
+  td.tracker-notes , td.tracker-history-notes{
+      .cell-holder {
+          max-width: 500px;
+      }
+  }
 }
 
 @media only screen and (min-width: 1800px) {

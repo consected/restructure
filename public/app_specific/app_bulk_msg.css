@@ -31,6 +31,11 @@ div#master-search-accordion {
 
 .panel.panel-default.activity-logs-item-block {
     border: 0;
+    background: rgb(248, 248, 248);
+}
+
+.master-main-panel {
+    background: rgb(248, 248, 248);
 }
 
 h4.list-group-item-heading.al-label-zeus-bulk-message-item {
@@ -40,6 +45,7 @@ h4.list-group-item-heading.al-label-zeus-bulk-message-item {
 
 ul.list-group.is-activity-log {
     border: 1px solid rgb(216, 216, 216);
+    background: white;
 }
 
 
@@ -154,4 +160,14 @@ table.import-grid td, table.table.report-table td {
 
 #master-search-accordion .panel-default {
   margin-bottom: 5px;
+}
+
+.sublist-controls  {
+  width: 75%;
+  margin-left: 12.5%;
+
+}
+
+.sublist-controls .sublist-filter-selectors {
+  visibility: hidden;
 }

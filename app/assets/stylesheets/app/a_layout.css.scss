@@ -1,3 +1,4 @@
+@import "../app_vars";
 
 html{
   min-height: 100%;
@@ -37,6 +38,10 @@ body.page-loading {
       }
   }
 
+}
+
+.navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
+  background: white;
 }
 
 .panel {
@@ -231,10 +236,10 @@ a.close-entity, a.glyphicon.glyphicon-remove-sign {
 
             background-color: white;
             color: #2e6da4;
-            border: 1px solid rgb(238, 238, 238);
+            border: 1px solid $master_header_bg;
         }
         > a.collapsed {
-          background-color: rgb(238, 238, 238);
+          background-color: $master_header_bg;
           color: #2e6da4;
 
 
@@ -270,12 +275,13 @@ ul.list-group ul {
 ul.list-group ul.list-group {
   padding-inline-end: 0;
   margin-bottom: 0;
-
+  border: 0;
+  box-shadow: none;
 }
 
 .nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
-    background-color: rgb(238, 238, 238);
-    border-color: rgb(238, 238, 238);
+    background-color: $master_header_bg;
+    border-color: $master_header_bg;
 }
 
 li.search-field input.default {width: 100% !important;}

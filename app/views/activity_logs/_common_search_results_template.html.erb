@@ -132,15 +132,14 @@
 
     <ul class="list-group" data-item-id="{{id}}" data-item-rank="{{rank}}">
       <li class="list-group-item sub-list-data">
+        <i class="glyphicon glyphicon-phone"></i>
         <a data-on-click-call="activity_logs.selected_parent" data-on-click-show="activity_logs_<%=item_type_name%>_actions-partial@#activity-log-{{master_id}}-initial-action" data-master-id="{{master_id}}" data-item-id="{{id}}" data-item-data="{{data}}" data-rec-type="{{rec_type}}">{{pretty_string data return_string="true" capitalize="true"}}</a>
         <a data-toggle="scrollto-result" data-target-force="true" data-target="#activity-log-<%=item_type_name_hyphenated%>-sub-list-{{master_id}}-{{id}}" title="edit" class="edit-entity edit-activity-log-<%=item_type_name_hyphenated%> pull-right glyphicon glyphicon-edit small" href="/masters/{{master_id}}/<%=item_type.pluralize%>/{{id}}/edit" data-remote="true" data-<%=item_type_hyphenated%>-id="{{id}}" data-result-target=""></a>
-        <span class="pull-right label label-info <%=item_type_hyphenated%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
+        <span class="pull-right label label-info general-rank-{{rank}} <%=item_type_hyphenated%>-{{rank}}" style="margin-right:1em">{{#has 'rank'}}{{#if rank}}{{rank}} - {{rank_name}}{{else}}(no rank){{/if}}{{/has}}</span>
       </li>
       <li class="list-group-item activity-log-actions-holder activity-log-initial-action">
           {{> activity_logs_<%=item_type_name%>_actions item_id=id}}
       </li>
-      <li class="list-group-item">{{pretty_string source return_string="true" capitalize="true"}}</li>
-      <li class="list-group-item record-meta">{{>update_metadata}}</li>
     </ul>
 
   {{#was _created}}</div>{{/was}}

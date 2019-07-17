@@ -42,7 +42,7 @@ class DynamicModel < ActiveRecord::Base
   end
 
   def field_list_array
-    self.field_list.split(/[,\s]/).map(&:strip).compact if self.field_list
+    self.field_list.split(/[,\s]+/).map(&:strip).compact if self.field_list
   end
 
   def all_implementation_fields ignore_errors: true
@@ -255,7 +255,7 @@ class DynamicModel < ActiveRecord::Base
             if field_list.blank?
               field_list = self.attribute_names.map(&:to_sym) - [:disabled, :user_id, :created_at, :updated_at, :tracker_id] + [:item_id]
             else
-              field_list = field_list.split(/[,\s]/).map(&:strip).map(&:to_sym)
+              field_list = self.definition.field_list_array.map(&:to_sym)
             end
 
             field_list

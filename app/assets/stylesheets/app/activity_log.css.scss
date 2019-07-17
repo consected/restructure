@@ -48,7 +48,9 @@ span.related-tracker-collapser .list-group-item:first-child {
 
   padding: 14px 1em;
 
-  .panel.selected-item {
+  .new-block {margin-top: 12px;}
+
+  .panel.selected-item .list-group {
     border-color: #aaa;
   }
 
@@ -165,10 +167,22 @@ a.related-tracker-histories-link {
 }
 
 
-.activity-logs-generic-block .common-template-item {margin-bottom: 40px;}
+.activity-logs-generic-block {
+  .common-template-item {
+    margin-bottom: 40px;
+  }
+
+  & > .panel-default {
+    border-radius: 0;
+  }
+}
 
 
 .wide-block {
   width: 75%;
   margin-left: 12.5%;
+}
+
+.btn.btn-primary[disabled]:link, .btn.add-item-button[disabled]:link {
+  background-color: rgb(63, 101, 139);
 }

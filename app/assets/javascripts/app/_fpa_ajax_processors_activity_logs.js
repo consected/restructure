@@ -63,7 +63,7 @@ _fpa.activity_logs.generate_postprocessors = function (item_type_name, extra_log
       for(el in data){
         break;
       }
-      if(data[el].rec_type){
+      if(data[el] && data[el].rec_type){
           if(item_type_name != data[el].item_type + "_" + data[el].rec_type){
             block.hide();
           }

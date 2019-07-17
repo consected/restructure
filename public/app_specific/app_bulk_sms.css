@@ -150,3 +150,12 @@ table.import-grid td, table.table.report-table td {
     font-size: 16px;
     font-weight: normal;
 }
+
+.sublist-controls  {
+  width: 75%;
+  margin-left: 12.5%;
+  .sublist-filter-selectors {
+    visibility: hidden;
+  }
+
+}

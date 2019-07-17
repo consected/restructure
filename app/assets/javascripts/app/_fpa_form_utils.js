@@ -284,19 +284,18 @@ _fpa.form_utils = {
       filter_out = !$a.hasClass('active');
 
       if(filter_out) {
-        $targets.slideUp().addClass('filtered-out', function(){
+        $targets.slideUp(function(){
           $targets.each (function(){
             _fpa.form_utils.format_block($(this));
           });
-
-        });
+        }).addClass('filtered-out');
       }
       else {
-        $targets.slideDown().removeClass('filtered-out', function(){
+        $targets.slideDown(function(){
           $targets.each (function(){
             _fpa.form_utils.format_block($(this));
           });
-        });
+        }).removeClass('filtered-out');
       }
 
 
