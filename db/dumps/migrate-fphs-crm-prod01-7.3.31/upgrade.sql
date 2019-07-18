@@ -1,5 +1,5 @@
 -- Script created @ 2019-07-17 16:28:43 +0100
-set search_path=ml_app; 
+set search_path=ml_app;
  begin;  ;
 ALTER TABLE "user_access_controls" ADD "role_name" character varying;
 CREATE TABLE "exception_logs" ("id" serial primary key, "message" character varying, "main" character varying, "backtrace" character varying, "user_id" integer, "admin_id" integer, "notified_at" timestamp, "created_at" timestamp NOT NULL, "updated_at" timestamp NOT NULL) ;
@@ -95,7 +95,7 @@ CREATE UNIQUE INDEX  "index_users_on_authentication_token" ON "users"  ("authent
 ALTER TABLE "external_identifiers" ADD "extra_fields" character varying;
 
   alter table external_identifier_history add column extra_fields varchar;
-  
+
   CREATE or REPLACE FUNCTION ml_app.log_external_identifier_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -238,7 +238,7 @@ ALTER TABLE "app_configurations" ADD "created_at" timestamp;
 ALTER TABLE "app_configurations" ADD "updated_at" timestamp;
 
 
-      BEGIN;
+--      BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create app_configurations name value app_type_id user_id role_name
@@ -321,14 +321,14 @@ ALTER TABLE "app_configurations" ADD "updated_at" timestamp;
       GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
       GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
-      COMMIT;
+--      COMMIT;
 
 
 ;
 ALTER TABLE "app_types" ADD "created_at" timestamp;
 ALTER TABLE "app_types" ADD "updated_at" timestamp;
 
- BEGIN;
+-- BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create app_types name label
@@ -402,11 +402,11 @@ ALTER TABLE "app_types" ADD "updated_at" timestamp;
      GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
      GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
-     COMMIT;
+--     COMMIT;
 
 ;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create message_templates name template_type template
@@ -483,11 +483,11 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
-COMMIT;
+--COMMIT;
 
 ;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create page_layouts layout_name panel_name panel_label panel_position options
@@ -570,13 +570,13 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
-COMMIT;
+--COMMIT;
 
 ;
 ALTER TABLE "user_access_controls" ADD "created_at" timestamp;
 ALTER TABLE "user_access_controls" ADD "updated_at" timestamp;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create user_access_controls user_id resource_type resource_name options access app_type_id role_name
@@ -665,11 +665,11 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
-COMMIT;
+--COMMIT;
 
 ;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create user_roles app_type_id role_name user_id
@@ -746,13 +746,13 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
-COMMIT;
+--COMMIT;
 
 ;
 ALTER TABLE "nfs_store_filters" ADD "created_at" timestamp;
 ALTER TABLE "nfs_store_filters" ADD "updated_at" timestamp;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create nfs_store_filters app_type_id role_name user_id resource_name filter description
@@ -838,7 +838,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA ml_app TO fphs;
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
-COMMIT;
+--COMMIT;
 
 ;
 
@@ -1123,7 +1123,7 @@ GRANT SELECT ON ALL SEQUENCES IN SCHEMA ml_app TO fphs;
 
 ;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create dynamic_models name table_name schema_name primary_key_name foreign_key_name description position category table_key_name field_list result_order options
@@ -1179,11 +1179,11 @@ BEGIN;
         ADD COLUMN options varchar;
 
 
-    COMMIT;
+--    COMMIT;
 
 ;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create external_identifiers name label external_id_attribute external_id_view_formatter external_id_edit_pattern prevent_edit pregenerate_ids min_id max_id alphanumeric extra_fields
@@ -1277,7 +1277,7 @@ ALTER TABLE external_identifier_history
 
 ;
 
-    BEGIN;
+--    BEGIN;
 
     -- Command line:
     -- table_generators/generate.sh admin_history_table create page_layouts layout_name panel_name panel_label panel_position options
@@ -1324,7 +1324,7 @@ ALTER TABLE external_identifier_history
 
 ;
 
-BEGIN;
+--BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh admin_history_table create page_layouts layout_name panel_name panel_label panel_position options
