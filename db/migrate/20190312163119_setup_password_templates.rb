@@ -1,6 +1,8 @@
 class SetupPasswordTemplates < ActiveRecord::Migration
   def change
     $dont_seed=true
+    return unless User.respond_to?(:reset_password_sent_at=)
+
     begin
       require "#{::Rails.root}/db/seeds.rb"
       Seeds::PasswordExpirationReminder.setup
