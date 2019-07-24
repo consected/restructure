@@ -85,6 +85,31 @@ input[type="date"].attached-datepicker {
 
 }
 
+.fixed-field {
+  position: relative;
+  input.form-control.has-value, select.form-control.has-value,
+  input.form-control, select.form-control
+  {
+
+    background: none !important;
+    background-color: none !important;
+    border: 0;
+    box-shadow: none;
+    font-weight: bold;
+  }
+
+  .fixed-field-cover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    z-index: 1200;
+  }
+}
+
 li.list-group-item label {
     font-size: 85%;
 }

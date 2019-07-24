@@ -437,6 +437,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
       rec_type: 'home',
       source: 'nflpa'
 
+    pc = m.player_contacts.create! data: '(516)123-7612', rec_type: 'phone', rank: 10, source: 'nflpa'
 
       conf = {
         all: {
@@ -629,6 +630,118 @@ RSpec.describe "Calculate conditional actions", type: :model do
     }
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
+
+
+    # Check that nested conditions work across various tables
+
+    conf = {
+      all: {
+        all: {
+          this: {
+            select_who: @al.select_who,
+            user_id: @al.user_id
+          },
+          addresses: {
+            id: a2.id,
+            zip: [a1.zip, a2.zip]
+          }
+        },
+        not_all: {
+          player_contacts: {
+            data: pc.data
+          }
+        }
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    conf = {
+      all: {
+        all: {
+          this: {
+            select_who: @al.select_who,
+            user_id: @al.user_id
+          },
+          addresses: {
+            id: a2.id,
+            zip: [a1.zip, a2.zip]
+          }
+        },
+        not_all: {
+          player_contacts: {
+            data: pc.data + '-bad'
+          }
+        }
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+
+    conf = {
+
+      all: {
+        this: {
+          select_who: @al.select_who,
+          user_id: @al.user_id
+        },
+        addresses: {
+          id: a2.id,
+          zip: [a1.zip, a2.zip]
+        }
+      },
+      not_all: {
+        all:
+          [
+            {
+              player_contacts: {
+                data: pc.data
+              }
+            },
+            {
+              player_contacts: {
+                id: pc.id
+              }
+            }
+          ]
+
+      }
+
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+
+    # Deep nesting
+    conf = {
+      # Negate the nested result
+      not_all_dms: {
+        all_pcs: {
+
+          any: {
+            # A player contact record exists in the master
+            player_contacts: {
+                id: pc.id
+            }
+
+          },
+
+          # A player contact record exists in the master
+          all_pcs_with_data: {
+            player_contacts: {
+              id: pc.id,
+              data: pc.data
+            }
+          }
+        }
+      }
+
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
   end
 
   it "checks if a certain the current user has a specific role" do

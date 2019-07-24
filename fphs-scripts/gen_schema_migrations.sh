@@ -185,6 +185,7 @@ export EXPORTSVR=fphs-crm-prod01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
 export EXTADMROLE=FPHSADM
+export EXTRAPGDUMPARGS='-T ml_app.masters_backup_20190703 -T ml_app.addresses_backup_20190709'
 ###############################
 fi
 
@@ -249,11 +250,11 @@ mkdir -p migrate-$EXTNAME
 mkdir -p $EXPORTLOC/migrate-$EXTNAME
 cd migrate-$EXTNAME
 echo -d $EXTDB $EXTDBCONN
-pg_dump -O -d $EXTDB $EXTDBCONN --clean --create --schema-only --schema=$SCHEMA -T $SCHEMA.jd_tmp  -x > "db-schema.sql"
-pg_dump -O -d $EXTDB $EXTDBCONN --data-only --schema=$SCHEMA --table=$SCHEMA.schema_migrations -x > "db-schema-migrations.sql"
+pg_dump -O -d $EXTDB $EXTDBCONN --clean --create --schema-only --schema=${SCHEMA} -T $SCHEMA.{jd_tmp} $EXTRAPGDUMPARGS -x > "db-schema.sql"
+pg_dump -O -d $EXTDB $EXTDBCONN --data-only --schema=${SCHEMA} --table=${SCHEMA}.schema_migrations $EXTRAPGDUMPARGS -x > "db-schema-migrations.sql"
 chmod 777 .
 chmod 755 *
-echo Done dumping files to `pwd`
+echo Done dumping files
 exit
 EOF
 
@@ -266,7 +267,7 @@ sudo chmod 777 .
 mkdir -p migrate-$EXTNAME-$VER
 cd migrate-$EXTNAME-$VER
 
-echo Preparing full db/migrate list of Rails files
+echo Preparing full db/migrate list of Rails files in: `pwd`
 ls -1 ../../migrate/  | grep -oP '([0-9]+)' > migration-list.txt
 echo `wc -l migration-list.txt` files available as Rails migrations
 
@@ -299,9 +300,10 @@ sed -i 's/COMMENT ON SCHEMA public/-- COMMENT ON SCHEMA public/g' db-schema.sql
 
 echo Create the local schema from the remote schema
 psql -d mig_db -U $DBUSER -h localhost < db-schema.sql
+echo Create the local schema from the remote schema - migrations
 psql -d mig_db -U $DBUSER -h localhost < db-schema-migrations.sql
 
-
+echo Getting migration list
 psql -d mig_db -U $DBUSER -h localhost -c "select * from $SCHEMA.schema_migrations order by version" | grep -oP '([0-9]{10,20})' > mig_comp.txt
 diff mig_comp.txt migration-list.txt |grep -oP '(> [0-9]{10,20})' | grep -oP '([0-9]{10,20})' > to_add.txt
 
@@ -381,4 +383,4 @@ echo "sudo -u postgres psql -c \"create database fpa_test owner `whoami`;\""
 echo 'psql -d fpa_test < db-schema.sql'
 echo 'psql -d fpa_test < db-schema-migrations.sql'
 echo 'psql -d fpa_test < upgrade.sql'
-echo 'rspec'
+echo 'cd ../../.. ; rspec'

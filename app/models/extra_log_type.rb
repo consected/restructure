@@ -105,12 +105,19 @@ class ExtraLogType < ExtraOptions
         end
       else
         new_ref = {}
+        fix_refs = {}
+
         # Make all keys singular, to simplify configurations
+        # The changes can't be made directly inside the iteration, so handle it in two steps
         self.references.each do |k,v|
           if k.to_s != k.to_s.singularize
-            new_k = k.to_s.singularize.to_sym
-            self.references[new_k] = self.references.delete(k)
+            fix_refs[k] = self.references[k]
           end
+        end
+
+        fix_refs.each do |k,v|
+          new_k = k.to_s.singularize.to_sym
+          self.references[new_k] = self.references.delete(k)
         end
 
         self.references.each do |k, v|

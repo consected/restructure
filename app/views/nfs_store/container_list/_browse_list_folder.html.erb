@@ -1,6 +1,6 @@
 <%
   folder_downloads = downloads.select {|d| d.container_path(no_filename: true, leading_dot: true).split('/')[0..level+1] == folder}
-  item_id = Digest::MD5.hexdigest(folder.join('/'))
+  item_id = "#{@container.id}--#{Digest::MD5.hexdigest(folder.join('/'))}"
   folder_name = folder.last
   is_archive = false
 

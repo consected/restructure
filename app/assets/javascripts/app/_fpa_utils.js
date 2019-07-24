@@ -403,3 +403,35 @@ _fpa.utils.pretty_print = function(stre, options_hash){
         }
         return stre;
 };
+
+_fpa.utils.calc_field = function (field_name_sym, form_object_item_type_us) {
+
+  console.log('calc_field');
+
+  var cwdef = _fpa.calculate_with[field_name_sym];
+
+  var target_field = $('[data-attr-name="'+field_name_sym+'"][data-object-name="'+form_object_item_type_us+'"]');
+
+  if(cwdef.sum) {
+
+    for(var i in cwdef.sum) {
+      var dfi = cwdef.sum[i];
+      $('[data-attr-name="'+dfi+'"][data-object-name="'+form_object_item_type_us+'"]').change(function() {
+        var s = 0;
+        for(var j in cwdef.sum) {
+          var dfj = cwdef.sum[j];
+          var val = $('[data-attr-name="'+dfj+'"][data-object-name="'+form_object_item_type_us+'"]').val();
+          if(val != null && val != '') {
+            val = parseInt(val);
+            s += val;
+          }
+        }
+        target_field.val(s);
+        target_field.change();
+      });
+
+    }
+
+  }
+
+};

@@ -151,7 +151,7 @@
   <%
     # Preload all of the general selections into cache so they can be used
     # This pulls dynamic model and activity log extra log types as separate items
-    implementation_classes = ActivityLog.implementation_classes + DynamicModel.implementation_classes
+    implementation_classes = ActivityLog.implementation_classes
 
     # Check the definition is ready to use and prepare it for use
     implementation_classes.reject! {|ic| !ic.definition.ready?}
@@ -170,6 +170,21 @@
   _fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
 
   <% end %>
+
+  <%
+  implementation_classes = DynamicModel.implementation_classes
+  implementation_classes.reject! {|ic| !ic.definition.ready?}
+  cnames = []
+  implementation_classes.each do |itc|
+    full_name = "dynamic_model__#{itc.definition.model_def_name.to_s}"
+    if current_user.has_access_to?(:access, :table, full_name.pluralize)
+      ito = itc.new
+      cnames.push("general_selections-item_type+#{ito.item_type}");
+    end
+  end
+  %>
+  _fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
+
 </script>
 
 

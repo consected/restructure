@@ -464,7 +464,13 @@ module HandlesUserBase
               cond.each do |k, v|
                 v = v.present? ? v : '(blank)'
                 if v.is_a? Hash
-                  v = "#{v.first.first.to_s.humanize.downcase}: #{v.first.last}"
+                  if v[:hide_error]
+                    next
+                  elsif v[:condition]
+                    v = "#{v[:condition]} #{v[:value].present? ? v[:value] : '(blank)' }"
+                  else
+                    v = "#{v.first.first.to_s.humanize.downcase}: #{v.first.last.present? ? v.first.last : '(blank)' }"
+                  end
                 else
                   v = ": #{v}"
                 end

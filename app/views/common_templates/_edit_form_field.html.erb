@@ -106,4 +106,23 @@
   <%
     got = true
   end
+
+  if opt[:calculate_with]
+    cw = opt[:calculate_with]
+    if cw
+      %>
+<script>
+
+  _fpa.calculate_with = _fpa.calculate_with || {};
+  var cwdef = _fpa.calculate_with['<%=field_name_sym%>'] = <%=cw.to_json.html_safe%>;
+
+  _fpa.utils.calc_field('<%=field_name_sym%>', '<%= form_object_item_type_us%>');
+
+
+</script>
+      <%
+    end
+
+  end
+
 %>

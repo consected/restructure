@@ -94,6 +94,9 @@ class ExtraOptions
           edit_as: {
             field_type: 'alternative field name to use for selection of edit field',
             alt_options: 'optional specification of options for a select_ type field to use instead of general selection specified list'
+          },
+          calculate_with: {
+            sum: []
           }
         }
       },
@@ -108,7 +111,9 @@ class ExtraOptions
       add_reference_if: attr_for_conditions_marker,
       valid_if: {
         on_save:  attr_for_validations,
-        on_create: {},
+        on_create: {
+          hide_error: 'true|false (default false) to hide an error associated with this validation'
+        },
         on_update: {}
       },
 

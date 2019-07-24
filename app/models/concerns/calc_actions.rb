@@ -180,13 +180,20 @@ module CalcActions
           loop_res ||= cond_res if condition_type == :not_all
           loop_res &&= cond_res if condition_type == :not_any
           unless Rails.env.production?
-            Rails.logger.debug "**#{orig_cond_type}*******************************************************************************************************"
-            Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
-            Rails.logger.debug @condition_config
-            Rails.logger.debug @non_query_conditions
-            Rails.logger.debug @base_query.to_sql if @base_query
-            Rails.logger.debug @condition_scope.to_sql if @condition_scope
-            Rails.logger.debug "*********************************************************************************************************"
+            begin
+              Rails.logger.debug "**#{orig_cond_type}*******************************************************************************************************"
+              Rails.logger.debug "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+              Rails.logger.debug @condition_config
+              Rails.logger.debug @non_query_conditions
+              Rails.logger.debug @base_query.to_sql if @base_query
+              Rails.logger.debug @condition_scope.to_sql if @condition_scope
+              Rails.logger.debug "*********************************************************************************************************"
+            # rescue => e
+            #   Rails.logger.warn "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+            #   Rails.logger.warn @condition_config
+            #   byebug
+            #   Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
+            end
           end
           break unless loop_res
         end
@@ -344,6 +351,12 @@ module CalcActions
             non_query_condition = table_name.in?([:this, :user, :parent])
             if val.is_a? Hash
               val_item_key = val.first.first
+
+              if is_selection_type(val_item_key)
+                val = {this: val}
+              end
+
+
               if val_item_key == :this && !val.first.last.is_a?(Hash)
                 # non_query_condition = true
                 val = @current_instance.attributes[val.first.last]
@@ -455,8 +468,8 @@ module CalcActions
           end
         end
       end
-      join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value]).uniq
-
+      join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
+Rails.logger.info join_tables
       @base_query = @current_scope.joins(join_tables)
     end
 
