@@ -22,7 +22,7 @@ module NfsStore
     validate :content_length_match
     validate :upload_allowed?
 
-    before_create :finalize_upload, if: ->{ @ready_to_finalize }
+    before_save :finalize_upload, if: ->{ @ready_to_finalize }
 
     attr_accessor :upload, :chunk_hash
 

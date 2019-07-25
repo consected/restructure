@@ -423,9 +423,18 @@ module HandlesUserBase
     # permitted params list, and this could unexpectedly change attributes that were
     # not submitted by a user. Although this could be considered reasonable, with the
     # introduction of filepaths with Filestore, the result was damaging.
+    # To allow specific models to specify additional attributes not to downcase
+    # define a class method no_downcase_attributes returning an array of attribute names
     def downcase_attributes
 
-      ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(e_signed_document)?/
+      ea = ""
+      if self.class.respond_to? :no_downcase_attributes
+        self.class.no_downcase_attributes.each do |e|
+          ea += "(#{e})?"
+        end
+      end
+
+      ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(e_signed_document)?#{ea}/
 
       self.attributes.select {|k,v| k.to_sym.in? self.class.permitted_params }.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
 

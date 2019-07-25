@@ -26,7 +26,7 @@ class Settings
   # a verified domain name.
   NotificationsFromEmail = ENV['FPHS_FROM_EMAIL']
   # Email address for admin contact
-  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'fphs-admin@hms.harvard.edu'
+  AdminEmail = ENV['FPHS_ADMIN_EMAIL'] || 'fphsetl@hms.harvard.edu'
 
   TwoFactorAuthDisabled = (ENV['FPHS_2FA_AUTH_DISABLED'] == 'true')
   TwoFactorAuthIssuer = ENV['FPHS_2FA_APP'] || 'FPHS Apps'

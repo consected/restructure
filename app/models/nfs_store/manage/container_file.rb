@@ -42,6 +42,9 @@ module NfsStore
         name.demodulize.underscore.to_sym
       end
 
+      def self.no_downcase_attributes
+        ['title', 'file_metadata']
+      end
 
       def no_user_validation
         validating?
@@ -109,18 +112,18 @@ module NfsStore
         new_file_name = "#{self.file_name}--#{dt}"
         move_to new_path, new_file_name
 
-        if respond_to? :archived_files
-          archived_files.each do |af|
-            af.current_user = self.current_user
-
-            path_parts = []
-            path_parts << TrashPath
-            path_parts << af.container_path(no_filename: true)
-            new_path = File.join path_parts
-            new_file_name = "#{af.file_name}--#{dt}"
-            af.move_to new_path, new_file_name
-          end
-        end
+        # if respond_to? :archived_files
+        #   archived_files.each do |af|
+        #     af.current_user = self.current_user
+        #
+        #     path_parts = []
+        #     path_parts << TrashPath
+        #     path_parts << af.container_path(no_filename: true)
+        #     new_path = File.join path_parts
+        #     new_file_name = "#{af.file_name}--#{dt}"
+        #     af.move_to new_path, new_file_name
+        #   end
+        # end
       end
 
 

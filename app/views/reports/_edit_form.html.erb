@@ -4,7 +4,7 @@
   object_instance = @report_item
 
   unless defined? labels
-    d = object_instance.class.default_options
+    d = object_instance.class.default_options if object_instance.class.respond_to? :default_options
     labels = d.labels if d
   end
   labels ||= {}
