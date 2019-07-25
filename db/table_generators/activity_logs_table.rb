@@ -68,7 +68,7 @@ EOF
     else
 
       @implementation_attr_name = attrib
-
+      attrib.reject!{|a| a.start_with? 'placeholder_' }
       attrib_pair = {}
       attrib.each do |a|
         f = 'varchar'

@@ -3,7 +3,7 @@ set search_path=sleep, ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create sleep_ps_audit_c_questions alcohol_frequency daily_alcohol six_or_more_frequency total_score placeholder_ineligible
+-- table_generators/generate.sh dynamic_models_table create sleep_ps_audit_c_questions alcohol_frequency daily_alcohol six_or_more_frequency total_score
 
       CREATE FUNCTION log_sleep_ps_audit_c_question_update() RETURNS trigger
           LANGUAGE plpgsql
@@ -16,7 +16,6 @@ set search_path=sleep, ml_app;
                       daily_alcohol,
                       six_or_more_frequency,
                       total_score,
-                      placeholder_ineligible,
                       user_id,
                       created_at,
                       updated_at,
@@ -28,7 +27,6 @@ set search_path=sleep, ml_app;
                       NEW.daily_alcohol,
                       NEW.six_or_more_frequency,
                       NEW.total_score,
-                      NEW.placeholder_ineligible,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -45,7 +43,6 @@ set search_path=sleep, ml_app;
           daily_alcohol varchar,
           six_or_more_frequency varchar,
           total_score varchar,
-          placeholder_ineligible varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -68,7 +65,6 @@ set search_path=sleep, ml_app;
           daily_alcohol varchar,
           six_or_more_frequency varchar,
           total_score varchar,
-          placeholder_ineligible varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

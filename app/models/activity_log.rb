@@ -12,6 +12,7 @@ class ActivityLog < ActiveRecord::Base
   validates :action_when_attribute, presence: {scope: :active}
   validate :item_type_exists
   validate :check_item_type_and_rec_type
+  validate :name_ok
   default_scope -> { order 'disabled asc nulls last'}
 
   after_save :force_option_config_parse
@@ -611,6 +612,14 @@ class ActivityLog < ActiveRecord::Base
 
   def set_table_name
     self.table_name = self.generate_table_name
+  end
+
+  def name_ok
+    if self.name.index(/_[0-9]/)
+      errors.add :name, 'must not contain numbers preceded by an underscore.'
+    else
+      true
+    end
   end
 
 end

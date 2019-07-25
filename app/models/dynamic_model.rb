@@ -5,6 +5,7 @@ class DynamicModel < ActiveRecord::Base
 
   default_scope -> {order disabled: :asc, category: :asc, position: :asc,  updated_at: :desc }
 
+  validate :table_name_ok
   after_save :force_option_config_parse
 
   attr_accessor :editable
@@ -387,6 +388,14 @@ class DynamicModel < ActiveRecord::Base
 
   def generator_script
     "db/table_generators/generate.sh dynamic_models_table create  #{table_name} #{all_implementation_fields(ignore_errors: true).join(' ')}"
+  end
+
+  def table_name_ok
+    if self.table_name.index(/_[0-9]/)
+      errors.add :name, 'must not contain numbers preceded by an underscore.'
+    else
+      true
+    end
   end
 
 end
