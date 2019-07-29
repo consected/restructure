@@ -8,7 +8,7 @@ module CalcActions
     SelectionTypes = :all, :any, :not_all, :not_any
     BoolTypeString = '__!BOOL__'.freeze
     ValidExtraConditions = ['<', '>', '<>', '<=', '>='].freeze
-    attr_accessor :condition_scope
+    attr_accessor :condition_scope, :this_val
   end
 
   private
@@ -188,11 +188,12 @@ module CalcActions
               Rails.logger.debug @base_query.to_sql if @base_query
               Rails.logger.debug @condition_scope.to_sql if @condition_scope
               Rails.logger.debug "*********************************************************************************************************"
-            # rescue => e
-            #   Rails.logger.warn "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
-            #   Rails.logger.warn @condition_config
-            #   byebug
-            #   Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
+            rescue => e
+              Rails.logger.warn "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
+              Rails.logger.warn @condition_config
+              Rails.logger.warn JSON.pretty_generate(@action_conf)
+              Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
+              raise e
             end
           end
           break unless loop_res
@@ -285,6 +286,7 @@ module CalcActions
             if is_selection_type field_name
               ca = ConditionalActions.new({field_name => expected_val}, in_instance, current_scope: @condition_scope, return_failures: return_failures)
               res &&= ca.calc_action_if
+              @this_val ||= ca.this_val
               @skip_merge = true
             elsif expected_val.keys.first == :validate
               res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
@@ -300,13 +302,13 @@ module CalcActions
             else
               res &&= this_val == expected_val
             end
-            @this_val = this_val if expected_val == 'return_value'
+            @this_val = this_val if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
           end
         elsif table == :user
           if field_name == :role_name
             user = @current_instance.master.current_user
             role_names = user.user_roles.active.pluck(:role_name)
-            @this_val = role_names if expected_val == 'return_value'
+            @this_val = role_names if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
             expected_val = [expected_val] unless expected_val.is_a? Array
             role_res = false
             expected_val.each do |e|
@@ -448,12 +450,18 @@ module CalcActions
                 @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
                 @extra_conditions << vv
               else
-                if val.in? ['return_value', 'return_value_list', 'return_result']
+                if val.in?(['return_value', 'return_value_list', 'return_result']) || val.is_a?(Array) && val.include?('return_value')
+                  mode = val
+                  if val.is_a?(Array) && val.include?('return_value')
+                    mode = 'return_value'
+                    @condition_values[table_name] ||= {}
+                    @condition_values[table_name][field_name] = dynamic_value(val)
+                  end
                   @this_val_where = {
                     assoc: c_table.to_sym,
                     field_name: field_name,
                     table_name: ModelReference.record_type_to_ns_table_name(c_table).to_sym,
-                    mode: val
+                    mode: mode
                   }
                 else
                   @condition_values[table_name] ||= {}
@@ -469,7 +477,7 @@ module CalcActions
         end
       end
       join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
-Rails.logger.info join_tables
+
       @base_query = @current_scope.joins(join_tables)
     end
 
@@ -497,6 +505,7 @@ Rails.logger.info join_tables
           ca = ConditionalActions.new({c_type => t_conds}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
           res_a = ca.calc_action_if
           res &&= res_a
+          @this_val ||= ca.this_val
           return unless res
         end
       end
