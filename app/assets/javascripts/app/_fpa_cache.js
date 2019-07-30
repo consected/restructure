@@ -1,12 +1,22 @@
-_fpa.local_storage = {};
+// To use cached localStorage provided by the browser, set to true
+_fpa.use_cached_local_storage = true;
+
+if(_fpa.use_cached_local_storage) {
+  _fpa.local_storage = localStorage;
+}
+else {
+  _fpa.local_storage = {};
+}
 
 _fpa.cache = function(name){
-
-  var localStorage = _fpa.local_storage;
-
     name = _fpa.cache_name(name);
-    var res = localStorage[name];
-    // res = JSON.parse(res);
+    if(_fpa.use_cached_local_storage) {
+      var res = _fpa.local_storage.getItem(name);
+      res = JSON.parse(res);
+    }
+    else {
+      var res = _fpa.local_storage[name];
+    }
     return res;
 };
 
@@ -97,24 +107,55 @@ _fpa.set_cache = function(name, val){
       throw('set_cache has name that is not a string: ' + name);
     }
 
-    var localStorage = _fpa.local_storage;
-
     var basename = name + '--';
     name = _fpa.cache_name(name);
 
     // Force removal of previous versions of the cached item.
     // This must be done synchronously, otherwise the item downloaded in a moment is also removed
-    for(var i in localStorage){
-      if(localStorage.hasOwnProperty(i)){
+    for(var i in _fpa.local_storage){
+      if(_fpa.local_storage.hasOwnProperty(i)){
         if(i.indexOf(basename)===0){
-          delete(localStorage[i]);
+          if(_fpa.use_cached_local_storage) {
+            _fpa.local_storage.removeItem(i);
+          }
+          else {
+            delete(_fpa.local_storage[i]);
+          }
           console.log("removed cache item: " +i);
         }
       }
     };
 
-    // val = JSON.stringify(val);
+    if(_fpa.use_cached_local_storage) {
+      val = JSON.stringify(val);
+      _fpa.local_storage.setItem(name, val);
+    }
+    else {
+      _fpa.local_storage[name] = val;
+    }
     console.log("storing cache item: " + name );
 
-    localStorage[name] = val;
 };
+
+
+_fpa.clean_cache = function(){
+
+  if(!_fpa.version)
+    return;
+
+  for(var i in _fpa.local_storage){
+    if(_fpa.local_storage.hasOwnProperty(i)){
+      if(i.indexOf(_fpa.version) < 0 && (i.indexOf('general_selections-') == 0 || i.indexOf('multiple-defs-') == 0)){
+        if(_fpa.use_cached_local_storage) {
+          _fpa.local_storage.removeItem(i);
+        }
+        else {
+          delete(_fpa.local_storage[i]);
+        }
+        console.log("cleaned old cache item: " +i);
+      }
+    }
+  }
+}
+
+_fpa.clean_cache();

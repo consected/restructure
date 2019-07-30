@@ -6,7 +6,7 @@ module FieldDefaults
     res = default
     from_when ||= DateTime.now
     if default.is_a? String
-      m = default.scan(/(-?+?\d+) (second|seconds|minute|minutes|hour|hours|days|day|months|month|years|year)/)
+      m = default.scan(/^(-?\+?\d+) (second|seconds|minute|minutes|hour|hours|days|day|months|month|years|year)/)
       if m.first
         t = m.first.last
         res = from_when + m.first.first.to_i.send(t)

@@ -15,11 +15,16 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     create_master
 
+    @al2 = create_item
     @al0 = create_item
     @al = create_item
 
     @al0.master_id = @al.master_id
     @al0.save!
+
+    @al2.master_id = @al.master_id
+    @al2.select_who += '-alt'
+    @al2.save!
 
     n = Admin::UserRole.order(id: :desc).limit(1).pluck(:id).first
     Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).update_all(role_name: "test-old-#{n}")
@@ -1172,6 +1177,76 @@ RSpec.describe "Calculate conditional actions", type: :model do
     ca = ConditionalActions.new conf, @al
     res = ca.get_this_val
     expect(res).to eq @al.select_who
+
+
+    # Alternatively return one value or another
+    conf = {
+
+      any: {
+        any_1: {
+          activity_log__player_contact_phones: {
+            id: @al2.id + 100,
+            select_who: 'return_value'
+          }
+        },
+        any_2: {
+          activity_log__player_contact_phones: {
+            id: @al.id,
+            select_who: 'return_value'
+          }
+        }
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq @al.select_who
+
+
+    conf = {
+      any: {
+        any_1: {
+          activity_log__player_contact_phones: {
+            id: @al2.id,
+            select_who: ['return_value']
+          }
+        },
+        any_2: {
+          activity_log__player_contact_phones: {
+            id: @al.id + 100,
+            select_who: 'return_value'
+          }
+        }
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq @al2.select_who
+
+
+
+    conf = {
+      any: {
+        all_1: {
+          activity_log__player_contact_phones: {
+            id: [@al2.id,
+            'return_value']
+          }
+        },
+        all_2: {
+          activity_log__player_contact_phones: {
+            id: [@al.id + 100,
+            'return_value']
+
+          }
+        }
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq @al2.id
 
 
   end

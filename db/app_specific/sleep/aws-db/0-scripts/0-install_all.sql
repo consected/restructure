@@ -35,6 +35,9 @@ set search_path=sleep,ml_app;
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_screener_responses.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_sleep_apnea_responses.sql
 
+-- # Sleep Screening Part 2
+\i db/app_specific/sleep/aws-db/screening/create_sleep_ps2_initial_screenings.sql
+
 -- # InEx
 \i db/app_specific/sleep/aws-db/inex/create_activity_log_inex_checklist_table.sql
 \i db/app_specific/sleep/aws-db/inex/create_inex_checklist_table.sql

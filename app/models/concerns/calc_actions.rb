@@ -13,6 +13,11 @@ module CalcActions
 
   private
 
+    def non_join_table_name? name
+       @non_join_table_names ||= %i(this this_references parent_references validate)
+       (name.in?(@non_join_table_names) || is_selection_type(name))
+    end
+
     # Allow the same selection type to be used multiple times, such as:
     # not_any:
     # not_any_2:
@@ -191,6 +196,7 @@ module CalcActions
             rescue => e
               Rails.logger.warn "condition_type: #{condition_type} - loop_res: #{loop_res} - cond_res: #{cond_res} - orig_loop_res: #{orig_loop_res}"
               Rails.logger.warn @condition_config
+              Rails.logger.warn @join_tables
               Rails.logger.warn JSON.pretty_generate(@action_conf)
               Rails.logger.warn "Failure in calc_actions: #{e}\n#{e.backtrace.join("\n")}"
               raise e
@@ -355,6 +361,7 @@ module CalcActions
               val_item_key = val.first.first
 
               if is_selection_type(val_item_key)
+                val_item_key = :this
                 val = {this: val}
               end
 
@@ -384,7 +391,7 @@ module CalcActions
 
                   mrs = @current_instance.model_references
 
-                  unless join_table_name.in? %i(this this_references parent_references validate)
+                  unless non_join_table_name?(join_table_name)
                     mrs = mrs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
                   end
 
@@ -417,7 +424,7 @@ module CalcActions
                   # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
                   parent_model_refs = @current_instance.referring_record.model_references
 
-                  unless join_table_name.in? %i(this this_references parent_references validate)
+                  unless non_join_table_name?(join_table_name)
                     parent_model_refs = parent_model_refs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
                   end
 
@@ -427,7 +434,7 @@ module CalcActions
                 end
               else
                 val.keys.each do |val_key|
-                  if val_key.in? %i(this this_references parent_references validate)
+                  if non_join_table_name?(val_key)
                     non_query_condition = true
                   else
                     join_tables << val_key unless join_tables.include? val_key
@@ -476,7 +483,7 @@ module CalcActions
           end
         end
       end
-      join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
+      @join_tables = join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
 
       @base_query = @current_scope.joins(join_tables)
     end

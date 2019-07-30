@@ -158,7 +158,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
   # @return [Hash | nil] returns the edit_as configurations per field, or nil if there are none
   def self.option_overrides item_type_object
     if item_type_object.model_data_type.in?([:activity_log, :dynamic_model])
-      fndefs = item_type_object.option_type_config.field_options.select {|fn, f| f[:edit_as] && f[:edit_as][:alt_options] }
+      fndefs = item_type_object.option_type_config.field_options.select {|fn, f| f && f[:edit_as] && f[:edit_as][:alt_options] }
       return unless fndefs.length > 0
       return fndefs
     end

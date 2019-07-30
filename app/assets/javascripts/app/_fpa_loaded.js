@@ -12,6 +12,7 @@ _fpa.loaded.preload = function(){
 };
 _fpa.loaded.default = function(){
 
+    _fpa.clean_cache();
 
     _fpa.timed_flash_fadeout();
     _fpa.form_utils.format_block();
