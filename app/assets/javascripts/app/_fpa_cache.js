@@ -157,5 +157,3 @@ _fpa.clean_cache = function(){
     }
   }
 }
-
-_fpa.clean_cache();

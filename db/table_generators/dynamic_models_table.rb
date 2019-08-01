@@ -52,8 +52,9 @@ EOF
         f = 'varchar'
         f = 'bigint' if a.end_with?('_id')
         f = 'date' if a.end_with?('_when')
-        f = 'timestamp' if a.end_with?('_at')
         f = 'date' if a.end_with?('_date')
+        f = 'time' if a.end_with?('_time')
+        f = 'timestamp' if a.end_with?('_at')
         f = 'varchar' if a == 'data'
         f = 'varchar' if a.end_with?('_name')
         f = 'boolean' if a.end_with?('_check')
