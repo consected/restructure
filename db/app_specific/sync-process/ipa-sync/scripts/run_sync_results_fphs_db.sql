@@ -13,6 +13,8 @@ UPDATE sync_statuses
 SET
   select_status = t.status,
   to_master_id=t.to_master_id,
+  external_id=t.ipa_id::varchar,
+  external_type='ipa_assignments',
   updated_at = now()
 FROM (
   SELECT * FROM temp_ipa_assignments_results
