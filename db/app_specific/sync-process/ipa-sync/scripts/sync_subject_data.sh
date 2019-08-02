@@ -52,7 +52,11 @@ then
   if [ "$EBENV" == 'DEV-fphs' ]
   then
     export SUBPROCESS_ID=169
+  fi
 
+  if [ "$EBENV" == 'TEST-aws' ]
+  then
+    export SUBPROCESS_ID=69
   fi
 
   if [ "$EBENV" == 'PROD-fphs' ]
