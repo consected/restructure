@@ -5,7 +5,13 @@ CREATE TEMPORARY TABLE temp_ipa_assignments (
 
 
 INSERT INTO temp_ipa_assignments (SELECT * FROM ml_app.find_new_local_ipa_records($SUBPROCESS_ID));
-select ml_app.lock_transfer_records('fphs-db', 'athena-db', (select array_agg(master_id) from temp_ipa_assignments));
+select ml_app.lock_transfer_records_with_external_ids(
+  'fphs-db',
+  'athena-db',
+  (select array_agg(master_id) from temp_ipa_assignments),
+  (select array_agg(master_id) from temp_ipa_assignments),
+  'ipa_assignments'
+);
 
 
 \copy (SELECT * FROM temp_ipa_assignments) TO $IPA_ASSIGNMENTS_FILE WITH (format csv, header true);
