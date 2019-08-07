@@ -73,10 +73,17 @@ _fpa.masters = {
                     // then fire a submit
                     // We do this within a timeout, to allow any DOM changes and CSS transitions to smoothly work through
                     // otherwise the result is a very jerky experience
+                    // We delay longer than necessary to allow a form submit button click to process first, preventing this blocking
+                    // a valid button click
                     window.setTimeout(function(){
-                        f.find('input[type="submit"].auto-submitter').click();
-                        _fpa.state.search_running = true;
-                    },1);
+                      if(!_fpa.state.search_running) {
+                        var bel = f.find('input[type="submit"].auto-submitter');
+                        if (bel.length > 0) {
+                          bel.click();
+                          _fpa.state.search_running = true;
+                        }
+                      }
+                    }, 20);
                 }
                 // Clean up after ourselves
                 $('.prevent-submit').removeClass('prevent-submit');

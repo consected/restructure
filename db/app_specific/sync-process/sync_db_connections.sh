@@ -63,6 +63,22 @@ then
 
   fi
 
+  if [ "$EBENV" == 'TEST-aws' ]
+  then
+    # Connection details for the TEST aws automated processing box
+    export ZEUS_DB=zeus
+    export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops
+    export ZEUS_FPHS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+    export ZEUS_FPHS_DB_USER=fphs
+
+    # Connection details for the remote AWS Athena database for DEV-fphs
+    export AWS_DB=ebdb
+    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
+    export AWS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+    export AWS_DB_USER=fphs
+
+  fi
+
   if [ "$EBENV" == 'PROD-fphs' ]
   then
     # Connection details for the local FPHS Zeus database for PROD-fphs

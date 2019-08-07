@@ -1,4 +1,4 @@
--- create schema ipa_ops OWNER fphs;
+create unless exists schema ipa_ops OWNER fphs;
 
 set search_path=ipa_ops,ml_app;
 \i db/app_specific/ipa/aws-db/create_activity_log_adverse_events_table.sql

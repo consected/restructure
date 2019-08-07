@@ -128,14 +128,14 @@ _fpa.activity_logs = {
           if(!c) {
             if(huc)
               ael.hide();
-            else
-              ael.attr('disabled', true);
+
+            ael.attr('disabled', true);
           }
           else {
             if(huc)
               ael.show();
-            else
-              ael.attr('disabled', false);
+
+            ael.attr('disabled', false);
           }
         }
       }

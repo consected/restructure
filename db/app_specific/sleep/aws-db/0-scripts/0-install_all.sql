@@ -4,6 +4,7 @@ set search_path=sleep,ml_app;
 
 -- # External Identifier
 \i db/app_specific/sleep/aws-db/external-id/create_ext_id_assignments.sql
+\i db/app_specific/sleep/aws-db/external-id/create_bwh_sleep_id_numbers.sql
 
 -- # Tracker
 \i db/app_specific/sleep/aws-db/tracker/create_activity_log_assignments.sql
@@ -16,7 +17,7 @@ set search_path=sleep,ml_app;
 \i db/app_specific/sleep/aws-db/tracker/create_survey_table.sql
 \i db/app_specific/sleep/aws-db/tracker/create_transportation_table.sql
 \i db/app_specific/sleep/aws-db/tracker/create_withdrawals_table.sql
-\i db/app_specific/sleep/aws-db/tracker/create_mrn_external_identifier.sql
+-- \i db/app_specific/sleep/aws-db/tracker/create_mrn_external_identifier.sql
 
 -- # Phone Screen
 \i db/app_specific/sleep/aws-db/phone-screen/create_activity_log_assignment_phone_screens_table.sql
@@ -79,6 +80,7 @@ set search_path=sleep,ml_app;
 
 
 -- # MedNav
+\i db/app_specific/sleep/aws-db/mednav/create_sleep_pi_follow_ups.sql
 \i db/app_specific/sleep/aws-db/mednav/create_al_exit_interviews.sql
 \i db/app_specific/sleep/aws-db/mednav/create_exit_interviews_table.sql
 \i db/app_specific/sleep/aws-db/mednav/create_four_wk_followups_table.sql
