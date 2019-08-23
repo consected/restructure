@@ -85,12 +85,24 @@ _fpa.show_if.methods = {
 
   calc_conditions: function(cond_def_init, data) {
 
+    // Valid condition types
     var cond_types = ['all', 'any', 'not_all', 'not_any'];
     var cond_success = true;
 
+    // Iterate through each top level rule
     for(var cond_type in cond_def_init) {
+      // Set the default in case a condition type was not specified and we have a field name instead
       var cond_def = cond_def_init;
+
+      // Pick up a common yaml error
+      if(cond_type == '<<') {
+        console.log(cond_def_init);
+        console.log(cond_type);
+        throw "Bad definition."
+      }
+
       // if the field definition specifies a condition type, use it
+      // otherwise assume a condition type 'all'
       if( cond_def_init.hasOwnProperty(cond_type) && cond_types.indexOf(cond_type) >= 0) {
         cond_def = cond_def_init[cond_type];
       }
@@ -98,12 +110,14 @@ _fpa.show_if.methods = {
         cond_type = 'all';
       }
 
+      // Now iterate through each of the fields in the definition
       for(var cond_field in cond_def) {
         if(cond_def.hasOwnProperty(cond_field)) {
           // Expect field data
           var exp_field_value = data[cond_field];
           // to have value
           var exp_value = cond_def[cond_field];
+
           if(exp_value == null)
             exp_value = [exp_value];
           else if(typeof exp_value == 'string')
@@ -112,37 +126,43 @@ _fpa.show_if.methods = {
             exp_value = [exp_value, (exp_value ? 'yes' : 'no')];
           }
           else if(typeof exp_value == 'number') {
-            exp_value = [exp_value];
+            exp_value = [exp_value.toString()];
           }
           else if(typeof exp_value == 'object') {
             for(var i = 0; i < exp_value.length; i ++) {
               if(exp_value[i] === true) exp_value.push('yes');
               if(exp_value[i] === false) exp_value.push('no');
+              if(typeof exp_value[i] == 'number') exp_value[i] = exp_value[i].toString();
             }
           }
 
+          var matches = exp_value.includes(exp_field_value);
           if(cond_type == 'all') {
-            cond_success = cond_success && (exp_value.includes(exp_field_value));
+            cond_success = cond_success && matches;
+            if (!matches) break;
           }
           else if(cond_type == 'not_all') {
-            if(!exp_value.includes(exp_field_value)) {
+            if(!matches) {
               cond_success = true;
               break;
             }
             cond_success = false;
           }
           else if(cond_type == 'any') {
-            cond_success = (exp_value.includes(exp_field_value));
+            // This checks that only if all are false does the cond_success get to be false,
+            // since any success breaks out of the loop, having already set the result to true
+            cond_success = matches;
             if(cond_success) break;
           }
           else if(cond_type == 'not_any') {
-            if(exp_value.includes(exp_field_value)) {
+            if(matches) {
               cond_success = false;
               break;
             }
           }
         }
       }
+      if(!cond_success) break;
     }
 
     return cond_success;
