@@ -246,7 +246,7 @@
             </li>
           <% end %>
 
-          <li class="list-group-item edit-field-container <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%>">
+          <li class="list-group-item edit-field-container <%= showed_caption_before ? 'showed-caption-before' : ''%> <%=form_object_item_type_us.hyphenate%>-<%=field_name_sym%> <%=field_name.start_with?('placeholder_') ? 'placeholder-field-item' : ''%>">
             <%= render local_vars.merge(partial: 'common_templates/edit_form_field') %>
           </li>
 

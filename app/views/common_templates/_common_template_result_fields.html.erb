@@ -139,7 +139,7 @@
   {{else is key 'includes' '^fixed_' }}
     <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^fixed_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '^placeholder_' }}
-    <li class="{{> field_result_class}} hidden">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}} hidden placeholder-field-item">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^placeholder_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'e_signed_by'}}
     <li class="{{> field_result_class}}">
       {{#with result_data}}
@@ -176,9 +176,9 @@
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}
     <li class="list-group-item is-full-width {{hyphenate name}}-item-flags">
-    {{#with ..}}
-      {{>item_flag_container item_type=full_name readonlyview=item_flags_readonly }}
-    {{/with}}
+
+      {{>item_flag_container item_type=../full_name master_id=result_data.master_id id=result_data.id readonlyview=../item_flags_readonly }}
+
     </li>
   {{/is}}
   {{/if}}
