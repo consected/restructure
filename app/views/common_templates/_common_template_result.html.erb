@@ -124,7 +124,9 @@
     {{/with}}
 
     {{#unless exclude_metadata }}
-      <li class="list-group-item record-meta">{{>update_metadata show_created_at=show_created_at }}</li>
+      {{#with result_data}}
+      <li class="list-group-item record-meta">{{>update_metadata show_created_at=../show_created_at }}</li>
+      {{/with}}
     {{/unless}}
   </ul>
   {{/caption_before_substitutions}}
