@@ -5,7 +5,7 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
       {
         model_name: {
           if: if_extras,
-          in: "this | master",
+          in: "this | master (creates no reference, just uses master_id) | master_with_reference",
           with: {
             field_name: "now()",
             field_name_2: "literal value",
@@ -63,6 +63,8 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
             ModelReference.create_with @item, new_item
           elsif config[:in] == 'master'
             # ModelReference.create_from_master_with @master, new_item
+          elsif config[:in] == 'master_with_reference'
+            ModelReference.create_from_master_with @master, new_item
           else
             raise FphsException.new "Unknown 'in' value in create_reference"
           end
