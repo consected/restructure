@@ -828,8 +828,15 @@ RSpec.describe "Calculate conditional actions", type: :model do
           from: 'master',
           add: 'one_to_master'
         }
+      },
+      player_contact: {
+        player_contact: {
+          from: 'master',
+          add: 'many'
+        }
       }
     }
+
     ModelReference.create_with @al, a1
     ModelReference.create_with @al, a2
 
@@ -924,6 +931,132 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
 
     expect(res.calc_action_if).to be true
+
+
+
+    # # Try matching any across multiple relations
+    pc1 = m.player_contacts.create! rec_type: :phone, data: '(123)456-7891', rank: 5
+    pc2 = m.player_contacts.create! rec_type: :phone, data: '(123)456-7892', rank: 10
+    # ModelReference.create_with @al, pc1
+    # ModelReference.create_with @al, pc2
+    #
+    # expect(@al.model_references.length).to eq 4
+
+    # Check that we correctly join in the queries so that any / not_any work as expected
+
+    confy = "
+        any:
+            addresses:
+              city: #{m.addresses.first.city}
+
+            player_contacts:
+              data: fake
+
+
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+
+    a = res.calc_action_if
+    expect(a).to be true
+
+
+    confy = "
+        not_any:
+            addresses:
+              city: #{m.addresses.first.city}
+
+            player_contacts:
+              data: fake
+
+
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+
+    a = res.calc_action_if
+    expect(a).to be false
+
+
+    confy = "
+        all:
+            addresses:
+              city: #{m.addresses.first.city}
+
+            player_contacts:
+              data: fake
+
+
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+
+    a = res.calc_action_if
+    expect(a).to be false
+
+
+    confy = "
+        all:
+            addresses:
+              city: #{m.addresses.first.city}
+
+            player_contacts:
+              data: #{m.player_contacts.first.data}
+
+
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+
+    a = res.calc_action_if
+    expect(a).to be true
+
+
+    confy = "
+        not_all:
+            addresses:
+              city: #{m.addresses.first.city}
+
+            player_contacts:
+              data: fake
+
+
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+
+    a = res.calc_action_if
+    expect(a).to be true
+
+
+    confy = "
+        not_all:
+            addresses:
+              city: #{m.addresses.first.city}
+
+            player_contacts:
+              data: #{m.player_contacts.first.data}
+
+
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+
+    a = res.calc_action_if
+    expect(a).to be false
+
 
 
     # Expect this one to fail, as the referemces do not exist when using @al0 as the object in ConditionalActions

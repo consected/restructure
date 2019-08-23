@@ -70,7 +70,7 @@ module CalcActions
           end
 
 
-          calc_base_query
+          calc_base_query condition_type
 
 
           if condition_type == :all
@@ -335,7 +335,7 @@ module CalcActions
     #  all:
     #    <creatable conditions>
     #
-    def calc_base_query
+    def calc_base_query condition_type
 
       # join_tables = @condition_config.keys.map(&:to_sym) - SelectionTypes
       join_tables = []
@@ -485,7 +485,11 @@ module CalcActions
       end
       @join_tables = join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
 
-      @base_query = @current_scope.joins(join_tables)
+      if [:all, :not_all].include? condition_type
+        @base_query = @current_scope.joins(join_tables)
+      else
+        @base_query = @current_scope.includes(join_tables)
+      end
     end
 
     # Create a dynamic value if the condition's value matches certain strings
