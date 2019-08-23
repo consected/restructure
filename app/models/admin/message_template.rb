@@ -213,7 +213,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
         assoc = master.send(an)
         if assoc.respond_to? :attributes
           data[an.to_sym] ||= assoc.attributes
-        elsif assoc.respond_to? :first
+        elsif assoc.first.respond_to? :first
           data[an.to_sym] ||= assoc.first.attributes
         end
 

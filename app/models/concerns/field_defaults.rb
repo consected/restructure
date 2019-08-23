@@ -25,6 +25,9 @@ module FieldDefaults
       elsif default == 'current_user_email'
         res = obj.current_user.email
       end
+    elsif default.is_a? Hash
+      ca = ConditionalActions.new default, obj
+      res = ca.get_this_val
     end
 
     if type&.to_sym == :date
