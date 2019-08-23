@@ -85,8 +85,8 @@ input[type="date"].attached-datepicker {
 
 }
 
-.placeholder-field-item {
-  display: none;
+li.list-group-item.placeholder-field-item {
+    display: none !important;
 }
 
 .fixed-field {

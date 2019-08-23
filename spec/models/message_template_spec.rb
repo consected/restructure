@@ -40,6 +40,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     master.player_contacts.create! data: pn + ' ext 123', rec_type: :phone, rank: 5
     master.player_contacts.create! data: 'abc@def.xyz', rec_type: :email, rank: 10
 
+    expect(master.player_contact_phones.first.data).to eq pn
+
     df = @user.user_preference.pattern_for_date_time_format
     tz = ActiveSupport::TimeZone.new('Eastern Time (US & Canada)')
 
