@@ -8,8 +8,8 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       {
         type: "email|sms",
         role: "(optional) role name to notify - or reference like {this: {user_id: return_value} }",
-        users: "(optional) list of users to notify - or reference like {this: {role_names: return_value} }",
-        phones: "(optional) list of phone numbers to notify - or reference like {this: {phone_numbers: return_value} }",
+        users: "(optional) list of users to notify - or reference like {this: {phone_numbers: return_value} }",
+        phones: "(optional) list of phone numbers to notify - or reference like {this: {role_names: return_value} }",
         default_country_code: "(optional) country code for SMS numbers, if they are not otherwise specified",
         layout_template: "name of layout template",
         content_template: "name of content template",

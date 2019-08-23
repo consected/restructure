@@ -20,6 +20,7 @@ class ExtraLogType < ExtraOptions
       label: "button label",
       references: {
         model_name: {
+          label: "button label",
           from: "this | master",
           add: "many | one_to_master | one_to_this",
           add_with: {
