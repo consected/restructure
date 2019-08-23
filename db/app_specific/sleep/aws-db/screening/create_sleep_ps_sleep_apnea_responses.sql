@@ -5,7 +5,7 @@ set search_path=sleep, ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_ps_sleep_apnea_responses diagnosed_yes_no use_treatment_yes_no severity
 
-      CREATE FUNCTION log_sleep_ps_sleep_apnea_response_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_sleep_ps_sleep_apnea_response_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -15,6 +15,8 @@ set search_path=sleep, ml_app;
                       diagnosed_yes_no,
                       use_treatment_yes_no,
                       severity,
+                      possibly_eligible_yes_no,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -25,6 +27,8 @@ set search_path=sleep, ml_app;
                       NEW.diagnosed_yes_no,
                       NEW.use_treatment_yes_no,
                       NEW.severity,
+                      NEW.possibly_eligible_yes_no,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -40,6 +44,8 @@ set search_path=sleep, ml_app;
           diagnosed_yes_no varchar,
           use_treatment_yes_no varchar,
           severity varchar,
+          possibly_eligible_yes_no VARCHAR,
+          notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -61,6 +67,8 @@ set search_path=sleep, ml_app;
           diagnosed_yes_no varchar,
           use_treatment_yes_no varchar,
           severity varchar,
+          possibly_eligible_yes_no VARCHAR,
+          notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

@@ -5,7 +5,7 @@ set search_path=sleep, ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_ps_dast2_mod_questions number_days_negative_feeling number_days_drug_usage
 
-      CREATE FUNCTION log_sleep_ps_dast2_mod_question_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_sleep_ps_dast2_mod_question_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -14,6 +14,8 @@ set search_path=sleep, ml_app;
                       master_id,
                       number_days_negative_feeling,
                       number_days_drug_usage,
+                      possibly_eligible_yes_no,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -23,6 +25,8 @@ set search_path=sleep, ml_app;
                       NEW.master_id,
                       NEW.number_days_negative_feeling,
                       NEW.number_days_drug_usage,
+                      NEW.possibly_eligible_yes_no,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -37,6 +41,8 @@ set search_path=sleep, ml_app;
           master_id integer,
           number_days_negative_feeling integer,
           number_days_drug_usage integer,
+          possibly_eligible_yes_no VARCHAR,
+          notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -57,6 +63,8 @@ set search_path=sleep, ml_app;
           master_id integer,
           number_days_negative_feeling integer,
           number_days_drug_usage integer,
+          possibly_eligible_yes_no VARCHAR,
+          notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

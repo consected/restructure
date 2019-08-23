@@ -5,13 +5,14 @@ set search_path=sleep, ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_ps_screener_responses comm_clearly_in_english_yes_no give_informed_consent_yes_no_dont_know give_informed_consent_notes notes
 
-      CREATE FUNCTION log_sleep_ps_screener_response_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_sleep_ps_screener_response_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
                   INSERT INTO sleep_ps_screener_response_history
                   (
                       master_id,
+                      outcome,
                       comm_clearly_in_english_yes_no,
                       give_informed_consent_yes_no_dont_know,
                       give_informed_consent_notes,
@@ -23,6 +24,7 @@ set search_path=sleep, ml_app;
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.outcome,
                       NEW.comm_clearly_in_english_yes_no,
                       NEW.give_informed_consent_yes_no_dont_know,
                       NEW.give_informed_consent_notes,
@@ -39,6 +41,7 @@ set search_path=sleep, ml_app;
       CREATE TABLE sleep_ps_screener_response_history (
           id integer NOT NULL,
           master_id integer,
+          outcome varchar,
           comm_clearly_in_english_yes_no varchar,
           give_informed_consent_yes_no_dont_know varchar,
           give_informed_consent_notes varchar,
@@ -61,6 +64,7 @@ set search_path=sleep, ml_app;
       CREATE TABLE sleep_ps_screener_responses (
           id integer NOT NULL,
           master_id integer,
+          outcome varchar,
           comm_clearly_in_english_yes_no varchar,
           give_informed_consent_yes_no_dont_know varchar,
           give_informed_consent_notes varchar,

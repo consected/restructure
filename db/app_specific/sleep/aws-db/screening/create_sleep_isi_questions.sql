@@ -5,7 +5,7 @@ set search_path=sleep, ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_isi_questions falling_asleep staying_asleep waking_too_early satisfaction_with_pattern noticeable_to_others worried_distressed interferes_with_daily_function
 
-      CREATE FUNCTION log_sleep_isi_question_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_sleep_isi_question_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -20,6 +20,11 @@ set search_path=sleep, ml_app;
                       worried_distressed,
                       interferes_with_daily_function,
                       total_score,
+                      ineligible_assist_yes_no,
+                      trust_assessment_info_yes_no,
+                      help_finding_pcp_yes_no,
+                      possibly_eligible_yes_no,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -35,6 +40,11 @@ set search_path=sleep, ml_app;
                       NEW.worried_distressed,
                       NEW.interferes_with_daily_function,
                       NEW.total_score,
+                      NEW.ineligible_assist_yes_no,
+                      NEW.trust_assessment_info_yes_no,
+                      NEW.help_finding_pcp_yes_no,
+                      NEW.possibly_eligible_yes_no,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -55,6 +65,11 @@ set search_path=sleep, ml_app;
           worried_distressed INTEGER,
           interferes_with_daily_function INTEGER,
           total_score INTEGER,
+          ineligible_assist_yes_no VARCHAR,
+          trust_assessment_info_yes_no VARCHAR,
+          help_finding_pcp_yes_no VARCHAR,
+          possibly_eligible_yes_no VARCHAR,
+          notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -81,6 +96,11 @@ set search_path=sleep, ml_app;
           worried_distressed INTEGER,
           interferes_with_daily_function INTEGER,
           total_score INTEGER,
+          ineligible_assist_yes_no VARCHAR,
+          trust_assessment_info_yes_no VARCHAR,
+          help_finding_pcp_yes_no VARCHAR,
+          possibly_eligible_yes_no VARCHAR,
+          notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

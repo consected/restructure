@@ -90,6 +90,9 @@ set search_path=sleep,ml_app;
 \i db/app_specific/sleep/aws-db/mednav/create_mednav_provider_reports.sql
 \i db/app_specific/sleep/aws-db/mednav/create_two_wk_followups_table.sql
 
+-- # Discussions
+\i db/app_specific/sleep/aws-db/discussions/create_activity_log_sleep_assignment_discussions.sql
+
 
 set search_path=ml_app;
 \i db/app_specific/sleep/aws-db/z-sync/z-ml_app-sync-create_sync_subject_data_aws_db.sql

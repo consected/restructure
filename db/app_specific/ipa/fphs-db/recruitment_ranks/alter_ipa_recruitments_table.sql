@@ -48,12 +48,18 @@
       drop view ml_app.ipa_recruitment_ranks;
       create view ml_app.ipa_recruitment_ranks as
         select
-        id, ranks.master_id, rank,
-        ml_app_age_eligible_for_ipa,
-        now() created_at, now() updated_at
-      from ipa_ops.ipa_recruitment_ranks ranks
-      inner join ipa_ops.q1_ages ages
-      on ranks.master_id = ages.master_id;
+          a.id,
+          m.id "master_id",
+          sleep_apnea + pain + neurocognitive + cardiometabolic "afflictions",
+          age between 24 and 55 "age_eligible",
+          q2_eligible, black # white "black_or_white",
+          coalesce((sleep_apnea + pain + neurocognitive + cardiometabolic <> 2) AND (age between 24 and 55) AND q2_eligible = 1 AND (black # white = 1), false) "eligible",
+          now() created_at,
+          now() updated_at
+        from ml_app.masters m
+        left join ipa_athena.afflictions a
+        on m.msid = a.msid
+      ;
 
       GRANT ALL ON ml_app.ipa_recruitment_ranks TO fphs;
       GRANT SELECT ON ml_app.ipa_recruitment_ranks TO fphsusr;
