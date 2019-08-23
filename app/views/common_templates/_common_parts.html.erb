@@ -9,7 +9,7 @@
 
 <script id="update_metadata-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   {{#if show_created_at}}
-    <span class="meta-created-at glyphicon glyphicon-plus-sign"></span>&nbsp;<span class="meta-created-at-shown" data-toggle="popover" data-trigger="click hover" data-content="created {{date_time created_at}}">{{pretty_string created_at}}</span>
+    <span class="meta-created-at glyphicon glyphicon-plus-sign"></span>&nbsp;<span class="meta-created-at-shown" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}">{{date_time created_at}}</span>
   {{else}}
     <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-trigger="click hover" data-content="created: {{date_time created_at}}"></span>
   {{/if}}
