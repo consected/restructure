@@ -9,15 +9,15 @@ set search_path=sleep,ml_app;
 -- # Tracker
 \i db/app_specific/sleep/aws-db/tracker/create_activity_log_assignments.sql
 \i db/app_specific/sleep/aws-db/tracker/create_screenings_table.sql
-\i db/app_specific/sleep/aws-db/tracker/create_emergency_contacts.sql
+-- \i db/app_specific/sleep/aws-db/tracker/create_emergency_contacts.sql
 \i db/app_specific/sleep/aws-db/tracker/create_appointment_table.sql
 \i db/app_specific/sleep/aws-db/tracker/create_consent_mailings.sql
-\i db/app_specific/sleep/aws-db/tracker/create_hotel_table.sql
+-- \i db/app_specific/sleep/aws-db/tracker/create_hotel_table.sql
 \i db/app_specific/sleep/aws-db/tracker/create_payment_table.sql
-\i db/app_specific/sleep/aws-db/tracker/create_survey_table.sql
-\i db/app_specific/sleep/aws-db/tracker/create_transportation_table.sql
+-- \i db/app_specific/sleep/aws-db/tracker/create_survey_table.sql
+-- \i db/app_specific/sleep/aws-db/tracker/create_transportation_table.sql
 \i db/app_specific/sleep/aws-db/tracker/create_withdrawals_table.sql
--- \i db/app_specific/sleep/aws-db/tracker/create_mrn_external_identifier.sql
+\i db/app_specific/sleep/aws-db/tracker/create_mrn_external_identifier.sql
 
 -- # Phone Screen
 \i db/app_specific/sleep/aws-db/phone-screen/create_activity_log_assignment_phone_screens_table.sql
@@ -25,34 +25,35 @@ set search_path=sleep,ml_app;
 
 -- # Sleep Screening
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ese_questions.sql
-\i db/app_specific/sleep/aws-db/screening/trigger_ese_score_calc.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_isi_questions.sql
-\i db/app_specific/sleep/aws-db/screening/trigger_isi_score_calc.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_audit_c_questions.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_basic_responses.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_dast_2_mod_questions.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_eligibles.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_non_eligibles.sql
+\i db/app_specific/sleep/aws-db/screening/create_sleep_ps_eligibility_followups.sql
+\i db/app_specific/sleep/aws-db/screening/create_sleep_ps_possibly_eligibles.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_screener_responses.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_sleep_apnea_responses.sql
+\i db/app_specific/sleep/aws-db/screening/create_sleep_ps_subject_contacts.sql
+\i db/app_specific/sleep/aws-db/screening/trigger_ese_score_calc.sql
+\i db/app_specific/sleep/aws-db/screening/trigger_isi_score_calc.sql
 
 -- # Sleep Screening Part 2
-\i db/app_specific/sleep/aws-db/screening/create_sleep_ps2_initial_screenings.sql
+\i db/app_specific/sleep/aws-db/screening_2/create_sleep_ps2_initial_screenings.sql
+\i db/app_specific/sleep/aws-db/screening_2/create_activity_log_sleep_assignment_phone_screen2s.sql
+\i db/app_specific/sleep/aws-db/screening_2/create_sleep_ps2_eligibles.sql
+\i db/app_specific/sleep/aws-db/screening_2/create_sleep_ps2_non_eligibles.sql
+\i db/app_specific/sleep/aws-db/screening_2/create_sleep_ps2_phq8_questions.sql
 
 -- # InEx
 \i db/app_specific/sleep/aws-db/inex/create_activity_log_inex_checklist_table.sql
-\i db/app_specific/sleep/aws-db/inex/create_inex_checklist_table.sql
+\i db/app_specific/sleep/aws-db/inex/create_sleep_inex_checklists.sql
 
-\i db/app_specific/sleep/aws-db/inex/create_adl_screener_data_table.sql
-\i db/app_specific/sleep/aws-db/inex/create_adl_informant_screener.sql
-\i db/app_specific/sleep/aws-db/inex/trigger_adl_screener.sql
-
--- \i db/app_specific/sleep/aws-db/inex/create_tms_reviews_view.sql
--- \i db/app_specific/sleep/aws-db/inex/prep_inex_checklist_from_ps.sql
 
 -- # Navigation
-\i db/app_specific/sleep/aws-db/navigation/create_activity_log_navigation_table.sql
-\i db/app_specific/sleep/aws-db/navigation/create_station_contacts_table.sql
+-- \i db/app_specific/sleep/aws-db/navigation/create_activity_log_navigation_table.sql
+-- \i db/app_specific/sleep/aws-db/navigation/create_station_contacts_table.sql
 
 -- # Adverse Events
 \i db/app_specific/sleep/aws-db/adverse-events/create_activity_log_adverse_events_table.sql
@@ -80,15 +81,15 @@ set search_path=sleep,ml_app;
 
 
 -- # MedNav
+\i db/app_specific/sleep/aws-db/mednav/create_al_med_navs.sql
 \i db/app_specific/sleep/aws-db/mednav/create_sleep_pi_follow_ups.sql
-\i db/app_specific/sleep/aws-db/mednav/create_al_exit_interviews.sql
-\i db/app_specific/sleep/aws-db/mednav/create_exit_interviews_table.sql
-\i db/app_specific/sleep/aws-db/mednav/create_four_wk_followups_table.sql
 \i db/app_specific/sleep/aws-db/mednav/create_incidental_findings_table.sql
-\i db/app_specific/sleep/aws-db/mednav/create_mednav_followups_table.sql
 \i db/app_specific/sleep/aws-db/mednav/create_mednav_provider_comms.sql
 \i db/app_specific/sleep/aws-db/mednav/create_mednav_provider_reports.sql
-\i db/app_specific/sleep/aws-db/mednav/create_two_wk_followups_table.sql
+-- \i db/app_specific/sleep/aws-db/mednav/create_exit_interviews_table.sql
+-- \i db/app_specific/sleep/aws-db/mednav/create_four_wk_followups_table.sql
+-- \i db/app_specific/sleep/aws-db/mednav/create_mednav_followups_table.sql
+-- \i db/app_specific/sleep/aws-db/mednav/create_two_wk_followups_table.sql
 
 -- # Discussions
 \i db/app_specific/sleep/aws-db/discussions/create_activity_log_sleep_assignment_discussions.sql

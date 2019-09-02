@@ -1,0 +1,245 @@
+# @library sleep enabled_if
+# @library sleep filestore_container
+
+_definitions:
+
+  ####
+  # Boilerplace for notifying roles
+  # Override the subject: and if: structures to refine operation
+  ####
+
+  # Default email - just add roles or users
+  notify_email_default: &notify_email_default
+    type: email
+    layout_template: sleep notification layout
+    content_template: sleep discussion message
+    subject: "Sleep Study App: Discussion message"
+
+  # Default SMS - just add roles or users
+  notify_sms_default: &notify_sms_default
+    type: sms
+    layout_template: standard sms layout
+    content_template: sleep sms notification
+    subject: "Sleep Study Discussion"
+
+
+  # HMS Phone Screener
+  notify_hms_ps: &notify_hms_ps
+    <<: *notify_email_default
+    role: email - discussion hms ps
+
+  # HMS Phone Screener SMS
+  notify_hms_ps_sms: &notify_hms_ps_sms
+    <<: *notify_sms_default
+    role: sms - discussion hms ps
+
+  # BWH Phone Screener
+  notify_bwh_ps: &notify_bwh_ps
+    <<: *notify_email_default
+    role: email - discussion bwh ps
+
+  # BWH Phone Screener SMS
+  notify_bwh_ps_sms: &notify_bwh_ps_sms
+    <<: *notify_sms_default
+    role: sms - discussion bwh ps
+
+  # Interventionist
+  notify_interventionists: &notify_interventionists
+    <<: *notify_email_default
+    role: email - discussion interventionist
+
+  # Interventionist SMS
+  notify_interventionists_sms: &notify_interventionists_sms
+    <<: *notify_sms_default
+    role: sms - discussion interventionist
+
+  # PI
+  notify_pi: &notify_pi
+    <<: *notify_email_default
+    role: email - discussion pi
+
+  # PI SMS
+  notify_pi_sms: &notify_pi_sms
+    <<: *notify_sms_default
+    role: sms - discussion pi
+
+
+
+
+  ####
+  # Handle options for generic contact forms, allowing a
+  # drop-down to select which role or user is notified
+  ####
+
+  notify_hms_ps_option: &notify_hms_ps_option
+    <<: *notify_hms_ps
+    if:
+      all:
+        this:
+          contact_role: hms phone screener
+
+  notify_hms_ps_option_sms: &notify_hms_ps_option_sms
+    <<: *notify_hms_ps_sms
+    if:
+      all:
+        this:
+          contact_role: hms phone screener
+
+  notify_bwh_ps_option: &notify_bwh_ps_option
+    <<: *notify_bwh_ps
+    if:
+      all:
+        this:
+          contact_role: bwh phone screener
+
+  notify_bwh_ps_option_sms: &notify_bwh_ps_option_sms
+    <<: *notify_bwh_ps_sms
+    if:
+      all:
+        this:
+          contact_role: bwh phone screener
+
+
+
+
+  notify_interventionists_option: &notify_interventionists_option
+    <<: *notify_interventionists
+    if:
+      all:
+        this:
+          contact_role: mednav reviewer
+
+  notify_interventionists_option_sms: &notify_interventionists_option_sms
+    <<: *notify_interventionists_sms
+    if:
+      all:
+        this:
+          contact_role: all interventionists
+
+
+  notify_pi_option: &notify_pi_option
+    <<: *notify_pi
+    if:
+      all:
+        this:
+          contact_role: pi
+
+  notify_pi_option_sms: &notify_pi_option_sms
+    <<: *notify_pi_sms
+    if:
+      all:
+        this:
+          contact_role: pi
+
+
+
+  ####
+  # Contact defaults for all generic contact forms
+  ####
+  contact_defaults: &contact_defaults
+    fields:
+      - contact_role
+      - notes
+      - prev_activity_type
+
+    valid_if:
+      on_save:
+        not_any:
+          this:
+            contact_role: ''
+
+    labels:
+      select_contact: notify role
+      contact_role: notify role
+
+    show_if:
+      prev_activity_type:
+        never: true
+
+    view_options:
+      data_attribute:
+        - "to:"
+        - contact_role
+        - ":"
+        - notes
+
+    showable_if:
+      <<: *enabled_if
+      all:
+        this:
+          prev_activity_type: ''
+
+    editable_if:
+      <<: *enabled_if
+      all:
+        this:
+          prev_activity_type: ''
+
+
+    save_action:
+      label: Send
+
+    save_trigger:
+      on_create:
+        notify:
+          - *notify_hms_ps_option
+          - *notify_bwh_ps_option
+          - *notify_interventionists_option
+#          - *notify_assigned_interventionist_option
+          - *notify_pi_option
+          - *notify_hms_ps_option_sms
+          - *notify_bwh_ps_option_sms
+          - *notify_interventionists_option_sms
+#          - *notify_assigned_interventionist_option_sms
+          - *notify_pi_option_sms
+
+
+  # Defaults for Phone Screen
+  contact_defaults_hms_ps: &contact_defaults_hms_ps
+    <<: *contact_defaults
+    field_options:
+      prev_activity_type:
+        edit_as:
+          field_type: fixed_type
+
+      contact_role:
+        edit_as:
+          field_type: select_contact
+          alt_options:
+            HMS Phone Screen Interviewer: hms phone screener
+            BWH Phone Screen Interviewer: bwh phone screener
+            All Interventions: all interventionists
+            Assigned Intervention: assigned interventionist
+            PI: pi
+
+    references:
+      - activity_log__ipa_assignment_discussion:
+          label: New Message
+          from: this
+          add: many
+          prevent_disable: true
+          add_with:
+            extra_log_type: contact_ps_users
+            prev_activity_type: contact_ps_users
+          filter_by:
+            extra_log_type: contact_ps_users
+
+
+
+
+contact_hms_ps_users:
+  label: HMS Phone Screeners
+
+  <<: *contact_defaults_hms_ps
+
+  caption_before:
+    all_fields: |
+      Use this activity to contact the selected role about the phone screen checklist.
+      Note: messages are visible to all phone screen checklist users.
+    submit: After clicking <i>Send</i> the selected role will be notified.
+
+  creatable_if:
+    <<: *enabled_if
+    not_all:
+      activity_log__ipa_assignment_discussions:
+        extra_log_type: baseline_review

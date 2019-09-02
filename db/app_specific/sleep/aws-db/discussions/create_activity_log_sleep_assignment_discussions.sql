@@ -3,13 +3,13 @@ set search_path=sleep, ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh activity_logs_table create activity_log_sleep_assignment_discussions sleep_assignment contact_role notes prev_activity_type
+-- table_generators/generate.sh activity_logs_table create activity_log_sleep_assignment_discussions sleep_assignment tag_select_contact_role notes prev_activity_type
 
       CREATE TABLE activity_log_sleep_assignment_discussion_history (
           id integer NOT NULL,
           master_id integer,
           sleep_assignment_id integer,
-          contact_role varchar,
+          tag_select_contact_role varchar,
           notes varchar,
           prev_activity_type varchar,
           extra_log_type varchar,
@@ -22,7 +22,7 @@ set search_path=sleep, ml_app;
           id integer NOT NULL,
           master_id integer,
           sleep_assignment_id integer,
-          contact_role varchar,
+          tag_select_contact_role varchar,
           notes varchar,
           prev_activity_type varchar,
           extra_log_type varchar,
@@ -31,7 +31,7 @@ set search_path=sleep, ml_app;
           updated_at timestamp without time zone NOT NULL
       );
 
-      CREATE FUNCTION log_activity_log_sleep_assignment_discussion_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_activity_log_sleep_assignment_discussion_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -39,7 +39,7 @@ set search_path=sleep, ml_app;
                   (
                       master_id,
                       sleep_assignment_id,
-                      contact_role,
+                      tag_select_contact_role,
                       notes,
                       prev_activity_type,
                       extra_log_type,
@@ -49,9 +49,9 @@ set search_path=sleep, ml_app;
                       activity_log_sleep_assignment_discussion_id
                       )
                   SELECT
-                      NEW.master_id,
+                      NEW.master_id,\
                       NEW.sleep_assignment_id,
-                      NEW.contact_role,
+                      NEW.tag_select_contact_role,
                       NEW.notes,
                       NEW.prev_activity_type,
                       NEW.extra_log_type,
