@@ -1,0 +1,19 @@
+<%
+# Allow a 'data' selection to be made from a dynamic model table that is not tied to this master
+
+role_name = field_name.sub('multi_select_users_with_role_', '').gsub('_', ' ')
+
+users = Admin::UserRole.active.where(app_type: current_user.app_type, role_name: role_name).users
+
+reslist = users.all.map{|user| [user.email, user.email]}
+
+options = field_options_for(form_object_instance, field_name_sym)
+options[:include_blank] = false
+html_options = {
+  data: {attr_name: field_name_sym, object_name: form_object_item_type_us},
+  multiple: 'multiple'
+}
+
+%>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: 'select user') %>
+<%= form.select field_name_sym, reslist, options, html_options %>

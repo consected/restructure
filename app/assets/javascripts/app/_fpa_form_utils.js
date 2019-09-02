@@ -547,7 +547,10 @@ _fpa.form_utils = {
         sels.each(function(){
             var sel = $(this);
             window.setTimeout(function(){
-                sel.chosen({width: '100%', placeholder_text_multiple: 'no tags selected'}).addClass('attached-chosen');
+                var no_sel_text = 'no tags selected';
+                var alt_nst = sel.attr('data-nothing-selected-text');
+                if(alt_nst) no_sel_text = alt_nst;
+                sel.chosen({width: '100%', placeholder_text_multiple: no_sel_text, hide_results_on_select: false}).addClass('attached-chosen');
             }, 1);
         });
     },

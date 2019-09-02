@@ -48,9 +48,25 @@ _fpa.utils.jump_to_linked_item = function(target, offset, options) {
       }
 
   }
-  // Scroll if necessary
-  if(!_fpa.utils.inViewport(h, true))
+
+  var scroll_attempts = 0;
+  var jump_scroll = function () {
+    // Scroll if necessary
+    if(!_fpa.utils.inViewport(h, true))
       _fpa.utils.scrollTo(h, 200, offset);
+    console.log('retry scroll');
+    if( $('.ajax-running').length > 0) {
+      scroll_attempts++;
+      if(scroll_attempts < 7) {
+        window.setTimeout(function() {
+          jump_scroll();
+        }, 500);
+      }
+    }
+  }
+
+
+  jump_scroll();
 
   return h;
 };
