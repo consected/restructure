@@ -98,6 +98,10 @@
     {{/unless}}
     {{/if}}
   {{/unless}}
+  {{else is key 'includes' '^tag_select_' }}
+    <li class="{{> field_result_class}} is--select-field" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_' }}
+      {{>tag_select_container field_key=key tag_selects=this_value nothing_selected_text="nothing selected"}}
+    </li>
   {{else is key 'includes' '^select_record_from_' }}
     <li class="{{> field_result_class}}" data-field-val="{{this_value}}">{{> field_label labels=(concat 'labels_' (underscore name)) replace='^select_record_from_' }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
   {{else is key 'includes' '^select_' }}
@@ -109,7 +113,7 @@
       {{#* inline "iterateMultiSelect"}}
         {{#each multi_vals}}
           {{#is this '!in' "0,false,no" }}
-          <span data-field-array-el-val="{{this}}">{{#if (get ../result_data_general_selections ../field_key @index 'name')}}{{get ../result_data_general_selections ../field_key @index 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</span>
+          <span data-field-array-el-val="{{this}}">{{#if (get ../result_data._general_selections ../field_key @index 'name')}}{{get ../result_data._general_selections ../field_key @index 'name'}}{{else}}{{pretty_string this return_string="true" capitalize="true"}}{{/if}}</span>
           <br/>
           {{/is}}
         {{/each}}
@@ -157,16 +161,29 @@
     {{> e_signature_parts name=(pluralize ../name) value=../this_value }}
     {{/with}}
   {{else is this_value 'typeof' 'object'}}
-      <li class="list-group-item typeof-object-field"><p>{{humanize key}} <a data-target="#view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a></p>
+      <li class="list-group-item typeof-object-field"><p>{{humanize key}}
+        {{#is this_value.length 0}}
+        {{else is this_value.[0] 'typeof' 'string'}}
+        {{else}}
+        <a data-target="#view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" data-toggle="collapse" data-toggle-caret="true" class="glyphicon glyphicon-triangle-bottom view-object-caret"></a>
+        {{/is}}
+      </p>
+      {{#is this_value.length 0}}
+      {{else is this_value.[0] 'typeof' 'string'}}
+      <ul class="array-results">
+        {{#each this_value}}
+        <li class="array-result">{{pretty_string this return_string="true" capitalize="false"}}</li>
+        {{/each}}
+      </ul>
+      {{else}}
       <ul class="view-object collapse" id="view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" aria-expanded="false">
       {{#each this_value}}
-
       {{#with ../template_config}}
       {{> common_template_result_field this_value=../this key=@key name=name template_config=this result_data=../result_data}}
       {{/with}}
-
       {{/each}}
       </ul>
+      {{/is}}
 
       </li>
   {{else is this_value '===' null}}
@@ -199,4 +216,38 @@
 
 {{/filter}}
 {{/if}}
+</script>
+
+
+
+<script id="tag_select_container-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div id="tag-selects-{{master_id}}-{{item_type}}-{{id}}" class="tag-selects-block">
+  <div class="" id="tag-select-{{master_id}}-{{item_type}}-{{id}}-" >
+  {{>tag_selects_result field_key=field_key}}
+  </div>
+  </div>
+</script>
+
+
+<script id="tag_selects_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+  <div class="">
+    <select multiple="true" disabled="disabled" class="form-control for-tag-select" data-nothing-selected-text="{{nothing_selected_text}}">
+    {{#each tag_selects}}
+      {{#is this 'in' "0,false,no" }}
+      {{else is @key 'typeof' 'number'}}
+        {{>tag_select_result this_value_id=this this_value_name=this result_data=../result_data field_key=../field_key}}
+      {{else}}
+        {{>tag_select_result this_value_id=@key this_value_name=this result_data=../result_data field_key=../field_key}}
+      {{/is}}
+    {{else}}
+      <span class="no-tag-selects">(nothing selected)</span>
+    {{/each}}
+    </select>
+  </div>
+</script>
+
+<script id="tag_select_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+   <option selected="true" class="tag-select" value="{{this_value_id}}">
+     {{#if (get result_data._general_selections field_key this_value_id 'name')}}{{get result_data._general_selections field_key this_value_id 'name'}}{{else}}{{pretty_string this_value_name return_string="true" capitalize="false"}}{{/if}}
+   </option>
 </script>

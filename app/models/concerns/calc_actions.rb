@@ -7,14 +7,15 @@ module CalcActions
   included do
     SelectionTypes = :all, :any, :not_all, :not_any
     BoolTypeString = '__!BOOL__'.freeze
-    ValidExtraConditions = ['<', '>', '<>', '<=', '>='].freeze
+    ValidExtraConditions = ['<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
+    ValidExtraConditionsArrays = ['= ANY', '<> ANY', '= ARRAY_LENGTH', '<> ARRAY_LENGTH', '= LENGTH', '<> LENGTH'].freeze
     attr_accessor :condition_scope, :this_val
   end
 
   private
 
     def non_join_table_name? name
-       @non_join_table_names ||= %i(this this_references parent_references validate)
+       @non_join_table_names ||= %i(this referring_record this_references parent_references validate)
        (name.in?(@non_join_table_names) || is_selection_type(name))
     end
 
@@ -279,11 +280,13 @@ module CalcActions
       # Allow a list of possible conditions to be used
       expected_vals = [expected_vals] unless expected_vals.is_a?(Array) && expected_vals.first.is_a?(Hash)
       expected_vals.each do |expected_val|
-        if table == :this || table == :parent
+        if table == :this || table == :parent || table == :referring_record
           if table == :this
             in_instance = current_instance
           elsif table == :parent
             in_instance = current_instance.parent_item
+          elsif table == :referring_record
+            in_instance = current_instance.referring_record
           end
 
           raise FphsException.new "Instance not found for #{table}" unless in_instance
@@ -356,7 +359,7 @@ module CalcActions
 
           t_conds.each do |field_name, val|
 
-            non_query_condition = table_name.in?([:this, :user, :parent])
+            non_query_condition = table_name.in?([:this, :user, :parent, :referring_record])
             if val.is_a? Hash
               val_item_key = val.first.first
 
@@ -365,13 +368,15 @@ module CalcActions
                 val = {this: val}
               end
 
-
               if val_item_key == :this && !val.first.last.is_a?(Hash)
                 # non_query_condition = true
                 val = @current_instance.attributes[val.first.last]
               elsif val_item_key == :parent && !val.first.last.is_a?(Hash)
                 # non_query_condition = true
                 val = @current_instance.parent_item.attributes[val.first.last]
+              elsif val_item_key == :referring_record && !val.first.last.is_a?(Hash)
+                # non_query_condition = true
+                val = @current_instance.referring_record && @current_instance.referring_record.attributes[val.first.last]
               elsif val_item_key == :this_references
                 if val.first.last.is_a?(Hash)
                   att = val.first.last.first.last
@@ -456,6 +461,21 @@ module CalcActions
 
                 @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
                 @extra_conditions << vv
+              elsif val.is_a?(Hash) && val[:condition].in?(ValidExtraConditionsArrays)
+                  veca_extra_args = ''
+                  if @extra_conditions[0].blank?
+                    @extra_conditions[0] = ""
+                  else
+                    @extra_conditions[0] += " #{BoolTypeString} "
+                  end
+
+                  vc = ValidExtraConditionsArrays.find {|c| c == val[:condition]}
+                  vv = dynamic_value(val[:value])
+
+                  veca_extra_args = ', 1' if vc.include?('ARRAY_LENGTH')
+
+                  @extra_conditions[0] += "? #{vc} (#{table_name}.#{field_name}#{veca_extra_args})"
+                  @extra_conditions << vv
               else
                 if val.in?(['return_value', 'return_value_list', 'return_result']) || val.is_a?(Array) && val.include?('return_value')
                   mode = val
@@ -483,7 +503,7 @@ module CalcActions
           end
         end
       end
-      @join_tables = join_tables = (join_tables - [:this, :parent, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
+      @join_tables = join_tables = (join_tables - [:this, :parent, :referring_record, :this_references, :parent_references, :user, :master, :condition, :value, :hide_error]).uniq
 
       if [:all, :not_all].include? condition_type
         @base_query = @current_scope.joins(join_tables)

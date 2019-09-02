@@ -99,6 +99,7 @@
       model_data_type: :activity_log,
       item_class_name: full_name,
       caption: c.label,
+      button_label: c.button_label,
       prevent_edit: prevent_edit,
       prevent_create: prevent_create,
       only_see_presence: current_user.has_access_to?(:see_presence, :activity_log_type, c.resource_name),
@@ -199,7 +200,7 @@
             eltc = c
             if current_user.has_access_to? :create, :activity_log_type, c.resource_name
         %>
-          <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>"  data-extra-log-type="<%=c.name%>" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.label %></a>
+          <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>"  data-extra-log-type="<%=c.name%>" data-remote="true" class="btn btn-sm btn-primary add-item-button <%= eltc.view_options[:hide_unless_creatable] ? 'hide-unless-creatable' : '' %>" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.button_label || c.label %></a>
         <%  end
            end %>
       </p>
@@ -241,7 +242,7 @@
             <% extra_log_type_configs.each do |c|
                 if current_user.has_access_to? :create, :activity_log_type, c.resource_name
             %>
-              <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.label %></a>
+              <a href="/masters/{{master_id}}/<% if item_list.include? item_type %><%=item_type.pluralize%>/{{id}}/<% end %>activity_log/<%=item_type_name.pluralize%>/new?extra_type=<%= c.name.to_s.hyphenate %>" data-remote="true" class="btn btn-sm btn-primary add-item-button" data-toggle="unhide scrollto-result" data-target="#activity-log--<%=item_type_name_hyphenated%>-<%= c.name.to_s.hyphenate %>-{{master_id}}-"><span class="glyphicon glyphicon-plus"></span> <%= c.button_label || c.label %></a>
             <%  end
                end %>
           <% end %>

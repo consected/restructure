@@ -6,7 +6,7 @@ class ExtraOptions
     [
       :name, :config_obj, :caption_before, :show_if, :resource_name, :save_action, :view_options,
       :field_options, :dialog_before, :creatable_if, :editable_if, :showable_if, :add_reference_if, :valid_if,
-      :filestore, :labels, :fields
+      :filestore, :labels, :fields, :button_label
     ]
   end
   def self.add_key_attributes
@@ -125,7 +125,7 @@ class ExtraOptions
     {
 
       all: {
-        'model_table_name | this | this_references | parent_references ': {
+        'model_table_name | this | this_references | parent_references | referring_record (the record referring to this one)': {
           field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)',
           field_name_2: 'literal value | null',
           field_name_3: { this: 'attribute in this record' },

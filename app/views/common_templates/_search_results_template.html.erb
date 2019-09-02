@@ -4,6 +4,10 @@
     caption = nil
   end
 
+  unless defined? button_label
+    button_label = nil
+  end
+
   unless defined? model_data_type
     model_data_type = nil
   end
@@ -203,6 +207,7 @@
     name: '<%=name%>',
     full_name: '<%=full_name%>',
     caption: Handlebars.compile('<%=caption%>'),
+    button_label: Handlebars.compile('<%=button_label || caption%>'),
     item_class_name: '<%=item_class_name%>',
     item_list: '<%=item_list%>',
     hide_rank_badge: <%=!!hide_rank_badge%>,
