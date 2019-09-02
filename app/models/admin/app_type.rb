@@ -74,6 +74,16 @@ class Admin::AppType < Admin::AdminBase
       res = results['app_type']
 
 
+      ### Force update of reports that don't have a short_name (yet)
+      rs = Report.active.where(short_name: nil)
+      rs.each do |r|
+        r.current_admin = admin
+        r.gen_short_name
+        r.save!
+      end
+      ###
+
+
       res['app_configurations'] = app_type.import_config_sub_items app_type_config, 'app_configurations', ['name', 'role_name']
 
       res['associated_config_libraries'] = app_type.import_config_sub_items app_type_config, 'associated_config_libraries', ['name', 'category', 'format']
@@ -82,7 +92,7 @@ class Admin::AppType < Admin::AdminBase
       res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'associated_activity_logs', ['item_type', 'rec_type', 'process_name'], create_disabled: force_disable
 
       res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value']
-      res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['name']
+      res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['short_name', 'item_type']
 
       res['page_layouts'] = app_type.import_config_sub_items app_type_config, 'page_layouts', ['layout_name', 'panel_name']
       res['user_roles'] = app_type.import_config_sub_items app_type_config, 'user_roles', ['role_name']

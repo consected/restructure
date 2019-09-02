@@ -1,6 +1,12 @@
 class Admin::ActivityLogsController < AdminController
 
+  after_action :routes_reload, only: [:update, :create]
+
   protected
+    def routes_reload
+      DynamicModel.routes_reload
+    end
+
     def default_index_order
       {updated_at: :desc}
     end

@@ -4,8 +4,14 @@ class Admin::DynamicModelsController < AdminController
   before_action :set_help_description
   before_action :set_defaults
   helper_method :view_folder
+  after_action :routes_reload, only: [:update, :create]
 
   protected
+
+    def routes_reload
+      DynamicModel.routes_reload
+    end
+
     def set_defaults
       @show_again_on_save = true
       @show_extra_help_info = {}

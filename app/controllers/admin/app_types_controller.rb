@@ -1,5 +1,7 @@
 class Admin::AppTypesController < AdminController
 
+  after_action :routes_reload, only: [:upload]
+
   def upload
     uploaded_io = params[:config]
 
@@ -26,6 +28,10 @@ class Admin::AppTypesController < AdminController
   end
 
   protected
+    def routes_reload
+      DynamicModel.routes_reload
+    end
+
   private
     def permitted_params
         [:name, :label, :disabled]

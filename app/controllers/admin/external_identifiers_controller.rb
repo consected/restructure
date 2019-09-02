@@ -1,9 +1,12 @@
 class Admin::ExternalIdentifiersController < AdminController
 
   helper_method :permitted_params, :objects_instance, :human_name
-
+  after_action :routes_reload, only: [:update, :create]
 
   protected
+    def routes_reload
+      DynamicModel.routes_reload
+    end
 
     def view_folder
       'admin/common_templates'

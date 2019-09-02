@@ -5,7 +5,8 @@ module DynamicModelDefHandler
   included do
     after_save :generate_model
     after_save :check_implementation_class
-    after_save :reload_routes
+    # Reload the routes based on specific controller actions, to allow app type uploads to work faster
+    # after_save :reload_routes
     after_save :add_master_association
     after_save :add_user_access_controls
     after_commit :update_tracker_events
