@@ -75,8 +75,21 @@ module HandlesUserBase
       !!user.has_access_to?(perform, :table, named, with_options)
     end
 
+    def refine_permitted_params param_list
+      res = param_list.dup
+
+      ms_keys = res.select {|a| columns_hash[a.to_s]&.array }
+      ms_keys.each do |k|
+        res.delete(k)
+        res << { k => [] }
+      end
+
+      res
+    end
+
     def permitted_params
-      self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id, :admin_id]
+      res = self.attribute_names.map{|a| a.to_sym} - [:disabled, :user_id, :created_at, :updated_at, :tracker_id, :admin_id]
+      refine_permitted_params res
     end
 
     def default_options

@@ -216,9 +216,11 @@ class ActivityLog::ActivityLogsController < UserBaseController
 
     def permitted_params
       res =  @implementation_class.permitted_params
+      res = @implementation_class.refine_permitted_params res
+
       # The embedded_item params are only used in an update. Create actions are handled separately
       if @embedded_item
-       res << {embedded_item: @embedded_item.class.permitted_params}
+        res << {embedded_item: @implementation_class.refine_permitted_params(@embedded_item.class.permitted_params)}
       end
 
       res

@@ -13,7 +13,7 @@ class DynamicModel::DynamicModelsController < UserBaseController
       @implementation_class ||= implementation_class
 
       res = @implementation_class.permitted_params
-      res
+      @implementation_class.refine_permitted_params res
     end
 
     def secure_params

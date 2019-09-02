@@ -13,6 +13,7 @@ module MasterHandler
     before_action :set_instance_from_id, only: [:show]
     before_action :set_instance_from_reference_id, only: [:create]
     before_action :set_instance_from_build, only: [:new, :create]
+    before_action :set_ref_item_for_new, only: [:new]
     before_action :check_showable?, only: [:show]
     before_action :check_editable?, only: [:edit, :update]
     before_action :check_creatable?, only: [:new, :create]
@@ -379,6 +380,20 @@ module MasterHandler
             object_instance.set_referring_record(ref_record_type, ref_record_id, current_user)
             # The reference will actually get created when the object instance is saved
           end
+        end
+      end
+
+      # For instances being used in a new action, set the referring record so it can be used in calc actions
+      def set_ref_item_for_new
+        ref_params = params[:references]
+        if ref_params.present?
+          ref_record_type = ref_params[:record_type]
+          ref_record_id = ref_params[:record_id]
+        end
+        if ref_record_type.present? && ref_record_id.present? && object_instance.respond_to?(:set_referring_record)
+
+          object_instance.set_referring_record(ref_record_type, ref_record_id, current_user)
+          # The reference will actually get created when the object instance is saved
         end
       end
 
