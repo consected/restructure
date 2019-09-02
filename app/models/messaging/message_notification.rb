@@ -72,13 +72,13 @@ module Messaging
 
     # Generate the message text from the templates and data
     def generate ignore_missing: false
-
       data = self.data
       if data.blank?
         raise FphsException.new "Data is blank and item_type / item_id does not return an item" unless item
 
         data = Admin::MessageTemplate.setup_data item
         data[:_subject] = self.subject
+        data[:extra_substitutions] = self.extra_substitutions_data
 
         save!
       end
@@ -132,6 +132,21 @@ module Messaging
     def recipient_sms_numbers= nums
       @recipient_numbers = nums
       self.recipient_data = nums
+    end
+
+    def extra_substitutions= data
+      
+      if data.is_a?(Hash)
+        data = data.to_yaml
+      end
+
+      super(data)
+    end
+
+    def extra_substitutions_data
+      return @extra_substitutions_data if @extra_substitutions_data
+      return unless self.extra_substitutions
+      @extra_substitutions_data = YAML.load(self.extra_substitutions)
     end
 
 

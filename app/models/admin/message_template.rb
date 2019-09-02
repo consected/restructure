@@ -141,6 +141,12 @@ class Admin::MessageTemplate < ActiveRecord::Base
         res = res.upcase
       elsif op == 'lowercase'
         res = res.downcase
+      elsif op == 'underscore'
+        res = res.underscore
+      elsif op == 'hyphenate'
+        res = res.hyphenate
+      elsif op == 'markup'
+        res = Kramdown::Document.new(res).to_html.html_safe
       end
 
       res

@@ -1,13 +1,13 @@
 class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
   attr_accessor :model_defs, :role, :users, :layout_template, :content_template, :content_template_text, :message_type, :subject,
-                :receiving_user_ids, :phones, :emails, :default_country_code, :when, :importance
+                :receiving_user_ids, :phones, :emails, :default_country_code, :when, :importance, :extra_substitutions
 
   def self.config_def if_extras: {}
     [
       {
         type: "email|sms",
-        role: "(optional) role name to notify - or reference like {this: {user_id: return_value} }",
+        role: "(optional) role name(s) to notify - or reference like {this: {user_id: return_value} }",
         users: "(optional) list of users to notify - or reference like {this: {phone_numbers: return_value} }",
         phones: "(optional) list of phone numbers to notify - or reference like {this: {role_names: return_value} }",
         default_country_code: "(optional) country code for SMS numbers, if they are not otherwise specified",
@@ -15,6 +15,9 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         content_template: "name of content template",
         content_template_text: "alternative content template text",
         subject: "subject text",
+        extra_substitutions: {
+          data1: 'fixed data item to be substituted into the message in {{extra_substitutions.data1}}'
+        },
         importance: "transactional (default) | promotional",
         when: {
           wait_until: '(optional) ISO date or {date:..., time..., zone:... } where zone is one specified in MAPPINGS @ https://api.rubyonrails.org/classes/ActiveSupport/TimeZone.html',
@@ -59,14 +62,33 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       @message_type = config[:type]
       @subject = config[:subject]
       @importance = config[:importance]
+      @extra_substitutions = config[:extra_substitutions]
 
+      if @role || @users
+        # Allow both role and users to be specified
+        @receiving_user_ids = []
 
-      if @role
-        role_name = calc_field_or_return(@role)
-        @receiving_user_ids = Admin::UserRole.active_user_ids role_name: role_name, app_type: @user.app_type
-      elsif @users
-        user_ids = calc_field_or_return(@users)
-        @receiving_user_ids = User.where(id: user_ids).active.pluck(:id)
+        if @role
+          
+          @role = @role.reject(&:blank?) if @role.is_a? Array
+
+          role_name = calc_field_or_return(@role)
+
+          role_name = role_name.reject(&:blank?) if role_name.is_a? Array
+
+          @receiving_user_ids += Admin::UserRole.active_user_ids role_name: role_name, app_type: @user.app_type
+        end
+
+        if @users
+          if @users.is_a? Array
+            @users = @users.reject(&:blank?)
+          end
+          user_ids = calc_field_or_return(@users)
+          @receiving_user_ids += User.where(id: user_ids).active.pluck(:id)
+        end
+
+        @receiving_user_ids.uniq!
+
       elsif @phones
         force_phones = calc_field_or_return(@phones)
 
@@ -93,7 +115,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       end
 
       if (!@receiving_user_ids || @receiving_user_ids.length == 0) && !force_phones && !force_emails && !force_recip_recs
-        Rails.logger.warn "No recipients based on role: #{@role} or specified phones/emails in #{self.class.name}"
+        Rails.logger.warn "No recipients based on role: #{@role}, users or specified phones/emails in #{self.class.name}"
         return
       end
 
@@ -149,6 +171,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
       setup_data[:recipient_emails] = force_emails if force_emails
       setup_data[:recipient_data] = force_recip_recs if force_recip_recs
       setup_data[:importance] = force_importance if force_importance
+      setup_data[:extra_substitutions] = @extra_substitutions
 
       mn = Messaging::MessageNotification.create! setup_data
 
