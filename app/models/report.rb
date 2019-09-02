@@ -470,9 +470,12 @@ class Report < ActiveRecord::Base
   end
 
   def valid_short_name?
-    res = self.class.active.where(short_name: self.short_name, item_type: self.item_type)
+    test = {short_name: self.short_name, item_type: self.item_type}
+    res = self.class.active.where(test)
     if (res.map(&:id) - [self.id]).length > 0
-      errors.add :short_name, 'is a duplicate of another record'
+      res.each do |res0|
+        errors.add :short_name, "is a duplicate of another report record: (#{self.name}) #{test} --duplicates-- (#{res0.name}) #{ {short_name: res0.short_name, item_type: res0.item_type} } "
+      end
     end
   end
 end
