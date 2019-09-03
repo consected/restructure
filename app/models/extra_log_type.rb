@@ -86,6 +86,26 @@ class ExtraLogType < ExtraOptions
 
     self.label ||= name.to_s.humanize
 
+    clean_references_def
+    clean_e_sign_def
+
+    self.save_trigger ||= {}
+    self.save_trigger = self.save_trigger.symbolize_keys
+    # Make save_trigger.on_save the default for on_create and on_update
+    os = self.save_trigger[:on_save]
+    if os
+      ou = self.save_trigger[:on_update] || {}
+      oc = self.save_trigger[:on_create] || {}
+      self.save_trigger[:on_update] = os.merge(ou)
+      self.save_trigger[:on_create] = os.merge(oc)
+    end
+
+    self.save_trigger[:on_upload] ||= {}
+    self.save_trigger[:on_disable] ||= {}
+
+  end
+
+  def clean_references_def
     if self.references
       new_ref = {}
       if self.references.is_a? Array
@@ -147,7 +167,9 @@ class ExtraLogType < ExtraOptions
 
     end
 
+  end
 
+  def clean_e_sign_def
     if self.e_sign
       # Set up the structure so that we can use the standard reference methods to parse the configuration
       self.e_sign[:document_reference] = {item: self.e_sign[:document_reference]} unless self.e_sign[:document_reference][:item]
@@ -170,21 +192,6 @@ class ExtraLogType < ExtraOptions
         end
       end
     end
-
-    self.save_trigger ||= {}
-    self.save_trigger = self.save_trigger.symbolize_keys
-    # Make save_trigger.on_save the default for on_create and on_update
-    os = self.save_trigger[:on_save]
-    if os
-      ou = self.save_trigger[:on_update] || {}
-      oc = self.save_trigger[:on_create] || {}
-      self.save_trigger[:on_update] = os.merge(ou)
-      self.save_trigger[:on_create] = os.merge(oc)
-    end
-
-    self.save_trigger[:on_upload] ||= {}
-    self.save_trigger[:on_disable] ||= {}
-
   end
 
 
