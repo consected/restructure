@@ -275,9 +275,9 @@ class ReportsController < UserBaseController
       redirect_to :index if id.blank?
       num_id = id.to_i
       if num_id > 0
-        @report = Report.find(num_id)
+        @report = Report.active.find(num_id)
       else
-        @report = Report.find_category_short_name id
+        @report = Report.active.find_category_short_name id
       end
 
       @report.current_user = current_user
