@@ -935,8 +935,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
     # # Try matching any across multiple relations
-    pc1 = m.player_contacts.create! rec_type: :phone, data: '(123)456-7891', rank: 5
-    pc2 = m.player_contacts.create! rec_type: :phone, data: '(123)456-7892', rank: 10
+    m.player_contacts.create! rec_type: :phone, data: '(123)456-7891', rank: 5
+    m.player_contacts.create! rec_type: :phone, data: '(123)456-7892', rank: 10
     # ModelReference.create_with @al, pc1
     # ModelReference.create_with @al, pc2
     #
@@ -1406,4 +1406,115 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
   end
+
+
+  it "returns a record using return_result" do
+
+    @al1 = create_item
+    @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
+
+    expect(@al.master_id).to eq @al0.master_id
+    expect(@al.master_id).to eq @al1.master_id
+
+    conf = {
+      activity_log__player_contact_phones: {
+        select_who: 'return_value_list',
+        id: @al0.id,
+        update: 'return_result'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+
+    res = ca.get_this_val
+    expect(res).to eq @al0
+
+
+  end
+
+
+  it "returns a referring record attribute" do
+
+    create_user
+    setup_access :activity_log__player_contact_phones
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
+    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
+
+
+    # create_master
+
+    @al = create_item
+    @al.current_user = @user
+
+
+    @al1 = create_item
+    @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
+
+    @al2 = create_item
+    @al2.update! select_who: 'someone else new', current_user: @user, master_id: @al.master_id
+
+    @al1.reload
+    @al2.reload
+    @al1.current_user = @user
+    @al2.current_user = @user
+
+    expect(@al.master_id).to eq @al2.master_id
+    expect(@al.master_id).to eq @al1.master_id
+
+    @al.extra_log_type_config.references = {
+      activity_log__player_contact_phone: {
+        from: 'this',
+        add: 'many'
+      }
+    }
+
+    @al.extra_log_type_config.clean_references_def
+    @al.extra_log_type_config.editable_if = {always: true}
+
+    ModelReference.create_with @al, @al1
+    ModelReference.create_with @al, @al2
+
+    expect(@al.model_references.length).to eq 2
+
+    conf = {
+      referring_record: {
+        id: 'return_value'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al2
+
+    res = ca.get_this_val
+    expect(res).to eq @al.id
+
+
+    conf = {
+      activity_log__player_contact_phones: {
+        id: {
+          referring_record: 'id'
+        },
+        update: 'return_result'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al2
+
+    res = ca.get_this_val
+    expect(res).to eq @al
+
+
+
+    conf = {
+      referring_record: {
+        update: 'return_result'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al2
+
+    res = ca.get_this_val
+    expect(res).to eq @al
+
+  end
+
 end

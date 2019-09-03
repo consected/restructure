@@ -55,7 +55,7 @@ RSpec.describe "Delete stored files", type: :model do
 
   end
 
-  it "delete a stored zip file and its exploded archive files" do
+  it "delete a stored zip file but retain its exploded archive files" do
 
     create_filter('.*', role_name: nil)
 
@@ -98,6 +98,8 @@ RSpec.describe "Delete stored files", type: :model do
     expect(sf).not_to be nil
     expect(sf.file_name).to eq delfn
 
+    count_afs = sf.archived_files.length
+
     dt = DateTime.now.to_i
     sf.move_to_trash!
     expect(sf.path).to eq trashdir
@@ -119,10 +121,17 @@ RSpec.describe "Delete stored files", type: :model do
     expect(non_trash_sf.count).to eq 3
 
     non_trash_af = @container.archived_files
-    expect(non_trash_af.count).to eq 0
+    expect(non_trash_af.count).to eq count_afs
 
     fs = @container.list_fs_files
-    expect(fs.length).to eq 3 + orig_count
+    expect(fs.length).to eq 3 + count_afs + orig_count
+
+    af = sf.archived_files.last
+    af.current_user = @user
+    af.move_to_trash!
+
+    non_trash_af = @container.archived_files
+    expect(non_trash_af.count).to eq (count_afs - 1)
 
   end
 
