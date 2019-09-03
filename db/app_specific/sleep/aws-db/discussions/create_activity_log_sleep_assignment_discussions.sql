@@ -9,7 +9,7 @@ set search_path=sleep, ml_app;
           id integer NOT NULL,
           master_id integer,
           sleep_assignment_id integer,
-          tag_select_contact_role varchar,
+          tag_select_contact_role varchar[],
           notes varchar,
           prev_activity_type varchar,
           extra_log_type varchar,
@@ -22,7 +22,7 @@ set search_path=sleep, ml_app;
           id integer NOT NULL,
           master_id integer,
           sleep_assignment_id integer,
-          tag_select_contact_role varchar,
+          tag_select_contact_role varchar[],
           notes varchar,
           prev_activity_type varchar,
           extra_log_type varchar,
@@ -49,7 +49,7 @@ set search_path=sleep, ml_app;
                       activity_log_sleep_assignment_discussion_id
                       )
                   SELECT
-                      NEW.master_id,\
+                      NEW.master_id,
                       NEW.sleep_assignment_id,
                       NEW.tag_select_contact_role,
                       NEW.notes,
