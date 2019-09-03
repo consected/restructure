@@ -34,13 +34,33 @@
     {
       "warning_type": "SQL Injection",
       "warning_code": 0,
-      "fingerprint": "596ea0372052c579b5f4fd09b4d76891544645bacafaaac59cf1bbe51864267c",
+      "fingerprint": "7085fa9bbe2091b698ee4ef62479cf458ae0862c3a2c7d8b56ed974d380b9373",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 249,
+      "line": 258,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "((@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\") or (@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_ns_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_ns_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
+      "code": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CalcActions",
+        "method": "calc_query"
+      },
+      "user_input": "UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "9d7823c2d839cc45b01876f5748165dc61b964dd6894c57b48b2e53d7ede732b",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/models/concerns/calc_actions.rb",
+      "line": 265,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "((@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\") or (@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
       "render_path": null,
       "location": {
         "type": "method",
@@ -52,55 +72,15 @@
       "note": ""
     },
     {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "987bf199a01bcfc5be06c25ad49064d1ed508c92272cf72466d85247ea0aba4b",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/concerns/calc_actions.rb",
-      "line": 243,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_ns_table_name(@this_val_where[:table_name]))}.id desc\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "CalcActions",
-        "method": "calc_query"
-      },
-      "user_input": "UserBase.clean_table_name(ModelReference.record_type_to_ns_table_name(@this_val_where[:table_name]))",
-      "confidence": "Medium",
-      "note": ""
-    },
-    {
-      "warning_type": "File Access",
-      "warning_code": 16,
-      "fingerprint": "a55415f189807cef4fd10393ecf13a2d445e438d7f668d0e15a88d7b7a01f2f1",
-      "check_name": "SendFile",
-      "message": "Parameter value used in file name",
-      "file": "app/controllers/nfs_store/downloads_controller.rb",
-      "line": 27,
-      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
-      "code": "send_file(Download.new(:container => (@container), :activity_log => (@activity_log)).retrieve_file_from(params[:download_id].to_i, [:stored_file, :archived_file].select do\n (r == params[:retrieval_type].to_sym)\n end.first, :for_action => :download))",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "NfsStore::DownloadsController",
-        "method": "show"
-      },
-      "user_input": "params[:download_id]",
-      "confidence": "Weak",
-      "note": ""
-    },
-    {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "dfa286b53590cee9ce6d90305cc079e8c6b6b92be62a721acc7781f9e97c3217",
+      "fingerprint": "a3f91e1d51c1425b602f37aea71321024015c12969389e863a464e55156b1413",
       "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/reports/_result_view_css.html.erb",
       "line": 19,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "((Report.find(params[:id].to_i) or Report.find_category_short_name(params[:id])).view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end + (Report.find(params[:id].to_i) or Report.find_category_short_name(params[:id])).view_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end).join(\"\\n\")",
+      "code": "((Report.active.find(params[:id].to_i) or Report.active.find_category_short_name(params[:id])).view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end + (Report.active.find(params[:id].to_i) or Report.active.find_category_short_name(params[:id])).view_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"report-container-#{SecureRandom.hex}\"}-results-block\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end).join(\"\\n\")",
       "render_path": [
         {
           "type": "controller",
@@ -128,7 +108,27 @@
         "type": "template",
         "template": "reports/_result_view_css"
       },
-      "user_input": "Report.find(params[:id].to_i)",
+      "user_input": "Report.active.find(params[:id].to_i)",
+      "confidence": "Weak",
+      "note": ""
+    },
+    {
+      "warning_type": "File Access",
+      "warning_code": 16,
+      "fingerprint": "a55415f189807cef4fd10393ecf13a2d445e438d7f668d0e15a88d7b7a01f2f1",
+      "check_name": "SendFile",
+      "message": "Parameter value used in file name",
+      "file": "app/controllers/nfs_store/downloads_controller.rb",
+      "line": 27,
+      "link": "https://brakemanscanner.org/docs/warning_types/file_access/",
+      "code": "send_file(Download.new(:container => (@container), :activity_log => (@activity_log)).retrieve_file_from(params[:download_id].to_i, [:stored_file, :archived_file].select do\n (r == params[:retrieval_type].to_sym)\n end.first, :for_action => :download))",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::DownloadsController",
+        "method": "show"
+      },
+      "user_input": "params[:download_id]",
       "confidence": "Weak",
       "note": ""
     },
@@ -153,6 +153,6 @@
       "note": ""
     }
   ],
-  "updated": "2019-07-03 15:54:41 +0100",
+  "updated": "2019-09-03 14:12:10 +0100",
   "brakeman_version": "4.5.1"
 }
