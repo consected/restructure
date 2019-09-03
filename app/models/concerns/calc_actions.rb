@@ -251,13 +251,14 @@ module CalcActions
           tn = first_res.class.table_name
           fn = first_res.class.attribute_names.select{|s| s == @this_val_where[:field_name].to_s}.first
 
-          tv_tn = UserBase.clean_table_name(ModelReference.record_type_to_ns_table_name(@this_val_where[:table_name]))
+          tv_tn = UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))
           if tn
             rquery = @condition_scope.reorder("#{tn}.id desc")
-          elsif tv_tn
+          elsif tv_tn.present?
             rquery = @condition_scope.reorder("#{tv_tn}.id desc")
           end
           if @this_val_where[:mode] == 'return_result'
+            raise "return_result clean table name is blank for (#{@this_val_where[:table_name]})" if tv_tn.blank?
             rquery = rquery.select("#{tv_tn}.*")
             @this_val = first_res.class.find(rquery.first.id)
           else
@@ -311,7 +312,11 @@ module CalcActions
             else
               res &&= this_val == expected_val
             end
-            @this_val = this_val if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
+            if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
+              @this_val = this_val
+            elsif expected_val == 'return_result'
+              @this_val = in_instance
+            end
           end
         elsif table == :user
           if field_name == :role_name
