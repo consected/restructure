@@ -53,7 +53,11 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}} for {{player_info.created_at}}. This is a name: {{player_info.first_name}} and {{player_contact_phones.data}}.</p>'
     Admin::MessageTemplate.create! name: 'test email content 2', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
+    # Should work with either master or a record specified as data
     res = layout.generate content_template_name: 'test email content 2', data: master
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted}. This is a name: #{@player_info.first_name.titleize} and #{pn}.</p></div></body></html>"
+
+    res = layout.generate content_template_name: 'test email content 2', data: @player_info
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} for #{dateformatted}. This is a name: #{@player_info.first_name.titleize} and #{pn}.</p></div></body></html>"
 
     expect(res).to eq expected_text
@@ -85,6 +89,13 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
     res = layout.generate content_template_text: t, data: {master_id: 12345678, 'name' => 'test name bob'}
     expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id 12345678. This is a name: TEST NAME BOB.</p></div></body></html>"
+
+    expect(res).to eq expected_text
+
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase::3}}.</p>'
+
+    res = layout.generate content_template_text: t, data: {master_id: 12345678, 'name' => 'test name bob'}
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id 12345678. This is a name: TEST.</p></div></body></html>"
 
     expect(res).to eq expected_text
 

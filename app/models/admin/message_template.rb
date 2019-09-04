@@ -123,7 +123,6 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       tagp = tag_and_operator.split('::')
       tag = tagp.first
-      op = tagp[1]
       res = data[tag] || data[tag.to_sym] || ''
 
       res = formatter_do(res.class, res, current_user: data[:current_user])
@@ -131,22 +130,26 @@ class Admin::MessageTemplate < ActiveRecord::Base
       return if res.nil?
 
       # Automatically titleize names
-      op ||= 'titleize'  if tag == 'name' || tag.end_with?('_name')
+      tagp << 'titleize'  if tagp.length == 1 &&  (tag == 'name' || tag.end_with?('_name'))
+      tagp[1..-1].each do |op|
 
-      if op == 'capitalize'
-        res = res.capitalize
-      elsif op == 'titleize'
-        res = res.titleize
-      elsif op == 'uppercase'
-        res = res.upcase
-      elsif op == 'lowercase'
-        res = res.downcase
-      elsif op == 'underscore'
-        res = res.underscore
-      elsif op == 'hyphenate'
-        res = res.hyphenate
-      elsif op == 'markup'
-        res = Kramdown::Document.new(res).to_html.html_safe
+        if op == 'capitalize'
+          res = res.capitalize
+        elsif op == 'titleize'
+          res = res.titleize
+        elsif op == 'uppercase'
+          res = res.upcase
+        elsif op == 'lowercase'
+          res = res.downcase
+        elsif op == 'underscore'
+          res = res.underscore
+        elsif op == 'hyphenate'
+          res = res.hyphenate
+        elsif op == 'markup'
+          res = Kramdown::Document.new(res).to_html.html_safe
+        elsif op.to_i != 0
+          res = res[0..op.to_i]
+        end
       end
 
       res
@@ -155,6 +158,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
     def self.setup_data item
       data = item.attributes.dup
 
+      data[:original_item] = item
       data[:base_url] = Settings::BaseUrl
       data[:admin_email] = Settings::AdminEmail
       data[:environment_name] = Settings::EnvironmentName
@@ -210,6 +214,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       if an == 'ids'
         return data[:ids] = master.alternative_ids
+      elsif an == 'referring_record'
+        return data[:referring_record] = data[:original_item].respond_to?(:referring_record) && data[:original_item].referring_record&.attributes
       end
 
 

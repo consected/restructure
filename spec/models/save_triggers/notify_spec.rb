@@ -79,6 +79,82 @@ RSpec.describe SaveTriggers::Notify, type: :model do
 
   end
 
+
+  it "generates a message notification and job with referring_record substitutions" do
+
+
+    @al1 = create_item
+    @al1.update! select_who: 'someone new', current_user: @user, master_id: @al.master_id
+
+    @al2 = create_item
+    @al2.update! select_who: 'someone else new', current_user: @user, master_id: @al.master_id
+
+    @al1.reload
+    @al2.reload
+    @al1.current_user = @user
+    @al2.current_user = @user
+
+    expect(@al.master_id).to eq @al2.master_id
+    expect(@al.master_id).to eq @al1.master_id
+
+    @al.extra_log_type_config.references = {
+      activity_log__player_contact_phone: {
+        from: 'this',
+        add: 'many'
+      }
+    }
+
+    @al.extra_log_type_config.clean_references_def
+    @al.extra_log_type_config.editable_if = {always: true}
+
+    ModelReference.create_with @al, @al1
+    ModelReference.create_with @al, @al2
+
+    t = '<p>This is some content.</p><p>Related to master_id {{master_id}} in id {{id}}. This is a name: {{select_who}}.</p><p>{{extra_substitutions.extra_text}}</p>'
+    @content_extra = Admin::MessageTemplate.create! name: 'test email content extra', message_type: :email, template_type: :content, template: t, current_admin: @admin
+
+
+    config = {
+      type: "email",
+      role: "test",
+      layout_template: @layout.name,
+      content_template: @content_extra.name,
+      subject: "subject text",
+      extra_substitutions: {
+        extra_text: "Extra text at {{created_at}} for {{referring_record.id}}"
+      }
+    }
+
+    # Check that we only get users that are enabled for the role in this app type
+    expect(Admin::UserRole.joins(:user).where(role_name: 'test', app_type: @user.app_type).where("users.disabled is null or users.disabled = false").count).to eq 3
+
+    @trigger = SaveTriggers::Notify.new(config, @al2)
+
+    last_mn = MessageNotification.order(id: :desc).first
+    # last_dj = Delayed::Job.order(id: :desc).first
+
+    @trigger.perform
+
+    expect(@trigger.receiving_user_ids.sort).to eq @role_user_ids.sort
+
+    new_mn = MessageNotification.order(id: :desc).first
+    # new_dj = Delayed::Job.order(id: :desc).first
+
+    expect(last_mn).not_to eq new_mn
+
+    new_mn.generate
+    res = new_mn.generated_text
+    expected_name = @al2.select_who
+    master = @al2.master
+    id = @al2.id
+    ca = Admin::MessageTemplate.formatter_do(@al2.created_at.class, @al2.created_at, current_user: @al2.user)
+    rrid = @al.id
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{master.id} in id #{id}. This is a name: #{expected_name}.</p><p>Extra text at #{ca} for #{rrid}</p></div></body></html>"
+
+    expect(res).to eq expected_text
+
+  end
+
   it "generates a message notification with text template and job" do
     t = '<p>This is some content in a text template.</p><p>Related to master_id {{master_id}}. This is a name: {{select_who}}.</p>'
     config = {

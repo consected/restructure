@@ -159,6 +159,16 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         @content_template_text = calc_field_or_return(@content_template_text)
       end
 
+      if @subject
+        Admin::MessageTemplate.substitute(@subject, data: @item, tag_subs: nil, ignore_missing: true)
+      end
+
+      if @extra_substitutions
+        @extra_substitutions.each do |k,v|
+          @extra_substitutions[k] = Admin::MessageTemplate.substitute(v, data: @item, tag_subs: nil, ignore_missing: true)
+        end
+      end
+
       setup_data = {
         app_type: @user.app_type, user: @user,
         recipient_user_ids: [@receiving_user_ids], layout_template_name: @layout_template,
