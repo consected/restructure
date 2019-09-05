@@ -4,7 +4,7 @@
 -- Command line:
 -- table_generators/generate.sh create external_identifiers_table
 
-      CREATE FUNCTION log_ipa_assignment_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_ipa_assignment_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN

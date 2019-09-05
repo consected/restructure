@@ -10,6 +10,8 @@ echo "==========================================================================
 echo ""
 echo "========================================="
 echo "Enter app environment: athena-stage, athena-production, filestore-production"
+
+
 read TEMP_ENV
 
 if [ "$TEMP_ENV" == 'athena-production' ]
@@ -21,7 +23,7 @@ fi
 if [ "$TEMP_ENV" == 'filestore-production' ]
 then
   TEMP_DBNAME=fphs
-  DB_SEARCH_PATH='ml_app,filestore_admin,filestore'
+  DB_SEARCH_PATH='filestore,filestore_admin,ipa_ops,ml_app'
 fi
 
 
@@ -60,3 +62,13 @@ if [ "$TEMP_ENV" == 'filestore-production' ]
 then
   psql -d $TEMP_DBNAME -h fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com -U fphs < fphs-sql/grant_roles_access_to_filestore.sql
 fi
+
+echo "Note:"
+echo "For Athena or Filestore, it may be necessary to force the migrations that have been completed directly in the database"
+echo "  rails db"
+echo "  set search_path=$DB_SEARCH_PATH;"
+echo "  insert into schema_migrations
+  (version)
+  values
+  (20181113175031),
+  (20181113180608);"
