@@ -82,12 +82,16 @@ module NfsStore
 
       end
 
+      # Get the full file path in a role mount for a stored or archived file
+      def file_path_for role_name:
+        Filesystem.nfs_store_path role_name, self.container, self.container_path(no_filename: true), self.file_name
+      end
 
       def move_to new_path, new_file_name=nil
         res = false
         new_file_name ||= self.file_name
         current_user_role_names.each do |role_name|
-          curr_path = Filesystem.nfs_store_path role_name, self.container, self.container_path(no_filename: true), self.file_name
+          curr_path = file_path_for role_name: role_name
           if File.exist?(curr_path)
             self.path = new_path
             self.file_name = new_file_name
@@ -106,15 +110,22 @@ module NfsStore
       end
 
       def move_to_trash!
+
+        curr_path = nil
+        current_user_role_names.each do |role_name|
+          curr_path = file_path_for role_name: role_name
+          break if File.exist?(curr_path)
+        end
+
         sf_path = self.container_path(no_filename: true)
         new_path = sf_path.blank? ? TrashPath : File.join(TrashPath, sf_path)
         dt = DateTime.now.to_i
         new_file_name = "#{self.file_name}--#{dt}"
         move_to new_path, new_file_name
 
-        # if self.is_a?(ArchivedFile)
-        #   NfsStore::Archive::Mounter.remove_empty_archive_dir(self)
-        # end
+        if curr_path && self.is_a?(ArchivedFile)
+           NfsStore::Archive::Mounter.remove_empty_archive_dir(curr_path)
+        end
 
       end
 

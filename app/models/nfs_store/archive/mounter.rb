@@ -54,6 +54,30 @@ module NfsStore
         "#{archive_file_name}#{ArchiveMountSuffix}"
       end
 
+      # Remove the directory this file was is if the directory is now empty
+      def self.remove_empty_archive_dir file_path
+
+        pn = Pathname.new file_path
+
+        start = true
+
+        while start || !path_is_archive?(file_path)
+          start = false
+          file_path = pn.dirname.to_s
+          pn = Pathname.new file_path
+
+          # We continue if the new path exists (and is accessible),
+          # is a directory and is not the base archive path
+          return unless pn.exist? && pn.directory? && !path_is_archive?(file_path)
+          puts "Reset file_path to its directory #{file_path}"
+
+          if pn.empty?
+            pn.rmdir
+            puts "Removed empty archive directory #{file_path}"
+          end
+        end
+      end
+
       # Check if a path appears to be a mounted archive based on its suffix
       # @param path [String] the path string
       # @return [Boolean]
