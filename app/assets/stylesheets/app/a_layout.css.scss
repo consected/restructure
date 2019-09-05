@@ -468,6 +468,10 @@ div.popover {
       &:hover {
           cursor: n-resize;
       }
+
+      .browse-container, form, a, button, input, textarea, label {
+        cursor: default;
+      }
       // &:after {
       //   content: '(click to shrink)';
       //   font-size: 90%;

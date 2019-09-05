@@ -819,10 +819,17 @@ _fpa.form_utils = {
 
         }).addClass('attached-datatoggle-str');
 
-        block.find('[data-toggle~="expandable"]').not('.attached-datatoggle-exp').on('click', function(){
-            if($(this).attr('disabled')) return;
+        var exp = block.find('[data-toggle~="expandable"]').not('.attached-datatoggle-exp').addClass('attached-datatoggle-exp');
+
+        exp.on('click', function(ev){
+            var ts = ['INPUT', 'SELECT', 'TEXTAREA', 'A', 'BUTTON', 'LABEL', 'FORM', '.browse-container'];
+            var bad_target = ts.indexOf(ev.target.nodeName) >= 0 ||
+              $(ev.target).parents(ts.join(', ')).length > 0;
+
+            if($(this).attr('disabled') || bad_target) return;
             _fpa.form_utils.toggle_expandable($(this));
-        }).addClass('attached-datatoggle-exp');
+        });
+
 
         // call a function on click - name the function 'something' or 'something.other' to call
         // _fpa.something(block, data) or _fpa.something.other(block, data)
