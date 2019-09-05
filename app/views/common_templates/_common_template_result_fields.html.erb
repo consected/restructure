@@ -179,7 +179,7 @@
       <ul class="view-object collapse" id="view-object-{{result_data.master_id}}-{{result_data.id}}-{{underscore key}}" aria-expanded="false">
       {{#each this_value}}
       {{#with ../template_config}}
-      {{> common_template_result_field this_value=../this key=@key name=name template_config=this result_data=../result_data}}
+      {{> common_template_result_field this_value=../this key=@key name=name template_config=this result_data=../result_data show_raw_text=true}}
       {{/with}}
       {{/each}}
       </ul>
@@ -188,7 +188,7 @@
       </li>
   {{else is this_value '===' null}}
   {{else}}
-    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{pretty_string this_value return_string="true" capitalize="true"}}</strong></li>
+    <li class="{{> field_result_class}}">{{> field_label labels=(concat 'labels_' (underscore name)) }} <strong>{{#if show_raw_text}}{{this_value}}{{else}}{{pretty_string this_value return_string="true" capitalize="true"}}{{/if}}</strong></li>
   {{/is}}
   {{#if show_item_type_flags_after}}
   {{#is key item_flags_after}}

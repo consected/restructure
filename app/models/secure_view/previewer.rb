@@ -84,7 +84,7 @@ module SecureView
       end
 
       def mime_type
-        @mime_type ||= MIME::Types.type_for(self.path)&.first
+        @mime_type ||= NfsStore::Utils::MimeType.full_mime_type(self.orig_path)
       end
 
       def viewable_image?

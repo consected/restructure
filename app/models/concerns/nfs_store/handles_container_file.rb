@@ -4,6 +4,8 @@ module NfsStore
   module HandlesContainerFile
     extend ActiveSupport::Concern
 
+    UnknownMimeTypeText = '(unknown)'.freeze
+
     included do
 
       # ChunkSize controls the size of upload chunks and the size of MD5 hash chunks
@@ -70,20 +72,16 @@ module NfsStore
         end
       end
 
-      ext = File.extname(self.file_name)
-      mt = MIME::Types.type_for(ext)&.first
-      self.content_type = mt || ext
+      self.content_type = NfsStore::Utils::MimeType.full_mime_type(full_file_path) || UnknownMimeTypeText
     end
 
-    # Get the
+
+    # Get mime type short text for current file
     def mime_type_text
-      mt = MIME::Types[self.content_type] if mt.present?
-      unless mt
-        ext = File.extname(self.file_name)
-        mt = MIME::Types.type_for(ext)&.first
-      end
-      return ext unless mt
-      return mt.friendly || mt.sub_type || mt.media_type
+
+      mt = MIME::Types[self.content_type]&.first if self.content_type.present?
+
+      return mt.present? && (mt.friendly || mt.sub_type || mt.media_type) || UnknownMimeTypeText
 
     end
 
