@@ -112,18 +112,10 @@ module NfsStore
         new_file_name = "#{self.file_name}--#{dt}"
         move_to new_path, new_file_name
 
-        # if respond_to? :archived_files
-        #   archived_files.each do |af|
-        #     af.current_user = self.current_user
-        #
-        #     path_parts = []
-        #     path_parts << TrashPath
-        #     path_parts << af.container_path(no_filename: true)
-        #     new_path = File.join path_parts
-        #     new_file_name = "#{af.file_name}--#{dt}"
-        #     af.move_to new_path, new_file_name
-        #   end
+        # if self.is_a?(ArchivedFile)
+        #   NfsStore::Archive::Mounter.remove_empty_archive_dir(self)
         # end
+
       end
 
 
@@ -153,7 +145,7 @@ module NfsStore
       private
 
         def reset_flags
-          valid_path_change = false
+          self.valid_path_change = false
         end
 
         def prevent_path_change

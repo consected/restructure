@@ -120,6 +120,12 @@ module NfsStore
             @archive_file = stored_file.file_name
 
             pn = Pathname.new(@mounted_path)
+
+            if pn.exist? && pn.empty?
+              puts "Removing the empty directory which appears at #{@mounted_path}"
+              Dir.rmdir @mounted_path
+            end
+
             unless pn.exist?
               raise FphsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
 
