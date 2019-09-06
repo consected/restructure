@@ -237,6 +237,12 @@ module NfsStore
         @can_send_to_trash = !!(can_edit? && cu.can?(:send_files_to_trash))
       end
 
+      def can_move_files?
+        return @can_move_files unless @can_move_files.nil?
+        cu = current_user
+        @can_move_files = !!(can_edit? && cu.can?(:move_files))
+      end
+
       # Method to provide checking of access controls. Can the user access the container
       # in a specific way. Easily overridden in applications to provide app specific functionality
       # @param perform [Symbol(:list_files, :create_files)]

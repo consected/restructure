@@ -77,6 +77,60 @@ module NfsStore
           redirect_to nfs_store_browse_path(@container)
         end
 
+      elsif commit == 'Move Files'
+        new_path = secure_params[:new_path]
+
+        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @move.current_user = current_user
+        @master = @container.master
+        @id = @container.id
+        moved_files = @move.move_files selected_items_info, new_path
+
+        if moved_files&.length > 0
+          filename = "#{@move.container.name} - #{moved_files.length} #{'file'.pluralize(moved_files.length)}.zip"
+          @move.save!
+
+          render json: moved_files
+        else
+          redirect_to nfs_store_browse_path(@container)
+        end
+
+      elsif commit == 'Rename File'
+        new_path = secure_params[:new_path]
+
+        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @move.current_user = current_user
+        @master = @container.master
+        @id = @container.id
+        moved_files = @move.move_files selected_items_info, new_path
+
+        if moved_files&.length > 0
+          filename = "#{@move.container.name} - #{moved_files.length} #{'file'.pluralize(moved_files.length)}.zip"
+          @move.save!
+
+          render json: moved_files
+        else
+          redirect_to nfs_store_browse_path(@container)
+        end
+
+      elsif commit == 'Rename Folder'
+        new_path = secure_params[:new_path]
+
+        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @move.current_user = current_user
+        @master = @container.master
+        @id = @container.id
+        moved_files = @move.move_files selected_items_info, new_path
+
+        if moved_files&.length > 0
+          filename = "#{@move.container.name} - #{moved_files.length} #{'file'.pluralize(moved_files.length)}.zip"
+          @move.save!
+
+          render json: moved_files
+        else
+          redirect_to nfs_store_browse_path(@container)
+        end
+
       else
         return not_found
       end
@@ -124,7 +178,7 @@ module NfsStore
     private
 
       def secure_params
-        params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, {selected_items: []})
+        params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, :new_path, {selected_items: []})
       end
 
       # Handle find container differently for multi container actions

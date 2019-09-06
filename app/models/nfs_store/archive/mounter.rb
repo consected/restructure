@@ -50,7 +50,7 @@ module NfsStore
       # @param archive_file_name [String] the file name of the archive file to be mounted
       # @return [String] the mount point name
       def self.archive_mount_name archive_file_name
-        return nil unless archive_file_name
+        return nil unless archive_file_name.present?
         "#{archive_file_name}#{ArchiveMountSuffix}"
       end
 
@@ -83,7 +83,9 @@ module NfsStore
       # @return [Boolean]
       def self.path_is_archive? path
         return unless path
-        NfsStore::Manage::Filesystem.clean_path(path).end_with? ArchiveMountSuffix
+        path = NfsStore::Manage::Filesystem.clean_path(path)
+        return unless path
+        path.end_with? ArchiveMountSuffix
       end
 
 
@@ -221,6 +223,18 @@ module NfsStore
         index_completed! if res
       end
 
+
+      def self.move_to_new_path f, to_path
+        from_path = f.path
+
+        # If this is the base archive folder, we must ensure the new name reflects this
+        if path_is_archive?(from_path) && !path_is_archive?(arch_to_path)
+          to_path = "#{to_path}#{ArchiveMountSuffix}"
+        end
+
+        res = f.move_to to_path
+
+      end
 
       private
 

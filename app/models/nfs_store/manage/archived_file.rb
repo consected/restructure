@@ -50,9 +50,9 @@ module NfsStore
       def container_path no_filename: nil, final_slash: nil, use_archive_file_name: nil, leading_dot: nil
         parts = []
         parts << '.' if leading_dot
-        if use_archive_file_name
+        if use_archive_file_name && archive_file.present?
           parts << archive_file
-        else
+        elsif archive_mount_name.present?
           parts << archive_mount_name
         end
         parts << path unless path.blank?

@@ -119,12 +119,16 @@ module NfsStore
         end
       end
 
-      # Clean up relative paths
+      # Clean up relative paths, removing useless dots, etc
       # @param path [String] simple relative path
       # @return [String, nil] cleaned up path, or nil if it represents the root
       def self.clean_path path
         return nil if path.blank? || path == '.'
         path.sub(/\/$/, '')
+        pn = Pathname.new path
+        path = pn.cleanpath
+        return if path.nil? || path.to_s.blank?
+        path.to_s
       end
 
       # Test permissions on a container (sub)directory
@@ -209,7 +213,7 @@ module NfsStore
 
       end
 
-      # Move temporary file to its final location after upload
+      # Move temporary file to its final location after upload, or move an existing file to a new location
       # @param role_name [String] current user role
       # @param from_path [String] absolute path to the temporary file to move
       # @param container [NfsStore::Manage::Container] container to move the file into

@@ -87,15 +87,35 @@ module NfsStore
         Filesystem.nfs_store_path role_name, self.container, self.container_path(no_filename: true), self.file_name
       end
 
+      # Move the file to a new path, and/or rename, changing the path and file_name stored in the record to match
+      # @param new_path [String] the new container relative path to move the file to, or if null leave it at the current path (rename only)
+      # @param new_file_name [String] the new file name, or leave it the same if nil (move, don't rename the actual file)
+      # @return [true|false] successful rename / move
       def move_to new_path, new_file_name=nil
         res = false
         new_file_name ||= self.file_name
         current_user_role_names.each do |role_name|
           curr_path = file_path_for role_name: role_name
           if File.exist?(curr_path)
-            self.path = new_path
+            self.path = new_path if new_path
             self.file_name = new_file_name
             self.valid_path_change = true
+
+            if respond_to?(:archive_mount_name)
+
+              possaf = self.path.split('/').first if self.path
+
+              if possaf && self.container.archived_files.where(archive_file: possaf)
+                # an archive file exists with the start of the path specified. Use it instead
+                self.archive_file = possaf || ''
+                self.path = self.path.split('/')[1..-1].join('/')
+              elsif self.archive_mount_name && !self.path.start_with?(self.archive_mount_name)
+                # Since we are moving this out of the archive, remove this
+                self.archive_file = ''
+              end
+            end
+
+
             transaction do
               move_from curr_path
               save!
@@ -109,6 +129,37 @@ module NfsStore
         res
       end
 
+      # Move all stored or archived files in the specified from_path to the new to_path
+      # @param in_container [NfsStore::Manage::Container]
+      # @param from_path [String]
+      # @param to_path [String]
+      # @return [Integer] Number of files moved
+      def self.move_folder in_container, from_path, to_path
+
+        moved = 0
+
+        files = in_container.stored_files.where(path: from_path)
+
+        files.each do |f|
+          res = f.move_to to_path
+          moved += 1 if res
+        end
+
+        files = in_container.archived_files.where(path: from_path)
+
+        files.each do |f|
+          res = NfsStore::Archive::Mounter.move_to_new_path f, to_path
+          moved += 1 if res
+        end
+
+        moved
+
+      end
+
+      # Move the file to trash
+      # Create a .trash/stored_file_name directory
+      # Then move the file appended with the current timestamp
+      # If the file is an archive, remove any directories that are empty
       def move_to_trash!
 
         curr_path = nil
@@ -130,7 +181,7 @@ module NfsStore
       end
 
 
-      # Move the file it its final location
+      # Move the file to its final location
       # @param from_path [String] the temporary path to move the file from
       # @return [Boolean] true if the file was moved successfully
       def move_from from_path
@@ -142,7 +193,23 @@ module NfsStore
 
             # If a path is set, ensure we can make a directory for it if one doesn't exist
             if !self.path.present? || Filesystem.test_dir(role_name, self.container, :mkdir, extra_path: self.path, ok_if_exists: true)
-              res = Filesystem.move_file_to_final_location role_name, from_path, self.container, self.path, self.file_name
+              full_rel_path = self.path
+
+              if self.path.present? && respond_to?(:archive_mount_name)
+                # For archive files, ensure we use the correct path
+                full_rel_path = [self.archive_mount_name, self.path].compact.join('/')
+              end
+
+              cleanpath = Filesystem.clean_path(full_rel_path)
+              if cleanpath && (cleanpath.start_with?('.') || cleanpath.start_with?('/'))
+                FsException::Action.new "Path to move to is bad: #{cleanpath}"
+              end
+
+              if self.path == from_path
+                FsException::Action.new "Path to move to matches the current path"
+              end
+
+              res = Filesystem.move_file_to_final_location role_name, from_path, self.container, full_rel_path, self.file_name
               break if res
             end
           end

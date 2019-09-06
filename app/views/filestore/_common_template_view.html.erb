@@ -15,7 +15,7 @@
       <div class="browse-controls">
         <div class="download-actions text-center">
           {{#if to_record_editable}}
-          <%= render partial: 'nfs_store/browse/options_menu', locals: { container_id: '{{to_record_id}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}', can_send_to_trash: true } %>
+          <%= render partial: 'nfs_store/browse/options_menu', locals: { container_id: '{{to_record_id}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}', can_send_to_trash: true, can_move_files: true} %>
           {{/if}}
           <%= render partial: 'nfs_store/browse/download_button', locals: { container_id: '{{to_record_id}}', activity_log_id: '{{from_record_id}}', activity_log_type: '{{from_record_type_us}}' } %>
           {{#if to_record_editable}}

@@ -15,9 +15,22 @@ _nfs_store.fs_browser = function ($outer) {
       return $('.container-browser-outer[data-container-id="'+container_id+'"] .container-browser');
     };
 
-    var disable_submit = function($this, disable) {
+    var disable_submit = function($this, disable, total_checked, total_checked_folders) {
       disable_submit_type('download', $this, disable);
       disable_submit_type('trash', $this, disable);
+      disable_submit_type('move-files', $this, disable);
+
+      if (!disable) {
+        disable = total_checked != 1;
+        disable_submit_type('rename-file', $this, disable);
+        disable = total_checked_folders != 1;
+        disable_submit_type('rename-folder', $this, disable);
+      }
+      else {
+        disable_submit_type('rename-file', $this, disable);
+        disable_submit_type('rename-folder', $this, disable);
+      }
+
     };
 
     var disable_submit_type = function(name, $this, disable) {
@@ -49,13 +62,28 @@ _nfs_store.fs_browser = function ($outer) {
       btn.click();
     };
 
-    var submit_trash_form = function($this) {
+    var submit_action_form = function($this, action, extra_params) {
 
-      var btn = $('#container-browse-trash-in-form-'+container_id);
+      var btn = $('#container-browse-' + action + '-in-form-'+container_id);
+
 
       var form = btn.parents('form').first();
-
       if (!form || form.length === 0) return;
+
+      var form_ep = form.find('.extra_params');
+
+      form_ep.html('');
+
+      if (extra_params) {
+        for (var k in extra_params) {
+          if(extra_params.hasOwnProperty(k)) {
+            var v = extra_params[k];
+            v = v.replace(/"/, '&quot;')
+            form_ep.append('<input type="hidden" name="nfs_store_download['+k+']" value="'+v+'" />');
+          }
+        }
+      }
+
 
       form.attr('data-remote', 'true');
       form[0].app_callback = function () {
@@ -134,9 +162,10 @@ _nfs_store.fs_browser = function ($outer) {
       var all_checked = $browser.find('.container-entry input[type="checkbox"]:checked');
       var all_checked_folders = $browser.find('.container-folder input[type="checkbox"]:checked');
       var total_checked = all_checked.length;
+      var total_checked_folders = all_checked_folders.length;
 
       set_submit_download_caption($this, 'download ' + total_checked + ' ' + (total_checked != 1 ? 'files' : 'file') );
-      disable_submit($this, !total_checked);
+      disable_submit($this, !total_checked, total_checked, total_checked_folders);
 
       $browser.find('.container-entry.checked').removeClass('checked');
       all_checked.each(function() {
@@ -149,6 +178,8 @@ _nfs_store.fs_browser = function ($outer) {
         if($(this).is(':checked'))
           $(this).parent().addClass('checked');
       });
+
+      return {total_checked: total_checked, total_checked_folders: total_checked_folders};
     };
 
 
@@ -186,10 +217,37 @@ _nfs_store.fs_browser = function ($outer) {
       submit_download_form(target);
       disable_submit(target, true);
       set_submit_download_caption(target, "request submitted");
-    }).on('click', '.container-browse-trash', function() {
+    }).on('click', '.container-browse-trash-submit', function() {
       var target = $($(this).attr('data-target-browser'));
-      submit_trash_form(target);
+      submit_action_form(target, 'trash');
       disable_submit(target, true);
+    }).on('click', '.container-browse-move-files', function() {
+      var target = $($(this).attr('data-target-browser'));
+      var msg = $('#container-browse-move-files-form-' + container_id).html();
+      var title = 'Move Files to a folder'
+      _fpa.show_modal(msg, title);
+    }).on('click', '.container-browse-rename-file-submit', function() {
+      var target = $($(this).attr('data-target-browser'));
+      submit_action_form(target, 'rename-file');
+      disable_submit(target, true);
+    }).on('click', '.container-browse-rename-folder-submit', function() {
+      var target = $($(this).attr('data-target-browser'));
+      submit_action_form(target, 'rename-folder');
+      disable_submit(target, true);
+    });
+
+    var $modal = $('#primary-modal');
+
+    $modal.on('click', '.container-browse-move-files-submit', function() {
+      var target = $($(this).attr('data-target-browser'));
+      var extra_params = {};
+      $modal.find('.container-browse-action-extra-params').each (function () {
+        var el = $(this);
+        extra_params[el.attr('name')] = el.val();
+      });
+      submit_action_form(target, 'move-files', extra_params);
+      disable_submit(target, true);
+      $modal.modal('hide');
     });
 
     $(document).on('click', '.refresh-container-list[data-container-id="'+container_id+'"]', function(e) {
