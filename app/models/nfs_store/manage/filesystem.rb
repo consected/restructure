@@ -87,7 +87,7 @@ module NfsStore
       # @param path [String] path relative to the container for a directory
       # @param file_name [String] specific file name to use
       # @return [String] path string
-      def self.nfs_store_path role_name, container=nil, path=nil, file_name=nil, app_type_id: nil, strip_final_slash: nil
+      def self.nfs_store_path role_name, container=nil, path=nil, file_name=nil, archive_file: nil, app_type_id: nil, strip_final_slash: nil
         fs_dir = self.nfs_store_directory
 
         # Use the specified app type if stated explicitly, otherwise get it from the container
@@ -107,6 +107,7 @@ module NfsStore
         end
 
         parts << container&.directory_name if container&.directory_name
+        parts << Archive::Mounter.archive_mount_name(archive_file) unless archive_file.blank?
         parts << path unless path.blank?
         parts << file_name if file_name
 
@@ -219,9 +220,12 @@ module NfsStore
       # @param container [NfsStore::Manage::Container] container to move the file into
       # @param path [String] the path within the container to move the file to
       # @param file_name [String] the actual file name to use for the file
+      # @param archivefile [String | nil] if the file belongs to an archive, this specifies the archive file it belongs to
       # @return [True] true represents success, exception on failure
       def self.move_file_to_final_location role_name, from_path, container, path, file_name
         fs_path = nfs_store_path(role_name, container, path, file_name)
+
+        raise FsException::Action.new "Path to move to matches the current path" if fs_path == from_path
         raise FsException::Upload.new "File already exists. Will not overwrite: #{file_name} in '#{container.name}'" if File.exist? fs_path
 
         test_dir role_name, container, :write

@@ -83,6 +83,7 @@ module NfsStore
       end
 
       # Get the full file path in a role mount for a stored or archived file
+      # This automatically handles the relative archive file mount path if it is needed
       def file_path_for role_name:
         Filesystem.nfs_store_path role_name, self.container, self.container_path(no_filename: true), self.file_name
       end
@@ -100,21 +101,6 @@ module NfsStore
             self.path = new_path if new_path
             self.file_name = new_file_name
             self.valid_path_change = true
-
-            if respond_to?(:archive_mount_name)
-
-              possaf = self.path.split('/').first if self.path
-
-              if possaf && self.container.archived_files.where(archive_file: possaf)
-                # an archive file exists with the start of the path specified. Use it instead
-                self.archive_file = possaf || ''
-                self.path = self.path.split('/')[1..-1].join('/')
-              elsif self.archive_mount_name && !self.path.start_with?(self.archive_mount_name)
-                # Since we are moving this out of the archive, remove this
-                self.archive_file = ''
-              end
-            end
-
 
             transaction do
               move_from curr_path
@@ -168,8 +154,8 @@ module NfsStore
           break if File.exist?(curr_path)
         end
 
-        sf_path = self.container_path(no_filename: true)
-        new_path = sf_path.blank? ? TrashPath : File.join(TrashPath, sf_path)
+        f_path = self.container_path(no_filename: true)
+        new_path = f_path.blank? ? TrashPath : File.join(TrashPath, f_path)
         dt = DateTime.now.to_i
         new_file_name = "#{self.file_name}--#{dt}"
         move_to new_path, new_file_name
@@ -192,24 +178,15 @@ module NfsStore
           if Filesystem.test_dir role_name, self.container, :write
 
             # If a path is set, ensure we can make a directory for it if one doesn't exist
-            if !self.path.present? || Filesystem.test_dir(role_name, self.container, :mkdir, extra_path: self.path, ok_if_exists: true)
-              full_rel_path = self.path
+            if !self.path.present? || Filesystem.test_dir(role_name, self.container, :mkdir, extra_path: self.container_path(no_filename: true), ok_if_exists: true)
 
-              if self.path.present? && respond_to?(:archive_mount_name)
-                # For archive files, ensure we use the correct path
-                full_rel_path = [self.archive_mount_name, self.path].compact.join('/')
-              end
 
-              cleanpath = Filesystem.clean_path(full_rel_path)
+              cleanpath = Filesystem.clean_path(self.path)
               if cleanpath && (cleanpath.start_with?('.') || cleanpath.start_with?('/'))
                 FsException::Action.new "Path to move to is bad: #{cleanpath}"
               end
 
-              if self.path == from_path
-                FsException::Action.new "Path to move to matches the current path"
-              end
-
-              res = Filesystem.move_file_to_final_location role_name, from_path, self.container, full_rel_path, self.file_name
+              res = Filesystem.move_file_to_final_location role_name, from_path, self.container, self.container_path(no_filename: true), self.file_name
               break if res
             end
           end

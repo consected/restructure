@@ -3,6 +3,8 @@ module NfsStore
 
     self.table_name = 'nfs_store_move_actions'
 
+
+
     def item_actions_field
       "moved_items"
     end
