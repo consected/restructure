@@ -1,6 +1,8 @@
 _nfs_store.fs_browser = function ($outer) {
     'use strict';
 
+    var last_count = {};
+
     var get_container_id = function($this) {
       var d = $this.attr('data-container-id');
       if(d) {
@@ -109,12 +111,16 @@ _nfs_store.fs_browser = function ($outer) {
       e.stopPropagation();
       var $icon = $browser.find('.folder-icon[aria-controls="'+$this.attr('id')+'"]' );
       if(collapse) {
+        $icon.removeClass('folder-open');
         $icon.addClass('glyphicon-folder-close');
         $icon.removeClass('glyphicon-folder-open');
+        $icon.attr('title', 'expand folder');
       }
       else {
+        $icon.addClass('folder-open');
         $icon.addClass('glyphicon-folder-open');
         $icon.removeClass('glyphicon-folder-close');
+        $icon.attr('title', 'shrink folder');
       }
     };
 
@@ -164,6 +170,17 @@ _nfs_store.fs_browser = function ($outer) {
       var total_checked = all_checked.length;
       var total_checked_folders = all_checked_folders.length;
 
+      var first_file = all_checked.first().siblings('.browse-filename').html();
+
+      var $folders = all_checked.first().parents('.container-folder-items');
+      var $folder_top = $folders.not('[data-folder-items="."]').last();
+      if ($folder_top.length == 0 || $folder_top.attr('data-folder-items').indexOf('__mounted-archive__') == -1) {
+        $folder_top = $folders.last();
+      }
+      $folder_top = $folder_top.prev().add($folder_top);
+      var $folder_in = $folders.first();
+      $folder_in = $folder_in.prev().add($folder_in);
+
       set_submit_download_caption($this, 'download ' + total_checked + ' ' + (total_checked != 1 ? 'files' : 'file') );
       disable_submit($this, !total_checked, total_checked, total_checked_folders);
 
@@ -179,7 +196,9 @@ _nfs_store.fs_browser = function ($outer) {
           $(this).parent().addClass('checked');
       });
 
-      return {total_checked: total_checked, total_checked_folders: total_checked_folders};
+      last_count = {total_checked: total_checked, total_checked_folders: total_checked_folders, first_file: first_file, $folder_top: $folder_top, $folder_in: $folder_in};
+
+      return last_count;
     };
 
 
@@ -199,6 +218,18 @@ _nfs_store.fs_browser = function ($outer) {
       var checked = $this.is(':checked');
       $browser.find('.container-folder-items[data-folder-items="'+path+'"] li input[type="checkbox"]').prop('checked', checked);
       count_downloads($this);
+    };
+
+    var submit_modal = function (action) {
+      var target = $($(this).attr('data-target-browser'));
+      var extra_params = {};
+      $modal.find('.container-browse-action-extra-params').each (function () {
+        var el = $(this);
+        extra_params[el.attr('name')] = el.val();
+      });
+      submit_action_form(target, action, extra_params);
+      disable_submit(target, true);
+      $modal.modal('hide');
     };
 
     var container_id = get_container_id($outer);
@@ -224,30 +255,98 @@ _nfs_store.fs_browser = function ($outer) {
     }).on('click', '.container-browse-move-files', function() {
       var target = $($(this).attr('data-target-browser'));
       var msg = $('#container-browse-move-files-form-' + container_id).html();
-      var title = 'Move Files to a folder'
+      var title = 'Move Files to a folder';
       _fpa.show_modal(msg, title);
-    }).on('click', '.container-browse-rename-file-submit', function() {
+
+      var $ff = last_count.$folder_top;
+      var $move_folders = $ff.find('.container-folder, .container-folder-items');
+      var $bmtf = $modal.find('.browse-move-to-folders');
+      $ff.clone().appendTo($bmtf);
+
+      if ($ff.first().hasClass("root-folder")) {
+        $bmtf.find('.container-folder-items').each (function () {
+          var $this = $(this);
+          if($this.attr('data-folder-items').indexOf('.__mounted-archive__') >= 0) {
+            $this.prev().remove();
+            $this.remove();
+          }
+        });
+      }
+
+      $bmtf.find('.container-entry').remove();
+      $bmtf.find('.container-folder-items').each (function () {
+        var $this = $(this);
+        var id = $this.attr('id');
+        $this.attr('id', 'bmtf-' + id);
+        $this.attr('aria-expanded', 'true');
+        $this.addClass('in');
+        var dfp = $this.attr('data-folder-items');
+        $this.prepend($('<li class="container-add"><input type="checkbox" class="container-folder-add" data-folder-path="'+dfp+'" /> new folder here</li>'));
+      });
+
+      $bmtf.find('.folder-icon').each (function () {
+        var $this = $(this);
+        var href = $this.attr('href');
+        if(href) {
+          var new_href = '#bmtf-' + href.replace(/^#/, '');
+          $this.attr('href', new_href);
+          $this.attr('aria-controls', new_href);
+        }
+        $this.addClass('folder-open glyphicon-folder-open').removeClass('glyphicon-folder');
+      });
+
+      var $checkboxes = $bmtf.find('input[type="checkbox"]')
+
+      $checkboxes.each (function () {
+        var $this = $(this);
+        $this.prop('checked', false);
+      });
+
+      $modal.find('.container-new-folder-name').parent().slideUp();
+
+      $bmtf.on('change', 'input[type="checkbox"]', function () {
+        var  $this = $(this);
+        var dfp = $this.attr('data-folder-path');
+        $checkboxes.not('[data-folder-path="'+dfp+'"]').prop('checked', false);
+
+        var path = dfp.replace(/^\.?\/?/, '');
+
+        var $cnfn = $modal.find('.container-new-folder-name');
+        $cnfn.parent().slideUp()
+
+        if ($this.hasClass("container-folder-add")) {
+          $cnfn.parent().slideDown()
+          $cnfn.on('keyup', function() {
+            var v = $(this).val();
+            if (v) {
+              var new_path = path + '/' + v;
+              $modal.find('input[name="new_path"]').val(new_path);
+            }
+          });
+        }
+
+        $modal.find('input[name="new_path"]').val(path);
+      });
+
+      var fi = last_count.$folder_in;
+      fi.addClass('move-from-this-folder');
+
+
+
+    }).on('click', '.container-browse-rename-file', function() {
       var target = $($(this).attr('data-target-browser'));
-      submit_action_form(target, 'rename-file');
-      disable_submit(target, true);
-    }).on('click', '.container-browse-rename-folder-submit', function() {
-      var target = $($(this).attr('data-target-browser'));
-      submit_action_form(target, 'rename-folder');
-      disable_submit(target, true);
+      var msg = $('#container-browse-rename-file-form-' + container_id).html();
+      var title = 'Rename file';
+      _fpa.show_modal(msg, title);
+      $modal.find('input[name="new_name"]').val(last_count.first_file);
     });
 
     var $modal = $('#primary-modal');
 
     $modal.on('click', '.container-browse-move-files-submit', function() {
-      var target = $($(this).attr('data-target-browser'));
-      var extra_params = {};
-      $modal.find('.container-browse-action-extra-params').each (function () {
-        var el = $(this);
-        extra_params[el.attr('name')] = el.val();
-      });
-      submit_action_form(target, 'move-files', extra_params);
-      disable_submit(target, true);
-      $modal.modal('hide');
+      submit_modal('move-files');
+    }).on('click', '.container-browse-rename-file-submit', function() {
+      submit_modal('rename-file');
     });
 
     $(document).on('click', '.refresh-container-list[data-container-id="'+container_id+'"]', function(e) {

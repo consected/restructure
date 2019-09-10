@@ -153,7 +153,7 @@ module NfsStore
             end
 
             unless pn.exist?
-              raise FphsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
+              raise FsException::Filesystem.new "Current group specificed in stored archive file is invalid: #{stored_file.current_gid}" unless NfsStore::Manage::Group.group_id_range.include?(stored_file.current_gid)
 
 
               dir = File.join(Manage::Filesystem.temp_directory, "__filestore__#{SecureRandom.hex}")
@@ -213,7 +213,7 @@ module NfsStore
       def archive_extracted?
         return @archive_extracted unless @archive_extracted.nil?
         @archive_file ||= stored_file.file_name
-        @archive_extracted = NfsStore::Manage::ArchivedFile.extracted? stored_file.container, stored_file.path, @archive_file
+        @archive_extracted = NfsStore::Manage::ArchivedFile.extracted? stored_file: stored_file
       end
 
 

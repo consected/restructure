@@ -68,68 +68,20 @@ module NfsStore
         @id = @container.id
         trashed_files = @trash.trash_all selected_items_info
 
-        if trashed_files&.length > 0
-          filename = "#{@trash.container.name} - #{trashed_files.length} #{'file'.pluralize(trashed_files.length)}.zip"
-          @trash.save!
-
-          render json: trashed_files
-        else
-          redirect_to nfs_store_browse_path(@container)
-        end
+        handle_action_results trashed_files
 
       elsif commit == 'Move Files'
         new_path = secure_params[:new_path]
-
-        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
-        @move.current_user = current_user
-        @master = @container.master
-        @id = @container.id
+        setup_move_and_rename
         moved_files = @move.move_files selected_items_info, new_path
-
-        if moved_files&.length > 0
-          filename = "#{@move.container.name} - #{moved_files.length} #{'file'.pluralize(moved_files.length)}.zip"
-          @move.save!
-
-          render json: moved_files
-        else
-          redirect_to nfs_store_browse_path(@container)
-        end
+        handle_action_results moved_files
 
       elsif commit == 'Rename File'
-        new_path = secure_params[:new_path]
+        new_name = secure_params[:new_name]
+        setup_move_and_rename
+        moved_files = @move.rename_file selected_items_info, new_name
 
-        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
-        @move.current_user = current_user
-        @master = @container.master
-        @id = @container.id
-        moved_files = @move.move_files selected_items_info, new_path
-
-        if moved_files&.length > 0
-          filename = "#{@move.container.name} - #{moved_files.length} #{'file'.pluralize(moved_files.length)}.zip"
-          @move.save!
-
-          render json: moved_files
-        else
-          redirect_to nfs_store_browse_path(@container)
-        end
-
-      elsif commit == 'Rename Folder'
-        new_path = secure_params[:new_path]
-
-        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
-        @move.current_user = current_user
-        @master = @container.master
-        @id = @container.id
-        moved_files = @move.move_files selected_items_info, new_path
-
-        if moved_files&.length > 0
-          filename = "#{@move.container.name} - #{moved_files.length} #{'file'.pluralize(moved_files.length)}.zip"
-          @move.save!
-
-          render json: moved_files
-        else
-          redirect_to nfs_store_browse_path(@container)
-        end
+        handle_action_results moved_files
 
       else
         return not_found
@@ -178,7 +130,7 @@ module NfsStore
     private
 
       def secure_params
-        params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, :new_path, {selected_items: []})
+        params.require(:nfs_store_download).permit(:container_id, :activity_log_id, :activity_log_type, :new_path, :new_name, {selected_items: []})
       end
 
       # Handle find container differently for multi container actions
@@ -186,6 +138,24 @@ module NfsStore
       def find_container
         return if action_name == 'multi'
         super
+      end
+
+      def setup_move_and_rename
+        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @move.current_user = current_user
+        @master = @container.master
+        @id = @container.id
+      end
+
+      def handle_action_results action_files
+        if action_files && action_files.length > 0
+          filename = "#{@container.name} - #{action_files.length} #{'file'.pluralize(action_files.length)}.zip"
+          @move.save!
+
+          render json: action_files
+        else
+          redirect_to nfs_store_browse_path(@container)
+        end
       end
 
   end

@@ -225,7 +225,7 @@ module NfsStore
       def self.move_file_to_final_location role_name, from_path, container, path, file_name
         fs_path = nfs_store_path(role_name, container, path, file_name)
 
-        raise FsException::Action.new "Path to move to matches the current path" if fs_path == from_path
+        raise FsException::Action.new "Path to move to matches the current path" if fs_path == from_path && file_name.blank?
         raise FsException::Upload.new "File already exists. Will not overwrite: #{file_name} in '#{container.name}'" if File.exist? fs_path
 
         test_dir role_name, container, :write

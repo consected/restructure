@@ -183,7 +183,7 @@ module NfsStore
 
               cleanpath = Filesystem.clean_path(self.path)
               if cleanpath && (cleanpath.start_with?('.') || cleanpath.start_with?('/'))
-                FsException::Action.new "Path to move to is bad: #{cleanpath}"
+                raise FsException::Action.new "Path to move to is bad: #{cleanpath}"
               end
 
               res = Filesystem.move_file_to_final_location role_name, from_path, self.container, self.container_path(no_filename: true), self.file_name
