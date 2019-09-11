@@ -232,6 +232,31 @@ _nfs_store.fs_browser = function ($outer) {
       $modal.modal('hide');
     };
 
+    var set_move_path = function (v, path) {
+      var v = v.replace(/^\.?\/?/, '');
+
+      if (v) {
+        if (path) {
+          var new_path = [path, v].join('/');
+        }
+        else {
+          var new_path = v;
+        }
+        var new_path = new_path.replace(/^\.?\/?/, '');
+        var new_path = new_path.replace(/^[^\/]+\.__mounted-archive__(\/|$)/, '');
+
+        $modal.find('input[name="new_path"]').val(new_path);
+      }
+    };
+
+    var set_move_from = function () {
+      var new_path = $modal.find('.browse-move-to-folders .container-folder.checked [data-folder-path]').first().attr('data-folder-path');
+      var new_path = new_path.replace(/^\.?\/?/, '');
+      var new_path = new_path.replace(/^[^\/]+\.__mounted-archive__(\/|$)/, '');
+
+      $modal.find('.container-browser-move-from').html(new_path);
+    };
+
     var container_id = get_container_id($outer);
     var $browser = get_$browser();
 
@@ -276,12 +301,28 @@ _nfs_store.fs_browser = function ($outer) {
       $bmtf.find('.container-entry').remove();
       $bmtf.find('.container-folder-items').each (function () {
         var $this = $(this);
+        var $folder_line = $this.prev();
         var id = $this.attr('id');
         $this.attr('id', 'bmtf-' + id);
         $this.attr('aria-expanded', 'true');
         $this.addClass('in');
         var dfp = $this.attr('data-folder-items');
-        $this.prepend($('<li class="container-add"><input type="checkbox" class="container-folder-add" data-folder-path="'+dfp+'" /> new folder here</li>'));
+        var $newf = $('<a class="container-add"><input type="checkbox" class="container-folder-add hidden" data-folder-path="'+dfp+'" /> <span class="glyphicon glyphicon-plus"></span> folder</a>').appendTo($folder_line);
+        $newf.on('click', function (e) {
+          e.preventDefault();
+          $(this).find('input.container-folder-add').prop('checked', true).change();
+
+          var $cnfn = $modal.find('.container-new-folder-name');
+          $cnfn.slideDown();
+          set_move_path($cnfn.val(), dfp);
+
+          $cnfn.on('keyup', function() {
+            var v = $(this).val();
+            set_move_path(v, dfp);
+          });
+
+          $folder_line.append($cnfn);
+        });
       });
 
       $bmtf.find('.folder-icon').each (function () {
@@ -309,28 +350,14 @@ _nfs_store.fs_browser = function ($outer) {
         var dfp = $this.attr('data-folder-path');
         $checkboxes.not('[data-folder-path="'+dfp+'"]').prop('checked', false);
 
-        var path = dfp.replace(/^\.?\/?/, '');
-
         var $cnfn = $modal.find('.container-new-folder-name');
-        $cnfn.parent().slideUp()
+        if(!$this.hasClass('container-folder-add'))
+          $cnfn.slideUp();
 
-        if ($this.hasClass("container-folder-add")) {
-          $cnfn.parent().slideDown()
-          $cnfn.on('keyup', function() {
-            var v = $(this).val();
-            if (v) {
-              var new_path = path + '/' + v;
-              $modal.find('input[name="new_path"]').val(new_path);
-            }
-          });
-        }
-
-        $modal.find('input[name="new_path"]').val(path);
+        set_move_path(dfp);
       });
 
-      var fi = last_count.$folder_in;
-      fi.addClass('move-from-this-folder');
-
+      set_move_from();
 
 
     }).on('click', '.container-browse-rename-file', function() {

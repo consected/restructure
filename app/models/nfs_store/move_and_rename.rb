@@ -26,7 +26,7 @@ module NfsStore
       setup_items selected_items
 
       if new_path && (new_path.start_with?('.') || new_path.start_with?('/'))
-        raise FsException::Action.new "Path to move to can not start with / or .: #{cleanpath}"
+        raise FsException::Action.new "Path to move to can not start with / or .: #{new_path}"
       end
 
       # Find the depth of the highest path we are planning to move, so we can use this as the root of sub directories to move
