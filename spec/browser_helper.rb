@@ -21,8 +21,12 @@ module BrowserHelper
       puts "To disable headless mode, run rspec with environment variable `NOT_HEADLESS=true rspec`"
       ENV['DISPLAY']=':99'
       if `pgrep Xvfb`.blank?
-        puts "Running new Xvfb headless X server"
-        `Xvfb +extension RANDR :99 -screen 0 1600x1000x16 &`
+        xvfb_cmd = 'Xvfb +extension RANDR :99 -screen 0 1600x1000x16 &'
+        puts "Start new Xvfb headless X server with DISPLAY #{ENV['DISPLAY']}"
+        puts "if this blocks, run directly as:"
+        puts xvfb_cmd
+        `#{xvfb_cmd}`
+        puts "New Xvfb headless X server is running"
       end
       if `pgrep x11vnc`.blank?
         puts "New x11vnc server will start on port 5901 with display #{ENV['DISPLAY']} in 5 seconds"

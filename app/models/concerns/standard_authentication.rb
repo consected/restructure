@@ -46,9 +46,9 @@ module StandardAuthentication
 
     # Calculate password strength
     def calculate_strength password
-      checker = StrongPassword::StrengthChecker.new(password)
       c = self.password_config
-      checker.calculate_entropy min_word_length: c[:min_word_length], use_dictionary: true, extra_dictionary_words: self.send(c[:extra_dictionary_words])
+      checker = StrongPassword::StrengthChecker.new(min_word_length: c[:min_word_length], use_dictionary: true, extra_dictionary_words: self.send(c[:extra_dictionary_words]))
+      checker.calculate_entropy password
     end
 
     # Word list to prevent use of in passwords
