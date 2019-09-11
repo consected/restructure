@@ -34,7 +34,7 @@ module NfsStore
       all_paths = self.all_action_items.map {|item| item[:retrieved_file].path}.uniq.sort
       top_path = all_paths.first
       second_path = all_paths[1]
-      top_paths = all_paths.map {|f| f.split('/').compact.first}.uniq
+      top_paths = all_paths.map {|f| f && f.split('/').compact.first}.uniq
 
       if top_paths.length > 1
         raise FsException::Action.new "Files and folders to move must all be in the same base path. Specified base paths are #{top_paths.join(", ")}"
