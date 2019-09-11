@@ -180,13 +180,22 @@ module NfsStore
             # If a path is set, ensure we can make a directory for it if one doesn't exist
             if !self.path.present? || Filesystem.test_dir(role_name, self.container, :mkdir, extra_path: self.container_path(no_filename: true), ok_if_exists: true)
 
-
               cleanpath = Filesystem.clean_path(self.path)
-              if cleanpath && !cleanpath.start_with?('.trash') && (cleanpath.start_with?('.') || cleanpath.start_with?('/'))
-                raise FsException::Action.new "Path to move to is bad: #{cleanpath}"
+              if cleanpath
+                is_trash_path = self.class.trash_path?(cleanpath)
+
+                if !is_trash_path && (cleanpath.start_with?('.') || cleanpath.start_with?('/'))
+                  raise FsException::Action.new "Path to move to is bad: #{cleanpath}"
+                end
               end
 
-              res = Filesystem.move_file_to_final_location role_name, from_path, self.container, self.container_path(no_filename: true), self.file_name
+              if is_trash_path
+                to_path = cleanpath
+              else
+                to_path = self.container_path(no_filename: true)
+              end
+
+              res = Filesystem.move_file_to_final_location role_name, from_path, self.container, to_path, self.file_name
               break if res
             end
           end

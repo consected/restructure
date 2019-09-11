@@ -147,9 +147,13 @@ module NfsStore
 
             pn = Pathname.new(@mounted_path)
 
-            if pn.exist? && pn.empty?
-              puts "Removing the empty directory which appears at #{@mounted_path}"
-              Dir.rmdir @mounted_path
+            if pn.exist?
+              if pn.empty?
+                puts "Removing the empty directory which appears at #{@mounted_path}"
+                Dir.rmdir @mounted_path
+              else
+                puts "The directory is not empty at #{@mounted_path}"
+              end
             end
 
             unless pn.exist?

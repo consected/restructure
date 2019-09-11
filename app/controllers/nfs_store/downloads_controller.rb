@@ -62,24 +62,24 @@ module NfsStore
 
       elsif commit == 'Trash'
 
-        @trash = Trash.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
-        @trash.current_user = current_user
+        @action = Trash.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @action.current_user = current_user
         @master = @container.master
         @id = @container.id
-        trashed_files = @trash.trash_all selected_items_info
+        trashed_files = @action.trash_all selected_items_info
 
         handle_action_results trashed_files
 
       elsif commit == 'Move Files'
         new_path = secure_params[:new_path]
         setup_move_and_rename
-        moved_files = @move.move_files selected_items_info, new_path
+        moved_files = @action.move_files selected_items_info, new_path
         handle_action_results moved_files
 
       elsif commit == 'Rename File'
         new_name = secure_params[:new_name]
         setup_move_and_rename
-        moved_files = @move.rename_file selected_items_info, new_name
+        moved_files = @action.rename_file selected_items_info, new_name
 
         handle_action_results moved_files
 
@@ -141,8 +141,8 @@ module NfsStore
       end
 
       def setup_move_and_rename
-        @move = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
-        @move.current_user = current_user
+        @action = MoveAndRename.new container_id: @container.id, multiple_items: true, activity_log: @activity_log
+        @action.current_user = current_user
         @master = @container.master
         @id = @container.id
       end
@@ -150,7 +150,7 @@ module NfsStore
       def handle_action_results action_files
         if action_files && action_files.length > 0
           filename = "#{@container.name} - #{action_files.length} #{'file'.pluralize(action_files.length)}.zip"
-          @move.save!
+          @action.save!
 
           render json: action_files
         else
