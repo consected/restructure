@@ -86,6 +86,7 @@ _fpa.reports = {
 
         var dct_parts = dct.split(':', 2);
         var dct_action = dct_parts[1];
+        var orig_action = dct_parts[1];
         var dct_json = $(this).html();
 
         if (!dct_json || dct_json == '') return;
@@ -112,11 +113,22 @@ _fpa.reports = {
           }
         }
 
+        var dctaus = 'report_' + orig_action.underscore();
+
         var pstring = $.param(params);
 
-        var new_html = '<a href="'+base_url+'?' + pstring + '" target="report-perform-action">'+dct_action+'</a>';
+        var new_html = '<a href="'+base_url+'?' + pstring + '" target="report-perform-action" class="'+dctaus+'">'+dct_action+'</a>';
 
         $(this).html(new_html);
+
+        if (orig_action.trim() == 'view file') {
+          _fpa.secure_view.setup_links($(this), 'a.' + dctaus);
+          $('a.' + dctaus).on('click', function (ev) {
+            ev.preventDefault();
+          });
+        }
+
+
 
       });
 

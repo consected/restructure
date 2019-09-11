@@ -251,8 +251,10 @@ _nfs_store.fs_browser = function ($outer) {
 
     var set_move_from = function () {
       var new_path = $modal.find('.browse-move-to-folders .container-folder.checked [data-folder-path]').first().attr('data-folder-path');
-      var new_path = new_path.replace(/^\.?\/?/, '');
-      var new_path = new_path.replace(/^[^\/]+\.__mounted-archive__(\/|$)/, '');
+      if (new_path) {
+        var new_path = new_path.replace(/^\.?\/?/, '');
+        var new_path = new_path.replace(/^[^\/]+\.__mounted-archive__(\/|$)/, '');
+      }
 
       $modal.find('.container-browser-move-from').html(new_path);
     };
