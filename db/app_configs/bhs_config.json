@@ -920,6 +920,7 @@
         "name": "Responses Needed",
         "description": "Shows records requiring response from the PI.",
         "sql": "SELECT \r\ndt.id,\r\ndt.select_record_from_player_contact_phones ,\r\ndt.return_call_availability_notes,\r\ndt.questions_from_call_notes,\r\ndt.results_link,\r\ndt.select_result,\r\ndt.pi_return_call_notes,\r\ndt.master_id\r\n\r\nFROM (\r\n SELECT id,\r\n   master_id, bhs_assignment_id, created_at, select_result,\r\n   select_record_from_player_contact_phones ,\r\n   return_call_availability_notes,\r\n   questions_from_call_notes,\r\n   results_link,\r\n   pi_return_call_notes,\r\n   rank()\r\n OVER (\r\n  PARTITION BY master_id \r\n  ORDER BY created_at DESC\r\n ) AS r\r\n FROM activity_log_bhs_assignments\r\n\r\n) AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\n\r\nWHERE\r\n  r = 1\r\nAND\r\n(  dt.select_result IS NULL or dt.select_result <> 'complete' )\r\n\r\n\r\nORDER BY\r\n  dt.id DESC\r\n;\r\n",
+        "short_name": "responses_needed",
         "search_attrs": "",
         "admin_id": 4,
         "disabled": false,
@@ -932,7 +933,7 @@
         "edit_model": "",
         "edit_field_names": "",
         "selection_fields": "",
-        "item_type": "BHS Search",
+        "item_type": "bhs search",
         "user_email": null
       },
       {
@@ -940,6 +941,7 @@
         "name": "Contact from PI",
         "description": "Shows contact messages from the PI that require an RA to respond.",
         "sql": "SELECT \r\ndt.id,\r\ndt.select_record_from_player_contact_phones ,\r\ndt.return_call_availability_notes,\r\ndt.questions_from_call_notes,\r\ndt.results_link,\r\ndt.select_result,\r\ndt.pi_return_call_notes,\r\ndt.master_id\r\n\r\nFROM (\r\n SELECT id,\r\n   master_id, bhs_assignment_id, created_at, select_result,\r\n   select_record_from_player_contact_phones ,\r\n   return_call_availability_notes,\r\n   questions_from_call_notes,\r\n   results_link,\r\n   pi_return_call_notes, extra_log_type,\r\n   rank()\r\n OVER (\r\n  PARTITION BY master_id \r\n  ORDER BY created_at DESC\r\n ) AS r\r\n FROM activity_log_bhs_assignments\r\n WHERE extra_log_type IN ('respond_to_pi', 'contact_initiator')\r\n) AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n  r >= 1 AND dt.extra_log_type = 'contact_initiator'\r\nAND\r\n  r = 1 AND dt.extra_log_type <> 'respond_to_pi'\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n",
+        "short_name": "contact_from_pi",
         "search_attrs": "",
         "admin_id": 4,
         "disabled": false,
@@ -952,7 +954,7 @@
         "edit_model": "",
         "edit_field_names": "",
         "selection_fields": "",
-        "item_type": "BHS Search",
+        "item_type": "bhs search",
         "user_email": null
       },
       {
@@ -960,6 +962,7 @@
         "name": "BHS Subjects Pending Sync",
         "description": "Show BHS subjects that have been created here, but have not yet been transferred from Zeus.",
         "sql": "select b.master_id from bhs_assignments b\r\nleft join player_infos pi\r\non b.master_id = pi.master_id\r\nwhere pi.id is null\r\n;",
+        "short_name": "bhs_subjects_pending_sync",
         "search_attrs": "",
         "admin_id": 4,
         "disabled": false,
@@ -972,7 +975,7 @@
         "edit_model": "",
         "edit_field_names": "",
         "selection_fields": "",
-        "item_type": "BHS Search",
+        "item_type": "bhs search",
         "user_email": null
       },
       {
@@ -981,6 +984,7 @@
         "description": "Search players by name, phone, email or ID.\r\nLeave the search field empty to see all subjects.",
         "sql": "select distinct m.id master_id, b.bhs_id,\r\npi.first_name, pi.middle_name, pi.last_name, pi.nick_name,\r\na.street, a.street2, a.city, a.state, a.zip, \r\npc.data, pc.rec_type\r\nfrom masters m\r\nleft join player_infos pi\r\non pi.master_id = m.id \r\ninner join bhs_assignments b\r\non m.id = b.master_id\r\nleft join addresses a\r\non m.id = a.master_id\r\nleft join player_contacts pc\r\non pc.master_id = m.id\r\nwhere \r\n(\r\n  :name is null \r\n  or pi.first_name ~* :name\r\n  or pi.last_name ~* :name\r\n  or pi.middle_name ~* :name\r\n  or pi.nick_name ~* :name\r\n  or( \r\n    pi.first_name ~* coalesce(split_part(:name, ' ', 1),'none')\r\n    AND pi.last_name ~* coalesce(split_part(:name, ' ', 2),'none')\r\n  )\r\n) \r\nOR\r\n(\r\n  regexp_replace(pc.data, '\\W+', '', 'g') ~* regexp_replace(:name, '\\W+', '', 'g')\r\n) \r\nOR\r\n(\r\n  :name is not null and\r\n  b.bhs_id::varchar  = regexp_replace(:name, '[^0-9]*', '', 'g')\r\n)\r\n",
         "search_attrs": "name: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n",
+        "short_name": "search_bhs_player",
         "admin_id": 4,
         "disabled": false,
         "created_at": "2018-05-29T18:27:09.132Z",
@@ -992,7 +996,7 @@
         "edit_model": "",
         "edit_field_names": "",
         "selection_fields": "",
-        "item_type": "BHS Search",
+        "item_type": "bhs search",
         "user_email": null
       },
       {
@@ -1000,6 +1004,7 @@
         "name": "Responses Completed",
         "description": "Shows records with completed response from the PI.",
         "sql": "SELECT \r\ndt.id,\r\ndt.select_record_from_player_contact_phones ,\r\ndt.return_call_availability_notes,\r\ndt.questions_from_call_notes,\r\ndt.results_link,\r\ndt.select_result,\r\ndt.pi_return_call_notes,\r\ndt.master_id\r\n\r\nFROM (\r\n SELECT id,\r\n   master_id, bhs_assignment_id, created_at, select_result,\r\n   select_record_from_player_contact_phones ,\r\n   return_call_availability_notes,\r\n   questions_from_call_notes,\r\n   results_link,\r\n   pi_return_call_notes,\r\n   rank()\r\n OVER (\r\n  PARTITION BY master_id \r\n  ORDER BY created_at DESC\r\n ) AS r\r\n FROM activity_log_bhs_assignments\r\n\r\n) AS dt\r\nWHERE\r\n  r = 1\r\nAND\r\n( dt.select_result = 'complete' )\r\n\r\n\r\nORDER BY\r\n  created_at DESC\r\n;\r\n",
+        "short_name": "responses_completed",
         "search_attrs": "",
         "admin_id": 4,
         "disabled": false,
@@ -1012,7 +1017,7 @@
         "edit_model": "",
         "edit_field_names": "",
         "selection_fields": "",
-        "item_type": "BHS Search",
+        "item_type": "bhs search",
         "user_email": null
       }
     ],
