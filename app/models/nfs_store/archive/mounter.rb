@@ -2,7 +2,7 @@ module NfsStore
   module Archive
     class Mounter
 
-      ArchiveExtensions = ['.zip', '.tar', '.gz', '.bz2'].freeze
+      ArchiveExtensions = ['.zip', '.tar', '.gz', '.bz2', '.7z'].freeze
       ArchiveMountSuffix = '.__mounted-archive__'.freeze
       ProcessingArchiveSuffix = '.__processing-archive__'.freeze
       ProcessingIndexSuffix = '.__processing-index__'.freeze
