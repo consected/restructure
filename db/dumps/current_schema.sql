@@ -4362,6 +4362,44 @@ ALTER SEQUENCE ml_app.nfs_store_imports_id_seq OWNED BY ml_app.nfs_store_imports
 
 
 --
+-- Name: nfs_store_move_actions; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+CREATE TABLE ml_app.nfs_store_move_actions (
+    id integer NOT NULL,
+    user_groups integer[],
+    path character varying,
+    new_path character varying,
+    retrieval_path character varying,
+    moved_items character varying,
+    nfs_store_container_ids integer[],
+    user_id integer NOT NULL,
+    nfs_store_container_id integer,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone
+);
+
+
+--
+-- Name: nfs_store_move_actions_id_seq; Type: SEQUENCE; Schema: ml_app; Owner: -
+--
+
+CREATE SEQUENCE ml_app.nfs_store_move_actions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: nfs_store_move_actions_id_seq; Type: SEQUENCE OWNED BY; Schema: ml_app; Owner: -
+--
+
+ALTER SEQUENCE ml_app.nfs_store_move_actions_id_seq OWNED BY ml_app.nfs_store_move_actions.id;
+
+
+--
 -- Name: nfs_store_stored_file_history; Type: TABLE; Schema: ml_app; Owner: -; Tablespace: 
 --
 
@@ -6145,6 +6183,13 @@ ALTER TABLE ONLY ml_app.nfs_store_imports ALTER COLUMN id SET DEFAULT nextval('m
 -- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
 --
 
+ALTER TABLE ONLY ml_app.nfs_store_move_actions ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_move_actions_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: ml_app; Owner: -
+--
+
 ALTER TABLE ONLY ml_app.nfs_store_stored_file_history ALTER COLUMN id SET DEFAULT nextval('ml_app.nfs_store_stored_file_history_id_seq'::regclass);
 
 
@@ -6775,6 +6820,14 @@ ALTER TABLE ONLY ml_app.nfs_store_filters
 
 ALTER TABLE ONLY ml_app.nfs_store_imports
     ADD CONSTRAINT nfs_store_imports_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nfs_store_move_actions_pkey; Type: CONSTRAINT; Schema: ml_app; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_move_actions
+    ADD CONSTRAINT nfs_store_move_actions_pkey PRIMARY KEY (id);
 
 
 --
@@ -9504,6 +9557,14 @@ ALTER TABLE ONLY ml_app.player_contacts
 
 
 --
+-- Name: fk_rails_75138f1972; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_move_actions
+    ADD CONSTRAINT fk_rails_75138f1972 FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
 -- Name: fk_rails_776e17eafd; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
 --
 
@@ -9685,6 +9746,14 @@ ALTER TABLE ONLY ml_app.trackers
 
 ALTER TABLE ONLY ml_app.nfs_store_uploads
     ADD CONSTRAINT fk_rails_bdb308087e FOREIGN KEY (user_id) REFERENCES ml_app.users(id);
+
+
+--
+-- Name: fk_rails_c1ea9a5fd9; Type: FK CONSTRAINT; Schema: ml_app; Owner: -
+--
+
+ALTER TABLE ONLY ml_app.nfs_store_move_actions
+    ADD CONSTRAINT fk_rails_c1ea9a5fd9 FOREIGN KEY (nfs_store_container_id) REFERENCES ml_app.nfs_store_containers(id);
 
 
 --
