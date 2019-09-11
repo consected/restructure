@@ -52,6 +52,26 @@
       "note": ""
     },
     {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "735d9b84f6fdd9c36661cd08ce04e8139f00da74b428c97a0c08a0ce012898ff",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/nfs_store/utils/mime_type.rb",
+      "line": 11,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "`file --mime-type -b '#{full_file_path}'`",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "NfsStore::Utils::MimeType",
+        "method": "NfsStore::Utils::MimeType.full_mime_type"
+      },
+      "user_input": "full_file_path",
+      "confidence": "Medium",
+      "note": ""
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "9d7823c2d839cc45b01876f5748165dc61b964dd6894c57b48b2e53d7ede732b",
@@ -139,7 +159,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/nfs_store/archive/mounter.rb",
-      "line": 135,
+      "line": 167,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")}/zip\"])",
       "render_path": null,
@@ -153,6 +173,6 @@
       "note": ""
     }
   ],
-  "updated": "2019-09-03 14:12:10 +0100",
-  "brakeman_version": "4.5.1"
+  "updated": "2019-09-11 12:32:48 +0100",
+  "brakeman_version": "4.6.1"
 }
