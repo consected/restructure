@@ -150,6 +150,12 @@ a.related-tracker-histories-link {
   }
 }
 
+// Added to avoid a blank block in drop down model reference results
+.model-reference-result .object-results-header.header-for-gen-model {
+    display: none;
+}
+
+
 .model-reference-result .is-activity-log .list-group-item.record-meta {
   display: block;
 }

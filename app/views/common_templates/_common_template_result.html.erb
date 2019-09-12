@@ -69,7 +69,7 @@
       {{/with}}
 
     {{else}}
-      <li class="list-group-item is-heading object-results-header">
+      <li class="list-group-item is-heading object-results-header {{#is model_data_type 'external_identifier' }}header-for-external-identifier{{else}}header-for-gen-model{{/is}}">
         {{#with result_data}}
 
         {{>edit_item_button resource=../name  edit_button_href=../edit_button_href}}

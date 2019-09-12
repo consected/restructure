@@ -95,12 +95,54 @@ _fpa.loaded.default = function(){
         _fpa.set_cache('login-redirect-hash', {hash: target});
       }
       else {
-        window.setTimeout(function(){
-          console.log('Jumping to linked target based on hash')
-          _fpa.utils.jump_to_linked_item(target, null, {no_highlight: true});
-        }, 1000);
-      }
 
+        var targets = target.split(':');
+        var num_targets = targets.length;
+        var i = 0;
+        _fpa.state.prevent_jump = targets[num_targets - 1];
+
+        var timed_jump = function (i) {
+          var attempts = 0;
+          var target = targets[i];
+          if (!target) {
+            // No more targets to try.
+            // Prevent additional jumps for a while then exit
+            window.setTimeout(function () {
+              _fpa.state.prevent_jump = false;
+            }, 10000);
+            return;
+          }
+
+          window.setTimeout(function(){
+            console.log('Jumping to linked target based on hash')
+            // Highlight if this is the last target and the number of targets > 1
+            console.log(i);
+            _fpa.utils.jump_to_linked_item(target, null, {no_highlight: !(num_targets > 1 && (i+1 == num_targets)) });
+
+            // Wait a little then test if the target is there (if it is an id target)
+            // If not try a few more times
+            window.setTimeout(function() {
+              if (target[0] == '#') {
+                if($(target).length == 0 && attempts < 8) {
+                  attempts ++;
+                  timed_jump(i);
+                }
+                else {
+                  timed_jump(i+1);
+                }
+              }
+              else {
+                timed_jump(i+1);
+              }
+            }, 1000);
+          }, 1000);
+        }
+
+
+        timed_jump(0);
+
+
+      }
     }
 
 

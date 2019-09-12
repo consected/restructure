@@ -52,9 +52,14 @@ _fpa.utils.jump_to_linked_item = function(target, offset, options) {
   var scroll_attempts = 0;
   var jump_scroll = function () {
     // Scroll if necessary
-    if(!_fpa.utils.inViewport(h, true))
+    if(!_fpa.utils.inViewport(h, true)) {
+      // If prevent_jump is set, and it is an id hash, and it doesn't match this target then just quit
+      if(_fpa.state.prevent_jump && _fpa.state.prevent_jump[0] == '#' && _fpa.state.prevent_jump != '#' + h.attr('id')) {
+        return;
+      }
       _fpa.utils.scrollTo(h, 200, offset);
-    console.log('retry scroll');
+    }
+
     if( $('.ajax-running').length > 0) {
       scroll_attempts++;
       if(scroll_attempts < 7) {
@@ -169,6 +174,13 @@ _fpa.utils.nl2br = function(text){
     var nl2br = (text + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + '<br>' + '$2');
     return new Handlebars.SafeString(nl2br);
 };
+
+_fpa.utils.remove_tags = function(text){
+    var stre = (text + '').replace(/(\<[a-zA-Z0-9\s-=_"']+\/?\>)/g, '' );
+    return new Handlebars.SafeString(stre);
+};
+
+
 
 String.prototype.capitalize = function(){
     return _fpa.utils.capitalize(this);
@@ -399,13 +411,19 @@ _fpa.utils.pretty_print = function(stre, options_hash){
                 if(options_hash.capitalize){
                     if(!stre || stre.length < 30){
                         //stre = Handlebars.Utils.escapeExpression(stre);
-                        return _fpa.utils.capitalize(stre);
+                        stre = _fpa.utils.capitalize(stre);
+                        if(options_hash.remove_tags) stre = _fpa.utils.remove_tags(stre);
+                        return stre;
                     }else{
-                        return _fpa.utils.nl2br(stre);
+                        stre = _fpa.utils.nl2br(stre);
+                        if(options_hash.remove_tags) stre = _fpa.utils.remove_tags(stre);
+                        return stre;
                     }
                 }
                 else{
-                    return _fpa.utils.nl2br(stre);
+                    stre = _fpa.utils.nl2br(stre);
+                    if(options_hash.remove_tags) stre = _fpa.utils.remove_tags(stre);
+                    return stre;
                 }
             } else {
                 return null;
