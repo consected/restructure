@@ -229,7 +229,8 @@ module NfsStore
 
 
     def self.filters_allow_upload? file_name, path, container
-      f = "#{path}/#{file_name}"
+      f = "#{path}/#{file_name}".gsub(/\/\/+/, '/')
+      f = "/#{f}" unless f.start_with? '/'
       NfsStore::Filter::Filter.evaluate f, container
     end
 

@@ -112,11 +112,11 @@ module NfsStore
         raise FsException::Action.new "No filestore container provided to evaluate filter" unless container
 
         conds = [""] + filters
-        conds[0] = filters.map{|f| "(coalesce(path, '') || '/' || file_name) ~ ?"}.join(' OR ')
+        conds[0] = filters.map{|f| "replace('/' || coalesce(path, '') || '/' || file_name, '//', '/') ~ ?"}.join(' OR ')
         sf = container.stored_files.where(conds)
 
         conds = [""] + filters
-        conds[0] = filters.map{|f| "('/' || archive_file || '/' ||  coalesce(path, '') || '/' || file_name) ~ ?"}.join(' OR ')
+        conds[0] = filters.map{|f| "replace('/' || archive_file || '/' ||  coalesce(path, '') || '/' || file_name , '//', '/') ~ ?"}.join(' OR ')
 
         af = container.archived_files.where(conds)
 

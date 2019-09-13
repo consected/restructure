@@ -79,7 +79,12 @@ module NfsStore
       setup_items selected_items
 
       self.all_action_items.each do |item|
-        item[:retrieved_file].move_to nil, new_name
+        f = item[:retrieved_file]
+        archive_file = f.archive_file if f.respond_to? :archive_file
+        unless filters_allow_rename?(archive_file, f.path, new_name)
+          raise FsException::Action.new "New name is not allowed. Check it meets the requirements of the 'valid upload files' list"
+        end
+        f.move_to nil, new_name
       end
 
       self.new_path = new_path
@@ -88,6 +93,12 @@ module NfsStore
     end
 
     protected
+
+      def filters_allow_rename? archive_file, path, new_name
+        f = [archive_file, path, new_name].join('/').gsub(/\/\/+/, '/')
+        f = "/#{f}" unless f.start_with? '/'
+        NfsStore::Filter::Filter.evaluate f, activity_log
+      end
 
       def setup_items selected_items
         # Retrieve each file's details. The container_id will be passed if this is a
