@@ -126,3 +126,26 @@ p.small.report-table-name {
   box-shadow: 0 5px 4px 2px #e4e4e4;
 
 }
+
+td[data-col-type^="perform action:"], td[data-col-type^="select items:"], td[data-col-type^="search_reports_"] {
+  color: rgba(255, 255, 255, 0);
+  -webkit-animation: working 1s ease-in-out infinite;
+  -moz-animation: working 1s ease-in-out infinite;
+  animation: working 1s ease-in-out infinite;
+
+  &:before {
+    color: silver;
+    content: 'loading...';
+  }
+
+  &.attached_report_search, &.attached_report_perform_action, &.attached_report_select_items {
+    -webkit-animation: none;
+    -moz-animation: none;
+    animation: none;
+    color: inherit;
+    &:before {
+      content: '';
+    }
+
+  }
+}
