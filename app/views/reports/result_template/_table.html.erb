@@ -37,8 +37,7 @@
           <% i = 0 %>
 
           <% list_item.each do |col| %>
-          <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %>">
-            <%
+          <td data-col-type="<%=@results.fields[i] %>" data-col-table="<%=result_tables[i] %>" class="report-el <%= @results.fields[i] == 'id' ? 'report-el-object-id' : '' %>"><%
                 l = col&.scan("\n")&.length if col.is_a?(String)
                 l ||= 0
                 got_nl = (l > 2)
@@ -46,9 +45,7 @@
                 if col.is_a?(Hash)
                   col = col.to_json
                 end
-            %>
-            <% if got_nl%><pre class="expandable"><% end %><%= col %><% if got_nl%></pre><% end %>
-          </td>
+            %><% if got_nl%><pre class="expandable"><% end %><%= col %><% if got_nl%></pre><% end %></td>
           <%  i += 1 %>
           <% end %>
 

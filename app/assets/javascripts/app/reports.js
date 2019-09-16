@@ -61,7 +61,7 @@ _fpa.reports = {
 
                 var dct_field = dct_parts[3];
                 var dct_report = dct_parts[2];
-                var dct_search = $(this).html();
+                var dct_search = $(this).html().trim();
 
                 var url = "/reports/"+dct_report+".json?&search_attrs["+ dct_field+"]="+dct_search+"&commit=search";
 
