@@ -435,10 +435,7 @@ fieldset.readonly-edit-fieldset
 }
 
 
-.wk-wysiwyg {
-  border: 1px solid rgb(192, 192, 192);
-  padding: 5px 5px 10px 5px;
-  min-height: 40px;
+.wk-wysiwyg, .custom-editor-viewer {
 
   ol {
     list-style-type: none;
@@ -449,13 +446,35 @@ fieldset.readonly-edit-fieldset
   h1 {
     font-size: 20px;
     margin-top: 10px;
+    font-weight: bold;
   }
   h2 {
     margin-top: 8px;
-    font-size: 17px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  h3 {
+    margin-top: 6px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  h4 {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: bold;
   }
 }
 
+.wk-wysiwyg {
+
+  border: 1px solid rgb(192, 192, 192);
+  padding: 5px 5px 10px 5px;
+  min-height: 40px;
+
+  &:focus {
+    outline: none;
+  }
+}
 
 @media only screen and (min-width: 1180px) {
     form.search_master label{

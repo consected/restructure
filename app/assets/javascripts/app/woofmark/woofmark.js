@@ -2433,6 +2433,7 @@ var commands = {
     blockquote: require('./markdown/blockquote'),
     codeblock: require('./markdown/codeblock'),
     heading: require('./markdown/heading'),
+    normal: require('./markdown/normal'),
     list: require('./markdown/list'),
     hr: require('./markdown/hr')
   },
@@ -2442,6 +2443,7 @@ var commands = {
     blockquote: require('./html/blockquote'),
     codeblock: require('./html/codeblock'),
     heading: require('./html/heading'),
+    normal: require('./html/normal'),
     list: require('./html/list'),
     hr: require('./html/hr')
   }
@@ -2450,16 +2452,26 @@ var commands = {
 commands.wysiwyg = commands.html;
 
 function bindCommands (surface, options, editor) {
+  bind('normal', 'cmd- ', router('normal'));
   bind('bold', 'cmd+b', bold);
   bind('italic', 'cmd+i', italic);
   bind('quote', 'cmd+j', router('blockquote'));
-  bind('code', 'cmd+e', code);
+  if (options.code) {
+    bind('code', 'cmd+e', code);
+  }
   bind('ol', 'cmd+o', ol);
   bind('ul', 'cmd+u', ul);
   bind('heading', 'cmd+d', router('heading'));
-  editor.showLinkDialog = fabricator(bind('link', 'cmd+k', linkOrImageOrAttachment('link')));
-  editor.showImageDialog = fabricator(bind('image', 'cmd+g', linkOrImageOrAttachment('image')));
-  editor.linkOrImageOrAttachment = linkOrImageOrAttachment;
+
+  if (options.links) {
+    editor.showLinkDialog = fabricator(bind('link', 'cmd+k', linkOrImageOrAttachment('link')));
+  }
+  if (options.images) {
+    editor.showImageDialog = fabricator(bind('image', 'cmd+g', linkOrImageOrAttachment('image')));
+  }
+  if (options.images || options.links) {
+    editor.linkOrImageOrAttachment = linkOrImageOrAttachment;
+  }
 
   if (options.attachments) {
     editor.showAttachmentDialog = fabricator(bind('attachment', 'cmd+shift+k', linkOrImageOrAttachment('attachment')));
@@ -2525,7 +2537,7 @@ function bindCommands (surface, options, editor) {
 
 module.exports = bindCommands;
 
-},{"./html/blockquote":49,"./html/boldOrItalic":50,"./html/codeblock":51,"./html/heading":52,"./html/hr":53,"./html/linkOrImageOrAttachment":54,"./html/list":55,"./markdown/blockquote":60,"./markdown/boldOrItalic":61,"./markdown/codeblock":62,"./markdown/heading":63,"./markdown/hr":64,"./markdown/linkOrImageOrAttachment":65,"./markdown/list":66,"crossvent":10}],39:[function(require,module,exports){
+},{"./html/blockquote":49,"./html/boldOrItalic":50,"./html/codeblock":51,"./html/heading":52,"./html/hr":53,"./html/linkOrImageOrAttachment":54,"./html/list":55,"./markdown/blockquote":60,"./markdown/boldOrItalic":61,"./markdown/codeblock":62,"./markdown/heading":63,"./markdown/hr":64,"./markdown/linkOrImageOrAttachment":65,"./markdown/list":66,"crossvent":10,"./html/normal":700,"./markdown/normal":701}],39:[function(require,module,exports){
 'use strict';
 
 function cast (collection) {
@@ -3004,7 +3016,7 @@ function heading (chunks) {
 
   function swap () {
     var level = parseInt(lead[1], 10);
-    var next = level <= 1 ? 4 : level - 1;
+    var next = level <= 1 ? 3 : level - 1;
     chunks.before = chunks.before.replace(rleading, '<h' + next + '>');
     chunks.after = chunks.after.replace(rtrailing, '</h' + next + '>');
   }
@@ -3019,6 +3031,23 @@ function heading (chunks) {
 }
 
 module.exports = heading;
+
+},{"../strings":76,"./wrapping":56}],700:[function(require,module,exports){
+'use strict';
+
+var strings = require('../strings');
+
+function normal (chunks) {
+  chunks.trim();
+
+  if (!chunks.selection) {
+    chunks.selection = strings.placeholders.normal;
+  }
+  chunks.before += '<p>';
+  chunks.after = '</p>' + chunks.after;
+}
+
+module.exports = normal;
 
 },{"../strings":76}],53:[function(require,module,exports){
 'use strict';
@@ -3723,6 +3752,34 @@ function heading (chunks) {
 
 module.exports = heading;
 
+},{"../many":58,"../strings":76}],701:[function(require,module,exports){
+'use strict';
+
+var many = require('../many');
+var strings = require('../strings');
+
+function normal (chunks) {
+  var level = 0;
+
+  chunks.selection = chunks.selection
+    .replace(/\s+/g, ' ')
+    .replace(/(^\s+|\s+$)/g, '');
+
+  if (!chunks.selection) {
+    chunks.startTag = '';
+    chunks.selection = strings.placeholders.normal;
+    chunks.endTag = '';
+    // chunks.skip({ before: 1, after: 1 });
+    return;
+  }
+
+  chunks.startTag = chunks.endTag = '';
+
+
+}
+
+module.exports = normal;
+
 },{"../many":58,"../strings":76}],64:[function(require,module,exports){
 'use strict';
 
@@ -4402,7 +4459,7 @@ var setText = require('./setText');
 var strings = require('./strings');
 
 function commands (el, id) {
-  setText(el, strings.buttons[id] || id);
+  setText(el, '');
 }
 
 function modes (el, id) {
@@ -4436,31 +4493,34 @@ module.exports = {
     heading: 'Heading Text',
     link: 'link text',
     image: 'image description',
-    attachment: 'attachment description'
+    attachment: 'attachment description',
+    normal: 'plain text'
   },
   titles: {
-    bold: 'Strong <strong> Ctrl+B',
-    italic: 'Emphasis <em> Ctrl+I',
-    quote: 'Blockquote <blockquote> Ctrl+J',
+    normal: 'Plain Ctrl+space',
+    bold: 'Bold Ctrl+B',
+    italic: 'Italic Ctrl+I',
+    quote: 'Blockquote Ctrl+J',
     code: 'Code Sample <pre><code> Ctrl+E',
-    ol: 'Numbered List <ol> Ctrl+O',
-    ul: 'Bulleted List <ul> Ctrl+U',
-    heading: 'Heading <h1>, <h2>, ... Ctrl+D',
-    link: 'Hyperlink <a> Ctrl+K',
-    image: 'Image <img> Ctrl+G',
+    ol: 'Numbered List Ctrl+O',
+    ul: 'Bulleted List Ctrl+U',
+    heading: 'Heading Ctrl+D',
+    link: 'Hyperlink Ctrl+K',
+    image: 'Image Ctrl+G',
     attachment: 'Attachment Ctrl+Shift+K',
     markdown: 'Markdown Mode Ctrl+M',
     html: 'HTML Mode Ctrl+H',
     wysiwyg: 'Preview Mode Ctrl+P'
   },
   buttons: {
-    bold: 'B',
-    italic: 'I',
-    quote: '\u201c',
+    normal: 'ce-cmd-p glyphicon glyphicon-font',
+    bold: 'ce-cmd-bold glyphicon glyphicon-bold',
+    italic: 'ce-cmd-italic glyphicon glyphicon-italic',
+    quote: 'ce-cmd-comment glyphicon glyphicon-comment',
     code: '</>',
-    ol: '1.',
-    ul: '\u29BF',
-    heading: 'Tt',
+    ol: 'ce-cmd-ol glyphicon glyphicon-list-alt',
+    ul: 'ce-cmd-ul glyphicon glyphicon-list',
+    heading: 'ce-cmd-h1 glyphicon glyphicon-header',
     link: 'Link',
     image: 'Image',
     attachment: 'Attachment',
@@ -4585,7 +4645,7 @@ var classes = require('./classes');
 var renderers = require('./renderers');
 var prompt = require('./prompts/prompt');
 var closePrompts = require('./prompts/close');
-var modeNames = ['markdown', 'html', 'wysiwyg'];
+var modeNames = [];
 var cache = [];
 var mac = /\bMac OS\b/.test(global.navigator.userAgent);
 var doc = document;
@@ -4636,6 +4696,7 @@ function woofmark (textarea, options) {
   if (o.classes.wysiwyg === void 0) { o.classes.wysiwyg = []; }
   if (o.classes.prompts === void 0) { o.classes.prompts = {}; }
   if (o.classes.input === void 0) { o.classes.input = {}; }
+  if (o.showModes === void 0) { o.showModes = modeNames; }
 
   var preference = o.storage && ls.get(o.storage);
   if (preference) {
@@ -4878,7 +4939,7 @@ function woofmark (textarea, options) {
       fn = combo;
       combo = null;
     }
-    var button = tag({ t: 'button', c: 'wk-command', p: commands });
+    var button = tag({ t: 'button', c: 'wk-command '+strings.buttons[id]+' custom-editor-cmd-'+id, p: commands });
     var custom = o.render.commands;
     var render = typeof custom === 'function' ? custom : renderers.commands;
     var title = strings.titles[id];

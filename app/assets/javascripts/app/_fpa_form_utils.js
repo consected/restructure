@@ -1291,16 +1291,19 @@ _fpa.form_utils = {
           });
 
           ed.setMode('wysiwyg');
-          console.log('autoparse')
+
           var autoparse = function() {
             if(ed && edta) {
               var txt = ed.value();
-              edta.value = txt;
+
+              var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
+
+              edta.value = cleantext;
               // edta.innerHTML = txt;
               var res = true;
               window.setTimeout(function(){
                 autoparse();
-              }, 200);
+              }, 500);
             }
             return res;
           };

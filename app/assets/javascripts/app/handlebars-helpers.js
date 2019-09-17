@@ -504,6 +504,10 @@
       return num.toFixed(1);
     });
 
+    Handlebars.registerHelper('markdown_html', function(obj) {
+     return megamark(obj);
+    });
+
     Handlebars.registerHelper('pretty_print', function(obj) {
      return JSON.stringify(obj, null, 2);
     });
