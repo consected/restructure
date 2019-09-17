@@ -1276,6 +1276,48 @@ _fpa.form_utils = {
 
     },
 
+    setup_textarea_editor: function(block) {
+
+      block.find('textarea.edit-as-custom').not('.edit-as-custom-setup').each(function(){
+        if($(this).hasClass('edit-as-markdown')) {
+          var edta = $(this)[0];
+          var ed = woofmark(edta, {
+            parseMarkdown: megamark,
+            parseHTML: domador,
+            html: false,
+            images: null,
+            attachments: null,
+            defaultMode: 'markdown'
+          });
+
+          ed.setMode('wysiwyg');
+          console.log('autoparse')
+          var autoparse = function() {
+            if(ed && edta) {
+              var txt = ed.value();
+              edta.value = txt;
+              // edta.innerHTML = txt;
+              var res = true;
+              window.setTimeout(function(){
+                autoparse();
+              }, 200);
+            }
+            return res;
+          };
+          window.setTimeout(function(){
+            autoparse();
+          }, 200);
+        }
+      }).addClass('edit-as-custom-setup');
+
+      // setTimeout(function(){
+      //   var notes = block.find('.notes-block .list-group-item strong, .notes-block  .panel-body, .al-shrinkable > ul.list-group')
+      //   _fpa.utils.make_readable_notes_expandable(notes, 100, _fpa.form_utils.resize_children);
+      //
+      // }, 10);
+
+    },
+
     setup_filestore: function(block) {
 
       block.find('.browse-container').not('.nfs-store-setup').each(function() {
@@ -1505,6 +1547,7 @@ _fpa.form_utils = {
         _fpa.form_utils.setup_datepickers(block);
         _fpa.form_utils.mask_inputs(block);
         _fpa.form_utils.setup_textarea_autogrow(block);
+        _fpa.form_utils.setup_textarea_editor(block);
         _fpa.form_utils.setup_contact_field_mask(block);
         _fpa.form_utils.setup_filestore(block);
         _fpa.form_utils.setup_e_signature(block);
