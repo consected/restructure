@@ -1,3 +1,16 @@
+@keyframes button-working {
+    100% {background: rgba(218,218,218, 0.25);}
+    50% {background: rgba(218,218,218, 0.75);}
+    0% {background: rgba(218,218,218, 0.45);}
+}
+
+
+input[type="submit"], button {
+  &.ajax-clicked-running {
+    animation: button-working 1s ease-in-out infinite;
+  }
+}
+
 .form-control {
     padding-left: 4px;
     padding-right: 4px;
@@ -435,37 +448,43 @@ fieldset.readonly-edit-fieldset
 }
 
 
-.wk-wysiwyg, .custom-editor-viewer {
+.custom-editor, .custom-editor-viewer {
+
+  div {
+    margin: 0 0 10px;
+  }
 
   ol {
-    list-style-type: none;
+    list-style-type: decimal;
+    padding-inline-end: 40px;
+    margin-bottom: 10px;
+  }
+
+  ul {
+    list-style-type: disc;
     padding-inline-end: 40px;
     margin-bottom: 10px;
   }
 
   h1 {
-    font-size: 20px;
+    font-size: 22px;
     margin-top: 10px;
-    font-weight: bold;
   }
+
   h2 {
-    margin-top: 8px;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  h3 {
     margin-top: 6px;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 18px;
   }
-  h4 {
-    margin-top: 4px;
+
+  blockquote {
+    padding: 0 0 10px 25px;
+    margin: 0 0 20px;
     font-size: 14px;
-    font-weight: bold;
+    border-left: none;
   }
 }
 
-.wk-wysiwyg {
+.custom-editor {
 
   border: 1px solid rgb(192, 192, 192);
   padding: 5px 5px 10px 5px;

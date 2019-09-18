@@ -15,14 +15,21 @@ _fpa = {
   },
   ajax_working: function(block){
     try {
-      $(block).addClass('ajax-running').removeClass('ajax-canceled');
+      var $block = $(block);
+      $block.addClass('ajax-running').removeClass('ajax-canceled');
+      var bclicked = $block.data('button_clicked');
+      if (bclicked) bclicked.addClass('ajax-clicked-running');
       var d = _fpa.result_target(block);
       if (d) $(d).addClass('ajax-running');
     } catch(err) {}
   },
   ajax_done: function(block){
     try {
-      $(block).removeClass('ajax-running').removeClass('ajax-canceled');
+      var $block = $(block);
+      $block.removeClass('ajax-running').removeClass('ajax-canceled');
+      var bclicked = $block.data('button_clicked');
+      if (bclicked) bclicked.removeClass('ajax-clicked-running').blur();
+      $block.data('button_clicked', null);
       var d = _fpa.result_target(block);
       if (d) $(d).removeClass('ajax-running').removeClass('ajax-canceled');
     } catch(err) {}
@@ -31,7 +38,11 @@ _fpa = {
   },
   ajax_canceled: function(block){
     try {
-      $(block).removeClass('ajax-running').addClass('ajax-canceled');
+      var $block = $(block);
+      $block.removeClass('ajax-running').addClass('ajax-canceled');
+      var bclicked = $block.data('button_clicked');
+      if (bclicked) bclicked.removeClass('ajax-clicked-running').blur();
+      $block.data('button_clicked', null);
       var d = _fpa.result_target(block);
       if (d) $(d).removeClass('ajax-running').addClass('ajax-canceled');
     } catch(err) {}
@@ -264,6 +275,8 @@ _fpa = {
   // Handle AJAX calls made through Rails data-remote="true" functionality
   handle_remotes: function(){
 
+    if (_fpa.state.remotes_setup) return;
+    console.log('Handling remotes');
     var sel = "form[data-remote='true'], a, btn";
 
     $(document).on('click', sel,  function(ev){
@@ -283,6 +296,14 @@ _fpa = {
         _fpa.remote_request = null;
         _fpa.remote_request_block = block;
 
+        var bclicked = block.find('input[type="submit"], button');
+
+        if(bclicked.is(':focus')) {
+          block.data('button_clicked', bclicked);
+        }
+        else {
+          block.data('button_clicked', null);
+        }
         // console.log((new Date()).toLocaleString() +' event requested by:');
         // console.log(block);
 
@@ -732,6 +753,8 @@ _fpa = {
 
         $('.ajax-running').removeClass('ajax-running');
     }).addClass('attached');
+
+    _fpa.state.remotes_setup = true;
 
   },
 

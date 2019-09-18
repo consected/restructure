@@ -47,9 +47,23 @@
     {{#if label}}
     <small class="notes-block-label">{{label}}</small>
     {{/if}}
-    <div class="notes-text">
-    {{pretty_string value return_string="true"}}
+    {{#is (get template_config 'field_options' key 'format') 'markdown'}}
+    <div class="custom-editor-viewer">
+      <div class="notes-text">
+        {{{markdown_html value}}}
+      </div>
     </div>
+    {{else is (fpa_state_item 'app_configs' 'notes_field_format') 'markdown'}}
+    <div class="custom-editor-viewer">
+      <div class="notes-text">
+        {{{markdown_html value}}}
+      </div>
+    </div>
+    {{else}}
+      <div class="notes-text">
+        {{pretty_string value return_string="true"}}
+      </div>
+    {{/is}}
   </li>
 </script>
 

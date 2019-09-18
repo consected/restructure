@@ -16,17 +16,17 @@
   {{/if}}
   {{/is}}
   {{#is key "notes"}}
-  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config}}
   {{else is key "description"}}
-  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config}}
   {{else is key "message"}}
-  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) template_config=template_config }}
   {{else is key 'includes' "_notes"}}
-  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) template_config=template_config }}
   {{else is key 'includes' "_description"}}
-  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) template_config=template_config }}
   {{else is key 'includes' "_details"}}
-  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) }}
+  {{> search_results_notes_block key=key value=this_value full_name_hyphenated=(hyphenate full_name) label=(humanize key) template_config=template_config }}
 
 
 

@@ -1278,28 +1278,23 @@ _fpa.form_utils = {
 
     setup_textarea_editor: function(block) {
 
-      block.find('textarea.edit-as-custom').not('.edit-as-custom-setup').each(function(){
+      block.find('.custom-editor-container').not('.edit-as-custom-setup').each(function(){
         if($(this).hasClass('edit-as-markdown')) {
-          var edta = $(this)[0];
-          var ed = woofmark(edta, {
-            parseMarkdown: megamark,
-            parseHTML: domador,
-            html: false,
-            images: null,
-            attachments: null,
-            defaultMode: 'markdown'
-          });
-
-          ed.setMode('wysiwyg');
+          var $edta = $(this).find('textarea.text-notes');
+          var $eddiv = $(this).find('div.custom-editor');
+          // var edid = $eddivgen.attr('id');
+          // var $eddiv = $('#' + edid);
+          var editor = $eddiv.wysiwyg({dragAndDropImages: false});
 
           var autoparse = function() {
-            if(ed && edta) {
-              var txt = ed.value();
+            if($eddiv.length && $edta.length) {
+              var html = editor.cleanHtml();
+              var txt = domador(html);
 
               var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
 
-              edta.value = cleantext;
-              // edta.innerHTML = txt;
+              $edta.val(cleantext);
+
               var res = true;
               window.setTimeout(function(){
                 autoparse();
@@ -1309,7 +1304,7 @@ _fpa.form_utils = {
           };
           window.setTimeout(function(){
             autoparse();
-          }, 200);
+          }, 500);
         }
       }).addClass('edit-as-custom-setup');
 

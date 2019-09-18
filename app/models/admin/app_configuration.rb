@@ -24,7 +24,7 @@ class Admin::AppConfiguration < Admin::AdminBase
       "hide player tabs", "hide pro info", "hide search form advanced", "hide search form searchable reports",
       "hide search form simple", "hide tracker panel", "heading create master record label", "filestore directory id",
       "master header prefix", "menu create master record label",
-      "menu research label", "notes field caption", "open panels", "show activity log panel", "show ids in master result", "user session timeout"
+      "menu research label", "notes field caption", "notes field format", "open panels", "show activity log panel", "show ids in master result", "user session timeout"
     ]
   end
 
@@ -46,6 +46,16 @@ class Admin::AppConfiguration < Admin::AdminBase
     res = value_for(name, user)
     res = '' if res.blank?
     res.split(',').map {|i| i.strip.send(to)}
+  end
+
+  def self.all_for user=nil
+    names = active.pluck(:name)
+    results = {}
+    names.each do |name|
+      name_sym = name.id_underscore.to_sym
+      results[name_sym] = value_for(name, user)
+    end
+    results
   end
 
   def self.sym_to_name config_name

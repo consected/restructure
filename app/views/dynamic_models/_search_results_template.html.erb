@@ -39,6 +39,7 @@
       show_if: m.default_options.show_if,
       data_sort: data_sort,
       category: m.category,
-      view_options: m.default_options.view_options
+      view_options: m.default_options.view_options,
+      extra_options_config: m.default_options
     } if current_user.has_access_to?(:access, :table, full_name.pluralize) %>
 <% end %>

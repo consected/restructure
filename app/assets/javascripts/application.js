@@ -23,7 +23,8 @@
 //= require app/nfs_store/application
 //= require app/secure_view/secure_view
 //= require app/jquery-mask/jquery-mask
-//= require app/woofmark/woofmark
+//= require app/bootstrap-wysiwyg/bootstrap-wysiwyg
+//= require app/bootstrap-wysiwyg/jquery-hotkeys
 //= require app/woofmark/megamark
 //= require app/woofmark/domador
 //= require fullcalendar/core/main

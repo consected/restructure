@@ -5,20 +5,21 @@
   _fpa.current_locale = 'en';
 
   _fpa.layout = {item_blocks: <%= layout_item_block_sizes.to_json.html_safe %> };
-
+  <% if current_user %>
+  _fpa.state.app_configs = <%= Admin::AppConfiguration.all_for(current_user).to_json.html_safe %>;
+  <% end %>
   _fpa.loaded.preload();
 
 <% #
   if current_user || current_admin %>
+  _fpa.handle_remotes();
 
   var one_time_setup = function () {
     if (_fpa.status.one_time_setup_run || !_fpa.status.loaded_templates || !_fpa.status.html_ready) return;
-
     _fpa.status.one_time_setup_run = true;
     _fpa.compile_templates();
     _fpa.reset_page_size();
 
-    _fpa.handle_remotes();
     _fpa.loaded.default();
   }
 
