@@ -1,12 +1,20 @@
 class Admin::AppTypesController < AdminController
 
+  ValidFormats = %w(json yaml)
   after_action :routes_reload, only: [:upload]
 
   def upload
     uploaded_io = params[:config]
 
+    f = params[:upload_format]
+    if f.present?
+      raise FphsException.new "Invalid upload format. Allowed formats: #{ValidFormats}" unless f.in? ValidFormats
+    else
+      f = 'json'
+    end
+
     begin
-      _, results = Admin::AppType.import_config(uploaded_io.read, current_admin)
+      _, results = Admin::AppType.import_config(uploaded_io.read, current_admin, format: f.to_sym)
     rescue => e
       @message = 'FAILED'
       @primary = "#{e}\n#{e.backtrace.join("\n")}"
@@ -15,7 +23,11 @@ class Admin::AppTypesController < AdminController
     end
 
     @message = "SUCCESS"
-    @primary = JSON.pretty_generate results
+    if f == 'json'
+      @primary = JSON.pretty_generate results
+    elsif f == 'yaml'
+      @primary = YAML.dump results
+    end
 
     render 'upload_results'
 
@@ -23,7 +35,14 @@ class Admin::AppTypesController < AdminController
 
   def show
     app_type = Admin::AppType.find(params[:id])
-    send_data app_type.export_config, filename: "#{app_type.name}_config.json"
+    f = params[:export_format]
+    if f.present?
+      raise FphsException.new "Invalid export format. Allowed formats: #{ValidFormats}" unless f.in? ValidFormats
+    else
+      f = 'json'
+    end
+
+    send_data app_type.export_config(format: f.to_sym), filename: "#{app_type.name}_config.#{f}"
 
   end
 
