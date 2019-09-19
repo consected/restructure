@@ -8,7 +8,17 @@ module CalcActions
     SelectionTypes = :all, :any, :not_all, :not_any
     BoolTypeString = '__!BOOL__'.freeze
     ValidExtraConditions = ['<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
-    ValidExtraConditionsArrays = ['= ANY', '<> ANY', '= ARRAY_LENGTH', '<> ARRAY_LENGTH', '= LENGTH', '<> LENGTH'].freeze
+    ValidExtraConditionsArrays = [
+      '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
+      '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
+      '= ARRAY_LENGTH', # The value of this field (must be integer) equals the length of the retrieved array field
+      '<> ARRAY_LENGTH', # The value of this field (must be integer) must not equal the length of the retrieved array field
+      '= LENGTH', # The value of this field (must be integer) equals the length of the string (varchar or text) field
+      '<> LENGTH', # The value of this field (must be integer) must not equal the length of the string (varchar or text) field
+      '&&', # Any value of this field (an array) must be in the retrieved array field
+      '@>', # This array field contains all of the elements of the retrieved array field
+      '<@' # This array field's elements are all found in the retrieved array field
+    ].freeze
     attr_accessor :condition_scope, :this_val
   end
 
@@ -478,9 +488,21 @@ module CalcActions
                   vc = ValidExtraConditionsArrays.find {|c| c == val[:condition]}
                   vv = dynamic_value(val[:value])
 
+                  negate = (val[:not] ? 'NOT' : '')
+
+                  leftop = '?'
+                  if vc == '&&'
+                    leftop = "ARRAY[?]"
+                    if vv.first.is_a? String
+                      leftop += "::varchar[]"
+                    end
+                  end
+
+
+
                   veca_extra_args = ', 1' if vc.include?('ARRAY_LENGTH')
 
-                  @extra_conditions[0] += "? #{vc} (#{table_name}.#{field_name}#{veca_extra_args})"
+                  @extra_conditions[0] += "#{negate} (#{leftop} #{vc} (#{table_name}.#{field_name}#{veca_extra_args}))"
                   @extra_conditions << vv
               else
                 if val.in?(['return_value', 'return_value_list', 'return_result']) || val.is_a?(Array) && val.include?('return_value')
@@ -520,7 +542,7 @@ module CalcActions
 
     # Create a dynamic value if the condition's value matches certain strings
     def dynamic_value val, type=nil
-      FieldDefaults.calculate_default(self, val, type)
+      FieldDefaults.calculate_default(current_instance, val, type)
     end
 
     # Calculate the sub conditions for this level if it contains any of the selection types

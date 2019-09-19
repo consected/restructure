@@ -24,6 +24,10 @@ module FieldDefaults
         res = obj.current_user.id
       elsif default == 'current_user_email'
         res = obj.current_user.email
+      elsif default == 'current_user_roles'
+        res = obj.current_user.user_roles.active.pluck(:id)
+      elsif default == 'current_user_role_names'
+        res = obj.current_user.user_roles.active.pluck(:role_name)
       end
     elsif default.is_a? Hash
       ca = ConditionalActions.new default, obj
