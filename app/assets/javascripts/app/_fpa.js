@@ -708,6 +708,8 @@ _fpa = {
         _fpa.clear_flash_notices();
         _fpa.ajax_done(block);
 
+        $('.ajax-clicked-running').removeClass('ajax-clicked-running').blur();
+
         var format_message = function(j){
             var msg = '';
             var msgar = [];
