@@ -43,22 +43,22 @@ module DynamicModelDefHandler
     def active_model_configurations
 
       olat = Admin::AppType.active_app_types
-      #
-      dma = []
-      olat.each do |app_type|
-        # Compare against string class names, to avoid autoload errors
-        if self.name == 'ActivityLog'
-          dma += app_type.associated_activity_logs
-        elsif self.name == 'DynamicModel'
-          dma += app_type.associated_dynamic_models
-        elsif self.name == 'ExternalIdentifier'
-          dma += app_type.associated_external_identifiers
+
+      if olat && olat.length > 0
+        dma = []
+        olat.each do |app_type|
+          # Compare against string class names, to avoid autoload errors
+          if self.name == 'ActivityLog'
+            dma += app_type.associated_activity_logs
+          elsif self.name == 'DynamicModel'
+            dma += app_type.associated_dynamic_models
+          elsif self.name == 'ExternalIdentifier'
+            dma += app_type.associated_external_identifiers
+          end
         end
+      else
+        dma = self.active
       end
-      #
-      # else
-      # dma = self.active
-      # end
       dma
     end
 

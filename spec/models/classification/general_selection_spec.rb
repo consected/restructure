@@ -57,7 +57,7 @@ EOF
     al.current_admin = @admin
     al.save!
 
-    dm = DynamicModel.active.first.implementation_class
+    dm = DynamicModel.active_model_configurations.first.implementation_class
 
     config1 = Classification::GeneralSelection.selector_with_config_overrides item_type: dm.new.item_type
     expect(config0.length).not_to eq config1.length

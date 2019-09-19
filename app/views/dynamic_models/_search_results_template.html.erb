@@ -1,4 +1,4 @@
-<% DynamicModel.active.each do |m|
+<% DynamicModel.active_model_configurations.each do |m|
   l = []
   full_name = "dynamic_model__#{m.model_def_name.to_s}"
   field_list = m.field_list
