@@ -40,11 +40,34 @@ module DynamicModelDefHandler
       nil
     end
 
+    def active_model_configurations
+
+      olat = Admin::AppType.active_app_types
+      #
+      dma = []
+      olat.each do |app_type|
+        # Compare against string class names, to avoid autoload errors
+        if self.name == 'ActivityLog'
+          dma += app_type.associated_activity_logs
+        elsif self.name == 'DynamicModel'
+          dma += app_type.associated_dynamic_models
+        elsif self.name == 'ExternalIdentifier'
+          dma += app_type.associated_external_identifiers
+        end
+      end
+      #
+      # else
+      # dma = self.active
+      # end
+      dma
+    end
+
     def define_models
       self.preload
 
       begin
-        dma = self.active
+
+        dma = active_model_configurations
 
         logger.info "Generating models #{self.name} #{self.active.length}"
 
@@ -73,7 +96,7 @@ module DynamicModelDefHandler
       # to ensure that the db migrations can run, check for the existence of the admin table
       # before attempting to use it. Otherwise Rake tasks fail.
       if ActiveRecord::Base.connection.table_exists? self.table_name
-        self.active.each do |dm|
+        active_model_configurations.each do |dm|
           dm.add_master_association if dm.ready?
         end
       else

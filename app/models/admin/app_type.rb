@@ -20,6 +20,15 @@ class Admin::AppType < Admin::AdminBase
     name
   end
 
+  def self.active_app_types
+    olat = Settings::OnlyLoadAppTypes
+    if olat
+      app_type = Admin::AppType.find(olat)
+    else
+      active
+    end
+  end
+
   def self.all_available_to user
     atavail = []
 
@@ -50,13 +59,17 @@ class Admin::AppType < Admin::AdminBase
     user
   end
 
-  def self.import_config config_json, admin, name: nil, force_disable: false
+  def self.import_config config_json, admin, name: nil, force_disable: false, format: :json
 
-    config = JSON.parse(config_json)
+    if format == :json
+      config = JSON.parse(config_json)
+    elsif format == :yaml
+      config = YAML.load(config_json)
+    end
 
 
     app_type_config = config['app_type']
-    raise FphsException.new "Incorrect format for configuration JSON" unless app_type_config
+    raise FphsException.new "Incorrect format for configuration format #{format}" unless app_type_config
 
     Admin::AppType.transaction do
       a_conf = app_type_config.slice('name', 'label')
@@ -327,8 +340,12 @@ class Admin::AppType < Admin::AdminBase
 
   end
 
-  def export_config
-    JSON.pretty_generate(JSON.parse self.to_json)
+  def export_config format: :json
+    if format == :json
+      JSON.pretty_generate(JSON.parse self.to_json)
+    elsif format == :yaml
+      YAML.dump(JSON.parse self.to_json)
+    end
   end
 
   def as_json options={}

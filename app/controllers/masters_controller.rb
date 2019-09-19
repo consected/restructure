@@ -65,7 +65,9 @@ class MastersController < UserBaseController
     @master.player_contacts.build
     @master.trackers.build
     @master.tracker_histories.build
-    @master.scantrons.build
+    if defined? Scantron
+      @master.scantrons.build
+    end
     #@master.sage_assignments.build
 
     # NOT conditions

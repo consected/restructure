@@ -42,4 +42,12 @@ class Settings
 
   SearchResultsLimit = ENV['FPHS_RESULT_LIMIT']
 
+  olat = ENV['FPHS_LOAD_APP_TYPES']
+  if olat.blank?
+    olat = nil
+  else
+    olat = olat.split(',').map(&:strip).map(&:to_i)
+  end
+  OnlyLoadAppTypes = olat
+
 end

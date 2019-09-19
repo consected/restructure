@@ -52,7 +52,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
   # the list of defined activity log implementation classes
   def self.implementation_classes
-    @implementation_classes = ExternalIdentifier.active.map{|a| "#{a.model_class_name.classify}".constantize }
+    @implementation_classes = active_model_configurations.map{|a| "#{a.model_class_name.classify}".constantize }
   end
 
 
@@ -60,7 +60,7 @@ class ExternalIdentifier < ActiveRecord::Base
 
     mn = nil
     begin
-      m = self.active
+      m = active_model_configurations
       return if m.length == 0
       Rails.application.routes.draw do
         resources :masters, only: [:show, :index, :new, :create] do

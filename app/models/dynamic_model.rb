@@ -34,7 +34,7 @@ class DynamicModel < ActiveRecord::Base
 
   # the list of defined activity log implementation classes
   def self.implementation_classes
-    @implementation_classes = DynamicModel.active.map{|a| "DynamicModel::#{a.model_class_name.classify}".constantize }
+    @implementation_classes = active_model_configurations.map{|a| "DynamicModel::#{a.model_class_name.classify}".constantize }
   end
 
 
@@ -362,8 +362,9 @@ class DynamicModel < ActiveRecord::Base
 
   def self.routes_load
 
+    m = active_model_configurations
     Rails.application.routes.draw do
-      DynamicModel.active.each do |dm|
+      m.each do |dm|
 
         pg_name = dm.implementation_model_name.pluralize.to_sym
         if dm.foreign_key_name.present?

@@ -68,7 +68,7 @@ class ActivityLog < ActiveRecord::Base
   # @return [Array] array of string names
   def self.extra_log_type_resource_names &block
     res = []
-    active.each do |a|
+    active_model_configurations.each do |a|
       if block_given?
         elts = a.extra_log_type_configs.select(&block)
       else
@@ -211,7 +211,7 @@ class ActivityLog < ActiveRecord::Base
 
   # the list of defined activity log implementation classes
   def self.implementation_classes
-    @implementation_classes = ActivityLog.enabled.map{|a| "ActivityLog::#{a.item_type_name.classify}".constantize }
+    @implementation_classes = active_model_configurations.map{|a| "ActivityLog::#{a.item_type_name.classify}".constantize }
   end
 
 
