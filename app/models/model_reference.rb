@@ -2,9 +2,10 @@ class ModelReference < ActiveRecord::Base
 
   belongs_to :user
 
-  validates :from_record_id, presence: true
   validates :from_record_master_id, presence: true
-  validates :from_record_type, presence: true
+  # Validations on from_record can not be enforced, since we want to allow reference from master only
+  # validates :from_record_id, presence: true
+  # validates :from_record_type, presence: true
   validates :to_record_id, presence: true
   validates :to_record_type, presence: true
   validates :to_record_master_id, presence: true, unless: ->{ to_record_class.no_master_association || self.disabled }
@@ -21,6 +22,7 @@ class ModelReference < ActiveRecord::Base
     {id: :asc}
   end
 
+  # Create an item referenced from a specific from_item
   # TODO consider if there is a significant race condition that we should be concerned about
   def self.create_with from_item, to_item
 
@@ -34,9 +36,7 @@ class ModelReference < ActiveRecord::Base
     end
   end
 
-  # Is this actually usable???
-  # Currently the validations don't allow a save without a from record, even though we are forcing this
-  # directly against the database for IpaAdlInformantScreener
+  # Create a reference from a master only, not an individual item.
   def self.create_from_master_with from_master, to_item
     ModelReference.create! from_record_type: nil, from_record_id: nil, from_record_master_id: from_master.id,
                           to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
