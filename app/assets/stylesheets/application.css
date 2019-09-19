@@ -18,7 +18,6 @@
  *= require chart.min
  *= require app/nfs_store/application
  *= require app/secure_view/secure_view
- *= require app/woofmark/woofmark
  *= require fullcalendar/core/main
  *= require fullcalendar/daygrid/main
  *= require fullcalendar/timegrid/main
