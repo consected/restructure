@@ -1,6 +1,6 @@
 module NfsStore
   module Dicom
-    class MetadataHandler < ApplicationJob
+    class MetadataHandler
 
       attr_accessor :file_path
 

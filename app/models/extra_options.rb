@@ -134,7 +134,12 @@ class ExtraOptions
       },
       any: {
         model_table_name: {
-          field_name: 'any conditional value must be true'
+          field_name: 'any conditional value must be true',
+          field_name_2: {
+            condition: " one of #{(ConditionalActions::ValidExtraConditions + ConditionalActions::ValidExtraConditionsArrays).join(', ')}",
+            not: "true|false (optional, default false) negate the result",
+            value: "any value, with defaults or substitutions, or a hash reference to another table field"
+          }
         },
         'all|any|not_all|not_any': {
           'nested conditions...': {}
@@ -349,6 +354,7 @@ class ExtraOptions
 
   def calc_showable_if obj
     ca = ConditionalActions.new self.showable_if, obj
+    byebug if obj.id == 49
     ca.calc_action_if
   end
 

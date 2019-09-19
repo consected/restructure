@@ -624,7 +624,7 @@ strong {
     min-height: 52px;
     border-radius: 0;
   }
-  &.notes-empty > .notes-text:before {
+  &.notes-empty  .notes-text:before {
     content: 'no notes entered';
     color: #999;
   }

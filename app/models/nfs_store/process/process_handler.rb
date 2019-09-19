@@ -3,16 +3,27 @@ module NfsStore
   module Process
     class ProcessHandler
 
-      attr_accessor :container_file
+      attr_accessor :container_file, :parent_item
 
       def initialize container_file
         self.container_file = container_file
+        # Save the parent_item activity log so we can use it to pick up additional configurations
+        self.parent_item = container_file.container&.parent_item
+      end
+
+      def pipeline_config
+        self.parent_item && self.parent_item.extra_log_type_config.nfs_store && self.parent_item.extra_log_type_config.nfs_store[:pipeline]
+      end
+
+      def pipeline_job_list
+        pipeline_config.map {|p| p.first.first}
       end
 
       # List of valid processing jobs.
       # Can be extended to dynamically select jobs based on container configuration
       # in the future
       def job_list
+        return pipeline_job_list if pipeline_config
         %w(mount_archive index_files dicom_metadata)
       end
 

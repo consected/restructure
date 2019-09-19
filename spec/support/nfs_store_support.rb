@@ -82,6 +82,50 @@ module NfsStoreSupport
             show: filestore
             new: not_embedded
 
+      nfs_store:
+        pipeline:
+          - mount_archive:
+          - index_files:
+          - dicom_metadata:
+          - dicom_deidentify:
+              - modify-all:
+                  (0010,0010): new value
+              - modify-all:
+                  (0010,0020): another tagval
+
+    step_2:
+      label: Step 2
+      fields:
+        - select_call_direction
+        - select_who
+
+      save_trigger:
+        on_create:
+          create_filestore_container:
+            name:
+              - session files
+              - select_scanner
+            label: Session Files
+            create_with_role: nfs_store group 600
+
+        on_upload:
+          notify:
+            type: email
+            role: upload notify role
+            layout_template: test email layout upload
+            content_template: test email content upload
+            subject: Send test
+
+      references:
+        nfs_store__manage__container:
+          label: Files
+          from: this
+          add: one_to_this
+          view_as:
+            edit: hide
+            show: filestore
+            new: not_embedded
+
 EOF
 
     aldef.current_admin = @admin

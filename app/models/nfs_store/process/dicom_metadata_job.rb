@@ -7,9 +7,7 @@ module NfsStore
 
       # Check whether the job should be enqueued or just skipped
       around_enqueue do |job, block|
-
         container_file = job.arguments.first
-
         if container_file.content_type == 'application/dicom' || container_file.is_archive?
           block.call
         else

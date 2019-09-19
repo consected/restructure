@@ -1276,6 +1276,40 @@ RSpec.describe "Calculate conditional actions", type: :model do
     }.to raise_error(FphsException)
 
 
+    # Right to Left conditions
+    expect(@al.select_who.length).to be > 0
+
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          select_who: {
+            condition: "= LENGTH",
+            value: "#{@al.select_who.length}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    # Right to Left conditions
+    conf = {
+      all: {
+        activity_log__player_contact_phones: {
+          id: @al.id,
+          select_who: {
+            condition: "= LENGTH",
+            value: "#{@al.select_who.length + 1}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
   end
 
   it "returns the last value from a condition as this_val attribute" do

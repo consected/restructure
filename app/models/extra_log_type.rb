@@ -9,7 +9,7 @@ class ExtraLogType < ExtraOptions
 
 
   def self.add_key_attributes
-    [:references, :label, :save_trigger, :e_sign]
+    [:references, :label, :save_trigger, :e_sign, :nfs_store]
   end
 
   attr_accessor(*self.key_attributes)
@@ -69,7 +69,8 @@ class ExtraLogType < ExtraOptions
         document_reference: SaveTriggers::CreateReference.config_def(if_extras: "ref: ** conditions reference **"),
         title: 'title to appear at top of prepared document',
         intro: 'text to appear at top of prepared document'
-      }
+      },
+      nfs_store: NfsStore::Config::ExtraOptions.config_def
 
     }
     res.merge(super)
