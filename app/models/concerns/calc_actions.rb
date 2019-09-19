@@ -79,7 +79,8 @@ module CalcActions
             res_q = true
             # equivalent of (cond1 AND cond2 AND cond3 ...)
             # These conditions are easy to handle as a standard query
-            unless @condition_values.empty? && @extra_conditions.empty?
+            # @this_val_where check allows a return_value definition to be used alone without other conditions
+            unless @condition_values.empty? && @extra_conditions.empty? && !@this_val_where
               calc_query @condition_values, @extra_conditions
               res_q = calc_query_conditions
               merge_failures({condition_type => @condition_config}) if !res_q
