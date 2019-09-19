@@ -447,7 +447,7 @@ module HandlesUserBase
         end
       end
 
-      ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(e_signed_document)?#{ea}/
+      ignore = /(item_type)?(notes)?(description)?(message)?(.+_notes)?(.+_description)?(.+_details)?(e_signed_document)?#{ea}/
 
       self.attributes.select {|k,v| k.to_sym.in? self.class.permitted_params }.reject {|k,v| k && k.match(ignore)[0].present?}.each do |k, v|
 
