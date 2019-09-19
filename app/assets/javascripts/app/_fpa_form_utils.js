@@ -1282,25 +1282,33 @@ _fpa.form_utils = {
         if($(this).hasClass('edit-as-markdown')) {
           var $edta = $(this).find('textarea.text-notes');
           var $eddiv = $(this).find('div.custom-editor');
-          // var edid = $eddivgen.attr('id');
-          // var $eddiv = $('#' + edid);
+          var edid = $eddiv.attr('id');
+          var $edtools = $(this).find('.btn-toolbar[data-target="#' + edid + '"]');
           var editor = $eddiv.wysiwyg({dragAndDropImages: false});
+
+          $edtools.hide();
+          $eddiv.on('focus', function() {
+            $('.custom-editor-container .btn-toolbar').hide();
+            $edtools.show();
+          }).on('change', function() {
+            $eddiv.data('editor-changed', true);
+          });
 
           var autoparse = function() {
             if($eddiv.length && $edta.length) {
-              var html = editor.cleanHtml();
-              var txt = domador(html);
+              if ($eddiv.data('editor-changed')) {
+                // Only if there has been a change
+                $eddiv.data('editor-changed', null);
+                var html = editor.cleanHtml();
+                var txt = domador(html);
+                var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
+                $edta.val(cleantext);
+              }
 
-              var cleantext = txt.replace(/(^|\n)(#|\*)+ *\n/g, '');
-
-              $edta.val(cleantext);
-
-              var res = true;
               window.setTimeout(function(){
                 autoparse();
               }, 500);
             }
-            return res;
           };
           window.setTimeout(function(){
             autoparse();

@@ -447,6 +447,13 @@ fieldset.readonly-edit-fieldset
   display: none;
 }
 
+.custom-editor-container {
+  a[data-edit] {
+    font-size: 16px;
+    line-height: 18px;
+    height: 30px;
+  }
+}
 
 .custom-editor, .custom-editor-viewer {
 

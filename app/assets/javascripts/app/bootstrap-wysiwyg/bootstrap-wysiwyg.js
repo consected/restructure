@@ -50,7 +50,7 @@
             this.initFileDrops( editor, options, toolbarBtnSelector );
         }
 
-        this.bindToolbar( editor, $( options.toolbarSelector ), options, toolbarBtnSelector );
+        this.bindToolbar( editor, $( options.toolbarSelector + '[data-target="#' + editor.attr('id') + '"]' ), options, toolbarBtnSelector );
 
         editor.attr( "contenteditable", true )
             .on( "mouseup keyup mouseout", function() {

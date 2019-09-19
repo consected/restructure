@@ -102,9 +102,9 @@
         {{>item_flag_container item_type=full_name master_id=result_data.master_id id=result_data.id}}
         {{/if}}
       </li>
-
+      {{#unless template_config.view_options.show_embedded_at_top}}
       {{> common_template_result_fields result_data=result_data name=name template_config=(fpa_state_item 'template_config' (underscore name))}}
-
+      {{/unless}}
       {{#each item_blocks}}
         {{> result_item_block name=../name item_name=@key item_list=this result_data=../result_data}}
       {{/each}}
@@ -114,6 +114,12 @@
     {{#with result_data}}
     {{>(concat 'activity_log_' (underscore ../name) '_references') }}
     {{/with}}
+
+    {{#if item_list.length}}
+      {{#if template_config.view_options.show_embedded_at_top}}
+      {{> common_template_result_fields result_data=result_data name=name template_config=(fpa_state_item 'template_config' (underscore name))}}
+      {{/if}}
+    {{/if}}
 
     {{#with (fpa_state_item 'caption_before' (underscore name) 'metadata')}}
     <div class="results-caption-before {{ hyphenate full_name }}-metadata">
