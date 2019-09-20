@@ -50,4 +50,6 @@ class Settings
   end
   OnlyLoadAppTypes = olat
 
+  TemplateUserEmail = 'template@template'
+
 end

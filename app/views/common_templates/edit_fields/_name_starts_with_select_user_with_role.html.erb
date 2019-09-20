@@ -3,7 +3,7 @@
 
 role_name = field_name.sub('select_user_with_role_', '').gsub('_', ' ')
 
-users = Admin::UserRole.active.where(app_type: current_user.app_type, role_name: role_name).users
+users = Admin::UserRole.active.where(app_type: current_user.app_type, role_name: role_name).users.not_template
 
 reslist = users.all.map{|user| [user.email, user.email]}
 

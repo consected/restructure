@@ -23,7 +23,7 @@ class User < ActiveRecord::Base
   # has_many :user_roles, autosave: true, class_name: "Admin::UserRole"
 
   default_scope -> {order email: :asc}
-
+  scope :not_template, -> {where("email <> ?", Settings::TemplateUserEmail)}
   before_save :set_app_type
   before_save :set_access_levels
 
