@@ -28,6 +28,11 @@ class User < ActiveRecord::Base
   before_save :set_access_levels
 
 
+  def self.template_user
+    where(email: Settings::TemplateUserEmail).first
+  end
+
+
   def self.active_id_name_list filter=nil
     active.map {|u| {id: u.id, value: u.id, name: u.email} }
   end

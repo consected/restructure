@@ -6,6 +6,10 @@ class Admin::UserRolesController < AdminController
     'admin/common_templates'
   end
 
+  def default_index_order
+    {app_type_id: :asc, user_id: :asc, role_name: :asc}
+  end
+
   def filters
     res = {
       app_type_id: Admin::AppType.all_by_name,

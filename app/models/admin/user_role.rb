@@ -10,6 +10,7 @@ class Admin::UserRole < ActiveRecord::Base
   validates :role_name, presence: true
   validates :user_id, uniqueness: {scope: [:app_type_id, :role_name]}
 
+  after_save :save_template
   after_save :invalidate_cache
 
   # Scope used when user.user_roles association is called, effectively forcing the results
@@ -102,6 +103,14 @@ class Admin::UserRole < ActiveRecord::Base
   end
 
   private
+
+    # Automatically add a template@template record if needed
+    def save_template
+      tu = User.template_user
+      tu.app_type = app_type
+      self.class.add_to_role tu, self.app_type, self.role_name, self.current_admin
+    end
+
     def invalidate_cache
       logger.info "User Role added or updated (#{self.class.name}). Invalidating cache."
       # Unfortunately we have no way to clear pattern matched keys with memcached so we just clear the whole cache

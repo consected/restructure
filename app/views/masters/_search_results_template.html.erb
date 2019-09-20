@@ -70,7 +70,7 @@
 
 
 <% # Add in all the external ID handlers (Scantron, Sage, etc)
-    external_id_types = ExternalIdentifier.active.map(&:implementation_class)
+    external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
     viewable_external_ids = external_id_types.select{|e| view?[e.plural_name.to_sym] }.map(&:plural_name)
     external_id_types.each do |e|
 
