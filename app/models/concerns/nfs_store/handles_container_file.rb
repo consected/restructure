@@ -6,13 +6,14 @@ module NfsStore
 
     UnknownMimeTypeText = '(unknown)'.freeze
 
+    # ChunkSize controls the size of upload chunks and the size of MD5 hash chunks
+    ChunkSize = 10_000_000
+    # Large archive files (files in mounted archives) are hard to deal with
+    # We don't attempt to MD5 anything that is too big. This sets the limit
+    MaxSizeForArchiveFileHash = ChunkSize * 5
+
     included do
 
-      # ChunkSize controls the size of upload chunks and the size of MD5 hash chunks
-      ChunkSize = 10_000_000
-      # Large archive files (files in mounted archives) are hard to deal with
-      # We don't attempt to MD5 anything that is too big. This sets the limit
-      MaxSizeForArchiveFileHash = ChunkSize * 5
 
       belongs_to :container, class_name: 'NfsStore::Manage::Container', foreign_key: 'nfs_store_container_id'
 

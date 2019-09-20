@@ -354,7 +354,6 @@ class ExtraOptions
 
   def calc_showable_if obj
     ca = ConditionalActions.new self.showable_if, obj
-    byebug if obj.id == 49
     ca.calc_action_if
   end
 

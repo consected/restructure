@@ -46,16 +46,19 @@ module DynamicModelDefHandler
 
       if olat && olat.length > 0
         dma = []
+        qs = []
         olat.each do |app_type|
           # Compare against string class names, to avoid autoload errors
           if self.name == 'ActivityLog'
-            dma += app_type.associated_activity_logs
+            qs << app_type.associated_activity_logs.reorder('').to_sql
           elsif self.name == 'DynamicModel'
-            dma += app_type.associated_dynamic_models
+            qs << app_type.associated_dynamic_models.reorder('').to_sql
           elsif self.name == 'ExternalIdentifier'
-            dma += app_type.associated_external_identifiers
+            qs << app_type.associated_external_identifiers.reorder('').to_sql
           end
         end
+        unions = qs.join("\nUNION\n")
+        dma = from("(#{unions}) AS #{self.table_name}")
       else
         dma = self.active
       end
