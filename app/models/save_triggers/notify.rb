@@ -69,7 +69,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
         @receiving_user_ids = []
 
         if @role
-          
+
           @role = @role.reject(&:blank?) if @role.is_a? Array
 
           role_name = calc_field_or_return(@role)
@@ -193,7 +193,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
       res = job.perform_later(mn, for_item: @item, on_complete_config: config[:on_complete])
 
-      if @item.respond_to? :background_job_ref
+      if @item.respond_to?(:background_job_ref) && res&.provider_job
         @item.background_job_ref = "#{res.provider_job.class.name.ns_underscore}%#{res.provider_job.id}"
         @item.save
       end
