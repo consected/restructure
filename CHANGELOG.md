@@ -17,6 +17,26 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [7.3.49] - 2019-09-23
+
+- [Added] [IPA] Participant Summary panel, pulling data from phone screen responses
+- [Added] [IPA] Reimbursement request added to IPA Tracker Payments block
+- [Added] [IPA] Automatically update player details with birth date from phone screener
+- [Added] WYSIWYG editor / viewing for notes fields
+- [Added] Much improved styling
+- [Added] Many changes to improve configuration of apps
+- [Added] Allow re-syncing from Zeus to Athena with a new IPA ID
+- [Added] Improved flexibility for email and SMS notifications
+- [Added] [Filestore] Allow file rename, move and improved send-to-trash by authorized users
+- [Fixed] [Filestore] Identify DICOM files based on content, not just filename
+- [Fixed] Many bug fixes
+
+## [7.3.21] - 2019-07-03
+
+- [Added] Dashboards include timeseries charts
+- [Added] [IPA] Phone screen comprehension questions
+
+
 ## [7.3.10] - 2019-06-24
 
 - [Added] [IPA] Changed flow and script of Phone Screener, added specific fields to TMS and updated eligibility call
@@ -25,7 +45,7 @@ The [Unreleased](#[unreleased]) section collects notes for unreleased changes an
 - [Added] [Bulk-SMS] An app configuration (and associated code changes) to allow sending bulk SMS messages to player contacts
 - [Added] Changes to support better modularization of apps and generating baseline components as building blocks for new apps
 - [Fixed] Performance and admin configuration bugs
-- [Fixed] [Filestore] Issue uploading under certain circumstances 
+- [Fixed] [Filestore] Issue uploading under certain circumstances
 
 ## [7.2.28] - 2019-05-21
 

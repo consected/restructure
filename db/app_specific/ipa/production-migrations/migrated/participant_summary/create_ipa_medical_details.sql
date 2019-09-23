@@ -6,7 +6,7 @@ set search_path=ipa_ops, ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create ipa_medical_details convulsion_or_seizure_blank_yes_no_dont_know convulsion_or_seizure_details sleep_disorder_blank_yes_no_dont_know sleep_disorder_details sleep_apnea_device_no_yes sleep_apnea_device_details chronic_pain_blank_yes_no chronic_pain_details chronic_pain_meds_blank_yes_no_dont_know chronic_pain_meds_details hypertension_diagnosis_blank_yes_no_dont_know hypertension_medications_blank_yes_no hypertension_diagnosis_details diabetes_diagnosis_blank_yes_no_dont_know diabetes_medications_blank_yes_no diabetes_diagnosis_details hemophilia_blank_yes_no_dont_know hemophilia_details high_cholesterol_diagnosis_blank_yes_no_dont_know high_cholesterol_medications_blank_yes_no high_cholesterol_diagnosis_details caridiac_pacemaker_blank_yes_no_dont_know caridiac_pacemaker_details other_heart_conditions_blank_yes_no_dont_know other_heart_conditions_details memory_problems_blank_yes_no_dont_know memory_problems_details mental_health_conditions_blank_yes_no_dont_know mental_health_conditions_details mental_health_help_blank_yes_no_dont_know mental_health_help_details neurological_problems_blank_yes_no_dont_know neurological_problems_details past_mri_yes_no_dont_know past_mri_details dietary_restrictions_blank_yes_no_dont_know dietary_restrictions_details
 
-      CREATE FUNCTION log_ipa_medical_detail_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_medical_detail_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -48,6 +48,9 @@ set search_path=ipa_ops, ml_app;
                       neurological_problems_details,
                       past_mri_yes_no_dont_know,
                       past_mri_details,
+                      metal_implants_blank_yes_no_dont_know,
+                      metal_implants_details,
+                      metal_implants_mri_approval_details,
                       dietary_restrictions_blank_yes_no_dont_know,
                       dietary_restrictions_details,
                       user_id,
@@ -92,6 +95,9 @@ set search_path=ipa_ops, ml_app;
                       NEW.neurological_problems_details,
                       NEW.past_mri_yes_no_dont_know,
                       NEW.past_mri_details,
+                      NEW.metal_implants_blank_yes_no_dont_know,
+                      NEW.metal_implants_details,
+                      NEW.metal_implants_mri_approval_details,
                       NEW.dietary_restrictions_blank_yes_no_dont_know,
                       NEW.dietary_restrictions_details,
                       NEW.user_id,
@@ -141,6 +147,9 @@ set search_path=ipa_ops, ml_app;
           neurological_problems_details varchar,
           past_mri_yes_no_dont_know varchar,
           past_mri_details varchar,
+          metal_implants_blank_yes_no_dont_know varchar,
+          metal_implants_details varchar,
+          metal_implants_mri_approval_details varchar,
           dietary_restrictions_blank_yes_no_dont_know varchar,
           dietary_restrictions_details varchar,
           user_id integer,
@@ -196,6 +205,9 @@ set search_path=ipa_ops, ml_app;
           neurological_problems_details varchar,
           past_mri_yes_no_dont_know varchar,
           past_mri_details varchar,
+          metal_implants_blank_yes_no_dont_know varchar,
+          metal_implants_details varchar,
+          metal_implants_mri_approval_details varchar,
           dietary_restrictions_blank_yes_no_dont_know varchar,
           dietary_restrictions_details varchar,
           user_id integer,

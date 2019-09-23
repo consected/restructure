@@ -1,0 +1,431 @@
+---
+app_type:
+  id: 3
+  name: ipa
+  label: IPA
+  disabled:
+  admin_id: 2
+  created_at:
+  updated_at:
+  app_configurations: []
+  user_access_controls:
+  - id: 1335
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__ipa_medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - summary
+    created_at: '2019-09-16T16:56:19.607Z'
+    updated_at: '2019-09-17T09:12:53.580Z'
+    user_email:
+  - id: 1336
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__ipa_medical_details
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - summary
+    created_at: '2019-09-16T16:56:46.245Z'
+    updated_at: '2019-09-17T09:22:37.726Z'
+    user_email:
+  - id: 1337
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__ipa_special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - summary
+    created_at: '2019-09-16T16:57:01.884Z'
+    updated_at: '2019-09-17T09:13:14.176Z'
+    user_email:
+  - id: 1338
+    user_id:
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_summaries
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - summary
+    created_at: '2019-09-17T09:12:13.479Z'
+    updated_at: '2019-09-17T09:12:31.616Z'
+    user_email:
+  - id: 1339
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medical_history
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - summary
+    created_at: '2019-09-17T09:14:16.469Z'
+    updated_at: '2019-09-17T09:14:16.469Z'
+    user_email:
+  - id: 1340
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - summary
+    created_at: '2019-09-17T10:44:02.557Z'
+    updated_at: '2019-09-17T10:44:02.557Z'
+    user_email:
+  - id: 1341
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 3
+    role_name: user - summary
+    created_at: '2019-09-17T10:44:24.376Z'
+    updated_at: '2019-09-17T10:44:24.376Z'
+    user_email:
+  associated_activity_logs:
+  - id: 84
+    name: IPA Summary
+    item_type: ipa_assignment
+    rec_type: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-17T08:51:31.742Z'
+    updated_at: '2019-09-23T09:00:47.676Z'
+    action_when_attribute: created_at
+    field_list: ''
+    blank_log_field_list: ''
+    blank_log_name: ''
+    extra_log_types: "_default:\r\n\r\n  view_options:\r\n    show_embedded_at_top:
+      true\r\n    hide_unless_creatable: true\r\n    \r\n  fields:\r\n    - notes\r\n
+      \ \r\n  caption_before:\r\n    notes: Additional Notes\r\n  \r\n  field_options:\r\n
+      \   notes:\r\n      format: markdown\r\n  \r\n\r\nmedical_history:\r\n  \r\n\r\n
+      \ references:\r\n    dynamic_model__ipa_medical_detail:\r\n      label: Medical
+      History\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n
+      \       new: not_embedded      \r\n        #show: readonly\r\n      prevent_disable:
+      true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
+      \       extra_log_type: medical_history\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     create_reference:\r\n        - dynamic_model__ipa_medical_detail:\r\n
+      \           in: master_with_reference\r\n            with:\r\n              convulsion_or_seizure_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_tms_tests:\r\n                  convulsion_or_seizure_blank_yes_no_dont_know:
+      return_value\r\n              convulsion_or_seizure_details: \r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 convulsion_or_seizure_details: return_value\r\n              sleep_disorder_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_sleeps:\r\n                  sleep_disorder_blank_yes_no_dont_know:
+      return_value\r\n              sleep_disorder_details: \r\n                dynamic_model__ipa_ps_sleeps:\r\n
+      \                 sleep_disorder_details: return_value\r\n              sleep_apnea_device_no_yes:
+      \r\n                dynamic_model__ipa_ps_sleeps:\r\n                  sleep_apnea_device_no_yes:
+      return_value\r\n              sleep_apnea_device_details: \r\n                dynamic_model__ipa_ps_sleeps:\r\n
+      \                 sleep_apnea_device_details: return_value\r\n              chronic_pain_blank_yes_no:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_blank_yes_no:
+      return_value\r\n              chronic_pain_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 chronic_pain_details: return_value\r\n              chronic_pain_meds_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_meds_blank_yes_no_dont_know:
+      return_value\r\n              chronic_pain_meds_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 chronic_pain_meds_details: return_value\r\n              hypertension_diagnosis_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              hypertension_medications_blank_yes_no: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 hypertension_medications_blank_yes_no: return_value\r\n              hypertension_diagnosis_details:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_details:
+      return_value\r\n              diabetes_diagnosis_blank_yes_no_dont_know: \r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  diabetes_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              diabetes_medications_blank_yes_no: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 diabetes_medications_blank_yes_no: return_value\r\n              diabetes_diagnosis_details:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  diabetes_diagnosis_details:
+      return_value\r\n              hemophilia_blank_yes_no_dont_know: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 hemophilia_blank_yes_no_dont_know: return_value\r\n              hemophilia_details:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  hemophilia_details:
+      return_value\r\n              high_cholesterol_diagnosis_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  high_cholesterol_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              high_cholesterol_medications_blank_yes_no: \r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  high_cholesterol_medications_blank_yes_no:
+      return_value\r\n              high_cholesterol_diagnosis_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 high_cholesterol_diagnosis_details: return_value\r\n              caridiac_pacemaker_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  caridiac_pacemaker_blank_yes_no_dont_know:
+      return_value\r\n              caridiac_pacemaker_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 caridiac_pacemaker_details: return_value\r\n              other_heart_conditions_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  other_heart_conditions_blank_yes_no_dont_know:
+      return_value\r\n              other_heart_conditions_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 other_heart_conditions_details: return_value\r\n              memory_problems_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  memory_problems_blank_yes_no_dont_know:
+      return_value\r\n              memory_problems_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 memory_problems_details: return_value\r\n              mental_health_conditions_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  mental_health_conditions_blank_yes_no_dont_know:
+      return_value\r\n              mental_health_conditions_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 mental_health_conditions_details: return_value\r\n              mental_health_help_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  mental_health_help_blank_yes_no_dont_know:
+      return_value\r\n              mental_health_help_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 mental_health_help_details: return_value\r\n              neurological_problems_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_healths:\r\n                  neurological_problems_blank_yes_no_dont_know:
+      return_value\r\n              neurological_problems_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 neurological_problems_details: return_value\r\n              past_mri_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_mris:\r\n                  past_mri_yes_no_dont_know:
+      return_value\r\n              past_mri_details: \r\n                dynamic_model__ipa_ps_mris:\r\n
+      \                 past_mri_details: return_value\r\n              metal_implants_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_mris:\r\n                  metal_implants_blank_yes_no_dont_know:
+      return_value\r\n              metal_implants_details:\r\n                dynamic_model__ipa_ps_mris:\r\n
+      \                 metal_implants_details: return_value\r\n              dietary_restrictions_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_tms_tests:\r\n                  dietary_restrictions_blank_yes_no_dont_know:
+      return_value\r\n              dietary_restrictions_details:\r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 dietary_restrictions_details: return_value\r\n\r\n\r\nmedications:\r\n
+      \ \r\n\r\n  references:\r\n    dynamic_model__ipa_medications:\r\n      label:
+      Medications\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n
+      \       #show: readonly\r\n        new: not_embedded\r\n      prevent_disable:
+      true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
+      \       extra_log_type: medications\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     create_reference:\r\n        - dynamic_model__ipa_medications:\r\n            in:
+      master_with_reference\r\n            with:\r\n              current_meds_blank_yes_no_dont_know:
+      \r\n                dynamic_model__ipa_ps_tms_tests:\r\n                  current_meds_blank_yes_no_dont_know:
+      return_value\r\n              current_meds_details: \r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 current_meds_details: return_value\r\n                  \r\nspecial_considerations:\r\n
+      \ \r\n\r\n  references:\r\n    dynamic_model__ipa_special_considerations:\r\n
+      \     label: Medications\r\n      from: master\r\n      add: one_to_master\r\n
+      \     view_as:\r\n#        show: readonly\r\n        new: not_embedded\r\n\r\n
+      \     prevent_disable: true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
+      \       extra_log_type: special_considerations\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     create_reference:\r\n        - dynamic_model__ipa_special_considerations:\r\n
+      \           in: master_with_reference\r\n            with:\r\n              #travel_with_wife_yes_no:
+      \r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n              #    travel_with_wife_yes_no:
+      return_value\r\n              #travel_with_wife_details: \r\n              #
+      \ dynamic_model__ipa_ps_tms_tests:\r\n              #    travel_with_wife_details:
+      return_value\r\n              #mmse_yes_no: 'yes'\r\n              \r\n              tmoca_score:
+      \r\n                dynamic_model__ipa_ps_tmocas:\r\n                  tmoca_score:
+      return_value\r\n              #bringing_cpap_yes_no: \r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n
+      \             #    bringing_cpap_yes_no: return_value\r\n              #tms_exempt_yes_no:
+      \r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n              #    tms_exempt_yes_no:
+      return_value\r\n              #taking_med_for_mri_pet_yes_no:\r\n              #
+      \ dynamic_model__ipa_ps_tms_tests:\r\n              #    taking_med_for_mri_pet_yes_no:
+      return_value\r\n                  "
+    hide_item_list_panel: true
+    main_log_name: ''
+    process_name: summary
+    table_name: activity_log_ipa_assignment_summaries
+    category: ipa
+    user_email:
+  associated_dynamic_models:
+  - id: 516
+    name: IPA Medical History
+    table_name: ipa_medical_details
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-16T13:05:29.933Z'
+    updated_at: '2019-09-23T08:56:20.088Z'
+    position:
+    category: ipa-records
+    table_key_name: ''
+    field_list: convulsion_or_seizure_blank_yes_no_dont_know convulsion_or_seizure_details
+      sleep_disorder_blank_yes_no_dont_know sleep_disorder_details sleep_apnea_device_no_yes
+      sleep_apnea_device_details chronic_pain_blank_yes_no chronic_pain_details chronic_pain_meds_blank_yes_no_dont_know
+      chronic_pain_meds_details hypertension_diagnosis_blank_yes_no_dont_know hypertension_medications_blank_yes_no
+      hypertension_diagnosis_details diabetes_diagnosis_blank_yes_no_dont_know diabetes_medications_blank_yes_no
+      diabetes_diagnosis_details hemophilia_blank_yes_no_dont_know hemophilia_details
+      high_cholesterol_diagnosis_blank_yes_no_dont_know high_cholesterol_medications_blank_yes_no
+      high_cholesterol_diagnosis_details caridiac_pacemaker_blank_yes_no_dont_know
+      caridiac_pacemaker_details other_heart_conditions_blank_yes_no_dont_know other_heart_conditions_details
+      memory_problems_blank_yes_no_dont_know memory_problems_details mental_health_conditions_blank_yes_no_dont_know
+      mental_health_conditions_details mental_health_help_blank_yes_no_dont_know mental_health_help_details
+      neurological_problems_blank_yes_no_dont_know neurological_problems_details past_mri_yes_no_dont_know
+      past_mri_details                       metal_implants_blank_yes_no_dont_know
+      metal_implants_details metal_implants_mri_approval_details dietary_restrictions_blank_yes_no_dont_know
+      dietary_restrictions_details
+    result_order: id
+    options: "default:\r\n\r\n  show_if:\r\n    convulsion_or_seizure_details:\r\n
+      \     convulsion_or_seizure_blank_yes_no_dont_know: 'yes'\r\n    sleep_disorder_details:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n    sleep_apnea_device_no_yes:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n    sleep_apnea_device_details:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n      sleep_apnea_device_no_yes:
+      \"yes\"\r\n    chronic_pain_details:\r\n      chronic_pain_blank_yes_no: 'yes'\r\n
+      \   chronic_pain_meds_blank_yes_no_dont_know:\r\n      chronic_pain_blank_yes_no:
+      'yes'\r\n    chronic_pain_meds_details:\r\n      chronic_pain_meds_blank_yes_no_dont_know:
+      'yes'\r\n    hypertension_medications_blank_yes_no:\r\n      hypertension_diagnosis_blank_yes_no_dont_know:
+      'yes'\r\n    hypertension_diagnosis_details:\r\n      hypertension_medications_blank_yes_no:
+      'yes'\r\n    diabetes_medications_blank_yes_no:\r\n      diabetes_diagnosis_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    diabetes_diagnosis_details:\r\n      diabetes_medications_blank_yes_no:
+      'yes'\r\n    \r\n    hemophilia_details:\r\n      hemophilia_blank_yes_no_dont_know:
+      'yes'\r\n    high_cholesterol_medications_blank_yes_no:\r\n      high_cholesterol_diagnosis_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    high_cholesterol_diagnosis_details:\r\n      high_cholesterol_medications_blank_yes_no:
+      'yes'\r\n    caridiac_pacemaker_details: \r\n      caridiac_pacemaker_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    other_heart_conditions_details:\r\n      other_heart_conditions_blank_yes_no_dont_know:
+      'yes'\r\n\r\n    memory_problems_details:\r\n      memory_problems_blank_yes_no_dont_know:
+      'yes'\r\n    mental_health_conditions_details:\r\n      mental_health_conditions_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    mental_health_help_details: \r\n      mental_health_help_blank_yes_no_dont_know:
+      'yes'\r\n    \r\n    neurological_problems_details:\r\n      neurological_problems_blank_yes_no_dont_know:
+      'yes'\r\n    past_mri_details:\r\n      past_mri_yes_no_dont_know: 'yes'\r\n
+      \     \r\n    metal_implants_details:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    metal_implants_mri_approval_details:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n\r\n    dietary_restrictions_details:\r\n      dietary_restrictions_blank_yes_no_dont_know:
+      \"yes\"\r\n\r\n\r\n  caption_before:\r\n    all_fields: \r\n    convulsion_or_seizure_blank_yes_no_dont_know:
+      |\r\n      **Seizures**\r\n      \r\n      Have you ever had a convulsion or
+      a seizure?\r\n    convulsion_or_seizure_details: <i>IF YES</i>, how long ago,
+      did you go to the hospital, were you put on medication, was it determined why?
+      \   \r\n    \r\n    sleep_disorder_blank_yes_no_dont_know: |\r\n      **Sleep
+      Apnea**\r\n      \r\n      Have you ever been diagnosed with sleep apnea or
+      any other sleep disorders (e.g. narcolepsy)\r\n    sleep_disorder_details: <i>IF
+      YES</i> Can you please tell me more about this?\r\n    sleep_apnea_device_no_yes:
+      IF THEY HAVE SLEEP APNEA<br/>Do you use a CPAP machine or another device for
+      your sleep apnea?\r\n    sleep_apnea_device_details: <i>IF YES</i> How many
+      nights a week?  Do you take it with you when you travel?\r\n\r\n    chronic_pain_blank_yes_no:
+      |\r\n      **Pain**\r\n      \r\n      Do you have chronic pain?\r\n    chronic_pain_details:
+      <i>IF YES</i> Please describe how often and how intense.\r\n    chronic_pain_meds_blank_yes_no_dont_know:
+      <i>IF YES TO CHRONIC PAIN</i><br/>Do you currently take any medication (prescription
+      or over the counter) or utilize alternative therapies to manage your chronic
+      pain?\r\n    chronic_pain_meds_details: <i>IF YES</i> Can you please tell me
+      more about this?\r\n    \r\n    hypertension_diagnosis_blank_yes_no_dont_know:
+      |\r\n      **Hypertension**\r\n      \r\n      Have you been diagnosed with
+      high blood pressure (hypertension)?\r\n    hypertension_medications_blank_yes_no:
+      <i>IF YES</i> Have you ever or are you currently taking medications to manage
+      these? \r\n    hypertension_diagnosis_details: Can you please tell me what medications?\r\n
+      \   \r\n    diabetes_diagnosis_blank_yes_no_dont_know: |\r\n      **Diabetes**\r\n
+      \     \r\n      Have you ever been diagnosed with diabetes\r\n    diabetes_medications_blank_yes_no:
+      <i>IF YES</i> Have you ever or are you currently taking medications to manage
+      these? \r\n    diabetes_diagnosis_details: Can you please tell me what medications?\r\n
+      \   \r\n    hemophilia_blank_yes_no_dont_know: |\r\n      **Blood Clotting Disorder**\r\n
+      \     Do you have any blood clotting disorders?\r\n    hemophilia_details: <i>IF
+      YES</i> Do you currently take medication to control it?\r\n    \r\n    high_cholesterol_diagnosis_blank_yes_no_dont_know:
+      |\r\n      **High Cholesterol**\r\n      \r\n      Have you ever been diagnosed
+      with high cholesterol?\r\n    high_cholesterol_medications_blank_yes_no: <i>IF
+      YES</i> Have you ever or are you currently taking medications to manage these?
+      \r\n    high_cholesterol_diagnosis_details: Can you please tell me what medications?\r\n
+      \   \r\n    caridiac_pacemaker_blank_yes_no_dont_know: |\r\n      **Pacemaker
+      or Intracardiac Lines**\r\n      \r\n      Do you have a cardiac pacemaker or
+      intracardiac lines, epidural/subdural stimulator, etc.\r\n    caridiac_pacemaker_details:
+      Details\r\n    \r\n    other_heart_conditions_blank_yes_no_dont_know: |\r\n
+      \     **Other Heart Conditions**\r\n      \r\n      Have you been diagnosed
+      with any other heart conditions or problems (e.g. heart attack, irregular heartbeat,
+      heart failure)?\r\n    other_heart_conditions_details: <i>IF YES</i> Please
+      describe. \r\n    \r\n    memory_problems_blank_yes_no_dont_know: |\r\n      **Memory**\r\n
+      \     \r\n      Do you have any problems with your memory?\r\n    memory_problems_details:
+      <i>IF YES</i> Please describe and tell me how long you have noticed a problem.\r\n
+      \   \r\n    mental_health_conditions_blank_yes_no_dont_know: |\r\n      **Mental
+      Health**\r\n      \r\n      Have you ever been diagnosed with depression, anxiety,
+      bipolar disorder, or another mental health condition?\r\n    mental_health_conditions_details:
+      <i>IF YES</i> Can you please tell me more about this?\r\n    mental_health_help_blank_yes_no_dont_know:
+      Have you ever sought help from a mental health professional in the past?\r\n
+      \   mental_health_help_details: <i>IF YES</i> Can you please tell me more about
+      this?\r\n    \r\n    neurological_problems_blank_yes_no_dont_know: |\r\n      **Neurological
+      Problems**\r\n      \r\n      Do you have a history of any neurological problems,
+      such as history of stroke, head injury, Parkinson’s Disease, MS?\r\n    neurological_problems_details:
+      Please describe.\r\n\r\n\r\n    past_mri_yes_no_dont_know: |\r\n      **Claustrophobia**\r\n
+      \     \r\n      Did you ever undergo an MRI in the past?\r\n    past_mri_details:
+      <i>IF YES</i> Were there any problems? \r\n    \r\n    metal_implants_blank_yes_no_dont_know:
+      |\r\n      **MRI - metal implants**\r\n    \r\n      Do you have any metal implants
+      such as surgical clips, heart valves \r\n      with steel parts, metal fragments,
+      shrapnel or steel implants?\r\n      \r\n    metal_implants_details: |\r\n      <i>IF
+      YES</i> Do you have a doctor card?\r\n    \r\n    metal_implants_mri_approval_details:
+      |\r\n      MRI approvals and other details\r\n    \r\n\r\n    dietary_restrictions_blank_yes_no_dont_know:
+      |\r\n      **Allegies**\r\n      Do you have any dietary restrictions or allergies?\r\n
+      \   dietary_restrictions_details: <i>IF YES</i> Could you tell me what dietary
+      restrictions/allergies you have?\r\n"
+    user_email:
+  - id: 520
+    name: IPA Special Considerations
+    table_name: ipa_special_considerations
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-16T16:24:11.118Z'
+    updated_at: '2019-09-23T10:23:30.339Z'
+    position:
+    category: ipa-records
+    table_key_name: ''
+    field_list: travel_with_wife_yes_no travel_with_wife_details mmse_yes_no mmse_details
+      tmoca_score bringing_cpap_yes_no tms_exempt_yes_no taking_med_for_mri_pet_yes_no
+    result_order: id
+    options: "default:\r\n\r\n  show_if:\r\n    travel_with_wife_details:\r\n      travel_with_wife_yes_no:
+      \"yes\"\r\n    tmoca_score:\r\n      mmse_yes_no: 'yes'\r\n    mmse_details:\r\n
+      \     mmse_yes_no: 'yes'\r\n\r\n  caption_before:\r\n    travel_with_wife_yes_no:
+      \ Traveling with wife?\r\n    travel_with_wife_details: Name and additional
+      information\r\n    mmse_yes_no: MMSE\r\n    mmse_details: MMSE details\r\n    tmoca_score:
+      TMoCA Score\r\n    bringing_cpap_yes_no: Bringing CPAP?\r\n    tms_exempt_yes_no:
+      TMS exempt?\r\n    taking_med_for_mri_pet_yes_no: Taking medication for MRI/PET?\r\n
+      \ "
+    user_email:
+
+  - id: 518
+    name: IPA Medications
+    table_name: ipa_medications
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-16T16:10:00.741Z'
+    updated_at: '2019-09-16T16:10:00.741Z'
+    position:
+    category: ipa-records
+    table_key_name: ''
+    field_list: current_meds_blank_yes_no_dont_know current_meds_details
+    result_order: id
+    options: "default:\r\n\r\n  show_if:\r\n    current_meds_details:\r\n      current_meds_blank_yes_no_dont_know:
+      \"yes\"\r\n\r\n  caption_before:\r\n    current_meds_blank_yes_no_dont_know:
+      Are you currently taking any medications including over the counter medications?\r\n
+      \   current_meds_details: <i>IF YES</i> can you please list them.\r\n  "
+    user_email:
+
+  associated_external_identifiers: []
+
+  associated_reports: []
+  associated_general_selections: []
+  page_layouts:
+  - id: 42
+    app_type_id: 3
+    layout_name: master
+    panel_name: ipa-summary
+    panel_label: Participant Summary
+    panel_position: 2
+    options: "contains: \r\n  resources:\r\n  - activity_log__ipa_assignment_summaries"
+    disabled: false
+    admin_id: 21
+    created_at: '2019-09-17T09:17:04.844Z'
+    updated_at: '2019-09-17T09:17:04.844Z'
+    description: ''
+    user_email:
+  user_roles:
+  - id: 295
+    app_type_id: 3
+    role_name: user - summary
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-16T16:55:11.682Z'
+    updated_at: '2019-09-16T16:55:11.682Z'
+    user_email: phil_ayres@test.com
+  - id: 296
+    app_type_id: 3
+    role_name: user - summary
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-16T16:55:20.105Z'
+    updated_at: '2019-09-16T16:55:20.105Z'
+    user_email: template@template
+  associated_message_templates: []
+  associated_config_libraries:
+  associated_protocols: []
+  associated_sub_processes: []
+  associated_protocol_events: []
+  nfs_store_filters: []

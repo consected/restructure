@@ -5,7 +5,7 @@ set search_path=ipa_ops, ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create ipa_special_considerations travel_with_wife_yes_no travel_with_wife_details mmse_yes_no tmoca_score bringing_cpap_yes_no tms_exempt_yes_no taking_med_for_mri_pet_yes_no
 
-      CREATE FUNCTION log_ipa_special_consideration_update() RETURNS trigger
+      CREATE or REPLACE FUNCTION log_ipa_special_consideration_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -16,6 +16,7 @@ set search_path=ipa_ops, ml_app;
                       travel_with_wife_details,
                       mmse_yes_no,
                       tmoca_score,
+                      mmse_details,
                       bringing_cpap_yes_no,
                       tms_exempt_yes_no,
                       taking_med_for_mri_pet_yes_no,
@@ -30,6 +31,7 @@ set search_path=ipa_ops, ml_app;
                       NEW.travel_with_wife_details,
                       NEW.mmse_yes_no,
                       NEW.tmoca_score,
+                      NEW.mmse_details,
                       NEW.bringing_cpap_yes_no,
                       NEW.tms_exempt_yes_no,
                       NEW.taking_med_for_mri_pet_yes_no,
@@ -49,6 +51,7 @@ set search_path=ipa_ops, ml_app;
           travel_with_wife_details varchar,
           mmse_yes_no varchar,
           tmoca_score varchar,
+          mmse_details varchar,
           bringing_cpap_yes_no varchar,
           tms_exempt_yes_no varchar,
           taking_med_for_mri_pet_yes_no varchar,
@@ -74,6 +77,7 @@ set search_path=ipa_ops, ml_app;
           travel_with_wife_details varchar,
           mmse_yes_no varchar,
           tmoca_score varchar,
+          mmse_details varchar,
           bringing_cpap_yes_no varchar,
           tms_exempt_yes_no varchar,
           taking_med_for_mri_pet_yes_no varchar,
