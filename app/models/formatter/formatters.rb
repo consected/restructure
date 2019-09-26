@@ -29,6 +29,12 @@ module Formatter
         end
       end
 
+      def format_data_attribute attr_conf, obj
+        attr_conf = [attr_conf] if attr_conf.is_a? String
+        res = attr_conf.map {|i| a = obj.attributes[i]; obj.attribute_names.include?(i) ? formatter_do(a.class, a, current_user: obj.current_user) : i }
+        return res.join(' ')
+      end
+
     end
 
   end

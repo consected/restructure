@@ -52,4 +52,13 @@ class Settings
 
   TemplateUserEmail = 'template@template'
 
+  def self.bulk_msg_app
+    Admin::AppType.where(name: 'bulk-msg').first
+  end
+
+
+  ShortcodeLength = 6
+  DefaultShortLinkS3Bucket = ENV['FPHS_CHECK_PREV_PASSWORDS'] || (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')
+
+
 end

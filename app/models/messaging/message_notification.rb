@@ -30,7 +30,7 @@ module Messaging
     scope :unhandled, -> { where status: nil }
     scope :index, -> { limit 20 }
 
-    attr_accessor :generated_text, :disabled, :admin_id
+    attr_accessor :generated_text, :disabled, :admin_id, :for_item
 
     # Get a layout template by name and optionally message type
     # Useful as a quick check to see if a specific template has been defined before instantiating a full MessageNotification
@@ -75,8 +75,8 @@ module Messaging
       data = self.data
       if data.blank?
         raise FphsException.new "Data is blank and item_type / item_id does not return an item" unless item
-
-        data = Admin::MessageTemplate.setup_data item
+        puts "Notification item: #{item}"
+        data = Admin::MessageTemplate.setup_data item, for_item
         data[:_subject] = self.subject
         data[:extra_substitutions] = self.extra_substitutions_data
 
@@ -135,7 +135,7 @@ module Messaging
     end
 
     def extra_substitutions= data
-      
+
       if data.is_a?(Hash)
         data = data.to_yaml
       end
@@ -180,6 +180,8 @@ module Messaging
             end
           end
 
+          self.for_item ||= for_item
+
           # If we have been passed recipient records, use these to generate each message for sending
           if recipient_records
 
@@ -198,6 +200,8 @@ module Messaging
                 self.data = nil
                 # If a record_item is referenced from the list item, use that as data instead
                 self.item = ri || list_item
+                # Force a current user to be the last user if one is not set
+                self.item.current_user ||= for_item&.user || self.user
                 pn = Formatter::Phone.format list_item.data, format: :unformatted, default_country_code: def_country_code
                 recipient_sms_numbers = [pn]
 
@@ -234,6 +238,7 @@ module Messaging
     end
 
     def generate_and_send recipient_sms_numbers: nil
+
       generate
 
       if is_email?

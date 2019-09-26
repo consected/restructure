@@ -97,6 +97,7 @@ class DynamicModel < ActiveRecord::Base
       DynamicModelOptions.parse_config(self)
       return true
     rescue => e
+      logger.info "Checking option configs valid failed silently: #{e}"
       return false
   end
 
@@ -125,6 +126,10 @@ class DynamicModel < ActiveRecord::Base
 
 
   def generate_model
+
+    logger.info "---------------------------------------------------------------------------
+************** GENERATING DynamicModel MODEL #{self.name} ****************
+---------------------------------------------------------------------------"
 
     obj = self
     failed = false
@@ -402,4 +407,4 @@ class DynamicModel < ActiveRecord::Base
 end
 
 # Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
-DynamicModel.define_models
+# DynamicModel.define_models

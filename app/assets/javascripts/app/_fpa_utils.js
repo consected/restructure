@@ -122,13 +122,22 @@ _fpa.utils.make_readable_notes_expandable = function(block, max_height, click_ca
 
   block.not('.attached-expandable').each(function(){
       if($(this).height() > max_height){
-          $(this).click(function(){
+          var this_expandable = $(this);
+          var exp_target = $(this).find('.list-group-item-heading');
+          var exp_full_block = false;
+          if(exp_target.length == 0) {
+            exp_full_block = true;
+            exp_target = $(this);
+          }
+
+          exp_target.click(function(){
             // don't do it if there is a selection
             if(window.getSelection().toString()) return;
-            _fpa.form_utils.toggle_expandable($(this));
+            _fpa.form_utils.toggle_expandable(this_expandable);
             if(click_callback)
-              click_callback(block, $(this));
-          }).addClass('expandable').attr('title', 'click to expand / shrink');
+              click_callback(block, this_expandable);
+          }).addClass('expandable-target').attr('title', 'click to expand / shrink');
+          this_expandable.addClass('expandable');
       }else{
           $(this).addClass('not-expandable');
       };

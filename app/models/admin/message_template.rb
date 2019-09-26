@@ -46,10 +46,10 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param data [Hash | UserBase] represent the substitution data with a Hash or a an object instance
   # @param tag_subs [String] for example 'span class="someclass"'
   def self.substitute all_content, data: {}, tag_subs:, ignore_missing: false
-    tags = all_content.scan(/{{[0-9a-zA-Z_\.\:]+}}/)
 
     data = setup_data(data) unless data.is_a? Hash
 
+    tags = all_content.scan(/{{[0-9a-zA-Z_\.\:]+}}/)
     tags.each do |tag_container|
       tag = tag_container[2..-3]
       missing = false
@@ -92,6 +92,26 @@ class Admin::MessageTemplate < ActiveRecord::Base
       all_content.gsub!(tag_container, tag_value)
     end
     raise FphsException.new "Not all the tags were replaced. This suggests there was an error in the markup." if ignore_missing != :show_tag && all_content.scan(/{{.*}}/).length > 0
+
+    tags = all_content.scan(/\[\[[^\]]+\]\]/)
+    tags.each do |tag_container|
+      tag = tag_container[2..-3]
+
+      tag_parts = tag.split(' ', 2)
+      tag_action = tag_parts.first
+
+      if tag_action == 'shortlink'
+        sl = DynamicModel::ZeusShortLink.new
+        res = sl.create_link(tag_parts[1], master: data[:master], batch_user: true, for_item: data[:alt_item] || data[:original_item])
+        tag_value = res[:short_link_instance]&.short_url
+      else
+        raise FphsException.new "Bad message template tag action [[#{tag_action}]] specified"
+      end
+
+      all_content.gsub!(tag_container, tag_value) if tag_value
+
+    end
+
     all_content
   end
 
@@ -155,10 +175,11 @@ class Admin::MessageTemplate < ActiveRecord::Base
       res
     end
 
-    def self.setup_data item
+    def self.setup_data item, alt_item=nil
       data = item.attributes.dup
 
       data[:original_item] = item
+      data[:alt_item] = alt_item
       data[:base_url] = Settings::BaseUrl
       data[:admin_email] = Settings::AdminEmail
       data[:environment_name] = Settings::EnvironmentName

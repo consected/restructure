@@ -410,4 +410,4 @@ class ExternalIdentifier < ActiveRecord::Base
 end
 
 # Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
-ExternalIdentifier.define_models
+# ExternalIdentifier.define_models

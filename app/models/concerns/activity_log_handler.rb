@@ -188,7 +188,7 @@ module ActivityLogHandler
       end
 
       if da
-        return DynamicModelBase.format_data_attribute da, self
+        return self.class.format_data_attribute da, self
       else
         n = extra_log_type_config.label || extra_log_type.to_s.humanize
         return "#{n}"

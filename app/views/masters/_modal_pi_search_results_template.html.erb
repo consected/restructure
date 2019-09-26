@@ -1,5 +1,5 @@
 <%
-external_id_types = ExternalIdentifier.active.map(&:implementation_class)
+external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
 %>
 
 <script id="modal-pi-search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">

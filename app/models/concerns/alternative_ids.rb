@@ -9,7 +9,7 @@ module AlternativeIds
     end
 
     def external_id_matching_fields
-      ExternalIdentifier.active.map{|f| f.external_id_attribute.to_sym}
+      ExternalIdentifier.active_model_configurations.map{|f| f.external_id_attribute.to_sym}
     end
 
     def external_id? attr_name
@@ -68,7 +68,7 @@ module AlternativeIds
 
   def alternative_ids
     res = {}
-    Master.alternative_id_fields.each {|f|  res[f] = self.alternative_id_value(f) }
+    self.class.alternative_id_fields.each {|f|  res[f] = self.alternative_id_value(f) }
     res
   end
 

@@ -187,7 +187,7 @@ class Tracker < UserBase
         res.update!(current_admin: admin)
         logger.info "Added protocol event #{v} in #{protocol.id} / #{sp.id}"
       else
-        logger.info "Did not add protocol event #{v} in #{protocol.id} / #{sp.id}"
+        # logger.info "Did not add protocol event #{v} in #{protocol.id} / #{sp.id}"
       end
     end
   end

@@ -370,7 +370,7 @@ class ActivityLog < ActiveRecord::Base
     Tracker.add_record_update_entries track_name, admin, 'record'
 
     Classification::Protocol.enabled.each do |p|
-      logger.info "For protocol: #{p.id} #{p.name}"
+      # logger.info "For protocol: #{p.id} #{p.name}"
 
       # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
       sps = p.sub_processes.where(name: self.class.sub_process_name)
@@ -379,7 +379,7 @@ class ActivityLog < ActiveRecord::Base
         logger.info "Adding a new Activity sub process #{sp.id}"
       else
         sp = sps.first
-        logger.info "Using the existing Activity sub process #{sp.id}"
+        # logger.info "Using the existing Activity sub process #{sp.id}"
       end
 
       # Note that we do not use the enabled scope, since we allow this item to be disabled (preventing its use by users)
@@ -388,7 +388,7 @@ class ActivityLog < ActiveRecord::Base
         pe = sp.protocol_events.create! name: self.name, current_admin: admin
         logger.info "Adding a new Activity protocol event #{pe.id}"
       else
-        logger.info "Using the existing Activity protocol event #{pes.first.id}"
+        # logger.info "Using the existing Activity protocol event #{pes.first.id}"
       end
     end
     return true
@@ -410,8 +410,8 @@ class ActivityLog < ActiveRecord::Base
   # Ensure that other dynamic implementations have been loaded before we attempt to create
   # activity logs that rely on them
   def self.preload
-    DynamicModel.define_models
     ExternalIdentifier.define_models
+    DynamicModel.define_models
   end
 
 
@@ -625,4 +625,4 @@ class ActivityLog < ActiveRecord::Base
 end
 
 # Force the initialization. Do this here, rather than an initializer, since forces a reload if rails reloads classes in development mode.
-::ActivityLog.define_models
+# ::ActivityLog.define_models

@@ -61,8 +61,15 @@ GEM
       aws-partitions (~> 1.0)
       aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
+    aws-sdk-kms (1.24.0)
+      aws-sdk-core (~> 3, >= 3.61.1)
+      aws-sigv4 (~> 1.1)
     aws-sdk-pinpoint (1.27.0)
       aws-sdk-core (~> 3, >= 3.61.1)
+      aws-sigv4 (~> 1.1)
+    aws-sdk-s3 (1.48.0)
+      aws-sdk-core (~> 3, >= 3.61.1)
+      aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.1)
     aws-sdk-sns (1.19.0)
       aws-sdk-core (~> 3, >= 3.61.1)
@@ -278,9 +285,10 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import
-  aws-sdk-cloudwatchlogs
-  aws-sdk-pinpoint
-  aws-sdk-sns
+  aws-sdk-cloudwatchlogs (~> 1)
+  aws-sdk-pinpoint (~> 1)
+  aws-sdk-s3 (~> 1)
+  aws-sdk-sns (~> 1)
   brakeman
   bundler-audit
   byebug

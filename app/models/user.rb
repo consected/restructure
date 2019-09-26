@@ -32,6 +32,18 @@ class User < ActiveRecord::Base
     where(email: Settings::TemplateUserEmail).first
   end
 
+  def self.batch_user
+    # Use the admin email as the user - this assumes that the equivalent user has been set up for automated use
+    where(email: Settings::AdminEmail).first
+  end
+
+  def self.use_batch_user with_app
+    bu = self.batch_user
+    return unless bu
+    bu.update(app_type: with_app)
+    bu
+  end
+
 
   def self.active_id_name_list filter=nil
     active.map {|u| {id: u.id, value: u.id, name: u.email} }

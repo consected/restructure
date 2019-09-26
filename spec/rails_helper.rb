@@ -50,6 +50,7 @@ Warden.test_mode!
 # controller will not exist without the seed
 require "#{::Rails.root}/db/seeds.rb"
 Seeds.setup
+raise "Scantron not defined by seeds" unless defined?(Scantron) && defined?(ScantronsController)
 
 res = `#{::Rails.root}/fphs-scripts/setup-dev-filestore.sh`
 if res == "Failed to setup mountpoint\n"
@@ -78,7 +79,7 @@ RSpec.configure do |config|
   config.before(:suite) do
     # Do some setup that could impact all tests through the availability of master associations
 
-    Seeds::setup
+    # Seeds.setup
     Seeds::ActivityLogPlayerContactPhone.setup
     Rails.application.load_tasks
     Rake::Task["assets:precompile"].invoke

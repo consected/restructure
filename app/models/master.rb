@@ -1,6 +1,10 @@
 class Master < ActiveRecord::Base
 
 
+  include AlternativeIds
+  AppControl.define_models
+
+
   after_initialize :init_vars_master
 
   belongs_to :user
@@ -64,7 +68,6 @@ class Master < ActiveRecord::Base
   # This is placed here, since there is a dependence on MasterSearchHandler
   ExternalIdentifier.enable_active_configurations
 
-  include AlternativeIds
 
 
   attr_accessor :force_order, :creating_master

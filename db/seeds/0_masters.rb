@@ -1,3 +1,4 @@
+require_dependency 'master'
 module Seeds
   module Masters
 

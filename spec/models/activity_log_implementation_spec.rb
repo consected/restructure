@@ -10,7 +10,7 @@ RSpec.describe 'Activity Log implementation', type: :model do
 
   before :all do
     seed_database
-    ::ActivityLog.define_models
+    # ::ActivityLog.define_models
     create_user
     setup_access :player_contacts
     let_user_create_player_contacts

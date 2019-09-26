@@ -4,7 +4,7 @@ module DynamicModelExtension
     extend ActiveSupport::Concern
 
     ValidStatuses = [:success, :failure]
-    
+
     included do
       belongs_to :zeus_bulk_message_recipients
 

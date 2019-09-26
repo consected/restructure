@@ -37,6 +37,20 @@ module Seeds
       else
         log "Did not run #{self}.setup"
       end
+
+      if Rails.env.test?
+        s = ExternalIdentifier.where(name: 'scantrons').first
+        s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+
+
+        s = ExternalIdentifier.where(name: 'sage_assignments').first
+        s.update!(current_admin: auto_admin, disabled: false) if s.disabled?
+
+        Admin::AppType.active.each do |app_type|
+          Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'scantrons', access: :create, current_admin: auto_admin)
+          Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'sage_assignments', access: :create, current_admin: auto_admin)
+        end
+      end
     end
   end
 end

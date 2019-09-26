@@ -100,7 +100,12 @@ module DynamicModelDefHandler
       # before attempting to use it. Otherwise Rake tasks fail.
       if ActiveRecord::Base.connection.table_exists? self.table_name
         active_model_configurations.each do |dm|
-          dm.add_master_association if dm.ready?
+          if dm.is_a? ExternalIdentifier
+            klass = Object
+          else
+            klass = dm.class.name.constantize
+          end
+          dm.add_master_association if dm.ready? && dm.implementation_class_defined?(klass, fail_without_exception: true)
         end
       else
         puts "Table doesn't exist yet: #{self.table_name}"

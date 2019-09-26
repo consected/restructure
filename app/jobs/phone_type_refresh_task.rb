@@ -5,8 +5,7 @@ class PhoneTypeRefreshTask
   queue 'recurring-tasks'
 
   def perform
-    # Use the admin email as the user - this assumes that the equivalent user has been set up for automated use
-    user = User.where(email: Settings::AdminEmail).first
+    user = User.use_batch_user(Settings.bulk_msg_app)
     PlayerContactPhoneInfo.validate_incomplete user: user
   end
 end

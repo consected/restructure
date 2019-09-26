@@ -73,6 +73,15 @@ module Seeds
         create_phone_log_admin_activity_log
       end
 
+      if Rails.env.test?
+        res = ActivityLog.where(name: 'Phone Log').first
+
+        res.update!(current_admin: auto_admin, disabled: false) if res.disabled?
+
+        app_type = Admin::AppType.where(name: :zeus).first
+        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones', access: :create, current_admin: auto_admin)
+      end
+
     end
 
   end

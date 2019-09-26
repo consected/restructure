@@ -66,7 +66,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
   def self.resource_names_for resource_type
     if resource_type == :table
-      return (Master.get_all_associations + ['item_flags'] + DynamicModel.active.map(&:full_item_types_name)).uniq
+      return (Master.get_all_associations + ['item_flags'] + ActivityLog.active.map(&:full_item_types_name) + DynamicModel.active.map(&:full_item_types_name) + ExternalIdentifier.active.map(&:name)).uniq
     elsif resource_type == :general
       return [
         'app_type', 'create_master',

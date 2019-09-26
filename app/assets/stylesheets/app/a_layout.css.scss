@@ -449,7 +449,7 @@ div.popover {
     overflow: hidden;
 
 
-    &:hover {
+    &.expandable-target:hover, .expandable-target:hover {
       cursor: s-resize;
     }
 
@@ -469,7 +469,7 @@ div.popover {
       max-height: none;
       border-bottom: 0;
 
-      &:hover {
+      &.expandable-target:hover, .expandable-target:hover {
           cursor: n-resize;
       }
 

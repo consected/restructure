@@ -39,9 +39,10 @@ gem 'rqrcode'
 gem 'activerecord-import'
 gem 'mime-types'
 
-gem 'aws-sdk-sns'
-gem 'aws-sdk-cloudwatchlogs'
-gem 'aws-sdk-pinpoint'
+gem 'aws-sdk-sns', '~> 1'
+gem 'aws-sdk-cloudwatchlogs', '~> 1'
+gem 'aws-sdk-pinpoint', '~> 1'
+gem 'aws-sdk-s3', '~> 1'
 
 gem 'crass', '~> 1.0.4'
 

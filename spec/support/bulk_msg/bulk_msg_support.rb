@@ -4,7 +4,7 @@ module BulkMsgSupport
   def import_bulk_msg_app
     @admin, _ = create_admin unless @admin
     # Setup the triggers, functions, etc
-    files = %w(bulk/create_al_bulk_messages.sql bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql 0-scripts/z_grant_roles.sql)
+    files = %w(bulk/create_al_bulk_messages.sql bulk/create_zeus_bulk_messages_table.sql bulk/dup_check_recipients.sql bulk/create_zeus_bulk_message_recipients_table.sql bulk/create_zeus_bulk_message_statuses.sql bulk/setup_master.sql bulk/create_zeus_short_links.sql 0-scripts/z_grant_roles.sql)
 
 
     files.each do |fn|
@@ -19,6 +19,11 @@ module BulkMsgSupport
     end
 
     config = File.read Rails.root.join('db/app_configs/bulk-msg_config.json')
+
+    al = ActivityLog.where(item_type: 'zeus_bulk_message').first
+    if al && al.disabled?
+      al.update!(disabled: false, current_admin: @admin) rescue nil
+    end
 
     Admin::AppType.import_config(config, @admin)
   end
