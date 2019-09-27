@@ -31,7 +31,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
     Admin::UserRole.create! app_type: u1.app_type, user: u1, role_name: 'test', current_admin: @admin
     Admin::UserRole.create! app_type: u1.app_type, user: @user, role_name: 'test', current_admin: @admin
 
-    expect(Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).count).to eq 2
+    # The number of roles is one more than we added due to automatic setup of a template@template item
+    expect(Admin::UserRole.where(role_name: 'test', app_type: u1.app_type).count).to eq 3
 
     @role_user_ids = [u1.id, @user.id]
 

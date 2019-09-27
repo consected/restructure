@@ -293,6 +293,24 @@ RSpec.describe Master, type: :model do
 
     end
 
+    it "provides alternative ids" do
+
+      ids = @master.alternative_ids
+      expect(ids.keys).to include :msid
+
+      t = Benchmark.realtime do
+        100.times do
+          ids = @master.alternative_ids
+          expect(ids.keys).to include :msid
+        end
+      end
+
+      puts "Took #{t} seconds"
+      expect(t).to be < 2
+
+
+
+    end
 
   end
 end

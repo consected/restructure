@@ -99,11 +99,31 @@ RSpec.describe Messaging::NotificationSms, type: :model do
   it "sends an sms with promotional importance" do
 
     @message_notification.importance = 'Promotional'
+    # This is a known bad number
     @message_notification.recipient_sms_numbers = ['+12025550147']
     sms = sms = Messaging::NotificationSms.new
     sms.send_now @message_notification
 
     expect(sms).not_to be nil
+  end
+
+  it "tests timing on send" do
+
+    @message_notification.importance = 'Promotional'
+    # This is a known bad number
+    @message_notification.recipient_sms_numbers = ['+12025550147']
+    sms = sms = Messaging::NotificationSms.new
+
+    t = Benchmark.realtime do
+      10.times do
+        sms.send_now @message_notification
+      end
+    end
+
+    puts "Done in #{t} seconds"
+
+    expect(t).to be < 10
+
   end
 
 end

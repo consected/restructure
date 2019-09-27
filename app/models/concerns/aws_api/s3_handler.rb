@@ -21,7 +21,10 @@ module AwsApi
       @s3_bucket = aws_s3_client.get_bucket name
     end
 
-    # Upload file data to current @s3_bucket
+    # Upload the file data to current @s3_bucket
+    # @param filename [String] filename
+    # @param data [String|Byte[]]
+    # @param bucket: [String] optional name of bucket. Will reuse the existing bucket name if one is already being used and the param is nil
     # @return [Aws:S3:Object] object uploaded
     def s3_upload_file filename, data, to_bucket: nil, options: nil
 
@@ -39,7 +42,7 @@ module AwsApi
       obj
     end
 
-    # Check if the redirect file exists in S3
+    # Check if the file exists in S3
     # @param filename [String] filename
     # @param bucket: [String] optional name of bucket. Will reuse the existing bucket name if one is already being used and the param is nil
     # @return [Boolean]
@@ -50,6 +53,41 @@ module AwsApi
       )
       !!(res && res.etag)
     end
+
+    # Get the whole file from S3
+    # @param filename [String] filename
+    # @param bucket: [String] optional name of bucket. Will reuse the existing bucket name if one is already being used and the param is nil
+    # @return [Boolean]
+    def s3_file_get_all filename, bucket: nil
+      res = aws_s3_client.get_object(
+        key: filename,
+        bucket: bucket || @s3_bucket_name
+      )
+      res.body.read
+    end
+
+    # List S3 bucket
+    # @param bucket: [String] optional name of bucket. Will reuse the existing bucket name if one is already being used and the param is nil\
+    # @param prefix: [String] optional. Limits the response to keys that begin with the specified prefix.
+    # @param start_after: [String] optional key to start after. S3 starts listing after this specified key. If a prefix is set but
+    # => it doesn't appear in key, it will be added automatically
+    # @return [Boolean]
+    def s3_list bucket: nil, prefix: nil, start_after: nil
+      cond = {
+        bucket: bucket || @s3_bucket_name
+      }
+
+      cond[:prefix] = prefix if prefix
+      if start_after
+        start_after = prefix + start_after if prefix && !start_after.start_with?(prefix)
+        cond[:start_after] = start_after
+      end
+
+      res = aws_s3_client.list_objects_v2(cond)
+
+      res.contents
+    end
+
 
   end
 end

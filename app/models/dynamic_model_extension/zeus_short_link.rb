@@ -144,5 +144,11 @@ res
       "http://#{self.domain}/#{self.shortcode}"
     end
 
+    def get_logs
+      bucket = Settings::DefaultShortLinkLogS3Bucket
+      s3_file_get_all.s3_list bucket: bucket, prefix: Settings::LogBucketPrefix
+
+    end
+
   end
 end

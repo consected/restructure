@@ -289,6 +289,8 @@ class ExternalIdentifier < ActiveRecord::Base
     if failed || !enabled?
       remove_model_from_list
     end
+    
+    Master.reset_external_id_matching_fields!
 
     res
   end

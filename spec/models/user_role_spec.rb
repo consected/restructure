@@ -108,10 +108,10 @@ RSpec.describe Admin::UserRole, type: :model do
 
     # Check the list of User IDs in a role are correctly returned for the app (as used in email notifications)
     res = Admin::UserRole.active_user_ids role_name: TestRoleName, app_type: app_type_1
-    expect(res).to eq [user1.id]
+    expect(res.sort).to eq [User.template_user.id, user1.id].sort
 
     res = Admin::UserRole.active_user_ids role_name: TestRoleName, app_type: app_type_2
-    expect(res).to eq [user2.id]
+    expect(res.sort).to eq [User.template_user.id, user2.id].sort
 
     res = user1.user_roles.active.where(app_type: user1.app_type).pluck(:role_name)
     res1 = user1.user_roles.active.pluck(:role_name)
@@ -121,10 +121,10 @@ RSpec.describe Admin::UserRole, type: :model do
     r3 = create_user_role TestRoleName, user: user1, app_type: app_type_2
 
     res = Admin::UserRole.active_user_ids role_name: TestRoleName, app_type: app_type_1
-    expect(res).to eq [user1.id]
+    expect(res.sort).to eq [User.template_user.id, user1.id].sort
 
     res = Admin::UserRole.active_user_ids role_name: TestRoleName, app_type: app_type_2
-    expect(res.sort).to eq [user2.id, user1.id].sort
+    expect(res.sort).to eq [User.template_user.id, user2.id, user1.id].sort
 
     # The user should now see the role for both app types
     expect(user1.app_type_id).to eq app_type_2.id

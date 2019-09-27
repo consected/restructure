@@ -2,6 +2,10 @@ module AlternativeIds
 
   extend ActiveSupport::Concern
 
+  included do
+    @stored_external_id_matching_fields = nil
+  end
+
   class_methods do
 
     def crosswalk_attrs
@@ -9,7 +13,14 @@ module AlternativeIds
     end
 
     def external_id_matching_fields
-      ExternalIdentifier.active_model_configurations.map{|f| f.external_id_attribute.to_sym}
+      # Cache the result, because it speeds up template use of ids hugely
+      return @stored_external_id_matching_fields if @stored_external_id_matching_fields
+      @stored_external_id_matching_fields = ExternalIdentifier.active_model_configurations.map{|f| f.external_id_attribute.to_sym}
+    end
+
+    # Force a reset of the external fields, allowing new definitions to appear
+    def reset_external_id_matching_fields!
+      @stored_external_id_matching_fields = nil
     end
 
     def external_id? attr_name

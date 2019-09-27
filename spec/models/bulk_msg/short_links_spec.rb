@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'benchmark'
 
 RSpec.describe "DynamicModel::ZeusShortLink", type: :model do
 
@@ -82,8 +83,44 @@ RSpec.describe "DynamicModel::ZeusShortLink", type: :model do
 
   end
 
-  it "attaches short link records to a bulk message and player" do
+  it "stress tests creating many" do
 
+    test_times = 10
+
+    txt = "A short message with a generated URL [[shortlink https://footballplayershealth.harvard.edu/join-us/?test_id={{ids.msid}}]]\nThanks!"
+    last_msid = (Master.order(msid: :desc).first.msid || 123) + 1
+
+    masters = []
+
+    test_times.times do
+      master = Master.create! current_user: @user, msid: last_msid
+      masters << master
+      master.player_contacts.create! data: '(123)123-1234', rec_type: :phone, rank: 10
+      master.player_contacts.create! data: '(123)123-1234 alt', rec_type: :phone, rank: 5
+      last_msid += 1
+    end
+
+    expect(masters.length).to eq test_times
+
+    t = Benchmark.realtime do
+      masters.each do |master|
+        data = Admin::MessageTemplate.setup_data(master.player_contacts[0], master.player_contacts[1])
+        res = Admin::MessageTemplate.substitute txt.dup, data: data, tag_subs: nil
+
+        sl = DynamicModel::ZeusShortLink.last
+        expect(sl).to be_a DynamicModel::ZeusShortLink
+        expect(sl.url).to eq "https://footballplayershealth.harvard.edu/join-us/?test_id=#{master.msid}"
+      end
+    end
+
+    puts "It took #{t} seconds to create #{test_times} shortlinks"
+
+    expect(t).to be < 5
+
+
+  end
+
+  it "gets logs from s3" do
 
   end
 
