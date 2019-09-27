@@ -57,11 +57,13 @@ textarea#activity_log_extra_log_types
 table.admin-list  {
   .expandable {
     max-height: 100px;
+    max-width: 70vw;
     padding-bottom: 20px;
     margin-bottom:26px;
     border-bottom: 2px dotted gray;
     display: block;
     overflow: hidden;
+    overflow-x: auto;
 
 
     &:hover {
