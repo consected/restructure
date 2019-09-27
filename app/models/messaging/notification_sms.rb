@@ -3,6 +3,7 @@ module Messaging
 
     include AwsApi::SmsHandler
 
+    BadFormatMsg = 'bad format phone number'.freeze
 
     # Send a series of SMS messages to a list of recipients with the same message
     # @param mn [Messaging::MessageNotification] object describing the list of numbers and message
@@ -29,11 +30,15 @@ module Messaging
 
       recipient_sms_numbers.each do |sms_number|
 
-        PhoneValidation.validate_sms_number_format sms_number
+        val = PhoneValidation.validate_sms_number_format sms_number, no_exception: true
 
-        res = send_sms sms_number, generated_text, importance
+        if val
+          res = send_sms sms_number, generated_text, importance
+          resp << {aws_sns_sms_message_id: res.message_id} if res
+        else
+          resp << {error: BadFormatMsg}
+        end
 
-        resp << {aws_sns_sms_message_id: res.message_id} if res
       end
 
       resp.to_json

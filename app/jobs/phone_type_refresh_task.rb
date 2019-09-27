@@ -6,6 +6,6 @@ class PhoneTypeRefreshTask
 
   def perform
     user = User.use_batch_user(Settings.bulk_msg_app)
-    PlayerContactPhoneInfo.validate_incomplete user: user
+    DynamicModel::PlayerContactPhoneInfo.validate_incomplete user: user
   end
 end

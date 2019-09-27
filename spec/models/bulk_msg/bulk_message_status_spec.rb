@@ -22,6 +22,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     let_user_create :player_contacts
     let_user_create :dynamic_model__zeus_bulk_message_recipients
     let_user_create :dynamic_model__zeus_bulk_message_statuses
+    let_user_create :dynamic_model__zeus_bulk_messages
 
     @bulk_master.dynamic_model__zeus_bulk_message_recipients.update_all(response: nil)
 
@@ -33,6 +34,8 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     max_num = 3
 
     recips = []
+
+    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now, send_time: Time.now - 10.minutes)
     9.times do |n|
       m = create_master
       # We need a range of timestamps
@@ -41,7 +44,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
       pc = pcs[n]
       restext = "[{\"aws_sns_sms_message_id\":\"#{rand(199999999999)}\"}]"
 
-      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext)
+      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext, zeus_bulk_message_id: zbmsg.id)
     end
 
     num = 0
@@ -66,6 +69,34 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
 
     not_done = DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp
     not_done_id = DynamicModel::ZeusBulkMessageStatus.incomplete_recipients.first.id
+
+
+
+    # No results will return if there is no associated zeus_bulk_message record, or its status isn't sent
+    # We shouldn't be checking for results from items that haven't been sent or are only scheduled, since that is a waste
+    # Generate a zeus_bulk_message and associate it with the recipients so the checks can progress
+    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'draft', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now, send_time: Time.now - 10.minutes)
+    recips.each do |r|
+      r.update!(zeus_bulk_message_id: zbmsg.id, current_user: @user)
+    end
+    expect(DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp).to be nil
+
+    # Any message sent more than 5 days ago also shouldn't be checked
+    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now - 6.days, send_time: Time.now - 10.minutes, updated_at: DateTime.now - 6.days)
+    recips.each do |r|
+      r.update!(zeus_bulk_message_id: zbmsg.id, current_user: @user)
+    end
+    expect(DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp).to be nil
+
+    # Sent status of message to sent, like in real life, allowing incomplete results to be returned
+    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now, send_time: Time.now - 10.minutes)
+    recips.each do |r|
+      r.update!(zeus_bulk_message_id: zbmsg.id, current_user: @user)
+    end
+    expect(DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp).not_to be nil
+
+
+
 
     # Ensure the date comes from the database, not the Rails time
     r0 = recips[num+1].reload
@@ -126,6 +157,10 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     new_mids = res[:events].map {|r| r[:message_id]}
     expect(mids).not_to eq new_mids
 
+    ev = res[:events].first
+    expect(ev[:message_id]).to match /[a-z0-9]+-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+/
+    expect(ev[:timestamp]).to be_a Integer
+
     # Ensure nothing is returned
     res = @bms.delivery_responses :success, limit: 10, start_timestamp: (DateTime.now + 1000.seconds)
     expect(res[:events].length).to be == 0
@@ -142,6 +177,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     res = @bms.delivery_responses :success, limit: 9, next_page: false
 
     mids = res[:events].map {|r| r[:message_id]}
+    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now, send_time: Time.now - 10.minutes)
 
     pcs = []
     recips = []
@@ -151,7 +187,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
       pc = pcs[n]
       expect(mids[n]).not_to be nil
       restext = "[{\"aws_sns_sms_message_id\":\"#{mids[n]}\"}]"
-      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext)
+      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext, zeus_bulk_message_id: zbmsg.id)
     end
 
     r = DynamicModel::ZeusBulkMessageStatus.find_matching_recipient_by_message_id('junk')
@@ -175,13 +211,16 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
 
     pcs = []
     recips = []
+
+    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now, send_time: Time.now - 10.minutes)
+
     mids.length.times do |n|
       m = create_master
       pcs << m.player_contacts.create(data: "(123)123-1234 ext #{n}", rank: 10, rec_type: :phone)
       pc = pcs[n]
       expect(mids[n]).not_to be nil
       restext = "[{\"aws_sns_sms_message_id\":\"#{mids[n]}\"}]"
-      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext)
+      recips << @bulk_master.dynamic_model__zeus_bulk_message_recipients.create!(record_id: pc.id, data: pc.data, rank: pc.rank, response: restext, zeus_bulk_message_id: zbmsg.id)
     end
 
     DynamicModel::ZeusBulkMessageRecipient.update_all(created_at: DateTime.now - 10.years)

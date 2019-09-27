@@ -166,7 +166,9 @@ module Messaging
       logger.info "Handling item #{self.id}"
       update! status: StatusInProgress
 
-      Messaging::MessageNotification.transaction do
+      # Do not use a transaction, since we want successfully sent recipients to have a record saved so they
+      # don't get hit again
+      #Messaging::MessageNotification.transaction do
         begin
 
           # Check if recipient records have been set in the recipient_data
@@ -194,7 +196,13 @@ module Messaging
               list_type_class = ModelReference.to_record_class_for_type list_type.singularize
               list_item = list_type_class.where(id: list_id).first
 
-              if list_item
+              if list_item&.send_status == 'sent'
+                logger.info "Recipient in list was already sent. Will not resend"
+              elsif list_item&.send_status == 'success'
+                logger.info "Recipient in list was already succesfully sent. Will not resend"
+              elsif list_item&.send_status == Messaging::NotificationSms::BadFormatMsg
+                logger.info "Recipient in list had bad format phone number. Will not attempt to resend"
+              elsif list_item # Any other status
                 # Get the referenced record item (such as live contact record)
                 ri = list_item.record_item no_exception: true
                 self.data = nil
@@ -234,7 +242,7 @@ module Messaging
           update! status: StatusFailed
           raise FphsException.new "Exception captured in handle_notification_now: #{e}\n#{e.backtrace[0..20].join("\n")}"
         end
-      end
+      #end
     end
 
     def generate_and_send recipient_sms_numbers: nil

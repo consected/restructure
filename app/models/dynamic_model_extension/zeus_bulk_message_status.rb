@@ -17,17 +17,32 @@ module DynamicModelExtension
         include AwsApi::SmsHandler
       end
 
-      # Get
+      # Get recipients for:
+      # - recipient record is not marked as disabled
+      # - bulk messages that are sent by the sms channel, and have status 'sent', and were last updated
+      #   more recently than five days ago (so we give up refreshing 5 days after the message was sent)
+      # - do not yet have a corresponding zeus_bulk_message_statuses record
+      # - have a response from sending the SMS with a aws_sns_sms_message_id
+      # @return [ActiveRecord::Relation] matching zeus_bulk_message_recipients ordered by created_at time
       def incomplete_recipients
-        ZeusBulkMessageRecipient
+
+        DynamicModel::ZeusBulkMessageRecipient
           .select('zeus_bulk_message_recipients.*')
+          .joins("INNER JOIN zeus_bulk_messages ON zeus_bulk_message_recipients.zeus_bulk_message_id = zeus_bulk_messages.id
+                    AND zeus_bulk_messages.channel = 'sms'
+                    AND zeus_bulk_messages.status = 'sent'
+                  ")
           .joins('LEFT OUTER JOIN zeus_bulk_message_statuses ON zeus_bulk_message_statuses.zeus_bulk_message_recipient_id = zeus_bulk_message_recipients.id')
-          .where("zeus_bulk_message_recipients.response is not null and zeus_bulk_message_recipients.disabled = false")
+          .where("zeus_bulk_message_recipients.response is not null
+                  and zeus_bulk_message_recipients.response LIKE '[{\"aws_sns_sms_message_id\":%'
+                  and zeus_bulk_message_recipients.disabled = false")
           .where(zeus_bulk_message_statuses: {id: nil})
+          .where(["zeus_bulk_messages.updated_at > ?", (DateTime.now - 5.days)]) # Give up trying 5 days after the message was sent
           .order('zeus_bulk_message_recipients.created_at asc')
+
       end
 
-      # Get the timestamp on the earliest recipient record where a message was sent (response is not null)
+      # Get the timestamp on the earliest recipient record where a message was sent
       # and a matching delivery status record is not found
       def earliest_incomplete_timestamp
         res = incomplete_recipients.first
@@ -49,7 +64,7 @@ module DynamicModelExtension
         if state == :incomplete
           res = incomplete_recipients
         else
-          res = ZeusBulkMessageRecipient
+          res = DynamicModel::ZeusBulkMessageRecipient
         end
         res = res.where(response: restext)
         return res.first
@@ -211,11 +226,18 @@ module DynamicModelExtension
         # We erroneously asked for a next page even though there isn't one
         # This possibly means the caller is not checking the more_results value
         # and risks looping forever
+        Rails.logger.info "Bulk Message Status: We erroneously asked for a next page even though there isn't one"
+        return
+      end
+
+      lgs = aws_log_groups[status]
+      unless lgs
+        Rails.logger.info "No Log Groups to return looking for status"
         return
       end
 
       conds = {
-          log_group_name: aws_log_groups[status],
+          log_group_name: lgs,
           next_token: @next_token,
           limit: limit,
           start_time: start_timestamp
@@ -235,6 +257,18 @@ module DynamicModelExtension
             reh = JSON.parse(re.message).deep_symbolize_keys
             reh[:status] = reh[:status].downcase.to_sym
             reh[:message_id] = reh[:notification][:messageId]
+            begin
+              tsstr = reh[:notification][:timestamp]
+              ts = nil
+              if tsstr
+                ts = DateTime.parse(tsstr)
+                tsi = ts.to_i
+              end
+              reh[:timestamp] = tsi
+            rescue => e
+              Rails.logger.info "Failed to parse message response timestamp (#{tsstr}): #{e}"
+            end
+
             reh[:status_reason] = reh[:delivery][:providerResponse]
           rescue => e
             reh = {
