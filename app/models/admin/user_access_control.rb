@@ -129,7 +129,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
     FphsException.new "Options can not be added to access_for?" if with_options
 
-    app_type_id = alt_app_type_id || user.app_type_id
+    app_type_id = alt_app_type_id || user&.app_type_id
 
 
     if can_perform
