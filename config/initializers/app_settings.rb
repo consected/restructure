@@ -56,6 +56,9 @@ class Settings
     Admin::AppType.where(name: 'bulk-msg').first
   end
 
+  def self.bulk_msg_master
+    Master.find(-1)
+  end
 
   ShortcodeLength = 6
   DefaultShortLinkS3Bucket = ENV['FPHS_SHORTLINK_BUCKET'] || (Rails.env.production? ? 'fphs.link' : 'test-shortlink.fphs.link')

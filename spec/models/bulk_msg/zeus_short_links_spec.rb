@@ -55,7 +55,7 @@ RSpec.describe "DynamicModel::ZeusShortLink", type: :model do
 
   end
 
-  it "generates a short URL in a message" do
+  it "generates a short URL in a mes\sage" do
     txt = "A short message with a generated URL [[shortlink https://footballplayershealth.harvard.edu/join-us/?test_id={{ids.msid}}]]\nThanks!"
     last_msid = (Master.order(msid: :desc).first.msid || 123) + 1
     @master = Master.create! current_user: @user, msid: last_msid

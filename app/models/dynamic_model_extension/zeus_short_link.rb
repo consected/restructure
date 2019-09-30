@@ -57,6 +57,20 @@ res
         %i(url shortcode)
       end
 
+
+      def update_click_count shortcode, clicks, master
+        sl = where(shortcode: shortcode).first
+        unless sl
+          logger.warn "Failed to find short link for shortcode: #{shortcode}"
+          return
+        end
+
+        sl.clicks = sl.clicks + clicks
+        sl.master = master
+        sl.force_save!
+        sl.save!
+      end
+
     end
 
 
@@ -144,11 +158,7 @@ res
       "http://#{self.domain}/#{self.shortcode}"
     end
 
-    def get_logs
-      bucket = Settings::DefaultShortLinkLogS3Bucket
-      s3_file_get_all.s3_list bucket: bucket, prefix: Settings::LogBucketPrefix
 
-    end
 
   end
 end

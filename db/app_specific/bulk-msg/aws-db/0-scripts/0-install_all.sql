@@ -9,6 +9,8 @@ set search_path=bulk_msg,ml_app;
 \i db/app_specific/bulk-msg/aws-db/bulk/create_player_contact_phone_infos.sql
 \i db/app_specific/bulk-msg/aws-db/bulk/dup_check_recipients.sql
 \i db/app_specific/bulk-msg/aws-db/bulk/setup_master.sql
+\i db/app_specific/bulk-msg/aws-db/bulk/create_zeus_short_links.sql
+\i db/app_specific/bulk-msg/aws-db/bulk/create_zeus_short_link_clicks.sql
 
 set search_path=bulk_msg,ml_app;
 \i db/app_specific/bulk-msg/aws-db/z_grant_roles.sql
