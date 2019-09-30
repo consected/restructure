@@ -1,6 +1,6 @@
 class SmsDeliveryStatusRefreshTask
   include Delayed::RecurringJob
-  run_every 10.minutes
+  run_every 2.hours
 
   queue 'recurring-tasks'
 
