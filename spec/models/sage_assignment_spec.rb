@@ -49,6 +49,8 @@ RSpec.describe 'SageAssignment', type: :model do
     end
 
     it "only allows sage_assignment IDs that have been pregenerated" do
+      res = SageAssignment.generate_ids(@admin, 100)
+
       create_items :list_invalid_attribs, @master, true
       check_all_records_failed
     end

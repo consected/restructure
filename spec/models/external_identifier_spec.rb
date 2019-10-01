@@ -136,4 +136,17 @@ RSpec.describe ExternalIdentifier, type: :model do
 
   end
 
+  it "creates an external ID automatically" do
+    create_master
+
+    expect(SageAssignment.definition.pregenerate_ids).to be true
+
+    SageAssignment.generate_ids(@admin, 100)
+
+
+    res = @master.sage_assignments.create!
+    expect(res.sage_id).not_to be blank?
+
+  end
+
 end

@@ -116,6 +116,18 @@ class ExternalIdentifier < ActiveRecord::Base
         def build att=nil
           self.master_build_with_next_id proxy_association.owner, att
         end
+
+        def create att={}
+          obj = self.master_build_with_next_id proxy_association.owner, att
+          obj.save
+          obj
+        end
+
+        def create! att={}
+          obj = self.master_build_with_next_id proxy_association.owner, att
+          obj.save!
+          obj
+        end
       end
     else
       Master.has_many model_association_name.to_sym,  inverse_of: :master
@@ -289,7 +301,7 @@ class ExternalIdentifier < ActiveRecord::Base
     if failed || !enabled?
       remove_model_from_list
     end
-    
+
     Master.reset_external_id_matching_fields!
 
     res
