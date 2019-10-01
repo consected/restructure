@@ -78,6 +78,8 @@ module Reports
       return general_error("no matching attributes") if matching_attribs.length == 0
 
       list_class.transaction do
+        all_recs = []
+
         new_item_ids.each do |id|
           item = item_class.find(id)
           master = item.master
@@ -88,8 +90,10 @@ module Reports
           matched_vals[:master_id] = from_master_id
           matched_vals[assoc_attr] = list_id
           matched_vals[:current_user] = current_user
-          list_class.create! matched_vals
+          all_recs << list_class.new(matched_vals)
         end
+
+        list_class.import all_recs, validate: false
       end
 
       n = new_item_ids.length
