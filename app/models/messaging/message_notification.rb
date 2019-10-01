@@ -221,7 +221,7 @@ module Messaging
                 logger.warn "A recipient list item did not exist"
               end
             end
-            self.data = {bulk_message_data: "#{recipient_records.length} #{'records'.pluralize(recipient_records.length)}"}
+            # self.data = {bulk_message_data: "#{recipient_records.length} #{'records'.pluralize(recipient_records.length)}"}
             self.recipient_data = recipient_data
           else
             generate_and_send

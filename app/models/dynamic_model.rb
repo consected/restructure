@@ -228,7 +228,7 @@ class DynamicModel < ActiveRecord::Base
 
           def master_id
             return nil if self.class.no_master_association
-            master.id
+            master&.id
           end
 
           def current_user

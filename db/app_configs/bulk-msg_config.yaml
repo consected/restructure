@@ -1,0 +1,1385 @@
+---
+app_type:
+  id: 13
+  name: bulk-msg
+  label: Bulk Message
+  disabled: false
+  admin_id: 2
+  created_at: '2019-06-10T17:17:06.929Z'
+  updated_at: '2019-06-25T16:35:22.724Z'
+  app_configurations:
+  - id: 126
+    name: default search form
+    value: bulk sms
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:06.970Z'
+    updated_at: '2019-06-10T17:17:06.970Z'
+    user_email: 
+  - id: 127
+    name: hide navbar search
+    value: 'true'
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:06.983Z'
+    updated_at: '2019-06-10T17:17:06.983Z'
+    user_email: 
+  - id: 128
+    name: hide player tabs
+    value: 'true'
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:06.993Z'
+    updated_at: '2019-06-10T17:17:06.993Z'
+    user_email: 
+  - id: 129
+    name: hide pro info
+    value: 'true'
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:07.004Z'
+    updated_at: '2019-06-10T17:17:07.004Z'
+    user_email: 
+  - id: 130
+    name: hide search form advanced
+    value: 'true'
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:07.014Z'
+    updated_at: '2019-06-10T17:17:07.014Z'
+    user_email: 
+  - id: 131
+    name: hide search form simple
+    value: 'true'
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:07.024Z'
+    updated_at: '2019-06-10T17:17:07.024Z'
+    user_email: 
+  - id: 132
+    name: hide tracker panel
+    value: 'true'
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:07.040Z'
+    updated_at: '2019-06-10T17:17:07.040Z'
+    user_email: 
+  - id: 133
+    name: menu research label
+    value: Bulk SMS
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:07.050Z'
+    updated_at: '2019-06-10T17:17:07.050Z'
+    user_email: 
+  - id: 134
+    name: header no subject details label
+    value: Configurations
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:07.060Z'
+    updated_at: '2019-06-10T17:17:07.060Z'
+    user_email: 
+  - id: 135
+    name: show ids in master result
+    value: none
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 13
+    role_name: ''
+    created_at: '2019-06-10T17:17:07.070Z'
+    updated_at: '2019-06-10T17:17:07.070Z'
+    user_email: 
+  user_access_controls:
+  - id: 692
+    user_id: 
+    resource_type: general
+    resource_name: app_type
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.743Z'
+    updated_at: '2019-06-14T07:33:08.154Z'
+    user_email: 
+  - id: 693
+    user_id: 
+    resource_type: report
+    resource_name: Bulk SMS
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.756Z'
+    updated_at: '2019-06-14T07:33:08.164Z'
+    user_email: 
+  - id: 694
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__zeus_bulk_messages
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.766Z'
+    updated_at: '2019-06-14T07:33:08.175Z'
+    user_email: 
+  - id: 695
+    user_id: 
+    resource_type: table
+    resource_name: trackers
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.776Z'
+    updated_at: '2019-06-14T07:33:08.185Z'
+    user_email: 
+  - id: 696
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__zeus_bulk_messages
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.787Z'
+    updated_at: '2019-06-14T07:33:08.194Z'
+    user_email: 
+  - id: 697
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__zeus_bulk_message__create_bulk_message
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.797Z'
+    updated_at: '2019-06-14T07:33:08.203Z'
+    user_email: 
+  - id: 698
+    user_id: 
+    resource_type: table
+    resource_name: player_contacts
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.808Z'
+    updated_at: '2019-06-14T07:33:08.213Z'
+    user_email: 
+  - id: 699
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__zeus_bulk_message_recipients
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.818Z'
+    updated_at: '2019-06-14T07:33:08.223Z'
+    user_email: 
+  - id: 700
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__zeus_bulk_message__submit_bulk_message
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.828Z'
+    updated_at: '2019-06-14T07:33:08.233Z'
+    user_email: 
+  - id: 701
+    user_id: 
+    resource_type: report
+    resource_name: Recipients and Delivery
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.838Z'
+    updated_at: '2019-06-14T11:48:27.863Z'
+    user_email: 
+  - id: 702
+    user_id: 
+    resource_type: general
+    resource_name: view_reports
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.848Z'
+    updated_at: '2019-06-14T07:33:08.251Z'
+    user_email: 
+  - id: 703
+    user_id: 
+    resource_type: report
+    resource_name: Select Players by Flag
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.858Z'
+    updated_at: '2019-06-14T07:33:08.260Z'
+    user_email: 
+  - id: 704
+    user_id: 
+    resource_type: report
+    resource_name: Players Selected
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-10T17:17:14.874Z'
+    updated_at: '2019-06-14T07:33:08.269Z'
+    user_email: 
+  - id: 705
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__zeus_bulk_message_statuses
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-14T07:33:08.280Z'
+    updated_at: '2019-06-14T11:49:02.994Z'
+    user_email: 
+  - id: 706
+    user_id: 
+    resource_type: report
+    resource_name: Message Metrics
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-14T12:55:10.221Z'
+    updated_at: '2019-06-14T12:55:10.221Z'
+    user_email: 
+  - id: 707
+    user_id: 
+    resource_type: report
+    resource_name: Select Players
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-18T11:08:48.033Z'
+    updated_at: '2019-06-18T11:08:48.033Z'
+    user_email: 
+  - id: 709
+    user_id: 
+    resource_type: report
+    resource_name: Delivery Stats
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 13
+    role_name: user - bulk sms
+    created_at: '2019-06-18T13:27:46.716Z'
+    updated_at: '2019-06-18T13:27:46.716Z'
+    user_email: 
+  - id: 1343
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__zeus_short_links
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 13
+    role_name: admin - short links
+    created_at: '2019-09-24T16:31:07.034Z'
+    updated_at: '2019-09-24T16:31:07.034Z'
+    user_email: 
+  - id: 1344
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__zeus_short_link_clicks
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 13
+    role_name: admin - short links
+    created_at: '2019-09-30T10:28:55.867Z'
+    updated_at: '2019-09-30T10:28:55.867Z'
+    user_email: 
+  associated_activity_logs:
+  - id: 57
+    name: Messages
+    item_type: zeus_bulk_message
+    rec_type: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-06-10T17:17:11.975Z'
+    updated_at: '2019-09-24T17:00:36.553Z'
+    action_when_attribute: created_at
+    field_list: ''
+    blank_log_field_list: ''
+    blank_log_name: ''
+    extra_log_types: "create_bulk_message:\r\n\r\n  label: Message {{capitalize embedded_item.name}}\r\n
+      \ \r\n  view_options:\r\n    always_embed_reference: dynamic_model__zeus_bulk_message\r\n
+      \   always_embed_creatable_reference: dynamic_model__zeus_bulk_message\r\n    alt_width_classes:
+      col-md-18 col-lg-18 col-md-offset-3 al-shrinkable \r\n  \r\n  references:\r\n
+      \   dynamic_model__zeus_bulk_message:\r\n      from: this\r\n      add: one_to_this\r\n
+      \     prevent_disable: true\r\n\r\n  # The initial review can be performed at
+      any time until the PI review has been completed\r\n  # It does not block PI
+      review\r\n    activity_log__zeus_bulk_message:\r\n      label: Submit\r\n      from:
+      this\r\n      add: one_to_this\r\n      add_with:\r\n        extra_log_type:
+      submit_bulk_message\r\n      filter_by:\r\n        extra_log_type: submit_bulk_message\r\n
+      \     also_disable_record: true\r\n      allow_disable_if_not_editable: true\r\n
+      \     creatable_if:\r\n        all:\r\n          dynamic_model__zeus_bulk_message_recipients:\r\n
+      \           zeus_bulk_message_id:\r\n              this_references:\r\n                dynamic_model__zeus_bulk_messages:
+      id\r\n            disabled: false\r\n            id: return_value\r\n        \r\n
+      \     prevent_disable:\r\n        all:\r\n          dynamic_model__zeus_bulk_messages:\r\n
+      \           id:\r\n              parent_references:\r\n                dynamic_model__zeus_bulk_messages:
+      id\r\n                  \r\n            status:\r\n              - sent\r\n
+      \             - cancelled\r\n\r\n\r\n\r\n\r\n  editable_if:\r\n    always: true\r\n\r\n\r\n\r\n\r\nsubmit_bulk_message:\r\n\r\n
+      \ fields:\r\n    - background_job_ref\r\n  \r\n  show_if:\r\n    background_job_ref:\r\n
+      \     never: true\r\n      \r\n  view_options:\r\n    data_attribute: \r\n      -
+      submitted at\r\n      - created_at\r\n    show_cancel: true\r\n    hide_unless_creatable:
+      true\r\n\r\n  caption_before:\r\n    submit: Schedule the message to be sent
+      at the configured time\r\n    all_fields:\r\n      show_caption: |\r\n        To
+      cancel a scheduled message, click the icon <span class=\"glyphicon glyphicon-remove\"></span>\r\n
+      \       \r\n  \r\n  save_action:\r\n    label: Schedule\r\n  \r\n  save_trigger:\r\n
+      \   \r\n    on_create:\r\n\r\n      update_reference:\r\n        ref:\r\n          force_not_editable_save:
+      true        \r\n          first:\r\n            dynamic_model__zeus_bulk_messages:\r\n
+      \             id:\r\n                parent_references:\r\n                  dynamic_model__zeus_bulk_messages:
+      id\r\n                  \r\n              update: return_result\r\n          with:\r\n
+      \           status: scheduled        \r\n      notify:\r\n        type: sms\r\n
+      \       list_type: dynamic_model__zeus_bulk_message_recipients\r\n        \r\n
+      \       phone_records: \r\n          dynamic_model__zeus_bulk_message_recipients:\r\n
+      \           zeus_bulk_message_id:\r\n              parent_references:\r\n                dynamic_model__zeus_bulk_messages:
+      id\r\n            disabled: false\r\n            id: return_value_list\r\n            \r\n
+      \       default_country_code: 1\r\n        layout_template: standard sms layout\r\n
+      \       importance: promotional\r\n        content_template_text:           \r\n
+      \         dynamic_model__zeus_bulk_messages:\r\n            id:\r\n              parent_references:\r\n
+      \               dynamic_model__zeus_bulk_messages: id\r\n            message:
+      return_value\r\n            \r\n        when:\r\n          wait_until:\r\n           date:
+      \ \r\n            dynamic_model__zeus_bulk_messages:\r\n              id:\r\n
+      \               parent_references:\r\n                  dynamic_model__zeus_bulk_messages:
+      id\r\n              send_date: return_value\r\n           time:  \r\n            dynamic_model__zeus_bulk_messages:\r\n
+      \             id:\r\n                parent_references:\r\n                  dynamic_model__zeus_bulk_messages:
+      id\r\n              send_time: return_value\r\n        \r\n        on_complete:\r\n
+      \         update_reference:\r\n            ref:\r\n              force_not_editable_save:
+      true\r\n              first:\r\n                dynamic_model__zeus_bulk_messages:\r\n
+      \                 id:\r\n                    parent_references:\r\n                      dynamic_model__zeus_bulk_messages:
+      id\r\n                      \r\n                  update: return_result\r\n
+      \             with:\r\n                status: sent\r\n\r\n\r\n    on_disable:\r\n
+      \     update_reference:\r\n        ref:\r\n          force_not_editable_save:
+      true\r\n          first:\r\n            dynamic_model__zeus_bulk_messages:\r\n
+      \             id:\r\n                parent_references:\r\n                  dynamic_model__zeus_bulk_messages:
+      id\r\n                  \r\n              update: return_result\r\n          with:\r\n
+      \           status: cancelled\r\n    \r\n          \r\n  creatable_if:\r\n    never:
+      true\r\n    \r\n  showable_if:\r\n    never: true\r\n    \r\n  \r\n  \r\n  \r\n
+      \ "
+    hide_item_list_panel: true
+    main_log_name: ''
+    process_name: ''
+    table_name: activity_log_zeus_bulk_messages
+    category: bulk-sms
+    user_email: 
+  associated_dynamic_models:
+  - id: 526
+    name: Short Link Clicks
+    table_name: zeus_short_link_clicks
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-30T09:25:34.588Z'
+    updated_at: '2019-09-30T09:25:34.588Z'
+    position: 
+    category: bulk-messages
+    table_key_name: ''
+    field_list: shortcode domain browser logfile action_timestamp
+    result_order: ''
+    options: ''
+    user_email: 
+  - id: 524
+    name: Short Links
+    table_name: zeus_short_links
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-24T15:58:40.055Z'
+    updated_at: '2019-09-24T15:58:40.055Z'
+    position: 
+    category: bulk-messages
+    table_key_name: ''
+    field_list: url,shortcode,clicks,next_check_date
+    result_order: ''
+    options: ''
+    user_email: 
+  - id: 229
+    name: Bulk Messages
+    table_name: zeus_bulk_messages
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-06-10T17:17:07.078Z'
+    updated_at: '2019-06-18T11:02:54.116Z'
+    position: 
+    category: bulk-messages
+    table_key_name: ''
+    field_list: name,notes,channel,message,send_date,send_time,embedded_report_84,embedded_report_82,embedded_report_81,status
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n  \r\n    channel:\r\n      edit_as:\r\n
+      \       field_type: select_channel\r\n        alt_options: \r\n          - sms\r\n
+      \     value: sms\r\n      \r\n    status:\r\n      edit_as:\r\n        field_type:
+      fixed_status\r\n      value: draft\r\n\r\n    message:\r\n      edit_as:\r\n
+      \       field_type: message_notes\r\n        \r\n\r\n  valid_if:\r\n    on_save:\r\n
+      \     not_any:\r\n        this:\r\n          send_date: null\r\n          send_time:
+      null\r\n          message: ''\r\n          name: ''\r\n\r\n  caption_before:\r\n
+      \   name: Name\r\n    notes: Description\r\n    channel: Send via\r\n    message:
+      |\r\n      Message to send\r\n      <i>Use {<span>{</span>tagname<span>}</span>}
+      for substitutions</i>\r\n    send_date:\r\n      keep_label: false\r\n      caption:
+      Send on\r\n    send_time: |\r\n      Send at\r\n      <i>timezone: {{user_preference.timezone}}</i>\r\n
+      \   status: Status\r\n    ready: Ready to send?\r\n    embedded_report_84: Add
+      recipients to list\r\n    embedded_report_82: Show added recipients\r\n    embedded_report_81:
+      Delivery status\r\n\r\n    \r\n  show_if:\r\n      \r\n    status:\r\n      not_any:\r\n
+      \       id: ''\r\n\r\n    embedded_report_84:\r\n      not_any:\r\n        id:
+      ''\r\n        status:\r\n          - scheduled\r\n          - sent\r\n\r\n    embedded_report_81:\r\n
+      \     all:\r\n        status:\r\n          - sent\r\n\r\n    embedded_report_82:\r\n
+      \     not_any:\r\n        id: ''\r\n        status:\r\n          - sent\r\n\r\n
+      \ editable_if:\r\n    all:\r\n      this: \r\n        status:\r\n          -
+      \r\n          - draft\r\n          - cancelled\r\n        \r\n"
+    user_email: 
+  - id: 231
+    name: Bulk Message Statuses
+    table_name: zeus_bulk_message_statuses
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-06-14T07:32:55.993Z'
+    updated_at: '2019-06-14T07:32:55.993Z'
+    position: 
+    category: bulk-messages
+    table_key_name: ''
+    field_list: res_timestamp message_id status status_reason zeus_bulk_message_recipient_id
+    result_order: ''
+    options: ''
+    user_email: 
+  - id: 230
+    name: Zeus Bulk Message Recipients
+    table_name: zeus_bulk_message_recipients
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-06-10T17:17:09.590Z'
+    updated_at: '2019-06-10T17:17:09.590Z'
+    position: 
+    category: bulk-messages
+    table_key_name: ''
+    field_list: record_id,data,rec_type,rank
+    result_order: ''
+    options: "default:\r\n\r\n"
+    user_email: 
+  associated_external_identifiers: []
+  associated_reports:
+  - id: 79
+    name: Bulk SMS
+    description: "#Send SMS text messages to selected players\r\n\r\n* [create a new
+      message](#zeus-bulk-message-activity-logs-zeus-bulk-message-type-) to be sent\r\n*
+      [check message metrics](/reports/83) for delivery rates of individual messages\r\n*
+      [view aggregate delivery stats](/reports/85) for all messages"
+    sql: select -1 master_id;
+    search_attrs: ''
+    admin_id: 1
+    disabled: false
+    created_at: '2019-06-10T17:17:14.595Z'
+    updated_at: '2019-06-24T09:32:29.798Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: messaging
+    short_name: bulk_sms
+    options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
+      true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
+      \ \r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 80
+    name: Select Players by Flag
+    description: ''
+    sql: "select distinct '{\"field_name\": \"add_to_list[items][]\",\"value\": {\"list_id\":
+      \"' || :list_id || '\",\"type\":\"player_contacts\", \"id\":' || pc.id || ',
+      \"from_master_id\":-1}}' \"select items: add to list: zeus_bulk_message_recipients\",
+      pi.first_name, pi.last_name, pc.data, pc.rank \r\n\r\nfrom item_flags\r\n\r\ninner
+      join player_infos pi on item_id = pi.id\r\ninner join player_contacts pc on
+      pc.master_id = pi.master_id\r\nleft outer join zeus_bulk_message_recipients
+      mr\r\n  on pc.id = mr.record_id and mr.zeus_bulk_message_id = :list_id and mr.disabled
+      = false\r\nwhere \r\npc.rec_type = 'phone' \r\nand pc.rank in (:rank)\r\nand\r\n(\r\n
+      \ (:item_flag_to_search) is not null and item_flag_name_id in (:item_flag_to_search)\r\n
+      \ or (:id_list) is not null and pi.master_id in (:id_list)\r\n)\r\nand mr.record_id
+      is null\r\norder by last_name, first_name\r\n;"
+    search_attrs: "\r\nitem_flag_to_search: \r\n  item_flag_name: \r\n    all: true\r\n
+      \   multiple: multiple\r\n    disabled: false\r\n    \r\nrank: \r\n  general_selection:
+      \r\n    label: Phone rank\r\n    item_type: player_contacts_rank\r\n    multiple:
+      multiple\r\n    disabled: false\r\n\r\nid_list: \r\n  number: \r\n    all: true\r\n
+      \   multiple: multiple\r\n    label: Master ID list\r\n    disabled: false\r\n
+      \   hidden: true\r\n    \r\nlist_id:\r\n  number:\r\n    label: ID\r\n    hidden:
+      true"
+    admin_id: 1
+    disabled: false
+    created_at: '2019-06-10T17:17:14.604Z'
+    updated_at: '2019-06-24T09:32:29.770Z'
+    report_type: regular_report
+    auto: false
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: messaging
+    short_name: select_players_by_flag
+    options: "list_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 81
+    name: Recipients and Delivery
+    description: ''
+    sql: "select \r\npi.first_name \"first name\", \r\npi.last_name \"last name\",
+      \r\nb.data \"phone\", \r\nzbms.status,\r\nzbms.status_reason \"reason\"\r\nfrom
+      zeus_bulk_message_recipients b\r\ninner join player_contacts pc on pc.id = b.record_id\r\ninner
+      join player_infos pi on pc.master_id = pi.master_id\r\nleft outer join zeus_bulk_message_statuses
+      zbms\r\non b.id = zbms.zeus_bulk_message_recipient_id\r\nwhere zeus_bulk_message_id
+      = :list_id;"
+    search_attrs: "\r\n\r\nlist_id: \r\n  number: \r\n    all: true\r\n    multiple:
+      single\r\n    disabled: false\r\n    hidden: true"
+    admin_id: 1
+    disabled: false
+    created_at: '2019-06-10T17:17:14.610Z'
+    updated_at: '2019-06-24T09:32:29.792Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: messaging
+    short_name: recipients_and_delivery
+    options: "list_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 82
+    name: Players Selected
+    description: ''
+    sql: "select \r\n'{\"field_name\": \"remove_from_list[items][]\",\"value\": {\"list_id\":
+      \"' || :list_id || '\",\"type\":\"player_contacts\", \"id\":' || b.id || ',
+      \"from_master_id\":-1}}' \"select items: remove from list: zeus_bulk_message_recipients\",\r\npi.first_name
+      \"first name\", \r\npi.last_name \"last name\", \r\nb.data \"phone\", \r\nb.rank
+      \"phone rank\"\r\n--, b.rec_type\r\n--, b.response\r\n--, pc.master_id\r\nfrom
+      zeus_bulk_message_recipients b\r\ninner join player_contacts pc on pc.id = record_id\r\ninner
+      join player_infos pi on pi.master_id = pc.master_id\r\nwhere zeus_bulk_message_id
+      = :list_id\r\nand b.disabled = false\r\norder by b.data"
+    search_attrs: "\r\n\r\nlist_id: \r\n  number: \r\n    all: true\r\n    multiple:
+      single\r\n    disabled: false\r\n    hidden: true"
+    admin_id: 1
+    disabled: false
+    created_at: '2019-06-10T17:17:14.616Z'
+    updated_at: '2019-06-24T09:32:29.786Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: messaging
+    short_name: players_selected
+    options: "list_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 83
+    name: Message Metrics
+    description: ''
+    sql: "create temporary table temp_zbmrs\r\n as\r\n   select zbmr.zeus_bulk_message_id,
+      zbms.status, zbms.status_reason\r\n   from zeus_bulk_message_recipients zbmr\r\n
+      \  left join zeus_bulk_message_statuses zbms on zbmr.id = zbms.zeus_bulk_message_recipient_id\r\n
+      \  where zbmr.disabled = false;\r\n  \r\nselect \r\nzbm.name, zbm.send_date,
+      zbm.send_time, zbm.message,\r\n(\r\n  select count(*) \r\n  from zeus_bulk_message_recipients
+      zbmr\r\n  where zbmr.zeus_bulk_message_id = zbm.id and zbmr.disabled = false\r\n)
+      recipients\r\n,\r\n(\r\n  select count(*) \r\n  from temp_zbmrs\r\n  where temp_zbmrs.zeus_bulk_message_id
+      = zbm.id \r\n  and status = 'success'\r\n  \r\n) delivered\r\n,\r\n(\r\n  select
+      count(*) \r\n  from temp_zbmrs\r\n  where temp_zbmrs.zeus_bulk_message_id =
+      zbm.id \r\n  and status = 'failure'\r\n  \r\n) failed\r\n,\r\n(\r\n  select
+      count(*) \r\n  from zeus_bulk_message_recipients zbmr\r\n  where zbmr.zeus_bulk_message_id
+      = zbm.id and zbmr.disabled = false\r\n) \r\n-\r\n(\r\n  select count(*) \r\n
+      \ from temp_zbmrs\r\n  where temp_zbmrs.zeus_bulk_message_id = zbm.id \r\n  and
+      status = 'success'  \r\n) \r\n- \r\n(\r\n  select count(*) \r\n  from temp_zbmrs\r\n
+      \ where temp_zbmrs.zeus_bulk_message_id = zbm.id \r\n  and status = 'failure'
+      \ \r\n) \r\nno_response\r\n,\r\nround(\r\n(\r\n  select count(*) \r\n  from
+      temp_zbmrs\r\n  where temp_zbmrs.zeus_bulk_message_id = zbm.id \r\n  and status
+      = 'success'\r\n  \r\n)::numeric / \r\n(\r\n  select count(*) \r\n  from zeus_bulk_message_recipients
+      zbmr\r\n  where zbmr.zeus_bulk_message_id = zbm.id and zbmr.disabled = false\r\n)
+      * 100, 2)::varchar || '%' \"delivery rate\",\r\n'{\"type\":\"pie\", \"label\":\"Delivery
+      Rate\", \"height\": 150, \"width\": 400 ,\"data\": {\"datasets\": [{\"data\":[colval.delivered,
+      colval.failed, colval.no_response], \"backgroundColor\": [\"#00aa00\",\"#aa0000\",\"#dddddd\"]}],
+      \"labels\":[\"Delivered\", \"Failed\", \"No Data\"]}}'\r\n\"chart:\"\r\n\r\nfrom
+      zeus_bulk_messages zbm\r\nwhere zbm.status = 'sent'\r\norder by zbm.created_at
+      desc\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 1
+    disabled: false
+    created_at: '2019-06-14T12:54:38.469Z'
+    updated_at: '2019-06-24T09:32:29.814Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: messaging
+    short_name: message_metrics
+    options: "view_options:\r\n  humanize_column_names: true\r\n  hide_table_names:
+      true\r\n"
+    user_email: 
+  - id: 84
+    name: Select Players
+    description: ''
+    sql: "select distinct \r\n'{\"field_name\": \"add_to_list[items][]\",\"value\":
+      {\"list_id\": \"' || :list_id || '\",\"type\":\"player_contacts\", \"id\":'
+      || pc.id || ', \"from_master_id\":-1}}' \"select items: add to list: zeus_bulk_message_recipients\",
+      \r\npi.first_name \"first name\", \r\npi.last_name \"last name\", \r\npc.data
+      \"phone\", \r\npcpi.phone_type \"phone type\", \r\ncase when pc.rank = 10 then
+      'primary' when pc.rank = 5 then 'secondary' else 'other' end \"phone rank\",
+      \r\nsp.name status,\r\na.city, a.state\r\nfrom player_infos pi\r\ninner join
+      player_contacts pc on pc.master_id = pi.master_id\r\ninner join addresses a
+      on pi.master_id = a.master_id\r\ninner join tracker_history th on th.master_id
+      = pi.master_id\r\ninner join sub_processes sp on th.sub_process_id = sp.id\r\nleft
+      outer join player_contact_phone_infos pcpi on pcpi.player_contact_id = pc.id\r\nwhere
+      \r\n(\r\n  (:state) is null OR a.state in (:state)\r\n)\r\nAND (\r\n  (:statuses)
+      is null OR th.sub_process_id in (:statuses)\r\n)\r\nAND pc.rank in (:rank)\r\nAND
+      pc.rec_type = 'phone'\r\n;\r\n"
+    search_attrs: "rank: \r\n  general_selection: \r\n    label: Phone number has
+      rank\r\n    item_type: player_contacts_rank\r\n    multiple: multiple\r\n    disabled:
+      false\r\n    default:\r\n      - 10\r\n\r\nstatuses: \r\n  sub_process: \r\n
+      \   all: true\r\n    multiple: multiple\r\n    label: Player has status\r\n
+      \   disabled: false\r\n\r\n    default: \r\n      - 13\r\n\r\nstate: \r\n  address_state:
+      \r\n    all: true\r\n    multiple: multiple\r\n    label: or in state\r\n    \r\n\r\n\r\nlist_id:\r\n
+      \ number:\r\n    label: ID\r\n    hidden: true\r\n"
+    admin_id: 1
+    disabled: false
+    created_at: '2019-06-18T11:00:21.115Z'
+    updated_at: '2019-06-24T09:32:29.803Z'
+    report_type: regular_report
+    auto: false
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: messaging
+    short_name: select_player_phones_by_status
+    options: "view_options:\r\n  hide_table_names: true\r\n  # humanize_column_names:
+      true\r\n\r\nlist_options:\r\n  hide_in_list: true"
+    user_email: 
+  - id: 85
+    name: Delivery Stats
+    description: ''
+    sql: "create temporary table temp_zbmrs\r\n as\r\n   select zbmr.zeus_bulk_message_id,
+      zbms.status, zbms.status_reason\r\n   from zeus_bulk_message_recipients zbmr\r\n
+      \  inner join zeus_bulk_messages zbm\r\n   on zbm.status = 'sent' and zbmr.zeus_bulk_message_id
+      = zbm.id\r\n   left join zeus_bulk_message_statuses zbms on zbmr.id = zbms.zeus_bulk_message_recipient_id\r\n
+      \  where zbmr.disabled = false;\r\n  \r\nselect \r\n(\r\n  select count(*) \r\n
+      \ from zeus_bulk_message_recipients zbmr\r\n  where zbmr.disabled = false\r\n)
+      recipients\r\n,\r\n(\r\n  select count(*) \r\n  from temp_zbmrs\r\n  where status
+      = 'success'\r\n  \r\n) delivered\r\n,\r\n(\r\n  select count(*) \r\n  from temp_zbmrs\r\n
+      \ where status = 'failure'\r\n  \r\n) failed\r\n,\r\n(\r\n  select count(*)
+      \r\n  from zeus_bulk_message_recipients zbmr\r\n  where zbmr.disabled = false\r\n)
+      \r\n-\r\n(\r\n  select count(*) \r\n  from temp_zbmrs\r\n  where status = 'success'
+      \ \r\n) \r\n- \r\n(\r\n  select count(*) \r\n  from temp_zbmrs\r\n  where status
+      = 'failure'  \r\n) \r\nno_response\r\n,\r\nround(\r\n(\r\n  select count(*)
+      \r\n  from temp_zbmrs\r\n  where status = 'success'\r\n  \r\n)::numeric / \r\n(\r\n
+      \ select count(*) \r\n  from zeus_bulk_message_recipients zbmr\r\n  where zbmr.disabled
+      = false\r\n) * 100, 2)::varchar || '%' \"delivery rate\",\r\n'{\"type\":\"pie\",
+      \"label\":\"Delivery Rate\", \"width\": 400, \"height\": 400, \"data\": {\"datasets\":
+      [{\"data\":[colval.delivered, colval.failed, colval.no_response], \"backgroundColor\":
+      [\"#00aa00\",\"#aa0000\",\"#dddddd\"]}], \"labels\":[\"Delivered\", \"Failed\",
+      \"No Data\"]}}'\r\n\"chart:\"\r\n\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 1
+    disabled: false
+    created_at: '2019-06-18T13:27:15.537Z'
+    updated_at: '2019-06-24T09:32:29.655Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: messaging
+    short_name: delivery_stats
+    options: "view_options:\r\n  humanize_column_names: true\r\n  hide_table_names:
+      true\r\n"
+    user_email: 
+  associated_general_selections:
+  - id: 14
+    name: primary
+    value: '10'
+    item_type: player_contacts_rank
+    created_at: '2018-02-15T15:52:01.514Z'
+    updated_at: '2019-09-16T13:34:00.861Z'
+    disabled: 
+    admin_id: 2
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 
+    description: 
+    lock: 
+    user_email: 
+  - id: 15
+    name: secondary
+    value: '5'
+    item_type: player_contacts_rank
+    created_at: '2018-02-15T15:52:01.543Z'
+    updated_at: '2019-09-16T13:34:00.864Z'
+    disabled: 
+    admin_id: 2
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 
+    description: 
+    lock: 
+    user_email: 
+  - id: 16
+    name: do not use
+    value: '0'
+    item_type: player_contacts_rank
+    created_at: '2018-02-15T15:52:01.671Z'
+    updated_at: '2018-05-29T13:24:49.671Z'
+    disabled: 
+    admin_id: 2
+    create_with: 
+    edit_if_set: 
+    edit_always: 
+    position: 
+    description: 
+    lock: 
+    user_email: 
+  - id: 17
+    name: bad contact
+    value: "-1"
+    item_type: player_contacts_rank
+    created_at: '2018-02-15T15:52:01.689Z'
+    updated_at: '2019-09-16T13:34:00.871Z'
+    disabled: 
+    admin_id: 2
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 
+    description: 
+    lock: 
+    user_email: 
+  - id: 18
+    name: NFL
+    value: nfl
+    item_type: player_contacts_source
+    created_at: '2018-02-15T15:52:01.716Z'
+    updated_at: '2019-09-16T13:34:00.875Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 19
+    name: nflpa
+    value: nflpa
+    item_type: player_contacts_source
+    created_at: '2018-02-15T15:52:01.731Z'
+    updated_at: '2019-09-16T13:34:00.878Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 34
+    name: Email
+    value: email
+    item_type: player_contacts_type
+    created_at: '2015-09-10T15:15:31.892Z'
+    updated_at: '2019-09-16T13:34:00.889Z'
+    disabled: false
+    admin_id: 2
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 35
+    name: Phone
+    value: phone
+    item_type: player_contacts_type
+    created_at: '2015-09-10T15:15:31.897Z'
+    updated_at: '2019-09-16T13:34:00.892Z'
+    disabled: false
+    admin_id: 2
+    create_with: true
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 43
+    name: nflpa2
+    value: nflpa2
+    item_type: player_contacts_source
+    created_at: '2015-09-24T20:26:05.392Z'
+    updated_at: '2019-09-16T13:34:00.902Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 44
+    name: integrate1
+    value: integrate1
+    item_type: player_contacts_source
+    created_at: '2015-09-24T20:26:39.899Z'
+    updated_at: '2019-09-16T13:34:00.905Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 45
+    name: integrate2
+    value: integrate2
+    item_type: player_contacts_source
+    created_at: '2015-09-24T20:26:51.693Z'
+    updated_at: '2019-09-16T13:34:00.908Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 46
+    name: CIS
+    value: cis
+    item_type: player_contacts_source
+    created_at: '2015-09-24T20:27:19.419Z'
+    updated_at: '2019-09-16T13:34:00.911Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 47
+    name: cis-paper
+    value: cis-paper
+    item_type: player_contacts_source
+    created_at: '2015-09-24T20:27:47.697Z'
+    updated_at: '2019-09-16T13:34:00.914Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 48
+    name: cis-email
+    value: cis-email
+    item_type: player_contacts_source
+    created_at: '2015-09-24T20:28:09.928Z'
+    updated_at: '2019-09-16T13:34:00.917Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 51
+    name: do not use
+    value: '0'
+    item_type: player_contacts_rank
+    created_at: '2015-10-20T16:24:09.278Z'
+    updated_at: '2019-09-16T13:34:00.920Z'
+    disabled: 
+    admin_id: 2
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 
+    description: 
+    lock: 
+    user_email: 
+  - id: 86
+    name: Phone
+    value: phone
+    item_type: player_contacts_rec_type
+    created_at: '2018-05-29T13:24:49.682Z'
+    updated_at: '2019-09-16T13:34:00.924Z'
+    disabled: 
+    admin_id: 2
+    create_with: 
+    edit_if_set: 
+    edit_always: 
+    position: 
+    description: 
+    lock: 
+    user_email: 
+  - id: 87
+    name: Email
+    value: email
+    item_type: player_contacts_rec_type
+    created_at: '2018-05-29T13:24:49.689Z'
+    updated_at: '2019-09-16T13:34:00.926Z'
+    disabled: 
+    admin_id: 2
+    create_with: 
+    edit_if_set: 
+    edit_always: 
+    position: 
+    description: 
+    lock: 
+    user_email: 
+  - id: 189
+    name: cis-redcap
+    value: cis-redcap
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.596Z'
+    updated_at: '2019-09-16T13:34:00.934Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 190
+    name: nflpa4
+    value: nflpa4
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.602Z'
+    updated_at: '2019-09-16T13:34:00.937Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 191
+    name: nflpa3
+    value: nflpa3
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.607Z'
+    updated_at: '2019-09-16T13:34:00.940Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 192
+    name: player referral
+    value: player referral
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.612Z'
+    updated_at: '2019-09-16T13:34:00.944Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 193
+    name: public source
+    value: public source
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.617Z'
+    updated_at: '2019-09-16T13:34:00.946Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 194
+    name: event
+    value: event
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.622Z'
+    updated_at: '2019-09-16T13:34:00.949Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 195
+    name: cis-phone
+    value: cis-phone
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.627Z'
+    updated_at: '2019-09-16T13:34:00.952Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 196
+    name: not set
+    value: not set
+    item_type: player_contacts_source
+    created_at: '2018-09-11T11:53:34.632Z'
+    updated_at: '2019-09-16T13:34:00.955Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 197
+    name: facebook
+    value: facebook
+    item_type: player_contacts_type
+    created_at: '2018-09-11T11:53:34.637Z'
+    updated_at: '2019-09-16T13:34:00.958Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 198
+    name: twitter
+    value: twitter
+    item_type: player_contacts_type
+    created_at: '2018-09-11T11:53:34.642Z'
+    updated_at: '2019-09-16T13:34:00.961Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 211
+    name: app entry
+    value: app entry
+    item_type: player_contacts_source
+    created_at: '2018-09-19T12:07:41.040Z'
+    updated_at: '2019-09-16T13:34:01.000Z'
+    disabled: false
+    admin_id: 2
+    create_with: true
+    edit_if_set: false
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 390
+    name: primary
+    value: '10'
+    item_type: dynamic_model__zeus_bulk_message_recipients_rank
+    created_at: '2019-06-10T17:17:14.551Z'
+    updated_at: '2019-06-10T17:17:14.551Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 390
+    name: primary
+    value: '10'
+    item_type: dynamic_model__zeus_bulk_message_recipients_rank
+    created_at: '2019-06-10T17:17:14.551Z'
+    updated_at: '2019-06-10T17:17:14.551Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 391
+    name: secondary
+    value: '5'
+    item_type: dynamic_model__zeus_bulk_message_recipients_rank
+    created_at: '2019-06-10T17:17:14.563Z'
+    updated_at: '2019-06-10T17:17:14.563Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 391
+    name: secondary
+    value: '5'
+    item_type: dynamic_model__zeus_bulk_message_recipients_rank
+    created_at: '2019-06-10T17:17:14.563Z'
+    updated_at: '2019-06-10T17:17:14.563Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 392
+    name: phone
+    value: phone
+    item_type: dynamic_model__zeus_bulk_message_recipients_rec_type
+    created_at: '2019-06-10T17:17:14.572Z'
+    updated_at: '2019-06-10T17:17:14.572Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 392
+    name: phone
+    value: phone
+    item_type: dynamic_model__zeus_bulk_message_recipients_rec_type
+    created_at: '2019-06-10T17:17:14.572Z'
+    updated_at: '2019-06-10T17:17:14.572Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  page_layouts:
+  - id: 16
+    app_type_id: 13
+    layout_name: master
+    panel_name: configurations
+    panel_label: Configurations
+    panel_position: 1
+    options: "contains: \r\n  resources:\r\n    - activity_log__zeus_bulk_messages\r\n
+      \   \r\nview_options:\r\n  initial_show: true\r\n  limit: 8\r\n"
+    disabled: false
+    admin_id: 2
+    created_at: '2019-06-10T17:17:14.661Z'
+    updated_at: '2019-06-18T13:45:29.670Z'
+    description: 
+    user_email: 
+  user_roles:
+  - id: 122
+    app_type_id: 13
+    role_name: user - bulk sms
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2019-06-10T17:17:14.689Z'
+    updated_at: '2019-06-10T17:17:14.689Z'
+    user_email: phil_ayres@test.com
+  - id: 123
+    app_type_id: 13
+    role_name: user - bulk sms
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2019-06-10T17:17:14.708Z'
+    updated_at: '2019-06-10T17:17:14.708Z'
+    user_email: template@template
+  - id: 310
+    app_type_id: 13
+    role_name: admin - short links
+    user_id: 84
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-24T16:30:13.282Z'
+    updated_at: '2019-09-24T16:30:13.282Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 311
+    app_type_id: 13
+    role_name: admin - short links
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-24T16:30:13.298Z'
+    updated_at: '2019-09-24T16:30:13.298Z'
+    user_email: template@template
+  - id: 312
+    app_type_id: 13
+    role_name: admin - short links
+    user_id: 68
+    admin_id: 21
+    disabled: false
+    created_at: '2019-09-24T16:41:36.252Z'
+    updated_at: '2019-09-24T16:41:36.252Z'
+    user_email: fphsetl@hms.harvard.edu
+  associated_message_templates:
+  - id: 22
+    name: standard sms layout
+    message_type: sms
+    template_type: layout
+    template: "{{main_content}}"
+    admin_id: 21
+    disabled: false
+    created_at: '2019-01-08T14:11:25.775Z'
+    updated_at: '2019-07-01T16:26:12.614Z'
+    category: 
+    user_email: 
+  associated_config_libraries: []
+  associated_protocols: []
+  associated_sub_processes: []
+  associated_protocol_events: []
+  nfs_store_filters: []
+  user_email: 

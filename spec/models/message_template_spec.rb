@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Admin::MessageTemplate, type: :model do
 
+  include MasterSupport
   include ModelSupport
   include PlayerInfoSupport
 
@@ -10,6 +11,7 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     create_admin
     create_user
     seed_database
+    create_master
     l = Admin::MessageTemplate.last.id
     Admin::MessageTemplate.where(name: 'test email layout').update_all(name: "test old layout #{l}")
     Admin::MessageTemplate.where(name: 'test email content').update_all(name: "test old content #{l}")
@@ -23,8 +25,8 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}.</p>'
     Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
 
-    res = layout.generate content_template_name: 'test email content', data: {master_id: 123456, 'name' => 'test name'}
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id 123456. This is a name: Test Name.</p></div></body></html>"
+    res = layout.generate content_template_name: 'test email content', data: {master_id: @master.id, 'name' => 'test name'}
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: Test Name.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end
@@ -71,11 +73,11 @@ RSpec.describe Admin::MessageTemplate, type: :model do
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name}}.</p>'
     # Admin::MessageTemplate.create! name: 'test email content', message_type: :email, template_type: :content, template: t, current_admin: @admin
     expect {
-      layout.generate data: {master_id: 123456, 'name' => 'test name'}
+      layout.generate data: {master_id: @master.id, 'name' => 'test name'}
     }.to raise_error FphsException
 
-    res = layout.generate content_template_text: t, data: {master_id: 12345678, 'name' => 'test name bob'}
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id 12345678. This is a name: Test Name Bob.</p></div></body></html>"
+    res = layout.generate content_template_text: t, data: {master: @master, 'name' => 'test name bob'}
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: Test Name Bob.</p></div></body></html>"
 
     expect(res).to eq expected_text
   end
@@ -87,15 +89,15 @@ RSpec.describe Admin::MessageTemplate, type: :model do
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase}}.</p>'
 
-    res = layout.generate content_template_text: t, data: {master_id: 12345678, 'name' => 'test name bob'}
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id 12345678. This is a name: TEST NAME BOB.</p></div></body></html>"
+    res = layout.generate content_template_text: t, data: {master_id: @master.id, 'name' => 'test name bob'}
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: TEST NAME BOB.</p></div></body></html>"
 
     expect(res).to eq expected_text
 
     t = '<p>This is some content.</p><p>Related to master_id {{master_id}}. This is a name: {{name::uppercase::3}}.</p>'
 
-    res = layout.generate content_template_text: t, data: {master_id: 12345678, 'name' => 'test name bob'}
-    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id 12345678. This is a name: TEST.</p></div></body></html>"
+    res = layout.generate content_template_text: t, data: {master_id: @master.id, 'name' => 'test name bob'}
+    expected_text = "<html><head><style>body {font-family: sans-serif;}</style></head><body><h1>Test Email</h1><div><p>This is some content.</p><p>Related to master_id #{@master.id}. This is a name: TEST.</p></div></body></html>"
 
     expect(res).to eq expected_text
 

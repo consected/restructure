@@ -47,7 +47,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
   # @param tag_subs [String] for example 'span class="someclass"'
   def self.substitute all_content, data: {}, tag_subs:, ignore_missing: false
 
-    data = setup_data(data) unless data.is_a? Hash
+    data = setup_data(data)
 
     tags = all_content.scan(/{{[0-9a-zA-Z_\.\:]+}}/)
     tags.each do |tag_container|
@@ -102,6 +102,9 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
       if tag_action == 'shortlink'
         sl = DynamicModel::ZeusShortLink.new
+
+        puts data[:master].inspect
+        raise FphsException.new "No master set for create_link: #{data}" unless data[:master]
         res = sl.create_link(tag_parts[1], master: data[:master], batch_user: true, for_item: data[:alt_item] || data[:original_item])
         tag_value = res[:short_link_instance]&.short_url
       else
@@ -176,6 +179,14 @@ class Admin::MessageTemplate < ActiveRecord::Base
     end
 
     def self.setup_data item, alt_item=nil
+
+      if item.is_a? Hash
+        item.symbolize_keys!
+        item[:master] = Master.find(item[:master_id]) if item[:master_id] && !item[:master]
+        item[:master_id] ||= item[:master].id if item[:master] && !item[:master_id]
+        return item
+      end
+
       data = item.attributes.dup
 
       data[:original_item] = item
