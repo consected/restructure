@@ -185,7 +185,7 @@ export EXPORTSVR=fphs-crm-prod01
 export EXPORTLOC=/FPHS/data/db_migrations
 export EXTROLE=FPHSUSR
 export EXTADMROLE=FPHSADM
-export EXTRAPGDUMPARGS='-T ml_app.masters_backup_20190703 -T ml_app.addresses_backup_20190709'
+export EXTRAPGDUMPARGS='-T ml_app.masters_backup_20190703 -T ml_app.addresses_backup_20190709 -T ml_app.player_contacts_20190808 -T ml_app.player_contacts_prenflpa6_20190920'
 ###############################
 fi
 
