@@ -89,8 +89,9 @@ module Reports
           matched_vals[:record_type] = item_type.singularize
           matched_vals[:master_id] = from_master_id
           matched_vals[assoc_attr] = list_id
-          matched_vals.send :write_attribute, :user_id, current_user.id
-          all_recs << list_class.new(matched_vals)
+          o = list_class.new(matched_vals)
+          o.send :write_attribute, :user_id, current_user.id
+          all_recs << o
         end
 
         list_class.import all_recs, validate: false
