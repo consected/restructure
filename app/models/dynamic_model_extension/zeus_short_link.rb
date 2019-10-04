@@ -66,7 +66,7 @@ res
         end
 
         sl.clicks = sl.clicks + clicks
-        sl.master = master
+        sl.master.current_user ||= master&.current_user
         sl.force_save!
         sl.save!
       end
