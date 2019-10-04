@@ -28,6 +28,13 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
     ]
   end
 
+  # If we are running in production the the queue adapter will not be :inline
+  # We can use future processing
+  # In dev, debug and test we may want to use inline processing, which does not allow a future date to be set
+  def self.allow_future_processing
+    Rails.configuration.active_job.queue_adapter != :inline
+  end
+
   def initialize config, item
     super
 
@@ -185,12 +192,13 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
 
       mn = Messaging::MessageNotification.create! setup_data
 
+      # Queue the job.
       job = HandleMessageNotificationJob
-
-      if set_when && Rails.configuration.active_job.queue_adapter != :inline
-        job = job.set(set_when)
-      end
-
+      # For testing and debugging mostly, allow this to run immediately inline
+      job = job.set(set_when) if set_when && self.class.allow_future_processing
+      # Pass in the MessageNotification as the main object
+      # for_item is the ActivityLog instance that was triggered on save
+      # Also pass the on_complete configuration to follow up after the main job processing completes
       res = job.perform_later(mn, for_item: @item, on_complete_config: config[:on_complete])
 
       if @item.respond_to?(:background_job_ref) && res&.provider_job
