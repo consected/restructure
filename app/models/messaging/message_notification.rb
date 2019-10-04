@@ -196,15 +196,10 @@ module Messaging
               list_type_class = ModelReference.to_record_class_for_type list_type.singularize
               list_item = list_type_class.where(id: list_id).first
 
-              if list_item&.send_status == 'sent'
-                logger.info "Recipient in list was already sent. Will not resend"
-              elsif list_item&.send_status == 'success'
-                logger.info "Recipient in list was already succesfully sent. Will not resend"
-              elsif list_item&.send_status == Messaging::NotificationSms::BadFormatMsg
-                logger.info "Recipient in list had bad format phone number. Will not attempt to resend"
-              elsif list_item # Any other status
+              if list_item && (list_item.send_status == 'not sent' || list_item.can_retry?)
                 # Get the referenced record item (such as live contact record)
                 ri = list_item.record_item no_exception: true
+                # Set the data to nil to ensure template generation uses the item instead
                 self.data = nil
                 # If a record_item is referenced from the list item, use that as data instead
                 self.item = ri || list_item
@@ -216,9 +211,19 @@ module Messaging
                 resp = generate_and_send recipient_sms_numbers: recipient_sms_numbers
 
                 list_item.update(current_user: list_item.user, response: resp) if list_item.respond_to? :response
+
+                # The final results is a list of recipient phone numbers
                 recipient_data << list_item.data
+              elsif list_item&.send_status == Messaging::NotificationSms::BadFormatMsg
+                logger.info "Recipient in list had bad format phone number. Will not attempt to resend"
+              elsif list_item&.send_status == 'success'
+                logger.info "Recipient in list was already succesfully sent. Will not resend"
+              elsif !list_item&.can_retry?
+                logger.info "Recipient previously failed but can not retry"
+              elsif list_item&.send_status == 'sent'
+                logger.info "Recipient in list was already sent. Will not resend for some other reason"
               else
-                logger.warn "A recipient list item did not exist"
+                logger.warn "A recipient list item did not exist (#{!!list_item}) or some other reason for not sending"
               end
             end
             # self.data = {bulk_message_data: "#{recipient_records.length} #{'records'.pluralize(recipient_records.length)}"}

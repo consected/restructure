@@ -3,8 +3,6 @@ module DynamicModelExtension
 
     extend ActiveSupport::Concern
 
-    ValidStatuses = [:success, :failure]
-
     included do
       has_one :zeus_bulk_message_status
     end
@@ -34,6 +32,18 @@ module DynamicModelExtension
 
     end
 
+    def received?
+      zeus_bulk_message_status&.status
+    end
+
+    # @return [Boolean|Nil] returns :
+    # => nil if not yet sent
+    # => false if send was successful or something failed but does not allow a retry
+    # => true if we failed for a retriable reason
+    def can_retry?
+      return unless self.response
+      zeus_bulk_message_status&.can_retry?
+    end
 
 
   end

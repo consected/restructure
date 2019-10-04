@@ -5,6 +5,17 @@ module DynamicModelExtension
 
     ValidStatuses = [:success, :failure]
 
+    RetriableStatuses = [
+      "Message body is invalid",
+      "Phone carrier is currently unreachable/unavailable",
+      "Phone is currently unreachable/unavailable",
+      "This delivery would exceed max price",
+      "Unknown error attempting to reach phone",
+      "No quota left for account"
+    ].freeze
+
+
+
     included do
       belongs_to :zeus_bulk_message_recipients
 
@@ -290,7 +301,15 @@ module DynamicModelExtension
 
     end
 
-
+    # @return [Boolean|Nil] returns :
+    # => nil if no reason set (probably not sent)
+    # => false if send was successful or something failed but does not allow a retry
+    # => true if we failed for a retriable reason
+    def can_retry?
+      reason = self.status_reason
+      return nil unless reason
+      reason.downcase.in? RetriableStatuses.map(&:downcase)
+    end
 
   end
 end
