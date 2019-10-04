@@ -154,19 +154,20 @@ _fpa.reports = {
         // Get values like "colval.xyz" for substitution
         var cols = chart_dct_json.match(/colval\.[a-zA-Z0-9_]+/g);
 
-        for(var i = 0; i < cols.length; i++) {
-          var c = cols[i];
-          var cname = c.split('.')[1];
-          var colval = row.find('td[data-col-type="'+cname+'"]').html();
-          if(colval) {
-            colval = colval.trim()
-          } else {
-            colval = null;
+        if(cols) {
+          for(var i = 0; i < cols.length; i++) {
+            var c = cols[i];
+            var cname = c.split('.')[1];
+            var colval = row.find('td[data-col-type="'+cname+'"]').html();
+            if(colval) {
+              colval = colval.trim()
+            } else {
+              colval = null;
+            }
+
+            chart_dct_json = chart_dct_json.replace(c, colval);
           }
-
-          chart_dct_json = chart_dct_json.replace(c, colval);
         }
-
 
         var chart_act_config = JSON.parse(chart_dct_json);
 
