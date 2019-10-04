@@ -51,7 +51,7 @@ set search_path=bulk_msg,ml_app;
           clicks integer default 0,
           next_check_date date,
           for_item_type varchar,
-          for_item_id varchar,
+          for_item_id integer,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -76,7 +76,7 @@ set search_path=bulk_msg,ml_app;
           clicks integer default 0,
           next_check_date date,
           for_item_type varchar,
-          for_item_id varchar,
+          for_item_id integer,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
