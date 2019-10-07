@@ -194,7 +194,7 @@ module Messaging
               list_type = rec[:list_type]
               list_id = rec[:id]
               list_type_class = ModelReference.to_record_class_for_type list_type.singularize
-              list_item = list_type_class.where(id: list_id).first
+              list_item = list_type_class.active.where(id: list_id).first
 
               if list_item && (list_item.send_status == 'not sent' || list_item.can_retry?)
                 # Get the referenced record item (such as live contact record)
