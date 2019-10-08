@@ -16,7 +16,7 @@ class ModelReference < ActiveRecord::Base
   after_save :handle_disabled, if: -> { self.disabled }
   after_create :set_created
 
-  attr_accessor :current_user
+  attr_accessor :current_user, :force_create
 
   def self.default_ref_order
     {id: :asc}
@@ -24,7 +24,7 @@ class ModelReference < ActiveRecord::Base
 
   # Create an item referenced from a specific from_item
   # TODO consider if there is a significant race condition that we should be concerned about
-  def self.create_with from_item, to_item
+  def self.create_with from_item, to_item, force_create: false
 
     m = ModelReference.where from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id
@@ -32,15 +32,15 @@ class ModelReference < ActiveRecord::Base
     if m.limit(1).length == 0
       ModelReference.create! from_record_type: from_item.class.name, from_record_id: from_item.id, from_record_master_id: from_item.master_id,
                             to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
-                            user: to_item.master_user, current_user: to_item.master_user
+                            user: to_item.master_user, current_user: to_item.master_user, force_create: force_create
     end
   end
 
   # Create a reference from a master only, not an individual item.
-  def self.create_from_master_with from_master, to_item
+  def self.create_from_master_with from_master, to_item, force_create: false
     ModelReference.create! from_record_type: nil, from_record_id: nil, from_record_master_id: from_master.id,
                           to_record_type: to_item.class.name, to_record_id: to_item.id, to_record_master_id: to_item.master_id,
-                          user: to_item.master_user, current_user: to_item.master_user
+                          user: to_item.master_user, current_user: to_item.master_user, force_create: force_create
   end
 
   # Find the configuration of the creatable reference for the pair of records representing a ModelReference
@@ -206,6 +206,10 @@ class ModelReference < ActiveRecord::Base
 
     res
 
+  end
+
+  def force_create?
+    @force_create
   end
 
   def item_type
@@ -418,7 +422,7 @@ class ModelReference < ActiveRecord::Base
 
     def allows_create
       return true unless from_record
-      unless from_record.can_edit? || from_record.can_add_reference?
+      unless force_create? || from_record.can_edit? || from_record.can_add_reference?
         errors.add :reference, 'can not be created from a read-only parent'
       end
       true
