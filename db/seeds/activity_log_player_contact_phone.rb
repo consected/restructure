@@ -76,10 +76,15 @@ module Seeds
       if Rails.env.test?
         res = ActivityLog.where(name: 'Phone Log').first
 
-        res.update!(current_admin: auto_admin, disabled: false) if res.disabled?
+        res.update!(current_admin: auto_admin, disabled: false) if res&.disabled?
 
         app_type = Admin::AppType.where(name: :zeus).first
-        Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones', access: :create, current_admin: auto_admin)
+        uac = Admin::UserAccessControl.where(user: nil,  app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones').first
+        if uac
+          uac.update(disabled: false, current_admin: auto_admin, access: :create)
+        else
+          Admin::UserAccessControl.create(user: nil, app_type: app_type, resource_type: 'table', resource_name: 'activity_log__player_contact_phones', access: :create, current_admin: auto_admin)
+        end
       end
 
     end
