@@ -10,20 +10,29 @@ RSpec.describe "Calculate conditional actions", type: :model do
     u1, _ = create_user
     @u1 = u1
     create_user
-    setup_access :activity_log__player_contact_phones
+    create_master
     let_user_create_player_contacts
 
-    create_master
+    setup_access :activity_log__player_contact_phones
+    setup_access :activity_log__player_contact_phone__primary
+    setup_access :activity_log__player_contact_phone__blank
+
+    setup_access :activity_log__player_contact_phones, user: @user
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
+
 
     @al2 = create_item
     @al0 = create_item
     @al = create_item
 
     @al0.master_id = @al.master_id
+    @al0.force_save!
     @al0.save!
 
     @al2.master_id = @al.master_id
     @al2.select_who += '-alt'
+    @al2.force_save!
     @al2.save!
 
     n = Admin::UserRole.order(id: :desc).limit(1).pluck(:id).first
@@ -838,8 +847,8 @@ RSpec.describe "Calculate conditional actions", type: :model do
       }
     }
 
-    ModelReference.create_with @al, a1
-    ModelReference.create_with @al, a2
+    ModelReference.create_with @al, a1, force_create: true
+    ModelReference.create_with @al, a2, force_create: true
 
     expect(@al.model_references.length).to eq 2
 
@@ -1060,11 +1069,17 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
 
 
-    # Expect this one to fail, as the referemces do not exist when using @al0 as the object in ConditionalActions
+    # Expect this one to fail, as the references do not exist when using @alnor as the object in ConditionalActions
+    @alnor = create_item
+
+    @alnor.master_id = @al.master_id
+    @alnor.force_save!
+    @alnor.save!
+
     confy = "
         all:
           activity_log__player_contact_phones:
-            id: #{@al0.id}
+            id: #{@alnor.id}
 
 
           any:
@@ -1092,7 +1107,9 @@ RSpec.describe "Calculate conditional actions", type: :model do
     conf = YAML.load(confy)
     conf = conf.deep_symbolize_keys
 
-    res = ConditionalActions.new conf, @al0
+    expect(@alnor.model_references.count).to eq 2 # two dynamic models only
+
+    res = ConditionalActions.new conf, @alnor
     expect(res.calc_action_if).to be false
 
 
@@ -1131,6 +1148,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
+    @al.force_save!
     @al.updated_at = DateTime.now
     @al.save!
 

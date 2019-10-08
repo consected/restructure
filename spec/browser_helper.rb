@@ -21,16 +21,19 @@ module BrowserHelper
       puts "To disable headless mode, run rspec with environment variable `NOT_HEADLESS=true rspec`"
       ENV['DISPLAY']=':99'
       if `pgrep Xvfb`.blank?
-        xvfb_cmd = 'Xvfb +extension RANDR :99 -screen 0 1600x1000x16 &'
+        xvfb_cmd = ['Xvfb', '+extension', 'RANDR', ':99', '-screen', '0', '1600x1000x16']
         puts "Start new Xvfb headless X server with DISPLAY #{ENV['DISPLAY']}"
         puts "if this blocks, run directly as:"
-        puts xvfb_cmd
-        `#{xvfb_cmd}`
+        puts "#{xvfb_cmd.join(" ")}"
+        # Run the framebuffer and immediately return, then detach since we don't want this to eventually block
+        pid = spawn *xvfb_cmd
+        Process.detach pid
         puts "New Xvfb headless X server is running"
+        `ps -p #{pid}`
       end
       if `pgrep x11vnc`.blank?
-        puts "New x11vnc server will start on port 5901 with display #{ENV['DISPLAY']} in 5 seconds"
-        `sleep 5; x11vnc -display $DISPLAY -bg -nopw -listen localhost -xkb  -rfbport 5901`
+        puts "New x11vnc server will start on port 5911 with display #{ENV['DISPLAY']} in 5 seconds"
+        `sleep 5; x11vnc -display $DISPLAY -bg -nopw -listen localhost -xkb  -rfbport 5911`
       end
       puts "Xvfb headless X server and x11vnc have been started"
     end

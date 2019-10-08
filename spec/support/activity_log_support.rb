@@ -82,14 +82,16 @@ module ActivityLogSupport
 
   def create_item att=nil, item=nil
     att ||= valid_attribs
-    master ||= @master || @player_contact.master
-    item ||= @player_contact
-    att[:player_contact] = item
-    att[:master] ||= master
+    # master ||= @master || @player_contact.master
+    # item ||= @player_contact
+    # att[:player_contact] = item
+    att[:master] ||= @player_contact.master
+    @player_contact.current_user = @user
 
-    setup_access :activity_log__player_contact_phones
-    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type
-    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type
+    setup_access :player_contacts, user: @user
+    setup_access :activity_log__player_contact_phones, user: @user
+    setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
+    setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user
 
     @activity_log = @player_contact.activity_log__player_contact_phones.create! att
 

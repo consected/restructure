@@ -1,5 +1,5 @@
 #! /bin/bash
-MOUNTPOINT=/media/phil/1081E6F600D5E861
+MOUNTPOINT=/media/phil/Data
 
 # if [ $(mountpoint -q $MOUNT_ROOT/gid601) ] && [ $(mountpoint -q $MOUNT_ROOT/gid601) ]
 # then

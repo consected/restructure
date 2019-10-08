@@ -118,7 +118,7 @@ module ModelSupport
     if in_app_type
       Admin::UserAccessControl.create! current_admin: @admin, app_type: in_app_type, user: @user, access: :create, resource_type: :table, resource_name: resource_name
     end
-    
+
   end
 
   def add_app_config app_type, name, value, user: nil, role_name: nil
@@ -158,7 +158,7 @@ module ModelSupport
       begin
         sqlfn = Rails.root.join('docs', 'config_tests', fn)
         puts "Running psql: #{sqlfn}"
-        `PGOPTIONS=--search_path=ml_app psql -d fpa_test < #{sqlfn}`
+        `PGOPTIONS=--search_path=ml_app psql -d fpa_test < #{sqlfn}  2>&1`
       rescue ActiveRecord::StatementInvalid => e
         puts "Exception due to PG error?... #{e}"
       end

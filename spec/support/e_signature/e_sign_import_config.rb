@@ -46,6 +46,13 @@ module ESignImportConfig
     new_app_type = Admin::AppType.where(name: 'test esign').first
     new_app_type.update!(disabled: false, current_admin: @admin)
 
+    al = ActivityLog.active.where(name: 'Test E Signature').first
+    if al&.disabled?
+      al.update! current_admin: @admin, disabled: false
+    end
+
+    expect(defined? ActivityLog::PlayerInfoESign).to be_truthy
+
     cdir = File.join(NfsStore::Manage::Filesystem.nfs_store_directory, 'gid600', "app-type-#{new_app_type.id}", "containers")
     FileUtils.rm_rf cdir
     FileUtils.mkdir_p cdir
