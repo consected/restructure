@@ -73,9 +73,15 @@ class Classification::GeneralSelection < ActiveRecord::Base
   # with the current field name. It is the responsibility of the client to see this.
   # This is used on the client side for the display of form values.
   # @param conditions [Hash] any conditions to be passed to retrieve the appropriate general selections
-  # @param extra_log_type [String] keyword param that states the extra log type in use if this is an activity log
+  # => conditions[:extra_log_type] states the extra log type in use if this is an activity log
+  # => conditions[:item_type] states the item type to use
   # @return [Array] serializable array of general_selection and alt_options overrides
-  def self.selector_with_config_overrides conditions=nil, extra_log_type: nil, item_type: nil
+  def self.selector_with_config_overrides conditions=nil
+
+    if conditions.is_a? Hash
+      extra_log_type = conditions.delete(:extra_log_type)
+      item_type = conditions.delete(:item_type)
+    end
 
     # Get the underlying general selection data and make it into an array of results
     res = selector_collection(conditions)
