@@ -53,8 +53,9 @@ Seeds.setup
 raise "Scantron not defined by seeds" unless defined?(Scantron) && defined?(ScantronsController)
 
 res = `#{::Rails.root}/fphs-scripts/setup-dev-filestore.sh`
-if res == "Failed to setup mountpoint\n"
+if res != "mountpoint OK\n"
   puts res
+  puts "Requires sudo to setup filestore"
   exit
 end
 

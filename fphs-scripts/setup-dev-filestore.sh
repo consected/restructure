@@ -1,5 +1,13 @@
 #! /bin/bash
-MOUNTPOINT=/media/phil/Data
+if [ -z "$MOUNTPOINT" ]
+then
+  if [ "$USER" == 'phil' ]
+  then
+    MOUNTPOINT=/media/phil/Data
+  else
+    MOUNTPOINT=/home/$USER/dev-filestore
+  fi
+fi
 
 # if [ $(mountpoint -q $MOUNT_ROOT/gid601) ] && [ $(mountpoint -q $MOUNT_ROOT/gid601) ]
 # then
@@ -9,16 +17,19 @@ MOUNTPOINT=/media/phil/Data
 #   exit
 # fi
 
-if [ "$(whoami)" != 'root' ] && [ "${RAILS_ENV}" != 'test' ]
+if [ "${RAILS_ENV}" != 'test' ]
 then
-  echo Must be sudo to run
-  exit
-fi
+  if [ "$(whoami)" != 'root' ]
+  then
+    echo Must be sudo to run
+    exit
+  fi
 
-if [ ! "$(mountpoint "${MOUNTPOINT}")" ]
-then
-  echo "${MOUNTPOINT} is not a real mount point. Check the file system is mounted correctly at this location"
-  exit 1
+  if [ ! "$(mountpoint "${MOUNTPOINT}")" ]
+  then
+    echo "${MOUNTPOINT} is not a real mount point. Check the file system is mounted correctly at this location"
+    exit 1
+  fi
 fi
 
 FS_ROOT=${MOUNTPOINT}/test-fphsfs
