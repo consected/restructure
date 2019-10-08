@@ -6,6 +6,21 @@ module UserHandler
   included do
     attr_accessor :no_track
 
+    scope :active, -> {
+      if attribute_names.include?('disabled')
+        where "disabled is null or disabled = false"
+      else
+        self
+      end
+    }
+    scope :disabled, -> {
+      if attribute_names.include?('disabled')
+        where "disabled = true"
+      else
+        self
+      end
+    }
+
     after_initialize :init_vars_user_handler
 
     # Ensure dynamic models without master as the foreign key and filestore files don't break associations
