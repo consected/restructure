@@ -104,7 +104,7 @@ _fpa.show_if.methods = {
       // if the field definition specifies a condition type, use it
       // otherwise assume a condition type 'all'
       var is_cond_type = false;
-      if( cond_def_init.hasOwnProperty(cond_type) ) {
+      if( cond_def_init.hasOwnProperty(cond_type) && typeof(cond_def_init[cond_type]) == 'object' ) {
         // console.log(cond_type)
         for(var ci in cond_types) {
           var cv = cond_types[ci];
