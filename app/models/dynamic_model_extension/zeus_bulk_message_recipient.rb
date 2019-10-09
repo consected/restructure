@@ -45,6 +45,18 @@ module DynamicModelExtension
       zeus_bulk_message_status&.can_retry?
     end
 
+    def set_response current_user, response
+
+      self.class.transaction do
+        update!(current_user: current_user, response: response)
+        # If there is a zeus_bulk_message_status, this is a retry. Mark the status as such so we can get a refreshed status
+        zbms = zeus_bulk_message_status
+        if zbms
+          zbms.update!(status: 'retrying', current_user: current_user)
+        end
+      end
+
+    end
 
   end
 end

@@ -210,7 +210,7 @@ module Messaging
 
                 resp = generate_and_send recipient_sms_numbers: recipient_sms_numbers
 
-                list_item.update(current_user: list_item.user, response: resp) if list_item.respond_to? :response
+                list_item.set_response list_item.user, resp
 
                 # The final results is a list of recipient phone numbers
                 recipient_data << list_item.data

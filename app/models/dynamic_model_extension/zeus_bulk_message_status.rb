@@ -31,8 +31,8 @@ module DynamicModelExtension
       # Get recipients for:
       # - recipient record is not marked as disabled
       # - bulk messages that are sent by the sms channel, and have status 'sent', and were last updated
-      #   more recently than five days ago (so we give up refreshing 5 days after the message was sent)
-      # - do not yet have a corresponding zeus_bulk_message_statuses record
+      #   more recently than 10 days ago (so we give up refreshing 10 days after the message was sent or re-sent)
+      # - do not yet have a corresponding zeus_bulk_message_statuses record or the record is marked as 'retrying'
       # - have a response from sending the SMS with a aws_sns_sms_message_id
       # @return [ActiveRecord::Relation] matching zeus_bulk_message_recipients ordered by created_at time
       def incomplete_recipients
@@ -47,14 +47,14 @@ module DynamicModelExtension
           .where("zeus_bulk_message_recipients.response is not null
                   and zeus_bulk_message_recipients.response LIKE '[{\"aws_sns_sms_message_id\":%'
                   and zeus_bulk_message_recipients.disabled = false")
-          .where(zeus_bulk_message_statuses: {id: nil})
-          .where(["zeus_bulk_messages.updated_at > ?", (DateTime.now - 5.days)]) # Give up trying 5 days after the message was sent
+          .where("zeus_bulk_message_statuses.id IS NULL or zeus_bulk_message_statuses.status = 'retrying'")
+          .where(["zeus_bulk_messages.updated_at > ?", (DateTime.now - 10.days)])
           .order('zeus_bulk_message_recipients.created_at asc')
 
       end
 
       # Get the timestamp on the earliest recipient record where a message was sent
-      # and a matching delivery status record is not found
+      # and a matching delivery status record is not found or is marked as retrying
       def earliest_incomplete_timestamp
         res = incomplete_recipients.first
 
@@ -103,14 +103,20 @@ module DynamicModelExtension
               recip = find_matching_recipient_by_message_id r[:message_id]
               if recip
                 recip.master.current_user = recip.user
-                set_recips << create!(
+                new_data = {
                   status: r[:status],
                   status_reason: r[:status_reason],
                   zeus_bulk_message_recipient_id: recip.id,
                   master: recip.master,
                   res_timestamp: r[:timestamp],
                   message_id: r[:message_id]
-                )
+                }
+                zbms = recip.zeus_bulk_message_status
+                if zbms
+                  set_recips << zbms.update!(new_data)
+                else
+                  set_recips << create!(new_data)
+                end
                 total += 1
               else
                 puts "Recipient not found: #{r[:message_id]}"
