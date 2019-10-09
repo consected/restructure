@@ -80,7 +80,10 @@ class ExtraLogType < ExtraOptions
     super(name, config, parent_activity_log)
 
 
-    raise FphsException.new "configuration for this activity log has not been enabled" if @config_obj.disabled
+    if @config_obj.disabled
+      Rails.logger.info "configuration for this activity log has not been enabled: #{@config_obj.table_name}"
+      return
+    end
     raise FphsException.new "extra log options name: property can not be blank" if self.name.blank?
     raise FphsException.new "extra log options caption_before: must be a hash of {field_name: caption, ...}" if self.caption_before && !self.caption_before.is_a?(Hash)
 
