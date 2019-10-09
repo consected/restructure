@@ -8,39 +8,44 @@ options[:include_blank] = true unless options.has_key?(:include_blank)
 
 rlit = curr_field_name.sub('select_record_from_', '').singularize
 
-if ActivityLog.use_with_class_names.include? rlit
-  cn = rl = rlit
-  cl = cn.camelize.constantize
-  reslist = cl.where(master_id: form_object_instance.master_id)
-  if cl.attribute_names.include?('rank')
-    reslist = reslist.order(rank: :desc)
-    reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
-  else
-    reslist = reslist.order(data: :asc)
-    reslist = reslist.all.map{|i| [i.data, i.data]}
+# Lookup all the possible classes an activity log be used with (really these are master associations)
+if ActivityLog.use_with_class_names.include?(rlit)
+  reslist = form_object_instance.master.send(rlit.pluralize)
+  cl = reslist.first.class
+  if cl
+    if cl.attribute_names.include?('rank')
+      reslist = reslist.order(rank: :desc)
+      reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
+    else
+      reslist = reslist.order(data: :asc)
+      reslist = reslist.all.map{|i| [i.data, i.data]}
+    end
   end
 elsif (ActivityLog.all_valid_item_and_rec_types - ActivityLog.use_with_class_names).include? rlit
   ActivityLog.use_with_class_names.each do |ucn|
     if rlit.start_with?(ucn)
-      rl = rlit
-      cn = ucn
-      cl = cn.camelize.constantize
-      reslist = cl.where(master_id: form_object_instance.master_id, rec_type: rlit.sub(/^#{ucn}_/, ''))
-      if cl.attribute_names.include?('rank')
-        reslist = reslist.order(rank: :desc)
-        reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
-      else
-        reslist = reslist.order(data: :asc)
-        reslist = reslist.all.map{|i| [i.data, i.data]}
+      reslist = form_object_instance.master.send(rlit.pluralize).where(rec_type: rlit.sub(/^#{ucn}_/, ''))
+      cl = reslist.first.class
+      if cl
+        if cl.attribute_names.include?('rank')
+          reslist = reslist.order(rank: :desc)
+          reslist = reslist.all.map{|i| ["#{i.data} [#{i.rank_name}]", i.data]}
+        else
+          reslist = reslist.order(data: :asc)
+          reslist = reslist.all.map{|i| [i.data, i.data]}
+        end
       end
     end
   end
 end
-unless rl
+
+if cl
+  human_name = cl.human_name
+else
   logger.warn "Failed to find valid class name for #{field_name_sym}"
 end
 
 
 %>
-<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: rl.humanize) %>
+<%= form.label field_name_sym, label_for(field_name_sym, labels, force_default: human_name) %>
 <%= form.select field_name_sym, reslist, options, { data: {attr_name: field_name_sym, object_name: form_object_item_type_us}} %>
