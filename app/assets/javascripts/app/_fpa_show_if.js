@@ -103,10 +103,20 @@ _fpa.show_if.methods = {
 
       // if the field definition specifies a condition type, use it
       // otherwise assume a condition type 'all'
-      if( cond_def_init.hasOwnProperty(cond_type) && cond_types.indexOf(cond_type) >= 0) {
-        cond_def = cond_def_init[cond_type];
+      var is_cond_type = false;
+      if( cond_def_init.hasOwnProperty(cond_type) ) {
+        // console.log(cond_type)
+        for(var ci in cond_types) {
+          var cv = cond_types[ci];
+          if(cond_type.indexOf(cv) === 0) {
+            cond_def = cond_def_init[cond_type];
+            is_cond_type = true;
+            break;
+          }
+        }
       }
-      else {
+
+      if(!is_cond_type) {
         cond_type = 'all';
       }
 
@@ -137,24 +147,24 @@ _fpa.show_if.methods = {
           }
 
           var matches = exp_value.includes(exp_field_value);
-          if(cond_type == 'all') {
+          if(cond_type.indexOf('all') === 0) {
             cond_success = cond_success && matches;
             if (!matches) break;
           }
-          else if(cond_type == 'not_all') {
+          else if(cond_type.indexOf('not_all') === 0) {
             if(!matches) {
               cond_success = true;
               break;
             }
             cond_success = false;
           }
-          else if(cond_type == 'any') {
+          else if(cond_type.indexOf('any') === 0) {
             // This checks that only if all are false does the cond_success get to be false,
             // since any success breaks out of the loop, having already set the result to true
             cond_success = matches;
             if(cond_success) break;
           }
-          else if(cond_type == 'not_any') {
+          else if(cond_type.indexOf('not_any') === 0) {
             if(matches) {
               cond_success = false;
               break;
