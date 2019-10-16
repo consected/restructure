@@ -301,33 +301,40 @@ module CalcActions
             in_instance = current_instance.referring_record
           end
 
-          raise FphsException.new "Instance not found for #{table}" unless in_instance
-
-          if expected_val.is_a?(Hash)
-            if is_selection_type field_name
-              ca = ConditionalActions.new({field_name => expected_val}, in_instance, current_scope: @condition_scope, return_failures: return_failures)
-              res &&= ca.calc_action_if
-              @this_val ||= ca.this_val
-              @skip_merge = true
-            elsif expected_val.keys.first == :validate
-              res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
-            end
+          if field_name == :exists
+            res = @this_val = (!!expected_val == !!in_instance)
+            @skip_merge = true
+          elsif !in_instance
+            raise FphsException.new "Instance not found for #{table}"
           else
-            this_val = in_instance.attributes[field_name.to_s]
-            if expected_val.is_a? Array
-              array_res = false
-              expected_val.each do |e|
-                array_res ||= (this_val == e)
+
+            if expected_val.is_a?(Hash)
+              if is_selection_type field_name
+                ca = ConditionalActions.new({field_name => expected_val}, in_instance, current_scope: @condition_scope, return_failures: return_failures)
+                res &&= ca.calc_action_if
+                @this_val ||= ca.this_val
+                @skip_merge = true
+              elsif expected_val.keys.first == :validate
+                res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
               end
-              res &&= array_res
             else
-              res &&= this_val == expected_val
+              this_val = in_instance.attributes[field_name.to_s]
+              if expected_val.is_a? Array
+                array_res = false
+                expected_val.each do |e|
+                  array_res ||= (this_val == e)
+                end
+                res &&= array_res
+              else
+                res &&= this_val == expected_val
+              end
+              if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
+                @this_val = this_val
+              elsif expected_val == 'return_result'
+                @this_val = in_instance
+              end
             end
-            if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
-              @this_val = this_val
-            elsif expected_val == 'return_result'
-              @this_val = in_instance
-            end
+
           end
         elsif table == :user
           if field_name == :role_name

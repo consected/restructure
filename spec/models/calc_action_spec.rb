@@ -1540,6 +1540,21 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to eq @al.id
 
+    conf = {
+      all: {
+        referring_record: {
+          exists: true
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al2
+    expect(res.calc_action_if).to be true
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+
 
     conf = {
       activity_log__player_contact_phones: {
