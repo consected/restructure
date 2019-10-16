@@ -60,7 +60,7 @@
       CREATE TABLE sleep_appointments (
           id integer NOT NULL,
           master_id integer,
-          visit_start_date date unique,
+          visit_start_date date,
           visit_end_date date,
           interventionist varchar,
           select_status varchar,
