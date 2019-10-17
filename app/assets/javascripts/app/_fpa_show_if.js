@@ -125,6 +125,8 @@ _fpa.show_if.methods = {
         if(cond_def.hasOwnProperty(cond_field)) {
           // Expect field data
           var exp_field_value = data[cond_field];
+          if(typeof exp_field_value == 'number') exp_field_value = exp_field_value.toString();
+          
           // to have value
           var exp_value = cond_def[cond_field];
 

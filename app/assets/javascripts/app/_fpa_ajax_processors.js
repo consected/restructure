@@ -105,7 +105,7 @@ _fpa.postprocessors = {
         if(data.form_data) {
           var form_data = data.form_data;
           var form_els = block.find('[data-attr-name][data-object-name]');
-          form_els.on('change', function() {
+          form_els.on('change click keyup', function() {
             var e = $(this);
             var obj_name = e.attr('data-object-name');
             var a_name = e.attr('data-attr-name');

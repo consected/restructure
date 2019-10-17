@@ -459,7 +459,7 @@ _fpa.utils.calc_field = function (field_name_sym, form_object_item_type_us) {
 
     for(var i in cwdef.sum) {
       var dfi = cwdef.sum[i];
-      $('[data-attr-name="'+dfi+'"][data-object-name="'+form_object_item_type_us+'"]').change(function() {
+      $('[data-attr-name="'+dfi+'"][data-object-name="'+form_object_item_type_us+'"]').on('change click keyup', function() {
         var s = 0;
         for(var j in cwdef.sum) {
           var dfj = cwdef.sum[j];
