@@ -17,6 +17,18 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [Unreleased]
+
+- [Added] [Sleep Study] configurations for Athena app
+- [Added] [Bulk Msg] app for SMS marketing
+- [Added] [Zeus] External Identifier for Q1 redcap links
+- [Added] [Zeus] External Identifier for Q2 redcap links
+- [Added] [Zeus] External Identifier for Marketo IDs
+- [Added] [Zeus] External Identifier for Sleep Study IDs
+- [Added] [Zeus] Authorized users can view added identifiers based on role assignments
+- [Fixed] Many bug fixes
+
+
 ## [7.3.49] - 2019-09-23
 
 - [Added] [IPA] Participant Summary panel, pulling data from phone screen responses
