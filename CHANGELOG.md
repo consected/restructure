@@ -17,7 +17,7 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
-## [Unreleased]
+## [7.3.59] - 2019-10-17
 
 - [Added] [Sleep Study] configurations for Athena app
 - [Added] [Bulk Msg] app for SMS marketing
