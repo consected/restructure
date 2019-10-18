@@ -233,9 +233,12 @@ _fpa = {
 
   // Sometimes we need a preprocessor or postprocessor to be able to define a callback that will be called on the next successful
   // AJAX response. This function attempts to call that callback if it has been set, and then clears it after use.
-  try_app_callback: function(el){
+  try_app_callback: function(el, xhr){
+
+    var data = xhr.responseJSON || $(xhr.responseText);
+    
     if(el[0].app_callback){
-        el[0].app_callback(el[0]);
+        el[0].app_callback(el[0], data);
         el[0].app_callback = null;
     }
   },
@@ -371,7 +374,7 @@ _fpa = {
         // Attempt an app-specific callback that a preprocessor may have created.
         // Typically used by special UI blocks that need to perform additional functions before the response
         // attempts to process
-        _fpa.try_app_callback($(this));
+        _fpa.try_app_callback($(this), xhr);
 
         // If the result is JSON process the data
         // else, process the rendered HTML
