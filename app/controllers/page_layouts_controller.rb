@@ -6,7 +6,7 @@ class PageLayoutsController < ApplicationController
   attr_accessor :object_instance, :objects_instance
 
   def index
-    self.objects_instance = @page_layouts = app_standalone_layouts
+    self.objects_instance = @page_layouts = Admin::PageLayout.app_standalone_layouts(current_user.app_type_id)
   end
 
   def show
@@ -25,9 +25,9 @@ class PageLayoutsController < ApplicationController
 
       num_id = id.to_i
       if num_id > 0
-        @page_layout = app_standalone_layouts.find(id)
+        @page_layout = Admin::PageLayout.app_show_layouts(current_user.app_type_id).find(id)
       else
-        @page_layout = app_standalone_layouts.where(panel_name: id).first
+        @page_layout = Admin::PageLayout.app_show_layouts(current_user.app_type_id).where(panel_name: id).first
       end
 
       return not_found unless @page_layout
@@ -52,8 +52,5 @@ class PageLayoutsController < ApplicationController
 
     end
 
-    def app_standalone_layouts
-      Admin::PageLayout.active.standalone.where(app_type_id: current_user.app_type_id)
-    end
 
 end

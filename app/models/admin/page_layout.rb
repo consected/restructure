@@ -20,6 +20,8 @@ class Admin::PageLayout < ActiveRecord::Base
   configure :view_css, with: [:classes, :selectors]
 
   scope :standalone, -> { where layout_name: 'standalone' }
+  scope :view, -> { where layout_name: 'view' }
+  scope :showable, -> { where layout_name: ['view', 'standalone'] }
 
   def to_s
     "#{layout_name}: #{panel_label}"
@@ -27,6 +29,15 @@ class Admin::PageLayout < ActiveRecord::Base
 
   def self.no_master_association
     true
+  end
+
+  def self.app_standalone_layouts app_type_id
+    Admin::PageLayout.active.standalone.where(app_type_id: app_type_id)
+  end
+
+
+  def self.app_show_layouts app_type_id
+    Admin::PageLayout.active.showable.where(app_type_id: app_type_id)
   end
 
   protected

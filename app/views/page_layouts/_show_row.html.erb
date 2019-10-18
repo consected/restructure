@@ -13,10 +13,11 @@
       col_block_id = "sp-col-#{col_id || col_label.id_underscore}"
       col_url = col['url']
 
-      col_label = Admin::MessageTemplate.substitute(col_label, data: @master, tag_subs: nil)
-      col_header = Admin::MessageTemplate.substitute(col_header, data: @master, tag_subs: nil)
-      col_footer = Admin::MessageTemplate.substitute(col_footer, data: @master, tag_subs: nil)
-
+      if @master
+        col_label = Admin::MessageTemplate.substitute(col_label, data: @master, tag_subs: nil)
+        col_header = Admin::MessageTemplate.substitute(col_header, data: @master, tag_subs: nil)
+        col_footer = Admin::MessageTemplate.substitute(col_footer, data: @master, tag_subs: nil)
+      end
 
       unless col_url
         inner_rows = col['rows']
