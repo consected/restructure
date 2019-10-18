@@ -2,8 +2,7 @@
 container = @page_layout.container
 rows = container.rows || []
 @outer_block_id = "standalone-page-container-#{SecureRandom.hex}"
-%>
-<%
+
 outer = "##{@outer_block_id}"
 if @page_layout.view_css.classes
   res = @page_layout.view_css.classes.map {|c, v|

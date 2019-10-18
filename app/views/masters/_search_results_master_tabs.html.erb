@@ -38,6 +38,32 @@
     %>
       </ul>
     </li>
+    <% end
+
+    extra_tabs = page_layout_panel layout_name: :nav, panel_name: 'master-tabs'
+    if extra_tabs
+      nav = extra_tabs.nav
+      emtab_label = nav.label
+    %>
+    <li role="presentation" class="dropdown">
+      <a href="#" class="dropdown-toggle" id="extra-master-tab-drop" data-toggle="dropdown" aria-controls="extra-master-tab-drop-contents" aria-expanded="false"><span class="caret"></span> <%= emtab_label %></a>
+      <ul class="dropdown-menu extra-master-tab-dropdown-menu" aria-labelledby="extra-master-tab-drop" id="extra-master-tab-drop-contents">
+    <%
+    end
+
+    nav.links&.each do |tab|
+    %>
+    <li role="presentation" class="extra-master-tab">
+      <a href="<%= tab['url'] %>" class="exta-master-tab-link"><%=tab['label']%></a>
+    </li>
+    <%
+    end
+
+    if extra_tabs
+    %>
+    </ul>
+    </li>
     <% end %>
+
   </ul>
 </script>

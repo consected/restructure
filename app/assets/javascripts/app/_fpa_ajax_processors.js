@@ -37,7 +37,7 @@ _fpa.postprocessors = {
 
         if (!$('body').hasClass('fixed-overlay')) {
 
-          if($('body').hasClass('user_page') && $('body').hasClass('show') && $('#master_results_block #results-accordion').length == 0) {
+          if($('body').hasClass('user_page') && $('body').hasClass('show') && $('#master_results_block #results-accordion, .no-table-results').length == 0) {
             $('body').addClass('table-results');
             $('html').css({overflow: 'hidden'});
             _fpa.reports.window_scrolling();

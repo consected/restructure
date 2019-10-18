@@ -15,7 +15,7 @@ class Admin::PageLayout < ActiveRecord::Base
   configure :contains, with: [:categories, :resources]
   configure :tab, with: [:parent]
   configure :view_options, with: [:initial_show, :orientation, :add_item_label, :limit]
-  configure :nav, with: [:links, :resources]
+  configure :nav, with: [:links, :resources, :label]
   configure :container, with: [:rows, :options]
   configure :view_css, with: [:classes, :selectors]
 

@@ -2,6 +2,7 @@ class PageLayoutsController < ApplicationController
   before_action :authenticate_user_or_admin!
   before_action :authorized?
   before_action :set_page_layout, only: [:show]
+  before_action :set_page_filters, only: [:show]
   attr_accessor :object_instance, :objects_instance
 
   def index
@@ -35,6 +36,19 @@ class PageLayoutsController < ApplicationController
       #####################################
       #@todo handle users access controls
       #####################################
+
+    end
+
+    def set_page_filters
+      @filters = params[:filters]
+
+      master_id = @filters[:master_id] if @filters
+      if master_id
+        @master = Master.find(master_id)
+        @master_id = @master.id
+        @master.current_user = current_user
+        return not_authorized unless @master.allows_user_access
+      end
 
     end
 
