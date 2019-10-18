@@ -3,19 +3,19 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 2,
-      "fingerprint": "11ad391fbe7c1c0226100beda70a7803467bcf61c08278c4154055d675097258",
+      "fingerprint": "54e62a96700972c7fc9874fbba9da1e8d6a79791d1028f575f3c47e1d9d91ed2",
       "check_name": "CrossSiteScripting",
-      "message": "Unescaped parameter value",
+      "message": "Unescaped model attribute",
       "file": "app/views/page_layouts/show.html.erb",
-      "line": 25,
+      "line": 24,
       "link": "https://brakemanscanner.org/docs/warning_types/cross_site_scripting",
-      "code": "((app_standalone_layouts.find(params[:id]) or app_standalone_layouts.where(:panel_name => params[:id]).first).view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + (app_standalone_layouts.find(params[:id]) or app_standalone_layouts.where(:panel_name => params[:id]).first).view_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
+      "code": "((Admin::PageLayout.app_show_layouts(current_user.app_type_id).find(params[:id]) or Admin::PageLayout.app_show_layouts(current_user.app_type_id).where(:panel_name => params[:id]).first).view_css.classes.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} .#{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end or ([] + (Admin::PageLayout.app_show_layouts(current_user.app_type_id).find(params[:id]) or Admin::PageLayout.app_show_layouts(current_user.app_type_id).where(:panel_name => params[:id]).first).view_css.selectors.map do\n styles = v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end\n\"#{\"##{\"standalone-page-container-#{SecureRandom.hex}\"}\"} #{c} {  #{v.map do\n \"#{s.to_s.hyphenate}: #{v};\"\n end.join(\" \")}}\"\n end)).join(\"\\n\")",
       "render_path": [
         {
           "type": "controller",
           "class": "PageLayoutsController",
           "method": "show",
-          "line": 12,
+          "line": 13,
           "file": "app/controllers/page_layouts_controller.rb",
           "rendered": {
             "name": "page_layouts/show",
@@ -27,7 +27,7 @@
         "type": "template",
         "template": "page_layouts/show"
       },
-      "user_input": "params[:id]",
+      "user_input": "Admin::PageLayout.app_show_layouts(current_user.app_type_id).find(params[:id])",
       "confidence": "Weak",
       "note": ""
     },
@@ -38,7 +38,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 258,
+      "line": 269,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")",
       "render_path": null,
@@ -58,7 +58,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/nfs_store/utils/mime_type.rb",
-      "line": 11,
+      "line": 13,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "`file --mime-type -b '#{full_file_path}'`",
       "render_path": null,
@@ -78,7 +78,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/concerns/calc_actions.rb",
-      "line": 265,
+      "line": 276,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "((@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.id desc\") or (@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).reorder(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.id desc\")).select(\"#{UserBase.clean_table_name(ModelReference.record_type_to_table_name(@this_val_where[:table_name]))}.*\").pluck(\"#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.table_name}.#{(@base_query or @base_query.where(conditions)).where(extra_conditions).order(:id => :desc).limit(1).first.send(@this_val_where[:assoc]).first.class.attribute_names.select do\n (s == @this_val_where[:field_name].to_s)\n end.first}\")",
       "render_path": null,
@@ -159,7 +159,7 @@
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/nfs_store/archive/mounter.rb",
-      "line": 167,
+      "line": 171,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "Kernel.system(*[\"unzip\", stored_file.retrieval_path, \"-d\", \"#{File.join(Manage::Filesystem.temp_directory, \"__filestore__#{SecureRandom.hex}\")}/zip\"])",
       "render_path": null,
@@ -173,6 +173,6 @@
       "note": ""
     }
   ],
-  "updated": "2019-09-11 12:32:48 +0100",
+  "updated": "2019-10-18 18:06:41 +0100",
   "brakeman_version": "4.6.1"
 }
