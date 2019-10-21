@@ -51,12 +51,14 @@
     <%
     end
 
+    if nav&.link
     nav.links&.each do |tab|
     %>
     <li role="presentation" class="extra-master-tab">
       <a href="<%= tab['url'] %>" class="exta-master-tab-link"><%=tab['label']%></a>
     </li>
     <%
+    end
     end
 
     if extra_tabs
