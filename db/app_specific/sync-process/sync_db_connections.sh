@@ -12,17 +12,36 @@ export RAILS_ENV
 
 echo Sync environment: $RAILS_ENV
 
+# if [ "$RAILS_ENV" == 'development' ]
+# then
+#   # Connection details for the demo FPHS Zeus database
+#   export ZEUS_DB=fphs_demo
+#   export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops,persnet
+#   export ZEUS_FPHS_DB_HOST=localhost
+#   export ZEUS_FPHS_DB_USER=fphsetl
+#   # Connection details for the demo AWS Elaine database
+#   export AWS_DB=fpa_development
+#   export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
+#   export AWS_DB_HOST=localhost
+#   export AWS_DB_USER=fphsetl
+#
+#   export upload_server="http://localhost:3001"
+#   export upload_user_email="sync_service_file_upload_client@app.fphs2.harvard.edu"
+#   export upload_user_token="c2PdFBzTs_DjqA3md-8n6Nxc5wtLFQ"
+#
+# fi
+
 if [ "$RAILS_ENV" == 'development' ]
 then
   # Connection details for the demo FPHS Zeus database
-  export ZEUS_DB=fphs_demo
-  export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops,persnet
+  export ZEUS_DB=fpa_development
+  export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops,persnet,sleep
   export ZEUS_FPHS_DB_HOST=localhost
-  export ZEUS_FPHS_DB_USER=fphsetl
+  export ZEUS_FPHS_DB_USER=phil
   # Connection details for the demo AWS Elaine database
-  export AWS_DB=fpa_development
-  export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
-  export AWS_DB_HOST=localhost
+  export AWS_DB=ebdb
+  export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet,sleep
+  export AWS_DB_HOST=fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com
   export AWS_DB_USER=fphsetl
 
   export upload_server="http://localhost:3001"
@@ -30,6 +49,7 @@ then
   export upload_user_token="c2PdFBzTs_DjqA3md-8n6Nxc5wtLFQ"
 
 fi
+
 
 if [ "$RAILS_ENV" == 'test' ]
 then
@@ -53,12 +73,12 @@ then
     # Connection details for the local FPHS Zeus database for DEV-fphs
     export ZEUS_DB=ebdb
     export ZEUS_FPHS_DB_SCHEMA=ml_app_zeus_full
-    export ZEUS_FPHS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+    export ZEUS_FPHS_DB_HOST=fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com
     export ZEUS_FPHS_DB_USER=fphs
     # Connection details for the remote AWS Elaine database for DEV-fphs
     export AWS_DB=ebdb
-    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
-    export AWS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
+    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet,sleep
+    export AWS_DB_HOST=fphs-aws-db-dev01.c9dljdsduksr.us-east-1.rds.amazonaws.com
     export AWS_DB_USER=fphs
 
   fi
@@ -67,13 +87,13 @@ then
   then
     # Connection details for the TEST aws automated processing box
     export ZEUS_DB=zeus
-    export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops
+    export ZEUS_FPHS_DB_SCHEMA=ml_app,ipa_ops,sleep
     export ZEUS_FPHS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
     export ZEUS_FPHS_DB_USER=fphs
 
     # Connection details for the remote AWS Athena database for DEV-fphs
     export AWS_DB=ebdb
-    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
+    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet,sleep
     export AWS_DB_HOST=aazpl1v3nlxurw.c9dljdsduksr.us-east-1.rds.amazonaws.com
     export AWS_DB_USER=fphs
 
@@ -88,7 +108,7 @@ then
     export ZEUS_FPHS_DB_USER=fphsetl
     # Connection details for the remote AWS Elaine database for PROD-fphs
     export AWS_DB=fphs
-    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet
+    export AWS_DB_SCHEMA=ml_app,ipa_ops,persnet,sleep
     export AWS_DB_HOST=fphs-aws-db-prod01.c9dljdsduksr.us-east-1.rds.amazonaws.com
     export AWS_DB_USER=fphsetl
   fi
