@@ -474,8 +474,15 @@ class Report < ActiveRecord::Base
     res = self.class.active.where(test)
     if (res.map(&:id) - [self.id]).length > 0
       res.each do |res0|
-        errors.add :short_name, "is a duplicate of another report record: (#{self.name}) #{test} --duplicates-- (#{res0.name}) #{ {short_name: res0.short_name, item_type: res0.item_type} } "
+        errors.add :short_name, "is a duplicate of another report record: (#{self.name}) #{self} --duplicates-- (#{res0.name}) #{ {short_name: res0.short_name, item_type: res0.item_type} } "
       end
     end
   end
+
+  def as_json options={}
+    self.item_type = self.item_type.downcase if self.item_type
+    self.short_name ||= gen_short_name
+    super
+  end
+
 end
