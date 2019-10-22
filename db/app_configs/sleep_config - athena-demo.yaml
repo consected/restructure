@@ -186,14 +186,14 @@ app_type:
     user_email: 
   - id: 192
     name: master header prefix
-    value: 'Scheduled: {{dynamic_model__sleep_appointments.visit_start_date}}'
+    value: 'Enrolled: {{dynamic_model__sleep_appointments.visit_start_date}}'
     disabled: false
     admin_id: 2
     user_id: 
     app_type_id: 14
     role_name: ''
     created_at: '2019-08-12T09:52:40.922Z'
-    updated_at: '2019-08-27T12:04:26.968Z'
+    updated_at: '2019-10-17T13:40:41.705Z'
     user_email: 
   - id: 193
     name: notes field format
@@ -5317,7 +5317,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:55:59.016Z'
-    updated_at: '2019-10-16T17:43:06.551Z'
+    updated_at: '2019-10-17T14:54:20.067Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5438,7 +5438,7 @@ app_type:
       \             not_any_already_created:\r\n                activity_log__sleep_assignments:\r\n
       \                 extra_log_type: assign_id\r\n\r\n        - activity_log__sleep_assignment_phone_screen2:
       \                   \r\n            in: master\r\n            with:\r\n              extra_log_type:
-      finalize\r\n            if:\r\n              not_any_already_created:\r\n                activity_log__sleep_assignment_phone_screen2:\r\n
+      finalize\r\n            if:\r\n              not_any_already_created:\r\n                activity_log__sleep_assignment_phone_screen2s:\r\n
       \                 extra_log_type: finalize\r\n      \r\n    \r\n      notify:\r\n
       \     - type: email\r\n        role: email - sleep tracker new participant\r\n
       \       \r\n        layout_template: sleep notification layout\r\n        content_template:
@@ -5723,7 +5723,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:14.333Z'
-    updated_at: '2019-10-15T17:32:20.896Z'
+    updated_at: '2019-10-17T14:16:41.446Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -5890,7 +5890,7 @@ app_type:
       \         \"To Staff\": to staff\r\n          \"To Subject\": to subject\r\n\r\n
       \   activity_date: \r\n      value: today()\r\n    \r\n\r\n\r\n  showable_if:\r\n
       \   never: true\r\n    \r\n  view_options:\r\n    only_create_as_reference:
-      true\r\n  \r\n\r\n\r\n\r\n#################################################\r\nincidental_findings:\r\n
+      true\r\n    data_attribute: \r\n      - select_result\r\n\r\n\r\n\r\n#################################################\r\nincidental_findings:\r\n
       \ label: Incidental Findings\r\n#################################################\r\n\r\n
       \ fields:\r\n\r\n  references:\r\n    dynamic_model__sleep_incidental_finding:\r\n
       \     from: this\r\n      add: one_to_this\r\n      prevent_disable: true\r\n
@@ -5915,7 +5915,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-30T10:45:35.756Z'
-    updated_at: '2019-10-15T18:01:23.250Z'
+    updated_at: '2019-10-21T16:27:04.606Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -6029,7 +6029,8 @@ app_type:
       \ save_trigger:\r\n    on_create:\r\n        \r\n      create_reference:\r\n
       \       - activity_log__sleep_assignment_phone_screen2:\r\n            in: master
       \               \r\n            with:\r\n              extra_log_type: finalize\r\n
-      \             \r\n\r\n\r\n#####################################################################\r\n#
+      \           if:\r\n              all:\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
+      \                 review_consent_now_yes_no: 'no'\r\n\r\n\r\n#####################################################################\r\n#
       Not used directly\r\n#####################################################################\r\nfinalize:\r\n
       \ label: Finalize Entries\r\n#####################################################################
       \ \r\n  view_options:\r\n    hide_unless_creatable: true\r\n    show_cancel:
@@ -6072,8 +6073,8 @@ app_type:
       \                 interested_yes_no: 'yes'\r\n                  follow_up_time:
       return_value\r\n              notes:\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
       \                 interested_yes_no: 'yes'\r\n                  notes: return_value\r\n\r\n
-      \       - activity_log__sleep_assignment_med_nav:\r\n            in: this\r\n
-      \           add: many\r\n            if:\r\n              all:\r\n                dynamic_model__sleep_ps2_phq8_questions:\r\n
+      \       - activity_log__sleep_assignment_med_nav:\r\n            in: master\r\n
+      \           \r\n            if:\r\n              all:\r\n                dynamic_model__sleep_ps2_phq8_questions:\r\n
       \                 total_score:\r\n                    - '20'\r\n                    -
       '21'\r\n                    - '22'\r\n                    - '23'\r\n                    -
       '24'\r\n                \r\n            with:\r\n              extra_log_type:
@@ -6090,11 +6091,11 @@ app_type:
       return_value\r\n\r\n            phq8_total_score:\r\n              dynamic_model__sleep_ps2_phq8_questions:\r\n
       \               master_id:\r\n                  this: master_id\r\n                total_score:
       return_value\r\n\r\n                    \r\n\r\n\r\n  # Notify the reviewers
-      that the phone screen has been completed\r\n      notify:\r\n        - <<: notify_reviewer\r\n
-      \         if: \r\n            <<: *all_eligible\r\n        - <<: notify_reviewer_sms\r\n
+      that the phone screen has been completed\r\n      notify:\r\n        - <<: *notify_reviewer\r\n
+      \         if: \r\n            <<: *all_eligible\r\n        - <<: *notify_reviewer_sms\r\n
       \         if: \r\n            <<: *all_eligible\r\n\r\n      # Notify the PI
-      that the subject has questions\r\n        - <<: *notify_pi\r\n          if:\r\n
-      \           all:\r\n              dynamic_model__sleep_ps2_phq8_questions:\r\n
+      that the subject requires follow up re: PHQ8\r\n        - <<: *notify_pi\r\n
+      \         if:\r\n            all:\r\n              dynamic_model__sleep_ps2_phq8_questions:\r\n
       \               total_score:\r\n                  - '20'\r\n                  -
       '21'\r\n                  - '22'\r\n                  - '23'\r\n                  -
       '24'\r\n"
@@ -6402,6 +6403,150 @@ app_type:
       PHQ-8 total score\r\n    \r\n\r\n    consent_to_pass_info_to_bwh_yes_no: Consent
       to pass information to BWH\r\n    \r\n    select_subject_eligibility: |\r\n
       \     **Subject's eligibility for the study**\r\n"
+    user_email: 
+  - id: 280
+    name: Sleep Epworth Sleepiness Scale
+    table_name: sleep_ese_questions
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-07-22T12:57:21.020Z'
+    updated_at: '2019-10-17T11:18:35.260Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: sitting_and_reading watching_tv public_place car_passenger afternoon_rest
+      sitting_and_talking after_lunch stopped_in_traffic total_score number_hours_sleep
+      possibly_eligible_yes_no placeholder_possibly_eligible placeholder_ineligible
+      ineligible_resource_yes_no placeholder_resource trust_assessment_info_yes_no
+      help_finding_pcp_yes_no placeholder_pcp_assist notes
+    result_order: ''
+    options: "default:\r\n\r\n# sitting_and_reading watching_tv public_place car_passenger
+      afternoon_rest sitting_and_talking after_lunch stopped_in_traffic total_score\r\n\r\n
+      \ valid_if:\r\n    on_save:\r\n\r\n      not_any:\r\n        this:\r\n          total_score:
+      ''\r\n\r\n\r\n\r\n  show_if:\r\n  \r\n    number_hours_sleep:\r\n      total_score:
+      \r\n        - '16'\r\n        - '17'\r\n        - '18'\r\n        - '19'\r\n
+      \       - '20'\r\n        - '21'\r\n        - '22'\r\n        - '23'\r\n        -
+      '24'\r\n    \r\n        \r\n    possibly_eligible_yes_no: &show_ineligible\r\n
+      \     any: &ineligible_total_score\r\n        total_score: \r\n          - '16'\r\n
+      \         - '17'\r\n          - '18'\r\n          - '19'\r\n          - '20'\r\n
+      \         - '21'\r\n          - '22'\r\n          - '23'\r\n          - '24'\r\n
+      \     not_any: &ineligible_hours_sleep\r\n        number_hours_sleep: \r\n          -
+      ''\r\n          - '0'\r\n          - '1'\r\n          - '2'\r\n          - '3'\r\n
+      \         - '4'\r\n          - '5'\r\n          - '6'\r\n\r\n    placeholder_possibly_eligible:\r\n
+      \     <<: *show_ineligible\r\n      all:\r\n        possibly_eligible_yes_no:
+      'yes'\r\n\r\n    placeholder_ineligible:\r\n      <<: *show_ineligible\r\n      all:\r\n
+      \       possibly_eligible_yes_no: 'no'\r\n    \r\n    ineligible_resource_yes_no:
+      \r\n      <<: *show_ineligible\r\n      all:\r\n        possibly_eligible_yes_no:
+      \r\n          - 'no'\r\n          - 'yes'\r\n\r\n    placeholder_resource:\r\n
+      \     ineligible_resource_yes_no: 'yes'\r\n\r\n    trust_assessment_info_yes_no:\r\n
+      \     ineligible_resource_yes_no: 'yes'\r\n\r\n\r\n    help_finding_pcp_yes_no:
+      \r\n      ineligible_resource_yes_no: 'yes'\r\n      \r\n    placeholder_pcp_assist:\r\n
+      \     help_finding_pcp_yes_no: 'yes'\r\n\r\n\r\n    notes:\r\n      ineligible_resource_yes_no:
+      'yes'\r\n\r\n\r\n\r\n\r\n  caption_before:     \r\n    all_fields: |\r\n      How
+      likely are you to doze off or fall asleep in the following\r\n      situations,
+      in contrast to feeling just tired?\r\n      This refers to your usual way of
+      life in recent times. \r\n\r\n      Even if you haven’t done some of these things
+      recently\r\n      try to work out how they would have affected you.\r\n      It
+      is important that you answer each question as best you can. \r\n      \r\n      The
+      options are:\r\n      \r\n      - Would never doze\r\n      - Slight chance
+      of dozing\r\n      - Moderate chance of dozing\r\n      - High chance of dozing\r\n\r\n
+      \     \r\n    sitting_and_reading: Sitting and reading\r\n    watching_tv: Watching
+      TV\r\n    public_place: Sitting, inactive in a public place (e.g. a theatre
+      or a meeting)\r\n    car_passenger: As a passenger in a car for an hour without
+      a break\r\n    afternoon_rest: Lying down to rest in the afternoon when circumstances
+      permit\r\n    sitting_and_talking: Sitting and talking to someone\r\n    after_lunch:
+      Sitting quietly after a lunch without alcohol\r\n    stopped_in_traffic: In
+      a car, while stopped for a few minutes in the traffic\r\n    total_score: Total
+      Score\r\n    number_hours_sleep: How many hours do you sleep on a typical night?\r\n
+      \   \r\n    possibly_eligible_yes_no: |\r\n      *Based on the scores, the participant
+      is ineligible. \r\n      If you believe the participant may be eligible, select
+      **yes** and continue\r\n      with the screening.*\r\n    \r\n    placeholder_possibly_eligible:
+      |\r\n      Thank you for answering those questions.  \r\n      Your score suggests
+      that you may have an underlying sleep disorder \r\n      such as sleep apnea,
+      rather than only insomnia, and we recommend \r\n      you discuss your symptoms
+      with a doctor.  \r\n    \r\n    placeholder_ineligible: |\r\n      Thank you
+      for answering those questions.  \r\n      Based on your responses, you are not
+      eligible for the study because \r\n      your score suggests that you may have
+      an underlying sleep disorder \r\n      such as sleep apnea, rather than only
+      insomnia, and we recommend \r\n      you discuss your symptoms with a doctor.
+      \ \r\n    \r\n    ineligible_resource_yes_no: |      \r\n      Are you interested
+      in a resource where you could find a sleep center \r\n      near you to undergo
+      an assessment?\r\n      \r\n    placeholder_resource: |\r\n      Great, I can
+      definitely give you a few options to get you started.\r\n\r\n      The first,
+      is that you are likely eligible to participate in one of the \r\n      Players
+      Trust medical wellness assessments. If you stopped playing with \r\n      the
+      NFL within the past 15 years, you would be eligible for the \r\n      Brain
+      & Body Assessment, or if you left the league more than 15 years ago, \r\n      it
+      would be the Milestone Assessment. They are very similar, and \r\n      would
+      provide you not only with a sleep study, but also a \r\n      comprehensive
+      medical assessment, and support to help you find a \r\n      Primary Care Physician
+      in your area if you do not already have one.  \r\n      There are 5 locations
+      around the country that host these assessments, \r\n      and if one is not
+      close to you the Trust should cover the cost of your travel.  \r\n      \r\n
+      \   trust_assessment_info_yes_no: |  \r\n      Would you like me to email you
+      more information about these assessments?\r\n\r\n    help_finding_pcp_yes_no:
+      |\r\n      Additionally, if you would prefer only to have your sleep assessed
+      or to \r\n      potentially stay closer to home, you can visit \r\n      http://sleepeducation.org/
+      and in the top left corner click on \r\n      “Find a Sleep Facility”.  That
+      page should help you find a sleep \r\n      center in your area where you could
+      do a sleep study to learn more \r\n      about any issues you may be experiencing
+      during sleep.  \r\n      Just so you are aware, if your insurance plan would
+      cover this assessment, \r\n      sometimes they will only do so if you get a
+      referral from your \r\n      Primary Care Physician first.  Do you need any
+      assistance finding a PCP?\r\n      \r\n    placeholder_pcp_assist: |\r\n      If
+      Yes: Okay. One option that I already mentioned is that when \r\n      you participate
+      in one of the wellness assessments with the Trust, \r\n      they will help
+      you find a PCP in your area.  Another option is \r\n      that you can contact
+      your insurance company and they will provide you \r\n      with a list of Primary
+      Care Physicians in your area who accept your \r\n      insurance plan. From
+      there, if you search on the internet \r\n      “How to choose the right PCP”
+      there are a number of articles \r\n      that will give you helpful tips on
+      what you should think about when \r\n      choosing your doctor.\r\n\r\n\r\n\r\n
+      \ field_options:\r\n  \r\n    possibly_eligible_yes_no: \r\n      value: 'no'\r\n
+      \ \r\n    total_score:\r\n      edit_as:\r\n        field_type: fixed_score\r\n
+      \     calculate_with:\r\n        sum:\r\n          - sitting_and_reading\r\n
+      \         - watching_tv\r\n          - public_place\r\n          - car_passenger\r\n
+      \         - afternoon_rest\r\n          - sitting_and_talking\r\n          -
+      after_lunch\r\n          - stopped_in_traffic \r\n\r\n  \r\n    sitting_and_reading:\r\n
+      \    edit_as:\r\n       field_type:\r\n         select_sitting_and_reading\r\n
+      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
+      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
+      of dozing: '3'\r\n    watching_tv:\r\n     edit_as:\r\n       field_type:\r\n
+      \        select_watching_tv\r\n       alt_options:\r\n         Would never doze:
+      '0'\r\n         Slight chance of dozing: '1'\r\n         Moderate chance of
+      dozing: '2'\r\n         High chance of dozing: '3'\r\n    public_place:\r\n
+      \    edit_as:\r\n       field_type:\r\n         select_public_place\r\n       alt_options:\r\n
+      \        Would never doze: '0'\r\n         Slight chance of dozing: '1'\r\n
+      \        Moderate chance of dozing: '2'\r\n         High chance of dozing: '3'\r\n
+      \   car_passenger:\r\n     edit_as:\r\n       field_type:\r\n         select_car_passenger\r\n
+      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
+      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
+      of dozing: '3'\r\n    afternoon_rest:\r\n     edit_as:\r\n       field_type:\r\n
+      \        select_afternoon_rest\r\n       alt_options:\r\n         Would never
+      doze: '0'\r\n         Slight chance of dozing: '1'\r\n         Moderate chance
+      of dozing: '2'\r\n         High chance of dozing: '3'\r\n    sitting_and_talking:\r\n
+      \    edit_as:\r\n       field_type:\r\n         select_sitting_and_talking\r\n
+      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
+      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
+      of dozing: '3'\r\n    after_lunch:\r\n     edit_as:\r\n       field_type:\r\n
+      \        select_after_lunch\r\n       alt_options:\r\n         Would never doze:
+      '0'\r\n         Slight chance of dozing: '1'\r\n         Moderate chance of
+      dozing: '2'\r\n         High chance of dozing: '3'\r\n    stopped_in_traffic:\r\n
+      \    edit_as:\r\n       field_type:\r\n         select_stopped_in_traffic\r\n
+      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
+      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
+      of dozing: '3'\r\n  \r\n    number_hours_sleep:\r\n      edit_as:\r\n        field_type:
+      select_number\r\n        alt_options:\r\n          - 0\r\n          - 1\r\n
+      \         - 2\r\n          - 3\r\n          - 4\r\n          - 5\r\n          -
+      6\r\n          - 7\r\n          - 8\r\n          - 9\r\n          - 10\r\n          -
+      11\r\n          - 12\r\n          - 13\r\n          - 14\r\n          - 15\r\n
+      \         - 16\r\n          - 17\r\n          - 18\r\n          - 19\r\n          -
+      20\r\n          - 21\r\n          - 22\r\n          - 23\r\n          - 24\r\n
+      \         \r\n      \r\n      \r\n      "
     user_email: 
   - id: 274
     name: SLEEP Basic Responses
@@ -6935,143 +7080,6 @@ app_type:
       right PCP” there are a number of articles \r\n      that will give you helpful
       tips on what you should think about when \r\n      choosing your doctor.\r\n
       \  \r\n   \r\n   \r\n   "
-    user_email: 
-  - id: 280
-    name: Sleep Epworth Sleepiness Scale
-    table_name: sleep_ese_questions
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-07-22T12:57:21.020Z'
-    updated_at: '2019-08-22T12:35:48.925Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: sitting_and_reading watching_tv public_place car_passenger afternoon_rest
-      sitting_and_talking after_lunch stopped_in_traffic total_score number_hours_sleep
-      possibly_eligible_yes_no placeholder_possibly_eligible placeholder_ineligible
-      ineligible_resource_yes_no placeholder_resource trust_assessment_info_yes_no
-      help_finding_pcp_yes_no placeholder_pcp_assist notes
-    result_order: ''
-    options: "default:\r\n\r\n# sitting_and_reading watching_tv public_place car_passenger
-      afternoon_rest sitting_and_talking after_lunch stopped_in_traffic total_score\r\n\r\n
-      \ valid_if:\r\n    on_save:\r\n\r\n      not_any:\r\n        this:\r\n          total_score:
-      ''\r\n\r\n\r\n\r\n  show_if:\r\n  \r\n    number_hours_sleep:\r\n      total_score:
-      \r\n        - '16'\r\n        - '17'\r\n        - '18'\r\n        - '19'\r\n
-      \       - '20'\r\n        - '21'\r\n        - '22'\r\n        - '23'\r\n        -
-      '24'\r\n    \r\n        \r\n    possibly_eligible_yes_no: &show_ineligible\r\n
-      \     any: &ineligible_total_score\r\n        total_score: \r\n          - '16'\r\n
-      \         - '17'\r\n          - '18'\r\n          - '19'\r\n          - '20'\r\n
-      \         - '21'\r\n          - '22'\r\n          - '23'\r\n          - '24'\r\n
-      \     not_any: &ineligible_hours_sleep\r\n        number_hours_sleep: \r\n          -
-      ''\r\n          - '0'\r\n          - '1'\r\n          - '2'\r\n          - '3'\r\n
-      \         - '4'\r\n          - '5'\r\n          - '6'\r\n\r\n    placeholder_possibly_eligible:\r\n
-      \     <<: *show_ineligible\r\n      all:\r\n        possibly_eligible_yes_no:
-      'yes'\r\n\r\n    placeholder_ineligible:\r\n      <<: *show_ineligible\r\n      all:\r\n
-      \       possibly_eligible_yes_no: 'no'\r\n    \r\n    ineligible_resource_yes_no:
-      \r\n      <<: *show_ineligible\r\n      all:\r\n        possibly_eligible_yes_no:
-      \r\n          - 'no'\r\n          - 'yes'\r\n\r\n    placeholder_resource:\r\n
-      \     ineligible_resource_yes_no: 'yes'\r\n\r\n    trust_assessment_info_yes_no:\r\n
-      \     ineligible_resource_yes_no: 'yes'\r\n\r\n\r\n    help_finding_pcp_yes_no:
-      \r\n      ineligible_resource_yes_no: 'yes'\r\n      \r\n    placeholder_pcp_assist:\r\n
-      \     help_finding_pcp_yes_no: 'yes'\r\n\r\n\r\n    notes:\r\n      ineligible_resource_yes_no:
-      'yes'\r\n\r\n\r\n\r\n\r\n  caption_before:     \r\n    sitting_and_reading:
-      Sitting and reading\r\n    watching_tv: Watching TV\r\n    public_place: Sitting,
-      inactive in a public place (e.g. a theatre or a meeting)\r\n    car_passenger:
-      As a passenger in a car for an hour without a break\r\n    afternoon_rest: Lying
-      down to rest in the afternoon when circumstances permit\r\n    sitting_and_talking:
-      Sitting and talking to someone\r\n    after_lunch: Sitting quietly after a lunch
-      without alcohol\r\n    stopped_in_traffic: In a car, while stopped for a few
-      minutes in the traffic\r\n    total_score: Total Score\r\n    number_hours_sleep:
-      How many hours do you sleep on a typical night?\r\n    \r\n    possibly_eligible_yes_no:
-      |\r\n      *Based on the scores, the participant is ineligible. \r\n      If
-      you believe the participant may be eligible, select **yes** and continue\r\n
-      \     with the screening.*\r\n    \r\n    placeholder_possibly_eligible: |\r\n
-      \     Thank you for answering those questions.  \r\n      Your score suggests
-      that you may have an underlying sleep disorder \r\n      such as sleep apnea,
-      rather than only insomnia, and we recommend \r\n      you discuss your symptoms
-      with a doctor.  \r\n    \r\n    placeholder_ineligible: |\r\n      Thank you
-      for answering those questions.  \r\n      Based on your responses, you are not
-      eligible for the study because \r\n      your score suggests that you may have
-      an underlying sleep disorder \r\n      such as sleep apnea, rather than only
-      insomnia, and we recommend \r\n      you discuss your symptoms with a doctor.
-      \ \r\n    \r\n    ineligible_resource_yes_no: |      \r\n      Are you interested
-      in a resource where you could find a sleep center \r\n      near you to undergo
-      an assessment?\r\n      \r\n    placeholder_resource: |\r\n      Great, I can
-      definitely give you a few options to get you started.\r\n\r\n      The first,
-      is that you are likely eligible to participate in one of the \r\n      Players
-      Trust medical wellness assessments. If you stopped playing with \r\n      the
-      NFL within the past 15 years, you would be eligible for the \r\n      Brain
-      & Body Assessment, or if you left the league more than 15 years ago, \r\n      it
-      would be the Milestone Assessment. They are very similar, and \r\n      would
-      provide you not only with a sleep study, but also a \r\n      comprehensive
-      medical assessment, and support to help you find a \r\n      Primary Care Physician
-      in your area if you do not already have one.  \r\n      There are 5 locations
-      around the country that host these assessments, \r\n      and if one is not
-      close to you the Trust should cover the cost of your travel.  \r\n      \r\n
-      \   trust_assessment_info_yes_no: |  \r\n      Would you like me to email you
-      more information about these assessments?\r\n\r\n    help_finding_pcp_yes_no:
-      |\r\n      Additionally, if you would prefer only to have your sleep assessed
-      or to \r\n      potentially stay closer to home, you can visit \r\n      http://sleepeducation.org/
-      and in the top left corner click on \r\n      “Find a Sleep Facility”.  That
-      page should help you find a sleep \r\n      center in your area where you could
-      do a sleep study to learn more \r\n      about any issues you may be experiencing
-      during sleep.  \r\n      Just so you are aware, if your insurance plan would
-      cover this assessment, \r\n      sometimes they will only do so if you get a
-      referral from your \r\n      Primary Care Physician first.  Do you need any
-      assistance finding a PCP?\r\n      \r\n    placeholder_pcp_assist: |\r\n      If
-      Yes: Okay. One option that I already mentioned is that when \r\n      you participate
-      in one of the wellness assessments with the Trust, \r\n      they will help
-      you find a PCP in your area.  Another option is \r\n      that you can contact
-      your insurance company and they will provide you \r\n      with a list of Primary
-      Care Physicians in your area who accept your \r\n      insurance plan. From
-      there, if you search on the internet \r\n      “How to choose the right PCP”
-      there are a number of articles \r\n      that will give you helpful tips on
-      what you should think about when \r\n      choosing your doctor.\r\n\r\n\r\n\r\n
-      \ field_options:\r\n  \r\n    possibly_eligible_yes_no: \r\n      value: 'no'\r\n
-      \ \r\n    total_score:\r\n      edit_as:\r\n        field_type: fixed_score\r\n
-      \     calculate_with:\r\n        sum:\r\n          - sitting_and_reading\r\n
-      \         - watching_tv\r\n          - public_place\r\n          - car_passenger\r\n
-      \         - afternoon_rest\r\n          - sitting_and_talking\r\n          -
-      after_lunch\r\n          - stopped_in_traffic \r\n\r\n  \r\n    sitting_and_reading:\r\n
-      \    edit_as:\r\n       field_type:\r\n         select_sitting_and_reading\r\n
-      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
-      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
-      of dozing: '3'\r\n    watching_tv:\r\n     edit_as:\r\n       field_type:\r\n
-      \        select_watching_tv\r\n       alt_options:\r\n         Would never doze:
-      '0'\r\n         Slight chance of dozing: '1'\r\n         Moderate chance of
-      dozing: '2'\r\n         High chance of dozing: '3'\r\n    public_place:\r\n
-      \    edit_as:\r\n       field_type:\r\n         select_public_place\r\n       alt_options:\r\n
-      \        Would never doze: '0'\r\n         Slight chance of dozing: '1'\r\n
-      \        Moderate chance of dozing: '2'\r\n         High chance of dozing: '3'\r\n
-      \   car_passenger:\r\n     edit_as:\r\n       field_type:\r\n         select_car_passenger\r\n
-      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
-      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
-      of dozing: '3'\r\n    afternoon_rest:\r\n     edit_as:\r\n       field_type:\r\n
-      \        select_afternoon_rest\r\n       alt_options:\r\n         Would never
-      doze: '0'\r\n         Slight chance of dozing: '1'\r\n         Moderate chance
-      of dozing: '2'\r\n         High chance of dozing: '3'\r\n    sitting_and_talking:\r\n
-      \    edit_as:\r\n       field_type:\r\n         select_sitting_and_talking\r\n
-      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
-      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
-      of dozing: '3'\r\n    after_lunch:\r\n     edit_as:\r\n       field_type:\r\n
-      \        select_after_lunch\r\n       alt_options:\r\n         Would never doze:
-      '0'\r\n         Slight chance of dozing: '1'\r\n         Moderate chance of
-      dozing: '2'\r\n         High chance of dozing: '3'\r\n    stopped_in_traffic:\r\n
-      \    edit_as:\r\n       field_type:\r\n         select_stopped_in_traffic\r\n
-      \      alt_options:\r\n         Would never doze: '0'\r\n         Slight chance
-      of dozing: '1'\r\n         Moderate chance of dozing: '2'\r\n         High chance
-      of dozing: '3'\r\n  \r\n    number_hours_sleep:\r\n      edit_as:\r\n        field_type:
-      select_number\r\n        alt_options:\r\n          - 0\r\n          - 1\r\n
-      \         - 2\r\n          - 3\r\n          - 4\r\n          - 5\r\n          -
-      6\r\n          - 7\r\n          - 8\r\n          - 9\r\n          - 10\r\n          -
-      11\r\n          - 12\r\n          - 13\r\n          - 14\r\n          - 15\r\n
-      \         - 16\r\n          - 17\r\n          - 18\r\n          - 19\r\n          -
-      20\r\n          - 21\r\n          - 22\r\n          - 23\r\n          - 24\r\n
-      \         \r\n      \r\n      \r\n      "
     user_email: 
   - id: 287
     name: Sleep Phone Screen Non-Eligible
@@ -8258,10 +8266,10 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:20.501Z'
-    updated_at: '2019-10-11T11:02:40.212Z'
-    report_type: regular_report
+    updated_at: '2019-10-17T13:16:14.080Z'
+    report_type: search
     auto: false
-    searchable: false
+    searchable: true
     position: 2
     edit_model: ''
     edit_field_names: ''
@@ -8467,21 +8475,25 @@ app_type:
   - id: 117
     name: Ready for PI Follow Up
     description: ''
-    sql: "SELECT distinct a.master_id, a.extra_log_type, a.id, a2.extra_log_type,
-      a2.id, mr2.*\r\n\r\n FROM activity_log_sleep_assignment_med_navs a\r\n\r\n LEFT
-      JOIN model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n   AND mr2.from_record_id
-      = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_med_navs a2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n   AND mr2.to_record_type
-      = 'ActivityLog::SleepAssignmentMedNav'\r\n   AND mr2.from_record_id = a.id\r\n
-      \  AND mr2.to_record_id = a2.id\r\n\r\n WHERE \r\n a.extra_log_type in ('request_pi_follow_up',
-      'request_pi_ps_review')\r\n AND (\r\n   a2.extra_log_type IS NULL \r\n   OR
-      a2.extra_log_type NOT in ('pi_follow_up', 'pi_ps_review')\r\n )\r\n \r\n\r\n"
+    sql: "SELECT a.master_id, a.extra_log_type, a.id\r\n--, a2.extra_log_type, a2.id,
+      mr2.*\r\nFROM activity_log_sleep_assignment_med_navs a\r\nWHERE \r\n  a.extra_log_type
+      = 'request_pi_follow_up'\r\n  AND a.id NOT IN (\r\n\r\n    SELECT a.id \r\n
+      \   FROM activity_log_sleep_assignment_med_navs a\r\n\r\n    LEFT JOIN model_references
+      mr2\r\n    ON\r\n     mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
+      \    AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n     AND
+      mr2.from_record_id = a.id\r\n\r\n    LEFT JOIN activity_log_sleep_assignment_med_navs
+      a2\r\n    ON\r\n     mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
+      \    AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n     AND
+      mr2.from_record_id = a.id\r\n     AND mr2.to_record_id = a2.id\r\n\r\n    WHERE
+      \r\n    a.extra_log_type = 'request_pi_follow_up'\r\n    AND a2.extra_log_type
+      = 'participant_follow_up'\r\n    AND a2.select_result = 'completed'\r\n\r\n
+      \   OR\r\n    a.extra_log_type = 'request_pi_ps_review'\r\n    AND a2.extra_log_type
+      = 'pi_ps_review'\r\n  )\r\n\r\n"
     search_attrs: ''
     admin_id: 2
     disabled: false
     created_at: '2019-08-28T13:05:15.231Z'
-    updated_at: '2019-08-28T13:40:02.935Z'
+    updated_at: '2019-10-17T14:10:15.868Z'
     report_type: search
     auto: true
     searchable: true

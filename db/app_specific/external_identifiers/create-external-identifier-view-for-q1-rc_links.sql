@@ -1,7 +1,7 @@
 create view
-ml_app.${survey}_rc_links as
-select id, master_id, link ${survey}_rc_link_ext_id, null::timestamp created_at, null::timestamp  updated_at, null::integer user_id
-from ${source_schema}.rc_links;
+ml_app.q1_rc_links as
+select id, master_id, link q1_rc_link_ext_id, null::timestamp created_at, null::timestamp  updated_at, null::integer user_id
+from q1.rc_links;
 
 
 REVOKE ALL ON SCHEMA ml_app FROM fphs;
