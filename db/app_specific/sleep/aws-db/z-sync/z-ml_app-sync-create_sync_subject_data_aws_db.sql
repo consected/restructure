@@ -6,14 +6,14 @@ set search_path=ml_app;
 
 
 -------------------------------------------------------
-----> At this point we switch to the Zeus FPHS DB
+----> At this point we switch to the Athena DB
 -- Get appropriate data as CSV
-----> Switch back to the AWS DB
+----> Switch back to the FPHS DB
 -- Generate temporary tables from the exported CSVs
 -------------------------------------------------------
 
 -------------------------------------------------------
--- Run through the entries in temporary temp_sleep_assignments table to create all the remote IPA records
+-- Run through the entries in temporary temp_sleep_assignments table to update all the Zeus IPA records
 -- Call create_remote_sleep_record() for each, pulling matched records from temp_player_infos and temp_player_contacts.
 -- Temporary tables are used, since they will already be populated with data from the Zeus server via CSV files
 CREATE OR REPLACE FUNCTION create_all_remote_sleep_records() returns INTEGER

@@ -1,0 +1,1 @@
+../sync-process/sync_db_connections.sh
