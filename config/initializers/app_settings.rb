@@ -51,6 +51,7 @@ class Settings
   OnlyLoadAppTypes = olat
 
   TemplateUserEmail = 'template@template'
+  TemplateUserEmailPattern = '%@template'
 
   def self.bulk_msg_app
     Admin::AppType.where(name: 'bulk-msg').first
