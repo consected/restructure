@@ -1729,7 +1729,7 @@ CREATE FUNCTION ml_app.log_nfs_store_stored_file_update() RETURNS trigger
 -- Name: log_page_layout_update(); Type: FUNCTION; Schema: ml_app; Owner: -
 --
 
-CREATE or REPLACE FUNCTION ml_app.log_page_layout_update() RETURNS trigger
+CREATE FUNCTION ml_app.log_page_layout_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
           BEGIN
