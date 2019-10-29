@@ -11,7 +11,7 @@
     <%= select_tag :to_user_id, active_user_options, include_blank: true %>
 
     <%= label_tag :app_type_id %>
-    <%= select_tag :app_type_id, app_type_options, app_type_select_current_item(use_current_user: true) %>
+    <%= select_tag :app_type_id, app_type_options(default_app_type_id: app_type_select_current_item(use_current_user: true)) %>
 
     <div class="form-group">
       <%= hidden_filter_fields %>
