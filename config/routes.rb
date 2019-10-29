@@ -36,6 +36,7 @@ Rails.application.routes.draw do
     post 'app_types/upload', to: 'app_types#upload'
 
     resources :user_roles, except: [:show, :destroy]
+    post 'user_roles/copy_user_roles', to: 'user_roles#copy_user_roles'
     resources :page_layouts, except: [:show, :destroy]
 
 

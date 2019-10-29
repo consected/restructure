@@ -1,6 +1,24 @@
 class Admin::UserRolesController < AdminController
 
   before_action :set_help_description
+  before_action :setup_copy, only: [:index]
+
+  def copy_user_roles
+
+    from_user_id = params[:from_user_id]
+    to_user_id = params[:to_user_id]
+    app_type_id = params[:app_type_id]
+
+    from_user = User.active.find from_user_id
+    to_user = User.active.find to_user_id
+    app_type = Admin::AppType.active.find app_type_id
+
+    res = Admin::UserRole.copy_user_roles from_user, to_user, app_type, current_admin
+
+    flash.now[:notice] = "#{to_user.email} now has #{res.length} roles for app #{app_type.name}"
+    index
+
+  end
 
   def view_folder
     'admin/common_templates'
@@ -26,6 +44,11 @@ class Admin::UserRolesController < AdminController
   private
     def permitted_params
       [:app_type_id, :role_name, :user_id, :disabled]
+    end
+
+    def setup_copy
+      @extra_part = 'admin/user_roles/copy_user_roles'
+
     end
 
     def set_help_description

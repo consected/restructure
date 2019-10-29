@@ -102,6 +102,33 @@ class Admin::UserRole < ActiveRecord::Base
     res.with_admin(admin).disable! if res
   end
 
+
+  # Copy roles from one user to another. To avoid confusion, app_type must be specified
+  # @param from_user [User] user to copy roles from
+  # @param to_user [User] user to copy roles to
+  # @param app_type [Admin::AppType] the app type the roles belong to.
+  # @return [Array] array of Admin::UserRole instances created in the to_user
+  def self.copy_user_roles from_user, to_user, app_type, current_admin
+    raise FphsException.new "app_type must be specified and not nil to copy roles" unless app_type
+    has_roles = Admin::UserRole.active_app_roles to_user, app_type: app_type
+    raise FphsException.new "can not copy roles to a user with roles in this app #{app_type}" if has_roles.length > 0
+
+    from_roles = Admin::UserRole.active_app_roles from_user, app_type: app_type
+
+    to_roles = []
+    from_roles.each do |r|
+      new_role = {
+        current_admin: current_admin,
+        role_name: r.role_name,
+        app_type: app_type,
+        user: to_user
+      }
+      to_roles << create!(new_role)
+    end
+
+    to_roles
+  end
+
   private
 
     # Automatically add a template@template record if needed

@@ -6,6 +6,8 @@ RSpec.describe Admin::UserRole, type: :model do
   include PlayerInfoSupport
 
   TestRoleName = 'test_role_1'
+  TestRoleName2 = 'test_role_2'
+  App2TestRoleName2 = 'app2_test_role_2'
 
   it "prevents others from querying UserRole.where directly" do
     create_admin
@@ -134,6 +136,50 @@ RSpec.describe Admin::UserRole, type: :model do
     user1.reload
 
     expect(user1.user_roles.role_names).to eq [TestRoleName]
+
+  end
+
+  it "duplicates all the roles from one user to another" do
+    create_admin
+    app_type_2 = create_app_type name: 'apptype2', label: 'apptype2'
+    user0, _ = create_user
+    app_type_0 = user0.app_type
+
+    # Validates that a named user in a user access control works
+    let_user_create_player_infos
+    let_user_create_player_infos in_app_type: app_type_2
+    create_item
+    user0.app_type = app_type_2
+    expect(user0.app_type).to be_a Admin::AppType
+    create_item
+
+    expect(user0.user_roles.length).to eq 0
+
+    user1, _ = create_user
+
+    r1 = create_user_role TestRoleName, user: user0, app_type: app_type_2
+    r2 = create_user_role TestRoleName2, user: user0, app_type: app_type_2
+    rapp2 = create_user_role App2TestRoleName2, user: user0, app_type: app_type_0
+
+    # Copy the roles for the named app type
+    res = Admin::UserRole.copy_user_roles user0, user1, app_type_2, @admin
+
+    expect(res.length).to eq 2
+    expect(Admin::UserRole.where(app_type: app_type_2, user: user1).role_names).to eq [TestRoleName, TestRoleName2]
+    expect(Admin::UserRole.where(app_type: app_type_0, user: user1).role_names).to eq []
+
+    # Copy the roles for the other app type
+    res = Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
+    expect(res.length).to eq 1
+
+    expect(Admin::UserRole.where(app_type: app_type_2, user: user1).role_names).to eq [TestRoleName, TestRoleName2]
+    expect(Admin::UserRole.where(app_type: app_type_0, user: user1).role_names).to eq [App2TestRoleName2]
+
+    # Can't copy roles if the target user has roles in the specified app
+    expect {
+      Admin::UserRole.copy_user_roles user0, user1, app_type_0, @admin
+    }.to raise_error FphsException
+
 
   end
 

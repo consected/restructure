@@ -37,6 +37,9 @@
     <%= @help_description %>
   </div>
 
+  <% if @extra_part %>
+  <%=  render partial: @extra_part  %>
+  <% end %>
 
   <%=  render partial: 'admin_handler/index_actions'  %>
   </div>
