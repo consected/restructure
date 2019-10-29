@@ -33,6 +33,10 @@ module DynamicModelExtension
         Rails.cache.write("ZeusShortLinkClick.latest_log", k)
       end
 
+      def no_downcase_attributes
+        %i(shortcode)
+      end
+
     end
 
     # A valid log entry looks like this:
@@ -87,10 +91,12 @@ module DynamicModelExtension
           )
 
           begin
-            c.force_save!
-            c.save!
+            transaction do
+              c.force_save!
+              c.save!
 
-            DynamicModel::ZeusShortLink.update_click_count shortcode, 1, m
+              DynamicModel::ZeusShortLink.update_click_count shortcode, 1, m
+            end
             res = true
           rescue => e
             logger.warn "Failed to update clicks for shortcode: #{c}. #{e}"
