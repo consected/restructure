@@ -17,7 +17,7 @@ module AdminSetup
         admin_obj.disabled = false
 
         otpsecret = 'not changed'
-        if admin_obj.otp_secret.blank? || ENV['reset_secret']=='yes'
+        if admin_obj.respond_to?(:otp_secret) && admin_obj.otp_secret.blank? || ENV['reset_secret']=='yes'
           admin_obj.reset_two_factor_auth
           otpsecret = 'created'
         end
