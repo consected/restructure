@@ -1,15 +1,16 @@
 CREATE TEMPORARY TABLE temp_sleep_assignments (
     master_id integer,
-    sleep_id bigint
+    sleep_id integer
 );
 
 
 INSERT INTO temp_sleep_assignments (SELECT * FROM ml_app.find_new_local_sleep_records($SUBPROCESS_ID));
+
 select ml_app.lock_transfer_records_with_external_ids(
   'fphs-db',
   'athena-db',
   (select array_agg(master_id) from temp_sleep_assignments),
-  (select array_agg(master_id) from temp_sleep_assignments),
+  (select array_agg(sleep_id) from temp_sleep_assignments),
   'sleep_assignments'
 );
 

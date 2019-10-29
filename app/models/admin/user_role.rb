@@ -106,6 +106,7 @@ class Admin::UserRole < ActiveRecord::Base
 
     # Automatically add a template@template record if needed
     def save_template
+      return true if self.disabled?
       tu = User.template_user
       tu.app_type = app_type
       self.class.add_to_role tu, self.app_type, self.role_name, self.current_admin

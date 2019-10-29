@@ -67,7 +67,7 @@ module NavHandler
     end
 
     if current_user || admin_view
-      @primary_navs << {label: 'Dashboards', url: '/page_layouts', route: 'page_layouts#index'} if (admin_view || current_user.can?(:view_dashboards)) && Admin::PageLayout.app_standalone_layouts(current_user.app_type_id).count > 0
+      @primary_navs << {label: 'Dashboards', url: '/page_layouts', route: 'page_layouts#index'} if (admin_view || current_user.can?(:view_dashboards)) && current_user&.app_type_id && Admin::PageLayout.app_standalone_layouts(current_user.app_type_id).count > 0
       @primary_navs << {label: 'Reports', url: '/reports', route: 'reports#index'} if admin_view || current_user.can?(:view_reports)
       @primary_navs << {label: 'Print', url: '#body-top', extras: {id: 'print-action', class: 'print-action-button'}} if admin_view || current_user.can?(:print)
       @primary_navs << {label: 'Import CSV', url: '/imports', route: 'imports#index'}  if admin_view || current_user.can?(:import_csv)
