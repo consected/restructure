@@ -296,7 +296,7 @@ module ActivityLogHandler
     res
   end
 
-  def model_references reference_type: :references
+  def model_references reference_type: :references, active_only: false
     res = []
     if reference_type == :references
       refs = extra_log_type_config.references
@@ -309,11 +309,18 @@ module ActivityLogHandler
       refitem.each do |ref_type, ref_config|
         f = ref_config[:from]
         if f == 'this'
-          res += ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config[:filter_by]
+          got = ModelReference.find_references self, to_record_type: ref_type, filter_by: ref_config[:filter_by]
         elsif f == 'master'
-          res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config[:filter_by]
+          got = ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config[:filter_by]
         elsif f == 'any'
-          res += ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config[:filter_by], without_reference: true
+          got = ModelReference.find_references self.master, to_record_type: ref_type, filter_by: ref_config[:filter_by], without_reference: true
+        else
+          got = nil
+        end
+
+        if got
+          got = got.select {|r| !r.disabled} if active_only
+          res += got
         end
       end
     end

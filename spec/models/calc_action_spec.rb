@@ -1110,8 +1110,18 @@ RSpec.describe "Calculate conditional actions", type: :model do
     expect(@alnor.model_references.count).to eq 2 # two dynamic models only
 
     res = ConditionalActions.new conf, @alnor
-    expect(res.calc_action_if).to be false
+    expect(res.calc_action_if).to be true
 
+    @alnor.extra_log_type_config.editable_if = {always: true}
+
+    @alnor.model_references.each do |r|
+      r.update! disabled: true, current_user: @user
+    end
+
+
+    res_if = res.calc_action_if
+
+    expect(res_if).to be false
 
   end
 

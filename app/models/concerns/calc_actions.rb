@@ -405,7 +405,7 @@ module CalcActions
                   att = val.first.last.first.last
                   to_table_name = val.first.last.first.first
                   val = []
-                  model_refs = @current_instance.model_references
+                  model_refs = @current_instance.model_references(active_only: true)
                   model_refs = model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
 
                   model_refs.each do |mr|
@@ -417,7 +417,7 @@ module CalcActions
                   # non_query_condition = true
                   val = []
 
-                  mrs = @current_instance.model_references
+                  mrs = @current_instance.model_references(active_only: true)
 
                   unless non_join_table_name?(join_table_name)
                     mrs = mrs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
@@ -435,7 +435,7 @@ module CalcActions
                   to_table_name = val.first.last.first.first
                   val = []
                   raise FphsException.new "No referring record specified when using parent_references" unless @current_instance.referring_record
-                  parent_model_refs = @current_instance.referring_record.model_references
+                  parent_model_refs = @current_instance.referring_record.model_references(active_only: true)
                   parent_model_refs = parent_model_refs.select {|r| r.to_record_type == to_table_name.to_s.singularize.ns_camelize}
 
                   parent_model_refs.each do |mr|
@@ -450,7 +450,7 @@ module CalcActions
                   # Get the specified attribute's value from each of the parent model references
                   # Generate an array, allowing the conditions to be IN any of these
                   # parent_model = ModelReference.find_where_referenced_from(@current_instance).order(id: :desc).first
-                  parent_model_refs = @current_instance.referring_record.model_references
+                  parent_model_refs = @current_instance.referring_record.model_references(active_only: true)
 
                   unless non_join_table_name?(join_table_name)
                     parent_model_refs = parent_model_refs.select {|r| r.to_record_type == join_table_name.to_s.singularize.ns_camelize}
