@@ -99,7 +99,7 @@
         {{/is}}
 
         {{#if show_item_type_flags_before}}
-        {{>item_flag_container item_type=full_name master_id=result_data.master_id id=result_data.id}}
+        {{>item_flag_container item_type=full_name master_id=result_data.master_id id=result_data.id item_flags=result_data.item_flags}}
         {{/if}}
       </li>
       {{#unless template_config.view_options.show_embedded_at_top}}

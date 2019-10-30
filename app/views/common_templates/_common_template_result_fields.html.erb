@@ -194,7 +194,7 @@
   {{#is key item_flags_after}}
     <li class="list-group-item is-full-width {{hyphenate name}}-item-flags">
 
-      {{>item_flag_container item_type=../full_name master_id=result_data.master_id id=result_data.id readonlyview=../item_flags_readonly }}
+      {{>item_flag_container item_type=../full_name master_id=result_data.master_id id=result_data.id readonlyview=../item_flags_readonly item_flags=result_data.item_flags}}
 
     </li>
   {{/is}}
