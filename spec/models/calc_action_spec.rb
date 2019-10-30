@@ -1115,7 +1115,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
     @alnor.extra_log_type_config.editable_if = {always: true}
 
     @alnor.model_references.each do |r|
-      r.update! disabled: true, current_user: @user
+      r.update!(disabled: true, current_user: @user) unless r.disabled?
     end
 
 
