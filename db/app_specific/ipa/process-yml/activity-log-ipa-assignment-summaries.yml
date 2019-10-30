@@ -102,7 +102,7 @@ medical_history:
               high_cholesterol_diagnosis_blank_yes_no_dont_know:
                 dynamic_model__ipa_ps_healths:
                   high_cholesterol_diagnosis_blank_yes_no_dont_know: return_value
-              high_cholesterol_medications_blank_yes_no: 
+              high_cholesterol_medications_blank_yes_no:
                 dynamic_model__ipa_ps_healths:
                   high_cholesterol_medications_blank_yes_no: return_value
               high_cholesterol_diagnosis_details:
@@ -162,6 +162,12 @@ medical_history:
               dietary_restrictions_details:
                 dynamic_model__ipa_ps_tms_tests:
                   dietary_restrictions_details: return_value
+              radiation_blank_yes_no:
+                dynamic_model__ipa_ps_mris:
+                  radiation_blank_yes_no: return_value
+              radiation_details:
+                dynamic_model__ipa_ps_mris:
+                  radiation_details: return_value
 
 
 medications:
