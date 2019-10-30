@@ -298,6 +298,8 @@ module DynamicModelExtension
         }
       end
 
+      @next_token = nil if @events.length == 0
+
       {
         raw_events: @raw_events,
         events: @events,

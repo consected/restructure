@@ -82,7 +82,7 @@ RSpec.describe "DynamicModel::ZeusBulkMessageStatus", type: :model do
     expect(DynamicModel::ZeusBulkMessageStatus.earliest_incomplete_timestamp).to be nil
 
     # Any message sent more than 5 days ago also shouldn't be checked
-    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now - 6.days, send_time: Time.now - 10.minutes, updated_at: DateTime.now - 6.days)
+    zbmsg = @bulk_master.dynamic_model__zeus_bulk_messages.create!(status: 'sent', name: 'test', channel: 'sms', message: 'message', send_date: DateTime.now - 11.days, send_time: Time.now - 10.minutes, updated_at: DateTime.now - 11.days)
     recips.each do |r|
       r.update!(zeus_bulk_message_id: zbmsg.id, current_user: @user)
     end
