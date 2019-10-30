@@ -13,114 +13,114 @@ app_type:
     value: bulk sms
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:06.970Z'
     updated_at: '2019-06-10T17:17:06.970Z'
-    user_email: 
+    user_email:
   - id: 127
     name: hide navbar search
     value: 'true'
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:06.983Z'
     updated_at: '2019-06-10T17:17:06.983Z'
-    user_email: 
+    user_email:
   - id: 128
     name: hide player tabs
     value: 'true'
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:06.993Z'
     updated_at: '2019-06-10T17:17:06.993Z'
-    user_email: 
+    user_email:
   - id: 129
     name: hide pro info
     value: 'true'
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:07.004Z'
     updated_at: '2019-06-10T17:17:07.004Z'
-    user_email: 
+    user_email:
   - id: 130
     name: hide search form advanced
     value: 'true'
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:07.014Z'
     updated_at: '2019-06-10T17:17:07.014Z'
-    user_email: 
+    user_email:
   - id: 131
     name: hide search form simple
     value: 'true'
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:07.024Z'
     updated_at: '2019-06-10T17:17:07.024Z'
-    user_email: 
+    user_email:
   - id: 132
     name: hide tracker panel
     value: 'true'
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:07.040Z'
     updated_at: '2019-06-10T17:17:07.040Z'
-    user_email: 
+    user_email:
   - id: 133
     name: menu research label
     value: Bulk SMS
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:07.050Z'
     updated_at: '2019-06-10T17:17:07.050Z'
-    user_email: 
+    user_email:
   - id: 134
     name: header no subject details label
     value: Configurations
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:07.060Z'
     updated_at: '2019-06-10T17:17:07.060Z'
-    user_email: 
+    user_email:
   - id: 135
     name: show ids in master result
     value: none
     disabled: false
     admin_id: 2
-    user_id: 
+    user_id:
     app_type_id: 13
     role_name: ''
     created_at: '2019-06-10T17:17:07.070Z'
     updated_at: '2019-06-10T17:17:07.070Z'
-    user_email: 
+    user_email:
   user_access_controls:
   - id: 692
-    user_id: 
+    user_id:
     resource_type: general
     resource_name: app_type
     options: ''
@@ -131,9 +131,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.743Z'
     updated_at: '2019-06-14T07:33:08.154Z'
-    user_email: 
+    user_email:
   - id: 693
-    user_id: 
+    user_id:
     resource_type: report
     resource_name: Bulk SMS
     options: ''
@@ -144,9 +144,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.756Z'
     updated_at: '2019-06-14T07:33:08.164Z'
-    user_email: 
+    user_email:
   - id: 694
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: dynamic_model__zeus_bulk_messages
     options: ''
@@ -157,9 +157,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.766Z'
     updated_at: '2019-06-14T07:33:08.175Z'
-    user_email: 
+    user_email:
   - id: 695
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: trackers
     options: ''
@@ -170,9 +170,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.776Z'
     updated_at: '2019-06-14T07:33:08.185Z'
-    user_email: 
+    user_email:
   - id: 696
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: activity_log__zeus_bulk_messages
     options: ''
@@ -183,9 +183,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.787Z'
     updated_at: '2019-06-14T07:33:08.194Z'
-    user_email: 
+    user_email:
   - id: 697
-    user_id: 
+    user_id:
     resource_type: activity_log_type
     resource_name: activity_log__zeus_bulk_message__create_bulk_message
     options: ''
@@ -196,9 +196,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.797Z'
     updated_at: '2019-06-14T07:33:08.203Z'
-    user_email: 
+    user_email:
   - id: 698
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: player_contacts
     options: ''
@@ -209,9 +209,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.808Z'
     updated_at: '2019-06-14T07:33:08.213Z'
-    user_email: 
+    user_email:
   - id: 699
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: dynamic_model__zeus_bulk_message_recipients
     options: ''
@@ -222,9 +222,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.818Z'
     updated_at: '2019-06-14T07:33:08.223Z'
-    user_email: 
+    user_email:
   - id: 700
-    user_id: 
+    user_id:
     resource_type: activity_log_type
     resource_name: activity_log__zeus_bulk_message__submit_bulk_message
     options: ''
@@ -235,9 +235,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.828Z'
     updated_at: '2019-06-14T07:33:08.233Z'
-    user_email: 
+    user_email:
   - id: 701
-    user_id: 
+    user_id:
     resource_type: report
     resource_name: Recipients and Delivery
     options: ''
@@ -248,9 +248,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.838Z'
     updated_at: '2019-06-14T11:48:27.863Z'
-    user_email: 
+    user_email:
   - id: 702
-    user_id: 
+    user_id:
     resource_type: general
     resource_name: view_reports
     options: ''
@@ -261,9 +261,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.848Z'
     updated_at: '2019-06-14T07:33:08.251Z'
-    user_email: 
+    user_email:
   - id: 703
-    user_id: 
+    user_id:
     resource_type: report
     resource_name: Select Players by Flag
     options: ''
@@ -274,9 +274,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.858Z'
     updated_at: '2019-06-14T07:33:08.260Z'
-    user_email: 
+    user_email:
   - id: 704
-    user_id: 
+    user_id:
     resource_type: report
     resource_name: Players Selected
     options: ''
@@ -287,9 +287,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-10T17:17:14.874Z'
     updated_at: '2019-06-14T07:33:08.269Z'
-    user_email: 
+    user_email:
   - id: 705
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: dynamic_model__zeus_bulk_message_statuses
     options: ''
@@ -300,9 +300,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-14T07:33:08.280Z'
     updated_at: '2019-06-14T11:49:02.994Z'
-    user_email: 
+    user_email:
   - id: 706
-    user_id: 
+    user_id:
     resource_type: report
     resource_name: Message Metrics
     options: ''
@@ -313,9 +313,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-14T12:55:10.221Z'
     updated_at: '2019-06-14T12:55:10.221Z'
-    user_email: 
+    user_email:
   - id: 707
-    user_id: 
+    user_id:
     resource_type: report
     resource_name: Select Players
     options: ''
@@ -326,9 +326,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-18T11:08:48.033Z'
     updated_at: '2019-06-18T11:08:48.033Z'
-    user_email: 
+    user_email:
   - id: 709
-    user_id: 
+    user_id:
     resource_type: report
     resource_name: Delivery Stats
     options: ''
@@ -339,9 +339,9 @@ app_type:
     role_name: user - bulk sms
     created_at: '2019-06-18T13:27:46.716Z'
     updated_at: '2019-06-18T13:27:46.716Z'
-    user_email: 
+    user_email:
   - id: 1343
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: dynamic_model__zeus_short_links
     options: ''
@@ -352,9 +352,9 @@ app_type:
     role_name: admin - short links
     created_at: '2019-09-24T16:31:07.034Z'
     updated_at: '2019-09-24T16:31:07.034Z'
-    user_email: 
+    user_email:
   - id: 1344
-    user_id: 
+    user_id:
     resource_type: table
     resource_name: dynamic_model__zeus_short_link_clicks
     options: ''
@@ -365,7 +365,7 @@ app_type:
     role_name: admin - short links
     created_at: '2019-09-30T10:28:55.867Z'
     updated_at: '2019-09-30T10:28:55.867Z'
-    user_email: 
+    user_email:
   associated_activity_logs:
   - id: 57
     name: Messages
@@ -440,12 +440,12 @@ app_type:
     process_name: ''
     table_name: activity_log_zeus_bulk_messages
     category: bulk-sms
-    user_email: 
+    user_email:
   associated_dynamic_models:
   - id: 526
     name: Short Link Clicks
     table_name: zeus_short_link_clicks
-    schema_name: 
+    schema_name:
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
@@ -453,17 +453,17 @@ app_type:
     disabled: false
     created_at: '2019-09-30T09:25:34.588Z'
     updated_at: '2019-09-30T09:25:34.588Z'
-    position: 
+    position:
     category: bulk-messages
     table_key_name: ''
     field_list: shortcode domain browser logfile action_timestamp
     result_order: ''
     options: ''
-    user_email: 
+    user_email:
   - id: 524
     name: Short Links
     table_name: zeus_short_links
-    schema_name: 
+    schema_name:
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
@@ -471,17 +471,17 @@ app_type:
     disabled: false
     created_at: '2019-09-24T15:58:40.055Z'
     updated_at: '2019-09-24T15:58:40.055Z'
-    position: 
+    position:
     category: bulk-messages
     table_key_name: ''
     field_list: url,shortcode,clicks,next_check_date
     result_order: ''
     options: ''
-    user_email: 
+    user_email:
   - id: 229
     name: Bulk Messages
     table_name: zeus_bulk_messages
-    schema_name: 
+    schema_name:
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
@@ -489,7 +489,7 @@ app_type:
     disabled: false
     created_at: '2019-06-10T17:17:07.078Z'
     updated_at: '2019-06-18T11:02:54.116Z'
-    position: 
+    position:
     category: bulk-messages
     table_key_name: ''
     field_list: name,notes,channel,message,send_date,send_time,embedded_report_84,embedded_report_82,embedded_report_81,status
@@ -514,11 +514,11 @@ app_type:
       \     not_any:\r\n        id: ''\r\n        status:\r\n          - sent\r\n\r\n
       \ editable_if:\r\n    all:\r\n      this: \r\n        status:\r\n          -
       \r\n          - draft\r\n          - cancelled\r\n        \r\n"
-    user_email: 
+    user_email:
   - id: 231
     name: Bulk Message Statuses
     table_name: zeus_bulk_message_statuses
-    schema_name: 
+    schema_name:
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
@@ -526,17 +526,17 @@ app_type:
     disabled: false
     created_at: '2019-06-14T07:32:55.993Z'
     updated_at: '2019-06-14T07:32:55.993Z'
-    position: 
+    position:
     category: bulk-messages
     table_key_name: ''
     field_list: res_timestamp message_id status status_reason zeus_bulk_message_recipient_id
     result_order: ''
     options: ''
-    user_email: 
+    user_email:
   - id: 230
     name: Zeus Bulk Message Recipients
     table_name: zeus_bulk_message_recipients
-    schema_name: 
+    schema_name:
     primary_key_name: id
     foreign_key_name: master_id
     description: ''
@@ -544,13 +544,33 @@ app_type:
     disabled: false
     created_at: '2019-06-10T17:17:09.590Z'
     updated_at: '2019-06-10T17:17:09.590Z'
-    position: 
+    position:
     category: bulk-messages
     table_key_name: ''
     field_list: record_id,data,rec_type,rank
     result_order: ''
     options: "default:\r\n\r\n"
-    user_email: 
+    user_email:
+
+  - id: 13
+    name: Player Contact Phone Info
+    table_name: player_contact_phone_infos
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 1
+    disabled: false
+    created_at: '2019-08-27T17:07:24.114Z'
+    updated_at: '2019-08-27T17:07:24.114Z'
+    position:
+    category: bulk-messages
+    table_key_name: ''
+    field_list: ''
+    result_order: ''
+    options: ''
+    user_email:
+
   associated_external_identifiers: []
   associated_reports:
   - id: 79
@@ -568,7 +588,7 @@ app_type:
     report_type: search
     auto: true
     searchable: true
-    position: 
+    position:
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
@@ -577,7 +597,7 @@ app_type:
     options: "view_options:\r\n  hide_result_count: true\r\n  hide_export_buttons:
       true\r\n#  hide_criteria_panel: true\r\n  prevent_collapse_for_list: true\r\n
       \ \r\nlist_options:\r\n  hide_in_list: true"
-    user_email: 
+    user_email:
   - id: 80
     name: Select Players by Flag
     description: ''
@@ -606,14 +626,14 @@ app_type:
     report_type: regular_report
     auto: false
     searchable: false
-    position: 
+    position:
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
     item_type: messaging
     short_name: select_players_by_flag
     options: "list_options:\r\n  hide_in_list: true"
-    user_email: 
+    user_email:
   - id: 81
     name: Recipients and Delivery
     description: ''
@@ -632,14 +652,14 @@ app_type:
     report_type: regular_report
     auto: true
     searchable: false
-    position: 
+    position:
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
     item_type: messaging
     short_name: recipients_and_delivery
     options: "list_options:\r\n  hide_in_list: true"
-    user_email: 
+    user_email:
   - id: 82
     name: Players Selected
     description: ''
@@ -660,14 +680,14 @@ app_type:
     report_type: regular_report
     auto: true
     searchable: false
-    position: 
+    position:
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
     item_type: messaging
     short_name: players_selected
     options: "list_options:\r\n  hide_in_list: true"
-    user_email: 
+    user_email:
   - id: 83
     name: Message Metrics
     description: ''
@@ -704,7 +724,7 @@ app_type:
     report_type: regular_report
     auto: true
     searchable: false
-    position: 
+    position:
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
@@ -712,7 +732,7 @@ app_type:
     short_name: message_metrics
     options: "view_options:\r\n  humanize_column_names: true\r\n  hide_table_names:
       true\r\n"
-    user_email: 
+    user_email:
   - id: 84
     name: Select Players
     description: ''
@@ -744,7 +764,7 @@ app_type:
     report_type: regular_report
     auto: false
     searchable: false
-    position: 
+    position:
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
@@ -752,7 +772,7 @@ app_type:
     short_name: select_player_phones_by_status
     options: "view_options:\r\n  hide_table_names: true\r\n  # humanize_column_names:
       true\r\n\r\nlist_options:\r\n  hide_in_list: true"
-    user_email: 
+    user_email:
   - id: 85
     name: Delivery Stats
     description: ''
@@ -784,7 +804,7 @@ app_type:
     report_type: regular_report
     auto: true
     searchable: false
-    position: 
+    position:
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
@@ -792,7 +812,7 @@ app_type:
     short_name: delivery_stats
     options: "view_options:\r\n  humanize_column_names: true\r\n  hide_table_names:
       true\r\n"
-    user_email: 
+    user_email:
   associated_general_selections:
   - id: 14
     name: primary
@@ -800,60 +820,60 @@ app_type:
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.514Z'
     updated_at: '2019-09-16T13:34:00.861Z'
-    disabled: 
+    disabled:
     admin_id: 2
     create_with: true
-    edit_if_set: 
+    edit_if_set:
     edit_always: true
-    position: 
-    description: 
-    lock: 
-    user_email: 
+    position:
+    description:
+    lock:
+    user_email:
   - id: 15
     name: secondary
     value: '5'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.543Z'
     updated_at: '2019-09-16T13:34:00.864Z'
-    disabled: 
+    disabled:
     admin_id: 2
     create_with: true
-    edit_if_set: 
+    edit_if_set:
     edit_always: true
-    position: 
-    description: 
-    lock: 
-    user_email: 
+    position:
+    description:
+    lock:
+    user_email:
   - id: 16
     name: do not use
     value: '0'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.671Z'
     updated_at: '2018-05-29T13:24:49.671Z'
-    disabled: 
+    disabled:
     admin_id: 2
-    create_with: 
-    edit_if_set: 
-    edit_always: 
-    position: 
-    description: 
-    lock: 
-    user_email: 
+    create_with:
+    edit_if_set:
+    edit_always:
+    position:
+    description:
+    lock:
+    user_email:
   - id: 17
     name: bad contact
     value: "-1"
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.689Z'
     updated_at: '2019-09-16T13:34:00.871Z'
-    disabled: 
+    disabled:
     admin_id: 2
     create_with: true
-    edit_if_set: 
+    edit_if_set:
     edit_always: true
-    position: 
-    description: 
-    lock: 
-    user_email: 
+    position:
+    description:
+    lock:
+    user_email:
   - id: 18
     name: NFL
     value: nfl
@@ -865,10 +885,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 19
     name: nflpa
     value: nflpa
@@ -880,10 +900,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 34
     name: Email
     value: email
@@ -895,10 +915,10 @@ app_type:
     create_with: true
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   - id: 35
     name: Phone
     value: phone
@@ -910,10 +930,10 @@ app_type:
     create_with: true
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   - id: 43
     name: nflpa2
     value: nflpa2
@@ -925,10 +945,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 44
     name: integrate1
     value: integrate1
@@ -940,10 +960,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 45
     name: integrate2
     value: integrate2
@@ -955,10 +975,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 46
     name: CIS
     value: cis
@@ -970,10 +990,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 47
     name: cis-paper
     value: cis-paper
@@ -985,10 +1005,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 48
     name: cis-email
     value: cis-email
@@ -1000,55 +1020,55 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 51
     name: do not use
     value: '0'
     item_type: player_contacts_rank
     created_at: '2015-10-20T16:24:09.278Z'
     updated_at: '2019-09-16T13:34:00.920Z'
-    disabled: 
+    disabled:
     admin_id: 2
     create_with: true
-    edit_if_set: 
+    edit_if_set:
     edit_always: true
-    position: 
-    description: 
-    lock: 
-    user_email: 
+    position:
+    description:
+    lock:
+    user_email:
   - id: 86
     name: Phone
     value: phone
     item_type: player_contacts_rec_type
     created_at: '2018-05-29T13:24:49.682Z'
     updated_at: '2019-09-16T13:34:00.924Z'
-    disabled: 
+    disabled:
     admin_id: 2
-    create_with: 
-    edit_if_set: 
-    edit_always: 
-    position: 
-    description: 
-    lock: 
-    user_email: 
+    create_with:
+    edit_if_set:
+    edit_always:
+    position:
+    description:
+    lock:
+    user_email:
   - id: 87
     name: Email
     value: email
     item_type: player_contacts_rec_type
     created_at: '2018-05-29T13:24:49.689Z'
     updated_at: '2019-09-16T13:34:00.926Z'
-    disabled: 
+    disabled:
     admin_id: 2
-    create_with: 
-    edit_if_set: 
-    edit_always: 
-    position: 
-    description: 
-    lock: 
-    user_email: 
+    create_with:
+    edit_if_set:
+    edit_always:
+    position:
+    description:
+    lock:
+    user_email:
   - id: 189
     name: cis-redcap
     value: cis-redcap
@@ -1060,10 +1080,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 190
     name: nflpa4
     value: nflpa4
@@ -1075,10 +1095,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 191
     name: nflpa3
     value: nflpa3
@@ -1090,10 +1110,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 192
     name: player referral
     value: player referral
@@ -1105,10 +1125,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 193
     name: public source
     value: public source
@@ -1120,10 +1140,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 194
     name: event
     value: event
@@ -1135,10 +1155,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 195
     name: cis-phone
     value: cis-phone
@@ -1150,10 +1170,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 196
     name: not set
     value: not set
@@ -1165,10 +1185,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 197
     name: facebook
     value: facebook
@@ -1180,10 +1200,10 @@ app_type:
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 198
     name: twitter
     value: twitter
@@ -1195,10 +1215,10 @@ app_type:
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 211
     name: app entry
     value: app entry
@@ -1210,10 +1230,10 @@ app_type:
     create_with: true
     edit_if_set: false
     edit_always: true
-    position: 
+    position:
     description: ''
     lock: false
-    user_email: 
+    user_email:
   - id: 390
     name: primary
     value: '10'
@@ -1225,10 +1245,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   - id: 390
     name: primary
     value: '10'
@@ -1240,10 +1260,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   - id: 391
     name: secondary
     value: '5'
@@ -1255,10 +1275,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   - id: 391
     name: secondary
     value: '5'
@@ -1270,10 +1290,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   - id: 392
     name: phone
     value: phone
@@ -1285,10 +1305,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   - id: 392
     name: phone
     value: phone
@@ -1300,10 +1320,10 @@ app_type:
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position:
     description: ''
     lock: true
-    user_email: 
+    user_email:
   page_layouts:
   - id: 16
     app_type_id: 13
@@ -1317,8 +1337,8 @@ app_type:
     admin_id: 2
     created_at: '2019-06-10T17:17:14.661Z'
     updated_at: '2019-06-18T13:45:29.670Z'
-    description: 
-    user_email: 
+    description:
+    user_email:
   user_roles:
   - id: 122
     app_type_id: 13
@@ -1375,11 +1395,11 @@ app_type:
     disabled: false
     created_at: '2019-01-08T14:11:25.775Z'
     updated_at: '2019-07-01T16:26:12.614Z'
-    category: 
-    user_email: 
+    category:
+    user_email:
   associated_config_libraries: []
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []
   nfs_store_filters: []
-  user_email: 
+  user_email:

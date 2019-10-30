@@ -28,4 +28,11 @@ if ActiveRecord::Base.connection.table_exists? :delayed_jobs
     ShortLinkClicksRefreshTask.schedule!
   end
 
+  res = Delayed::Job.lookup_jobs_by_class('SmsOptOutRefreshTask', queue: 'recurring-tasks')
+
+  if res.length == 0
+    Rails.logger.info "Scheduling the SMS opt out refresh task"
+    SmsOptOutRefreshTask.schedule!
+  end
+
 end

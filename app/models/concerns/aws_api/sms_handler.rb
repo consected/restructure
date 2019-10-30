@@ -65,6 +65,11 @@ module AwsApi
       )
     end
 
+    def list_sms_opt_outs next_token: nil
+      cond = {}
+      cond[:next_token] = next_token if next_token
+      aws_sns_client.list_phone_numbers_opted_out cond
+    end
 
 
     def pp_phone_validate phone_number

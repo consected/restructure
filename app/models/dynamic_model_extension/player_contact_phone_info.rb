@@ -7,6 +7,7 @@ module DynamicModelExtension
 
       def extension_setup
         PlayerContact.has_one :player_contact_phone_info, class_name: 'DynamicModel::PlayerContactPhoneInfo'
+        include AwsApi::SmsHandler
       end
 
       # Get the player contact records that do not yet have phone info
@@ -50,6 +51,52 @@ module DynamicModelExtension
         end
 
       end
+
+      def update_opt_outs max_iters=1000
+
+        nt = nil
+        total_opt_outs = 0
+
+        pcpi_inst = DynamicModel::PlayerContactPhoneInfo.new
+
+        batch_user = User.use_batch_user(Settings.bulk_msg_app) if Settings.bulk_msg_app
+
+
+        (0..max_iters).each do |i|
+          res = pcpi_inst.list_sms_opt_outs next_token: nt
+          nt = res.next_token
+
+          res.phone_numbers.each do |pn|
+
+            pcpi = DynamicModel::PlayerContactPhoneInfo.where(cleansed_phone_number_e164: pn).first
+
+            if pcpi
+              unless pcpi.opted_out_at
+                # Not opted-out yet
+                pcpi.opted_out_at = DateTime.now
+                pcpi.current_user = batch_user #pcpi.user
+                ures = pcpi.save
+
+       	       	Rails.logger.warn "Could not update player contact phone info record #{pcpi.id}: #{pcpi.errors.first}" unless ures
+
+              end
+              total_opt_outs += 1
+            else
+              Rails.logger.warn "SMS opt out received from a phone that is not a player contact phone info record: #{pn}"
+            end
+
+          end
+
+          break unless nt
+
+        end
+
+        total_opt_outs
+
+      end
+
+
+
     end
 
   end
