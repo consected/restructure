@@ -7,9 +7,9 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
   include FeatureSupport
 
   before(:all) do
+    seed_database
     @admin, _ = create_admin
 
-    seed_database
     gs = Classification::GeneralSelection.all
     gs.each {|g| g.current_admin = @admin; g.create_with = true; g.edit_always = true; g.save!}
 
@@ -40,16 +40,18 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
       Admin::AppConfiguration.create! app_type: @user.app_type, name: 'create master with', value: 'player_info', current_admin: @admin
     end
 
-    setup_access :addresses
-    setup_access :player_contacts
-    setup_access :player_infos, access: :edit
-    setup_access :item_flags
-    setup_access :player_infos_item_flags
-    setup_access :not_tracker_histories
-    setup_access :not_trackers
-    setup_access :trackers
-    setup_access :tracker_histories
-    setup_access :latest_tracker_history
+    #
+    # setup_access :addresses
+    # setup_access :player_contacts
+    # setup_access :player_infos, access: :edit
+    # setup_access :item_flags
+    # setup_access :player_infos_item_flags
+    # setup_access :not_tracker_histories
+    # setup_access :not_trackers
+    # setup_access :trackers
+    # setup_access :tracker_histories
+    # setup_access :latest_tracker_history
+
 
   end
 
@@ -77,17 +79,17 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
 
     has_no_css? '.formatting-block'
 
-    p = ".#{ctype.downcase}-type li.player-contact-data strong"
+    p = ".common-template-item[data-rec-type=\"#{ctype.downcase}\"] .list-group-item-heading"
     expect(page).to have_css(p)
 
     t = page.all(p).first.text
 
-    if t != expected
+    if t.downcase != expected.downcase
       puts "failed to sort correctly"
     end
 
 
-    expect(t).to eq(expected)
+    expect(t.downcase).to eq(expected.downcase)
 
   end
 
@@ -438,6 +440,7 @@ describe "advanced search", js: true, driver: :app_firefox_driver do
     expect(ftag.text).to eq(res.first.text)
 
     within ('.item-flags-block form') do
+      find('.chosen-choices').click
       click_button 'Save Item flag'
     end
 

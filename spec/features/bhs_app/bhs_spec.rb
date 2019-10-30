@@ -50,10 +50,11 @@ describe "Create a BHS subject and activity", driver: :app_firefox_driver do
   def login_to_app
 
     if user_logged_in?
-      logged_in_user = find('a[data-do-action="show-user-options"]')
+      logged_in_user = find('a[data-do-action="show-user-options"]')[:title]
       if logged_in_user == @good_email
         visit "/"
       else
+        puts "Logout user #{logged_in_user} and login as #{@good_email}"
         user_logout
       end
     end

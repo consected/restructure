@@ -33,7 +33,8 @@ module AdminHandler
     self.save
   end
 
-  def enable!
+  def enable! current_admin=nil
+    self.current_admin = current_admin if current_admin
     self.disabled = false
     self.save!
   end
