@@ -1,7 +1,7 @@
 class Admin::UserRolesController < AdminController
 
   before_action :set_help_description
-  before_action :setup_copy, only: [:index]
+  before_action :setup_copy, only: [:index, :copy_user_roles]
 
   def copy_user_roles
 
