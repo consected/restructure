@@ -103,6 +103,7 @@ class Import < ActiveRecord::Base
   # If necessary, match on secondary key field.
   def attempt_match_on_secondary_key new_obj
     return false unless new_obj.respond_to?(:item)
+    return false unless new_obj.respond_to?(:match_with_parent_secondary_key)
     #return new_obj.item if new_obj.item
     new_obj.match_with_parent_secondary_key current_user: self.user
     if new_obj.item

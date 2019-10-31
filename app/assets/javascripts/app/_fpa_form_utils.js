@@ -125,6 +125,13 @@ _fpa.form_utils = {
       });
     },
 
+    // Called on form submit event for AJAX or page submissions, to ensure
+    // all fields are appropriately handled
+    on_form_submit: function(block) {
+      _fpa.form_utils.date_inputs_to_iso(block);
+      _fpa.form_utils.unmask_inputs(block);
+    },
+
     unmask_inputs: function(block){
 
       var inputs = block.find("input[data-unmask='number'].is-masked");

@@ -61,5 +61,8 @@ module TrackerHandler
     self.record_type.ns_underscore
   end
 
+  def no_master_association
+    false
+  end
 
 end
