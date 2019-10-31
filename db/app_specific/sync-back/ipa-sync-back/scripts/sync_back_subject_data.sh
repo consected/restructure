@@ -106,6 +106,7 @@ export IPA_ASSIGNMENTS_FILE=${WORKINGDIR}/athena_ipa_assignments.csv
 export IPA_PLAYER_INFOS_FILE=${WORKINGDIR}/athena_ipa_player_infos.csv
 export IPA_PLAYER_CONTACTS_FILE=${WORKINGDIR}/athena_ipa_player_contacts.csv
 export IPA_ADDRESSES_FILE=${WORKINGDIR}/athena_ipa_addresses.csv
+export IPA_AL_IPA_ASSIGNMENTS_FILE=${WORKINGDIR}/athena_ipa_activity_log_ipa_assignments.csv
 export IPA_ASSIGNMENTS_RESULTS_FILE=${WORKINGDIR}/fphs_ipa_assignments_results.csv
 
 # ----> Cleanup from previous runs, just in case

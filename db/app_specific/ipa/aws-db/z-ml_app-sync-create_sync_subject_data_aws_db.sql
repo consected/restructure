@@ -31,7 +31,8 @@ BEGIN
 			ipa_record.ipa_id::BIGINT,
 			(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = ipa_record.master_id LIMIT 1),
 			ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = ipa_record.master_id),
-			ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ipa_record.master_id)
+			ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ipa_record.master_id),
+			ARRAY(SELECT distinct (al::varchar)::activity_log_ipa_assignments FROM temp_activity_log_ipa_assignments al WHERE master_id = ipa_record.master_id)
 		);
 
 	END LOOP;
