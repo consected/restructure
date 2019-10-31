@@ -6,9 +6,7 @@ _fpa.preprocessors = {
 
         _fpa.masters.get_results_block().removeClass('search-status-abort search-status-error search-status-done');
 
-        _fpa.form_utils.date_inputs_to_iso(block);
-
-        _fpa.form_utils.unmask_inputs(block);
+        _fpa.form_utils.on_form_submit(block);
 
         // Mark the block a form was within, to make scrolling more reliable
         if(block.is('form')) {

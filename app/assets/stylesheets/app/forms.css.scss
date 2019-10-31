@@ -448,6 +448,8 @@ fieldset.readonly-edit-fieldset
 }
 
 .custom-editor-container {
+  min-width: 419px;
+
   a[data-edit] {
     font-size: 16px;
     line-height: 18px;
@@ -501,6 +503,12 @@ fieldset.readonly-edit-fieldset
 
   &:focus {
     outline: none;
+  }
+}
+
+.import-grid {
+  .custom-editor {
+    border: none;
   }
 }
 
