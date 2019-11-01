@@ -1532,6 +1532,25 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ca.get_this_val
     expect(res).to eq 'random constant'
 
+    conf = {
+      all: {
+        all_2: {
+          this: {
+
+            select_who: @al.select_who,
+            user_id: @al.user_id
+          }
+        },
+        all_3: {
+          this: {
+            return_constant: 'random constant2'
+          }
+        }
+      }
+    }
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq 'random constant2'
 
   end
 

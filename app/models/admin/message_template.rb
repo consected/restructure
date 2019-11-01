@@ -283,6 +283,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
         end
 
         data[an.to_sym][:current_user] = data[:current_user] if data[an.to_sym]
+        data[an.to_sym][:current_user_instance] = data[:current_user_instance] if data[an.to_sym]
       rescue => e
         Rails.logger.info "Get associations for #{an} failed: #{e}"
       end
