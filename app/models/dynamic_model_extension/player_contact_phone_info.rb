@@ -74,7 +74,7 @@ module DynamicModelExtension
               unless pcpi.opted_out_at
                 # Not opted-out yet
                 pcpi.opted_out_at = DateTime.now
-                pcpi.current_user = batch_user #pcpi.user
+                pcpi.current_user = batch_user || pcpi.user  # the latter user is only likely to be needed in test 
                 ures = pcpi.save
 
        	       	Rails.logger.warn "Could not update player contact phone info record #{pcpi.id}: #{pcpi.errors.first}" unless ures

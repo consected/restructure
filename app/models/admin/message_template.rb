@@ -148,7 +148,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
       tag = tagp.first
       res = data[tag] || data[tag.to_sym] || ''
 
-      res = formatter_do(res.class, res, current_user: data[:current_user])
+      res = formatter_do(res.class, res, current_user: data[:current_user_instance])
 
       return if res.nil?
 
@@ -236,7 +236,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
         data[:master] = master
         data[:master_id] = master.id
         cu = master.current_user
-        data[:current_user] = master.current_user.attributes
+        data[:current_user] = cu.attributes if cu
+        data[:current_user_instance] = cu
         # Alternative ids are evaluated as needed
         # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
 
