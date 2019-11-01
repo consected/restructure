@@ -116,8 +116,8 @@ module MasterSearch
     rescue => e
       @no_masters = true
       logger.error "Error in MastersController#index: #{e.inspect}\n#{e.backtrace.join("\n")}"
-      m = {error: ": unable to search - please check your search criteria."}
-      render json: m, status: 400
+      m = "error: unable to search - please check your search criteria."
+      return_and_log_error e, m, 400
       return
     end
 

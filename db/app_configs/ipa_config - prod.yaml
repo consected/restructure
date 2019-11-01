@@ -151,6 +151,17 @@ app_type:
     created_at: '2019-05-21T12:34:14.721Z'
     updated_at: '2019-05-21T12:36:09.968Z'
     user_email: 
+  - id: 66
+    name: notes field format
+    value: markdown
+    disabled: false
+    admin_id: 4
+    user_id: 
+    app_type_id: 9
+    role_name: ''
+    created_at: '2019-09-23T10:32:14.631Z'
+    updated_at: '2019-09-23T10:32:14.631Z'
+    user_email: 
   user_access_controls:
   - id: 183
     user_id: 
@@ -3964,7 +3975,7 @@ app_type:
   - id: 604
     user_id: 
     resource_type: report
-    resource_name: Screenings Completed
+    resource_name: Screenings & Enrollments
     options: ''
     access: read
     disabled: false
@@ -3972,7 +3983,7 @@ app_type:
     app_type_id: 9
     role_name: user - dashboards
     created_at: '2019-07-09T11:46:12.228Z'
-    updated_at: '2019-07-09T11:46:12.228Z'
+    updated_at: '2019-10-29T11:38:55.224Z'
     user_email: 
   - id: 605
     user_id: 
@@ -4025,6 +4036,227 @@ app_type:
     role_name: user - phone screen
     created_at: '2019-07-11T18:03:54.029Z'
     updated_at: '2019-07-11T18:03:54.029Z'
+    user_email: 
+  - id: 609
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - summary
+    created_at: '2019-09-23T10:32:14.890Z'
+    updated_at: '2019-09-23T10:32:14.890Z'
+    user_email: 
+  - id: 610
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_medical_details
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - summary
+    created_at: '2019-09-23T10:32:14.919Z'
+    updated_at: '2019-09-23T10:32:14.919Z'
+    user_email: 
+  - id: 611
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - summary
+    created_at: '2019-09-23T10:32:14.925Z'
+    updated_at: '2019-09-23T10:32:14.925Z'
+    user_email: 
+  - id: 612
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_summaries
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - summary
+    created_at: '2019-09-23T10:32:14.931Z'
+    updated_at: '2019-09-23T10:32:14.931Z'
+    user_email: 
+  - id: 613
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medical_history
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - summary
+    created_at: '2019-09-23T10:32:14.937Z'
+    updated_at: '2019-09-23T10:32:14.937Z'
+    user_email: 
+  - id: 614
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - summary
+    created_at: '2019-09-23T10:32:14.943Z'
+    updated_at: '2019-09-23T10:32:14.943Z'
+    user_email: 
+  - id: 615
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: user - summary
+    created_at: '2019-09-23T10:32:14.949Z'
+    updated_at: '2019-09-23T10:32:14.949Z'
+    user_email: 
+  - id: 616
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_reimbursement_reqs
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: tracker
+    created_at: '2019-09-23T10:32:40.643Z'
+    updated_at: '2019-09-23T10:32:40.643Z'
+    user_email: 
+  - id: 617
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2019-09-26T09:22:32.334Z'
+    updated_at: '2019-09-26T09:22:32.334Z'
+    user_email: 
+  - id: 618
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2019-09-26T09:22:41.395Z'
+    updated_at: '2019-09-26T09:22:41.395Z'
+    user_email: 
+  - id: 619
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_medical_details
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2019-09-26T09:22:48.250Z'
+    updated_at: '2019-09-26T09:22:48.250Z'
+    user_email: 
+  - id: 620
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_summaries
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2019-09-26T09:22:56.597Z'
+    updated_at: '2019-09-26T09:22:56.597Z'
+    user_email: 
+  - id: 621
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2019-09-26T09:23:04.195Z'
+    updated_at: '2019-09-26T09:23:04.195Z'
+    user_email: 
+  - id: 622
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2019-09-26T09:23:11.040Z'
+    updated_at: '2019-09-26T09:23:11.040Z'
+    user_email: 
+  - id: 623
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medical_history
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: phone screener
+    created_at: '2019-09-26T09:23:18.999Z'
+    updated_at: '2019-09-26T09:23:18.999Z'
+    user_email: 
+  - id: 624
+    user_id: 
+    resource_type: general
+    resource_name: print
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: print participant summary
+    created_at: '2019-10-21T10:48:11.818Z'
+    updated_at: '2019-10-21T10:48:11.818Z'
+    user_email: 
+  - id: 625
+    user_id: 
+    resource_type: general
+    resource_name: view_dashboards
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 4
+    app_type_id: 9
+    role_name: print participant summary
+    created_at: '2019-10-21T10:48:32.447Z'
+    updated_at: '2019-10-21T10:48:32.447Z'
     user_email: 
   associated_activity_logs:
   - id: 4
@@ -4170,7 +4402,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:53.336Z'
-    updated_at: '2019-06-25T09:13:41.872Z'
+    updated_at: '2019-09-23T10:34:25.825Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4525,14 +4757,25 @@ app_type:
       \     hide_panel:\r\n        value: activity_log__ipa_assignment_phone_screens\r\n\r\n
       \ save_trigger:\r\n    on_create:\r\n      create_reference:\r\n        - activity_log__ipa_assignment_inex_checklist:\r\n
       \           in: master\r\n            with:\r\n              extra_log_type:
-      tms_responses\r\n\r\n\r\n  # Notify the reviewers that the phone screen has
-      been completed\r\n      notify:\r\n        - *notify_reviewer\r\n        - *notify_reviewer_sms\r\n#
-      \       - *notify_pi\r\n#        - *notify_pi_sms\r\n"
+      tms_responses\r\n\r\n        - activity_log__ipa_assignment_summary:\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: medical_history\r\n\r\n
+      \       - activity_log__ipa_assignment_summary:\r\n            in: master\r\n
+      \           with:\r\n              extra_log_type: medications\r\n\r\n        -
+      activity_log__ipa_assignment_summary:\r\n            in: master\r\n            with:\r\n
+      \             extra_log_type: special_considerations\r\n      \r\n      update_reference:\r\n
+      \       - player_info:\r\n            if:\r\n              not_any:\r\n                player_infos:\r\n
+      \                 birth_date:\r\n                    this: birth_date\r\n            first:\r\n
+      \             player_infos:\r\n                update: return_result\r\n            with:\r\n
+      \             birth_date:\r\n                dynamic_model__ipa_ps_sizes:\r\n
+      \                 birth_date: return_value\r\n                    \r\n\r\n\r\n
+      \ # Notify the reviewers that the phone screen has been completed\r\n      notify:\r\n
+      \       - *notify_reviewer\r\n        - *notify_reviewer_sms\r\n#        - *notify_pi\r\n#
+      \       - *notify_pi_sms\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: phone_screen
     table_name: activity_log_ipa_assignment_phone_screens
-    category: 
+    category: ''
     user_email: 
   - id: 6
     name: Inclusion / Exclusion
@@ -4938,7 +5181,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:56.307Z'
-    updated_at: '2019-04-29T16:24:36.978Z'
+    updated_at: '2019-09-23T10:33:43.161Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
@@ -5071,13 +5314,15 @@ app_type:
       \ label: Consent Mailing\r\n  fields: \r\n  references:\r\n    ipa_consent_mailing:\r\n
       \     from: master\r\n      add: one_to_this\r\n\r\npayments:\r\n  label: Payments\r\n
       \ fields:\r\n  references:\r\n    ipa_payment:\r\n      from: master\r\n      add:
-      many\r\n      limit: 2\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n
-      \     activity_log__ipa_assignments:\r\n        extra_log_type: screening_follow_up\r\n
-      \   \r\n\r\nwithdraw:\r\n  label: Withdraw\r\n  fields:\r\n  references:\r\n
-      \   ipa_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n  creatable_if:\r\n
+      many\r\n      limit: 2\r\n    ipa_reimbursement_reqs:\r\n      label: Reimbursement
+      Request\r\n      from: master\r\n      add: many    \r\n      \r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: schedule_screening\r\n\r\n  # Always show, so we know
-      why a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\nfollow_up_surveys:\r\n
+      \       extra_log_type: screening_follow_up\r\n    \r\n\r\nwithdraw:\r\n  label:
+      Withdraw\r\n  fields:\r\n  references:\r\n    ipa_withdrawal:\r\n      from:
+      master\r\n      add: one_to_master\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
+      \   any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
+      schedule_screening\r\n\r\n  # Always show, so we know why a player's records
+      may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\nfollow_up_surveys:\r\n
       \ label: Follow Up Surveys\r\n  fields: \r\n  references:\r\n    ipa_survey:\r\n
       \     from: master\r\n      add: many\r\n      limit: 2\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
@@ -5115,7 +5360,7 @@ app_type:
     main_log_name: ''
     process_name: ''
     table_name: activity_log_ipa_assignments
-    category: 
+    category: ''
     user_email: 
   - id: 8
     name: Navigation
@@ -5546,6 +5791,127 @@ app_type:
     process_name: med_nav
     table_name: activity_log_ipa_assignment_med_navs
     category: 
+    user_email: 
+  - id: 11
+    name: IPA Summary
+    item_type: ipa_assignment
+    rec_type: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:32:14.811Z'
+    updated_at: '2019-10-30T09:18:59.545Z'
+    action_when_attribute: created_at
+    field_list: ''
+    blank_log_field_list: ''
+    blank_log_name: ''
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n_default:\r\n\r\n  view_options:\r\n
+      \   show_embedded_at_top: true\r\n    hide_unless_creatable: true\r\n\r\n  fields:\r\n
+      \   - notes\r\n\r\n  caption_before:\r\n    notes: Additional Notes\r\n\r\n
+      \ field_options:\r\n    notes:\r\n      format: markdown\r\n\r\n  showable_if:
+      *enabled_if\r\n  creatable_if: *enabled_if\r\n  editable_if: *enabled_if\r\n\r\n\r\nmedical_history:\r\n\r\n\r\n
+      \ references:\r\n    dynamic_model__ipa_medical_details:\r\n      label: Medical
+      History\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n
+      \       new: not_embedded\r\n        #show: readonly\r\n      prevent_disable:
+      true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
+      \       extra_log_type: medical_history\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     create_reference:\r\n        - dynamic_model__ipa_medical_detail:\r\n
+      \           in: master_with_reference\r\n            with:\r\n              convulsion_or_seizure_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_tms_tests:\r\n                  convulsion_or_seizure_blank_yes_no_dont_know:
+      return_value\r\n              convulsion_or_seizure_details:\r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 convulsion_or_seizure_details: return_value\r\n              sleep_disorder_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_sleeps:\r\n                  sleep_disorder_blank_yes_no_dont_know:
+      return_value\r\n              sleep_disorder_details:\r\n                dynamic_model__ipa_ps_sleeps:\r\n
+      \                 sleep_disorder_details: return_value\r\n              sleep_apnea_device_no_yes:\r\n
+      \               dynamic_model__ipa_ps_sleeps:\r\n                  sleep_apnea_device_no_yes:
+      return_value\r\n              sleep_apnea_device_details:\r\n                dynamic_model__ipa_ps_sleeps:\r\n
+      \                 sleep_apnea_device_details: return_value\r\n              chronic_pain_blank_yes_no:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_blank_yes_no:
+      return_value\r\n              chronic_pain_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 chronic_pain_details: return_value\r\n              chronic_pain_meds_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_meds_blank_yes_no_dont_know:
+      return_value\r\n              chronic_pain_meds_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 chronic_pain_meds_details: return_value\r\n              hypertension_diagnosis_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              hypertension_medications_blank_yes_no:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 hypertension_medications_blank_yes_no: return_value\r\n              hypertension_diagnosis_details:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_details:
+      return_value\r\n              diabetes_diagnosis_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  diabetes_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              diabetes_medications_blank_yes_no:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 diabetes_medications_blank_yes_no: return_value\r\n              diabetes_diagnosis_details:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  diabetes_diagnosis_details:
+      return_value\r\n              hemophilia_blank_yes_no_dont_know:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 hemophilia_blank_yes_no_dont_know: return_value\r\n              hemophilia_details:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  hemophilia_details:
+      return_value\r\n              high_cholesterol_diagnosis_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  high_cholesterol_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              high_cholesterol_medications_blank_yes_no:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  high_cholesterol_medications_blank_yes_no:
+      return_value\r\n              high_cholesterol_diagnosis_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 high_cholesterol_diagnosis_details: return_value\r\n              caridiac_pacemaker_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  caridiac_pacemaker_blank_yes_no_dont_know:
+      return_value\r\n              caridiac_pacemaker_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 caridiac_pacemaker_details: return_value\r\n              other_heart_conditions_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  other_heart_conditions_blank_yes_no_dont_know:
+      return_value\r\n              other_heart_conditions_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 other_heart_conditions_details: return_value\r\n              memory_problems_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  memory_problems_blank_yes_no_dont_know:
+      return_value\r\n              memory_problems_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 memory_problems_details: return_value\r\n              mental_health_conditions_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  mental_health_conditions_blank_yes_no_dont_know:
+      return_value\r\n              mental_health_conditions_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 mental_health_conditions_details: return_value\r\n              mental_health_help_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  mental_health_help_blank_yes_no_dont_know:
+      return_value\r\n              mental_health_help_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 mental_health_help_details: return_value\r\n              neurological_problems_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  neurological_problems_blank_yes_no_dont_know:
+      return_value\r\n              neurological_problems_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 neurological_problems_details: return_value\r\n              past_mri_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_mris:\r\n                  past_mri_yes_no_dont_know:
+      return_value\r\n              past_mri_details:\r\n                dynamic_model__ipa_ps_mris:\r\n
+      \                 past_mri_details: return_value\r\n              metal_implants_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_mris:\r\n                  metal_implants_blank_yes_no_dont_know:
+      return_value\r\n              metal_implants_details:\r\n                dynamic_model__ipa_ps_mris:\r\n
+      \                 metal_implants_details: return_value\r\n              dietary_restrictions_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_tms_tests:\r\n                  dietary_restrictions_blank_yes_no_dont_know:
+      return_value\r\n              dietary_restrictions_details:\r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 dietary_restrictions_details: return_value\r\n              radiation_blank_yes_no:\r\n
+      \               dynamic_model__ipa_ps_mris:\r\n                  radiation_blank_yes_no:
+      return_value\r\n              radiation_details:\r\n                dynamic_model__ipa_ps_mris:\r\n
+      \                 radiation_details: return_value\r\n\r\n\r\nmedications:\r\n\r\n\r\n
+      \ references:\r\n    dynamic_model__ipa_medications:\r\n      label: Medications\r\n
+      \     from: master\r\n      add: one_to_master\r\n      view_as:\r\n        #show:
+      readonly\r\n        new: not_embedded\r\n      prevent_disable: true\r\n\r\n
+      \ creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
+      \       extra_log_type: medications\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     create_reference:\r\n        - dynamic_model__ipa_medications:\r\n            in:
+      master_with_reference\r\n            with:\r\n              current_meds_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_tms_tests:\r\n                  current_meds_blank_yes_no_dont_know:
+      return_value\r\n              current_meds_details:\r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 current_meds_details: return_value\r\n\r\nspecial_considerations:\r\n\r\n\r\n
+      \ references:\r\n    dynamic_model__ipa_special_considerations:\r\n      label:
+      Medications\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n#
+      \       show: readonly\r\n        new: not_embedded\r\n\r\n      prevent_disable:
+      true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
+      \       extra_log_type: special_considerations\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     create_reference:\r\n        - dynamic_model__ipa_special_considerations:\r\n
+      \           in: master_with_reference\r\n            with:\r\n              #travel_with_wife_yes_no:\r\n
+      \             #  dynamic_model__ipa_ps_tms_tests:\r\n              #    travel_with_wife_yes_no:
+      return_value\r\n              #travel_with_wife_details:\r\n              #
+      \ dynamic_model__ipa_ps_tms_tests:\r\n              #    travel_with_wife_details:
+      return_value\r\n              #mmse_yes_no: 'yes'\r\n\r\n              tmoca_score:\r\n
+      \               dynamic_model__ipa_ps_tmocas:\r\n                  tmoca_score:
+      return_value\r\n              #bringing_cpap_yes_no:\r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n
+      \             #    bringing_cpap_yes_no: return_value\r\n              #tms_exempt_yes_no:\r\n
+      \             #  dynamic_model__ipa_ps_tms_tests:\r\n              #    tms_exempt_yes_no:
+      return_value\r\n              #taking_med_for_mri_pet_yes_no:\r\n              #
+      \ dynamic_model__ipa_ps_tms_tests:\r\n              #    taking_med_for_mri_pet_yes_no:
+      return_value\r\n"
+    hide_item_list_panel: true
+    main_log_name: ''
+    process_name: summary
+    table_name: activity_log_ipa_assignment_summaries
+    category: ipa
     user_email: 
   associated_dynamic_models:
   - id: 6
@@ -6974,6 +7340,24 @@ app_type:
       \     include_blank: yes\r\n    select_record_from_addresses:\r\n      include_blank:
       yes\r\n#    sent_when:\r\n#      value: today()\r\n"
     user_email: 
+  - id: 44
+    name: IPA Reimbursement Requests
+    table_name: ipa_reimbursement_reqs
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:32:40.583Z'
+    updated_at: '2019-09-23T10:32:40.583Z'
+    position: 50
+    category: ipa-records
+    table_key_name: ''
+    field_list: participant_requested_yes_no submission_date additional_notes
+    result_order: ''
+    options: ''
+    user_email: 
   - id: 26
     name: IPA Payment
     table_name: ipa_payments
@@ -7009,6 +7393,199 @@ app_type:
     field_list: ''
     result_order: ''
     options: 
+    user_email: 
+  - id: 41
+    name: IPA Medical History
+    table_name: ipa_medical_details
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:32:14.635Z'
+    updated_at: '2019-10-31T12:29:36.329Z'
+    position: 
+    category: ipa-records
+    table_key_name: ''
+    field_list: convulsion_or_seizure_blank_yes_no_dont_know convulsion_or_seizure_details
+      sleep_disorder_blank_yes_no_dont_know sleep_disorder_details sleep_apnea_device_no_yes
+      sleep_apnea_device_details chronic_pain_blank_yes_no chronic_pain_details chronic_pain_meds_blank_yes_no_dont_know
+      chronic_pain_meds_details hypertension_diagnosis_blank_yes_no_dont_know hypertension_medications_blank_yes_no
+      hypertension_diagnosis_details diabetes_diagnosis_blank_yes_no_dont_know diabetes_medications_blank_yes_no
+      diabetes_diagnosis_details hemophilia_blank_yes_no_dont_know hemophilia_details
+      high_cholesterol_diagnosis_blank_yes_no_dont_know high_cholesterol_medications_blank_yes_no
+      high_cholesterol_diagnosis_details caridiac_pacemaker_blank_yes_no_dont_know
+      caridiac_pacemaker_details other_heart_conditions_blank_yes_no_dont_know other_heart_conditions_details
+      memory_problems_blank_yes_no_dont_know memory_problems_details mental_health_conditions_blank_yes_no_dont_know
+      mental_health_conditions_details mental_health_help_blank_yes_no_dont_know mental_health_help_details
+      neurological_problems_blank_yes_no_dont_know neurological_problems_details past_mri_yes_no_dont_know
+      past_mri_details                       metal_implants_blank_yes_no_dont_know
+      metal_implants_details metal_implants_mri_approval_details radiation_blank_yes_no
+      radiation_details dietary_restrictions_blank_yes_no_dont_know dietary_restrictions_details
+    result_order: id
+    options: "default:\r\n\r\n  show_if:\r\n    convulsion_or_seizure_blank_yes_no_dont_know:\r\n
+      \     convulsion_or_seizure_blank_yes_no_dont_know: 'yes'\r\n    convulsion_or_seizure_details:\r\n
+      \     convulsion_or_seizure_blank_yes_no_dont_know: 'yes'\r\n      \r\n    sleep_disorder_blank_yes_no_dont_know:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"      \r\n    sleep_disorder_details:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"  \r\n    sleep_apnea_device_no_yes:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"      \r\n    sleep_apnea_device_details:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n      sleep_apnea_device_no_yes:
+      \"yes\"\r\n    \r\n    chronic_pain_blank_yes_no:\r\n      chronic_pain_blank_yes_no:
+      'yes'      \r\n    chronic_pain_details:\r\n      chronic_pain_blank_yes_no:
+      'yes'\r\n    chronic_pain_meds_blank_yes_no_dont_know:\r\n      chronic_pain_blank_yes_no:
+      'yes'\r\n      \r\n    chronic_pain_meds_blank_yes_no_dont_know:\r\n      chronic_pain_meds_blank_yes_no_dont_know:
+      'yes'\r\n    chronic_pain_meds_details:\r\n      chronic_pain_meds_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    hypertension_diagnosis_blank_yes_no_dont_know:\r\n      hypertension_diagnosis_blank_yes_no_dont_know:
+      'yes'\r\n    hypertension_medications_blank_yes_no:\r\n      hypertension_diagnosis_blank_yes_no_dont_know:
+      'yes'\r\n    hypertension_diagnosis_details:\r\n      hypertension_medications_blank_yes_no:
+      'yes'\r\n      \r\n    diabetes_diagnosis_blank_yes_no_dont_know:\r\n      diabetes_diagnosis_blank_yes_no_dont_know:
+      'yes'\r\n    diabetes_medications_blank_yes_no:\r\n      diabetes_diagnosis_blank_yes_no_dont_know:
+      'yes'\r\n    diabetes_diagnosis_details:\r\n      diabetes_medications_blank_yes_no:
+      'yes'\r\n      \r\n\r\n    hemophilia_blank_yes_no_dont_know:\r\n      hemophilia_blank_yes_no_dont_know:
+      'yes'\r\n    hemophilia_details:\r\n      hemophilia_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    high_cholesterol_diagnosis_blank_yes_no_dont_know:\r\n
+      \     high_cholesterol_diagnosis_blank_yes_no_dont_know: 'yes'\r\n    high_cholesterol_medications_blank_yes_no:\r\n
+      \     high_cholesterol_diagnosis_blank_yes_no_dont_know: 'yes'\r\n    high_cholesterol_diagnosis_details:\r\n
+      \     high_cholesterol_medications_blank_yes_no: 'yes'\r\n      \r\n    caridiac_pacemaker_blank_yes_no_dont_know:\r\n
+      \     caridiac_pacemaker_blank_yes_no_dont_know: 'yes'\r\n    caridiac_pacemaker_details:\r\n
+      \     caridiac_pacemaker_blank_yes_no_dont_know: 'yes'\r\n\r\n    other_heart_conditions_blank_yes_no_dont_know:\r\n
+      \     other_heart_conditions_blank_yes_no_dont_know: 'yes'\r\n    other_heart_conditions_details:\r\n
+      \     other_heart_conditions_blank_yes_no_dont_know: 'yes'\r\n\r\n    memory_problems_blank_yes_no_dont_know:\r\n
+      \     memory_problems_blank_yes_no_dont_know: 'yes'\r\n    memory_problems_details:\r\n
+      \     memory_problems_blank_yes_no_dont_know: 'yes'\r\n      \r\n    mental_health_conditions_blank_yes_no_dont_know:\r\n
+      \     mental_health_conditions_blank_yes_no_dont_know: 'yes'\r\n    mental_health_conditions_details:\r\n
+      \     mental_health_conditions_blank_yes_no_dont_know: 'yes'\r\n\r\n    mental_health_help_blank_yes_no_dont_know:\r\n
+      \     mental_health_help_blank_yes_no_dont_know: 'yes'\r\n    mental_health_help_details:\r\n
+      \     mental_health_help_blank_yes_no_dont_know: 'yes'\r\n\r\n    neurological_problems_blank_yes_no_dont_know:\r\n
+      \     neurological_problems_blank_yes_no_dont_know: 'yes'\r\n    neurological_problems_details:\r\n
+      \     neurological_problems_blank_yes_no_dont_know: 'yes'\r\n      \r\n    past_mri_yes_no_dont_know:\r\n
+      \     past_mri_yes_no_dont_know: 'yes'\r\n    past_mri_details:\r\n      past_mri_yes_no_dont_know:
+      'yes'\r\n\r\n    metal_implants_blank_yes_no_dont_know:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n    metal_implants_details:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n\r\n    metal_implants_blank_yes_no_dont_know:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n    metal_implants_mri_approval_details:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n\r\n    dietary_restrictions_blank_yes_no_dont_know:\r\n      dietary_restrictions_blank_yes_no_dont_know:
+      \"yes\"\r\n    dietary_restrictions_details:\r\n      dietary_restrictions_blank_yes_no_dont_know:
+      \"yes\"\r\n\r\n    radiation_blank_yes_no:\r\n      radiation_blank_yes_no:
+      \"yes\"\r\n    radiation_details:\r\n      radiation_blank_yes_no: \"yes\"\r\n\r\n
+      \ caption_before:\r\n    all_fields:\r\n    convulsion_or_seizure_blank_yes_no_dont_know:
+      |\r\n      **Seizures**\r\n\r\n      Have you ever had a convulsion or a seizure?\r\n
+      \     \r\n    convulsion_or_seizure_details: <i>IF YES</i>, how long ago, did
+      you go to the hospital, were you put on medication, was it determined why?\r\n\r\n
+      \   sleep_disorder_blank_yes_no_dont_know: |\r\n      **Sleep Apnea**\r\n\r\n
+      \     Have you ever been diagnosed with sleep apnea or \r\n      any other sleep
+      disorders (e.g. narcolepsy)\r\n      \r\n    sleep_disorder_details: <i>IF YES</i>
+      Can you please tell me more about this?\r\n    sleep_apnea_device_no_yes: IF
+      THEY HAVE SLEEP APNEA<br/>Do you use a CPAP machine or another device for your
+      sleep apnea?\r\n    sleep_apnea_device_details: <i>IF YES</i> How many nights
+      a week?  Do you take it with you when you travel?\r\n\r\n    chronic_pain_blank_yes_no:
+      |\r\n      **Pain**\r\n\r\n      Do you have chronic pain?\r\n      \r\n    chronic_pain_details:
+      <i>IF YES</i> Please describe how often and how intense.\r\n    chronic_pain_meds_blank_yes_no_dont_know:
+      <i>IF YES TO CHRONIC PAIN</i><br/>Do you currently take any medication (prescription
+      or over the counter) or utilize alternative therapies to manage your chronic
+      pain?\r\n    chronic_pain_meds_details: <i>IF YES</i> Can you please tell me
+      more about this?\r\n\r\n    hypertension_diagnosis_blank_yes_no_dont_know: |\r\n
+      \     **Hypertension**\r\n\r\n      Have you been diagnosed with high blood
+      pressure (hypertension)?\r\n      \r\n    hypertension_medications_blank_yes_no:
+      <i>IF YES</i> Have you ever or are you currently taking medications to manage
+      these?\r\n    hypertension_diagnosis_details: Can you please tell me what medications?\r\n\r\n
+      \   diabetes_diagnosis_blank_yes_no_dont_know: |\r\n      **Diabetes**\r\n\r\n
+      \     Have you ever been diagnosed with diabetes\r\n      \r\n    diabetes_medications_blank_yes_no:
+      <i>IF YES</i> Have you ever or are you currently taking medications to manage
+      these?\r\n    diabetes_diagnosis_details: Can you please tell me what medications?\r\n\r\n
+      \   hemophilia_blank_yes_no_dont_know: |\r\n      **Blood Clotting Disorder**\r\n
+      \     \r\n      Do you have any blood clotting disorders?\r\n      \r\n    hemophilia_details:
+      <i>IF YES</i> Do you currently take medication to control it?\r\n\r\n    high_cholesterol_diagnosis_blank_yes_no_dont_know:
+      |\r\n      **High Cholesterol**\r\n\r\n      Have you ever been diagnosed with
+      high cholesterol?\r\n      \r\n    high_cholesterol_medications_blank_yes_no:
+      <i>IF YES</i> Have you ever or are you currently taking medications to manage
+      these?\r\n    high_cholesterol_diagnosis_details: Can you please tell me what
+      medications?\r\n\r\n    caridiac_pacemaker_blank_yes_no_dont_know: |\r\n      **Pacemaker
+      or Intracardiac Lines**\r\n\r\n      Do you have a cardiac pacemaker or intracardiac
+      \r\n      lines, epidural/subdural stimulator, etc.\r\n      \r\n    caridiac_pacemaker_details:
+      Details\r\n\r\n    other_heart_conditions_blank_yes_no_dont_know: |\r\n      **Other
+      Heart Conditions**\r\n\r\n      Have you been diagnosed with any other heart
+      conditions \r\n      or problems (e.g. heart attack, irregular heartbeat, heart
+      failure)?\r\n      \r\n    other_heart_conditions_details: <i>IF YES</i> Please
+      describe.\r\n\r\n    memory_problems_blank_yes_no_dont_know: |\r\n      **Memory**\r\n\r\n
+      \     Do you have any problems with your memory?\r\n      \r\n    memory_problems_details:
+      <i>IF YES</i> Please describe and tell me how long you have noticed a problem.\r\n\r\n
+      \   mental_health_conditions_blank_yes_no_dont_know: |\r\n      **Mental Health**\r\n\r\n
+      \     Have you ever been diagnosed with depression, anxiety, \r\n      bipolar
+      disorder, or another mental health condition?\r\n      \r\n    mental_health_conditions_details:
+      <i>IF YES</i> Can you please tell me more about this?\r\n    mental_health_help_blank_yes_no_dont_know:
+      Have you ever sought help from a mental health professional in the past?\r\n
+      \   mental_health_help_details: <i>IF YES</i> Can you please tell me more about
+      this?\r\n\r\n    neurological_problems_blank_yes_no_dont_know: |\r\n      **Neurological
+      Problems**\r\n\r\n      Do you have a history of any neurological problems,
+      \r\n      such as history of stroke, head injury, Parkinson’s Disease, MS?\r\n
+      \     \r\n    neurological_problems_details: Please describe.\r\n\r\n\r\n    past_mri_yes_no_dont_know:
+      |\r\n      **Claustrophobia**\r\n\r\n      Did you ever undergo an MRI in the
+      past?\r\n      \r\n    past_mri_details: <i>IF YES</i> Were there any problems?\r\n\r\n
+      \   metal_implants_blank_yes_no_dont_know: |\r\n      **MRI - metal implants**\r\n\r\n
+      \     Do you have any metal implants such as surgical clips, heart valves\r\n
+      \     with steel parts, metal fragments, shrapnel or steel implants?\r\n\r\n
+      \   metal_implants_details: |\r\n      <i>IF YES</i> Do you have a doctor card?\r\n\r\n
+      \   metal_implants_mri_approval_details: |\r\n      MRI approvals and other
+      details\r\n\r\n    radiation_blank_yes_no: |\r\n      **Radiation**\r\n      \r\n
+      \     Have you participated in other research studies (not\r\n      including
+      this study) involving radiation exposure within the last 12 months?\r\n\r\n
+      \   radiation_details: |\r\n      IF YES, can you please tell me what type of
+      radiation\r\n      research assessments you have undergone?\r\n\r\n    dietary_restrictions_blank_yes_no_dont_know:
+      |\r\n      **Allegies**\r\n      \r\n      Do you have any dietary restrictions
+      or allergies?\r\n      \r\n    dietary_restrictions_details: <i>IF YES</i> Could
+      you tell me what dietary restrictions/allergies you have?\r\n"
+    user_email: 
+  - id: 42
+    name: IPA Special Considerations
+    table_name: ipa_special_considerations
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:32:14.744Z'
+    updated_at: '2019-10-17T16:05:34.664Z'
+    position: 
+    category: ipa-records
+    table_key_name: ''
+    field_list: travel_with_wife_yes_no travel_with_wife_details tmoca_score mmse_yes_no
+      mmse_details bringing_cpap_yes_no tms_exempt_yes_no taking_med_for_mri_pet_yes_no
+    result_order: id
+    options: "default:\r\n\r\n  show_if:\r\n    travel_with_wife_details:\r\n      travel_with_wife_yes_no:
+      \"yes\"\r\n    mmse_yes_no:\r\n      tmoca_score:\r\n        - 1\r\n        -
+      2\r\n        - 3\r\n        - 4\r\n        - 5\r\n        - 6\r\n        - 7\r\n
+      \       - 8\r\n        - 9\r\n        - 10\r\n        - 11\r\n        - 12\r\n
+      \       - 13\r\n        - 14\r\n        - 15\r\n        - 16\r\n    mmse_details:\r\n
+      \     mmse_yes_no: 'yes'\r\n\r\n  caption_before:\r\n    travel_with_wife_yes_no:
+      \ Traveling with wife?\r\n    travel_with_wife_details: Name and additional
+      information\r\n    mmse_yes_no: MMSE\r\n    mmse_details: MMSE details\r\n    tmoca_score:
+      TMoCA Score\r\n    bringing_cpap_yes_no: Bringing CPAP?\r\n    tms_exempt_yes_no:
+      TMS exempt?\r\n    taking_med_for_mri_pet_yes_no: Taking medication for MRI/PET?\r\n
+      \ "
+    user_email: 
+  - id: 43
+    name: IPA Medications
+    table_name: ipa_medications
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:32:14.779Z'
+    updated_at: '2019-09-23T10:32:14.779Z'
+    position: 
+    category: ipa-records
+    table_key_name: ''
+    field_list: current_meds_blank_yes_no_dont_know current_meds_details
+    result_order: id
+    options: "default:\r\n\r\n  show_if:\r\n    current_meds_details:\r\n      current_meds_blank_yes_no_dont_know:
+      \"yes\"\r\n\r\n  caption_before:\r\n    current_meds_blank_yes_no_dont_know:
+      Are you currently taking any medications including over the counter medications?\r\n
+      \   current_meds_details: <i>IF YES</i> can you please list them.\r\n  "
     user_email: 
   - id: 29
     name: Tech Contact
@@ -8589,13 +9166,15 @@ app_type:
       \ al.event_date::varchar || 'T' || al.start_time::varchar \"start\",\r\n  al.event_date::varchar
       || 'T' || al.completion_time::varchar \"end\",\r\n  ipa_id || ': ' || al.select_station
       || ' ' || al.select_event_type || ' ' || al.other_event_type \"title\",\r\n
-      \ array['report-cal-nav-event'] \"classNames\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n
-      \ true ,\r\n  visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n
-      \ ipa_id || ': ' || 'appointment start' ,\r\n  array['report-cal-start-event']
-      \"classNames\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
-      \ follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n
-      \ ipa_id || ': ' || '(call) ' || replace(extra_log_type, '_', ' '),\r\n  array['report-cal-call-event']
-      \"classNames\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
+      \ array['report-cal-nav-event'] \"classNames\",\r\n  '/masters/' || master_id
+      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  true ,\r\n
+      \ visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n  ipa_id ||
+      ': ' || 'appointment start' ,\r\n  array['report-cal-start-event'] \"classNames\",\r\n
+      \ '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
+      \ NULL,\r\n  ipa_id || ': ' || '(call) ' || replace(extra_log_type, '_', ' '),\r\n
+      \ array['report-cal-call-event'] \"classNames\",\r\n  '/masters/' || master_id
+      \"url\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
     search_attrs: "\r\nfrom_date: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n
       \   default: -6 months\r\n\r\nto_date: \r\n  date: \r\n    all: true\r\n    multiple:
       single\r\n    default: +12 months\r\n    \r\n\r\ntype: \r\n  config_selector:
@@ -8612,7 +9191,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-06-24T10:37:11.993Z'
-    updated_at: '2019-06-24T11:21:14.579Z'
+    updated_at: '2019-09-23T11:31:01.173Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -8701,21 +9280,33 @@ app_type:
       \   \r\n        \r\n    options:\r\n      legend:\r\n        display: true\r\n"
     user_email: 
   - id: 46
-    name: Screenings Completed
+    name: Screenings & Enrollments
     description: ''
-    sql: "create temp table temp_counts as\r\nselect count(*) \"count\", t.created_at
+    sql: "create temp table temp_counts as\r\nselect count(*) \"screening_count\",
+      t.created_at \r\nfrom \r\n(\r\n  select \r\n  al.master_id, max(al.created_at)
+      \"created_at\"\r\n  from activity_log_ipa_assignment_phone_screens al\r\n  where
+      al.extra_log_type = 'finalize'\r\n  group by al.master_id\r\n) t\r\n\r\ninner
+      join player_infos pi on t.master_id = pi.master_id and pi.first_name <> 'test'
+      and pi.last_name <> 'test'\r\ngroup by t.created_at;\r\n\r\n\r\ncreate temp
+      table temp_count_apps as\r\nselect count(*) \"enrollment_count\", t.created_at
       \r\nfrom \r\n(\r\n  select \r\n  al.master_id, max(al.created_at) \"created_at\"\r\n
-      \ from activity_log_ipa_assignment_phone_screens al\r\n  where al.extra_log_type
-      = 'finalize'\r\n  group by al.master_id\r\n) t\r\n\r\ninner join player_infos
-      pi on t.master_id = pi.master_id and pi.first_name <> 'test' and pi.last_name
-      <> 'test'\r\ngroup by t.created_at;\r\n\r\n\r\nselect\r\n  created_at \"started
-      when\",\r\n  sum(\"count\") over(order by created_at asc rows between unbounded
-      preceding and current row) \"count\"\r\n  \r\nfrom temp_counts;"
+      \ from activity_log_ipa_assignments al\r\n  where al.extra_log_type = 'appointment'\r\n
+      \ group by al.master_id\r\n) t\r\n\r\ninner join player_infos pi on t.master_id
+      = pi.master_id and pi.first_name <> 'test' and pi.last_name <> 'test'\r\ngroup
+      by t.created_at;\r\n\r\n\r\ncreate temp table temp_ca as\r\nselect created_at\r\nfrom
+      temp_counts \r\nunion\r\nselect created_at\r\nfrom temp_count_apps;\r\n\r\nselect\r\n
+      \ all_c.created_at \"started when\",\r\n  sum(\"screening_count\") over(order
+      by all_c.created_at asc rows between unbounded preceding and current row) \"screenings\"
+      ,\r\n  sum(\"enrollment_count\") over(order by all_c.created_at asc rows between
+      unbounded preceding and current row) \"enrollments\"  \r\nfrom temp_ca all_c\r\nleft
+      outer join temp_counts cp on all_c.created_at = cp.created_at\r\nleft outer
+      join temp_count_apps ca on all_c.created_at = ca.created_at\r\n--order by \"started
+      when\";"
     search_attrs: ''
     admin_id: 4
     disabled: false
     created_at: '2019-07-09T10:23:54.442Z'
-    updated_at: '2019-07-09T11:48:28.596Z'
+    updated_at: '2019-10-21T11:14:39.288Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -8728,13 +9319,15 @@ app_type:
     options: "view_options:\r\n  view_as: chart\r\n  \r\ncomponent:\r\n  options:\r\n
       \   type: line\r\n    height: 250\r\n    width: 800\r\n    responsive: true\r\n
       \   label_with_column: started when\r\n    dataset_options:\r\n      - borderColor:
-      '#c00'\r\n        borderWidth: 3\r\n        backgroundColor: rgba(204,0,0,0.4)\r\n
-      \       lineTension: 0.1\r\n        cubicInterpolationMode: monotone\r\n\r\n
-      \   options:\r\n     scales:\r\n      yAxes:\r\n        - ticks:\r\n            min:
-      0\r\n          stacked: false\r\n      xAxes: \r\n        - type: time\r\n#
-      \         stacked: true\r\n          display: true\r\n          time:\r\n            unit:
-      week\r\n#            min: 2014-01-01\r\n            displayFormats:\r\n              day:
-      MMM D, YY\r\n#            distribution: linear"
+      '#c00'\r\n        borderWidth: 3\r\n        backgroundColor: transparent\r\n
+      \       #rgba(204,0,0,0.4)\r\n        lineTension: 0.1\r\n        cubicInterpolationMode:
+      monotone\r\n      - borderColor: '#0c0'\r\n        borderWidth: 3\r\n        backgroundColor:
+      transparent\r\n        #rgba(0,204,0,0.4)\r\n        lineTension: 0.1\r\n        cubicInterpolationMode:
+      monotone\r\n\r\n    options:\r\n     scales:\r\n      yAxes:\r\n        - ticks:\r\n
+      \           min: 0\r\n          stacked: false\r\n      xAxes: \r\n        -
+      type: time\r\n#          stacked: true\r\n          display: true\r\n          time:\r\n
+      \           unit: week\r\n#            min: 2014-01-01\r\n            displayFormats:\r\n
+      \             day: MMM D, YY\r\n#            distribution: linear"
     user_email: 
   - id: 47
     name: T-MoCA Scores
@@ -13777,14 +14370,60 @@ app_type:
       \           id: ipa-dashboard__participant_status\r\n\r\n        - label: T-MoCA
       Scores\r\n          classes: col-md-12\r\n          report:\r\n            id:
       ipa-dashboard__t_moca_scores\r\n\r\n\r\n    - cols:\r\n        - label: Screenings
-      Completed\r\n          classes: col-md-offset-2 col-md-20\r\n          report:\r\n
+      & Enrollments\r\n          classes: col-md-offset-2 col-md-20\r\n          report:\r\n
       \           id: ipa-dashboard__screenings_completed\r\n            \r\nview_css:\r\n
       \ selectors:\r\n    .report-chart:\r\n      height: 30vh\r\n      min-height:
       200px\r\n      \r\n      "
     disabled: false
     admin_id: 4
     created_at: '2019-07-09T11:42:50.621Z'
-    updated_at: '2019-07-09T11:48:56.492Z'
+    updated_at: '2019-10-21T11:15:42.071Z'
+    description: ''
+    user_email: 
+  - id: 13
+    app_type_id: 9
+    layout_name: master
+    panel_name: ipa-summary
+    panel_label: Participant Summary
+    panel_position: 2
+    options: "contains: \r\n  resources:\r\n  - activity_log__ipa_assignment_summaries"
+    disabled: false
+    admin_id: 4
+    created_at: '2019-09-23T10:32:14.865Z'
+    updated_at: '2019-09-23T10:32:14.865Z'
+    description: ''
+    user_email: 
+  - id: 14
+    app_type_id: 9
+    layout_name: view
+    panel_name: summary
+    panel_label: Participant Summary
+    panel_position: 1
+    options: "container:\r\n  rows:\r\n    - styles:\r\n        min-height: 30vh\r\n
+      \     cols:\r\n        - label: Participant Summary\r\n          header: |\r\n
+      \           ## IPA ID: {{ids.ipa_id}}\r\n          \r\n          classes: col-md-24
+      col-lg-24\r\n          resource: \r\n            name: activity_log__ipa_assignment_summary\r\n
+      \           \r\n            \r\n        \r\nview_css:\r\n  selectors:\r\n    .sp-main:\r\n
+      \     margin: 2% 5%"
+    disabled: false
+    admin_id: 4
+    created_at: '2019-10-21T10:45:17.672Z'
+    updated_at: '2019-10-21T10:45:17.672Z'
+    description: ''
+    user_email: 
+  - id: 15
+    app_type_id: 9
+    layout_name: nav
+    panel_name: master-tabs
+    panel_label: Menu
+    panel_position: 2
+    options: "nav:\r\n  label: actions\r\n  links:\r\n    - label: Print Summary\r\n
+      \     resource_name: view_dashboards\r\n      resource_type: general\r\n      url:
+      /page_layouts/summary?filters[master_id]={{id}}\r\n      "
+    disabled: false
+    admin_id: 4
+    created_at: '2019-10-21T10:46:29.555Z'
+    updated_at: '2019-10-21T10:46:29.555Z'
     description: ''
     user_email: 
   user_roles:
@@ -13874,9 +14513,9 @@ app_type:
     role_name: audit
     user_id: 1
     admin_id: 4
-    disabled: true
+    disabled: false
     created_at: '2019-01-17T11:51:02.807Z'
-    updated_at: '2019-06-24T10:40:59.062Z'
+    updated_at: '2019-10-17T16:15:18.026Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 46
     app_type_id: 9
@@ -16353,6 +16992,969 @@ app_type:
     created_at: '2019-08-15T15:47:25.500Z'
     updated_at: '2019-08-15T15:47:25.500Z'
     user_email: aconnor@bidmc.harvard.edu
+  - id: 642
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:39:15.438Z'
+    updated_at: '2019-09-23T10:39:15.438Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 643
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:39:15.445Z'
+    updated_at: '2019-09-23T10:39:15.445Z'
+    user_email: template@template
+  - id: 644
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 10
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:40:00.707Z'
+    updated_at: '2019-09-23T10:40:00.707Z'
+    user_email: chelsea_valdivia@hms.harvard.edu
+  - id: 645
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 23
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:40:07.997Z'
+    updated_at: '2019-09-23T10:40:07.997Z'
+    user_email: aconnor@bidmc.harvard.edu
+  - id: 646
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 16
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:40:14.366Z'
+    updated_at: '2019-09-23T10:40:14.366Z'
+    user_email: linda.pitler@mgh.harvard.edu
+  - id: 647
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 14
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-23T10:40:33.390Z'
+    updated_at: '2019-09-23T10:40:33.390Z'
+    user_email: sarah_kim@hms.harvard.edu
+  - id: 648
+    app_type_id: 9
+    role_name: user - adverse event
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:02:51.642Z'
+    updated_at: '2019-09-23T14:02:51.642Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 649
+    app_type_id: 9
+    role_name: user - adverse event
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:02:51.652Z'
+    updated_at: '2019-09-23T14:02:51.652Z'
+    user_email: template@template
+  - id: 650
+    app_type_id: 9
+    role_name: irb reporting
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:02.983Z'
+    updated_at: '2019-09-23T14:03:02.983Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 651
+    app_type_id: 9
+    role_name: irb reporting
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:02.991Z'
+    updated_at: '2019-09-23T14:03:02.991Z'
+    user_email: template@template
+  - id: 652
+    app_type_id: 9
+    role_name: email - adverse event irb report
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:24.473Z'
+    updated_at: '2019-09-23T14:03:24.473Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 653
+    app_type_id: 9
+    role_name: email - adverse event irb report
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:24.480Z'
+    updated_at: '2019-09-23T14:03:24.480Z'
+    user_email: template@template
+  - id: 654
+    app_type_id: 9
+    role_name: email - adverse event review
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:36.704Z'
+    updated_at: '2019-09-23T14:03:36.704Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 655
+    app_type_id: 9
+    role_name: email - adverse event review
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:36.710Z'
+    updated_at: '2019-09-23T14:03:36.710Z'
+    user_email: template@template
+  - id: 656
+    app_type_id: 9
+    role_name: email - protocol deviation review
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:48.824Z'
+    updated_at: '2019-09-23T14:03:48.824Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 657
+    app_type_id: 9
+    role_name: email - protocol deviation review
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:03:48.830Z'
+    updated_at: '2019-09-23T14:03:48.830Z'
+    user_email: template@template
+  - id: 658
+    app_type_id: 9
+    role_name: email - protocol deviation irb report
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:04:04.155Z'
+    updated_at: '2019-09-23T14:04:04.155Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 659
+    app_type_id: 9
+    role_name: email - protocol deviation irb report
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:04:04.162Z'
+    updated_at: '2019-09-23T14:04:04.162Z'
+    user_email: template@template
+  - id: 660
+    app_type_id: 9
+    role_name: nfs_store group 600
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:04:34.960Z'
+    updated_at: '2019-09-23T14:04:34.960Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 661
+    app_type_id: 9
+    role_name: nfs_store group 600
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:04:34.966Z'
+    updated_at: '2019-09-23T14:04:34.966Z'
+    user_email: template@template
+  - id: 662
+    app_type_id: 9
+    role_name: reviewer - adverse event
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:04:45.986Z'
+    updated_at: '2019-09-23T14:04:45.986Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 663
+    app_type_id: 9
+    role_name: reviewer - adverse event
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:04:45.992Z'
+    updated_at: '2019-09-23T14:04:45.992Z'
+    user_email: template@template
+  - id: 664
+    app_type_id: 9
+    role_name: reviewer - protocol deviation
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:05:06.612Z'
+    updated_at: '2019-09-23T14:05:06.612Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 665
+    app_type_id: 9
+    role_name: reviewer - protocol deviation
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:05:06.618Z'
+    updated_at: '2019-09-23T14:05:06.618Z'
+    user_email: template@template
+  - id: 666
+    app_type_id: 9
+    role_name: tracker
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:05:17.545Z'
+    updated_at: '2019-09-23T14:05:17.545Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 667
+    app_type_id: 9
+    role_name: tracker
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:05:17.551Z'
+    updated_at: '2019-09-23T14:05:17.551Z'
+    user_email: template@template
+  - id: 668
+    app_type_id: 9
+    role_name: user - dashboards
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:05:42.520Z'
+    updated_at: '2019-09-23T14:05:50.119Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 669
+    app_type_id: 9
+    role_name: user - da
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:05:42.526Z'
+    updated_at: '2019-09-23T14:05:42.526Z'
+    user_email: template@template
+  - id: 670
+    app_type_id: 9
+    role_name: user - dashboards
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:05:50.125Z'
+    updated_at: '2019-09-23T14:05:50.125Z'
+    user_email: template@template
+  - id: 671
+    app_type_id: 9
+    role_name: user - inex
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:06:05.192Z'
+    updated_at: '2019-09-23T14:06:05.192Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 672
+    app_type_id: 9
+    role_name: user - inex
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:06:05.199Z'
+    updated_at: '2019-09-23T14:06:05.199Z'
+    user_email: template@template
+  - id: 673
+    app_type_id: 9
+    role_name: user - mednav
+    user_id: 72
+    admin_id: 5
+    disabled: true
+    created_at: '2019-09-23T14:06:35.207Z'
+    updated_at: '2019-10-07T17:32:11.625Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 674
+    app_type_id: 9
+    role_name: user - mednav
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:06:35.213Z'
+    updated_at: '2019-09-23T14:06:35.213Z'
+    user_email: template@template
+  - id: 675
+    app_type_id: 9
+    role_name: user - navigation
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:06:59.563Z'
+    updated_at: '2019-09-23T14:06:59.563Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 676
+    app_type_id: 9
+    role_name: user - navigation
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:06:59.569Z'
+    updated_at: '2019-09-23T14:06:59.569Z'
+    user_email: template@template
+  - id: 677
+    app_type_id: 9
+    role_name: user - participant details
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:10.953Z'
+    updated_at: '2019-09-23T14:07:19.639Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 678
+    app_type_id: 9
+    role_name: user - partic
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:10.959Z'
+    updated_at: '2019-09-23T14:07:10.959Z'
+    user_email: template@template
+  - id: 679
+    app_type_id: 9
+    role_name: user - participant details
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:19.645Z'
+    updated_at: '2019-09-23T14:07:19.645Z'
+    user_email: template@template
+  - id: 680
+    app_type_id: 9
+    role_name: user - phone screen
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:33.722Z'
+    updated_at: '2019-09-23T14:07:33.722Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 681
+    app_type_id: 9
+    role_name: user - phone screen
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:33.727Z'
+    updated_at: '2019-09-23T14:07:33.727Z'
+    user_email: template@template
+  - id: 682
+    app_type_id: 9
+    role_name: user - protocol deviation
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:46.109Z'
+    updated_at: '2019-09-23T14:07:46.109Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 683
+    app_type_id: 9
+    role_name: user - protocol deviation
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:46.115Z'
+    updated_at: '2019-09-23T14:07:46.115Z'
+    user_email: template@template
+  - id: 684
+    app_type_id: 9
+    role_name: user - protocol exception
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:57.108Z'
+    updated_at: '2019-09-23T14:07:57.108Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 685
+    app_type_id: 9
+    role_name: user - protocol exception
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:07:57.114Z'
+    updated_at: '2019-09-23T14:07:57.114Z'
+    user_email: template@template
+  - id: 686
+    app_type_id: 9
+    role_name: user - reports
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:08:09.913Z'
+    updated_at: '2019-09-23T14:08:09.913Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 687
+    app_type_id: 9
+    role_name: user - reports
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:08:09.919Z'
+    updated_at: '2019-09-23T14:08:09.919Z'
+    user_email: template@template
+  - id: 688
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2019-09-23T14:08:20.678Z'
+    updated_at: '2019-09-23T14:08:20.678Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 689
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 13
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-26T09:18:29.269Z'
+    updated_at: '2019-09-26T09:18:29.269Z'
+    user_email: dylan_keating@hms.harvard.edu
+  - id: 690
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 65
+    admin_id: 4
+    disabled: false
+    created_at: '2019-09-26T09:21:20.980Z'
+    updated_at: '2019-09-26T09:21:20.980Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 722
+    app_type_id: 9
+    role_name: audit
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2019-10-17T16:15:18.039Z'
+    updated_at: '2019-10-17T16:15:18.039Z'
+    user_email: template@template
+  - id: 723
+    app_type_id: 9
+    role_name: print participant summary
+    user_id: 1
+    admin_id: 4
+    disabled: false
+    created_at: '2019-10-21T10:47:06.267Z'
+    updated_at: '2019-10-21T10:47:06.267Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 724
+    app_type_id: 9
+    role_name: print participant summary
+    user_id: 71
+    admin_id: 4
+    disabled: false
+    created_at: '2019-10-21T10:47:06.285Z'
+    updated_at: '2019-10-21T10:47:06.285Z'
+    user_email: template@template
+  - id: 725
+    app_type_id: 9
+    role_name: print participant summary
+    user_id: 13
+    admin_id: 4
+    disabled: false
+    created_at: '2019-10-21T10:49:35.766Z'
+    updated_at: '2019-10-21T10:49:35.766Z'
+    user_email: dylan_keating@hms.harvard.edu
+  - id: 726
+    app_type_id: 9
+    role_name: print participant summary
+    user_id: 72
+    admin_id: 4
+    disabled: false
+    created_at: '2019-10-21T11:17:40.168Z'
+    updated_at: '2019-10-21T11:17:40.168Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 727
+    app_type_id: 9
+    role_name: baseline creator - inex
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:55:38.247Z'
+    updated_at: '2019-10-29T12:55:38.247Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 728
+    app_type_id: 9
+    role_name: baseline creator - inex
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:55:38.257Z'
+    updated_at: '2019-10-29T12:55:38.257Z'
+    user_email: template@template
+  - id: 729
+    app_type_id: 9
+    role_name: email - adverse event irb report
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:55:51.721Z'
+    updated_at: '2019-10-29T12:55:51.721Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 730
+    app_type_id: 9
+    role_name: email - adverse event review
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:56:08.164Z'
+    updated_at: '2019-10-29T12:56:08.164Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 731
+    app_type_id: 9
+    role_name: email - protocol deviation irb report
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:56:32.375Z'
+    updated_at: '2019-10-29T12:56:32.375Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 732
+    app_type_id: 9
+    role_name: email - protocol deviation review
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:56:48.342Z'
+    updated_at: '2019-10-29T12:56:48.342Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 733
+    app_type_id: 9
+    role_name: irb reporting
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:57:17.789Z'
+    updated_at: '2019-10-29T12:57:17.789Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 734
+    app_type_id: 9
+    role_name: nfs_store group 600
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:57:28.393Z'
+    updated_at: '2019-10-29T12:57:28.393Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 735
+    app_type_id: 9
+    role_name: phone screener
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:57:36.593Z'
+    updated_at: '2019-10-29T12:57:36.593Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 736
+    app_type_id: 9
+    role_name: phone screener
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:57:36.599Z'
+    updated_at: '2019-10-29T12:57:36.599Z'
+    user_email: template@template
+  - id: 737
+    app_type_id: 9
+    role_name: print participant summary
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:57:49.477Z'
+    updated_at: '2019-10-29T12:57:49.477Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 738
+    app_type_id: 9
+    role_name: reviewer - adverse event
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:57:59.048Z'
+    updated_at: '2019-10-29T12:57:59.048Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 739
+    app_type_id: 9
+    role_name: reviewer - protocol deviation
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:58:12.856Z'
+    updated_at: '2019-10-29T12:58:12.856Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 740
+    app_type_id: 9
+    role_name: sms - adverse event irb report
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:58:26.735Z'
+    updated_at: '2019-10-29T12:58:26.735Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 741
+    app_type_id: 9
+    role_name: sms - adverse event irb report
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:58:26.741Z'
+    updated_at: '2019-10-29T12:58:26.741Z'
+    user_email: template@template
+  - id: 742
+    app_type_id: 9
+    role_name: sms - adverse event review
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:58:39.619Z'
+    updated_at: '2019-10-29T12:58:39.619Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 743
+    app_type_id: 9
+    role_name: sms - adverse event review
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:58:39.625Z'
+    updated_at: '2019-10-29T12:58:39.625Z'
+    user_email: template@template
+  - id: 744
+    app_type_id: 9
+    role_name: sms - protocol deviation irb report
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:58:52.412Z'
+    updated_at: '2019-10-29T12:58:52.412Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 745
+    app_type_id: 9
+    role_name: sms - protocol deviation irb report
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:58:52.418Z'
+    updated_at: '2019-10-29T12:58:52.418Z'
+    user_email: template@template
+  - id: 746
+    app_type_id: 9
+    role_name: sms - protocol deviation review
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:59:08.919Z'
+    updated_at: '2019-10-29T12:59:08.919Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 747
+    app_type_id: 9
+    role_name: sms - protocol deviation review
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:59:08.926Z'
+    updated_at: '2019-10-29T12:59:08.926Z'
+    user_email: template@template
+  - id: 748
+    app_type_id: 9
+    role_name: staff - inex
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:59:19.826Z'
+    updated_at: '2019-10-29T12:59:27.781Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 749
+    app_type_id: 9
+    role_name: staff - inex
+    user_id: 71
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T12:59:19.832Z'
+    updated_at: '2019-10-29T12:59:19.832Z'
+    user_email: template@template
+  - id: 750
+    app_type_id: 9
+    role_name: tracker
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:01:56.016Z'
+    updated_at: '2019-10-29T13:01:56.016Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 751
+    app_type_id: 9
+    role_name: user - adverse event
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:02:12.541Z'
+    updated_at: '2019-10-29T13:02:12.541Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 752
+    app_type_id: 9
+    role_name: user - dashboards
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:02:34.851Z'
+    updated_at: '2019-10-29T13:02:34.851Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 753
+    app_type_id: 9
+    role_name: user - inex
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:03:24.255Z'
+    updated_at: '2019-10-29T13:03:24.255Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 754
+    app_type_id: 9
+    role_name: user - navigation
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:03:38.369Z'
+    updated_at: '2019-10-29T13:03:38.369Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 755
+    app_type_id: 9
+    role_name: user - participant details
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:03:50.921Z'
+    updated_at: '2019-10-29T13:03:50.921Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 756
+    app_type_id: 9
+    role_name: user - phone screen
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:04:03.041Z'
+    updated_at: '2019-10-29T13:04:03.041Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 757
+    app_type_id: 9
+    role_name: user - protocol deviation
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:04:12.050Z'
+    updated_at: '2019-10-29T13:04:12.050Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 758
+    app_type_id: 9
+    role_name: user - protocol exception
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:05:47.041Z'
+    updated_at: '2019-10-29T13:05:47.041Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 759
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 74
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:05:56.427Z'
+    updated_at: '2019-10-29T13:05:56.427Z'
+    user_email: cheyenne_brown@hms.harvard.edu
+  - id: 760
+    app_type_id: 9
+    role_name: email - adverse event irb report
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:18:21.632Z'
+    updated_at: '2019-10-29T13:18:21.632Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 761
+    app_type_id: 9
+    role_name: email - adverse event review
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:18:28.698Z'
+    updated_at: '2019-10-29T13:18:28.698Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 762
+    app_type_id: 9
+    role_name: email - protocol deviation irb report
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:18:36.891Z'
+    updated_at: '2019-10-29T13:18:36.891Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 763
+    app_type_id: 9
+    role_name: email - protocol deviation review
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:18:47.289Z'
+    updated_at: '2019-10-29T13:18:47.289Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 764
+    app_type_id: 9
+    role_name: irb reporting
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:18:56.752Z'
+    updated_at: '2019-10-29T13:18:56.752Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 765
+    app_type_id: 9
+    role_name: nfs_store group 600
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:19:03.166Z'
+    updated_at: '2019-10-29T13:19:03.166Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 766
+    app_type_id: 9
+    role_name: phone screener
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:19:13.511Z'
+    updated_at: '2019-10-29T13:19:13.511Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 767
+    app_type_id: 9
+    role_name: reviewer - adverse event
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:23:42.089Z'
+    updated_at: '2019-10-29T13:23:42.089Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 768
+    app_type_id: 9
+    role_name: reviewer - protocol deviation
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:23:51.802Z'
+    updated_at: '2019-10-29T13:23:51.802Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 769
+    app_type_id: 9
+    role_name: staff - inex
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:24:24.976Z'
+    updated_at: '2019-10-29T13:24:24.976Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 770
+    app_type_id: 9
+    role_name: tracker
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:24:34.719Z'
+    updated_at: '2019-10-29T13:24:34.719Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 771
+    app_type_id: 9
+    role_name: user - adverse event
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:24:44.181Z'
+    updated_at: '2019-10-29T13:24:44.181Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 772
+    app_type_id: 9
+    role_name: user - dashboards
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:24:55.143Z'
+    updated_at: '2019-10-29T13:24:55.143Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 773
+    app_type_id: 9
+    role_name: user - inex
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:25:04.861Z'
+    updated_at: '2019-10-29T13:25:04.861Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 774
+    app_type_id: 9
+    role_name: user - navigation
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:25:14.737Z'
+    updated_at: '2019-10-29T13:25:14.737Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 775
+    app_type_id: 9
+    role_name: user - participant details
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:25:25.225Z'
+    updated_at: '2019-10-29T13:25:25.225Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 776
+    app_type_id: 9
+    role_name: user - phone screen
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:25:33.678Z'
+    updated_at: '2019-10-29T13:25:33.678Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 777
+    app_type_id: 9
+    role_name: user - protocol deviation
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:25:44.525Z'
+    updated_at: '2019-10-29T13:25:44.525Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 778
+    app_type_id: 9
+    role_name: user - protocol exception
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:25:55.225Z'
+    updated_at: '2019-10-29T13:25:55.225Z'
+    user_email: taylor_panczyk@hms.harvard.edu
+  - id: 779
+    app_type_id: 9
+    role_name: user - summary
+    user_id: 73
+    admin_id: 5
+    disabled: false
+    created_at: '2019-10-29T13:26:04.220Z'
+    updated_at: '2019-10-29T13:26:04.220Z'
+    user_email: taylor_panczyk@hms.harvard.edu
   associated_message_templates:
   - id: 7
     name: ipa ps intro
@@ -16752,7 +18354,45 @@ app_type:
     updated_at: '2019-01-21T10:38:37.510Z'
     category: 
     user_email: 
-  associated_config_libraries: []
+  associated_config_libraries:
+  - id: 1
+    category: ipa
+    name: enabled_if
+    options: "_definitions:\r\n\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
+      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
+      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
+      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
+      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
+      \         created_at:\r\n            condition: <\r\n            value: -14
+      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
+      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
+      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:
+      \r\n            - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
+      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
+      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
+      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
+      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
+      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
+      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
+      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
+      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
+      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
+      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
+      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
+      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
+      exit survey     \r\n        created_at:\r\n          condition: <\r\n          value:
+      -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container:
+      \r\n      from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit:
+      hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n  save_trigger:\r\n
+      \   on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container:
+      \r\n        name: general files\r\n        label: General Files\r\n        create_with_role:
+      nfs_store group 600\r\n\r\n\r\n  "
+    format: yaml
+    disabled: false
+    admin_id: 4
+    created_at: '2019-10-17T07:46:32.087Z'
+    updated_at: '2019-10-17T07:46:32.087Z'
+    user_email: 
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []

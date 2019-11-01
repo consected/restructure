@@ -14,7 +14,8 @@ module Users
   def clean_sms_number
     res = ""
 
-    return unless self.sms_number && self.sms_number[0] == '+'
+    return if self.sms_number.blank?
+    return unless self.sms_number[0] == '+'
     return unless self.sms_number.length > 6
 
     res << '+'
@@ -31,6 +32,8 @@ module Users
   private
 
     def sms_number_valid
+      return true if self.sms_number.blank?
+
       unless Messaging::PhoneValidation.validate_sms_number_format self.sms_number, no_exception: true
         errors.add :sms_number, "is not valid. Ensure it has the correct format including +nnn country code"
         return false

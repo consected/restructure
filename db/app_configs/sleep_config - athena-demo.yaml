@@ -2,11 +2,11 @@
 app_type:
   id: 14
   name: sleep
-  label: Sleep Study (2)
+  label: Sleep Study
   disabled: false
   admin_id: 2
   created_at: '2019-07-08T12:46:34.871Z'
-  updated_at: '2019-07-08T12:46:34.871Z'
+  updated_at: '2019-10-23T08:35:12.199Z'
   app_configurations:
   - id: 138
     name: hide search form simple
@@ -380,14 +380,14 @@ app_type:
     user_id: 
     resource_type: table
     resource_name: sleep_assignments
-    options: 
-    access: create
-    disabled: 
+    options: ''
+    access: 
+    disabled: false
     admin_id: 2
     app_type_id: 14
-    role_name: 
+    role_name: ''
     created_at: '2019-07-08T14:56:21.427Z'
-    updated_at: '2019-07-08T14:56:21.427Z'
+    updated_at: '2019-10-24T16:34:24.267Z'
     user_email: 
   - id: 747
     user_id: 
@@ -4588,6 +4588,227 @@ app_type:
     created_at: '2019-10-14T18:08:19.089Z'
     updated_at: '2019-10-14T18:08:19.089Z'
     user_email: 
+  - id: 1137
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__exit_opt_out
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: tracker
+    created_at: '2019-10-23T17:51:34.164Z'
+    updated_at: '2019-10-23T17:51:34.164Z'
+    user_email: 
+  - id: 1138
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__sleep_assignment_phone_screens
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:06:51.222Z'
+    updated_at: '2019-10-24T13:06:51.222Z'
+    user_email: 
+  - id: 1139
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__sleep_assignments
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:09:14.074Z'
+    updated_at: '2019-10-24T13:19:22.087Z'
+    user_email: 
+  - id: 1140
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__withdraw
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:15:55.126Z'
+    updated_at: '2019-10-24T13:15:55.126Z'
+    user_email: 
+  - id: 1141
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__completed_intervention
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:17:11.814Z'
+    updated_at: '2019-10-24T13:17:11.814Z'
+    user_email: 
+  - id: 1142
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__appointment
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:17:45.486Z'
+    updated_at: '2019-10-24T13:17:45.486Z'
+    user_email: 
+  - id: 1143
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__assign_id
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:17:59.806Z'
+    updated_at: '2019-10-24T13:17:59.806Z'
+    user_email: 
+  - id: 1144
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__completed
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:18:24.763Z'
+    updated_at: '2019-10-24T13:18:24.763Z'
+    user_email: 
+  - id: 1145
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__completed_data_collection
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:18:41.091Z'
+    updated_at: '2019-10-24T13:18:41.091Z'
+    user_email: 
+  - id: 1146
+    user_id: 
+    resource_type: table
+    resource_name: bwh_sleep_id_numbers
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:19:48.663Z'
+    updated_at: '2019-10-24T13:19:48.663Z'
+    user_email: 
+  - id: 1147
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__sleep_appointments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:20:10.857Z'
+    updated_at: '2019-10-24T13:20:10.857Z'
+    user_email: 
+  - id: 1148
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__sleep_withdrawals
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:20:50.624Z'
+    updated_at: '2019-10-24T13:20:50.624Z'
+    user_email: 
+  - id: 1149
+    user_id: 
+    resource_type: table
+    resource_name: player_infos
+    options: ''
+    access: create
+    disabled: true
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:22:47.885Z'
+    updated_at: '2019-10-24T13:26:08.105Z'
+    user_email: 
+  - id: 1150
+    user_id: 
+    resource_type: table
+    resource_name: player_contacts
+    options: ''
+    access: create
+    disabled: true
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:23:01.164Z'
+    updated_at: '2019-10-24T13:26:17.648Z'
+    user_email: 
+  - id: 1151
+    user_id: 
+    resource_type: table
+    resource_name: addresses
+    options: ''
+    access: create
+    disabled: true
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T13:23:17.179Z'
+    updated_at: '2019-10-24T13:26:29.170Z'
+    user_email: 
+  - id: 1152
+    user_id: 
+    resource_type: general
+    resource_name: app_type
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: interventionist
+    created_at: '2019-10-24T16:22:12.927Z'
+    updated_at: '2019-10-24T16:22:12.927Z'
+    user_email: 
+  - id: 1153
+    user_id: 
+    resource_type: table
+    resource_name: sleep_assignments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener 2
+    created_at: '2019-10-24T16:33:25.448Z'
+    updated_at: '2019-10-24T16:33:25.448Z'
+    user_email: 
   associated_activity_logs:
   - id: 59
     name: Protocol Deviations & Exceptions
@@ -4596,43 +4817,14 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:55:44.326Z'
-    updated_at: '2019-10-14T15:55:55.754Z'
+    updated_at: '2019-10-23T16:08:39.808Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__sleep_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__sleep_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__sleep_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
-      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
-      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
-      \       dynamic_model__sleep_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__sleep_screenings:\r\n
-      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
-      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
-      \     dynamic_model__sleep_screenings:\r\n        still_interested_blank_yes_no:
-      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__sleep_surveys:\r\n        select_survey_type:
-      exit survey\r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container:
-      &ref_nfs_store__manage__container\r\n      from: this\r\n      add: one_to_this\r\n
-      \     view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new:
-      not_embedded\r\n      creatable_if:\r\n        never: true\r\n\r\n  save_trigger:\r\n
-      \   on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container:\r\n
-      \       name: event documents\r\n        label: Event Documents\r\n        create_with_role:
-      nfs_store group 600\r\n\r\n\r\n\r\n_default:\r\n  showable_if: *enabled_if\r\n
-      \ creatable_if: *enabled_if\r\n\r\n\r\n  view_options:\r\n    hide_unless_creatable:
-      true,\r\n    always_embed_reference: dynamic_model__sleep_protocol_deviation\r\n\r\nexception_record:\r\n
+    extra_log_types: "# @library sleep enabled_if\r\n# @library sleep filestore_container\r\n\r\n\r\n\r\n_default:\r\n
+      \ showable_if: *enabled_if\r\n  creatable_if: *enabled_if\r\n\r\n\r\n  view_options:\r\n
+      \   hide_unless_creatable: true,\r\n    always_embed_reference: dynamic_model__sleep_protocol_deviation\r\n\r\nexception_record:\r\n
       \ label: Protocol Exception\r\n  \r\n  references:\r\n\r\n  # Always show the
       record that contains event details\r\n  - dynamic_model__sleep_protocol_exception:\r\n
       \     from: this\r\n      add: one_to_this\r\n      \r\n\r\ndeviation_record:\r\n
@@ -4748,7 +4940,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:55:49.231Z'
-    updated_at: '2019-10-16T16:05:50.936Z'
+    updated_at: '2019-10-24T11:14:01.106Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4839,16 +5031,10 @@ app_type:
       \       \r\n          \r\n\r\n          \r\n_default:\r\n  <<: *access_defaults\r\n
       \ editable_if: *not_finalized\r\n  \r\n  save_action:\r\n    on_create: create_next_creatable\r\n\r\n\r\n################################################\r\nstart_phone_screen:\r\n
       \ label: Start Phone Screening\r\n  fields:\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_initial_screening:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  caption_before:\r\n    all_fields:
-      |\r\n      **Instructions for FPHS Study Staff**\r\n      \r\n      *Screen
-      participants over the phone.*\r\n      \r\n      *If there are issues during
-      screening or participants have questions that are\r\n      not addressed in
-      the script provided, please respond to the best \r\n      of your ability and
-      make a note. Then follow-up\r\n      with Dr. Bertisch after the phone call
-      is complete to \r\n      determine if further communication is required.*\r\n
-      \     \r\n    submit: If the subject is ready to continue, save this form and
-      continue with the next form.\r\n  view_options:\r\n    show_embedded_at_top:
-      true\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      dynamic_model__sleep_ps_initial_screenings:\r\n
+      \     from: this\r\n      add: one_to_this\r\n\r\n  caption_before:      \r\n
+      \   submit: If the subject is ready to continue, save this form and continue
+      with the next form.\r\n  view_options:\r\n    show_embedded_at_top: true\r\n\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      dynamic_model__sleep_ps_initial_screenings:\r\n
       \       select_still_interested: \"yes\"\r\n\r\n\r\n  save_action:\r\n    on_create:\r\n
       \     create_next_creatable:\r\n        if:\r\n          all:\r\n            dynamic_model__sleep_ps_initial_screenings:\r\n
       \             select_still_interested: \"yes\"\r\n              id:\r\n                this_references:
@@ -5317,8 +5503,8 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:55:59.016Z'
-    updated_at: '2019-10-17T14:54:20.067Z'
-    action_when_attribute: activity_date
+    updated_at: '2019-10-24T10:09:48.714Z'
+    action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
@@ -5330,13 +5516,15 @@ app_type:
       \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
       \   select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
-      Scheduled time (Eastern Time)\r\n    notes: Additional notes for the screener
-      \   \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
-      \       extra_log_type: screener_responses\r\n    not_any_exit:\r\n      <<:
-      *any_exit_or_complete      \r\n\r\n\r\n  field_options:\r\n    select_who:\r\n
-      \     edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n
-      \   select_record_from_player_contacts:\r\n      edit_as:\r\n        field_type:
-      select_record_from_player_contact_phone\r\n\r\n\r\n\r\n###################################\r\nconsent_to_share_details:\r\n
+      Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes for
+      the screener    \r\n      \r\n      *Do not enter personal health information
+      here*\r\n\r\n      \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n
+      \     activity_log__sleep_assignment_phone_screens:\r\n        extra_log_type:
+      screener_responses\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete      \r\n\r\n\r\n
+      \ field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type:
+      select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n
+      \     edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n
+      \ showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nconsent_to_share_details:\r\n
       \ label: Consent To Share Details\r\n###################################\r\n
       \ \r\n  fields:\r\n    - activity_date\r\n    - select_activity\r\n    - select_who\r\n
       \   \r\n  field_options:\r\n    select_activity:\r\n      edit_as:\r\n        field_type:
@@ -5348,19 +5536,20 @@ app_type:
       \       extra_log_type: consent_to_share_details\r\n    not_any_exit:\r\n      <<:
       *any_exit_or_complete\r\n\r\n\r\n###################################\r\nconfirmed_bwh_share:\r\n
       \ label: Shared Info with BWH\r\n###################################\r\n\r\n
-      \ fields: \r\n  \r\n  caption_before:\r\n    all_fields:\r\n      This records
-      that the participant has been emailed\r\n      to confirm information has been
-      sent to BWH.\r\n      \r\n  creatable_if:\r\n    all:\r\n      activity_log__sleep_assignments:\r\n
-      \       extra_log_type: consent_to_share_details\r\n    not_any:  \r\n      <<:
-      *any_exit_or_complete\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
-      confirmed_bwh_share\r\n\r\n\r\n\r\n\r\n###################################\r\nschedule_screening_2:\r\n
+      \ fields: \r\n\r\n  showable_if:\r\n    always: true\r\n\r\n  caption_before:\r\n
+      \   all_fields:\r\n      This records that the participant has been emailed\r\n
+      \     to confirm information has been sent to BWH.\r\n      \r\n  creatable_if:\r\n
+      \   all:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
+      consent_to_share_details\r\n    not_any:  \r\n      <<: *any_exit_or_complete\r\n
+      \     activity_log__sleep_assignments:\r\n        extra_log_type: confirmed_bwh_share\r\n\r\n\r\n\r\n\r\n###################################\r\nschedule_screening_2:\r\n
       \ label: Schedule BWH Screening\r\n###################################  \r\n
       \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
       \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
       \   select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
-      Scheduled time (Eastern Time)\r\n    notes: Additional notes for the screener
-      \   \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
+      Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes for
+      the screener    \r\n\r\n      *Do not enter personal health information here*\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
       \       extra_log_type: \r\n          - eligible\r\n      any:\r\n        dynamic_model__sleep_ps_eligibles:\r\n
       \           consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n            consent_to_pass_info_to_bwh_2_yes_no:
       'yes'\r\n\r\n    not_any:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
@@ -5432,10 +5621,10 @@ app_type:
       \       - dynamic_model__sleep_appointment:\r\n            in: this\r\n            with:\r\n
       \             visit_start_date: today()\r\n              select_status: confirmed\r\n
       \           if:\r\n              not_any_already_created:\r\n                dynamic_model__sleep_appointments:\r\n
-      \                 id:\r\n                    this_references: id\r\n        -
-      activity_log__sleep_assignment:                    \r\n            in: master\r\n
-      \           with:\r\n              extra_log_type: assign_id\r\n            if:\r\n
-      \             not_any_already_created:\r\n                activity_log__sleep_assignments:\r\n
+      \                 id:\r\n                    this_references: id\r\n#        -
+      activity_log__sleep_assignment:                    \r\n#            in: master\r\n#
+      \           with:\r\n#              extra_log_type: assign_id\r\n#            if:\r\n#
+      \             not_any_already_created:\r\n#                activity_log__sleep_assignments:\r\n#
       \                 extra_log_type: assign_id\r\n\r\n        - activity_log__sleep_assignment_phone_screen2:
       \                   \r\n            in: master\r\n            with:\r\n              extra_log_type:
       finalize\r\n            if:\r\n              not_any_already_created:\r\n                activity_log__sleep_assignment_phone_screen2s:\r\n
@@ -5452,7 +5641,10 @@ app_type:
       \ label: Assign ID\r\n###################################\r\n  \r\n  fields:\r\n\r\n
       \ references:\r\n    bwh_sleep_id_number:\r\n      from: master\r\n      add:
       one_to_master\r\n      prevent_disable: true\r\n      \r\n  creatable_if:\r\n
-      \   never: true\r\n\r\n  save_trigger:\r\n    on_create:\r\n \r\n      create_reference:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
+      \       extra_log_type: appointment\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
+      \   not_any:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
+      assign_id\r\n\r\n\r\n  save_trigger:\r\n    on_create:\r\n \r\n      create_reference:\r\n
       \     \r\n        - bwh_sleep_id_number:\r\n            in: this\r\n            with:
       []\r\n                              \r\n\r\n\r\n###################################\r\nconsent_mailing:\r\n
       \ label: Mail Consent Documents\r\n###################################\r\n\r\n
@@ -5478,12 +5670,21 @@ app_type:
       the study.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignments:\r\n
       \       extra_log_type: assign_id\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
       \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n\r\n\r\n###################################\r\nwithdraw:\r\n
+      \   always: true\r\n\r\n\r\n###################################\r\nexit_opt_out:\r\n
+      \ label: Exit (Opt-Out)\r\n###################################\r\n  \r\n  fields:\r\n
+      \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject exited by
+      opting out before enrollment. \r\n      \r\n      All records records are locked
+      down after 14 days.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any_opt_out:\r\n
+      \     activity_log__sleep_assignments:\r\n        extra_log_type: \r\n          -
+      exit_opt_out\r\n          - assign_id\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
+      \   always: true\r\n\r\n\r\n###################################\r\nwithdraw:\r\n
       \ label: Withdraw\r\n###################################\r\n  \r\n  fields:\r\n
       \ references:\r\n    sleep_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n\r\n
-      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n\r\n###################################\r\nineligible:\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n
+      \   all_enrolled:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
+      assign_id\r\n\r\n  # Always show, so we know why a player's records may be locked
+      down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nineligible:\r\n
       \ label: Ineligible\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject was found
       to be ineligible. \r\n      \r\n      All records records are locked down after
@@ -5553,7 +5754,12 @@ app_type:
       \     select_activity: general communications\r\n      \r\n    select_record_from_player_contacts:\r\n
       \     select_activity: \r\n        - general communications\r\n        - schedule
       follow up\r\n    select_record_from_addresses:\r\n      select_activity: \r\n
-      \       - general communications\r\n        - schedule follow up\r\n\r\n\r\n###################################\r\nfiles:\r\n
+      \       - general communications\r\n        - schedule follow up\r\n\r\n\r\n
+      \ save_trigger:\r\n    on_save:                \r\n      update_reference:\r\n
+      \       ref:\r\n          if:\r\n            any:\r\n              referring_record:\r\n
+      \               exists: true\r\n\r\n          first:\r\n            all:\r\n
+      \             referring_record:\r\n                update: return_result\r\n\r\n
+      \         with:\r\n            updated_at: now()\r\n              \r\n\r\n###################################\r\nfiles:\r\n
       \ label: Files\r\n###################################\r\n\r\n  <<: *files_activity
       \ \r\n  save_trigger:\r\n    on_create:\r\n      <<: *create_filestore_container
       \r\n  references:\r\n    <<: *ref_filestore_container\r\n\r\n\r\n\r\n#################################################################\r\n#
@@ -5915,7 +6121,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-30T10:45:35.756Z'
-    updated_at: '2019-10-21T16:27:04.606Z'
+    updated_at: '2019-10-23T16:36:25.548Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -5992,10 +6198,10 @@ app_type:
       *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
       \       extra_log_type: start_phone_screen\r\n        \r\n    not_any:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
       \       extra_log_type: phq8\r\n\r\n\r\n\r\n################################################\r\nineligible:\r\n
-      \ label: Ineligible\r\n  \r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n
-      \ references:\r\n    dynamic_model__sleep_ps2_non_eligible:\r\n      from: this\r\n
-      \     add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n
-      \     not_any:\r\n        activity_log__sleep_assignment_phone_screen2s:\r\n
+      \ label: Ineligible\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n  view_options:\r\n
+      \   hide_unless_creatable: true\r\n\r\n  references:\r\n    dynamic_model__sleep_ps2_non_eligible:\r\n
+      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
+      \     <<: *enabled_if\r\n      not_any:\r\n        activity_log__sleep_assignment_phone_screen2s:\r\n
       \         extra_log_type: ineligible\r\n      any_ineligible:\r\n        all_basic_questions:\r\n
       \         activity_log__sleep_assignment_phone_screen2s:\r\n            extra_log_type:
       phq8\r\n          not_all:\r\n            <<: *eligible_phq8_questions\r\n            \r\n\r\n\r\n
@@ -6014,11 +6220,12 @@ app_type:
       'yes'\r\n          \r\n        - <<: *notify_pi_sms\r\n          if: \r\n            any:\r\n
       \             dynamic_model__sleep_ps2_non_eligibles:\r\n                questions_for_pi_yes_no:
       'yes'\r\n\r\n\r\n################################################\r\neligible:\r\n
-      \ label: Eligible\r\n\r\n  references:\r\n    dynamic_model__sleep_ps2_eligible:\r\n
-      \     from: this\r\n      add: one_to_this\r\n      \r\n    activity_log__sleep_assignment:\r\n
-      \     add: many\r\n      add_with:\r\n        extra_log_type: perform_screening_follow_up\r\n
-      \       eligible_for_study_blank_yes_no: 'yes'\r\n        good_time_to_speak_blank_yes_no:
-      'yes - during phone screen'\r\n\r\n\r\n  caption_before:\r\n\r\n    reference_activity_log__sleep_assignment_perform_screening_follow_up:
+      \ label: Eligible\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n  references:\r\n
+      \   dynamic_model__sleep_ps2_eligible:\r\n      from: this\r\n      add: one_to_this\r\n
+      \     \r\n    activity_log__sleep_assignment:\r\n      add: many\r\n      add_with:\r\n
+      \       extra_log_type: perform_screening_follow_up\r\n        eligible_for_study_blank_yes_no:
+      'yes'\r\n        good_time_to_speak_blank_yes_no: 'yes - during phone screen'\r\n\r\n\r\n
+      \ caption_before:\r\n\r\n    reference_activity_log__sleep_assignment_perform_screening_follow_up:
       |\r\n      Record information about the informed consent.\r\n\r\n\r\n  creatable_if:\r\n
       \   all:\r\n      <<: *enabled_if\r\n\r\n      all_done:\r\n        activity_log__sleep_assignment_phone_screen2s:\r\n
       \         extra_log_type: phq8\r\n      <<: *eligible_phq8_questions\r\n\r\n
@@ -6404,6 +6611,128 @@ app_type:
       to pass information to BWH\r\n    \r\n    select_subject_eligibility: |\r\n
       \     **Subject's eligibility for the study**\r\n"
     user_email: 
+  - id: 291
+    name: Sleep Phone Screen Eligible
+    table_name: sleep_ps_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-07-22T14:25:11.846Z'
+    updated_at: '2019-10-24T11:26:00.101Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: interested_yes_no not_interested_notes consent_to_pass_info_to_bwh_yes_no
+      consent_to_pass_info_to_bwh_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
+      placeholder_end notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Thank
+      you for your time and for answering our questions..  \r\n      Based on your
+      responses so far you are eligible to participate in this study. \r\n      \r\n
+      \     Do you have any questions?\r\n      \r\n      \r\n    interested_yes_no:
+      Are you interested in participating?\r\n\r\n    not_interested_notes: |\r\n
+      \     May I ask you why you are not interested? \r\n      *(will record reason,
+      for example, too busy)*. \r\n      \r\n      Thank you for your time.\r\n      \r\n
+      \   consent_to_pass_info_to_bwh_yes_no: |\r\n      Wonderful. In order for you
+      to participate I will need to give your \r\n      contact information to our
+      collaborating researchers at \r\n      Brigham & Women’s Hospital, and they
+      will be conducting a final, \r\n      short screening survey to finalize your
+      eligibility.  This means \r\n      that it’s still possible you may be ineligible
+      for the study, \r\n      however based on your responses so far you’re a great
+      candidate.\r\n\r\n      Is it okay with you if I give them your contact information?\r\n\r\n
+      \   consent_to_pass_info_to_bwh_2_yes_no: |\r\n      Okay - just to confirm,
+      your information will be kept completely secure \r\n      and private, in a
+      locked environment only accessible by approved researchers. \r\n      Access
+      to your information at Brigham & Women’s will be removed once the \r\n      study
+      has finished.  Does that alleviate any concerns you may have?  \r\n      If
+      you’d still prefer not to participate I understand.\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
+      |\r\n      Okay, I understand.  Well thank you so much for your time today and
+      for \r\n      your support of our research, and we will certainly be in touch
+      with \r\n      future participation opportunities.\r\n      \r\n    contact_info_notes:
+      |\r\n      Great.  I will give your information to the research manager at Brigham,
+      \r\n      [NAME], \r\n      and she will reach out to you within the next week.
+      \ \r\n      \r\n      I will also send you an email confirmation when your information
+      has been sent.  \r\n      \r\n      They will be contacting you by email to
+      send you some information about the study, \r\n      but they may also reach
+      out to you by telephone in order \r\n      to schedule your interview.  \r\n
+      \     \r\n      Can I please confirm the contact information I have for you?\r\n
+      \     \r\n    notes: Additional Notes\r\n    \r\n    placeholder_end: |\r\n
+      \     Thank you so much for speaking with me today. If you have any \r\n      questions
+      or want to contact me at any time, you can reach me\r\n      at 617-432-5000
+      or players@footballplayershealth.harvard.edu. \r\n      You may also contact
+      the Principal Investigator of \r\n      the study Dr. Suzanne Bertisch at Brigham
+      and Women’s \r\n      Hospital at 857-307-0355 or by email at sbertisch@partners.org.\r\n
+      \     \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
+      \     interested_yes_no: 'no'\r\n      \r\n    consent_to_pass_info_to_bwh_yes_no:\r\n
+      \     interested_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_2_yes_no:\r\n
+      \     consent_to_pass_info_to_bwh_yes_no: 'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n
+      \     consent_to_pass_info_to_bwh_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
+      \     any:\r\n        consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n        consent_to_pass_info_to_bwh_2_yes_no:
+      'yes'\r\n        \r\n    "
+    user_email: 
+  - id: 257
+    name: SLEEP Initial Screening
+    table_name: sleep_ps_initial_screenings
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-07-08T14:54:38.632Z'
+    updated_at: '2019-10-24T11:20:05.216Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: select_is_good_time_to_speak,any_questions_blank_yes_no,select_still_interested,placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
+    result_order: ''
+    options: "# Unused fields: looked_at_website_yes_no\r\n\r\ndefault:\r\n  dialog_before:\r\n
+      \   select_is_good_time_to_speak: \r\n      name: sleep ps intro\r\n\r\n    any_questions_blank_yes_no:
+      \r\n      name: sleep ps intro overview\r\n      label: show script\r\n#    select_still_interested:
+      \r\n#      name: sleep ps intro details\r\n#      label: show script\r\n#    select_still_interested:
+      \r\n#      name: sleep ps intro time to continue\r\n#      label: show script\r\n#
+      \   placeholder_complete_intro: \r\n#      name: sleep ps intro complete intro\r\n#
+      \     label: show script\r\n\r\n  show_if:\r\n  \r\n  \r\n#    looked_at_website_yes_no:
+      \ \r\n#      select_is_good_time_to_speak: \"yes\"\r\n    any_questions_blank_yes_no:\r\n
+      \     select_is_good_time_to_speak: \"yes\"\r\n      \r\n    select_still_interested:\r\n
+      \     select_is_good_time_to_speak: 'yes'\r\n      any_questions_blank_yes_no:
+      \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n
+      \     any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n
+      \   follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n
+      \         - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
+      yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
+      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
+      yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n
+      \       select_is_good_time_to_speak: not interested\r\n        select_still_interested:
+      no\r\n        \r\n      \r\n\r\n  caption_before:\r\n    all_fields: |\r\n      **Instructions
+      for FPHS Study Staff**\r\n      \r\n      *Screen participants over the phone.*\r\n
+      \     \r\n      *If there are issues during screening or participants have questions
+      that are\r\n      not addressed in the script provided, please respond to the
+      best \r\n      of your ability and make a note. Then follow-up\r\n      with
+      Dr. Bertisch after the phone call is complete to \r\n      determine if further
+      communication is required.*\r\n\r\n    select_still_interested: |\r\n      Great.
+      \ If you are still interested in the study, would you be \r\n      willing to
+      answer some\r\n      questions about your health and medical history to find
+      out \r\n      if you might qualify for the study? \r\n      And is this a good
+      time to talk?\r\n      \r\n\r\n    follow_up_date: Enter a follow up date and
+      time if the subject wishes for a call back before continuing with the screening,
+      or you left a voicemail. \r\n    follow_up_time: Follow up time\r\n    \r\n
+      \   placeholder_complete_intro: |\r\n      Okay.  I’d like to mention that,
+      some of the questions may\r\n      make you feel uncomfortable. You can stop
+      at any time. Also, \r\n      though we are recording your answers\r\n      in
+      a completely secure system and we do not share your data outside \r\n      the
+      study team or without your approval, providing us with your \r\n      health
+      information does have a potential risk of loss of confidentiality.\r\n      \r\n
+      \     May I begin?\r\n\r\n    placeholder_not_interested: |\r\n      May I ask
+      you why you are not interested? \r\n      *(will record reason, for example,
+      too busy)*. \r\n      \r\n      Thank you for your time. \r\n      \r\n    notes:
+      Notes, questions or other information for follow up\r\n    \r\n\r\n#    contact_details_notes:
+      Contact details notes for gift card. After completing the call, ensure contact
+      details recorded here are transferred to the subject's address record."
+    user_email: 
   - id: 280
     name: Sleep Epworth Sleepiness Scale
     table_name: sleep_ese_questions
@@ -6728,117 +7057,6 @@ app_type:
       \       consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n#        consent_to_pass_info_to_bwh_2_yes_no:
       'yes'\r\n        \r\n#    follow_up_date: *consent_given\r\n#    follow_up_time:
       *consent_given\r\n\r\n#    placeholder_end_call: *consent_given\r\n"
-    user_email: 
-  - id: 291
-    name: Sleep Phone Screen Eligible
-    table_name: sleep_ps_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-07-22T14:25:11.846Z'
-    updated_at: '2019-09-20T12:13:28.130Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: interested_yes_no not_interested_notes consent_to_pass_info_to_bwh_yes_no
-      consent_to_pass_info_to_bwh_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
-      placeholder_end notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Thank
-      you for your time and for answering our questions..  \r\n      Based on your
-      responses so far you are eligible to participate in this study. \r\n      \r\n
-      \     Do you have any questions?\r\n      \r\n      \r\n    interested_yes_no:
-      Are you interested in participating?\r\n\r\n    not_interested_notes: |\r\n
-      \     May I ask you why you are not interested? \r\n      *(will record reason,
-      for example, too busy)*. \r\n      \r\n      Thank you for your time.\r\n      \r\n
-      \   consent_to_pass_info_to_bwh_yes_no: |\r\n      Wonderful. In order for you
-      to participate I will need to give your \r\n      contact information to our
-      collaborating researchers at \r\n      Brigham & Women’s Hospital, and they
-      will be conducting a final, \r\n      short screening survey to finalize your
-      eligibility.  This means \r\n      that it’s still possible you may be ineligible
-      for the study, \r\n      however based on your responses so far you’re a great
-      candidate.\r\n\r\n      Is it okay with you if I give them your contact information?\r\n\r\n
-      \   consent_to_pass_info_to_bwh_2_yes_no: |\r\n      Okay - just to confirm,
-      your information will be kept completely secure \r\n      and private, in a
-      locked environment only accessible by approved researchers. \r\n      Access
-      to your information at Brigham & Women’s will be removed once the \r\n      study
-      has finished.  Does that alleviate any concerns you may have?  \r\n      If
-      you’d still prefer not to participate I understand.\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
-      |\r\n      Okay, I understand.  Well thank you so much for your time today and
-      for \r\n      your support of our research, and we will certainly be in touch
-      with \r\n      future participation opportunities.\r\n      \r\n    contact_info_notes:
-      |\r\n      Great.  I will give your information to the research manager at Brigham,
-      \r\n      [NAME], \r\n      and she will reach out to you within the next week.
-      \ \r\n      \r\n      I will also send you an email confirmation when your information
-      has been sent.  \r\n      \r\n      They will be contacting you by email to
-      send you some information about the study, \r\n      but they may also reach
-      out to you by telephone in order \r\n      to schedule your interview.  \r\n
-      \     \r\n      Can I please confirm the contact information I have for you?\r\n
-      \     \r\n    notes: Additional Notes\r\n    \r\n    placeholder_end: |\r\n
-      \     Thank you so much for speaking with me today. If you have any \r\n      questions
-      or want to contact me at any time, you can reach me\r\n      at 617-432-5000
-      or players@footballplayershealth.harvard.edu.\r\n      \r\n      **END SCREENING**\r\n
-      \     \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n      interested_yes_no:
-      'no'\r\n      \r\n    consent_to_pass_info_to_bwh_yes_no:\r\n      interested_yes_no:
-      'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_2_yes_no:\r\n      consent_to_pass_info_to_bwh_yes_no:
-      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      consent_to_pass_info_to_bwh_2_yes_no:
-      'no'\r\n      \r\n    contact_info_notes:\r\n      any:\r\n        consent_to_pass_info_to_bwh_yes_no:
-      'yes'\r\n        consent_to_pass_info_to_bwh_2_yes_no: 'yes'\r\n        \r\n
-      \   "
-    user_email: 
-  - id: 257
-    name: SLEEP Initial Screening
-    table_name: sleep_ps_initial_screenings
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-07-08T14:54:38.632Z'
-    updated_at: '2019-08-27T12:19:09.793Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: select_is_good_time_to_speak,any_questions_blank_yes_no,select_still_interested,placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
-    result_order: ''
-    options: "# Unused fields: looked_at_website_yes_no\r\n\r\ndefault:\r\n  dialog_before:\r\n
-      \   select_is_good_time_to_speak: \r\n      name: sleep ps intro\r\n\r\n    any_questions_blank_yes_no:
-      \r\n      name: sleep ps intro overview\r\n      label: show script\r\n#    select_still_interested:
-      \r\n#      name: sleep ps intro details\r\n#      label: show script\r\n#    select_still_interested:
-      \r\n#      name: sleep ps intro time to continue\r\n#      label: show script\r\n#
-      \   placeholder_complete_intro: \r\n#      name: sleep ps intro complete intro\r\n#
-      \     label: show script\r\n\r\n  show_if:\r\n  \r\n  \r\n#    looked_at_website_yes_no:
-      \ \r\n#      select_is_good_time_to_speak: \"yes\"\r\n    any_questions_blank_yes_no:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n      \r\n    select_still_interested:\r\n
-      \     select_is_good_time_to_speak: 'yes'\r\n      any_questions_blank_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n
-      \     any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n
-      \   follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n
-      \         - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
-      yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
-      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
-      yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n
-      \       select_is_good_time_to_speak: not interested\r\n        select_still_interested:
-      no\r\n        \r\n      \r\n\r\n  caption_before:\r\n\r\n    select_still_interested:
-      |\r\n      Great.  If you are still interested in the study, may I ask you some\r\n
-      \     questions about your sleep and health to determine if you are eligible
-      to participate?  \r\n\r\n    follow_up_date: Enter a follow up date and time
-      if the subject wishes for a call back before continuing with the screening,
-      or you left a voicemail. \r\n    follow_up_time: Follow up time\r\n    \r\n
-      \   placeholder_complete_intro: |\r\n      Okay.  I’d like to mention that though
-      we are recording your answers\r\n      in a completely secure system and we
-      do not share your data outside \r\n      the study team or without your approval,
-      providing us with your \r\n      health information does have a potential risk
-      of loss of confidentiality.\r\n\r\n    placeholder_not_interested: |\r\n      May
-      I ask you why you are not interested? \r\n      *(will record reason, for example,
-      too busy)*. \r\n      \r\n      Thank you for your time. \r\n      \r\n    notes:
-      Notes, questions or other information for follow up\r\n    \r\n\r\n#    contact_details_notes:
-      Contact details notes for gift card. After completing the call, ensure contact
-      details recorded here are transferred to the subject's address record."
     user_email: 
   - id: 310
     name: Subject Contact
@@ -7185,46 +7403,6 @@ app_type:
       \r\n      diagnosed_yes_no: 'yes'\r\n    severity:\r\n      use_treatment_yes_no:
       'no'"
     user_email: 
-  - id: 300
-    name: Sleep Phone Screen Part 2 Eligible
-    table_name: sleep_ps2_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-08-01T09:51:23.203Z'
-    updated_at: '2019-10-11T12:24:23.202Z'
-    position: 
-    category: sleep-phone-screen-2
-    table_key_name: ''
-    field_list: interested_yes_no not_interested_notes review_consent_now_yes_no placeholder_review_now
-      follow_up_date,follow_up_time notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n    \r\n\r\n    interested_yes_no:
-      Are you interested in participating?\r\n    \r\n    not_interested_notes: |\r\n
-      \     May I ask you why you are not interested? \r\n      \r\n      Thank you
-      for your time. \r\n      \r\n      *record reason, for example, too busy*\r\n
-      \   \r\n    review_consent_now_yes_no: |\r\n      Wonderful. The next step to
-      enrolling in the study is to complete \r\n      the informed consent.\r\n      \r\n
-      \     We can go through this now together if you have a few more \r\n      minutes
-      and access to your email account now. \r\n      \r\n      Shall we go through
-      the informed consent together?\r\n      \r\n      \r\n    placeholder_review_now:
-      |\r\n      *Email consent document to conduct consent and enrollment protocol.*\r\n\r\n
-      \     Save this form, then click the **+ Informed Consent** button to record\r\n
-      \     the informed consent.\r\n\r\n    \r\n    follow_up_date:\r\n      keep_label:
-      true\r\n      caption: |\r\n        I will email you the consent document for
-      you to review.\r\n        \r\n        Is there a more convenient time to go
-      through this together and \r\n        complete your enrollment?\r\n\r\n    notes:
-      Additional notes\r\n    \r\n    \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
-      \     interested_yes_no: 'no'\r\n      \r\n    review_consent_now_yes_no: \r\n
-      \     interested_yes_no: 'yes'\r\n\r\n    placeholder_review_now:\r\n      interested_yes_no:
-      'yes'\r\n      review_consent_now_yes_no: 'yes'\r\n\r\n    follow_up_date:\r\n
-      \     interested_yes_no: 'yes'\r\n      review_consent_now_yes_no: 'no'\r\n
-      \     \r\n    follow_up_time:\r\n      interested_yes_no: 'yes'\r\n      review_consent_now_yes_no:
-      'no'\r\n      \r\n    \r\n    "
-    user_email: 
   - id: 296
     name: PHQ-8 Questions
     table_name: sleep_ps2_phq8_questions
@@ -7235,7 +7413,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-30T14:37:28.733Z'
-    updated_at: '2019-10-10T14:57:16.911Z'
+    updated_at: '2019-10-24T11:06:43.223Z'
     position: 
     category: sleep-phone-screen-2
     table_key_name: ''
@@ -7244,17 +7422,17 @@ app_type:
     options: "default:\r\n\r\n  field_options:  \r\n    little_interest: \r\n      edit_as:\r\n
       \       field_type: select_little_interest\r\n        alt_options:  &alt_options\r\n
       \         Not at all: 0\r\n          Several days: 1 \r\n          More than
-      half the day: 2\r\n          Nearly every day: 3\r\n    feeling_down: \r\n      edit_as:\r\n
-      \       field_type: select_feeling_down\r\n        alt_options: *alt_options\r\n
-      \   trouble_sleeping: \r\n      edit_as:\r\n        field_type: select_trouble_sleeping\r\n
-      \       alt_options: *alt_options\r\n    feeling_tired: \r\n      edit_as:\r\n
-      \       field_type: select_feeling_tired\r\n        alt_options: *alt_options\r\n
-      \   poor_appetite: \r\n      edit_as:\r\n        field_type: select_poor_appetite\r\n
-      \       alt_options: *alt_options\r\n    feeling_bad: \r\n      edit_as:\r\n
-      \       field_type: select_feeling_bad\r\n        alt_options: *alt_options\r\n
-      \   trouble_concentrating: \r\n      edit_as:\r\n        field_type: select_trouble_concentrating\r\n
-      \       alt_options: *alt_options\r\n    acting_slowly_or_restlessly:    \r\n
-      \     edit_as:\r\n        field_type: select_acting_slowly_or_restlessly\r\n
+      half the days: 2\r\n          Nearly every day: 3\r\n    feeling_down: \r\n
+      \     edit_as:\r\n        field_type: select_feeling_down\r\n        alt_options:
+      *alt_options\r\n    trouble_sleeping: \r\n      edit_as:\r\n        field_type:
+      select_trouble_sleeping\r\n        alt_options: *alt_options\r\n    feeling_tired:
+      \r\n      edit_as:\r\n        field_type: select_feeling_tired\r\n        alt_options:
+      *alt_options\r\n    poor_appetite: \r\n      edit_as:\r\n        field_type:
+      select_poor_appetite\r\n        alt_options: *alt_options\r\n    feeling_bad:
+      \r\n      edit_as:\r\n        field_type: select_feeling_bad\r\n        alt_options:
+      *alt_options\r\n    trouble_concentrating: \r\n      edit_as:\r\n        field_type:
+      select_trouble_concentrating\r\n        alt_options: *alt_options\r\n    acting_slowly_or_restlessly:
+      \   \r\n      edit_as:\r\n        field_type: select_acting_slowly_or_restlessly\r\n
       \       alt_options: *alt_options\r\n    \r\n    initial_score:\r\n      edit_as:\r\n
       \       field_type: fixed_initial_score\r\n      calculate_with:\r\n        sum:
       \r\n          - little_interest\r\n          - feeling_down\r\n\r\n    total_score:\r\n
@@ -7263,14 +7441,17 @@ app_type:
       \         - trouble_sleeping\r\n          - feeling_tired\r\n          - poor_appetite\r\n
       \         - feeling_bad\r\n          - trouble_concentrating\r\n          -
       acting_slowly_or_restlessly\r\n    \r\n\r\n\r\n  caption_before:\r\n    all_fields:
-      Over the last 2 weeks, how often have you been bothered by the following problems?\r\n
-      \   little_interest: Little interest or pleasure in doing things\r\n    feeling_down:
-      Feeling down, depressed or hopeless\r\n    trouble_sleeping: Trouble falling
-      or staying asleep, or sleeping too much\r\n    feeling_tired: Feeling tired
-      or having little energy\r\n    poor_appetite: Poor appetite or overeating\r\n
-      \   feeling_bad: Feeling bad about yourself, or that you are a failure, or have
-      let yourself or your family down\r\n    trouble_concentrating: Trouble concentrating
-      on things, such as reading the newspaper or watching television\r\n    acting_slowly_or_restlessly:
+      |\r\n      Over the last 2 weeks, how often have you been bothered \r\n      by
+      the following problems?\r\n      \r\n      For each, please choose one of the
+      following responses:\r\n      \r\n      - Not at all\r\n      - Several days\r\n
+      \     - More than half the days\r\n      - Nearly every day\r\n      \r\n    little_interest:
+      Little interest or pleasure in doing things\r\n    feeling_down: Feeling down,
+      depressed or hopeless\r\n    trouble_sleeping: Trouble falling or staying asleep,
+      or sleeping too much\r\n    feeling_tired: Feeling tired or having little energy\r\n
+      \   poor_appetite: Poor appetite or overeating\r\n    feeling_bad: Feeling bad
+      about yourself, or that you are a failure, or have let yourself or your family
+      down\r\n    trouble_concentrating: Trouble concentrating on things, such as
+      reading the newspaper or watching television\r\n    acting_slowly_or_restlessly:
       Moving or speaking so slowly that other people could have noticed. Or the opposite
       –  being so fidgety or restless that you have been moving around a lot more
       than usual\r\n    total_sum: Total Sum\r\n      \r\n    placeholder_ineligible:
@@ -7328,7 +7509,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-29T15:48:36.023Z'
-    updated_at: '2019-10-10T14:36:48.199Z'
+    updated_at: '2019-10-24T11:02:46.072Z'
     position: 
     category: sleep-phone-screen-2
     table_key_name: ''
@@ -7382,16 +7563,57 @@ app_type:
       |\r\n      Did you have any questions for me about this study before \r\n      we
       go through the final screening questions?\r\n      \r\n      *Respond to questions*\r\n\r\n
       \   placeholder_end: |\r\n      Great. And like my colleague mentioned last
-      time, I want you to\r\n      know that we are recording your answers in a completely
-      secure system. \r\n      We do not share your data outside the study team or
-      without your\r\n      approval, but providing us with your health information
-      always has\r\n      a potential risk of loss of confidentiality. \r\n      \r\n
-      \     Okay, we can begin now. Since mood can often\r\n      contribute to sleep
-      problems, we will be asking you questions about\r\n      how you have been feeling
-      recently.\r\n\r\n\r\n    notes: Notes, questions or other information for follow
-      up\r\n    \r\n\r\n#    contact_details_notes: Contact details notes for gift
-      card. After completing the call, ensure contact details recorded here are transferred
-      to the subject's address record."
+      time, some of the questions \r\n      may make you feel uncomfortable. You can
+      stop at any time. I want you to\r\n      know that we are recording your answers
+      in a completely secure system. \r\n      We do not share your data outside the
+      study team or without your\r\n      approval, but providing us with your health
+      information always has\r\n      a potential risk of loss of confidentiality.
+      May I begin?\r\n      \r\n      Since mood can often\r\n      contribute to
+      sleep problems, we will be asking you questions about\r\n      how you have
+      been feeling recently.\r\n\r\n\r\n    notes: Notes, questions or other information
+      for follow up\r\n    \r\n\r\n#    contact_details_notes: Contact details notes
+      for gift card. After completing the call, ensure contact details recorded here
+      are transferred to the subject's address record."
+    user_email: 
+  - id: 300
+    name: Sleep Phone Screen Part 2 Eligible
+    table_name: sleep_ps2_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-08-01T09:51:23.203Z'
+    updated_at: '2019-10-11T12:24:23.202Z'
+    position: 
+    category: sleep-phone-screen-2
+    table_key_name: ''
+    field_list: interested_yes_no not_interested_notes review_consent_now_yes_no placeholder_review_now
+      follow_up_date,follow_up_time notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n    \r\n\r\n    interested_yes_no:
+      Are you interested in participating?\r\n    \r\n    not_interested_notes: |\r\n
+      \     May I ask you why you are not interested? \r\n      \r\n      Thank you
+      for your time. \r\n      \r\n      *record reason, for example, too busy*\r\n
+      \   \r\n    review_consent_now_yes_no: |\r\n      Wonderful. The next step to
+      enrolling in the study is to complete \r\n      the informed consent.\r\n      \r\n
+      \     We can go through this now together if you have a few more \r\n      minutes
+      and access to your email account now. \r\n      \r\n      Shall we go through
+      the informed consent together?\r\n      \r\n      \r\n    placeholder_review_now:
+      |\r\n      *Email consent document to conduct consent and enrollment protocol.*\r\n\r\n
+      \     Save this form, then click the **+ Informed Consent** button to record\r\n
+      \     the informed consent.\r\n\r\n    \r\n    follow_up_date:\r\n      keep_label:
+      true\r\n      caption: |\r\n        I will email you the consent document for
+      you to review.\r\n        \r\n        Is there a more convenient time to go
+      through this together and \r\n        complete your enrollment?\r\n\r\n    notes:
+      Additional notes\r\n    \r\n    \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
+      \     interested_yes_no: 'no'\r\n      \r\n    review_consent_now_yes_no: \r\n
+      \     interested_yes_no: 'yes'\r\n\r\n    placeholder_review_now:\r\n      interested_yes_no:
+      'yes'\r\n      review_consent_now_yes_no: 'yes'\r\n\r\n    follow_up_date:\r\n
+      \     interested_yes_no: 'yes'\r\n      review_consent_now_yes_no: 'no'\r\n
+      \     \r\n    follow_up_time:\r\n      interested_yes_no: 'yes'\r\n      review_consent_now_yes_no:
+      'no'\r\n      \r\n    \r\n    "
     user_email: 
   - id: 298
     name: Sleep Phone Screen Part 2 Ineligible
@@ -7559,7 +7781,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:54:58.753Z'
-    updated_at: '2019-10-11T12:56:08.880Z'
+    updated_at: '2019-10-23T17:55:32.832Z'
     position: 20
     category: sleep-records
     table_key_name: ''
@@ -7602,19 +7824,20 @@ app_type:
       true\r\n      caption: |\r\n        <i>Enter date and time to call back</i>\r\n
       \       Thanks and end call\r\n    #still_interested_blank_yes_no: Are you still
       interested in participating? Do you have any questions?\r\n    ineligible_notes:
-      Record any notes from the call\r\n    not_interested_notes: |\r\n      Thank
-      you for your time today.\r\n      <i>END CALL and complete call notes</i>\r\n
-      \     \r\n    contact_in_future_yes_no: Did the participant give permission
-      to contact in future?\r\n\r\n    good_time_to_speak_blank_yes_no: |\r\n      The
-      next step to enrolling in the study is to complete the informed consent. \r\n
-      \     You should have been emailed a copy of the consent form. Did you receive
-      it? \r\n      Do you have a few minutes to review the consent form together
-      now? \r\n\r\n    placeholder_start_review: |\r\n      (Follow the review script)\r\n
-      \     \r\n      (If the subject states that he no longer wishes to participate,
-      note this below)\r\n\r\n    consent_performed_yes_no: Did informed consent get
-      performed?\r\n    did_subject_consent_yes_no: Did subject consent?\r\n\r\n    eligible_notes:
-      Notes\r\n    \r\n  dialog_before:\r\n\r\n    ineligible_notes:\r\n      name:
-      sleep eligibility call not eligible\r\n    \r\n\r\n"
+      |\r\n      Record any notes from the call\r\n      \r\n    not_interested_notes:
+      |\r\n      Thank you for your time today.\r\n      \r\n      *END CALL and complete
+      call notes*\r\n\r\n      \r\n    contact_in_future_yes_no: Did the participant
+      give permission to contact in future?\r\n\r\n    good_time_to_speak_blank_yes_no:
+      |\r\n      The next step to enrolling in the study is to complete the informed
+      consent. \r\n      You should have been emailed a copy of the consent form.
+      Did you receive it? \r\n      Do you have a few minutes to review the consent
+      form together now? \r\n\r\n    placeholder_start_review: |\r\n      (Follow
+      the review script)\r\n      \r\n      (If the subject states that he no longer
+      wishes to participate, note this below)\r\n\r\n    consent_performed_yes_no:
+      Did informed consent get performed?\r\n    did_subject_consent_yes_no: Did subject
+      consent?\r\n\r\n    eligible_notes: |\r\n      Additional Notes\r\n\r\n    \r\n
+      \ dialog_before:\r\n\r\n    ineligible_notes:\r\n      name: sleep eligibility
+      call not eligible\r\n    \r\n\r\n"
     user_email: 
   - id: 263
     name: SLEEP Transportation
@@ -7870,7 +8093,7 @@ app_type:
     user_email: 
   - id: 25
     name: sleep_assignments
-    label: HMS Sleep ID
+    label: Sleep Study ID
     external_id_attribute: sleep_id
     external_id_view_formatter: ''
     external_id_edit_pattern: ''
@@ -7881,7 +8104,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:55:39.337Z'
-    updated_at: '2019-08-12T10:44:02.970Z'
+    updated_at: '2019-10-23T08:39:34.202Z'
     alphanumeric: false
     extra_fields: ''
     user_email: 
@@ -7890,16 +8113,16 @@ app_type:
     label: BWH Sleep ID
     external_id_attribute: bwh_sleep_id
     external_id_view_formatter: ''
-    external_id_edit_pattern: ''
-    prevent_edit: true
-    pregenerate_ids: true
-    min_id: 1000
-    max_id: 9999
+    external_id_edit_pattern: "\\d{0,6}"
+    prevent_edit: false
+    pregenerate_ids: false
+    min_id: 1
+    max_id: 999999
     admin_id: 2
     disabled: false
     created_at: '2019-08-05T15:19:15.482Z'
-    updated_at: '2019-09-20T16:04:36.174Z'
-    alphanumeric: true
+    updated_at: '2019-10-24T13:03:28.090Z'
+    alphanumeric: false
     extra_fields: ''
     user_email: 
   associated_reports:
@@ -8242,35 +8465,36 @@ app_type:
     sql: "SELECT * from (\r\n  SELECT distinct dt.master_id, sleep.sleep_id, bwh_sleep.bwh_sleep_id,\r\n
       \ CASE \r\n  WHEN extra_log_type = 'completed' THEN 'completed'\r\n  WHEN extra_log_type
       = 'withdraw' THEN 'withdrawn'\r\n  WHEN extra_log_type IN ('exit_not_consented',
-      'exit_ps', 'exit_ps_bwh') THEN 'exited'\r\n  WHEN extra_log_type = 'ineligible'
-      THEN 'ineligible'\r\n  WHEN extra_log_type = 'bwh_ps_eligible' THEN 'eligible'\r\n
-      \ WHEN extra_log_type = 'schedule_screening' THEN 'in process'\r\n  WHEN extra_log_type
-      = 'appointment' THEN 'enrolled'\r\n  ELSE extra_log_type\r\n  END \"status\",
-      \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id, al.created_at,
-      al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION BY al.master_id
-      \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n    FROM activity_log_sleep_assignments
-      al\r\n    WHERE   \r\n    extra_log_type IN (\r\n      'schedule_screening',
-      \r\n      'bwh_ps_eligible', \r\n      'ineligible', \r\n      'exit_not_consented',
-      \r\n      'exit_ps', \r\n      'exit_ps_bwh',\r\n      'appointment',\r\n      'completed',\r\n
-      \     'withdraw'\r\n    )\r\n  ) dt\r\n  INNER JOIN sleep_assignments sleep
-      ON dt.master_id = sleep.master_id\r\n  LEFT OUTER JOIN bwh_sleep_id_numbers
-      bwh_sleep ON dt.master_id = bwh_sleep.master_id\r\n  WHERE r = 1 \r\n) dt2\r\nWHERE
-      status IN(:select_status)\r\nORDER BY status, created_at desc\r\n;\r\n"
+      'exit_ps', 'exit_ps_bwh', 'exit_opt_out') THEN 'exited'\r\n  WHEN extra_log_type
+      = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'bwh_ps_eligible'
+      THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'in process'\r\n
+      \ WHEN extra_log_type = 'appointment' THEN 'enrolled'\r\n  ELSE extra_log_type\r\n
+      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id,
+      al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
+      BY al.master_id \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n
+      \   FROM activity_log_sleep_assignments al\r\n    WHERE   \r\n    extra_log_type
+      IN (\r\n      'schedule_screening', \r\n      'bwh_ps_eligible', \r\n      'ineligible',
+      \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_ps_bwh',\r\n
+      \     'exit_opt_out',\r\n      'appointment',\r\n      'completed',\r\n      'withdraw'\r\n
+      \   )\r\n  ) dt\r\n  INNER JOIN sleep_assignments sleep ON dt.master_id = sleep.master_id\r\n
+      \ LEFT OUTER JOIN bwh_sleep_id_numbers bwh_sleep ON dt.master_id = bwh_sleep.master_id\r\n
+      \ WHERE r = 1 \r\n) dt2\r\nWHERE status IN(:select_status)\r\nORDER BY status,
+      created_at desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - eligible\r\n      - ineligible\r\n      - completed\r\n
-      \     - withdrawn\r\n      - exited\r\n      - enrolled\r\n      - in process\r\n
+      \   default: \r\n      - eligible\r\n#      - ineligible\r\n#      - completed\r\n#
+      \     - withdrawn\r\n#      - exited\r\n      - enrolled\r\n      - in process\r\n
       \   selections: \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
       \     completed: completed\r\n      withdrawn: withdrawn\r\n      exited: exited\r\n
       \     enrolled: enrolled\r\n      in process: in process\r\n      \r\n      "
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:20.501Z'
-    updated_at: '2019-10-17T13:16:14.080Z'
+    updated_at: '2019-10-24T16:28:57.716Z'
     report_type: search
     auto: false
     searchable: true
-    position: 2
+    position: 3
     edit_model: ''
     edit_field_names: ''
     selection_fields: ''
@@ -8373,29 +8597,50 @@ app_type:
       or sleep.sleep_id = :sleep_id)\r\nGROUP BY\r\nap.master_id, visit_start_date,
       pi.first_name, pi.last_name, sleep.sleep_id\r\n;\r\n\r\ncreate temp table scheduled_calls\r\nas
       select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n  dt.master_id,\r\n
-      \ sleep.sleep_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
-      \ dt.select_who\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
-      \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
-      \     a.notes,\r\n      rank()\r\n    OVER (\r\n      PARTITION BY a.master_id,
-      a.extra_log_type\r\n      ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from
-      activity_log_sleep_assignments a\r\n    where\r\n      follow_up_when is not
-      null\r\n      AND (:from_date IS NULL OR follow_up_when >= :from_date)\r\n      AND
-      (:to_date IS NULL OR follow_up_when <= :to_date )\r\n  ) dt\r\ninner join player_infos
-      p\r\n  on dt.master_id = p.master_id\r\n\r\ninner join sleep_assignments sleep\r\n
-      \ on dt.master_id = sleep.master_id\r\n\r\nWHERE r = 1\r\nAND (:sleep_id IS
-      NULL or sleep.sleep_id = :sleep_id)\r\n;\r\n\r\ncreate temp table all_dates\r\nas\r\nselect
-      follow_up_when from scheduled_calls\r\nunion\r\nselect visit_start_date from
-      appointments\r\n;\r\n\r\n\r\nSELECT\r\n  true \"allDay\",\r\n  visit_start_date::varchar
-      || 'T' || '00:00:00' \"start\",\r\n  null \"end\",\r\n  'assessment start' \"title\",\r\n
-      \ array['report-cal-start-event'] \"classNames\",\r\n  '/masters/' || master_id
-      \"url\"\r\nFROM appointments\r\n\r\nUNION\r\nSELECT\r\n  true ,\r\n  '2019-06-20'
-      ,\r\n  null ,\r\n  'assessment start' ,\r\n  array['report-cal-start-event']
+      \ sleep.sleep_id,\r\n--  p.first_name,\r\n--  p.last_name,\r\n  dt.extra_log_type,\r\n
+      \ dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n  (\r\n    select a.master_id,\r\n
+      \     a.extra_log_type,\r\n      a.select_who,\r\n      a.follow_up_when,\r\n
+      \     a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n      rank()\r\n
+      \   OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n      ORDER
+      BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_sleep_assignments
+      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
+      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
+      <= :to_date )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id
+      = p.master_id\r\n\r\ninner join sleep_assignments sleep\r\n  on dt.master_id
+      = sleep.master_id\r\n\r\nWHERE r = 1\r\nAND (:sleep_id IS NULL or sleep.sleep_id
+      = :sleep_id)\r\n;\r\n\r\n\r\ncreate temp table pi_calls\r\nas select\r\n  dt.follow_up_when,\r\n
+      \ dt.follow_up_time,\r\n  dt.master_id,\r\n  sleep.sleep_id,\r\n--  p.first_name,\r\n--
+      \ p.last_name,\r\n  dt.extra_log_type,\r\n  dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n
+      \ (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n      'PI' select_who,\r\n
+      \     a.follow_up_when,\r\n      a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
+      \     rank()\r\n    OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n
+      \     ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_sleep_assignment_med_navs
+      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
+      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
+      <= :to_date )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id
+      = p.master_id\r\n\r\ninner join sleep_assignments sleep\r\n  on dt.master_id
+      = sleep.master_id\r\n\r\nWHERE r = 1\r\nAND (:sleep_id IS NULL or sleep.sleep_id
+      = :sleep_id)\r\n;\r\n\r\n/*\r\ncreate temp table all_dates\r\nas\r\nselect follow_up_when
+      from scheduled_calls\r\nunion\r\nselect visit_start_date from appointments\r\n;\r\n*/\r\n\r\nSELECT\r\n
+      \ true \"allDay\",\r\n  visit_start_date::varchar || 'T' || '00:00:00' \"start\",\r\n
+      \ null \"end\",\r\n  'assessment start' \"title\",\r\n  array['report-cal-start-event']
+      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\nUNION\r\nSELECT\r\n
+      \ true ,\r\n  '2019-06-20' ,\r\n  null ,\r\n  'assessment start' ,\r\n  array['report-cal-start-event']
       \"classNames\",\r\n  null \"url\"\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
       \ follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n
-      \ '(call) ' || \r\n  case when extra_log_type = 'schedule_screening' then 'scheduled
-      HMS screening'\r\n  when extra_log_type = 'schedule_screening_2' then 'scheduled
-      BWH screening'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event']
-      \"classNames\",\r\n    '/masters/' || master_id \"url\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
+      \ case when select_next_step = 'email back' then '(email)'\r\n  else '(call)'
+      end\r\n  || ' ' ||\r\n  case when extra_log_type = 'schedule_screening' then
+      'scheduled HMS screening'\r\n  when extra_log_type = 'schedule_screening_2'
+      then 'scheduled BWH screening'\r\n  when extra_log_type = 'screening_follow_up'
+      then 'scheduled informed consent'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event']
+      \"classNames\",\r\n    '/masters/' || master_id \"url\"\r\nFROM scheduled_calls\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
+      \ NULL,\r\n  case when select_next_step = 'email back' then '(email)'\r\n  else
+      '(call)' end\r\n  || ' ' ||\r\n  case when extra_log_type = 'participant_follow_up'
+      then 'PI follow up'\r\n  when extra_log_type = 'participant_communication' then
+      'PI participant communication'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-pi-call-event']
+      \"classNames\",\r\n    '/masters/' || master_id || '#activity-log--sleep-assignment-med-navs-'
+      || master_id \"url\"\r\nFROM pi_calls\r\n;\r\n"
     search_attrs: "\r\nfrom_date: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n
       \   default: -6 months\r\n\r\nto_date: \r\n  date: \r\n    all: true\r\n    multiple:
       single\r\n    default: +12 months\r\n    \r\n\r\n\r\nsleep_id: \r\n  number:
@@ -8403,7 +8648,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-08-09T15:59:19.661Z'
-    updated_at: '2019-08-27T13:49:00.150Z'
+    updated_at: '2019-10-24T10:32:31.537Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -8417,7 +8662,8 @@ app_type:
       \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
       \     background-color: red\r\n      border-color: red\r\n      text-align:
       center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
-      gray\r\n    "
+      gray\r\n    report-cal-pi-call-event:\r\n      background-color: '#044'\r\n
+      \     border-color: gray\r\n    "
     user_email: 
   - id: 115
     name: Ready for HMS Screening
@@ -8426,12 +8672,14 @@ app_type:
       not in (\r\n  select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screens
       ps\r\n  where extra_log_type = 'finalize'\r\n)\r\nand sa.master_id not in (\r\n
       \ select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n  where
-      extra_log_type = 'exit_ps'\r\n)\r\n;\r\n"
+      \r\n  extra_log_type in ('exit_ps','exit_opt_out')\r\n)\r\nand sa.master_id
+      not in (\r\n  select dsw.master_id \r\n  from sleep_withdrawals dsw\r\n  where
+      \r\n  select_subject_withdrew_reason = 'withdrew'\r\n)\r\n;\r\n"
     search_attrs: ''
     admin_id: 2
     disabled: false
     created_at: '2019-08-27T11:07:37.316Z'
-    updated_at: '2019-10-10T13:46:25.365Z'
+    updated_at: '2019-10-24T08:58:25.992Z'
     report_type: search
     auto: true
     searchable: true
@@ -8455,12 +8703,14 @@ app_type:
       \ select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screen2s
       ps\r\n  where extra_log_type in ('finalize')\r\n)\r\nand sa.master_id not in
       (\r\n  select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n
-      \ where extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh')\r\n)\r\n;\r\n\r\n"
+      \ where extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh','exit_opt_out')\r\n)\r\nand
+      sa.master_id not in (\r\n  select dsw.master_id \r\n  from sleep_withdrawals
+      dsw\r\n  where \r\n  select_subject_withdrew_reason = 'withdrew'\r\n)\r\n;\r\n\r\n"
     search_attrs: ''
     admin_id: 2
     disabled: false
     created_at: '2019-08-27T11:13:01.455Z'
-    updated_at: '2019-10-10T13:47:27.071Z'
+    updated_at: '2019-10-24T08:57:52.963Z'
     report_type: search
     auto: true
     searchable: true
@@ -8488,12 +8738,17 @@ app_type:
       \r\n    a.extra_log_type = 'request_pi_follow_up'\r\n    AND a2.extra_log_type
       = 'participant_follow_up'\r\n    AND a2.select_result = 'completed'\r\n\r\n
       \   OR\r\n    a.extra_log_type = 'request_pi_ps_review'\r\n    AND a2.extra_log_type
-      = 'pi_ps_review'\r\n  )\r\n\r\n"
+      = 'pi_ps_review'\r\n  )\r\n  \r\n  and a.master_id not in (\r\n    select sa2.master_id
+      \r\n    from activity_log_sleep_assignments sa2\r\n    where extra_log_type
+      in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh')\r\n    and
+      created_at < (current_date - 14)\r\n  )\r\n  and a.master_id not in (\r\n    select
+      dsw.master_id \r\n    from sleep_withdrawals dsw\r\n    where \r\n    select_subject_withdrew_reason
+      = 'withdrew'\r\n    and created_at < (current_date - 14)\r\n  )\r\n\r\n"
     search_attrs: ''
     admin_id: 2
     disabled: false
     created_at: '2019-08-28T13:05:15.231Z'
-    updated_at: '2019-10-17T14:10:15.868Z'
+    updated_at: '2019-10-23T08:54:10.578Z'
     report_type: search
     auto: true
     searchable: true
@@ -8541,13 +8796,13 @@ app_type:
     value: '10'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.514Z'
-    updated_at: '2018-09-11T11:53:34.512Z'
+    updated_at: '2019-10-22T10:59:18.023Z'
     disabled: 
-    admin_id: 2
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1100
     description: 
     lock: 
     user_email: 
@@ -8556,13 +8811,13 @@ app_type:
     value: '5'
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.543Z'
-    updated_at: '2018-09-11T11:53:34.519Z'
+    updated_at: '2019-10-22T10:59:18.026Z'
     disabled: 
-    admin_id: 2
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1110
     description: 
     lock: 
     user_email: 
@@ -8586,13 +8841,13 @@ app_type:
     value: "-1"
     item_type: player_contacts_rank
     created_at: '2018-02-15T15:52:01.689Z'
-    updated_at: '2018-09-11T11:53:34.530Z'
+    updated_at: '2019-10-22T10:59:18.033Z'
     disabled: 
-    admin_id: 2
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1130
     description: 
     lock: 
     user_email: 
@@ -8616,15 +8871,15 @@ app_type:
     value: nflpa
     item_type: player_contacts_source
     created_at: '2018-02-15T15:52:01.731Z'
-    updated_at: '2018-09-19T12:08:42.765Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.081Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1280
+    description: 
+    lock: true
     user_email: 
   - id: 22
     name: NFL
@@ -8642,32 +8897,32 @@ app_type:
     lock: false
     user_email: 
   - id: 23
-    name: NFLPA
+    name: nflpa
     value: nflpa
     item_type: addresses_source
     created_at: '2018-02-15T15:52:01.827Z'
-    updated_at: '2018-09-19T12:12:48.818Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.129Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1450
+    description: 
+    lock: true
     user_email: 
   - id: 24
     name: primary
     value: '10'
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.847Z'
-    updated_at: '2019-01-18T11:24:31.074Z'
+    updated_at: '2019-10-22T10:59:18.005Z'
     disabled: 
-    admin_id: 2
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1060
     description: 
     lock: 
     user_email: 
@@ -8676,13 +8931,13 @@ app_type:
     value: '5'
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.860Z'
-    updated_at: '2019-01-18T11:24:31.080Z'
+    updated_at: '2019-10-22T10:59:18.012Z'
     disabled: 
-    admin_id: 2
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1070
     description: 
     lock: 
     user_email: 
@@ -8706,13 +8961,13 @@ app_type:
     value: "-1"
     item_type: addresses_rank
     created_at: '2018-02-15T15:52:01.895Z'
-    updated_at: '2019-01-18T11:24:31.089Z'
+    updated_at: '2019-10-22T10:59:18.019Z'
     disabled: 
-    admin_id: 2
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1090
     description: 
     lock: 
     user_email: 
@@ -8721,14 +8976,14 @@ app_type:
     value: nflpa
     item_type: player_infos_source
     created_at: '2015-08-12T19:43:23.821Z'
-    updated_at: '2018-09-11T11:53:34.498Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.171Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1600
+    description: 
     lock: true
     user_email: 
   - id: 30
@@ -8762,19 +9017,19 @@ app_type:
     lock: 
     user_email: 
   - id: 32
-    name: NFLPA 2
+    name: nflpa2
     value: nflpa2
     item_type: addresses_source
     created_at: '2015-08-12T20:09:46.808Z'
-    updated_at: '2018-09-19T12:12:39.446Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.132Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 30
-    description: ''
-    lock: false
+    position: 1460
+    description: 
+    lock: true
     user_email: 
   - id: 33
     name: CIS
@@ -8795,64 +9050,64 @@ app_type:
     lock: false
     user_email: 
   - id: 34
-    name: Email
+    name: email
     value: email
     item_type: player_contacts_type
     created_at: '2015-09-10T15:15:31.892Z'
-    updated_at: '2018-09-19T12:10:33.153Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.091Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
-    edit_always: false
-    position: 
-    description: ''
-    lock: true
+    edit_if_set: 
+    edit_always: true
+    position: 1330
+    description: 
+    lock: 
     user_email: 
   - id: 35
-    name: Phone
+    name: phone
     value: phone
     item_type: player_contacts_type
     created_at: '2015-09-10T15:15:31.897Z'
-    updated_at: '2018-09-19T12:10:39.278Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.099Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
-    edit_always: false
-    position: 
-    description: ''
-    lock: true
+    edit_if_set: 
+    edit_always: true
+    position: 1350
+    description: 
+    lock: 
     user_email: 
   - id: 36
-    name: Integrate
+    name: integrate1
     value: integrate1
     item_type: addresses_source
     created_at: '2015-09-24T18:58:00.195Z'
-    updated_at: '2019-01-18T11:24:31.122Z'
+    updated_at: '2019-10-22T10:59:18.121Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position: 1430
     description: ''
-    lock: 
+    lock: true
     user_email: 
   - id: 37
-    name: Integrate
+    name: integrate2
     value: integrate2
     item_type: addresses_source
     created_at: '2015-09-24T18:58:27.899Z'
-    updated_at: '2019-01-18T11:24:31.155Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.125Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: 
+    position: 1440
+    description: 
+    lock: true
     user_email: 
   - id: 38
     name: Other
@@ -8875,58 +9130,58 @@ app_type:
     value: cis-paper
     item_type: player_infos_source
     created_at: '2015-09-24T19:00:01.751Z'
-    updated_at: '2018-09-11T11:53:34.591Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.158Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 1
-    description: ''
-    lock: false
+    position: 1560
+    description: 
+    lock: 
     user_email: 
   - id: 40
-    name: CIS - Paper
+    name: cis-paper
     value: cis-paper
     item_type: addresses_source
     created_at: '2015-09-24T19:00:27.920Z'
-    updated_at: '2018-09-19T12:12:11.962Z'
-    disabled: false
-    admin_id: 2
-    create_with: false
-    edit_if_set: false
-    edit_always: false
-    position: 1
-    description: Incoming CIS on paper as Scantron form or written mail
-    lock: false
+    updated_at: '2019-10-22T10:59:18.110Z'
+    disabled: 
+    admin_id: 1
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 1390
+    description: 
+    lock: 
     user_email: 
   - id: 41
-    name: CIS - Email
+    name: cis-email
     value: cis-email
     item_type: addresses_source
     created_at: '2015-09-24T19:00:45.434Z'
-    updated_at: '2018-09-19T12:12:18.275Z'
+    updated_at: '2019-10-22T10:59:18.106Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
-    position: 2
-    description: CIS - contact information provided by email
+    edit_always: true
+    position: 1380
+    description: ''
     lock: false
     user_email: 
   - id: 42
-    name: NFLPA 2
+    name: nflpa2
     value: nflpa2
     item_type: player_infos_source
     created_at: '2015-09-24T20:20:44.103Z'
-    updated_at: '2019-09-04T09:54:26.844Z'
+    updated_at: '2019-10-22T10:59:18.044Z'
     disabled: 
-    admin_id: 2
-    create_with: true
+    admin_id: 1
+    create_with: false
     edit_if_set: 
-    edit_always: 
-    position: 
+    edit_always: false
+    position: 1160
     description: 
     lock: true
     user_email: 
@@ -8935,45 +9190,46 @@ app_type:
     value: nflpa2
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:05.392Z'
-    updated_at: '2018-09-19T12:09:06.293Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.084Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1290
+    description: 
+    lock: true
     user_email: 
   - id: 44
     name: integrate1
     value: integrate1
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:39.899Z'
-    updated_at: '2018-09-19T12:09:11.018Z'
+    updated_at: '2019-10-22T10:59:18.073Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position: 1260
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 45
     name: integrate2
     value: integrate2
     item_type: player_contacts_source
     created_at: '2015-09-24T20:26:51.693Z'
-    updated_at: '2018-09-19T12:09:15.353Z'
+    updated_at: '2019-10-22T10:59:18.077Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1270
+    description: This data is from the original NFLPA data but has been verified and
+      updated by FPHS staff during in the first data cleaning round.
+    lock: true
     user_email: 
   - id: 46
     name: CIS
@@ -8995,28 +9251,28 @@ app_type:
     value: cis-paper
     item_type: player_contacts_source
     created_at: '2015-09-24T20:27:47.697Z'
-    updated_at: '2018-09-19T12:09:20.796Z'
-    disabled: false
-    admin_id: 2
-    create_with: false
-    edit_if_set: false
-    edit_always: false
-    position: 
-    description: ''
-    lock: false
+    updated_at: '2019-10-22T10:59:18.062Z'
+    disabled: 
+    admin_id: 1
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 1220
+    description: 
+    lock: 
     user_email: 
   - id: 48
     name: cis-email
     value: cis-email
     item_type: player_contacts_source
     created_at: '2015-09-24T20:28:09.928Z'
-    updated_at: '2018-09-19T12:08:49.447Z'
+    updated_at: '2019-10-22T10:59:18.059Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
-    position: 
+    edit_always: true
+    position: 1210
     description: ''
     lock: false
     user_email: 
@@ -9025,13 +9281,13 @@ app_type:
     value: '0'
     item_type: player_contacts_rank
     created_at: '2015-10-20T16:24:09.278Z'
-    updated_at: '2019-09-04T09:54:26.860Z'
+    updated_at: '2019-10-22T10:59:18.030Z'
     disabled: 
-    admin_id: 2
+    admin_id: 1
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1120
     description: 
     lock: 
     user_email: 
@@ -9040,13 +9296,13 @@ app_type:
     value: '0'
     item_type: addresses_rank
     created_at: '2015-10-20T16:24:09.308Z'
-    updated_at: '2019-09-04T09:54:26.863Z'
+    updated_at: '2019-10-22T10:59:18.015Z'
     disabled: 
-    admin_id: 2
-    create_with: 
+    admin_id: 1
+    create_with: true
     edit_if_set: 
-    edit_always: 
-    position: 
+    edit_always: true
+    position: 1080
     description: 
     lock: 
     user_email: 
@@ -9085,13 +9341,13 @@ app_type:
     value: cis-redcap
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.596Z'
-    updated_at: '2018-09-19T12:09:26.630Z'
+    updated_at: '2019-10-22T10:59:18.070Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
-    position: 
+    edit_always: true
+    position: 1240
     description: ''
     lock: false
     user_email: 
@@ -9100,42 +9356,42 @@ app_type:
     value: nflpa4
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.602Z'
-    updated_at: '2018-09-19T12:09:31.190Z'
+    updated_at: '2019-10-22T10:59:18.208Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 191
     name: nflpa3
     value: nflpa3
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.607Z'
-    updated_at: '2018-09-19T12:09:36.009Z'
+    updated_at: '2019-10-22T10:59:18.198Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 192
     name: player referral
     value: player referral
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.612Z'
-    updated_at: '2018-09-19T12:09:43.013Z'
+    updated_at: '2019-10-22T10:59:18.184Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -9145,12 +9401,12 @@ app_type:
     value: public source
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.617Z'
-    updated_at: '2018-09-19T12:08:19.397Z'
+    updated_at: '2019-10-22T10:59:18.188Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -9160,12 +9416,12 @@ app_type:
     value: event
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.622Z'
-    updated_at: '2018-09-19T12:08:13.074Z'
+    updated_at: '2019-10-22T10:59:18.177Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -9175,29 +9431,29 @@ app_type:
     value: cis-phone
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.627Z'
-    updated_at: '2018-09-19T12:08:04.188Z'
-    disabled: false
-    admin_id: 2
-    create_with: false
-    edit_if_set: false
-    edit_always: false
-    position: 
-    description: ''
-    lock: false
+    updated_at: '2019-10-22T10:59:18.066Z'
+    disabled: 
+    admin_id: 1
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 1230
+    description: 
+    lock: 
     user_email: 
   - id: 196
     name: not set
     value: not set
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.632Z'
-    updated_at: '2018-09-19T12:07:54.918Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.088Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1300
+    description: 
     lock: false
     user_email: 
   - id: 197
@@ -9205,14 +9461,14 @@ app_type:
     value: facebook
     item_type: player_contacts_type
     created_at: '2018-09-11T11:53:34.637Z'
-    updated_at: '2018-09-11T11:53:34.637Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.095Z'
+    disabled: 
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1340
+    description: 
     lock: false
     user_email: 
   - id: 198
@@ -9220,14 +9476,14 @@ app_type:
     value: twitter
     item_type: player_contacts_type
     created_at: '2018-09-11T11:53:34.642Z'
-    updated_at: '2018-09-11T11:53:34.642Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.103Z'
+    disabled: 
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1360
+    description: 
     lock: false
     user_email: 
   - id: 199
@@ -9235,9 +9491,9 @@ app_type:
     value: nflpa4
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.647Z'
-    updated_at: '2018-09-11T11:53:34.647Z'
+    updated_at: '2019-10-22T10:59:18.205Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
@@ -9250,14 +9506,14 @@ app_type:
     value: integrate1
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.651Z'
-    updated_at: '2018-09-11T11:53:34.651Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.036Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1140
+    description: 
     lock: true
     user_email: 
   - id: 201
@@ -9265,14 +9521,14 @@ app_type:
     value: integrate2
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.656Z'
-    updated_at: '2018-09-11T11:53:34.656Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.040Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1150
+    description: 
     lock: true
     user_email: 
   - id: 202
@@ -9280,14 +9536,14 @@ app_type:
     value: not set
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.661Z'
-    updated_at: '2018-09-11T11:53:34.661Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.047Z'
+    disabled: 
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1170
+    description: 
     lock: false
     user_email: 
   - id: 203
@@ -9295,29 +9551,29 @@ app_type:
     value: other
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.666Z'
-    updated_at: '2018-09-11T11:53:34.666Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.051Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1180
+    description: 
+    lock: 
     user_email: 
   - id: 204
     name: redcap
     value: redcap
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.671Z'
-    updated_at: '2018-09-11T11:53:34.671Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.055Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1190
+    description: 
     lock: true
     user_email: 
   - id: 205
@@ -9325,14 +9581,14 @@ app_type:
     value: cis
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.677Z'
-    updated_at: '2018-09-11T11:53:34.677Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.151Z'
+    disabled: 
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1540
+    description: 
     lock: false
     user_email: 
   - id: 206
@@ -9340,44 +9596,44 @@ app_type:
     value: cis-email
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.682Z'
-    updated_at: '2018-09-11T11:53:34.682Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.155Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1550
+    description: 
+    lock: 
     user_email: 
   - id: 207
     name: cis-phone
     value: cis-phone
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.687Z'
-    updated_at: '2018-09-11T11:53:34.687Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.161Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1570
+    description: 
+    lock: 
     user_email: 
   - id: 208
     name: cis-redcap
     value: cis-redcap
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.691Z'
-    updated_at: '2018-09-11T11:53:34.691Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.165Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1580
+    description: 
     lock: true
     user_email: 
   - id: 209
@@ -9385,14 +9641,14 @@ app_type:
     value: contactinfo
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.697Z'
-    updated_at: '2018-09-11T11:53:34.697Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.168Z'
+    disabled: 
+    admin_id: 1
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1590
+    description: 
     lock: false
     user_email: 
   - id: 210
@@ -9400,14 +9656,14 @@ app_type:
     value: usps
     item_type: player_infos_source
     created_at: '2018-09-11T11:53:34.703Z'
-    updated_at: '2018-09-11T11:53:34.703Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.174Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1610
+    description: 
     lock: true
     user_email: 
   - id: 211
@@ -9475,13 +9731,13 @@ app_type:
     value: cis-redcap
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.115Z'
-    updated_at: '2019-01-18T11:24:31.115Z'
+    updated_at: '2019-10-22T10:59:18.117Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
-    position: 
+    edit_always: true
+    position: 1410
     description: ''
     lock: false
     user_email: 
@@ -9490,42 +9746,42 @@ app_type:
     value: nflpa4
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.126Z'
-    updated_at: '2019-01-18T11:24:31.126Z'
+    updated_at: '2019-10-22T10:59:18.258Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 375
     name: nflpa3
     value: nflpa3
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.130Z'
-    updated_at: '2019-01-18T11:24:31.130Z'
+    updated_at: '2019-10-22T10:59:18.201Z'
     disabled: false
-    admin_id: 2
+    admin_id: 1
     create_with: false
     edit_if_set: false
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 376
     name: public source
     value: public source
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.135Z'
-    updated_at: '2019-01-18T11:24:31.135Z'
+    updated_at: '2019-10-22T10:59:18.194Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -9535,12 +9791,12 @@ app_type:
     value: player referral
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.139Z'
-    updated_at: '2019-01-18T11:24:31.139Z'
+    updated_at: '2019-10-22T10:59:18.191Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -9550,12 +9806,12 @@ app_type:
     value: event
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.144Z'
-    updated_at: '2019-01-18T11:24:31.144Z'
+    updated_at: '2019-10-22T10:59:18.181Z'
     disabled: false
-    admin_id: 2
-    create_with: false
+    admin_id: 1
+    create_with: true
     edit_if_set: false
-    edit_always: false
+    edit_always: true
     position: 
     description: ''
     lock: false
@@ -9565,29 +9821,29 @@ app_type:
     value: cis-phone
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.151Z'
-    updated_at: '2019-01-18T11:24:31.151Z'
-    disabled: false
-    admin_id: 2
-    create_with: false
-    edit_if_set: false
-    edit_always: false
-    position: 
-    description: ''
-    lock: false
+    updated_at: '2019-10-22T10:59:18.114Z'
+    disabled: 
+    admin_id: 1
+    create_with: true
+    edit_if_set: 
+    edit_always: true
+    position: 1400
+    description: 
+    lock: 
     user_email: 
   - id: 380
     name: not set
     value: not set
     item_type: addresses_source
     created_at: '2019-01-18T11:24:31.160Z'
-    updated_at: '2019-01-18T11:24:31.160Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.135Z'
+    disabled: 
+    admin_id: 1
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1470
+    description: 
     lock: false
     user_email: 
   - id: 381
@@ -9595,44 +9851,44 @@ app_type:
     value: business
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.167Z'
-    updated_at: '2019-01-18T11:24:31.167Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.139Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1510
+    description: 
+    lock: 
     user_email: 
   - id: 382
     name: home
     value: home
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.171Z'
-    updated_at: '2019-01-18T11:24:31.171Z'
-    disabled: false
-    admin_id: 2
+    updated_at: '2019-10-22T10:59:18.142Z'
+    disabled: 
+    admin_id: 1
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1520
+    description: 
+    lock: 
     user_email: 
   - id: 383
     name: not set
     value: not set
     item_type: addresses_type
     created_at: '2019-01-18T11:24:31.176Z'
-    updated_at: '2019-01-18T11:24:31.176Z'
-    disabled: false
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 
-    description: ''
+    updated_at: '2019-10-22T10:59:18.145Z'
+    disabled: 
+    admin_id: 1
+    create_with: false
+    edit_if_set: true
+    edit_always: false
+    position: 1530
+    description: 
     lock: false
     user_email: 
   - id: 393
@@ -11255,6 +11511,111 @@ app_type:
     description: ''
     lock: false
     user_email: 
+  - id: 578
+    name: escrow
+    value: '1'
+    item_type: player_contacts_rank
+    created_at: '2019-10-22T10:59:18.302Z'
+    updated_at: '2019-10-22T10:59:18.302Z'
+    disabled: false
+    admin_id: 1
+    create_with: false
+    edit_if_set: true
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 579
+    name: escrow-secondary
+    value: '2'
+    item_type: player_contacts_rank
+    created_at: '2019-10-22T10:59:18.305Z'
+    updated_at: '2019-10-22T10:59:18.305Z'
+    disabled: false
+    admin_id: 1
+    create_with: false
+    edit_if_set: true
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 580
+    name: nflpa5
+    value: nflpa5
+    item_type: player_infos_source
+    created_at: '2019-10-22T10:59:18.309Z'
+    updated_at: '2019-10-22T10:59:18.309Z'
+    disabled: false
+    admin_id: 1
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 581
+    name: nflpa5
+    value: nflpa5
+    item_type: player_contacts_source
+    created_at: '2019-10-22T10:59:18.312Z'
+    updated_at: '2019-10-22T10:59:18.312Z'
+    disabled: false
+    admin_id: 1
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 582
+    name: nflpa5
+    value: nflpa5
+    item_type: addresses_source
+    created_at: '2019-10-22T10:59:18.316Z'
+    updated_at: '2019-10-22T10:59:18.316Z'
+    disabled: false
+    admin_id: 1
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 584
+    name: nflpa6
+    value: nflpa6
+    item_type: player_infos_source
+    created_at: '2019-10-22T10:59:18.323Z'
+    updated_at: '2019-10-22T10:59:18.323Z'
+    disabled: false
+    admin_id: 1
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 585
+    name: nflpa6
+    value: nflpa6
+    item_type: player_contacts_source
+    created_at: '2019-10-22T10:59:18.326Z'
+    updated_at: '2019-10-22T10:59:18.326Z'
+    disabled: false
+    admin_id: 1
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
   page_layouts:
   - id: 20
     app_type_id: 14
@@ -11461,12 +11822,12 @@ app_type:
   - id: 152
     app_type_id: 14
     role_name: tracker
-    user_id: 2
+    user_id: 
     admin_id: 2
-    disabled: false
+    disabled: true
     created_at: '2019-07-08T14:56:20.745Z'
-    updated_at: '2019-07-08T14:56:20.745Z'
-    user_email: james_drummey@hms.harvard.edu
+    updated_at: '2019-10-24T16:11:36.955Z'
+    user_email: 
   - id: 153
     app_type_id: 14
     role_name: phone screener
@@ -11515,12 +11876,12 @@ app_type:
   - id: 158
     app_type_id: 14
     role_name: pi
-    user_id: 2
+    user_id: 
     admin_id: 2
-    disabled: false
+    disabled: true
     created_at: '2019-07-08T14:56:20.815Z'
-    updated_at: '2019-07-08T14:56:20.815Z'
-    user_email: james_drummey@hms.harvard.edu
+    updated_at: '2019-10-24T16:08:35.796Z'
+    user_email: 
   - id: 159
     app_type_id: 14
     role_name: audit
@@ -11573,7 +11934,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:20.899Z'
-    updated_at: '2019-09-02T17:04:37.549Z'
+    updated_at: '2019-10-24T16:02:20.345Z'
     user_email: template@template
   - id: 165
     app_type_id: 14
@@ -11582,7 +11943,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:20.911Z'
-    updated_at: '2019-09-02T17:04:37.560Z'
+    updated_at: '2019-10-24T13:39:44.938Z'
     user_email: template@template
   - id: 166
     app_type_id: 14
@@ -12255,9 +12616,9 @@ app_type:
     role_name: sms - hms phone screener
     user_id: 
     admin_id: 2
-    disabled: false
+    disabled: true
     created_at: '2019-09-02T17:04:37.745Z'
-    updated_at: '2019-09-02T17:04:37.745Z'
+    updated_at: '2019-10-24T16:10:15.217Z'
     user_email: 
   - id: 241
     app_type_id: 14
@@ -12313,6 +12674,1653 @@ app_type:
     created_at: '2019-09-02T17:08:29.106Z'
     updated_at: '2019-09-02T17:08:29.106Z'
     user_email: nicole_jones@hms.harvard.edu
+  - id: 268
+    app_type_id: 14
+    role_name: email - hms phone screener
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:29:23.513Z'
+    updated_at: '2019-10-23T08:29:23.513Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 269
+    app_type_id: 14
+    role_name: email - hms phone screener
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:29:55.353Z'
+    updated_at: '2019-10-23T08:29:55.353Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 270
+    app_type_id: 14
+    role_name: email - bwh phone screener
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:30:22.124Z'
+    updated_at: '2019-10-23T08:30:22.124Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 271
+    app_type_id: 14
+    role_name: email - bwh phone screener
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:30:36.841Z'
+    updated_at: '2019-10-23T08:30:36.841Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 272
+    app_type_id: 14
+    role_name: email - pi follow up
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:30:54.988Z'
+    updated_at: '2019-10-23T08:30:54.988Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 273
+    app_type_id: 14
+    role_name: email - pi follow up
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:31:02.626Z'
+    updated_at: '2019-10-23T08:31:02.626Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 274
+    app_type_id: 14
+    role_name: email - pi
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:31:13.250Z'
+    updated_at: '2019-10-23T08:31:13.250Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 275
+    app_type_id: 14
+    role_name: email - pi
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:31:20.243Z'
+    updated_at: '2019-10-23T08:31:20.243Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 276
+    app_type_id: 14
+    role_name: reviewer - adverse event
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:32:06.278Z'
+    updated_at: '2019-10-23T08:32:06.278Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 277
+    app_type_id: 14
+    role_name: reviewer - adverse event
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:32:15.047Z'
+    updated_at: '2019-10-23T08:32:15.047Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 278
+    app_type_id: 14
+    role_name: reviewer - adverse event
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:32:22.634Z'
+    updated_at: '2019-10-23T08:32:22.634Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 279
+    app_type_id: 14
+    role_name: reviewer - protocol deviation
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:32:36.172Z'
+    updated_at: '2019-10-23T08:32:36.172Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 280
+    app_type_id: 14
+    role_name: reviewer - protocol deviation
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:32:43.268Z'
+    updated_at: '2019-10-23T08:32:43.268Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 281
+    app_type_id: 14
+    role_name: reviewer - protocol deviation
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-23T08:32:51.442Z'
+    updated_at: '2019-10-23T08:32:51.442Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 282
+    app_type_id: 14
+    role_name: email - interventionist
+    user_id: 90
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T12:58:57.936Z'
+    updated_at: '2019-10-24T12:58:57.936Z'
+    user_email: sleep-iv@test
+  - id: 283
+    app_type_id: 14
+    role_name: interventionist
+    user_id: 90
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T12:59:18.852Z'
+    updated_at: '2019-10-24T12:59:18.852Z'
+    user_email: sleep-iv@test
+  - id: 284
+    app_type_id: 14
+    role_name: sms - interventionist
+    user_id: 90
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T12:59:49.216Z'
+    updated_at: '2019-10-24T12:59:49.216Z'
+    user_email: sleep-iv@test
+  - id: 285
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 90
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:07:53.311Z'
+    updated_at: '2019-10-24T13:07:53.311Z'
+    user_email: sleep-iv@test
+  - id: 286
+    app_type_id: 14
+    role_name: email - pi
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:25:05.966Z'
+    updated_at: '2019-10-24T13:25:05.966Z'
+    user_email: sleep-pi@test
+  - id: 287
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 90
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:25:49.293Z'
+    updated_at: '2019-10-24T13:25:49.293Z'
+    user_email: sleep-iv@test
+  - id: 288
+    app_type_id: 14
+    role_name: email - pi follow up
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:27:38.349Z'
+    updated_at: '2019-10-24T13:27:38.349Z'
+    user_email: sleep-pi@test
+  - id: 289
+    app_type_id: 14
+    role_name: email - protocol deviation review
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:28:32.386Z'
+    updated_at: '2019-10-24T13:28:32.386Z'
+    user_email: sleep-pi@test
+  - id: 290
+    app_type_id: 14
+    role_name: email - adverse event review
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:28:53.155Z'
+    updated_at: '2019-10-24T13:28:53.155Z'
+    user_email: sleep-pi@test
+  - id: 291
+    app_type_id: 14
+    role_name: pi
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:29:25.050Z'
+    updated_at: '2019-10-24T13:29:25.050Z'
+    user_email: sleep-pi@test
+  - id: 292
+    app_type_id: 14
+    role_name: sms - pi
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:30:18.045Z'
+    updated_at: '2019-10-24T13:30:18.045Z'
+    user_email: sleep-pi@test
+  - id: 293
+    app_type_id: 14
+    role_name: sms - pi follow up
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:30:29.406Z'
+    updated_at: '2019-10-24T13:30:29.406Z'
+    user_email: sleep-pi@test
+  - id: 294
+    app_type_id: 14
+    role_name: user - adverse event
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:31:28.945Z'
+    updated_at: '2019-10-24T13:31:28.945Z'
+    user_email: sleep-pi@test
+  - id: 295
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:31:45.854Z'
+    updated_at: '2019-10-24T13:31:45.854Z'
+    user_email: sleep-pi@test
+  - id: 296
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:31:56.722Z'
+    updated_at: '2019-10-24T13:31:56.722Z'
+    user_email: sleep-pi@test
+  - id: 297
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:32:06.139Z'
+    updated_at: '2019-10-24T13:32:06.139Z'
+    user_email: sleep-pi@test
+  - id: 298
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:32:37.071Z'
+    updated_at: '2019-10-24T13:32:37.071Z'
+    user_email: sleep-pi@test
+  - id: 299
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:32:48.191Z'
+    updated_at: '2019-10-24T13:32:48.191Z'
+    user_email: sleep-pi@test
+  - id: 300
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:33:00.298Z'
+    updated_at: '2019-10-24T13:33:00.298Z'
+    user_email: sleep-pi@test
+  - id: 301
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:33:08.062Z'
+    updated_at: '2019-10-24T13:33:08.062Z'
+    user_email: sleep-pi@test
+  - id: 302
+    app_type_id: 14
+    role_name: email - bwh phone screener
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:35:20.744Z'
+    updated_at: '2019-10-24T13:35:20.744Z'
+    user_email: sleep-bwh@test
+  - id: 303
+    app_type_id: 14
+    role_name: irb reporting
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:35:55.426Z'
+    updated_at: '2019-10-24T13:35:55.426Z'
+    user_email: sleep-bwh@test
+  - id: 304
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:36:09.632Z'
+    updated_at: '2019-10-24T13:36:09.632Z'
+    user_email: sleep-pi@test
+  - id: 305
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:36:22.993Z'
+    updated_at: '2019-10-24T13:36:22.993Z'
+    user_email: sleep-hms@test
+  - id: 306
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:36:29.869Z'
+    updated_at: '2019-10-24T13:36:29.869Z'
+    user_email: sleep-bwh@test
+  - id: 307
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 90
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:36:42.847Z'
+    updated_at: '2019-10-24T13:36:42.847Z'
+    user_email: sleep-iv@test
+  - id: 308
+    app_type_id: 14
+    role_name: phone screener 2
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:37:10.479Z'
+    updated_at: '2019-10-24T13:37:10.479Z'
+    user_email: sleep-bwh@test
+  - id: 309
+    app_type_id: 14
+    role_name: reviewer - adverse event
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:37:23.191Z'
+    updated_at: '2019-10-24T13:37:23.191Z'
+    user_email: sleep-bwh@test
+  - id: 310
+    app_type_id: 14
+    role_name: reviewer - protocol deviation
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:37:39.193Z'
+    updated_at: '2019-10-24T13:37:39.193Z'
+    user_email: sleep-bwh@test
+  - id: 311
+    app_type_id: 14
+    role_name: sms - bwh phone screener
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:38:03.407Z'
+    updated_at: '2019-10-24T13:38:03.407Z'
+    user_email: sleep-bwh@test
+  - id: 312
+    app_type_id: 14
+    role_name: staff - inex
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:38:18.101Z'
+    updated_at: '2019-10-24T13:38:18.101Z'
+    user_email: sleep-bwh@test
+  - id: 313
+    app_type_id: 14
+    role_name: tracker
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:38:31.106Z'
+    updated_at: '2019-10-24T13:38:31.106Z'
+    user_email: sleep-bwh@test
+  - id: 314
+    app_type_id: 14
+    role_name: user - adverse event
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:38:50.313Z'
+    updated_at: '2019-10-24T13:38:50.313Z'
+    user_email: sleep-bwh@test
+  - id: 315
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:38:59.974Z'
+    updated_at: '2019-10-24T13:38:59.974Z'
+    user_email: sleep-bwh@test
+  - id: 316
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:39:09.068Z'
+    updated_at: '2019-10-24T13:39:09.068Z'
+    user_email: sleep-bwh@test
+  - id: 317
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:39:35.111Z'
+    updated_at: '2019-10-24T13:39:35.111Z'
+    user_email: sleep-bwh@test
+  - id: 318
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:39:55.766Z'
+    updated_at: '2019-10-24T13:39:55.766Z'
+    user_email: sleep-bwh@test
+  - id: 319
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:40:10.757Z'
+    updated_at: '2019-10-24T13:40:10.757Z'
+    user_email: sleep-bwh@test
+  - id: 320
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:40:19.781Z'
+    updated_at: '2019-10-24T13:40:19.781Z'
+    user_email: sleep-bwh@test
+  - id: 321
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:40:34.825Z'
+    updated_at: '2019-10-24T13:40:34.825Z'
+    user_email: sleep-bwh@test
+  - id: 322
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T13:40:44.654Z'
+    updated_at: '2019-10-24T13:40:44.654Z'
+    user_email: sleep-bwh@test
+  - id: 323
+    app_type_id: 14
+    role_name: email - hms phone screener
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:03:05.477Z'
+    updated_at: '2019-10-24T16:03:05.477Z'
+    user_email: sleep-hms@test
+  - id: 324
+    app_type_id: 14
+    role_name: phone screener
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:03:18.434Z'
+    updated_at: '2019-10-24T16:03:18.434Z'
+    user_email: sleep-hms@test
+  - id: 325
+    app_type_id: 14
+    role_name: sms - hms phone screener
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:03:46.505Z'
+    updated_at: '2019-10-24T16:03:46.505Z'
+    user_email: sleep-hms@test
+  - id: 326
+    app_type_id: 14
+    role_name: sms - hms phone screener
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:03:46.513Z'
+    updated_at: '2019-10-24T16:03:46.513Z'
+    user_email: template@template
+  - id: 327
+    app_type_id: 14
+    role_name: tracker
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:03:59.498Z'
+    updated_at: '2019-10-24T16:03:59.498Z'
+    user_email: sleep-hms@test
+  - id: 328
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:04:10.706Z'
+    updated_at: '2019-10-24T16:04:10.706Z'
+    user_email: sleep-hms@test
+  - id: 329
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:04:30.518Z'
+    updated_at: '2019-10-24T16:04:30.518Z'
+    user_email: sleep-hms@test
+  - id: 330
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:04:41.044Z'
+    updated_at: '2019-10-24T16:04:41.044Z'
+    user_email: sleep-hms@test
+  - id: 331
+    app_type_id: 14
+    role_name: email - protocol deviation irb report
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:09:48.560Z'
+    updated_at: '2019-10-24T16:09:48.560Z'
+    user_email: sleep-bwh@test
+  - id: 332
+    app_type_id: 14
+    role_name: email - adverse event irb report
+    user_id: 88
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:09:58.013Z'
+    updated_at: '2019-10-24T16:09:58.013Z'
+    user_email: sleep-bwh@test
+  - id: 333
+    app_type_id: 14
+    role_name: tracker
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:12:04.842Z'
+    updated_at: '2019-10-24T16:12:04.842Z'
+    user_email: sleep-pi@test
+  - id: 334
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:14:10.471Z'
+    updated_at: '2019-10-24T16:14:10.471Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 335
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:14:23.229Z'
+    updated_at: '2019-10-24T16:14:23.229Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 336
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:14:42.824Z'
+    updated_at: '2019-10-24T16:14:42.824Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 337
+    app_type_id: 14
+    role_name: interventionist
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:20:57.902Z'
+    updated_at: '2019-10-24T16:20:57.902Z'
+    user_email: phil@test
+  - id: 338
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:21:09.637Z'
+    updated_at: '2019-10-24T16:21:09.637Z'
+    user_email: phil@test
+  - id: 339
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:21:18.303Z'
+    updated_at: '2019-10-24T16:21:18.303Z'
+    user_email: phil@test
+  - id: 340
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-24T16:40:31.305Z'
+    updated_at: '2019-10-24T16:40:31.305Z'
+    user_email: sleep-hms@test
+  - id: 341
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:00:07.259Z'
+    updated_at: '2019-10-25T17:00:07.259Z'
+    user_email: sleep-bwh@test2
+  - id: 342
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:00:18.362Z'
+    updated_at: '2019-10-25T17:00:18.362Z'
+    user_email: sleep-bwh@test2
+  - id: 343
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:00:27.202Z'
+    updated_at: '2019-10-25T17:00:27.202Z'
+    user_email: sleep-bwh@test2
+  - id: 344
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:00:34.419Z'
+    updated_at: '2019-10-25T17:00:34.419Z'
+    user_email: sleep-bwh@test2
+  - id: 345
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:00:41.498Z'
+    updated_at: '2019-10-25T17:00:41.498Z'
+    user_email: sleep-bwh@test2
+  - id: 346
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:00:49.172Z'
+    updated_at: '2019-10-25T17:00:49.172Z'
+    user_email: sleep-bwh@test2
+  - id: 347
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:00:57.792Z'
+    updated_at: '2019-10-25T17:00:57.792Z'
+    user_email: sleep-bwh@test2
+  - id: 348
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:01:06.575Z'
+    updated_at: '2019-10-25T17:01:06.575Z'
+    user_email: sleep-bwh@test2
+  - id: 349
+    app_type_id: 14
+    role_name: user - adverse event
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:01:18.030Z'
+    updated_at: '2019-10-25T17:01:18.030Z'
+    user_email: sleep-bwh@test2
+  - id: 350
+    app_type_id: 14
+    role_name: tracker
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:01:27.385Z'
+    updated_at: '2019-10-25T17:01:27.385Z'
+    user_email: sleep-bwh@test2
+  - id: 351
+    app_type_id: 14
+    role_name: staff - inex
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:01:37.538Z'
+    updated_at: '2019-10-25T17:01:37.538Z'
+    user_email: sleep-bwh@test2
+  - id: 352
+    app_type_id: 14
+    role_name: sms - bwh phone screener
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:01:45.876Z'
+    updated_at: '2019-10-25T17:01:45.876Z'
+    user_email: sleep-bwh@test2
+  - id: 353
+    app_type_id: 14
+    role_name: reviewer - protocol deviation
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:02:02.342Z'
+    updated_at: '2019-10-25T17:02:02.342Z'
+    user_email: sleep-bwh@test2
+  - id: 354
+    app_type_id: 14
+    role_name: reviewer - adverse event
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:02:11.250Z'
+    updated_at: '2019-10-25T17:02:11.250Z'
+    user_email: sleep-bwh@test2
+  - id: 355
+    app_type_id: 14
+    role_name: phone screener 2
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:02:26.952Z'
+    updated_at: '2019-10-25T17:02:26.952Z'
+    user_email: sleep-bwh@test2
+  - id: 356
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:02:36.657Z'
+    updated_at: '2019-10-25T17:02:36.657Z'
+    user_email: sleep-bwh@test2
+  - id: 357
+    app_type_id: 14
+    role_name: irb reporting
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:02:46.201Z'
+    updated_at: '2019-10-25T17:02:46.201Z'
+    user_email: sleep-bwh@test2
+  - id: 358
+    app_type_id: 14
+    role_name: email - protocol deviation irb report
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:03:04.011Z'
+    updated_at: '2019-10-25T17:03:04.011Z'
+    user_email: sleep-bwh@test2
+  - id: 359
+    app_type_id: 14
+    role_name: email - bwh phone screener
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:03:18.902Z'
+    updated_at: '2019-10-25T17:03:18.902Z'
+    user_email: sleep-bwh@test2
+  - id: 360
+    app_type_id: 14
+    role_name: email - adverse event irb report
+    user_id: 96
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:03:36.017Z'
+    updated_at: '2019-10-25T17:03:36.017Z'
+    user_email: sleep-bwh@test2
+  - id: 361
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:03:49.144Z'
+    updated_at: '2019-10-25T17:07:10.733Z'
+    user_email: sleep-hms@test
+  - id: 362
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 89
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:07:56.903Z'
+    updated_at: '2019-10-25T17:07:56.903Z'
+    user_email: sleep-hms@test
+  - id: 363
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:08:05.042Z'
+    updated_at: '2019-10-25T17:08:05.042Z'
+    user_email: sleep-hms@test2
+  - id: 364
+    app_type_id: 14
+    role_name: email - hms phone screener
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:08:12.937Z'
+    updated_at: '2019-10-25T17:08:12.937Z'
+    user_email: sleep-hms@test2
+  - id: 365
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:08:24.663Z'
+    updated_at: '2019-10-25T17:08:24.663Z'
+    user_email: sleep-hms@test2
+  - id: 366
+    app_type_id: 14
+    role_name: phone screener
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:08:31.105Z'
+    updated_at: '2019-10-25T17:08:31.105Z'
+    user_email: sleep-hms@test2
+  - id: 367
+    app_type_id: 14
+    role_name: sms - hms phone screener
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:08:41.412Z'
+    updated_at: '2019-10-25T17:08:41.412Z'
+    user_email: sleep-hms@test2
+  - id: 368
+    app_type_id: 14
+    role_name: tracker
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:08:49.460Z'
+    updated_at: '2019-10-25T17:08:49.460Z'
+    user_email: sleep-hms@test2
+  - id: 369
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:08:57.728Z'
+    updated_at: '2019-10-25T17:08:57.728Z'
+    user_email: sleep-hms@test2
+  - id: 370
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:09:06.269Z'
+    updated_at: '2019-10-25T17:09:06.269Z'
+    user_email: sleep-hms@test2
+  - id: 371
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:09:14.348Z'
+    updated_at: '2019-10-25T17:09:14.348Z'
+    user_email: sleep-hms@test2
+  - id: 372
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:09:21.083Z'
+    updated_at: '2019-10-25T17:09:21.083Z'
+    user_email: sleep-hms@test2
+  - id: 373
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 97
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:09:27.475Z'
+    updated_at: '2019-10-25T17:09:27.475Z'
+    user_email: sleep-hms@test2
+  - id: 374
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 98
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:10:21.887Z'
+    updated_at: '2019-10-25T17:10:21.887Z'
+    user_email: sleep-iv@test2
+  - id: 375
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 98
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:10:29.213Z'
+    updated_at: '2019-10-25T17:10:29.213Z'
+    user_email: sleep-iv@test2
+  - id: 376
+    app_type_id: 14
+    role_name: sms - interventionist
+    user_id: 98
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:10:34.733Z'
+    updated_at: '2019-10-25T17:10:34.733Z'
+    user_email: sleep-iv@test2
+  - id: 377
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 98
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:10:41.641Z'
+    updated_at: '2019-10-25T17:10:41.641Z'
+    user_email: sleep-iv@test2
+  - id: 378
+    app_type_id: 14
+    role_name: interventionist
+    user_id: 98
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:10:48.728Z'
+    updated_at: '2019-10-25T17:10:48.728Z'
+    user_email: sleep-iv@test2
+  - id: 379
+    app_type_id: 14
+    role_name: email - interventionist
+    user_id: 98
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:10:55.441Z'
+    updated_at: '2019-10-25T17:10:55.441Z'
+    user_email: sleep-iv@test2
+  - id: 380
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:11:42.688Z'
+    updated_at: '2019-10-25T17:11:42.688Z'
+    user_email: sleep-pi@test2
+  - id: 381
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:11:48.989Z'
+    updated_at: '2019-10-25T17:11:48.989Z'
+    user_email: sleep-pi@test2
+  - id: 382
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:11:55.710Z'
+    updated_at: '2019-10-25T17:11:55.710Z'
+    user_email: sleep-pi@test2
+  - id: 383
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:04.574Z'
+    updated_at: '2019-10-25T17:12:04.574Z'
+    user_email: sleep-pi@test2
+  - id: 384
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:12.785Z'
+    updated_at: '2019-10-25T17:12:12.785Z'
+    user_email: sleep-pi@test2
+  - id: 385
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:20.901Z'
+    updated_at: '2019-10-25T17:12:20.901Z'
+    user_email: sleep-pi@test2
+  - id: 386
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:29.101Z'
+    updated_at: '2019-10-25T17:12:29.101Z'
+    user_email: sleep-pi@test2
+  - id: 387
+    app_type_id: 14
+    role_name: user - adverse event
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:37.172Z'
+    updated_at: '2019-10-25T17:12:37.172Z'
+    user_email: sleep-pi@test2
+  - id: 388
+    app_type_id: 14
+    role_name: tracker
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:44.466Z'
+    updated_at: '2019-10-25T17:12:44.466Z'
+    user_email: sleep-pi@test2
+  - id: 389
+    app_type_id: 14
+    role_name: sms - pi follow up
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:51.371Z'
+    updated_at: '2019-10-25T17:12:51.371Z'
+    user_email: sleep-pi@test2
+  - id: 390
+    app_type_id: 14
+    role_name: sms - pi
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:12:57.510Z'
+    updated_at: '2019-10-25T17:12:57.510Z'
+    user_email: sleep-pi@test2
+  - id: 391
+    app_type_id: 14
+    role_name: pi
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:13:05.514Z'
+    updated_at: '2019-10-25T17:13:05.514Z'
+    user_email: sleep-pi@test2
+  - id: 392
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:13:12.298Z'
+    updated_at: '2019-10-25T17:13:12.298Z'
+    user_email: sleep-pi@test2
+  - id: 393
+    app_type_id: 14
+    role_name: email - protocol deviation review
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:13:20.444Z'
+    updated_at: '2019-10-25T17:13:20.444Z'
+    user_email: sleep-pi@test2
+  - id: 394
+    app_type_id: 14
+    role_name: email - pi follow up
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:13:27.499Z'
+    updated_at: '2019-10-25T17:13:27.499Z'
+    user_email: sleep-pi@test2
+  - id: 395
+    app_type_id: 14
+    role_name: email - pi
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:13:35.597Z'
+    updated_at: '2019-10-25T17:13:35.597Z'
+    user_email: sleep-pi@test2
+  - id: 396
+    app_type_id: 14
+    role_name: email - adverse event review
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-25T17:14:22.220Z'
+    updated_at: '2019-10-25T17:14:22.220Z'
+    user_email: sleep-pi@test2
+  - id: 397
+    app_type_id: 14
+    role_name: email - bwh phone screener
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.198Z'
+    updated_at: '2019-10-30T09:39:17.198Z'
+    user_email: sleep-bwh@template
+  - id: 398
+    app_type_id: 14
+    role_name: irb reporting
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.247Z'
+    updated_at: '2019-10-30T09:39:17.247Z'
+    user_email: sleep-bwh@template
+  - id: 399
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.270Z'
+    updated_at: '2019-10-30T09:39:17.270Z'
+    user_email: sleep-bwh@template
+  - id: 400
+    app_type_id: 14
+    role_name: phone screener 2
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.278Z'
+    updated_at: '2019-10-30T09:39:17.278Z'
+    user_email: sleep-bwh@template
+  - id: 401
+    app_type_id: 14
+    role_name: reviewer - adverse event
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.286Z'
+    updated_at: '2019-10-30T09:39:17.286Z'
+    user_email: sleep-bwh@template
+  - id: 402
+    app_type_id: 14
+    role_name: reviewer - protocol deviation
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.301Z'
+    updated_at: '2019-10-30T09:39:17.301Z'
+    user_email: sleep-bwh@template
+  - id: 403
+    app_type_id: 14
+    role_name: sms - bwh phone screener
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.309Z'
+    updated_at: '2019-10-30T09:39:17.309Z'
+    user_email: sleep-bwh@template
+  - id: 404
+    app_type_id: 14
+    role_name: staff - inex
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.317Z'
+    updated_at: '2019-10-30T09:39:17.317Z'
+    user_email: sleep-bwh@template
+  - id: 405
+    app_type_id: 14
+    role_name: tracker
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.326Z'
+    updated_at: '2019-10-30T09:39:17.326Z'
+    user_email: sleep-bwh@template
+  - id: 406
+    app_type_id: 14
+    role_name: user - adverse event
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.334Z'
+    updated_at: '2019-10-30T09:39:17.334Z'
+    user_email: sleep-bwh@template
+  - id: 407
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.341Z'
+    updated_at: '2019-10-30T09:39:17.341Z'
+    user_email: sleep-bwh@template
+  - id: 408
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.349Z'
+    updated_at: '2019-10-30T09:39:17.349Z'
+    user_email: sleep-bwh@template
+  - id: 409
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.356Z'
+    updated_at: '2019-10-30T09:39:17.356Z'
+    user_email: sleep-bwh@template
+  - id: 410
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.364Z'
+    updated_at: '2019-10-30T09:39:17.364Z'
+    user_email: sleep-bwh@template
+  - id: 411
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.371Z'
+    updated_at: '2019-10-30T09:39:17.371Z'
+    user_email: sleep-bwh@template
+  - id: 412
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.379Z'
+    updated_at: '2019-10-30T09:39:17.379Z'
+    user_email: sleep-bwh@template
+  - id: 413
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.386Z'
+    updated_at: '2019-10-30T09:39:17.386Z'
+    user_email: sleep-bwh@template
+  - id: 414
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.394Z'
+    updated_at: '2019-10-30T09:39:17.394Z'
+    user_email: sleep-bwh@template
+  - id: 415
+    app_type_id: 14
+    role_name: email - protocol deviation irb report
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.401Z'
+    updated_at: '2019-10-30T09:39:17.401Z'
+    user_email: sleep-bwh@template
+  - id: 416
+    app_type_id: 14
+    role_name: email - adverse event irb report
+    user_id: 92
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:39:17.409Z'
+    updated_at: '2019-10-30T09:39:17.409Z'
+    user_email: sleep-bwh@template
+  - id: 417
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.373Z'
+    updated_at: '2019-10-30T09:40:09.373Z'
+    user_email: sleep-hms@template
+  - id: 418
+    app_type_id: 14
+    role_name: email - hms phone screener
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.386Z'
+    updated_at: '2019-10-30T09:40:09.386Z'
+    user_email: sleep-hms@template
+  - id: 419
+    app_type_id: 14
+    role_name: phone screener
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.395Z'
+    updated_at: '2019-10-30T09:40:09.395Z'
+    user_email: sleep-hms@template
+  - id: 420
+    app_type_id: 14
+    role_name: sms - hms phone screener
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.403Z'
+    updated_at: '2019-10-30T09:40:09.403Z'
+    user_email: sleep-hms@template
+  - id: 421
+    app_type_id: 14
+    role_name: tracker
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.412Z'
+    updated_at: '2019-10-30T09:40:09.412Z'
+    user_email: sleep-hms@template
+  - id: 422
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.422Z'
+    updated_at: '2019-10-30T09:40:09.422Z'
+    user_email: sleep-hms@template
+  - id: 423
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.430Z'
+    updated_at: '2019-10-30T09:40:09.430Z'
+    user_email: sleep-hms@template
+  - id: 424
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.438Z'
+    updated_at: '2019-10-30T09:40:09.438Z'
+    user_email: sleep-hms@template
+  - id: 425
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.447Z'
+    updated_at: '2019-10-30T09:40:09.447Z'
+    user_email: sleep-hms@template
+  - id: 426
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.456Z'
+    updated_at: '2019-10-30T09:40:09.456Z'
+    user_email: sleep-hms@template
+  - id: 427
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 93
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:09.463Z'
+    updated_at: '2019-10-30T09:40:09.463Z'
+    user_email: sleep-hms@template
+  - id: 428
+    app_type_id: 14
+    role_name: email - interventionist
+    user_id: 94
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:45.496Z'
+    updated_at: '2019-10-30T09:40:45.496Z'
+    user_email: sleep-iv@template
+  - id: 429
+    app_type_id: 14
+    role_name: interventionist
+    user_id: 94
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:45.515Z'
+    updated_at: '2019-10-30T09:40:45.515Z'
+    user_email: sleep-iv@template
+  - id: 430
+    app_type_id: 14
+    role_name: sms - interventionist
+    user_id: 94
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:45.523Z'
+    updated_at: '2019-10-30T09:40:45.523Z'
+    user_email: sleep-iv@template
+  - id: 431
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 94
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:45.531Z'
+    updated_at: '2019-10-30T09:40:45.531Z'
+    user_email: sleep-iv@template
+  - id: 432
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 94
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:45.539Z'
+    updated_at: '2019-10-30T09:40:45.539Z'
+    user_email: sleep-iv@template
+  - id: 433
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 94
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:40:45.547Z'
+    updated_at: '2019-10-30T09:40:45.547Z'
+    user_email: sleep-iv@template
+  - id: 434
+    app_type_id: 14
+    role_name: email - pi
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.774Z'
+    updated_at: '2019-10-30T09:41:08.774Z'
+    user_email: sleep-pi@template
+  - id: 435
+    app_type_id: 14
+    role_name: email - pi follow up
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.784Z'
+    updated_at: '2019-10-30T09:41:08.784Z'
+    user_email: sleep-pi@template
+  - id: 436
+    app_type_id: 14
+    role_name: email - protocol deviation review
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.795Z'
+    updated_at: '2019-10-30T09:41:08.795Z'
+    user_email: sleep-pi@template
+  - id: 437
+    app_type_id: 14
+    role_name: email - adverse event review
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.804Z'
+    updated_at: '2019-10-30T09:41:08.804Z'
+    user_email: sleep-pi@template
+  - id: 438
+    app_type_id: 14
+    role_name: pi
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.815Z'
+    updated_at: '2019-10-30T09:41:08.815Z'
+    user_email: sleep-pi@template
+  - id: 439
+    app_type_id: 14
+    role_name: sms - pi
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.825Z'
+    updated_at: '2019-10-30T09:41:08.825Z'
+    user_email: sleep-pi@template
+  - id: 440
+    app_type_id: 14
+    role_name: sms - pi follow up
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.834Z'
+    updated_at: '2019-10-30T09:41:08.834Z'
+    user_email: sleep-pi@template
+  - id: 441
+    app_type_id: 14
+    role_name: user - adverse event
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.844Z'
+    updated_at: '2019-10-30T09:41:08.844Z'
+    user_email: sleep-pi@template
+  - id: 442
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.858Z'
+    updated_at: '2019-10-30T09:41:08.858Z'
+    user_email: sleep-pi@template
+  - id: 443
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.866Z'
+    updated_at: '2019-10-30T09:41:08.866Z'
+    user_email: sleep-pi@template
+  - id: 444
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.873Z'
+    updated_at: '2019-10-30T09:41:08.873Z'
+    user_email: sleep-pi@template
+  - id: 445
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.885Z'
+    updated_at: '2019-10-30T09:41:08.885Z'
+    user_email: sleep-pi@template
+  - id: 446
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.895Z'
+    updated_at: '2019-10-30T09:41:08.895Z'
+    user_email: sleep-pi@template
+  - id: 447
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.904Z'
+    updated_at: '2019-10-30T09:41:08.904Z'
+    user_email: sleep-pi@template
+  - id: 448
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.912Z'
+    updated_at: '2019-10-30T09:41:08.912Z'
+    user_email: sleep-pi@template
+  - id: 449
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.920Z'
+    updated_at: '2019-10-30T09:41:08.920Z'
+    user_email: sleep-pi@template
+  - id: 450
+    app_type_id: 14
+    role_name: tracker
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-10-30T09:41:08.928Z'
+    updated_at: '2019-10-30T09:41:08.928Z'
+    user_email: sleep-pi@template
   associated_message_templates:
   - id: 22
     name: standard sms layout
@@ -12331,11 +14339,12 @@ app_type:
     template_type: content
     template: "<p>\r\n  Hello, my name is [NAME] calling from the Harvard Football
       Players Health Study, how are you doing today? \r\n</p>\r\n<p>\r\n  I am calling
-      because we are working with researchers at Brigham and Women’s Hospital on a
-      new study called ‘Sleep Bootcamp’, a proven program to improve sleep without
-      medications. I’d love to tell you a bit more about this study and, if you are
-      interested, determine whether you are eligible to participate. Are you interested
-      in hearing more, and do you have 10 or 15 minutes to speak with me right now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
+      because we are working with researchers at \r\n  Brigham and Women’s Hospital
+      on a new study called\r\n  ‘Sleep Bootcamp’, a proven program to improve sleep
+      without medications. \r\n  I would love to tell you a bit more about this study
+      and, if you are \r\n  interested, determine whether you are eligible to participate.
+      \r\n  Are you interested in hearing more, and do you have 10 or 15 minutes \r\n
+      \ to speak with me right now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
       \ Hello, my name is [NAME] calling from the Harvard Football Players Health
       Study. \r\n  I am calling because we are working with researchers at \r\n  Brigham
       and Women’s Hospital on a new study called ‘Sleep Bootcamp’, \r\n  a proven
@@ -12349,32 +14358,33 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:21.217Z'
-    updated_at: '2019-07-22T10:19:18.558Z'
+    updated_at: '2019-10-24T11:11:15.805Z'
     category: sleep
     user_email: 
   - id: 27
     name: sleep ps intro overview
     message_type: dialog
     template_type: content
-    template: "<p>\r\n  Great!\r\n</p>\r\n<p>\r\nSleep problems are common in American
-      adults and can negatively affect daily life \r\nand long-term health. We are
-      offering Sleep Bootcamp to see if the proven program \r\nto improve sleep can
-      be helpful for former NFL players, \r\nand if by improving sleep we can improve
-      quality-of-life and mood and\r\nreduce pain. The program is delivered \r\nover
-      your computer and phone and is 4-weeks long. Your overall involvement \r\nin
-      this study about 3.5 months because we will be collecting information from \r\nyou
-      before and after the program.\r\n</p>\r\n<p>\r\nIf you participate, you will
-      have private weekly phone calls with a \r\nsleep expert who will coach you through
-      the 4-week personalized plan to help you \r\nsleep better. The study is conducted
-      by researchers at Brigham & Women’s \r\nhospital who we are collaborating with.
-      \ If you are eligible and decide \r\nyou want to participate, we ask you for
-      permission to give them your \r\ncontact information. If you participate in
-      the program, you will receive up to \r\n$200 for your time. \r\n</p>\r\n<p>\r\nDo
-      you have any questions so far?\r\n</p>\r\n\r\n"
+    template: "<p>\r\n  Great! Thank you for your interest in our research study.
+      \r\n</p>\r\n<p>\r\nSleep problems are common in American adults and can negatively
+      affect daily life \r\nand long-term health. We are offering Sleep Bootcamp to
+      see if the proven program \r\nto improve sleep can be helpful for former NFL
+      players, \r\nand if by improving sleep we can improve quality-of-life and mood
+      and\r\nreduce pain. The program is delivered \r\nover your computer and phone
+      and is 4-weeks long. Your overall involvement \r\nin this study about 3.5 months
+      because we will be collecting information from \r\nyou before and after the
+      program.\r\n</p>\r\n<p>\r\nIf you participate, you will have private weekly
+      phone calls with a \r\nsleep expert who will coach you through the 4-week personalized
+      plan to help you \r\nsleep better. The study is conducted by researchers at
+      Brigham & Women’s \r\nhospital who we are collaborating with.  If you are eligible
+      and decide \r\nyou want to participate, we ask you for permission to give them
+      your \r\ncontact information. If you participate in the program, you will receive
+      up to \r\n$200 for your time. \r\n</p>\r\n<p>\r\nDo you have any questions so
+      far?\r\n</p>\r\n\r\n"
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:21.225Z'
-    updated_at: '2019-10-11T12:06:35.118Z'
+    updated_at: '2019-10-24T11:17:09.120Z'
     category: sleep
     user_email: 
   - id: 29
@@ -12444,11 +14454,14 @@ app_type:
     template_type: content
     template: "<p><b>Participant answers the phone</b></p>\r\n<p>\r\n  Hello, my name
       is [NAME] and I am calling about the Harvard Football Players\r\n  ‘Sleep Bootcamp’
-      research study. How are you doing today?\r\n</p>\r\n<p>\r\n  I understand you
-      recently spoke with my colleague about this proven program\r\n  to improve sleep.
-      I know you already went through many eligibility questions. \r\n  I have a few
-      more but will be able to determine if you are eligible \r\n  once we’re done.
-      Do you have 5-10 minutes to speak with me now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
+      research study. Thank you for your interest \r\n  in our research study. How
+      are you doing today?\r\n</p>\r\n<p>\r\n  I understand you recently spoke with
+      my colleague about this proven program\r\n  to improve sleep. I know you already
+      went through many eligibility questions. \r\n  I have a few more but will be
+      able to determine if you are eligible \r\n  once we’re done. Would you be willing
+      to answer the remaining questions \r\n  about your health and medical history
+      to find out if you might \r\n  qualify for the study? Is this a good time to
+      talk? Do \r\n  you have 5-10 minutes to speak with me now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
       \ Hello, my name is [NAME] calling from the Harvard Football Players Health
       Study \r\n  about the  ‘Sleep Bootcamp’ research study. \r\n  I understand you
       recently spoke with my colleague -- \r\n  I am following-up from Brigham and
@@ -12461,7 +14474,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-29T15:50:38.282Z'
-    updated_at: '2019-10-10T14:18:44.052Z'
+    updated_at: '2019-10-24T11:01:32.171Z'
     category: sleep
     user_email: 
   - id: 42
@@ -12487,23 +14500,24 @@ app_type:
       \   any_exit_or_complete:\r\n      any_exit: &any_exit\r\n        any_tracker_exits:
       &any_tracker_exit\r\n          activity_log__sleep_assignments:\r\n            extra_log_type:\r\n
       \             - exit_ps_bwh\r\n              - exit_ps\r\n              - exit_not_consented\r\n
-      \             - ineligible\r\n              - completed\r\n        any_withdrawal:
-      &any_withdrawal\r\n          dynamic_model__sleep_withdrawals:\r\n            no_longer_participating_no_yes:
-      'yes'\r\n            lost_to_follow_up_no_yes: 'yes'\r\n            select_subject_withdrew_reason:
-      withdrew\r\n            select_investigator_terminated: \r\n              -
-      yes - due to ae\r\n              - yes - other reason\r\n\r\n      all_completed:
-      &all_completed\r\n        activity_log__sleep_assignments:\r\n          extra_log_type:
-      completed      \r\n\r\n  \r\n\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__sleep_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__sleep_ps_initial_screenings:\r\n
+      \             - exit_opt_out\r\n              - ineligible\r\n              -
+      completed\r\n        any_withdrawal: &any_withdrawal\r\n          dynamic_model__sleep_withdrawals:\r\n
+      \           no_longer_participating_no_yes: 'yes'\r\n            lost_to_follow_up_no_yes:
+      'yes'\r\n            select_subject_withdrew_reason: withdrew\r\n            select_investigator_terminated:
+      \r\n              - yes - due to ae\r\n              - yes - other reason\r\n\r\n
+      \     all_completed: &all_completed\r\n        activity_log__sleep_assignments:\r\n
+      \         extra_log_type: completed      \r\n\r\n  \r\n\r\n  enabled_if: &enabled_if\r\n\r\n
+      \   # if performed a phone screening no consent to continue, disable after 14
+      days\r\n    not_all_not_interested:\r\n      any:\r\n        dynamic_model__sleep_ps_initial_screenings:\r\n
+      \         select_is_good_time_to_speak: not interested\r\n          select_may_i_begin:
+      not interested\r\n          select_still_interested: 'no'\r\n\r\n      all_created_at:\r\n
+      \       dynamic_model__sleep_ps_initial_screenings:\r\n          created_at:\r\n
+      \           condition: <\r\n            value: -14 days\r\n\r\n    # if recorded
+      a withdraw activity, disable after 14 days\r\n    not_all_withdraw:\r\n      any_withdrawal:
+      *any_withdrawal\r\n      all_created_at:\r\n        dynamic_model__sleep_withdrawals:\r\n
       \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any_withdrawal: *any_withdrawal\r\n      all_created_at:\r\n
-      \       dynamic_model__sleep_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__sleep_screenings:\r\n
+      days\r\n\r\n    # if performed a screening follow up and not eligible, disable
+      after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__sleep_screenings:\r\n
       \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
       <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
       up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
@@ -12511,16 +14525,16 @@ app_type:
       'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
       days\r\n\r\n\r\n    not_all_tracker_exit: \r\n      activity_log__sleep_assignments:\r\n
       \       extra_log_type:\r\n          - exit_ps_bwh\r\n          - exit_ps\r\n
-      \         - exit_not_consented\r\n          - ineligible\r\n          - completed\r\n
-      \       created_at:\r\n          condition: <\r\n          value: -14 days\r\n
-      \     \r\n      \r\n      \r\n      \r\n  access_defaults: &access_defaults\r\n
+      \         - exit_not_consented\r\n          - exit_opt_out\r\n          - ineligible\r\n
+      \         - completed\r\n        created_at:\r\n          condition: <\r\n          value:
+      -14 days\r\n      \r\n      \r\n      \r\n      \r\n  access_defaults: &access_defaults\r\n
       \   showable_if: *enabled_if\r\n    creatable_if: *enabled_if\r\n    editable_if:
       *enabled_if\r\n"
     format: yaml
     disabled: false
     admin_id: 2
     created_at: '2019-07-11T16:29:56.935Z'
-    updated_at: '2019-09-20T17:04:31.141Z'
+    updated_at: '2019-10-23T17:50:40.557Z'
     user_email: 
   - id: 2
     category: sleep
