@@ -1483,7 +1483,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
       activity_log__player_contact_phones: {
         select_who: 'return_value_list',
         id: @al0.id,
-        update: 'return_result'
+        return: 'return_result'
       }
     }
 
@@ -1495,6 +1495,45 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
   end
 
+  it "returns a constant value if the condition is matched" do
+    conf = {
+      activity_log__player_contact_phones: {
+        id: @al.id,
+        return_constant: 'yes'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq 'yes'
+
+    conf = {
+      activity_log__player_contact_phones: {
+        id: @al.id + 1,
+        return_constant: 'yes'
+      }
+    }
+
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to be nil
+
+
+    conf = {
+      all: {
+        this: {
+            select_who: @al.select_who,
+            user_id: @al.user_id,
+            return_constant: 'random constant'
+        }
+      }
+    }
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq 'random constant'
+
+
+  end
 
   it "returns a referring record attribute" do
 

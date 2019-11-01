@@ -129,7 +129,12 @@ class ExtraOptions
           field_name: 'all conditional values must be true in model_table_name (any matching record unless id or other filters specified separately) or this (this record)',
           field_name_2: 'literal value | null',
           field_name_3: { this: 'attribute in this record' },
-          field_name_4: { this_references: 'attribute in any referenced record' }
+          field_name_4: { this_references: 'attribute in any referenced record' },
+          return_constant: "value to return if previous condition matches",
+          field_to_return: "return_value",
+          field_to_return_if_also_a_condition: ['match1', 'match2', 'return_value'],
+          list_field_to_return: 'return_value_list',
+          return: 'return_result (return the actual matched instance)'
         }
       },
       any: {

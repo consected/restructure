@@ -292,6 +292,14 @@ module CalcActions
       # Allow a list of possible conditions to be used
       expected_vals = [expected_vals] unless expected_vals.is_a?(Array) && expected_vals.first.is_a?(Hash)
       expected_vals.each do |expected_val|
+
+
+        if field_name == :return_constant
+          # The literal value will be returned in this case
+          @this_val = expected_val
+          return true
+        end
+
         if table == :this || table == :parent || table == :referring_record
           if table == :this
             in_instance = current_instance
@@ -383,7 +391,9 @@ module CalcActions
           t_conds.each do |field_name, val|
 
             non_query_condition = table_name.in?([:this, :user, :parent, :referring_record])
-            if val.is_a? Hash
+            if field_name == :return_constant
+              non_query_condition = true
+            elsif val.is_a? Hash
               val_item_key = val.first.first
 
               if is_selection_type(val_item_key)
