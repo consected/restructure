@@ -8,7 +8,7 @@ class Admin::UserRole < ActiveRecord::Base
   belongs_to :user
 
   validates :role_name, presence: true
-  validates :user_id, uniqueness: {scope: [:app_type_id, :role_name]}
+  validates :user_id, uniqueness: {scope: [:app_type_id, :role_name, :disabled]}, unless: :disabled?
 
   after_save :save_template
   after_save :invalidate_cache
