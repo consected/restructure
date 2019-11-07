@@ -40,7 +40,8 @@ class ExtraOptions
         field_with_different_views: {
           show_caption: 'caption in show mode',
           edit_caption: 'caption in edit mode'
-        }
+        },
+        reference_with_reference_name: 'add caption above a reference action / list where the reference is named reference_<reference name>'
 
       },
       labels: {
