@@ -1,3 +1,4 @@
+set search_path=sleep, ml_app;
 
       BEGIN;
 
