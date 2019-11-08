@@ -206,6 +206,50 @@ app_type:
     created_at: '2019-09-20T12:25:51.015Z'
     updated_at: '2019-09-20T12:25:51.015Z'
     user_email: 
+  - id: 213
+    name: open panels
+    value: activity_log__sleep_assignment_med_navs
+    disabled: false
+    admin_id: 2
+    user_id: 
+    app_type_id: 14
+    role_name: pi
+    created_at: '2019-11-01T16:47:35.771Z'
+    updated_at: '2019-11-01T16:59:45.446Z'
+    user_email: 
+  - id: 214
+    name: open panels
+    value: activity_log__sleep_assignments
+    disabled: false
+    admin_id: 2
+    user_id: 1
+    app_type_id: 14
+    role_name: ''
+    created_at: '2019-11-01T17:06:12.049Z'
+    updated_at: '2019-11-01T17:06:12.049Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 215
+    name: open panels
+    value: activity_log__sleep_assignments
+    disabled: false
+    admin_id: 2
+    user_id: 84
+    app_type_id: 14
+    role_name: ''
+    created_at: '2019-11-01T17:06:31.030Z'
+    updated_at: '2019-11-01T17:06:31.030Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 216
+    name: open panels
+    value: activity_log__sleep_assignments
+    disabled: false
+    admin_id: 2
+    user_id: 85
+    app_type_id: 14
+    role_name: ''
+    created_at: '2019-11-01T17:06:54.269Z'
+    updated_at: '2019-11-01T17:06:54.269Z'
+    user_email: nicole_jones@hms.harvard.edu
   user_access_controls:
   - id: 733
     user_id: 
@@ -2591,13 +2635,13 @@ app_type:
     resource_type: activity_log_type
     resource_name: activity_log__sleep_assignment_med_nav__files
     options: ''
-    access: create
+    access: 
     disabled: false
     admin_id: 2
     app_type_id: 14
     role_name: user - mednav
     created_at: '2019-07-08T14:56:23.082Z'
-    updated_at: '2019-07-08T14:56:23.082Z'
+    updated_at: '2019-11-01T16:28:41.591Z'
     user_email: 
   - id: 917
     user_id: 
@@ -3501,13 +3545,13 @@ app_type:
     resource_type: activity_log_type
     resource_name: activity_log__sleep_assignment_med_nav__request_pi_follow_up
     options: ''
-    access: create
+    access: update
     disabled: false
     admin_id: 2
     app_type_id: 14
     role_name: pi
     created_at: '2019-08-06T11:37:29.700Z'
-    updated_at: '2019-08-06T11:37:29.700Z'
+    updated_at: '2019-11-01T16:23:44.701Z'
     user_email: 
   - id: 990
     user_id: 
@@ -3774,13 +3818,13 @@ app_type:
     resource_type: activity_log_type
     resource_name: activity_log__sleep_assignment_med_nav__request_pi_ps_review
     options: ''
-    access: create
+    access: update
     disabled: false
     admin_id: 2
     app_type_id: 14
     role_name: pi
     created_at: '2019-08-21T17:31:54.447Z'
-    updated_at: '2019-08-21T17:31:54.447Z'
+    updated_at: '2019-11-01T16:23:34.110Z'
     user_email: 
   - id: 1012
     user_id: 
@@ -4051,9 +4095,9 @@ app_type:
     disabled: false
     admin_id: 2
     app_type_id: 14
-    role_name: phone screener
+    role_name: phone screener 2
     created_at: '2019-08-27T14:59:32.599Z'
-    updated_at: '2019-08-27T14:59:32.599Z'
+    updated_at: '2019-11-04T14:02:15.459Z'
     user_email: 
   - id: 1033
     user_id: 
@@ -4528,13 +4572,13 @@ app_type:
     resource_type: activity_log_type
     resource_name: activity_log__sleep_assignment__perform_screening_follow_up
     options: ''
-    access: create
-    disabled: false
+    access: read
+    disabled: true
     admin_id: 2
     app_type_id: 14
     role_name: phone screener
     created_at: '2019-10-08T13:55:44.383Z'
-    updated_at: '2019-10-08T13:55:44.383Z'
+    updated_at: '2019-11-04T18:37:20.593Z'
     user_email: 
   - id: 1080
     user_id: 
@@ -4677,7 +4721,7 @@ app_type:
     app_type_id: 14
     role_name: interventionist
     created_at: '2019-10-24T13:17:59.806Z'
-    updated_at: '2019-10-24T13:17:59.806Z'
+    updated_at: '2019-11-04T19:24:34.563Z'
     user_email: 
   - id: 1144
     user_id: 
@@ -4808,6 +4852,110 @@ app_type:
     role_name: phone screener 2
     created_at: '2019-10-24T16:33:25.448Z'
     updated_at: '2019-10-24T16:33:25.448Z'
+    user_email: 
+  - id: 1154
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__hms_ps_eligible
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: pi
+    created_at: '2019-11-01T17:52:32.214Z'
+    updated_at: '2019-11-01T17:52:32.214Z'
+    user_email: 
+  - id: 1155
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__schedule_screening_2
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener 2
+    created_at: '2019-11-01T18:01:15.557Z'
+    updated_at: '2019-11-01T18:01:15.557Z'
+    user_email: 
+  - id: 1156
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__sleep_assignments
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener 2
+    created_at: '2019-11-04T13:58:38.803Z'
+    updated_at: '2019-11-04T13:58:38.803Z'
+    user_email: 
+  - id: 1157
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__sleep_assignment_inex_checklists
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener 2
+    created_at: '2019-11-04T13:59:03.262Z'
+    updated_at: '2019-11-04T13:59:03.262Z'
+    user_email: 
+  - id: 1158
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__sleep_assignment_med_navs
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener
+    created_at: '2019-11-04T13:59:30.726Z'
+    updated_at: '2019-11-04T13:59:30.726Z'
+    user_email: 
+  - id: 1159
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__sleep_assignment_med_navs
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener 2
+    created_at: '2019-11-04T13:59:43.423Z'
+    updated_at: '2019-11-04T13:59:43.423Z'
+    user_email: 
+  - id: 1160
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__ineligible
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener 2
+    created_at: '2019-11-04T14:01:22.470Z'
+    updated_at: '2019-11-04T14:01:22.470Z'
+    user_email: 
+  - id: 1161
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__sleep_assignment__exit_ps_bwh
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 14
+    role_name: phone screener 2
+    created_at: '2019-11-04T14:01:46.190Z'
+    updated_at: '2019-11-04T14:01:46.190Z'
     user_email: 
   associated_activity_logs:
   - id: 59
@@ -4940,7 +5088,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:55:49.231Z'
-    updated_at: '2019-10-24T11:14:01.106Z'
+    updated_at: '2019-11-01T16:02:52.374Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -5065,8 +5213,8 @@ app_type:
       \                   this_references: id\r\n                  follow_up_date:
       return_value\r\n              follow_up_time:\r\n                dynamic_model__sleep_ps_initial_screenings:\r\n
       \                 id:\r\n                    this_references: id\r\n                  follow_up_time:
-      return_value\r\n              notes: Phone screen call when to voicemail or
-      participant requested a call back\r\n              select_record_from_player_contacts:\r\n
+      return_value\r\n              notes: |\r\n                Call went to voicemail,
+      or participant requested to speak another time\r\n                \r\n              select_record_from_player_contacts:\r\n
       \               activity_log__sleep_assignments:\r\n                  extra_log_type:
       schedule_screening\r\n                  select_record_from_player_contacts:
       return_value\r\n\r\n\r\n################################################\r\nbasic_questions:\r\n
@@ -5079,7 +5227,19 @@ app_type:
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
       \     <<: *enabled_if\r\n      <<: *continue_after_basic_questions\r\n      not_any:\r\n
       \       activity_log__sleep_assignment_phone_screens:\r\n          extra_log_type:
-      insomnia_severity_index\r\n\r\n\r\n################################################\r\nsleep_apenea:\r\n
+      insomnia_severity_index\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_reference:\r\n
+      \       ###### Create tracker entry to follow up and email Trust info ######\r\n
+      \       - activity_log__sleep_assignment:\r\n            if:\r\n              all:\r\n
+      \               dynamic_model__sleep_isi_questions:\r\n                  id:\r\n
+      \                   this_references: id\r\n                  trust_assessment_info_yes_no:
+      'yes'\r\n\r\n            in: master\r\n            with:\r\n              extra_log_type:
+      general\r\n              select_activity: schedule follow up\r\n              select_direction:
+      to staff\r\n              select_next_step: more info requested\r\n              follow_up_when:
+      today()\r\n              follow_up_time: now()\r\n              notes: |\r\n
+      \               During the HMS Phone Screen the participant requested\r\n                more
+      information about the *Players Trust medical wellness assessments*.\r\n                \r\n
+      \               When an email has been sent with details, add a **follow up**,\r\n
+      \               to record this.\r\n\r\n################################################\r\nsleep_apenea:\r\n
       \ label: Sleep Apnea\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_sleep_apnea_response:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
       \     <<: *enabled_if\r\n      <<: *continue_after_isi_questions\r\n      all:\r\n
@@ -5103,8 +5263,9 @@ app_type:
       \               During the HMS Phone Screen the participant requested\r\n                more
       information about the *Players Trust medical wellness assessments*.\r\n                \r\n
       \               When an email has been sent with details, add a **follow up**,\r\n
-      \               to record this.\r\n                \r\n              \r\n        \r\n
-      \       \r\n\r\n################################################\r\naudit_c:\r\n
+      \               to record this.\r\n                \r\n  save_action:\r\n    on_create:\r\n
+      \     show_panel:\r\n        value: activity_log__sleep_assignments              \r\n
+      \       \r\n        \r\n\r\n################################################\r\naudit_c:\r\n
       \ label: Audit-C\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_audit_c_question:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
       *enabled_if\r\n\r\n    all:      \r\n      activity_log__sleep_assignment_phone_screens:\r\n
@@ -5114,13 +5275,13 @@ app_type:
       \ label: DAST-2 Modified\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_dast2_mod_question:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
       *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
-      \       extra_log_type: audit_c\r\n      <<: *continue_after_audit_c\r\n        \r\n
+      \       extra_log_type: audit_c\r\n      #<<: *continue_after_audit_c\r\n        \r\n
       \   not_any:\r\n      activity_log__sleep_assignment_phone_screens:\r\n        extra_log_type:
       dast2_mod\r\n\r\n\r\n\r\n################################################\r\nineligible:\r\n
       \ label: Ineligible\r\n  \r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n
       \ references:\r\n    dynamic_model__sleep_ps_non_eligible:\r\n      from: this\r\n
-      \     add: one_to_this\r\n\r\n\r\n  creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n
-      \     not_any:\r\n        activity_log__sleep_assignment_phone_screens:\r\n
+      \     add: one_to_this\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n
+      \ creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n      not_any:\r\n        activity_log__sleep_assignment_phone_screens:\r\n
       \         extra_log_type: ineligible\r\n      not_any_show_eligible:\r\n        <<:
       *all_show_eligible\r\n        \r\n\r\n\r\n      any_ineligible: &any_ineligible\r\n
       \       all_basic_questions:\r\n          activity_log__sleep_assignment_phone_screens:\r\n
@@ -5143,8 +5304,20 @@ app_type:
       dast2_mod\r\n          not_any:\r\n            <<: *eligible_dast2_mod\r\n          not_any_2:\r\n
       \           <<: *possibly_eligible_dast2_mod\r\n\r\n  save_trigger:\r\n    on_create:\r\n
       \     create_reference:\r\n\r\n        ##### Screener Responses with outcome
-      default #####\r\n        dynamic_model__sleep_ps_screener_response:\r\n          in:
-      master\r\n          with:\r\n            outcome: ineligible\r\n\r\n\r\n################################################\r\npossibly_eligible:\r\n
+      default #####\r\n        - dynamic_model__sleep_ps_screener_response:\r\n            in:
+      master\r\n            with:\r\n              outcome: ineligible\r\n\r\n         ######
+      Create tracker entry with screener responses ######\r\n#        - activity_log__sleep_assignment_phone_screen:\r\n#
+      \           in: master\r\n#            with:\r\n#              extra_log_type:
+      screener_responses\r\n\r\n\r\n        ##### Ineligible - requested PI follow
+      up ######\r\n        - activity_log__sleep_assignment_med_nav: &create_ref_request_pi_followup\r\n
+      \           in: this\r\n            add: many\r\n            if:\r\n              all:\r\n
+      \               any:\r\n                  dynamic_model__sleep_ps_non_eligibles:\r\n
+      \                   contact_pi_yes_no: 'yes'\r\n                <<: *gave_consent_to_share\r\n
+      \               \r\n            with:\r\n              extra_log_type: request_pi_follow_up\r\n
+      \             notes: |\r\n                HMS Phone Screen found this subject
+      to be ineligible.\r\n                The subject requested a PI follow up.\r\n
+      \               \r\n                Please review the HMS Phone Screen tab for
+      complete information.\r\n\r\n\r\n################################################\r\npossibly_eligible:\r\n
       \ label: Possibly Eligible\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_possibly_eligibles:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
       \     <<: *enabled_if\r\n      \r\n      all_done:\r\n        activity_log__sleep_assignment_phone_screens:\r\n
@@ -5162,27 +5335,29 @@ app_type:
       \           activity_log__sleep_assignment_phone_screens:\r\n              extra_log_type:
       epworth_sleepiness_scale\r\n\r\n          <<: *continue_after_ese_questions\r\n
       \           \r\n            \r\n        all_audit_c:\r\n          activity_log__sleep_assignment_phone_screens:\r\n
-      \           extra_log_type: audit_c\r\n          \r\n          <<: *continue_after_audit_c\r\n
-      \           \r\n        all_dast2_mod:\r\n          activity_log__sleep_assignment_phone_screens:\r\n
+      \           extra_log_type: dast2_mod\r\n            # Was originally audit_c,
+      but we want to always complete dast2\r\n            # irrespective or the result
+      here\r\n          \r\n          <<: *continue_after_audit_c\r\n            \r\n
+      \       all_dast2_mod:\r\n          activity_log__sleep_assignment_phone_screens:\r\n
       \           extra_log_type: dast2_mod\r\n          <<: *continue_after_dast2_mod\r\n\r\n
       \ \r\n  \r\n\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n  save_trigger:\r\n
       \   on_create:\r\n      create_reference:\r\n\r\n        ##### Screener Responses
       with outcome default #####\r\n        dynamic_model__sleep_ps_screener_response:\r\n
       \         in: master\r\n          with:\r\n            outcome: possibly_eligible\r\n\r\n
       \           \r\n\r\n################################################\r\neligible:\r\n
-      \ label: Eligible\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_eligible:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
-      \     <<: *enabled_if\r\n      <<: *all_show_eligible\r\n      \r\n      not_any:\r\n
-      \       activity_log__sleep_assignment_phone_screens:\r\n          extra_log_type:
-      eligible\r\n\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n  save_trigger:\r\n
-      \   on_create:\r\n      create_reference:\r\n\r\n        ##### Screener Responses
-      with outcome default #####\r\n        dynamic_model__sleep_ps_screener_response:\r\n
+      \ label: Eligible\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n  references:\r\n
+      \   dynamic_model__sleep_ps_eligible:\r\n      from: this\r\n      add: one_to_this\r\n\r\n
+      \ creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n      <<: *all_show_eligible\r\n
+      \     \r\n      not_any:\r\n        activity_log__sleep_assignment_phone_screens:\r\n
+      \         extra_log_type: eligible\r\n\r\n  view_options:\r\n    hide_unless_creatable:
+      true\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_reference:\r\n\r\n
+      \       ##### Screener Responses with outcome default #####\r\n        dynamic_model__sleep_ps_screener_response:\r\n
       \         in: master\r\n          with:\r\n            outcome: eligible\r\n\r\n\r\n\r\n################################################\r\nscreener_responses:\r\n
       \ label: Screener Responses\r\n\r\n  view_options:\r\n    hide_unless_creatable:
       true\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_screener_response:\r\n
       \     from: this\r\n      add: one_to_this      \r\n    \r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
-      \       extra_log_type: \r\n          - eligible\r\n          - ineligible\r\n
+      \       extra_log_type: \r\n          - eligible\r\n#          - ineligible\r\n
       \         - possibly_eligible\r\n          \r\n    not_any:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
       \       extra_log_type: screener_responses\r\n\r\n  save_trigger:\r\n    on_create:\r\n
       \   \r\n      create_reference:\r\n\r\n        ##### Record consent in tracker
@@ -5191,18 +5366,8 @@ app_type:
       \           with:\r\n              extra_log_type: consent_to_share_details\r\n
       \             activity_date: now()\r\n              select_activity: Verbal
       consent during HMS Phone Screen\r\n              select_who: current_user_email\r\n\r\n\r\n\r\n
-      \       ##### Ineligible - requested PI follow up ######\r\n        - activity_log__sleep_assignment_med_nav:
-      &create_ref_request_pi_followup\r\n            in: this\r\n            add:
-      many\r\n            if: &all_request_ineligible_pi_followup\r\n              all:\r\n
-      \               any:\r\n                  dynamic_model__sleep_ps_non_eligibles:\r\n
-      \                   contact_pi_yes_no: 'yes'\r\n                <<: *gave_and_understood_consent\r\n
-      \               \r\n            with:\r\n              extra_log_type: request_pi_follow_up\r\n
-      \             notes: |\r\n                HMS Phone Screen found this subject
-      to be ineligible.\r\n                The subject requested a PI follow up.\r\n
-      \               \r\n                Please review the HMS Phone Screen tab for
-      complete information.\r\n\r\n\r\n        ##### Possibly eligible - requested
-      PI review ######\r\n        - activity_log__sleep_assignment_med_nav:\r\n            in:
-      this\r\n            add: many\r\n            if: &all_request_possibly_eligible_pi_review\r\n
+      \       ##### Possibly eligible - requested PI review ######\r\n        - activity_log__sleep_assignment_med_nav:\r\n
+      \           in: this\r\n            add: many\r\n            if: &all_request_possibly_eligible_pi_review\r\n
       \             all:\r\n                any:\r\n                  dynamic_model__sleep_ps_screener_responses:\r\n
       \                   outcome: possibly_eligible\r\n                <<: *gave_and_understood_consent\r\n
       \               \r\n            with:\r\n              extra_log_type: request_pi_ps_review\r\n
@@ -5210,11 +5375,7 @@ app_type:
       to be possibly eligible.\r\n                \r\n                A review is
       required before eligibility for BWH screening can be finalized.\r\n                \r\n
       \               Please review the HMS Phone Screen tab for complete information.\r\n
-      \             \r\n  save_action:\r\n\r\n\r\n################################################\r\nsubject_contact:\r\n
-      \ label: Contact Participant\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_subject_contacts:\r\n
-      \     from: this\r\n      add: one_to_this\r\n    \r\n  creatable_if:\r\n    all:\r\n
-      \     <<: *enabled_if\r\n      <<: *not_finalized\r\n      <<: *all_request_possibly_eligible_pi_review\r\n\r\n
-      \ view_options:\r\n    hide_unless_creatable: true\r\n    \r\n  save_action:\r\n\r\n################################################\r\neligibility_followup:\r\n
+      \             \r\n\r\n\r\n################################################\r\neligibility_followup:\r\n
       \ label: Eligibility Follow Up\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_eligibility_followups:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
       \     <<: *enabled_if\r\n      <<: *not_finalized\r\n      <<: *all_request_possibly_eligible_pi_review\r\n
@@ -5222,8 +5383,13 @@ app_type:
       \         extra_log_type: eligibility_followup\r\n\r\n  view_options:\r\n    hide_unless_creatable:
       true\r\n\r\n  save_trigger:\r\n        \r\n    on_create:\r\n      create_reference:\r\n
       \       - activity_log__sleep_assignment: *create_ref_record_consent      \r\n
-      \       - activity_log__sleep_assignment_med_nav: *create_ref_request_pi_followup\r\n\r\n
-      \ save_action:\r\n      \r\n\r\n################################################\r\nfinalize:\r\n
+      \       ##### Ineligible - requested PI follow up ######\r\n        - activity_log__sleep_assignment_med_nav:
+      *create_ref_request_pi_followup\r\n\r\n\r\n################################################\r\nsubject_contact:\r\n
+      \ label: Contact Participant\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_subject_contacts:\r\n
+      \     from: this\r\n      add: one_to_this\r\n    \r\n  creatable_if:\r\n    all:\r\n
+      \     <<: *enabled_if\r\n      <<: *not_finalized\r\n      <<: *all_request_possibly_eligible_pi_review\r\n\r\n
+      \ view_options:\r\n    hide_unless_creatable: true\r\n    \r\n  save_action:\r\n
+      \     \r\n\r\n################################################\r\nfinalize:\r\n
       \ label: Finalize Entries       \r\n  \r\n  view_options:\r\n    hide_unless_creatable:
       true\r\n    show_cancel: true\r\n\r\n  caption_before:\r\n    all_fields: |\r\n
       \     When finalized the phone screen forms are locked from editing.\r\n      \r\n
@@ -5232,32 +5398,32 @@ app_type:
       phone screener is \r\n      ready to be performed.\r\n      \r\n      Otherwise
       the BWH team will not be notified.\r\n      \r\n      \r\n    submit: |\r\n
       \     Click the cancel button instead if review or \r\n      revision of the
-      phone screen forms is still required.\r\n   \r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
-      \       extra_log_type: screener_responses\r\n      \r\n      any:\r\n        dynamic_model__sleep_ps_screener_responses:\r\n
-      \         outcome: \r\n            - eligible\r\n            - ineligible\r\n
+      phone screen forms is still required.\r\n   \r\n\r\n  creatable_if:\r\n    all:
+      \r\n      <<: *enabled_if\r\n\r\n      # If ineligible, or eligible and screener
+      responses completed\r\n      any_ineligible_eligible_with_screener: \r\n        dynamic_model__sleep_ps_screener_responses:\r\n
+      \         outcome: \r\n            - ineligible\r\n            - eligible\r\n
       \       dynamic_model__sleep_ps_eligibility_followups:\r\n          outcome:
-      \r\n            - eligible\r\n            - ineligible\r\n          \r\n        \r\n
-      \   not_any:\r\n      activity_log__sleep_assignment_phone_screens:\r\n        extra_log_type:
+      \r\n            - ineligible\r\n            - eligible\r\n\r\n      not_any:\r\n
+      \       activity_log__sleep_assignment_phone_screens:\r\n          extra_log_type:
       finalize\r\n\r\n\r\n  # Override the default that hides activities after a certain
       stage,\r\n  # so that any user can see that the phone screen process has been
       completed\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n  save_action:\r\n
       \   on_create:\r\n      show_panel:\r\n        value: activity_log__sleep_assignments\r\n
       \     hide_panel:\r\n        value: activity_log__sleep_assignment_phone_screens\r\n\r\n
-      \ save_trigger:\r\n    on_create:\r\n      create_reference:\r\n\r\n        ######
-      Create tracker entry with ineligible record ######\r\n        - activity_log__sleep_assignment:\r\n
-      \           if:\r\n              any_ineligible: *any_ineligible              \r\n
-      \           in: master\r\n            with:\r\n              extra_log_type:
-      ineligible\r\n\r\n\r\n        ###### Create tracker entry with exit (no consent)
-      record ######\r\n        ###### Not ineligible, but also not eligible and consented
-      ######\r\n        - activity_log__sleep_assignment:\r\n            if:\r\n              not_any:
-      \r\n                <<: *any_ineligible\r\n                <<: *all_eligible_and_gave_consent\r\n
-      \           in: master\r\n            with:\r\n              extra_log_type:
-      exit_ps\r\n\r\n\r\n        ###### Create tracker entry with HMS Eligible record
-      ######\r\n        - activity_log__sleep_assignment:\r\n            if:\r\n              <<:
-      *all_eligible_and_gave_consent\r\n            in: master\r\n            with:\r\n
-      \             extra_log_type: hms_ps_eligible\r\n\r\n\r\n        ###### Create
-      inclusion exclusion checklist ######\r\n        - activity_log__sleep_assignment_inex_checklist:\r\n
+      \ save_trigger:\r\n    on_create:\r\n      create_reference:\r\n\r\n\r\n\r\n
+      \       ###### Create tracker entry with ineligible record ######\r\n        -
+      activity_log__sleep_assignment:\r\n            if:\r\n              any_ineligible:
+      *any_ineligible              \r\n            in: master\r\n            with:\r\n
+      \             extra_log_type: ineligible\r\n\r\n\r\n        ###### Create tracker
+      entry with exit (no consent) record ######\r\n        ###### Not ineligible,
+      but also not eligible and consented ######\r\n        - activity_log__sleep_assignment:\r\n
+      \           if:\r\n              not_any: \r\n                <<: *any_ineligible\r\n
+      \               <<: *all_eligible_and_gave_consent\r\n            in: master\r\n
+      \           with:\r\n              extra_log_type: exit_ps\r\n\r\n\r\n        ######
+      Create tracker entry with HMS Eligible record ######\r\n        - activity_log__sleep_assignment:\r\n
+      \           if:\r\n              <<: *all_eligible_and_gave_consent\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: hms_ps_eligible\r\n\r\n\r\n
+      \       ###### Create inclusion exclusion checklist ######\r\n        - activity_log__sleep_assignment_inex_checklist:\r\n
       \           if:\r\n              <<: *all_eligible_and_gave_consent\r\n            in:
       master\r\n            with:\r\n              extra_log_type: phone_screen_review\r\n
       \               \r\n      update_reference:\r\n        ###### Update inclusion
@@ -5503,7 +5669,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:55:59.016Z'
-    updated_at: '2019-10-24T10:09:48.714Z'
+    updated_at: '2019-11-04T19:25:11.108Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -5610,7 +5776,8 @@ app_type:
       \               dynamic_model__sleep_screenings:\r\n                  id: \r\n
       \                   this_references: id\r\n                  did_subject_consent_yes_no:
       'yes'\r\n                    \r\n            in: master\r\n            with:\r\n
-      \             extra_log_type: appointment\r\n\r\n\r\n\r\n\r\n###################################\r\nappointment:\r\n
+      \             extra_log_type: appointment\r\n\r\n  save_action:\r\n    on_create:\r\n
+      \     show_panel:\r\n        value: activity_log__sleep_assignments\r\n\r\n\r\n\r\n###################################\r\nappointment:\r\n
       \ label: Participant Enrolled\r\n###################################\r\n  \r\n
       \ fields:\r\n\r\n  references:\r\n    dynamic_model__sleep_appointment:\r\n
       \     from: master\r\n      add: one_to_master\r\n  creatable_if:\r\n    <<:
@@ -5641,7 +5808,7 @@ app_type:
       \ label: Assign ID\r\n###################################\r\n  \r\n  fields:\r\n\r\n
       \ references:\r\n    bwh_sleep_id_number:\r\n      from: master\r\n      add:
       one_to_master\r\n      prevent_disable: true\r\n      \r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screen2s:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      activity_log__sleep_assignments:\r\n
       \       extra_log_type: appointment\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
       \   not_any:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
       assign_id\r\n\r\n\r\n  save_trigger:\r\n    on_create:\r\n \r\n      create_reference:\r\n
@@ -5929,7 +6096,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:14.333Z'
-    updated_at: '2019-10-17T14:16:41.446Z'
+    updated_at: '2019-11-01T17:58:16.164Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -6054,7 +6221,7 @@ app_type:
       \             \r\n            panel_tab: activity-log--sleep-assignment-med-navs
       \     \r\n\r\n          \r\n        - <<: *notify_pi_sms\r\n          subject:
       \"Review HMS Phone Screen eligibility\"\r\n\r\n    \r\n\r\n\r\n#################################################\r\npi_ps_review:\r\n
-      \ label: Review Decision\r\n#################################################\r\n\r\n
+      \ label: Eligibility Decision\r\n#################################################\r\n\r\n
       \ fields:\r\n    - select_result\r\n    - notes\r\n\r\n  field_options:\r\n
       \   select_result:\r\n      edit_as:\r\n        alt_options:\r\n          Eligible:
       hms_ps_eligible\r\n          Not Eligible: ineligible\r\n\r\n\r\n  caption_before:\r\n
@@ -6064,22 +6231,22 @@ app_type:
       review. \r\n\r\n  valid_if: \r\n    on_create:\r\n      not_any:\r\n        this:\r\n
       \         select_result: \r\n            \r\n\r\n  creatable_if:\r\n    never:
       true\r\n  showable_if:\r\n    never: true\r\n    \r\n  view_options:\r\n    hide_unless_creatable:
-      true\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_reference:\r\n
+      true\r\n    data_attribute: '(expand to view eligibility)'\r\n\r\n  save_trigger:\r\n
+      \   on_create:\r\n      create_reference:\r\n        - activity_log__sleep_assignment:\r\n
+      \           in: master\r\n            with:\r\n              extra_log_type:
+      hms_ps_eligible\r\n            if: \r\n              <<: *enabled_if\r\n              any_status:\r\n
+      \               this:\r\n                  select_result: hms_ps_eligible\r\n\r\n
       \       - activity_log__sleep_assignment:\r\n            in: master\r\n            with:\r\n
-      \             extra_log_type: hms_ps_eligible\r\n            if: \r\n              <<:
+      \             extra_log_type: ineligible\r\n            if: \r\n              <<:
       *enabled_if\r\n              any_status:\r\n                this:\r\n                  select_result:
-      hms_ps_eligible\r\n\r\n        - activity_log__sleep_assignment:\r\n            in:
-      master\r\n            with:\r\n              extra_log_type: ineligible\r\n
-      \           if: \r\n              <<: *enabled_if\r\n              any_status:\r\n
-      \               this:\r\n                  select_result: ineligible                  \r\n
-      \     notify:\r\n        # Notify phone screen interviewer the PI review is
-      complete\r\n        - type: email\r\n          layout_template: sleep notification
-      layout\r\n          content_template: sleep notification message\r\n          extra_substitutions:\r\n
-      \           reason: ''\r\n            extra_text: |\r\n              The PI
-      has completed the requested review of the the participant\r\n              based
-      on the HMS Phone Screen.\r\n              \r\n              Please review the
-      response then follow up with the participant\r\n              as needed.\r\n
-      \             \r\n            panel_tab: activity-log--sleep-assignment-med-navs\r\n\r\n
+      ineligible                  \r\n      notify:\r\n        # Notify phone screen
+      interviewer the PI review is complete\r\n        - type: email\r\n          layout_template:
+      sleep notification layout\r\n          content_template: sleep notification
+      message\r\n          extra_substitutions:\r\n            reason: ''\r\n            extra_text:
+      |\r\n              The PI has completed the requested review of the the participant\r\n
+      \             based on the HMS Phone Screen.\r\n              \r\n              Please
+      review the response then follow up with the participant\r\n              as
+      needed.\r\n              \r\n            panel_tab: activity-log--sleep-assignment-med-navs\r\n\r\n
       \         subject: \"Sleep App: PI Completed Requested Review\"\r\n          role:
       phone screener\r\n            \r\n\r\n\r\n\r\n#################################################\r\nparticipant_communication:\r\n
       \ label: Participant Communication\r\n#################################################\r\n\r\n\r\n
@@ -6094,9 +6261,10 @@ app_type:
       to the subject?\r\n\r\n\r\n  field_options:\r\n    <<: *communication_field_options\r\n
       \   select_direction:\r\n      value: to subject\r\n      edit_as:\r\n        alt_options:\r\n
       \         \"To Staff\": to staff\r\n          \"To Subject\": to subject\r\n\r\n
-      \   activity_date: \r\n      value: today()\r\n    \r\n\r\n\r\n  showable_if:\r\n
-      \   never: true\r\n    \r\n  view_options:\r\n    only_create_as_reference:
-      true\r\n    data_attribute: \r\n      - select_result\r\n\r\n\r\n\r\n#################################################\r\nincidental_findings:\r\n
+      \   activity_date: \r\n      value: today()\r\n    \r\n\r\n  creatable_if:\r\n
+      \   never: true\r\n\r\n  showable_if:\r\n    never: true\r\n    \r\n  view_options:\r\n
+      \   only_create_as_reference: true\r\n    data_attribute: \r\n      - select_result\r\n
+      \   hide_unless_creatable: true\r\n\r\n#################################################\r\nincidental_findings:\r\n
       \ label: Incidental Findings\r\n#################################################\r\n\r\n
       \ fields:\r\n\r\n  references:\r\n    dynamic_model__sleep_incidental_finding:\r\n
       \     from: this\r\n      add: one_to_this\r\n      prevent_disable: true\r\n
@@ -6121,7 +6289,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-30T10:45:35.756Z'
-    updated_at: '2019-10-23T16:36:25.548Z'
+    updated_at: '2019-11-04T15:10:24.032Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -6188,8 +6356,8 @@ app_type:
       \                   this_references: id\r\n                  follow_up_date:
       return_value\r\n              follow_up_time:\r\n                dynamic_model__sleep_ps2_initial_screenings:\r\n
       \                 id:\r\n                    this_references: id\r\n                  follow_up_time:
-      return_value\r\n              notes: Phone screen call when to voicemail or
-      participant requested a call back\r\n              select_record_from_player_contacts:\r\n
+      return_value\r\n              notes: |\r\n                Call went to voicemail,
+      or participant requested to speak another time\r\n              select_record_from_player_contacts:\r\n
       \               activity_log__sleep_assignments:\r\n                  extra_log_type:
       schedule_screening\r\n                  select_record_from_player_contacts:
       return_value\r\n\r\n\r\n\r\n################################################\r\nphq8:\r\n
@@ -6204,8 +6372,9 @@ app_type:
       \     <<: *enabled_if\r\n      not_any:\r\n        activity_log__sleep_assignment_phone_screen2s:\r\n
       \         extra_log_type: ineligible\r\n      any_ineligible:\r\n        all_basic_questions:\r\n
       \         activity_log__sleep_assignment_phone_screen2s:\r\n            extra_log_type:
-      phq8\r\n          not_all:\r\n            <<: *eligible_phq8_questions\r\n            \r\n\r\n\r\n
-      \ save_trigger:\r\n    on_create:\r\n        \r\n      create_reference:\r\n
+      phq8\r\n          not_all:\r\n            <<: *eligible_phq8_questions\r\n            \r\n
+      \ save_action:\r\n    on_save:\r\n      show_panel:\r\n        value: activity_log__sleep_assignments\r\n
+      \ \r\n\r\n  save_trigger:\r\n    on_create:\r\n        \r\n      create_reference:\r\n
       \       - activity_log__sleep_assignment_med_nav:\r\n            in: this\r\n
       \           add: many\r\n            if:\r\n              any:\r\n                dynamic_model__sleep_ps2_non_eligibles:\r\n
       \                 questions_for_pi_yes_no: 'yes'\r\n                \r\n            with:\r\n
@@ -6236,8 +6405,9 @@ app_type:
       \ save_trigger:\r\n    on_create:\r\n        \r\n      create_reference:\r\n
       \       - activity_log__sleep_assignment_phone_screen2:\r\n            in: master
       \               \r\n            with:\r\n              extra_log_type: finalize\r\n
-      \           if:\r\n              all:\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
-      \                 review_consent_now_yes_no: 'no'\r\n\r\n\r\n#####################################################################\r\n#
+      \           if:\r\n              any:\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
+      \                 review_consent_now_yes_no: 'no'\r\n                  interested_yes_no:
+      'no'\r\n\r\n\r\n#####################################################################\r\n#
       Not used directly\r\n#####################################################################\r\nfinalize:\r\n
       \ label: Finalize Entries\r\n#####################################################################
       \ \r\n  view_options:\r\n    hide_unless_creatable: true\r\n    show_cancel:
@@ -6264,12 +6434,19 @@ app_type:
       \           if: &any_bwh_eligible_and_interested\r\n              any_bwh_eligible_and_interested:\r\n
       \               dynamic_model__sleep_ps2_eligibles:\r\n                  interested_yes_no:
       'yes'\r\n            in: master\r\n            with:\r\n              extra_log_type:
-      bwh_ps_eligible\r\n\r\n        ###### Create tracker entry with exit (no consent)
-      record ######\r\n        ###### Not ineligible, but also not eligible and consented
+      bwh_ps_eligible\r\n\r\n        ###### Create tracker entry with exit (not interested)
+      record ######\r\n#        - activity_log__sleep_assignment:\r\n#            if:
+      &any_bwh_eligible_and_not_interested\r\n#              any_bwh_eligible_and_not_interested:\r\n#
+      \               dynamic_model__sleep_ps2_eligibles:\r\n#                  interested_yes_no:
+      'no'\r\n#            in: master\r\n#            with:\r\n#              extra_log_type:
+      exit_ps_bwh\r\n\r\n\r\n        ###### Create tracker entry with exit record
+      ######\r\n        ###### Not ineligible, but also not eligible and interested
       ######\r\n        - activity_log__sleep_assignment:\r\n            if:\r\n              not_any:
       \r\n                <<: *any_bwh_ps_ineligible                \r\n                <<:
       *any_bwh_eligible_and_interested\r\n            in: master\r\n            with:\r\n
-      \             extra_log_type: exit_ps_bwh\r\n\r\n\r\n\r\n\r\n\r\n        - activity_log__sleep_assignment:\r\n
+      \             extra_log_type: exit_ps_bwh\r\n\r\n\r\n\r\n        ###### Create
+      tracker for informed consent screening follow up ######\r\n        ###### if
+      eligible but do not want to review the consent now #####\r\n        - activity_log__sleep_assignment:\r\n
       \           if:\r\n              all:\r\n                activity_log__sleep_assignment_phone_screen2s:\r\n
       \                 extra_log_type: eligible\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
       \                 review_consent_now_yes_no: 'no'\r\n              \r\n            in:
@@ -6279,9 +6456,10 @@ app_type:
       return_value\r\n              follow_up_time:\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
       \                 interested_yes_no: 'yes'\r\n                  follow_up_time:
       return_value\r\n              notes:\r\n                dynamic_model__sleep_ps2_eligibles:\r\n
-      \                 interested_yes_no: 'yes'\r\n                  notes: return_value\r\n\r\n
-      \       - activity_log__sleep_assignment_med_nav:\r\n            in: master\r\n
-      \           \r\n            if:\r\n              all:\r\n                dynamic_model__sleep_ps2_phq8_questions:\r\n
+      \                 interested_yes_no: 'yes'\r\n                  notes: return_value\r\n\r\n\r\n
+      \       ###### PHQ-8 score > 19 - A PI follow up is required #####\r\n        -
+      activity_log__sleep_assignment_med_nav:\r\n            in: master\r\n            \r\n
+      \           if:\r\n              all:\r\n                dynamic_model__sleep_ps2_phq8_questions:\r\n
       \                 total_score:\r\n                    - '20'\r\n                    -
       '21'\r\n                    - '22'\r\n                    - '23'\r\n                    -
       '24'\r\n                \r\n            with:\r\n              extra_log_type:
@@ -6611,68 +6789,6 @@ app_type:
       to pass information to BWH\r\n    \r\n    select_subject_eligibility: |\r\n
       \     **Subject's eligibility for the study**\r\n"
     user_email: 
-  - id: 291
-    name: Sleep Phone Screen Eligible
-    table_name: sleep_ps_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-07-22T14:25:11.846Z'
-    updated_at: '2019-10-24T11:26:00.101Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: interested_yes_no not_interested_notes consent_to_pass_info_to_bwh_yes_no
-      consent_to_pass_info_to_bwh_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
-      placeholder_end notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Thank
-      you for your time and for answering our questions..  \r\n      Based on your
-      responses so far you are eligible to participate in this study. \r\n      \r\n
-      \     Do you have any questions?\r\n      \r\n      \r\n    interested_yes_no:
-      Are you interested in participating?\r\n\r\n    not_interested_notes: |\r\n
-      \     May I ask you why you are not interested? \r\n      *(will record reason,
-      for example, too busy)*. \r\n      \r\n      Thank you for your time.\r\n      \r\n
-      \   consent_to_pass_info_to_bwh_yes_no: |\r\n      Wonderful. In order for you
-      to participate I will need to give your \r\n      contact information to our
-      collaborating researchers at \r\n      Brigham & Women’s Hospital, and they
-      will be conducting a final, \r\n      short screening survey to finalize your
-      eligibility.  This means \r\n      that it’s still possible you may be ineligible
-      for the study, \r\n      however based on your responses so far you’re a great
-      candidate.\r\n\r\n      Is it okay with you if I give them your contact information?\r\n\r\n
-      \   consent_to_pass_info_to_bwh_2_yes_no: |\r\n      Okay - just to confirm,
-      your information will be kept completely secure \r\n      and private, in a
-      locked environment only accessible by approved researchers. \r\n      Access
-      to your information at Brigham & Women’s will be removed once the \r\n      study
-      has finished.  Does that alleviate any concerns you may have?  \r\n      If
-      you’d still prefer not to participate I understand.\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
-      |\r\n      Okay, I understand.  Well thank you so much for your time today and
-      for \r\n      your support of our research, and we will certainly be in touch
-      with \r\n      future participation opportunities.\r\n      \r\n    contact_info_notes:
-      |\r\n      Great.  I will give your information to the research manager at Brigham,
-      \r\n      [NAME], \r\n      and she will reach out to you within the next week.
-      \ \r\n      \r\n      I will also send you an email confirmation when your information
-      has been sent.  \r\n      \r\n      They will be contacting you by email to
-      send you some information about the study, \r\n      but they may also reach
-      out to you by telephone in order \r\n      to schedule your interview.  \r\n
-      \     \r\n      Can I please confirm the contact information I have for you?\r\n
-      \     \r\n    notes: Additional Notes\r\n    \r\n    placeholder_end: |\r\n
-      \     Thank you so much for speaking with me today. If you have any \r\n      questions
-      or want to contact me at any time, you can reach me\r\n      at 617-432-5000
-      or players@footballplayershealth.harvard.edu. \r\n      You may also contact
-      the Principal Investigator of \r\n      the study Dr. Suzanne Bertisch at Brigham
-      and Women’s \r\n      Hospital at 857-307-0355 or by email at sbertisch@partners.org.\r\n
-      \     \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
-      \     interested_yes_no: 'no'\r\n      \r\n    consent_to_pass_info_to_bwh_yes_no:\r\n
-      \     interested_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_2_yes_no:\r\n
-      \     consent_to_pass_info_to_bwh_yes_no: 'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n
-      \     consent_to_pass_info_to_bwh_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
-      \     any:\r\n        consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n        consent_to_pass_info_to_bwh_2_yes_no:
-      'yes'\r\n        \r\n    "
-    user_email: 
   - id: 257
     name: SLEEP Initial Screening
     table_name: sleep_ps_initial_screenings
@@ -6683,11 +6799,11 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:54:38.632Z'
-    updated_at: '2019-10-24T11:20:05.216Z'
+    updated_at: '2019-11-01T18:22:55.572Z'
     position: 
     category: sleep-phone-screen
     table_key_name: ''
-    field_list: select_is_good_time_to_speak,any_questions_blank_yes_no,select_still_interested,placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
+    field_list: select_is_good_time_to_speak,any_questions_blank_yes_no,question_notes,select_still_interested,placeholder_complete_intro,follow_up_date,follow_up_time,placeholder_not_interested,notes
     result_order: ''
     options: "# Unused fields: looked_at_website_yes_no\r\n\r\ndefault:\r\n  dialog_before:\r\n
       \   select_is_good_time_to_speak: \r\n      name: sleep ps intro\r\n\r\n    any_questions_blank_yes_no:
@@ -6697,12 +6813,12 @@ app_type:
       \   placeholder_complete_intro: \r\n#      name: sleep ps intro complete intro\r\n#
       \     label: show script\r\n\r\n  show_if:\r\n  \r\n  \r\n#    looked_at_website_yes_no:
       \ \r\n#      select_is_good_time_to_speak: \"yes\"\r\n    any_questions_blank_yes_no:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n      \r\n    select_still_interested:\r\n
-      \     select_is_good_time_to_speak: 'yes'\r\n      any_questions_blank_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n
-      \     any:\r\n        select_still_interested:\r\n          - \"yes\"\r\n\r\n
-      \   follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak: \r\n
-      \         - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
+      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    question_notes:\r\n      any_questions_blank_yes_no:
+      'yes'\r\n\r\n    select_still_interested:\r\n      select_is_good_time_to_speak:
+      'yes'\r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        -
+      \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n      any:\r\n        select_still_interested:\r\n
+      \         - \"yes\"\r\n\r\n    follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak:
+      \r\n          - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
       yes - call back\r\n\r\n    follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
       \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
       yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n
@@ -6713,9 +6829,10 @@ app_type:
       that are\r\n      not addressed in the script provided, please respond to the
       best \r\n      of your ability and make a note. Then follow-up\r\n      with
       Dr. Bertisch after the phone call is complete to \r\n      determine if further
-      communication is required.*\r\n\r\n    select_still_interested: |\r\n      Great.
-      \ If you are still interested in the study, would you be \r\n      willing to
-      answer some\r\n      questions about your health and medical history to find
+      communication is required.*\r\n\r\n\r\n    question_notes: |\r\n      *Respond
+      to questions and take notes below*\r\n\r\n\r\n    select_still_interested: |\r\n
+      \     Great.  If you are still interested in the study, would you be \r\n      willing
+      to answer some\r\n      questions about your health and medical history to find
       out \r\n      if you might qualify for the study? \r\n      And is this a good
       time to talk?\r\n      \r\n\r\n    follow_up_date: Enter a follow up date and
       time if the subject wishes for a call back before continuing with the screening,
@@ -6733,6 +6850,198 @@ app_type:
       Contact details notes for gift card. After completing the call, ensure contact
       details recorded here are transferred to the subject's address record."
     user_email: 
+  - id: 304
+    name: Sleep Phone Screen Possibly Eligible
+    table_name: sleep_ps_possibly_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-08-19T17:01:17.359Z'
+    updated_at: '2019-11-01T15:32:39.796Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: 'any_questions_yes_no  placeholder_any_questions_no placeholder_any_questions_yes
+      notes  contact_info_notes follow_up_date follow_up_time placeholder_end_call  '
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    all_fields: |\r\n      Thank
+      you for your time and for answering our questions.  \r\n      The next step
+      is for the Principal Investigator of our study to review \r\n      the answers
+      to the questions we just discussed.  \r\n      You may receive a follow-up phone
+      call from me to get clarification \r\n      on some of the questions that I
+      asked you today. \r\n      I will also be contacting you to let you know whether
+      or not you are \r\n      eligible for the study. If you are eligible, I will
+      let you know \r\n      the next steps at that time.\r\n\r\n    any_questions_yes_no:
+      Do you have any questions for me at this time?\r\n    \r\n    placeholder_any_questions_no:
+      Okay - thank you again for your interest and your time! \r\n\r\n    placeholder_any_questions_yes:
+      \"*address any questions*\"\r\n\r\n            \r\n    contact_info_notes: |\r\n
+      \       Okay – as I mentioned, I will call you back to inform you of your \r\n
+      \       eligibility status. What are good days/times to call you? \r\n        It
+      may take up to 10 days for us to make a determination. \r\n      \r\n    follow_up_date:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        Okay – as I mentioned,
+      I will call you back to inform you of your \r\n        eligibility status. What
+      are good days/times to call you? \r\n        It may take up to 10 days for us
+      to make a determination. \r\n\r\n    #notes: Addtional follow up information
+      or other notes.\r\n\r\n    placeholder_end_call: |\r\n      Can I please confirm
+      the contact information I have for you?\r\n      \r\n      *Scroll to Participant
+      Details to check and add any contact information*\r\n    \r\n      If you have
+      any questions in the meantime, please do not hesitate \r\n      to contact us.
+      Thank you again for your time.\r\n\r\n\r\n  show_if:    \r\n    placeholder_any_questions_no:\r\n
+      \     #any_questions_yes_no: 'no'\r\n      never: true\r\n      \r\n    placeholder_any_questions_yes:\r\n
+      \     any_questions_yes_no: 'yes'\r\n      \r\n    notes:\r\n      any_questions_yes_no:
+      'yes'\r\n      \r\n    follow_up_date:\r\n      never: true\r\n\r\n    follow_up_time:\r\n
+      \     never: true\r\n\r\n#    contact_info_notes: &consent_given\r\n#      any:\r\n#
+      \       consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n#        consent_to_pass_info_to_bwh_2_yes_no:
+      'yes'\r\n        \r\n#    follow_up_date: *consent_given\r\n#    follow_up_time:
+      *consent_given\r\n\r\n#    placeholder_end_call: *consent_given\r\n"
+    user_email: 
+  - id: 287
+    name: Sleep Phone Screen Non-Eligible
+    table_name: sleep_ps_non_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-07-22T14:09:03.698Z'
+    updated_at: '2019-11-01T15:29:36.653Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: any_questions_yes_no notes placeholder_any_questions_no contact_pi_yes_no
+      additional_questions_yes_no placeholder_additional_questions_no placeholder_additional_questions_yes
+      consent_to_pass_info_to_bwh_yes_no consent_to_pass_info_to_bwh_2_yes_no placeholder_consent_to_pass_info_2_no
+      contact_info_notes placeholder_finish
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n  \r\n\r\n    any_questions_yes_no:
+      Do you have any questions for me at this time?\r\n    \r\n    placeholder_any_questions_no:
+      Okay - thank you again for your interest and your time! \r\n    \r\n    contact_pi_yes_no:
+      |\r\n      *Address questions*\r\n      \r\n      *If they ask why they are
+      not eligible:* \r\n      \r\n      * **NOTE**: if the final screening element
+      just performed was the \r\n      Epworth Sleepiness Scale, or the question regarding
+      internet access, \r\n      return to that section to reiterate the details of
+      why they are not eligible.  \r\n      Otherwise, continue:*\r\n      \r\n      Actually
+      the way that our system works, \r\n      I’m not able to determine exactly which
+      question caused you to be \r\n      ineligible for the study right now, but
+      if you have concerns \r\n      or would like to discuss it further with our
+      study PI, \r\n      I would be happy to put you in touch with her if you would
+      like. \r\n      \r\n      Is that something you would like to do?\r\n\r\n\r\n
+      \   # Had questions but no contact with PI requested\r\n    additional_questions_yes_no:
+      |\r\n      Okay, I understand.  \r\n      \r\n      Do you have any other questions
+      for me at the moment?\r\n      \r\n    placeholder_additional_questions_no:
+      |\r\n      Okay - thank you again for your interest and your time! \r\n\r\n
+      \   placeholder_additional_questions_yes: |\r\n      *Address questions*\r\n\r\n
+      \   consent_to_pass_info_to_bwh_yes_no: |\r\n      Absolutely. In order for
+      her to contact you I will need to \r\n      give your contact information to
+      our collaborating \r\n      researchers at Brigham & Women’s Hospital. \r\n\r\n
+      \     Is that okay with you?\r\n      \r\n    consent_to_pass_info_to_bwh_2_yes_no:
+      |\r\n      Okay - just to confirm, your information will be kept completely
+      secure \r\n      and private, in a locked environment only accessible by approved
+      researchers. \r\n      Access to your information at Brigham & Women's will
+      be removed once the \r\n      study has finished.  Does that alleviate any concerns
+      you may have?  \r\n      If you'd still prefer not to participate I understand.\r\n
+      \     \r\n    placeholder_consent_to_pass_info_2_no: |\r\n      Okay, I understand.
+      \ Well thank you so much for your time today and for your \r\n      support
+      of our research, and we will certainly be in touch with \r\n      future participation
+      opportunities.\r\n      \r\n      If you have any questions or want to contact
+      me at any time, you \r\n      can reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n
+      \     \r\n    contact_info_notes: |\r\n      Great.  I will give your contact
+      information to the research team at \r\n      Brigham, and our study PI, Dr.
+      Suzanne Bertisch, \r\n      will reach out to you as soon as possible.  \r\n
+      \     \r\n      Can I please confirm the contact information I have for you?\r\n
+      \     \r\n      *Scroll to Participant Details to check and add any contact
+      information*\r\n      \r\n    notes: Additional Notes\r\n      \r\n    placeholder_finish:
+      |\r\n      Thank you so much for speaking with me today. \r\n      \r\n      If
+      you have any questions or want to contact me at any time, you \r\n      can
+      reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n      \r\n
+      \     **END SCREENING**\r\n      \r\n\r\n  show_if:\r\n    \r\n    placeholder_any_questions_no:\r\n
+      \     any_questions_yes_no: 'no'\r\n      \r\n    contact_pi_yes_no:\r\n      any_questions_yes_no:
+      'yes'\r\n\r\n    additional_questions_yes_no:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      \r\n    placeholder_additional_questions_no:\r\n
+      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
+      'no'\r\n      \r\n    placeholder_additional_questions_yes:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
+      'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_yes_no:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_2_yes_no:\r\n
+      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_bwh_yes_no:
+      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_bwh_yes_no:
+      'no'\r\n      consent_to_pass_info_to_bwh_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
+      \     all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
+      'yes'\r\n      any:\r\n        consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n
+      \       consent_to_pass_info_to_bwh_2_yes_no: 'yes'\r\n        \r\n    placeholder_finish:\r\n
+      \     all:\r\n        any_questions_yes_no:\r\n          - 'yes'\r\n          -
+      'no'\r\n      not_all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
+      'yes'\r\n        consent_to_pass_info_to_bwh_yes_no: 'no'\r\n        consent_to_pass_info_to_bwh_2_yes_no:
+      'no'\r\n      \r\n    "
+    user_email: 
+  - id: 291
+    name: Sleep Phone Screen Eligible
+    table_name: sleep_ps_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-07-22T14:25:11.846Z'
+    updated_at: '2019-11-01T15:28:47.407Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: notes interested_yes_no not_interested_notes consent_to_pass_info_to_bwh_yes_no
+      consent_to_pass_info_to_bwh_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
+      placeholder_end
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Thank
+      you for your time and for answering our questions..  \r\n      Based on your
+      responses so far you are eligible to participate in this study.             \r\n
+      \     \r\n    interested_yes_no: Are you interested in participating?\r\n\r\n
+      \   not_interested_notes: |\r\n      May I ask you why you are not interested?
+      \r\n      *(will record reason, for example, too busy)*. \r\n      \r\n      Thank
+      you for your time.\r\n      \r\n    consent_to_pass_info_to_bwh_yes_no: |\r\n
+      \     Wonderful. In order for you to participate I will need to give your \r\n
+      \     contact information to our collaborating researchers at \r\n      Brigham
+      & Women’s Hospital, and they will be conducting a final, \r\n      short screening
+      survey to finalize your eligibility.  This means \r\n      that it’s still possible
+      you may be ineligible for the study, \r\n      however based on your responses
+      so far you’re a great candidate.\r\n\r\n      Is it okay with you if I give
+      them your contact information?\r\n\r\n    consent_to_pass_info_to_bwh_2_yes_no:
+      |\r\n      Okay - just to confirm, your information will be kept completely
+      secure \r\n      and private, in a locked environment only accessible by approved
+      researchers. \r\n      Access to your information at Brigham & Women’s will
+      be removed once the \r\n      study has finished.  Does that alleviate any concerns
+      you may have?  \r\n      If you’d still prefer not to participate I understand.\r\n
+      \   \r\n    placeholder_consent_to_pass_info_2_no: |\r\n      Okay, I understand.
+      \ Well thank you so much for your time today and for \r\n      your support
+      of our research, and we will certainly be in touch with \r\n      future participation
+      opportunities.\r\n      \r\n    contact_info_notes: |\r\n      Great.  I will
+      give your information to the research manager at Brigham, \r\n      [NAME],
+      \r\n      and she will reach out to you within the next week.  \r\n      \r\n
+      \     I will also send you an email confirmation when your information has been
+      sent.  \r\n      \r\n      They will be contacting you by email to send you
+      some information about the study, \r\n      but they may also reach out to you
+      by telephone in order \r\n      to schedule your interview.  \r\n      \r\n
+      \     Can I please confirm the contact information I have for you?\r\n      \r\n
+      \     *Scroll to Participant Details to check and add any contact information*\r\n
+      \     \r\n    notes: |\r\n      Do you have any questions?\r\n\r\n    \r\n    placeholder_end:
+      |\r\n      Thank you so much for speaking with me today. If you have any \r\n
+      \     questions or want to contact me at any time, you can reach me\r\n      at
+      617-432-5000 or players@footballplayershealth.harvard.edu. \r\n      You may
+      also contact the Principal Investigator of \r\n      the study Dr. Suzanne Bertisch
+      at Brigham and Women’s \r\n      Hospital at 857-307-0355 or by email at sbertisch@partners.org.\r\n
+      \     \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
+      \     interested_yes_no: 'no'\r\n      \r\n    consent_to_pass_info_to_bwh_yes_no:\r\n
+      \     interested_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_2_yes_no:\r\n
+      \     consent_to_pass_info_to_bwh_yes_no: 'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n
+      \     consent_to_pass_info_to_bwh_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
+      \     any:\r\n        consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n        consent_to_pass_info_to_bwh_2_yes_no:
+      'yes'\r\n        \r\n    "
+    user_email: 
   - id: 280
     name: Sleep Epworth Sleepiness Scale
     table_name: sleep_ese_questions
@@ -6743,7 +7052,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-22T12:57:21.020Z'
-    updated_at: '2019-10-17T11:18:35.260Z'
+    updated_at: '2019-11-01T15:08:27.369Z'
     position: 
     category: sleep-phone-screen
     table_key_name: ''
@@ -6774,7 +7083,7 @@ app_type:
       \     ineligible_resource_yes_no: 'yes'\r\n\r\n    trust_assessment_info_yes_no:\r\n
       \     ineligible_resource_yes_no: 'yes'\r\n\r\n\r\n    help_finding_pcp_yes_no:
       \r\n      ineligible_resource_yes_no: 'yes'\r\n      \r\n    placeholder_pcp_assist:\r\n
-      \     help_finding_pcp_yes_no: 'yes'\r\n\r\n\r\n    notes:\r\n      ineligible_resource_yes_no:
+      \     help_finding_pcp_yes_no: 'yes'\r\n\r\n\r\n#    notes:\r\n#      ineligible_resource_yes_no:
       'yes'\r\n\r\n\r\n\r\n\r\n  caption_before:     \r\n    all_fields: |\r\n      How
       likely are you to doze off or fall asleep in the following\r\n      situations,
       in contrast to feeling just tired?\r\n      This refers to your usual way of
@@ -6877,6 +7186,46 @@ app_type:
       20\r\n          - 21\r\n          - 22\r\n          - 23\r\n          - 24\r\n
       \         \r\n      \r\n      \r\n      "
     user_email: 
+  - id: 282
+    name: Sleep Audit-C
+    table_name: sleep_ps_audit_c_questions
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-07-22T13:26:11.547Z'
+    updated_at: '2019-11-01T14:44:07.624Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: alcohol_frequency daily_alcohol six_or_more_frequency total_score
+      placeholder_possibly_eligible possibly_eligible_yes_no notes
+    result_order: ''
+    options: "# @library sleep field_options\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
+      \   alcohol_frequency: How often do you have a drink containing alcohol?\r\n
+      \   daily_alcohol: How many standard drinks containing alcohol do you have on
+      a typical day?\r\n    six_or_more_frequency: How often do you have six or more
+      drinks on one occasion?\r\n    total_score: Score\r\n    placeholder_possibly_eligible:
+      |\r\n      *Based on the scores, the participant is ineligible. \r\n      The
+      option to change status to possibly eligible will appear at the next step.*
+      \   \r\n\r\n    \r\n  field_options:\r\n    <<: *ps_field_options\r\n\r\n    total_score:\r\n
+      \     edit_as:\r\n        field_type: fixed_score\r\n      calculate_with:\r\n
+      \       sum: \r\n          - alcohol_frequency\r\n          - daily_alcohol\r\n
+      \         - six_or_more_frequency\r\n          \r\n      \r\n  show_if:\r\n#
+      \   daily_alcohol:\r\n#      not_all:\r\n#        alcohol_frequency: '0'\r\n
+      \   \r\n#    six_or_more_frequency:\r\n#      not_all:\r\n#        alcohol_frequency:
+      '0'\r\n  \r\n    possibly_eligible_yes_no:\r\n      never: true\r\n      \r\n#
+      \   possibly_eligible_yes_no: &ineligible_rules\r\n    placeholder_possibly_eligible:\r\n
+      \     any:\r\n        total_score:\r\n          - '4'\r\n          - '5'\r\n
+      \         - '6'\r\n          - '7'\r\n          - '8'\r\n          - '9'\r\n
+      \         - '10'\r\n          - '11'\r\n          - '12'\r\n      not_all:\r\n
+      \       total_score: '4'\r\n        daily_alcohol: \r\n          - '0'\r\n          -
+      ''\r\n        six_or_more_frequency: \r\n          - '0'\r\n          - ''\r\n\r\n#
+      \   placeholder_possibly_eligible:\r\n#      all:\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n#      <<: *ineligible_rules\r\n        \r\n        \r\n"
+    user_email: 
   - id: 274
     name: SLEEP Basic Responses
     table_name: sleep_ps_basic_responses
@@ -6887,7 +7236,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-09T17:27:36.487Z'
-    updated_at: '2019-10-14T17:37:54.876Z'
+    updated_at: '2019-11-01T14:40:59.724Z'
     position: 
     category: sleep-phone-screen
     table_key_name: ''
@@ -6900,47 +7249,50 @@ app_type:
     options: "# @library sleep field_options\r\n\r\ndefault:\r\n\r\n\r\n\r\n  field_options:\r\n
       \   <<: *ps_field_options      \r\n\r\n  show_if:\r\n    \r\n    placeholder_digital_no:\r\n
       \     reliable_internet_yes_no: 'no'\r\n      \r\n    cbt_yes_no:\r\n      reliable_internet_yes_no:
-      'yes'\r\n\r\n    cbt_how_long_ago:\r\n      cbt_yes_no: 'yes'\r\n      \r\n
-      \   cbt_notes:\r\n      cbt_yes_no: 'yes'\r\n\r\n    sleep_times_yes_no:\r\n
-      \     all:\r\n        reliable_internet_yes_no: 'yes'\r\n      any_cbt:\r\n
-      \       cbt_yes_no: 'no'\r\n        cbt_how_long_ago: more than 5 years ago\r\n
-      \       possibly_eligible_yes_no: 'yes'\r\n\r\n    sleep_times_notes:\r\n      sleep_times_yes_no:
-      'yes'\r\n\r\n    work_night_shifts_yes_no:\r\n      all:\r\n        reliable_internet_yes_no:
-      'yes'\r\n      any_sleep:\r\n        sleep_times_yes_no: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_cbt:\r\n        cbt_yes_no: 'no'\r\n        cbt_how_long_ago:
-      more than 5 years ago\r\n        possibly_eligible_yes_no: 'yes'\r\n      \r\n
-      \   number_times_per_week_work_night_shifts:\r\n      work_night_shifts_yes_no:
-      'yes'\r\n\r\n    narcolepsy_diagnosis_yes_no_dont_know:\r\n      all:\r\n        reliable_internet_yes_no:
-      'yes'\r\n      any_sleep:\r\n        sleep_times_yes_no: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_cbt:\r\n        cbt_yes_no: 'no'\r\n        cbt_how_long_ago:
-      more than 5 years ago\r\n        possibly_eligible_yes_no: 'yes'\r\n      any_nights:\r\n
-      \       work_night_shifts_yes_no: 'no'\r\n        number_times_per_week_work_night_shifts:
-      '0'\r\n        possibly_eligible_yes_no: 'yes'\r\n\r\n\r\n    narcolepsy_diagnosis_notes:\r\n
-      \     narcolepsy_diagnosis_yes_no_dont_know:\r\n        - \"yes\"\r\n        -
-      \"don't know\"      \r\n\r\n    antiseizure_meds_yes_no:\r\n      all:\r\n        reliable_internet_yes_no:
-      'yes'\r\n      any_sleep:\r\n        sleep_times_yes_no: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_cbt:\r\n        cbt_yes_no: 'no'\r\n        cbt_how_long_ago:
-      more than 5 years ago\r\n        possibly_eligible_yes_no: 'yes'\r\n      any_nights:\r\n
-      \       work_night_shifts_yes_no: 'no'\r\n        number_times_per_week_work_night_shifts:
-      '0'\r\n        possibly_eligible_yes_no: 'yes'\r\n      any_narcolepsy:\r\n
-      \       narcolepsy_diagnosis_yes_no_dont_know: 'no'\r\n        possibly_eligible_yes_no:
+      'yes'\r\n\r\n    cbt_how_long_ago:\r\n      reliable_internet_yes_no: 'yes'\r\n
+      \     cbt_yes_no: 'yes'\r\n      \r\n    cbt_notes:\r\n      reliable_internet_yes_no:
+      'yes'\r\n      cbt_yes_no: 'yes'\r\n\r\n    sleep_times_yes_no:\r\n      all:\r\n
+      \       reliable_internet_yes_no: 'yes'\r\n#      any_cbt:\r\n#        cbt_yes_no:
+      'no'\r\n#        cbt_how_long_ago: more than 5 years ago\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n\r\n    sleep_times_notes:\r\n      reliable_internet_yes_no: 'yes'\r\n
+      \     sleep_times_yes_no: 'yes'\r\n\r\n    work_night_shifts_yes_no:\r\n      all:\r\n
+      \       reliable_internet_yes_no: 'yes'\r\n#      any_sleep:\r\n#        sleep_times_yes_no:
+      'no'\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_cbt:\r\n#        cbt_yes_no:
+      'no'\r\n#        cbt_how_long_ago: more than 5 years ago\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n      \r\n    number_times_per_week_work_night_shifts:\r\n      reliable_internet_yes_no:
+      'yes'\r\n      work_night_shifts_yes_no: 'yes'\r\n\r\n    narcolepsy_diagnosis_yes_no_dont_know:\r\n
+      \     all:\r\n        reliable_internet_yes_no: 'yes'\r\n#      any_sleep:\r\n#
+      \       sleep_times_yes_no: 'no'\r\n#        possibly_eligible_yes_no: 'yes'\r\n#
+      \     any_cbt:\r\n#        cbt_yes_no: 'no'\r\n#        cbt_how_long_ago: more
+      than 5 years ago\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_nights:\r\n#
+      \       work_night_shifts_yes_no: 'no'\r\n#        number_times_per_week_work_night_shifts:
+      '0'\r\n#        possibly_eligible_yes_no: 'yes'\r\n\r\n\r\n    narcolepsy_diagnosis_notes:\r\n
+      \     reliable_internet_yes_no: 'yes'\r\n      narcolepsy_diagnosis_yes_no_dont_know:\r\n
+      \       - \"yes\"\r\n        - \"don't know\"      \r\n\r\n    antiseizure_meds_yes_no:\r\n
+      \     all:\r\n        reliable_internet_yes_no: 'yes'\r\n#      any_sleep:\r\n#
+      \       sleep_times_yes_no: 'no'\r\n#        possibly_eligible_yes_no: 'yes'\r\n#
+      \     any_cbt:\r\n#        cbt_yes_no: 'no'\r\n#        cbt_how_long_ago: more
+      than 5 years ago\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_nights:\r\n#
+      \       work_night_shifts_yes_no: 'no'\r\n#        number_times_per_week_work_night_shifts:
+      '0'\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_narcolepsy:\r\n#
+      \       narcolepsy_diagnosis_yes_no_dont_know: 'no'\r\n#        possibly_eligible_yes_no:
       'yes'\r\n\r\n    seizure_in_ten_years_yes_no:\r\n      all:\r\n        reliable_internet_yes_no:
-      'yes'\r\n      any_sleep:\r\n        sleep_times_yes_no: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_cbt:\r\n        cbt_yes_no: 'no'\r\n        cbt_how_long_ago:
-      more than 5 years ago\r\n        possibly_eligible_yes_no: 'yes'\r\n      any_nights:\r\n
-      \       work_night_shifts_yes_no: 'no'\r\n        number_times_per_week_work_night_shifts:
-      '0'\r\n        possibly_eligible_yes_no: 'yes'\r\n      any_narcolepsy:\r\n
-      \       narcolepsy_diagnosis_yes_no_dont_know: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_meds:\r\n        antiseizure_meds_yes_no: 'no'\r\n        possibly_eligible_yes_no:
+      'yes'\r\n#      any_sleep:\r\n#        sleep_times_yes_no: 'no'\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n#      any_cbt:\r\n#        cbt_yes_no: 'no'\r\n#        cbt_how_long_ago:
+      more than 5 years ago\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_nights:\r\n#
+      \       work_night_shifts_yes_no: 'no'\r\n#        number_times_per_week_work_night_shifts:
+      '0'\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_narcolepsy:\r\n#
+      \       narcolepsy_diagnosis_yes_no_dont_know: 'no'\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n#      any_meds:\r\n#        antiseizure_meds_yes_no: 'no'\r\n#        possibly_eligible_yes_no:
       'yes'\r\n\r\n\r\n    major_psychiatric_disorder_yes_no:\r\n      all:\r\n        reliable_internet_yes_no:
-      'yes'\r\n      any_sleep:\r\n        sleep_times_yes_no: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_cbt:\r\n        cbt_yes_no: 'no'\r\n        cbt_how_long_ago:
-      more than 5 years ago\r\n        possibly_eligible_yes_no: 'yes'\r\n      any_nights:\r\n
-      \       work_night_shifts_yes_no: 'no'\r\n        number_times_per_week_work_night_shifts:
-      '0'\r\n        possibly_eligible_yes_no: 'yes'\r\n      any_narcolepsy:\r\n
-      \       narcolepsy_diagnosis_yes_no_dont_know: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_meds:\r\n        antiseizure_meds_yes_no: 'no'\r\n        possibly_eligible_yes_no:
-      'yes'\r\n      any_seizure:\r\n        seizure_in_ten_years_yes_no: 'no'\r\n
+      'yes'\r\n#      any_sleep:\r\n#        sleep_times_yes_no: 'no'\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n#      any_cbt:\r\n#        cbt_yes_no: 'no'\r\n#        cbt_how_long_ago:
+      more than 5 years ago\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_nights:\r\n#
+      \       work_night_shifts_yes_no: 'no'\r\n#        number_times_per_week_work_night_shifts:
+      '0'\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      any_narcolepsy:\r\n#
+      \       narcolepsy_diagnosis_yes_no_dont_know: 'no'\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n#      any_meds:\r\n#        antiseizure_meds_yes_no: 'no'\r\n#        possibly_eligible_yes_no:
+      'yes'\r\n#      any_seizure:\r\n#        seizure_in_ten_years_yes_no: 'no'\r\n#
       \       possibly_eligible_yes_no: 'yes'\r\n      \r\n    \r\n    possibly_eligible_yes_no:
       \r\n      any: &any_show_ineligible\r\n        sleep_times_yes_no: 'yes'\r\n
       \       narcolepsy_diagnosis_yes_no_dont_know: \r\n          - 'yes'\r\n          -
@@ -6983,7 +7335,8 @@ app_type:
       qualify for this particular study. We really appreciate your interest in \r\n
       \     research and helping to improve the health of former players nationwide.
       \r\n      We will be sure to contact you about future studies that you may be
-      eligible for. \r\n      \r\n      "
+      eligible for. \r\n      \r\n      Do you have any questions for me at this time?\r\n
+      \     \r\n      *Click save to continue to the Ineligible responses form*\r\n"
     user_email: 
   - id: 284
     name: Sleep DAST-2
@@ -6995,12 +7348,12 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-22T13:33:36.388Z'
-    updated_at: '2019-09-20T12:30:44.390Z'
+    updated_at: '2019-11-01T14:37:42.455Z'
     position: 
     category: sleep-phone-screen
     table_key_name: ''
-    field_list: number_days_drug_usage number_days_negative_feeling possibly_eligible_yes_no
-      notes
+    field_list: audit_c_eligible_yes_no number_days_drug_usage number_days_negative_feeling
+      possibly_eligible_yes_no placeholder_thanks notes
     result_order: ''
     options: "default:\r\n\r\n  caption_before:\r\n    number_days_negative_feeling:
       |\r\n      How many days in the past 12 months have you felt bad or guilty\r\n
@@ -7010,53 +7363,27 @@ app_type:
       or CBD, and drugs prescribed by a clinician)?\r\n\r\n    possibly_eligible_yes_no:
       |\r\n      *Based on the scores, the participant is ineligible. \r\n      If
       you believe the participant may be eligible, select **yes** and continue\r\n
-      \     with the screening.*\r\n\r\n  field_options:\r\n    possibly_eligible_yes_no:
-      \r\n      value: 'no'\r\n\r\n  show_if:\r\n    possibly_eligible_yes_no:\r\n
-      \     not_all:\r\n        number_days_negative_feeling: \r\n          - '0'\r\n
-      \         - ''\r\n        number_days_drug_usage:\r\n          - '0'\r\n          -
-      ''\r\n        \r\n    "
-    user_email: 
-  - id: 304
-    name: Sleep Phone Screen Possibly Eligible
-    table_name: sleep_ps_possibly_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-08-19T17:01:17.359Z'
-    updated_at: '2019-09-20T12:22:32.085Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: any_questions_yes_no placeholder_any_questions_no placeholder_any_questions_yes  follow_up_date
-      follow_up_time placeholder_end_call contact_info_notes notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    all_fields: |\r\n      Thank
-      you for your time and for answering our questions.  \r\n      The next step
-      is for the Principal Investigator of our study to review \r\n      the answers
-      to the questions we just discussed.  \r\n      You may receive a follow-up phone
-      call from me to get clarification \r\n      on some of the questions that I
-      asked you today. \r\n      I will also be contacting you to let you know whether
-      or not you are \r\n      eligible for the study. If you are eligible, I will
-      let you know \r\n      the next steps at that time.\r\n\r\n    any_questions_yes_no:
-      Do you have any questions for me at this time?\r\n    \r\n    placeholder_any_questions_no:
-      Okay - thank you again for your interest and your time! \r\n\r\n    placeholder_any_questions_yes:
-      \"*address any questions*\"\r\n\r\n            \r\n    contact_info_notes: |\r\n
-      \     Contact Information Notes\r\n      \r\n    follow_up_date:\r\n      keep_label:
-      true\r\n      caption: |\r\n        Okay – as I mentioned, I will call you back
-      to inform you of your \r\n        eligibility status. What are good days/times
-      to call you? \r\n        It may take up to 10 days for us to make a determination.
-      \r\n\r\n    note: Addtional follow up information or other notes.\r\n\r\n    placeholder_end_call:
-      |\r\n      If you have any questions in the meantime, please do not hesitate
-      \r\n      to contact us. Thank you again for your time.\r\n\r\n\r\n  show_if:
-      \   \r\n    placeholder_any_questions_no:\r\n      any_questions_yes_no: 'no'\r\n
-      \     \r\n    placeholder_any_questions_yes:\r\n      any_questions_yes_no:
-      'yes'\r\n            \r\n\r\n#    contact_info_notes: &consent_given\r\n#      any:\r\n#
-      \       consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n#        consent_to_pass_info_to_bwh_2_yes_no:
-      'yes'\r\n        \r\n#    follow_up_date: *consent_given\r\n#    follow_up_time:
-      *consent_given\r\n\r\n#    placeholder_end_call: *consent_given\r\n"
+      \     with the screening.*\r\n\r\n    placeholder_thanks: |\r\n      Thank you
+      for answering our questions. Unfortunately, at this \r\n      time you do not
+      qualify for this particular study. We really \r\n      appreciate your interest
+      in research and helping to improve \r\n      the health of former players nationwide.
+      \r\n      We will be sure to contact you about future studies \r\n      that
+      you may be eligible for. \r\n      \r\n      Do you have any questions for me
+      at this time?\r\n      \r\n      *Click save to continue to the Ineligible responses
+      form*\r\n\r\n  field_options:\r\n    possibly_eligible_yes_no: \r\n      value:
+      'no'\r\n    audit_c_eligible_yes_no:\r\n      value:\r\n        all:\r\n          not_all_eligible_audit_c:\r\n
+      \           not_any:\r\n              dynamic_model__sleep_ps_audit_c_questions:
+      \r\n                total_score: \r\n                  - 0\r\n                  -
+      1 \r\n                  - 2\r\n                  - 3\r\n            not_all:\r\n
+      \             dynamic_model__sleep_ps_audit_c_questions:\r\n                alcohol_frequency:
+      4\r\n                daily_alcohol: 0\r\n                six_or_more_frequency:
+      0\r\n\r\n          all_return:\r\n            this:\r\n              return_constant:
+      'yes'\r\n\r\n  show_if:\r\n    audit_c_eligible_yes_no: \r\n      never: true\r\n
+      \ \r\n    possibly_eligible_yes_no: &not_all_eligible_show\r\n      not_all:\r\n
+      \       audit_c_eligible_yes_no: 'yes'\r\n        number_days_negative_feeling:
+      \r\n          - '0'\r\n          - ''\r\n        number_days_drug_usage:\r\n
+      \         - '0'\r\n          - ''\r\n    placeholder_thanks:\r\n      <<: *not_all_eligible_show\r\n
+      \     all:\r\n        possibly_eligible_yes_no: 'no'\r\n    "
     user_email: 
   - id: 310
     name: Subject Contact
@@ -7134,45 +7461,6 @@ app_type:
       true\r\n\r\n    placeholder_possibly_eligible:\r\n      outcome: possibly_eligible\r\n
       \     \r\n    placeholder_eligible:\r\n      outcome: eligible\r\n    \r\n    placeholder_ineligible:\r\n
       \     outcome: ineligible\r\n      \r\n      "
-    user_email: 
-  - id: 282
-    name: Sleep Audit-C
-    table_name: sleep_ps_audit_c_questions
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-07-22T13:26:11.547Z'
-    updated_at: '2019-08-22T15:17:30.689Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: alcohol_frequency daily_alcohol six_or_more_frequency total_score
-      possibly_eligible_yes_no notes
-    result_order: ''
-    options: "# @library sleep field_options\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
-      \   alcohol_frequency: How often do you have a drink containing alcohol?\r\n
-      \   daily_alcohol: How many standard drinks containing alcohol do you have on
-      a typical day?\r\n    six_or_more_frequency: How often do you have six or more
-      drinks on one occasion?\r\n    total_score: Score\r\n    possibly_eligible_yes_no:
-      |\r\n      *Based on the scores, the participant is ineligible. \r\n      If
-      you believe the participant may be eligible, select **yes** and continue\r\n
-      \     with the screening.*    \r\n\r\n    \r\n  field_options:\r\n    <<: *ps_field_options\r\n\r\n
-      \   total_score:\r\n      edit_as:\r\n        field_type: fixed_score\r\n      calculate_with:\r\n
-      \       sum: \r\n          - alcohol_frequency\r\n          - daily_alcohol\r\n
-      \         - six_or_more_frequency\r\n          \r\n      \r\n  show_if:\r\n
-      \   daily_alcohol:\r\n      not_all:\r\n        alcohol_frequency: '0'\r\n    \r\n
-      \   six_or_more_frequency:\r\n      not_all:\r\n        alcohol_frequency: '0'\r\n
-      \ \r\n    possibly_eligible_yes_no: &ineligible_rules\r\n      any:\r\n        total_score:\r\n
-      \         - '4'\r\n          - '5'\r\n          - '6'\r\n          - '7'\r\n
-      \         - '8'\r\n          - '9'\r\n          - '10'\r\n          - '11'\r\n
-      \         - '12'\r\n      not_all:\r\n        total_score: '4'\r\n        daily_alcohol:
-      \r\n          - '0'\r\n          - ''\r\n        six_or_more_frequency: \r\n
-      \         - '0'\r\n          - ''\r\n\r\n    placeholder_possibly_eligible:\r\n
-      \     all:\r\n        possibly_eligible_yes_no: 'yes'\r\n      <<: *ineligible_rules\r\n
-      \       \r\n        \r\n"
     user_email: 
   - id: 236
     name: Insomnia Severity Index
@@ -7299,86 +7587,6 @@ app_type:
       tips on what you should think about when \r\n      choosing your doctor.\r\n
       \  \r\n   \r\n   \r\n   "
     user_email: 
-  - id: 287
-    name: Sleep Phone Screen Non-Eligible
-    table_name: sleep_ps_non_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-07-22T14:09:03.698Z'
-    updated_at: '2019-08-19T16:45:31.917Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: 'any_questions_yes_no placeholder_any_questions_no contact_pi_yes_no
-      additional_questions_yes_no placeholder_additional_questions_no placeholder_additional_questions_yes
-      consent_to_pass_info_to_bwh_yes_no consent_to_pass_info_to_bwh_2_yes_no placeholder_consent_to_pass_info_2_no
-      contact_info_notes placeholder_finish notes '
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n  \r\n\r\n    any_questions_yes_no:
-      Do you have any questions for me at this time?\r\n    \r\n    placeholder_any_questions_no:
-      Okay - thank you again for your interest and your time! \r\n    \r\n    contact_pi_yes_no:
-      |\r\n      *Address questions*\r\n      \r\n      *If they ask why they are
-      not eligible:* \r\n      \r\n      * **NOTE**: if the final screening element
-      just performed was the \r\n      Epworth Sleepiness Scale, or the question regarding
-      internet access, \r\n      return to that section to reiterate the details of
-      why they are not eligible.  \r\n      Otherwise, continue:*\r\n      \r\n      Actually
-      the way that our system works, \r\n      I’m not able to determine exactly which
-      question caused you to be \r\n      ineligible for the study right now, but
-      if you have concerns \r\n      or would like to discuss it further with our
-      study PI, \r\n      I would be happy to put you in touch with her if you would
-      like. \r\n      \r\n      Is that something you would like to do?\r\n\r\n\r\n
-      \   # Had questions but no contact with PI requested\r\n    additional_questions_yes_no:
-      |\r\n      Okay, I understand.  \r\n      \r\n      Do you have any other questions
-      for me at the moment?\r\n      \r\n    placeholder_additional_questions_no:
-      |\r\n      Okay - thank you again for your interest and your time! \r\n\r\n
-      \   placeholder_additional_questions_yes: |\r\n      *Address questions*\r\n\r\n
-      \   consent_to_pass_info_to_bwh_yes_no: |\r\n      Absolutely. In order for
-      her to contact you I will need to give your contact information to our collaborating
-      researchers at Brigham & Women’s Hospital. \r\n\r\n      Is that okay with you?\r\n
-      \     \r\n    consent_to_pass_info_to_bwh_2_yes_no: |\r\n      Okay - just to
-      confirm, your information will be kept completely secure \r\n      and private,
-      in a locked environment only accessible by approved researchers. \r\n      Access
-      to your information at Brigham & Women's will be removed once the \r\n      study
-      has finished.  Does that alleviate any concerns you may have?  \r\n      If
-      you'd still prefer not to participate I understand.\r\n      \r\n    placeholder_consent_to_pass_info_2_no:
-      |\r\n      Okay, I understand.  Well thank you so much for your time today and
-      for your \r\n      support of our research, and we will certainly be in touch
-      with \r\n      future participation opportunities.\r\n      \r\n      If you
-      have any questions or want to contact me at any time, you \r\n      can reach
-      me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n      \r\n
-      \   contact_info_notes: |\r\n      Great.  I will give your contact information
-      to the research team at \r\n      Brigham, and our study PI, Dr. Suzanne Bertisch,
-      \r\n      will reach out to you as soon as possible.  \r\n      \r\n      Can
-      I please confirm the contact information I have for you?\r\n      \r\n      \r\n
-      \     \r\n    notes: Additional Notes\r\n      \r\n    placeholder_finish: |\r\n
-      \     Thank you so much for speaking with me today. \r\n      \r\n      If you
-      have any questions or want to contact me at any time, you \r\n      can reach
-      me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n      \r\n
-      \     **END SCREENING**\r\n      \r\n\r\n  show_if:\r\n    \r\n    placeholder_any_questions_no:\r\n
-      \     any_questions_yes_no: 'no'\r\n      \r\n    contact_pi_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n\r\n    additional_questions_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      \r\n    placeholder_additional_questions_no:\r\n
-      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
-      'no'\r\n      \r\n    placeholder_additional_questions_yes:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
-      'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_bwh_2_yes_no:\r\n
-      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_bwh_yes_no:
-      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_bwh_yes_no:
-      'no'\r\n      consent_to_pass_info_to_bwh_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
-      \     all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
-      'yes'\r\n      any:\r\n        consent_to_pass_info_to_bwh_yes_no: 'yes'\r\n
-      \       consent_to_pass_info_to_bwh_2_yes_no: 'yes'\r\n        \r\n    placeholder_finish:\r\n
-      \     all:\r\n        any_questions_yes_no:\r\n          - 'yes'\r\n          -
-      'no'\r\n      not_all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
-      'yes'\r\n        consent_to_pass_info_to_bwh_yes_no: 'no'\r\n        consent_to_pass_info_to_bwh_2_yes_no:
-      'no'\r\n      \r\n    "
-    user_email: 
   - id: 278
     name: Sleep Apnea Responses
     table_name: sleep_ps_sleep_apnea_responses
@@ -7403,6 +7611,48 @@ app_type:
       \r\n      diagnosed_yes_no: 'yes'\r\n    severity:\r\n      use_treatment_yes_no:
       'no'"
     user_email: 
+  - id: 300
+    name: Sleep Phone Screen Part 2 Eligible
+    table_name: sleep_ps2_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-08-01T09:51:23.203Z'
+    updated_at: '2019-11-04T14:33:04.131Z'
+    position: 
+    category: sleep-phone-screen-2
+    table_key_name: ''
+    field_list: notes interested_yes_no not_interested_notes review_consent_now_yes_no
+      placeholder_review_now follow_up_date,follow_up_time
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n    \r\n    notes: |\r\n      Thank
+      you for answering our remaining questions. \r\n      You are eligible to participate
+      in this study! Do you have any questions? \r\n    \r\n\r\n    interested_yes_no:
+      |\r\n      Are you interested in participating?\r\n    \r\n    not_interested_notes:
+      |\r\n      May I ask you why you are not interested? \r\n      \r\n      Thank
+      you for your time. \r\n      \r\n      *record reason, for example, too busy*\r\n
+      \   \r\n    review_consent_now_yes_no: |\r\n      Wonderful. The next step to
+      enrolling in the study is to complete \r\n      the informed consent.\r\n      \r\n
+      \     We can go through this now together if you have a few more \r\n      minutes
+      and access to your email account now. \r\n      \r\n      Shall we go through
+      the informed consent together?\r\n      \r\n      \r\n    placeholder_review_now:
+      |\r\n      *Email consent document to conduct consent and enrollment protocol.*\r\n\r\n
+      \     Save this form, then click the **+ Perform screening follow up** button
+      to record\r\n      the informed consent.\r\n\r\n    \r\n    follow_up_date:\r\n
+      \     keep_label: true\r\n      caption: |\r\n        I will email you the consent
+      document for you to review.\r\n        \r\n        Is there a more convenient
+      time to go through this together and \r\n        complete your enrollment?\r\n\r\n
+      \   #notes: Notes\r\n    \r\n    \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
+      \     interested_yes_no: 'no'\r\n      \r\n    review_consent_now_yes_no: \r\n
+      \     interested_yes_no: 'yes'\r\n\r\n    placeholder_review_now:\r\n      interested_yes_no:
+      'yes'\r\n      review_consent_now_yes_no: 'yes'\r\n\r\n    follow_up_date:\r\n
+      \     interested_yes_no: 'yes'\r\n      review_consent_now_yes_no: 'no'\r\n
+      \     \r\n    follow_up_time:\r\n      interested_yes_no: 'yes'\r\n      review_consent_now_yes_no:
+      'no'\r\n      \r\n    \r\n    "
+    user_email: 
   - id: 296
     name: PHQ-8 Questions
     table_name: sleep_ps2_phq8_questions
@@ -7413,7 +7663,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-30T14:37:28.733Z'
-    updated_at: '2019-10-24T11:06:43.223Z'
+    updated_at: '2019-11-04T13:54:27.220Z'
     position: 
     category: sleep-phone-screen-2
     table_key_name: ''
@@ -7466,38 +7716,68 @@ app_type:
       \r\n      studies that you may be eligible for. \r\n      \r\n      *The PI
       will be automatically notified that a follow up is required when this form is
       saved*\r\n\r\n    # Eligible placeholders\r\n    \r\n    placeholder_eligible_initial:
-      |\r\n      You are eligible to participate in the study!\r\n    placeholder_eligible:
-      |\r\n      Thank you for answering our remaining questions. \r\n      You are
-      eligible to participate in this study! Do you have any questions? \r\n    placeholder_mod_depression:
+      |\r\n      *Click **save** to move forward*\r\n      \r\n    placeholder_eligible:
+      |\r\n      *Click **save** to move forward*\r\n      \r\n    placeholder_mod_depression:
       |\r\n      Thank you for answering our remaining questions. \r\n      The results
       of this screening indicate that you may have moderate depression.  \r\n      We
       recommend that you discuss your mood symptoms with your doctor.  \r\n      \r\n
-      \     Also, you are eligible to participate in this study! \r\n      Are you
-      interested in participating?\r\n      \r\n  show_if:\r\n    trouble_sleeping:
-      &show_extra_fields_if\r\n      not_any:\r\n        little_interest: ''\r\n        feeling_down:
-      ''\r\n        initial_score: \r\n          - '0'\r\n          - '1'\r\n          -
-      '2'      \r\n        \r\n    feeling_tired: *show_extra_fields_if\r\n    poor_appetite:
-      *show_extra_fields_if\r\n    feeling_bad: *show_extra_fields_if\r\n    trouble_concentrating:
-      *show_extra_fields_if\r\n    acting_slowly_or_restlessly: *show_extra_fields_if\r\n\r\n
-      \   placeholder_eligible_initial:\r\n      all:\r\n        initial_score: \r\n
-      \         - '0'\r\n          - '1'\r\n          - '2'\r\n        trouble_sleeping:
-      ''\r\n        feeling_tired: ''\r\n        poor_appetite: ''\r\n        feeling_bad:
-      ''\r\n        trouble_concentrating: ''\r\n        acting_slowly_or_restlessly:
-      ''\r\n      \r\n      not_any:\r\n        little_interest: ''\r\n        feeling_down:
-      ''        \r\n      \r\n    placeholder_eligible:\r\n      all:\r\n        total_score:\r\n
-      \         - '0'\r\n          - '1'\r\n          - '2'\r\n          - '3'\r\n
-      \         - '4'\r\n          - '5'\r\n          - '6'\r\n          - '7'\r\n
-      \         - '8'\r\n          - '9'\r\n        \r\n      not_any: &not_any_blanks\r\n
-      \       little_interest: ''\r\n        feeling_down: ''\r\n        trouble_sleeping:
-      ''\r\n        feeling_tired: ''\r\n        poor_appetite: ''\r\n        feeling_bad:
-      ''\r\n        trouble_concentrating: ''\r\n        acting_slowly_or_restlessly:
-      ''\r\n\r\n    placeholder_mod_depression:\r\n      all:\r\n        total_score:\r\n
-      \         - '10'\r\n          - '11'\r\n          - '12'\r\n          - '13'\r\n
-      \         - '14'\r\n          - '15'\r\n          - '16'\r\n          - '17'\r\n
-      \         - '18'\r\n          - '19'\r\n      not_any: *not_any_blanks\r\n        \r\n
-      \   placeholder_ineligible:\r\n      all:\r\n        total_score:\r\n          -
-      '20'\r\n          - '21'\r\n          - '22'\r\n          - '23'\r\n          -
-      '24'\r\n      not_any: *not_any_blanks\r\n\r\n"
+      \     Also, you are eligible to participate in this study! \r\n      \r\n      \r\n
+      \ show_if:\r\n    trouble_sleeping: &show_extra_fields_if\r\n      not_any:\r\n
+      \       little_interest: ''\r\n        feeling_down: ''\r\n        initial_score:
+      \r\n          - '0'\r\n          - '1'\r\n          - '2'      \r\n        \r\n
+      \   feeling_tired: *show_extra_fields_if\r\n    poor_appetite: *show_extra_fields_if\r\n
+      \   feeling_bad: *show_extra_fields_if\r\n    trouble_concentrating: *show_extra_fields_if\r\n
+      \   acting_slowly_or_restlessly: *show_extra_fields_if\r\n\r\n    placeholder_eligible_initial:\r\n
+      \     all:\r\n        initial_score: \r\n          - '0'\r\n          - '1'\r\n
+      \         - '2'\r\n        trouble_sleeping: ''\r\n        feeling_tired: ''\r\n
+      \       poor_appetite: ''\r\n        feeling_bad: ''\r\n        trouble_concentrating:
+      ''\r\n        acting_slowly_or_restlessly: ''\r\n      \r\n      not_any:\r\n
+      \       little_interest: ''\r\n        feeling_down: ''        \r\n      \r\n
+      \   placeholder_eligible:\r\n      all:\r\n        total_score:\r\n          -
+      '0'\r\n          - '1'\r\n          - '2'\r\n          - '3'\r\n          -
+      '4'\r\n          - '5'\r\n          - '6'\r\n          - '7'\r\n          -
+      '8'\r\n          - '9'\r\n        \r\n      not_any: &not_any_blanks\r\n        little_interest:
+      ''\r\n        feeling_down: ''\r\n        trouble_sleeping: ''\r\n        feeling_tired:
+      ''\r\n        poor_appetite: ''\r\n        feeling_bad: ''\r\n        trouble_concentrating:
+      ''\r\n        acting_slowly_or_restlessly: ''\r\n\r\n    placeholder_mod_depression:\r\n
+      \     all:\r\n        total_score:\r\n          - '10'\r\n          - '11'\r\n
+      \         - '12'\r\n          - '13'\r\n          - '14'\r\n          - '15'\r\n
+      \         - '16'\r\n          - '17'\r\n          - '18'\r\n          - '19'\r\n
+      \     not_any: *not_any_blanks\r\n        \r\n    placeholder_ineligible:\r\n
+      \     all:\r\n        total_score:\r\n          - '20'\r\n          - '21'\r\n
+      \         - '22'\r\n          - '23'\r\n          - '24'\r\n      not_any: *not_any_blanks\r\n\r\n"
+    user_email: 
+  - id: 298
+    name: Sleep Phone Screen Part 2 Ineligible
+    table_name: sleep_ps2_non_eligibles
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-08-01T09:33:07.925Z'
+    updated_at: '2019-11-04T13:28:22.444Z'
+    position: 
+    category: sleep-phone-screen-2
+    table_key_name: ''
+    field_list: any_questions_yes_no placeholder_no_questions notes questions_for_pi_yes_no
+      questions_for_pi_notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n\r\n    any_questions_yes_no: Do
+      you have any questions for me at this time?\r\n    \r\n    placeholder_no_questions:
+      Okay - thank you again for your interest and your time! \r\n    \r\n    notes:
+      \"*address questions and record them below*\"\r\n    \r\n    questions_for_pi_yes_no:
+      \"*also has questions for PI?\"\r\n    \r\n    questions_for_pi_notes: |\r\n
+      \     I will give your contact information to the research team at Brigham,
+      \r\n      and our study PI, Dr. Suzanne Bertisch, will reach out to you as soon
+      \r\n      as possible.  Can I please confirm the contact information I have
+      for you?\r\n\r\n      *Scroll to Participant Details to check and add any contact
+      information*\r\n    \r\n  show_if:\r\n  \r\n    placeholder_no_questions:\r\n
+      \     any_questions_yes_no: 'no'\r\n      \r\n      \r\n    notes:\r\n      any_questions_yes_no:
+      'yes'\r\n    \r\n    questions_for_pi_yes_no:\r\n      any_questions_yes_no:
+      'yes'\r\n    \r\n    questions_for_pi_notes:\r\n      questions_for_pi_yes_no:
+      'yes'\r\n\r\n"
     user_email: 
   - id: 293
     name: Sleep Initial Screening Part 2
@@ -7509,11 +7789,11 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-29T15:48:36.023Z'
-    updated_at: '2019-10-24T11:02:46.072Z'
+    updated_at: '2019-11-01T18:25:05.139Z'
     position: 
     category: sleep-phone-screen-2
     table_key_name: ''
-    field_list: select_is_good_time_to_speak,placeholder_complete_intro,any_questions_blank_yes_no,placeholder_end,placeholder_not_appropriate_time,follow_up_date,follow_up_time,placeholder_not_interested,notes
+    field_list: select_is_good_time_to_speak,placeholder_complete_intro,any_questions_blank_yes_no,question_notes,placeholder_end,placeholder_not_appropriate_time,follow_up_date,follow_up_time,placeholder_not_interested,notes
     result_order: ''
     options: "# select_is_good_time_to_speak\r\n# placeholder_complete_intro\r\n#
       any_questions_blank_yes_no\r\n# placeholder_end\r\n# placeholder_not_appropriate_time\r\n#
@@ -7525,13 +7805,13 @@ app_type:
       \r\n      name: sleep ps2 intro\r\n\r\n  show_if:\r\n\r\n    placeholder_not_appropriate_time:\r\n
       \     select_is_good_time_to_speak: not appropriate time\r\n\r\n    placeholder_complete_intro:\r\n
       \     select_is_good_time_to_speak: \"yes\"\r\n  \r\n\r\n    any_questions_blank_yes_no:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n      \r\n    placeholder_end:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n      any_questions_blank_yes_no:
-      \r\n        - \"yes\"\r\n        - \"no\"        \r\n\r\n\r\n    follow_up_date:\r\n
-      \     any:\r\n        select_is_good_time_to_speak: \r\n          - not appropriate
-      time\r\n          - left voicemail\r\n\r\n    follow_up_time:\r\n      any:\r\n
-      \       select_is_good_time_to_speak:\r\n          - not appropriate time\r\n
-      \         - left voicemail        \r\n        \r\n    placeholder_not_interested:\r\n
+      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    question_notes:\r\n      any_questions_blank_yes_no:
+      'yes'\r\n\r\n\r\n    placeholder_end:\r\n      select_is_good_time_to_speak:
+      \"yes\"\r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        -
+      \"no\"        \r\n\r\n\r\n    follow_up_date:\r\n      any:\r\n        select_is_good_time_to_speak:
+      \r\n          - not appropriate time\r\n          - left voicemail\r\n\r\n    follow_up_time:\r\n
+      \     any:\r\n        select_is_good_time_to_speak:\r\n          - not appropriate
+      time\r\n          - left voicemail        \r\n        \r\n    placeholder_not_interested:\r\n
       \     any:\r\n        select_is_good_time_to_speak: not interested\r\n        \r\n\r\n
       \ caption_before:\r\n\r\n    all_fields: |\r\n      *If there are issues during
       screening or participants have questions that are\r\n      not addressed in
@@ -7561,90 +7841,20 @@ app_type:
       look forward to connecting with you about future research opportunities! \r\n
       \           \r\n      Thank you for your time. \r\n\r\n    any_questions_blank_yes_no:
       |\r\n      Did you have any questions for me about this study before \r\n      we
-      go through the final screening questions?\r\n      \r\n      *Respond to questions*\r\n\r\n
-      \   placeholder_end: |\r\n      Great. And like my colleague mentioned last
-      time, some of the questions \r\n      may make you feel uncomfortable. You can
-      stop at any time. I want you to\r\n      know that we are recording your answers
-      in a completely secure system. \r\n      We do not share your data outside the
-      study team or without your\r\n      approval, but providing us with your health
-      information always has\r\n      a potential risk of loss of confidentiality.
-      May I begin?\r\n      \r\n      Since mood can often\r\n      contribute to
-      sleep problems, we will be asking you questions about\r\n      how you have
-      been feeling recently.\r\n\r\n\r\n    notes: Notes, questions or other information
-      for follow up\r\n    \r\n\r\n#    contact_details_notes: Contact details notes
-      for gift card. After completing the call, ensure contact details recorded here
-      are transferred to the subject's address record."
-    user_email: 
-  - id: 300
-    name: Sleep Phone Screen Part 2 Eligible
-    table_name: sleep_ps2_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-08-01T09:51:23.203Z'
-    updated_at: '2019-10-11T12:24:23.202Z'
-    position: 
-    category: sleep-phone-screen-2
-    table_key_name: ''
-    field_list: interested_yes_no not_interested_notes review_consent_now_yes_no placeholder_review_now
-      follow_up_date,follow_up_time notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n    \r\n\r\n    interested_yes_no:
-      Are you interested in participating?\r\n    \r\n    not_interested_notes: |\r\n
-      \     May I ask you why you are not interested? \r\n      \r\n      Thank you
-      for your time. \r\n      \r\n      *record reason, for example, too busy*\r\n
-      \   \r\n    review_consent_now_yes_no: |\r\n      Wonderful. The next step to
-      enrolling in the study is to complete \r\n      the informed consent.\r\n      \r\n
-      \     We can go through this now together if you have a few more \r\n      minutes
-      and access to your email account now. \r\n      \r\n      Shall we go through
-      the informed consent together?\r\n      \r\n      \r\n    placeholder_review_now:
-      |\r\n      *Email consent document to conduct consent and enrollment protocol.*\r\n\r\n
-      \     Save this form, then click the **+ Informed Consent** button to record\r\n
-      \     the informed consent.\r\n\r\n    \r\n    follow_up_date:\r\n      keep_label:
-      true\r\n      caption: |\r\n        I will email you the consent document for
-      you to review.\r\n        \r\n        Is there a more convenient time to go
-      through this together and \r\n        complete your enrollment?\r\n\r\n    notes:
-      Additional notes\r\n    \r\n    \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
-      \     interested_yes_no: 'no'\r\n      \r\n    review_consent_now_yes_no: \r\n
-      \     interested_yes_no: 'yes'\r\n\r\n    placeholder_review_now:\r\n      interested_yes_no:
-      'yes'\r\n      review_consent_now_yes_no: 'yes'\r\n\r\n    follow_up_date:\r\n
-      \     interested_yes_no: 'yes'\r\n      review_consent_now_yes_no: 'no'\r\n
-      \     \r\n    follow_up_time:\r\n      interested_yes_no: 'yes'\r\n      review_consent_now_yes_no:
-      'no'\r\n      \r\n    \r\n    "
-    user_email: 
-  - id: 298
-    name: Sleep Phone Screen Part 2 Ineligible
-    table_name: sleep_ps2_non_eligibles
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-08-01T09:33:07.925Z'
-    updated_at: '2019-08-19T13:43:15.056Z'
-    position: 
-    category: sleep-phone-screen-2
-    table_key_name: ''
-    field_list: any_questions_yes_no placeholder_no_questions placeholder_has_questions
-      questions_for_pi_yes_no questions_for_pi_notes notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n\r\n    any_questions_yes_no: Do
-      you have any questions for me at this time?\r\n    \r\n    placeholder_no_questions:
-      Okay - thank you again for your interest and your time! \r\n    \r\n    placeholder_has_questions:
-      \"*address questions*\"\r\n    \r\n    questions_for_pi_yes_no: \"*also has
-      questions for PI?\"\r\n    \r\n    questions_for_pi_notes: |\r\n       I will
-      give your contact information to the research team at Brigham, \r\n       and
-      our study PI, Dr. Suzanne Bertisch, will reach out to you as soon \r\n       as
-      possible.  Can I please confirm the contact information I have for you?\r\n
-      \      \r\n    notes: Additional notes\r\n    \r\n  show_if:\r\n  \r\n    placeholder_no_questions:\r\n
-      \     any_questions_yes_no: 'no'\r\n      \r\n    placeholder_has_questions:\r\n
-      \     any_questions_yes_no: 'yes'\r\n    \r\n    questions_for_pi_yes_no:\r\n
-      \     any_questions_yes_no: 'yes'\r\n    \r\n    questions_for_pi_notes:\r\n
-      \     questions_for_pi_yes_no: 'yes'\r\n\r\n"
+      go through the final screening questions?\r\n      \r\n    question_notes: |\r\n
+      \     *Respond to questions and take notes below*\r\n\r\n    placeholder_end:
+      |\r\n      Great. And like my colleague mentioned last time, some of the questions
+      \r\n      may make you feel uncomfortable. You can stop at any time. I want
+      you to\r\n      know that we are recording your answers in a completely secure
+      system. \r\n      We do not share your data outside the study team or without
+      your\r\n      approval, but providing us with your health information always
+      has\r\n      a potential risk of loss of confidentiality. May I begin?\r\n      \r\n
+      \     Since mood can often\r\n      contribute to sleep problems, we will be
+      asking you questions about\r\n      how you have been feeling recently.\r\n\r\n\r\n
+      \   notes: Notes, questions or other information for follow up\r\n    \r\n\r\n#
+      \   contact_details_notes: Contact details notes for gift card. After completing
+      the call, ensure contact details recorded here are transferred to the subject's
+      address record."
     user_email: 
   - id: 260
     name: Protocol Deviation
@@ -7781,7 +7991,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:54:58.753Z'
-    updated_at: '2019-10-23T17:55:32.832Z'
+    updated_at: '2019-11-04T18:50:38.417Z'
     position: 20
     category: sleep-records
     table_key_name: ''
@@ -7801,9 +8011,9 @@ app_type:
       \       eligible_for_study_blank_yes_no: yes\r\n        good_time_to_speak_blank_yes_no:
       \r\n          - 'yes'\r\n          - 'yes - during phone screen'\r\n\r\n    still_interested_blank_yes_no:\r\n
       \       eligible_for_study_blank_yes_no: yes\r\n        good_time_to_speak_blank_yes_no:
-      \r\n          - 'yes'\r\n          - 'yes - during phone screen'\r\n\r\n\r\n
-      \   consent_performed_yes_no:\r\n        eligible_for_study_blank_yes_no: yes\r\n
-      \       good_time_to_speak_blank_yes_no: \r\n          - 'yes'\r\n          -
+      \r\n          - 'yes'\r\n          - 'yes - during phone screen'\r\n\r\n#    still_interested_blank_yes_no:\r\n#
+      \     never: true\r\n\r\n\r\n    consent_performed_yes_no:\r\n        eligible_for_study_blank_yes_no:
+      yes\r\n        good_time_to_speak_blank_yes_no: \r\n          - 'yes'\r\n          -
       'yes - during phone screen'\r\n        still_interested_blank_yes_no: yes\r\n
       \   \r\n    did_subject_consent_yes_no:\r\n        eligible_for_study_blank_yes_no:
       yes\r\n        good_time_to_speak_blank_yes_no: \r\n          - 'yes'\r\n          -
@@ -8632,14 +8842,15 @@ app_type:
       end\r\n  || ' ' ||\r\n  case when extra_log_type = 'schedule_screening' then
       'scheduled HMS screening'\r\n  when extra_log_type = 'schedule_screening_2'
       then 'scheduled BWH screening'\r\n  when extra_log_type = 'screening_follow_up'
-      then 'scheduled informed consent'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event']
-      \"classNames\",\r\n    '/masters/' || master_id \"url\"\r\nFROM scheduled_calls\r\n\r\nUNION\r\n\r\nSELECT\r\n
-      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
-      \ NULL,\r\n  case when select_next_step = 'email back' then '(email)'\r\n  else
-      '(call)' end\r\n  || ' ' ||\r\n  case when extra_log_type = 'participant_follow_up'
-      then 'PI follow up'\r\n  when extra_log_type = 'participant_communication' then
-      'PI participant communication'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-pi-call-event']
-      \"classNames\",\r\n    '/masters/' || master_id || '#activity-log--sleep-assignment-med-navs-'
+      then 'scheduled informed consent'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event',
+      extra_log_type] \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM
+      scheduled_calls\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n  follow_up_when::varchar
+      || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n  case when select_next_step
+      = 'email back' then '(email)'\r\n  else '(call)' end\r\n  || ' ' ||\r\n  case
+      when extra_log_type = 'participant_follow_up' then 'PI follow up'\r\n  when
+      extra_log_type = 'participant_communication' then 'PI participant communication'\r\n
+      \ else extra_log_type end\r\n  ,\r\n  array['report-cal-pi-call-event'] \"classNames\",\r\n
+      \   '/masters/' || master_id || '#activity-log--sleep-assignment-med-navs-'
       || master_id \"url\"\r\nFROM pi_calls\r\n;\r\n"
     search_attrs: "\r\nfrom_date: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n
       \   default: -6 months\r\n\r\nto_date: \r\n  date: \r\n    all: true\r\n    multiple:
@@ -8648,7 +8859,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-08-09T15:59:19.661Z'
-    updated_at: '2019-10-24T10:32:31.537Z'
+    updated_at: '2019-11-04T19:07:46.984Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -8662,8 +8873,9 @@ app_type:
       \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
       \     background-color: red\r\n      border-color: red\r\n      text-align:
       center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
-      gray\r\n    report-cal-pi-call-event:\r\n      background-color: '#044'\r\n
-      \     border-color: gray\r\n    "
+      gray\r\n    report-cal-call-event.schedule_screening_2:\r\n      background-color:
+      '#155fbb'\r\n      border-color: gray\r\n    report-cal-pi-call-event:\r\n      background-color:
+      '#044'\r\n      border-color: gray\r\n"
     user_email: 
   - id: 115
     name: Ready for HMS Screening
@@ -9251,27 +9463,27 @@ app_type:
     value: cis-paper
     item_type: player_contacts_source
     created_at: '2015-09-24T20:27:47.697Z'
-    updated_at: '2019-10-22T10:59:18.062Z'
-    disabled: 
-    admin_id: 1
-    create_with: true
-    edit_if_set: 
-    edit_always: true
+    updated_at: '2019-11-01T15:05:39.074Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1220
-    description: 
-    lock: 
+    description: ''
+    lock: false
     user_email: 
   - id: 48
     name: cis-email
     value: cis-email
     item_type: player_contacts_source
     created_at: '2015-09-24T20:28:09.928Z'
-    updated_at: '2019-10-22T10:59:18.059Z'
+    updated_at: '2019-11-01T15:04:54.595Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1210
     description: ''
     lock: false
@@ -9341,12 +9553,12 @@ app_type:
     value: cis-redcap
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.596Z'
-    updated_at: '2019-10-22T10:59:18.070Z'
+    updated_at: '2019-11-01T15:05:02.726Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1240
     description: ''
     lock: false
@@ -9386,12 +9598,12 @@ app_type:
     value: player referral
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.612Z'
-    updated_at: '2019-10-22T10:59:18.184Z'
+    updated_at: '2019-11-01T15:05:24.879Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 
     description: ''
     lock: false
@@ -9401,12 +9613,12 @@ app_type:
     value: public source
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.617Z'
-    updated_at: '2019-10-22T10:59:18.188Z'
+    updated_at: '2019-11-01T15:05:15.459Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 
     description: ''
     lock: false
@@ -9416,12 +9628,12 @@ app_type:
     value: event
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.622Z'
-    updated_at: '2019-10-22T10:59:18.177Z'
+    updated_at: '2019-11-01T15:05:49.742Z'
     disabled: false
-    admin_id: 1
-    create_with: true
-    edit_if_set: false
-    edit_always: true
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 
     description: ''
     lock: false
@@ -9431,15 +9643,15 @@ app_type:
     value: cis-phone
     item_type: player_contacts_source
     created_at: '2018-09-11T11:53:34.627Z'
-    updated_at: '2019-10-22T10:59:18.066Z'
-    disabled: 
-    admin_id: 1
-    create_with: true
-    edit_if_set: 
-    edit_always: true
+    updated_at: '2019-11-01T15:06:00.317Z'
+    disabled: false
+    admin_id: 2
+    create_with: false
+    edit_if_set: true
+    edit_always: false
     position: 1230
-    description: 
-    lock: 
+    description: ''
+    lock: false
     user_email: 
   - id: 196
     name: not set
@@ -12114,7 +12326,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:57:40.342Z'
-    updated_at: '2019-07-10T16:07:10.689Z'
+    updated_at: '2019-11-04T18:40:34.691Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 185
     app_type_id: 14
@@ -13300,27 +13512,27 @@ app_type:
     role_name: interventionist
     user_id: 91
     admin_id: 2
-    disabled: false
+    disabled: true
     created_at: '2019-10-24T16:20:57.902Z'
-    updated_at: '2019-10-24T16:20:57.902Z'
+    updated_at: '2019-11-01T16:32:26.719Z'
     user_email: phil@test
   - id: 338
     app_type_id: 14
     role_name: user - discussions
     user_id: 91
     admin_id: 2
-    disabled: false
+    disabled: true
     created_at: '2019-10-24T16:21:09.637Z'
-    updated_at: '2019-10-24T16:21:09.637Z'
+    updated_at: '2019-11-01T16:33:14.993Z'
     user_email: phil@test
   - id: 339
     app_type_id: 14
     role_name: user - participant details
     user_id: 91
     admin_id: 2
-    disabled: false
+    disabled: true
     created_at: '2019-10-24T16:21:18.303Z'
-    updated_at: '2019-10-24T16:21:18.303Z'
+    updated_at: '2019-11-01T16:33:03.035Z'
     user_email: phil@test
   - id: 340
     app_type_id: 14
@@ -14321,6 +14533,285 @@ app_type:
     created_at: '2019-10-30T09:41:08.928Z'
     updated_at: '2019-10-30T09:41:08.928Z'
     user_email: sleep-pi@template
+  - id: 451
+    app_type_id: 14
+    role_name: junk
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:32:51.588Z'
+    updated_at: '2019-11-01T16:32:51.588Z'
+    user_email: phil@test
+  - id: 452
+    app_type_id: 14
+    role_name: tracker
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.463Z'
+    updated_at: '2019-11-01T16:34:19.621Z'
+    user_email: phil@test
+  - id: 453
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.520Z'
+    updated_at: '2019-11-01T16:34:15.302Z'
+    user_email: phil@test
+  - id: 454
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.531Z'
+    updated_at: '2019-11-01T16:34:44.463Z'
+    user_email: phil@test
+  - id: 455
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.544Z'
+    updated_at: '2019-11-01T16:34:40.673Z'
+    user_email: phil@test
+  - id: 456
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.564Z'
+    updated_at: '2019-11-01T16:34:36.414Z'
+    user_email: phil@test
+  - id: 457
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.575Z'
+    updated_at: '2019-11-01T16:34:32.002Z'
+    user_email: phil@test
+  - id: 458
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.584Z'
+    updated_at: '2019-11-01T16:34:28.167Z'
+    user_email: phil@test
+  - id: 459
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:33:43.597Z'
+    updated_at: '2019-11-01T16:34:23.750Z'
+    user_email: phil@test
+  - id: 460
+    app_type_id: 14
+    role_name: tracker
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.748Z'
+    updated_at: '2019-11-01T16:39:35.748Z'
+    user_email: phil@test
+  - id: 461
+    app_type_id: 14
+    role_name: nfs_store group 600
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.791Z'
+    updated_at: '2019-11-01T16:39:35.791Z'
+    user_email: phil@test
+  - id: 462
+    app_type_id: 14
+    role_name: user - protocol exception
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.800Z'
+    updated_at: '2019-11-01T16:39:35.800Z'
+    user_email: phil@test
+  - id: 463
+    app_type_id: 14
+    role_name: user - protocol deviation
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.808Z'
+    updated_at: '2019-11-01T16:39:35.808Z'
+    user_email: phil@test
+  - id: 464
+    app_type_id: 14
+    role_name: user - phone screen 2
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.816Z'
+    updated_at: '2019-11-01T16:39:35.816Z'
+    user_email: phil@test
+  - id: 465
+    app_type_id: 14
+    role_name: user - phone screen
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.829Z'
+    updated_at: '2019-11-01T16:39:35.829Z'
+    user_email: phil@test
+  - id: 466
+    app_type_id: 14
+    role_name: user - mednav
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.837Z'
+    updated_at: '2019-11-01T16:39:35.837Z'
+    user_email: phil@test
+  - id: 467
+    app_type_id: 14
+    role_name: user - inex
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.844Z'
+    updated_at: '2019-11-01T16:39:35.844Z'
+    user_email: phil@test
+  - id: 468
+    app_type_id: 14
+    role_name: user - discussions
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.850Z'
+    updated_at: '2019-11-01T16:39:35.850Z'
+    user_email: phil@test
+  - id: 469
+    app_type_id: 14
+    role_name: user - adverse event
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.858Z'
+    updated_at: '2019-11-01T16:39:35.858Z'
+    user_email: phil@test
+  - id: 470
+    app_type_id: 14
+    role_name: sms - pi follow up
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.865Z'
+    updated_at: '2019-11-01T16:39:35.865Z'
+    user_email: phil@test
+  - id: 471
+    app_type_id: 14
+    role_name: sms - pi
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.871Z'
+    updated_at: '2019-11-01T16:39:35.871Z'
+    user_email: phil@test
+  - id: 472
+    app_type_id: 14
+    role_name: phone screener 2
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.878Z'
+    updated_at: '2019-11-01T18:04:46.085Z'
+    user_email: phil@test
+  - id: 473
+    app_type_id: 14
+    role_name: email - adverse event review
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.891Z'
+    updated_at: '2019-11-01T16:39:35.891Z'
+    user_email: phil@test
+  - id: 474
+    app_type_id: 14
+    role_name: email - protocol deviation review
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.898Z'
+    updated_at: '2019-11-01T16:39:35.898Z'
+    user_email: phil@test
+  - id: 475
+    app_type_id: 14
+    role_name: email - pi follow up
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.911Z'
+    updated_at: '2019-11-01T16:39:35.911Z'
+    user_email: phil@test
+  - id: 476
+    app_type_id: 14
+    role_name: email - pi
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T16:39:35.918Z'
+    updated_at: '2019-11-01T16:39:35.918Z'
+    user_email: phil@test
+  - id: 477
+    app_type_id: 14
+    role_name: interventionist
+    user_id: 91
+    admin_id: 2
+    disabled: true
+    created_at: '2019-11-01T16:45:18.192Z'
+    updated_at: '2019-11-01T16:45:18.192Z'
+    user_email: phil@test
+  - id: 478
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 91
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T17:11:50.521Z'
+    updated_at: '2019-11-01T17:11:50.521Z'
+    user_email: phil@test
+  - id: 479
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 95
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T17:12:05.980Z'
+    updated_at: '2019-11-01T17:12:05.980Z'
+    user_email: sleep-pi@template
+  - id: 480
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 87
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T17:12:12.575Z'
+    updated_at: '2019-11-01T17:12:12.575Z'
+    user_email: sleep-pi@test
+  - id: 481
+    app_type_id: 14
+    role_name: user - participant details
+    user_id: 99
+    admin_id: 2
+    disabled: false
+    created_at: '2019-11-01T17:12:18.631Z'
+    updated_at: '2019-11-01T17:12:18.631Z'
+    user_email: sleep-pi@test2
   associated_message_templates:
   - id: 22
     name: standard sms layout
@@ -14337,28 +14828,29 @@ app_type:
     name: sleep ps intro
     message_type: dialog
     template_type: content
-    template: "<p>\r\n  Hello, my name is [NAME] calling from the Harvard Football
-      Players Health Study, how are you doing today? \r\n</p>\r\n<p>\r\n  I am calling
-      because we are working with researchers at \r\n  Brigham and Women’s Hospital
-      on a new study called\r\n  ‘Sleep Bootcamp’, a proven program to improve sleep
-      without medications. \r\n  I would love to tell you a bit more about this study
-      and, if you are \r\n  interested, determine whether you are eligible to participate.
-      \r\n  Are you interested in hearing more, and do you have 10 or 15 minutes \r\n
-      \ to speak with me right now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
-      \ Hello, my name is [NAME] calling from the Harvard Football Players Health
-      Study. \r\n  I am calling because we are working with researchers at \r\n  Brigham
-      and Women’s Hospital on a new study called ‘Sleep Bootcamp’, \r\n  a proven
-      program to improve sleep without medications. I would love to speak \r\n  with
-      you on the phone to discuss whether you are interested and eligible to participate
-      \r\n  in this study.  \r\n</p>\r\n<p>\r\n  You can reach me by email at [EMAIL]
-      or by phone at [###-###-####]. \r\n  Please leave a message if I don’t answer
-      and I’ll call you back as soon as I can. \r\n  Again - my name is [XXXXXX] from
-      the Harvard Football Players Health Study \r\n  and you can reach me at [###-###-####].
+    template: "<p>\r\n  Hello, my name is {{current_user.first_name}} calling from
+      the Harvard Football Players Health Study, how are you doing today? \r\n</p>\r\n<p>\r\n
+      \ I am calling because we are working with researchers at \r\n  Brigham and
+      Women’s Hospital on a new study called\r\n  ‘Sleep Bootcamp’, a proven program
+      to improve sleep without medications. \r\n  I would love to tell you a bit more
+      about this study and, if you are \r\n  interested, determine whether you are
+      eligible to participate. \r\n  Are you interested in hearing more, and do you
+      have 10 or 15 minutes \r\n  to speak with me right now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
+      \ Hello, my name is {{current_user.first_name}} calling from the Harvard Football
+      Players Health Study. \r\n  I am calling because we are working with researchers
+      at \r\n  Brigham and Women’s Hospital on a new study called ‘Sleep Bootcamp’,
+      \r\n  a proven program to improve sleep without medications. I would love to
+      speak \r\n  with you on the phone to discuss whether you are interested and
+      eligible to participate \r\n  in this study.  \r\n</p>\r\n<p>\r\n  You can reach
+      me by email at {{current_user.email}} or by phone at [{{current_user_contact_info.phone_number}}].
+      \r\n  Please leave a message if I don’t answer and I’ll call you back as soon
+      as I can. \r\n  Again - my name is {{current_user.first_name}} from the Harvard
+      Football Players Health Study \r\n  and you can reach me at [{{current_user_contact_info.phone_number}}].
       Thank you. \r\n</p>\r\n<hr>"
     admin_id: 2
     disabled: false
     created_at: '2019-07-08T14:56:21.217Z'
-    updated_at: '2019-10-24T11:11:15.805Z'
+    updated_at: '2019-10-31T18:00:52.261Z'
     category: sleep
     user_email: 
   - id: 27
@@ -14453,28 +14945,30 @@ app_type:
     message_type: dialog
     template_type: content
     template: "<p><b>Participant answers the phone</b></p>\r\n<p>\r\n  Hello, my name
-      is [NAME] and I am calling about the Harvard Football Players\r\n  ‘Sleep Bootcamp’
-      research study. Thank you for your interest \r\n  in our research study. How
-      are you doing today?\r\n</p>\r\n<p>\r\n  I understand you recently spoke with
-      my colleague about this proven program\r\n  to improve sleep. I know you already
-      went through many eligibility questions. \r\n  I have a few more but will be
-      able to determine if you are eligible \r\n  once we’re done. Would you be willing
-      to answer the remaining questions \r\n  about your health and medical history
-      to find out if you might \r\n  qualify for the study? Is this a good time to
-      talk? Do \r\n  you have 5-10 minutes to speak with me now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
-      \ Hello, my name is [NAME] calling from the Harvard Football Players Health
-      Study \r\n  about the  ‘Sleep Bootcamp’ research study. \r\n  I understand you
-      recently spoke with my colleague -- \r\n  I am following-up from Brigham and
-      Women’s Hospital and I would love to speak \r\n  with you on the phone to discuss
-      whether you are interested and \r\n  eligible in participating in this study.
-      \r\n</p>\r\n<p>\r\n  You can reach me by email at [EMAIL] or by phone at [###-###-####].
-      \r\n  Please leave a message if I don’t answer and I’ll call you back as soon
-      as I can. \r\n  Again - my name is [XXXXXX] from the Harvard Football Players
-      Health Study \r\n  and you can reach me at [###-###-####]. Thank you. \r\n</p>\r\n<hr>"
+      is {{current_user.first_name}} and I am calling about the Harvard Football Players\r\n
+      \ ‘Sleep Bootcamp’ research study. Thank you for your interest \r\n  in our
+      research study. How are you doing today?\r\n</p>\r\n<p>\r\n  I understand you
+      recently spoke with my colleague about this proven program\r\n  to improve sleep.
+      I know you already went through many eligibility questions. \r\n  I have a few
+      more but will be able to determine if you are eligible \r\n  once we’re done.
+      Would you be willing to answer the remaining questions \r\n  about your health
+      and medical history to find out if you might \r\n  qualify for the study? Is
+      this a good time to talk? Do \r\n  you have 5-10 minutes to speak with me now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
+      \ Hello, my name is {{current_user.first_name}} calling from the Harvard Football
+      Players Health Study \r\n  about the  ‘Sleep Bootcamp’ research study. \r\n
+      \ I understand you recently spoke with my colleague -- \r\n  I am following-up
+      from Brigham and Women’s Hospital and I would love to speak \r\n  with you on
+      the phone to discuss whether you are interested and \r\n  eligible in participating
+      in this study. \r\n</p>\r\n<p>\r\n  You can reach me by email at {{current_user.email}}
+      or by phone at [{{current_user_contact_info.phone_number}}]. \r\n  Please leave
+      a message if I don’t answer and I’ll call you back as soon as I can. \r\n  Again
+      - my name is {{current_user.first_name}} from the Harvard Football Players Health
+      Study \r\n  and you can reach me at [{{current_user_contact_info.phone_number}}].
+      Thank you. \r\n</p>\r\n<hr>"
     admin_id: 2
     disabled: false
     created_at: '2019-07-29T15:50:38.282Z'
-    updated_at: '2019-10-24T11:01:32.171Z'
+    updated_at: '2019-10-31T18:01:40.517Z'
     category: sleep
     user_email: 
   - id: 42
