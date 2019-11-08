@@ -1,6 +1,6 @@
 set search_path=sleep, ml_app;
 
-      BEGIN;
+  BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_ps_audit_c_questions alcohol_frequency daily_alcohol six_or_more_frequency total_score

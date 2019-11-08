@@ -1,6 +1,6 @@
 set search_path=sleep, ml_app;
 
-      BEGIN;
+  BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_isi_questions falling_asleep staying_asleep waking_too_early satisfaction_with_pattern noticeable_to_others worried_distressed interferes_with_daily_function

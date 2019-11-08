@@ -1,6 +1,6 @@
 set search_path=sleep, ml_app;
 
-      BEGIN;
+  BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_ese_questions sitting_and_reading watching_tv public_place car_passenger afternoon_rest sitting_and_talking after_lunch stopped_in_traffic total_score number_hours_sleep ineligible_resource_yes_no placeholder_resource
