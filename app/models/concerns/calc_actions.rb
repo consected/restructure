@@ -317,6 +317,16 @@ module CalcActions
           else
 
             if expected_val.is_a?(Hash)
+
+              # If this is a condition rather than an association reference, set it up to be calculated
+              # Generate a query that references the in_instance object through its association,
+              # specifying the id as an expected value, plus the condition to be calculated within the query
+              if expected_val[:condition]
+                assoc_name = ModelReference.record_type_to_ns_table_name(in_instance).pluralize.to_sym
+                expected_val = { assoc_name => { field_name => expected_val, id: in_instance.id } }
+                field_name = :all
+              end
+
               if is_selection_type field_name
                 ca = ConditionalActions.new({field_name => expected_val}, in_instance, current_scope: @condition_scope, return_failures: return_failures)
                 res &&= ca.calc_action_if

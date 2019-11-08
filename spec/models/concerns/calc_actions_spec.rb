@@ -1301,7 +1301,7 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ConditionalActions.new conf, @al
     expect {
-      res.calc_action_if
+     res.calc_action_if
     }.to raise_error(FphsException)
 
 
@@ -1338,6 +1338,39 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
+
+
+
+    # Right to Left conditions in "this" - a special case that requires extra calculation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: "= LENGTH",
+            value: "#{@al.select_who.length + 1}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+
+    # Right to Left conditions in "this" - a special case that requires extra calculation
+    conf = {
+      all: {
+        this: {
+          select_who: {
+            condition: "= LENGTH",
+            value: "#{@al.select_who.length}"
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
 
   end
 
