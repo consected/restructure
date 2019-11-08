@@ -1001,6 +1001,26 @@ _fpa.form_utils = {
           $(this).datepicker('hide');
         });
 
+
+        // Automatically format the date on / being entered by hand,
+        // making it easy to type 9/7/1963 and get 09/07/1963
+        $(this).on('keyup', function(e) {
+          console.log('hit');
+          var key = e.which;
+
+          if (key == 191) {
+              var v = $(this).val();
+              var vparts = v.split('/');
+              for(var i in vparts) {
+                var vp = vparts[i];
+                if (i > 1) break;
+                if(vp == null || vp == '') break;
+                if(vp.length < 2) vparts[i] = '0' + vp;
+              }
+              $(this).val(vparts.join('/'));
+          }
+        });
+
         $(this).mask('09\/09\/0000', {translation: _fpa.masker.translation, placeholder: "__/__/____"});
         $(this).addClass('attached-datepicker date-is-local');
       });
