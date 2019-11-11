@@ -1,6 +1,6 @@
 set search_path=sleep, ml_app;
 
-      BEGIN;
+  BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_ps_basic_responses reliable_internet_yes_no placeholder_digital_no cbt_yes_no cbt_how_long_ago cbt_notes sleep_times_yes_no sleep_times_notes work_night_shifts_yes_no number_times_per_week_work_night_shifts narcolepsy_diagnosis_yes_no_dont_know narcolepsy_diagnosis_notes antiseizure_meds_yes_no seizure_in_ten_years_yes_no major_psychiatric_disorder_yes_no notes
@@ -27,6 +27,7 @@ set search_path=sleep, ml_app;
                       seizure_in_ten_years_yes_no,
                       major_psychiatric_disorder_yes_no,
                       possibly_eligible_yes_no,
+                      possibly_eligible_reason_notes,
                       notes,
                       user_id,
                       created_at,
@@ -50,6 +51,7 @@ set search_path=sleep, ml_app;
                       NEW.seizure_in_ten_years_yes_no,
                       NEW.major_psychiatric_disorder_yes_no,
                       NEW.possibly_eligible_yes_no,
+                      NEW.possibly_eligible_reason_notes,
                       NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
@@ -78,6 +80,7 @@ set search_path=sleep, ml_app;
           seizure_in_ten_years_yes_no varchar,
           major_psychiatric_disorder_yes_no varchar,
           possibly_eligible_yes_no VARCHAR,
+          possibly_eligible_reason_notes varchar,
           notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -112,6 +115,7 @@ set search_path=sleep, ml_app;
           seizure_in_ten_years_yes_no varchar,
           major_psychiatric_disorder_yes_no varchar,
           possibly_eligible_yes_no VARCHAR,
+          possibly_eligible_reason_notes varchar,
           notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,

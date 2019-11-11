@@ -1,6 +1,6 @@
 set search_path=sleep, ml_app;
 
-      BEGIN;
+  BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_ps_dast2_mod_questions number_days_negative_feeling number_days_drug_usage
@@ -15,6 +15,7 @@ set search_path=sleep, ml_app;
                       number_days_negative_feeling,
                       number_days_drug_usage,
                       possibly_eligible_yes_no,
+                      possibly_eligible_reason_notes,
                       notes,
                       audit_c_eligible_yes_no,
                       user_id,
@@ -27,6 +28,7 @@ set search_path=sleep, ml_app;
                       NEW.number_days_negative_feeling,
                       NEW.number_days_drug_usage,
                       NEW.possibly_eligible_yes_no,
+                      NEW.possibly_eligible_reason_notes,
                       NEW.notes,
                       NEW.audit_c_eligible_yes_no,
                       NEW.user_id,
@@ -44,6 +46,7 @@ set search_path=sleep, ml_app;
           number_days_negative_feeling integer,
           number_days_drug_usage integer,
           possibly_eligible_yes_no VARCHAR,
+          possibly_eligible_reason_notes VARCHAR,
           notes VARCHAR,
           audit_c_eligible_yes_no VARCHAR,
           user_id integer,
@@ -67,6 +70,7 @@ set search_path=sleep, ml_app;
           number_days_negative_feeling integer,
           number_days_drug_usage integer,
           possibly_eligible_yes_no VARCHAR,
+          possibly_eligible_reason_notes VARCHAR,
           notes VARCHAR,
           audit_c_eligible_yes_no VARCHAR,
           user_id integer,

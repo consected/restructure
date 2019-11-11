@@ -1,6 +1,6 @@
 set search_path=sleep, ml_app;
 
-      BEGIN;
+  BEGIN;
 
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create sleep_isi_questions falling_asleep staying_asleep waking_too_early satisfaction_with_pattern noticeable_to_others worried_distressed interferes_with_daily_function
@@ -24,6 +24,7 @@ set search_path=sleep, ml_app;
                       trust_assessment_info_yes_no,
                       help_finding_pcp_yes_no,
                       possibly_eligible_yes_no,
+                      possibly_eligible_reason_notes,
                       notes,
                       user_id,
                       created_at,
@@ -44,6 +45,7 @@ set search_path=sleep, ml_app;
                       NEW.trust_assessment_info_yes_no,
                       NEW.help_finding_pcp_yes_no,
                       NEW.possibly_eligible_yes_no,
+                      NEW.possibly_eligible_reason_notes,
                       NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
@@ -69,6 +71,7 @@ set search_path=sleep, ml_app;
           trust_assessment_info_yes_no VARCHAR,
           help_finding_pcp_yes_no VARCHAR,
           possibly_eligible_yes_no VARCHAR,
+          possibly_eligible_reason_notes varchar,
           notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
@@ -100,6 +103,7 @@ set search_path=sleep, ml_app;
           trust_assessment_info_yes_no VARCHAR,
           help_finding_pcp_yes_no VARCHAR,
           possibly_eligible_yes_no VARCHAR,
+          possibly_eligible_reason_notes varchar,
           notes VARCHAR,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
