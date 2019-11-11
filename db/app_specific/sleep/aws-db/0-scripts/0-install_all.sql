@@ -24,11 +24,12 @@ set search_path=sleep,ml_app;
 \i db/app_specific/sleep/aws-db/phone-screen/create_ps_init_screening_table.sql
 
 -- # Sleep Screening
+\i db/app_specific/sleep/aws-db/screening/create_ps_init_screening_table.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ese_questions.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_isi_questions.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_audit_c_questions.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_basic_responses.sql
-\i db/app_specific/sleep/aws-db/screening/create_sleep_ps_dast_2_mod_questions.sql
+\i db/app_specific/sleep/aws-db/screening/create_sleep_ps_dast2_mod_questions.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_eligibles.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_non_eligibles.sql
 \i db/app_specific/sleep/aws-db/screening/create_sleep_ps_eligibility_followups.sql
