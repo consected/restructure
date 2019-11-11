@@ -148,7 +148,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
       tag = tagp.first
       res = data[tag] || data[tag.to_sym] || ''
 
-      res = formatter_do(res.class, res, current_user: data[:current_user])
+      res = formatter_do(res.class, res, current_user: data[:current_user_instance])
 
       return if res.nil?
 
@@ -203,13 +203,25 @@ class Admin::MessageTemplate < ActiveRecord::Base
       end
 
       if item.respond_to?(:user) && item.user
+        cu = item.user
+        data[:item_user] = item.user.attributes
+        data[:current_user] = item.user.attributes
         data[:user_email] = item.user.email
         data[:user_preference] = item.user.user_preference.attributes
+
+        if item.user.contact_info
+          data[:user_contact_info] = item.user.contact_info.attributes
+        else
+          data[:user_contact_info] = Users::ContactInfo.new.attributes
+        end
       end
 
       if item.respond_to?(:current_user) && item.current_user
+        cu = item.current_user
+        data[:current_user] = item.current_user.attributes
         data[:user_email] ||= item.current_user.email
         data[:user_preference] ||= item.current_user.user_preference.attributes
+
       end
 
       if item.respond_to?(:master)
@@ -223,12 +235,19 @@ class Admin::MessageTemplate < ActiveRecord::Base
 
         data[:master] = master
         data[:master_id] = master.id
-        data[:current_user] = master.current_user
+        cu = master.current_user
+        data[:current_user] = cu.attributes if cu
+        data[:current_user_instance] = cu
         # Alternative ids are evaluated as needed
         # Associations are evaluated as needed in the data substitution, to avoid slowing everything down
 
       end
 
+      if cu && cu.respond_to?(:contact_info) && cu.contact_info
+        data[:current_user_contact_info] = cu.contact_info.attributes
+      else
+        data[:current_user_contact_info] = Users::ContactInfo.new.attributes
+      end
 
 
       data
@@ -264,6 +283,7 @@ class Admin::MessageTemplate < ActiveRecord::Base
         end
 
         data[an.to_sym][:current_user] = data[:current_user] if data[an.to_sym]
+        data[an.to_sym][:current_user_instance] = data[:current_user_instance] if data[an.to_sym]
       rescue => e
         Rails.logger.info "Get associations for #{an} failed: #{e}"
       end

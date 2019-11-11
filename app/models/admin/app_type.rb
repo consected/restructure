@@ -175,7 +175,13 @@ class Admin::AppType < Admin::AdminBase
 
         if parent
           has_user = parent.send(assoc_name).attribute_names.include?('user_id')
-          cond[:user] = user = self.class.user_from_email ac['user_email'] if has_user
+
+          if has_user
+            # Check if the user exists, based on its email. If not, and the email ends with @template, create a user as a placeholder
+            user = self.class.user_from_email ac['user_email']
+            User.create(email: ac['user_email'], first_name: 'template', last_name: 'template', current_admin: admin) if user == :unknown && ac['user_email'].end_with?('@template')
+            cond[:user] = user
+          end
           unless user == :unknown
             # Use the app type's admin as the current admin
             new_vals[:user] = user if has_user

@@ -38,7 +38,7 @@ class SaveTriggers::Notify < SaveTriggers::SaveTriggersBase
   def initialize config, item
     super
 
-    @model_defs = config
+    @model_defs = config.deep_dup
     @model_defs = [@model_defs] unless @model_defs.is_a? Array
 
   end
