@@ -1,10 +1,12 @@
 <%
   def_format = app_config_text(:notes_field_format)
   fopt = field_options_for(form_object_instance, field_name_sym)
-  editor_format = fopt[:format] || def_format
-  if editor_format.present?
-    extra_class = "edit-as-custom edit-as-#{editor_format}"
-    edid = "custom-editor-#{form_object_instance.class.name.ns_hyphenate}-#{field_name_sym}-#{form_object_instance.id}"
+  unless @plain_notes
+    editor_format = fopt[:format] || def_format
+    if editor_format.present?
+      extra_class = "edit-as-custom edit-as-#{editor_format}"
+      edid = "custom-editor-#{form_object_instance.class.name.ns_hyphenate}-#{field_name_sym}-#{form_object_instance.id}"
+    end
   end
 %>
 <%= form.label field_name_sym, label_for(field_name_sym, labels) %>

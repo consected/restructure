@@ -1,6 +1,8 @@
+
 <%
 invalid_items = 0
 filled_items = 0
+@plain_notes = true
 %>
   <div id="import-container" class="hide-blank-rows">
     <%= form_for(@import, class: "inline-form", remote: false, html: {'data-result-target' => '#import-edit-results', 'data-template' => "edit-edit-result"}) do |form| %>
@@ -45,6 +47,9 @@ filled_items = 0
                   <td class="row-num">
                     <%= row_num %>
                   </td>
+                  <%
+                    gs_prefix = general_selection_prefix_name(form_object_instance)
+                  %>
                   <% fields.each do |field_name_sym|
 
                   %>
@@ -64,7 +69,7 @@ filled_items = 0
                           field_name_sym: field_name_sym,
                           field_name: field_name,
                           column_type: column_type,
-                          general_selection_name: general_selection_prefix_name(form_object_instance),
+                          general_selection_name: gs_prefix,
                           form_object_instance: form_object_instance,
                           form_object_item_type_us: form_object_item_type_us,
                           caption_before: {},

@@ -5,7 +5,7 @@
   # Get the list of filenames for templates, making them into the matchers we wish to use.
   # Sort by length to ensure the more specific matchers appear before the less specific matchers.
   # For example 'name_starts_with_select_record_from' should be tested before 'name_starts_with_select'
-  f_names = Dir.entries(Rails.root.join 'app', 'views', 'common_templates', 'edit_fields').reject {|fn| fn.start_with?('.')}.map {|fn| fn[1..-10]}.sort {|a,b| b.length <=> a.length}
+  f_names = @f_names ||= Dir.entries(Rails.root.join 'app', 'views', 'common_templates', 'edit_fields').reject {|fn| fn.start_with?('.')}.map {|fn| fn[1..-10]}.sort {|a,b| b.length <=> a.length}
 
   got = false
 
@@ -69,7 +69,13 @@
   end
 
   unless got
-    if Classification::GeneralSelection.exists_for? form_object_instance, curr_field_name_sym %>
+
+    @gs_exists ||= {}
+    ckey = "#{form_object_instance.class.name}--#{curr_field_name_sym}"
+    @gs_exists[ckey] = !!Classification::GeneralSelection.exists_for?(form_object_instance, curr_field_name_sym) if @gs_exists[ckey].nil?
+    gs_exists = @gs_exists[ckey]
+
+    if gs_exists %>
       <%= render partial: "common_templates/edit_fields/is_general_selection", locals: local_vars[:locals] %>
     <%
       got = true
