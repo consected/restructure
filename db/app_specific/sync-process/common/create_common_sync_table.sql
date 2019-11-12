@@ -9,6 +9,8 @@ create table if not exists sync_statuses
     to_db varchar,
     to_master_id integer,
     select_status varchar default 'new',
+    external_id varchar,
+    external_type varchar,
     created_at timestamp without time zone,
     updated_at timestamp without time zone
   )
