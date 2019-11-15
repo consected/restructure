@@ -2,6 +2,11 @@ create schema IF NOT EXISTS sleep AUTHORIZATION fphs;
 
 set search_path=sleep,ml_app;
 
+-- # Access
+\i db/app_specific/sleep/aws-db/access/create_sleep_access_pis.sql
+\i db/app_specific/sleep/aws-db/access/create_sleep_access_bwh_staffs.sql
+\i db/app_specific/sleep/aws-db/access/create_sleep_access_interventionists.sql
+
 -- # External Identifier
 \i db/app_specific/sleep/aws-db/external-id/create_ext_id_assignments.sql
 \i db/app_specific/sleep/aws-db/external-id/create_bwh_sleep_id_numbers.sql
