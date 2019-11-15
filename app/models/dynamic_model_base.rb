@@ -4,6 +4,7 @@ class DynamicModelBase < UserBase
 
   include RankHandler
   include Formatter::Formatters
+  include LimitedAccessControl
 
 
   # Use the view_options.data_attribute configuration option if it has been set,

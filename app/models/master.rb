@@ -2,6 +2,7 @@ class Master < ActiveRecord::Base
 
 
   include AlternativeIds
+  include LimitedAccessControl
   AppControl.define_models
 
 
@@ -77,17 +78,24 @@ class Master < ActiveRecord::Base
     (id || '').to_s
   end
 
-  # Scope results with inner joins on external identifier tables if they are in the user access control conditions
-  def self.external_identifier_assignment_scope(user)
+  # Handle limited access controls in master queries
+  # Scope results with inner joins on external identifier or dynamic model tables if they are in the user access control conditions
+  def self.limited_access_scope(user)
     # Check if the resource is restricted through external identifier assignment
-    er = Admin::UserAccessControl.external_identifier_restrictions(user)
+    er = Admin::UserAccessControl.limited_access_restrictions(user)
 
+    res = all
     if er
-      list = er.map {|e| e.resource_name.to_sym }
-      joins(*list)
-    else
-      all
+      # For each required limited_access model, inner join it. If it also requires
+      # an assign_access_to_user_id field ensure this matches the current user too
+      er.each do |e|
+        assoc_name = e.resource_name.to_sym
+        res = res.join_limit_to_assigned(assoc_name, user)
+      end
     end
+
+    res
+
   end
 
   def accuracy_rank
@@ -341,16 +349,20 @@ class Master < ActiveRecord::Base
   def allows_user_access
     # but ignore the test if not persisted yet, since the external identifier may be added during the creation process
     unless self.creating_master
-      er = Admin::UserAccessControl.external_identifier_restrictions(current_user)
+      er = Admin::UserAccessControl.limited_access_restrictions(current_user)
     end
 
     if er
       # Restrictions were returned. Go through each and validate an external ID has been assigned to this master by calling its association
-      er.map {|e| e.resource_name.to_sym }.each do |assoc|
-        return false unless self.send(assoc).first
+      # If all required instances (and their assign_access_to_user_id fields if needed) exist, allow access
+      er.each do |e|
+        assoc_name = e.resource_name.to_sym
+        assoc = self.send(assoc_name)
+        return false unless assoc.limit_to_assigned(current_user).first
       end
-      return true
+      true
     else
+      # No restrictions were specified. Allow access
       true
     end
 

@@ -285,6 +285,7 @@ class ExternalIdentifier < ActiveRecord::Base
         # Do the include after naming, to ensure the correct names are used during initialization
         res.include UserHandler
         res.include ExternalIdHandler
+        res.include LimitedAccessControl
 
         c_name = full_implementation_controller_name
         klass.send(:remove_const, c_name) if implementation_controller_defined?(klass)

@@ -72,7 +72,7 @@ module MasterSearch
 
       if @masters
 
-        @masters = @masters.external_identifier_assignment_scope(current_user)
+        @masters = @masters.limited_access_scope(current_user)
 
 
         # If a list of IDs to sort by is provided (from a report search), sort by it

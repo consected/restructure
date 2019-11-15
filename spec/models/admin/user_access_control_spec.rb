@@ -315,7 +315,7 @@ RSpec.describe Admin::UserAccessControl, type: :model do
 
   end
 
-  it "limits a user to master records with an external identifier" do
+  it "limits a user to master records with a limited_access specified and an associated model or external identifier in place" do
 
     # Create an external identifier implementation
     create_admin
@@ -367,64 +367,81 @@ RSpec.describe Admin::UserAccessControl, type: :model do
       player_ids << @player_info.id
     end
 
-    # Check that users can access these records
+    # We will deprecate the use of :external_id_assignments in favor of :limited_access
+    # Check they both have the same result
+    [:limited_access, :external_id_assignments].each do |rt|
 
-    jres = Master.where(id: ids).external_identifier_assignment_scope(@user).to_json(current_user: @user)
-    res = JSON.parse jres
-    expect(res.length).to eq 10
+      puts "Trying resource_type: #{rt}"
 
-
-    # Initialize the acceess control to external id assignments, but don't enforce a restriction
-    ac = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :external_id_assignments, resource_name: @implementation_table_name, current_admin: @admin
-    expect(Admin::UserAccessControl.external_identifier_restrictions(@user)).to be nil
-    res = @user.has_access_to? :limited, :external_id_assignments, @implementation_table_name
-    expect(res).to be_falsey
-
-    # Force users in the app type to only have access to externally identified records
-    ac.update! access: :limited
-
-    # Validate the control was set
-    res = @user.has_access_to? :limited, :external_id_assignments, @implementation_table_name
-    expect(res).to be_truthy
-    expect(Admin::UserAccessControl.external_identifier_restrictions(@user).first).to eq ac
+      # Check that users can access these records
+      jres = Master.where(id: ids).limited_access_scope(@user).to_json(current_user: @user)
+      res = JSON.parse jres
+      expect(res.length).to eq 10
 
 
-    # Now we should get none of the master records returned
-    jres = Master.where(id: ids).external_identifier_assignment_scope(@user).to_json(current_user: @user)
-    res = JSON.parse jres
-    expect(res.length).to eq 0
+      # Initialize the acceess control to external id assignments, but don't enforce a restriction
+      ac = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt, resource_name: @implementation_table_name, current_admin: @admin
+      expect(Admin::UserAccessControl.limited_access_restrictions(@user)).to be nil
+      res = @user.has_access_to? :limited, rt, @implementation_table_name
+      expect(res).to be_falsey
 
-    # Adding an external identifier for a master record allows access
+      # Force users in the app type to only have access to externally identified records
+      ac.update! access: :limited
 
-    # But we need a second user, with privileges to do this, as the current users can't create the external identifier
-    # because he can't see the master. This is of course correct, otherwise the current user could add an
-    # external identifier himself to gain access
-    # This demonstrates again that the default value can be overridden for a specific user
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: :external_id_assignments, resource_name: @implementation_table_name, current_admin: @admin, user: user1
-    Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: @implementation_table_name, current_admin: @admin, user: user1
-    res = user1.has_access_to? :limited, :external_id_assignments, @implementation_table_name
-    expect(res).to be_falsey
-    expect(Admin::UserAccessControl.external_identifier_restrictions(user1)).to be nil
+      # Validate the control was set
+      res = @user.has_access_to? :limited, rt, @implementation_table_name
+      expect(res).to be_truthy
+      expect(Admin::UserAccessControl.limited_access_restrictions(@user).first).to eq ac
 
 
-    ids.each do |i|
+      # Now we should get none of the master records returned
+      jres = Master.where(id: ids).limited_access_scope(@user).to_json(current_user: @user)
+      res = JSON.parse jres
+      expect(res.length).to eq 0
 
-      m = Master.find(i)
-      m.current_user = @user
-      expect(m.to_json).to eq "{}"
+      # Adding an external identifier for a master record allows access
 
-      m2 = Master.find(i)
-      m2.current_user = user1
-      j = JSON.parse(m2.to_json)
-      expect(j['id']).to eq m2.id
+      # But we need a second user, with privileges to do this, as the current users can't create the external identifier
+      # because he can't see the master. This is of course correct, otherwise the current user could add an
+      # external identifier himself to gain access
+      # This demonstrates again that the default value can be overridden for a specific user
+      ac2 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: nil, resource_type: rt, resource_name: @implementation_table_name, current_admin: @admin, user: user1
+      ac3 = Admin::UserAccessControl.create! app_type_id: @user.app_type_id, access: :create, resource_type: :table, resource_name: @implementation_table_name, current_admin: @admin, user: user1
+      res = user1.has_access_to? :limited, rt, @implementation_table_name
+      expect(res).to be_falsey
+      expect(Admin::UserAccessControl.limited_access_restrictions(user1)).to be nil
 
-      c.create! @implementation_attr_name => rand(1..99999999), master: m2
+      extids = []
+      ids.each do |i|
 
-      m = Master.find(i)
-      m.current_user = @user
-      j = JSON.parse(m.to_json)
-      expect(j['id']).to eq m.id
+        m = Master.find(i)
+        m.current_user = @user
+        expect(m.to_json).to eq "{}"
 
+        m2 = Master.find(i)
+        m2.current_user = user1
+        j = JSON.parse(m2.to_json)
+        expect(j['id']).to eq m2.id
+
+        extids << c.create!( @implementation_attr_name => rand(1..99999999), master: m2)
+
+        m = Master.find(i)
+        m.current_user = @user
+        j = JSON.parse(m.to_json)
+        expect(j['id']).to eq m.id
+
+      end
+
+      # Cleanup for next round
+      extids.each do |ex|
+        # Force a master change
+        exrec = ex.class.where(id: ex.id)
+        exrec.update_all(master_id: -1)
+      end
+
+      ac.update! access: nil, disabled: true
+      ac2.update! disabled: true
+      ac3.update! disabled: true
     end
 
   end

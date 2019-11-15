@@ -13,7 +13,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
 
   def self.resource_types
-    [:table, :general, :external_id_assignments, :report, :activity_log_type]
+    [:table, :general, :limited_access, :report, :activity_log_type, :external_id_assignments]
   end
 
 
@@ -27,9 +27,10 @@ class Admin::UserAccessControl < ActiveRecord::Base
     {
       table: [nil, :see_presence, :read, :update, :create],
       general: [nil, :read],
-      external_id_assignments: [nil, :limited],
+      limited_access: [nil, :limited],
       report: [nil, :read],
-      activity_log_type: [nil, :see_presence, :read, :update, :create]
+      activity_log_type: [nil, :see_presence, :read, :update, :create],
+      external_id_assignments: [nil, :limited]
     }
   end
 
@@ -75,8 +76,8 @@ class Admin::UserAccessControl < ActiveRecord::Base
         'download_files', 'view_files_as_image', 'view_files_as_html', 'send_files_to_trash', 'move_files',
         'view_dashboards'
       ]
-    elsif resource_type == :external_id_assignments
-      return ExternalIdentifier.active.map(&:name)
+    elsif resource_type == :external_id_assignments || resource_type == :limited_access
+      return ExternalIdentifier.active.map(&:name) + DynamicModel.active.map(&:full_item_types_name)
     elsif resource_type == :report
       return Report.active.map(&:name) + ['_all_reports_']
     elsif resource_type == :activity_log_type
@@ -196,23 +197,25 @@ class Admin::UserAccessControl < ActiveRecord::Base
     view
   end
 
-  # Get list of controls for the external_id_assignments type in the user's current app.
+  # Get list of controls for the external_id_assignments / limited_access type in the user's current app.
   # Get both the user's override, if it exists, and the default for each resource, which we then filter down to the actual access control
   # If there are no restrictions for this user in this app, just return nil
-  def self.external_identifier_restrictions user
+  def self.limited_access_restrictions user
 
-    primary_conditions = {resource_type: :external_id_assignments}
+    primary_conditions = {resource_type: [:external_id_assignments, :limited_access]}
 
     res = self.where(primary_conditions).scope_user_and_role(user)
 
-    # res = Admin::UserAccessControl.active.where(app_type_id: user.app_type_id,  user: user_list, resource_type: :external_id_assignments).order('resource_name asc, user_id asc nulls last')
     res_length = res.length
     return unless res_length > 0
 
     r_prev = nil
     delist = []
+    # Filter out later repeats in the list if they have matching resource_names
+    # This ensures the precedence of the defined limited access controls works as expected.
+    # while allowing controls on multiple resources to be defined
     (0..res_length-1).each do |i|
-      if r_prev && r_prev.app_type_id == res[i].app_type_id
+      if r_prev && r_prev.app_type_id == res[i].app_type_id && r_prev.resource_name == res[i].resource_name
         delist << i
       else
         r_prev = res[i]
