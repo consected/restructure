@@ -2,7 +2,7 @@ SET search_path=ml_app;
 -------------------------------------------------------
 
 -- Add records to sync_statuses that indicate specific master IDs are in the process of being sync'd
-CREATE OR REPLACE FUNCTION update_transfer_record_results(new_from_db VARCHAR, new_to_db VARCHAR, for_external_type VARCHAR) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION update_ipa_transfer_record_results(new_from_db VARCHAR, new_to_db VARCHAR, for_external_type VARCHAR, for_event VARCHAR) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -22,6 +22,7 @@ BEGIN
     AND to_db = new_to_db
     AND external_id = t.ipa_id::varchar
     AND external_type = for_external_type
+    AND event = for_event
     AND coalesce(select_status, '') NOT IN ('completed', 'already transferred');
 
 END;

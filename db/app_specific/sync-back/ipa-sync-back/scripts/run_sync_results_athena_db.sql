@@ -26,4 +26,4 @@ CREATE TEMPORARY TABLE temp_ipa_assignments_results (
 --   AND to_db = 'athena-db'
 --   AND coalesce(select_status, '') NOT IN ('completed', 'already transferred');
 -- Add records to sync_statuses that indicate specific master IDs are in the process of being sync'd
-select update_transfer_record_results('athena-db', 'fphs-db', 'ipa_assignments') RETURNS INTEGER
+select update_ipa_transfer_record_results('athena-db', 'fphs-db', 'ipa_assignments') RETURNS INTEGER

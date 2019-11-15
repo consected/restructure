@@ -106,7 +106,7 @@ export IPA_ASSIGNMENTS_FILE=${WORKINGDIR}/athena_ipa_assignments.csv
 export IPA_PLAYER_INFOS_FILE=${WORKINGDIR}/athena_ipa_player_infos.csv
 export IPA_PLAYER_CONTACTS_FILE=${WORKINGDIR}/athena_ipa_player_contacts.csv
 export IPA_ADDRESSES_FILE=${WORKINGDIR}/athena_ipa_addresses.csv
-export IPA_AL_IPA_ASSIGNMENTS_FILE=${WORKINGDIR}/athena_ipa_activity_log_ipa_assignments.csv
+# export IPA_AL_IPA_ASSIGNMENTS_FILE=${WORKINGDIR}/athena_ipa_activity_log_ipa_assignments.csv
 export IPA_ASSIGNMENTS_RESULTS_FILE=${WORKINGDIR}/fphs_ipa_assignments_results.csv
 
 # ----> Cleanup from previous runs, just in case
@@ -118,7 +118,7 @@ log 'Starting subject data sync.'
 
 # ----> On Zeus FPHS DB
 # Run run_sync_subject_data_fphs_db.sql
-# Create a temp table temp_ipa_assignments to contain the  IPA IDs to sync, based on a simple query
+# Create a temp table temp_ipa_assignments to contain the IPA IDs to sync, based on a simple query
 #
 # For all master_id in temp_ipa_assignments table, copy matching player_infos, player_contacts and addresses records
 # to CSV files IPA_PLAYER_INFOS_FILE, IPA_PLAYER_CONTACTS_FILE AND IPA_ADDRESSES_FILE
@@ -128,7 +128,7 @@ log 'Starting subject data sync.'
 log "Match and export Athena records"
 envsubst < $IPA_ATHENA_SQL_FILE > $IPA_SQL_FILE
 
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE 2> ${PSQLRESFL}
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER -v ON_ERROR_STOP=1 < $IPA_SQL_FILE 2> ${PSQLRESFL}
 log_last_error
 
 LINECOUNT="$(wc -l < $IPA_ASSIGNMENTS_FILE)"
@@ -160,13 +160,13 @@ fi
 
 log "Transfer matched records to FPHS DB"
 envsubst < $IPA_TO_FPHS_SQL_FILE > $IPA_SQL_FILE
-PGOPTIONS=--search_path=$AWS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER < $IPA_SQL_FILE 2> ${PSQLRESFL}
+PGOPTIONS=--search_path=$AWS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER -v ON_ERROR_STOP=1 < $IPA_SQL_FILE 2> ${PSQLRESFL}
 log_last_error
 
 # Mark the transferred records as completed
 log "Mark sync_statuses for transferred records"
 envsubst < $IPA_ATHENA_RESULTS_SQL_FILE > $IPA_SQL_FILE
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER < $IPA_SQL_FILE 2> ${PSQLRESFL}
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER -v ON_ERROR_STOP=1 < $IPA_SQL_FILE 2> ${PSQLRESFL}
 log_last_error
 
 # ----> Cleanup
