@@ -7,7 +7,7 @@ module CalcActions
   included do
     SelectionTypes = :all, :any, :not_all, :not_any
     BoolTypeString = '__!BOOL__'.freeze
-    ValidExtraConditions = ['<', '>', '<>', '<=', '>=', 'LIKE', '~'].freeze
+    ValidExtraConditions = ['<', '>', '<>', '<=', '>=', 'LIKE', '~', 'IS NOT NULL'].freeze
     ValidExtraConditionsArrays = [
       '= ANY', # The value of this field (must be scalar) matches any value from the retrieved array field
       '<> ANY', # The value of this field (must be scalar) must not match any value from the retrieved array field
@@ -492,18 +492,22 @@ module CalcActions
             end
             unless non_query_condition
               if val.is_a?(Hash) && val[:condition].in?(ValidExtraConditions)
-
                 if @extra_conditions[0].blank?
                   @extra_conditions[0] = ""
                 else
                   @extra_conditions[0] += " #{BoolTypeString} "
                 end
+                
+                if val[:condition] == 'IS NOT NULL'
+                  @extra_conditions[0] += "#{table_name}.#{field_name} IS NOT NULL"
+                else
 
-                vc = ValidExtraConditions.find {|c| c == val[:condition]}
-                vv = dynamic_value(val[:value])
+                  vc = ValidExtraConditions.find {|c| c == val[:condition]}
+                  vv = dynamic_value(val[:value])
 
-                @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
-                @extra_conditions << vv
+                  @extra_conditions[0] += "#{table_name}.#{field_name} #{vc} (?)"
+                  @extra_conditions << vv
+                end
               elsif val.is_a?(Hash) && val[:condition].in?(ValidExtraConditionsArrays)
                   veca_extra_args = ''
                   if @extra_conditions[0].blank?
