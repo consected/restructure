@@ -18,6 +18,8 @@ module StandardAuthentication
     after_save :handle_password_reminder, if: :set_reminder?
     after_save :clear_plaintext_password
     attr_accessor :new_two_factor_auth_code, :forced_password_reset, :new_password
+
+    scope :can_email, -> { where "do_not_email IS NULL or do_not_email = FALSE" }
   end
 
   class_methods do

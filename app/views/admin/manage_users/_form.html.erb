@@ -27,6 +27,10 @@
     <%= check_box_tag :reset_two_factor_auth%>
     <%= label_tag :reset_two_factor_auth, 'Reset two factor auth' %>
   </div>
+  <div class="form-group">
+    <%= f.check_box :do_not_email%>
+    <%= label_tag :do_not_email, 'Do not email' %>
+  </div>
   <%end%>
   <div class="form-group">
     <%= hidden_filter_fields %>

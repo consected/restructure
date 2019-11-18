@@ -58,6 +58,6 @@ class Admin::ManageUsersController < AdminController
   private
 
     def permitted_params
-      [:email, :disabled, :first_name, :last_name]
+      [:email, :disabled, :first_name, :last_name, :do_not_email]
     end
 end
