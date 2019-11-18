@@ -11,7 +11,7 @@ set search_path=sleep, ml_app;
                   INSERT INTO sleep_access_bwh_staff_history
                   (
                       master_id,
-                      assign_access_to_user_id,
+                      -- assign_access_to_user_id,
                       user_id,
                       created_at,
                       updated_at,
@@ -19,7 +19,7 @@ set search_path=sleep, ml_app;
                       )
                   SELECT
                       NEW.master_id,
-                      NEW.assign_access_to_user_id,
+                      -- NEW.assign_access_to_user_id,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -32,7 +32,7 @@ set search_path=sleep, ml_app;
       CREATE TABLE sleep_access_bwh_staff_history (
           id integer NOT NULL,
           master_id integer,
-          assign_access_to_user_id bigint,
+          -- assign_access_to_user_id bigint,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -51,7 +51,7 @@ set search_path=sleep, ml_app;
       CREATE TABLE sleep_access_bwh_staffs (
           id integer NOT NULL,
           master_id integer,
-          assign_access_to_user_id bigint,
+          -- assign_access_to_user_id bigint,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
