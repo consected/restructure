@@ -2926,7 +2926,8 @@ CREATE TABLE ml_app.admins (
     reset_password_sent_at timestamp without time zone,
     password_updated_at timestamp without time zone,
     first_name character varying,
-    last_name character varying
+    last_name character varying,
+    do_not_email boolean DEFAULT false
 );
 
 
@@ -5788,7 +5789,8 @@ CREATE TABLE ml_app.users (
     otp_required_for_login boolean,
     password_updated_at timestamp without time zone,
     first_name character varying,
-    last_name character varying
+    last_name character varying,
+    do_not_email boolean DEFAULT false
 );
 
 
