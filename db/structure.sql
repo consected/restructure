@@ -2,8 +2,13 @@
 -- PostgreSQL database dump
 --
 
+<<<<<<< HEAD
 -- Dumped from database version 9.5.19
 -- Dumped by pg_dump version 9.5.19
+=======
+-- Dumped from database version 9.6.16
+-- Dumped by pg_dump version 9.6.16
+>>>>>>> c5587b5115a0ffafe79e24dea8eca2272fc34a72
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -55049,6 +55054,7 @@ ALTER TABLE ONLY tbs.activity_log_tbs_assignment_history
 
 
 --
+<<<<<<< HEAD
 -- Name: fk_activity_log_tbs_assignment_inex_checklist_history_activity_; Type: FK CONSTRAINT; Schema: tbs; Owner: -
 --
 
@@ -55062,6 +55068,19 @@ ALTER TABLE ONLY tbs.activity_log_tbs_assignment_inex_checklist_history
 
 ALTER TABLE ONLY tbs.activity_log_tbs_assignment_inex_checklist_history
     ADD CONSTRAINT fk_activity_log_tbs_assignment_inex_checklist_history_masters FOREIGN KEY (master_id) REFERENCES ml_app.masters(id);
+=======
+-- Name: tracker_history tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER tracker_history_update BEFORE UPDATE ON ml_app.tracker_history FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.handle_tracker_history_update();
+
+
+--
+-- Name: trackers tracker_history_update; Type: TRIGGER; Schema: ml_app; Owner: -
+--
+
+CREATE TRIGGER tracker_history_update AFTER UPDATE ON ml_app.trackers FOR EACH ROW WHEN ((old.* IS DISTINCT FROM new.*)) EXECUTE PROCEDURE ml_app.log_tracker_update();
+>>>>>>> c5587b5115a0ffafe79e24dea8eca2272fc34a72
 
 
 --
