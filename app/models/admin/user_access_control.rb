@@ -204,7 +204,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
 
     primary_conditions = {resource_type: [:external_id_assignments, :limited_access]}
 
-    res = self.where(primary_conditions).scope_user_and_role(user)
+    res = self.where(primary_conditions).order(resource_name: :asc).scope_user_and_role(user)
 
     res_length = res.length
     return unless res_length > 0

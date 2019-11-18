@@ -44,16 +44,18 @@ class SaveTriggers::CreateReference < SaveTriggers::SaveTriggersBase
           next unless ca.calc_action_if
         end
 
-        config[:with].each do |fn, def_val|
+        if config[:with]
+          config[:with].each do |fn, def_val|
 
-          if def_val.is_a? Hash
-            ca = ConditionalActions.new def_val, @item
-            res = ca.get_this_val
-          else
-            res = FieldDefaults.calculate_default @item, def_val
+            if def_val.is_a? Hash
+              ca = ConditionalActions.new def_val, @item
+              res = ca.get_this_val
+            else
+              res = FieldDefaults.calculate_default @item, def_val
+            end
+
+            vals[fn] = res
           end
-
-          vals[fn] = res
         end
 
         @item.transaction do

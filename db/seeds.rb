@@ -43,7 +43,7 @@ def auto_admin
   ENV['FPHS_ADMIN_SETUP']='yes'
   @admin ||= Admin.find_or_create_by email: 'auto-admin@nodomain.com'
   @admin.update(disabled: false) if @admin.disabled
-  puts "Admin: #{@admin.inspect}"
+  # puts "Admin: #{@admin.inspect}"
   @admin
 end
 
