@@ -117,13 +117,8 @@ class Admin::AppType < Admin::AdminBase
       res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'], filter_on: ['protocol_name']
       res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name'], filter_on: ['sub_process_name', 'protocol_name']
 
-      # app_type.user_access_controls.active.each do |a|
-      #   unless a.update(access: nil, current_admin: admin)
-      #     puts "Failed to update UAC #{a.inspect}. #{a.errors.first}"
-      #     a.disable!
-      #   end
-      # end
-      res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'user_access_controls', ['resource_type', 'resource_name', 'role_name'], add_vals: {allow_bad_resource_name: true}, reject: Proc.new {|a| a['access'].nil?}
+
+      res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'user_access_controls', ['resource_type', 'resource_name', 'role_name'], add_vals: {allow_bad_resource_name: true}
       app_type.reload
       return app_type, results
     end

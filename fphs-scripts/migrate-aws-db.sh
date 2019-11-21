@@ -29,7 +29,7 @@ fi
 
 if [ "$TEMP_ENV" == 'athena-stage' ]
 then
-  TEMP_DBNAME=fphs_test_ipa
+  TEMP_DBNAME=fphs_sleep_test
   DB_SEARCH_PATH='filestore,filestore_admin,ml_app'
 fi
 

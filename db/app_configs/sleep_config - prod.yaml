@@ -416,7 +416,7 @@ app_type:
     app_type_id: 14
     role_name: tracker
     created_at: '2019-07-08T14:56:21.408Z'
-    updated_at: '2019-07-08T14:56:21.408Z'
+    updated_at: '2019-11-20T14:09:22.152Z'
     user_email:
   - id: 745
     user_id:
@@ -429,7 +429,7 @@ app_type:
     app_type_id: 14
     role_name: tracker
     created_at: '2019-07-08T14:56:21.417Z'
-    updated_at: '2019-07-08T14:56:21.417Z'
+    updated_at: '2019-11-20T14:12:33.016Z'
     user_email:
   - id: 746
     user_id:
@@ -593,12 +593,12 @@ app_type:
     resource_name: mrn_numbers
     options: ''
     access: create
-    disabled: false
+    disabled: true
     admin_id: 2
     app_type_id: 14
     role_name: tracker
     created_at: '2019-07-08T14:56:21.547Z'
-    updated_at: '2019-09-02T17:04:38.004Z'
+    updated_at: '2019-11-20T14:08:06.928Z'
     user_email:
   - id: 759
     user_id:
@@ -1300,7 +1300,7 @@ app_type:
     app_type_id: 14
     role_name: user - navigation
     created_at: '2019-07-08T14:56:22.061Z'
-    updated_at: '2019-07-08T14:56:22.061Z'
+    updated_at: '2019-11-20T14:09:14.968Z'
     user_email:
   - id: 813
     user_id:
@@ -2743,7 +2743,7 @@ app_type:
     app_type_id: 14
     role_name: user - mednav
     created_at: '2019-07-08T14:56:23.147Z'
-    updated_at: '2019-07-08T14:56:23.147Z'
+    updated_at: '2019-11-20T14:07:18.482Z'
     user_email:
   - id: 924
     user_id:
@@ -2769,7 +2769,7 @@ app_type:
     app_type_id: 14
     role_name: user - mednav
     created_at: '2019-07-08T14:56:23.166Z'
-    updated_at: '2019-07-08T14:56:23.166Z'
+    updated_at: '2019-11-20T14:11:28.795Z'
     user_email:
   - id: 926
     user_id:
@@ -2777,12 +2777,12 @@ app_type:
     resource_name: dynamic_model__sleep_mednav_provider_comms
     options: ''
     access: create
-    disabled: false
+    disabled: true
     admin_id: 2
     app_type_id: 14
     role_name: user - mednav
     created_at: '2019-07-08T14:56:23.175Z'
-    updated_at: '2019-07-08T14:56:23.175Z'
+    updated_at: '2019-11-20T14:11:19.348Z'
     user_email:
   - id: 927
     user_id:
@@ -4402,12 +4402,12 @@ app_type:
     resource_name: mrn_numbers
     options: ''
     access: create
-    disabled: false
+    disabled: true
     admin_id: 2
     app_type_id: 14
     role_name: clinical research coordinator
     created_at: '2019-09-02T17:04:38.561Z'
-    updated_at: '2019-09-02T17:04:38.561Z'
+    updated_at: '2019-11-20T14:08:18.704Z'
     user_email:
   - id: 1056
     user_id:
@@ -4415,12 +4415,12 @@ app_type:
     resource_name: mrn_numbers
     options: ''
     access: read
-    disabled: false
+    disabled: true
     admin_id: 2
     app_type_id: 14
     role_name: user - navigation
     created_at: '2019-09-02T17:04:38.567Z'
-    updated_at: '2019-09-02T17:04:38.567Z'
+    updated_at: '2019-11-20T14:07:40.110Z'
     user_email:
   - id: 1057
     user_id:
@@ -4454,12 +4454,12 @@ app_type:
     resource_name: mrn_numbers
     options: ''
     access: read
-    disabled: false
+    disabled: true
     admin_id: 2
     app_type_id: 14
-    role_name: user - mrn
+    role_name: ''
     created_at: '2019-09-02T17:04:38.696Z'
-    updated_at: '2019-09-02T17:04:38.696Z'
+    updated_at: '2019-11-20T14:07:46.816Z'
     user_email:
   - id: 1060
     user_id:
@@ -4467,12 +4467,12 @@ app_type:
     resource_name: mrn_numbers
     options: ''
     access: create
-    disabled: false
+    disabled: true
     admin_id: 2
     app_type_id: 14
     role_name: scheduling
     created_at: '2019-09-02T17:04:38.703Z'
-    updated_at: '2019-09-02T17:04:38.703Z'
+    updated_at: '2019-11-20T14:08:13.107Z'
     user_email:
   - id: 1061
     user_id:
@@ -7170,52 +7170,6 @@ app_type:
     result_order: ''
     options: "\r\ndefault:\r\n\r\n  fields: []\r\n\r\n\r\n"
     user_email:
-  - id: 251
-    name: Exit Interview
-    table_name: sleep_exit_interviews
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: true
-    created_at: '2019-07-08T14:54:17.276Z'
-    updated_at: '2019-08-22T10:47:29.822Z'
-    position:
-    category: sleep-follow-up
-    table_key_name: ''
-    field_list: select_all_results_returned,notes,assisted_finding_provider_yes_no,assistance_notes,other_notes
-    result_order: ''
-    options: "#labs_returned_yes_no,labs_notes,dexa_returned_yes_no,dexa_notes,brain_mri_returned_yes_no,brain_mri_notes,neuro_psych_returned_yes_no,neuro_psych_notes,\r\ndefault:\r\n\r\n
-      \ field_options:\r\n    select_all_results_returned:\r\n      edit_as:\r\n        alt_options:\r\n
-      \         \"Yes\": \"yes\"\r\n          \"No - declined\": no - declined\r\n
-      \         \"No - not all\": no - not all\r\n          \r\n    labs_returned_yes_no:
-      &select_yes_no_not_ready\r\n      edit_as:\r\n        field_type: select_item_returned\r\n
-      \       alt_options:\r\n          \"Yes\": \"yes\"\r\n          \"No\": \"no\"\r\n
-      \         \"Report not ready\": report not ready\r\n    \r\n    dexa_returned_yes_no:
-      *select_yes_no_not_ready\r\n    brain_mri_returned_yes_no: *select_yes_no_not_ready\r\n
-      \   neuro_psych_returned_yes_no: *select_yes_no_not_ready\r\n    \r\n\r\n    interview_date:\r\n
-      \     value: today()\r\n\r\n  caption_before:\r\n    interview_date: Exit Interview
-      date\r\n    select_all_results_returned: Have all results been returned?\r\n
-      \   notes: Notes\r\n    labs_returned_yes_no: Labs returned?\r\n    dexa_returned_yes_no:
-      Dexa returned?\r\n    brain_mri_returned_yes_no: Brain MRI returned?\r\n    neuro_psych_returned_yes_no:
-      Neuropsych returned?\r\n    labs_notes: Notes\r\n    dexa_notes: Notes\r\n    brain_mri_notes:
-      Notes\r\n    neuro_psych_notes: Notes\r\n    other_notes: Other notes\r\n    assisted_finding_provider_yes_no:
-      Did you provide assistance finding a provider?\r\n    assistance_notes: Notes\r\n
-      \   \r\n  show_if:\r\n    notes:\r\n      select_all_results_returned:\r\n        -
-      no - declined\r\n        - no - not all\r\n    labs_returned_yes_no:\r\n      select_all_results_returned:\r\n
-      \       - no - declined\r\n        - no - not all\r\n    dexa_returned_yes_no:\r\n
-      \     select_all_results_returned:\r\n        - no - declined\r\n        - no
-      - not all\r\n    brain_mri_returned_yes_no:\r\n      select_all_results_returned:\r\n
-      \       - no - declined\r\n        - no - not all\r\n    neuro_psych_returned_yes_no:\r\n
-      \     select_all_results_returned:\r\n        - no - declined\r\n        - no
-      - not all\r\n    labs_notes:\r\n      labs_returned_yes_no:\r\n        - no\r\n
-      \       - report not ready\r\n    dexa_notes:\r\n      dexa_returned_yes_no:
-      \r\n        - no\r\n        - report not ready\r\n    brain_mri_notes:\r\n      brain_mri_returned_yes_no:\r\n
-      \       - no\r\n        - report not ready\r\n    neuro_psych_notes:\r\n      neuro_psych_returned_yes_no:\r\n
-      \       - no\r\n        - report not ready\r\n    assistance_notes:\r\n      assisted_finding_provider_yes_no:
-      yes\r\n      "
-    user_email:
   - id: 302
     name: PI Follow Up
     table_name: sleep_pi_follow_ups
@@ -7234,97 +7188,6 @@ app_type:
     result_order: ''
     options: "default:\r\n\r\n  caption_before:\r\n    pre_call_notes: Notes in preparation
       for the follow up call \r\n    \r\n    call_notes: Notes from follow up call\r\n\r\n\r\n"
-    user_email:
-  - id: 254
-    name: Med Nav Follow Up
-    table_name: sleep_mednav_followups
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: true
-    created_at: '2019-07-08T14:54:27.543Z'
-    updated_at: '2019-07-08T14:54:27.543Z'
-    position:
-    category: sleep-follow-up
-    table_key_name: ''
-    field_list: anthropometrics_check,anthropometrics_notes,lab_results_check,lab_results_notes,dexa_check,dexa_notes,brain_mri_check,brain_mri_notes,neuro_psych_check,neuro_psych_notes,sensory_testing_check,sensory_testing_notes,liver_mri_check,liver_mri_notes,physical_function_check,physical_function_notes,eeg_check,eeg_notes,sleep_check,sleep_notes,cardiac_check,cardiac_notes,xray_check,xray_notes,assisted_finding_provider_yes_no,assistance_notes,other_notes
-    result_order: ''
-    options: "default:\r\n\r\n  labels:\r\n    anthropometrics_check: Anthropometrics\r\n
-      \   lab_results_check: Lab Results\r\n    dexa_check: Dexa\r\n    brain_mri_check:
-      Brain MRI\r\n    neuro_psych_check: Neuro Psych\r\n    sensory_testing_check:
-      Sensory Testing\r\n    liver_mri_check: Liver MRI\r\n    physical_function_check:
-      Physical Function\r\n    eeg_check: EEG\r\n    sleep_check: Sleep\r\n    cardiac_check:
-      Cardiac\r\n    xray_check: X-Ray\r\n\r\n  caption_before:\r\n    all_fields:
-      Relevant assessments\r\n    # participant_call_yes_no: Did you have a phone
-      call with the participant?\r\n    # participant_call_date: Date of call\r\n
-      \   # participant_call_notes: Notes\r\n    # provider_call_yes_no: Did you have
-      a phone call with the provider?\r\n    # provider_call_date: Date of call\r\n
-      \   # provider_call_notes: Notes\r\n    # reports_sent_yes_no: Were any reports
-      sent to a provider?\r\n    # reports_sent_notes: Which reports were sent to
-      the provider?\r\n    # report_sent_date: Date report was sent\r\n    # report_delivery_date:
-      Date of delivery report confirmation\r\n    assisted_finding_provider_yes_no:
-      Did you provide assistance finding a provider?\r\n    assistance_notes: Notes\r\n
-      \   other_notes: Other notes\r\n\r\n    anthropometrics_notes: Notes\r\n    lab_results_notes:
-      Notes\r\n    dexa_notes: Notes\r\n    brain_mri_notes: Notes\r\n    neuro_psych_notes:
-      Notes\r\n    sensory_testing_notes: Notes\r\n    liver_mri_notes: Notes\r\n
-      \   physical_function_notes: Notes\r\n    eeg_notes: Notes\r\n    sleep_notes:
-      Notes\r\n    cardiac_notes: Notes\r\n    xray_notes: Notes\r\n\r\n\r\n  show_if:\r\n
-      \   # participant_call_date:\r\n    #   participant_call_yes_no: yes\r\n    #
-      participant_call_notes:\r\n    #   participant_call_yes_no: yes\r\n    # provider_call_date:\r\n
-      \   #   provider_call_yes_no: yes\r\n    # provider_call_notes:\r\n    #   provider_call_yes_no:
-      yes\r\n\r\n    # reports_sent_notes:\r\n    #   reports_sent_yes_no: yes\r\n
-      \   # report_sent_date:\r\n    #   reports_sent_yes_no: yes\r\n    # report_delivery_date:\r\n
-      \   #   reports_sent_yes_no: yes\r\n    assistance_notes:\r\n      assisted_finding_provider_yes_no:
-      yes\r\n\r\n    anthropometrics_notes:\r\n      anthropometrics_check: yes\r\n\r\n
-      \   lab_results_notes:\r\n      lab_results_check: yes\r\n\r\n    dexa_notes:\r\n
-      \     dexa_check: yes\r\n\r\n    brain_mri_notes:\r\n      brain_mri_check:
-      yes\r\n\r\n    neuro_psych_notes:\r\n      neuro_psych_check: yes\r\n\r\n    sensory_testing_notes:\r\n
-      \     sensory_testing_check: yes\r\n\r\n    liver_mri_notes:\r\n      liver_mri_check:
-      yes\r\n\r\n    physical_function_notes:\r\n      physical_function_check: yes\r\n\r\n
-      \   eeg_notes:\r\n      eeg_check: yes\r\n\r\n    sleep_notes:\r\n      sleep_check:
-      yes\r\n\r\n    cardiac_notes:\r\n      cardiac_check: yes\r\n\r\n    xray_notes:\r\n
-      \     xray_check: yes\r\n\r\n\r\n#  field_options:\r\n#    call_date:\r\n#      value:
-      today()\r\n"
-    user_email:
-  - id: 253
-    name: Med Nav Provider Communications
-    table_name: sleep_mednav_provider_comms
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-07-08T14:54:24.103Z'
-    updated_at: '2019-07-08T14:54:24.103Z'
-    position:
-    category: sleep-follow-up
-    table_key_name: ''
-    field_list: anthropometrics_check,anthropometrics_notes,lab_results_check,lab_results_notes,dexa_check,dexa_notes,brain_mri_check,brain_mri_notes,neuro_psych_check,neuro_psych_notes,sensory_testing_check,sensory_testing_notes,liver_mri_check,liver_mri_notes,physical_function_check,physical_function_notes,eeg_check,eeg_notes,sleep_check,sleep_notes,cardiac_check,cardiac_notes,xray_check,xray_notes,other_notes
-    result_order: ''
-    options: "default:\r\n\r\n  labels:\r\n    anthropometrics_check: Anthropometrics\r\n
-      \   lab_results_check: Lab Results\r\n    dexa_check: Dexa\r\n    brain_mri_check:
-      Brain MRI\r\n    neuro_psych_check: Neuro Psych\r\n    sensory_testing_check:
-      Sensory Testing\r\n    liver_mri_check: Liver MRI\r\n    physical_function_check:
-      Physical Function\r\n    eeg_check: EEG\r\n    sleep_check: Sleep\r\n    cardiac_check:
-      Cardiac\r\n    xray_check: X-Ray\r\n\r\n  caption_before:\r\n    all_fields:
-      Which reports were sent to the provider?\r\n    report_delivery_date: Date of
-      delivery report confirmation\r\n    anthropometrics_notes: Notes\r\n    lab_results_notes:
-      Notes\r\n    dexa_notes: Notes\r\n    brain_mri_notes: Notes\r\n    neuro_psych_notes:
-      Notes\r\n    sensory_testing_notes: Notes\r\n    liver_mri_notes: Notes\r\n
-      \   physical_function_notes: Notes\r\n    eeg_notes: Notes\r\n    sleep_notes:
-      Notes\r\n    cardiac_notes: Notes\r\n    xray_notes: Notes\r\n    other_notes:
-      Other notes\r\n\r\n\r\n  show_if:\r\n    anthropometrics_notes:\r\n      anthropometrics_check:
-      yes\r\n\r\n    lab_results_notes:\r\n      lab_results_check: yes\r\n\r\n    dexa_notes:\r\n
-      \     dexa_check: yes\r\n\r\n    brain_mri_notes:\r\n      brain_mri_check:
-      yes\r\n\r\n    neuro_psych_notes:\r\n      neuro_psych_check: yes\r\n\r\n    sensory_testing_notes:\r\n
-      \     sensory_testing_check: yes\r\n\r\n    liver_mri_notes:\r\n      liver_mri_check:
-      yes\r\n\r\n    physical_function_notes:\r\n      physical_function_check: yes\r\n\r\n
-      \   eeg_notes:\r\n      eeg_check: yes\r\n\r\n    sleep_notes:\r\n      sleep_check:
-      yes\r\n\r\n    cardiac_notes:\r\n      cardiac_check: yes\r\n\r\n    xray_notes:\r\n
-      \     xray_check: yes\r\n"
     user_email:
   - id: 256
     name: Inclusion Exclusion Checklist
@@ -8876,43 +8739,6 @@ app_type:
       information here*\r\n\r\n    \r\n  dialog_before:\r\n\r\n    ineligible_notes:\r\n
       \     name: sleep eligibility call not eligible\r\n    \r\n\r\n"
     user_email:
-  - id: 263
-    name: SLEEP Transportation
-    table_name: sleep_transportations
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: true
-    created_at: '2019-07-08T14:55:03.065Z'
-    updated_at: '2019-07-08T14:55:03.065Z'
-    position: 32
-    category: sleep-records
-    table_key_name: ''
-    field_list: ''
-    result_order: select_direction asc
-    options: "default:\r\n  view_options:\r\n    data_attribute:\r\n      - select_direction\r\n
-      \     - select_mode_of_transport\r\n      - travel_date"
-    user_email:
-  - id: 264
-    name: SLEEP Hotel
-    table_name: sleep_hotels
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: true
-    created_at: '2019-07-08T14:55:07.212Z'
-    updated_at: '2019-07-08T14:55:07.212Z'
-    position: 34
-    category: sleep-records
-    table_key_name: ''
-    field_list: ''
-    result_order: ''
-    options:
-    user_email:
   - id: 265
     name: SLEEP Consent Mailing
     table_name: sleep_consent_mailings
@@ -8960,47 +8786,7 @@ app_type:
       the subject is no longer participating? Provide details in the notes below.\r\n
       \   "
     user_email:
-  - id: 268
-    name: Tech Contact
-    table_name: sleep_station_contacts
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: ''
-    description: ''
-    admin_id: 2
-    disabled: true
-    created_at: '2019-07-08T14:55:25.132Z'
-    updated_at: '2019-07-08T14:55:25.132Z'
-    position:
-    category: sleep-records
-    table_key_name: ''
-    field_list: ''
-    result_order: last_name asc
-    options: "default:\r\n  valid_if:\r\n    on_save:\r\n      not_any:\r\n        this:\r\n
-      \         first_name: ''\r\n          last_name: ''\r\n          role: ''\r\n\r\n
-      \ view_options:\r\n    data_attribute:\r\n      - first_name\r\n      - last_name\r\n
-      \     - role\r\n\r\n  field_options:\r\n    alt_phone:\r\n      edit_as:\r\n
-      \       field_type: phone\r\n    alt_email:\r\n      edit_as: \r\n        field_type:
-      email\r\n       "
-    user_email:
   associated_external_identifiers:
-  - id: 22
-    name: mrn_numbers
-    label: MRN
-    external_id_attribute: mrn_id
-    external_id_view_formatter: ''
-    external_id_edit_pattern: ".{0,16}"
-    prevent_edit: false
-    pregenerate_ids: false
-    min_id:
-    max_id:
-    admin_id: 2
-    disabled: false
-    created_at: '2018-05-31T14:52:23.403Z'
-    updated_at: '2019-01-11T12:39:46.418Z'
-    alphanumeric: true
-    extra_fields: select_organization
-    user_email:
   - id: 25
     name: sleep_assignments
     label: Sleep Study ID
@@ -10832,36 +10618,6 @@ app_type:
     description: ''
     lock: false
     user_email:
-  - id: 318
-    name: Partners
-    value: partners
-    item_type: mrn_numbers_select_organization
-    created_at: '2019-01-14T08:56:27.132Z'
-    updated_at: '2019-01-14T08:56:27.132Z'
-    disabled: false
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position:
-    description: ''
-    lock: false
-    user_email:
-  - id: 319
-    name: BI
-    value: bi
-    item_type: mrn_numbers_select_organization
-    created_at: '2019-01-14T08:56:43.337Z'
-    updated_at: '2019-01-14T08:56:43.337Z'
-    disabled: false
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position:
-    description: ''
-    lock: false
-    user_email:
   - id: 373
     name: cis-redcap
     value: cis-redcap
@@ -11025,96 +10781,6 @@ app_type:
     edit_always: false
     position: 1530
     description:
-    lock: false
-    user_email:
-  - id: 393
-    name: Outbound
-    value: outbound
-    item_type: dynamic_model__sleep_transportations_select_direction
-    created_at: '2019-07-08T14:56:19.730Z'
-    updated_at: '2019-07-08T14:56:19.730Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: false
-    position:
-    description: ''
-    lock: false
-    user_email:
-  - id: 394
-    name: Return
-    value: return
-    item_type: dynamic_model__sleep_transportations_select_direction
-    created_at: '2019-07-08T14:56:19.739Z'
-    updated_at: '2019-07-08T14:56:19.739Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: false
-    position:
-    description: ''
-    lock: false
-    user_email:
-  - id: 395
-    name: Flight
-    value: flight
-    item_type: dynamic_model__sleep_transportations_select_mode_of_transport
-    created_at: '2019-07-08T14:56:19.745Z'
-    updated_at: '2019-07-08T14:56:19.745Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 5
-    description: ''
-    lock: false
-    user_email:
-  - id: 396
-    name: Car Service
-    value: car service
-    item_type: dynamic_model__sleep_transportations_select_mode_of_transport
-    created_at: '2019-07-08T14:56:19.751Z'
-    updated_at: '2019-07-08T14:56:19.751Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 20
-    description: ''
-    lock: false
-    user_email:
-  - id: 397
-    name: Personal Car
-    value: personal car
-    item_type: dynamic_model__sleep_transportations_select_mode_of_transport
-    created_at: '2019-07-08T14:56:19.757Z'
-    updated_at: '2019-07-08T14:56:19.757Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 10
-    description: ''
-    lock: false
-    user_email:
-  - id: 398
-    name: Other
-    value: other
-    item_type: dynamic_model__sleep_transportations_select_mode_of_transport
-    created_at: '2019-07-08T14:56:19.762Z'
-    updated_at: '2019-07-08T14:56:19.762Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 100
-    description: ''
     lock: false
     user_email:
   - id: 399
@@ -12092,51 +11758,6 @@ app_type:
     description: ''
     lock: false
     user_email:
-  - id: 468
-    name: Primary
-    value: primary
-    item_type: dynamic_model__sleep_station_contacts_select_availability
-    created_at: '2019-07-08T14:56:20.201Z'
-    updated_at: '2019-07-08T14:56:20.201Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 1
-    description: ''
-    lock: false
-    user_email:
-  - id: 469
-    name: On-Call
-    value: on-call
-    item_type: dynamic_model__sleep_station_contacts_select_availability
-    created_at: '2019-07-08T14:56:20.207Z'
-    updated_at: '2019-07-08T14:56:20.207Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 2
-    description: ''
-    lock: false
-    user_email:
-  - id: 470
-    name: Other
-    value: other
-    item_type: dynamic_model__sleep_station_contacts_select_availability
-    created_at: '2019-07-08T14:56:20.212Z'
-    updated_at: '2019-07-08T14:56:20.212Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 3
-    description: ''
-    lock: false
-    user_email:
   - id: 471
     name: 'No'
     value: 'no'
@@ -12329,21 +11950,6 @@ app_type:
     edit_if_set: false
     edit_always: true
     position: 3
-    description: ''
-    lock: false
-    user_email:
-  - id: 481
-    name: Rail
-    value: rail
-    item_type: dynamic_model__sleep_transportations_select_mode_of_transport
-    created_at: '2019-07-08T14:56:20.277Z'
-    updated_at: '2019-07-08T14:56:20.277Z'
-    disabled: true
-    admin_id: 2
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 50
     description: ''
     lock: false
     user_email:
