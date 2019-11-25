@@ -1,0 +1,156 @@
+# @library sleep field_options
+
+default:
+
+
+  field_options:
+    <<: *ps_field_options
+#    select_subject_eligibility:
+#      value: eligible
+
+
+  show_if:
+
+    cbt_yes_no:
+      reliable_internet_yes_no: 'yes'
+
+    cbt_how_long_ago:
+      cbt_yes_no: 'yes'
+
+    sleep_times_yes_no:
+      reliable_internet_yes_no: 'yes'
+
+    work_night_shifts_yes_no:
+      reliable_internet_yes_no: 'yes'
+
+    number_times_per_week_work_night_shifts:
+      work_night_shifts_yes_no: 'yes'
+
+    narcolepsy_diagnosis_yes_no_dont_know:
+      reliable_internet_yes_no: 'yes'
+
+    antiseizure_meds_yes_no:
+      reliable_internet_yes_no: 'yes'
+
+    seizure_in_ten_years_yes_no:
+      reliable_internet_yes_no: 'yes'
+#      antiseizure_meds_yes_no: 'no'
+
+    major_psychiatric_disorder_yes_no:
+      reliable_internet_yes_no: 'yes'
+
+    isi_total_score:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        isi_total_score: null
+
+    sa_diagnosed_yes_no:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        sa_diagnosed_yes_no: null
+
+    sa_use_treatment_yes_no:
+      all:
+        reliable_internet_yes_no: 'yes'
+        sa_diagnosed_yes_no: 'yes'
+      not_any:
+        sa_use_treatment_yes_no: null
+
+    sa_severity:
+      all:
+        reliable_internet_yes_no: 'yes'
+        sa_use_treatment_yes_no: 'no'
+      not_any:
+        sa_severity: null
+
+    ese_total_score:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        ese_total_score: null
+
+    number_hours_sleep:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        number_hours_sleep: null
+
+    audit_c_total_score:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        audit_c_total_score: null
+
+    alcohol_frequency:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        alcohol_frequency: null
+
+    number_days_negative_feeling_d2:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        number_days_negative_feeling_d2: null
+
+    number_days_drug_usage_d2:
+      all:
+        reliable_internet_yes_no: 'yes'
+      not_any:
+        number_days_drug_usage_d2: null
+
+
+
+  caption_before:
+
+    reliable_internet_yes_no: Has reliable mobile device and Internet
+    cbt_yes_no: Has participated in CBTi
+    cbt_how_long_ago: Participated in CBTi how long ago
+
+    sleep_times_yes_no: |
+      Typically falls asleep before 8pm
+      _or_
+      wakes up for the final time later than 11am?
+
+    work_night_shifts_yes_no: Works night shifts
+    number_times_per_week_work_night_shifts: Typical night shifts per week
+
+    narcolepsy_diagnosis_yes_no_dont_know: Has been diagnosed with narcolepsy
+    antiseizure_meds_yes_no: Currently taking anti-seizure medications
+    seizure_in_ten_years_yes_no: Has had a seizure within the past 10 years
+    major_psychiatric_disorder_yes_no: |
+      Has ever been diagnosed with bipolar disorder,
+      psychosis, or another major psychiatric disorder
+
+    isi_total_score: Insomnia Severity Index total score
+
+    sa_diagnosed_yes_no: Has been diagnosed with sleep apnea by a doctor
+    sa_use_treatment_yes_no: Currently uses treatment
+    sa_severity: Diagnosis severity
+
+    ese_total_score: Epworth Sleepiness Scale total score
+    number_hours_sleep: Hours of sleep on a typical night
+
+    audit_c_total_score: AUDIT-C total score
+    alcohol_frequency: Typically has a drink containing alcohol
+
+
+    number_days_negative_feeling_d2: Days in the past 12 months has felt bad or guilty about his drug use
+    number_days_drug_usage_d2: Days in the past 3 months has used drugs (excluding marijuana or CBD, and drugs prescribed by a clinician)
+
+
+    phq8_initial_score: |
+      PHQ-8 score to questions:
+
+        * Little interest or pleasure in doing things
+        * Feeling down, depressed or hopeless
+
+    phq8_total_score: PHQ-8 total score
+
+
+    consent_to_pass_info_to_bwh_yes_no: Consent to pass information to BWH
+
+    select_subject_eligibility: |
+      **Subject's eligibility for the study**

@@ -70,6 +70,7 @@ _definitions:
           antiseizure_meds_yes_no: 'no'
           seizure_in_ten_years_yes_no: 'no'
           major_psychiatric_disorder_yes_no: 'no'
+          conditions_yes_no: 'no'
 
 
       any_cbt:
@@ -1144,6 +1145,13 @@ finalize:
                 master_id:
                   this: master_id
                 reliable_internet_yes_no: return_value
+
+            conditions_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                conditions_yes_no: return_value
+
 
             cbt_yes_no:
               dynamic_model__sleep_ps_basic_responses:
