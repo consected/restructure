@@ -557,7 +557,7 @@ CREATE FUNCTION ml_app.handle_delete() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
       DECLARE
-        latest_tracker %ROWTYPE;
+        latest_tracker tracker_history%ROWTYPE;
       BEGIN
 
         -- Find the most recent remaining item in tracker_history for the master/protocol pair,
@@ -10578,3 +10578,4 @@ INSERT INTO schema_migrations (version) VALUES ('20190906172361');
 INSERT INTO schema_migrations (version) VALUES ('20191115124723');
 
 INSERT INTO schema_migrations (version) VALUES ('20191115124732');
+
