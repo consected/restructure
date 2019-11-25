@@ -1,0 +1,1311 @@
+# @library sleep enabled_if
+# @library sleep eligibility
+
+_definitions:
+
+  # Rule for editable_if only
+  # Lock the forms on finalization
+  not_finalized: &not_finalized
+    not_any:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: finalize
+
+
+  ####
+  # Boilerplace for notifying roles
+  # Override the subject: and if: structures to refine operation
+  ####
+
+  # Default email - just add roles or users
+  notify_email_default: &notify_email_default
+    type: email
+
+    layout_template: sleep notification layout
+    content_template: sleep notification message
+    extra_substitutions:
+      reason: ''
+      extra_text: |
+        The Sleep Study participant has completed the HMS phone screen.
+      panel_tab: activity-log--sleep-assignment-phone-screens
+    subject: "Sleep Study: HMS Phone Screen Complete"
+
+
+  # Default SMS - just add roles or users
+  notify_sms_default: &notify_sms_default
+    type: sms
+    layout_template: standard sms layout
+    content_template: sleep sms notification
+    subject: "HMS Phone Screen Complete"
+
+
+
+  # Notify BWH phone screener
+  notify_ps_complete: &notify_ps_complete
+    <<: *notify_email_default
+    role: email - bwh phone screener
+
+  # MedNav reviewer SMS
+  notify_ps_complete_sms: &notify_ps_complete_sms
+    <<: *notify_sms_default
+    role: sms - bwh phone screener
+
+  # PI
+  notify_pi: &notify_pi
+    <<: *notify_email_default
+    role: email - pi follow up
+
+
+  # PI SMS
+  notify_pi_sms: &notify_pi_sms
+    <<: *notify_sms_default
+    role: sms - pi follow up
+
+  eligible_basic_questions: &eligible_basic_questions
+    all_basic_questions_eligible:
+      all:
+        dynamic_model__sleep_ps_basic_responses:
+          reliable_internet_yes_no: 'yes'
+          sleep_times_yes_no: 'no'
+          narcolepsy_diagnosis_yes_no_dont_know: 'no'
+          antiseizure_meds_yes_no: 'no'
+          seizure_in_ten_years_yes_no: 'no'
+          major_psychiatric_disorder_yes_no: 'no'
+
+
+      any_cbt:
+        dynamic_model__sleep_ps_basic_responses:
+          cbt_yes_no: 'no'
+          cbt_how_long_ago: more than 5 years ago
+
+      any_night_shifts:
+        dynamic_model__sleep_ps_basic_responses:
+          work_night_shifts_yes_no: 'no'
+          number_times_per_week_work_night_shifts: 0
+
+  continue_after_basic_questions: &continue_after_basic_questions
+    any_after_basic_questions:
+      <<: *eligible_basic_questions
+      all_possibly_eligible: &possibly_eligible_basic_questions
+        dynamic_model__sleep_ps_basic_responses:
+          possibly_eligible_yes_no: 'yes'
+
+
+  eligible_isi_questions: &eligible_isi_questions
+
+    all_eligible_isi_questions:
+      dynamic_model__sleep_isi_questions:
+        total_score:
+          condition: '>'
+          value: 7
+
+  continue_after_isi_questions: &continue_after_isi_questions
+    any_after_isi:
+      <<: *eligible_isi_questions
+      all_possibly_eligible: &possibly_eligible_isi_questions
+        dynamic_model__sleep_isi_questions:
+          possibly_eligible_yes_no: 'yes'
+
+
+  administer_ess: &administer_ess
+
+    any_sleep_apnea_ess:
+      dynamic_model__sleep_ps_sleep_apnea_responses:
+        diagnosed_yes_no: 'no'
+        severity:
+          - moderate
+          - severe
+          - unsure
+
+  eligible_ese_questions: &eligible_ese_questions
+    any_ese:
+      all:
+        <<: *administer_ess
+        any:
+
+          dynamic_model__sleep_ese_questions:
+            total_score:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+              - 6
+              - 7
+              - 8
+              - 9
+              - 10
+              - 11
+              - 12
+              - 13
+              - 14
+              - 15
+
+            number_hours_sleep:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+      not_all:
+        <<: *administer_ess
+
+
+  continue_after_ese_questions: &continue_after_ese_questions
+    any_after_ese:
+      <<: *eligible_ese_questions
+      all_possibly_eligible: &possibly_eligible_ese_questions
+        dynamic_model__sleep_ese_questions:
+          possibly_eligible_yes_no: 'yes'
+
+
+  eligible_audit_c: &eligible_audit_c
+    not_all_eligible_audit_c:
+      not_any:
+        dynamic_model__sleep_ps_audit_c_questions:
+          total_score:
+            - 0
+            - 1
+            - 2
+            - 3
+      not_all:
+        dynamic_model__sleep_ps_audit_c_questions:
+          alcohol_frequency: 4
+          daily_alcohol: 0
+          six_or_more_frequency: 0
+
+  continue_after_audit_c: &continue_after_audit_c
+    any_after_audit_c:
+      <<: *eligible_audit_c
+      all_possibly_eligible: &possibly_eligible_audit_c
+        dynamic_model__sleep_ps_audit_c_questions:
+          possibly_eligible_yes_no: 'yes'
+
+
+  eligible_dast2_mod: &eligible_dast2_mod
+    all_eligible_dast2_mod:
+      dynamic_model__sleep_ps_dast2_mod_questions:
+        number_days_negative_feeling: 0
+        number_days_drug_usage: 0
+
+  continue_after_dast2_mod: &continue_after_dast2_mod
+    any_after_dast2_mod:
+      <<: *eligible_dast2_mod
+      all_possibly_eligible: &possibly_eligible_dast2_mod
+        dynamic_model__sleep_ps_dast2_mod_questions:
+          possibly_eligible_yes_no: 'yes'
+
+  all_eligible: &all_eligible
+    all_eligible: &all_eligible_items
+      <<: *eligible_basic_questions
+      <<: *eligible_isi_questions
+      <<: *eligible_ese_questions
+      <<: *eligible_audit_c
+      <<: *eligible_dast2_mod
+
+  all_eligible_and_complete: &all_eligible_and_complete
+    all_eligible_and_complete:
+      <<: *all_eligible_items
+      all_has_eligible_done:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: eligible
+
+  not_any_possibly_eligible: &not_any_possibly_eligible
+    not_any_possibly_eligible: &possibly_eligible_items
+      any_possibly_1:
+          <<: *possibly_eligible_basic_questions
+      any_possibly_2:
+          <<: *possibly_eligible_isi_questions
+      any_possibly_3:
+          <<: *possibly_eligible_ese_questions
+      any_possibly_4:
+          <<: *possibly_eligible_audit_c
+      any_possibly_5:
+          <<: *possibly_eligible_dast2_mod
+
+
+  all_show_eligible: &all_show_eligible
+    all_show_eligible:
+      all:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: dast2_mod
+      <<: *all_eligible_items
+#      <<: *not_any_possibly_eligible
+
+
+  any_possibly_eligible_no: &any_possibly_eligible_no
+    any_possibly_eligible_no:
+      all_basic:
+        not_all_eligible:
+          <<: *eligible_basic_questions
+        any_no:
+          dynamic_model__sleep_ps_basic_responses:
+            possibly_eligible_yes_no: 'no'
+      all_isi:
+        not_all_eligible:
+          <<: *eligible_isi_questions
+        any_no:
+          dynamic_model__sleep_isi_questions:
+            possibly_eligible_yes_no: 'no'
+      all_ese:
+        not_all_eligible:
+          <<: *eligible_ese_questions
+        any_no:
+          dynamic_model__sleep_ese_questions:
+            possibly_eligible_yes_no: 'no'
+#        all_audit_c:
+#          <<: *eligible_audit_c
+#          not_any_no:
+#           dynamic_model__sleep_ps_audit_c_questions:
+#             possibly_eligible_yes_no: 'no'
+      all_dast2_mod:
+        not_all_eligible:
+          <<: *eligible_dast2_mod
+          <<: *eligible_audit_c
+        any_no:
+          dynamic_model__sleep_ps_dast2_mod_questions:
+            possibly_eligible_yes_no: 'no'
+
+
+
+_default:
+  <<: *access_defaults
+  editable_if: *not_finalized
+
+  save_action:
+    on_create: create_next_creatable
+
+
+################################################
+start_phone_screen:
+  label: Start Phone Screening
+  fields:
+
+  references:
+    dynamic_model__sleep_ps_initial_screening:
+      from: this
+      add: one_to_this
+
+  caption_before:
+    submit: If the subject is ready to continue, save this form and continue with the next form.
+  view_options:
+    show_embedded_at_top: true
+
+  creatable_if:
+    <<: *enabled_if
+    not_any:
+      dynamic_model__sleep_ps_initial_screenings:
+        select_still_interested: "yes"
+
+
+  save_action:
+    on_create:
+      create_next_creatable:
+        if:
+          all:
+            dynamic_model__sleep_ps_initial_screenings:
+              select_still_interested: "yes"
+              id:
+                this_references: id
+      show_panel:
+        value: activity_log__sleep_assignments
+        if:
+          not_all:
+            dynamic_model__sleep_ps_initial_screenings:
+              select_still_interested: "yes"
+              id:
+                this_references: id
+      hide_panel:
+        value: activity_log__sleep_assignment_phone_screens
+        if:
+          not_all:
+            dynamic_model__sleep_ps_initial_screenings:
+              select_still_interested: "yes"
+              id:
+                this_references: id
+
+  showable_if:
+    always: true
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+        ###### Create tracker entry with exit (no consent) record ######
+        ###### Not ineligible, but also not eligible and consented ######
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                dynamic_model__sleep_ps_initial_screenings:
+                  id:
+                    this_references: id
+                this:
+                  any:
+                    dynamic_model__sleep_ps_initial_screenings:
+                      select_is_good_time_to_speak: 'not interested'
+                      select_still_interested: 'no'
+
+            in: master
+            with:
+              extra_log_type: exit_ps
+
+
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                dynamic_model__sleep_ps_initial_screenings:
+                  id:
+                    this_references: id
+                this:
+                  any:
+                    dynamic_model__sleep_ps_initial_screenings:
+                      select_is_good_time_to_speak:
+                        - left voicemail
+                        - not appropriate time
+                      select_still_interested: 'yes - call back'
+
+            in: master
+            with:
+              extra_log_type: schedule_screening
+              select_who: current_user_email
+              follow_up_when:
+                dynamic_model__sleep_ps_initial_screenings:
+                  id:
+                    this_references: id
+                  follow_up_date: return_value
+              follow_up_time:
+                dynamic_model__sleep_ps_initial_screenings:
+                  id:
+                    this_references: id
+                  follow_up_time: return_value
+              notes: |
+                Call went to voicemail, or participant requested to speak another time
+
+              select_record_from_player_contacts:
+                activity_log__sleep_assignments:
+                  extra_log_type: schedule_screening
+                  select_record_from_player_contacts: return_value
+
+
+################################################
+basic_questions:
+  label: Basic Questions
+
+  references:
+    dynamic_model__sleep_ps_basic_response:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: start_phone_screen
+    not_any:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: basic_questions
+
+################################################
+insomnia_severity_index:
+  label: Insomnia Severity Index
+
+  references:
+    dynamic_model__sleep_isi_question:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *continue_after_basic_questions
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: insomnia_severity_index
+
+  save_trigger:
+    on_create:
+      create_reference:
+        ###### Create tracker entry to follow up and email Trust info ######
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                dynamic_model__sleep_isi_questions:
+                  id:
+                    this_references: id
+                  trust_assessment_info_yes_no: 'yes'
+
+            in: master
+            with:
+              extra_log_type: general
+              select_activity: schedule follow up
+              select_direction: to staff
+              select_next_step: more info requested
+              follow_up_when: today()
+              follow_up_time: now()
+              notes: |
+                During the HMS Phone Screen the participant requested
+                more information about the *Trust sleep assessments*.
+
+                When an email has been sent with details, add a **follow up**,
+                to record this.
+
+################################################
+sleep_apenea:
+  label: Sleep Apnea
+
+  references:
+    dynamic_model__sleep_ps_sleep_apnea_response:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *continue_after_isi_questions
+      all:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: insomnia_severity_index
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: sleep_apenea
+
+
+################################################
+epworth_sleepiness_scale:
+  label: Epworth Sleepiness Scale
+
+  references:
+    dynamic_model__sleep_ese_question:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: sleep_apenea
+      <<: *administer_ess
+
+    not_any:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: epworth_sleepiness_scale
+
+  save_trigger:
+    on_create:
+      create_reference:
+        ###### Create tracker entry to follow up and email Trust info ######
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                dynamic_model__sleep_ese_questions:
+                  id:
+                    this_references: id
+                  trust_assessment_info_yes_no: 'yes'
+
+            in: master
+            with:
+              extra_log_type: general
+              select_activity: schedule follow up
+              select_direction: to staff
+              select_next_step: more info requested
+              follow_up_when: today()
+              follow_up_time: now()
+              notes: |
+                During the HMS Phone Screen the participant requested
+                more information about the *Trust sleep assessments*.
+
+                When an email has been sent with details, add a **follow up**,
+                to record this.
+
+
+
+################################################
+audit_c:
+  label: Audit-C
+
+  references:
+    dynamic_model__sleep_ps_audit_c_question:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+
+    all:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: sleep_apenea
+      <<: *continue_after_ese_questions
+
+    not_any:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: audit_c
+
+
+################################################
+dast2_mod:
+  label: DAST-2 Modified
+
+  references:
+    dynamic_model__sleep_ps_dast2_mod_question:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: audit_c
+      #<<: *continue_after_audit_c
+
+    not_any:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: dast2_mod
+
+
+
+################################################
+ineligible:
+  label: Ineligible
+
+  view_options:
+    hide_unless_creatable: true
+
+  references:
+    dynamic_model__sleep_ps_non_eligible:
+      from: this
+      add: one_to_this
+
+  showable_if:
+    always: true
+
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: ineligible
+      not_all_show_eligible:
+        <<: *all_show_eligible
+        <<: *not_any_possibly_eligible
+
+      any_responses_ineligible: &any_responses_ineligible
+        <<: *any_possibly_eligible_no
+
+        all_basic_questions:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: basic_questions
+          not_any:
+            <<: *eligible_basic_questions
+          not_any_2:
+            <<: *possibly_eligible_basic_questions
+
+        all_isi_questions:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: insomnia_severity_index
+          not_any:
+            <<: *eligible_isi_questions
+          not_any_2:
+            <<: *possibly_eligible_isi_questions
+
+        all_sleep_apnea_and_ese:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: sleep_apenea
+
+          any_done_sleep_apnea_and_ese:
+            not_all:
+              <<: *administer_ess
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: epworth_sleepiness_scale
+
+          not_any:
+            <<: *eligible_ese_questions
+          not_any_2:
+            <<: *possibly_eligible_ese_questions
+
+
+#        all_audit_c:
+#          activity_log__sleep_assignment_phone_screens:
+#            extra_log_type: audit_c
+#          not_any:
+#            <<: *eligible_audit_c
+#          not_any_2:
+#            <<: *possibly_eligible_audit_c
+
+        all_dast2_mod:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: dast2_mod
+          not_any:
+            <<: *eligible_dast2_mod
+          not_any_2:
+            <<: *possibly_eligible_dast2_mod
+
+
+
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+        ##### Screener Responses with outcome default #####
+        - dynamic_model__sleep_ps_screener_response:
+            in: master
+            with:
+              outcome: ineligible
+
+         ###### Create tracker entry with screener responses ######
+#        - activity_log__sleep_assignment_phone_screen:
+#            in: master
+#            with:
+#              extra_log_type: screener_responses
+
+        ##### Record consent in tracker since requested follow up and gave consent #####
+        - activity_log__sleep_assignment:
+            in: master
+            if:
+              any_gave_consent_to_share_ineligible:
+                dynamic_model__sleep_ps_non_eligibles:
+                  consent_to_pass_info_to_bwh_yes_no: 'yes'
+                  consent_to_pass_info_to_bwh_2_yes_no: 'yes'
+
+            with:
+              extra_log_type: consent_to_share_details
+              activity_date: now()
+              select_activity: Verbal consent during HMS Phone Screen
+              select_who: current_user_email
+
+
+
+        ##### Ineligible - requested PI follow up ######
+        - activity_log__sleep_assignment_med_nav: &create_ref_request_pi_followup
+            in: this
+            add: many
+            if:
+              all:
+                any:
+                  dynamic_model__sleep_ps_non_eligibles:
+                    contact_pi_yes_no: 'yes'
+                <<: *gave_consent_to_share
+
+            with:
+              extra_log_type: request_pi_follow_up
+              notes: |
+                HMS Phone Screen found this subject to be ineligible.
+                The subject requested a PI follow up.
+
+                Please review the HMS Phone Screen tab for complete information.
+
+
+
+################################################
+possibly_eligible:
+  label: Possibly Eligible
+
+  references:
+    dynamic_model__sleep_ps_possibly_eligibles:
+      from: this
+      add: one_to_this
+
+  showable_if:
+    always: true
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+
+      all_done:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: dast2_mod
+
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: possibly_eligible
+
+      any_possible_eligible:
+        <<: *possibly_eligible_items
+
+      not_any_show_eligible:
+        <<: *all_show_eligible
+
+      not_any_ineligible:
+        <<: *any_responses_ineligible
+
+#      not_any_possibly_eligible_no:
+#        <<: *any_possibly_eligible_no
+
+      any_continue_after_possibly_eligible:
+        all_basic_questions:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: basic_questions
+          <<: *continue_after_basic_questions
+
+        all_isi_questions:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: insomnia_severity_index
+          <<: *continue_after_isi_questions
+
+        all_sleep_apnea_and_ese:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: sleep_apenea
+
+          any_done_sleep_apnea_and_ese:
+            not_all:
+              <<: *administer_ess
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: epworth_sleepiness_scale
+
+          <<: *continue_after_ese_questions
+
+
+#        all_audit_c:
+#          activity_log__sleep_assignment_phone_screens:
+#            extra_log_type: dast2_mod
+#            # Was originally audit_c, but we want to always complete dast2
+#            # irrespective or the result here
+#
+#          <<: *continue_after_audit_c
+
+        all_dast2_mod:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: dast2_mod
+          <<: *continue_after_dast2_mod
+
+
+  caption_before:
+    submit: |
+      *Save this form after the call, then complete the **Screener Reponses**.
+      When that form has been created the PI will be informed that a
+      follow up is required.*
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+        ##### Screener Responses with outcome default #####
+        - dynamic_model__sleep_ps_screener_response:
+            in: master
+            with:
+              outcome: possibly_eligible
+            if:
+              any:
+                dynamic_model__sleep_ps_possibly_eligibles:
+                  consent_to_pass_info_to_bwh_yes_no: 'yes'
+                  consent_to_pass_info_to_bwh_2_yes_no: 'yes'
+
+        - dynamic_model__sleep_ps_screener_response:
+            in: master
+            with:
+              outcome: possibly eligible - no consent
+            if:
+              all:
+                dynamic_model__sleep_ps_possibly_eligibles:
+                  consent_to_pass_info_to_bwh_yes_no: 'no'
+                  consent_to_pass_info_to_bwh_2_yes_no: 'no'
+
+
+
+
+
+################################################
+eligible:
+  label: Eligible
+
+  showable_if:
+    always: true
+
+  references:
+    dynamic_model__sleep_ps_eligible:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *all_show_eligible
+
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: eligible
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+        ##### Screener Responses with outcome default #####
+        dynamic_model__sleep_ps_screener_response:
+          in: master
+          with:
+            outcome: eligible
+
+
+
+################################################
+screener_responses:
+  label: Screener Responses
+
+  view_options:
+    hide_unless_creatable: true
+
+  references:
+    dynamic_model__sleep_ps_screener_response:
+      from: this
+      add: one_to_this
+
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      any_eligible_possibly:
+        all_eligible:
+          activity_log__sleep_assignment_phone_screens:
+            extra_log_type: eligible
+  #      all_consented_possibly_eligible: &consented_possibly_eligible
+  #        activity_log__sleep_assignment_phone_screens:
+  #          extra_log_type: possibly_eligible
+        any_consented_possibly_eligible: &consented_possibly_eligible
+          dynamic_model__sleep_ps_possibly_eligibles:
+            consent_to_pass_info_to_bwh_yes_no: 'yes'
+            consent_to_pass_info_to_bwh_2_yes_no: 'yes'
+
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: screener_responses
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+        ##### Record consent in tracker since requested follow up and gave consent #####
+        - activity_log__sleep_assignment: &create_ref_record_consent
+            in: master
+            if:
+              <<: *gave_and_understood_consent
+            with:
+              extra_log_type: consent_to_share_details
+              activity_date: now()
+              select_activity: Verbal consent during HMS Phone Screen
+              select_who: current_user_email
+
+
+        ##### Possibly eligible - requested PI review ######
+        - activity_log__sleep_assignment_med_nav:
+            in: this
+            add: many
+            if: &all_request_possibly_eligible_pi_review
+              all:
+                any:
+                  dynamic_model__sleep_ps_screener_responses:
+                    outcome: possibly_eligible
+                <<: *gave_and_understood_consent
+
+            with:
+              extra_log_type: request_pi_ps_review
+              notes: |
+                HMS Phone Screen found this subject to be possibly eligible.
+
+                A review is required before eligibility for BWH screening can be finalized.
+
+                Please review the HMS Phone Screen tab for complete information.
+                At least one of the screener blocks will have a header prompt:
+
+                > **NOTE TO PI**
+                >
+                > The screener marked this form as Possibly Eligible
+
+                Additional notes will be provided by the screening interviewer.
+
+
+
+################################################
+subject_contact:
+  label: Contact Participant
+
+  references:
+    dynamic_model__sleep_ps_subject_contacts:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *not_finalized
+      <<: *all_request_possibly_eligible_pi_review
+      not_all_eligibility_follow_up_done:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: eligibility_followup
+
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_action:
+
+
+################################################
+eligibility_followup:
+  label: Eligibility Follow Up
+
+  references:
+    dynamic_model__sleep_ps_eligibility_followups:
+      from: this
+      add: one_to_this
+
+  showable_if:
+    always: true
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *not_finalized
+      <<: *all_request_possibly_eligible_pi_review
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: eligibility_followup
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_trigger:
+
+    on_create:
+      create_reference:
+        ##### Record consent to share details if the participant gave it
+        - activity_log__sleep_assignment: *create_ref_record_consent
+        ##### Ineligible - requested PI follow up ######
+        - activity_log__sleep_assignment_med_nav:
+            <<: *create_ref_request_pi_followup
+            if:
+              all:
+                all_ineligible_and_contact_pi:
+                  dynamic_model__sleep_ps_eligibility_followups:
+                    outcome: 'ineligible'
+                    contact_pi_yes_no: 'yes'
+                <<: *gave_consent_to_share
+
+
+
+
+################################################
+finalize:
+  label: Finalize Entries
+
+  view_options:
+    hide_unless_creatable: true
+    show_cancel: true
+
+  caption_before:
+    all_fields: |
+      When finalized the phone screen forms are locked from editing.
+
+      If the subject is eligible and has consented
+      to passing information to BWH,
+      the BWH team will be notified automatically that the second phone screener is
+      ready to be performed.
+
+      Otherwise the BWH team will not be notified.
+
+
+    submit: |
+      Click the cancel button instead if review or
+      revision of the phone screen forms is still required.
+
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+
+      any_next:
+        # If ineligible, or eligible and screener responses completed
+        any_ineligible_eligible_with_screener:
+          dynamic_model__sleep_ps_screener_responses:
+            outcome:
+              - ineligible
+              - eligible
+              - possibly eligible - no consent
+
+          dynamic_model__sleep_ps_eligibility_followups:
+            outcome:
+              - ineligible
+              - eligible
+
+      not_any:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: finalize
+
+
+  # Override the default that hides activities after a certain stage,
+  # so that any user can see that the phone screen process has been completed
+  showable_if:
+    always: true
+
+
+  save_action:
+    on_create:
+      show_panel:
+        value: activity_log__sleep_assignments
+      hide_panel:
+        value: activity_log__sleep_assignment_phone_screens
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+
+
+        ###### Create tracker entry with ineligible record ######
+        - activity_log__sleep_assignment:
+            if:
+              <<: *any_ineligible
+            in: master
+            with:
+              extra_log_type: ineligible
+
+
+        ###### Create tracker entry with exit (no consent) record ######
+        ###### Not ineligible, but also not eligible and consented ######
+        - activity_log__sleep_assignment:
+            if:
+              not_any:
+                <<: *any_ineligible
+                <<: *all_eligible_and_gave_consent
+            in: master
+            with:
+              extra_log_type: exit_ps
+
+
+        ###### Create tracker entry with HMS Eligible record ######
+        - activity_log__sleep_assignment:
+            if:
+              <<: *all_eligible_and_gave_consent
+            in: master
+            with:
+              extra_log_type: hms_ps_eligible
+
+
+        ###### Create inclusion exclusion checklist ######
+        - activity_log__sleep_assignment_inex_checklist:
+            if:
+              <<: *all_eligible_and_gave_consent
+            in: master
+            with:
+              extra_log_type: phone_screen_review
+
+        ###### Grant BWH Staff access to participant ######
+        - dynamic_model__sleep_access_bwh_staffs:
+            in: master
+            if:
+              <<: *all_eligible_and_gave_consent
+              not_all_access:
+                dynamic_model__sleep_access_bwh_staffs:
+                  id:
+                    condition: IS NOT NULL
+
+        ###### Grant PI access to participant ######
+        - dynamic_model__sleep_access_pis:
+            in: master
+            if:
+              <<: *all_eligible_and_gave_consent
+              not_all_access:
+                dynamic_model__sleep_access_pis:
+                  id:
+                    condition: IS NOT NULL
+
+
+
+      update_reference:
+        ###### Update inclusion exclusion checklist with #####
+        ###### initial info from this screener ######
+        ref:
+          if:
+            <<: *all_eligible_and_gave_consent
+
+          force_not_editable_save: true
+          first:
+            dynamic_model__sleep_inex_checklists:
+              master_id:
+                this: master_id
+              update: return_result
+
+          with:
+
+            fixed_checklist_type: phone screen review
+
+            reliable_internet_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                reliable_internet_yes_no: return_value
+
+            cbt_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                cbt_yes_no: return_value
+
+            cbt_how_long_ago:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                cbt_how_long_ago: return_value
+
+
+            sleep_times_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                sleep_times_yes_no: return_value
+
+
+            work_night_shifts_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                work_night_shifts_yes_no: return_value
+
+
+            number_times_per_week_work_night_shifts:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                number_times_per_week_work_night_shifts: return_value
+
+            narcolepsy_diagnosis_yes_no_dont_know:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                narcolepsy_diagnosis_yes_no_dont_know: return_value
+
+            antiseizure_meds_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                antiseizure_meds_yes_no: return_value
+
+            seizure_in_ten_years_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                seizure_in_ten_years_yes_no: return_value
+
+
+            major_psychiatric_disorder_yes_no:
+              dynamic_model__sleep_ps_basic_responses:
+                master_id:
+                  this: master_id
+                major_psychiatric_disorder_yes_no: return_value
+
+
+            isi_total_score:
+              dynamic_model__sleep_isi_questions:
+                master_id:
+                  this: master_id
+                total_score: return_value
+
+            sa_diagnosed_yes_no:
+              dynamic_model__sleep_ps_sleep_apnea_responses:
+                master_id:
+                  this: master_id
+                diagnosed_yes_no: return_value
+
+            sa_use_treatment_yes_no:
+              dynamic_model__sleep_ps_sleep_apnea_responses:
+                master_id:
+                  this: master_id
+                use_treatment_yes_no: return_value
+
+            sa_severity:
+              dynamic_model__sleep_ps_sleep_apnea_responses:
+                master_id:
+                  this: master_id
+                severity: return_value
+
+
+            ese_total_score:
+              dynamic_model__sleep_ese_questions:
+                master_id:
+                  this: master_id
+                total_score: return_value
+
+
+            number_hours_sleep:
+              dynamic_model__sleep_ese_questions:
+                master_id:
+                  this: master_id
+                number_hours_sleep: return_value
+
+            audit_c_total_score:
+              dynamic_model__sleep_ps_audit_c_questions:
+                master_id:
+                  this: master_id
+                total_score: return_value
+
+            alcohol_frequency:
+              dynamic_model__sleep_ps_audit_c_questions:
+                master_id:
+                  this: master_id
+                alcohol_frequency: return_value
+
+            number_days_negative_feeling_d2:
+              dynamic_model__sleep_ps_dast2_mod_questions:
+                master_id:
+                  this: master_id
+                number_days_negative_feeling: return_value
+
+            number_days_drug_usage_d2:
+              dynamic_model__sleep_ps_dast2_mod_questions:
+                master_id:
+                  this: master_id
+                number_days_drug_usage: return_value
+
+            consent_to_pass_info_to_bwh_yes_no:
+              any:
+                all_1:
+                  dynamic_model__sleep_ps_eligibles:
+                    consent_to_pass_info_to_bwh_yes_no:
+                      - 'yes'
+                      - return_value
+                all_2:
+                  dynamic_model__sleep_ps_eligibles:
+                    consent_to_pass_info_to_bwh_2_yes_no:
+                      - 'yes'
+                      - return_value
+
+                all_followup_1:
+                  dynamic_model__sleep_ps_eligibility_followups:
+                    consent_to_pass_info_to_bwh_yes_no:
+                      - 'yes'
+                      - return_value
+                all_followup_2:
+                  dynamic_model__sleep_ps_eligibility_followups:
+                    consent_to_pass_info_to_bwh_2_yes_no:
+                      - 'yes'
+                      - return_value
+
+
+
+  ##### Notify the reviewers that the phone screen has been completed
+  ##### The participant was eligible or possibly eligible
+  #####
+      notify:
+        - <<: *notify_ps_complete
+          if:
+            <<: *all_eligible_and_gave_consent
+
+        - <<: *notify_ps_complete_sms
+          if:
+            <<: *all_eligible_and_gave_consent
+
+
+test_condition:
+  label: Test Condition
+  creatable_if:
+    <<: *any_ineligible
