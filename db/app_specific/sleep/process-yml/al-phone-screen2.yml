@@ -1,0 +1,576 @@
+# @library sleep enabled_if
+# @library sleep eligibility
+
+
+_definitions:
+
+  # Rule for editable_if only
+  # Lock the forms on finalization
+  not_finalized: &not_finalized
+    not_any:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type: finalize
+
+
+  ####
+  # Boilerplace for notifying roles
+  # Override the subject: and if: structures to refine operation
+  ####
+
+  # Default email - just add roles or users
+  notify_email_default: &notify_email_default
+    type: email
+    layout_template: sleep notification layout
+    content_template: sleep inex message
+    subject: "SLEEP App: Phone Screen Complete"
+
+
+  # Default SMS - just add roles or users
+  notify_sms_default: &notify_sms_default
+    type: sms
+    layout_template: standard sms layout
+    content_template: sleep sms notification
+    subject: "SLEEP Phone Screen Complete"
+
+
+
+  # MedNav reviewer
+  notify_reviewer: &notify_reviewer
+    <<: *notify_email_default
+    role: email - inex reviewer
+
+  # MedNav reviewer SMS
+  notify_reviewer_sms: &notify_reviewer_sms
+    <<: *notify_sms_default
+    role: sms - inex reviewer
+
+  # PI
+  notify_pi: &notify_pi
+    <<: *notify_email_default
+    role: email - pi
+
+  notify_pi_sms: &notify_pi_sms
+    <<: *notify_sms_default
+    role: sms - pi
+
+  # PI Inex
+  notify_inex_pi: &notify_inex_pi
+    <<: *notify_email_default
+    role: email - inex pi
+
+
+  notify_inex_pi_sms: &notify_inex_pi_sms
+    <<: *notify_sms_default
+    role: sms - inex pi
+
+  eligible_phq8_questions: &eligible_phq8_questions
+    all_phq8_eligible:
+      dynamic_model__sleep_ps2_phq8_questions:
+        total_score:
+          condition: '<'
+          value: 20
+
+
+  all_eligible: &all_eligible
+    all_eligible:
+      <<: *eligible_phq8_questions
+      all_has_eligible_done:
+        activity_log__sleep_assignment_phone_screen2s:
+          extra_log_type: eligible
+
+
+
+_default:
+  <<: *access_defaults
+  editable_if: *not_finalized
+
+  save_action:
+    on_create: create_next_creatable
+
+
+################################################
+start_phone_screen:
+  label: Start Phone Screening
+  fields:
+
+  references:
+    dynamic_model__sleep_ps2_initial_screening:
+      from: this
+      add: one_to_this
+
+  caption_before:
+    #all_fields: Record initial screening responses. If necessary, enter a date and time to follow up.
+    submit: If the subject is ready to continue, save this form and continue with the next form.
+  view_options:
+    show_embedded_at_top: true
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *all_eligible_and_gave_consent_hms_finalized
+
+    not_any:
+      dynamic_model__sleep_ps2_initial_screenings:
+        select_is_good_time_to_speak: "yes"
+
+  save_action:
+    on_create:
+      create_next_creatable:
+        if:
+          all:
+            dynamic_model__sleep_ps2_initial_screenings:
+              select_is_good_time_to_speak: "yes"
+              id:
+                this_references: id
+      show_panel:
+        value: activity_log__sleep_assignments
+        if:
+          not_all:
+            dynamic_model__sleep_ps2_initial_screenings:
+              select_is_good_time_to_speak: "yes"
+              id:
+                this_references: id
+      hide_panel:
+        value: activity_log__sleep_assignment_phone_screen2s
+        if:
+          not_all:
+            dynamic_model__sleep_ps2_initial_screenings:
+              select_is_good_time_to_speak: "yes"
+              id:
+                this_references: id
+
+
+  showable_if:
+    always: true
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+
+        ###### Create tracker entry with exit (no consent) record ######
+        ###### Not ineligible, but also not eligible and consented ######
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                dynamic_model__sleep_ps2_initial_screenings:
+                  id:
+                    this_references: id
+                this:
+                  any:
+                    dynamic_model__sleep_ps2_initial_screenings:
+                      select_is_good_time_to_speak: 'not interested'
+
+
+            in: master
+            with:
+              extra_log_type: exit_ps_bwh
+
+
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                dynamic_model__sleep_ps2_initial_screenings:
+                  id:
+                    this_references: id
+                this:
+                  any:
+                    dynamic_model__sleep_ps2_initial_screenings:
+                      select_is_good_time_to_speak:
+                        - left voicemail
+                        - not appropriate time
+
+            in: master
+            with:
+              extra_log_type: schedule_screening_2
+              select_who: current_user_email
+              follow_up_when:
+                dynamic_model__sleep_ps2_initial_screenings:
+                  id:
+                    this_references: id
+                  follow_up_date: return_value
+              follow_up_time:
+                dynamic_model__sleep_ps2_initial_screenings:
+                  id:
+                    this_references: id
+                  follow_up_time: return_value
+              notes: |
+                Call went to voicemail, or participant requested to speak another time
+              select_record_from_player_contacts:
+                activity_log__sleep_assignments:
+                  extra_log_type: schedule_screening
+                  select_record_from_player_contacts: return_value
+
+
+
+################################################
+phq8:
+  label: PHQ-8
+
+  references:
+    dynamic_model__sleep_ps2_phq8_questions:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type: start_phone_screen
+
+    not_any:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type: phq8
+
+
+
+################################################
+ineligible:
+  label: Ineligible
+
+  showable_if:
+    always: true
+
+
+  view_options:
+    hide_unless_creatable: true
+
+  references:
+    dynamic_model__sleep_ps2_non_eligible:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      not_any:
+        activity_log__sleep_assignment_phone_screen2s:
+          extra_log_type: ineligible
+      any_ineligible:
+        all_basic_questions:
+          activity_log__sleep_assignment_phone_screen2s:
+            extra_log_type: phq8
+          not_all:
+            <<: *eligible_phq8_questions
+
+  save_action:
+    on_save:
+      show_panel:
+        value: activity_log__sleep_assignments
+
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+        - activity_log__sleep_assignment_med_nav:
+            in: this
+            add: many
+            if:
+              any:
+                dynamic_model__sleep_ps2_non_eligibles:
+                  questions_for_pi_yes_no: 'yes'
+
+            with:
+              extra_log_type: request_pi_follow_up
+              notes: |
+                BWH Phone Screen found this subject to be ineligible.
+                The subject requested a PI follow up.
+
+                Please review the BWH Phone Screen tab for complete information.
+
+        - activity_log__sleep_assignment_phone_screen2:
+            in: master
+            with:
+              extra_log_type: finalize
+
+
+      # Notify the PI that the subject has questions
+      notify:
+        - <<: *notify_pi
+          if:
+            any:
+              dynamic_model__sleep_ps2_non_eligibles:
+                questions_for_pi_yes_no: 'yes'
+
+        - <<: *notify_pi_sms
+          if:
+            any:
+              dynamic_model__sleep_ps2_non_eligibles:
+                questions_for_pi_yes_no: 'yes'
+
+
+################################################
+eligible:
+  label: Eligible
+
+  showable_if:
+    always: true
+
+
+  references:
+    dynamic_model__sleep_ps2_eligible:
+      from: this
+      add: one_to_this
+
+    activity_log__sleep_assignment:
+      label: Perform Informed Consent Review
+      add: many
+      add_with:
+        extra_log_type: perform_screening_follow_up
+        eligible_for_study_blank_yes_no: 'yes'
+        good_time_to_speak_blank_yes_no: 'yes - during phone screen'
+
+
+  caption_before:
+
+    reference_activity_log__sleep_assignment_perform_screening_follow_up: |
+      Record information about the informed consent.
+
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+
+      all_done:
+        activity_log__sleep_assignment_phone_screen2s:
+          extra_log_type: phq8
+      <<: *eligible_phq8_questions
+
+      not_any:
+        activity_log__sleep_assignment_phone_screen2s:
+          extra_log_type: eligible
+
+  view_options:
+    hide_unless_creatable: true
+    always_embed_reference: dynamic_model__sleep_ps2_eligible
+    always_embed_creatable_reference: dynamic_model__sleep_ps2_eligible
+
+
+
+  save_action:
+
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+        - activity_log__sleep_assignment_phone_screen2:
+            in: master
+            with:
+              extra_log_type: finalize
+            if:
+              any:
+                dynamic_model__sleep_ps2_eligibles:
+                  review_consent_now_yes_no: 'no'
+                  interested_yes_no: 'no'
+
+
+#####################################################################
+# Not used directly
+#####################################################################
+finalize:
+  label: Finalize Entries
+#####################################################################
+  view_options:
+    hide_unless_creatable: true
+    show_cancel: true
+
+  caption_before:
+    all_fields: |
+      When finalized the phone screen forms are locked from editing.
+
+      Save this entry to lock the phone screen forms.
+      If the subject is eligible an inclusion/exclusion checklist record will be generated.
+
+      Click the cancel button instead if review or revision of the phone screen forms is still required.
+
+
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type:
+#         - eligible
+         - ineligible
+
+    not_any:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type: finalize
+
+
+  # Override the default that hides activities after a certain stage,
+  # so that any user can see that the phone screen process has been completed
+  showable_if:
+    always: true
+
+
+  save_action:
+    on_create:
+      show_panel:
+        value: activity_log__sleep_assignment_inex_checklists
+      hide_panel:
+        value: activity_log__sleep_assignment_phone_screen2s
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+
+        ###### Create tracker entry with ineligible record ######
+        - activity_log__sleep_assignment:
+            if: &any_bwh_ps_ineligible
+              any_bwh_ps_ineligible:
+                activity_log__sleep_assignment_phone_screen2s:
+                  extra_log_type: ineligible
+            in: master
+            with:
+              extra_log_type: ineligible
+
+        ###### Create tracker entry with BWH Eligible record ######
+        - activity_log__sleep_assignment:
+            if: &any_bwh_eligible_and_interested
+              any_bwh_eligible_and_interested:
+                dynamic_model__sleep_ps2_eligibles:
+                  interested_yes_no: 'yes'
+            in: master
+            with:
+              extra_log_type: bwh_ps_eligible
+              created_at:
+                activity_log__sleep_assignment_phone_screen2s:
+                  extra_log_type: eligible
+                  created_at: return_value
+              updated_at:
+                activity_log__sleep_assignment_phone_screen2s:
+                  extra_log_type: eligible
+                  created_at: return_value
+
+        ###### Create tracker entry with exit (not interested) record ######
+#        - activity_log__sleep_assignment:
+#            if: &any_bwh_eligible_and_not_interested
+#              any_bwh_eligible_and_not_interested:
+#                dynamic_model__sleep_ps2_eligibles:
+#                  interested_yes_no: 'no'
+#            in: master
+#            with:
+#              extra_log_type: exit_ps_bwh
+
+
+        ###### Create tracker entry with exit record ######
+        ###### Not ineligible, but also not eligible and interested ######
+        - activity_log__sleep_assignment:
+            if:
+              not_any:
+                <<: *any_bwh_ps_ineligible
+                <<: *any_bwh_eligible_and_interested
+            in: master
+            with:
+              extra_log_type: exit_ps_bwh
+
+
+
+        ###### Create tracker for informed consent screening follow up ######
+        ###### if eligible but do not want to review the consent now #####
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                activity_log__sleep_assignment_phone_screen2s:
+                  extra_log_type: eligible
+                dynamic_model__sleep_ps2_eligibles:
+                  review_consent_now_yes_no: 'no'
+
+            in: master
+
+            with:
+              extra_log_type: screening_follow_up
+              follow_up_when:
+                dynamic_model__sleep_ps2_eligibles:
+                  interested_yes_no: 'yes'
+                  follow_up_date: return_value
+              follow_up_time:
+                dynamic_model__sleep_ps2_eligibles:
+                  interested_yes_no: 'yes'
+                  follow_up_time: return_value
+              notes:
+                dynamic_model__sleep_ps2_eligibles:
+                  interested_yes_no: 'yes'
+                  notes: return_value
+
+
+        ###### PHQ-8 score > 19 - A PI follow up is required #####
+        - activity_log__sleep_assignment_med_nav:
+            in: master
+
+            if:
+              all:
+                dynamic_model__sleep_ps2_phq8_questions:
+                  total_score:
+                    - '20'
+                    - '21'
+                    - '22'
+                    - '23'
+                    - '24'
+
+            with:
+              extra_log_type: request_pi_follow_up
+              notes: |
+                BWH Phone Screen recorded a PHQ-8 score > 19. A PI follow up is automatically required.
+
+                Please review the BWH Phone Screen tab for complete information.
+
+
+
+      update_reference:
+        ref:
+          if:
+            <<: *all_eligible
+
+          force_not_editable_save: true
+          first:
+            dynamic_model__sleep_inex_checklists:
+              master_id:
+                this: master_id
+              update: return_result
+
+          with:
+
+            fixed_checklist_type: phone screen review
+
+            phq8_initial_score:
+              dynamic_model__sleep_ps2_phq8_questions:
+                master_id:
+                  this: master_id
+                initial_score: return_value
+
+            phq8_total_score:
+              dynamic_model__sleep_ps2_phq8_questions:
+                master_id:
+                  this: master_id
+                total_score: return_value
+
+            select_subject_eligibility: eligible
+
+
+
+  # Notify the reviewers that the phone screen has been completed
+      notify:
+        - <<: *notify_reviewer
+          if:
+            <<: *all_eligible
+        - <<: *notify_reviewer_sms
+          if:
+            <<: *all_eligible
+
+      # Notify the PI that the subject requires follow up re: PHQ8
+        - <<: *notify_inex_pi
+          if:
+            all:
+              dynamic_model__sleep_ps2_phq8_questions:
+                total_score:
+                  - '20'
+                  - '21'
+                  - '22'
+                  - '23'
+                  - '24'
