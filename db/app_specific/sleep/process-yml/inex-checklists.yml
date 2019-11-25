@@ -11,10 +11,14 @@ default:
 
   show_if:
 
+    conditions_yes_no:
+      reliable_internet_yes_no: 'yes'
+
     cbt_yes_no:
       reliable_internet_yes_no: 'yes'
 
     cbt_how_long_ago:
+      reliable_internet_yes_no: 'yes'
       cbt_yes_no: 'yes'
 
     sleep_times_yes_no:
@@ -106,6 +110,13 @@ default:
   caption_before:
 
     reliable_internet_yes_no: Has reliable mobile device and Internet
+
+    conditions_yes_no: |
+      Has any condition that will prevent them from participating
+      in this study over the next 3-6 months,
+      OR a condition that may require hospitalizations, surgery or new treatments?
+
+
     cbt_yes_no: Has participated in CBTi
     cbt_how_long_ago: Participated in CBTi how long ago
 
