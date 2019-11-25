@@ -328,6 +328,10 @@ eligible:
     reference_activity_log__sleep_assignment_perform_screening_follow_up: |
       Record information about the informed consent.
 
+  editable_if:
+    not_all:
+      activity_log__sleep_assignments:
+        extra_log_type: appointment
 
   creatable_if:
     all:
@@ -361,9 +365,8 @@ eligible:
             with:
               extra_log_type: finalize
             if:
-              any:
+              not_any:
                 dynamic_model__sleep_ps2_eligibles:
-                  review_consent_now_yes_no: 'no'
                   interested_yes_no: 'no'
 
 
