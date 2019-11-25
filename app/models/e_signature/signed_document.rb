@@ -155,8 +155,18 @@ module ESignature
         # or the fields specified in the model to be signed
         sign_fields = @specified_fields || elt.fields
 
-        # Limit the attributes to just the specified fields
-        atts = @e_sign_document.attributes.select {|k,v| sign_fields.include? k}
+        # Limit the attributes to just the specified fields, and order them according the field config
+        att_order = @e_sign_document.class.permitted_params
+        all_atts = {}
+        if att_order
+          att_order.each do |a|
+            a = a.to_s
+            all_atts[a] = @e_sign_document.attributes[a]
+          end
+        else
+          all_atts = @e_sign_document.attributes.dup
+        end
+        atts = all_atts.select {|k,v| sign_fields.include? k}
 
         ActionController::Base.new.render_to_string(template: 'e_signature/document', layout: 'e_signature', locals: {
           e_sign_document: @e_sign_document,
