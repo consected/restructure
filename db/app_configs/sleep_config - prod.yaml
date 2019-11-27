@@ -4035,7 +4035,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:53.752Z'
-    updated_at: '2019-11-25T11:37:08.408Z'
+    updated_at: '2019-11-27T11:27:43.685Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4091,15 +4091,16 @@ app_type:
       11\r\n              - 12\r\n              - 13\r\n              - 14\r\n              -
       15\r\n\r\n            number_hours_sleep:\r\n              - 0\r\n              -
       1\r\n              - 2\r\n              - 3\r\n              - 4\r\n              -
-      5\r\n      not_all:\r\n        <<: *administer_ess\r\n\r\n\r\n  continue_after_ese_questions:
-      &continue_after_ese_questions\r\n    any_after_ese:\r\n      <<: *eligible_ese_questions\r\n
-      \     all_possibly_eligible: &possibly_eligible_ese_questions\r\n        dynamic_model__sleep_ese_questions:\r\n
-      \         possibly_eligible_yes_no: 'yes'\r\n\r\n\r\n  eligible_audit_c: &eligible_audit_c\r\n
-      \   not_all_eligible_audit_c:\r\n      not_any:\r\n        dynamic_model__sleep_ps_audit_c_questions:\r\n
-      \         total_score:\r\n            - 0\r\n            - 1\r\n            -
-      2\r\n            - 3\r\n      not_all:\r\n        dynamic_model__sleep_ps_audit_c_questions:\r\n
-      \         alcohol_frequency: 4\r\n          daily_alcohol: 0\r\n          six_or_more_frequency:
-      0\r\n\r\n  continue_after_audit_c: &continue_after_audit_c\r\n    any_after_audit_c:\r\n
+      5\r\n              - 6\r\n              \r\n      not_all:\r\n        <<: *administer_ess\r\n\r\n\r\n
+      \ continue_after_ese_questions: &continue_after_ese_questions\r\n    any_after_ese:\r\n
+      \     <<: *eligible_ese_questions\r\n      all_possibly_eligible: &possibly_eligible_ese_questions\r\n
+      \       dynamic_model__sleep_ese_questions:\r\n          possibly_eligible_yes_no:
+      'yes'\r\n\r\n\r\n  eligible_audit_c: &eligible_audit_c\r\n    not_all_eligible_audit_c:\r\n
+      \     not_any:\r\n        dynamic_model__sleep_ps_audit_c_questions:\r\n          total_score:\r\n
+      \           - 0\r\n            - 1\r\n            - 2\r\n            - 3\r\n
+      \     not_all:\r\n        dynamic_model__sleep_ps_audit_c_questions:\r\n          alcohol_frequency:
+      4\r\n          daily_alcohol: 0\r\n          six_or_more_frequency: 0\r\n\r\n
+      \ continue_after_audit_c: &continue_after_audit_c\r\n    any_after_audit_c:\r\n
       \     <<: *eligible_audit_c\r\n      all_possibly_eligible: &possibly_eligible_audit_c\r\n
       \       dynamic_model__sleep_ps_audit_c_questions:\r\n          possibly_eligible_yes_no:
       'yes'\r\n\r\n\r\n  eligible_dast2_mod: &eligible_dast2_mod\r\n    all_eligible_dast2_mod:\r\n
