@@ -6,7 +6,7 @@
 </script>
 
 <script id="activity_log_<%=name%>_references"  type="text/x-handlebars-template" class="hidden handlebars-partial">
-<% if references %>
+<% if references && references.first&.last&.first&.last %>
   {{#each model_references}}
     {{#is ../embedded_item.id '===' to_record_id}}
       {{#is ../embedded_item.item_type '===' '<%= references.first.last.first.last[:to_model_name_us] %>'}}

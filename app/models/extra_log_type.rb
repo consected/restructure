@@ -156,18 +156,32 @@ class ExtraLogType < ExtraOptions
 
       self.references = new_ref
 
+
       self.references.each do |k, refitem|
+        bad_ref_items = []
         refitem.each do |mn, conf|
           to_class = ModelReference.to_record_class_for_type(mn)
-          elt = conf[:add_with] && conf[:add_with][:extra_log_type]
-          add_with_elt = nil
-          if elt && to_class.respond_to?(:human_name_for)
-            add_with_elt = to_class.human_name_for(elt)
+
+          if to_class
+            elt = conf[:add_with] && conf[:add_with][:extra_log_type]
+            add_with_elt = nil
+            if elt && to_class.respond_to?(:human_name_for)
+              add_with_elt = to_class.human_name_for(elt)
+            end
+            refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class&.human_name
+            refitem[mn][:no_master_association] = to_class.no_master_association if to_class&.respond_to?(:no_master_association)
+            refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
+          else
+            bad_ref_items << mn
+            Rails.logger.info "Will clean up reference to avoid it being used again in this session"
           end
-          refitem[mn][:to_record_label] = conf[:label] || add_with_elt || to_class&.human_name
-          refitem[mn][:no_master_association] = to_class.no_master_association if to_class&.respond_to?(:no_master_association)
-          refitem[mn][:to_model_name_us] = to_class&.to_s&.ns_underscore
         end
+
+        # Cleanup bad items
+        bad_ref_items.each do |br|
+          refitem.delete(br)
+        end
+
       end
 
     end

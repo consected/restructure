@@ -68,14 +68,18 @@ class ActivityLog < ActiveRecord::Base
   # @return [Array] array of string names
   def self.extra_log_type_resource_names &block
     res = []
-    active_model_configurations.each do |a|
+
+    @extra_log_type_resource_names ||= active_model_configurations.map(&:extra_log_type_configs)
+
+    @extra_log_type_resource_names.each do |a|
       if block_given?
-        elts = a.extra_log_type_configs.select(&block)
+        elts = a.select(&block)
       else
-        elts = a.extra_log_type_configs
+        elts = a
       end
       res += elts.map(&:resource_name)
     end
+    
     return res
   end
 

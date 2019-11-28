@@ -71,6 +71,10 @@ class Admin::AppType < Admin::AdminBase
     app_type_config = config['app_type']
     raise FphsException.new "Incorrect format for configuration format #{format}" unless app_type_config
 
+    new_id = nil
+    results = {'app_type' => {}}
+    id_list = []
+
     Admin::AppType.transaction do
       a_conf = app_type_config.slice('name', 'label')
 
@@ -82,7 +86,6 @@ class Admin::AppType < Admin::AdminBase
 
       app_type = Admin::AppType.where(name: a_conf['name']).first || Admin::AppType.create!(a_conf)
 
-      results = {'app_type' => {}}
 
       res = results['app_type']
 
@@ -102,7 +105,7 @@ class Admin::AppType < Admin::AdminBase
       res['associated_config_libraries'] = app_type.import_config_sub_items app_type_config, 'associated_config_libraries', ['name', 'category', 'format']
       res['associated_dynamic_models'] = app_type.import_config_sub_items app_type_config, 'associated_dynamic_models', ['table_name'], create_disabled: force_disable
       res['associated_external_identifiers'] = app_type.import_config_sub_items app_type_config, 'associated_external_identifiers', ['name'], create_disabled: force_disable
-      res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'associated_activity_logs', ['item_type', 'rec_type', 'process_name'], create_disabled: force_disable
+      res['associated_activity_logs'] = app_type.import_config_sub_items app_type_config, 'valid_associated_activity_logs', ['item_type', 'rec_type', 'process_name'], create_disabled: force_disable
 
       res['associated_general_selections'] = app_type.import_config_sub_items app_type_config, 'associated_general_selections', ['item_type', 'value']
       res['associated_reports'] = app_type.import_config_sub_items app_type_config, 'associated_reports', ['short_name', 'item_type']
@@ -117,11 +120,18 @@ class Admin::AppType < Admin::AdminBase
       res['associated_sub_processes'] = app_type.import_config_sub_items app_type_config, 'associated_sub_processes', ['name'], filter_on: ['protocol_name']
       res['associated_protocol_events'] = app_type.import_config_sub_items app_type_config, 'associated_protocol_events', ['name'], filter_on: ['sub_process_name', 'protocol_name']
 
+      res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'valid_user_access_controls', ['resource_type', 'resource_name', 'role_name'], add_vals: {allow_bad_resource_name: true}, id_list: id_list
 
-      res['user_access_controls'] = app_type.import_config_sub_items app_type_config, 'user_access_controls', ['resource_type', 'resource_name', 'role_name'], add_vals: {allow_bad_resource_name: true}
+
       app_type.reload
-      return app_type, results
+      new_id = app_type.id
     end
+
+    app_type = find(new_id)
+    app_type.clean_user_access_controls id_list
+    app_type.reload
+
+    return app_type, results
 
 
   end
@@ -136,9 +146,11 @@ class Admin::AppType < Admin::AdminBase
     f
   end
 
-  def import_config_sub_items app_type_config, name, lookup_existing_with_fields, reject: nil, add_vals: {}, create_disabled: false, filter_on: nil
+  def import_config_sub_items app_type_config, name, lookup_existing_with_fields, reject: nil, add_vals: {}, create_disabled: false, filter_on: nil, id_list: []
 
     results = []
+    orig_name = name
+    name = name.gsub(/^valid_/, '')
 
     if name.starts_with? 'associated_'
       not_directly_associated = true
@@ -155,7 +167,7 @@ class Admin::AppType < Admin::AdminBase
       assoc_name = name
     end
 
-    acs = app_type_config[name]
+    acs = app_type_config[name] || app_type_config[orig_name]
     return unless acs
     acs = acs.reject(&reject) if reject
     acs.each do |ac|
@@ -190,7 +202,7 @@ class Admin::AppType < Admin::AdminBase
               i.update! new_vals
             else
               new_vals['disabled'] = true if create_disabled
-              el = parent.send(assoc_name).create! new_vals
+              i = el = parent.send(assoc_name).create! new_vals
             end
           end
         else
@@ -207,9 +219,12 @@ class Admin::AppType < Admin::AdminBase
             i.update! new_vals
           else
             new_vals['disabled'] = true if create_disabled
-            el = cname.create! new_vals
+            i = el = cname.create! new_vals
           end
         end
+
+        id_list << i.id if i
+
         if el
           if el.respond_to? :attributes
             results << el.attributes
@@ -222,16 +237,55 @@ class Admin::AppType < Admin::AdminBase
     results
   end
 
+  def clean_user_access_controls id_list
+
+    # Invalid user access control ID list, so we can disable them
+    vuc = valid_user_access_controls.pluck(:id)
+    #inv =
+    inv = user_access_controls.active.pluck(:id) - id_list #- vuc
+
+    inv.each do |i|
+      el = Admin::UserAccessControl.find(i)
+      res = el.disable! admin
+      Rails.logger.info "Failed to clean up bad resource UAC: #{i}. #{el.errors.first}" unless res
+    end
+
+
+    valid_user_access_controls.where(resource_type: :report).each do |u|
+      rn = u.resource_name
+      if rn.present?
+        unless rn.include?('_')
+          u.update resource_name: Report.resource_name_for_named_report(rn), current_admin: admin
+        end
+      end
+    end
+
+  end
+
+  def valid_user_access_controls
+    user_access_controls.valid_resources
+  end
 
   # Select any tables that have some kind of access
   def associated_table_names
-    user_access_controls.active.where(resource_type: :table).select {|a| a.access }.map(&:resource_name).uniq
+    user_access_controls.valid_resources.where(resource_type: :table).select {|a| a.access }.map(&:resource_name).uniq
+  end
+
+  def valid_associated_activity_logs
+    associated_activity_logs valid_resources_only: true
   end
 
   # Select activity logs that have some kind of access, typically scoped to a specific app type
   # @return [ActiveRecord::Relation]
-  def associated_activity_logs
-    get_names = user_access_controls.active.where(resource_type: :table)
+  def associated_activity_logs valid_resources_only: false
+
+    if valid_resources_only
+      uacs = user_access_controls.valid_resources
+    else
+      uacs = user_access_controls.active
+    end
+
+    get_names = uacs.where(resource_type: :table)
       .select {|a| a.access && a.resource_name.start_with?( 'activity_log__')}
     names = get_names.map{|n| n.resource_name.singularize.sub('activity_log__', '')}.uniq
     names += get_names.map{|n| n.resource_name.sub('activity_log__', '')}.uniq
@@ -244,20 +298,21 @@ class Admin::AppType < Admin::AdminBase
   end
 
   def associated_dynamic_models
-    names = user_access_controls.active.where(resource_type: :table).select {|a| a.access && a.resource_name.start_with?( 'dynamic_model__')}.map{|n| n.resource_name.sub('dynamic_model__', '')}.uniq
+    names = user_access_controls.valid_resources.where(resource_type: :table).select {|a| a.access && a.resource_name.start_with?( 'dynamic_model__')}.map{|n| n.resource_name.sub('dynamic_model__', '')}.uniq
     DynamicModel.active.where(table_name: names).order(id: :asc)
   end
 
   def associated_external_identifiers
     eids = ExternalIdentifier.active.map(&:name)
-    names = user_access_controls.active.where(resource_type: :table).select {|a| a.access && a.resource_name.in?(eids)}.map(&:resource_name).uniq
+    names = user_access_controls.valid_resources.where(resource_type: :table).select {|a| a.access && a.resource_name.in?(eids)}.map(&:resource_name).uniq
     ExternalIdentifier.active.where(name: names).order(id: :asc)
   end
 
   def associated_reports
-    names = user_access_controls.active.where(resource_type: :report).select {|a| a.access }.map(&:resource_name).uniq
-    names = Report.active.pluck(:name).uniq if names.include? '_all_reports_'
-    Report.active.where(name: names).order(id: :asc)
+    names = user_access_controls.valid_resources.where(resource_type: :report).where("access IS NOT NULL and access <> ''").pluck(:resource_name).uniq
+    names = Report.active.map(&:alt_resource_name).uniq if names.include? '_all_reports_'
+
+    Report.active.where("(item_type || '__' || short_name) in (?)", names).order(id: :asc)
   end
 
   def associated_general_selections
@@ -356,8 +411,8 @@ class Admin::AppType < Admin::AdminBase
     options[:include] ||= {}
 
     options[:methods] << :app_configurations
-    options[:methods] << :user_access_controls
-    options[:methods] << :associated_activity_logs
+    options[:methods] << :valid_user_access_controls
+    options[:methods] << :valid_associated_activity_logs
     options[:methods] << :associated_dynamic_models
     options[:methods] << :associated_external_identifiers
     options[:methods] << :associated_reports

@@ -173,8 +173,8 @@ class ModelReference < ActiveRecord::Base
   def self.to_record_class_for_type rec_type
     begin
       rec_type.ns_camelize.constantize
-    rescue NameError
-      Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist"
+    rescue NameError => e
+      Rails.logger.error "Attempt to get to_record_class_for_type #{rec_type} failed as the type does not exist.\n#{e.backtrace[0..20].join("\n")}"
       nil
     end
   end

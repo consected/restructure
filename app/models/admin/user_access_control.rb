@@ -40,6 +40,26 @@ class Admin::UserAccessControl < ActiveRecord::Base
     res.include? can_perform if res
   end
 
+  # Scope result of a query to only return valid resources, not those that no longer exist
+  def self.valid_resources
+    # Return if everything is not setup yet
+    return active unless Master.respond_to? :get_all_associations
+
+    rnft = self.resource_names_by_type
+
+    ids = []
+    active.each do |r|
+      ids << r.id if r.bad_resource_name(rnft)
+    end
+    if ids.length > 0
+      active.where(["id not in (?)", ids])
+    else
+      active
+    end
+  end
+
+
+
   # combo levels provide a convenient way to check for common access control patterns.
   # Can a user access a resource? Yes, if they have any level of read or above
   # Can a user edit a resource? Yes, if they have any level of update or above
@@ -79,7 +99,7 @@ class Admin::UserAccessControl < ActiveRecord::Base
     elsif resource_type == :external_id_assignments || resource_type == :limited_access
       return ExternalIdentifier.active.map(&:name) + DynamicModel.active.map(&:full_item_types_name)
     elsif resource_type == :report
-      return Report.active.map(&:name) + ['_all_reports_']
+      return Report.active.map(&:alt_resource_name) + Report.active.map(&:name) + ['_all_reports_']
     elsif resource_type == :activity_log_type
       return ActivityLog.extra_log_type_resource_names
     else
@@ -256,7 +276,9 @@ class Admin::UserAccessControl < ActiveRecord::Base
   private
     def correct_access
       self.access = nil if self.access.blank?
-      if self.user && self.user.disabled && !self.disabled
+      if self.disabled
+        true
+      elsif self.user && self.user.disabled && !self.disabled
         errors.add :disabled, "flag of an access control must be disabled, since the user is disabled"
       elsif !self.class.valid_access_level?(self.resource_type.to_sym, self.access)
         errors.add :access, "is an invalid value"

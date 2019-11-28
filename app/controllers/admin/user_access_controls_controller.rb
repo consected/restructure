@@ -2,6 +2,8 @@ class Admin::UserAccessControlsController < AdminController
 
   helper_method  :has_access_levels, :user_id_options, :role_name_options
 
+  before_action :set_report_to_short_name, only: [:edit]
+
   protected
 
     def default_index_order
@@ -52,6 +54,22 @@ class Admin::UserAccessControlsController < AdminController
 
     def permitted_params
       @permitted_params = [:id, :access, :resource_type, :resource_name, :options, :app_type_id, :user_id, :role_name, :disabled]
+    end
+
+
+    # For edit forms on report resources, switch the value to the short name if the long name is being used
+    # @return [true]
+    def set_report_to_short_name
+
+      if object_instance.resource_type == 'report'
+        rn = object_instance.resource_name
+        if rn.present?
+          unless rn.include? '_'
+            object_instance.resource_name = Report.resource_name_for_named_report(rn)
+          end
+        end
+      end
+      true
     end
 
 end

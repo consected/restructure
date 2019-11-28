@@ -3,10 +3,10 @@ app_type:
   id: 38
   name: grit
   label: GRIT Study
-  disabled:
+  disabled: false
   admin_id: 21
   created_at: '2019-11-27T15:43:00.453Z'
-  updated_at: '2019-11-27T15:43:00.453Z'
+  updated_at: '2019-11-28T15:00:13.970Z'
   app_configurations:
   - id: 509
     name: hide search form simple
@@ -240,7 +240,7 @@ app_type:
     app_type_id: 38
     role_name: user - screening
     created_at: '2019-11-27T15:43:10.652Z'
-    updated_at: '2019-11-27T15:43:10.652Z'
+    updated_at: '2019-11-28T16:34:08.243Z'
     user_email:
   - id: 1718
     user_id:
@@ -253,7 +253,7 @@ app_type:
     app_type_id: 38
     role_name: user - participant details
     created_at: '2019-11-27T15:43:10.667Z'
-    updated_at: '2019-11-27T15:43:10.667Z'
+    updated_at: '2019-11-28T16:34:08.248Z'
     user_email:
   - id: 1719
     user_id:
@@ -266,7 +266,7 @@ app_type:
     app_type_id: 38
     role_name: user - participant details
     created_at: '2019-11-27T15:43:10.673Z'
-    updated_at: '2019-11-27T15:43:10.673Z'
+    updated_at: '2019-11-28T16:34:08.265Z'
     user_email:
   - id: 1720
     user_id:
@@ -279,7 +279,7 @@ app_type:
     app_type_id: 38
     role_name: user - participant details
     created_at: '2019-11-27T15:43:10.678Z'
-    updated_at: '2019-11-27T15:43:10.678Z'
+    updated_at: '2019-11-28T16:34:08.270Z'
     user_email:
   - id: 1721
     user_id:
@@ -292,7 +292,7 @@ app_type:
     app_type_id: 38
     role_name:
     created_at: '2019-11-27T15:43:10.684Z'
-    updated_at: '2019-11-27T15:43:10.684Z'
+    updated_at: '2019-11-28T16:34:08.275Z'
     user_email:
   - id: 1722
     user_id:
@@ -305,7 +305,7 @@ app_type:
     app_type_id: 38
     role_name:
     created_at: '2019-11-27T15:43:10.690Z'
-    updated_at: '2019-11-27T15:43:10.690Z'
+    updated_at: '2019-11-28T16:34:08.279Z'
     user_email:
   - id: 1723
     user_id:
@@ -318,7 +318,7 @@ app_type:
     app_type_id: 38
     role_name:
     created_at: '2019-11-27T15:43:10.696Z'
-    updated_at: '2019-11-27T15:43:10.696Z'
+    updated_at: '2019-11-28T16:34:08.283Z'
     user_email:
   - id: 1724
     user_id:
@@ -331,7 +331,7 @@ app_type:
     app_type_id: 38
     role_name: user - participant details
     created_at: '2019-11-27T15:43:10.703Z'
-    updated_at: '2019-11-27T15:43:10.703Z'
+    updated_at: '2019-11-28T16:34:08.286Z'
     user_email:
   - id: 1725
     user_id:
@@ -344,7 +344,7 @@ app_type:
     app_type_id: 38
     role_name:
     created_at: '2019-11-27T15:43:10.708Z'
-    updated_at: '2019-11-27T15:43:10.708Z'
+    updated_at: '2019-11-28T16:34:08.289Z'
     user_email:
   - id: 1726
     user_id:
@@ -357,7 +357,7 @@ app_type:
     app_type_id: 38
     role_name:
     created_at: '2019-11-27T15:43:10.715Z'
-    updated_at: '2019-11-27T15:43:10.715Z'
+    updated_at: '2019-11-28T16:34:08.293Z'
     user_email:
   - id: 1728
     user_id:
@@ -370,7 +370,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.731Z'
-    updated_at: '2019-11-27T15:43:10.731Z'
+    updated_at: '2019-11-28T16:34:08.298Z'
     user_email:
   - id: 1729
     user_id:
@@ -383,7 +383,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:10.738Z'
-    updated_at: '2019-11-27T15:43:10.738Z'
+    updated_at: '2019-11-28T16:34:08.303Z'
     user_email:
   - id: 1730
     user_id:
@@ -396,7 +396,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol deviation
     created_at: '2019-11-27T15:43:10.745Z'
-    updated_at: '2019-11-27T15:43:10.745Z'
+    updated_at: '2019-11-28T16:34:08.307Z'
     user_email:
   - id: 1731
     user_id:
@@ -409,7 +409,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.752Z'
-    updated_at: '2019-11-27T15:43:10.752Z'
+    updated_at: '2019-11-28T16:34:08.312Z'
     user_email:
   - id: 1732
     user_id:
@@ -422,7 +422,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.758Z'
-    updated_at: '2019-11-27T15:43:10.758Z'
+    updated_at: '2019-11-28T16:34:08.317Z'
     user_email:
   - id: 1733
     user_id:
@@ -435,7 +435,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.764Z'
-    updated_at: '2019-11-27T15:43:10.764Z'
+    updated_at: '2019-11-28T16:34:08.321Z'
     user_email:
   - id: 1734
     user_id:
@@ -448,7 +448,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.770Z'
-    updated_at: '2019-11-27T15:43:10.770Z'
+    updated_at: '2019-11-28T16:34:08.325Z'
     user_email:
   - id: 1735
     user_id:
@@ -461,7 +461,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.776Z'
-    updated_at: '2019-11-27T15:43:10.776Z'
+    updated_at: '2019-11-28T16:34:08.329Z'
     user_email:
   - id: 1736
     user_id:
@@ -474,20 +474,7 @@ app_type:
     app_type_id: 38
     role_name:
     created_at: '2019-11-27T15:43:10.781Z'
-    updated_at: '2019-11-27T15:43:10.781Z'
-    user_email:
-  - id: 1737
-    user_id:
-    resource_type: report
-    resource_name: Search GRIT Study Subject
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - participant details
-    created_at: '2019-11-27T15:43:10.788Z'
-    updated_at: '2019-11-27T15:43:10.788Z'
+    updated_at: '2019-11-28T16:34:08.333Z'
     user_email:
   - id: 1738
     user_id:
@@ -500,7 +487,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.794Z'
-    updated_at: '2019-11-27T15:43:10.794Z'
+    updated_at: '2019-11-28T16:34:08.341Z'
     user_email:
   - id: 1739
     user_id:
@@ -513,7 +500,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.799Z'
-    updated_at: '2019-11-27T15:43:10.799Z'
+    updated_at: '2019-11-28T16:34:08.346Z'
     user_email:
   - id: 1740
     user_id:
@@ -526,7 +513,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.804Z'
-    updated_at: '2019-11-27T15:43:10.804Z'
+    updated_at: '2019-11-28T16:34:08.350Z'
     user_email:
   - id: 1741
     user_id:
@@ -539,7 +526,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.810Z'
-    updated_at: '2019-11-27T15:43:10.810Z'
+    updated_at: '2019-11-28T16:34:08.355Z'
     user_email:
   - id: 1742
     user_id:
@@ -552,7 +539,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.815Z'
-    updated_at: '2019-11-27T15:43:10.815Z'
+    updated_at: '2019-11-28T16:34:08.360Z'
     user_email:
   - id: 1743
     user_id:
@@ -565,7 +552,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.821Z'
-    updated_at: '2019-11-27T15:43:10.821Z'
+    updated_at: '2019-11-28T16:34:08.364Z'
     user_email:
   - id: 1746
     user_id:
@@ -578,7 +565,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.837Z'
-    updated_at: '2019-11-27T15:43:10.837Z'
+    updated_at: '2019-11-28T16:34:08.369Z'
     user_email:
   - id: 1747
     user_id:
@@ -591,7 +578,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.843Z'
-    updated_at: '2019-11-27T15:43:10.843Z'
+    updated_at: '2019-11-28T16:34:08.372Z'
     user_email:
   - id: 1748
     user_id:
@@ -604,7 +591,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.848Z'
-    updated_at: '2019-11-27T15:43:10.848Z'
+    updated_at: '2019-11-28T16:34:08.376Z'
     user_email:
   - id: 1749
     user_id:
@@ -617,7 +604,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.854Z'
-    updated_at: '2019-11-27T15:43:10.854Z'
+    updated_at: '2019-11-28T16:34:08.379Z'
     user_email:
   - id: 1750
     user_id:
@@ -630,7 +617,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.859Z'
-    updated_at: '2019-11-27T15:43:10.859Z'
+    updated_at: '2019-11-28T16:34:08.382Z'
     user_email:
   - id: 1751
     user_id:
@@ -643,7 +630,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.865Z'
-    updated_at: '2019-11-27T15:43:10.865Z'
+    updated_at: '2019-11-28T16:34:08.385Z'
     user_email:
   - id: 1752
     user_id:
@@ -656,7 +643,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.870Z'
-    updated_at: '2019-11-27T15:43:10.870Z'
+    updated_at: '2019-11-28T16:34:08.389Z'
     user_email:
   - id: 1753
     user_id:
@@ -669,7 +656,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.876Z'
-    updated_at: '2019-11-27T15:43:10.876Z'
+    updated_at: '2019-11-28T16:34:08.392Z'
     user_email:
   - id: 1754
     user_id:
@@ -682,7 +669,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.880Z'
-    updated_at: '2019-11-27T15:43:10.880Z'
+    updated_at: '2019-11-28T16:34:08.396Z'
     user_email:
   - id: 1756
     user_id:
@@ -695,7 +682,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol deviation
     created_at: '2019-11-27T15:43:10.891Z'
-    updated_at: '2019-11-27T15:43:10.891Z'
+    updated_at: '2019-11-28T16:34:08.399Z'
     user_email:
   - id: 1757
     user_id:
@@ -708,7 +695,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol deviation
     created_at: '2019-11-27T15:43:10.897Z'
-    updated_at: '2019-11-27T15:43:10.897Z'
+    updated_at: '2019-11-28T16:34:08.402Z'
     user_email:
   - id: 1758
     user_id:
@@ -721,7 +708,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol deviation
     created_at: '2019-11-27T15:43:10.903Z'
-    updated_at: '2019-11-27T15:43:10.903Z'
+    updated_at: '2019-11-28T16:34:08.405Z'
     user_email:
   - id: 1759
     user_id:
@@ -734,7 +721,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol deviation
     created_at: '2019-11-27T15:43:10.908Z'
-    updated_at: '2019-11-27T15:43:10.908Z'
+    updated_at: '2019-11-28T16:34:08.408Z'
     user_email:
   - id: 1760
     user_id:
@@ -747,7 +734,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol deviation
     created_at: '2019-11-27T15:43:10.913Z'
-    updated_at: '2019-11-27T15:43:10.913Z'
+    updated_at: '2019-11-28T16:34:08.412Z'
     user_email:
   - id: 1761
     user_id:
@@ -760,7 +747,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:10.921Z'
-    updated_at: '2019-11-27T15:43:10.921Z'
+    updated_at: '2019-11-28T16:34:08.416Z'
     user_email:
   - id: 1762
     user_id:
@@ -773,7 +760,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:10.927Z'
-    updated_at: '2019-11-27T15:43:10.927Z'
+    updated_at: '2019-11-28T16:34:08.419Z'
     user_email:
   - id: 1763
     user_id:
@@ -786,7 +773,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:10.932Z'
-    updated_at: '2019-11-27T15:43:10.932Z'
+    updated_at: '2019-11-28T16:34:08.422Z'
     user_email:
   - id: 1764
     user_id:
@@ -799,7 +786,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:10.940Z'
-    updated_at: '2019-11-27T15:43:10.940Z'
+    updated_at: '2019-11-28T16:34:08.426Z'
     user_email:
   - id: 1765
     user_id:
@@ -812,7 +799,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:10.946Z'
-    updated_at: '2019-11-27T15:43:10.946Z'
+    updated_at: '2019-11-28T16:34:08.429Z'
     user_email:
   - id: 1766
     user_id:
@@ -825,7 +812,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:10.954Z'
-    updated_at: '2019-11-27T15:43:10.954Z'
+    updated_at: '2019-11-28T16:34:08.433Z'
     user_email:
   - id: 1768
     user_id:
@@ -838,33 +825,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol deviation
     created_at: '2019-11-27T15:43:10.967Z'
-    updated_at: '2019-11-27T15:43:10.967Z'
-    user_email:
-  - id: 1769
-    user_id:
-    resource_type: report
-    resource_name: Protocol Deviation PI Review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - protocol deviation
-    created_at: '2019-11-27T15:43:10.974Z'
-    updated_at: '2019-11-27T15:43:10.974Z'
-    user_email:
-  - id: 1770
-    user_id:
-    resource_type: report
-    resource_name: Adverse Event PI Review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - adverse event
-    created_at: '2019-11-27T15:43:10.979Z'
-    updated_at: '2019-11-27T15:43:10.979Z'
+    updated_at: '2019-11-28T16:34:08.437Z'
     user_email:
   - id: 1771
     user_id:
@@ -877,33 +838,7 @@ app_type:
     app_type_id: 38
     role_name:
     created_at: '2019-11-27T15:43:10.985Z'
-    updated_at: '2019-11-27T15:43:10.985Z'
-    user_email:
-  - id: 1772
-    user_id:
-    resource_type: report
-    resource_name: Protocol Deviation Initial Review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - protocol deviation
-    created_at: '2019-11-27T15:43:10.990Z'
-    updated_at: '2019-11-27T15:43:10.990Z'
-    user_email:
-  - id: 1773
-    user_id:
-    resource_type: report
-    resource_name: Adverse Event Initial Review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - adverse event
-    created_at: '2019-11-27T15:43:10.995Z'
-    updated_at: '2019-11-27T15:43:10.995Z'
+    updated_at: '2019-11-28T16:34:08.448Z'
     user_email:
   - id: 1774
     user_id:
@@ -916,46 +851,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.000Z'
-    updated_at: '2019-11-27T15:43:11.000Z'
-    user_email:
-  - id: 1775
-    user_id:
-    resource_type: report
-    resource_name: Adverse Events
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - adverse event
-    created_at: '2019-11-27T15:43:11.005Z'
-    updated_at: '2019-11-27T15:43:11.005Z'
-    user_email:
-  - id: 1776
-    user_id:
-    resource_type: report
-    resource_name: Subjects In Process & Exited
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: ''
-    created_at: '2019-11-27T15:43:11.010Z'
-    updated_at: '2019-11-27T15:43:11.010Z'
-    user_email:
-  - id: 1777
-    user_id:
-    resource_type: report
-    resource_name: Protocol Deviations
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - protocol deviation
-    created_at: '2019-11-27T15:43:11.015Z'
-    updated_at: '2019-11-27T15:43:11.015Z'
+    updated_at: '2019-11-28T16:34:08.458Z'
     user_email:
   - id: 1778
     user_id:
@@ -968,7 +864,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.020Z'
-    updated_at: '2019-11-27T15:43:11.020Z'
+    updated_at: '2019-11-28T16:34:08.473Z'
     user_email:
   - id: 1779
     user_id:
@@ -981,7 +877,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.025Z'
-    updated_at: '2019-11-27T15:43:11.025Z'
+    updated_at: '2019-11-28T16:34:08.477Z'
     user_email:
   - id: 1780
     user_id:
@@ -994,7 +890,7 @@ app_type:
     app_type_id: 38
     role_name: reviewer - adverse event
     created_at: '2019-11-27T15:43:11.030Z'
-    updated_at: '2019-11-27T15:43:11.030Z'
+    updated_at: '2019-11-28T16:34:08.482Z'
     user_email:
   - id: 1781
     user_id:
@@ -1007,7 +903,7 @@ app_type:
     app_type_id: 38
     role_name: irb reporting
     created_at: '2019-11-27T15:43:11.036Z'
-    updated_at: '2019-11-27T15:43:11.036Z'
+    updated_at: '2019-11-28T16:34:08.485Z'
     user_email:
   - id: 1782
     user_id:
@@ -1020,7 +916,7 @@ app_type:
     app_type_id: 38
     role_name: reviewer - protocol deviation
     created_at: '2019-11-27T15:43:11.043Z'
-    updated_at: '2019-11-27T15:43:11.043Z'
+    updated_at: '2019-11-28T16:34:08.489Z'
     user_email:
   - id: 1783
     user_id:
@@ -1033,7 +929,7 @@ app_type:
     app_type_id: 38
     role_name: irb reporting
     created_at: '2019-11-27T15:43:11.049Z'
-    updated_at: '2019-11-27T15:43:11.049Z'
+    updated_at: '2019-11-28T16:34:08.494Z'
     user_email:
   - id: 1786
     user_id:
@@ -1046,7 +942,7 @@ app_type:
     app_type_id: 38
     role_name: user - navigation
     created_at: '2019-11-27T15:43:11.068Z'
-    updated_at: '2019-11-27T15:43:11.068Z'
+    updated_at: '2019-11-28T16:34:08.498Z'
     user_email:
   - id: 1787
     user_id:
@@ -1059,7 +955,7 @@ app_type:
     app_type_id: 38
     role_name: clinical research coordinator
     created_at: '2019-11-27T15:43:11.073Z'
-    updated_at: '2019-11-27T15:43:11.073Z'
+    updated_at: '2019-11-28T16:34:08.502Z'
     user_email:
   - id: 1788
     user_id:
@@ -1072,7 +968,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.078Z'
-    updated_at: '2019-11-27T15:43:11.078Z'
+    updated_at: '2019-11-28T16:34:08.506Z'
     user_email:
   - id: 1789
     user_id:
@@ -1085,7 +981,7 @@ app_type:
     app_type_id: 38
     role_name: user - inex
     created_at: '2019-11-27T15:43:11.084Z'
-    updated_at: '2019-11-27T15:43:11.084Z'
+    updated_at: '2019-11-28T16:34:08.511Z'
     user_email:
   - id: 1790
     user_id:
@@ -1098,7 +994,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:11.089Z'
-    updated_at: '2019-11-27T15:43:11.089Z'
+    updated_at: '2019-11-28T16:34:08.515Z'
     user_email:
   - id: 1791
     user_id:
@@ -1111,7 +1007,7 @@ app_type:
     app_type_id: 38
     role_name: nfs_store group 600
     created_at: '2019-11-27T15:43:11.096Z'
-    updated_at: '2019-11-27T15:43:11.096Z'
+    updated_at: '2019-11-28T16:34:08.519Z'
     user_email:
   - id: 1792
     user_id:
@@ -1124,7 +1020,7 @@ app_type:
     app_type_id: 38
     role_name: nfs_store group 600
     created_at: '2019-11-27T15:43:11.102Z'
-    updated_at: '2019-11-27T15:43:11.102Z'
+    updated_at: '2019-11-28T16:34:08.524Z'
     user_email:
   - id: 1793
     user_id:
@@ -1137,7 +1033,7 @@ app_type:
     app_type_id: 38
     role_name: nfs_store group 600
     created_at: '2019-11-27T15:43:11.108Z'
-    updated_at: '2019-11-27T15:43:11.108Z'
+    updated_at: '2019-11-28T16:34:08.528Z'
     user_email:
   - id: 1798
     user_id:
@@ -1150,7 +1046,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.136Z'
-    updated_at: '2019-11-27T15:43:11.136Z'
+    updated_at: '2019-11-28T16:34:08.533Z'
     user_email:
   - id: 1799
     user_id:
@@ -1163,7 +1059,7 @@ app_type:
     app_type_id: 38
     role_name: admin
     created_at: '2019-11-27T15:43:11.142Z'
-    updated_at: '2019-11-27T15:43:11.142Z'
+    updated_at: '2019-11-28T16:34:08.537Z'
     user_email:
   - id: 1800
     user_id:
@@ -1176,7 +1072,7 @@ app_type:
     app_type_id: 38
     role_name: user - navigation
     created_at: '2019-11-27T15:43:11.148Z'
-    updated_at: '2019-11-27T15:43:11.148Z'
+    updated_at: '2019-11-28T16:34:08.540Z'
     user_email:
   - id: 1801
     user_id:
@@ -1189,7 +1085,7 @@ app_type:
     app_type_id: 38
     role_name: admin
     created_at: '2019-11-27T15:43:11.153Z'
-    updated_at: '2019-11-27T15:43:11.153Z'
+    updated_at: '2019-11-28T16:34:08.544Z'
     user_email:
   - id: 1802
     user_id:
@@ -1202,7 +1098,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.158Z'
-    updated_at: '2019-11-27T15:43:11.158Z'
+    updated_at: '2019-11-28T16:34:08.548Z'
     user_email:
   - id: 1805
     user_id:
@@ -1215,7 +1111,7 @@ app_type:
     app_type_id: 38
     role_name: reviewer - tms
     created_at: '2019-11-27T15:43:11.173Z'
-    updated_at: '2019-11-27T15:43:11.173Z'
+    updated_at: '2019-11-28T16:34:08.552Z'
     user_email:
   - id: 1806
     user_id:
@@ -1228,7 +1124,7 @@ app_type:
     app_type_id: 38
     role_name: clinical research coordinator
     created_at: '2019-11-27T15:43:11.178Z'
-    updated_at: '2019-11-27T15:43:11.178Z'
+    updated_at: '2019-11-28T16:34:08.555Z'
     user_email:
   - id: 1807
     user_id:
@@ -1241,7 +1137,7 @@ app_type:
     app_type_id: 38
     role_name: user - navigation
     created_at: '2019-11-27T15:43:11.183Z'
-    updated_at: '2019-11-27T15:43:11.183Z'
+    updated_at: '2019-11-28T16:34:08.558Z'
     user_email:
   - id: 1808
     user_id:
@@ -1254,7 +1150,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.188Z'
-    updated_at: '2019-11-27T15:43:11.188Z'
+    updated_at: '2019-11-28T16:34:08.562Z'
     user_email:
   - id: 1809
     user_id:
@@ -1267,7 +1163,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.193Z'
-    updated_at: '2019-11-27T15:43:11.193Z'
+    updated_at: '2019-11-28T16:34:08.565Z'
     user_email:
   - id: 1811
     user_id:
@@ -1280,7 +1176,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.202Z'
-    updated_at: '2019-11-27T15:43:11.202Z'
+    updated_at: '2019-11-28T16:34:08.569Z'
     user_email:
   - id: 1812
     user_id:
@@ -1293,7 +1189,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.208Z'
-    updated_at: '2019-11-27T15:43:11.208Z'
+    updated_at: '2019-11-28T16:34:08.573Z'
     user_email:
   - id: 1813
     user_id:
@@ -1306,7 +1202,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.213Z'
-    updated_at: '2019-11-27T15:43:11.213Z'
+    updated_at: '2019-11-28T16:34:08.577Z'
     user_email:
   - id: 1814
     user_id:
@@ -1319,7 +1215,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.218Z'
-    updated_at: '2019-11-27T15:43:11.218Z'
+    updated_at: '2019-11-28T16:34:08.580Z'
     user_email:
   - id: 1815
     user_id:
@@ -1332,7 +1228,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.224Z'
-    updated_at: '2019-11-27T15:43:11.224Z'
+    updated_at: '2019-11-28T16:34:08.584Z'
     user_email:
   - id: 1816
     user_id:
@@ -1345,7 +1241,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.229Z'
-    updated_at: '2019-11-27T15:43:11.229Z'
+    updated_at: '2019-11-28T16:34:08.587Z'
     user_email:
   - id: 1817
     user_id:
@@ -1358,7 +1254,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.234Z'
-    updated_at: '2019-11-27T15:43:11.234Z'
+    updated_at: '2019-11-28T16:34:08.590Z'
     user_email:
   - id: 1818
     user_id:
@@ -1371,7 +1267,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.238Z'
-    updated_at: '2019-11-27T15:43:11.238Z'
+    updated_at: '2019-11-28T16:34:08.593Z'
     user_email:
   - id: 1819
     user_id:
@@ -1384,7 +1280,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.243Z'
-    updated_at: '2019-11-27T15:43:11.243Z'
+    updated_at: '2019-11-28T16:34:08.597Z'
     user_email:
   - id: 1820
     user_id:
@@ -1397,7 +1293,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.247Z'
-    updated_at: '2019-11-27T15:43:11.247Z'
+    updated_at: '2019-11-28T16:34:08.600Z'
     user_email:
   - id: 1821
     user_id:
@@ -1410,7 +1306,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.252Z'
-    updated_at: '2019-11-27T15:43:11.252Z'
+    updated_at: '2019-11-28T16:34:08.603Z'
     user_email:
   - id: 1822
     user_id:
@@ -1423,20 +1319,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.257Z'
-    updated_at: '2019-11-27T15:43:11.257Z'
-    user_email:
-  - id: 1826
-    user_id:
-    resource_type: report
-    resource_name: GRIT Study ID Search
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: ''
-    created_at: '2019-11-27T15:43:11.277Z'
-    updated_at: '2019-11-27T15:43:11.277Z'
+    updated_at: '2019-11-28T16:34:08.607Z'
     user_email:
   - id: 1827
     user_id:
@@ -1449,7 +1332,7 @@ app_type:
     app_type_id: 38
     role_name: user - participant details
     created_at: '2019-11-27T15:43:11.283Z'
-    updated_at: '2019-11-27T15:43:11.283Z'
+    updated_at: '2019-11-28T16:34:08.614Z'
     user_email:
   - id: 1828
     user_id:
@@ -1462,7 +1345,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol exception
     created_at: '2019-11-27T15:43:11.288Z'
-    updated_at: '2019-11-27T15:43:11.288Z'
+    updated_at: '2019-11-28T16:34:08.617Z'
     user_email:
   - id: 1829
     user_id:
@@ -1475,7 +1358,7 @@ app_type:
     app_type_id: 38
     role_name: user - protocol exception
     created_at: '2019-11-27T15:43:11.293Z'
-    updated_at: '2019-11-27T15:43:11.293Z'
+    updated_at: '2019-11-28T16:34:08.620Z'
     user_email:
   - id: 1830
     user_id:
@@ -1488,33 +1371,7 @@ app_type:
     app_type_id: 38
     role_name: scheduling
     created_at: '2019-11-27T15:43:11.299Z'
-    updated_at: '2019-11-27T15:43:11.299Z'
-    user_email:
-  - id: 1831
-    user_id:
-    resource_type: report
-    resource_name: Ready for Sign Off - MSM PI
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: pi
-    created_at: '2019-11-27T15:43:11.304Z'
-    updated_at: '2019-11-27T15:43:11.304Z'
-    user_email:
-  - id: 1832
-    user_id:
-    resource_type: report
-    resource_name: Ready for Sign Off - MSM Staff
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: staff - inex
-    created_at: '2019-11-27T15:43:11.310Z'
-    updated_at: '2019-11-27T15:43:11.310Z'
+    updated_at: '2019-11-28T16:34:08.624Z'
     user_email:
   - id: 1833
     user_id:
@@ -1527,7 +1384,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.316Z'
-    updated_at: '2019-11-27T15:43:11.316Z'
+    updated_at: '2019-11-28T16:34:08.636Z'
     user_email:
   - id: 1834
     user_id:
@@ -1540,7 +1397,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.321Z'
-    updated_at: '2019-11-27T15:43:11.321Z'
+    updated_at: '2019-11-28T16:34:08.640Z'
     user_email:
   - id: 1835
     user_id:
@@ -1553,7 +1410,7 @@ app_type:
     app_type_id: 38
     role_name: nfs_store group 600
     created_at: '2019-11-27T15:43:11.326Z'
-    updated_at: '2019-11-27T15:43:11.326Z'
+    updated_at: '2019-11-28T16:34:08.644Z'
     user_email:
   - id: 1836
     user_id:
@@ -1566,7 +1423,7 @@ app_type:
     app_type_id: 38
     role_name: nfs_store group 600
     created_at: '2019-11-27T15:43:11.331Z'
-    updated_at: '2019-11-27T15:43:11.331Z'
+    updated_at: '2019-11-28T16:34:08.648Z'
     user_email:
   - id: 1840
     user_id:
@@ -1579,7 +1436,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.354Z'
-    updated_at: '2019-11-27T15:43:11.354Z'
+    updated_at: '2019-11-28T16:34:08.651Z'
     user_email:
   - id: 1841
     user_id:
@@ -1592,7 +1449,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.361Z'
-    updated_at: '2019-11-27T15:43:11.361Z'
+    updated_at: '2019-11-28T16:34:08.655Z'
     user_email:
   - id: 1842
     user_id:
@@ -1605,7 +1462,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.366Z'
-    updated_at: '2019-11-27T15:43:11.366Z'
+    updated_at: '2019-11-28T16:34:08.658Z'
     user_email:
   - id: 1843
     user_id:
@@ -1618,7 +1475,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.371Z'
-    updated_at: '2019-11-27T15:43:11.371Z'
+    updated_at: '2019-11-28T16:34:08.663Z'
     user_email:
   - id: 1844
     user_id:
@@ -1631,7 +1488,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.376Z'
-    updated_at: '2019-11-27T15:43:11.376Z'
+    updated_at: '2019-11-28T16:34:08.667Z'
     user_email:
   - id: 1845
     user_id:
@@ -1644,7 +1501,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.381Z'
-    updated_at: '2019-11-27T15:43:11.381Z'
+    updated_at: '2019-11-28T16:34:08.670Z'
     user_email:
   - id: 1846
     user_id:
@@ -1657,7 +1514,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.386Z'
-    updated_at: '2019-11-27T15:43:11.386Z'
+    updated_at: '2019-11-28T16:34:08.674Z'
     user_email:
   - id: 1851
     user_id:
@@ -1670,7 +1527,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.442Z'
-    updated_at: '2019-11-27T15:43:11.442Z'
+    updated_at: '2019-11-28T16:34:08.678Z'
     user_email:
   - id: 1852
     user_id:
@@ -1683,7 +1540,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.446Z'
-    updated_at: '2019-11-27T15:43:11.446Z'
+    updated_at: '2019-11-28T16:34:08.682Z'
     user_email:
   - id: 1855
     user_id:
@@ -1696,7 +1553,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.460Z'
-    updated_at: '2019-11-27T15:43:11.460Z'
+    updated_at: '2019-11-28T16:34:08.685Z'
     user_email:
   - id: 1856
     user_id:
@@ -1709,7 +1566,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.464Z'
-    updated_at: '2019-11-27T15:43:11.464Z'
+    updated_at: '2019-11-28T16:34:08.689Z'
     user_email:
   - id: 1857
     user_id:
@@ -1722,7 +1579,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.469Z'
-    updated_at: '2019-11-27T15:43:11.469Z'
+    updated_at: '2019-11-28T16:34:08.693Z'
     user_email:
   - id: 1858
     user_id:
@@ -1735,7 +1592,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:11.474Z'
-    updated_at: '2019-11-27T15:43:11.474Z'
+    updated_at: '2019-11-28T16:34:08.697Z'
     user_email:
   - id: 1879
     user_id:
@@ -1748,7 +1605,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.565Z'
-    updated_at: '2019-11-27T15:43:11.565Z'
+    updated_at: '2019-11-28T16:34:08.700Z'
     user_email:
   - id: 1880
     user_id:
@@ -1761,7 +1618,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.569Z'
-    updated_at: '2019-11-27T15:43:11.569Z'
+    updated_at: '2019-11-28T16:34:08.703Z'
     user_email:
   - id: 1881
     user_id:
@@ -1774,7 +1631,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.574Z'
-    updated_at: '2019-11-27T15:43:11.574Z'
+    updated_at: '2019-11-28T16:34:08.707Z'
     user_email:
   - id: 1882
     user_id:
@@ -1787,7 +1644,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.578Z'
-    updated_at: '2019-11-27T15:43:11.578Z'
+    updated_at: '2019-11-28T16:34:08.710Z'
     user_email:
   - id: 1883
     user_id:
@@ -1800,7 +1657,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.582Z'
-    updated_at: '2019-11-27T15:43:11.582Z'
+    updated_at: '2019-11-28T16:34:08.714Z'
     user_email:
   - id: 1884
     user_id:
@@ -1813,7 +1670,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.588Z'
-    updated_at: '2019-11-27T15:43:11.588Z'
+    updated_at: '2019-11-28T16:34:08.717Z'
     user_email:
   - id: 1885
     user_id:
@@ -1826,7 +1683,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.594Z'
-    updated_at: '2019-11-27T15:43:11.594Z'
+    updated_at: '2019-11-28T16:34:08.720Z'
     user_email:
   - id: 1886
     user_id:
@@ -1839,7 +1696,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.598Z'
-    updated_at: '2019-11-27T15:43:11.598Z'
+    updated_at: '2019-11-28T16:34:08.725Z'
     user_email:
   - id: 1887
     user_id:
@@ -1852,7 +1709,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.602Z'
-    updated_at: '2019-11-27T15:43:11.602Z'
+    updated_at: '2019-11-28T16:34:08.729Z'
     user_email:
   - id: 1888
     user_id:
@@ -1865,33 +1722,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.606Z'
-    updated_at: '2019-11-27T15:43:11.606Z'
-    user_email:
-  - id: 1889
-    user_id:
-    resource_type: report
-    resource_name: GRIT Calendar
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:11.610Z'
-    updated_at: '2019-11-27T15:43:11.610Z'
-    user_email:
-  - id: 1890
-    user_id:
-    resource_type: report
-    resource_name: GRIT Calendar
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: ''
-    created_at: '2019-11-27T15:43:11.614Z'
-    updated_at: '2019-11-27T15:43:11.614Z'
+    updated_at: '2019-11-28T16:34:08.733Z'
     user_email:
   - id: 1891
     user_id:
@@ -1904,7 +1735,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.620Z'
-    updated_at: '2019-11-27T15:43:11.620Z'
+    updated_at: '2019-11-28T16:34:08.744Z'
     user_email:
   - id: 1892
     user_id:
@@ -1917,7 +1748,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.624Z'
-    updated_at: '2019-11-27T15:43:11.624Z'
+    updated_at: '2019-11-28T16:34:08.751Z'
     user_email:
   - id: 1893
     user_id:
@@ -1930,7 +1761,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.627Z'
-    updated_at: '2019-11-27T15:43:11.627Z'
+    updated_at: '2019-11-28T16:34:08.755Z'
     user_email:
   - id: 1894
     user_id:
@@ -1943,7 +1774,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:11.631Z'
-    updated_at: '2019-11-27T15:43:11.631Z'
+    updated_at: '2019-11-28T16:34:08.759Z'
     user_email:
   - id: 1896
     user_id:
@@ -1956,7 +1787,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.640Z'
-    updated_at: '2019-11-27T15:43:11.640Z'
+    updated_at: '2019-11-28T16:34:08.764Z'
     user_email:
   - id: 1897
     user_id:
@@ -1969,7 +1800,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.644Z'
-    updated_at: '2019-11-27T15:43:11.644Z'
+    updated_at: '2019-11-28T16:34:08.769Z'
     user_email:
   - id: 1898
     user_id:
@@ -1982,7 +1813,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.648Z'
-    updated_at: '2019-11-27T15:43:11.648Z'
+    updated_at: '2019-11-28T16:34:08.773Z'
     user_email:
   - id: 1899
     user_id:
@@ -1995,7 +1826,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.653Z'
-    updated_at: '2019-11-27T15:43:11.653Z'
+    updated_at: '2019-11-28T16:34:08.778Z'
     user_email:
   - id: 1900
     user_id:
@@ -2008,7 +1839,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.658Z'
-    updated_at: '2019-11-27T15:43:11.658Z'
+    updated_at: '2019-11-28T16:34:08.783Z'
     user_email:
   - id: 1901
     user_id:
@@ -2021,7 +1852,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.663Z'
-    updated_at: '2019-11-27T15:43:11.663Z'
+    updated_at: '2019-11-28T16:34:08.788Z'
     user_email:
   - id: 1902
     user_id:
@@ -2034,7 +1865,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.668Z'
-    updated_at: '2019-11-27T15:43:11.668Z'
+    updated_at: '2019-11-28T16:34:08.791Z'
     user_email:
   - id: 1903
     user_id:
@@ -2047,7 +1878,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.672Z'
-    updated_at: '2019-11-27T15:43:11.672Z'
+    updated_at: '2019-11-28T16:34:08.796Z'
     user_email:
   - id: 1904
     user_id:
@@ -2060,7 +1891,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.676Z'
-    updated_at: '2019-11-27T15:43:11.676Z'
+    updated_at: '2019-11-28T16:34:08.800Z'
     user_email:
   - id: 1905
     user_id:
@@ -2073,7 +1904,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.680Z'
-    updated_at: '2019-11-27T15:43:11.680Z'
+    updated_at: '2019-11-28T16:34:08.803Z'
     user_email:
   - id: 1906
     user_id:
@@ -2086,7 +1917,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.684Z'
-    updated_at: '2019-11-27T15:43:11.684Z'
+    updated_at: '2019-11-28T16:34:08.807Z'
     user_email:
   - id: 1907
     user_id:
@@ -2099,7 +1930,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.688Z'
-    updated_at: '2019-11-27T15:43:11.688Z'
+    updated_at: '2019-11-28T16:34:08.811Z'
     user_email:
   - id: 1908
     user_id:
@@ -2112,7 +1943,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.692Z'
-    updated_at: '2019-11-27T15:43:11.692Z'
+    updated_at: '2019-11-28T16:34:08.815Z'
     user_email:
   - id: 1909
     user_id:
@@ -2125,7 +1956,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.696Z'
-    updated_at: '2019-11-27T15:43:11.696Z'
+    updated_at: '2019-11-28T16:34:08.818Z'
     user_email:
   - id: 1911
     user_id:
@@ -2138,7 +1969,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.705Z'
-    updated_at: '2019-11-27T15:43:11.705Z'
+    updated_at: '2019-11-28T16:34:08.822Z'
     user_email:
   - id: 1913
     user_id:
@@ -2151,7 +1982,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.712Z'
-    updated_at: '2019-11-27T15:43:11.712Z'
+    updated_at: '2019-11-28T16:34:08.825Z'
     user_email:
   - id: 1914
     user_id:
@@ -2164,7 +1995,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.716Z'
-    updated_at: '2019-11-27T15:43:11.716Z'
+    updated_at: '2019-11-28T16:34:08.829Z'
     user_email:
   - id: 1915
     user_id:
@@ -2177,7 +2008,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.721Z'
-    updated_at: '2019-11-27T15:43:11.721Z'
+    updated_at: '2019-11-28T16:34:08.833Z'
     user_email:
   - id: 1916
     user_id:
@@ -2190,33 +2021,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.725Z'
-    updated_at: '2019-11-27T15:43:11.725Z'
-    user_email:
-  - id: 1917
-    user_id:
-    resource_type: report
-    resource_name: Ready for HMS Screening
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.729Z'
-    updated_at: '2019-11-27T15:43:11.729Z'
-    user_email:
-  - id: 1918
-    user_id:
-    resource_type: report
-    resource_name: Ready for MSM Screening
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.733Z'
-    updated_at: '2019-11-27T15:43:11.733Z'
+    updated_at: '2019-11-28T16:34:08.836Z'
     user_email:
   - id: 1919
     user_id:
@@ -2229,7 +2034,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.737Z'
-    updated_at: '2019-11-27T15:43:11.737Z'
+    updated_at: '2019-11-28T16:34:08.847Z'
     user_email:
   - id: 1920
     user_id:
@@ -2242,7 +2047,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.741Z'
-    updated_at: '2019-11-27T15:43:11.741Z'
+    updated_at: '2019-11-28T16:34:08.851Z'
     user_email:
   - id: 1921
     user_id:
@@ -2255,7 +2060,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.745Z'
-    updated_at: '2019-11-27T15:43:11.745Z'
+    updated_at: '2019-11-28T16:34:08.854Z'
     user_email:
   - id: 1922
     user_id:
@@ -2268,7 +2073,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.749Z'
-    updated_at: '2019-11-27T15:43:11.749Z'
+    updated_at: '2019-11-28T16:34:08.858Z'
     user_email:
   - id: 1923
     user_id:
@@ -2281,7 +2086,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.753Z'
-    updated_at: '2019-11-27T15:43:11.753Z'
+    updated_at: '2019-11-28T16:34:08.861Z'
     user_email:
   - id: 1924
     user_id:
@@ -2294,7 +2099,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.757Z'
-    updated_at: '2019-11-27T15:43:11.757Z'
+    updated_at: '2019-11-28T16:34:08.865Z'
     user_email:
   - id: 1925
     user_id:
@@ -2307,7 +2112,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.762Z'
-    updated_at: '2019-11-27T15:43:11.762Z'
+    updated_at: '2019-11-28T16:34:08.869Z'
     user_email:
   - id: 1926
     user_id:
@@ -2320,20 +2125,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.765Z'
-    updated_at: '2019-11-27T15:43:11.765Z'
-    user_email:
-  - id: 1927
-    user_id:
-    resource_type: report
-    resource_name: Ready for PI Follow Up
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: pi
-    created_at: '2019-11-27T15:43:11.769Z'
-    updated_at: '2019-11-27T15:43:11.769Z'
+    updated_at: '2019-11-28T16:34:08.873Z'
     user_email:
   - id: 1928
     user_id:
@@ -2346,7 +2138,7 @@ app_type:
     app_type_id: 38
     role_name: user - discussions
     created_at: '2019-11-27T15:43:11.773Z'
-    updated_at: '2019-11-27T15:43:11.773Z'
+    updated_at: '2019-11-28T16:34:08.881Z'
     user_email:
   - id: 1929
     user_id:
@@ -2359,7 +2151,7 @@ app_type:
     app_type_id: 38
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:11.776Z'
-    updated_at: '2019-11-27T15:43:11.776Z'
+    updated_at: '2019-11-28T16:34:08.885Z'
     user_email:
   - id: 1930
     user_id:
@@ -2372,7 +2164,7 @@ app_type:
     app_type_id: 38
     role_name: user - discussions
     created_at: '2019-11-27T15:43:11.780Z'
-    updated_at: '2019-11-27T15:43:11.780Z'
+    updated_at: '2019-11-28T16:34:08.889Z'
     user_email:
   - id: 1931
     user_id:
@@ -2385,7 +2177,7 @@ app_type:
     app_type_id: 38
     role_name: user - discussions
     created_at: '2019-11-27T15:43:11.784Z'
-    updated_at: '2019-11-27T15:43:11.784Z'
+    updated_at: '2019-11-28T16:34:08.893Z'
     user_email:
   - id: 1932
     user_id:
@@ -2398,7 +2190,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.788Z'
-    updated_at: '2019-11-27T15:43:11.788Z'
+    updated_at: '2019-11-28T16:34:08.897Z'
     user_email:
   - id: 1933
     user_id:
@@ -2411,7 +2203,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.792Z'
-    updated_at: '2019-11-27T15:43:11.792Z'
+    updated_at: '2019-11-28T16:34:08.901Z'
     user_email:
   - id: 1934
     user_id:
@@ -2424,7 +2216,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.796Z'
-    updated_at: '2019-11-27T15:43:11.796Z'
+    updated_at: '2019-11-28T16:34:08.904Z'
     user_email:
   - id: 1935
     user_id:
@@ -2437,7 +2229,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.800Z'
-    updated_at: '2019-11-27T15:43:11.800Z'
+    updated_at: '2019-11-28T16:34:08.908Z'
     user_email:
   - id: 1936
     user_id:
@@ -2450,7 +2242,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.804Z'
-    updated_at: '2019-11-27T15:43:11.804Z'
+    updated_at: '2019-11-28T16:34:08.913Z'
     user_email:
   - id: 1937
     user_id:
@@ -2463,7 +2255,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.808Z'
-    updated_at: '2019-11-27T15:43:11.808Z'
+    updated_at: '2019-11-28T16:34:08.917Z'
     user_email:
   - id: 1938
     user_id:
@@ -2476,7 +2268,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.812Z'
-    updated_at: '2019-11-27T15:43:11.812Z'
+    updated_at: '2019-11-28T16:34:08.921Z'
     user_email:
   - id: 1939
     user_id:
@@ -2489,7 +2281,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.816Z'
-    updated_at: '2019-11-27T15:43:11.816Z'
+    updated_at: '2019-11-28T16:34:08.926Z'
     user_email:
   - id: 1940
     user_id:
@@ -2502,7 +2294,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.821Z'
-    updated_at: '2019-11-27T15:43:11.821Z'
+    updated_at: '2019-11-28T16:34:08.931Z'
     user_email:
   - id: 1941
     user_id:
@@ -2515,7 +2307,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.826Z'
-    updated_at: '2019-11-27T15:43:11.826Z'
+    updated_at: '2019-11-28T16:34:08.936Z'
     user_email:
   - id: 1942
     user_id:
@@ -2528,7 +2320,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.830Z'
-    updated_at: '2019-11-27T15:43:11.830Z'
+    updated_at: '2019-11-28T16:34:08.940Z'
     user_email:
   - id: 1943
     user_id:
@@ -2541,7 +2333,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.834Z'
-    updated_at: '2019-11-27T15:43:11.834Z'
+    updated_at: '2019-11-28T16:34:08.944Z'
     user_email:
   - id: 1944
     user_id:
@@ -2554,7 +2346,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.838Z'
-    updated_at: '2019-11-27T15:43:11.838Z'
+    updated_at: '2019-11-28T16:34:08.948Z'
     user_email:
   - id: 1945
     user_id:
@@ -2567,7 +2359,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.842Z'
-    updated_at: '2019-11-27T15:43:11.842Z'
+    updated_at: '2019-11-28T16:34:08.952Z'
     user_email:
   - id: 1946
     user_id:
@@ -2580,7 +2372,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.846Z'
-    updated_at: '2019-11-27T15:43:11.846Z'
+    updated_at: '2019-11-28T16:34:08.956Z'
     user_email:
   - id: 1947
     user_id:
@@ -2593,7 +2385,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.850Z'
-    updated_at: '2019-11-27T15:43:11.850Z'
+    updated_at: '2019-11-28T16:34:08.959Z'
     user_email:
   - id: 1948
     user_id:
@@ -2606,7 +2398,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:11.854Z'
-    updated_at: '2019-11-27T15:43:11.854Z'
+    updated_at: '2019-11-28T16:34:08.963Z'
     user_email:
   - id: 1949
     user_id:
@@ -2619,7 +2411,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.858Z'
-    updated_at: '2019-11-27T15:43:11.858Z'
+    updated_at: '2019-11-28T16:34:08.966Z'
     user_email:
   - id: 1950
     user_id:
@@ -2632,7 +2424,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.862Z'
-    updated_at: '2019-11-27T15:43:11.862Z'
+    updated_at: '2019-11-28T16:34:08.970Z'
     user_email:
   - id: 1951
     user_id:
@@ -2645,7 +2437,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.866Z'
-    updated_at: '2019-11-27T15:43:11.866Z'
+    updated_at: '2019-11-28T16:34:08.973Z'
     user_email:
   - id: 1952
     user_id:
@@ -2658,7 +2450,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.870Z'
-    updated_at: '2019-11-27T15:43:11.870Z'
+    updated_at: '2019-11-28T16:34:08.977Z'
     user_email:
   - id: 1954
     user_id:
@@ -2671,7 +2463,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.878Z'
-    updated_at: '2019-11-27T15:43:11.878Z'
+    updated_at: '2019-11-28T16:34:08.981Z'
     user_email:
   - id: 1955
     user_id:
@@ -2684,7 +2476,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.882Z'
-    updated_at: '2019-11-27T15:43:11.882Z'
+    updated_at: '2019-11-28T16:34:08.985Z'
     user_email:
   - id: 1956
     user_id:
@@ -2697,7 +2489,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.886Z'
-    updated_at: '2019-11-27T15:43:11.886Z'
+    updated_at: '2019-11-28T16:34:08.988Z'
     user_email:
   - id: 1957
     user_id:
@@ -2710,46 +2502,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.890Z'
-    updated_at: '2019-11-27T15:43:11.890Z'
-    user_email:
-  - id: 1960
-    user_id:
-    resource_type: report
-    resource_name: Completed PI Eligibility Review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.903Z'
-    updated_at: '2019-11-27T15:43:11.903Z'
-    user_email:
-  - id: 1961
-    user_id:
-    resource_type: report
-    resource_name: Ready for Informed Consent
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.907Z'
-    updated_at: '2019-11-27T15:43:11.907Z'
-    user_email:
-  - id: 1962
-    user_id:
-    resource_type: report
-    resource_name: Needs Follow Up Communication
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:11.911Z'
-    updated_at: '2019-11-27T15:43:11.911Z'
+    updated_at: '2019-11-28T16:34:08.992Z'
     user_email:
   - id: 1963
     user_id:
@@ -2762,7 +2515,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.915Z'
-    updated_at: '2019-11-27T15:43:11.915Z'
+    updated_at: '2019-11-28T16:34:09.019Z'
     user_email:
   - id: 1964
     user_id:
@@ -2775,7 +2528,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.920Z'
-    updated_at: '2019-11-27T15:43:11.920Z'
+    updated_at: '2019-11-28T16:34:09.022Z'
     user_email:
   - id: 1965
     user_id:
@@ -2788,7 +2541,7 @@ app_type:
     app_type_id: 38
     role_name: pi
     created_at: '2019-11-27T15:43:11.923Z'
-    updated_at: '2019-11-27T15:43:11.923Z'
+    updated_at: '2019-11-28T16:34:09.026Z'
     user_email:
   - id: 1966
     user_id:
@@ -2801,7 +2554,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.927Z'
-    updated_at: '2019-11-27T15:43:11.927Z'
+    updated_at: '2019-11-28T16:34:09.030Z'
     user_email:
   - id: 1968
     user_id:
@@ -2814,7 +2567,7 @@ app_type:
     app_type_id: 38
     role_name: admin
     created_at: '2019-11-27T15:43:11.934Z'
-    updated_at: '2019-11-27T15:43:11.934Z'
+    updated_at: '2019-11-28T16:34:09.034Z'
     user_email:
   - id: 1970
     user_id:
@@ -2827,20 +2580,7 @@ app_type:
     app_type_id: 38
     role_name: admin
     created_at: '2019-11-27T15:43:11.943Z'
-    updated_at: '2019-11-27T15:43:11.943Z'
-    user_email:
-  - id: 1971
-    user_id:
-    resource_type: report
-    resource_name: Needs Follow Up Communication
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: admin
-    created_at: '2019-11-27T15:43:11.949Z'
-    updated_at: '2019-11-27T15:43:11.949Z'
+    updated_at: '2019-11-28T16:34:09.038Z'
     user_email:
   - id: 1972
     user_id: 84
@@ -2853,7 +2593,7 @@ app_type:
     app_type_id: 38
     role_name: ''
     created_at: '2019-11-27T15:43:11.958Z'
-    updated_at: '2019-11-27T15:43:11.958Z'
+    updated_at: '2019-11-28T16:34:09.048Z'
     user_email: phil_ayres@hms.harvard.edu
   - id: 1973
     user_id:
@@ -2866,7 +2606,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.962Z'
-    updated_at: '2019-11-27T15:43:11.962Z'
+    updated_at: '2019-11-28T16:34:09.051Z'
     user_email:
   - id: 1974
     user_id:
@@ -2879,59 +2619,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.966Z'
-    updated_at: '2019-11-27T15:43:11.966Z'
-    user_email:
-  - id: 1976
-    user_id:
-    resource_type: report
-    resource_name: Ready for Informed Consent
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:11.976Z'
-    updated_at: '2019-11-27T15:43:11.976Z'
-    user_email:
-  - id: 1977
-    user_id:
-    resource_type: report
-    resource_name: GRIT Interventionist Assignments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.980Z'
-    updated_at: '2019-11-27T15:43:11.980Z'
-    user_email:
-  - id: 1978
-    user_id:
-    resource_type: report
-    resource_name: GRIT Interventionist Assignments Report
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: admin
-    created_at: '2019-11-27T15:43:11.984Z'
-    updated_at: '2019-11-27T15:43:11.984Z'
-    user_email:
-  - id: 1979
-    user_id:
-    resource_type: report
-    resource_name: GRIT Interventionist Assignments Report
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.988Z'
-    updated_at: '2019-11-27T15:43:11.988Z'
+    updated_at: '2019-11-28T16:34:09.055Z'
     user_email:
   - id: 1980
     user_id:
@@ -2944,7 +2632,7 @@ app_type:
     app_type_id: 38
     role_name: ''
     created_at: '2019-11-27T15:43:11.994Z'
-    updated_at: '2019-11-27T15:43:11.994Z'
+    updated_at: '2019-11-28T16:34:09.074Z'
     user_email:
   - id: 1981
     user_id:
@@ -2957,20 +2645,7 @@ app_type:
     app_type_id: 38
     role_name: user - followup
     created_at: '2019-11-27T15:43:11.998Z'
-    updated_at: '2019-11-27T15:43:11.998Z'
-    user_email:
-  - id: 1982
-    user_id:
-    resource_type: report
-    resource_name: GRIT Study ID Search
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - participant details
-    created_at: '2019-11-27T15:43:12.005Z'
-    updated_at: '2019-11-27T15:43:12.005Z'
+    updated_at: '2019-11-28T16:34:09.078Z'
     user_email:
   - id: 1983
     user_id:
@@ -2983,20 +2658,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:12.010Z'
-    updated_at: '2019-11-27T15:43:12.010Z'
-    user_email:
-  - id: 1984
-    user_id:
-    resource_type: report
-    resource_name: Needs Follow Up Communication
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: pi
-    created_at: '2019-11-27T15:43:12.014Z'
-    updated_at: '2019-11-27T15:43:12.014Z'
+    updated_at: '2019-11-28T16:34:09.085Z'
     user_email:
   - id: 1985
     user_id:
@@ -3009,7 +2671,7 @@ app_type:
     app_type_id: 38
     role_name: admin
     created_at: '2019-11-27T15:43:12.018Z'
-    updated_at: '2019-11-27T15:43:12.018Z'
+    updated_at: '2019-11-28T16:34:09.092Z'
     user_email:
   - id: 1987
     user_id:
@@ -3022,33 +2684,7 @@ app_type:
     app_type_id: 38
     role_name: admin
     created_at: '2019-11-27T15:43:12.025Z'
-    updated_at: '2019-11-27T15:43:12.025Z'
-    user_email:
-  - id: 1988
-    user_id:
-    resource_type: report
-    resource_name: Subjects In Process & Exited
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:12.029Z'
-    updated_at: '2019-11-27T15:43:12.029Z'
-    user_email:
-  - id: 1989
-    user_id:
-    resource_type: report
-    resource_name: GRIT Calendar
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:12.033Z'
-    updated_at: '2019-11-27T15:43:12.033Z'
+    updated_at: '2019-11-28T16:34:09.096Z'
     user_email:
   - id: 1990
     user_id:
@@ -3061,46 +2697,7 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:12.037Z'
-    updated_at: '2019-11-27T15:43:12.037Z'
-    user_email:
-  - id: 1991
-    user_id:
-    resource_type: report
-    resource_name: GRIT Interventionist Assignments
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: ''
-    created_at: '2019-11-27T15:43:12.041Z'
-    updated_at: '2019-11-27T15:43:12.041Z'
-    user_email:
-  - id: 1992
-    user_id:
-    resource_type: report
-    resource_name: GRIT Interventionist Assignments Report
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: ''
-    created_at: '2019-11-27T15:43:12.044Z'
-    updated_at: '2019-11-27T15:43:12.044Z'
-    user_email:
-  - id: 1993
-    user_id:
-    resource_type: report
-    resource_name: Search GRIT Study Subject
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:12.048Z'
-    updated_at: '2019-11-27T15:43:12.048Z'
+    updated_at: '2019-11-28T16:34:09.107Z'
     user_email:
   - id: 1994
     user_id:
@@ -3113,7 +2710,410 @@ app_type:
     app_type_id: 38
     role_name: interventionist
     created_at: '2019-11-27T15:43:12.052Z'
-    updated_at: '2019-11-27T15:43:12.052Z'
+    updated_at: '2019-11-28T16:34:09.121Z'
+    user_email:
+  - id: 2103
+    user_id:
+    resource_type: report
+    resource_name: grit__search_grit_subject
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - participant details
+    created_at: '2019-11-28T16:55:52.922Z'
+    updated_at: '2019-11-28T16:55:54.601Z'
+    user_email:
+  - id: 2104
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_protocol_deviation_pi_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - protocol deviation
+    created_at: '2019-11-28T16:55:53.025Z'
+    updated_at: '2019-11-28T16:55:54.702Z'
+    user_email:
+  - id: 2105
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_adverse_event_pi_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - adverse event
+    created_at: '2019-11-28T16:55:53.029Z'
+    updated_at: '2019-11-28T16:55:54.819Z'
+    user_email:
+  - id: 2106
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_protocol_deviation_initial_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - protocol deviation
+    created_at: '2019-11-28T16:55:53.043Z'
+    updated_at: '2019-11-28T16:55:54.884Z'
+    user_email:
+  - id: 2107
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_adverse_event_initial_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - adverse event
+    created_at: '2019-11-28T16:55:53.047Z'
+    updated_at: '2019-11-28T16:55:54.980Z'
+    user_email:
+  - id: 2108
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_adverse_events
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - adverse event
+    created_at: '2019-11-28T16:55:53.053Z'
+    updated_at: '2019-11-28T16:55:55.073Z'
+    user_email:
+  - id: 2109
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_in_process___exited
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: ''
+    created_at: '2019-11-28T16:55:53.057Z'
+    updated_at: '2019-11-28T16:55:55.157Z'
+    user_email:
+  - id: 2110
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_protocol_deviations
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - protocol deviation
+    created_at: '2019-11-28T16:55:53.061Z'
+    updated_at: '2019-11-28T16:55:55.261Z'
+    user_email:
+  - id: 2111
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_id_search
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: ''
+    created_at: '2019-11-28T16:55:53.200Z'
+    updated_at: '2019-11-28T16:55:55.377Z'
+    user_email:
+  - id: 2112
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_ready_for_sign_off___pi
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: pi
+    created_at: '2019-11-28T16:55:53.218Z'
+    updated_at: '2019-11-28T16:55:55.470Z'
+    user_email:
+  - id: 2113
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_ready_for_sign_off___staff
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: staff - inex
+    created_at: '2019-11-28T16:55:53.222Z'
+    updated_at: '2019-11-28T16:55:55.539Z'
+    user_email:
+  - id: 2114
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_calendar
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: tracker
+    created_at: '2019-11-28T16:55:53.306Z'
+    updated_at: '2019-11-28T16:55:55.631Z'
+    user_email:
+  - id: 2115
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_calendar
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: ''
+    created_at: '2019-11-28T16:55:53.310Z'
+    updated_at: '2019-11-28T16:55:55.707Z'
+    user_email:
+  - id: 2116
+    user_id:
+    resource_type: report
+    resource_name: grit__ready_for_hms_screening
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener
+    created_at: '2019-11-28T16:55:53.387Z'
+    updated_at: '2019-11-28T16:55:55.778Z'
+    user_email:
+  - id: 2117
+    user_id:
+    resource_type: report
+    resource_name: grit__ready_for_msm_screening
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener 2
+    created_at: '2019-11-28T16:55:53.391Z'
+    updated_at: '2019-11-28T16:55:55.894Z'
+    user_email:
+  - id: 2118
+    user_id:
+    resource_type: report
+    resource_name: grit__ready_for_pi_followup
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: pi
+    created_at: '2019-11-28T16:55:53.426Z'
+    updated_at: '2019-11-28T16:55:55.999Z'
+    user_email:
+  - id: 2119
+    user_id:
+    resource_type: report
+    resource_name: grit__pi_followup_complete
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener
+    created_at: '2019-11-28T16:55:53.559Z'
+    updated_at: '2019-11-28T16:55:56.080Z'
+    user_email:
+  - id: 2120
+    user_id:
+    resource_type: report
+    resource_name: grit__ready_for_informed_consent
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener 2
+    created_at: '2019-11-28T16:55:53.563Z'
+    updated_at: '2019-11-28T16:55:56.146Z'
+    user_email:
+  - id: 2121
+    user_id:
+    resource_type: report
+    resource_name: grit__needs_followup_communication
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: tracker
+    created_at: '2019-11-28T16:55:53.567Z'
+    updated_at: '2019-11-28T16:55:56.221Z'
+    user_email:
+  - id: 2122
+    user_id:
+    resource_type: report
+    resource_name: grit__needs_followup_communication
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: admin
+    created_at: '2019-11-28T16:55:53.587Z'
+    updated_at: '2019-11-28T16:55:56.329Z'
+    user_email:
+  - id: 2123
+    user_id:
+    resource_type: report
+    resource_name: grit__ready_for_informed_consent
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: tracker
+    created_at: '2019-11-28T16:55:53.601Z'
+    updated_at: '2019-11-28T16:55:56.426Z'
+    user_email:
+  - id: 2124
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_interventionist_assignments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: interventionist
+    created_at: '2019-11-28T16:55:53.605Z'
+    updated_at: '2019-11-28T16:55:56.570Z'
+    user_email:
+  - id: 2125
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_interventionist_assignments_report
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: admin
+    created_at: '2019-11-28T16:55:53.615Z'
+    updated_at: '2019-11-28T16:55:56.669Z'
+    user_email:
+  - id: 2126
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_interventionist_assignments_report
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener 2
+    created_at: '2019-11-28T16:55:53.618Z'
+    updated_at: '2019-11-28T16:55:56.751Z'
+    user_email:
+  - id: 2127
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_id_search
+    options: ''
+    access:
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - participant details
+    created_at: '2019-11-28T16:55:53.627Z'
+    updated_at: '2019-11-28T16:55:56.861Z'
+    user_email:
+  - id: 2128
+    user_id:
+    resource_type: report
+    resource_name: grit__needs_followup_communication
+    options: ''
+    access:
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: pi
+    created_at: '2019-11-28T16:55:53.634Z'
+    updated_at: '2019-11-28T16:55:56.977Z'
+    user_email:
+  - id: 2129
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_in_process___exited
+    options: ''
+    access:
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: interventionist
+    created_at: '2019-11-28T16:55:53.643Z'
+    updated_at: '2019-11-28T16:55:57.070Z'
+    user_email:
+  - id: 2130
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_calendar
+    options: ''
+    access:
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: interventionist
+    created_at: '2019-11-28T16:55:53.648Z'
+    updated_at: '2019-11-28T16:55:57.207Z'
+    user_email:
+  - id: 2131
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_interventionist_assignments
+    options: ''
+    access:
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: ''
+    created_at: '2019-11-28T16:55:53.654Z'
+    updated_at: '2019-11-28T16:55:57.294Z'
+    user_email:
+  - id: 2132
+    user_id:
+    resource_type: report
+    resource_name: grit__grit_interventionist_assignments_report
+    options: ''
+    access:
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: ''
+    created_at: '2019-11-28T16:55:53.658Z'
+    updated_at: '2019-11-28T16:55:57.378Z'
+    user_email:
+  - id: 2133
+    user_id:
+    resource_type: report
+    resource_name: grit__search_grit_subject
+    options: ''
+    access:
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: interventionist
+    created_at: '2019-11-28T16:55:53.662Z'
+    updated_at: '2019-11-28T16:55:57.482Z'
     user_email:
   valid_associated_activity_logs:
   - id: 85
@@ -3245,7 +3245,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:02.285Z'
-    updated_at: '2019-11-27T15:43:02.285Z'
+    updated_at: '2019-11-28T15:06:16.482Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -5280,491 +5280,6 @@ app_type:
     extra_fields: ''
     user_email:
   associated_reports:
-  - id: 110
-    name: Protocol Deviation PI Review
-    description: 'Sleep Study Protocol Deviation records requiring review by the PI. '
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.*,\r\n   rank()\r\n
-      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
-      DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_protocol_deviations a\r\n\r\n
-      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_protocol_deviations
-      p\r\n ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n INNER
-      JOIN model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n\r\n INNER JOIN activity_log_sleep_assignment_protocol_deviations
-      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n
-      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n AND a2.extra_log_type
-      in ('pi_review', 'initial_review')\r\n AND p.select_severity = 'major'\r\n\r\n\r\n)
-      AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n
-      \ r >= 1 AND dt.extra_log_type = 'initial_review'\r\nAND\r\n  r = 1 AND dt.extra_log_type
-      <> 'pi_review'\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-07-23T13:33:55.810Z'
-    updated_at: '2019-10-17T10:08:29.872Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 31
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: sleep_protocol_deviation_pi_review
-    options: ''
-    user_email:
-  - id: 111
-    name: Adverse Event PI Review
-    description: 'Sleep Study Adverse Event records requiring review by the PI. '
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.*,\r\n   rank()\r\n
-      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
-      DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_adverse_events a\r\n\r\n
-      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_adverse_events p\r\n ON \r\n
-      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
-      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
-      \  AND mr.to_record_id = p.id\r\n\r\n INNER JOIN model_references mr2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n\r\n INNER JOIN activity_log_sleep_assignment_adverse_events a2\r\n
-      ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n WHERE \r\n
-      a.extra_log_type = 'adverse_event_record' \r\n AND a2.extra_log_type in ('pi_review',
-      'initial_review')\r\n AND p.select_relatedness IN ('related', 'possibly related')
-      AND p.select_expectedness = 'unexpected'\r\n AND (p.select_location = 'internal'
-      OR p.select_severity = 'serious')\r\n\r\n\r\n) AS dt\r\n\r\ninner join player_infos
-      pi on dt.master_id = pi.master_id\r\nWHERE\r\n  r >= 1 AND dt.extra_log_type
-      = 'initial_review'\r\nAND\r\n  r = 1 AND dt.extra_log_type <> 'pi_review'\r\n\r\nORDER
-      BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-07-23T13:33:55.815Z'
-    updated_at: '2019-10-17T10:08:29.876Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 41
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: sleep_adverse_event_pi_review
-    options: ''
-    user_email:
-  - id: 113
-    name: Protocol Deviation Initial Review
-    description: Sleep Study Protocol Deviation records requiring initial review prior
-      to sending to the PI
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a.master_id, a2.extra_log_type,
-      a.created_at,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at
-      DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_protocol_deviations
-      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_protocol_deviations
-      p\r\n ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n LEFT
-      JOIN model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_protocol_deviations
-      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n
-      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n AND a2.extra_log_type
-      IS NULL\r\n AND p.select_severity = 'major'\r\n\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n  r >= 1 AND
-      dt.extra_log_type IS NULL\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-07-23T13:33:55.824Z'
-    updated_at: '2019-10-17T10:08:29.879Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 30
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: sleep_protocol_deviation_initial_review
-    options: ''
-    user_email:
-  - id: 114
-    name: Adverse Event Initial Review
-    description: Sleep Study Adverse Event records requiring initial review prior
-      to sending to the PI
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.extra_log_type, a.created_at,
-      a.master_id,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at
-      DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_adverse_events
-      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_adverse_events p\r\n ON \r\n
-      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
-      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
-      \  AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN model_references mr2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_adverse_events a2\r\n
-      ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n WHERE \r\n
-      a.extra_log_type = 'adverse_event_record' \r\n AND a2.extra_log_type IS NULL\r\n\r\n\r\n)
-      AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n
-      \ r >= 1 AND dt.extra_log_type IS NULL\r\n\r\n\r\nORDER BY\r\n  dt.created_at
-      DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-07-23T13:33:55.829Z'
-    updated_at: '2019-10-17T10:08:29.883Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 40
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: sleep_adverse_event_initial_review
-    options: ''
-    user_email:
-  - id: 115
-    name: Adverse Events
-    description: "Sleep Study Adverse Events report for fast review of events requiring
-      additional action or for summary reporting.\r\n\r\nThe activities are performed
-      in this order: initial submission, initial review, PI review (if required),
-      report to IRB (if PI review was required)\r\n\r\nNOTE: the Last Activity Performed
-      represents the last recorded activity for a specific adverse event. Therefore
-      to find outstanding tasks, for example items requiring Report to IRB, it is
-      necessary to search for the last activity that was performed, PI Review in this
-      example."
-    sql: "\r\nSELECT \r\ndt.master_id,\r\nipa.sleep_id,\r\ncoalesce(dt.created_at,
-      dt.submitted_at) \"last activity\",\r\ncoalesce(dt.extra_log_type, 'initial
-      submission') \"Last Activity Performed\",\r\n--pi.first_name,\r\n--pi.last_name,\r\nselect_severity,
-      select_location, select_relatedness, select_expectedness, event_occurred_when,
-      event_discovered_when,\r\ndt.primary_extra_log_type,\r\ndt.primary_activity\r\nFROM
-      (\r\n SELECT a.master_id , a.id \"primary_activity\", a.extra_log_type \"primary_extra_log_type\",
-      a.created_at \"submitted_at\", a2.created_at, a2.extra_log_type, p.select_severity,
-      p.select_location, p.select_relatedness, p.select_expectedness,\r\n   p.event_occurred_when,
-      p.event_discovered_when,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n
-      \ ORDER BY a.created_at DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_adverse_events
-      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_adverse_events p\r\n ON \r\n
-      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
-      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
-      \  AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN model_references mr2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_adverse_events a2\r\n
-      ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n\r\n WHERE
-      \r\n a.extra_log_type = 'adverse_event_record' \r\n\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\nINNER JOIN sleep_assignments
-      sleep ON dt.master_id = sleep.master_id\r\nWHERE r = 1 \r\nAND (:event_occurred_from
-      IS NULL OR event_occurred_when >= :event_occurred_from)\r\nAND (:event_occurred_to
-      IS NULL OR event_occurred_when <= :event_occurred_to)\r\nAND (:severity IS NULL
-      OR select_severity = :severity)\r\nAND (:location IS NULL OR select_location
-      = :location)\r\nAND ((:relatedness) IS NULL OR select_relatedness IN (:relatedness))\r\nAND
-      ((:expectedness) IS NULL OR select_expectedness = (:expectedness))\r\nAND ((:latest_activity)
-      IS NULL OR coalesce(dt.extra_log_type, 'initial submission') IN (:latest_activity))\r\n\r\nORDER
-      BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: "\r\nseverity: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_adverse_events_select_severity\r\n
-      \   multiple: single\r\n    default: serious\r\nlocation: \r\n  general_selection:
-      \r\n    item_type: dynamic_model__sleep_adverse_events_select_location\r\n    multiple:
-      single\r\n\r\nrelatedness: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_adverse_events_select_relatedness\r\n
-      \   multiple: multiple\r\n    default: \r\n      - related\r\n      - possibly
-      related\r\n\r\nexpectedness: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_adverse_events_select_expectedness\r\n
-      \   multiple: single\r\n\r\nevent_occurred_from: \r\n  date: \r\n    all: true\r\n
-      \   multiple: single\r\n    default: -15 days\r\nevent_occurred_to: \r\n  date:
-      \r\n    all: true\r\n    multiple: single\r\nlatest_activity: \r\n  config_selector:
-      \r\n    all: true\r\n    multiple: multiple\r\n    label: Latest Activity Performed\r\n
-      \   selections: \r\n      initial submission: initial submission\r\n      initial
-      review: initial_review\r\n      pi review: pi_review\r\n      report to irb:
-      report_to_irb"
-    admin_id: 21
-    disabled: false
-    created_at: '2019-07-23T13:33:55.834Z'
-    updated_at: '2019-10-17T10:08:29.887Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position:
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: sleep_adverse_events
-    options: ''
-    user_email:
-  - id: 116
-    name: Subjects In Process & Exited
-    description: 'All subjects that have joined or exited the study: in process (phone
-      screening scheduled), enrolled, completed, withdrawn, ineligible, other exit
-      (not interested, etc)'
-    sql: "SELECT * from (\r\n  SELECT distinct dt.master_id, sleep.sleep_id, bwh_sleep.bwh_sleep_id,\r\n
-      \ CASE \r\n  WHEN extra_log_type = 'completed' THEN 'completed'\r\n  WHEN extra_log_type
-      = 'withdraw' THEN 'withdrawn'\r\n  WHEN extra_log_type IN ('exit_not_consented',
-      'exit_ps', 'exit_ps_bwh', 'exit_opt_out', 'exit_l2fu') THEN 'exited'\r\n  WHEN
-      extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'bwh_ps_eligible'
-      THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'in process'\r\n
-      \ WHEN extra_log_type = 'appointment' THEN 'enrolled'\r\n  ELSE extra_log_type\r\n
-      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id,
-      al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
-      BY al.master_id \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n
-      \   FROM activity_log_sleep_assignments al\r\n    WHERE   \r\n    extra_log_type
-      IN (\r\n      'schedule_screening', \r\n      'bwh_ps_eligible', \r\n      'ineligible',
-      \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_ps_bwh',\r\n
-      \     'exit_opt_out',\r\n      'exit_l2fu',\r\n      'appointment',\r\n      'completed',\r\n
-      \     'withdraw'\r\n    )\r\n  ) dt\r\n  INNER JOIN sleep_assignments sleep
-      ON dt.master_id = sleep.master_id\r\n  LEFT OUTER JOIN bwh_sleep_id_numbers
-      bwh_sleep ON dt.master_id = bwh_sleep.master_id\r\n  WHERE r = 1 \r\n) dt2\r\nWHERE
-      status IN(:select_status)\r\nORDER BY status, created_at desc\r\n;\r\n"
-    search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
-      / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - eligible\r\n#      - ineligible\r\n#      - completed\r\n#
-      \     - withdrawn\r\n#      - exited\r\n      - enrolled\r\n      - in process\r\n
-      \   selections: \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
-      \     completed: completed\r\n      withdrawn: withdrawn\r\n      exited: exited\r\n
-      \     enrolled: enrolled\r\n      in process: in process\r\n      \r\n      "
-    admin_id: 21
-    disabled: false
-    created_at: '2019-07-23T13:33:55.839Z'
-    updated_at: '2019-11-18T13:24:30.902Z'
-    report_type: search
-    auto: false
-    searchable: true
-    position: 21
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: sleep_in_process___exited
-    options: ''
-    user_email:
-  - id: 118
-    name: Protocol Deviations
-    description: "Sleep Study Protocol Deviations report for fast review of events
-      requiring additional action or for summary reporting.\r\n\r\nThe activities
-      are performed in this order: initial submission, initial review, PI review (if
-      required), report to IRB (if PI review was required)\r\n\r\nNOTE: the Last Activity
-      Performed represents the last recorded activity for a specific protocol deviations.
-      Therefore to find outstanding tasks, for example items requiring Report to IRB,
-      it is necessary to search for the last activity that was performed, PI Review
-      in this example."
-    sql: "\r\nSELECT \r\ndt.master_id,\r\nipa.sleep_id,\r\ncoalesce(dt.created_at,
-      dt.submitted_at) \"last activity\",\r\ncoalesce(dt.extra_log_type, 'initial
-      submission') \"Last Activity Performed\",\r\n-- pi.first_name,\r\n-- pi.last_name,\r\nselect_severity,
-      deviation_occurred_when, deviation_discovered_when,\r\ndt.primary_extra_log_type,\r\ndt.primary_activity\r\nFROM
-      (\r\n SELECT a.master_id , a.id \"primary_activity\", a.extra_log_type \"primary_extra_log_type\",
-      a.created_at \"submitted_at\", a2.created_at, a2.extra_log_type, p.select_severity,
-      \r\n   p.deviation_occurred_when, p.deviation_discovered_when,\r\n   rank()\r\n
-      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
-      DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_protocol_deviations a\r\n\r\n
-      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_protocol_deviations
-      p\r\n ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n LEFT
-      JOIN model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_protocol_deviations
-      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n\r\n
-      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\ninner join sleep_assignments
-      sleep on dt.master_id = sleep.master_id\r\nWHERE \r\nr = 1 \r\nAND (:deviation_occurred_from
-      IS NULL OR deviation_occurred_when >= :deviation_occurred_from)\r\nAND (:deviation_occurred_to
-      IS NULL OR deviation_occurred_when <= :deviation_occurred_to)\r\nAND (:severity
-      IS NULL OR select_severity = :severity)\r\nAND ((:latest_activity) IS NULL OR
-      coalesce(dt.extra_log_type, 'initial submission') IN (:latest_activity))\r\n\r\nORDER
-      BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: "\r\nseverity: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_protocol_deviations_select_severity\r\n
-      \   multiple: single\r\n    default: serious\r\n\r\ndeviation_occurred_from:
-      \r\n  date: \r\n    all: true\r\n    multiple: single\r\n    default: -15 days\r\ndeviation_occurred_to:
-      \r\n  date: \r\n    all: true\r\n    multiple: single\r\n\r\nlatest_activity:
-      \r\n  config_selector: \r\n    all: true\r\n    multiple: multiple\r\n    label:
-      Latest Activity Performed\r\n    selections: \r\n      initial submission: initial
-      submission\r\n      initial review: initial_review\r\n      pi review: pi_review\r\n
-      \     report to irb: report_to_irb\r\n    default:\r\n      - pi_review"
-    admin_id: 21
-    disabled: false
-    created_at: '2019-07-23T13:33:55.849Z'
-    updated_at: '2019-10-17T10:08:29.896Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position:
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: sleep_protocol_deviations
-    options: ''
-    user_email:
-  - id: 142
-    name: Ready for HMS Screening
-    description: List of subjects where the HMS Phone Screen has not been performed.
-    sql: "select sa.master_id, sa.sleep_id\r\nfrom sleep_assignments sa\r\nwhere sa.master_id
-      not in (\r\n  select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screens
-      ps\r\n  where extra_log_type = 'finalize'\r\n)\r\nand sa.master_id not in (\r\n
-      \ select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n  where
-      \r\n  extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh','exit_opt_out',
-      'exit_l2fu')\r\n  and created_at < (current_date - 14)\r\n\r\n)\r\nand sa.master_id
-      not in (\r\n  select dsw.master_id \r\n  from sleep_withdrawals dsw\r\n  where
-      \r\n  select_subject_withdrew_reason = 'withdrew'\r\n  and created_at < (current_date
-      - 14)\r\n\r\n)\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-08-29T14:56:37.842Z'
-    updated_at: '2019-11-18T13:24:30.919Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 1
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: ready_for_hms_screening
-    options: ''
-    user_email:
-  - id: 144
-    name: Ready for PI Follow Up
-    description: ''
-    sql: "SELECT a.master_id, a.extra_log_type, a.id\r\n--, a2.extra_log_type, a2.id,
-      mr2.*\r\nFROM activity_log_sleep_assignment_med_navs a\r\nWHERE \r\n  a.extra_log_type
-      in ('request_pi_follow_up', 'request_pi_ps_review')\r\n  AND a.id NOT IN (\r\n\r\n
-      \   SELECT a.id \r\n    FROM activity_log_sleep_assignment_med_navs a\r\n\r\n
-      \   LEFT JOIN model_references mr2\r\n    ON\r\n     mr2.from_record_type =
-      'ActivityLog::SleepAssignmentMedNav'\r\n     AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
-      \    AND mr2.from_record_id = a.id\r\n\r\n    LEFT JOIN activity_log_sleep_assignment_med_navs
-      a2\r\n    ON\r\n     mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
-      \    AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n     AND
-      mr2.from_record_id = a.id\r\n     AND mr2.to_record_id = a2.id\r\n\r\n    WHERE
-      \r\n    a.extra_log_type = 'request_pi_follow_up'\r\n    AND a2.extra_log_type
-      = 'participant_follow_up'\r\n    AND a2.select_result = 'completed'\r\n\r\n
-      \   OR\r\n    a.extra_log_type = 'request_pi_ps_review'\r\n    AND a2.extra_log_type
-      = 'pi_ps_review'\r\n  )\r\n  \r\n  and a.master_id not in (\r\n    select sa2.master_id
-      \r\n    from activity_log_sleep_assignments sa2\r\n    where extra_log_type
-      in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh', 'completed',
-      'exit_opt_out', 'exit_l2fu')\r\n    and created_at < (current_date - 14)\r\n
-      \ )\r\n  and a.master_id not in (\r\n    select dsw.master_id \r\n    from sleep_withdrawals
-      dsw\r\n    where \r\n    select_subject_withdrew_reason = 'withdrew'\r\n    and
-      created_at < (current_date - 14)\r\n  )\r\n\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-08-29T14:56:37.851Z'
-    updated_at: '2019-11-18T13:24:30.926Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 3
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: ready_for_pi_follow_up
-    options: ''
-    user_email:
-  - id: 230
-    name: Needs Follow Up Communication
-    description: Participants with an appointment set that are ready for specific
-      follow up activities.
-    sql: "select al0.master_id, max(al0.updated_at) \"updated_at\"\r\nfrom \r\n  activity_log_sleep_assignments
-      al0\r\n  \r\n-- Ensure this is a record appearing at the top level, not referenced
-      from \r\n-- a top level activity\r\nleft join model_references mr1\r\n  on mr1.to_record_master_id
-      = al0.master_id\r\n  and mr1.to_record_type = 'ActivityLog::SleepAssignment'\r\n
-      \ and mr1.to_record_id = al0.id\r\nleft join activity_log_sleep_assignments
-      al02\r\n  on mr1.from_record_master_id = al02.master_id\r\n  and mr1.from_record_type
-      = 'ActivityLog::SleepAssignment'\r\n  and mr1.from_record_id = al02.id\r\n  and
-      al02.extra_log_type = 'general'  \r\n  \r\nwhere \r\n  al0.extra_log_type =
-      'general'\r\n  and ( \r\n    al02.id is null \r\n    and\r\n    (\r\n      coalesce(al0.select_result,
-      'none') <> 'completed' \r\n      and coalesce(al0.select_activity, 'none') <>
-      'completed' \r\n    )\r\n    and\r\n      -- Check this does not have a referenced
-      record \r\n      -- marked as completed\r\n      al0.id not in \r\n      (\r\n
-      \       select al.id\r\n        from activity_log_sleep_assignments al\r\n        inner
-      join model_references mr\r\n          on mr.from_record_master_id = al.master_id\r\n
-      \         and mr.from_record_type = 'ActivityLog::SleepAssignment'\r\n          and
-      mr.from_record_id = al.id\r\n        inner join activity_log_sleep_assignments
-      al2\r\n          on mr.to_record_master_id = al2.master_id\r\n          and
-      mr.to_record_type = 'ActivityLog::SleepAssignment'\r\n          and mr.to_record_id
-      = al2.id\r\n          and al2.extra_log_type = 'general'\r\n        where \r\n
-      \         al.master_id = al0.master_id\r\n          and al.extra_log_type =
-      'general'\r\n          and  (\r\n            coalesce(al.select_result, 'none')
-      = 'completed' \r\n            or coalesce(al2.select_result, 'none') = 'completed'
-      \r\n            or coalesce(al.select_activity, 'none') = 'completed' \r\n            or
-      coalesce(al2.select_activity, 'none') = 'completed' \r\n          )\r\n      )\r\n
-      \   ) \r\n    \r\n  and al0.master_id not in (\r\n    select sa2.master_id \r\n
-      \   from activity_log_sleep_assignments sa2\r\n    where extra_log_type in ('exit_ps',
-      'exit_not_consented', 'ineligible', 'exit_ps_bwh', 'completed', 'exit_opt_out',
-      'exit_l2fu')\r\n    and created_at < (current_date - 14)\r\n  )\r\n  and al0.master_id
-      not in (\r\n    select dsw.master_id \r\n    from sleep_withdrawals dsw\r\n
-      \   where \r\n    select_subject_withdrew_reason = 'withdrew'\r\n    and created_at
-      < (current_date - 14)\r\n  )    \r\ngroup by al0.master_id\r\norder by \r\n
-      \ \"updated_at\" desc;"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-08T15:18:34.170Z'
-    updated_at: '2019-11-18T13:24:30.879Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 5
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: needs_follow_up_communication
-    options: ''
-    user_email:
-  - id: 232
-    name: Ready for Informed Consent
-    description: ''
-    sql: "select sa.master_id, sa.sleep_id\r\nfrom sleep_assignments sa\r\nwhere \r\nsa.master_id
-      in (\r\n  select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n
-      \ where extra_log_type = 'bwh_ps_eligible'\r\n)\r\nAND\r\nsa.master_id in (\r\n
-      \ select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screen2s
-      ps\r\n  where extra_log_type in ('finalize')\r\n)\r\nand sa.master_id not in
-      (\r\n  select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n
-      \ where extra_log_type in ('appointment')\r\n)\r\nand sa.master_id not in (\r\n
-      \ select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n  where
-      extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh','exit_opt_out',
-      'exit_l2fu')\r\n)\r\nand sa.master_id not in (\r\n  select dsw.master_id \r\n
-      \ from sleep_withdrawals dsw\r\n  where \r\n  select_subject_withdrew_reason
-      = 'withdrew'\r\n)\r\n;\r\n\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-08T15:18:34.231Z'
-    updated_at: '2019-11-18T13:24:30.933Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 4
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: sleep
-    short_name: ready_for_informed_consent
-    options: ''
-    user_email:
   - id: 238
     name: Ready for Sign Off - MSM PI
     description: Participants with inclusion / exclusion checklist ready for sign
@@ -6801,7 +6316,7 @@ app_type:
     value: nflpa
     item_type: player_infos_source
     created_at: '2015-08-12T19:43:23.821Z'
-    updated_at: '2019-11-27T16:51:39.180Z'
+    updated_at: '2019-11-28T16:55:50.810Z'
     disabled:
     admin_id: 21
     create_with: false
@@ -7000,7 +6515,7 @@ app_type:
     value: nflpa2
     item_type: player_infos_source
     created_at: '2015-09-24T20:20:44.103Z'
-    updated_at: '2019-11-27T16:51:39.205Z'
+    updated_at: '2019-11-28T16:55:50.856Z'
     disabled:
     admin_id: 21
     create_with: false
@@ -7106,7 +6621,7 @@ app_type:
     value: '0'
     item_type: player_contacts_rank
     created_at: '2015-10-20T16:24:09.278Z'
-    updated_at: '2019-11-27T16:51:39.224Z'
+    updated_at: '2019-11-28T16:55:50.883Z'
     disabled:
     admin_id: 21
     create_with: true
@@ -7121,7 +6636,7 @@ app_type:
     value: '0'
     item_type: addresses_rank
     created_at: '2015-10-20T16:24:09.308Z'
-    updated_at: '2019-11-27T16:51:39.228Z'
+    updated_at: '2019-11-28T16:55:50.887Z'
     disabled:
     admin_id: 21
     create_with: true
@@ -9314,7 +8829,7 @@ app_type:
     disabled: false
     admin_id: 21
     created_at: '2019-11-27T15:43:03.931Z'
-    updated_at: '2019-11-27T16:51:41.599Z'
+    updated_at: '2019-11-28T16:55:51.484Z'
     description: ''
     user_email:
   user_roles:

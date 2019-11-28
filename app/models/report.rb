@@ -42,7 +42,7 @@ class Report < ActiveRecord::Base
     else
       ns = []
       all.each do |r|
-        ns << r.id if user.has_access_to? :read, :report, r.name
+        ns << r.id if report_available_to_user r, user
       end
 
       where(id: ns)
@@ -61,8 +61,23 @@ class Report < ActiveRecord::Base
     res
   end
 
+  # Get the short name for a report based on the provided name
+  # @param name [String] full name of the report
+  # @return [String] short_name for the report
+  def self.resource_name_for_named_report name, item_type=nil
+    res = Report.active.where(name: name)
+
+    res = res.where(item_type: item_type) if item_type
+
+    res.order(updated_at: :desc).first&.alt_resource_name
+  end
+
+  def self.report_available_to_user report, user
+    user.has_access_to?(:read, :report, report.alt_resource_name) || user.has_access_to?(:read, :report, report.name)
+  end
+
   def can_access? user
-    return true if user.has_access_to?(:read, :report, self.name)
+    return true if self.class.report_available_to_user self, user
     return user.has_access_to?(:read, :report, :_all_reports_)
   end
 
@@ -288,6 +303,7 @@ class Report < ActiveRecord::Base
           ids = []
           res.each_row {|r| ids << r[m_field]}
         end
+        ids.uniq!
         write_filtering_ids ids
 
         if filtering_previous
