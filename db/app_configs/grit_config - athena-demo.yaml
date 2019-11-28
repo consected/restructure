@@ -228,7 +228,7 @@ app_type:
     created_at: '2019-11-27T15:43:00.572Z'
     updated_at: '2019-11-27T15:43:00.572Z'
     user_email:
-  user_access_controls:
+  valid_user_access_controls:
   - id: 1716
     user_id:
     resource_type: general
@@ -241,19 +241,6 @@ app_type:
     role_name: user - screening
     created_at: '2019-11-27T15:43:10.652Z'
     updated_at: '2019-11-27T15:43:10.652Z'
-    user_email:
-  - id: 1717
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_isi_questions
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:10.661Z'
-    updated_at: '2019-11-27T15:43:10.661Z'
     user_email:
   - id: 1718
     user_id:
@@ -371,19 +358,6 @@ app_type:
     role_name:
     created_at: '2019-11-27T15:43:10.715Z'
     updated_at: '2019-11-27T15:43:10.715Z'
-    user_email:
-  - id: 1727
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_inex_checklists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:10.724Z'
-    updated_at: '2019-11-27T15:43:10.724Z'
     user_email:
   - id: 1728
     user_id:
@@ -593,32 +567,6 @@ app_type:
     created_at: '2019-11-27T15:43:10.821Z'
     updated_at: '2019-11-27T15:43:10.821Z'
     user_email:
-  - id: 1744
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__sign_phone_screen
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:10.827Z'
-    updated_at: '2019-11-27T15:43:10.827Z'
-    user_email:
-  - id: 1745
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignment_inex_checklists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:10.832Z'
-    updated_at: '2019-11-27T15:43:10.832Z'
-    user_email:
   - id: 1746
     user_id:
     resource_type: activity_log_type
@@ -735,19 +683,6 @@ app_type:
     role_name: tracker
     created_at: '2019-11-27T15:43:10.880Z'
     updated_at: '2019-11-27T15:43:10.880Z'
-    user_email:
-  - id: 1755
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__sign_phone_screen_staff
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:10.886Z'
-    updated_at: '2019-11-27T15:43:10.886Z'
     user_email:
   - id: 1756
     user_id:
@@ -891,19 +826,6 @@ app_type:
     role_name: tracker
     created_at: '2019-11-27T15:43:10.954Z'
     updated_at: '2019-11-27T15:43:10.954Z'
-    user_email:
-  - id: 1767
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__phone_screen_review
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:10.960Z'
-    updated_at: '2019-11-27T15:43:10.960Z'
     user_email:
   - id: 1768
     user_id:
@@ -1113,32 +1035,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.049Z'
     updated_at: '2019-11-27T15:43:11.049Z'
     user_email:
-  - id: 1784
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__sign_phone_screen
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: pi
-    created_at: '2019-11-27T15:43:11.057Z'
-    updated_at: '2019-11-27T15:43:11.057Z'
-    user_email:
-  - id: 1785
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__sign_phone_screen_staff
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: staff - inex
-    created_at: '2019-11-27T15:43:11.063Z'
-    updated_at: '2019-11-27T15:43:11.063Z'
-    user_email:
   - id: 1786
     user_id:
     resource_type: general
@@ -1243,58 +1139,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.108Z'
     updated_at: '2019-11-27T15:43:11.108Z'
     user_email:
-  - id: 1794
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__supporting_files
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:11.113Z'
-    updated_at: '2019-11-27T15:43:11.113Z'
-    user_email:
-  - id: 1795
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__notes
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:11.119Z'
-    updated_at: '2019-11-27T15:43:11.119Z'
-    user_email:
-  - id: 1796
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__notes
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: staff - inex
-    created_at: '2019-11-27T15:43:11.125Z'
-    updated_at: '2019-11-27T15:43:11.125Z'
-    user_email:
-  - id: 1797
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__notes
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: pi
-    created_at: '2019-11-27T15:43:11.131Z'
-    updated_at: '2019-11-27T15:43:11.131Z'
-    user_email:
   - id: 1798
     user_id:
     resource_type: activity_log_type
@@ -1360,32 +1204,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.158Z'
     updated_at: '2019-11-27T15:43:11.158Z'
     user_email:
-  - id: 1803
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__notes
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: reviewer - inex
-    created_at: '2019-11-27T15:43:11.163Z'
-    updated_at: '2019-11-27T15:43:11.163Z'
-    user_email:
-  - id: 1804
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignment_inex_checklists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: reviewer - tms
-    created_at: '2019-11-27T15:43:11.168Z'
-    updated_at: '2019-11-27T15:43:11.168Z'
-    user_email:
   - id: 1805
     user_id:
     resource_type: general
@@ -1450,19 +1268,6 @@ app_type:
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.193Z'
     updated_at: '2019-11-27T15:43:11.193Z'
-    user_email:
-  - id: 1810
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignment_inex_checklists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.197Z'
-    updated_at: '2019-11-27T15:43:11.197Z'
     user_email:
   - id: 1811
     user_id:
@@ -1620,45 +1425,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.257Z'
     updated_at: '2019-11-27T15:43:11.257Z'
     user_email:
-  - id: 1823
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__finalize_phone_screen_checklist
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - inex
-    created_at: '2019-11-27T15:43:11.262Z'
-    updated_at: '2019-11-27T15:43:11.262Z'
-    user_email:
-  - id: 1824
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__finalize_phone_screen_checklist
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: staff - inex
-    created_at: '2019-11-27T15:43:11.267Z'
-    updated_at: '2019-11-27T15:43:11.267Z'
-    user_email:
-  - id: 1825
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__finalize_phone_screen_checklist
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: reviewer - inex
-    created_at: '2019-11-27T15:43:11.273Z'
-    updated_at: '2019-11-27T15:43:11.273Z'
-    user_email:
   - id: 1826
     user_id:
     resource_type: report
@@ -1802,45 +1568,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.331Z'
     updated_at: '2019-11-27T15:43:11.331Z'
     user_email:
-  - id: 1837
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_isi_questions
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.337Z'
-    updated_at: '2019-11-27T15:43:11.337Z'
-    user_email:
-  - id: 1838
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_basic_responses
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.343Z'
-    updated_at: '2019-11-27T15:43:11.343Z'
-    user_email:
-  - id: 1839
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_basic_responses
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.349Z'
-    updated_at: '2019-11-27T15:43:11.349Z'
-    user_email:
   - id: 1840
     user_id:
     resource_type: table
@@ -1932,58 +1659,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.386Z'
     updated_at: '2019-11-27T15:43:11.386Z'
     user_email:
-  - id: 1847
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_grit_apnea_responses
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.426Z'
-    updated_at: '2019-11-27T15:43:11.426Z'
-    user_email:
-  - id: 1848
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_grit_apnea_responses
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.430Z'
-    updated_at: '2019-11-27T15:43:11.430Z'
-    user_email:
-  - id: 1849
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ese_questions
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.434Z'
-    updated_at: '2019-11-27T15:43:11.434Z'
-    user_email:
-  - id: 1850
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ese_questions
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.438Z'
-    updated_at: '2019-11-27T15:43:11.438Z'
-    user_email:
   - id: 1851
     user_id:
     resource_type: table
@@ -2009,32 +1684,6 @@ app_type:
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.446Z'
     updated_at: '2019-11-27T15:43:11.446Z'
-    user_email:
-  - id: 1853
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_dast2_mod_questions
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.450Z'
-    updated_at: '2019-11-27T15:43:11.450Z'
-    user_email:
-  - id: 1854
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_dast2_mod_questions
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.455Z'
-    updated_at: '2019-11-27T15:43:11.455Z'
     user_email:
   - id: 1855
     user_id:
@@ -2087,266 +1736,6 @@ app_type:
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:11.474Z'
     updated_at: '2019-11-27T15:43:11.474Z'
-    user_email:
-  - id: 1859
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_initial_screenings
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.480Z'
-    updated_at: '2019-11-27T15:43:11.480Z'
-    user_email:
-  - id: 1860
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_initial_screenings
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.486Z'
-    updated_at: '2019-11-27T15:43:11.486Z'
-    user_email:
-  - id: 1861
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__start_phone_screen
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.490Z'
-    updated_at: '2019-11-27T15:43:11.490Z'
-    user_email:
-  - id: 1862
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__start_phone_screen
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.494Z'
-    updated_at: '2019-11-27T15:43:11.494Z'
-    user_email:
-  - id: 1863
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignment_phone_screen2s
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.499Z'
-    updated_at: '2019-11-27T15:43:11.499Z'
-    user_email:
-  - id: 1864
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignment_phone_screen2s
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.504Z'
-    updated_at: '2019-11-27T15:43:11.504Z'
-    user_email:
-  - id: 1865
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__ineligible
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.510Z'
-    updated_at: '2019-11-27T15:43:11.510Z'
-    user_email:
-  - id: 1866
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__ineligible
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.516Z'
-    updated_at: '2019-11-27T15:43:11.516Z'
-    user_email:
-  - id: 1867
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__eligible
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.520Z'
-    updated_at: '2019-11-27T15:43:11.520Z'
-    user_email:
-  - id: 1868
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__eligible
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.523Z'
-    updated_at: '2019-11-27T15:43:11.523Z'
-    user_email:
-  - id: 1869
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__phq8
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.527Z'
-    updated_at: '2019-11-27T15:43:11.527Z'
-    user_email:
-  - id: 1870
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__phq8
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.531Z'
-    updated_at: '2019-11-27T15:43:11.531Z'
-    user_email:
-  - id: 1871
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_phq8_questions
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.535Z'
-    updated_at: '2019-11-27T15:43:11.535Z'
-    user_email:
-  - id: 1872
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_phq8_questions
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.539Z'
-    updated_at: '2019-11-27T15:43:11.539Z'
-    user_email:
-  - id: 1873
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_non_eligibles
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.543Z'
-    updated_at: '2019-11-27T15:43:11.543Z'
-    user_email:
-  - id: 1874
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_non_eligibles
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.546Z'
-    updated_at: '2019-11-27T15:43:11.546Z'
-    user_email:
-  - id: 1875
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_eligibles
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.550Z'
-    updated_at: '2019-11-27T15:43:11.550Z'
-    user_email:
-  - id: 1876
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps2_eligibles
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.554Z'
-    updated_at: '2019-11-27T15:43:11.554Z'
-    user_email:
-  - id: 1877
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__finalize
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.558Z'
-    updated_at: '2019-11-27T15:43:11.558Z'
-    user_email:
-  - id: 1878
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen2__finalize
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen 2
-    created_at: '2019-11-27T15:43:11.561Z'
-    updated_at: '2019-11-27T15:43:11.561Z'
     user_email:
   - id: 1879
     user_id:
@@ -2556,19 +1945,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.631Z'
     updated_at: '2019-11-27T15:43:11.631Z'
     user_email:
-  - id: 1895
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_isi_questions
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.636Z'
-    updated_at: '2019-11-27T15:43:11.636Z'
-    user_email:
   - id: 1896
     user_id:
     resource_type: activity_log_type
@@ -2751,19 +2127,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.696Z'
     updated_at: '2019-11-27T15:43:11.696Z'
     user_email:
-  - id: 1910
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_subject_contacts
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.700Z'
-    updated_at: '2019-11-27T15:43:11.700Z'
-    user_email:
   - id: 1911
     user_id:
     resource_type: table
@@ -2776,19 +2139,6 @@ app_type:
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.705Z'
     updated_at: '2019-11-27T15:43:11.705Z'
-    user_email:
-  - id: 1912
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_ps_subject_contacts
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.708Z'
-    updated_at: '2019-11-27T15:43:11.708Z'
     user_email:
   - id: 1913
     user_id:
@@ -3310,19 +2660,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.870Z'
     updated_at: '2019-11-27T15:43:11.870Z'
     user_email:
-  - id: 1953
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignment_inex_checklists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.874Z'
-    updated_at: '2019-11-27T15:43:11.874Z'
-    user_email:
   - id: 1954
     user_id:
     resource_type: table
@@ -3374,32 +2711,6 @@ app_type:
     role_name: phone screener 2
     created_at: '2019-11-27T15:43:11.890Z'
     updated_at: '2019-11-27T15:43:11.890Z'
-    user_email:
-  - id: 1958
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_inex_checklist__phone_screen_review
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.894Z'
-    updated_at: '2019-11-27T15:43:11.894Z'
-    user_email:
-  - id: 1959
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_inex_checklists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.898Z'
-    updated_at: '2019-11-27T15:43:11.898Z'
     user_email:
   - id: 1960
     user_id:
@@ -3492,19 +2803,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.927Z'
     updated_at: '2019-11-27T15:43:11.927Z'
     user_email:
-  - id: 1967
-    user_id:
-    resource_type: limited_access
-    resource_name: dynamic_model__grit_access_interventionists
-    options: ''
-    access: limited
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.930Z'
-    updated_at: '2019-11-27T15:43:11.930Z'
-    user_email:
   - id: 1968
     user_id:
     resource_type: table
@@ -3517,19 +2815,6 @@ app_type:
     role_name: admin
     created_at: '2019-11-27T15:43:11.934Z'
     updated_at: '2019-11-27T15:43:11.934Z'
-    user_email:
-  - id: 1969
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_access_interventionists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: admin
-    created_at: '2019-11-27T15:43:11.938Z'
-    updated_at: '2019-11-27T15:43:11.938Z'
     user_email:
   - id: 1970
     user_id:
@@ -3595,19 +2880,6 @@ app_type:
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.966Z'
     updated_at: '2019-11-27T15:43:11.966Z'
-    user_email:
-  - id: 1975
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_access_interventionists
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:11.971Z'
-    updated_at: '2019-11-27T15:43:11.971Z'
     user_email:
   - id: 1976
     user_id:
@@ -3739,19 +3011,6 @@ app_type:
     created_at: '2019-11-27T15:43:12.018Z'
     updated_at: '2019-11-27T15:43:12.018Z'
     user_email:
-  - id: 1986
-    user_id:
-    resource_type: limited_access
-    resource_name: dynamic_model__grit_access_interventionists
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: admin
-    created_at: '2019-11-27T15:43:12.021Z'
-    updated_at: '2019-11-27T15:43:12.021Z'
-    user_email:
   - id: 1987
     user_id:
     resource_type: limited_access
@@ -3856,7 +3115,7 @@ app_type:
     created_at: '2019-11-27T15:43:12.052Z'
     updated_at: '2019-11-27T15:43:12.052Z'
     user_email:
-  associated_activity_logs:
+  valid_associated_activity_logs:
   - id: 85
     name: Protocol Deviations & Exceptions
     item_type: grit_assignment
@@ -8922,36 +8181,6 @@ app_type:
     description: ''
     lock: false
     user_email:
-  - id: 762
-    name: Phone Screen Review
-    value: phone screen review
-    item_type: dynamic_model__grit_inex_checklists_select_checklist_type
-    created_at: '2019-11-27T15:43:03.398Z'
-    updated_at: '2019-11-27T15:43:03.398Z'
-    disabled: false
-    admin_id: 21
-    create_with: true
-    edit_if_set: false
-    edit_always: false
-    position: 1
-    description: ''
-    lock: true
-    user_email:
-  - id: 763
-    name: Baseline Review
-    value: baseline review
-    item_type: dynamic_model__grit_inex_checklists_select_checklist_type
-    created_at: '2019-11-27T15:43:03.403Z'
-    updated_at: '2019-11-27T15:43:03.403Z'
-    disabled: false
-    admin_id: 21
-    create_with: true
-    edit_if_set: false
-    edit_always: false
-    position: 2
-    description: ''
-    lock: true
-    user_email:
   - id: 764
     name: Not interested
     value: not interested
@@ -9627,21 +8856,6 @@ app_type:
     description: ''
     lock: false
     user_email:
-  - id: 808
-    name: Not Eligible
-    value: not eligible
-    item_type: activity_log__grit_assignment_inex_checklist_select_subject_eligibility
-    created_at: '2019-11-27T15:43:03.609Z'
-    updated_at: '2019-11-27T15:43:03.609Z'
-    disabled: false
-    admin_id: 21
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 1
-    description: ''
-    lock: false
-    user_email:
   - id: 809
     name: Eligible with Study Partner
     value: eligible with study partner
@@ -9654,36 +8868,6 @@ app_type:
     edit_if_set: false
     edit_always: true
     position: 2
-    description: ''
-    lock: false
-    user_email:
-  - id: 809
-    name: Eligible with Study Partner
-    value: eligible with study partner
-    item_type: activity_log__grit_assignment_inex_checklist_select_subject_eligibility
-    created_at: '2019-11-27T15:43:03.616Z'
-    updated_at: '2019-11-27T15:43:03.616Z'
-    disabled: false
-    admin_id: 21
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 2
-    description: ''
-    lock: false
-    user_email:
-  - id: 810
-    name: Eligible
-    value: eligible
-    item_type: activity_log__grit_assignment_inex_checklist_select_subject_eligibility
-    created_at: '2019-11-27T15:43:03.623Z'
-    updated_at: '2019-11-27T15:43:03.623Z'
-    disabled: false
-    admin_id: 21
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 3
     description: ''
     lock: false
     user_email:
@@ -9954,36 +9138,6 @@ app_type:
     edit_if_set: false
     edit_always: true
     position: 55
-    description: ''
-    lock: false
-    user_email:
-  - id: 828
-    name: Not Eligible
-    value: not eligible
-    item_type: dynamic_model__grit_inex_checklists_select_subject_eligibility
-    created_at: '2019-11-27T15:43:03.706Z'
-    updated_at: '2019-11-27T15:43:03.706Z'
-    disabled: false
-    admin_id: 21
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 20
-    description: ''
-    lock: false
-    user_email:
-  - id: 829
-    name: Eligible
-    value: eligible
-    item_type: dynamic_model__grit_inex_checklists_select_subject_eligibility
-    created_at: '2019-11-27T15:43:03.709Z'
-    updated_at: '2019-11-27T15:43:03.709Z'
-    disabled: false
-    admin_id: 21
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 30
     description: ''
     lock: false
     user_email:
