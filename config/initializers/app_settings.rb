@@ -52,6 +52,7 @@ class Settings
 
   TemplateUserEmail = 'template@template'
   TemplateUserEmailPattern = '%@template'
+  AppTemplateRole = '_app_'
 
   def self.bulk_msg_app
     Admin::AppType.where(name: 'bulk-msg').first

@@ -3,7 +3,7 @@ set search_path=grit, ml_app;
       BEGIN;
 
 -- Command line:
--- table_generators/generate.sh dynamic_models_table create grit_ps_eligibles interested_yes_no not_interested_notes consent_to_pass_info_to_msm_yes_no consent_to_pass_info_to_msm_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes notes
+-- table_generators/generate.sh dynamic_models_table create grit_ps_eligibles notes interested_yes_no not_interested_notes consent_to_pass_info_to_msm_yes_no consent_to_pass_info_to_msm_2_yes_no contact_info_notes more_questions_yes_no more_questions_notes select_still_interested
 
       CREATE FUNCTION log_grit_ps_eligible_update() RETURNS trigger
           LANGUAGE plpgsql
@@ -12,13 +12,15 @@ set search_path=grit, ml_app;
                   INSERT INTO grit_ps_eligible_history
                   (
                       master_id,
+                      notes,
                       interested_yes_no,
                       not_interested_notes,
                       consent_to_pass_info_to_msm_yes_no,
                       consent_to_pass_info_to_msm_2_yes_no,
-                      placeholder_consent_to_pass_info_2_no,
                       contact_info_notes,
-                      notes,
+                      more_questions_yes_no,
+                      more_questions_notes,
+                      select_still_interested,
                       user_id,
                       created_at,
                       updated_at,
@@ -26,13 +28,15 @@ set search_path=grit, ml_app;
                       )
                   SELECT
                       NEW.master_id,
+                      NEW.notes,
                       NEW.interested_yes_no,
                       NEW.not_interested_notes,
                       NEW.consent_to_pass_info_to_msm_yes_no,
                       NEW.consent_to_pass_info_to_msm_2_yes_no,
-                      NEW.placeholder_consent_to_pass_info_2_no,
                       NEW.contact_info_notes,
-                      NEW.notes,
+                      NEW.more_questions_yes_no,
+                      NEW.more_questions_notes,
+                      NEW.select_still_interested,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -45,13 +49,15 @@ set search_path=grit, ml_app;
       CREATE TABLE grit_ps_eligible_history (
           id integer NOT NULL,
           master_id integer,
+          notes varchar,
           interested_yes_no varchar,
           not_interested_notes varchar,
           consent_to_pass_info_to_msm_yes_no varchar,
           consent_to_pass_info_to_msm_2_yes_no varchar,
-          placeholder_consent_to_pass_info_2_no varchar,
           contact_info_notes varchar,
-          notes varchar,
+          more_questions_yes_no varchar,
+          more_questions_notes varchar,
+          select_still_interested varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -70,13 +76,15 @@ set search_path=grit, ml_app;
       CREATE TABLE grit_ps_eligibles (
           id integer NOT NULL,
           master_id integer,
+          notes varchar,
           interested_yes_no varchar,
           not_interested_notes varchar,
           consent_to_pass_info_to_msm_yes_no varchar,
           consent_to_pass_info_to_msm_2_yes_no varchar,
-          placeholder_consent_to_pass_info_2_no varchar,
           contact_info_notes varchar,
-          notes varchar,
+          more_questions_yes_no varchar,
+          more_questions_notes varchar,
+          select_still_interested varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL

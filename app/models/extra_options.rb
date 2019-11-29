@@ -203,15 +203,11 @@ class ExtraOptions
     self.caption_before ||= {}
     self.caption_before = self.caption_before.symbolize_keys
 
-    html_reg = /<(p ?.*|br ?.*|div ?.*|ul ?.*|hr ?.*)>/
     self.caption_before = self.caption_before.each do |k,v|
 
       if v.is_a? String
 
-        has_html = v.scan(html_reg).length > 0
-        unless has_html
-          v =  Kramdown::Document.new(v).to_html.html_safe
-        end
+        v = Admin::MessageTemplate.text_to_html(v)
 
         self.caption_before[k] = {
           caption: v,
@@ -220,12 +216,7 @@ class ExtraOptions
         }
       elsif v.is_a? Hash
         v.each do |mode, modeval|
-          if modeval.is_a? String
-            has_html = modeval.scan(html_reg).length > 0
-            unless has_html
-              v[mode] = Kramdown::Document.new(modeval).to_html.html_safe
-            end
-          end
+          v[mode] = Admin::MessageTemplate.text_to_html(modeval)
         end
       end
 

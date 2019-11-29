@@ -518,7 +518,7 @@ app_type:
   - id: 1741
     user_id:
     resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__basic_questions
+    resource_name: activity_log__grit_assignment_phone_screen__pain_questions
     options: ''
     access: create
     disabled: false
@@ -526,7 +526,7 @@ app_type:
     app_type_id: 38
     role_name: phone screener
     created_at: '2019-11-27T15:43:10.810Z'
-    updated_at: '2019-11-28T16:34:08.355Z'
+    updated_at: '2019-11-29T14:45:18.320Z'
     user_email:
   - id: 1742
     user_id:
@@ -566,32 +566,6 @@ app_type:
     role_name: tracker
     created_at: '2019-11-27T15:43:10.837Z'
     updated_at: '2019-11-28T16:34:08.369Z'
-    user_email:
-  - id: 1747
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__dast2_mod
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:10.843Z'
-    updated_at: '2019-11-28T16:34:08.372Z'
-    user_email:
-  - id: 1748
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__grit_apenea
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:10.848Z'
-    updated_at: '2019-11-28T16:34:08.376Z'
     user_email:
   - id: 1749
     user_id:
@@ -1087,19 +1061,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.153Z'
     updated_at: '2019-11-28T16:34:08.544Z'
     user_email:
-  - id: 1802
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__epworth_gritiness_scale
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.158Z'
-    updated_at: '2019-11-28T16:34:08.548Z'
-    user_email:
   - id: 1805
     user_id:
     resource_type: general
@@ -1194,7 +1155,7 @@ app_type:
   - id: 1813
     user_id:
     resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__basic_questions
+    resource_name: activity_log__grit_assignment_phone_screen__pain_questions
     options: ''
     access: read
     disabled: false
@@ -1202,7 +1163,7 @@ app_type:
     app_type_id: 38
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.213Z'
-    updated_at: '2019-11-28T16:34:08.577Z'
+    updated_at: '2019-11-29T14:45:03.436Z'
     user_email:
   - id: 1814
     user_id:
@@ -1216,19 +1177,6 @@ app_type:
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.218Z'
     updated_at: '2019-11-28T16:34:08.580Z'
-    user_email:
-  - id: 1815
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__dast2_mod
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.224Z'
-    updated_at: '2019-11-28T16:34:08.584Z'
     user_email:
   - id: 1816
     user_id:
@@ -1268,32 +1216,6 @@ app_type:
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.238Z'
     updated_at: '2019-11-28T16:34:08.593Z'
-    user_email:
-  - id: 1819
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__epworth_gritiness_scale
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.243Z'
-    updated_at: '2019-11-28T16:34:08.597Z'
-    user_email:
-  - id: 1820
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__grit_apenea
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.247Z'
-    updated_at: '2019-11-28T16:34:08.600Z'
     user_email:
   - id: 1821
     user_id:
@@ -1450,32 +1372,6 @@ app_type:
     role_name: user - phone screen
     created_at: '2019-11-27T15:43:11.361Z'
     updated_at: '2019-11-28T16:34:08.655Z'
-    user_email:
-  - id: 1842
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__insomnia_severity_index
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.366Z'
-    updated_at: '2019-11-28T16:34:08.658Z'
-    user_email:
-  - id: 1843
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__insomnia_severity_index
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: user - phone screen
-    created_at: '2019-11-27T15:43:11.371Z'
-    updated_at: '2019-11-28T16:34:08.663Z'
     user_email:
   - id: 1844
     user_id:
@@ -1775,19 +1671,6 @@ app_type:
     role_name: user - adverse event
     created_at: '2019-11-27T15:43:11.631Z'
     updated_at: '2019-11-28T16:34:08.759Z'
-    user_email:
-  - id: 1896
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__insomnia_severity_index
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.640Z'
-    updated_at: '2019-11-28T16:34:08.764Z'
     user_email:
   - id: 1897
     user_id:
@@ -2699,19 +2582,6 @@ app_type:
     created_at: '2019-11-27T15:43:12.037Z'
     updated_at: '2019-11-28T16:34:09.107Z'
     user_email:
-  - id: 1994
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment_phone_screen__epworth_gritiness_scale
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:12.052Z'
-    updated_at: '2019-11-28T16:34:09.121Z'
-    user_email:
   - id: 2103
     user_id:
     resource_type: report
@@ -3115,6 +2985,110 @@ app_type:
     created_at: '2019-11-28T16:55:53.662Z'
     updated_at: '2019-11-28T16:55:57.482Z'
     user_email:
+  - id: 2136
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_pain_questions
+    options:
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: _app_
+    created_at: '2019-11-29T14:26:36.930Z'
+    updated_at: '2019-11-29T14:26:36.930Z'
+    user_email:
+  - id: 2137
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_pain_questions
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - phone screen
+    created_at: '2019-11-29T14:56:20.088Z'
+    updated_at: '2019-11-29T14:56:20.088Z'
+    user_email:
+  - id: 2138
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_pain_questions
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener
+    created_at: '2019-11-29T14:56:40.363Z'
+    updated_at: '2019-11-29T14:56:40.363Z'
+    user_email:
+  - id: 2139
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_participations
+    options:
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: _app_
+    created_at: '2019-11-29T15:45:11.901Z'
+    updated_at: '2019-11-29T15:45:11.901Z'
+    user_email:
+  - id: 2140
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment_phone_screen__participation
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - phone screen
+    created_at: '2019-11-29T16:08:45.781Z'
+    updated_at: '2019-11-29T16:08:45.781Z'
+    user_email:
+  - id: 2141
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment_phone_screen__participation
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener
+    created_at: '2019-11-29T16:08:56.574Z'
+    updated_at: '2019-11-29T16:08:56.574Z'
+    user_email:
+  - id: 2142
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_participations
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: user - phone screen
+    created_at: '2019-11-29T16:10:08.690Z'
+    updated_at: '2019-11-29T16:10:08.690Z'
+    user_email:
+  - id: 2143
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_ps_participations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: phone screener
+    created_at: '2019-11-29T16:10:26.262Z'
+    updated_at: '2019-11-29T16:10:26.262Z'
+    user_email:
   valid_associated_activity_logs:
   - id: 85
     name: Protocol Deviations & Exceptions
@@ -3245,21 +3219,22 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:02.285Z'
-    updated_at: '2019-11-28T15:06:16.482Z'
+    updated_at: '2019-11-29T17:06:43.846Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "# @library grit enabled_if\r\n# @library grit eligibility\r\n\r\n_definitions:\r\n\r\n
-      \ # Rule for editable_if only\r\n  # Lock the forms on finalization\r\n  not_finalized:
-      &not_finalized\r\n    not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n
-      \       extra_log_type: finalize\r\n\r\n\r\n  ####\r\n  # Boilerplace for notifying
-      roles\r\n  # Override the subject: and if: structures to refine operation\r\n
-      \ ####\r\n\r\n  # Default email - just add roles or users\r\n  notify_email_default:
-      &notify_email_default\r\n    type: email\r\n\r\n    layout_template: grit notification
-      layout\r\n    content_template: grit notification message\r\n    extra_substitutions:\r\n
-      \     reason: ''\r\n      extra_text: |\r\n        The GRIT Study participant
-      has completed the HMS phone screen.\r\n      panel_tab: activity-log--grit-assignment-phone-screens\r\n
+    extra_log_types: "# @library grit enabled_if\r\n# @library grit ps_forms_eligibility\r\n#
+      @library grit eligibility\r\n\r\n_definitions:\r\n\r\n  # Rule for editable_if
+      only\r\n  # Lock the forms on finalization\r\n  not_finalized: &not_finalized\r\n
+      \   not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n        extra_log_type:
+      finalize\r\n\r\n\r\n  ####\r\n  # Boilerplace for notifying roles\r\n  # Override
+      the subject: and if: structures to refine operation\r\n  ####\r\n\r\n  # Default
+      email - just add roles or users\r\n  notify_email_default: &notify_email_default\r\n
+      \   type: email\r\n\r\n    layout_template: grit notification layout\r\n    content_template:
+      grit notification message\r\n    extra_substitutions:\r\n      reason: ''\r\n
+      \     extra_text: |\r\n        The GRIT Study participant has completed the
+      HMS phone screen.\r\n      panel_tab: activity-log--grit-assignment-phone-screens\r\n
       \   subject: \"GRIT Study: HMS Phone Screen Complete\"\r\n\r\n\r\n  # Default
       SMS - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n
       \   type: sms\r\n    layout_template: standard sms layout\r\n    content_template:
@@ -3270,82 +3245,38 @@ app_type:
       \   <<: *notify_sms_default\r\n    role: sms - msm phone screener\r\n\r\n  #
       PI\r\n  notify_pi: &notify_pi\r\n    <<: *notify_email_default\r\n    role:
       email - pi follow up\r\n\r\n\r\n  # PI SMS\r\n  notify_pi_sms: &notify_pi_sms\r\n
-      \   <<: *notify_sms_default\r\n    role: sms - pi follow up\r\n\r\n  eligible_basic_questions:
-      &eligible_basic_questions\r\n    all_basic_questions_eligible:\r\n      all:\r\n
-      \       dynamic_model__grit_ps_basic_responses:\r\n          reliable_internet_yes_no:
-      'yes'\r\n          grit_times_yes_no: 'no'\r\n          narcolepsy_diagnosis_yes_no_dont_know:
-      'no'\r\n          antiseizure_meds_yes_no: 'no'\r\n          seizure_in_ten_years_yes_no:
-      'no'\r\n          major_psychiatric_disorder_yes_no: 'no'\r\n          conditions_yes_no:
-      'no'\r\n\r\n\r\n      any_cbt:\r\n        dynamic_model__grit_ps_basic_responses:\r\n
-      \         cbt_yes_no: 'no'\r\n          cbt_how_long_ago: more than 5 years
-      ago\r\n\r\n      any_night_shifts:\r\n        dynamic_model__grit_ps_basic_responses:\r\n
-      \         work_night_shifts_yes_no: 'no'\r\n          number_times_per_week_work_night_shifts:
-      0\r\n\r\n  continue_after_basic_questions: &continue_after_basic_questions\r\n
-      \   any_after_basic_questions:\r\n      <<: *eligible_basic_questions\r\n      all_possibly_eligible:
-      &possibly_eligible_basic_questions\r\n        dynamic_model__grit_ps_basic_responses:\r\n
-      \         possibly_eligible_yes_no: 'yes'\r\n\r\n\r\n  eligible_isi_questions:
-      &eligible_isi_questions\r\n\r\n    all_eligible_isi_questions:\r\n      dynamic_model__grit_isi_questions:\r\n
-      \       total_score:\r\n          condition: '>'\r\n          value: 7\r\n\r\n
-      \ continue_after_isi_questions: &continue_after_isi_questions\r\n    any_after_isi:\r\n
-      \     <<: *eligible_isi_questions\r\n      all_possibly_eligible: &possibly_eligible_isi_questions\r\n
-      \       dynamic_model__grit_isi_questions:\r\n          possibly_eligible_yes_no:
-      'yes'\r\n\r\n\r\n  administer_ess: &administer_ess\r\n\r\n    any_grit_apnea_ess:\r\n
-      \     dynamic_model__grit_ps_grit_apnea_responses:\r\n        diagnosed_yes_no:
-      'no'\r\n        severity:\r\n          - moderate\r\n          - severe\r\n
-      \         - unsure\r\n\r\n  eligible_ese_questions: &eligible_ese_questions\r\n
-      \   any_ese:\r\n      all:\r\n        <<: *administer_ess\r\n        any:\r\n\r\n
-      \         dynamic_model__grit_ese_questions:\r\n            total_score:\r\n
-      \             - 0\r\n              - 1\r\n              - 2\r\n              -
-      3\r\n              - 4\r\n              - 5\r\n              - 6\r\n              -
-      7\r\n              - 8\r\n              - 9\r\n              - 10\r\n              -
-      11\r\n              - 12\r\n              - 13\r\n              - 14\r\n              -
-      15\r\n\r\n            number_hours_grit:\r\n              - 0\r\n              -
-      1\r\n              - 2\r\n              - 3\r\n              - 4\r\n              -
-      5\r\n      not_all:\r\n        <<: *administer_ess\r\n\r\n\r\n  continue_after_ese_questions:
-      &continue_after_ese_questions\r\n    any_after_ese:\r\n      <<: *eligible_ese_questions\r\n
-      \     all_possibly_eligible: &possibly_eligible_ese_questions\r\n        dynamic_model__grit_ese_questions:\r\n
-      \         possibly_eligible_yes_no: 'yes'\r\n\r\n\r\n  eligible_audit_c: &eligible_audit_c\r\n
-      \   not_all_eligible_audit_c:\r\n      not_any:\r\n        dynamic_model__grit_ps_audit_c_questions:\r\n
-      \         total_score:\r\n            - 0\r\n            - 1\r\n            -
-      2\r\n            - 3\r\n      not_all:\r\n        dynamic_model__grit_ps_audit_c_questions:\r\n
-      \         alcohol_frequency: 4\r\n          daily_alcohol: 0\r\n          six_or_more_frequency:
-      0\r\n\r\n  continue_after_audit_c: &continue_after_audit_c\r\n    any_after_audit_c:\r\n
-      \     <<: *eligible_audit_c\r\n      all_possibly_eligible: &possibly_eligible_audit_c\r\n
-      \       dynamic_model__grit_ps_audit_c_questions:\r\n          possibly_eligible_yes_no:
-      'yes'\r\n\r\n\r\n  eligible_dast2_mod: &eligible_dast2_mod\r\n    all_eligible_dast2_mod:\r\n
-      \     dynamic_model__grit_ps_dast2_mod_questions:\r\n        number_days_negative_feeling:
-      0\r\n        number_days_drug_usage: 0\r\n\r\n  continue_after_dast2_mod: &continue_after_dast2_mod\r\n
-      \   any_after_dast2_mod:\r\n      <<: *eligible_dast2_mod\r\n      all_possibly_eligible:
-      &possibly_eligible_dast2_mod\r\n        dynamic_model__grit_ps_dast2_mod_questions:\r\n
-      \         possibly_eligible_yes_no: 'yes'\r\n\r\n  all_eligible: &all_eligible\r\n
-      \   all_eligible: &all_eligible_items\r\n      <<: *eligible_basic_questions\r\n
-      \     <<: *eligible_isi_questions\r\n      <<: *eligible_ese_questions\r\n      <<:
-      *eligible_audit_c\r\n      <<: *eligible_dast2_mod\r\n\r\n  all_eligible_and_complete:
+      \   <<: *notify_sms_default\r\n    role: sms - pi follow up\r\n\r\n\r\n  continue_after_audit_c:
+      &continue_after_audit_c\r\n    any_after_audit_c:\r\n      <<: *eligible_audit_c\r\n
+      \     all_possibly_eligible: &possibly_eligible_audit_c\r\n        dynamic_model__grit_ps_audit_c_questions:\r\n
+      \         possibly_eligible_yes_no: 'yes'\r\n\r\n  continue_after_pain_questions:
+      &continue_after_pain_questions\r\n    any_after_pain_questions:\r\n      <<:
+      *eligible_pain_questions\r\n      all_possibly_eligible: &possibly_eligible_pain_questions\r\n
+      \       dynamic_model__grit_ps_pain_questions:\r\n          possibly_eligible_yes_no:
+      'yes'\r\n\r\n  continue_after_participations: &continue_after_participations\r\n
+      \   any_after_participations:\r\n      <<: *eligible_participation\r\n      all_possibly_eligible:
+      &possibly_eligible_participation\r\n        dynamic_model__grit_ps_participations:\r\n
+      \         possibly_eligible_yes_no: 'yes'\r\n\r\n\r\n  all_eligible: &all_eligible\r\n
+      \   all_eligible: &all_eligible_items\r\n      <<: *eligible_pain_questions\r\n
+      \     <<: *eligible_audit_c\r\n      <<: *eligible_participation\r\n\r\n  all_eligible_and_complete:
       &all_eligible_and_complete\r\n    all_eligible_and_complete:\r\n      <<: *all_eligible_items\r\n
       \     all_has_eligible_done:\r\n        activity_log__grit_assignment_phone_screens:\r\n
       \         extra_log_type: eligible\r\n\r\n  not_any_possibly_eligible: &not_any_possibly_eligible\r\n
       \   not_any_possibly_eligible: &possibly_eligible_items\r\n      any_possibly_1:\r\n
-      \         <<: *possibly_eligible_basic_questions\r\n      any_possibly_2:\r\n
-      \         <<: *possibly_eligible_isi_questions\r\n      any_possibly_3:\r\n
-      \         <<: *possibly_eligible_ese_questions\r\n      any_possibly_4:\r\n
-      \         <<: *possibly_eligible_audit_c\r\n      any_possibly_5:\r\n          <<:
-      *possibly_eligible_dast2_mod\r\n\r\n\r\n  all_show_eligible: &all_show_eligible\r\n
+      \         <<: *possibly_eligible_pain_questions\r\n      any_possibly_2:\r\n
+      \         <<: *possibly_eligible_audit_c\r\n      any_possibly_3:\r\n          <<:
+      *possibly_eligible_participation\r\n\r\n  all_show_eligible: &all_show_eligible\r\n
       \   all_show_eligible:\r\n      all:\r\n        activity_log__grit_assignment_phone_screens:\r\n
-      \         extra_log_type: dast2_mod\r\n      <<: *all_eligible_items\r\n#      <<:
-      *not_any_possibly_eligible\r\n\r\n\r\n  any_possibly_eligible_no: &any_possibly_eligible_no\r\n
-      \   any_possibly_eligible_no:\r\n      all_basic:\r\n        not_all_eligible:\r\n
-      \         <<: *eligible_basic_questions\r\n        any_no:\r\n          dynamic_model__grit_ps_basic_responses:\r\n
-      \           possibly_eligible_yes_no: 'no'\r\n      all_isi:\r\n        not_all_eligible:\r\n
-      \         <<: *eligible_isi_questions\r\n        any_no:\r\n          dynamic_model__grit_isi_questions:\r\n
-      \           possibly_eligible_yes_no: 'no'\r\n      all_ese:\r\n        not_all_eligible:\r\n
-      \         <<: *eligible_ese_questions\r\n        any_no:\r\n          dynamic_model__grit_ese_questions:\r\n
-      \           possibly_eligible_yes_no: 'no'\r\n#        all_audit_c:\r\n#          <<:
-      *eligible_audit_c\r\n#          not_any_no:\r\n#           dynamic_model__grit_ps_audit_c_questions:\r\n#
-      \            possibly_eligible_yes_no: 'no'\r\n      all_dast2_mod:\r\n        not_all_eligible:\r\n
-      \         <<: *eligible_dast2_mod\r\n          <<: *eligible_audit_c\r\n        any_no:\r\n
-      \         dynamic_model__grit_ps_dast2_mod_questions:\r\n            possibly_eligible_yes_no:
-      'no'\r\n\r\n\r\n\r\n_default:\r\n  <<: *access_defaults\r\n  editable_if: *not_finalized\r\n\r\n
-      \ save_action:\r\n    on_create: create_next_creatable\r\n\r\n\r\n################################################\r\nstart_phone_screen:\r\n
+      \         extra_log_type: participation\r\n      <<: *all_eligible_items\r\n\r\n\r\n
+      \ any_possibly_eligible_no: &any_possibly_eligible_no\r\n    any_possibly_eligible_no:\r\n
+      \     all_basic:\r\n        <<: *ineligible_pain_questions\r\n        any_no:\r\n
+      \         dynamic_model__grit_ps_pain_questions:\r\n            possibly_eligible_yes_no:
+      'no'\r\n        all_audit_c:\r\n          <<: *ineligible_audit_c\r\n          not_any_no:\r\n
+      \          dynamic_model__grit_ps_audit_c_questions:\r\n             possibly_eligible_yes_no:
+      'no'\r\n        all_participation:\r\n          <<: *ineligible_participation\r\n
+      \         not_any_no:\r\n           dynamic_model__grit_ps_participations:\r\n
+      \            possibly_eligible_yes_no: 'no'\r\n\r\n\r\n\r\n_default:\r\n  <<:
+      *access_defaults\r\n  editable_if: *not_finalized\r\n\r\n  save_action:\r\n
+      \   on_create: create_next_creatable\r\n\r\n\r\n################################################\r\nstart_phone_screen:\r\n
       \ label: Start Phone Screening\r\n  fields:\r\n\r\n  references:\r\n    dynamic_model__grit_ps_initial_screening:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  caption_before:\r\n    submit:
       If the subject is ready to continue, save this form and continue with the next
@@ -3353,14 +3284,12 @@ app_type:
       \   <<: *enabled_if\r\n    not_any:\r\n      dynamic_model__grit_ps_initial_screenings:\r\n
       \       select_still_interested: \"yes\"\r\n\r\n\r\n  save_action:\r\n    on_create:\r\n
       \     create_next_creatable:\r\n        if:\r\n          all:\r\n            dynamic_model__grit_ps_initial_screenings:\r\n
-      \             select_still_interested: \"yes\"\r\n              id:\r\n                this_references:
+      \             still_interested_2_yes_no: \"yes\"\r\n              id:\r\n                this_references:
       id\r\n      show_panel:\r\n        value: activity_log__grit_assignments\r\n
       \       if:\r\n          not_all:\r\n            dynamic_model__grit_ps_initial_screenings:\r\n
-      \             select_still_interested: \"yes\"\r\n              id:\r\n                this_references:
-      id\r\n      hide_panel:\r\n        value: activity_log__grit_assignment_phone_screens\r\n
-      \       if:\r\n          not_all:\r\n            dynamic_model__grit_ps_initial_screenings:\r\n
-      \             select_still_interested: \"yes\"\r\n              id:\r\n                this_references:
-      id\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n  save_trigger:\r\n    on_create:\r\n\r\n
+      \             select_still_interested: \"yes\"\r\n              still_interested_2_yes_no:
+      \"yes\"\r\n              id:\r\n                this_references: id\r\n\r\n
+      \ showable_if:\r\n    always: true\r\n\r\n  save_trigger:\r\n    on_create:\r\n\r\n
       \     create_reference:\r\n\r\n        ###### Create tracker entry with exit
       (no consent) record ######\r\n        ###### Not ineligible, but also not eligible
       and consented ######\r\n        - activity_log__grit_assignment:\r\n            if:\r\n
@@ -3368,107 +3297,58 @@ app_type:
       \                 id:\r\n                    this_references: id\r\n                this:\r\n
       \                 any:\r\n                    dynamic_model__grit_ps_initial_screenings:\r\n
       \                     select_is_good_time_to_speak: 'not interested'\r\n                      select_still_interested:
-      'no'\r\n\r\n            in: master\r\n            with:\r\n              extra_log_type:
-      exit_ps\r\n\r\n\r\n        - activity_log__grit_assignment:\r\n            if:\r\n
-      \             all:\r\n                dynamic_model__grit_ps_initial_screenings:\r\n
-      \                 id:\r\n                    this_references: id\r\n                this:\r\n
-      \                 any:\r\n                    dynamic_model__grit_ps_initial_screenings:\r\n
-      \                     select_is_good_time_to_speak:\r\n                        -
-      left voicemail\r\n                        - not appropriate time\r\n                      select_still_interested:
-      'yes - call back'\r\n\r\n            in: master\r\n            with:\r\n              extra_log_type:
-      schedule_screening\r\n              select_who: current_user_email\r\n              followup_when:\r\n
+      'no'\r\n                      still_interested_2_yes_no: 'no'\r\n\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: exit_ps\r\n\r\n\r\n
+      \       - activity_log__grit_assignment:\r\n            if:\r\n              all:\r\n
+      \               dynamic_model__grit_ps_initial_screenings:\r\n                  id:\r\n
+      \                   this_references: id\r\n                this:\r\n                  any:\r\n
+      \                   dynamic_model__grit_ps_initial_screenings:\r\n                      select_is_good_time_to_speak:\r\n
+      \                       - left voicemail\r\n                        - not appropriate
+      time\r\n                      select_still_interested: 'yes - call back'\r\n\r\n
+      \           in: master\r\n            with:\r\n              extra_log_type:
+      schedule_screening\r\n              select_who: current_user_email\r\n              follow_up_when:\r\n
       \               dynamic_model__grit_ps_initial_screenings:\r\n                  id:\r\n
       \                   this_references: id\r\n                  followup_date:
-      return_value\r\n              followup_time:\r\n                dynamic_model__grit_ps_initial_screenings:\r\n
-      \                 id:\r\n                    this_references: id\r\n                  followup_time:
+      return_value\r\n              follow_up_time:\r\n                dynamic_model__grit_ps_initial_screenings:\r\n
+      \                 id:\r\n                    this_references: id\r\n                  follow_up_time:
       return_value\r\n              notes: |\r\n                Call went to voicemail,
       or participant requested to speak another time\r\n\r\n              select_record_from_player_contacts:\r\n
       \               activity_log__grit_assignments:\r\n                  extra_log_type:
       schedule_screening\r\n                  select_record_from_player_contacts:
-      return_value\r\n\r\n\r\n################################################\r\nbasic_questions:\r\n
-      \ label: Basic Questions\r\n\r\n  references:\r\n    dynamic_model__grit_ps_basic_response:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
-      \       extra_log_type: start_phone_screen\r\n    not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n
-      \       extra_log_type: basic_questions\r\n\r\n################################################\r\ninsomnia_severity_index:\r\n
-      \ label: Insomnia Severity Index\r\n\r\n  references:\r\n    dynamic_model__grit_isi_question:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
-      \     <<: *enabled_if\r\n      <<: *continue_after_basic_questions\r\n      not_any:\r\n
-      \       activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
-      insomnia_severity_index\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_reference:\r\n
-      \       ###### Create tracker entry to follow up and email Trust info ######\r\n
-      \       - activity_log__grit_assignment:\r\n            if:\r\n              all:\r\n
-      \               dynamic_model__grit_isi_questions:\r\n                  id:\r\n
-      \                   this_references: id\r\n                  trust_assessment_info_yes_no:
-      'yes'\r\n\r\n            in: master\r\n            with:\r\n              extra_log_type:
-      general\r\n              select_activity: schedule follow up\r\n              select_direction:
-      to staff\r\n              select_next_step: more info requested\r\n              followup_when:
-      today()\r\n              followup_time: now()\r\n              notes: |\r\n
-      \               During the HMS Phone Screen the participant requested\r\n                more
-      information about the *Trust grit assessments*.\r\n\r\n                When
-      an email has been sent with details, add a **follow up**,\r\n                to
-      record this.\r\n\r\n################################################\r\ngrit_apenea:\r\n
-      \ label: GRIT Apnea\r\n\r\n  references:\r\n    dynamic_model__grit_ps_grit_apnea_response:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
-      \     <<: *enabled_if\r\n      <<: *continue_after_isi_questions\r\n      all:\r\n
-      \       activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
-      insomnia_severity_index\r\n      not_any:\r\n        activity_log__grit_assignment_phone_screens:\r\n
-      \         extra_log_type: grit_apenea\r\n\r\n\r\n################################################\r\nepworth_gritiness_scale:\r\n
-      \ label: Epworth GRITiness Scale\r\n\r\n  references:\r\n    dynamic_model__grit_ese_question:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
-      \       extra_log_type: grit_apenea\r\n      <<: *administer_ess\r\n\r\n    not_any:\r\n
-      \     activity_log__grit_assignment_phone_screens:\r\n        extra_log_type:
-      epworth_gritiness_scale\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_reference:\r\n
-      \       ###### Create tracker entry to follow up and email Trust info ######\r\n
-      \       - activity_log__grit_assignment:\r\n            if:\r\n              all:\r\n
-      \               dynamic_model__grit_ese_questions:\r\n                  id:\r\n
-      \                   this_references: id\r\n                  trust_assessment_info_yes_no:
-      'yes'\r\n\r\n            in: master\r\n            with:\r\n              extra_log_type:
-      general\r\n              select_activity: schedule follow up\r\n              select_direction:
-      to staff\r\n              select_next_step: more info requested\r\n              followup_when:
-      today()\r\n              followup_time: now()\r\n              notes: |\r\n
-      \               During the HMS Phone Screen the participant requested\r\n                more
-      information about the *Trust grit assessments*.\r\n\r\n                When
-      an email has been sent with details, add a **follow up**,\r\n                to
-      record this.\r\n\r\n\r\n\r\n################################################\r\naudit_c:\r\n
+      return_value\r\n\r\n\r\n\r\n################################################\r\naudit_c:\r\n
       \ label: Audit-C\r\n\r\n  references:\r\n    dynamic_model__grit_ps_audit_c_question:\r\n
+      \     from: this\r\n      add: one_to_this\r\n\r\n\r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
+      \       extra_log_type: start_phone_screen\r\n\r\n    not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n
+      \       extra_log_type: audit_c\r\n\r\n\r\n\r\n################################################\r\npain_questions:\r\n
+      \ label: Pain Inquiry\r\n\r\n  references:\r\n    dynamic_model__grit_ps_pain_question:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
       *enabled_if\r\n\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
-      \       extra_log_type: grit_apenea\r\n      <<: *continue_after_ese_questions\r\n\r\n
+      \       extra_log_type: audit_c\r\n      <<: *continue_after_audit_c\r\n\r\n
       \   not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n        extra_log_type:
-      audit_c\r\n\r\n\r\n################################################\r\ndast2_mod:\r\n
-      \ label: DAST-2 Modified\r\n\r\n  references:\r\n    dynamic_model__grit_ps_dast2_mod_question:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
-      \       extra_log_type: audit_c\r\n      #<<: *continue_after_audit_c\r\n\r\n
+      pain_questions\r\n\r\n################################################\r\nparticipation:\r\n
+      \ label: Ability to Participate\r\n  \r\n  references:\r\n    dynamic_model__grit_ps_participation:\r\n
+      \     from: this\r\n      add: one_to_this\r\n      \r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
+      \       extra_log_type: pain_questions\r\n      <<: *continue_after_pain_questions\r\n\r\n
       \   not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n        extra_log_type:
-      dast2_mod\r\n\r\n\r\n\r\n################################################\r\nineligible:\r\n
+      participation\r\n      \r\n\r\n################################################\r\nineligible:\r\n
       \ label: Ineligible\r\n\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n
       \ references:\r\n    dynamic_model__grit_ps_non_eligible:\r\n      from: this\r\n
       \     add: one_to_this\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n
       \ creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n      not_any:\r\n        activity_log__grit_assignment_phone_screens:\r\n
       \         extra_log_type: ineligible\r\n      not_all_show_eligible:\r\n        <<:
       *all_show_eligible\r\n        <<: *not_any_possibly_eligible\r\n\r\n      any_responses_ineligible:
-      &any_responses_ineligible\r\n        <<: *any_possibly_eligible_no\r\n\r\n        all_basic_questions:\r\n
-      \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
-      basic_questions\r\n          not_any:\r\n            <<: *eligible_basic_questions\r\n
-      \         not_any_2:\r\n            <<: *possibly_eligible_basic_questions\r\n\r\n
-      \       all_isi_questions:\r\n          activity_log__grit_assignment_phone_screens:\r\n
-      \           extra_log_type: insomnia_severity_index\r\n          not_any:\r\n
-      \           <<: *eligible_isi_questions\r\n          not_any_2:\r\n            <<:
-      *possibly_eligible_isi_questions\r\n\r\n        all_grit_apnea_and_ese:\r\n
-      \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
-      grit_apenea\r\n\r\n          any_done_grit_apnea_and_ese:\r\n            not_all:\r\n
-      \             <<: *administer_ess\r\n            activity_log__grit_assignment_phone_screens:\r\n
-      \             extra_log_type: epworth_gritiness_scale\r\n\r\n          not_any:\r\n
-      \           <<: *eligible_ese_questions\r\n          not_any_2:\r\n            <<:
-      *possibly_eligible_ese_questions\r\n\r\n\r\n#        all_audit_c:\r\n#          activity_log__grit_assignment_phone_screens:\r\n#
-      \           extra_log_type: audit_c\r\n#          not_any:\r\n#            <<:
-      *eligible_audit_c\r\n#          not_any_2:\r\n#            <<: *possibly_eligible_audit_c\r\n\r\n
-      \       all_dast2_mod:\r\n          activity_log__grit_assignment_phone_screens:\r\n
-      \           extra_log_type: dast2_mod\r\n          not_any:\r\n            <<:
-      *eligible_dast2_mod\r\n          not_any_2:\r\n            <<: *possibly_eligible_dast2_mod\r\n\r\n\r\n\r\n\r\n
+      &any_responses_ineligible\r\n        <<: *any_possibly_eligible_no\r\n\r\n\r\n
+      \       all_audit_c:\r\n          activity_log__grit_assignment_phone_screens:\r\n
+      \           extra_log_type: audit_c\r\n          not_any:\r\n            <<:
+      *eligible_audit_c\r\n          not_any_2:\r\n            <<: *possibly_eligible_audit_c\r\n\r\n
+      \       all_pain_questions:\r\n          activity_log__grit_assignment_phone_screens:\r\n
+      \           extra_log_type: pain_questions\r\n          not_any:\r\n            <<:
+      *eligible_pain_questions\r\n          not_any_2:\r\n            <<: *possibly_eligible_pain_questions\r\n\r\n\r\n
+      \       all_participation:\r\n          activity_log__grit_assignment_phone_screens:\r\n
+      \           extra_log_type: participation\r\n          not_any:\r\n            <<:
+      *eligible_participation\r\n          not_any_2:\r\n            <<: *possibly_eligible_participation\r\n\r\n\r\n\r\n
       \ save_trigger:\r\n    on_create:\r\n      create_reference:\r\n\r\n        #####
       Screener Responses with outcome default #####\r\n        - dynamic_model__grit_ps_screener_response:\r\n
       \           in: master\r\n            with:\r\n              outcome: ineligible\r\n\r\n
@@ -3494,26 +3374,18 @@ app_type:
       \     from: this\r\n      add: one_to_this\r\n\r\n  showable_if:\r\n    always:
       true\r\n\r\n  creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n\r\n      all_done:\r\n
       \       activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
-      dast2_mod\r\n\r\n      not_any:\r\n        activity_log__grit_assignment_phone_screens:\r\n
+      participation\r\n\r\n      not_any:\r\n        activity_log__grit_assignment_phone_screens:\r\n
       \         extra_log_type: possibly_eligible\r\n\r\n      any_possible_eligible:\r\n
       \       <<: *possibly_eligible_items\r\n\r\n      not_any_show_eligible:\r\n
       \       <<: *all_show_eligible\r\n\r\n      not_any_ineligible:\r\n        <<:
-      *any_responses_ineligible\r\n\r\n#      not_any_possibly_eligible_no:\r\n#        <<:
-      *any_possibly_eligible_no\r\n\r\n      any_continue_after_possibly_eligible:\r\n
-      \       all_basic_questions:\r\n          activity_log__grit_assignment_phone_screens:\r\n
-      \           extra_log_type: basic_questions\r\n          <<: *continue_after_basic_questions\r\n\r\n
-      \       all_isi_questions:\r\n          activity_log__grit_assignment_phone_screens:\r\n
-      \           extra_log_type: insomnia_severity_index\r\n          <<: *continue_after_isi_questions\r\n\r\n
-      \       all_grit_apnea_and_ese:\r\n          activity_log__grit_assignment_phone_screens:\r\n
-      \           extra_log_type: grit_apenea\r\n\r\n          any_done_grit_apnea_and_ese:\r\n
-      \           not_all:\r\n              <<: *administer_ess\r\n            activity_log__grit_assignment_phone_screens:\r\n
-      \             extra_log_type: epworth_gritiness_scale\r\n\r\n          <<: *continue_after_ese_questions\r\n\r\n\r\n#
-      \       all_audit_c:\r\n#          activity_log__grit_assignment_phone_screens:\r\n#
-      \           extra_log_type: dast2_mod\r\n#            # Was originally audit_c,
-      but we want to always complete dast2\r\n#            # irrespective or the result
-      here\r\n#\r\n#          <<: *continue_after_audit_c\r\n\r\n        all_dast2_mod:\r\n
+      *any_responses_ineligible\r\n\r\n#      not_:\r\n#        <<: *any_possibly_eligible_no\r\n\r\n
+      \     any_continue_after_possibly_eligible:\r\n        all_pain_questions:\r\n
       \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
-      dast2_mod\r\n          <<: *continue_after_dast2_mod\r\n\r\n\r\n  caption_before:\r\n
+      pain_questions\r\n          <<: *continue_after_pain_questions\r\n\r\n\r\n        all_audit_c:\r\n
+      \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
+      audit_c\r\n          <<: *continue_after_audit_c\r\n\r\n        all_pain_questions:\r\n
+      \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
+      participations\r\n          <<: *continue_after_participations\r\n\r\n\r\n  caption_before:\r\n
       \   submit: |\r\n      *Save this form after the call, then complete the **Screener
       Reponses**.\r\n      When that form has been created the PI will be informed
       that a\r\n      follow up is required.*\r\n\r\n  view_options:\r\n    hide_unless_creatable:
@@ -3540,9 +3412,7 @@ app_type:
       \     from: this\r\n      add: one_to_this\r\n\r\n\r\n  creatable_if:\r\n    all:\r\n
       \     <<: *enabled_if\r\n      any_eligible_possibly:\r\n        all_eligible:\r\n
       \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
-      eligible\r\n  #      all_consented_possibly_eligible: &consented_possibly_eligible\r\n
-      \ #        activity_log__grit_assignment_phone_screens:\r\n  #          extra_log_type:
-      possibly_eligible\r\n        any_consented_possibly_eligible: &consented_possibly_eligible\r\n
+      eligible\r\n        any_consented_possibly_eligible: &consented_possibly_eligible\r\n
       \         dynamic_model__grit_ps_possibly_eligibles:\r\n            consent_to_pass_info_to_msm_yes_no:
       'yes'\r\n            consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n\r\n      not_any:\r\n
       \       activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
@@ -3629,72 +3499,12 @@ app_type:
       \       ###### Grant PI access to participant ######\r\n        - dynamic_model__grit_access_pis:\r\n
       \           in: master\r\n            if:\r\n              <<: *all_eligible_and_gave_consent\r\n
       \             not_all_access:\r\n                dynamic_model__grit_access_pis:\r\n
-      \                 id:\r\n                    condition: IS NOT NULL\r\n\r\n\r\n\r\n
-      \     update_reference:\r\n        ###### Update inclusion exclusion checklist
-      with #####\r\n        ###### initial info from this screener ######\r\n        ref:\r\n
-      \         if:\r\n            <<: *all_eligible_and_gave_consent\r\n\r\n          force_not_editable_save:
-      true\r\n          first:\r\n            dynamic_model__grit_inex_checklists:\r\n
-      \             master_id:\r\n                this: master_id\r\n              update:
-      return_result\r\n\r\n          with:\r\n\r\n            fixed_checklist_type:
-      phone screen review\r\n\r\n            reliable_internet_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                reliable_internet_yes_no:
-      return_value\r\n\r\n            conditions_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                conditions_yes_no:
-      return_value\r\n\r\n\r\n            cbt_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                cbt_yes_no:
-      return_value\r\n\r\n            cbt_how_long_ago:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                cbt_how_long_ago:
-      return_value\r\n\r\n\r\n            grit_times_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                grit_times_yes_no:
-      return_value\r\n\r\n\r\n            work_night_shifts_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                work_night_shifts_yes_no:
-      return_value\r\n\r\n\r\n            number_times_per_week_work_night_shifts:\r\n
-      \             dynamic_model__grit_ps_basic_responses:\r\n                master_id:\r\n
-      \                 this: master_id\r\n                number_times_per_week_work_night_shifts:
-      return_value\r\n\r\n            narcolepsy_diagnosis_yes_no_dont_know:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                narcolepsy_diagnosis_yes_no_dont_know:
-      return_value\r\n\r\n            antiseizure_meds_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                antiseizure_meds_yes_no:
-      return_value\r\n\r\n            seizure_in_ten_years_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                seizure_in_ten_years_yes_no:
-      return_value\r\n\r\n\r\n            major_psychiatric_disorder_yes_no:\r\n              dynamic_model__grit_ps_basic_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                major_psychiatric_disorder_yes_no:
-      return_value\r\n\r\n\r\n            isi_total_score:\r\n              dynamic_model__grit_isi_questions:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                total_score:
-      return_value\r\n\r\n            sa_diagnosed_yes_no:\r\n              dynamic_model__grit_ps_grit_apnea_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                diagnosed_yes_no:
-      return_value\r\n\r\n            sa_use_treatment_yes_no:\r\n              dynamic_model__grit_ps_grit_apnea_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                use_treatment_yes_no:
-      return_value\r\n\r\n            sa_severity:\r\n              dynamic_model__grit_ps_grit_apnea_responses:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                severity:
-      return_value\r\n\r\n\r\n            ese_total_score:\r\n              dynamic_model__grit_ese_questions:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                total_score:
-      return_value\r\n\r\n\r\n            number_hours_grit:\r\n              dynamic_model__grit_ese_questions:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                number_hours_grit:
-      return_value\r\n\r\n            audit_c_total_score:\r\n              dynamic_model__grit_ps_audit_c_questions:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                total_score:
-      return_value\r\n\r\n            alcohol_frequency:\r\n              dynamic_model__grit_ps_audit_c_questions:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                alcohol_frequency:
-      return_value\r\n\r\n            number_days_negative_feeling_d2:\r\n              dynamic_model__grit_ps_dast2_mod_questions:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                number_days_negative_feeling:
-      return_value\r\n\r\n            number_days_drug_usage_d2:\r\n              dynamic_model__grit_ps_dast2_mod_questions:\r\n
-      \               master_id:\r\n                  this: master_id\r\n                number_days_drug_usage:
-      return_value\r\n\r\n            consent_to_pass_info_to_msm_yes_no:\r\n              any:\r\n
-      \               all_1:\r\n                  dynamic_model__grit_ps_eligibles:\r\n
-      \                   consent_to_pass_info_to_msm_yes_no:\r\n                      -
-      'yes'\r\n                      - return_value\r\n                all_2:\r\n
-      \                 dynamic_model__grit_ps_eligibles:\r\n                    consent_to_pass_info_to_msm_2_yes_no:\r\n
-      \                     - 'yes'\r\n                      - return_value\r\n\r\n
-      \               all_followup_1:\r\n                  dynamic_model__grit_ps_eligibility_followups:\r\n
-      \                   consent_to_pass_info_to_msm_yes_no:\r\n                      -
-      'yes'\r\n                      - return_value\r\n                all_followup_2:\r\n
-      \                 dynamic_model__grit_ps_eligibility_followups:\r\n                    consent_to_pass_info_to_msm_2_yes_no:\r\n
-      \                     - 'yes'\r\n                      - return_value\r\n\r\n\r\n\r\n
+      \                 id:\r\n                    condition: IS NOT NULL\r\n\r\n\r\n\r\n\r\n\r\n
       \ ##### Notify the reviewers that the phone screen has been completed\r\n  #####
       The participant was eligible or possibly eligible\r\n  #####\r\n      notify:\r\n
       \       - <<: *notify_ps_complete\r\n          if:\r\n            <<: *all_eligible_and_gave_consent\r\n\r\n
       \       - <<: *notify_ps_complete_sms\r\n          if:\r\n            <<: *all_eligible_and_gave_consent\r\n\r\n\r\ntest_condition:\r\n
-      \ label: Test Condition\r\n  creatable_if:\r\n    <<: *any_ineligible\r\n"
+      \ label: Test Condition\r\n  creatable_if:\r\n      <<: *eligible_pain_questions\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: phone_screen
@@ -3708,7 +3518,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:02.385Z'
-    updated_at: '2019-11-27T16:48:47.881Z'
+    updated_at: '2019-11-29T10:23:51.182Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -3718,9 +3528,9 @@ app_type:
       \ view_options:\r\n    hide_unless_creatable: true\r\n\r\n\r\n###################################\r\nschedule_screening:\r\n
       \ label: Schedule HMS Screening\r\n###################################\r\n\r\n
       \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
-      \   - followup_when\r\n    - followup_time\r\n    - notes\r\n  caption_before:\r\n
+      \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
       \   select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts:
-      Phone number to call\r\n    followup_when: Scheduled date\r\n    followup_time:
+      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes for
       the screener    \r\n      \r\n      *Do not enter personal health information
       here*\r\n\r\n      \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n
@@ -3749,9 +3559,9 @@ app_type:
       \     activity_log__grit_assignments:\r\n        extra_log_type: confirmed_msm_share\r\n\r\n\r\n\r\n\r\n###################################\r\nschedule_screening_2:\r\n
       \ label: Schedule MSM Screening\r\n###################################  \r\n
       \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
-      \   - followup_when\r\n    - followup_time\r\n    - notes\r\n  caption_before:\r\n
+      \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
       \   select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts:
-      Phone number to call\r\n    followup_when: Scheduled date\r\n    followup_time:
+      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes for
       the screener    \r\n\r\n      *Do not enter personal health information here*\r\n
       \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
@@ -3764,9 +3574,9 @@ app_type:
       \ showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nscreening_followup:\r\n
       \ label: Schedule Informed Consent Follow Up\r\n###################################\r\n\r\n
       \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
-      \   - followup_when\r\n    - followup_time\r\n    - notes\r\n  caption_before:\r\n
+      \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
       \   select_who: Who will perform the follow up?\r\n    select_record_from_player_contacts:
-      Phone number to call\r\n    followup_when: Scheduled date\r\n    followup_time:
+      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: Additional notes\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
       \       extra_log_type: \r\n          - appointment\r\n          - exit_not_consented\r\n
@@ -3790,10 +3600,10 @@ app_type:
       \                 id: \r\n                    this_references: id\r\n                  good_time_to_speak_blank_yes_no:
       \r\n                    - left voicemail\r\n                    - 'no'                      \r\n
       \                   \r\n            in: master\r\n            with:\r\n              extra_log_type:
-      screening_followup\r\n              select_who: current_user_email\r\n              followup_when:
+      screening_followup\r\n              select_who: current_user_email\r\n              follow_up_when:
       \r\n                dynamic_model__grit_screenings: \r\n                  id:\r\n
       \                   this_references: id\r\n                  callback_date:
-      return_value\r\n              followup_time: \r\n                dynamic_model__grit_screenings:
+      return_value\r\n              follow_up_time: \r\n                dynamic_model__grit_screenings:
       \r\n                  id:\r\n                    this_references: id\r\n                  callback_time:
       return_value\r\n              notes: Informed consent review call went to voicemail
       or participant requested a call back\r\n              select_record_from_player_contacts:\r\n
@@ -3954,9 +3764,9 @@ app_type:
       \ fields:\r\n    - select_activity\r\n    - activity_date\r\n    - placeholder_communication\r\n
       \   - placeholder_followup\r\n    - select_record_from_player_contacts\r\n    -
       select_record_from_addresses\r\n    - select_direction\r\n    - select_who\r\n
-      \   - select_result\r\n    - select_next_step\r\n    - followup_when\r\n    -
-      followup_time\r\n    - notes\r\n\r\n  view_options:\r\n    data_attribute: \r\n
-      \     - activity_date\r\n      - select_activity\r\n      - select_direction\r\n
+      \   - select_result\r\n    - select_next_step\r\n    - follow_up_when\r\n    -
+      follow_up_time\r\n    - notes\r\n\r\n  view_options:\r\n    data_attribute:
+      \r\n      - activity_date\r\n      - select_activity\r\n      - select_direction\r\n
       \     - \"status:\"\r\n      - select_result\r\n    hide_unless_creatable: true
       \ \r\n\r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type:
       select_user_with_role_phone_screener\r\n    activity_date:\r\n      value: today()\r\n\r\n\r\n
@@ -3979,8 +3789,8 @@ app_type:
       \     referring_record:\r\n        exists: true\r\n\r\n  show_if:\r\n    select_result:\r\n
       \     select_activity: general communications\r\n    \r\n    select_next_step:\r\n
       \     any:\r\n        select_result: follow up\r\n        select_activity: schedule
-      follow up\r\n    followup_when:\r\n      any:\r\n        select_result: follow
-      up\r\n        select_activity: schedule follow up\r\n    followup_time:\r\n
+      follow up\r\n    follow_up_when:\r\n      any:\r\n        select_result: follow
+      up\r\n        select_activity: schedule follow up\r\n    follow_up_time:\r\n
       \     any:\r\n        select_result: follow up\r\n        select_activity: schedule
       follow up\r\n\r\n    select_direction:\r\n      select_activity: general communications\r\n
       \   activity_date:\r\n      select_activity: general communications\r\n    select_who:\r\n
@@ -4172,7 +3982,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:02.766Z'
-    updated_at: '2019-11-27T15:43:02.766Z'
+    updated_at: '2019-11-29T10:23:51.643Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4193,17 +4003,17 @@ app_type:
       \   <<: *notify_sms_default\r\n    role: sms - pi follow up\r\n\r\n\r\n######################\r\n\r\n
       \ followup_fields: &followup_fields\r\n    - activity_date\r\n    - select_direction\r\n
       \   - select_contact\r\n    - select_result\r\n    - select_next_step\r\n    -
-      followup_when\r\n    - followup_time\r\n    - notes\r\n\r\n\r\n  communication_fields:
+      follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n\r\n\r\n  communication_fields:
       &communication_fields\r\n    - select_activity\r\n    - activity_date\r\n    -
       select_contact\r\n    - select_direction\r\n    - select_result\r\n    - select_next_step\r\n
-      \   - followup_when\r\n    - followup_time\r\n\r\n  communication_show_if: &communication_show_if\r\n
-      \   select_result:\r\n      not_any:\r\n        select_activity:\r\n          -
-      schedule follow up\r\n          - completed\r\n    select_next_step:\r\n      any:\r\n
-      \       select_result: follow up\r\n        select_activity: schedule follow
-      up\r\n    followup_when:\r\n      any:\r\n        select_result: follow up\r\n
-      \       select_activity: schedule follow up\r\n    followup_time:\r\n      any:\r\n
-      \       select_result: follow up\r\n        select_activity: schedule follow
-      up\r\n    select_direction:\r\n      not_any:\r\n        select_activity:\r\n
+      \   - follow_up_when\r\n    - follow_up_time\r\n\r\n  communication_show_if:
+      &communication_show_if\r\n    select_result:\r\n      not_any:\r\n        select_activity:\r\n
+      \         - schedule follow up\r\n          - completed\r\n    select_next_step:\r\n
+      \     any:\r\n        select_result: follow up\r\n        select_activity: schedule
+      follow up\r\n    follow_up_when:\r\n      any:\r\n        select_result: follow
+      up\r\n        select_activity: schedule follow up\r\n    follow_up_time:\r\n
+      \     any:\r\n        select_result: follow up\r\n        select_activity: schedule
+      follow up\r\n    select_direction:\r\n      not_any:\r\n        select_activity:\r\n
       \         - schedule follow up\r\n          - completed\r\n    select_contact:\r\n
       \     not_any:\r\n        select_activity:\r\n          - completed\r\n          \r\n
       \       select_direction:\r\n          - in person\r\n\r\n  communication_field_options:
@@ -4477,6 +4287,413 @@ app_type:
     options: "default:\r\n\r\n  caption_before:\r\n    pre_call_notes: Notes in preparation
       for the follow up call \r\n    \r\n    call_notes: Notes from follow up call\r\n\r\n\r\n"
     user_email:
+  - id: 566
+    name: GRIT Phone Screen Eligible
+    table_name: grit_ps_eligibles
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-11-27T15:43:00.946Z'
+    updated_at: '2019-11-29T18:07:43.319Z'
+    position:
+    category: grit-phone-screen
+    table_key_name: ''
+    field_list: interested_yes_no notes not_interested_notes consent_to_pass_info_to_msm_yes_no
+      consent_to_pass_info_to_msm_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
+      placeholder_continue more_questions_yes_no placeholder_more_questions_yes placeholder_more_questions_no
+      more_questions_notes select_still_interested  placeholder_select_still_interested_no
+      placeholder_select_still_interested_yes placeholder_end
+    result_order: ''
+    options: "default:\r\n\r\n  field_options:\r\n    select_still_interested:\r\n
+      \     edit_as:\r\n        alt_options:\r\n          No Longer Interested: \"no
+      longer interested\"\r\n          Yes - Still Interested: \"yes - still interested\"\r\n\r\n
+      \ caption_before: \r\n    all_fields: |\r\n      Thank you for your time and
+      for answering our questions.  \r\n      Based on your responses so far you are
+      eligible to participate in this study. \r\n\r\n      A reminder that two final
+      screening assessments will take place \r\n      in person at Morehouse School
+      of Medicine, and it’s \r\n      possible at that time you may not be eligible
+      for the study.  \r\n      If that is the case, you will still be compensated
+      $25 for \r\n      the time you spend traveling to and participating in that
+      session.\r\n\r\n      A few other reminders - this study will take place in
+      Atlanta at\r\n      the Morehouse School of Medicine, and the purpose of this
+      study \r\n      is to test a resilience skills training developed to improve
+      those\r\n      parts of your life affected by chronic pain such as quality of\r\n
+      \     life, personal relationships, and personal growth or development. \r\n\r\n
+      \   interested_yes_no: |\r\n      Do you have any questions at this time, and
+      are you still interested in participating?\r\n\r\n    notes: |\r\n      *Record
+      questions*\r\n\r\n\r\n    not_interested_notes: |\r\n      May I ask you why
+      you are not interested? \r\n      *(will record reason, for example, too busy)*.
+      \r\n      \r\n      Thank you for your time.\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:
+      |\r\n      Wonderful. In order for you to participate I will need to give your
+      \r\n      contact information to our collaborating researchers at Morehouse
+      School\r\n      of Medicine, and they will be conducting a two additional in-person
+      \r\n      assessments to determine your eligibility.  This means that it’s \r\n
+      \     still possible you may be ineligible for the study, however based \r\n
+      \     on your responses so far, you’re a great candidate.\r\n\r\n      Is it
+      okay with you if I give them your contact information?\r\n\r\n\r\n    consent_to_pass_info_to_msm_2_yes_no:
+      |\r\n      Okay - just to confirm, your information will be kept completely
+      \r\n      secure and private, in a locked environment only accessible by \r\n
+      \     approved researchers. Access to your information at Morehouse will \r\n
+      \     be removed once the study has finished.  Does that alleviate any \r\n
+      \     concerns you may have?  \r\n      \r\n      If you’d still prefer not
+      to participate I understand.\r\n\r\n    \r\n    placeholder_consent_to_pass_info_2_no:
+      |\r\n      Okay, I understand.  Well thank you so much for your time today and
+      for \r\n      your support of our research, and we will certainly be in touch
+      with \r\n      future participation opportunities.\r\n      \r\n      \r\n    contact_info_notes:
+      |\r\n      Great.  Can I please confirm the contact information I have for you?\r\n
+      \     \r\n      *Scroll to Participant Details to check and add any contact
+      information*\r\n\r\n    placeholder_continue: |    \r\n      Thank you.  We
+      will only be sharing contact information for former \r\n      players with the
+      team at Morehouse once we have 20 former players who are \r\n      eligible
+      and interested in participating, and this may take some \r\n      time as we
+      continue our recruitment efforts.  Once we reach that\r\n      goal, we will
+      send you an email stating that we have shared your \r\n      contact information
+      with them, and you will hear from them \r\n      directly shortly thereafter.
+      \ They may contact you by email, by \r\n      telephone, or both.  This may
+      take many weeks, or it may \r\n      be as soon as next week, so we appreciate
+      your patience and do keep \r\n      an eye out for the next email from us.  At
+      any time please \r\n      feel free to check in with us by phone or email, even
+      if it’s \r\n      just to check in on the status of our recruitment efforts.\r\n\r\n
+      \     If you are enrolled in the study at Morehouse, though they will be\r\n
+      \     conducting the research with you at that location, we will be kept\r\n
+      \     updated on your status in the study, and are always here to\r\n      provide
+      support and answer any questions at any time.\r\n\r\n      And if you have any
+      friends who are former players and live in the\r\n      Atlanta area, please
+      feel free to tell them about the study!\r\n      They can contact us at atlanta@footballplayershealth.harvard.edu,\r\n
+      \     or by the phone number listed on our website.    \r\n\r\n    more_questions_yes_no:
+      Do you have any questions about this?\r\n    \r\n    placeholder_more_questions_yes:
+      |    \r\n      *If Yes, about privacy:* \r\n      \r\n      Just to confirm,
+      your data and contact information lives in a highly \r\n      secure and private
+      environment, accessible only to approved researchers \r\n      on the study
+      team. The data we store is protected by a Certificate \r\n      of Confidentiality
+      issued by the National Institute of Health. \r\n      This means that your identifiable
+      information is protected from \r\n      forced disclosure (i.e. subpoenas) by
+      all possible means.\r\n      \r\n      *other question - respond and record
+      questions*\r\n      \r\n    \r\n    placeholder_more_questions_no: |\r\n      Great!
+      \ Then we will be in touch as soon as possible by email to confirm\r\n      that
+      we have provided the Morehouse researchers with your contact information.\r\n
+      \   \r\n    select_still_interested: |\r\n      Does this alleviate any concerns
+      you have? Do you have other questions? \r\n      If you would still prefer not
+      to participate I understand.\r\n\r\n    placeholder_select_still_interested_no:
+      |\r\n      Okay, I understand.  Well thank you so much for your time today and
+      for \r\n      your support of our research, and we will certainly be in touch
+      with \r\n      future participation opportunities.\r\n\r\n    placeholder_select_still_interested_yes:
+      |\r\n      Great!  Then we will be in touch as soon as possible by email to
+      \r\n      confirm that we have provided the Morehouse researchers with your
+      \r\n      contact information.\r\n    \r\n    placeholder_end: |\r\n      If
+      you have any questions or want to contact us at any time, \r\n      you can
+      reach me at 617-432-5000 or \r\n      atlanta@footballplayershealth.harvard.edu.\r\n
+      \     \r\n      **END SCREENING**\r\n      \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n
+      \     interested_yes_no: 'no'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n
+      \     interested_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n
+      \     consent_to_pass_info_to_msm_yes_no: 'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n
+      \     consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:
+      &ok_to_continue\r\n      any_ok_to_continue:\r\n        consent_to_pass_info_to_msm_yes_no:
+      'yes'\r\n        consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n
+      \   placeholder_continue:\r\n      <<: *ok_to_continue\r\n      \r\n    more_questions_yes_no:\r\n
+      \     <<: *ok_to_continue\r\n    \r\n    placeholder_more_questions_yes:\r\n
+      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
+      \       \r\n    placeholder_more_questions_no:\r\n      <<: *ok_to_continue\r\n
+      \     any:\r\n        more_questions_yes_no: 'no'\r\n    \r\n    more_questions_notes:\r\n
+      \     <<: *ok_to_continue\r\n      any:\r\n        more_questions_yes_no: 'yes'\r\n
+      \   \r\n    select_still_interested:\r\n      <<: *ok_to_continue\r\n      any:\r\n
+      \       more_questions_yes_no: 'yes'\r\n    \r\n    placeholder_select_still_interested_no:\r\n
+      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
+      \       select_still_interested: 'no longer interested'\r\n\r\n    placeholder_select_still_interested_yes:\r\n
+      \     <<: *ok_to_continue\r\n      all:\r\n        more_questions_yes_no: 'yes'\r\n
+      \       select_still_interested: 'yes - still interested'\r\n    \r\n\r\n    "
+    user_email:
+  - id: 564
+    name: GRIT Phone Screen Non-Eligible
+    table_name: grit_ps_non_eligibles
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-11-27T15:43:00.762Z'
+    updated_at: '2019-11-29T17:32:52.406Z'
+    position:
+    category: grit-phone-screen
+    table_key_name: ''
+    field_list: placeholder_initial any_questions_yes_no notes placeholder_any_questions_no
+      contact_pi_yes_no additional_questions_yes_no placeholder_additional_questions_no
+      placeholder_additional_questions_yes consent_to_pass_info_to_msm_yes_no consent_to_pass_info_to_msm_2_yes_no
+      placeholder_consent_to_pass_info_2_no contact_info_notes placeholder_finish
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    placeholder_initial:
+      | \r\n      Thank you for answering these questions today. Unfortunately, \r\n
+      \     at this time you do not qualify for this particular study. We \r\n      really
+      appreciate your interest in research and helping to improve \r\n      the health
+      of former players nationwide. We will be sure to contact \r\n      you about
+      future studies that you may be eligible for. \r\n      \r\n\r\n    any_questions_yes_no:
+      |\r\n      Do you have any questions for me at this time?\r\n\r\n    \r\n    placeholder_any_questions_no:
+      |\r\n      Okay - thank you again for your interest and your time! \r\n    \r\n
+      \   contact_pi_yes_no: |\r\n      *Address questions*\r\n      \r\n      *If
+      they ask why they are not eligible:* \r\n      \r\n      Actually the way that
+      our system works, \r\n      I’m not able to determine exactly which question
+      caused you to be \r\n      ineligible for the study right now, but if you have
+      concerns \r\n      or would like to discuss it further with our study PI, \r\n
+      \     I would be happy to put you in touch with him if you would like. \r\n
+      \     \r\n      Is that something you would like to do?\r\n\r\n\r\n    # Had
+      questions but no contact with PI requested\r\n    additional_questions_yes_no:
+      |\r\n      Okay, I understand.  \r\n      \r\n      Do you have any other questions
+      for me at the moment?\r\n      \r\n    placeholder_additional_questions_no:
+      |\r\n      Okay - thank you again for your interest and your time! \r\n\r\n
+      \   placeholder_additional_questions_yes: |\r\n      *Address questions*\r\n\r\n
+      \   consent_to_pass_info_to_msm_yes_no: |\r\n      Absolutely. In order for
+      him to contact you I will need to give \r\n      your contact information to
+      our collaborating researchers at \r\n      Morehouse School of Medicine.\r\n\r\n
+      \     Is that okay with you?\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:
+      |\r\n      Okay - just to confirm, your information will be kept completely
+      \r\n      secure and private, in a locked environment only accessible by \r\n
+      \     approved researchers. Access to your information at Morehouse will \r\n
+      \     be removed once the study has finished.  Does that alleviate any \r\n
+      \     concerns you may have?  \r\n      \r\n      If you’d still prefer I not
+      provide them with your contact \r\n      information I understand.\r\n      \r\n
+      \   placeholder_consent_to_pass_info_2_no: |\r\n      Okay, I understand.  Well
+      thank you so much for your time today and for your \r\n      support of our
+      research, and we will certainly be in touch with \r\n      future participation
+      opportunities.\r\n      \r\n      \r\n      If you have any questions or want
+      to contact me at any time, you \r\n      can reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n
+      \     \r\n    contact_info_notes: |\r\n      Great.  I will give your contact
+      information to the research team \r\n      at Morehouse, and one of our study
+      PIs, Dr. Leroy Reese, will reach \r\n      out to you as soon as possible.  \r\n
+      \     \r\n      Can I please confirm the contact information I have for you?\r\n
+      \     \r\n      *Scroll to Participant Details to check and add any contact
+      information*\r\n      \r\n    notes: Additional Notes\r\n      \r\n    placeholder_finish:
+      |\r\n      Thank you so much for speaking with me today. \r\n      \r\n      If
+      you have any questions or want to contact me at any time, you \r\n      can
+      reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n      \r\n
+      \     **END SCREENING**\r\n      \r\n\r\n  show_if:\r\n    \r\n    placeholder_any_questions_no:\r\n
+      \     any_questions_yes_no: 'no'\r\n      \r\n    contact_pi_yes_no:\r\n      any_questions_yes_no:
+      'yes'\r\n\r\n    additional_questions_yes_no:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      \r\n    placeholder_additional_questions_no:\r\n
+      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
+      'no'\r\n      \r\n    placeholder_additional_questions_yes:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
+      'yes'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n
+      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_msm_yes_no:
+      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      any_questions_yes_no:
+      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_msm_yes_no:
+      'no'\r\n      consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
+      \     all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
+      'yes'\r\n      any:\r\n        consent_to_pass_info_to_msm_yes_no: 'yes'\r\n
+      \       consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n    placeholder_finish:\r\n
+      \     all:\r\n        any_questions_yes_no:\r\n          - 'yes'\r\n          -
+      'no'\r\n      not_all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
+      'yes'\r\n        consent_to_pass_info_to_msm_yes_no: 'no'\r\n        consent_to_pass_info_to_msm_2_yes_no:
+      'no'\r\n      \r\n    "
+    user_email:
+  - id: 581
+    name: Ability to Participate
+    table_name: grit_ps_participations
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-11-29T15:45:11.754Z'
+    updated_at: '2019-11-29T16:44:54.451Z'
+    position:
+    category: grit-phone-screen
+    table_key_name: ''
+    field_list: commit_to_attend_yes_no small_group_yes_no possibly_eligible_yes_no
+      possibly_eligible_reason_notes placeholder_commit_to_attend_no placeholder_small_group_no
+      any_questions_yes_no notes placeholder_questions_yes placeholder_questions_no
+    result_order: ''
+    options: "# @library grit ps_forms_eligibility\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
+      \ \r\n    commit_to_attend_yes_no: |\r\n      This study involves training sessions
+      for four weeks \r\n      at the Morehouse School of Medicine.  Each training
+      \r\n      session will be 90 minutes, and there will be two per week.  \r\n
+      \     This means you’ll attend 8 training sessions in total.\r\n      The sessions
+      will take place between 4-6pm on two days \r\n      out of Mondays through Thursdays.
+      \ The exact days and times of\r\n      the training will be set in advance for
+      each group, and \r\n      the scheduling will not be able to accommodate individual
+      schedules. \r\n      \r\n      Can you commit to meeting these attendance requirements?
+      \r\n    \r\n    placeholder_commit_to_attend_no: |\r\n      Ok - Unfortunately,
+      this study requires that participants \r\n      are able to commit to the scheduling
+      of the training program, \r\n      and I understand at this time you are unable
+      to accommodate \r\n      this in your schedule.  If this changes at any point
+      in \r\n      the near future, you are welcome to reach out to us again \r\n
+      \     once you would be available to participate.\r\n\r\n    \r\n    \r\n    small_group_yes_no:
+      |\r\n      Are you able to participate in small group discussions? Some\r\n
+      \     examples of things that might prevent you from being able to \r\n      do
+      this are a disabling illnesses, dementia, a recent stroke, \r\n      or difficulty
+      with day to day activities.\r\n    \r\n    placeholder_small_group_no: |\r\n
+      \      Ok - Unfortunately, this study requires that participants are \r\n       able
+      to participate in small group discussions as a part of \r\n       each training
+      session, and I understand at this time you are \r\n       unable to do this.
+      \ If this changes at any point in the near \r\n       future, you are welcome
+      to reach out to us again once you would \r\n       be available to participate.\r\n\r\n\r\n
+      \   possibly_eligible_yes_no: |\r\n      *Based on the scores, the participant
+      is ineligible. \r\n      If you believe the participant may be eligible, select
+      **yes** and continue\r\n      with the screening.*\r\n\r\n    possibly_eligible_reason_notes:
+      Reason\r\n    \r\n\r\n    any_questions_yes_no: |\r\n      Do you have any questions
+      for me at this time?\r\n\r\n    \r\n    \r\n    placeholder_questions_yes: |\r\n
+      \     **Address questions and record responses**\r\n      \r\n      Thank you
+      for your interest and your time!  \r\n      \r\n      **END SCREENING.**\r\n
+      \   \r\n    placeholder_questions_no: |\r\n      Okay - thank you again for
+      your interest and your time!  \r\n      \r\n      **END SCREENING.**\r\n    \r\n
+      \   notes: Record question and notes\r\n\r\n\r\n  show_if:\r\n      \r\n    small_group_yes_no:\r\n
+      \     commit_to_attend_yes_no: 'yes'\r\n    \r\n    placeholder_questions_no:\r\n
+      \     all:\r\n        any_questions_yes_no: 'no'\r\n      <<: *ineligible_rules_participation\r\n
+      \     \r\n    possibly_eligible_yes_no: \r\n      <<: *ineligible_rules_participation\r\n\r\n
+      \   possibly_eligible_reason_notes:\r\n      all:\r\n        possibly_eligible_yes_no:
+      'yes'\r\n      <<: *ineligible_rules_participation\r\n      \r\n    placeholder_commit_to_attend_no:\r\n
+      \     commit_to_attend_yes_no: 'no'\r\n      possibly_eligible_yes_no: 'no'\r\n
+      \   \r\n    placeholder_small_group_no:\r\n      small_group_yes_no: 'no'\r\n
+      \     possibly_eligible_yes_no: 'no'\r\n\r\n    any_questions_yes_no:\r\n      <<:
+      *ineligible_rules_participation\r\n      all:\r\n        possibly_eligible_yes_no:
+      'no'\r\n      \r\n    placeholder_questions_yes:\r\n      all:\r\n        possibly_eligible_yes_no:
+      'no'\r\n        any_questions_yes_no: 'yes'\r\n      <<: *ineligible_rules_participation\r\n
+      \   \r\n\r\n"
+    user_email:
+  - id: 567
+    name: GRIT Audit-C
+    table_name: grit_ps_audit_c_questions
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-11-27T15:43:01.024Z'
+    updated_at: '2019-11-29T16:36:22.282Z'
+    position:
+    category: grit-phone-screen
+    table_key_name: ''
+    field_list: alcohol_frequency daily_alcohol six_or_more_frequency total_score
+      possibly_eligible_yes_no possibly_eligible_reason_notes notes
+    result_order: ''
+    options: "# @library grit field_options\r\n# @library grit ps_forms_eligibility\r\n\r\ndefault:\r\n\r\n
+      \ caption_before:\r\n    all_fields: |\r\n      The first few questions I’m
+      going to ask you are about your alcohol intake.\r\n\r\n    alcohol_frequency:
+      How often do you have a drink containing alcohol?\r\n    daily_alcohol: How
+      many standard drinks containing alcohol do you have on a typical day?\r\n    six_or_more_frequency:
+      How often do you have six or more drinks on one occasion?\r\n    total_score:
+      Score\r\n\r\n    possibly_eligible_yes_no: |\r\n      *Based on the scores,
+      the participant is ineligible. \r\n      If you believe the participant may
+      be eligible, select **yes** and continue\r\n      with the screening.*\r\n\r\n
+      \   possibly_eligible_reason_notes: Reason\r\n    \r\n  field_options:\r\n    <<:
+      *ps_field_options\r\n\r\n    total_score:\r\n      edit_as:\r\n        field_type:
+      fixed_score\r\n      calculate_with:\r\n        sum: \r\n          - alcohol_frequency\r\n
+      \         - daily_alcohol\r\n          - six_or_more_frequency\r\n          \r\n
+      \     \r\n  show_if:\r\n\r\n      \r\n    possibly_eligible_yes_no: \r\n      <<:
+      *ineligible_rules_audit_c\r\n\r\n    possibly_eligible_reason_notes:\r\n      all:\r\n
+      \       possibly_eligible_yes_no: 'yes'\r\n      <<: *ineligible_rules_audit_c\r\n
+      \       \r\n"
+    user_email:
+  - id: 579
+    name: GRIT Pain Inquiry
+    table_name: grit_ps_pain_questions
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-11-29T14:26:36.827Z'
+    updated_at: '2019-11-29T16:33:26.380Z'
+    position:
+    category: grit-phone-screen
+    table_key_name: ''
+    field_list: select_pain_interfere possibly_eligible_yes_no possibly_eligible_reason_notes
+      notes
+    result_order: ''
+    options: "# @library grit field_options\r\n# @library grit ps_forms_eligibility\r\n\r\ndefault:\r\n\r\n
+      \ caption_before:\r\n\r\n    select_pain_interfere: |\r\n      In the past 3
+      months, how frequently did pain interfere with your\r\n      daily life, such
+      as interfering with day to day activities, \r\n      concentrating on or performing
+      tasks, enjoying \r\n      recreational activities, or socializing and generally
+      enjoying life?  \r\n\r\n    possibly_eligible_yes_no: |\r\n      *Based on the
+      scores, the participant is ineligible. \r\n      If you believe the participant
+      may be eligible, select **yes** and continue\r\n      with the screening.*\r\n\r\n
+      \   possibly_eligible_reason_notes: Reason\r\n    \r\n  field_options:\r\n    <<:
+      *ps_field_options\r\n          \r\n      \r\n  show_if:\r\n\r\n      \r\n    possibly_eligible_yes_no:
+      \r\n      <<: *ineligible_rules_pain_questions\r\n\r\n\r\n    possibly_eligible_reason_notes:\r\n
+      \     all:\r\n        possibly_eligible_yes_no: 'yes'\r\n      <<: *ineligible_rules_pain_questions"
+    user_email:
+  - id: 565
+    name: GRIT Initial Screening
+    table_name: grit_ps_initial_screenings
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-11-27T15:43:00.874Z'
+    updated_at: '2019-11-29T12:17:45.626Z'
+    position:
+    category: grit-phone-screen
+    table_key_name: ''
+    field_list: select_is_good_time_to_speak,placeholder_not_appropriate_time,any_questions_blank_yes_no,question_notes,select_still_interested,follow_up_date,follow_up_time,more_questions_yes_no,more_questions_notes,still_interested_2_yes_no,placeholder_not_interested,placeholder_complete_intro,notes
+    result_order: ''
+    options: "# Unused fields: looked_at_website_yes_no\r\n\r\ndefault:\r\n\r\n  show_if:\r\n
+      \ \r\n  \r\n    any_questions_blank_yes_no:\r\n      select_is_good_time_to_speak:
+      \"yes\"\r\n\r\n    question_notes:\r\n      any_questions_blank_yes_no: 'yes'\r\n\r\n
+      \   select_still_interested:\r\n      select_is_good_time_to_speak: 'yes'\r\n
+      \     any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        - \"no\"
+      \       \r\n\r\n\r\n    placeholder_not_appropriate_time:\r\n      select_is_good_time_to_speak:
+      not appropriate time\r\n          \r\n    follow_up_date:\r\n      any:\r\n
+      \       select_is_good_time_to_speak: \r\n          - not appropriate time\r\n
+      \         - left voicemail\r\n        select_still_interested: yes - call back\r\n\r\n
+      \   follow_up_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
+      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
+      yes - call back\r\n        \r\n\r\n    more_questions_yes_no:\r\n      any:\r\n
+      \       select_still_interested:\r\n          - \"yes\"\r\n    \r\n    \r\n
+      \   more_questions_notes:\r\n      all:\r\n        select_still_interested:\r\n
+      \         - \"yes\"\r\n        more_questions_yes_no: 'yes'\r\n        \r\n
+      \   still_interested_2_yes_no:\r\n      any:\r\n        select_still_interested:\r\n
+      \         - \"yes\"\r\n\r\n    placeholder_not_interested:\r\n      any:\r\n
+      \       select_is_good_time_to_speak: not interested\r\n        select_still_interested:
+      no\r\n        still_interested_2_yes_no: no\r\n        \r\n    placeholder_complete_intro:\r\n
+      \     any:\r\n        still_interested_2_yes_no:\r\n          - \"yes\"\r\n\r\n\r\n
+      \ dialog_before:\r\n    select_is_good_time_to_speak: \r\n      name: grit ps
+      intro\r\n    any_questions_blank_yes_no: \r\n      name: grit ps intro overview\r\n
+      \     label: show script\r\n\r\n  caption_before:\r\n\r\n    question_notes:
+      |\r\n      *Respond to questions and take notes below*\r\n\r\n\r\n    select_still_interested:
+      |\r\n      Great.  If you are still interested in the study, \r\n      may I
+      ask you some questions about your health to determine if you \r\n      are eligible
+      to participate?  \r\n      \r\n    placeholder_not_appropriate_time: |\r\n      *If
+      interested but not available – *\r\n      \r\n      Is there a better time I
+      can call you to discuss the study and also determine if you are interested and
+      eligible? \r\n\r\n\r\n\r\n    follow_up_date: |    \r\n      Enter a follow
+      up date and time if the subject wishes for a call back before continuing with
+      the screening, or you left a voicemail. \r\n      \r\n    follow_up_time: Follow
+      up time\r\n    \r\n    more_questions_yes_no: |\r\n      Great, let me tell
+      you about the duration of the study and compensation.  \r\n      If you complete
+      the final screening assessments at Morehouse and you \r\n      are not eligible
+      for the study, you will be compensated $25 for your \r\n      time on that day.
+      \ If you are eligible for the study and choose to \r\n      participate, you
+      may be compensated anywhere from $525-$825 for \r\n      completed participation
+      in the study, depending on the group to \r\n      which you are assigned and
+      how many study visits you complete.  \r\n      The length of time you spend
+      in the study could range from 6-18 weeks, \r\n      depending on which group
+      you are assigned to, and on your schedule.\r\n\r\n      Do you have any more
+      questions at this time?\r\n\r\n    still_interested_2_yes_no: |\r\n      Great.
+      \ \r\n      \r\n      If you are still interested in the study, may I ask you
+      some \r\n      questions about your health to determine if you are eligible
+      to participate?  \r\n\r\n    placeholder_not_interested: |\r\n      Okay, may
+      I ask why you are not interested? \r\n      \r\n      *(Record reasoning)*\r\n
+      \     \r\n      Thank you for letting me know, and for your time and participating
+      \r\n      in our first health and wellness survey. Would you like me to see
+      \r\n      if you are eligible for any other studies with us at this time?\r\n
+      \     \r\n      *As relevant provide information about other FPHS studies, \r\n
+      \     send links to other studies*\r\n\r\n\r\n    placeholder_complete_intro:
+      |\r\n      Thank you. I’m going to ask you some questions to determine \r\n
+      \     if you are eligible for the study.  Please feel free to ask for \r\n      clarification
+      at any time, or let me know if there is anything \r\n      you’d like me to
+      repeat. \r\n      \r\n    notes: |\r\n      Notes, questions or other information
+      for follow up\r\n    \r\n\r\n\r\n  \r\n\r\n"
+    user_email:
   - id: 569
     name: GRIT Phone Screen Possibly Eligible
     table_name: grit_ps_possibly_eligibles
@@ -4487,7 +4704,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:01.249Z'
-    updated_at: '2019-11-27T15:43:01.249Z'
+    updated_at: '2019-11-29T10:23:49.870Z'
     position:
     category: grit-phone-screen
     table_key_name: ''
@@ -4541,7 +4758,7 @@ app_type:
       'yes'\r\n      \r\n\r\n    contact_info_notes: &consent_given\r\n      all:\r\n
       \       any_questions_yes_no: \r\n          - 'yes'\r\n          - 'no'\r\n
       \     any:\r\n        consent_to_pass_info_to_msm_yes_no: 'yes'\r\n        consent_to_pass_info_to_msm_2_yes_no:
-      'yes'\r\n        \r\n#    followup_date: *consent_given\r\n#    followup_time:
+      'yes'\r\n        \r\n#    followup_date: *consent_given\r\n#    follow_up_time:
       *consent_given\r\n\r\n    placeholder_end_call: *consent_given\r\n"
     user_email:
   - id: 568
@@ -4683,254 +4900,6 @@ app_type:
       \         - 'no'        \r\n      not_all:\r\n        any_questions_yes_no:
       'yes'\r\n        contact_pi_yes_no: 'yes'\r\n        consent_to_pass_info_to_msm_yes_no:
       'no'\r\n        consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    "
-    user_email:
-  - id: 567
-    name: GRIT Audit-C
-    table_name: grit_ps_audit_c_questions
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:01.024Z'
-    updated_at: '2019-11-27T15:43:01.024Z'
-    position:
-    category: grit-phone-screen
-    table_key_name: ''
-    field_list: alcohol_frequency daily_alcohol six_or_more_frequency total_score
-      placeholder_possibly_eligible possibly_eligible_yes_no possibly_eligible_reason_notes
-      notes
-    result_order: ''
-    options: "# @library grit field_options\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
-      \   alcohol_frequency: How often do you have a drink containing alcohol?\r\n
-      \   daily_alcohol: How many standard drinks containing alcohol do you have on
-      a typical day?\r\n    six_or_more_frequency: How often do you have six or more
-      drinks on one occasion?\r\n    total_score: Score\r\n    placeholder_possibly_eligible:
-      |\r\n      *Based on the scores, the participant is ineligible. \r\n      The
-      option to change status to possibly eligible will appear at the next step.*
-      \   \r\n\r\n    possibly_eligible_reason_notes: Reason\r\n    \r\n  field_options:\r\n
-      \   <<: *ps_field_options\r\n\r\n    total_score:\r\n      edit_as:\r\n        field_type:
-      fixed_score\r\n      calculate_with:\r\n        sum: \r\n          - alcohol_frequency\r\n
-      \         - daily_alcohol\r\n          - six_or_more_frequency\r\n          \r\n
-      \     \r\n  show_if:\r\n#    daily_alcohol:\r\n#      not_all:\r\n#        alcohol_frequency:
-      '0'\r\n    \r\n#    six_or_more_frequency:\r\n#      not_all:\r\n#        alcohol_frequency:
-      '0'\r\n  \r\n    possibly_eligible_yes_no:\r\n      never: true\r\n\r\n    possibly_eligible_reason_notes:\r\n
-      \     never: true\r\n      \r\n#    possibly_eligible_yes_no: &ineligible_rules\r\n
-      \   placeholder_possibly_eligible:\r\n      any:\r\n        total_score:\r\n
-      \         - '4'\r\n          - '5'\r\n          - '6'\r\n          - '7'\r\n
-      \         - '8'\r\n          - '9'\r\n          - '10'\r\n          - '11'\r\n
-      \         - '12'\r\n      not_all:\r\n        total_score: '4'\r\n        daily_alcohol:
-      \r\n          - '0'\r\n          - ''\r\n        six_or_more_frequency: \r\n
-      \         - '0'\r\n          - ''\r\n\r\n#    placeholder_possibly_eligible:\r\n#
-      \     all:\r\n#        possibly_eligible_yes_no: 'yes'\r\n#      <<: *ineligible_rules\r\n
-      \       \r\n        \r\n"
-    user_email:
-  - id: 566
-    name: GRIT Phone Screen Eligible
-    table_name: grit_ps_eligibles
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:00.946Z'
-    updated_at: '2019-11-27T15:43:00.946Z'
-    position:
-    category: grit-phone-screen
-    table_key_name: ''
-    field_list: notes interested_yes_no not_interested_notes consent_to_pass_info_to_msm_yes_no
-      consent_to_pass_info_to_msm_2_yes_no placeholder_consent_to_pass_info_2_no contact_info_notes
-      placeholder_end
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before: \r\n    all_fields: |\r\n      Thank
-      you for your time and for answering our questions..  \r\n      Based on your
-      responses so far you are eligible to participate in this study.             \r\n
-      \     \r\n    interested_yes_no: Are you interested in participating?\r\n\r\n
-      \   not_interested_notes: |\r\n      May I ask you why you are not interested?
-      \r\n      *(will record reason, for example, too busy)*. \r\n      \r\n      Thank
-      you for your time.\r\n      \r\n    consent_to_pass_info_to_msm_yes_no: |\r\n
-      \     Wonderful. In order for you to participate I will need to give your \r\n
-      \     contact information to our collaborating researchers at \r\n      Brigham
-      & Women’s Hospital, and they will be conducting a final, \r\n      short screening
-      survey to finalize your eligibility.  This means \r\n      that it’s still possible
-      you may be ineligible for the study, \r\n      however based on your responses
-      so far you’re a great candidate.\r\n\r\n      Is it okay with you if I give
-      them your contact information?\r\n\r\n    consent_to_pass_info_to_msm_2_yes_no:
-      |\r\n      Okay - just to confirm, your information will be kept completely
-      secure \r\n      and private, in a locked environment only accessible by approved
-      researchers. \r\n      Access to your information at Brigham & Women’s will
-      be removed once the \r\n      study has finished.  Does that alleviate any concerns
-      you may have?  \r\n      If you’d still prefer not to participate I understand.\r\n
-      \   \r\n    placeholder_consent_to_pass_info_2_no: |\r\n      Okay, I understand.
-      \ Well thank you so much for your time today and for \r\n      your support
-      of our research, and we will certainly be in touch with \r\n      future participation
-      opportunities.\r\n      \r\n    contact_info_notes: |\r\n      Great.  I will
-      give your information to the research managers at Brigham, \r\n      Rebecca
-      and Lindsey, \r\n      and one of them will reach out to you within the next
-      week.  \r\n      \r\n      I will also send you an email confirmation when your
-      information has been sent.  \r\n      \r\n      They will be contacting you
-      by email to send you some information about the study, \r\n      but they may
-      also reach out to you by telephone in order \r\n      to schedule your interview.
-      \ \r\n      \r\n      Can I please confirm the contact information I have for
-      you?\r\n      \r\n      *Scroll to Participant Details to check and add any
-      contact information*\r\n      \r\n    notes: |\r\n      Do you have any questions?\r\n\r\n
-      \   \r\n    placeholder_end: |\r\n      Thank you so much for speaking with
-      me today. If you have any \r\n      questions or want to contact me at any time,
-      you can reach me\r\n      at 617-432-5000 or players@footballplayershealth.harvard.edu.
-      \r\n      You may also contact the Principal Investigator of \r\n      the study
-      Dr. Suzanne Bertisch at Brigham and Women’s \r\n      Hospital at 857-307-0355
-      or by email at sbertisch@partners.org.\r\n      \r\n      **END SCREENING**\r\n
-      \     \r\n  show_if:\r\n    \r\n    not_interested_notes:\r\n      interested_yes_no:
-      'no'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n      interested_yes_no:
-      'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n      consent_to_pass_info_to_msm_yes_no:
-      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      consent_to_pass_info_to_msm_2_yes_no:
-      'no'\r\n      \r\n    contact_info_notes:\r\n      any:\r\n        consent_to_pass_info_to_msm_yes_no:
-      'yes'\r\n        consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n
-      \   "
-    user_email:
-  - id: 565
-    name: GRIT Initial Screening
-    table_name: grit_ps_initial_screenings
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:00.874Z'
-    updated_at: '2019-11-27T15:43:00.874Z'
-    position:
-    category: grit-phone-screen
-    table_key_name: ''
-    field_list: select_is_good_time_to_speak,any_questions_blank_yes_no,question_notes,select_still_interested,placeholder_complete_intro,followup_date,followup_time,placeholder_not_interested,notes
-    result_order: ''
-    options: "# Unused fields: looked_at_website_yes_no\r\n\r\ndefault:\r\n  dialog_before:\r\n
-      \   select_is_good_time_to_speak: \r\n      name: grit ps intro\r\n\r\n    any_questions_blank_yes_no:
-      \r\n      name: grit ps intro overview\r\n      label: show script\r\n#    select_still_interested:
-      \r\n#      name: grit ps intro details\r\n#      label: show script\r\n#    select_still_interested:
-      \r\n#      name: grit ps intro time to continue\r\n#      label: show script\r\n#
-      \   placeholder_complete_intro: \r\n#      name: grit ps intro complete intro\r\n#
-      \     label: show script\r\n\r\n  show_if:\r\n  \r\n  \r\n#    looked_at_website_yes_no:
-      \ \r\n#      select_is_good_time_to_speak: \"yes\"\r\n    any_questions_blank_yes_no:\r\n
-      \     select_is_good_time_to_speak: \"yes\"\r\n\r\n    question_notes:\r\n      any_questions_blank_yes_no:
-      'yes'\r\n\r\n    select_still_interested:\r\n      select_is_good_time_to_speak:
-      'yes'\r\n      any_questions_blank_yes_no: \r\n        - \"yes\"\r\n        -
-      \"no\"        \r\n\r\n    placeholder_complete_intro:\r\n      any:\r\n        select_still_interested:\r\n
-      \         - \"yes\"\r\n\r\n    followup_date:\r\n      any:\r\n        select_is_good_time_to_speak:
-      \r\n          - not appropriate time\r\n          - left voicemail\r\n        select_still_interested:
-      yes - call back\r\n\r\n    followup_time:\r\n      any:\r\n        select_is_good_time_to_speak:\r\n
-      \         - not appropriate time\r\n          - left voicemail        \r\n        select_still_interested:
-      yes - call back\r\n        \r\n    placeholder_not_interested:\r\n      any:\r\n
-      \       select_is_good_time_to_speak: not interested\r\n        select_still_interested:
-      no\r\n        \r\n      \r\n\r\n  caption_before:\r\n    all_fields: |\r\n      **Instructions
-      for FPHS Study Staff**\r\n      \r\n      *Screen participants over the phone.*\r\n
-      \     \r\n      *If there are issues during screening or participants have questions
-      that are\r\n      not addressed in the script provided, please respond to the
-      best \r\n      of your ability and make a note. Then follow-up\r\n      with
-      Dr. Bertisch after the phone call is complete to \r\n      determine if further
-      communication is required.*\r\n\r\n\r\n    question_notes: |\r\n      *Respond
-      to questions and take notes below*\r\n\r\n\r\n    select_still_interested: |\r\n
-      \     Great.  If you are still interested in the study, would you be \r\n      willing
-      to answer some\r\n      questions about your health and medical history to find
-      out \r\n      if you might qualify for the study? \r\n      And is this a good
-      time to talk?\r\n      \r\n\r\n    followup_date: Enter a follow up date and
-      time if the subject wishes for a call back before continuing with the screening,
-      or you left a voicemail. \r\n    followup_time: Follow up time\r\n    \r\n    placeholder_complete_intro:
-      |\r\n      Okay.  I’d like to mention that, some of the questions may\r\n      make
-      you feel uncomfortable. You can stop at any time. Also, \r\n      though we
-      are recording your answers\r\n      in a completely secure system and we do
-      not share your data outside \r\n      the study team or without your approval,
-      providing us with your \r\n      health information does have a potential risk
-      of loss of confidentiality.\r\n      \r\n      May I begin?\r\n\r\n    placeholder_not_interested:
-      |\r\n      May I ask you why you are not interested? \r\n      *(will record
-      reason, for example, too busy)*. \r\n      \r\n      Thank you for your time.
-      \r\n      \r\n    notes: Notes, questions or other information for follow up\r\n
-      \   \r\n\r\n#    contact_details_notes: Contact details notes for gift card.
-      After completing the call, ensure contact details recorded here are transferred
-      to the subject's address record."
-    user_email:
-  - id: 564
-    name: GRIT Phone Screen Non-Eligible
-    table_name: grit_ps_non_eligibles
-    schema_name:
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:00.762Z'
-    updated_at: '2019-11-27T15:43:00.762Z'
-    position:
-    category: grit-phone-screen
-    table_key_name: ''
-    field_list: any_questions_yes_no notes placeholder_any_questions_no contact_pi_yes_no
-      additional_questions_yes_no placeholder_additional_questions_no placeholder_additional_questions_yes
-      consent_to_pass_info_to_msm_yes_no consent_to_pass_info_to_msm_2_yes_no placeholder_consent_to_pass_info_2_no
-      contact_info_notes placeholder_finish
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n  \r\n\r\n    any_questions_yes_no:
-      Do you have any questions for me at this time?\r\n    \r\n    placeholder_any_questions_no:
-      Okay - thank you again for your interest and your time! \r\n    \r\n    contact_pi_yes_no:
-      |\r\n      *Address questions*\r\n      \r\n      *If they ask why they are
-      not eligible:* \r\n      \r\n      * **NOTE**: if the final screening element
-      just performed was the \r\n      Epworth GRITiness Scale, or the question regarding
-      internet access, \r\n      return to that section to reiterate the details of
-      why they are not eligible.  \r\n      Otherwise, continue:*\r\n      \r\n      Actually
-      the way that our system works, \r\n      I’m not able to determine exactly which
-      question caused you to be \r\n      ineligible for the study right now, but
-      if you have concerns \r\n      or would like to discuss it further with our
-      study PI, \r\n      I would be happy to put you in touch with her if you would
-      like. \r\n      \r\n      Is that something you would like to do?\r\n\r\n\r\n
-      \   # Had questions but no contact with PI requested\r\n    additional_questions_yes_no:
-      |\r\n      Okay, I understand.  \r\n      \r\n      Do you have any other questions
-      for me at the moment?\r\n      \r\n    placeholder_additional_questions_no:
-      |\r\n      Okay - thank you again for your interest and your time! \r\n\r\n
-      \   placeholder_additional_questions_yes: |\r\n      *Address questions*\r\n\r\n
-      \   consent_to_pass_info_to_msm_yes_no: |\r\n      Absolutely. In order for
-      her to contact you I will need to \r\n      give your contact information to
-      our collaborating \r\n      researchers at Brigham & Women’s Hospital. \r\n\r\n
-      \     Is that okay with you?\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:
-      |\r\n      Okay - just to confirm, your information will be kept completely
-      secure \r\n      and private, in a locked environment only accessible by approved
-      researchers. \r\n      Access to your information at Brigham & Women's will
-      be removed once the \r\n      study has finished.  Does that alleviate any concerns
-      you may have?  \r\n      If you'd still prefer not to participate I understand.\r\n
-      \     \r\n    placeholder_consent_to_pass_info_2_no: |\r\n      Okay, I understand.
-      \ Well thank you so much for your time today and for your \r\n      support
-      of our research, and we will certainly be in touch with \r\n      future participation
-      opportunities.\r\n      \r\n      If you have any questions or want to contact
-      me at any time, you \r\n      can reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n
-      \     \r\n    contact_info_notes: |\r\n      Great.  I will give your contact
-      information to the research team at \r\n      Brigham, and our study PI, Dr.
-      Suzanne Bertisch, \r\n      will reach out to you as soon as possible.  \r\n
-      \     \r\n      Can I please confirm the contact information I have for you?\r\n
-      \     \r\n      *Scroll to Participant Details to check and add any contact
-      information*\r\n      \r\n    notes: Additional Notes\r\n      \r\n    placeholder_finish:
-      |\r\n      Thank you so much for speaking with me today. \r\n      \r\n      If
-      you have any questions or want to contact me at any time, you \r\n      can
-      reach me at 617-432-5000 or players@footballplayershealth.harvard.edu.\r\n      \r\n
-      \     **END SCREENING**\r\n      \r\n\r\n  show_if:\r\n    \r\n    placeholder_any_questions_no:\r\n
-      \     any_questions_yes_no: 'no'\r\n      \r\n    contact_pi_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n\r\n    additional_questions_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      \r\n    placeholder_additional_questions_no:\r\n
-      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
-      'no'\r\n      \r\n    placeholder_additional_questions_yes:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'no'\r\n      additional_questions_yes_no:
-      'yes'\r\n      \r\n    consent_to_pass_info_to_msm_yes_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      \r\n    consent_to_pass_info_to_msm_2_yes_no:\r\n
-      \     any_questions_yes_no: 'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_msm_yes_no:
-      'no'\r\n      \r\n    placeholder_consent_to_pass_info_2_no:\r\n      any_questions_yes_no:
-      'yes'\r\n      contact_pi_yes_no: 'yes'\r\n      consent_to_pass_info_to_msm_yes_no:
-      'no'\r\n      consent_to_pass_info_to_msm_2_yes_no: 'no'\r\n      \r\n    contact_info_notes:\r\n
-      \     all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
-      'yes'\r\n      any:\r\n        consent_to_pass_info_to_msm_yes_no: 'yes'\r\n
-      \       consent_to_pass_info_to_msm_2_yes_no: 'yes'\r\n        \r\n    placeholder_finish:\r\n
-      \     all:\r\n        any_questions_yes_no:\r\n          - 'yes'\r\n          -
-      'no'\r\n      not_all:\r\n        any_questions_yes_no: 'yes'\r\n        contact_pi_yes_no:
-      'yes'\r\n        consent_to_pass_info_to_msm_yes_no: 'no'\r\n        consent_to_pass_info_to_msm_2_yes_no:
-      'no'\r\n      \r\n    "
     user_email:
   - id: 563
     name: GRIT Screener Responses
@@ -5807,46 +5776,46 @@ app_type:
       IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
       <= :to_date)\r\n  AND (:grit_id IS NULL or grit.grit_id = :grit_id)\r\nGROUP
       BY\r\nap.master_id, visit_start_date, pi.first_name, pi.last_name, grit.grit_id\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.followup_when,\r\n  dt.followup_time,\r\n
+      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
       \ dt.master_id,\r\n  grit.grit_id,\r\n--  p.first_name,\r\n--  p.last_name,\r\n
       \ dt.extra_log_type,\r\n  dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n
       \ (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n      a.select_who,\r\n
-      \     a.followup_when,\r\n      a.followup_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
+      \     a.follow_up_when,\r\n      a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
       \     rank()\r\n    OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n
       \     ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_grit_assignments
-      a\r\n    where\r\n      followup_when is not null\r\n      AND (:from_date IS
-      NULL OR followup_when >= :from_date)\r\n      AND (:to_date IS NULL OR followup_when
+      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
+      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
       <= :to_date )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id
       = p.master_id\r\n\r\ninner join grit_assignments grit\r\n  on dt.master_id =
       grit.master_id\r\n\r\nWHERE r = 1\r\nAND (:grit_id IS NULL or grit.grit_id =
-      :grit_id)\r\n;\r\n\r\n\r\ncreate temp table pi_calls\r\nas select\r\n  dt.followup_when,\r\n
-      \ dt.followup_time,\r\n  dt.master_id,\r\n  grit.grit_id,\r\n--  p.first_name,\r\n--
+      :grit_id)\r\n;\r\n\r\n\r\ncreate temp table pi_calls\r\nas select\r\n  dt.follow_up_when,\r\n
+      \ dt.follow_up_time,\r\n  dt.master_id,\r\n  grit.grit_id,\r\n--  p.first_name,\r\n--
       \ p.last_name,\r\n  dt.extra_log_type,\r\n  dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n
       \ (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n      'PI' select_who,\r\n
-      \     a.followup_when,\r\n      a.followup_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
+      \     a.follow_up_when,\r\n      a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
       \     rank()\r\n    OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n
       \     ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_grit_assignment_followups
-      a\r\n    where\r\n      followup_when is not null\r\n      AND (:from_date IS
-      NULL OR followup_when >= :from_date)\r\n      AND (:to_date IS NULL OR followup_when
+      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
+      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
       <= :to_date )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id
       = p.master_id\r\n\r\ninner join grit_assignments grit\r\n  on dt.master_id =
       grit.master_id\r\n\r\nWHERE r = 1\r\nAND (:grit_id IS NULL or grit.grit_id =
-      :grit_id)\r\n;\r\n\r\n/*\r\ncreate temp table all_dates\r\nas\r\nselect followup_when
+      :grit_id)\r\n;\r\n\r\n/*\r\ncreate temp table all_dates\r\nas\r\nselect follow_up_when
       from scheduled_calls\r\nunion\r\nselect visit_start_date from appointments\r\n;\r\n*/\r\n\r\nSELECT\r\n
       \ true \"allDay\",\r\n  visit_start_date::varchar || 'T' || '00:00:00' \"start\",\r\n
       \ null \"end\",\r\n  'assessment start' \"title\",\r\n  array['report-cal-start-event']
       \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\nUNION\r\nSELECT\r\n
       \ true ,\r\n  '2019-06-20' ,\r\n  null ,\r\n  'assessment start' ,\r\n  array['report-cal-start-event']
       \"classNames\",\r\n  null \"url\"\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
-      \ followup_when::varchar || 'T' || followup_time::varchar,\r\n  NULL,\r\n  case
-      when select_next_step = 'email back' then '(email)'\r\n  else '(call)' end\r\n
-      \ || ' ' ||\r\n  case when extra_log_type = 'schedule_screening' then 'scheduled
-      HMS screening'\r\n  when extra_log_type = 'schedule_screening_2' then 'scheduled
-      MSM screening'\r\n  when extra_log_type = 'screening_followup' then 'scheduled
-      informed consent'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event',
+      \ follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n
+      \ case when select_next_step = 'email back' then '(email)'\r\n  else '(call)'
+      end\r\n  || ' ' ||\r\n  case when extra_log_type = 'schedule_screening' then
+      'scheduled HMS screening'\r\n  when extra_log_type = 'schedule_screening_2'
+      then 'scheduled MSM screening'\r\n  when extra_log_type = 'screening_followup'
+      then 'scheduled informed consent'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event',
       extra_log_type] \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM
-      scheduled_calls\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n  followup_when::varchar
-      || 'T' || followup_time::varchar,\r\n  NULL,\r\n  case when select_next_step
+      scheduled_calls\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n  follow_up_when::varchar
+      || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n  case when select_next_step
       = 'email back' then '(email)'\r\n  else '(call)' end\r\n  || ' ' ||\r\n  case
       when extra_log_type = 'participant_followup' then 'PI follow up'\r\n  when extra_log_type
       = 'participant_communication' then 'PI participant communication'\r\n  else
@@ -5860,7 +5829,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:03.799Z'
-    updated_at: '2019-11-27T15:43:03.799Z'
+    updated_at: '2019-11-29T10:23:52.488Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -6316,7 +6285,7 @@ app_type:
     value: nflpa
     item_type: player_infos_source
     created_at: '2015-08-12T19:43:23.821Z'
-    updated_at: '2019-11-28T16:55:50.810Z'
+    updated_at: '2019-11-29T10:23:52.100Z'
     disabled:
     admin_id: 21
     create_with: false
@@ -6515,7 +6484,7 @@ app_type:
     value: nflpa2
     item_type: player_infos_source
     created_at: '2015-09-24T20:20:44.103Z'
-    updated_at: '2019-11-28T16:55:50.856Z'
+    updated_at: '2019-11-29T10:23:52.127Z'
     disabled:
     admin_id: 21
     create_with: false
@@ -6621,7 +6590,7 @@ app_type:
     value: '0'
     item_type: player_contacts_rank
     created_at: '2015-10-20T16:24:09.278Z'
-    updated_at: '2019-11-28T16:55:50.883Z'
+    updated_at: '2019-11-29T10:23:52.144Z'
     disabled:
     admin_id: 21
     create_with: true
@@ -6636,7 +6605,7 @@ app_type:
     value: '0'
     item_type: addresses_rank
     created_at: '2015-10-20T16:24:09.308Z'
-    updated_at: '2019-11-28T16:55:50.887Z'
+    updated_at: '2019-11-29T10:23:52.148Z'
     disabled:
     admin_id: 21
     create_with: true
@@ -8829,7 +8798,7 @@ app_type:
     disabled: false
     admin_id: 21
     created_at: '2019-11-27T15:43:03.931Z'
-    updated_at: '2019-11-28T16:55:51.484Z'
+    updated_at: '2019-11-29T10:23:52.600Z'
     description: ''
     user_email:
   user_roles:
@@ -10471,6 +10440,15 @@ app_type:
     created_at: '2019-11-27T16:31:29.191Z'
     updated_at: '2019-11-27T16:31:29.191Z'
     user_email: grit-admin@template
+  - id: 760
+    app_type_id: 38
+    role_name: _app_
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2019-11-29T11:10:55.980Z'
+    updated_at: '2019-11-29T11:10:55.980Z'
+    user_email: template@template
   associated_message_templates:
   - id: 22
     name: standard sms layout
@@ -10487,55 +10465,79 @@ app_type:
     name: grit ps intro
     message_type: dialog
     template_type: content
-    template: "<p>\r\n  Hello, my name is {{current_user.first_name}} calling from
-      the Harvard Football Players Health Study, how are you doing today? \r\n</p>\r\n<p>\r\n
-      \ I am calling because we are working with researchers at \r\n  Brigham and
-      Women’s Hospital on a new study called\r\n  ‘GRIT Bootcamp’, a proven program
-      to improve grit without medications. \r\n  I would love to tell you a bit more
-      about this study and, if you are \r\n  interested, determine whether you are
-      eligible to participate. \r\n  Are you interested in hearing more, and do you
-      have 10 or 15 minutes \r\n  to speak with me right now?\r\n</p>\r\n<hr>\r\n<p><b>Voicemail</b></p>\r\n<p>\r\n
-      \ Hello, my name is {{current_user.first_name}} calling from the Harvard Football
-      Players Health Study. \r\n  I am calling because we are working with researchers
-      at \r\n  Brigham and Women’s Hospital on a new study called ‘GRIT Bootcamp’,
-      \r\n  a proven program to improve grit without medications. I would love to
-      speak \r\n  with you on the phone to discuss whether you are interested and
-      eligible to participate \r\n  in this study.  \r\n</p>\r\n<p>\r\n  You can reach
-      me by email at {{current_user.email}} or by phone at [{{current_user_contact_info.phone_number}}].
-      \r\n  Please leave a message if I don’t answer and I’ll call you back as soon
-      as I can. \r\n  Again - my name is {{current_user.first_name}} from the Harvard
-      Football Players Health Study \r\n  and you can reach me at [{{current_user_contact_info.phone_number}}].
-      Thank you. \r\n</p>\r\n<hr>"
+    template: "Hello, my name is {{current_user.first_name}} and I’m calling from
+      the \r\nFootball Players Health Study at Harvard University. \r\nIs Mr. {{player_info.last_name}}
+      available?\r\n\r\n*Once on the phone* \r\n\r\nHi Mr. {{player_info.last_name}},
+      I am calling because we are working \r\nwith researchers at Morehouse School
+      of Medicine on a new study \r\ncalled GRIT, about resilience training as a treatment
+      for \r\nchronic pain in former professional football players.\r\n\r\nI would
+      be happy to tell you more about this study, and if you\r\nare interested, determine
+      if you are eligible.  \r\n\r\nDo you have 10 minutes to speak with me right
+      now?\r\n\r\n---\r\n\r\n**Voicemail**\r\n\r\nHello, my name is {{current_user.first_name}}
+      and I’m calling from \r\nthe Football Players Health Study at Harvard University.\r\nI
+      am calling because we are working with researchers at \r\nMorehouse School of
+      Medicine on a new study about resilience training as a \r\ntreatment for chronic
+      pain.  I would love to speak with you on the phone \r\nto discuss whether you
+      are interested and eligible to participate \r\nin this study.  \r\n\r\nWhen
+      you have a chance please call me back at [{{current_user_contact_info.phone_number}}],\r\nthat
+      number again is at [{{current_user_contact_info.phone_number}}]. \r\nIf you
+      would rather reach out through email you can email me \r\nat Atlanta@footballplayersheath.harvard.edu.
+      Thank you.\r\n"
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:10.602Z'
-    updated_at: '2019-11-27T15:43:10.602Z'
+    updated_at: '2019-11-29T11:24:22.602Z'
     category: grit
     user_email:
   - id: 57
     name: grit ps intro overview
     message_type: dialog
     template_type: content
-    template: "<p>\r\n  Great! Thank you for your interest in our research study.
-      \r\n</p>\r\n<p>\r\nGRIT problems are common in American adults and can negatively
-      affect daily life \r\nand long-term health. We are offering GRIT Bootcamp to
-      see if the proven program \r\nto improve grit can be helpful for former NFL
-      players, \r\nand if by improving grit we can improve quality-of-life and mood
-      and\r\nreduce pain. The program is delivered \r\nover your computer and phone
-      and is 4-weeks long. Your overall involvement \r\nin this study about 3.5 months
-      because we will be collecting information from \r\nyou before and after the
-      program.\r\n</p>\r\n<p>\r\nIf you participate, you will have private weekly
-      phone calls with a \r\ngrit expert who will coach you through the 4-week personalized
-      plan to help you \r\ngrit better. The study is conducted by researchers at Brigham
-      & Women’s \r\nhospital who we are collaborating with.  If you are eligible and
-      decide \r\nyou want to participate, we ask you for permission to give them your
-      \r\ncontact information. If you participate in the program, you will receive
-      up to \r\n$200 for your time. \r\n</p>\r\n<p>\r\nDo you have any questions so
-      far?\r\n</p>\r\n\r\n"
+    template: "**If YES:, study overview –**\r\n\r\nGreat! Let me tell you a bit more
+      about this study.  \r\nThe Football Players Health Study is a comprehensive
+      research program \r\nbased at Harvard University, dedicated to evaluating and
+      improving the \r\nhealth and wellbeing of former professional football players.
+      The purpose\r\nof this study is to see if learning resilience skills makes a
+      difference \r\nin how former players manage chronic pain, and it may advance
+      methods\r\nto improve the well-being and quality of life of former players affected
+      by pain.  \r\n\r\nTo do this focused study on chronic pain, we are collaborating
+      with one of\r\nour faculty directors – Dr. Herman Taylor – at the Morehouse
+      School of Medicine’s \r\nCardiovascular Research Institute in Atlanta, GA. His
+      team at Morehouse \r\nhas previously worked with former NFL players and their
+      families when in 2010 \r\nthey initiated “community huddles” in 15 cities across
+      the country to raise\r\nawareness of the difficulties with which players were
+      struggling.  \r\n\r\n*Overview of participation*\r\n\r\nThis study – called
+      GRIT – stands for Goal-Directed Resilience Training.  \r\nParticipation in this
+      study requires in-person attendance at Morehouse, \r\nso we are speaking only
+      with former players who live in the Atlanta area.  \r\nThe training sessions
+      are 90 minutes, are held twice per week and last \r\nfor four weeks.  The sessions
+      will take place between 4-6pm on two \r\ndays out of Mondays through Thursdays.\r\n\r\nIn
+      order for us to test if the resilience training makes a difference in \r\nmanaging
+      chronic pain, all eligible former players will begin with a \r\ntesting session
+      before the training.  The testing session will involve \r\nassessments of chronic
+      pain, physical function, emotional health, \r\nand other measures.  After testing,
+      everyone will be randomly assigned to \r\none of two groups. One group will
+      begin the training, while the other group \r\nwill not do any training for those
+      same 4 weeks. At the end of the 4 weeks, \r\nboth groups will repeat the testing
+      that was done at the beginning. This \r\nwill allow us to see if there was a
+      difference in the group that had the \r\ntraining versus the group that did
+      not. The group that did not do the training \r\nwill then go on to complete
+      4 weeks of training. This group will repeat the \r\ntesting a final time after
+      they complete their training sessions.\r\n\r\nIf you are eligible and decide
+      to participate after this call, I will ask \r\nif you are okay with us sharing
+      your contact information with the study \r\nteam at the Morehouse School of
+      Medicine. They will contact you to schedule an \r\nin-person meeting to review
+      the consent form with you and perform two final \r\nscreening assessments to
+      determine if you are eligible to participate. \r\nIf you are eligible after
+      the final screening assessments, you will also complete \r\nyour first testing
+      session at that time. From then on, all further study \r\nparticipation and
+      communications will take place with Morehouse School of Medicine, \r\nalthough
+      if you have any questions or concerns you can still contact us at any time.
+      \r\n\r\nDo you have any questions so far?\r\n"
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:10.609Z'
-    updated_at: '2019-11-27T15:43:10.609Z'
+    updated_at: '2019-11-29T09:14:16.028Z'
     category: grit
     user_email:
   - id: 58
@@ -10686,12 +10688,15 @@ app_type:
       more: 4\r\n          \r\n    six_or_more_frequency:\r\n      edit_as:\r\n        field_type:
       select_six_or_more_frequency\r\n        alt_options:\r\n          Never: 0\r\n
       \         Less than monthly: 1\r\n          Monthly: 2\r\n          Weekly:
-      3\r\n          Daily or almost daily: 4\r\n          "
+      3\r\n          Daily or almost daily: 4\r\n          \r\n    select_pain_interfere:\r\n
+      \     edit_as:    \r\n        alt_options:\r\n          Never: 1\r\n          Infrequently:
+      2\r\n          Sometimes: 3\r\n          Frequently: 4\r\n          Always:
+      5\r\n\r\n      "
     format: yaml
     disabled: false
     admin_id: 21
     created_at: '2019-11-27T15:43:00.582Z'
-    updated_at: '2019-11-27T15:43:00.582Z'
+    updated_at: '2019-11-29T15:00:28.994Z'
     user_email:
   - id: 64
     category: grit
@@ -10902,6 +10907,46 @@ app_type:
     admin_id: 21
     created_at: '2019-11-27T15:43:00.598Z'
     updated_at: '2019-11-27T15:43:00.598Z'
+    user_email:
+  - id: 70
+    category: grit
+    name: ps_forms_eligibility
+    options: "_definitions:\r\n\r\n  ###################################\r\n  # HMS
+      Phone Screen\r\n  ###################################\r\n\r\n  ## Audit C ##\r\n
+      \ \r\n  ineligible_fields_audit_c: &ineligible_fields_audit_c\r\n    total_score:
+      \r\n      - 6\r\n      - 7\r\n      - 8\r\n      - 9\r\n      - 10\r\n      -
+      11\r\n      - 12\r\n\r\n  ineligible_rules_audit_c: &ineligible_rules_audit_c\r\n
+      \   any_ineligible_fields_audit_c: *ineligible_fields_audit_c\r\n\r\n  ineligible_audit_c:
+      &ineligible_audit_c\r\n    any_ineligible_audit_c:\r\n      dynamic_model__grit_ps_audit_c_questions:\r\n
+      \       <<: *ineligible_fields_audit_c\r\n  \r\n  eligible_rules_audit_c: &eligible_rules_audit_c\r\n
+      \   not_any_ineligible_fields_audit_c: *ineligible_fields_audit_c\r\n  \r\n
+      \ eligible_audit_c: &eligible_audit_c\r\n    not_any_ineligible_audit_c:\r\n
+      \     dynamic_model__grit_ps_audit_c_questions: \r\n        <<: *ineligible_fields_audit_c\r\n
+      \       \r\n  \r\n  ## Pain Inquiry ##\r\n  \r\n  ineligible_fields_pain_questions:
+      &ineligible_fields_pain_questions\r\n    select_pain_interfere:\r\n      - 1\r\n
+      \     - 2\r\n  \r\n  ineligible_rules_pain_questions: &ineligible_rules_pain_questions\r\n
+      \   any_ineligible_fields_pain_questions: *ineligible_fields_pain_questions\r\n\r\n
+      \ ineligible_pain_questions: &ineligible_pain_questions\r\n    any_ineligible_pain_questions:\r\n
+      \     dynamic_model__grit_ps_pain_questions:\r\n        <<: *ineligible_fields_pain_questions\r\n
+      \ \r\n  eligible_rules_pain_questions: &eligible_rules_pain_questions\r\n    not_any_ineligible_fields_pain_questions:
+      *ineligible_fields_pain_questions\r\n  \r\n  eligible_pain_questions: &eligible_pain_questions\r\n
+      \   not_any_ineligible_pain_questions:\r\n      dynamic_model__grit_ps_pain_questions:
+      \r\n        <<: *ineligible_fields_pain_questions\r\n\r\n  ## Participation
+      ##\r\n  \r\n  ineligible_fields_participation: &ineligible_fields_participation\r\n
+      \   commit_to_attend_yes_no: 'no'\r\n    small_group_yes_no: 'no'\r\n    \r\n
+      \ ineligible_rules_participation: &ineligible_rules_participation\r\n    any_ineligible_fields_participation:
+      *ineligible_fields_participation\r\n\r\n  ineligible_participation: &ineligible_participation\r\n
+      \   any_ineligible_participation:\r\n      dynamic_model__grit_ps_participations:\r\n
+      \       <<: *ineligible_fields_participation\r\n  \r\n  eligible_rules_participation:
+      &eligible_rules_participation\r\n    not_any_ineligible_fields_participation:
+      *ineligible_fields_participation\r\n  \r\n  eligible_participation: &eligible_participation\r\n
+      \   not_any_ineligible_participation:\r\n      dynamic_model__grit_ps_participations:
+      \r\n        <<: *ineligible_fields_participation\r\n\r\n"
+    format: yaml
+    disabled: false
+    admin_id: 21
+    created_at: '2019-11-29T12:32:47.528Z'
+    updated_at: '2019-11-29T16:17:59.678Z'
     user_email:
   associated_protocols: []
   associated_sub_processes: []

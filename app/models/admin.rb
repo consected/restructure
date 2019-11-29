@@ -36,6 +36,18 @@ class Admin < ActiveRecord::Base
     !self.disabled  ? super : :account_has_been_disabled
   end
 
+  # Get the user that corresponds to this admin
+  # @return [User | nil]
+  def matching_user
+    User.active.where(email: self.email).first
+  end
+
+  # Get the current app type for the user that corresponds to this admin
+  # @return [Admin::AppType | nil]
+  def matching_user_app_type
+    matching_user&.app_type
+  end
+
   # Simple way to ensure that this is not being run from inside Passenger
   def in_setup_script
     ENV['FPHS_ADMIN_SETUP']=='yes'

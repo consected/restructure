@@ -26,7 +26,8 @@ set search_path=grit,ml_app;
 -- # grit Screening
 \i db/app_specific/grit/aws-db/screening/create_ps_init_screening_table.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_audit_c_questions.sql
-\i db/app_specific/grit/aws-db/screening/create_ps_basic_responses.sql
+\i db/app_specific/grit/aws-db/screening/create_ps_pain_questions.sql
+\i db/app_specific/grit/aws-db/screening/create_ps_participations.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_eligibles.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_non_eligibles.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_eligibility_followups.sql

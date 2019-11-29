@@ -206,6 +206,19 @@ class Admin::UserAccessControl < ActiveRecord::Base
     end
   end
 
+  def self.create_template_control admin, app_type, resource_type, resource_name, default_access: :read, disabled: nil
+    # Fails quietly if the item already exists
+    Admin::UserRole.create(role_name: Settings::AppTemplateRole, app_type: app_type, user: User.template_user, current_admin: admin)
+
+    uac = Admin::UserAccessControl.where(role_name: Settings::AppTemplateRole, app_type: app_type, resource_type: resource_type, resource_name: resource_name).first
+
+    if uac
+      uac.update(role_name: Settings::AppTemplateRole, app_type: app_type, resource_type: resource_type, resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
+    else
+      Admin::UserAccessControl.create(role_name: Settings::AppTemplateRole, app_type: app_type, resource_type: resource_type, resource_name: resource_name, access: default_access, disabled: disabled, current_admin: admin)
+    end
+  end
+
 
   # Check which tables a user can view in the current app type, or an alternative app type if specified
   def self.view_tables? user, alt_app_type_id: nil

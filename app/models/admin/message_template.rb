@@ -11,6 +11,8 @@ class Admin::MessageTemplate < ActiveRecord::Base
   scope :layout_templates, ->{ where template_type: 'layout' }
   scope :dialog_templates, ->{ where message_type: 'dialog' }
 
+  HtmlRegEx = /<(p ?.*|br ?.*|div ?.*|ul ?.*|hr ?.*)>/
+
   def self.named name, type: nil
     res = where(name: name)
     res = res.where(message_type: type) if type
@@ -138,6 +140,17 @@ class Admin::MessageTemplate < ActiveRecord::Base
     substitute all_content, data: data, ignore_missing: ignore_missing
 
     return all_content
+  end
+
+  def self.text_to_html text
+    return text unless text.is_a? String
+
+    has_html = text.scan(HtmlRegEx).length > 0
+    unless has_html
+      text =  Kramdown::Document.new(text).to_html.html_safe
+    end
+
+    text
   end
 
 
