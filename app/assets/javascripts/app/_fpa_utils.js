@@ -142,6 +142,19 @@ _fpa.utils.make_readable_notes_expandable = function(block, max_height, click_ca
           $(this).addClass('not-expandable');
       };
   }).addClass('attached-expandable');
+
+  if($('.attached-expandable').length > 0) {
+    $('.expand-all-expandables').not('.attached-click').on('click', function () {
+      $('.attached-expandable').not('.expanded').click();
+    }).addClass('attached-click').show();
+    $('.shrink-all-expandables').not('.attached-click').on('click', function () {
+      $('.attached-expandable.expanded').click();
+    }).addClass('attached-click').show();
+  }
+  else {
+    $('.expand-all-expandables').not('.attached-click').hide();
+    $('.shrink-all-expandables').not('.attached-click').hide()
+  }
 };
 
 _fpa.utils.show_modal_results = function(){

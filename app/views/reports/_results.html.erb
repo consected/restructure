@@ -16,8 +16,8 @@
     <p class="text-center"><a href="#<%=@outer_block_id%>-clean-sql" data-toggle="collapse" class="collapsed">show SQL</a></p>
     <div class="row">
         <div class="col-md-20 col-md-offset-2 collapse clean-sql" id="<%=@outer_block_id%>-clean-sql">
-          <pre><%=@report.clean_sql%>
-          </pre>
+          <textarea class="admin-clean-sql"><%=@report.clean_sql%>
+          </textarea>
         </div>
     </div>
     <% end %>
