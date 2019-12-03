@@ -24,6 +24,7 @@ set search_path=grit,ml_app;
 \i db/app_specific/grit/aws-db/phone-screen/create_activity_log_assignment_phone_screens_table.sql
 
 -- # grit Screening
+\i db/app_specific/grit/aws-db/screening/create_grit_msm_screening_details.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_init_screening_table.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_audit_c_questions.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_pain_questions.sql
