@@ -258,6 +258,9 @@ class Report < ActiveRecord::Base
       end
     end
 
+    # Import config libraries
+    Admin::ConfigLibrary.make_substitutions! sql, :sql
+
     if options[:count_only]
       sql = "select count(*) \"result_count\" from (#{sql}) t"
     end

@@ -392,6 +392,10 @@ class Admin::AppType < Admin::AdminBase
       ms += ExtraOptions.config_libraries a
     end
 
+    associated_reports.all.each do |a|
+      ms += ExtraOptions.config_libraries a
+    end
+
     ms.sort {|a, b| a.id <=> b.id}.uniq
 
   end

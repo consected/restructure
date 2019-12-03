@@ -22,6 +22,42 @@ class Admin::ConfigLibrary < Admin::AdminBase
     l.options
   end
 
+  # Directly substitute the library configurations into the supplied text
+  # @param text [String] text that will be updated
+  # @param format [Symbol] :yaml or :sql
+  # @return [Array] list of Admin::ConfigLibrary instances that were substitued in
+  def self.make_substitutions! text, format
+
+    return unless text
+
+    if format == :yaml
+      prefix = '# '
+    elsif format == :sql
+      prefix = '-- '
+      direct_sub = true
+    end
+
+    reg = /#{prefix}@library\s+([^\s]+)\s+([^\s]+)\s*$/
+    res = text.match reg
+    all_libs = []
+
+    while res
+      category = res[1].strip
+      name = res[2].strip
+      lib = Admin::ConfigLibrary.where(category: category, name: name, format: format).first
+      all_libs << lib
+      if direct_sub
+        text.gsub!(res[0], lib.options || '')
+      else
+        text.gsub!(res[0], '')
+      end
+      res = text.match reg
+    end
+
+    all_libs
+  end
+
+
   def is_yaml?
     self.format.to_s == 'yaml'
   end
@@ -45,7 +81,7 @@ class Admin::ConfigLibrary < Admin::AdminBase
     end
 
     def restart_server
-      AppControl.restart_server
+      AppControl.restart_server if self.format.to_s == 'yaml'
     end
 
 

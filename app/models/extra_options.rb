@@ -365,21 +365,8 @@ class ExtraOptions
     c = options_text(config_obj)
     return [] unless c.present?
 
-    reg = /# @library\s+([^\s]+)\s+([^\s]+)\s*$/
+    Admin::ConfigLibrary.make_substitutions! c, :yaml
 
-    res = c.match reg
-
-    all_libs = []
-
-    while res
-      category = res[1].strip
-      name = res[2].strip
-      all_libs << Admin::ConfigLibrary.where(category: category, name: name, format: :yaml).first
-      c.gsub!(res[0], '')
-      res = c.match reg
-    end
-
-    all_libs
   end
 
   protected
