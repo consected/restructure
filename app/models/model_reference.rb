@@ -286,6 +286,7 @@ class ModelReference < ActiveRecord::Base
   def to_record
     return @to_record if @to_record
     @to_record = self.to_record_class.find(self.to_record_id)
+    raise FphsException.new "Model Reference (#{self.id}) 'to record' not found: #{self.to_record_class} #{self.to_record_id}" unless @to_record
     @to_record.current_user ||= self.current_user if self.current_user
     @to_record.parent_item = from_record if to_record.respond_to?(:parent_item)
     @to_record
