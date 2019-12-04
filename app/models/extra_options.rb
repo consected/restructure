@@ -365,14 +365,20 @@ class ExtraOptions
     c = options_text(config_obj)
     return [] unless c.present?
 
-    Admin::ConfigLibrary.make_substitutions! c, :yaml
+    format = config_obj.is_a?(Report) ? :sql : :yaml
+
+    Admin::ConfigLibrary.make_substitutions! c, format
 
   end
 
   protected
 
     def self.options_text config_obj
-      config_obj.options.dup
+      if config_obj.is_a?(Report)
+        config_obj.sql.dup
+      else
+        config_obj.options.dup
+      end
     end
 
     def self.set_defaults config_obj, all_options={}
