@@ -20,7 +20,7 @@ category_models.each do |m|
     <% else %>
     <div class="<%= layout_item_block_sizes[:regular] %> ">
       {{>sublist_controls sub_list="<%=m.full_item_types_name%>" order='asc'}}
-      <div class="dynamic-container resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
+      <div class="dynamic-container do-not-resize-children category-<%=category%> orientation-<%=orientation%>" id="<%=m.full_item_types_name%>-{{id}}-" data-sub-list="<%=m.full_item_types_name%>"></div>
     </div>
 <%
     end

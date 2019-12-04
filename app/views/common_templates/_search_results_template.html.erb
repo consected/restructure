@@ -100,6 +100,14 @@
     with_data = nil
   end
 
+  unless defined? prevent_create
+    prevent_create = nil
+  end
+
+  unless defined? prevent_edit
+    prevent_edit = nil
+  end
+
   unless defined? implementation_class
     implementation_class = nil
   else
@@ -217,6 +225,8 @@
     hide_rank_badge: <%=!!hide_rank_badge%>,
     hide_tracker_panel: <%=!!hide_tracker_panel%>,
     implementation_class_name: '<%=implementation_class_name%>',
+    prevent_edit: <%= !!prevent_edit %>,
+    prevent_create: <%= !!prevent_create %>,
     edit_button_href: Handlebars.compile('<%=edit_button_href%>'),
     show_item_type_flags_after: <%=!!show_item_type_flags_after%>,
     show_item_type_flags_before: <%=!!show_item_type_flags_before%>,
