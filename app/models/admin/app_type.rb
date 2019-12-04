@@ -297,8 +297,16 @@ class Admin::AppType < Admin::AdminBase
       ", names, names, names).order(id: :asc)
   end
 
-  def associated_dynamic_models
+  def associated_dynamic_models valid_resources_only: true
+
+    if valid_resources_only
+      uacs = user_access_controls.valid_resources
+    else
+      uacs = user_access_controls.active
+    end
+
     names = user_access_controls.valid_resources.where(resource_type: :table).select {|a| a.access && a.resource_name.start_with?( 'dynamic_model__')}.map{|n| n.resource_name.sub('dynamic_model__', '')}.uniq
+
     DynamicModel.active.where(table_name: names).order(id: :asc)
   end
 

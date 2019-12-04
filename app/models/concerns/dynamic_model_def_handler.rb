@@ -52,7 +52,7 @@ module DynamicModelDefHandler
           if self.name == 'ActivityLog'
             qs << app_type.associated_activity_logs.reorder('').to_sql
           elsif self.name == 'DynamicModel'
-            qs << app_type.associated_dynamic_models.reorder('').to_sql
+            qs << app_type.associated_dynamic_models(valid_resources_only: false).reorder('').to_sql
           elsif self.name == 'ExternalIdentifier'
             qs << app_type.associated_external_identifiers.reorder('').to_sql
           end

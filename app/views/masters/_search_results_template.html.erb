@@ -149,6 +149,8 @@
 
 <script>
   <%
+    all_cnames = []
+
     # Preload all of the general selections into cache so they can be used
     # This pulls dynamic model and activity log extra log types as separate items
     implementation_classes = ActivityLog.implementation_classes
@@ -166,8 +168,9 @@
         cnames = ["general_selections-item_type+#{ito.item_type}"]
       end
 
+      all_cnames += cnames
   %>
-  _fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
+  //_fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
 
   <% end %>
 
@@ -182,9 +185,10 @@
       cnames.push("general_selections-item_type+#{ito.item_type}");
     end
   end
+  all_cnames += cnames
   %>
-  _fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
-
+  //_fpa.cache_definitions(<%=cnames.to_json.html_safe%>);
+  _fpa.cache_definitions(<%=all_cnames.flatten.to_json.html_safe%>);
 </script>
 
 

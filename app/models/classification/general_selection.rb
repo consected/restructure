@@ -65,6 +65,12 @@ class Classification::GeneralSelection < ActiveRecord::Base
     item_types.include?("#{prefix_name(record)}_#{field_name}".to_sym)
   end
 
+  def self.get_implementation_classes
+    # For each of the implementation classes that can provide form_options.edit_as.alt_options configurations
+    @implementation_classes ||= ActivityLog.implementation_classes + DynamicModel.implementation_classes
+
+  end
+
   # Get the general selection configurations and override them with the form_options.edit_as.alt_options
   # from dynamic model and activity log extra option type configurations.
   # If alt_options override an existing select_... field, the general selection records for this will
@@ -87,9 +93,7 @@ class Classification::GeneralSelection < ActiveRecord::Base
     res = selector_collection(conditions)
     res = res.to_ary
 
-    # For each of the implementation classes that can provide form_options.edit_as.alt_options configurations
-    implementation_classes = ActivityLog.implementation_classes + DynamicModel.implementation_classes
-
+    implementation_classes = get_implementation_classes
     # Check the definition is ready to use and prepare it for use
     implementation_classes.reject! {|ic| !ic.definition.ready?}
 
