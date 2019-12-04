@@ -619,32 +619,6 @@ app_type:
     created_at: '2019-11-27T15:43:10.870Z'
     updated_at: '2019-11-28T16:34:08.389Z'
     user_email:
-  - id: 1753
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__screening_followup
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:10.876Z'
-    updated_at: '2019-11-28T16:34:08.392Z'
-    user_email:
-  - id: 1754
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__perform_screening_followup
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:10.880Z'
-    updated_at: '2019-11-28T16:34:08.396Z'
-    user_email:
   - id: 1756
     user_id:
     resource_type: table
@@ -823,9 +797,9 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: tracker
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.000Z'
-    updated_at: '2019-11-28T16:34:08.458Z'
+    updated_at: '2019-12-02T14:38:02.962Z'
     user_email:
   - id: 1778
     user_id:
@@ -1125,19 +1099,6 @@ app_type:
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.193Z'
     updated_at: '2019-11-28T16:34:08.565Z'
-    user_email:
-  - id: 1811
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__screening_followup
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.202Z'
-    updated_at: '2019-11-28T16:34:08.569Z'
     user_email:
   - id: 1812
     user_id:
@@ -1538,7 +1499,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.578Z'
     updated_at: '2019-11-28T16:34:08.710Z'
     user_email:
@@ -1606,19 +1567,6 @@ app_type:
     role_name: pi
     created_at: '2019-11-27T15:43:11.602Z'
     updated_at: '2019-11-28T16:34:08.729Z'
-    user_email:
-  - id: 1888
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__schedule_screening_2
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:11.606Z'
-    updated_at: '2019-11-28T16:34:08.733Z'
     user_email:
   - id: 1891
     user_id:
@@ -1720,7 +1668,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.658Z'
     updated_at: '2019-11-28T16:34:08.783Z'
     user_email:
@@ -1909,28 +1857,28 @@ app_type:
   - id: 1919
     user_id:
     resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__confirmed_msm_share
+    resource_name: activity_log__grit_assignment__transferred_to_msm
     options: ''
     access: create
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener
+    role_name: hms coordinator
     created_at: '2019-11-27T15:43:11.737Z'
-    updated_at: '2019-11-28T16:34:08.847Z'
+    updated_at: '2019-12-02T15:21:12.606Z'
     user_email:
   - id: 1920
     user_id:
     resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__confirmed_msm_share
+    resource_name: activity_log__grit_assignment__transferred_to_msm
     options: ''
-    access: create
+    access: read
     disabled: false
     admin_id: 21
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-27T15:43:11.741Z'
-    updated_at: '2019-11-28T16:34:08.851Z'
+    updated_at: '2019-12-02T15:20:23.822Z'
     user_email:
   - id: 1921
     user_id:
@@ -1954,7 +1902,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.749Z'
     updated_at: '2019-11-28T16:34:08.858Z'
     user_email:
@@ -1983,32 +1931,6 @@ app_type:
     role_name: phone screener
     created_at: '2019-11-27T15:43:11.757Z'
     updated_at: '2019-11-28T16:34:08.865Z'
-    user_email:
-  - id: 1925
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__perform_screening_followup
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.762Z'
-    updated_at: '2019-11-28T16:34:08.869Z'
-    user_email:
-  - id: 1926
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__screening_followup
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.765Z'
-    updated_at: '2019-11-28T16:34:08.873Z'
     user_email:
   - id: 1928
     user_id:
@@ -2088,32 +2010,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.792Z'
     updated_at: '2019-11-28T16:34:08.901Z'
     user_email:
-  - id: 1934
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__completed_intervention
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:11.796Z'
-    updated_at: '2019-11-28T16:34:08.904Z'
-    user_email:
-  - id: 1935
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__schedule_screening_2
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener
-    created_at: '2019-11-27T15:43:11.800Z'
-    updated_at: '2019-11-28T16:34:08.908Z'
-    user_email:
   - id: 1936
     user_id:
     resource_type: activity_log_type
@@ -2140,149 +2036,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.808Z'
     updated_at: '2019-11-28T16:34:08.917Z'
     user_email:
-  - id: 1938
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignment_phone_screens
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.812Z'
-    updated_at: '2019-11-28T16:34:08.921Z'
-    user_email:
-  - id: 1939
-    user_id:
-    resource_type: table
-    resource_name: activity_log__grit_assignments
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.816Z'
-    updated_at: '2019-11-28T16:34:08.926Z'
-    user_email:
-  - id: 1940
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__withdraw
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.821Z'
-    updated_at: '2019-11-28T16:34:08.931Z'
-    user_email:
-  - id: 1941
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__completed_intervention
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.826Z'
-    updated_at: '2019-11-28T16:34:08.936Z'
-    user_email:
-  - id: 1942
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__appointment
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.830Z'
-    updated_at: '2019-11-28T16:34:08.940Z'
-    user_email:
-  - id: 1943
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__assign_id
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.834Z'
-    updated_at: '2019-11-28T16:34:08.944Z'
-    user_email:
-  - id: 1944
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__completed
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.838Z'
-    updated_at: '2019-11-28T16:34:08.948Z'
-    user_email:
-  - id: 1945
-    user_id:
-    resource_type: table
-    resource_name: msm_grit_id_numbers
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.842Z'
-    updated_at: '2019-11-28T16:34:08.952Z'
-    user_email:
-  - id: 1946
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_appointments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.846Z'
-    updated_at: '2019-11-28T16:34:08.956Z'
-    user_email:
-  - id: 1947
-    user_id:
-    resource_type: table
-    resource_name: dynamic_model__grit_withdrawals
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.850Z'
-    updated_at: '2019-11-28T16:34:08.959Z'
-    user_email:
-  - id: 1948
-    user_id:
-    resource_type: general
-    resource_name: app_type
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:11.854Z'
-    updated_at: '2019-11-28T16:34:08.963Z'
-    user_email:
   - id: 1949
     user_id:
     resource_type: table
@@ -2292,7 +2045,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.858Z'
     updated_at: '2019-11-28T16:34:08.966Z'
     user_email:
@@ -2309,19 +2062,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.862Z'
     updated_at: '2019-11-28T16:34:08.970Z'
     user_email:
-  - id: 1951
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__schedule_screening_2
-    options: ''
-    access: create
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-27T15:43:11.866Z'
-    updated_at: '2019-11-28T16:34:08.973Z'
-    user_email:
   - id: 1952
     user_id:
     resource_type: table
@@ -2331,7 +2071,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.870Z'
     updated_at: '2019-11-28T16:34:08.977Z'
     user_email:
@@ -2357,7 +2097,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.882Z'
     updated_at: '2019-11-28T16:34:08.985Z'
     user_email:
@@ -2370,7 +2110,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.886Z'
     updated_at: '2019-11-28T16:34:08.988Z'
     user_email:
@@ -2383,7 +2123,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.890Z'
     updated_at: '2019-11-28T16:34:08.992Z'
     user_email:
@@ -2435,7 +2175,7 @@ app_type:
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-27T15:43:11.927Z'
     updated_at: '2019-11-28T16:34:09.030Z'
     user_email:
@@ -2530,19 +2270,6 @@ app_type:
     created_at: '2019-11-27T15:43:11.998Z'
     updated_at: '2019-11-28T16:34:09.078Z'
     user_email:
-  - id: 1983
-    user_id:
-    resource_type: activity_log_type
-    resource_name: activity_log__grit_assignment__subject_consented
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: tracker
-    created_at: '2019-11-27T15:43:12.010Z'
-    updated_at: '2019-11-28T16:34:09.085Z'
-    user_email:
   - id: 1985
     user_id:
     resource_type: limited_access
@@ -2568,19 +2295,6 @@ app_type:
     role_name: admin
     created_at: '2019-11-27T15:43:12.025Z'
     updated_at: '2019-11-28T16:34:09.096Z'
-    user_email:
-  - id: 1990
-    user_id:
-    resource_type: general
-    resource_name: view_reports
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-27T15:43:12.037Z'
-    updated_at: '2019-11-28T16:34:09.107Z'
     user_email:
   - id: 2103
     user_id:
@@ -2699,32 +2413,6 @@ app_type:
     created_at: '2019-11-28T16:55:53.200Z'
     updated_at: '2019-11-28T16:55:55.377Z'
     user_email:
-  - id: 2112
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_ready_for_sign_off___pi
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: pi
-    created_at: '2019-11-28T16:55:53.218Z'
-    updated_at: '2019-11-28T16:55:55.470Z'
-    user_email:
-  - id: 2113
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_ready_for_sign_off___staff
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: staff - inex
-    created_at: '2019-11-28T16:55:53.222Z'
-    updated_at: '2019-11-28T16:55:55.539Z'
-    user_email:
   - id: 2114
     user_id:
     resource_type: report
@@ -2767,15 +2455,15 @@ app_type:
   - id: 2117
     user_id:
     resource_type: report
-    resource_name: grit__ready_for_msm_screening
+    resource_name: grit__ready_for_msm_transfer
     options: ''
     access: read
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: phone screener
     created_at: '2019-11-28T16:55:53.391Z'
-    updated_at: '2019-11-28T16:55:55.894Z'
+    updated_at: '2019-12-01T11:52:59.910Z'
     user_email:
   - id: 2118
     user_id:
@@ -2806,15 +2494,15 @@ app_type:
   - id: 2120
     user_id:
     resource_type: report
-    resource_name: grit__ready_for_informed_consent
+    resource_name: grit__ready_for_msm_screening
     options: ''
     access: read
     disabled: false
     admin_id: 21
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     created_at: '2019-11-28T16:55:53.563Z'
-    updated_at: '2019-11-28T16:55:56.146Z'
+    updated_at: '2019-12-01T12:00:36.569Z'
     user_email:
   - id: 2121
     user_id:
@@ -2845,7 +2533,7 @@ app_type:
   - id: 2123
     user_id:
     resource_type: report
-    resource_name: grit__ready_for_informed_consent
+    resource_name: grit__ready_for_msm_screening
     options: ''
     access: read
     disabled: false
@@ -2853,46 +2541,7 @@ app_type:
     app_type_id: 38
     role_name: tracker
     created_at: '2019-11-28T16:55:53.601Z'
-    updated_at: '2019-11-28T16:55:56.426Z'
-    user_email:
-  - id: 2124
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_interventionist_assignments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-28T16:55:53.605Z'
-    updated_at: '2019-11-28T16:55:56.570Z'
-    user_email:
-  - id: 2125
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_interventionist_assignments_report
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: admin
-    created_at: '2019-11-28T16:55:53.615Z'
-    updated_at: '2019-11-28T16:55:56.669Z'
-    user_email:
-  - id: 2126
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_interventionist_assignments_report
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: phone screener 2
-    created_at: '2019-11-28T16:55:53.618Z'
-    updated_at: '2019-11-28T16:55:56.751Z'
+    updated_at: '2019-12-01T12:00:07.930Z'
     user_email:
   - id: 2127
     user_id:
@@ -2919,71 +2568,6 @@ app_type:
     role_name: pi
     created_at: '2019-11-28T16:55:53.634Z'
     updated_at: '2019-11-28T16:55:56.977Z'
-    user_email:
-  - id: 2129
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_in_process___exited
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-28T16:55:53.643Z'
-    updated_at: '2019-11-28T16:55:57.070Z'
-    user_email:
-  - id: 2130
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_calendar
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-28T16:55:53.648Z'
-    updated_at: '2019-11-28T16:55:57.207Z'
-    user_email:
-  - id: 2131
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_interventionist_assignments
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: ''
-    created_at: '2019-11-28T16:55:53.654Z'
-    updated_at: '2019-11-28T16:55:57.294Z'
-    user_email:
-  - id: 2132
-    user_id:
-    resource_type: report
-    resource_name: grit__grit_interventionist_assignments_report
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: ''
-    created_at: '2019-11-28T16:55:53.658Z'
-    updated_at: '2019-11-28T16:55:57.378Z'
-    user_email:
-  - id: 2133
-    user_id:
-    resource_type: report
-    resource_name: grit__search_grit_subject
-    options: ''
-    access:
-    disabled: false
-    admin_id: 21
-    app_type_id: 38
-    role_name: interventionist
-    created_at: '2019-11-28T16:55:53.662Z'
-    updated_at: '2019-11-28T16:55:57.482Z'
     user_email:
   - id: 2136
     user_id:
@@ -3088,6 +2672,123 @@ app_type:
     role_name: phone screener
     created_at: '2019-11-29T16:10:26.262Z'
     updated_at: '2019-11-29T16:10:26.262Z'
+    user_email:
+  - id: 2146
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_msm_screening_details
+    options:
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: _app_
+    created_at: '2019-12-01T12:12:39.371Z'
+    updated_at: '2019-12-01T12:12:39.371Z'
+    user_email:
+  - id: 2147
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment__msm_screening_appointment
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: tracker
+    created_at: '2019-12-01T12:19:06.306Z'
+    updated_at: '2019-12-01T12:19:06.306Z'
+    user_email:
+  - id: 2149
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment__post_testing_1
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: msm coordinator
+    created_at: '2019-12-02T10:35:39.314Z'
+    updated_at: '2019-12-02T10:35:39.314Z'
+    user_email:
+  - id: 2150
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment__post_testing_2
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: msm coordinator
+    created_at: '2019-12-02T10:35:49.764Z'
+    updated_at: '2019-12-02T10:35:49.764Z'
+    user_email:
+  - id: 2151
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment__msm_screening_appointment
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: msm coordinator
+    created_at: '2019-12-02T10:41:11.803Z'
+    updated_at: '2019-12-02T10:41:11.803Z'
+    user_email:
+  - id: 2152
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_secure_notes
+    options:
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: _app_
+    created_at: '2019-12-02T13:11:42.478Z'
+    updated_at: '2019-12-02T13:11:42.478Z'
+    user_email:
+  - id: 2153
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_msm_screening_details
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: msm coordinator
+    created_at: '2019-12-02T14:07:37.323Z'
+    updated_at: '2019-12-02T14:07:37.323Z'
+    user_email:
+  - id: 2154
+    user_id:
+    resource_type: table
+    resource_name: dynamic_model__grit_msm_screening_details
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: tracker
+    created_at: '2019-12-02T14:07:58.815Z'
+    updated_at: '2019-12-02T14:07:58.815Z'
+    user_email:
+  - id: 2155
+    user_id:
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment__assign_id
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 21
+    app_type_id: 38
+    role_name: tracker
+    created_at: '2019-12-02T14:38:11.274Z'
+    updated_at: '2019-12-02T14:38:11.274Z'
     user_email:
   valid_associated_activity_logs:
   - id: 85
@@ -3219,7 +2920,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:02.285Z'
-    updated_at: '2019-11-29T17:06:43.846Z'
+    updated_at: '2019-12-02T12:16:43.423Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -3488,22 +3189,7 @@ app_type:
       exit_ps\r\n\r\n\r\n        ###### Create tracker entry with HMS Eligible record
       ######\r\n        - activity_log__grit_assignment:\r\n            if:\r\n              <<:
       *all_eligible_and_gave_consent\r\n            in: master\r\n            with:\r\n
-      \             extra_log_type: hms_ps_eligible\r\n\r\n\r\n        ###### Create
-      inclusion exclusion checklist ######\r\n        - activity_log__grit_assignment_inex_checklist:\r\n
-      \           if:\r\n              <<: *all_eligible_and_gave_consent\r\n            in:
-      master\r\n            with:\r\n              extra_log_type: phone_screen_review\r\n\r\n
-      \       ###### Grant MSM Staff access to participant ######\r\n        - dynamic_model__grit_access_msm_staffs:\r\n
-      \           in: master\r\n            if:\r\n              <<: *all_eligible_and_gave_consent\r\n
-      \             not_all_access:\r\n                dynamic_model__grit_access_msm_staffs:\r\n
-      \                 id:\r\n                    condition: IS NOT NULL\r\n\r\n
-      \       ###### Grant PI access to participant ######\r\n        - dynamic_model__grit_access_pis:\r\n
-      \           in: master\r\n            if:\r\n              <<: *all_eligible_and_gave_consent\r\n
-      \             not_all_access:\r\n                dynamic_model__grit_access_pis:\r\n
-      \                 id:\r\n                    condition: IS NOT NULL\r\n\r\n\r\n\r\n\r\n\r\n
-      \ ##### Notify the reviewers that the phone screen has been completed\r\n  #####
-      The participant was eligible or possibly eligible\r\n  #####\r\n      notify:\r\n
-      \       - <<: *notify_ps_complete\r\n          if:\r\n            <<: *all_eligible_and_gave_consent\r\n\r\n
-      \       - <<: *notify_ps_complete_sms\r\n          if:\r\n            <<: *all_eligible_and_gave_consent\r\n\r\n\r\ntest_condition:\r\n
+      \             extra_log_type: hms_ps_eligible\r\n\r\n\r\n\r\n\r\ntest_condition:\r\n
       \ label: Test Condition\r\n  creatable_if:\r\n      <<: *eligible_pain_questions\r\n"
     hide_item_list_panel: true
     main_log_name: ''
@@ -3518,14 +3204,15 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:02.385Z'
-    updated_at: '2019-11-29T10:23:51.182Z'
+    updated_at: '2019-12-03T10:05:04.182Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
     extra_log_types: "# @library grit enabled_if\r\n# @library grit exit\r\n# @library
-      grit filestore_container\r\n\r\n\r\n_default:\r\n  <<: *access_defaults\r\n\r\n
-      \ view_options:\r\n    hide_unless_creatable: true\r\n\r\n\r\n###################################\r\nschedule_screening:\r\n
+      grit eligibility\r\n# @library grit secure_notes\r\n\r\n# @library grit filestore_container\r\n\r\n\r\n_default:\r\n
+      \ <<: *access_defaults\r\n\r\n  view_options:\r\n    hide_unless_creatable:
+      true\r\n\r\n\r\n\r\n###################################\r\nschedule_screening:\r\n
       \ label: Schedule HMS Screening\r\n###################################\r\n\r\n
       \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
       \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
@@ -3549,177 +3236,93 @@ app_type:
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
       \       extra_log_type: schedule_screening\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
       \       extra_log_type: consent_to_share_details\r\n    not_any_exit:\r\n      <<:
-      *any_exit_or_complete\r\n\r\n\r\n###################################\r\nconfirmed_msm_share:\r\n
-      \ label: Shared Info with MSM\r\n###################################\r\n\r\n
-      \ fields: \r\n\r\n  showable_if:\r\n    always: true\r\n\r\n  caption_before:\r\n
-      \   all_fields:\r\n      This records that the participant has been emailed\r\n
-      \     to confirm information has been sent to MSM.\r\n      \r\n  creatable_if:\r\n
-      \   all:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      consent_to_share_details\r\n    not_any:  \r\n      <<: *any_exit_or_complete\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: confirmed_msm_share\r\n\r\n\r\n\r\n\r\n###################################\r\nschedule_screening_2:\r\n
-      \ label: Schedule MSM Screening\r\n###################################  \r\n
-      \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
-      \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
-      \   select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts:
-      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
-      Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes for
-      the screener    \r\n\r\n      *Do not enter personal health information here*\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
-      \       extra_log_type: \r\n          - eligible\r\n      any:\r\n        dynamic_model__grit_ps_eligibles:\r\n
-      \           consent_to_pass_info_to_msm_yes_no: 'yes'\r\n            consent_to_pass_info_to_msm_2_yes_no:
-      'yes'\r\n\r\n    not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n\r\n
-      \ field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type:
-      select_user_with_role_phone_screener_2\r\n    select_record_from_player_contacts:\r\n
-      \     edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n
-      \ showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nscreening_followup:\r\n
-      \ label: Schedule Informed Consent Follow Up\r\n###################################\r\n\r\n
-      \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
-      \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
-      \   select_who: Who will perform the follow up?\r\n    select_record_from_player_contacts:
-      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
-      Scheduled time (Eastern Time)\r\n    notes: Additional notes\r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: \r\n          - appointment\r\n          - exit_not_consented\r\n
-      \         - subject_consented\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete\r\n\r\n
-      \ field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type:
-      select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n
-      \     edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n\r\n\r\n\r\n###################################
-      \     \r\nperform_screening_followup:\r\n  label: Perform Informed Consent Review\r\n###################################\r\n
-      \ \r\n  references:\r\n    grit_screening:\r\n      from: this\r\n      add:
-      one_to_this\r\n#  caption_before:\r\n#    all_fields: |\r\n#      Record the
-      eligibility of the participant and any additional notes needed to perform the
-      phone screening follow up.\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n
-      \     dynamic_model__grit_ps_eligibles:\r\n        interested_yes_no: 'yes'
-      \       \r\n#      activity_log__grit_assignment_inex_checklists:\r\n#        extra_log_type:
-      finalize_phone_screen_checklist\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: appointment\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete\r\n
-      \       \r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n  save_trigger:\r\n
-      \   on_create:\r\n    \r\n      create_reference:\r\n      \r\n        #####
-      not a good time to speak - reschedule \r\n        - activity_log__grit_assignment:\r\n
-      \           if: \r\n              all:\r\n                dynamic_model__grit_screenings:\r\n
-      \                 id: \r\n                    this_references: id\r\n                  good_time_to_speak_blank_yes_no:
-      \r\n                    - left voicemail\r\n                    - 'no'                      \r\n
-      \                   \r\n            in: master\r\n            with:\r\n              extra_log_type:
-      screening_followup\r\n              select_who: current_user_email\r\n              follow_up_when:
-      \r\n                dynamic_model__grit_screenings: \r\n                  id:\r\n
-      \                   this_references: id\r\n                  callback_date:
-      return_value\r\n              follow_up_time: \r\n                dynamic_model__grit_screenings:
-      \r\n                  id:\r\n                    this_references: id\r\n                  callback_time:
-      return_value\r\n              notes: Informed consent review call went to voicemail
-      or participant requested a call back\r\n              select_record_from_player_contacts:\r\n
-      \               activity_log__grit_assignments:\r\n                  extra_log_type:
-      screening_followup\r\n                  select_record_from_player_contacts:
-      return_value\r\n\r\n\r\n        ###### Informed Consent not performed - subject
-      not interested\r\n        - activity_log__grit_assignment:\r\n            if:
-      \r\n              any:\r\n                all_not_consented:\r\n                  dynamic_model__grit_screenings:\r\n
-      \                   id: \r\n                      this_references: id\r\n                    good_time_to_speak_blank_yes_no:
-      'not interested'\r\n            in: master\r\n            with:\r\n              extra_log_type:
-      exit_not_consented\r\n\r\n        ###### Informed Consent was performed but
-      the subject did not consent\r\n        - activity_log__grit_assignment:\r\n
-      \           if: \r\n              any:\r\n                all_not_consented:\r\n
-      \                 dynamic_model__grit_screenings:\r\n                    id:
-      \r\n                      this_references: id\r\n                    consent_performed_yes_no:
-      'yes'\r\n                    did_subject_consent_yes_no: 'no'                    \r\n
-      \           in: master\r\n            with:\r\n              extra_log_type:
-      exit_not_consented\r\n\r\n        ##### The subject consented\r\n        - activity_log__grit_assignment:\r\n
-      \           if: \r\n              all_consented:\r\n                dynamic_model__grit_screenings:\r\n
-      \                 id: \r\n                    this_references: id\r\n                  consent_performed_yes_no:
-      'yes'\r\n                  did_subject_consent_yes_no: 'yes'\r\n                    \r\n
-      \           in: master\r\n            with:\r\n              extra_log_type:
-      appointment\r\n\r\n  save_action:\r\n    on_create:\r\n      show_panel:\r\n
-      \       value: activity_log__grit_assignments\r\n\r\n\r\n\r\n###################################\r\nappointment:\r\n
-      \ label: Participant Enrolled\r\n###################################\r\n  \r\n
-      \ fields:\r\n\r\n  references:\r\n    dynamic_model__grit_appointment:\r\n      from:
-      master\r\n      add: one_to_master\r\n      \r\n    activity_log__grit_assignment:\r\n
-      \     from: master\r\n      add: one_to_master\r\n      add_with: \r\n        extra_log_type:
-      assign_id\r\n      filter_by: \r\n        extra_log_type: assign_id\r\n      view_as:\r\n
-      \       eidt: hide\r\n        show: hide\r\n  \r\n  view_options:\r\n    always_embed_reference:
-      dynamic_model__grit_appointment\r\n    hide_unless_creatable: true\r\n\r\n  caption_before:\r\n
-      \   reference_activity_log__grit_assignment: |\r\n      Click **+ Assign ID**
-      to record the MSM Study ID for this participant\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n    not_any:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: appointment\r\n\r\n
-      \ save_trigger:\r\n    on_save:\r\n      create_reference:    \r\n        ######
-      Grant Interventionist access to participant ######\r\n        - dynamic_model__grit_access_interventionists:\r\n
-      \           in: master\r\n            if:\r\n              not_all_iv_set:\r\n
-      \               dynamic_model__grit_appointments:\r\n                  interventionist:\r\n
-      \                   - ''\r\n                    - null\r\n              not_all_access:\r\n
-      \               dynamic_model__grit_access_interventionists:\r\n                  id:\r\n
-      \                   condition: IS NOT NULL\r\n            with:\r\n              assign_access_to_user_id:\r\n
-      \               dynamic_model__grit_appointments:\r\n                  interventionist:
-      return_value\r\n\r\n      update_reference:\r\n        ###### Change Interventionist
-      access to participant ######\r\n        - dynamic_model__grit_access_interventionists:\r\n
-      \           in: master\r\n            if:\r\n              not_all_iv_set:\r\n
-      \               dynamic_model__grit_appointments:\r\n                  interventionist:\r\n
-      \                   - ''\r\n                    - null\r\n              all_access:\r\n
-      \               dynamic_model__grit_access_interventionists:\r\n                  id:\r\n
-      \                   condition: IS NOT NULL\r\n            first:\r\n              dynamic_model__grit_access_interventionists:\r\n
-      \               update: return_result\r\n            with:\r\n              assign_access_to_user_id:\r\n
-      \               dynamic_model__grit_appointments:\r\n                  interventionist:
-      return_value\r\n\r\n  \r\n      \r\n\r\n    on_create:\r\n      create_reference:\r\n
-      \       - dynamic_model__grit_appointment:\r\n            in: this\r\n            with:\r\n
-      \             visit_start_date: today()\r\n              select_status: confirmed\r\n
-      \           if:\r\n              not_any_already_created:\r\n                dynamic_model__grit_appointments:\r\n
-      \                 id:\r\n                    this_references: id\r\n#        -
-      activity_log__grit_assignment:                    \r\n#            in: master\r\n#
-      \           with:\r\n#              extra_log_type: assign_id\r\n#            if:\r\n#
-      \             not_any_already_created:\r\n#                activity_log__grit_assignments:\r\n#
-      \                 extra_log_type: assign_id\r\n\r\n      \r\n    \r\n      notify:\r\n
-      \     - type: email\r\n        role: email - grit tracker new participant\r\n
-      \       \r\n        layout_template: grit notification layout\r\n        content_template:
-      grit notification message\r\n        extra_substitutions:\r\n          reason:
-      ''\r\n          extra_text: |\r\n            This participant has enrolled after
-      informed consent.\r\n          panel_tab: activity-log--grit-assignments\r\n
-      \       subject: Notification of New GRIT Enrollment\r\n        \r\n      -
-      type: sms\r\n        role: sms - grit tracker new participant\r\n        layout_template:
-      standard sms layout\r\n        content_template: grit sms notification\r\n        subject:
-      New GRIT Enrollment\r\n\r\n\r\n\r\n\r\n###################################\r\nassign_id:\r\n
+      *any_exit_or_complete\r\n\r\n\r\n###################################\r\ntransferred_to_msm:\r\n
+      \ label: Transfer to MSM\r\n###################################\r\n  \r\n  fields:\r\n
+      \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject was found
+      to be eligible in the HMS Phone Screen and has\r\n      been passed to MSM for
+      screening.\r\n      \r\n      Ensure the participant has been emailed\r\n      to
+      confirm information has been sent to MSM.\r\n      \r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
+      hms_ps_eligible\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
+      \       extra_log_type: transferred_to_msm\r\n    not_any_exit:\r\n      <<:
+      *any_exit_or_complete\r\n  \r\n\r\n  # Always show, so we know why a player's
+      records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n  save_trigger:\r\n
+      \   on_create:\r\n      create_reference:\r\n      \r\n        ###### Grant
+      MSM Staff access to participant ######\r\n        - dynamic_model__grit_access_msm_staffs:\r\n
+      \           in: master\r\n            if:\r\n              <<: *all_eligible_and_gave_consent\r\n
+      \             not_all_access:\r\n                dynamic_model__grit_access_msm_staffs:\r\n
+      \                 id:\r\n                    condition: IS NOT NULL\r\n\r\n
+      \       ###### Grant PI access to participant ######\r\n        - dynamic_model__grit_access_pis:\r\n
+      \           in: master\r\n            if:\r\n              <<: *all_eligible_and_gave_consent\r\n
+      \             not_all_access:\r\n                dynamic_model__grit_access_pis:\r\n
+      \                 id:\r\n                    condition: IS NOT NULL\r\n\r\n\r\n\r\n\r\n\r\n\r\n###################################\r\nmsm_screening_appointment:\r\n
+      \ label: MSM Screening\r\n###################################\r\n  \r\n  fields:\r\n\r\n
+      \ references:\r\n    dynamic_model__grit_msm_screening_detail:\r\n      from:
+      master\r\n      add: one_to_master\r\n      \r\n\r\n  view_options:\r\n    hide_unless_creatable:
+      true\r\n\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n            \r\n    not_any_exit:
+      *any_exit_or_complete\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
+      \       extra_log_type: msm_screening_appointment\r\n    all_transferred:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: transferred_to_msm\r\n\r\n\r\n\r\n###################################\r\nassign_id:\r\n
       \ label: Assign ID\r\n###################################\r\n  \r\n  fields:\r\n\r\n
       \ references:\r\n    msm_grit_id_number:\r\n      from: master\r\n      add:
       one_to_master\r\n      prevent_disable: true\r\n      \r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: appointment\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
-      \   not_any:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      assign_id\r\n\r\n\r\n#  save_trigger:\r\n#    on_create:\r\n \r\n#      create_reference:\r\n
-      \     \r\n#        - msm_grit_id_number:\r\n#            in: this\r\n#            with:
-      []\r\n  save_action:\r\n    on_create:\r\n      show_panel:\r\n        value:
-      activity_log__grit_assignments\r\n                              \r\n\r\n\r\n###################################\r\nconsent_mailing:\r\n
-      \ label: Mail Consent Documents\r\n###################################\r\n\r\n
-      \ fields: \r\n  references:\r\n    grit_consent_mailing:\r\n      from: master\r\n
-      \     add: one_to_this\r\n\r\n  creatable_if:\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: consent_mailing\r\n    not_any_exit:\r\n      <<: *any_exit_or_complete\r\n\r\n
-      \ \r\n    \r\n###################################\r\ncompleted_intervention:\r\n
-      \ label: Completed 4-Week BBTI\r\n###################################\r\n  \r\n
-      \ fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The participant
-      completed the 4-week BBTI.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n
-      \   all:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      assign_id\r\n    not_any_exit: *any_exit_or_complete\r\n    not_all:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: completed_intervention\r\n\r\n\r\n    \r\n###################################\r\ncompleted:\r\n
+      \       extra_log_type: msm_screening_appointment\r\n            \r\n    not_any_exit:
+      *any_exit_or_complete\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
+      \       extra_log_type: assign_id\r\n\r\n\r\n\r\n\r\n###################################\r\nappointment:\r\n
+      \ label: Participant Enrolled\r\n###################################\r\n  \r\n
+      \ fields:\r\n\r\n  references:\r\n    dynamic_model__grit_appointment:\r\n      from:
+      master\r\n      add: one_to_master\r\n      \r\n  \r\n  view_options:\r\n    always_embed_reference:
+      dynamic_model__grit_appointment\r\n    hide_unless_creatable: true\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
+      \   <<: *not_enrolled\r\n    all_screened:\r\n      activity_log__grit_assignments:\r\n
+      \       extra_log_type: msm_screening_appointment\r\n      \r\n\r\n\r\n\r\n\r\n###################################\r\npost_testing_1:\r\n
+      \ label: Post Testing 1\r\n###################################  \r\n  fields:
+      \r\n#    - select_who\r\n#    - select_record_from_player_contacts\r\n    -
+      follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n#
+      \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
+      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
+      Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n
+      \   not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: post_testing_1\r\n
+      \       \r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\npost_testing_2:\r\n
+      \ label: Post Testing 2\r\n###################################  \r\n  fields:
+      \r\n#    - select_who\r\n#    - select_record_from_player_contacts\r\n    -
+      follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n#
+      \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
+      Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
+      Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n\r\n
+      \   not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: post_testing_2\r\n\r\n
+      \ showable_if:\r\n    always: true\r\n\r\n\r\n\r\n    \r\n###################################\r\ncompleted:\r\n
       \ label: Completed Study\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: |\r\n      The participant completed
       the study.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: assign_id\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      \       extra_log_type: post_testing_2\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
       \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
       \   always: true\r\n\r\n\r\n###################################\r\nexit_opt_out:\r\n
       \ label: Exit (Opt-Out)\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject exited by
       opting out before enrollment. \r\n      \r\n      All records are locked down
-      after 14 days.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any_opt_out:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: \r\n          -
-      exit_opt_out\r\n          - assign_id\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      after 14 days.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *not_enrolled
+      \   \r\n    not_any_exit: *any_exit_or_complete\r\n\r\n  # Always show, so we
+      know why a player's records may be locked down\r\n  showable_if:\r\n    always:
+      true\r\n\r\n\r\n###################################\r\nwithdraw:\r\n  label:
+      Withdraw\r\n###################################\r\n  \r\n  fields:\r\n  references:\r\n
+      \   grit_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n    <<: *all_enrolled\r\n\r\n\r\n
       \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n\r\n###################################\r\nwithdraw:\r\n
-      \ label: Withdraw\r\n###################################\r\n  \r\n  fields:\r\n
-      \ references:\r\n    grit_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n
-      \   all_enrolled:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      assign_id\r\n\r\n  # Always show, so we know why a player's records may be locked
-      down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nineligible:\r\n
+      \   always: true\r\n\r\n\r\n###################################\r\nineligible:\r\n
       \ label: Ineligible\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject was found
       to be ineligible. \r\n      \r\n      All records are locked down after 14 days.\r\n
-      \ \r\n  creatable_if:\r\n    never: true\r\n\r\n  # Always show, so we know
-      why a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n\r\n###################################\r\nexit_not_consented:\r\n
+      \ \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    any_transferred_to_msm:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: \r\n          -
+      msm_screening_appointment\r\n    <<: *not_enrolled\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
+      \   always: true\r\n\r\n\r\n\r\n###################################\r\nexit_not_consented:\r\n
       \ label: Exit During Informed Consent Review\r\n###################################\r\n
       \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
       subject exited during the informed consent review. The subject\r\n      was
@@ -3731,9 +3334,8 @@ app_type:
       \ fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The subject
       was lost to follow up before enrollment.\r\n      \r\n      All records are
       locked down after 14 days.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n
-      \   not_any_opt_out:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      \r\n          - exit_l2fu\r\n          - assign_id\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
-      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
+      \   not_any_exit: *any_exit_or_complete\r\n    <<: *not_enrolled\r\n\r\n  #
+      Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
       \   always: true\r\n\r\n\r\n###################################\r\nexit_ps:\r\n
       \ label: Exit During HMS Phone Screen\r\n###################################\r\n
       \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
@@ -3753,7 +3355,7 @@ app_type:
       subject was found to be eligible in the HMS Phone Screen and\r\n      consented
       to pass information to MSM.\r\n      \r\n  \r\n  creatable_if:\r\n    never:
       true\r\n\r\n  # Always show, so we know why a player's records may be locked
-      down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nmsm_ps_eligible:\r\n
+      down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n\r\n\r\n###################################\r\nmsm_ps_eligible:\r\n
       \ label: MSM Phone Screen Eligible\r\n###################################\r\n
       \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
       subject was found to be eligible in the MSM Phone Screen and\r\n      was interested
@@ -3808,21 +3410,9 @@ app_type:
       \         with:\r\n            updated_at: now()\r\n              \r\n\r\n###################################\r\nfiles:\r\n
       \ label: Files\r\n###################################\r\n\r\n  <<: *files_activity
       \ \r\n  save_trigger:\r\n    on_create:\r\n      <<: *create_filestore_container
-      \r\n  references:\r\n    <<: *ref_filestore_container\r\n\r\n\r\n\r\n#################################################################\r\n#
-      NOT USED\r\n#################################################################\r\n\r\n\r\n###################################\r\nsubject_consented:\r\n
-      \ label: Subject Gave Informed Consent\r\n###################################\r\n
-      \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
-      subject consented during the informed consent review.\r\n  \r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n\r\n  #
-      Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n\r\n\r\n\r\n###################################\r\ncompleted_data_collection:\r\n
-      \ label: Completed Data Collection\r\n###################################\r\n
-      \ \r\n  fields:\r\n  \r\n  caption_before:\r\n    all_fields: |\r\n      The
-      participant has completed all follow-up data collection and interview.\r\n  \r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: assign_id\r\n    not_any_exit: *any_exit_or_complete\r\n
-      \   not_all:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      completed_data_collection\r\n"
+      \r\n  references:\r\n    <<: *ref_filestore_container\r\n\r\n\r\n\r\n###################################\r\nsecure_notes:\r\n
+      \ label: Secure Notes\r\n###################################\r\n\r\n  references:
+      *al_secure_note_embedded_reference\r\n\r\n      \r\n   \r\n  \r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: ''
@@ -4188,7 +3778,7 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:03.039Z'
-    updated_at: '2019-11-27T15:43:03.039Z'
+    updated_at: '2019-12-01T12:40:44.673Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -4210,15 +3800,13 @@ app_type:
       \ \r\n  field_options: \r\n    <<: *start_discussion_field_options\r\n    tag_select_contact_role:\r\n
       \     edit_as:\r\n        alt_options:\r\n          HMS Admins: hms admins\r\n
       \         HMS Phone Screen Interviewers: hms phone screener\r\n          MSM
-      Phone Screen Interviewers: msm phone screener          \r\n          All Interventionists:
-      all interventionists\r\n          Assigned Interventionist: assigned interventionist\r\n
-      \         PI: pi\r\n          \r\n\r\n\r\n  showable_if:\r\n    any:\r\n      all_creator:\r\n
-      \       this:\r\n          user_id:\r\n            user: id\r\n          \r\n
-      \     all:\r\n        activity_log__grit_assignment_discussions:\r\n          id:\r\n
-      \           this: id\r\n          tag_select_contact_role:\r\n            condition:
-      '&&'\r\n            value: current_user_role_names\r\n          \r\n    \r\n
-      \ references:\r\n    - activity_log__grit_assignment_discussion:\r\n        label:
-      New Message\r\n        from: this\r\n        add: many\r\n        prevent_disable:
+      staff: msm staff          \r\n          PI: pi\r\n          \r\n\r\n\r\n  showable_if:\r\n
+      \   any:\r\n      all_creator:\r\n        this:\r\n          user_id:\r\n            user:
+      id\r\n          \r\n      all:\r\n        activity_log__grit_assignment_discussions:\r\n
+      \         id:\r\n            this: id\r\n          tag_select_contact_role:\r\n
+      \           condition: '&&'\r\n            value: current_user_role_names\r\n
+      \         \r\n    \r\n  references:\r\n    - activity_log__grit_assignment_discussion:\r\n
+      \       label: New Message\r\n        from: this\r\n        add: many\r\n        prevent_disable:
       true\r\n        add_with:\r\n          extra_log_type: general_discussion\r\n
       \         prev_activity_type: general_discussion\r\n        filter_by:\r\n          extra_log_type:
       general_discussion\r\n\r\n\r\n\r\ngeneral_discussion:\r\n  label: Message\r\n\r\n
@@ -5063,25 +4651,72 @@ app_type:
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:01.707Z'
-    updated_at: '2019-11-27T15:43:01.707Z'
+    updated_at: '2019-12-02T14:58:41.976Z'
     position: 1
     category: grit-records
     table_key_name: ''
-    field_list: placeholder_set_iv,visit_start_date,visit_end_date,interventionist,select_status,notes
+    field_list: placeholder_set_sd,visit_start_date,visit_end_date,select_status,notes
     result_order: updated_at desc
     options: "default:\r\n\r\n  field_options:\r\n    select_status:\r\n      edit_as:\r\n
       \       alt_options: \r\n          - confirmed\r\n          - uncomfirmed\r\n
-      \   interventionist:\r\n      edit_as:\r\n        field_type: select_user_with_role_interventionist\r\n
+      \   \r\n      \r\n    select_status:\r\n      edit_as:\r\n        field_type:
+      status\r\n      value: confirmed\r\n\r\n  caption_before: \r\n    placeholder_set_sd:
+      |\r\n      **The subject has been enrolled. A training start date is required**\r\n
+      \     \r\n      Edit this form to set the start date.\r\n      \r\n    visit_start_date:
+      Training start date\r\n    visit_end_date: Expected training end date\r\n    select_status:
+      Status\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n    visit_end_date:\r\n
+      \     never: true\r\n    select_status:\r\n      never: true\r\n    placeholder_set_sd:\r\n
+      \     visit_start_date: \r\n        - ''\r\n        - null"
+    user_email:
+  - id: 584
+    name: GRIT MSM Screening Details
+    table_name: grit_msm_screening_details
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-12-01T12:12:39.278Z'
+    updated_at: '2019-12-02T14:49:25.928Z'
+    position: 1
+    category: grit-records
+    table_key_name: ''
+    field_list: placeholder_set_sd,screening_date,select_status,notes
+    result_order: updated_at desc
+    options: "default:\r\n\r\n  field_options:\r\n    select_status:\r\n      edit_as:\r\n
+      \       alt_options: \r\n          - confirmed\r\n          - uncomfirmed\r\n
       \   \r\n    visit_start_date:\r\n      value: today()\r\n      \r\n    select_status:\r\n
       \     edit_as:\r\n        field_type: status\r\n      value: confirmed\r\n\r\n
-      \ caption_before: \r\n    placeholder_set_iv: |\r\n      **The subject has been
-      enrolled and an Interventionist must be assigned**\r\n      \r\n      Edit this
-      form to set the assigned Interventionist.\r\n      \r\n    visit_start_date:
-      Assessment start date\r\n    visit_end_date: Assessment end date\r\n    select_status:
-      Status\r\n    notes: Additional notes  \r\n    interventionist: Assigned Interventionist\r\n
-      \ \r\n  \r\n  show_if:\r\n    visit_end_date:\r\n      never: true\r\n    select_status:\r\n
-      \     never: true\r\n    placeholder_set_iv:\r\n      interventionist: \r\n
-      \       - ''\r\n        - null"
+      \ caption_before: \r\n    placeholder_set_sd: | \r\n      **A session for screening,
+      consent and pre-testing must be scheduled.**\r\n      \r\n      When an appointment
+      date is available, ensure it is entered below.\r\n      \r\n    screening_date:
+      Appointment date for screening, consent and pre-testing\r\n    notes: Additional
+      notes  \r\n  \r\n  \r\n  show_if:\r\n    select_status:\r\n      never: true\r\n
+      \   placeholder_set_sd:\r\n      screening_date: \r\n        - ''\r\n        -
+      null"
+    user_email:
+  - id: 589
+    name: GRIT Secure Notes
+    table_name: grit_secure_notes
+    schema_name:
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 21
+    disabled: false
+    created_at: '2019-12-02T13:11:42.395Z'
+    updated_at: '2019-12-02T13:11:42.395Z'
+    position: 1
+    category: grit-records
+    table_key_name: ''
+    field_list: notes
+    result_order: updated_at desc
+    options: "# @library grit enabled_if\r\n\r\ndefault:\r\n\r\n  caption_before:\r\n
+      \   notes: |\r\n      **Secure notes related to the participant**\r\n      \r\n
+      \     PII and PHI may be recorded \r\n      here. All notes form part of the
+      participant's study records, and are\r\n      retained and viewable according
+      to the study protocol rules.\r\n    \r\n  <<: *access_defaults\r\n"
     user_email:
   - id: 574
     name: GRIT Informed Consent Review
@@ -5249,80 +4884,6 @@ app_type:
     extra_fields: ''
     user_email:
   associated_reports:
-  - id: 238
-    name: Ready for Sign Off - MSM PI
-    description: Participants with inclusion / exclusion checklist ready for sign
-      off by PI
-    sql: "SELECT\r\n   dt.master_id,\r\n   grit.grit_id,\r\n   dt.extra_log_type activity,\r\n
-      \  dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n  SELECT\r\n
-      \   di.*,\r\n    rank() OVER (\r\n      PARTITION BY di.master_id\r\n      ORDER
-      BY di.created_at DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n\r\n    SELECT\r\n      inex.master_id,
-      \r\n      inex.extra_log_type,\r\n      al.extra_log_type \"exit_type\",\r\n
-      \     inex.created_at\r\n    FROM activity_log_grit_assignment_inex_checklists
-      inex\r\n    LEFT OUTER JOIN activity_log_grit_assignments al\r\n    ON\r\n      al.master_id
-      = inex.master_id\r\n      AND al.extra_log_type IN (\r\n        'ineligible',
-      \r\n        'exit_not_consented', \r\n        'exit_ps', \r\n        'exit_ps_msm',\r\n
-      \       'exit_l2fu',\r\n        'completed',\r\n        'withdraw'\r\n      )\r\n
-      \   WHERE\r\n      inex.extra_log_type IN ('finalize_phone_screen_checklist',
-      'sign_phone_screen')\r\n\r\n    \r\n  ) AS di\r\n\r\n) AS dt\r\n\r\nINNER JOIN
-      grit_assignments grit on dt.master_id = grit.master_id\r\n\r\nWHERE\r\n  r =
-      1 AND dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n  AND NOT ( r
-      = 1 AND dt.extra_log_type = 'sign_phone_screen' )\r\n  AND dt.exit_type IS NULL\r\n\r\nORDER
-      BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:03.736Z'
-    updated_at: '2019-11-27T15:43:03.736Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 22
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: grit
-    short_name: grit_ready_for_sign_off___pi
-    options: ''
-    user_email:
-  - id: 239
-    name: Ready for Sign Off - MSM Staff
-    description: Participants with inclusion / exclusion checklist ready for sign
-      off by MSM staff member (phone screener interviewer)
-    sql: "SELECT\r\n   dt.master_id,\r\n   grit.grit_id,\r\n   dt.extra_log_type activity,\r\n
-      \  dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n  SELECT\r\n
-      \   di.*,\r\n    rank() OVER (\r\n      PARTITION BY di.master_id\r\n      ORDER
-      BY di.created_at DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n\r\n    SELECT\r\n      inex.master_id,
-      \r\n      inex.extra_log_type,\r\n      al.extra_log_type \"exit_type\",\r\n
-      \     inex.created_at\r\n    FROM activity_log_grit_assignment_inex_checklists
-      inex\r\n    LEFT OUTER JOIN activity_log_grit_assignments al\r\n    ON\r\n      al.master_id
-      = inex.master_id\r\n      AND al.extra_log_type IN (\r\n        'ineligible',
-      \r\n        'exit_not_consented', \r\n        'exit_ps', \r\n        'exit_ps_msm',\r\n
-      \       'exit_l2fu',\r\n        'completed',\r\n        'withdraw'\r\n      )\r\n
-      \   WHERE\r\n      inex.extra_log_type IN ('phone_screen_review', 'sign_phone_screen_staff')\r\n\r\n
-      \   \r\n  ) AS di\r\n\r\n) AS dt\r\n\r\nINNER JOIN grit_assignments grit on
-      dt.master_id = grit.master_id\r\n\r\nWHERE\r\n  r = 1 AND dt.extra_log_type
-      = 'phone_screen_review'\r\n  AND NOT ( r = 1 AND dt.extra_log_type = 'sign_phone_screen_staff'
-      )\r\n  AND dt.exit_type IS NULL\r\n  AND dt.master_id IN (\r\n    SELECT master_id
-      FROM activity_log_grit_assignments al2\r\n    WHERE\r\n      al2.master_id =
-      dt.master_id\r\n      AND al2.extra_log_type IN (\r\n        'appointment'\r\n
-      \     )\r\n  )\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:03.741Z'
-    updated_at: '2019-11-27T15:43:03.741Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 22
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: grit
-    short_name: grit_ready_for_sign_off___staff
-    options: ''
-    user_email:
   - id: 240
     name: Needs Follow Up Communication
     description: Participants with an appointment set that are ready for specific
@@ -5876,26 +5437,21 @@ app_type:
     options: ''
     user_email:
   - id: 252
-    name: Ready for MSM Screening
+    name: Ready for MSM Transfer
     description: List of subjects where the MSM Phone Screen has not been performed
       (and HMS Phone Screen has)
     sql: "select sa.master_id, sa.grit_id\r\nfrom grit_assignments sa\r\nwhere \r\nsa.master_id
       in (\r\n  select ps.master_id \r\n  from activity_log_grit_assignment_phone_screens
       ps\r\n  where extra_log_type = 'finalize'\r\n)\r\nand sa.master_id in (\r\n
       \ select sa2.master_id \r\n  from activity_log_grit_assignments sa2\r\n  where
-      extra_log_type = 'hms_ps_eligible'\r\n)\r\nAND\r\nsa.master_id not in (\r\n
-      \ select ps.master_id \r\n  from activity_log_grit_assignment_phone_screen2s
-      ps\r\n  where extra_log_type in ('finalize')\r\n)\r\nand sa.master_id not in
-      (\r\n  select sa2.master_id \r\n  from activity_log_grit_assignments sa2\r\n
-      \ where extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_msm','exit_opt_out',
-      'exit_l2fu')\r\n)\r\nand sa.master_id not in (\r\n  select dsw.master_id \r\n
-      \ from grit_withdrawals dsw\r\n  where \r\n  select_subject_withdrew_reason
-      = 'withdrew'\r\n)\r\n;\r\n\r\n"
+      extra_log_type = 'hms_ps_eligible'\r\n)\r\nand sa.master_id not in (\r\n  select
+      sa2.master_id \r\n  from activity_log_grit_assignments sa2\r\n  where extra_log_type
+      = 'transferred_to_msm'\r\n)\r\n-- @library grit where_not_exited\r\n;\r\n\r\n"
     search_attrs: ''
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:03.810Z'
-    updated_at: '2019-11-27T15:43:03.810Z'
+    updated_at: '2019-12-02T17:30:54.022Z'
     report_type: search
     auto: true
     searchable: true
@@ -5904,7 +5460,7 @@ app_type:
     edit_field_names: ''
     selection_fields: ''
     item_type: grit
-    short_name: ready_for_msm_screening
+    short_name: ready_for_msm_transfer
     options: ''
     user_email:
   - id: 253
@@ -5993,25 +5549,19 @@ app_type:
     options: ''
     user_email:
   - id: 255
-    name: Ready for Informed Consent
+    name: Ready for MSM Screening
     description: ''
     sql: "select sa.master_id, sa.grit_id\r\nfrom grit_assignments sa\r\nwhere \r\nsa.master_id
       in (\r\n  select sa2.master_id \r\n  from activity_log_grit_assignments sa2\r\n
-      \ where extra_log_type = 'msm_ps_eligible'\r\n)\r\nAND\r\nsa.master_id in (\r\n
-      \ select ps.master_id \r\n  from activity_log_grit_assignment_phone_screen2s
-      ps\r\n  where extra_log_type in ('finalize')\r\n)\r\nand sa.master_id not in
+      \ where extra_log_type = 'transferred_to_msm'\r\n)\r\nand sa.master_id not in
       (\r\n  select sa2.master_id \r\n  from activity_log_grit_assignments sa2\r\n
-      \ where extra_log_type in ('appointment')\r\n)\r\nand sa.master_id not in (\r\n
-      \ select sa2.master_id \r\n  from activity_log_grit_assignments sa2\r\n  where
-      extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_msm','exit_opt_out',
-      'exit_l2fu')\r\n)\r\nand sa.master_id not in (\r\n  select dsw.master_id \r\n
-      \ from grit_withdrawals dsw\r\n  where \r\n  select_subject_withdrew_reason
-      = 'withdrew'\r\n)\r\n;\r\n\r\n"
+      \ where extra_log_type = 'msm_screening_appointment'\r\n)\r\n-- @library grit
+      where_not_exited\r\n;\r\n\r\n"
     search_attrs: ''
     admin_id: 21
     disabled: false
     created_at: '2019-11-27T15:43:03.827Z'
-    updated_at: '2019-11-27T15:43:03.827Z'
+    updated_at: '2019-12-02T17:49:54.601Z'
     report_type: search
     auto: true
     searchable: true
@@ -6020,53 +5570,7 @@ app_type:
     edit_field_names: ''
     selection_fields: ''
     item_type: grit
-    short_name: ready_for_informed_consent
-    options: ''
-    user_email:
-  - id: 256
-    name: GRIT Interventionist Assignments
-    description: "### GRIT Study participants assigned to you"
-    sql: "select sa.master_id, sa.grit_id, \r\ncase coalesce(sapp.interventionist,
-      '')\r\nwhen '' then '(not assigned)' \r\nelse sapp.interventionist\r\nend\r\n,
-      visit_start_date \"start_date\" from grit_assignments sa\r\ninner join grit_appointments
-      sapp on sa.master_id = sapp.master_id\r\norder by interventionist desc\r\n;"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:03.831Z'
-    updated_at: '2019-11-27T15:43:03.831Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 2
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: grit
-    short_name: grit_interventionist_assignments
-    options: ''
-    user_email:
-  - id: 257
-    name: GRIT Interventionist Assignments Report
-    description: ''
-    sql: "select sa.master_id, sa.grit_id, \r\ncase coalesce(sapp.interventionist,
-      '')\r\nwhen '' then '(not assigned)' \r\nelse sapp.interventionist\r\nend\r\n,
-      visit_start_date \"start_date\" from grit_assignments sa\r\ninner join grit_appointments
-      sapp on sa.master_id = sapp.master_id\r\norder by interventionist desc\r\n;"
-    search_attrs: ''
-    admin_id: 21
-    disabled: false
-    created_at: '2019-11-27T15:43:03.836Z'
-    updated_at: '2019-11-27T15:43:03.836Z'
-    report_type: regular_report
-    auto: true
-    searchable: false
-    position: 2
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: grit
-    short_name: grit_interventionist_assignments_report
+    short_name: ready_for_msm_screening
     options: ''
     user_email:
   associated_general_selections:
@@ -9119,7 +8623,7 @@ app_type:
     user_email: phil_ayres@hms.harvard.edu
   - id: 613
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     user_id: 82
     admin_id: 21
     disabled: false
@@ -9128,7 +8632,7 @@ app_type:
     user_email: template@template
   - id: 614
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     user_id: 84
     admin_id: 21
     disabled: false
@@ -9209,7 +8713,7 @@ app_type:
     user_email: phil_ayres@hms.harvard.edu
   - id: 623
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     user_id: 90
     admin_id: 21
     disabled: false
@@ -9389,7 +8893,7 @@ app_type:
     user_email: grit-msm@template
   - id: 643
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     user_id: 91
     admin_id: 21
     disabled: false
@@ -9992,7 +9496,7 @@ app_type:
     user_email: grit-admin@template
   - id: 710
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     user_id: 95
     admin_id: 21
     disabled: false
@@ -10202,9 +9706,9 @@ app_type:
     role_name: pi
     user_id: 1
     admin_id: 21
-    disabled: false
+    disabled: true
     created_at: '2019-11-27T16:09:31.470Z'
-    updated_at: '2019-11-27T16:09:31.470Z'
+    updated_at: '2019-12-02T10:57:43.182Z'
     user_email: phil_ayres@test.com
   - id: 734
     app_type_id: 38
@@ -10289,7 +9793,7 @@ app_type:
     user_email: phil_ayres@test.com
   - id: 743
     app_type_id: 38
-    role_name: phone screener 2
+    role_name: msm coordinator
     user_id: 1
     admin_id: 21
     disabled: false
@@ -10448,6 +9952,24 @@ app_type:
     disabled: false
     created_at: '2019-11-29T11:10:55.980Z'
     updated_at: '2019-11-29T11:10:55.980Z'
+    user_email: template@template
+  - id: 761
+    app_type_id: 38
+    role_name: hms coordinator
+    user_id: 1
+    admin_id: 21
+    disabled: false
+    created_at: '2019-12-02T15:20:52.018Z'
+    updated_at: '2019-12-02T15:20:52.018Z'
+    user_email: phil_ayres@test.com
+  - id: 762
+    app_type_id: 38
+    role_name: hms coordinator
+    user_id: 82
+    admin_id: 21
+    disabled: false
+    created_at: '2019-12-02T15:20:52.028Z'
+    updated_at: '2019-12-02T15:20:52.028Z'
     user_email: template@template
   associated_message_templates:
   - id: 22
@@ -10718,22 +10240,8 @@ app_type:
       \             condition: '= ANY'\r\n\r\n    #notify_msm_ps_option_sms: &notify_msm_ps_option_sms\r\n
       \   - <<: *notify_msm_ps_sms\r\n      if:\r\n        all:\r\n          referring_record:\r\n
       \           tag_select_contact_role:\r\n              value: msm phone screener\r\n
-      \             condition: '= ANY'\r\n\r\n\r\n    #notify_interventionists_option:
-      &notify_interventionists_option\r\n    - <<: *notify_interventionists\r\n      if:\r\n
-      \       all:\r\n          referring_record:\r\n            tag_select_contact_role:\r\n
-      \             value: all interventionists\r\n              condition: '= ANY'\r\n\r\n
-      \   #notify_interventionists_option_sms: &notify_interventionists_option_sms\r\n
-      \   - <<: *notify_interventionists_sms\r\n      if:\r\n        all:\r\n          referring_record:\r\n
-      \           tag_select_contact_role: \r\n              value: all interventionists\r\n
-      \             condition: '= ANY'\r\n\r\n\r\n    #notify_assigned_interventionist_option:
-      &notify_assigned_interventionist_option\r\n    - <<: *notify_assigned_interventionist\r\n
-      \     if:\r\n        all:\r\n          referring_record:\r\n            tag_select_contact_role:\r\n
-      \             value: assigned interventionist\r\n              condition: '=
-      ANY'\r\n\r\n    #notify_assigned_interventionist_option_sms: &notify_assigned_interventionist_option_sms\r\n
-      \   - <<: *notify_assigned_interventionist_sms\r\n      if:\r\n        all:\r\n
-      \         referring_record:\r\n            tag_select_contact_role:\r\n              value:
-      assigned interventionist\r\n              condition: '= ANY'\r\n\r\n\r\n    #notify_pi_option:
-      &notify_pi_option\r\n    - <<: *notify_pi\r\n      if:\r\n        all:\r\n          referring_record:\r\n
+      \             condition: '= ANY'\r\n\r\n\r\n\r\n\r\n    #notify_pi_option: &notify_pi_option\r\n
+      \   - <<: *notify_pi\r\n      if:\r\n        all:\r\n          referring_record:\r\n
       \           tag_select_contact_role:\r\n              value: pi\r\n              condition:
       '= ANY'\r\n\r\n\r\n    #notify_pi_option_sms: &notify_pi_option_sms\r\n    -
       <<: *notify_pi_sms\r\n      if:\r\n        all:\r\n          referring_record:\r\n
@@ -10744,32 +10252,27 @@ app_type:
       \             condition: '= ANY'\r\n\r\n\r\n    #notify_hms_admin_option_sms:
       &notify_hms_admin_option_sms\r\n    - <<: *notify_hms_admin_sms\r\n      if:\r\n
       \       all:\r\n          referring_record:\r\n            tag_select_contact_role:
-      \r\n              value: hms admins\r\n              condition: '= ANY'\r\n\r\n\r\n\r\n\r\n\r\n#
-      \   - *notify_hms_ps_option\r\n#    - *notify_msm_ps_option\r\n#    - *notify_interventionists_option\r\n#
-      \   - *notify_assigned_interventionist_option\r\n#    - *notify_pi_option\r\n#
-      \   - *notify_hms_ps_option_sms\r\n##    - *notify_msm_ps_option_sms\r\n#    -
-      *notify_interventionists_option_sms\r\n#    - *notify_assigned_interventionist_option_sms\r\n#
-      \   - *notify_pi_option_sms\r\n\r\n\r\n  ####\r\n  # Defaults for the form for
-      setting up a new discussion\r\n  ####\r\n  setup_discussion: &setup_discussion\r\n
-      \   fields:\r\n      - notes\r\n      - tag_select_contact_role\r\n      - prev_activity_type\r\n\r\n
-      \   field_options: &start_discussion_field_options\r\n    \r\n      notes:\r\n
-      \       edit_as: \r\n          field_type: subject\r\n    \r\n      prev_activity_type:\r\n
-      \       edit_as:\r\n          field_type: fixed_type\r\n        value:\r\n          this:\r\n
-      \           extra_log_type: return_value\r\n\r\n\r\n    show_if: \r\n      prev_activity_type:\r\n
-      \       never: true\r\n\r\n    valid_if:\r\n      on_save:\r\n        not_any:\r\n
-      \         this:\r\n            #tag_select_contact_role:\r\n            #  value:
-      0\r\n            #  condition: '= ARRAY_LENGTH'\r\n            subject: ''\r\n\r\n
-      \   labels:\r\n      tag_select_contact_role: notify role\r\n\r\n    caption_before:
-      &setup_discussion_caption_before\r\n      all_fields: |\r\n        Setup a discussion
-      to securely contact the selected roles.\r\n\r\n        Messages are visible,
-      and notifications sent to only the users with the \r\n        selected roles
-      (and the creator of the discussion: {{user_email}}). \r\n        To change this
-      visibility, and future notifications, edit this discussion before sending new
-      messages.\r\n\r\n      notes: \r\n        edit_caption: |\r\n          Enter
-      subject of the discussion\r\n          \r\n          *Do not enter any PII or
-      PHI in this field, \r\n          since it will be included in notification emails*\r\n
-      \       show_caption: Subject\r\n      tag_select_contact_role: Roles to be
-      included\r\n\r\n\r\n    references:\r\n      - activity_log__grit_assignment_grit_discussion:\r\n
+      \r\n              value: hms admins\r\n              condition: '= ANY'\r\n\r\n\r\n\r\n\r\n\r\n\r\n
+      \ ####\r\n  # Defaults for the form for setting up a new discussion\r\n  ####\r\n
+      \ setup_discussion: &setup_discussion\r\n    fields:\r\n      - notes\r\n      -
+      tag_select_contact_role\r\n      - prev_activity_type\r\n\r\n    field_options:
+      &start_discussion_field_options\r\n    \r\n      notes:\r\n        edit_as:
+      \r\n          field_type: subject\r\n    \r\n      prev_activity_type:\r\n        edit_as:\r\n
+      \         field_type: fixed_type\r\n        value:\r\n          this:\r\n            extra_log_type:
+      return_value\r\n\r\n\r\n    show_if: \r\n      prev_activity_type:\r\n        never:
+      true\r\n\r\n    valid_if:\r\n      on_save:\r\n        not_any:\r\n          this:\r\n
+      \           #tag_select_contact_role:\r\n            #  value: 0\r\n            #
+      \ condition: '= ARRAY_LENGTH'\r\n            subject: ''\r\n\r\n    labels:\r\n
+      \     tag_select_contact_role: notify role\r\n\r\n    caption_before: &setup_discussion_caption_before\r\n
+      \     all_fields: |\r\n        Setup a discussion to securely contact the selected
+      roles.\r\n\r\n        Messages are visible, and notifications sent to only the
+      users with the \r\n        selected roles (and the creator of the discussion:
+      {{user_email}}). \r\n        To change this visibility, and future notifications,
+      edit this discussion before sending new messages.\r\n\r\n      notes: \r\n        edit_caption:
+      |\r\n          Enter subject of the discussion\r\n          \r\n          *Do
+      not enter any PII or PHI in this field, \r\n          since it will be included
+      in notification emails*\r\n        show_caption: Subject\r\n      tag_select_contact_role:
+      Roles to be included\r\n\r\n\r\n    references:\r\n      - activity_log__grit_assignment_grit_discussion:\r\n
       \         label: New Message\r\n          from: this\r\n          add: many\r\n
       \         prevent_disable: true\r\n          add_with:\r\n            extra_log_type:
       \r\n              this:\r\n                prev_activity_type: return_value\r\n
@@ -10800,7 +10303,7 @@ app_type:
     disabled: false
     admin_id: 21
     created_at: '2019-11-27T15:43:00.584Z'
-    updated_at: '2019-11-27T15:43:00.584Z'
+    updated_at: '2019-12-01T12:43:46.137Z'
     user_email:
   - id: 65
     category: grit
@@ -10827,18 +10330,23 @@ app_type:
       eligible\r\n            interested_yes_no: 'yes'\r\n        all_eligible_and_interested:\r\n
       \         dynamic_model__grit_ps_screener_responses:\r\n            outcome:
       eligible\r\n          dynamic_model__grit_ps_eligibles:\r\n            interested_yes_no:
-      'yes'\r\n            \r\n  all_eligible_and_gave_consent_hms_finalized: &all_eligible_and_gave_consent_hms_finalized
-      \           \r\n    all_eligible_and_gave_consent_hms_finalized:\r\n      all_finalized:\r\n
-      \       activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
-      finalize\r\n\r\n      <<: *all_eligible_and_gave_consent\r\n\r\n\r\n\r\n  any_ineligible:
-      &any_ineligible\r\n    any_ineligible:\r\n      dynamic_model__grit_ps_screener_responses:\r\n
+      'yes'\r\n          any:\r\n            dynamic_model__grit_ps_eligibles:\r\n
+      \             more_questions_yes_no: 'no'\r\n              select_still_interested:
+      \"yes - still interested\"\r\n            \r\n\r\n            \r\n  all_eligible_and_gave_consent_hms_finalized:
+      &all_eligible_and_gave_consent_hms_finalized            \r\n    all_eligible_and_gave_consent_hms_finalized:\r\n
+      \     all_finalized:\r\n        activity_log__grit_assignment_phone_screens:\r\n
+      \         extra_log_type: finalize\r\n\r\n      <<: *all_eligible_and_gave_consent\r\n\r\n\r\n\r\n
+      \ any_ineligible: &any_ineligible\r\n    any_ineligible:\r\n      dynamic_model__grit_ps_screener_responses:\r\n
       \       outcome: ineligible\r\n      dynamic_model__grit_ps_eligibility_followups:\r\n
-      \       outcome: ineligible\r\n\r\n        "
+      \       outcome: ineligible\r\n\r\n\r\n  all_enrolled: &all_enrolled\r\n    all_enrolled:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: appointment\r\n\r\n
+      \ not_enrolled: &not_enrolled\r\n    not_all_enrolled:\r\n      activity_log__grit_assignments:\r\n
+      \       extra_log_type: appointment\r\n  \r\n  \r\n  "
     format: yaml
     disabled: false
     admin_id: 21
     created_at: '2019-11-27T15:43:00.587Z'
-    updated_at: '2019-11-27T15:43:00.587Z'
+    updated_at: '2019-12-02T18:14:46.198Z'
     user_email:
   - id: 67
     category: grit
@@ -10876,27 +10384,17 @@ app_type:
       Screener\r\n  notify_msm_ps: &notify_msm_ps\r\n    <<: *notify_email_default\r\n
       \   role: email - msm phone screener\r\n\r\n  # MSM Phone Screener SMS\r\n  notify_msm_ps_sms:
       &notify_msm_ps_sms\r\n    <<: *notify_sms_default\r\n    role: sms - msm phone
-      screener\r\n\r\n  # Interventionist\r\n  notify_interventionists: &notify_interventionists\r\n
-      \   <<: *notify_email_default\r\n    role: email - interventionist\r\n\r\n  #
-      Interventionist SMS\r\n  notify_interventionists_sms: &notify_interventionists_sms\r\n
-      \   <<: *notify_sms_default\r\n    role: sms - interventionist\r\n\r\n  # Assigned
-      Interventionist\r\n  notify_assigned_interventionist_option: &notify_assigned_interventionist\r\n
-      \   <<: *notify_email_default\r\n    users:\r\n      dynamic_model__grit_appointments:\r\n
-      \       interventionist: return_value\r\n        \r\n\r\n  # Assigned Interventionist
-      SMS\r\n  notify_assigned_interventionist_option_sms: &notify_assigned_interventionist_sms\r\n
-      \   <<: *notify_sms_default\r\n    users:\r\n      dynamic_model__grit_appointments:\r\n
-      \       interventionist: return_value\r\n\r\n\r\n  # PI\r\n  notify_pi: &notify_pi\r\n
-      \   <<: *notify_email_default\r\n    role: email - pi\r\n\r\n  # PI SMS\r\n
-      \ notify_pi_sms: &notify_pi_sms\r\n    <<: *notify_sms_default\r\n    role:
-      sms - pi\r\n\r\n\r\n  # HMS Admin\r\n  notify_hms_admin: &notify_hms_admin\r\n
-      \   <<: *notify_email_default\r\n    role: email - hms admin\r\n\r\n  # HMS
-      Admin SMS\r\n  notify_hms_admin_sms: &notify_hms_admin_sms\r\n    <<: *notify_sms_default\r\n
-      \   role: sms - hms admin\r\n"
+      screener\r\n\r\n\r\n  # PI\r\n  notify_pi: &notify_pi\r\n    <<: *notify_email_default\r\n
+      \   role: email - pi\r\n\r\n  # PI SMS\r\n  notify_pi_sms: &notify_pi_sms\r\n
+      \   <<: *notify_sms_default\r\n    role: sms - pi\r\n\r\n\r\n  # HMS Admin\r\n
+      \ notify_hms_admin: &notify_hms_admin\r\n    <<: *notify_email_default\r\n    role:
+      email - hms admin\r\n\r\n  # HMS Admin SMS\r\n  notify_hms_admin_sms: &notify_hms_admin_sms\r\n
+      \   <<: *notify_sms_default\r\n    role: sms - hms admin\r\n"
     format: yaml
     disabled: false
     admin_id: 21
     created_at: '2019-11-27T15:43:00.595Z'
-    updated_at: '2019-11-27T15:43:00.595Z'
+    updated_at: '2019-12-01T12:44:25.070Z'
     user_email:
   - id: 69
     category: grit
@@ -10947,6 +10445,37 @@ app_type:
     admin_id: 21
     created_at: '2019-11-29T12:32:47.528Z'
     updated_at: '2019-11-29T16:17:59.678Z'
+    user_email:
+  - id: 71
+    category: grit
+    name: secure_notes
+    options: "####################\r\n# Simple definition to allow add button for
+      secure notes to activities\r\n####################\r\n\r\n_definitions:\r\n\r\n
+      \ al_secure_note_add_button_reference: &al_secure_note_add_button_reference\r\n
+      \   dynamic_model__secure_note:\r\n      label: secure note\r\n      from: this\r\n
+      \     add: many\r\n      prevent_disable: true\r\n\r\n\r\n  al_secure_note_embedded_reference:
+      &al_secure_note_embedded_reference\r\n    dynamic_model__secure_note:\r\n      from:
+      this\r\n      add: one_to_this\r\n      prevent_disable: true"
+    format: yaml
+    disabled: false
+    admin_id: 21
+    created_at: '2019-12-02T13:20:53.022Z'
+    updated_at: '2019-12-02T13:25:07.759Z'
+    user_email:
+  - id: 72
+    category: grit
+    name: where_not_exited
+    options: "and sa.master_id not in (\r\n  select sa2.master_id \r\n  from activity_log_grit_assignments
+      sa2\r\n  where extra_log_type in (\r\n    'exit_ps', \r\n    'exit_not_consented',
+      \r\n    'ineligible', \r\n    'exit_ps_msm',\r\n    'exit_opt_out', \r\n    'exit_l2fu',\r\n
+      \   'completed'\r\n  )\r\n)\r\nand sa.master_id not in (\r\n  select dsw.master_id
+      \r\n  from grit_withdrawals dsw\r\n  where \r\n  select_subject_withdrew_reason
+      = 'withdrew'\r\n)\r\n"
+    format: sql
+    disabled: false
+    admin_id: 21
+    created_at: '2019-12-02T17:28:31.704Z'
+    updated_at: '2019-12-02T17:28:31.704Z'
     user_email:
   associated_protocols: []
   associated_sub_processes: []

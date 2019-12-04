@@ -24,16 +24,18 @@ set search_path=grit,ml_app;
 \i db/app_specific/grit/aws-db/phone-screen/create_activity_log_assignment_phone_screens_table.sql
 
 -- # grit Screening
+\i db/app_specific/grit/aws-db/screening/create_grit_msm_post_testings.sql
 \i db/app_specific/grit/aws-db/screening/create_grit_msm_screening_details.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_init_screening_table.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_audit_c_questions.sql
-\i db/app_specific/grit/aws-db/screening/create_ps_pain_questions.sql
-\i db/app_specific/grit/aws-db/screening/create_ps_participations.sql
+\i db/app_specific/grit/aws-db/screening/create_grit_ps_pain_questions.sql
+\i db/app_specific/grit/aws-db/screening/create_grit_ps_participations.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_eligibles.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_non_eligibles.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_eligibility_followups.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_possibly_eligibles.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_screener_responses.sql
+\i db/app_specific/grit/aws-db/screening/create_grit_secure_notes.sql
 
 
 -- # Adverse Events
