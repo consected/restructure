@@ -1,8 +1,8 @@
 REVOKE ALL ON SCHEMA ipa_staging FROM fphs;
 GRANT ALL ON SCHEMA ipa_staging TO fphs;
-GRANT USAGE ON SCHEMA ipa_staging TO fphsadm;
-GRANT USAGE ON SCHEMA ipa_staging TO fphsusr;
-GRANT USAGE ON SCHEMA ipa_staging TO fphsetl;
+GRANT ALL ON SCHEMA ipa_staging TO fphsadm;
+GRANT ALL ON SCHEMA ipa_staging TO fphsusr;
+GRANT ALL ON SCHEMA ipa_staging TO fphsetl;
 
 
 GRANT ALL ON ALL TABLES IN SCHEMA ipa_staging TO fphs;

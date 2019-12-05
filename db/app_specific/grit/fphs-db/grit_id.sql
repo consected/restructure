@@ -1,3 +1,5 @@
+set search_path=ml_app;
+
 
 BEGIN;
 
