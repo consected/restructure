@@ -1,5 +1,6 @@
 class Master < ActiveRecord::Base
 
+  FilteredAssocPrefix = 'filtered__'.freeze
 
   include AlternativeIds
   include LimitedAccessControl
@@ -150,6 +151,17 @@ class Master < ActiveRecord::Base
     self.send(assoc_sym)
   end
 
+  # Some associations have an equivalent 'filtered' version, used to get lists that have removed items that do not
+  # meet the calc_showable_if rules
+  # @param tname [String] the name of the association
+  # @return [String] returns the filtered name if it exists, otherwise return the name that was passed
+  def filtered_assoc_name tname
+    tname = "#{FilteredAssocPrefix}#{tname}" if respond_to?("#{FilteredAssocPrefix}#{tname}")
+    tname
+  end
+
+
+
   def self.each_create_master_with_item user
     # Create each of the items listed in the configuration item :create_master_with (comma separated)
     create_master_with = Admin::AppConfiguration.value_for :create_master_with, user
@@ -257,9 +269,16 @@ class Master < ActiveRecord::Base
 
     raise FphsException.new "current_user not set for master when getting results" unless self.current_user
 
+    # Use configurations to specify the model to use for primary subject info
+    subject_info_sym = Admin::AppConfiguration.value_for(:header_subject_data_type, self.current_user)
+    subject_info_sym = 'player_infos' if subject_info_sym.blank?
+    subject_info_sym = subject_info_sym.to_sym
+
     if style == :index
-      tname = :player_infos
+      tname = subject_info_sym
       if current_user.has_access_to? :access, :table, tname
+        tname = filtered_assoc_name(tname)
+
         included_tables[tname] = {
           order: Master::PlayerInfoRankOrderClause,
           methods: [:user_name, :accuracy_score_name, :rank_name, :source_name]
@@ -275,8 +294,10 @@ class Master < ActiveRecord::Base
 
     else
 
-      tname = :player_infos
+      tname = subject_info_sym
       if current_user.has_access_to? :access, :table, tname
+        tname = filtered_assoc_name(tname)
+
         included_tables[tname] = {order: Master::PlayerInfoRankOrderClause,
           include: {
             item_flags: {include: [:item_flag_name], methods: [:method_id, :item_type_us]}
@@ -336,7 +357,17 @@ class Master < ActiveRecord::Base
       extras[:methods] << id_attr
     end
 
-    super(extras)
+    res = super(extras)
+
+    # Handled the filtered lists, changing their names back to match the original expected objects names
+    res.keys.each do |k|
+      if k.start_with?(FilteredAssocPrefix)
+        res[k.sub(FilteredAssocPrefix, '')] = res[k]
+        res.delete(k)
+      end
+    end
+
+    res
   end
 
   def header_prefix

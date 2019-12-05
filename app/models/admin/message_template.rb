@@ -289,8 +289,12 @@ class Admin::MessageTemplate < ActiveRecord::Base
         assoc = master.send(an)
         if assoc.respond_to? :attributes
           data[an.to_sym] ||= assoc.attributes
-        elsif assoc.respond_to?(:first) && assoc.first.respond_to?(:attributes)
-          data[an.to_sym] ||= assoc.first.attributes
+        elsif assoc.respond_to?(:first)
+          if assoc.first.respond_to?(:attributes)
+            data[an.to_sym] ||= assoc.first.attributes
+          else
+            return nil
+          end
         else
           raise "Association first item does not respond to attributes: #{an}"
         end

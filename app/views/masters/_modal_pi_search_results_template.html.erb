@@ -1,5 +1,7 @@
 <%
-external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
+  external_id_types = ExternalIdentifier.active_model_configurations.map(&:implementation_class)
+  subject_data_type = app_config_text(:header_subject_data_type, 'player_infos')
+  no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
 %>
 
 <script id="modal-pi-search-results-template" type="text/x-handlebars-template" class="hidden handlebars-template">
@@ -13,12 +15,16 @@ external_id_types = ExternalIdentifier.active_model_configurations.map(&:impleme
           <div class="row">
             <div class="col-md-2 col-lg-2 result-refs"><span class="master_id"  title="Master ID">{{id}}</span></div>
             <a class="master-expander collapsed one-time-only-ajax " data-toggle="collapse" data-parent="#results-accordion" href="/masters/{{id}}.json" data-remote="true" data-target="#master-{{id}}-main-container" data-result-target="#master-{{id}}-main-container" data-template="master-main-template" aria-expanded="false" aria-controls="master-{{id}}-main-container">
-              <div class="col-md-11 col-lg-11 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
-                {{#with player_infos.[0]}}
-                  {{>player_info_summary_result}}
+              <div class="col-md-11 col-lg-11 player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="<%=subject_data_type.singularize%>" data-template="subject-info-summary-result-template">
+                <% if view?[subject_data_type.to_sym] %>
+                {{#with <%=subject_data_type%>.[0]}}
+                  {{>subject_info_summary_result}}
                 {{else}}
-                <strong class="no-player-info"><%= app_config_text :header_no_subject_details_label, '(no subject details)' %></strong>
+                <strong class="no-player-info"><%= no_subject_details_label %></strong>
                 {{/with}}
+                <% else %>
+                <strong class="no-player-info"><%= no_subject_details_label %></strong>
+                <% end %>
               </div>
               <div class="col-md-9 col-md-offset-1 pro-info-header">
               {{#with pro_infos.[0]}}

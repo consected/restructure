@@ -20,7 +20,7 @@ class Admin::AppConfiguration < Admin::AdminBase
   def self.configurations
     [
       "create master with", "completion sub processes",
-      "default search form", "default report tab", "file browser default view", "header no subject details label", "hide navbar search", "hide player accuracy",
+      "default search form", "default report tab", "file browser default view", "header no subject details label", "header subject data type", "hide navbar search", "hide player accuracy",
       "hide player tabs", "hide pro info", "hide search form advanced", "hide search form searchable reports",
       "hide search form simple", "hide tracker panel", "heading create master record label", "filestore directory id",
       "master header prefix", "menu create master record label",

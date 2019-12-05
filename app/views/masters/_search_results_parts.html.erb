@@ -1,3 +1,7 @@
+<%
+  subject_data_type = app_config_text(:header_subject_data_type, 'player_infos')
+  no_subject_details_label = app_config_text(:header_no_subject_details_label, '(no subject details)')
+%>
 <script id="search-count-template" type="text/x-handlebars-template" class="hidden handlebars-template">
   <span>
   {{#with count}}
@@ -20,7 +24,7 @@
 </script>
 
 
-<script id="player_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
+<script id="subject_info_summary_result-partial" type="text/x-handlebars-template" class="hidden handlebars-partial">
   <strong class="player-names">
     {{capitalize first_name}}
     <span class="middle-name">{{capitalize middle_name}}</span>
@@ -56,15 +60,16 @@
             {{>master_header_prefix}}
           </div>
           {{/if}}
-          <div class="{{#if header_prefix}}col-md-9 col-lg-9{{else}}col-md-11 col-lg-11{{/if}} player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="player_info" data-template="player-info-summary-result-template">
-            <% if view?[:player_infos] %>
-            {{#with player_infos.[0]}}
-              {{>player_info_summary_result}}
+          <div class="{{#if header_prefix}}col-md-9 col-lg-9{{else}}col-md-11 col-lg-11{{/if}} player-info-header" data-sub-for="master_id" data-sub-id="{{id}}" data-sub-item="<%=subject_data_type.singularize%>" data-template="subject-info-summary-result-template">
+            <% if view?[subject_data_type.to_sym] %>
+            {{log this}}
+            {{#with <%=subject_data_type%>.[0]}}
+              {{>subject_info_summary_result}}
             {{else}}
-            <strong class="no-player-info"><%= app_config_text :header_no_subject_details_label, '(no subject details)' %></strong>
+            <strong class="no-player-info no-subject-info"><%= no_subject_details_label %></strong>
             {{/with}}
             <% else %>
-            <strong class="no-player-info"><%= app_config_text :header_no_subject_details_label, '(no subject details)' %></strong>
+            <strong class="no-player-info no-subject-info-access"><%= no_subject_details_label %></strong>
             <% end %>
           </div>
           <% if view?[:pro_infos] %>
@@ -139,9 +144,9 @@
   {{>accuracy_badge}}
 </script>
 
-<script id="player-info-summary-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
-  {{#with player_info}}
-  {{>player_info_summary_result}}
+<script id="subject-info-summary-result-template" type="text/x-handlebars-template" class="hidden handlebars-template">
+  {{#with <%=subject_data_type%>}}
+  {{>subject_info_summary_result}}
   {{/with}}
 </script>
 

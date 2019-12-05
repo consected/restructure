@@ -7,10 +7,14 @@ class DynamicModelBase < UserBase
   include LimitedAccessControl
 
 
+  def definition_default_options
+    self.class.definition.default_options
+  end
+
   # Use the view_options.data_attribute configuration option if it has been set,
   # otherwise use the data attribute from the table (if it has been set)
   def data
-    dopt = self.class.definition.default_options
+    dopt = definition_default_options
     return unless dopt && dopt.view_options
     da = dopt.view_options[:data_attribute]
 

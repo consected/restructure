@@ -80,7 +80,16 @@ class DynamicModel < ActiveRecord::Base
     # Now forcibly set the Master association if there is a foreign_key_name set
     # If there is no foreign_key_name set, then this is not attached to a master record
     if foreign_key_name.present?
-      Master.has_many self.model_association_name, inverse_of: :master , class_name: "DynamicModel::#{self.model_class_name}", foreign_key: self.foreign_key_name, primary_key: self.primary_key_name
+      man = self.model_association_name
+      Master.has_many man, inverse_of: :master , class_name: "DynamicModel::#{self.model_class_name}", foreign_key: self.foreign_key_name, primary_key: self.primary_key_name
+
+      # Add a filtered scope method, which allows master associations to remove non-accessible items automatically
+      # This is not the default scope, since it calls calc_showable_if under the covers, and that may
+      # reference the associations itself, causing a cascade of calls
+      Master.send :define_method, "#{Master::FilteredAssocPrefix}#{self.model_association_name}" do
+        send(man).filter_results
+      end
+
     end
   end
 
@@ -347,8 +356,6 @@ class DynamicModel < ActiveRecord::Base
         end
 
         res2 = klass.const_set(c_name, a_new_controller)
-        # Do the include after naming, to ensure the correct names are used during initialization
-        res2.include MasterHandler
 
         logger.info "Model Name: #{m_name} + Controller #{c_name}. Def:\n#{res}\n#{res2}"
 

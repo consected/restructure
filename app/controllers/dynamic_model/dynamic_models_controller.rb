@@ -1,5 +1,6 @@
 class DynamicModel::DynamicModelsController < UserBaseController
 
+  include MasterHandler
 
   def destroy
     not_authorized
@@ -19,6 +20,13 @@ class DynamicModel::DynamicModelsController < UserBaseController
     def secure_params
       @implementation_class = implementation_class
       params.require(@implementation_class.name.ns_underscore.gsub('__', '_').singularize.to_sym).permit(*permitted_params)
+    end
+
+    # Remove items that are not showable, based on showable_if in the default options config
+    def filter_records
+      @filtered_ids = @master_objects.select { |i| i.definition_default_options&.calc_showable_if(i) }.map(&:id)
+      @master_objects = @master_objects.where(id: @filtered_ids)
+      limit_results
     end
 
 
