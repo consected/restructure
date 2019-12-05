@@ -31,12 +31,17 @@ module DynamicModelHandler
 
 
   def can_edit?
+
+    # This returns nil if there was no rule, true or false otherwise.
+    # Therefore, for no rule (nil) return true
     res = calc_can :edit
-    return unless res
+    return true if res.nil?
+    return if !res
 
     # Finally continue with the standard checks if none of the previous have failed
     super()
   end
+
 
   def can_access?
     res = calc_can :access
@@ -73,9 +78,9 @@ module DynamicModelHandler
       old_obj.master = self.master
 
       if type == :edit
-        res = dopt.calc_editable_if(old_obj)
+        res = !!dopt.calc_editable_if(old_obj)
       elsif type == :access
-        res = dopt.calc_showable_if(old_obj)
+        res = !!dopt.calc_showable_if(old_obj)
       end
     end
 
