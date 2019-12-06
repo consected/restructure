@@ -44,7 +44,11 @@ module DynamicModelHandler
 
 
   def can_access?
+
+    # This returns nil if there was no rule, true or false otherwise.
+    # Therefore, for no rule (nil) return true
     res = calc_can :access
+    return true if res.nil?
     return unless res
 
     # Finally continue with the standard checks if none of the previous have failed
