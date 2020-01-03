@@ -15,20 +15,40 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
   RETURN QUERY
-    SELECT distinct m.id, ipa.ipa_id, exits.status
+
+    SELECT distinct m.id, ipa.ipa_id, null::varchar "event"
     FROM masters m
     INNER JOIN ipa_ops.ipa_assignments ipa
-      ON m.id = ipa.master_id
-    INNER JOIN ipa_ops.ipa_participant_exits exits
-      ON m.id = exits.master_id
-      AND exits.status NOT IN ('in process')
+    ON m.id = ipa.master_id
     LEFT JOIN sync_statuses s
       ON from_db = 'athena-db'
       AND to_db = 'fphs-db'
       AND m.id = s.from_master_id
       AND ipa.ipa_id::varchar = s.external_id
       AND s.external_type = 'ipa_assignments'
-      AND s.event = exits.status
+      AND s.event IS NULL
+    WHERE
+      (
+        s.id IS NULL
+        OR coalesce(s.select_status, '') NOT IN ('completed', 'already transferred', 'invalid sync-back', 'invalid tracker sync-back')
+        AND s.created_at < now() - interval '2 hours'
+      )
+
+    UNION
+
+    SELECT distinct m.id, ipa.ipa_id, events.event
+    FROM masters m
+    INNER JOIN ipa_ops.ipa_assignments ipa
+      ON m.id = ipa.master_id
+    INNER JOIN temp_events events
+      ON m.id = events.master_id AND events.event NOT IN ('in process')
+    LEFT JOIN sync_statuses s
+      ON from_db = 'athena-db'
+      AND to_db = 'fphs-db'
+      AND m.id = s.from_master_id
+      AND ipa.ipa_id::varchar = s.external_id
+      AND s.external_type = 'ipa_assignments'
+      AND s.event = events.event
     WHERE
       (
         s.id IS NULL
@@ -41,7 +61,7 @@ $$;
 
 
 -- Add records to sync_statuses that indicate specific master IDs are in the process of being sync'd
-CREATE OR REPLACE FUNCTION update_ipa_transfer_record_results(new_from_db VARCHAR, new_to_db VARCHAR, for_external_type VARCHAR, for_event VARCHAR) RETURNS INTEGER
+CREATE OR REPLACE FUNCTION update_ipa_transfer_record_results(new_from_db VARCHAR, new_to_db VARCHAR, for_external_type VARCHAR) RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -61,8 +81,10 @@ BEGIN
     AND to_db = new_to_db
     AND external_id = t.ipa_id::varchar
     AND external_type = for_external_type
-    AND event = for_event
+    AND (t.event IS NULL AND ml_app.sync_statuses.event IS NULL OR ml_app.sync_statuses.event = t.event)
     AND coalesce(select_status, '') NOT IN ('completed', 'already transferred');
+
+  RETURN 1;
 
 END;
 $$;
