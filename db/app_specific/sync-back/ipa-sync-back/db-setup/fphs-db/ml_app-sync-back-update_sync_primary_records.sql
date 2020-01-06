@@ -21,7 +21,12 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
 	ipa_record RECORD;
+	primary_count integer;
+	event_count integer;
 BEGIN
+
+	primary_count := 0;
+	event_count := 0;
 
 	FOR ipa_record IN
 	  SELECT * from temp_ipa_assignments
@@ -38,6 +43,8 @@ BEGIN
 				ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ipa_record.master_id)
 			);
 
+			primary_count := primary_count + 1;
+
 		ELSE
 
 			PERFORM updated_ipa_tracker(
@@ -48,9 +55,13 @@ BEGIN
 				'Activity recorded in Athena: ' || ipa_record.event
 			);
 
+			event_count := event_count + 1;
+
 		END IF;
 
 	END LOOP;
+
+	RAISE NOTICE 'Performed updates on primary records (%) and events (%)', primary_count, event_count;
 
 	return 1;
 
@@ -108,7 +119,7 @@ BEGIN
 
 	UPDATE temp_ipa_assignments SET status='started sync' WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 
-	RAISE NOTICE 'Updating master record with user_id % and external identifier % into master %', etl_user_id::varchar, match_ipa_id::varchar, new_master_id::varchar;
+	-- RAISE NOTICE 'Updating master record with user_id % and external identifier % into master %', etl_user_id::varchar, match_ipa_id::varchar, new_master_id::varchar;
 
 	IF new_player_info_record.master_id IS NULL THEN
 		RAISE NOTICE 'No new_player_info_record found for IPA_ID --> %', (match_ipa_id);
@@ -375,7 +386,7 @@ BEGIN
 
 	END IF;
 
-	RAISE NOTICE 'Setting completed status for master_id % with ipa_id % updated at %', new_master_id, match_ipa_id::varchar, rec_updated_at::varchar;
+	-- RAISE NOTICE 'Setting completed status for master_id % with ipa_id % updated at %', new_master_id, match_ipa_id::varchar, rec_updated_at::varchar;
 
 	UPDATE temp_ipa_assignments SET status='completed', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 
