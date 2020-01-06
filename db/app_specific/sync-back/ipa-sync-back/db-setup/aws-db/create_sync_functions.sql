@@ -9,17 +9,36 @@ SET search_path=ml_app;
 CREATE OR REPLACE FUNCTION find_new_athena_ipa_records() RETURNS TABLE (
   master_id integer,
   ipa_id bigint,
-  event varchar
+  event varchar,
+  record_updated_at timestamp without time zone
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
   RETURN QUERY
 
-    SELECT distinct m.id, ipa.ipa_id, null::varchar "event"
+    SELECT distinct on (m.id) m.id "master_id", ipa.ipa_id, null::varchar "event", t2.record_updated_at
     FROM masters m
-    INNER JOIN ipa_ops.ipa_assignments ipa
-    ON m.id = ipa.master_id
+    INNER JOIN ipa_ops.ipa_assignments ipa ON m.id = ipa.master_id
+
+    LEFT JOIN (
+      SELECT t1.master_id, max(t1.record_updated_at) "record_updated_at" FROM (
+        SELECT pi.master_id, GREATEST(updated_at, created_at) "record_updated_at"
+        FROM player_infos pi
+        UNION
+        SELECT pc.master_id, GREATEST(updated_at, created_at) "record_updated_at"
+        FROM player_contacts pc
+        UNION
+        SELECT a.master_id, GREATEST(updated_at, created_at) "record_updated_at"
+        FROM addresses a
+
+
+      ) t1
+      GROUP BY t1.master_id
+    ) t2
+        ON t2.master_id = m.id
+
+
     LEFT JOIN sync_statuses s
       ON from_db = 'athena-db'
       AND to_db = 'fphs-db'
@@ -27,6 +46,7 @@ BEGIN
       AND ipa.ipa_id::varchar = s.external_id
       AND s.external_type = 'ipa_assignments'
       AND s.event IS NULL
+      AND s.record_updated_at <= t2.record_updated_at
     WHERE
       (
         s.id IS NULL
@@ -36,12 +56,16 @@ BEGIN
 
     UNION
 
-    SELECT distinct m.id, ipa.ipa_id, events.event
+    SELECT distinct
+      m.id "master_id",
+      ipa.ipa_id,
+      events.event,
+      events.created_at "record_updated_at"
     FROM masters m
     INNER JOIN ipa_ops.ipa_assignments ipa
       ON m.id = ipa.master_id
     INNER JOIN temp_events events
-      ON m.id = events.master_id AND events.event NOT IN ('in process')
+      ON m.id = events.master_id
     LEFT JOIN sync_statuses s
       ON from_db = 'athena-db'
       AND to_db = 'fphs-db'
@@ -49,6 +73,7 @@ BEGIN
       AND ipa.ipa_id::varchar = s.external_id
       AND s.external_type = 'ipa_assignments'
       AND s.event = events.event
+      AND s.record_updated_at <= events.created_at
     WHERE
       (
         s.id IS NULL
@@ -66,11 +91,10 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 
-  UPDATE ml_app.sync_statuses
+  UPDATE ml_app.sync_statuses sync
   SET
     select_status = t.status,
     to_master_id = t.to_master_id,
-    event = t.event,
     updated_at = now()
   FROM (
     SELECT * FROM temp_ipa_assignments_results
@@ -81,10 +105,11 @@ BEGIN
     AND to_db = new_to_db
     AND external_id = t.ipa_id::varchar
     AND external_type = for_external_type
-    AND (t.event IS NULL AND ml_app.sync_statuses.event IS NULL OR ml_app.sync_statuses.event = t.event)
+    AND (t.event IS NULL and sync.event IS NULL OR sync.event = t.event)
+    AND sync.record_updated_at = t.record_updated_at
     AND coalesce(select_status, '') NOT IN ('completed', 'already transferred');
 
-  RETURN 1;
+    RETURN 1;
 
 END;
 $$;

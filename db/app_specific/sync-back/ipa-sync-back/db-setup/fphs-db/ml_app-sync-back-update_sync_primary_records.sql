@@ -21,38 +21,32 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
 	ipa_record RECORD;
-	ipa_event RECORD;
-	res INTEGER;
-
 BEGIN
 
 	FOR ipa_record IN
 	  SELECT * from temp_ipa_assignments
 	LOOP
 
-		SELECT update_primary_ipa_record(
-			ipa_record.ipa_id::BIGINT,
-			(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = ipa_record.master_id LIMIT 1),
-			ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = ipa_record.master_id),
-			ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ipa_record.master_id)
-		)
-		INTO res
-		;
 
-		IF res IS NOT NULL THEN
+		IF ipa_record.event IS NULL THEN
 
-			FOR ipa_event IN
-				SELECT * from temp_events
-			LOOP
+			PERFORM update_primary_ipa_record(
+				ipa_record.record_updated_at,
+				ipa_record.ipa_id::BIGINT,
+				(SELECT (pi::varchar)::player_infos FROM temp_player_infos pi WHERE master_id = ipa_record.master_id LIMIT 1),
+				ARRAY(SELECT distinct (pc::varchar)::player_contacts FROM temp_player_contacts pc WHERE master_id = ipa_record.master_id),
+				ARRAY(SELECT distinct (a::varchar)::addresses FROM temp_addresses a WHERE master_id = ipa_record.master_id)
+			);
 
-				PERFORM updated_ipa_tracker(
-					ipa_record.ipa_id::BIGINT,
-					ipa_event.event,
-					ipa_event.created_at,
-					'Activity recorded in Athena: ' || ipa_event.event
-				);
+		ELSE
 
-			END LOOP;
+			PERFORM updated_ipa_tracker(
+				ipa_record.record_updated_at,
+				ipa_record.ipa_id::BIGINT,
+				ipa_record.event,
+				ipa_record.record_updated_at,
+				'Activity recorded in Athena: ' || ipa_record.event
+			);
 
 		END IF;
 
@@ -70,7 +64,7 @@ $$;
 -- Run tests with:
 -- select ipa_ops.update_primary_ipa_record(364648868, (select pi from player_infos pi where master_id = 105029 limit 1), ARRAY(select pi from player_contacts pi where master_id = 105029), ARRAY(select pi from addresses pi where master_id = 105029) );
 -- Notice that player_contacts and addresses results are converted to an array, using the ARRAY() function, allowing them to be passed to the function.
-CREATE OR REPLACE FUNCTION update_primary_ipa_record(match_ipa_id BIGINT, new_player_info_record player_infos, new_player_contact_records player_contacts[], new_address_records addresses[]) returns INTEGER
+CREATE OR REPLACE FUNCTION update_primary_ipa_record(rec_updated_at timestamp without time zone, match_ipa_id BIGINT, new_player_info_record player_infos, new_player_contact_records player_contacts[], new_address_records addresses[]) returns INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -99,29 +93,26 @@ BEGIN
 
 	IF NOT FOUND THEN
 		RAISE NOTICE 'Attempting to transfer back an external ID that does not exist: ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
-		UPDATE temp_ipa_assignments SET status='invalid sync-back', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event IS NULL;
+		UPDATE temp_ipa_assignments SET status='invalid sync-back', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 	  RETURN NULL;
 	END IF;
 
+	new_master_id := found_ipa.master_id;
+
 	-- We create new records setting user_id for the user with email fphsetl@hms.harvard.edu, rather than the original
 	-- value from the source database, which probably would not match the user IDs in the remote database.
-	SELECT id
+	SELECT id FROM get_etl_user()
 	INTO etl_user_id
-	FROM users u
-	WHERE u.email = 'fphsetl@hms.harvard.edu'
 	LIMIT 1;
 
-	IF NOT FOUND THEN
-		RAISE EXCEPTION 'No user with email fphsetl@hms.harvard.edu was found. Can not continue.';
-	END IF;
 
-	UPDATE temp_ipa_assignments SET status='started sync' WHERE ipa_id = match_ipa_id AND event IS NULL;
+	UPDATE temp_ipa_assignments SET status='started sync' WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 
 	RAISE NOTICE 'Updating master record with user_id % and external identifier % into master %', etl_user_id::varchar, match_ipa_id::varchar, new_master_id::varchar;
 
 	IF new_player_info_record.master_id IS NULL THEN
 		RAISE NOTICE 'No new_player_info_record found for IPA_ID --> %', (match_ipa_id);
-		UPDATE temp_ipa_assignments SET status='failed - no player info provided' WHERE ipa_id = match_ipa_id AND event IS NULL;
+		UPDATE temp_ipa_assignments SET status='failed - no player info provided' WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 		RETURN NULL;
 	ELSE
 
@@ -384,9 +375,9 @@ BEGIN
 
 	END IF;
 
-	RAISE NOTICE 'Setting results for master_id %', (new_master_id);
+	RAISE NOTICE 'Setting completed status for master_id % with ipa_id % updated at %', new_master_id, match_ipa_id::varchar, rec_updated_at::varchar;
 
-	UPDATE temp_ipa_assignments SET status='completed', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event IS NULL;
+	UPDATE temp_ipa_assignments SET status='completed', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 
 	return new_master_id;
 
@@ -395,11 +386,13 @@ $$;
 
 ----------------------------------------------------------
 -- Update the primary tracker with entries specific to the event
-CREATE OR REPLACE FUNCTION updated_ipa_tracker(match_ipa_id BIGINT, for_event VARCHAR, event_date timestamp without time zone, add_notes VARCHAR) returns INTEGER
+CREATE OR REPLACE FUNCTION updated_ipa_tracker(rec_updated_at timestamp without time zone, match_ipa_id BIGINT, for_event VARCHAR, event_date timestamp without time zone, add_notes VARCHAR) returns INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
+  etl_user_id integer;
 	found_ipa record;
+	new_master_id integer;
 	this_protocol_id integer;
 	opt_out_id integer;
 	complete_id integer;
@@ -410,6 +403,12 @@ DECLARE
 	enrolled_id integer;
 BEGIN
 
+	-- We create new records setting user_id for the user with email fphsetl@hms.harvard.edu, rather than the original
+	-- value from the source database, which probably would not match the user IDs in the remote database.
+	SELECT id FROM get_etl_user()
+	INTO etl_user_id
+	LIMIT 1;
+
 
 	-- Find the ipa_assignments external identifier record for this master record and
 	-- validate that it exists
@@ -419,11 +418,13 @@ BEGIN
 	WHERE ipa.ipa_id = match_ipa_id
 	LIMIT 1;
 
+	new_master_id := found_ipa.master_id;
+
 	-- If the IPA external identifier does not exist then the sync should fail.
 
 	IF NOT FOUND THEN
 		RAISE NOTICE 'Attempting to transfer trackers back for an external ID that does not exist: ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
-		UPDATE temp_ipa_assignments SET status='invalid tracker sync-back', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event = for_event;
+		UPDATE temp_ipa_assignments SET status='invalid tracker sync-back', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event = for_event and record_updated_at = rec_updated_at;
 	  RETURN NULL;
 	END IF;
 
@@ -439,7 +440,8 @@ BEGIN
 	SELECT id
 	FROM sub_processes
 	WHERE
-		name = 'Opt Out'
+		protocol_id = this_protocol_id
+		AND name = 'Opt Out'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
 	INTO opt_out_id;
@@ -447,7 +449,8 @@ BEGIN
 	SELECT id
 	FROM sub_processes
 	WHERE
-		name = 'Complete'
+		protocol_id = this_protocol_id
+		AND name = 'Complete'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
 	INTO complete_id;
@@ -455,7 +458,8 @@ BEGIN
 	SELECT id
 	FROM sub_processes
 	WHERE
-		name = 'Withdrew'
+		protocol_id = this_protocol_id
+		AND name = 'Withdrew'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
 	INTO withdrew_id;
@@ -463,7 +467,8 @@ BEGIN
 	SELECT id
 	FROM sub_processes
 	WHERE
-		name = 'Screened'
+		protocol_id = this_protocol_id
+		AND name = 'Screened'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
 	INTO screened_id;
@@ -471,7 +476,8 @@ BEGIN
 	SELECT id
 	FROM sub_processes
 	WHERE
-		name = 'Eligible'
+		protocol_id = this_protocol_id
+		AND name = 'Eligible'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
 	INTO eligible_id;
@@ -479,7 +485,8 @@ BEGIN
 	SELECT id
 	FROM sub_processes
 	WHERE
-		name = 'Ineligible'
+		protocol_id = this_protocol_id
+		AND name = 'Ineligible'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
 	INTO ineligible_id;
@@ -487,7 +494,8 @@ BEGIN
 	SELECT id
 	FROM sub_processes
 	WHERE
-		name = 'Enrolled'
+		protocol_id = this_protocol_id
+		AND name = 'Enrolled'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
 	INTO enrolled_id;
@@ -501,7 +509,8 @@ BEGIN
 		event_date,
 		notes,
 		created_at,
-		updated_at
+		updated_at,
+		user_id
 	)
 	VALUES
 	(
@@ -521,10 +530,14 @@ BEGIN
 		event_date,
 		add_notes,
 		now(),
-		now()
+		now(),
+		etl_user_id
 
 	);
 
+	UPDATE temp_ipa_assignments SET status='completed', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event = for_event and record_updated_at = rec_updated_at;
+
+	return new_master_id;
 
 END;
 $$;
