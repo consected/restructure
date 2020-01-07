@@ -26,14 +26,33 @@ default:
           - six_or_more_frequency
 
 
-  show_if:
-#    daily_alcohol:
-#      not_all:
-#        alcohol_frequency: '0'
+  editable_if:
+    always: true
 
-#    six_or_more_frequency:
-#      not_all:
-#        alcohol_frequency: '0'
+  show_if:
+    daily_alcohol:
+      all:
+        alcohol_frequency:
+          - 2
+          - 3
+          - 4
+
+    six_or_more_frequency:
+      any:
+        six_or_more_frequency: ''
+      all:
+        alcohol_frequency:
+          - 2
+          - 3
+          - 4
+        total_score:
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+
 
     possibly_eligible_yes_no:
       never: true
@@ -42,26 +61,24 @@ default:
       never: true
 
 #    possibly_eligible_yes_no: &ineligible_rules
+    # we are ineligible (or possibly eligible if)
     placeholder_possibly_eligible:
-      any:
-        total_score:
-          - '4'
-          - '5'
-          - '6'
-          - '7'
-          - '8'
-          - '9'
-          - '10'
-          - '11'
-          - '12'
+
       not_all:
-        total_score: '4'
-        daily_alcohol:
-          - '0'
-          - ''
+        total_score:
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
         six_or_more_frequency:
-          - '0'
           - ''
+          - 0
+          - 1
+          - 2
+          - 3
+
 
 #    placeholder_possibly_eligible:
 #      all:
