@@ -5143,7 +5143,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:54.138Z'
-    updated_at: '2019-11-21T11:00:54.138Z'
+    updated_at: '2020-01-06T10:09:00.956Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -5198,8 +5198,8 @@ app_type:
       this communication complete?\r\n\r\n\r\n_default:\r\n  fields: *communication_fields\r\n\r\n
       \ show_if:\r\n    <<: *communication_show_if\r\n\r\n  field_options:\r\n    <<:
       *communication_field_options\r\n    \r\n  caption_before: \r\n    <<: *communication_caption_before\r\n\r\n
-      \ view_options:\r\n    hide_unless_creatable: true\r\n\r\n  showable_if: *enabled_if\r\n
-      \ creatable_if: *enabled_if\r\n  editable_if: *enabled_if\r\n\r\n\r\n\r\n#################################################\r\nrequest_pi_follow_up:\r\n
+      \ view_options:\r\n    hide_unless_creatable: true\r\n\r\n#  showable_if: *enabled_if\r\n#
+      \ creatable_if: *enabled_if\r\n#  editable_if: *enabled_if\r\n\r\n\r\n\r\n#################################################\r\nrequest_pi_follow_up:\r\n
       \ label: Request PI Follow Up\r\n#################################################\r\n\r\n
       \ fields:\r\n    - notes\r\n\r\n  caption_before:\r\n    notes: \r\n      edit_caption:
       |\r\n        A follow up by the PI with the participant is required, please
@@ -13385,6 +13385,402 @@ app_type:
     created_at: '2019-11-25T16:56:23.151Z'
     updated_at: '2019-11-25T16:56:23.151Z'
     user_email: sleep-iv@template
+  - id: 1054
+    app_type_id: 11
+    role_name: interventionist
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.033Z'
+    updated_at: '2020-01-03T21:49:47.033Z'
+    user_email: brarlk@upmc.edu
+  - id: 1055
+    app_type_id: 11
+    role_name: sms - interventionist
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.064Z'
+    updated_at: '2020-01-03T21:49:47.064Z'
+    user_email: brarlk@upmc.edu
+  - id: 1056
+    app_type_id: 11
+    role_name: user - discussions
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.073Z'
+    updated_at: '2020-01-03T21:49:47.073Z'
+    user_email: brarlk@upmc.edu
+  - id: 1057
+    app_type_id: 11
+    role_name: user - participant details
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.082Z'
+    updated_at: '2020-01-03T21:49:47.082Z'
+    user_email: brarlk@upmc.edu
+  - id: 1058
+    app_type_id: 11
+    role_name: nfs_store group 600
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.094Z'
+    updated_at: '2020-01-03T21:49:47.094Z'
+    user_email: brarlk@upmc.edu
+  - id: 1059
+    app_type_id: 11
+    role_name: email - interventionist
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.103Z'
+    updated_at: '2020-01-03T21:49:47.103Z'
+    user_email: brarlk@upmc.edu
+  - id: 1060
+    app_type_id: 11
+    role_name: user - phone screen
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.111Z'
+    updated_at: '2020-01-03T21:49:47.111Z'
+    user_email: brarlk@upmc.edu
+  - id: 1061
+    app_type_id: 11
+    role_name: user - phone screen 2
+    user_id: 84
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:49:47.120Z'
+    updated_at: '2020-01-03T21:49:47.120Z'
+    user_email: brarlk@upmc.edu
+  - id: 1062
+    app_type_id: 11
+    role_name: interventionist
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.298Z'
+    updated_at: '2020-01-03T21:50:22.298Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1063
+    app_type_id: 11
+    role_name: sms - interventionist
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.308Z'
+    updated_at: '2020-01-03T21:50:22.308Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1064
+    app_type_id: 11
+    role_name: user - discussions
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.317Z'
+    updated_at: '2020-01-03T21:50:22.317Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1065
+    app_type_id: 11
+    role_name: user - participant details
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.326Z'
+    updated_at: '2020-01-03T21:50:22.326Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1066
+    app_type_id: 11
+    role_name: nfs_store group 600
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.335Z'
+    updated_at: '2020-01-03T21:50:22.335Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1067
+    app_type_id: 11
+    role_name: email - interventionist
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.344Z'
+    updated_at: '2020-01-03T21:50:22.344Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1068
+    app_type_id: 11
+    role_name: user - phone screen
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.353Z'
+    updated_at: '2020-01-03T21:50:22.353Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1069
+    app_type_id: 11
+    role_name: user - phone screen 2
+    user_id: 85
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-03T21:50:22.364Z'
+    updated_at: '2020-01-03T21:50:22.364Z'
+    user_email: sjthoma@uabmc.edu
+  - id: 1070
+    app_type_id: 11
+    role_name: interventionist
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.517Z'
+    updated_at: '2020-01-06T14:57:28.517Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1071
+    app_type_id: 11
+    role_name: sms - interventionist
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.545Z'
+    updated_at: '2020-01-06T14:57:28.545Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1072
+    app_type_id: 11
+    role_name: user - discussions
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.553Z'
+    updated_at: '2020-01-06T14:57:28.553Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1073
+    app_type_id: 11
+    role_name: user - participant details
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.562Z'
+    updated_at: '2020-01-06T14:57:28.562Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1074
+    app_type_id: 11
+    role_name: nfs_store group 600
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.571Z'
+    updated_at: '2020-01-06T14:57:28.571Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1075
+    app_type_id: 11
+    role_name: email - interventionist
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.579Z'
+    updated_at: '2020-01-06T14:57:28.579Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1076
+    app_type_id: 11
+    role_name: user - phone screen
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.589Z'
+    updated_at: '2020-01-06T14:57:28.589Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1077
+    app_type_id: 11
+    role_name: user - phone screen 2
+    user_id: 86
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:57:28.599Z'
+    updated_at: '2020-01-06T14:57:28.599Z'
+    user_email: michael.goldstein1@gmail.com
+  - id: 1078
+    app_type_id: 11
+    role_name: email - pi follow up
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.499Z'
+    updated_at: '2020-01-06T14:58:16.499Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1079
+    app_type_id: 11
+    role_name: email - protocol deviation review
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.515Z'
+    updated_at: '2020-01-06T14:58:16.515Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1080
+    app_type_id: 11
+    role_name: email - adverse event review
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.524Z'
+    updated_at: '2020-01-06T14:58:16.524Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1081
+    app_type_id: 11
+    role_name: pi
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.533Z'
+    updated_at: '2020-01-06T14:58:16.533Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1082
+    app_type_id: 11
+    role_name: sms - pi
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.543Z'
+    updated_at: '2020-01-06T14:58:16.543Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1083
+    app_type_id: 11
+    role_name: sms - pi follow up
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.552Z'
+    updated_at: '2020-01-06T14:58:16.552Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1084
+    app_type_id: 11
+    role_name: user - adverse event
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.561Z'
+    updated_at: '2020-01-06T14:58:16.561Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1085
+    app_type_id: 11
+    role_name: user - discussions
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.569Z'
+    updated_at: '2020-01-06T14:58:16.569Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1086
+    app_type_id: 11
+    role_name: user - inex
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.577Z'
+    updated_at: '2020-01-06T14:58:16.577Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1087
+    app_type_id: 11
+    role_name: user - mednav
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.585Z'
+    updated_at: '2020-01-06T14:58:16.585Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1088
+    app_type_id: 11
+    role_name: user - phone screen
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.594Z'
+    updated_at: '2020-01-06T14:58:16.594Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1089
+    app_type_id: 11
+    role_name: user - phone screen 2
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.602Z'
+    updated_at: '2020-01-06T14:58:16.602Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1090
+    app_type_id: 11
+    role_name: user - protocol deviation
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.611Z'
+    updated_at: '2020-01-06T14:58:16.611Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1091
+    app_type_id: 11
+    role_name: user - protocol exception
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.620Z'
+    updated_at: '2020-01-06T14:58:16.620Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1092
+    app_type_id: 11
+    role_name: nfs_store group 600
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.628Z'
+    updated_at: '2020-01-06T14:58:16.628Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1093
+    app_type_id: 11
+    role_name: tracker
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.636Z'
+    updated_at: '2020-01-06T14:58:16.636Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1094
+    app_type_id: 11
+    role_name: user - participant details
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.644Z'
+    updated_at: '2020-01-06T14:58:16.644Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1095
+    app_type_id: 11
+    role_name: email - inex pi
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.654Z'
+    updated_at: '2020-01-06T14:58:16.654Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1096
+    app_type_id: 11
+    role_name: sms - inex pi
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.662Z'
+    updated_at: '2020-01-06T14:58:16.662Z'
+    user_email: janicebiddle99@gmail.com
+  - id: 1097
+    app_type_id: 11
+    role_name: email - pi
+    user_id: 87
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-06T14:58:16.680Z'
+    updated_at: '2020-01-06T14:58:16.680Z'
+    user_email: janicebiddle99@gmail.com
   associated_message_templates:
   - id: 21
     name: standard sms layout
