@@ -46,11 +46,11 @@ BEGIN
       AND ipa.ipa_id::varchar = s.external_id
       AND s.external_type = 'ipa_assignments'
       AND s.event IS NULL
-      AND s.record_updated_at <= t2.record_updated_at
+      AND s.record_updated_at = t2.record_updated_at
     WHERE
       (
         s.id IS NULL
-        OR coalesce(s.select_status, '') NOT IN ('completed', 'already transferred', 'invalid sync-back', 'invalid tracker sync-back')
+        OR coalesce(s.select_status, '') NOT IN ('completed', 'already transferred', 'invalid sync-back', 'invalid tracker sync-back', 'failed - no player info provided')
         AND s.created_at < now() - interval '2 hours'
       )
 
@@ -73,11 +73,11 @@ BEGIN
       AND ipa.ipa_id::varchar = s.external_id
       AND s.external_type = 'ipa_assignments'
       AND s.event = events.event
-      AND s.record_updated_at <= events.created_at
+      AND s.record_updated_at = events.created_at
     WHERE
       (
         s.id IS NULL
-        OR coalesce(s.select_status, '') NOT IN ('completed', 'already transferred', 'invalid sync-back', 'invalid tracker sync-back')
+        OR coalesce(s.select_status, '') NOT IN ('completed', 'already transferred', 'invalid sync-back', 'invalid tracker sync-back', 'failed - no player info provided')
         AND s.created_at < now() - interval '2 hours'
       )
     ;

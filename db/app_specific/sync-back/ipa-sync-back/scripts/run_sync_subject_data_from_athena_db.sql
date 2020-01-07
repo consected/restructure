@@ -25,44 +25,39 @@ SELECT * FROM (
         THEN 'eligible'
       WHEN extra_log_type = 'appointment' THEN 'enrolled'
       -- WHEN extra_log_type = 'schedule_screening' THEN 'in process'
-      WHEN ps_finalized = 'finalized' THEN 'screened'
+      WHEN extra_log_type = 'screening_follow_up' THEN 'screened'
       ELSE NULL
     END "event",
     dt.created_at
   FROM (
       SELECT
         al.master_id,
-        CASE WHEN activity_log_ipa_assignment_phone_screens.extra_log_type = 'finalize' THEN activity_log_ipa_assignment_phone_screens.created_at
-          ELSE al.created_at
-        END "created_at",
+        al.created_at,
         al.extra_log_type,
         ipa_screenings.eligible_for_study_blank_yes_no, ipa_screenings.still_interested_blank_yes_no "follow_up_still_interested",
         ipa_ps_initial_screenings.select_is_good_time_to_speak "ps_interested1",
         ipa_ps_initial_screenings.select_may_i_begin "ps_interested2",
-        ipa_ps_initial_screenings.select_still_interested "ps_still_interested",
-        activity_log_ipa_assignment_phone_screens.extra_log_type "ps_finalized"
+        ipa_ps_initial_screenings.select_still_interested "ps_still_interested"
       FROM activity_log_ipa_assignments al
       LEFT JOIN ipa_screenings ON al.master_id = ipa_screenings.master_id
       LEFT JOIN ipa_surveys ON al.master_id = ipa_surveys.master_id
       LEFT JOIN ipa_ps_initial_screenings ON al.master_id = ipa_ps_initial_screenings.master_id
-      LEFT JOIN activity_log_ipa_assignment_phone_screens ON al.master_id = activity_log_ipa_assignment_phone_screens.master_id AND activity_log_ipa_assignment_phone_screens.extra_log_type = 'finalize'
       WHERE
         ipa_ps_initial_screenings.select_is_good_time_to_speak = 'not interested'
         OR ipa_ps_initial_screenings.select_may_i_begin = 'not interested'
         OR ipa_ps_initial_screenings.select_still_interested = 'no'
-        OR activity_log_ipa_assignment_phone_screens.extra_log_type = 'finalize'
         OR (
           al.extra_log_type = 'follow_up_surveys'
           AND ipa_surveys.select_survey_type = 'exit survey'
         )
         OR
-          al.extra_log_type in ('perform_screening_follow_up', 'withdraw', 'schedule_screening',  'appointment')
+          al.extra_log_type in ('screening_follow_up', 'perform_screening_follow_up', 'withdraw', 'schedule_screening',  'appointment')
   ) dt
   INNER JOIN ipa_assignments ipa
     ON dt.master_id = ipa.master_id
 ) e1
 WHERE event IS NOT NULL
-ORDER by master_id, created_at desc;
+ORDER by master_id, created_at asc;
 
 
 INSERT INTO temp_ipa_assignments (SELECT * FROM ml_app.find_new_athena_ipa_records());

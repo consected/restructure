@@ -29,7 +29,7 @@ BEGIN
 	event_count := 0;
 
 	FOR ipa_record IN
-	  SELECT * from temp_ipa_assignments
+	  SELECT * from temp_ipa_assignments ORDER BY record_updated_at
 	LOOP
 
 
@@ -134,7 +134,10 @@ BEGIN
 		WHERE
 			master_id = new_master_id
 			AND new_player_info_record.updated_at IS NOT NULL
-			AND updated_at < new_player_info_record.updated_at
+			AND (
+				updated_at IS NULL OR
+				updated_at < new_player_info_record.updated_at
+			)
 		LIMIT 1
 		;
 
@@ -248,7 +251,7 @@ BEGIN
 
 			ELSE
 
-				IF found_pc.updated_at < player_contact.updated_at THEN
+				IF found_pc.updated_at IS NULL AND player_contact.updated_at IS NOT NULL OR found_pc.updated_at < player_contact.updated_at THEN
 
 					RAISE NOTICE 'Updating player contact record %. It was older than the one found for IPA_ID --> %', found_pc.id, match_ipa_id;
 
@@ -343,7 +346,7 @@ BEGIN
 
 			ELSE
 
-			IF found_a.updated_at < address.updated_at THEN
+			IF found_a.updated_at IS NULL AND address.updated_at IS NOT NULL OR found_a.updated_at < address.updated_at THEN
 
 				RAISE NOTICE 'Updating address record %. It was older than the one found for IPA_ID --> %', found_a.id, match_ipa_id;
 
