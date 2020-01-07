@@ -1,0 +1,69 @@
+# @library sleep field_options
+
+default:
+
+  caption_before:
+    alcohol_frequency: How often do you have a drink containing alcohol?
+    daily_alcohol: How many standard drinks containing alcohol do you have on a typical day?
+    six_or_more_frequency: How often do you have six or more drinks on one occasion?
+    total_score: Score
+    placeholder_possibly_eligible: |
+      *Based on the scores, the participant is ineligible.
+      The option to change status to possibly eligible will appear at the next step.*
+
+    possibly_eligible_reason_notes: Reason
+
+  field_options:
+    <<: *ps_field_options
+
+    total_score:
+      edit_as:
+        field_type: fixed_score
+      calculate_with:
+        sum:
+          - alcohol_frequency
+          - daily_alcohol
+          - six_or_more_frequency
+
+
+  show_if:
+#    daily_alcohol:
+#      not_all:
+#        alcohol_frequency: '0'
+
+#    six_or_more_frequency:
+#      not_all:
+#        alcohol_frequency: '0'
+
+    possibly_eligible_yes_no:
+      never: true
+
+    possibly_eligible_reason_notes:
+      never: true
+
+#    possibly_eligible_yes_no: &ineligible_rules
+    placeholder_possibly_eligible:
+      any:
+        total_score:
+          - '4'
+          - '5'
+          - '6'
+          - '7'
+          - '8'
+          - '9'
+          - '10'
+          - '11'
+          - '12'
+      not_all:
+        total_score: '4'
+        daily_alcohol:
+          - '0'
+          - ''
+        six_or_more_frequency:
+          - '0'
+          - ''
+
+#    placeholder_possibly_eligible:
+#      all:
+#        possibly_eligible_yes_no: 'yes'
+#      <<: *ineligible_rules
