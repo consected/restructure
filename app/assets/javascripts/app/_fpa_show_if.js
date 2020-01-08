@@ -104,6 +104,9 @@ _fpa.show_if.methods = {
       // if the field definition specifies a condition type, use it
       // otherwise assume a condition type 'all'
       var is_cond_type = false;
+
+      // If the definition is a hash and it has a condition type specified, use the key
+      // as the condition type, and the inner value as the condition definition
       if( cond_def_init.hasOwnProperty(cond_type) && typeof(cond_def_init[cond_type]) == 'object' && !Array.isArray(cond_def_init[cond_type])) {
         // console.log(cond_type)
         for(var ci in cond_types) {
@@ -120,35 +123,49 @@ _fpa.show_if.methods = {
         cond_type = 'all';
       }
 
+
       // Now iterate through each of the fields in the definition
       for(var cond_field in cond_def) {
         if(cond_def.hasOwnProperty(cond_field)) {
-          // Expect field data
-          var exp_field_value = data[cond_field];
-          if(typeof exp_field_value == 'number') exp_field_value = exp_field_value.toString();
-          
-          // to have value
+
           var exp_value = cond_def[cond_field];
 
-          if(exp_value == null)
-            exp_value = [exp_value];
-          else if(typeof exp_value == 'string')
-            exp_value = [exp_value];
-          else if(typeof exp_value == 'boolean') {
-            exp_value = [exp_value, (exp_value ? 'yes' : 'no')];
+          // If the condition definition is a hash, then this is an embedded condition. Handle it.
+          if (exp_value != null && typeof(exp_value) == 'object' && !Array.isArray(exp_value)) {
+            var subdef = {};
+            subdef[cond_field] = exp_value;
+            var matches = _fpa.show_if.methods.calc_conditions(subdef, data);
           }
-          else if(typeof exp_value == 'number') {
-            exp_value = [exp_value.toString()];
-          }
-          else if(typeof exp_value == 'object') {
-            for(var i = 0; i < exp_value.length; i ++) {
-              if(exp_value[i] === true) exp_value.push('yes');
-              if(exp_value[i] === false) exp_value.push('no');
-              if(typeof exp_value[i] == 'number') exp_value[i] = exp_value[i].toString();
+          else {
+            // This is instead a standard field comparison
+
+            // Expect field data
+            var exp_field_value = data[cond_field];
+            if(typeof exp_field_value == 'number') exp_field_value = exp_field_value.toString();
+
+            // to have value
+            if(exp_value == null)
+            exp_value = [exp_value];
+            else if(typeof exp_value == 'string')
+            exp_value = [exp_value];
+            else if(typeof exp_value == 'boolean') {
+              exp_value = [exp_value, (exp_value ? 'yes' : 'no')];
             }
+            else if(typeof exp_value == 'number') {
+              exp_value = [exp_value.toString()];
+            }
+            else if(typeof exp_value == 'object') {
+              for(var i = 0; i < exp_value.length; i ++) {
+                if(exp_value[i] === true) exp_value.push('yes');
+                if(exp_value[i] === false) exp_value.push('no');
+                if(typeof exp_value[i] == 'number') exp_value[i] = exp_value[i].toString();
+              }
+            }
+
+            var matches = exp_value.indexOf(exp_field_value) >= 0;
+
           }
 
-          var matches = exp_value.includes(exp_field_value);
           if(cond_type.indexOf('all') === 0) {
             cond_success = cond_success && matches;
             if (!matches) break;
