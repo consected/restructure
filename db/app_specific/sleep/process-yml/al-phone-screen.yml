@@ -149,6 +149,8 @@ _definitions:
               - 3
               - 4
               - 5
+              - 6
+
       not_all:
         <<: *administer_ess
 
@@ -163,18 +165,24 @@ _definitions:
 
   eligible_audit_c: &eligible_audit_c
     not_all_eligible_audit_c:
-      not_any:
+      not_all:
         dynamic_model__sleep_ps_audit_c_questions:
           total_score:
             - 0
             - 1
             - 2
             - 3
-      not_all:
+            - 4
+      not_all_2:
+        dynamic_model__sleep_ps_audit_c_questions:
+          alcohol_frequency: 4
+          daily_alcohol: 1
+          six_or_more_frequency: 0
+      not_all_3:
         dynamic_model__sleep_ps_audit_c_questions:
           alcohol_frequency: 4
           daily_alcohol: 0
-          six_or_more_frequency: 0
+          six_or_more_frequency: 1
 
   continue_after_audit_c: &continue_after_audit_c
     any_after_audit_c:
