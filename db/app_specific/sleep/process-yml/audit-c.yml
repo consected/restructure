@@ -39,20 +39,27 @@ default:
 
     six_or_more_frequency:
       any:
-        six_or_more_frequency: ''
-      all:
-        alcohol_frequency:
-          - 2
-          - 3
-          - 4
-        total_score:
-          - 0
-          - 1
-          - 2
-          - 3
-          - 4
-          - 5
-
+        all:
+          alcohol_frequency:
+            - 2
+            - 3
+            - 4
+          daily_alcohol:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+          six_or_more_frequency: ''
+          total_score:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+        not_any:
+          six_or_more_frequency: ''
 
     possibly_eligible_yes_no:
       never: true
@@ -60,27 +67,38 @@ default:
     possibly_eligible_reason_notes:
       never: true
 
-#    possibly_eligible_yes_no: &ineligible_rules
     # we are ineligible (or possibly eligible if)
     placeholder_possibly_eligible:
-
-      not_all:
-        total_score:
-          - 0
-          - 1
-          - 2
-          - 3
-          - 4
-          - 5
-        six_or_more_frequency:
-          - ''
-          - 0
-          - 1
-          - 2
-          - 3
-
-
-#    placeholder_possibly_eligible:
-#      all:
-#        possibly_eligible_yes_no: 'yes'
-#      <<: *ineligible_rules
+      any:
+        all:
+          alcohol_frequency:
+            - 2
+            - 3
+            - 4
+          daily_alcohol:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+          six_or_more_frequency: ''
+          total_score:
+            - 6
+            - 7
+            - 8
+            - 9
+            - 10
+            - 11
+            - 12
+        all_2:
+          alcohol_frequency:
+            - 2
+            - 3
+            - 4
+          daily_alcohol:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+          six_or_more_frequency: 4
