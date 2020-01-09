@@ -29,6 +29,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     setup_access :player_contacts
     setup_access :player_infos
     setup_access :trackers
+    setup_access :tracker_histories
   end
 
   before :each do
@@ -80,7 +81,7 @@ describe "tracker block", js: true, driver: :app_firefox_driver do
     has_css? ".tracker-tree-results"
 
     sleep 0.5
-    
+
     within ".tracker-tree-results" do
       find('a.add-tracker-record').click
     end

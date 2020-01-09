@@ -16,7 +16,7 @@ module ActivityLogSupport
 
 
     unless @player_contact
-      setup_access :player_contacts
+      setup_access :player_contacts, user: @master.current_user
 
       @player_contact = @master.player_contacts.create!(
       {
@@ -81,6 +81,7 @@ module ActivityLogSupport
 
 
   def create_item att=nil, item=nil
+    setup_access :player_contacts, user: @user
     att ||= valid_attribs
     # master ||= @master || @player_contact.master
     # item ||= @player_contact
@@ -88,7 +89,6 @@ module ActivityLogSupport
     att[:master] ||= @player_contact.master
     @player_contact.current_user = @user
 
-    setup_access :player_contacts, user: @user
     setup_access :activity_log__player_contact_phones, user: @user
     setup_access :activity_log__player_contact_phone__primary, resource_type: :activity_log_type, user: @user
     setup_access :activity_log__player_contact_phone__blank, resource_type: :activity_log_type, user: @user

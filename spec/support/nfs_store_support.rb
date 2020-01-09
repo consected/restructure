@@ -134,12 +134,12 @@ EOF
     @resource_name = ActivityLog::PlayerContactPhone.extra_log_type_config_for(:step_1).resource_name
 
 
-    setup_access 'activity_log__player_contact_phones'
-    setup_access @resource_name, resource_type: :activity_log_type
-    setup_access 'nfs_store__manage__containers'
-    setup_access 'nfs_store__manage__stored_files'
-    setup_access 'nfs_store__manage__archived_files'
-    setup_access :download_files, resource_type: :general, access: :read
+    setup_access 'activity_log__player_contact_phones', user: @user
+    setup_access @resource_name, resource_type: :activity_log_type, user: @user
+    setup_access 'nfs_store__manage__containers', user: @user
+    setup_access 'nfs_store__manage__stored_files', user: @user
+    setup_access 'nfs_store__manage__archived_files', user: @user
+    setup_access :download_files, resource_type: :general, access: :read, user: @user
 
     basedir = '/var/tmp/nfs_store_tmp'
     FileUtils.mkdir_p File.join(basedir, 'gid600', "app-type-#{@app_type.id}", "containers")
