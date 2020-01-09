@@ -96,7 +96,7 @@ RSpec.describe "Export an app configuration", type: :model do
     expect(config['user_email']).to eq @user.email
     expect(config['value']).to eq 'true'
 
-    uac = app['user_access_controls']
+    uac = app['valid_user_access_controls']
     expect(uac).to be_a Array
     config = uac.select {|a| a['resource_name'] == 'player_infos'}.first
     expect(config['resource_type']).to eq 'table'
@@ -107,7 +107,7 @@ RSpec.describe "Export an app configuration", type: :model do
     expect(config['access']).to eq 'read'
     expect(config['user_email']).to eq @user.email
 
-    uac = app['associated_activity_logs']
+    uac = app['valid_associated_activity_logs']
     expect(uac).to be_a Array
     config = uac.select {|a| a['name'] == @activity_log.name}.first
     expect(config['item_type']).to eq @activity_log.item_type
