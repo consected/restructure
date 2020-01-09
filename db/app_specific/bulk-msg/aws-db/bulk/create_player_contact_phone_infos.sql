@@ -5,7 +5,7 @@ set search_path=bulk_msg,ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create player_contact_phone_infos player_contact_id carrier city cleansed_phone_number_e164 cleansed_phone_number_national country country_code_iso_2 country_code_numeric county original_country_code_iso_2 original_phone_number phone_type phone_type_code timezone zip_code
 
-      CREATE FUNCTION log_player_contact_phone_info_update() RETURNS trigger
+        CREATE or REPLACE FUNCTION log_player_contact_phone_info_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -27,6 +27,7 @@ set search_path=bulk_msg,ml_app;
                       phone_type_code,
                       timezone,
                       zip_code,
+                      opted_out_at,
                       user_id,
                       created_at,
                       updated_at,
@@ -49,6 +50,7 @@ set search_path=bulk_msg,ml_app;
                       NEW.phone_type_code,
                       NEW.timezone,
                       NEW.zip_code,
+                      NEW.opted_out_at,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -57,6 +59,7 @@ set search_path=bulk_msg,ml_app;
                   RETURN NEW;
               END;
           $$;
+
 
       CREATE TABLE player_contact_phone_info_history (
           id integer NOT NULL,
@@ -76,6 +79,7 @@ set search_path=bulk_msg,ml_app;
           phone_type_code varchar,
           timezone varchar,
           zip_code varchar,
+          opted_out_at timestamp without time zone,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -109,6 +113,7 @@ set search_path=bulk_msg,ml_app;
           phone_type_code varchar,
           timezone varchar,
           zip_code varchar,
+          opted_out_at timestamp without time zone,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
