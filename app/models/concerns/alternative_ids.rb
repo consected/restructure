@@ -67,7 +67,9 @@ module AlternativeIds
 
     return self.attributes[field_name.to_s] if self.class.crosswalk_attrs.include?(field_name)
 
-    assoc_name = self.class.external_id_definition(field_name).model_association_name
+    eid = self.class.external_id_definition(field_name)
+    raise FphsException.new "External ID definition is not active for #{field_name}" unless eid
+    assoc_name = eid.model_association_name
 
     if self.class.external_id_matching_fields.include?(field_name.to_sym)
       m = self.send(assoc_name).first
