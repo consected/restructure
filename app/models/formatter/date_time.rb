@@ -13,8 +13,10 @@ module Formatter
           end
 
           if w
+            curr_zone = w[:zone]
+            curr_zone ||= :user if current_user
             dstr = Formatter::Date.format w[:date], iso: iso, utc: utc
-            data = "#{dstr} #{Formatter::Time.format w[:time], iso: iso, utc: utc,  current_timezone: w[:zone], current_date: dstr, current_user: current_user}"
+            data = "#{dstr} #{Formatter::Time.format w[:time], iso: iso, utc: utc,  current_timezone: curr_zone, current_date: dstr, current_user: current_user}"
           end
 
           if data.is_a? String

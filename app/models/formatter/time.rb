@@ -7,7 +7,7 @@ module Formatter
     def self.format data, options=nil, current_user: nil, iso: nil, utc: nil, show_timezone: nil, current_timezone: nil, current_date: nil
       unless data.blank?
 
-        if current_timezone&.to_sym == :user
+        if current_timezone&.to_sym == :user && current_user
           current_timezone = current_user.user_preference.timezone
         end
 
