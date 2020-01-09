@@ -5,7 +5,7 @@ set search_path=grit, ml_app;
 -- Command line:
 -- table_generators/generate.sh dynamic_models_table create grit_ps_eligibles notes interested_yes_no not_interested_notes consent_to_pass_info_to_msm_yes_no consent_to_pass_info_to_msm_2_yes_no contact_info_notes more_questions_yes_no more_questions_notes select_still_interested
 
-      CREATE FUNCTION log_grit_ps_eligible_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_grit_ps_eligible_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -13,6 +13,7 @@ set search_path=grit, ml_app;
                   (
                       master_id,
                       notes,
+                      questions_yes_no,
                       interested_yes_no,
                       not_interested_notes,
                       consent_to_pass_info_to_msm_yes_no,
@@ -29,6 +30,7 @@ set search_path=grit, ml_app;
                   SELECT
                       NEW.master_id,
                       NEW.notes,
+                      NEW.questions_yes_no,
                       NEW.interested_yes_no,
                       NEW.not_interested_notes,
                       NEW.consent_to_pass_info_to_msm_yes_no,
@@ -50,6 +52,7 @@ set search_path=grit, ml_app;
           id integer NOT NULL,
           master_id integer,
           notes varchar,
+          questions_yes_no varchar,
           interested_yes_no varchar,
           not_interested_notes varchar,
           consent_to_pass_info_to_msm_yes_no varchar,
@@ -77,6 +80,7 @@ set search_path=grit, ml_app;
           id integer NOT NULL,
           master_id integer,
           notes varchar,
+          questions_yes_no varchar,
           interested_yes_no varchar,
           not_interested_notes varchar,
           consent_to_pass_info_to_msm_yes_no varchar,

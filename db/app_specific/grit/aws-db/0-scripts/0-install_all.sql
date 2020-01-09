@@ -36,6 +36,7 @@ set search_path=grit,ml_app;
 \i db/app_specific/grit/aws-db/screening/create_ps_possibly_eligibles.sql
 \i db/app_specific/grit/aws-db/screening/create_ps_screener_responses.sql
 \i db/app_specific/grit/aws-db/screening/create_grit_secure_notes.sql
+\i db/app_specific/grit/aws-db/screening/create_ps_subject_contacts.sql
 
 
 -- # Adverse Events

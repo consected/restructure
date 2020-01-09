@@ -15,16 +15,18 @@ SELECT * FROM (
     CASE
       WHEN extra_log_type = 'follow_up_surveys' THEN 'completed'
       WHEN extra_log_type = 'withdraw' THEN 'withdrawn'
+      WHEN extra_log_type = 'exit_l2fu' THEN 'lost to follow up'
       WHEN ps_interested1 = 'not interested' OR ps_interested2 = 'not interested' OR ps_still_interested = 'no'
         THEN 'not interest during phone screening'
       WHEN extra_log_type = 'perform_screening_follow_up' AND follow_up_still_interested = 'no'
         THEN 'not interest during screening follow-up'
       WHEN extra_log_type = 'perform_screening_follow_up' AND eligible_for_study_blank_yes_no = 'no'
         THEN 'ineligible'
-      WHEN extra_log_type = 'perform_screening_follow_up' AND eligible_for_study_blank_yes_no = 'yes'
-        THEN 'eligible'
-      WHEN extra_log_type = 'appointment' THEN 'enrolled'
-      -- WHEN extra_log_type = 'schedule_screening' THEN 'in process'
+      -- WHEN extra_log_type = 'perform_screening_follow_up' AND eligible_for_study_blank_yes_no = 'yes'
+      --   THEN 'eligible'
+      WHEN extra_log_type = 'appointment' THEN 'scheduled'
+      WHEN extra_log_type IN ('eligible', 'eligible with study partner', 'not eligible')
+        THEN extra_log_type
       WHEN extra_log_type = 'screening_follow_up' THEN 'screened'
       ELSE NULL
     END "event",
@@ -34,7 +36,8 @@ SELECT * FROM (
         al.master_id,
         al.created_at,
         al.extra_log_type,
-        ipa_screenings.eligible_for_study_blank_yes_no, ipa_screenings.still_interested_blank_yes_no "follow_up_still_interested",
+        ipa_screenings.eligible_for_study_blank_yes_no,
+        ipa_screenings.still_interested_blank_yes_no "follow_up_still_interested",
         ipa_ps_initial_screenings.select_is_good_time_to_speak "ps_interested1",
         ipa_ps_initial_screenings.select_may_i_begin "ps_interested2",
         ipa_ps_initial_screenings.select_still_interested "ps_still_interested"
@@ -52,6 +55,24 @@ SELECT * FROM (
         )
         OR
           al.extra_log_type in ('screening_follow_up', 'perform_screening_follow_up', 'withdraw', 'schedule_screening',  'appointment')
+
+      UNION
+
+      SELECT
+        al.master_id,
+        al.created_at,
+        ipa_inex_checklists.select_subject_eligibility "extra_log_type",
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+      FROM activity_log_ipa_assignment_inex_checklists al
+      INNER JOIN ipa_inex_checklists ON al.master_id = ipa_inex_checklists.master_id
+      WHERE
+        al.extra_log_type =  'sign_phone_screen'
+        AND ipa_inex_checklists.fixed_checklist_type = 'phone screen review'
+
   ) dt
   INNER JOIN ipa_assignments ipa
     ON dt.master_id = ipa.master_id

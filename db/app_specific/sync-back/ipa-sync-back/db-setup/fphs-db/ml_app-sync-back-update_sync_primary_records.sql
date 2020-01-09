@@ -90,6 +90,7 @@ DECLARE
 	a_length INTEGER;
 	found_a record;
 	last_id INTEGER;
+	rec_id INTEGER;
 BEGIN
 
 	-- Find the ipa_assignments external identifier record for this master record and
@@ -103,7 +104,7 @@ BEGIN
 	-- If the IPA external identifier does not exist then the sync should fail.
 
 	IF NOT FOUND THEN
-		RAISE NOTICE 'Attempting to transfer back an external ID that does not exist: ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
+		RAISE NOTICE 'Attempting to transfer back an external ID that does not exist: ipa_assigments record found for IPA_ID %', (match_ipa_id);
 		UPDATE temp_ipa_assignments SET status='invalid sync-back', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 	  RETURN NULL;
 	END IF;
@@ -122,7 +123,7 @@ BEGIN
 	-- RAISE NOTICE 'Updating master record with user_id % and external identifier % into master %', etl_user_id::varchar, match_ipa_id::varchar, new_master_id::varchar;
 
 	IF new_player_info_record.master_id IS NULL THEN
-		RAISE NOTICE 'No new_player_info_record found for IPA_ID --> %', (match_ipa_id);
+		RAISE NOTICE 'No Player Info record found for IPA_ID %', (match_ipa_id);
 		UPDATE temp_ipa_assignments SET status='failed - no player info provided' WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 		RETURN NULL;
 	ELSE
@@ -142,11 +143,9 @@ BEGIN
 		;
 
 		IF player_info IS NULL THEN
-			RAISE NOTICE 'No older primary player_infos record found for IPA_ID --> %', (match_ipa_id);
+			RAISE NOTICE 'No primary Player Info record found for IPA_ID %', (match_ipa_id);
 
 		ELSE
-
-			RAISE NOTICE 'Syncing older player info record %', (new_player_info_record::varchar);
 
 			-- Update the player info record
 			UPDATE player_infos
@@ -193,6 +192,9 @@ BEGIN
 			INTO last_id
 			;
 
+			RAISE NOTICE 'Updated player info record id % for IPA_ID %', last_id, match_ipa_id;
+
+
 		END IF;
 
 
@@ -207,10 +209,10 @@ BEGIN
 
 
 	IF pc_length IS NULL THEN
-		RAISE NOTICE 'No new_player_contact_records found for IPA_ID --> %', (match_ipa_id);
+		RAISE NOTICE 'No Player Contact records found for IPA_ID %', (match_ipa_id);
 	ELSE
 
-		RAISE NOTICE 'player contacts length %', (pc_length);
+		-- RAISE NOTICE 'player contacts length %', (pc_length);
 
 		FOREACH player_contact IN ARRAY new_player_contact_records LOOP
 
@@ -224,8 +226,6 @@ BEGIN
 
 			IF found_pc.id IS NULL THEN
 
-				RAISE NOTICE 'Inserting player contact record % % for IPA_ID --> %',
-					player_contact.rec_type, player_contact.data, match_ipa_id;
 
 			  INSERT INTO player_contacts
 				(
@@ -247,13 +247,16 @@ BEGIN
 						etl_user_id,
 						player_contact.created_at,
 						player_contact.updated_at
+				RETURNING id
+				INTO rec_id
 				;
+
+				RAISE NOTICE 'Inserted Player Contact id % for IPA_ID %', rec_id, match_ipa_id;
 
 			ELSE
 
 				IF found_pc.updated_at IS NULL AND player_contact.updated_at IS NOT NULL OR found_pc.updated_at < player_contact.updated_at THEN
 
-					RAISE NOTICE 'Updating player contact record %. It was older than the one found for IPA_ID --> %', found_pc.id, match_ipa_id;
 
 					UPDATE player_contacts
 					SET (
@@ -272,9 +275,10 @@ BEGIN
 						player_contacts.master_id = new_master_id
 						AND player_contacts.id = found_pc.id;
 
+					RAISE NOTICE 'Updated Player Contact id % for IPA_ID %', found_pc.id, match_ipa_id;
 
-				ELSE
-				  RAISE NOTICE 'Skipping player contact record %. It was not older than the one found for IPA_ID --> %', found_pc.id, match_ipa_id;
+				-- ELSE
+				--   RAISE NOTICE 'Skipping player contact record %. It was not older than the one found for IPA_ID --> %', found_pc.id, match_ipa_id;
 				END IF;
 
 
@@ -292,10 +296,10 @@ BEGIN
 
 
 	IF a_length IS NULL THEN
-		RAISE NOTICE 'No new_address_records found for IPA_ID --> %', (match_ipa_id);
+		RAISE NOTICE 'No Address records found for IPA_ID %', (match_ipa_id);
 	ELSE
 
-		RAISE NOTICE 'addresses length %', (a_length);
+		-- RAISE NOTICE 'addresses length %', (a_length);
 
 		FOREACH address IN ARRAY new_address_records LOOP
 
@@ -308,9 +312,6 @@ BEGIN
 			LIMIT 1;
 
 			IF found_a.id IS NULL THEN
-
-			RAISE NOTICE 'Inserting address record % % for IPA_ID --> %',
-				address.street, address.zip, match_ipa_id;
 
 			  INSERT INTO addresses
 				(
@@ -342,13 +343,16 @@ BEGIN
 						etl_user_id,
 						address.created_at,
 						address.updated_at
+				RETURNING id
+				INTO rec_id
 				;
+
+				RAISE NOTICE 'Inserted Address record id % for IPA_ID %', rec_id, match_ipa_id;
 
 			ELSE
 
 			IF found_a.updated_at IS NULL AND address.updated_at IS NOT NULL OR found_a.updated_at < address.updated_at THEN
 
-				RAISE NOTICE 'Updating address record %. It was older than the one found for IPA_ID --> %', found_a.id, match_ipa_id;
 
 				UPDATE addresses
 				SET (
@@ -377,9 +381,10 @@ BEGIN
 					addresses.master_id = new_master_id
 					AND addresses.id = found_a.id;
 
+				RAISE NOTICE 'Updated Address record % id for IPA_ID %', found_a.id, match_ipa_id;
 
-			ELSE
-				RAISE NOTICE 'Skipping address record %. It was not older than the one found for IPA_ID --> %', found_a.id, match_ipa_id;
+			-- ELSE
+			-- 	RAISE NOTICE 'Skipping address record %. It was not older than the one found for IPA_ID --> %', found_a.id, match_ipa_id;
 			END IF;
 
 
@@ -404,6 +409,7 @@ CREATE OR REPLACE FUNCTION updated_ipa_tracker(rec_updated_at timestamp without 
 LANGUAGE plpgsql
 AS $$
 DECLARE
+	rec_id integer;
   etl_user_id integer;
 	found_ipa record;
 	new_master_id integer;
@@ -414,7 +420,9 @@ DECLARE
 	screened_id integer;
 	eligible_id integer;
 	ineligible_id integer;
-	enrolled_id integer;
+	scheduled_id integer;
+	l2fu_id integer;
+
 BEGIN
 
 	-- We create new records setting user_id for the user with email fphsetl@hms.harvard.edu, rather than the original
@@ -437,7 +445,7 @@ BEGIN
 	-- If the IPA external identifier does not exist then the sync should fail.
 
 	IF NOT FOUND THEN
-		RAISE NOTICE 'Attempting to transfer trackers back for an external ID that does not exist: ipa_assigments record found for IPA_ID --> %', (match_ipa_id);
+		RAISE NOTICE 'Attempting to transfer trackers back for an external ID that does not exist: ipa_assigments record found for IPA_ID %', (match_ipa_id);
 		UPDATE temp_ipa_assignments SET status='invalid tracker sync-back', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event = for_event and record_updated_at = rec_updated_at;
 	  RETURN NULL;
 	END IF;
@@ -509,10 +517,19 @@ BEGIN
 	FROM sub_processes
 	WHERE
 		protocol_id = this_protocol_id
-		AND name = 'Enrolled'
+		AND name = 'Scheduled'
 		AND coalesce(disabled, FALSE) = FALSE
 	LIMIT 1
-	INTO enrolled_id;
+	INTO scheduled_id;
+
+	SELECT id
+	FROM sub_processes
+	WHERE
+		protocol_id = this_protocol_id
+		AND name = 'Lost to Follow Up, Not Enrolled'
+		AND coalesce(disabled, FALSE) = FALSE
+	LIMIT 1
+	INTO l2fu_id;
 
 	INSERT INTO trackers
 	(
@@ -535,10 +552,12 @@ BEGIN
 			WHEN 'not interest during screening follow-up' THEN opt_out_id
 			WHEN 'completed' THEN complete_id
 			WHEN 'withdrawn' THEN withdrew_id
-			WHEN 'enrolled' THEN enrolled_id
-			WHEN 'ineligible' THEN ineligible_id
+			WHEN 'scheduled' THEN scheduled_id
+			WHEN 'not eligible' THEN ineligible_id
 			WHEN 'eligible' THEN eligible_id
+			WHEN 'eligible with study partner' THEN eligible_id
 			WHEN 'screened' THEN screened_id
+			WHEN 'lost to follow up' THEN l2fu_id
 		END,
 		NULL,
 		event_date,
@@ -547,9 +566,14 @@ BEGIN
 		now(),
 		etl_user_id
 
-	);
+	)
+	RETURNING id
+	INTO rec_id
+	;
 
 	UPDATE temp_ipa_assignments SET status='completed', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event = for_event and record_updated_at = rec_updated_at;
+
+	RAISE NOTICE 'Inserted Event "%" for IPA_ID %', for_event, match_ipa_id;
 
 	return new_master_id;
 
