@@ -73,6 +73,7 @@ RSpec.describe Tracker, type: :model do
   end
 
   it "gets completions" do
+    setup_access :tracker_histories
 
     master = create_master
 
@@ -90,7 +91,8 @@ RSpec.describe Tracker, type: :model do
     res = master.tracker_completions
     expect(res.length).to eq 1
 
-    expect( master.as_json["tracker_completions"].first[:sub_process_name]).to eq @sp1_1.name
+    res = master.as_json["tracker_completions"].first[:sub_process_name]
+    expect(res).to eq @sp1_1.name
 
   end
 
