@@ -37,4 +37,6 @@ COMMIT;
 
 SELECT update_all_primary_ipa_records();
 
+UPDATE temp_ipa_assignments SET status = 'failed' WHERE status = 'new';
+
 \copy (SELECT * FROM temp_ipa_assignments) TO $ASSIGNMENTS_RESULTS_FILE WITH (format csv, header true);

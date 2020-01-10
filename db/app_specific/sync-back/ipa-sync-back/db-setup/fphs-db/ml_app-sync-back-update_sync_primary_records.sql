@@ -93,6 +93,8 @@ DECLARE
 	rec_id INTEGER;
 BEGIN
 
+	UPDATE temp_ipa_assignments SET status='started sync' WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
+
 	-- Find the ipa_assignments external identifier record for this master record and
 	-- validate that it exists
 	SELECT *
@@ -105,7 +107,7 @@ BEGIN
 
 	IF NOT FOUND THEN
 		RAISE NOTICE 'Attempting to transfer back an external ID that does not exist: ipa_assigments record found for IPA_ID %', (match_ipa_id);
-		UPDATE temp_ipa_assignments SET status='invalid sync-back', to_master_id=new_master_id WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
+		UPDATE temp_ipa_assignments SET status='invalid sync-back' WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 	  RETURN NULL;
 	END IF;
 
@@ -118,7 +120,6 @@ BEGIN
 	LIMIT 1;
 
 
-	UPDATE temp_ipa_assignments SET status='started sync' WHERE ipa_id = match_ipa_id AND event IS NULL and record_updated_at = rec_updated_at;
 
 	-- RAISE NOTICE 'Updating master record with user_id % and external identifier % into master %', etl_user_id::varchar, match_ipa_id::varchar, new_master_id::varchar;
 

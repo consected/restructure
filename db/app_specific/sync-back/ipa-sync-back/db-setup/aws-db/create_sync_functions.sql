@@ -17,7 +17,7 @@ AS $$
 BEGIN
   RETURN QUERY
 
-    SELECT distinct on (m.id) m.id "master_id", ipa.ipa_id, null::varchar "event", t2.record_updated_at
+    SELECT distinct on (m.id) m.id "master_id", ipa.ipa_id, null::varchar "event", coalesce(t2.record_updated_at, ipa.created_at) "record_updated_at"
     FROM masters m
     INNER JOIN ipa_ops.ipa_assignments ipa ON m.id = ipa.master_id
 
@@ -46,7 +46,7 @@ BEGIN
       AND ipa.ipa_id::varchar = s.external_id
       AND s.external_type = 'ipa_assignments'
       AND s.event IS NULL
-      AND s.record_updated_at = t2.record_updated_at
+      AND s.record_updated_at = coalesce(t2.record_updated_at, ipa.created_at)
     WHERE
       (
         s.id IS NULL
