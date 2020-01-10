@@ -22,7 +22,7 @@ if [ "$RAILS_ENV" == 'development' ]
 then
   BASEDIR=$(pwd)/..
 else
-  BASEDIR=/FPHS/data/ipa-sync-back
+  BASEDIR=/FPHS/data/sync-back/ipa
 fi
 export SBPULLDIR=${BASEDIR}/..
 
@@ -87,7 +87,7 @@ log INFO 'Starting subject data sync.'
 log INFO "Match and export Athena records"
 envsubst < $ATHENA_SQL_FILE > $CURRENT_SQL_FILE
 
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER -v ON_ERROR_STOP=1 < $CURRENT_SQL_FILE 2> ${PSQLRESFL}
+PGOPTIONS=--search_path=$AWS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER -v ON_ERROR_STOP=1 < $CURRENT_SQL_FILE 2> ${PSQLRESFL}
 log_last_error_and_exit
 
 LINECOUNT="$(wc -l < $ASSIGNMENTS_FILE)"
@@ -121,13 +121,13 @@ fi
 
 log INFO "Transfer matched records to FPHS DB"
 envsubst < $TO_FPHS_SQL_FILE > $CURRENT_SQL_FILE
-PGOPTIONS=--search_path=$AWS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER -v ON_ERROR_STOP=1 < $CURRENT_SQL_FILE 2> ${PSQLRESFL}
+PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $ZEUS_DB -h $ZEUS_FPHS_DB_HOST -U $ZEUS_FPHS_DB_USER -v ON_ERROR_STOP=1 < $CURRENT_SQL_FILE 2> ${PSQLRESFL}
 log_last_error_and_exit
 
 # Mark the transferred records as completed
 log INFO "Mark sync_statuses for transferred records"
 envsubst < $ATHENA_RESULTS_SQL_FILE > $CURRENT_SQL_FILE
-PGOPTIONS=--search_path=$ZEUS_FPHS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER -v ON_ERROR_STOP=1 < $CURRENT_SQL_FILE 2> ${PSQLRESFL}
+PGOPTIONS=--search_path=$AWS_DB_SCHEMA psql -d $AWS_DB -h $AWS_DB_HOST -U $AWS_DB_USER -v ON_ERROR_STOP=1 < $CURRENT_SQL_FILE 2> ${PSQLRESFL}
 log_last_error_and_exit
 
 # ----> Cleanup

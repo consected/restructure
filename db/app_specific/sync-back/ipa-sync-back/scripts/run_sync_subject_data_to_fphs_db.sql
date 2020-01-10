@@ -1,3 +1,5 @@
+\set VERBOSITY terse
+
 -- SQL run by sync_subject_data.sh
 -- Running this SQL script independently does not make sense
 set search_path=ml_app, ipa_ops;

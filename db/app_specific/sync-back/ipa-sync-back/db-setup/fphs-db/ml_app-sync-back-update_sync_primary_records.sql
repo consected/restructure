@@ -97,7 +97,7 @@ BEGIN
 	-- validate that it exists
 	SELECT *
 	INTO found_ipa
-	FROM ipa_ops.ipa_assignments ipa
+	FROM ipa_assignments ipa
 	WHERE ipa.ipa_id = match_ipa_id
 	LIMIT 1;
 
@@ -436,7 +436,7 @@ BEGIN
 	-- validate that it exists
 	SELECT *
 	INTO found_ipa
-	FROM ipa_ops.ipa_assignments ipa
+	FROM ipa_assignments ipa
 	WHERE ipa.ipa_id = match_ipa_id
 	LIMIT 1;
 

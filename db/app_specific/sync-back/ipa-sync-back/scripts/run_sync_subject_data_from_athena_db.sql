@@ -1,3 +1,5 @@
+\set VERBOSITY terse
+
 BEGIN;
 
 CREATE TEMPORARY TABLE temp_ipa_assignments (
@@ -20,8 +22,8 @@ SELECT * FROM (
         THEN 'not interest during phone screening'
       WHEN extra_log_type = 'perform_screening_follow_up' AND follow_up_still_interested = 'no'
         THEN 'not interest during screening follow-up'
-      WHEN extra_log_type = 'perform_screening_follow_up' AND eligible_for_study_blank_yes_no = 'no'
-        THEN 'ineligible'
+      -- WHEN extra_log_type = 'perform_screening_follow_up' AND eligible_for_study_blank_yes_no = 'no'
+      --   THEN 'ineligible'
       -- WHEN extra_log_type = 'perform_screening_follow_up' AND eligible_for_study_blank_yes_no = 'yes'
       --   THEN 'eligible'
       WHEN extra_log_type = 'appointment' THEN 'scheduled'

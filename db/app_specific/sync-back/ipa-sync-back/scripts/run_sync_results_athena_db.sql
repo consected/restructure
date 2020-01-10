@@ -1,3 +1,5 @@
+\set VERBOSITY terse
+
 set search_path=ml_app, ipa_ops;
 
 BEGIN;
