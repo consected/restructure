@@ -164,42 +164,19 @@ _definitions:
 
 
   eligible_audit_c: &eligible_audit_c
-    not_any_eligible_audit_c:
-      all:
+    not_all_eligible_audit_c:
+      not_any:
         dynamic_model__sleep_ps_audit_c_questions:
-          alcohol_frequency:
-            - 2
-            - 3
-            - 4
-          daily_alcohol:
-            - 0
-            - 1
-            - 2
-            - 3
-            - 4
-          six_or_more_frequency: ''
           total_score:
-            - 6
-            - 7
-            - 8
-            - 9
-            - 10
-            - 11
-            - 12
-      all_2:
-        dynamic_model__sleep_ps_audit_c_questions:
-          alcohol_frequency:
-            - 2
-            - 3
-            - 4
-          daily_alcohol:
             - 0
             - 1
             - 2
             - 3
-            - 4
-          six_or_more_frequency: 4
-
+      not_all:
+        dynamic_model__sleep_ps_audit_c_questions:
+          alcohol_frequency: 4
+          daily_alcohol: 0
+          six_or_more_frequency: 0
 
   continue_after_audit_c: &continue_after_audit_c
     any_after_audit_c:
