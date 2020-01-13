@@ -17,6 +17,20 @@ version has occurred.
 
 The [Unreleased](#[unreleased]) section collects notes for unreleased changes and features, until they are absorbed into a formal release in a version number tagged section below.
 
+## [7.3.83] - 2020-01-13
+
+- [Added] [IPA] sync-back participant data and events to Zeus
+- [Added] Enahncements allowing more complex forms to be defined in activities
+- [Added] [Sleep Study] configurations to cover screener changes
+- [Added] [IPA] participant summary changes
+- [Added] [Bulk SMS] capture opt-outs from AWS
+- [Added] [GRIT Study] preparations for GRIT release
+- [Added] [Zeus] Scantron Q2 table
+- [Added] Configurations allow alternatives to player info in search results headers
+- [Added] [Admin] improvements to support admin configurations of applications and user roles
+- [Fixed] Small bug fixes
+
+
 ## [7.3.59] - 2019-10-17
 
 - [Added] [Sleep Study] configurations for Athena app
