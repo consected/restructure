@@ -1,0 +1,979 @@
+# @library sleep enabled_if
+# @library sleep exit
+# @library sleep filestore_container
+
+
+_default:
+  <<: *access_defaults
+
+  view_options:
+    hide_unless_creatable: true
+
+
+###################################
+schedule_screening:
+  label: Schedule HMS Screening
+###################################
+
+  fields:
+    - select_who
+    - select_record_from_player_contacts
+    - follow_up_when
+    - follow_up_time
+    - notes
+  caption_before:
+    select_who: Who will perform the phone screening?
+    select_record_from_player_contacts: Phone number to call
+    follow_up_when: Scheduled date
+    follow_up_time: Scheduled time (Eastern Time)
+    notes: |
+      Additional notes for the screener
+
+      *Do not enter personal health information here*
+
+
+  creatable_if:
+    <<: *enabled_if
+    not_any:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: screener_responses
+    not_any_exit:
+      <<: *any_exit_or_complete
+
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+    select_record_from_player_contacts:
+      edit_as:
+        field_type: select_record_from_player_contact_phone
+
+  showable_if:
+    always: true
+
+
+###################################
+consent_to_share_details:
+  label: Consent To Share Details
+###################################
+
+  fields:
+    - activity_date
+    - select_activity
+    - select_who
+
+  field_options:
+    select_activity:
+      edit_as:
+        field_type: default
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+
+  caption_before:
+    activity_date: Consent given on
+    select_activity: Consent given how
+    select_who: Received by
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignments:
+        extra_log_type: schedule_screening
+    not_any:
+      activity_log__sleep_assignments:
+        extra_log_type: consent_to_share_details
+    not_any_exit:
+      <<: *any_exit_or_complete
+
+
+###################################
+confirmed_bwh_share:
+  label: Shared Info with BWH
+###################################
+
+  fields:
+
+  showable_if:
+    always: true
+
+  caption_before:
+    all_fields:
+      This records that the participant has been emailed
+      to confirm information has been sent to BWH.
+
+  creatable_if:
+    all:
+      activity_log__sleep_assignments:
+        extra_log_type: consent_to_share_details
+    not_any:
+      <<: *any_exit_or_complete
+      activity_log__sleep_assignments:
+        extra_log_type: confirmed_bwh_share
+
+
+
+
+###################################
+schedule_screening_2:
+  label: Schedule BWH Screening
+###################################
+  fields:
+    - select_who
+    - select_record_from_player_contacts
+    - follow_up_when
+    - follow_up_time
+    - notes
+  caption_before:
+    select_who: Who will perform the phone screening?
+    select_record_from_player_contacts: Phone number to call
+    follow_up_when: Scheduled date
+    follow_up_time: Scheduled time (Eastern Time)
+    notes: |
+      Additional notes for the screener
+
+      *Do not enter personal health information here*
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type:
+          - eligible
+      any:
+        dynamic_model__sleep_ps_eligibles:
+            consent_to_pass_info_to_bwh_yes_no: 'yes'
+            consent_to_pass_info_to_bwh_2_yes_no: 'yes'
+
+    not_any:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type:
+          - ineligible
+          - eligible
+    not_any_exit:
+      <<: *any_exit_or_complete
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener_2
+    select_record_from_player_contacts:
+      edit_as:
+        field_type: select_record_from_player_contact_phone
+
+  showable_if:
+    always: true
+
+
+###################################
+screening_follow_up:
+  label: Schedule Informed Consent Follow Up
+###################################
+
+  fields:
+    - select_who
+    - select_record_from_player_contacts
+    - follow_up_when
+    - follow_up_time
+    - notes
+  caption_before:
+    select_who: Who will perform the follow up?
+    select_record_from_player_contacts: Phone number to call
+    follow_up_when: Scheduled date
+    follow_up_time: Scheduled time (Eastern Time)
+    notes: Additional notes
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type: eligible
+      dynamic_model__sleep_ps2_eligibles:
+        interested_yes_no: 'yes'
+    not_any:
+      activity_log__sleep_assignments:
+        extra_log_type:
+          - appointment
+          - exit_not_consented
+          - subject_consented
+    not_any_exit:
+      <<: *any_exit_or_complete
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+    select_record_from_player_contacts:
+      edit_as:
+        field_type: select_record_from_player_contact_phone
+
+
+
+
+###################################
+perform_screening_follow_up:
+  label: Perform Informed Consent Review
+###################################
+
+  references:
+    sleep_screening:
+      from: this
+      add: one_to_this
+#  caption_before:
+#    all_fields: |
+#      Record the eligibility of the participant and any additional notes needed to perform the phone screening follow up.
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type: eligible
+      dynamic_model__sleep_ps2_eligibles:
+        interested_yes_no: 'yes'
+#      activity_log__sleep_assignment_inex_checklists:
+#        extra_log_type: finalize_phone_screen_checklist
+    not_any:
+      activity_log__sleep_assignments:
+        extra_log_type: appointment
+    not_any_exit:
+      <<: *any_exit_or_complete
+
+
+  showable_if:
+    always: true
+
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+        ##### not a good time to speak - reschedule
+        - activity_log__sleep_assignment:
+            if:
+              all:
+                dynamic_model__sleep_screenings:
+                  id:
+                    this_references: id
+                  good_time_to_speak_blank_yes_no:
+                    - left voicemail
+                    - 'no'
+
+            in: master
+            with:
+              extra_log_type: screening_follow_up
+              select_who: current_user_email
+              follow_up_when:
+                dynamic_model__sleep_screenings:
+                  id:
+                    this_references: id
+                  callback_date: return_value
+              follow_up_time:
+                dynamic_model__sleep_screenings:
+                  id:
+                    this_references: id
+                  callback_time: return_value
+              notes: Informed consent review call went to voicemail or participant requested a call back
+              select_record_from_player_contacts:
+                activity_log__sleep_assignments:
+                  extra_log_type: screening_follow_up
+                  select_record_from_player_contacts: return_value
+
+
+        ###### Informed Consent not performed - subject not interested
+        - activity_log__sleep_assignment:
+            if:
+              any:
+                all_not_consented:
+                  dynamic_model__sleep_screenings:
+                    id:
+                      this_references: id
+                    good_time_to_speak_blank_yes_no: 'not interested'
+            in: master
+            with:
+              extra_log_type: exit_not_consented
+
+        ###### Informed Consent was performed but the subject did not consent
+        - activity_log__sleep_assignment:
+            if:
+              any:
+                all_not_consented:
+                  dynamic_model__sleep_screenings:
+                    id:
+                      this_references: id
+                    consent_performed_yes_no: 'yes'
+                    did_subject_consent_yes_no: 'no'
+            in: master
+            with:
+              extra_log_type: exit_not_consented
+
+        ##### The subject consented
+        - activity_log__sleep_assignment:
+            if:
+              all_consented:
+                dynamic_model__sleep_screenings:
+                  id:
+                    this_references: id
+                  consent_performed_yes_no: 'yes'
+                  did_subject_consent_yes_no: 'yes'
+
+            in: master
+            with:
+              extra_log_type: appointment
+
+  save_action:
+    on_create:
+      show_panel:
+        value: activity_log__sleep_assignments
+
+
+
+###################################
+appointment:
+  label: Participant Enrolled
+###################################
+
+  fields:
+
+  references:
+    dynamic_model__sleep_appointment:
+      from: master
+      add: one_to_master
+
+    activity_log__sleep_assignment:
+      from: master
+      add: one_to_master
+      add_with:
+        extra_log_type: assign_id
+      filter_by:
+        extra_log_type: assign_id
+      view_as:
+        eidt: hide
+        show: hide
+
+  view_options:
+    always_embed_reference: dynamic_model__sleep_appointment
+    hide_unless_creatable: true
+
+  caption_before:
+    reference_activity_log__sleep_assignment: |
+      Click **+ Assign ID** to record the BWH Study ID for this participant
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignment_phone_screen2s:
+        extra_log_type: eligible
+
+    not_any_exit: *any_exit_or_complete
+    not_any:
+      activity_log__sleep_assignments:
+        extra_log_type: appointment
+
+  save_trigger:
+    on_save:
+      create_reference:
+        ###### Grant Interventionist access to participant ######
+        - dynamic_model__sleep_access_interventionists:
+            in: master
+            if:
+              not_all_iv_set:
+                dynamic_model__sleep_appointments:
+                  interventionist:
+                    - ''
+                    - null
+              not_all_access:
+                dynamic_model__sleep_access_interventionists:
+                  id:
+                    condition: IS NOT NULL
+            with:
+              assign_access_to_user_id:
+                dynamic_model__sleep_appointments:
+                  interventionist: return_value
+
+      update_reference:
+        ###### Change Interventionist access to participant ######
+        - dynamic_model__sleep_access_interventionists:
+            in: master
+            if:
+              not_all_iv_set:
+                dynamic_model__sleep_appointments:
+                  interventionist:
+                    - ''
+                    - null
+              all_access:
+                dynamic_model__sleep_access_interventionists:
+                  id:
+                    condition: IS NOT NULL
+            first:
+              dynamic_model__sleep_access_interventionists:
+                update: return_result
+            with:
+              assign_access_to_user_id:
+                dynamic_model__sleep_appointments:
+                  interventionist: return_value
+
+
+
+
+    on_create:
+      create_reference:
+        - dynamic_model__sleep_appointment:
+            in: this
+            with:
+              visit_start_date: today()
+              select_status: confirmed
+            if:
+              not_any_already_created:
+                dynamic_model__sleep_appointments:
+                  id:
+                    this_references: id
+#        - activity_log__sleep_assignment:
+#            in: master
+#            with:
+#              extra_log_type: assign_id
+#            if:
+#              not_any_already_created:
+#                activity_log__sleep_assignments:
+#                  extra_log_type: assign_id
+
+        - activity_log__sleep_assignment_phone_screen2:
+            in: master
+            with:
+              extra_log_type: finalize
+            if:
+              not_any_already_created:
+                activity_log__sleep_assignment_phone_screen2s:
+                  extra_log_type: finalize
+
+
+      notify:
+      - type: email
+        role: email - sleep tracker new participant
+
+        layout_template: sleep notification layout
+        content_template: sleep notification message
+        extra_substitutions:
+          reason: ''
+          extra_text: |
+            This participant has enrolled after informed consent.
+          panel_tab: activity-log--sleep-assignments
+        subject: Notification of New Sleep Enrollment
+
+      - type: sms
+        role: sms - sleep tracker new participant
+        layout_template: standard sms layout
+        content_template: sleep sms notification
+        subject: New SLEEP Enrollment
+
+
+
+
+###################################
+assign_id:
+  label: Assign ID
+###################################
+
+  fields:
+
+  references:
+    bwh_sleep_id_number:
+      from: master
+      add: one_to_master
+      prevent_disable: true
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignments:
+        extra_log_type: appointment
+
+    not_any_exit: *any_exit_or_complete
+    not_any:
+      activity_log__sleep_assignments:
+        extra_log_type: assign_id
+
+
+#  save_trigger:
+#    on_create:
+
+#      create_reference:
+
+#        - bwh_sleep_id_number:
+#            in: this
+#            with: []
+  save_action:
+    on_create:
+      show_panel:
+        value: activity_log__sleep_assignments
+
+
+
+###################################
+consent_mailing:
+  label: Mail Consent Documents
+###################################
+
+  fields:
+  references:
+    sleep_consent_mailing:
+      from: master
+      add: one_to_this
+
+  creatable_if:
+    not_any:
+      activity_log__sleep_assignments:
+        extra_log_type: consent_mailing
+    not_any_exit:
+      <<: *any_exit_or_complete
+
+
+
+###################################
+completed_intervention:
+  label: Completed 4-Week BBTI
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The participant completed the 4-week BBTI.
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignments:
+        extra_log_type: assign_id
+    not_any_exit: *any_exit_or_complete
+    not_all:
+      activity_log__sleep_assignments:
+        extra_log_type: completed_intervention
+
+
+
+###################################
+completed:
+  label: Completed Study
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The participant completed the study.
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignments:
+        extra_log_type: assign_id
+    not_any_exit: *any_exit_or_complete
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+exit_opt_out:
+  label: Exit (Opt-Out)
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject exited by opting out before enrollment.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    <<: *enabled_if
+    not_any_opt_out:
+      activity_log__sleep_assignments:
+        extra_log_type:
+          - exit_opt_out
+          - assign_id
+    not_any_exit: *any_exit_or_complete
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+withdraw:
+  label: Withdraw
+###################################
+
+  fields:
+  references:
+    sleep_withdrawal:
+      from: master
+      add: one_to_master
+  creatable_if:
+    <<: *enabled_if
+    not_any_exit: *any_exit_or_complete
+    all_enrolled:
+      activity_log__sleep_assignments:
+        extra_log_type: assign_id
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+ineligible:
+  label: Ineligible
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject was found to be ineligible.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    never: true
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+
+###################################
+exit_not_consented:
+  label: Exit During Informed Consent Review
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject exited during the informed consent review. The subject
+      was not interested in continuing or
+      did not give consent.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    never: true
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+###################################
+exit_l2fu:
+  label: Lost to Follow Up
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject was lost to follow up before enrollment.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    <<: *enabled_if
+    not_any_opt_out:
+      activity_log__sleep_assignments:
+        extra_log_type:
+          - exit_l2fu
+          - assign_id
+    not_any_exit: *any_exit_or_complete
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+exit_ps:
+  label: Exit During HMS Phone Screen
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject exited during HMS phone screen, due to no interest or not
+      giving consent to pass information to BWH.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    never: true
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+###################################
+exit_ps_bwh:
+  label: Exit During BWH Phone Screen
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject exited during BWH phone screen, due to no interest.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    never: true
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+hms_ps_eligible:
+  label: HMS Phone Screen Eligible
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject was found to be eligible in the HMS Phone Screen and
+      consented to pass information to BWH.
+
+
+  creatable_if:
+    never: true
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+bwh_ps_eligible:
+  label: BWH Phone Screen Eligible
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject was found to be eligible in the BWH Phone Screen and
+      was interested in continuing.
+
+
+  creatable_if:
+    never: true
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+
+
+###################################
+general:
+  label: General Communications
+###################################
+
+  fields:
+    - select_activity
+    - activity_date
+    - placeholder_communication
+    - placeholder_follow_up
+    - select_record_from_player_contacts
+    - select_record_from_addresses
+    - select_direction
+    - select_who
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
+    - notes
+
+  view_options:
+    data_attribute:
+      - activity_date
+      - select_activity
+      - select_direction
+      - "status:"
+      - select_result
+    hide_unless_creatable: true
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+    activity_date:
+      value: today()
+
+
+  caption_before:
+    select_activity: Select an action:<ul><li>make a record of an incoming or outgoing communication</li><li>schedule a follow up</li><li>mark all previous follow-ups completed</li></ul>
+    select_who: If not you, who performed the activity?
+    activity_date: When was the communication sent or received?
+
+    placeholder_communication: |
+        Was this communication sent by email, phone or regular mail:
+
+    placeholder_follow_up: |
+        Is this communication to be sent by email, phone or regular mail:
+
+    select_record_from_player_contacts: |
+      *Email or Phone*
+    select_record_from_addresses: |
+      *Mail Address*
+
+    select_result: Is a follow up required, or is this communication complete?
+    select_direction: Was the communication received from the subject or sent to the subject?
+    notes: Notes regarding a communication or to assist with a follow up
+
+  references:
+    activity_log__sleep_assignments:
+      label: follow up
+      from: this
+      add: many
+      add_with:
+        extra_log_type: general
+        select_activity: general communications
+        select_direction: to subject
+        select_result: completed
+
+  # Only show this if it is not embedded
+  showable_if:
+    not_all:
+      referring_record:
+        exists: true
+
+  show_if:
+    select_result:
+      select_activity: general communications
+
+    select_next_step:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_when:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_time:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+
+    select_direction:
+      select_activity: general communications
+    activity_date:
+      select_activity: general communications
+    select_who:
+      never: true
+      #select_activity: general communications
+
+    placeholder_follow_up:
+      select_activity:
+        - schedule follow up
+
+    placeholder_communication:
+      select_activity:
+        - general communications
+
+    select_record_from_player_contacts:
+      select_activity:
+        - general communications
+        - schedule follow up
+    select_record_from_addresses:
+      select_activity:
+        - general communications
+        - schedule follow up
+
+
+  save_trigger:
+    on_save:
+      update_reference:
+        ref:
+          if:
+            any:
+              referring_record:
+                exists: true
+
+          first:
+            all:
+              referring_record:
+                update: return_result
+
+          with:
+            updated_at: now()
+
+
+###################################
+files:
+  label: Files
+###################################
+
+  <<: *files_activity
+  save_trigger:
+    on_create:
+      <<: *create_filestore_container
+  references:
+    <<: *ref_filestore_container
+
+
+
+#################################################################
+# NOT USED
+#################################################################
+
+
+###################################
+subject_consented:
+  label: Subject Gave Informed Consent
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject consented during the informed consent review.
+
+  creatable_if:
+    <<: *enabled_if
+    not_any_exit: *any_exit_or_complete
+
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+
+
+###################################
+completed_data_collection:
+  label: Completed Data Collection
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The participant has completed all follow-up data collection and interview.
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__sleep_assignments:
+        extra_log_type: assign_id
+    not_any_exit: *any_exit_or_complete
+    not_all:
+      activity_log__sleep_assignments:
+        extra_log_type: completed_data_collection

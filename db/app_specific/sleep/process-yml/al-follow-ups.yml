@@ -1,0 +1,589 @@
+# @library sleep enabled_if
+# @library sleep filestore_container
+
+
+_definitions:
+
+
+######################
+# Notification Setup
+######################
+
+  notify_email_default: &notify_email_default
+    type: email
+
+    layout_template: sleep notification layout
+    content_template: sleep notification message
+    extra_substitutions:
+      reason: ''
+      extra_text: |
+        The Sleep Study participant requires a follow up from the PI.
+
+        Click the link below to review the follow up request.
+
+      panel_tab: activity-log--sleep-assignment-med-navs
+    subject: "Sleep Study: Participant Follow Up Required"
+
+
+  # Default SMS - just add roles or users
+  notify_sms_default: &notify_sms_default
+    type: sms
+    layout_template: standard sms layout
+    content_template: sleep sms notification
+    subject: "Sleep Study Participant Follow Up Required"
+
+
+  # PI
+  notify_pi: &notify_pi
+    <<: *notify_email_default
+    role: email - pi follow up
+
+
+  # PI SMS
+  notify_pi_sms: &notify_pi_sms
+    <<: *notify_sms_default
+    role: sms - pi follow up
+
+
+######################
+
+  followup_fields: &followup_fields
+    - activity_date
+    - select_direction
+    - select_contact
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
+    - notes
+
+
+  communication_fields: &communication_fields
+    - select_activity
+    - activity_date
+    - select_contact
+    - select_direction
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
+
+  communication_show_if: &communication_show_if
+    select_result:
+      not_any:
+        select_activity:
+          - schedule follow up
+          - completed
+    select_next_step:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_when:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_time:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    select_direction:
+      not_any:
+        select_activity:
+          - schedule follow up
+          - completed
+    select_contact:
+      not_any:
+        select_activity:
+          - completed
+
+        select_direction:
+          - in person
+
+  communication_field_options: &communication_field_options
+    select_result:
+      edit_as:
+        alt_options:
+          "Completed": completed
+          "Follow up": follow up
+    select_next_step:
+      edit_as:
+        alt_options:
+          # "More Info Requested": more info requested
+          # "No Follow Up": no follow up
+          "Call Back": call back
+          "Email Back": email back
+
+
+    select_contact:
+      edit_as:
+        field_type: select_record_from_player_contacts
+
+    select_activity:
+      edit_as:
+        alt_options:
+          "General Communications": general communications
+          "Incidental Finding": incidental finding
+          "Schedule Follow Up": schedule follow up
+          "Mark All Previous As Completed": completed
+
+    select_direction:
+      edit_as:
+        alt_options:
+          "In Person": in person
+          "By Phone": by phone
+
+
+  communication_caption_before: &communication_caption_before
+    select_activity: Select an action
+    activity_date: Date
+    select_contact: Phone or email address
+    select_direction: Was the follow-up / interview performed in person or by phone?
+    select_result: Is a follow up required, or is this communication complete?
+
+
+_default:
+  fields: *communication_fields
+
+  show_if:
+    <<: *communication_show_if
+
+  field_options:
+    <<: *communication_field_options
+
+  caption_before:
+    <<: *communication_caption_before
+
+  view_options:
+    hide_unless_creatable: true
+
+#  showable_if: *enabled_if
+#  creatable_if: *enabled_if
+#  editable_if: *enabled_if
+
+
+
+#################################################
+request_pi_follow_up:
+  label: Request PI Follow Up
+#################################################
+
+  fields:
+    - notes
+
+  caption_before:
+    notes:
+      edit_caption: |
+        A follow up by the PI with the participant is required, please provide
+        information to assist the PI in this follow up.
+      show_caption: |
+        A follow up by the PI with the participant is required.
+
+        If you have have questions for the Phone Screen interviewer,
+        please use the Discussions tab to communicate securely.
+
+    submit: |
+      When saved, a notification will be sent to the PI regarding this request
+
+
+    reference_activity_log__sleep_assignment_med_nav: |
+      Add a record of the follow up communication.
+
+
+  creatable_if:
+    <<: *enabled_if
+
+  view_options:
+    hide_unless_creatable: false
+
+  references:
+    activity_log__sleep_assignment_med_nav:
+      label: follow up communication
+      from: this
+      add: many
+      add_with:
+        extra_log_type: participant_follow_up
+      filter_by:
+        extra_log_type: participant_follow_up
+
+      creatable_if:
+        <<: *enabled_if
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+        ###### Grant PI access to participant ######
+        - dynamic_model__sleep_access_pis:
+            in: master
+            if:
+              not_all:
+                dynamic_model__sleep_access_pis:
+                  id:
+                    condition: IS NOT NULL
+
+
+
+      notify:
+        ##### Notify the PI that the subject has questions #####
+        - <<: *notify_pi
+          subject: "Sleep Study: Participant Follow Up Required"
+          extra_substitutions:
+            reason: ''
+            extra_text: |
+              A response from the PI is required.
+
+              Follow the link below to view the screening responses.
+
+              If you have questions for the Phone Screen interviewer,
+              please use the Discussions tab to communicate securely.
+
+
+            panel_tab: activity-log--sleep-assignment-med-navs
+
+        - <<: *notify_pi_sms
+          subject: "Participant Follow Up Required"
+
+
+
+#################################################
+request_pi_ps_review:
+  label: Request PI Phone Screen Review
+#################################################
+
+
+  fields:
+    - notes
+    - placeholder_next
+
+  caption_before:
+    notes:
+      edit_caption: |
+        The Phone Screen requires a review by the PI before finalizing the
+        participant's eligibility status. Provide information to guide the PI's
+        eligibility review
+      show_caption: |
+        The Sleep Study participant has completed the HMS phone screen,
+        and is possibly eligible. A review is required by the PI to confirm
+        eligibility or ineligibility.
+
+        If you have have questions for the HMS Phone Screen interviewer,
+        please use the secure Discussions tab to communicate.
+
+    submit: |
+      When saved, a notification will be sent to the PI regarding this request
+
+    placeholder_next: |
+      When a decision has been made, record *eligibility decision*.
+
+
+
+  creatable_if:
+    <<: *enabled_if
+
+  view_options:
+    hide_unless_creatable: false
+
+  references:
+    - activity_log__sleep_assignment_med_nav:
+        label: follow up communication
+        from: this
+        add: many
+        add_with:
+          extra_log_type: participant_follow_up
+        filter_by:
+          extra_log_type: participant_follow_up
+
+        creatable_if:
+          <<: *enabled_if
+
+    - activity_log__sleep_assignment_med_nav:
+        label: eligibility decision
+        from: this
+        add: one_to_this
+        add_with:
+          extra_log_type: pi_ps_review
+        filter_by:
+          extra_log_type: pi_ps_review
+
+        creatable_if:
+          <<: *enabled_if
+
+
+
+  save_trigger:
+    on_create:
+      create_reference:
+        ###### Grant PI access to participant ######
+        - dynamic_model__sleep_access_pis:
+            in: master
+            if:
+              not_all:
+                dynamic_model__sleep_access_pis:
+                  id:
+                    condition: IS NOT NULL
+
+
+      notify:
+
+        - <<: *notify_pi
+          subject: "Sleep Study: PI review of HMS Phone Screen required"
+          extra_substitutions:
+            reason: ''
+            extra_text: |
+              The Sleep Study participant has completed the HMS phone screen,
+              and is possibly eligible. A review is required by the PI to confirm
+              eligibility or ineligibility.
+
+              Follow the link below to view the request and the
+              partipant Phone Screen details.
+
+              If you have questions for the HMS Phone Screen interviewer,
+              please use the secure Discussions tab to communicate.
+
+
+            panel_tab: activity-log--sleep-assignment-med-navs
+
+
+        - <<: *notify_pi_sms
+          subject: "Review HMS Phone Screen eligibility"
+
+
+
+
+#################################################
+pi_ps_review:
+  label: Eligibility Decision
+#################################################
+
+  fields:
+    - select_result
+    - notes
+
+  field_options:
+    select_result:
+      edit_as:
+        alt_options:
+          Eligible: hms_ps_eligible
+          Not Eligible: ineligible
+
+
+  caption_before:
+    select_result: |
+      Select the eligibility decision.
+
+    submit: |
+      When the form is saved the Phone Screen interviewer will be notified.
+
+    notes: |
+      Enter any notes related to your review.
+
+  valid_if:
+    on_create:
+      not_any:
+        this:
+          select_result:
+
+
+  creatable_if:
+    never: true
+  showable_if:
+    never: true
+
+  view_options:
+    hide_unless_creatable: true
+    data_attribute: '(expand to view eligibility)'
+
+  save_trigger:
+    on_create:
+      #create_reference:
+      #  - activity_log__sleep_assignment:
+      #      in: master
+      #      with:
+      #        extra_log_type: hms_ps_eligible
+      #      if:
+      #        <<: *enabled_if
+      #        any_status:
+      #          this:
+      #            select_result: hms_ps_eligible
+
+      #  - activity_log__sleep_assignment:
+      #      in: master
+      #      with:
+      #        extra_log_type: ineligible
+      #      if:
+      #        <<: *enabled_if
+      #        any_status:
+      #          this:
+      #            select_result: ineligible
+
+      notify:
+        # Notify phone screen interviewer the PI review is complete
+        - type: email
+          layout_template: sleep notification layout
+          content_template: sleep notification message
+          extra_substitutions:
+            reason: ''
+            extra_text: |
+              The PI has completed the requested review of the the participant
+              based on the HMS Phone Screen.
+
+              Please review the response then follow up with the participant
+              as needed.
+
+            panel_tab: activity-log--sleep-assignment-med-navs
+
+          subject: "Sleep App: PI Completed Requested Review"
+          role: phone screener
+
+
+
+
+#################################################
+participant_communication:
+  label: Participant Communication
+#################################################
+
+
+  caption_before:
+    <<: *communication_caption_before
+    select_direction: Was the communication received from the subject or sent to the subject?
+
+
+  field_options:
+    <<: *communication_field_options
+    select_direction:
+      edit_as:
+        alt_options:
+          "To Staff": to staff
+          "To Subject": to subject
+
+
+#################################################
+participant_follow_up:
+  label: Participant Follow Up
+#################################################
+
+  fields: *followup_fields
+
+
+  caption_before:
+    <<: *communication_caption_before
+    select_direction: Was the communication received from the subject or sent to the subject?
+
+
+  field_options:
+    <<: *communication_field_options
+    select_direction:
+      value: to subject
+      edit_as:
+        alt_options:
+          "To Staff": to staff
+          "To Subject": to subject
+
+    activity_date:
+      value: today()
+
+
+  creatable_if:
+    never: true
+
+  showable_if:
+    never: true
+
+  view_options:
+    only_create_as_reference: true
+    data_attribute:
+      - select_result
+    hide_unless_creatable: true
+
+  save_trigger:
+    on_create:
+      notify:
+        # Notify phone screen interviewer the PI follow up is complete
+        - type: email
+          if:
+            any:
+              this:
+                select_result: completed
+                select_activity: completed
+
+          layout_template: sleep notification layout
+          content_template: sleep notification message
+          extra_substitutions:
+            reason: ''
+            extra_text: |
+              The PI has completed the requested phone screen
+              follow up with the participant.
+
+
+            panel_tab: activity-log--sleep-assignment-med-navs
+
+          subject: "Sleep App: PI Completed Requested Follow Up"
+          role: phone screener
+
+
+#################################################
+incidental_findings:
+  label: Incidental Findings
+#################################################
+
+  fields:
+
+  references:
+    dynamic_model__sleep_incidental_finding:
+      from: this
+      add: one_to_this
+      prevent_disable: true
+
+  creatable_if:
+    <<: *enabled_if
+    not_any:
+      activity_log__sleep_assignment_med_navs:
+        extra_log_type: incidental_findings
+
+  view_options:
+    hide_unless_creatable: false
+
+
+
+#################################################
+files:
+  label: Files
+#################################################
+
+  fields:
+    - notes
+
+  caption_before:
+    notes: Notes
+    submit: Save to create a container for files
+
+  save_trigger:
+    on_create:
+      <<: *create_filestore_container
+
+  references:
+    <<: *ref_filestore_container
+
+
+#################################################
+### UNUSED
+pi_follow_up:
+  label: PI Follow Up
+#################################################
+
+  fields:
+
+  references:
+    dynamic_model__sleep_pi_follow_up:
+      from: this
+      add: many
+      prevent_disable: true
+
+  creatable_if:
+    never: true
+  showable_if:
+    never: true
+
+  view_options:
+    hide_unless_creatable: true
