@@ -48,12 +48,14 @@ _definitions:
           condition: <
           value: -14 days
 
-    # if the exit survey has been completed, disable after 14 days
-    not_all_complete:
+    # if an exit or lost to follow up before scheduled, disable after 14 days
+    not_all_tracker_exits:
       activity_log__ipa_assignments:
-        extra_log_type: follow_up_surveys
-      dynamic_model__ipa_surveys:
-        select_survey_type: exit survey
+        extra_log_type:
+          - exit_opt_out
+          - exit_l2fu
+          # if the exit survey has been completed, do not disable after 14 days
+          #- completed
         created_at:
           condition: <
           value: -14 days
@@ -75,4 +77,25 @@ _definitions:
         create_with_role: nfs_store group 600
 
 
-  
+
+  any_exit_or_complete: &any_exit_or_complete
+    any_exit_or_complete:
+      any_exit: &any_exit
+        any_tracker_exits: &any_tracker_exit
+          activity_log__ipa_assignments:
+            extra_log_type:
+              - exit_opt_out
+              - exit_l2fu
+              - completed
+        any_withdrawal: &any_withdrawal
+          dynamic_model__ipa_withdrawals:
+            no_longer_participating_no_yes: 'yes'
+            lost_to_follow_up_no_yes: 'yes'
+            select_subject_withdrew_reason: withdrew
+            select_investigator_terminated:
+              - yes - due to ae
+              - yes - other reason
+
+      all_completed: &all_completed
+        activity_log__ipa_assignments:
+          extra_log_type: completed
