@@ -47,15 +47,18 @@ _definitions:
           condition: <
           value: -14 days
 
-    # if the exit survey has been completed, disable after 14 days
-    not_all_complete:
+    # if an exit or lost to follow up before scheduled, disable after 14 days
+    not_all_tracker_exits:
       activity_log__ipa_assignments:
-        extra_log_type: follow_up_surveys
-      dynamic_model__ipa_surveys:
-        select_survey_type: exit survey
+        extra_log_type:
+          - exit_opt_out
+          - exit_l2fu
+          # if the exit survey has been completed, do not disable after 14 days
+          #- completed
         created_at:
           condition: <
           value: -14 days
+
 
   ref_filestore_container: &ref_filestore_container
     nfs_store__manage__container:
@@ -72,6 +75,30 @@ _definitions:
         name: general files
         label: General Files
         create_with_role: nfs_store group 600
+
+
+
+  any_exit_or_complete: &any_exit_or_complete
+    any_exit_or_complete:
+      any_exit: &any_exit
+        any_tracker_exits: &any_tracker_exit
+          activity_log__ipa_assignments:
+            extra_log_type:
+              - exit_opt_out
+              - exit_l2fu
+              - completed
+        any_withdrawal: &any_withdrawal
+          dynamic_model__ipa_withdrawals:
+            no_longer_participating_no_yes: 'yes'
+            lost_to_follow_up_no_yes: 'yes'
+            select_subject_withdrew_reason: withdrew
+            select_investigator_terminated:
+              - yes - due to ae
+              - yes - other reason
+
+      all_completed: &all_completed
+        activity_log__ipa_assignments:
+          extra_log_type: completed
 
 
 
@@ -395,9 +422,92 @@ payments:
       activity_log__ipa_assignments:
         extra_log_type: screening_follow_up
 
+###################################
+exit_l2fu:
+  label: Lost to Follow Up
+###################################
 
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject was lost to follow up before being scheduled for an appointment.
+
+      A staff member typically sets this after a *phone screener* or
+      *phone screening follow up*  has been scheduled 3 times without a response.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    <<: *enabled_if
+    not_any_opt_out:
+      activity_log__ipa_assignments:
+        extra_log_type:
+          - exit_l2fu
+          - appointment
+    not_any_exit: *any_exit_or_complete
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+completed:
+  label: Completed Study
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The participant completed the study.
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignments:
+        extra_log_type: appointment
+    not_any_exit: *any_exit_or_complete
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+###################################
+exit_opt_out:
+  label: Exit (Opt-Out)
+###################################
+
+  fields:
+
+  caption_before:
+    all_fields: |
+      The subject exited by opting out before being scheduled for an appointment.
+
+      All records are locked down after 14 days.
+
+  creatable_if:
+    <<: *enabled_if
+    not_any_opt_out:
+      activity_log__ipa_assignments:
+        extra_log_type:
+          - exit_opt_out
+          - appointment
+    not_any_exit: *any_exit_or_complete
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+
+###################################
 withdraw:
   label: Withdraw
+###################################
+
   fields:
   references:
     ipa_withdrawal:
@@ -405,9 +515,10 @@ withdraw:
       add: one_to_master
   creatable_if:
     <<: *enabled_if
-    any:
+    not_any_exit: *any_exit_or_complete
+    all_enrolled:
       activity_log__ipa_assignments:
-        extra_log_type: schedule_screening
+        extra_log_type: appointment
 
   # Always show, so we know why a player's records may be locked down
   showable_if:
