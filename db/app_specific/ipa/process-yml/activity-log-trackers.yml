@@ -1,0 +1,507 @@
+_definitions:
+  enabled_if: &enabled_if
+
+    # if performed a phone screening no consent to continue, disable after 14 days
+    not_all_not_interested:
+      any:
+        dynamic_model__ipa_ps_initial_screenings:
+          select_is_good_time_to_speak: not interested
+          select_may_i_begin: not interested
+          select_still_interested: 'no'
+
+      all_created_at:
+        dynamic_model__ipa_ps_initial_screenings:
+          created_at:
+            condition: <
+            value: -14 days
+
+    # if recorded a withdraw activity, disable after 14 days
+    not_all_withdraw:
+      any:
+        dynamic_model__ipa_withdrawals:
+          select_subject_withdrew_reason: withdrew
+          select_investigator_terminated:
+            - yes - due to ae
+            - yes - other reason
+          lost_to_follow_up_no_yes: 'yes'
+          no_longer_participating_no_yes: 'yes'
+      all_created_at:
+        dynamic_model__ipa_withdrawals:
+          created_at:
+            condition: <
+            value: -14 days
+
+    # if performed a screening follow up and not eligible, disable after 14 days
+    not_all_ineligible:
+      dynamic_model__ipa_screenings:
+        eligible_for_study_blank_yes_no: 'no'
+        created_at:
+          condition: <
+          value: -14 days
+
+    # if performed a screening follow up and not interested in participating, disable after 14 days
+    not_all_ps_followup_not_interested:
+      dynamic_model__ipa_screenings:
+        still_interested_blank_yes_no: 'no'
+        created_at:
+          condition: <
+          value: -14 days
+
+    # if the exit survey has been completed, disable after 14 days
+    not_all_complete:
+      activity_log__ipa_assignments:
+        extra_log_type: follow_up_surveys
+      dynamic_model__ipa_surveys:
+        select_survey_type: exit survey
+        created_at:
+          condition: <
+          value: -14 days
+
+  ref_filestore_container: &ref_filestore_container
+    nfs_store__manage__container:
+      from: this
+      add: one_to_this
+      view_as:
+        edit: hide
+        show: filestore
+        new: not_embedded
+
+  save_trigger:
+    on_create_filestore_container: &create_filestore_container
+      create_filestore_container:
+        name: general files
+        label: General Files
+        create_with_role: nfs_store group 600
+
+
+
+
+_default:
+  view_options:
+    hide_unless_creatable: true
+
+  showable_if: *enabled_if
+  creatable_if: *enabled_if
+  editable_if: *enabled_if
+
+
+schedule_screening:
+  label: Schedule Screening
+  fields:
+    - select_who
+    - select_record_from_player_contacts
+    - follow_up_when
+    - follow_up_time
+    - notes
+  caption_before:
+    select_who: Who will perform the phone screening?
+    select_record_from_player_contacts: Phone number to call
+    follow_up_when: Scheduled date
+    follow_up_time: Scheduled time (Eastern Time)
+    notes: Additional notes for the screener
+  creatable_if:
+    <<: *enabled_if
+    not_any:
+      activity_log__ipa_assignments:
+        extra_log_type:
+          - screening_follow_up
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+    select_record_from_player_contacts:
+      edit_as:
+        field_type: select_record_from_player_contact_phone
+
+  showable_if:
+    always: true
+
+
+
+
+
+schedule_informant_screener:
+  label: Schedule Informant Screener
+  fields:
+    - select_who
+    - follow_up_when
+    - follow_up_time
+    - notes
+  caption_before:
+    select_who: Who will perform the informant screening?
+    follow_up_when: Scheduled date
+    follow_up_time: Scheduled time (Eastern Time)
+    notes: Additional notes
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type: informant_details
+
+
+    not_any:
+      activity_log__ipa_assignments:
+        extra_log_type:
+          - perform_screening_follow_up
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
+
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+
+  references:
+    ipa_ps_informant_detail:
+      from: master
+      add: one_to_master
+
+
+
+
+
+screening_follow_up:
+  label: Schedule Screening Follow Up
+  fields:
+    - select_who
+    - select_record_from_player_contacts
+    - follow_up_when
+    - follow_up_time
+    - notes
+  caption_before:
+    select_who: Who will perform the phone screening follow up?
+    select_record_from_player_contacts: Phone number to call
+    follow_up_when: Scheduled date
+    follow_up_time: Scheduled time (Eastern Time)
+    notes: Additional notes
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignments:
+        extra_log_type: screening_follow_up
+    not_all:
+      dynamic_model__ipa_screenings:
+        still_interested_blank_yes_no:
+          - 'yes'
+          - 'no'
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+    select_record_from_player_contacts:
+      edit_as:
+        field_type: select_record_from_player_contact_phone
+
+
+perform_screening_follow_up:
+  label: Perform Screening Follow Up
+  references:
+    ipa_screening:
+      from: this
+      add: one_to_this
+  caption_before:
+    all_fields: |
+      Record the eligibility of the participant and any additional notes needed to perform the phone screening follow up.
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignments:
+        extra_log_type: screening_follow_up
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
+    not_all:
+      dynamic_model__ipa_screenings:
+        still_interested_blank_yes_no:
+          - 'yes'
+          - 'no'
+
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+        - activity_log__ipa_assignment:
+            if:
+              all:
+                dynamic_model__ipa_screenings:
+                  id:
+                    this_references: id
+                  good_time_to_speak_blank_yes_no:
+                    - left voicemail
+                    - 'no'
+
+            in: master
+            with:
+              extra_log_type: screening_follow_up
+              select_who: current_user_email
+              follow_up_when:
+                dynamic_model__ipa_screenings:
+                  id:
+                    this_references: id
+                  callback_date: return_value
+              follow_up_time:
+                dynamic_model__ipa_screenings:
+                  id:
+                    this_references: id
+                  callback_time: return_value
+              notes: Screening follow up call when to voicemail or participant requested a call back
+              select_record_from_player_contacts:
+                activity_log__ipa_assignments:
+                  extra_log_type: screening_follow_up
+                  select_record_from_player_contacts: return_value
+
+
+appointment:
+  label: Appointment
+  fields:
+
+  references:
+    ipa_appointment:
+      from: master
+      add: one_to_master
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignments:
+        extra_log_type: perform_screening_follow_up
+      dynamic_model__ipa_screenings:
+        eligible_for_study_blank_yes_no: 'yes'
+        still_interested_blank_yes_no: 'yes'
+    not_any:
+      activity_log__ipa_assignments:
+        extra_log_type: appointment
+
+  save_trigger:
+    on_create:
+      notify:
+      - type: email
+        role: email - ipa tracker new participant
+        layout_template: ipa notification layout
+        content_template: ipa message content
+        subject: Notification of New IPA Participant Appointment
+      - type: sms
+        role: sms - ipa tracker new participant
+        layout_template: standard sms layout
+        content_template: ipa sms notification
+        subject: New IPA Participant
+
+
+contact_info:
+  label: Emergency Contacts
+  fields:
+
+  caption_before:
+    all_fields: One or more emergency contacts should be added.
+    submit: When multiple have been added do not edit the block directly.
+    metadata: Expand items in the list above to view and allow editing. To remove an item, edit it and select rank '0 - Not Used'.
+  references:
+
+    dynamic_model__emergency_contact:
+      from: master
+      add: many
+      prevent_disable: true
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignments:
+        extra_log_type: appointment
+
+
+mrn:
+  label: MRN
+  fields:
+
+  references:
+    mrn_number:
+      from: master
+      add: many
+      prevent_disable: true
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignments:
+        extra_log_type: appointment
+
+  save_trigger:
+    on_create:
+      notify:
+        type: email
+        role: clinical research coordinator
+        layout_template: ipa notification layout
+        content_template: ipa message content
+        subject: "IPA App: Subject MRN assigned"
+
+
+transportation_and_housing:
+  label: Transportation and Housing
+  fields:
+  references:
+    ipa_transportation:
+      from: master
+      add: many
+      view_as:
+        new: not_embedded
+        edit: not_embedded
+    ipa_hotel:
+      from: master
+      add: one_to_master
+      view_as:
+        new: not_embedded
+        edit: not_embedded
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignments:
+        extra_log_type: appointment
+
+  caption_before:
+    submit: Save this record to add or edit individual Transportation and Housing items.
+
+
+consent_mailing:
+  label: Consent Mailing
+  fields:
+  references:
+    ipa_consent_mailing:
+      from: master
+      add: one_to_this
+
+payments:
+  label: Payments
+  fields:
+  references:
+    ipa_payment:
+      from: master
+      add: many
+      limit: 2
+    ipa_reimbursement_reqs:
+      label: Reimbursement Request
+      from: master
+      add: many
+
+  creatable_if:
+    <<: *enabled_if
+    any:
+      activity_log__ipa_assignments:
+        extra_log_type: screening_follow_up
+
+
+withdraw:
+  label: Withdraw
+  fields:
+  references:
+    ipa_withdrawal:
+      from: master
+      add: one_to_master
+  creatable_if:
+    <<: *enabled_if
+    any:
+      activity_log__ipa_assignments:
+        extra_log_type: schedule_screening
+
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+follow_up_surveys:
+  label: Follow Up Surveys
+  fields:
+  references:
+    ipa_survey:
+      from: master
+      add: many
+      limit: 2
+  creatable_if:
+    <<: *enabled_if
+    any:
+      activity_log__ipa_assignments:
+        extra_log_type:
+          - appointment
+  # Always show, so we know why a player's records may be locked down
+  showable_if:
+    always: true
+
+
+general:
+  label: General Communications
+  fields:
+    - select_activity
+    - activity_date
+    - select_record_from_player_contacts
+    - select_record_from_addresses
+    - select_direction
+    - select_who
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
+    - notes
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_phone_screener
+
+
+  caption_before:
+    select_activity: Select an action:<ul><li>make a record of an incoming or outgoing communication</li><li>schedule a follow up</li><li>mark all previous follow-ups completed</li></ul>
+    select_who: If not you, who performed the activity?
+    activity_date: When was the communication sent or received?
+    select_record_from_player_contacts: The phone or email address, or...
+    select_record_from_addresses: ... mailing address for the communication or follow up
+    select_result: Is a follow up required, or is this communication complete?
+    select_direction: Was the communication received by FPHS staff or sent to the subject?
+    notes: Notes regarding a communication or to assist with a follow up
+  show_if:
+    select_result:
+      select_activity: general communications
+
+    select_next_step:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_when:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+    follow_up_time:
+      any:
+        select_result: follow up
+        select_activity: schedule follow up
+
+    select_direction:
+      select_activity: general communications
+    activity_date:
+      select_activity: general communications
+    select_who:
+      select_activity: general communications
+
+    select_record_from_player_contacts:
+      select_activity:
+        - general communications
+        - schedule follow up
+    select_record_from_addresses:
+      select_activity:
+        - general communications
+        - schedule follow up
+
+
+files:
+  label: Files
+
+  save_trigger:
+    on_create:
+      <<: *create_filestore_container
+
+  references:
+    <<: *ref_filestore_container

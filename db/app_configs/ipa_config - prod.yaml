@@ -162,7 +162,7 @@ app_type:
     created_at: '2019-09-23T10:32:14.631Z'
     updated_at: '2019-09-23T10:32:14.631Z'
     user_email: 
-  user_access_controls:
+  valid_user_access_controls:
   - id: 183
     user_id: 
     resource_type: table
@@ -305,19 +305,6 @@ app_type:
     role_name: user - participant details
     created_at: '2019-01-17T11:50:28.584Z'
     updated_at: '2019-03-19T17:11:21.159Z'
-    user_email: 
-  - id: 194
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__bhs_assignments
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: ''
-    created_at: '2019-01-17T11:50:28.589Z'
-    updated_at: '2019-01-24T19:43:42.567Z'
     user_email: 
   - id: 195
     user_id: 
@@ -864,19 +851,6 @@ app_type:
     role_name: 
     created_at: '2019-01-17T11:51:01.277Z'
     updated_at: '2019-01-17T11:51:01.277Z'
-    user_email: 
-  - id: 365
-    user_id: 
-    resource_type: table
-    resource_name: trackers_item_flags
-    options: 
-    access: create
-    disabled: 
-    admin_id: 4
-    app_type_id: 9
-    role_name: 
-    created_at: '2019-01-17T11:51:03.455Z'
-    updated_at: '2019-01-17T11:51:03.455Z'
     user_email: 
   - id: 366
     user_id: 
@@ -2594,19 +2568,6 @@ app_type:
     created_at: '2019-01-17T11:51:04.318Z'
     updated_at: '2019-01-17T11:51:04.318Z'
     user_email: 
-  - id: 498
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_inex_checklist__tms_responses
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: reviewer - inex
-    created_at: '2019-01-17T11:51:04.324Z'
-    updated_at: '2019-05-09T14:39:04.137Z'
-    user_email: 
   - id: 499
     user_id: 
     resource_type: activity_log_type
@@ -3140,19 +3101,6 @@ app_type:
     created_at: '2019-04-04T11:35:52.754Z'
     updated_at: '2019-04-04T11:35:52.754Z'
     user_email: 
-  - id: 540
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_inex_checklist__sign_tms_eligibility
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: reviewer - inex
-    created_at: '2019-04-04T11:36:34.672Z'
-    updated_at: '2019-05-09T14:38:45.306Z'
-    user_email: 
   - id: 541
     user_id: 
     resource_type: activity_log_type
@@ -3191,19 +3139,6 @@ app_type:
     role_name: user - inex
     created_at: '2019-04-04T11:38:23.755Z'
     updated_at: '2019-04-04T11:38:23.755Z'
-    user_email: 
-  - id: 544
-    user_id: 
-    resource_type: general
-    resource_name: view_reports
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: reviewer - tms
-    created_at: '2019-04-04T11:54:43.406Z'
-    updated_at: '2019-05-09T14:40:35.696Z'
     user_email: 
   - id: 545
     user_id: 
@@ -3269,19 +3204,6 @@ app_type:
     role_name: user - mrn
     created_at: '2019-04-29T16:31:35.058Z'
     updated_at: '2019-04-29T16:37:31.461Z'
-    user_email: 
-  - id: 550
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_navigation__add_mrn
-    options: ''
-    access: 
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: ''
-    created_at: '2019-05-13T18:13:28.387Z'
-    updated_at: '2019-05-13T18:37:55.357Z'
     user_email: 
   - id: 551
     user_id: 
@@ -3764,45 +3686,6 @@ app_type:
     created_at: '2019-06-24T10:37:12.993Z'
     updated_at: '2019-06-24T10:37:12.993Z'
     user_email: 
-  - id: 588
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_inex_checklist__sign_baseline
-    options: ''
-    access: create
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: staff - inex
-    created_at: '2019-06-24T10:37:13.088Z'
-    updated_at: '2019-06-24T11:10:42.239Z'
-    user_email: 
-  - id: 589
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment__schedule_informant_screener
-    options: ''
-    access: create
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: ''
-    created_at: '2019-06-24T10:37:13.094Z'
-    updated_at: '2019-06-24T11:10:30.731Z'
-    user_email: 
-  - id: 590
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_phone_screen__blank_log
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: ''
-    created_at: '2019-06-24T10:37:13.099Z'
-    updated_at: '2019-06-24T11:10:52.997Z'
-    user_email: 
   - id: 591
     user_id: 
     resource_type: activity_log_type
@@ -3855,19 +3738,6 @@ app_type:
     created_at: '2019-06-24T10:37:13.472Z'
     updated_at: '2019-06-24T10:37:13.472Z'
     user_email: 
-  - id: 595
-    user_id: 1
-    resource_type: general
-    resource_name: print
-    options: ''
-    access: read
-    disabled: true
-    admin_id: 4
-    app_type_id: 9
-    role_name: ''
-    created_at: '2019-06-24T10:37:13.482Z'
-    updated_at: '2019-06-24T11:15:54.134Z'
-    user_email: phil_ayres@hms.harvard.edu
   - id: 596
     user_id: 
     resource_type: report
@@ -4258,7 +4128,7 @@ app_type:
     created_at: '2019-10-21T10:48:32.447Z'
     updated_at: '2019-10-21T10:48:32.447Z'
     user_email: 
-  associated_activity_logs:
+  valid_associated_activity_logs:
   - id: 4
     name: Protocol Deviations & Exceptions
     item_type: ipa_assignment
@@ -7671,1693 +7541,35 @@ app_type:
     alphanumeric: false
     extra_fields: ''
     user_email: 
-  associated_reports:
-  - id: 24
-    name: Search IPA Subject
-    description: "Search subjects by name, phone, email or ID.\r\nLeave the search
-      field empty to see all subjects."
-    sql: "select distinct m.id master_id, \r\npi.first_name, pi.middle_name, pi.last_name,
-      pi.nick_name,\r\na.street, a.street2, a.city, a.state, a.zip, \r\npc.data, pc.rec_type\r\nfrom
-      masters m\r\ninner join player_infos pi\r\non pi.master_id = m.id \r\ninner
-      join ipa_assignments b\r\non m.id = b.master_id\r\nleft join addresses a\r\non
-      m.id = a.master_id\r\nleft join player_contacts pc\r\non pc.master_id = m.id\r\nwhere
-      \r\n(:name is null \r\nor pi.first_name ~* :name\r\nor pi.last_name ~* :name\r\nor
-      pi.middle_name ~* :name\r\nor pi.nick_name ~* :name\r\nor( \r\n    pi.first_name
-      ~* coalesce(split_part(:name, ' ', 1),'none')\r\n    AND pi.last_name ~* coalesce(split_part(:name,
-      ' ', 2),'none')\r\n  )\r\n) OR\r\n(\r\nregexp_replace(pc.data, '\\W+', '', 'g')
-      ~* regexp_replace(:name, '\\W+', '', 'g')\r\n) OR\r\n(\r\nb.ipa_id::varchar
-      = :name\r\n)\r\n"
-    search_attrs: "name: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.564Z'
-    updated_at: '2019-06-24T10:33:02.356Z'
-    report_type: search
-    auto: false
-    searchable: true
-    position: 1
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: search_ipa_subject
-    options: 
-    user_email: 
-  - id: 25
-    name: IPA Protocol Deviation PI Review
-    description: 'IPA records requiring review by the PI. '
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.*,\r\n   rank()\r\n
-      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
-      DESC\r\n ) AS r\r\n FROM activity_log_ipa_assignment_protocol_deviations a\r\n\r\n
-      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN ipa_protocol_deviations p\r\n
-      ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n   AND
-      mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n   AND
-      mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n INNER JOIN
-      model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n\r\n INNER JOIN activity_log_ipa_assignment_protocol_deviations
-      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n
-      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n AND a2.extra_log_type
-      in ('pi_review', 'initial_review')\r\n AND p.select_severity = 'major'\r\n\r\n\r\n)
-      AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n
-      \ r >= 1 AND dt.extra_log_type = 'initial_review'\r\nAND\r\n  r = 1 AND dt.extra_log_type
-      <> 'pi_review'\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.568Z'
-    updated_at: '2019-06-24T10:33:02.369Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 31
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_protocol_deviation_pi_review
-    options: 
-    user_email: 
-  - id: 26
-    name: IPA Adverse Event PI Review
-    description: 'IPA records requiring review by the PI. '
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.*,\r\n   rank()\r\n
-      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
-      DESC\r\n ) AS r\r\n FROM activity_log_ipa_assignment_adverse_events a\r\n\r\n
-      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr.from_record_id = a.id\r\n\r\n INNER JOIN ipa_adverse_events p\r\n ON \r\n
-      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
-      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
-      \  AND mr.to_record_id = p.id\r\n\r\n INNER JOIN model_references mr2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n\r\n INNER JOIN activity_log_ipa_assignment_adverse_events a2\r\n
-      ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n WHERE \r\n
-      a.extra_log_type = 'adverse_event_record' \r\n AND a2.extra_log_type in ('pi_review',
-      'initial_review')\r\n AND p.select_relatedness IN ('related', 'possibly related')
-      AND p.select_expectedness = 'unexpected'\r\n AND (p.select_location = 'internal'
-      OR p.select_severity = 'serious')\r\n\r\n\r\n) AS dt\r\n\r\ninner join player_infos
-      pi on dt.master_id = pi.master_id\r\nWHERE\r\n  r >= 1 AND dt.extra_log_type
-      = 'initial_review'\r\nAND\r\n  r = 1 AND dt.extra_log_type <> 'pi_review'\r\n\r\nORDER
-      BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.572Z'
-    updated_at: '2019-06-24T10:33:02.378Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 41
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_adverse_event_pi_review
-    options: 
-    user_email: 
-  - id: 27
-    name: IPA Outstanding Activities
-    description: Search for records where one activity has been performed and another
-      hasn't been performed after it (optional).
-    sql: "SELECT\r\n   dt.master_id,\r\n   ipa.ipa_id,\r\n   --pi.first_name,\r\n
-      \  --pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n
-      \  dt.checklist_signed,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM
-      (\r\n  -- Generate a resultset of ranked results\r\n  -- with most recently
-      created items first\r\n  -- that include only the requested previous and outstanding
-      activities\r\n  -- This allows us to see if an outstanding item appears more
-      recently than\r\n  -- a previous item\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n
-      \   rank()\r\n    OVER (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at
-      DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n    --\r\n    -- IPA Tracker process\r\n
-      \   --\r\n    SELECT\r\n      al.master_id,\r\n      'tracker' \"source\",\r\n
-      \     al.extra_log_type,\r\n      CASE WHEN\r\n        (select_result='follow
-      up' OR select_activity = 'schedule follow up') THEN 'follow up'\r\n      WHEN\r\n
-      \       (select_result='completed' OR select_activity = 'completed') THEN 'completed'\r\n
-      \     ELSE\r\n        al.select_result\r\n      END \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n\r\n    WHERE\r\n      :activity_performed = 'general-follow-up' AND al.extra_log_type='general'
-      AND (select_result='follow up' OR select_activity = 'schedule follow up')\r\n
-      \     OR :activity_performed = 'general-completed' AND al.extra_log_type='general'
-      AND (select_result='completed' OR select_activity = 'completed')\r\n      OR
-      :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up'
-      AND al.extra_log_type='general'\r\n      OR :activity_outstanding is not null
-      AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general'\r\n
-      \     OR al.extra_log_type IN (:activity_performed, :activity_outstanding)\r\n\r\n
-      \   UNION\r\n\r\n    --\r\n    -- IPA Tracker process for appointments\r\n    --\r\n
-      \   SELECT\r\n      al.master_id,\r\n      'tracker' \"source\",\r\n      al.extra_log_type,\r\n
-      \     NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     '1900-01-01 00:00:00'\r\n\r\n    FROM activity_log_ipa_assignments al\r\n\r\n
-      \   -- INNER JOIN ipa_appointments apt\r\n    -- ON al.master_id = apt.master_id\r\n\r\n
-      \   WHERE\r\n      :activity_performed = 'appointment-set' AND al.extra_log_type='appointment'\r\n
-      \     OR :activity_outstanding is not null AND :activity_outstanding = 'appointment-set'
-      AND al.extra_log_type='appointment'\r\n\r\n    UNION\r\n    --\r\n    -- Inclusion
-      / Exclusion process\r\n    --\r\n    SELECT\r\n      inex.master_id,\r\n      'inex'
-      \"source\",\r\n      inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n
-      \     inex.signed_no_yes \"checklist_signed\",\r\n      inex.created_at\r\n\r\n\r\n
-      \   FROM activity_log_ipa_assignment_inex_checklists inex\r\n\r\n    WHERE\r\n\r\n
-      \   (\r\n      (\r\n        :activity_performed = 'inex-phone-screen-finalized'
-      AND extra_log_type = 'finalize_phone_screen_checklist'\r\n        OR :activity_performed
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      :activity_performed = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \       OR :activity_performed = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n        OR :activity_performed = 'inex-baseline-complete'
-      AND extra_log_type = 'sign_baseline'\r\n        OR :activity_performed = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR :activity_performed = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      )\r\n\r\n\r\n      OR :activity_outstanding
-      IS NOT NULL AND (\r\n        :activity_outstanding = 'inex-phone-screen-finalized'
-      AND extra_log_type = 'finalize_phone_screen_checklist'\r\n        OR :activity_outstanding
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      :activity_outstanding = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \       OR :activity_outstanding = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n        OR :activity_outstanding = 'inex-baseline-complete'
-      AND extra_log_type = 'sign_baseline'\r\n        OR :activity_outstanding = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR :activity_outstanding = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      )\r\n    )\r\n\r\n    UNION\r\n\r\n
-      \   --\r\n    -- Phone Screen process\r\n    --\r\n    SELECT\r\n      ps.master_id,\r\n
-      \     'phone screen' \"source\",\r\n      'phone_screen_finalized' \"extra_log_type\",\r\n
-      \     NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     ps.created_at\r\n\r\n    FROM activity_log_ipa_assignment_phone_screens
-      ps\r\n\r\n    WHERE\r\n      (:activity_performed = 'phone-screen-complete'
-      OR :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'phone-screen-complete'
-      )\r\n      AND extra_log_type IN ('finalize')\r\n\r\n\r\n\r\n    UNION\r\n\r\n
-      \   --\r\n    -- Navigation process\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'navigation' \"source\",\r\n      extra_log_type,\r\n      NULL \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      coalesce(event_date + start_time,
-      created_at) \"created_at\"\r\n\r\n    FROM activity_log_ipa_assignment_navigations
-      nav\r\n\r\n    WHERE\r\n    (\r\n      (\r\n        :activity_performed = 'has-planned-event'
-      AND extra_log_type = 'planned_event'\r\n        OR :activity_performed = 'has-event-feedback'
-      AND extra_log_type = 'station_event'\r\n      )\r\n\r\n      OR :activity_outstanding
-      IS NOT NULL AND (\r\n        :activity_outstanding  = 'has-planned-event' AND
-      extra_log_type = 'planned_event'\r\n        OR :activity_outstanding = 'has-event-feedback'
-      AND extra_log_type = 'station_event'\r\n      )\r\n    )\r\n\r\n\r\n  ) AS di\r\n\r\n
-      \ LEFT OUTER JOIN (\r\n    -- Add an exit type column for those participants
-      that have exited the study\r\n    -- NULL if they are still in the study\r\n\r\n
-      \   --\r\n    -- Phone Screen not interested or not eligible\r\n    --\r\n    SELECT\r\n
-      \     master_id,\r\n      'not interested or ineligible (follow up)' \"exit_type\"\r\n\r\n\r\n
-      \   FROM ipa_screenings ps\r\n    WHERE\r\n      still_interested_blank_yes_no
-      = 'no' OR\r\n      eligible_for_study_blank_yes_no = 'no'\r\n\r\n\r\n    UNION\r\n\r\n
-      \   --\r\n    -- Phone screen not interested\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'not interested (phone screening)' \"exit_type\"\r\n\r\n    FROM ipa_ps_initial_screenings
-      inits\r\n    WHERE\r\n     select_is_good_time_to_speak = 'not interested' OR\r\n
-      \    select_may_i_begin = 'not interested' OR\r\n     select_still_interested
-      = 'no'\r\n\r\n    UNION\r\n\r\n    --\r\n    -- Withdrew\r\n    --\r\n    SELECT\r\n
-      \     master_id,\r\n      'withdrew' \"exit_type\"\r\n\r\n    FROM ipa_withdrawals
-      wd\r\n    WHERE\r\n     select_subject_withdrew_reason = 'withdrew' OR\r\n     select_investigator_terminated
-      IN ('yes - due to ae', 'yes - other reason') OR\r\n     lost_to_follow_up_no_yes
-      = 'yes' OR\r\n     no_longer_participating_no_yes = 'yes'\r\n\r\n     UNION\r\n\r\n
-      \   --\r\n    -- Completed study\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'completed exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n
-      \   WHERE\r\n      select_survey_type = 'exit survey'\r\n\r\n  -- End left outer
-      join\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n-- End ranked selection\r\n)
-      AS dt\r\n\r\n-- Include player details\r\ninner join player_infos pi on dt.master_id
-      = pi.master_id\r\n-- Match IPA ID to master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n(\r\n  -- Either:\r\n  --
-      no outstanding activity has been selected, so just perform a plain query\r\n
-      \ -- or:\r\n  -- we want the first record from the results based\r\n  -- on
-      an order of most recently created appearing first (and therefore overriding
-      older records)\r\n  :activity_outstanding IS NULL OR :activity_outstanding IS
-      NOT NULL AND r = 1\r\n)\r\nAND\r\n(\r\n  -- Based on the activity performed
-      selection pick the appropriate conditions\r\n  :activity_performed = 'general-follow-up'
-      AND extra_log_type='general' AND dt.communication_result='follow up'\r\n  OR
-      :activity_performed = 'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \ OR :activity_performed = 'inex-phone-screen-finalized' AND extra_log_type
-      = 'finalize_phone_screen_checklist'\r\n  OR :activity_performed = 'inex-phone-screen-so-pi'
-      AND extra_log_type = 'sign_phone_screen'\r\n  OR :activity_performed = 'inex-phone-screen-so-mednav'
-      AND extra_log_type = 'sign_phone_screen_reviewer'\r\n  OR :activity_performed
-      = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'\r\n
-      \ OR :activity_performed = 'inex-tms-responses' AND extra_log_type = 'tms_responses'\r\n
-      \ OR :activity_performed = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'\r\n
-      \ OR :activity_performed = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'\r\n
-      \ OR :activity_performed = 'has-planned-event' AND extra_log_type = 'planned_event'\r\n
-      \ OR :activity_performed = 'has-event-feedback' AND extra_log_type = 'station_event'\r\n
-      \ OR :activity_performed = 'appointment-set' AND extra_log_type='appointment'\r\n\r\n
-      \ OR (\r\n    :activity_performed = 'inex-baseline-complete'\r\n    AND (\r\n
-      \     extra_log_type IN ('sign_baseline') AND\r\n      checklist_signed = 'yes'\r\n
-      \   )\r\n  )\r\n\r\n  OR :activity_performed NOT IN ('inex-complete', 'phone-screen-complete')
-      AND extra_log_type = :activity_performed\r\n)\r\nAND (\r\n  -- If no outstanding
-      activity was selected then there are no conditions to apply\r\n  :activity_outstanding
-      IS NULL\r\n  OR NOT (\r\n    -- An outstanding activity was selected\r\n    --
-      Based on the activity outstanding selection pick the appropriate conditions\r\n
-      \   -- that the first record in the results must match in order to correctly
-      override the previous activities\r\n    -- If one was found, the NOT negation
-      ensures a found record does not register as an activity outstanding\r\n    r
-      = 1\r\n    AND (\r\n      :activity_outstanding = 'general-follow-up' AND extra_log_type='general'
-      AND dt.communication_result='follow up'\r\n      OR :activity_outstanding =
-      'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \     OR :activity_outstanding = 'inex-phone-screen-finalized' AND extra_log_type
-      = 'finalize_phone_screen_checklist'\r\n      OR :activity_outstanding = 'inex-phone-screen-so-pi'
-      AND extra_log_type = 'sign_phone_screen'\r\n      OR :activity_outstanding =
-      'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \     OR :activity_outstanding = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n      OR :activity_outstanding = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n      OR :activity_outstanding = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      OR :activity_outstanding
-      = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'\r\n
-      \     OR :activity_outstanding = 'has-planned-event' AND extra_log_type = 'planned_event'\r\n
-      \     OR :activity_outstanding = 'has-event-feedback' AND extra_log_type = 'station_event'\r\n
-      \     OR :activity_outstanding = 'appointment-set' AND extra_log_type='appointment'\r\n\r\n
-      \     OR (\r\n          :activity_outstanding = 'inex-baseline-complete'\r\n
-      \         AND (\r\n            extra_log_type IN ('sign_baseline') AND\r\n            checklist_signed
-      = 'yes'\r\n          )\r\n      )\r\n\r\n\r\n      OR :activity_outstanding
-      NOT IN ('inex-complete', 'phone-screen-complete') AND extra_log_type = :activity_outstanding\r\n
-      \   )\r\n  )\r\n\r\n)\r\n\r\nAND (\r\n  :completed_or_withdrawn IS NULL\r\n
-      \ OR (\r\n    :completed_or_withdrawn = 'in_study' AND dt.exit_type IS NULL\r\n
-      \   OR\r\n    :completed_or_withdrawn = 'not_in_study' AND dt.exit_type IS NOT
-      NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: "\r\nactivity_performed: \r\n  config_selector: \r\n    all: true\r\n
-      \   multiple: single\r\n    default: general-follow-up\r\n    selections:\r\n
-      \     general communication - follow-up: general-follow-up\r\n      general
-      communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
-      \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
-      phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
-      \     inclusion/exclusion phone screen sign-off (PI): inex-phone-screen-so-pi\r\n
-      \     inclusion/exclusion phone screen sign-off (MedNav): inex-phone-screen-so-mednav\r\n
-      \     inclusion/exclusion phone screen sign-off (Staff): inex-phone-screen-so-staff\r\n
-      \     inclusion/exclusion tms ready for sign-off: inex-tms-responses\r\n      inclusion/exclusion
-      tms sign-off: inex-tms-so\r\n      inclusion/exclusion baseline review: inex-baseline-complete\r\n
-      \     payment made: payments\r\n      scheduled screening follow-up: screening_follow_up\r\n
-      \     performed screening follow-up: perform_screening_follow_up\r\n      set
-      appointment: appointment-set\r\n      added emergency contacts: contact_info\r\n
-      \     transportation and housing: transportation_and_housing\r\n      navigation
-      planned event: has-planned-event\r\n      navigation event feedback: has-event-feedback\r\n
-      \     consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n
-      \     withdraw: withdraw\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector:
-      \r\n    label: Activity outstanding (optional)\r\n    all: true\r\n    multiple:
-      single\r\n    default: general-completed\r\n    selections:\r\n      general
-      communication - follow-up: general-follow-up\r\n      general communication
-      - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
-      \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
-      phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
-      \     inclusion/exclusion phone screen sign-off (PI): inex-phone-screen-so-pi\r\n
-      \     inclusion/exclusion phone screen sign-off (MedNav): inex-phone-screen-so-mednav\r\n
-      \     inclusion/exclusion phone screen sign-off (Staff): inex-phone-screen-so-staff\r\n
-      \     inclusion/exclusion tms ready for sign-off: inex-tms-responses\r\n      inclusion/exclusion
-      tms sign-off: inex-tms-so\r\n      inclusion/exclusion baseline review: inex-baseline-complete\r\n
-      \     payment made: payments\r\n      scheduled screening follow-up: screening_follow_up\r\n
-      \     performed screening follow-up: perform_screening_follow_up\r\n      set
-      appointment: appointment-set\r\n      added emergency contacts: contact_info\r\n
-      \     transportation and housing: transportation_and_housing\r\n      navigation
-      planned event: has-planned-event\r\n      navigation event feedback: has-event-feedback\r\n
-      \     consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n
-      \     withdraw: withdraw\r\n\r\n\r\ncompleted_or_withdrawn: \r\n  config_selector:
-      \r\n    all: true\r\n    multiple: single\r\n    default: in_study\r\n    selections:
-      \r\n      in study: in_study\r\n      completed or withdrawn: not_in_study"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.576Z'
-    updated_at: '2019-06-24T10:33:02.394Z'
-    report_type: search
-    auto: false
-    searchable: true
-    position: 20
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_outstanding_activities
-    options: 
-    user_email: 
-  - id: 28
-    name: IPA Protocol Deviation Initial Review
-    description: IPA records requiring initial review by the Senior Clinical Research
-      Coordinator.
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a.master_id, a2.extra_log_type,
-      a.created_at,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at
-      DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_ipa_assignment_protocol_deviations
-      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN ipa_protocol_deviations p\r\n
-      ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n   AND
-      mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n   AND
-      mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN
-      model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n\r\n LEFT JOIN activity_log_ipa_assignment_protocol_deviations
-      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n
-      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n AND a2.extra_log_type
-      IS NULL\r\n AND p.select_severity = 'major'\r\n\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n  r >= 1 AND
-      dt.extra_log_type IS NULL\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.582Z'
-    updated_at: '2019-06-24T10:33:02.406Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 30
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_protocol_deviation_initial_review
-    options: 
-    user_email: 
-  - id: 29
-    name: IPA Adverse Event Initial Review
-    description: IPA records requiring initial review by the Senior Clinical Research
-      Coordinator.
-    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.extra_log_type, a.created_at,
-      a.master_id,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at
-      DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_ipa_assignment_adverse_events
-      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr.from_record_id = a.id\r\n\r\n INNER JOIN ipa_adverse_events p\r\n ON \r\n
-      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
-      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
-      \  AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN model_references mr2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n\r\n LEFT JOIN activity_log_ipa_assignment_adverse_events a2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n WHERE \r\n a.extra_log_type
-      = 'adverse_event_record' \r\n AND a2.extra_log_type IS NULL\r\n\r\n\r\n) AS
-      dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n
-      \ r >= 1 AND dt.extra_log_type IS NULL\r\n\r\n\r\nORDER BY\r\n  dt.created_at
-      DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.586Z'
-    updated_at: '2019-06-24T10:33:02.412Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 40
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_adverse_event_initial_review
-    options: 
-    user_email: 
-  - id: 30
-    name: IPA Adverse Events
-    description: "IPA Adverse Events report for fast review of events requiring additional
-      action or for summary reporting.\r\n\r\nThe activities are performed in this
-      order: initial submission, initial review, PI review (if required), report to
-      IRB (if PI review was required)\r\n\r\nNOTE: the Last Activity Performed represents
-      the last recorded activity for a specific adverse event. Therefore to find outstanding
-      tasks, for example items requiring Report to IRB, it is necessary to search
-      for the last activity that was performed, PI Review in this example."
-    sql: "\r\nSELECT \r\ndt.master_id,\r\nipa.ipa_id,\r\ncoalesce(dt.created_at, dt.submitted_at)
-      \"last activity\",\r\ncoalesce(dt.extra_log_type, 'initial submission') \"Last
-      Activity Performed\",\r\n--pi.first_name,\r\n--pi.last_name,\r\nselect_severity,
-      select_location, select_relatedness, select_expectedness, event_occurred_when,
-      event_discovered_when,\r\ndt.primary_extra_log_type,\r\ndt.primary_activity\r\nFROM
-      (\r\n SELECT a.master_id , a.id \"primary_activity\", a.extra_log_type \"primary_extra_log_type\",
-      a.created_at \"submitted_at\", a2.created_at, a2.extra_log_type, p.select_severity,
-      p.select_location, p.select_relatedness, p.select_expectedness,\r\n   p.event_occurred_when,
-      p.event_discovered_when,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n
-      \ ORDER BY a.created_at DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_ipa_assignment_adverse_events
-      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr.from_record_id = a.id\r\n\r\n INNER JOIN ipa_adverse_events p\r\n ON \r\n
-      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
-      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
-      \  AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN model_references mr2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n\r\n LEFT JOIN activity_log_ipa_assignment_adverse_events a2\r\n ON\r\n
-      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
-      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
-      = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n\r\n WHERE \r\n a.extra_log_type
-      = 'adverse_event_record' \r\n\r\n\r\n) AS dt\r\n\r\ninner join player_infos
-      pi on dt.master_id = pi.master_id\r\nINNER JOIN ipa_assignments ipa ON dt.master_id
-      = ipa.master_id\r\nWHERE r = 1 \r\nAND (:event_occurred_from IS NULL OR event_occurred_when
-      >= :event_occurred_from)\r\nAND (:event_occurred_to IS NULL OR event_occurred_when
-      <= :event_occurred_to)\r\nAND (:severity IS NULL OR select_severity = :severity)\r\nAND
-      (:location IS NULL OR select_location = :location)\r\nAND ((:relatedness) IS
-      NULL OR select_relatedness IN (:relatedness))\r\nAND ((:expectedness) IS NULL
-      OR select_expectedness = (:expectedness))\r\nAND ((:latest_activity) IS NULL
-      OR coalesce(dt.extra_log_type, 'initial submission') IN (:latest_activity))\r\n\r\nORDER
-      BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: "\r\nseverity: \r\n  general_selection: \r\n    item_type: dynamic_model__ipa_adverse_events_select_severity\r\n
-      \   multiple: single\r\n    default: serious\r\nlocation: \r\n  general_selection:
-      \r\n    item_type: dynamic_model__ipa_adverse_events_select_location\r\n    multiple:
-      single\r\n\r\nrelatedness: \r\n  general_selection: \r\n    item_type: dynamic_model__ipa_adverse_events_select_relatedness\r\n
-      \   multiple: multiple\r\n    default: \r\n      - related\r\n      - possibly
-      related\r\n\r\nexpectedness: \r\n  general_selection: \r\n    item_type: dynamic_model__ipa_adverse_events_select_expectedness\r\n
-      \   multiple: single\r\n\r\nevent_occurred_from: \r\n  date: \r\n    all: true\r\n
-      \   multiple: single\r\n    default: -15 days\r\nevent_occurred_to: \r\n  date:
-      \r\n    all: true\r\n    multiple: single\r\nlatest_activity: \r\n  config_selector:
-      \r\n    all: true\r\n    multiple: multiple\r\n    label: Latest Activity Performed\r\n
-      \   selections: \r\n      initial submission: initial submission\r\n      initial
-      review: initial_review\r\n      pi review: pi_review\r\n      report to irb:
-      report_to_irb"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.589Z'
-    updated_at: '2019-06-24T10:33:02.426Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_adverse_events
-    options: 
-    user_email: 
-  - id: 31
-    name: IPA In Process & Exited
-    description: 'All subjects that have joined or exited the study: in process (phone
-      screening scheduled), completed, withdrawn, ineligible, not interested (during
-      phone screen or follow-up)'
-    sql: "SELECT * from ipa_ops.ipa_participant_exits\r\nWHERE status IN(:select_status)\r\nORDER
-      BY status, \"when\" desc\r\n;\r\n"
-    search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
-      / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - ineligible\r\n      - completed\r\n      - withdrawn\r\n
-      \     - in process\r\n      - not interest during phone screening\r\n      -
-      not interest during screening follow-up\r\n    selections: \r\n      ineligible:
-      ineligible\r\n      completed: completed\r\n      withdrawn: withdrawn\r\n      in
-      process: in process\r\n      not interest during phone screening: not interest
-      during phone screening\r\n      not interest during screening follow-up: not
-      interest during screening follow-up"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.594Z'
-    updated_at: '2019-11-12T10:10:14.202Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 2
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_in_process_&_exited
-    options: ''
-    user_email: 
-  - id: 32
-    name: IPA Appointments & Assessments
-    description: View all scheduled calls, communication follow-ups, phone screenings
-      and planned assessment events in a chronological list, split week by week.
-    sql: "create temp table nav_events\r\nas select\r\n'' \"-\",\r\nal.event_date,\r\nal.start_time,\r\npi.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nal.extra_log_type,\r\nal.select_status,\r\nal.select_station,\r\nal.select_event_type,\r\nal.other_event_type,\r\nal.completion_time,\r\nal.arrival_time,\r\nal.select_navigator,\r\nal.select_pi,\r\nal.location\r\nfrom\r\nactivity_log_ipa_assignment_navigations
-      al\r\ninner join player_infos pi\r\non pi.master_id = al.master_id\r\ninner
-      join ipa_assignments ipa\r\non ipa.master_id = al.master_id\r\n\r\nwhere\r\n(:from_date
-      IS NULL or event_date >= :from_date)\r\nAND (:to_date IS NULL or event_date
-      <= :to_date)\r\nAND ((:type) IS NULL or extra_log_type in (:type))\r\nAND ((:confirmed)
-      IS NULL or select_status in (:confirmed))\r\nAND ((:station) IS NULL or select_station
-      in (:station))\r\nAND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\n\r\ncreate
-      temp table appointments\r\nas select\r\nvisit_start_date,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
-      appointment_id\r\nfrom ipa_appointments ap\r\ninner join activity_log_ipa_assignments
-      al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
-      ap.master_id = pi.master_id\r\n\r\ninner join ipa_assignments ipa\r\non ipa.master_id
-      = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT NULL\r\n  AND (:from_date
-      IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
-      <= :to_date)\r\n  AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\nGROUP BY\r\nap.master_id,
-      visit_start_date, pi.first_name, pi.last_name, ipa.ipa_id\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
-      \ dt.master_id,\r\n  ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
-      \ dt.select_who\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
-      \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
-      \     a.notes,\r\n      rank()\r\n    OVER (\r\n      PARTITION BY a.master_id,
-      a.extra_log_type\r\n      ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from
-      activity_log_ipa_assignments a\r\n    where\r\n      follow_up_when is not null\r\n
-      \     AND (:from_date IS NULL OR follow_up_when >= :from_date)\r\n      AND
-      (:to_date IS NULL OR follow_up_when <= :to_date )\r\n  ) dt\r\ninner join player_infos
-      p\r\n  on dt.master_id = p.master_id\r\n\r\ninner join ipa_assignments ipa\r\n
-      \ on dt.master_id = ipa.master_id\r\n\r\nWHERE r = 1\r\nAND (:ipa_id IS NULL
-      or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\ncreate temp table all_dates\r\nas\r\nselect
-      event_date from nav_events\r\nunion\r\nselect follow_up_when from scheduled_calls\r\nunion\r\nselect
-      visit_start_date from appointments\r\n;\r\n\r\nSELECT\r\n  al.event_date \"date\",\r\n
-      \ al.start_time \"start time\",\r\n  'assessment event' \"-\",\r\n  al.extra_log_type
-      \"type\",\r\n  select_navigator \"assigned to\",\r\n  select_pi \"assigned to
-      pi\",\r\n  al.master_id,\r\n  al.ipa_id \"IPA ID\",\r\n  --al.first_name \"first
-      name\",\r\n  --al.last_name \"last name\",\r\n  al.select_status \"status\",\r\n
-      \ al.select_station \"station\",\r\n  al.select_event_type \"event type\",\r\n
-      \ al.other_event_type \"other event type\",\r\n  al.location,\r\n  al.completion_time
-      \"planned or actual completion time\",\r\n  al.arrival_time \"arrival time\"\r\n\r\nFROM
-      nav_events al\r\n\r\nUNION\r\n\r\nSELECT\r\n  date_trunc('week', dd)::date,\r\n
-      \ NULL,\r\n  '          ',\r\n  '          ',\r\n  '          ',\r\n  NULL,\r\n
-      \ NULL,\r\n  NULL,\r\n  --'          ',\r\n  --'          ',\r\n  '          ',\r\n
-      \ '          ',\r\n  '          ',\r\n  '          ',\r\n  NULL,\r\n  NULL,\r\n
-      \ NULL\r\nFROM generate_series\r\n      ( (select min(event_date)::timestamp
-      from all_dates)\r\n      , (select max(event_date)::timestamp from all_dates)\r\n
-      \     , '7 day'::interval) dd\r\n\r\nUNION\r\n\r\nSELECT\r\n  visit_start_date
-      event_date,\r\n  NULL,\r\n  'appointment start',\r\n  '',\r\n  '' \"assigned
-      to\",\r\n  '' \"assigned to pi\",\r\n  master_id,\r\n  ipa_id,\r\n  --first_name,\r\n
-      \ --last_name,\r\n  '',\r\n  '',\r\n  '',\r\n  '',\r\n  NULL,\r\n  NULL,\r\n
-      \ NULL\r\nFROM appointments\r\n\r\nUNION\r\n\r\nSELECT\r\n  follow_up_when,\r\n
-      \ follow_up_time,\r\n  'scheduled call' \"-\",\r\n  extra_log_type,\r\n  select_who
-      \"assigned to\",\r\n  '' \"assigned to pi\",\r\n  master_id,\r\n  ipa_id,\r\n
-      \ --first_name,\r\n  --last_name,\r\n  '',\r\n  '',\r\n  '',\r\n  '',\r\n  NULL,\r\n
-      \ NULL,\r\n  NULL\r\nFROM scheduled_calls\r\n\r\n\r\norder by\r\n\"date\",\r\n\"start
-      time\"\r\n;\r\n"
-    search_attrs: "\r\nfrom_date: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n\r\nto_date:
-      \r\n  date: \r\n    all: true\r\n    multiple: single\r\n\r\ntype: \r\n  config_selector:
-      \r\n    label: Assessment Event Type (planned or feedback)\r\n    all: true\r\n
-      \   multiple: multiple\r\n    selections: \r\n      planned: planned_event\r\n
-      \     event feedback: station_event\r\n    default: \r\n      - planned_event\r\n\r\nconfirmed:
-      \r\n  general_selection: \r\n    label: Planned Assessment Event Status\r\n
-      \   item_type: activity_log__ipa_assignment_navigation_select_status\r\n    multiple:
-      multiple\r\n    default: \r\n      - unconfirmed\r\n      - confirmed\r\n      -
-      in progress\r\n\r\nstation: \r\n  general_selection: \r\n    label: Assessment
-      Event Station\r\n    item_type: activity_log__ipa_assignment_navigation_select_station\r\n
-      \   multiple: multiple\r\n    disabled: false\r\nipa_id: \r\n  number: \r\n
-      \   label: IPA ID\r\n    all: true\r\n    multiple: single\r\n\r\n\r\n"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.598Z'
-    updated_at: '2019-06-24T10:37:11.954Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 1
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_appointments_&_assessments
-    options: 
-    user_email: 
-  - id: 33
-    name: IPA Protocol Deviations
-    description: "IPA Protocol Deviations report for fast review of events requiring
-      additional action or for summary reporting.\r\n\r\nThe activities are performed
-      in this order: initial submission, initial review, PI review (if required),
-      report to IRB (if PI review was required)\r\n\r\nNOTE: the Last Activity Performed
-      represents the last recorded activity for a specific protocol deviations. Therefore
-      to find outstanding tasks, for example items requiring Report to IRB, it is
-      necessary to search for the last activity that was performed, PI Review in this
-      example."
-    sql: "\r\nSELECT \r\ndt.master_id,\r\nipa.ipa_id,\r\ncoalesce(dt.created_at, dt.submitted_at)
-      \"last activity\",\r\ncoalesce(dt.extra_log_type, 'initial submission') \"Last
-      Activity Performed\",\r\n-- pi.first_name,\r\n-- pi.last_name,\r\nselect_severity,
-      deviation_occurred_when, deviation_discovered_when,\r\ndt.primary_extra_log_type,\r\ndt.primary_activity\r\nFROM
-      (\r\n SELECT a.master_id , a.id \"primary_activity\", a.extra_log_type \"primary_extra_log_type\",
-      a.created_at \"submitted_at\", a2.created_at, a2.extra_log_type, p.select_severity,
-      \r\n   p.deviation_occurred_when, p.deviation_discovered_when,\r\n   rank()\r\n
-      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
-      DESC\r\n ) AS r\r\n FROM activity_log_ipa_assignment_protocol_deviations a\r\n\r\n
-      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
-      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN ipa_protocol_deviations p\r\n
-      ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n   AND
-      mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n   AND
-      mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN
-      model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n\r\n LEFT JOIN activity_log_ipa_assignment_protocol_deviations
-      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
-      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n\r\n
-      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\nWHERE \r\nr = 1 \r\nAND (:deviation_occurred_from
-      IS NULL OR deviation_occurred_when >= :deviation_occurred_from)\r\nAND (:deviation_occurred_to
-      IS NULL OR deviation_occurred_when <= :deviation_occurred_to)\r\nAND (:severity
-      IS NULL OR select_severity = :severity)\r\nAND ((:latest_activity) IS NULL OR
-      coalesce(dt.extra_log_type, 'initial submission') IN (:latest_activity))\r\n\r\nORDER
-      BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: "\r\nseverity: \r\n  general_selection: \r\n    item_type: dynamic_model__ipa_protocol_deviations_select_severity\r\n
-      \   multiple: single\r\n    default: serious\r\n\r\ndeviation_occurred_from:
-      \r\n  date: \r\n    all: true\r\n    multiple: single\r\n    default: -15 days\r\ndeviation_occurred_to:
-      \r\n  date: \r\n    all: true\r\n    multiple: single\r\n\r\nlatest_activity:
-      \r\n  config_selector: \r\n    all: true\r\n    multiple: multiple\r\n    label:
-      Latest Activity Performed\r\n    selections: \r\n      initial submission: initial
-      submission\r\n      initial review: initial_review\r\n      pi review: pi_review\r\n
-      \     report to irb: report_to_irb\r\n    default:\r\n      - pi_review"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.602Z'
-    updated_at: '2019-06-24T10:33:02.454Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_protocol_deviations
-    options: 
-    user_email: 
-  - id: 34
-    name: Edit IPA Tech Contacts
-    description: Edit IPA contact information for assessment stations
-    sql: "select id, first_name,last_name,role,select_availability,phone,alt_phone,email,alt_email,notes
-      from ipa_station_contacts;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-01-17T11:51:02.605Z'
-    updated_at: '2019-06-24T10:33:02.460Z'
-    report_type: regular_report
-    auto: false
-    searchable: false
-    position: 
-    edit_model: ipa_station_contacts
-    edit_field_names: first_name,last_name,role,select_availability,phone,alt_phone,email,alt_email,notes
-    selection_fields: select_availability
-    item_type: ipa
-    short_name: edit_ipa_tech_contacts
-    options: 
-    user_email: 
-  - id: 35
-    name: IPA ID Search
-    description: Search for IPA subject by IPA ID.
-    sql: select * from ipa_assignments where ipa_id = :ipa_id
-    search_attrs: "\r\nipa_id:\r\n  number:\r\n    all: true\r\n    multiple: single\r\n"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-03-19T17:18:19.109Z'
-    updated_at: '2019-06-24T10:33:02.469Z'
-    report_type: search
-    auto: false
-    searchable: true
-    position: 2
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_id_search
-    options: 
-    user_email: 
-  - id: 37
-    name: Ready for Sign Off - PI
-    description: Participants with inclusion / exclusion checklist ready for sign
-      off by PI
-    sql: "SELECT\r\n   dt.master_id,\r\n   ipa.ipa_id,\r\n   --pi.first_name,\r\n
-      \  --pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n
-      \  dt.checklist_signed,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM
-      (\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n    rank()\r\n    OVER
-      (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at DESC\r\n    )
-      AS r\r\n  FROM\r\n  (\r\n    SELECT\r\n      al.master_id,\r\n      'tracker'
-      \"source\",\r\n      al.extra_log_type,\r\n      CASE WHEN\r\n        (select_result='follow
-      up' OR select_activity = 'schedule follow up') THEN 'follow up'\r\n      WHEN\r\n
-      \       (select_result='completed' OR select_activity = 'completed') THEN 'completed'\r\n
-      \     ELSE\r\n        al.select_result \r\n      END \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n\r\n    WHERE\r\n    'inex-phone-screen-finalized' = 'general-follow-up'
-      AND al.extra_log_type='general' AND (select_result='follow up' OR select_activity
-      = 'schedule follow up')\r\n    OR\r\n    'inex-phone-screen-finalized' = 'general-completed'
-      AND al.extra_log_type='general' AND (select_result='completed' OR select_activity
-      = 'completed')\r\n    OR\r\n    'inex-phone-screen-so-pi' is not null AND 'inex-phone-screen-so-pi'
-      = 'general-follow-up' AND al.extra_log_type='general'\r\n    OR\r\n    'inex-phone-screen-so-pi'
-      is not null AND 'inex-phone-screen-so-pi' = 'general-completed' AND al.extra_log_type='general'\r\n
-      \   OR\r\n    (\r\n      al.extra_log_type IN ('inex-phone-screen-finalized',
-      'inex-phone-screen-so-pi', 'withdraw', 'perform_screening_follow_up')\r\n    )\r\n\r\n
-      \   UNION\r\n\r\n    SELECT\r\n      inex.master_id,\r\n      'inex' \"source\",\r\n
-      \     inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n      inex.signed_no_yes
-      \"checklist_signed\",\r\n      inex.created_at\r\n\r\n\r\n    FROM activity_log_ipa_assignment_inex_checklists
-      inex\r\n    WHERE\r\n\r\n    (\r\n      (\r\n        'inex-phone-screen-finalized'
-      = 'inex-phone-screen-finalized' AND extra_log_type = 'finalize_phone_screen_checklist'\r\n
-      \       OR 'inex-phone-screen-finalized' = 'inex-phone-screen-so-pi' AND extra_log_type
-      = 'sign_phone_screen'\r\n        OR 'inex-phone-screen-finalized' = 'inex-phone-screen-so-mednav'
-      AND extra_log_type = 'sign_phone_screen_reviewer'\r\n        OR 'inex-phone-screen-finalized'
-      = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'\r\n
-      \       OR 'inex-phone-screen-finalized' = 'inex-baseline-complete' AND extra_log_type
-      = 'sign_baseline'\r\n      ) \r\n      \r\n      \r\n      OR 'inex-phone-screen-so-pi'
-      IS NOT NULL AND (\r\n        'inex-phone-screen-so-pi' = 'inex-phone-screen-finalized'
-      AND extra_log_type = 'finalize_phone_screen_checklist'\r\n        OR 'inex-phone-screen-so-pi'
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      'inex-phone-screen-so-pi' = 'inex-phone-screen-so-mednav' AND extra_log_type
-      = 'sign_phone_screen_reviewer'\r\n        OR 'inex-phone-screen-so-pi' = 'inex-phone-screen-so-staff'
-      AND extra_log_type = 'sign_phone_screen_staff'\r\n        OR 'inex-phone-screen-so-pi'
-      = 'inex-baseline-complete' AND extra_log_type = 'sign_baseline'\r\n      ) \r\n
-      \   ) \r\n\r\n    UNION\r\n\r\n    SELECT\r\n      ps.master_id,\r\n      'phone
-      screen' \"source\",\r\n      'phone_screen_finalized' \"extra_log_type\",\r\n
-      \     NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     ps.created_at\r\n\r\n\r\n    FROM activity_log_ipa_assignment_phone_screens
-      ps\r\n    WHERE\r\n\r\n    ('inex-phone-screen-finalized' = 'phone-screen-complete'
-      OR 'inex-phone-screen-so-pi' IS NOT NULL AND 'inex-phone-screen-so-pi'  = 'phone-screen-complete'
-      )\r\n    AND extra_log_type IN ('finalize')\r\n\r\n\r\n\r\n    \r\n\r\n  ) AS
-      di\r\n\r\n  LEFT OUTER JOIN (\r\n\r\n    SELECT\r\n      master_id,\r\n      'not
-      interested or ineligible (follow up)' \"exit_type\"\r\n\r\n\r\n    FROM ipa_screenings
-      ps\r\n    WHERE\r\n      still_interested_blank_yes_no = 'no' OR\r\n      eligible_for_study_blank_yes_no
-      = 'no'\r\n\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'not
-      interested (phone screening)' \"exit_type\"\r\n\r\n    FROM ipa_ps_initial_screenings
-      inits\r\n    WHERE\r\n     select_is_good_time_to_speak = 'not interested' OR\r\n
-      \    select_may_i_begin = 'not interested' OR\r\n     select_still_interested
-      = 'no'\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'withdrew'
-      \"exit_type\"\r\n\r\n    FROM ipa_withdrawals wd\r\n    WHERE\r\n     select_subject_withdrew_reason
-      = 'withdrew' OR\r\n     select_investigator_terminated IN ('yes - due to ae',
-      'yes - other reason') OR\r\n     lost_to_follow_up_no_yes = 'yes' OR\r\n     no_longer_participating_no_yes
-      = 'yes'\r\n\r\n     UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'completed
-      exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n    WHERE\r\n      select_survey_type
-      = 'exit survey'\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n('inex-phone-screen-so-pi'
-      IS NULL OR 'inex-phone-screen-so-pi' IS NOT NULL AND r = 1)\r\nAND\r\n(\r\n\r\n
-      \ 'inex-phone-screen-finalized' = 'general-follow-up' AND dt.extra_log_type='general'
-      AND dt.communication_result='follow up'\r\n  OR\r\n    'inex-phone-screen-finalized'
-      = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \ OR \r\n    'inex-phone-screen-finalized' = 'inex-phone-screen-finalized' AND
-      dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n  OR \r\n    'inex-phone-screen-finalized'
-      = 'inex-phone-screen-so-pi' AND dt.extra_log_type = 'sign_phone_screen'\r\n
-      \ OR \r\n    'inex-phone-screen-finalized' = 'inex-phone-screen-so-mednav' AND
-      dt.extra_log_type = 'sign_phone_screen_reviewer'\r\n  OR \r\n    'inex-phone-screen-finalized'
-      = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'\r\n\r\n
-      \ OR (\r\n    'inex-phone-screen-finalized' = 'inex-baseline-complete'\r\n    AND
-      (\r\n      dt.extra_log_type IN ('sign_baseline') AND\r\n      checklist_signed
-      = 'yes'\r\n    )\r\n  )\r\n  OR (\r\n    'inex-phone-screen-finalized' = 'phone-screen-complete'\r\n
-      \   AND (\r\n      dt.extra_log_type IN ('phone_screen_finalized')\r\n    )\r\n
-      \ )\r\n  OR 'inex-phone-screen-finalized' NOT IN ('inex-complete', 'phone-screen-complete')
-      AND dt.extra_log_type = 'inex-phone-screen-finalized'\r\n)\r\nAND (\r\n  'inex-phone-screen-so-pi'
-      IS NULL\r\n  OR NOT (\r\n    r = 1\r\n    AND (\r\n      'inex-phone-screen-so-pi'
-      = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow
-      up'\r\n      OR 'inex-phone-screen-so-pi' = 'general-completed' AND dt.extra_log_type='general'
-      AND dt.communication_result='completed'\r\n\r\n      OR \r\n        'inex-phone-screen-so-pi'
-      = 'inex-phone-screen-finalized' AND dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n
-      \     OR \r\n        'inex-phone-screen-so-pi' = 'inex-phone-screen-so-pi' AND
-      dt.extra_log_type = 'sign_phone_screen'\r\n      OR \r\n        'inex-phone-screen-so-pi'
-      = 'inex-phone-screen-so-mednav' AND dt.extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \     OR \r\n        'inex-phone-screen-so-pi' = 'inex-phone-screen-so-staff'
-      AND dt.extra_log_type = 'sign_phone_screen_staff'\r\n\r\n      OR (\r\n          'inex-phone-screen-so-pi'
-      = 'inex-baseline-complete'\r\n          AND (\r\n            dt.extra_log_type
-      IN ('sign_baseline') AND\r\n            checklist_signed = 'yes'\r\n          )\r\n
-      \     )\r\n\r\n      OR (\r\n        'inex-phone-screen-so-pi' = 'phone-screen-complete'\r\n
-      \       AND (\r\n          dt.extra_log_type IN ('phone_screen_finalized')\r\n
-      \       )\r\n      )\r\n      OR 'inex-phone-screen-so-pi' NOT IN ('inex-complete',
-      'phone-screen-complete') AND dt.extra_log_type = 'inex-phone-screen-so-pi'\r\n
-      \   )\r\n  )\r\n\r\n)\r\nAND (\r\n  'in_study' IS NULL \r\n  OR (\r\n    'in_study'
-      = 'in_study' AND dt.exit_type IS NULL\r\n    OR\r\n    'in_study' = 'not_in_study'
-      AND dt.exit_type IS NOT NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-05-14T09:34:59.319Z'
-    updated_at: '2019-06-24T10:33:02.482Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 22
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ready_for_sign_off___pi
-    options: 
-    user_email: 
-  - id: 38
-    name: Ready for Sign Off - MedNav
-    description: Participants with inclusion / exclusion checklist ready for sign
-      off by Med Nav reviewer
-    sql: "SELECT\r\n   dt.master_id,\r\n   ipa.ipa_id,\r\n   dt.source,\r\n   dt.extra_log_type
-      activity,\r\n   dt.communication_result,\r\n   dt.checklist_signed,\r\n   dt.exit_type,\r\n
-      \  dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n
-      \   rank()\r\n    OVER (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at
-      DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n/*    SELECT\r\n      al.master_id,\r\n
-      \     'tracker' \"source\",\r\n      al.extra_log_type,\r\n      CASE WHEN\r\n
-      \       (select_result='follow up' OR select_activity = 'schedule follow up')
-      THEN 'follow up'\r\n      WHEN\r\n        (select_result='completed' OR select_activity
-      = 'completed') THEN 'completed'\r\n      ELSE\r\n        al.select_result \r\n
-      \     END \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     al.created_at\r\n\r\n    FROM activity_log_ipa_assignments al\r\n\r\n
-      \   WHERE    \r\n      al.extra_log_type IN ('inex-phone-screen-finalized',
-      'inex-phone-screen-so-mednav', 'withdraw', 'perform_screening_follow_up')\r\n\r\n
-      \   UNION\r\n*/\r\n    SELECT\r\n      inex.master_id,\r\n      'inex' \"source\",\r\n
-      \     inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n      inex.signed_no_yes
-      \"checklist_signed\",\r\n      inex.created_at\r\n\r\n\r\n    FROM activity_log_ipa_assignment_inex_checklists
-      inex\r\n    WHERE\r\n\r\n    (\r\n      extra_log_type IN ('finalize_phone_screen_checklist',
-      'sign_phone_screen_reviewer')\r\n    ) \r\n\r\n\r\n  ) AS di\r\n\r\n  LEFT OUTER
-      JOIN (\r\n\r\n    SELECT\r\n      master_id,\r\n      'not interested or ineligible
-      (follow up)' \"exit_type\"\r\n\r\n\r\n    FROM ipa_screenings ps\r\n    WHERE\r\n
-      \     still_interested_blank_yes_no = 'no' OR\r\n      eligible_for_study_blank_yes_no
-      = 'no'\r\n\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'not
-      interested (phone screening)' \"exit_type\"\r\n\r\n    FROM ipa_ps_initial_screenings
-      inits\r\n    WHERE\r\n     select_is_good_time_to_speak = 'not interested' OR\r\n
-      \    select_may_i_begin = 'not interested' OR\r\n     select_still_interested
-      = 'no'\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'withdrew'
-      \"exit_type\"\r\n\r\n    FROM ipa_withdrawals wd\r\n    WHERE\r\n     select_subject_withdrew_reason
-      = 'withdrew' OR\r\n     select_investigator_terminated IN ('yes - due to ae',
-      'yes - other reason') OR\r\n     lost_to_follow_up_no_yes = 'yes' OR\r\n     no_longer_participating_no_yes
-      = 'yes'\r\n\r\n     UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'completed
-      exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n    WHERE\r\n      select_survey_type
-      = 'exit survey'\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n) AS dt\r\n\r\ninner
-      join ipa_assignments ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n(r
-      = 1)\r\nAND\r\n  dt.extra_log_type = 'finalize_phone_screen_checklist'\r\nAND
-      (\r\n\r\n  NOT (\r\n    r = 1\r\n    AND (\r\n      dt.extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \   )\r\n  )\r\n\r\n)\r\nAND (\r\n  'in_study' IS NULL \r\n  OR (\r\n    'in_study'
-      = 'in_study' AND dt.exit_type IS NULL\r\n    OR\r\n    'in_study' = 'not_in_study'
-      AND dt.exit_type IS NOT NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-05-14T11:05:46.727Z'
-    updated_at: '2019-08-21T09:01:08.237Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 22
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ready_for_sign_off___mednav
-    options: ''
-    user_email: 
-  - id: 39
-    name: Ready for Sign Off - Staff
-    description: Participants with inclusion / exclusion checklist ready for sign
-      off by FPHS staff member (phone screener interviewer)
-    sql: "SELECT\r\n   dt.master_id,\r\n   ipa.ipa_id,\r\n   --pi.first_name,\r\n
-      \  --pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n
-      \  dt.checklist_signed,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM
-      (\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n    rank()\r\n    OVER
-      (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at DESC\r\n    )
-      AS r\r\n  FROM\r\n  (\r\n    SELECT\r\n      al.master_id,\r\n      'tracker'
-      \"source\",\r\n      al.extra_log_type,\r\n      CASE WHEN\r\n        (select_result='follow
-      up' OR select_activity = 'schedule follow up') THEN 'follow up'\r\n      WHEN\r\n
-      \       (select_result='completed' OR select_activity = 'completed') THEN 'completed'\r\n
-      \     ELSE\r\n        al.select_result \r\n      END \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n\r\n    WHERE\r\n    'inex-phone-screen-finalized' = 'general-follow-up'
-      AND al.extra_log_type='general' AND (select_result='follow up' OR select_activity
-      = 'schedule follow up')\r\n    OR\r\n    'inex-phone-screen-finalized' = 'general-completed'
-      AND al.extra_log_type='general' AND (select_result='completed' OR select_activity
-      = 'completed')\r\n    OR\r\n    'inex-phone-screen-so-staff' is not null AND
-      'inex-phone-screen-so-staff' = 'general-follow-up' AND al.extra_log_type='general'\r\n
-      \   OR\r\n    'inex-phone-screen-so-staff' is not null AND 'inex-phone-screen-so-staff'
-      = 'general-completed' AND al.extra_log_type='general'\r\n    OR\r\n    (\r\n
-      \     al.extra_log_type IN ('inex-phone-screen-finalized', 'inex-phone-screen-so-staff',
-      'withdraw', 'perform_screening_follow_up')\r\n    )\r\n\r\n    UNION\r\n\r\n
-      \   SELECT\r\n      inex.master_id,\r\n      'inex' \"source\",\r\n      inex.extra_log_type,\r\n
-      \     NULL \"communication_result\",\r\n      inex.signed_no_yes \"checklist_signed\",\r\n
-      \     inex.created_at\r\n\r\n\r\n    FROM activity_log_ipa_assignment_inex_checklists
-      inex\r\n    WHERE\r\n\r\n    (\r\n      (\r\n        'inex-phone-screen-finalized'
-      = 'inex-phone-screen-finalized' AND extra_log_type = 'finalize_phone_screen_checklist'\r\n
-      \       OR 'inex-phone-screen-finalized' = 'inex-phone-screen-so-pi' AND extra_log_type
-      = 'sign_phone_screen'\r\n        OR 'inex-phone-screen-finalized' = 'inex-phone-screen-so-mednav'
-      AND extra_log_type = 'sign_phone_screen_reviewer'\r\n        OR 'inex-phone-screen-finalized'
-      = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'\r\n
-      \       OR 'inex-phone-screen-finalized' = 'inex-baseline-complete' AND extra_log_type
-      = 'sign_baseline'\r\n        OR 'inex-phone-screen-finalized' = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR 'inex-phone-screen-finalized'
-      = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'\r\n      ) \r\n
-      \     \r\n      \r\n      OR 'inex-phone-screen-so-staff' IS NOT NULL AND (\r\n
-      \       'inex-phone-screen-so-staff' = 'inex-phone-screen-finalized' AND extra_log_type
-      = 'finalize_phone_screen_checklist'\r\n        OR 'inex-phone-screen-so-staff'
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      'inex-phone-screen-so-staff' = 'inex-phone-screen-so-mednav' AND extra_log_type
-      = 'sign_phone_screen_reviewer'\r\n        OR 'inex-phone-screen-so-staff' =
-      'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'\r\n
-      \       OR 'inex-phone-screen-so-staff' = 'inex-baseline-complete' AND extra_log_type
-      = 'sign_baseline'\r\n        OR 'inex-phone-screen-so-staff' = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR 'inex-phone-screen-so-staff'
-      = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'\r\n      ) \r\n
-      \   ) \r\n\r\n    UNION\r\n\r\n    SELECT\r\n      ps.master_id,\r\n      'phone
-      screen' \"source\",\r\n      'phone_screen_finalized' \"extra_log_type\",\r\n
-      \     NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     ps.created_at\r\n\r\n\r\n    FROM activity_log_ipa_assignment_phone_screens
-      ps\r\n    WHERE\r\n\r\n    ('inex-phone-screen-finalized' = 'phone-screen-complete'
-      OR 'inex-phone-screen-so-staff' IS NOT NULL AND 'inex-phone-screen-so-staff'
-      \ = 'phone-screen-complete' )\r\n    AND extra_log_type IN ('finalize')\r\n\r\n\r\n\r\n
-      \   \r\n\r\n  ) AS di\r\n\r\n  LEFT OUTER JOIN (\r\n\r\n    SELECT\r\n      master_id,\r\n
-      \     'not interested or ineligible (follow up)' \"exit_type\"\r\n\r\n\r\n    FROM
-      ipa_screenings ps\r\n    WHERE\r\n      still_interested_blank_yes_no = 'no'
-      OR\r\n      eligible_for_study_blank_yes_no = 'no'\r\n\r\n\r\n    UNION\r\n\r\n
-      \   SELECT\r\n      master_id,\r\n      'not interested (phone screening)' \"exit_type\"\r\n\r\n
-      \   FROM ipa_ps_initial_screenings inits\r\n    WHERE\r\n     select_is_good_time_to_speak
-      = 'not interested' OR\r\n     select_may_i_begin = 'not interested' OR\r\n     select_still_interested
-      = 'no'\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'withdrew'
-      \"exit_type\"\r\n\r\n    FROM ipa_withdrawals wd\r\n    WHERE\r\n     select_subject_withdrew_reason
-      = 'withdrew' OR\r\n     select_investigator_terminated IN ('yes - due to ae',
-      'yes - other reason') OR\r\n     lost_to_follow_up_no_yes = 'yes' OR\r\n     no_longer_participating_no_yes
-      = 'yes'\r\n\r\n     UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'completed
-      exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n    WHERE\r\n      select_survey_type
-      = 'exit survey'\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n('inex-phone-screen-so-staff'
-      IS NULL OR 'inex-phone-screen-so-staff' IS NOT NULL AND r = 1)\r\nAND\r\n(\r\n\r\n
-      \ 'inex-phone-screen-finalized' = 'general-follow-up' AND dt.extra_log_type='general'
-      AND dt.communication_result='follow up'\r\n  OR\r\n    'inex-phone-screen-finalized'
-      = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \ OR \r\n    'inex-phone-screen-finalized' = 'inex-phone-screen-finalized' AND
-      dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n  OR \r\n    'inex-phone-screen-finalized'
-      = 'inex-phone-screen-so-pi' AND dt.extra_log_type = 'sign_phone_screen'\r\n
-      \ OR \r\n    'inex-phone-screen-finalized' = 'inex-phone-screen-so-mednav' AND
-      dt.extra_log_type = 'sign_phone_screen_reviewer'\r\n  OR \r\n    'inex-phone-screen-finalized'
-      = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'\r\n\r\n
-      \ OR 'inex-phone-screen-finalized' = 'inex-tms-responses' AND dt.extra_log_type
-      = 'tms_responses'\r\n  OR 'inex-phone-screen-finalized' = 'inex-tms-so' AND
-      dt.extra_log_type = 'sign_tms_eligibility'\r\n\r\n  OR (\r\n    'inex-phone-screen-finalized'
-      = 'inex-baseline-complete'\r\n    AND (\r\n      dt.extra_log_type IN ('sign_baseline')
-      AND\r\n      checklist_signed = 'yes'\r\n    )\r\n  )\r\n  OR (\r\n    'inex-phone-screen-finalized'
-      = 'phone-screen-complete'\r\n    AND (\r\n      dt.extra_log_type IN ('phone_screen_finalized')\r\n
-      \   )\r\n  )\r\n  OR 'inex-phone-screen-finalized' NOT IN ('inex-complete',
-      'phone-screen-complete') AND dt.extra_log_type = 'inex-phone-screen-finalized'\r\n)\r\nAND
-      (\r\n  'inex-phone-screen-so-staff' IS NULL\r\n  OR NOT (\r\n    r = 1\r\n    AND
-      (\r\n      'inex-phone-screen-so-staff' = 'general-follow-up' AND dt.extra_log_type='general'
-      AND dt.communication_result='follow up'\r\n      OR 'inex-phone-screen-so-staff'
-      = 'general-completed' AND dt.extra_log_type='general' AND dt.communication_result='completed'\r\n\r\n
-      \     OR \r\n        'inex-phone-screen-so-staff' = 'inex-phone-screen-finalized'
-      AND dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n      OR \r\n        'inex-phone-screen-so-staff'
-      = 'inex-phone-screen-so-pi' AND dt.extra_log_type = 'sign_phone_screen'\r\n
-      \     OR \r\n        'inex-phone-screen-so-staff' = 'inex-phone-screen-so-mednav'
-      AND dt.extra_log_type = 'sign_phone_screen_reviewer'\r\n      OR \r\n        'inex-phone-screen-so-staff'
-      = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'\r\n\r\n
-      \     OR 'inex-phone-screen-so-staff' = 'inex-tms-responses' AND dt.extra_log_type
-      = 'tms_responses'\r\n      OR 'inex-phone-screen-so-staff' = 'inex-tms-so' AND
-      dt.extra_log_type = 'sign_tms_eligibility'\r\n\r\n      OR (\r\n          'inex-phone-screen-so-staff'
-      = 'inex-baseline-complete'\r\n          AND (\r\n            dt.extra_log_type
-      IN ('sign_baseline') AND\r\n            checklist_signed = 'yes'\r\n          )\r\n
-      \     )\r\n\r\n      OR (\r\n        'inex-phone-screen-so-staff' = 'phone-screen-complete'\r\n
-      \       AND (\r\n          dt.extra_log_type IN ('phone_screen_finalized')\r\n
-      \       )\r\n      )\r\n      OR 'inex-phone-screen-so-staff' NOT IN ('inex-complete',
-      'phone-screen-complete') AND dt.extra_log_type = 'inex-phone-screen-so-staff'\r\n
-      \   )\r\n  )\r\n\r\n)\r\nAND (\r\n  'in_study' IS NULL \r\n  OR (\r\n    'in_study'
-      = 'in_study' AND dt.exit_type IS NULL\r\n    OR\r\n    'in_study' = 'not_in_study'
-      AND dt.exit_type IS NOT NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-05-14T11:07:43.339Z'
-    updated_at: '2019-06-24T10:33:02.504Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 22
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ready_for_sign_off___staff
-    options: 
-    user_email: 
-  - id: 40
-    name: Ready for Sign Off - TMS
-    description: Participants with inclusion / exclusion TMS eligibility review ready
-      for sign off by TMS group
-    sql: "SELECT\r\n   dt.master_id,\r\n   ipa.ipa_id,\r\n   --pi.first_name,\r\n
-      \  --pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n
-      \  dt.checklist_signed,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM
-      (\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n    rank()\r\n    OVER
-      (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at DESC\r\n    )
-      AS r\r\n  FROM\r\n  (\r\n    SELECT\r\n      al.master_id,\r\n      'tracker'
-      \"source\",\r\n      al.extra_log_type,\r\n      CASE WHEN\r\n        (select_result='follow
-      up' OR select_activity = 'schedule follow up') THEN 'follow up'\r\n      WHEN\r\n
-      \       (select_result='completed' OR select_activity = 'completed') THEN 'completed'\r\n
-      \     ELSE\r\n        al.select_result \r\n      END \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n\r\n    WHERE\r\n    'inex-tms-responses' = 'general-follow-up' AND al.extra_log_type='general'
-      AND (select_result='follow up' OR select_activity = 'schedule follow up')\r\n
-      \   OR\r\n    'inex-tms-responses' = 'general-completed' AND al.extra_log_type='general'
-      AND (select_result='completed' OR select_activity = 'completed')\r\n    OR\r\n
-      \   'inex-tms-so' is not null AND 'inex-tms-so' = 'general-follow-up' AND al.extra_log_type='general'\r\n
-      \   OR\r\n    'inex-tms-so' is not null AND 'inex-tms-so' = 'general-completed'
-      AND al.extra_log_type='general'\r\n    OR\r\n    (\r\n      al.extra_log_type
-      IN ('inex-tms-responses', 'inex-tms-so', 'withdraw', 'perform_screening_follow_up')\r\n
-      \   )\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      inex.master_id,\r\n      'inex'
-      \"source\",\r\n      inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n
-      \     inex.signed_no_yes \"checklist_signed\",\r\n      inex.created_at\r\n\r\n\r\n
-      \   FROM activity_log_ipa_assignment_inex_checklists inex\r\n    WHERE\r\n\r\n
-      \   (\r\n      (\r\n        'inex-tms-responses' = 'inex-phone-screen-finalized'
-      AND extra_log_type = 'finalize_phone_screen_checklist'\r\n        OR 'inex-tms-responses'
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      'inex-tms-responses' = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \       OR 'inex-tms-responses' = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n        OR 'inex-tms-responses' = 'inex-baseline-complete'
-      AND extra_log_type = 'sign_baseline'\r\n        OR 'inex-tms-responses' = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR 'inex-tms-responses' = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      ) \r\n      \r\n      \r\n
-      \     OR 'inex-tms-so' IS NOT NULL AND (\r\n        'inex-tms-so' = 'inex-phone-screen-finalized'
-      AND extra_log_type = 'finalize_phone_screen_checklist'\r\n        OR 'inex-tms-so'
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      'inex-tms-so' = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \       OR 'inex-tms-so' = 'inex-phone-screen-so-staff' AND extra_log_type =
-      'sign_phone_screen_staff'\r\n        OR 'inex-tms-so' = 'inex-baseline-complete'
-      AND extra_log_type = 'sign_baseline'\r\n        OR 'inex-tms-so' = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR 'inex-tms-so' = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      ) \r\n    ) \r\n\r\n    UNION\r\n\r\n
-      \   SELECT\r\n      ps.master_id,\r\n      'phone screen' \"source\",\r\n      'phone_screen_finalized'
-      \"extra_log_type\",\r\n      NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     ps.created_at\r\n\r\n\r\n    FROM activity_log_ipa_assignment_phone_screens
-      ps\r\n    WHERE\r\n\r\n    ('inex-tms-responses' = 'phone-screen-complete' OR
-      'inex-tms-so' IS NOT NULL AND 'inex-tms-so'  = 'phone-screen-complete' )\r\n
-      \   AND extra_log_type IN ('finalize')\r\n\r\n\r\n\r\n    \r\n\r\n  ) AS di\r\n\r\n
-      \ LEFT OUTER JOIN (\r\n\r\n    SELECT\r\n      master_id,\r\n      'not interested
-      or ineligible (follow up)' \"exit_type\"\r\n\r\n\r\n    FROM ipa_screenings
-      ps\r\n    WHERE\r\n      still_interested_blank_yes_no = 'no' OR\r\n      eligible_for_study_blank_yes_no
-      = 'no'\r\n\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'not
-      interested (phone screening)' \"exit_type\"\r\n\r\n    FROM ipa_ps_initial_screenings
-      inits\r\n    WHERE\r\n     select_is_good_time_to_speak = 'not interested' OR\r\n
-      \    select_may_i_begin = 'not interested' OR\r\n     select_still_interested
-      = 'no'\r\n\r\n    UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'withdrew'
-      \"exit_type\"\r\n\r\n    FROM ipa_withdrawals wd\r\n    WHERE\r\n     select_subject_withdrew_reason
-      = 'withdrew' OR\r\n     select_investigator_terminated IN ('yes - due to ae',
-      'yes - other reason') OR\r\n     lost_to_follow_up_no_yes = 'yes' OR\r\n     no_longer_participating_no_yes
-      = 'yes'\r\n\r\n     UNION\r\n\r\n    SELECT\r\n      master_id,\r\n      'completed
-      exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n    WHERE\r\n      select_survey_type
-      = 'exit survey'\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n) AS dt\r\n\r\ninner
-      join player_infos pi on dt.master_id = pi.master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n('inex-tms-so' IS NULL OR
-      'inex-tms-so' IS NOT NULL AND r = 1)\r\nAND\r\n(\r\n\r\n  'inex-tms-responses'
-      = 'general-follow-up' AND dt.extra_log_type='general' AND dt.communication_result='follow
-      up'\r\n  OR\r\n    'inex-tms-responses' = 'general-completed' AND dt.extra_log_type='general'
-      AND dt.communication_result='completed'\r\n  OR \r\n    'inex-tms-responses'
-      = 'inex-phone-screen-finalized' AND dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n
-      \ OR \r\n    'inex-tms-responses' = 'inex-phone-screen-so-pi' AND dt.extra_log_type
-      = 'sign_phone_screen'\r\n  OR \r\n    'inex-tms-responses' = 'inex-phone-screen-so-mednav'
-      AND dt.extra_log_type = 'sign_phone_screen_reviewer'\r\n  OR \r\n    'inex-tms-responses'
-      = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'\r\n\r\n
-      \ OR 'inex-tms-responses' = 'inex-tms-responses' AND dt.extra_log_type = 'tms_responses'\r\n
-      \ OR 'inex-tms-responses' = 'inex-tms-so' AND dt.extra_log_type = 'sign_tms_eligibility'\r\n\r\n
-      \ OR (\r\n    'inex-tms-responses' = 'inex-baseline-complete'\r\n    AND (\r\n
-      \     dt.extra_log_type IN ('sign_baseline') AND\r\n      checklist_signed =
-      'yes'\r\n    )\r\n  )\r\n  OR (\r\n    'inex-tms-responses' = 'phone-screen-complete'\r\n
-      \   AND (\r\n      dt.extra_log_type IN ('phone_screen_finalized')\r\n    )\r\n
-      \ )\r\n  OR 'inex-tms-responses' NOT IN ('inex-complete', 'phone-screen-complete')
-      AND dt.extra_log_type = 'inex-tms-responses'\r\n)\r\nAND (\r\n  'inex-tms-so'
-      IS NULL\r\n  OR NOT (\r\n    r = 1\r\n    AND (\r\n      'inex-tms-so' = 'general-follow-up'
-      AND dt.extra_log_type='general' AND dt.communication_result='follow up'\r\n
-      \     OR 'inex-tms-so' = 'general-completed' AND dt.extra_log_type='general'
-      AND dt.communication_result='completed'\r\n\r\n      OR \r\n        'inex-tms-so'
-      = 'inex-phone-screen-finalized' AND dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n
-      \     OR \r\n        'inex-tms-so' = 'inex-phone-screen-so-pi' AND dt.extra_log_type
-      = 'sign_phone_screen'\r\n      OR \r\n        'inex-tms-so' = 'inex-phone-screen-so-mednav'
-      AND dt.extra_log_type = 'sign_phone_screen_reviewer'\r\n      OR \r\n        'inex-tms-so'
-      = 'inex-phone-screen-so-staff' AND dt.extra_log_type = 'sign_phone_screen_staff'\r\n\r\n
-      \     OR 'inex-tms-so' = 'inex-tms-responses' AND dt.extra_log_type = 'tms_responses'\r\n
-      \     OR 'inex-tms-so' = 'inex-tms-so' AND dt.extra_log_type = 'sign_tms_eligibility'\r\n\r\n
-      \     OR (\r\n          'inex-tms-so' = 'inex-baseline-complete'\r\n          AND
-      (\r\n            dt.extra_log_type IN ('sign_baseline') AND\r\n            checklist_signed
-      = 'yes'\r\n          )\r\n      )\r\n\r\n      OR (\r\n        'inex-tms-so'
-      = 'phone-screen-complete'\r\n        AND (\r\n          dt.extra_log_type IN
-      ('phone_screen_finalized')\r\n        )\r\n      )\r\n      OR 'inex-tms-so'
-      NOT IN ('inex-complete', 'phone-screen-complete') AND dt.extra_log_type = 'inex-tms-so'\r\n
-      \   )\r\n  )\r\n\r\n)\r\nAND (\r\n  'in_study' IS NULL \r\n  OR (\r\n    'in_study'
-      = 'in_study' AND dt.exit_type IS NULL\r\n    OR\r\n    'in_study' = 'not_in_study'
-      AND dt.exit_type IS NOT NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-05-14T11:32:14.907Z'
-    updated_at: '2019-06-24T10:33:02.513Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 23
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ready_for_sign_off___tms
-    options: 
-    user_email: 
-  - id: 41
-    name: Ready for Scheduling
-    description: "Participants that have a set appointment date.\r\n\r\nSelect to
-      show participants where scheduling has not started (default), or show all participants
-      with appointments"
-    sql: "SELECT\r\n   dt.master_id,\r\n   ipa.ipa_id,\r\n   --pi.first_name,\r\n
-      \  --pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n
-      \  dt.checklist_signed,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM
-      (\r\n  -- Generate a resultset of ranked results\r\n  -- with most recently
-      created items first\r\n  -- that include only the requested previous and outstanding
-      activities\r\n  -- This allows us to see if an outstanding item appears more
-      recently than\r\n  -- a previous item\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n
-      \   rank()\r\n    OVER (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at
-      DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n    --\r\n    -- IPA Tracker process\r\n
-      \   --\r\n    SELECT\r\n      al.master_id,\r\n      'tracker' \"source\",\r\n
-      \     al.extra_log_type,\r\n      CASE WHEN\r\n        (select_result='follow
-      up' OR select_activity = 'schedule follow up') THEN 'follow up'\r\n      WHEN\r\n
-      \       (select_result='completed' OR select_activity = 'completed') THEN 'completed'\r\n
-      \     ELSE\r\n        al.select_result\r\n      END \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n\r\n    WHERE\r\n      'appointment-set' = 'general-follow-up' AND al.extra_log_type='general'
-      AND (select_result='follow up' OR select_activity = 'schedule follow up')\r\n
-      \     OR 'appointment-set' = 'general-completed' AND al.extra_log_type='general'
-      AND (select_result='completed' OR select_activity = 'completed')\r\n      OR
-      :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up'
-      AND al.extra_log_type='general'\r\n      OR :activity_outstanding is not null
-      AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general'\r\n
-      \     OR al.extra_log_type IN ('appointment-set', :activity_outstanding)\r\n\r\n
-      \   UNION\r\n\r\n    --\r\n    -- IPA Tracker process for appointments\r\n    --\r\n
-      \   SELECT\r\n      al.master_id,\r\n      'tracker' \"source\",\r\n      al.extra_log_type,\r\n
-      \     NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     '1900-01-01 00:00:00'\r\n\r\n    FROM activity_log_ipa_assignments al\r\n\r\n
-      \   INNER JOIN ipa_appointments apt\r\n    ON al.master_id = apt.master_id\r\n\r\n
-      \   WHERE\r\n      'appointment-set' = 'appointment-set' AND al.extra_log_type='appointment'\r\n
-      \     OR :activity_outstanding is not null AND :activity_outstanding = 'appointment-set'
-      AND al.extra_log_type='appointment'\r\n\r\n    UNION\r\n    --\r\n    -- Inclusion
-      / Exclusion process\r\n    --\r\n    SELECT\r\n      inex.master_id,\r\n      'inex'
-      \"source\",\r\n      inex.extra_log_type,\r\n      NULL \"communication_result\",\r\n
-      \     inex.signed_no_yes \"checklist_signed\",\r\n      inex.created_at\r\n\r\n\r\n
-      \   FROM activity_log_ipa_assignment_inex_checklists inex\r\n\r\n    WHERE\r\n\r\n
-      \   (\r\n      (\r\n        'appointment-set' = 'inex-phone-screen-finalized'
-      AND extra_log_type = 'finalize_phone_screen_checklist'\r\n        OR 'appointment-set'
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      'appointment-set' = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \       OR 'appointment-set' = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n        OR 'appointment-set' = 'inex-baseline-complete'
-      AND extra_log_type = 'sign_baseline'\r\n        OR 'appointment-set' = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR 'appointment-set' = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      )\r\n\r\n\r\n      OR :activity_outstanding
-      IS NOT NULL AND (\r\n        :activity_outstanding = 'inex-phone-screen-finalized'
-      AND extra_log_type = 'finalize_phone_screen_checklist'\r\n        OR :activity_outstanding
-      = 'inex-phone-screen-so-pi' AND extra_log_type = 'sign_phone_screen'\r\n        OR
-      :activity_outstanding = 'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \       OR :activity_outstanding = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n        OR :activity_outstanding = 'inex-baseline-complete'
-      AND extra_log_type = 'sign_baseline'\r\n        OR :activity_outstanding = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n        OR :activity_outstanding = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      )\r\n    )\r\n\r\n    UNION\r\n\r\n
-      \   --\r\n    -- Phone Screen process\r\n    --\r\n    SELECT\r\n      ps.master_id,\r\n
-      \     'phone screen' \"source\",\r\n      'phone_screen_finalized' \"extra_log_type\",\r\n
-      \     NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     ps.created_at\r\n\r\n    FROM activity_log_ipa_assignment_phone_screens
-      ps\r\n\r\n    WHERE\r\n      ('appointment-set' = 'phone-screen-complete' OR
-      :activity_outstanding IS NOT NULL AND :activity_outstanding  = 'phone-screen-complete'
-      )\r\n      AND extra_log_type IN ('finalize')\r\n\r\n\r\n\r\n    UNION\r\n\r\n
-      \   --\r\n    -- Navigation process\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'navigation' \"source\",\r\n      extra_log_type,\r\n      NULL \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      coalesce(event_date + start_time,
-      created_at) \"created_at\"\r\n\r\n    FROM activity_log_ipa_assignment_navigations
-      nav\r\n\r\n    WHERE\r\n    (\r\n      (\r\n        'appointment-set' = 'has-planned-event'
-      AND extra_log_type = 'planned_event'\r\n        OR 'appointment-set' = 'has-event-feedback'
-      AND extra_log_type = 'station_event'\r\n      )\r\n\r\n      OR :activity_outstanding
-      IS NOT NULL AND (\r\n        :activity_outstanding  = 'has-planned-event' AND
-      extra_log_type = 'planned_event'\r\n        OR :activity_outstanding = 'has-event-feedback'
-      AND extra_log_type = 'station_event'\r\n      )\r\n    )\r\n\r\n\r\n  ) AS di\r\n\r\n
-      \ LEFT OUTER JOIN (\r\n    -- Add an exit type column for those participants
-      that have exited the study\r\n    -- NULL if they are still in the study\r\n\r\n
-      \   --\r\n    -- Phone Screen not interested or not eligible\r\n    --\r\n    SELECT\r\n
-      \     master_id,\r\n      'not interested or ineligible (follow up)' \"exit_type\"\r\n\r\n\r\n
-      \   FROM ipa_screenings ps\r\n    WHERE\r\n      still_interested_blank_yes_no
-      = 'no' OR\r\n      eligible_for_study_blank_yes_no = 'no'\r\n\r\n\r\n    UNION\r\n\r\n
-      \   --\r\n    -- Phone screen not interested\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'not interested (phone screening)' \"exit_type\"\r\n\r\n    FROM ipa_ps_initial_screenings
-      inits\r\n    WHERE\r\n     select_is_good_time_to_speak = 'not interested' OR\r\n
-      \    select_may_i_begin = 'not interested' OR\r\n     select_still_interested
-      = 'no'\r\n\r\n    UNION\r\n\r\n    --\r\n    -- Withdrew\r\n    --\r\n    SELECT\r\n
-      \     master_id,\r\n      'withdrew' \"exit_type\"\r\n\r\n    FROM ipa_withdrawals
-      wd\r\n    WHERE\r\n     select_subject_withdrew_reason = 'withdrew' OR\r\n     select_investigator_terminated
-      IN ('yes - due to ae', 'yes - other reason') OR\r\n     lost_to_follow_up_no_yes
-      = 'yes' OR\r\n     no_longer_participating_no_yes = 'yes'\r\n\r\n     UNION\r\n\r\n
-      \   --\r\n    -- Completed study\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'completed exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n
-      \   WHERE\r\n      select_survey_type = 'exit survey'\r\n\r\n  -- End left outer
-      join\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n-- End ranked selection\r\n)
-      AS dt\r\n\r\n-- Include player details\r\ninner join player_infos pi on dt.master_id
-      = pi.master_id\r\n-- Match IPA ID to master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n(\r\n  -- Either:\r\n  --
-      no outstanding activity has been selected, so just perform a plain query\r\n
-      \ -- or:\r\n  -- we want the first record from the results based\r\n  -- on
-      an order of most recently created appearing first (and therefore overriding
-      older records)\r\n  :activity_outstanding IS NULL OR :activity_outstanding IS
-      NOT NULL AND r = 1\r\n)\r\nAND\r\n(\r\n  -- Based on the activity performed
-      selection pick the appropriate conditions\r\n  'appointment-set' = 'general-follow-up'
-      AND extra_log_type='general' AND dt.communication_result='follow up'\r\n  OR
-      'appointment-set' = 'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \ OR 'appointment-set' = 'inex-phone-screen-finalized' AND extra_log_type =
-      'finalize_phone_screen_checklist'\r\n  OR 'appointment-set' = 'inex-phone-screen-so-pi'
-      AND extra_log_type = 'sign_phone_screen'\r\n  OR 'appointment-set' = 'inex-phone-screen-so-mednav'
-      AND extra_log_type = 'sign_phone_screen_reviewer'\r\n  OR 'appointment-set'
-      = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'\r\n
-      \ OR 'appointment-set' = 'inex-tms-responses' AND extra_log_type = 'tms_responses'\r\n
-      \ OR 'appointment-set' = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'\r\n
-      \ OR 'appointment-set' = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'\r\n
-      \ OR 'appointment-set' = 'has-planned-event' AND extra_log_type = 'planned_event'\r\n
-      \ OR 'appointment-set' = 'has-event-feedback' AND extra_log_type = 'station_event'\r\n
-      \ OR 'appointment-set' = 'appointment-set' AND extra_log_type='appointment'\r\n\r\n
-      \ OR (\r\n    'appointment-set' = 'inex-baseline-complete'\r\n    AND (\r\n
-      \     extra_log_type IN ('sign_baseline') AND\r\n      checklist_signed = 'yes'\r\n
-      \   )\r\n  )\r\n\r\n  OR 'appointment-set' NOT IN ('inex-complete', 'phone-screen-complete')
-      AND extra_log_type = 'appointment-set'\r\n)\r\nAND (\r\n  -- If no outstanding
-      activity was selected then there are no conditions to apply\r\n  :activity_outstanding
-      IS NULL\r\n  OR NOT (\r\n    -- An outstanding activity was selected\r\n    --
-      Based on the activity outstanding selection pick the appropriate conditions\r\n
-      \   -- that the first record in the results must match in order to correctly
-      override the previous activities\r\n    -- If one was found, the NOT negation
-      ensures a found record does not register as an activity outstanding\r\n    r
-      = 1\r\n    AND (\r\n      :activity_outstanding = 'general-follow-up' AND extra_log_type='general'
-      AND dt.communication_result='follow up'\r\n      OR :activity_outstanding =
-      'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \     OR :activity_outstanding = 'inex-phone-screen-finalized' AND extra_log_type
-      = 'finalize_phone_screen_checklist'\r\n      OR :activity_outstanding = 'inex-phone-screen-so-pi'
-      AND extra_log_type = 'sign_phone_screen'\r\n      OR :activity_outstanding =
-      'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \     OR :activity_outstanding = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n      OR :activity_outstanding = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n      OR :activity_outstanding = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      OR :activity_outstanding
-      = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'\r\n
-      \     OR :activity_outstanding = 'has-planned-event' AND extra_log_type = 'planned_event'\r\n
-      \     OR :activity_outstanding = 'has-event-feedback' AND extra_log_type = 'station_event'\r\n
-      \     OR :activity_outstanding = 'appointment-set' AND extra_log_type='appointment'\r\n\r\n
-      \     OR (\r\n          :activity_outstanding = 'inex-baseline-complete'\r\n
-      \         AND (\r\n            extra_log_type IN ('sign_baseline') AND\r\n            checklist_signed
-      = 'yes'\r\n          )\r\n      )\r\n\r\n\r\n      OR :activity_outstanding
-      NOT IN ('inex-complete', 'phone-screen-complete') AND extra_log_type = :activity_outstanding\r\n
-      \   )\r\n  )\r\n\r\n)\r\n\r\nAND (\r\n  'in_study' IS NULL\r\n  OR (\r\n    'in_study'
-      = 'in_study' AND dt.exit_type IS NULL\r\n    OR\r\n    'in_study' = 'not_in_study'
-      AND dt.exit_type IS NOT NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: "\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    all:
-      true\r\n    multiple: single\r\n    label: Show participants\r\n    default:
-      has-planned-event\r\n    selections: \r\n      Scheduling not started: has-planned-event\r\n
-      \     All with appointments:"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-05-15T12:26:07.350Z'
-    updated_at: '2019-06-24T10:33:02.524Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 23
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ready_for_scheduling
-    options: 
-    user_email: 
-  - id: 42
-    name: Awaiting ADL Informant Screener
-    description: Participants requiring ADL Informant Screener where the screener
-      response has not been received.
-    sql: "select distinct \r\n  al.master_id,\r\n  ipa.ipa_id,\r\n  al.created_at\r\nfrom
-      ipa_ops.activity_log_ipa_assignment_phone_screens al\r\ninner join ipa_assignments
-      ipa\r\non ipa.master_id = al.master_id\r\nleft outer join ipa_adl_informant_screeners
-      adl\r\non adl.master_id = al.master_id\r\nwhere extra_log_type = 'informant_details'\r\nand
-      adl.id is null\r\norder by created_at desc;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-05-15T16:39:35.520Z'
-    updated_at: '2019-06-24T10:33:02.530Z'
-    report_type: search
-    auto: true
-    searchable: true
-    position: 21
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: awaiting_adl_informant_screener
-    options: 
-    user_email: 
-  - id: 43
-    name: Ready For Follow Up
-    description: Participants with an appointment set that are ready for specific
-      follow up activities.
-    sql: "SELECT\r\n   dt.master_id,\r\n   ipa.ipa_id,\r\n   --pi.first_name,\r\n
-      \  --pi.last_name,\r\n   dt.source,\r\n   dt.extra_log_type activity,\r\n   dt.communication_result,\r\n
-      \  dt.checklist_signed,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM
-      (\r\n  -- Generate a resultset of ranked results\r\n  -- with most recently
-      created items first\r\n  -- that include only the requested previous and outstanding
-      activities\r\n  -- This allows us to see if an outstanding item appears more
-      recently than\r\n  -- a previous item\r\n\r\n  SELECT\r\n    di.*,\r\n    dlo.exit_type,\r\n
-      \   rank()\r\n    OVER (\r\n    PARTITION BY di.master_id\r\n    ORDER BY di.created_at
-      DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n    --\r\n    -- IPA Tracker process\r\n
-      \   --\r\n    SELECT\r\n      al.master_id,\r\n      'tracker' \"source\",\r\n
-      \     al.extra_log_type,\r\n      CASE WHEN\r\n        (select_result='follow
-      up' OR select_activity = 'schedule follow up') THEN 'follow up'\r\n      WHEN\r\n
-      \       (select_result='completed' OR select_activity = 'completed') THEN 'completed'\r\n
-      \     ELSE\r\n        al.select_result\r\n      END \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n\r\n    WHERE\r\n      'appointment-set' = 'general-follow-up' AND al.extra_log_type='general'
-      AND (select_result='follow up' OR select_activity = 'schedule follow up')\r\n
-      \     OR 'appointment-set' = 'general-completed' AND al.extra_log_type='general'
-      AND (select_result='completed' OR select_activity = 'completed')\r\n      OR
-      :activity_outstanding is not null AND :activity_outstanding = 'general-follow-up'
-      AND al.extra_log_type='general'\r\n      OR :activity_outstanding is not null
-      AND :activity_outstanding = 'general-completed' AND al.extra_log_type='general'\r\n
-      \     OR al.extra_log_type IN ('appointment-set', :activity_outstanding)\r\n\r\n
-      \   UNION\r\n\r\n    --\r\n    -- IPA Tracker process for Transportation\r\n
-      \   --\r\n    SELECT\r\n      distinct al.master_id,\r\n      'transportation'
-      \"source\",\r\n      al.extra_log_type,\r\n      NULL \"communication_result\",\r\n
-      \     NULL \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n    INNER JOIN ipa_transportations tr\r\n    ON tr.master_id = al.master_id\r\n\r\n
-      \   WHERE\r\n      :activity_outstanding is not null AND :activity_outstanding
-      = 'transportation' AND al.extra_log_type='transportation_and_housing'\r\n\r\n
-      \   UNION\r\n    \r\n    --\r\n    -- IPA Tracker process for Housing\r\n    --\r\n
-      \   SELECT\r\n      distinct al.master_id,\r\n      'housing' \"source\",\r\n
-      \     al.extra_log_type,\r\n      NULL \"communication_result\",\r\n      NULL
-      \"checklist_signed\",\r\n      al.created_at\r\n\r\n    FROM activity_log_ipa_assignments
-      al\r\n    INNER JOIN ipa_hotels h\r\n    ON h.master_id = al.master_id\r\n\r\n
-      \   WHERE\r\n      :activity_outstanding is not null AND :activity_outstanding
-      = 'housing' AND al.extra_log_type='transportation_and_housing'\r\n\r\n    UNION\r\n
-      \    \r\n    --\r\n    -- IPA Tracker process for appointments\r\n    --\r\n
-      \   SELECT\r\n      al.master_id,\r\n      'tracker' \"source\",\r\n      al.extra_log_type,\r\n
-      \     NULL \"communication_result\",\r\n      NULL \"checklist_signed\",\r\n
-      \     created_at\r\n\r\n    FROM activity_log_ipa_assignments al\r\n\r\n    --
-      INNER JOIN ipa_appointments apt\r\n    -- ON al.master_id = apt.master_id\r\n\r\n
-      \   WHERE\r\n      'appointment-set' = 'appointment-set' AND al.extra_log_type='appointment'\r\n
-      \     OR :activity_outstanding is not null AND :activity_outstanding = 'appointment-set'
-      AND al.extra_log_type='appointment'\r\n\r\n\r\n  ) AS di\r\n\r\n  LEFT OUTER
-      JOIN (\r\n    -- Add an exit type column for those participants that have exited
-      the study\r\n    -- NULL if they are still in the study\r\n\r\n    --\r\n    --
-      Phone Screen not interested or not eligible\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'not interested or ineligible (follow up)' \"exit_type\"\r\n\r\n\r\n    FROM
-      ipa_screenings ps\r\n    WHERE\r\n      still_interested_blank_yes_no = 'no'
-      OR\r\n      eligible_for_study_blank_yes_no = 'no'\r\n\r\n\r\n    UNION\r\n\r\n
-      \   --\r\n    -- Phone screen not interested\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'not interested (phone screening)' \"exit_type\"\r\n\r\n    FROM ipa_ps_initial_screenings
-      inits\r\n    WHERE\r\n     select_is_good_time_to_speak = 'not interested' OR\r\n
-      \    select_may_i_begin = 'not interested' OR\r\n     select_still_interested
-      = 'no'\r\n\r\n    UNION\r\n\r\n    --\r\n    -- Withdrew\r\n    --\r\n    SELECT\r\n
-      \     master_id,\r\n      'withdrew' \"exit_type\"\r\n\r\n    FROM ipa_withdrawals
-      wd\r\n    WHERE\r\n     select_subject_withdrew_reason = 'withdrew' OR\r\n     select_investigator_terminated
-      IN ('yes - due to ae', 'yes - other reason') OR\r\n     lost_to_follow_up_no_yes
-      = 'yes' OR\r\n     no_longer_participating_no_yes = 'yes'\r\n\r\n     UNION\r\n\r\n
-      \   --\r\n    -- Completed study\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'completed exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n
-      \   WHERE\r\n      select_survey_type = 'exit survey'\r\n\r\n  -- End left outer
-      join\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n-- End ranked selection\r\n)
-      AS dt\r\n\r\n-- Include player details\r\ninner join player_infos pi on dt.master_id
-      = pi.master_id\r\n-- Match IPA ID to master_id\r\ninner join ipa_assignments
-      ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n(\r\n  -- Either:\r\n  --
-      no outstanding activity has been selected, so just perform a plain query\r\n
-      \ -- or:\r\n  -- we want the first record from the results based\r\n  -- on
-      an order of most recently created appearing first (and therefore overriding
-      older records)\r\n  :activity_outstanding IS NULL OR :activity_outstanding IS
-      NOT NULL AND r = 1\r\n)\r\nAND\r\n(\r\n  -- Based on the activity performed
-      selection pick the appropriate conditions\r\n  'appointment-set' = 'general-follow-up'
-      AND extra_log_type='general' AND dt.communication_result='follow up'\r\n  OR
-      'appointment-set' = 'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \ OR 'appointment-set' = 'inex-phone-screen-finalized' AND extra_log_type =
-      'finalize_phone_screen_checklist'\r\n  OR 'appointment-set' = 'inex-phone-screen-so-pi'
-      AND extra_log_type = 'sign_phone_screen'\r\n  OR 'appointment-set' = 'inex-phone-screen-so-mednav'
-      AND extra_log_type = 'sign_phone_screen_reviewer'\r\n  OR 'appointment-set'
-      = 'inex-phone-screen-so-staff' AND extra_log_type = 'sign_phone_screen_staff'\r\n
-      \ OR 'appointment-set' = 'inex-tms-responses' AND extra_log_type = 'tms_responses'\r\n
-      \ OR 'appointment-set' = 'inex-tms-so' AND extra_log_type = 'sign_tms_eligibility'\r\n
-      \ OR 'appointment-set' = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'\r\n
-      \ OR 'appointment-set' = 'has-planned-event' AND extra_log_type = 'planned_event'\r\n
-      \ OR 'appointment-set' = 'has-event-feedback' AND extra_log_type = 'station_event'\r\n
-      \ OR 'appointment-set' = 'appointment-set' AND extra_log_type='appointment'\r\n\r\n
-      \ OR (\r\n    'appointment-set' = 'inex-baseline-complete'\r\n    AND (\r\n
-      \     extra_log_type IN ('sign_baseline') AND\r\n      checklist_signed = 'yes'\r\n
-      \   )\r\n  )\r\n\r\n  OR 'appointment-set' NOT IN ('inex-complete', 'phone-screen-complete')
-      AND extra_log_type = 'appointment-set'\r\n)\r\nAND (\r\n  -- If no outstanding
-      activity was selected then there are no conditions to apply\r\n  :activity_outstanding
-      IS NULL\r\n  OR NOT (\r\n    -- An outstanding activity was selected\r\n    --
-      Based on the activity outstanding selection pick the appropriate conditions\r\n
-      \   -- that the first record in the results must match in order to correctly
-      override the previous activities\r\n    -- If one was found, the NOT negation
-      ensures a found record does not register as an activity outstanding\r\n    r
-      = 1\r\n    AND (\r\n      :activity_outstanding = 'general-follow-up' AND extra_log_type='general'
-      AND dt.communication_result='follow up'\r\n      OR :activity_outstanding =
-      'general-completed' AND extra_log_type='general' AND dt.communication_result='completed'\r\n
-      \     OR :activity_outstanding = 'inex-phone-screen-finalized' AND extra_log_type
-      = 'finalize_phone_screen_checklist'\r\n      OR :activity_outstanding = 'inex-phone-screen-so-pi'
-      AND extra_log_type = 'sign_phone_screen'\r\n      OR :activity_outstanding =
-      'inex-phone-screen-so-mednav' AND extra_log_type = 'sign_phone_screen_reviewer'\r\n
-      \     OR :activity_outstanding = 'inex-phone-screen-so-staff' AND extra_log_type
-      = 'sign_phone_screen_staff'\r\n      OR :activity_outstanding = 'inex-tms-responses'
-      AND extra_log_type = 'tms_responses'\r\n      OR :activity_outstanding = 'inex-tms-so'
-      AND extra_log_type = 'sign_tms_eligibility'\r\n      OR :activity_outstanding
-      = 'phone-screen-complete' AND extra_log_type = 'phone_screen_finalized'\r\n
-      \     OR :activity_outstanding = 'has-planned-event' AND extra_log_type = 'planned_event'\r\n
-      \     OR :activity_outstanding = 'has-event-feedback' AND extra_log_type = 'station_event'\r\n
-      \     OR :activity_outstanding = 'appointment-set' AND extra_log_type='appointment'\r\n\r\n
-      \     OR (\r\n          :activity_outstanding = 'inex-baseline-complete'\r\n
-      \         AND (\r\n            extra_log_type IN ('sign_baseline') AND\r\n            checklist_signed
-      = 'yes'\r\n          )\r\n      )\r\n\r\n\r\n      OR :activity_outstanding
-      NOT IN ('inex-complete', 'phone-screen-complete') AND extra_log_type = :activity_outstanding\r\n
-      \   )\r\n  )\r\n\r\n)\r\n\r\nAND (\r\n  'in_study' IS NULL\r\n  OR (\r\n    'in_study'
-      = 'in_study' AND dt.exit_type IS NULL\r\n    OR\r\n    'in_study' = 'not_in_study'
-      AND dt.exit_type IS NOT NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
-    search_attrs: "\r\n\r\nactivity_outstanding: \r\n  config_selector: \r\n    all:
-      true\r\n    multiple: single\r\n    label: Follow Up Type\r\n    disabled: false\r\n
-      \   selections:\r\n      Emergency Contact Info: contact_info\r\n      Transportation:
-      transportation\r\n      Housing: housing\r\n      #Transportation and Housing:
-      transportation_and_housing\r\n      Consent Mailing: consent_mailing\r\n      Payments:
-      payments\r\n      Follow Up Surveys: follow_up_surveys"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-05-16T16:34:17.523Z'
-    updated_at: '2019-06-24T10:33:02.545Z'
-    report_type: search
-    auto: false
-    searchable: true
-    position: 24
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ready_for_follow_up
-    options: 
-    user_email: 
-  - id: 44
-    name: IPA Calendar
-    description: ''
-    sql: "create temp table nav_events\r\nas select\r\n'' \"-\",\r\nal.event_date,\r\nal.start_time,\r\npi.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nal.extra_log_type,\r\nal.select_status,\r\nal.select_station,\r\nal.select_event_type,\r\nal.other_event_type,\r\nal.completion_time,\r\nal.arrival_time,\r\nal.select_navigator,\r\nal.select_pi,\r\nal.location\r\nfrom\r\nactivity_log_ipa_assignment_navigations
-      al\r\ninner join player_infos pi\r\non pi.master_id = al.master_id\r\ninner
-      join ipa_assignments ipa\r\non ipa.master_id = al.master_id\r\n\r\nwhere\r\n(:from_date
-      IS NULL or event_date >= :from_date)\r\nAND (:to_date IS NULL or event_date
-      <= :to_date)\r\nAND ((:type) IS NULL or extra_log_type in (:type))\r\nAND ((:confirmed)
-      IS NULL or select_status in (:confirmed))\r\nAND ((:station) IS NULL or select_station
-      in (:station))\r\nAND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\n\r\ncreate
-      temp table appointments\r\nas select\r\nvisit_start_date,\r\nap.master_id,\r\nipa.ipa_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
-      appointment_id\r\nfrom ipa_appointments ap\r\ninner join activity_log_ipa_assignments
-      al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
-      ap.master_id = pi.master_id\r\n\r\ninner join ipa_assignments ipa\r\non ipa.master_id
-      = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT NULL\r\n  AND (:from_date
-      IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
-      <= :to_date)\r\n  AND (:ipa_id IS NULL or ipa.ipa_id = :ipa_id)\r\nGROUP BY\r\nap.master_id,
-      visit_start_date, pi.first_name, pi.last_name, ipa.ipa_id\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
-      \ dt.master_id,\r\n  ipa.ipa_id,\r\n  p.first_name,\r\n  p.last_name,\r\n  dt.extra_log_type,\r\n
-      \ dt.select_who\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
-      \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
-      \     a.notes,\r\n      rank()\r\n    OVER (\r\n      PARTITION BY a.master_id,
-      a.extra_log_type\r\n      ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from
-      activity_log_ipa_assignments a\r\n    where\r\n      follow_up_when is not null\r\n
-      \     AND (:from_date IS NULL OR follow_up_when >= :from_date)\r\n      AND
-      (:to_date IS NULL OR follow_up_when <= :to_date )\r\n  ) dt\r\ninner join player_infos
-      p\r\n  on dt.master_id = p.master_id\r\n\r\ninner join ipa_assignments ipa\r\n
-      \ on dt.master_id = ipa.master_id\r\n\r\nWHERE r = 1\r\nAND (:ipa_id IS NULL
-      or ipa.ipa_id = :ipa_id)\r\n;\r\n\r\ncreate temp table all_dates\r\nas\r\nselect
-      event_date from nav_events\r\nunion\r\nselect follow_up_when from scheduled_calls\r\nunion\r\nselect
-      visit_start_date from appointments\r\n;\r\n\r\nSELECT\r\n  false::boolean \"allDay\",\r\n
-      \ al.event_date::varchar || 'T' || al.start_time::varchar \"start\",\r\n  al.event_date::varchar
-      || 'T' || al.completion_time::varchar \"end\",\r\n  ipa_id || ': ' || al.select_station
-      || ' ' || al.select_event_type || ' ' || al.other_event_type \"title\",\r\n
-      \ array['report-cal-nav-event'] \"classNames\",\r\n  '/masters/' || master_id
-      \"url\"\r\nFROM nav_events al\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  true ,\r\n
-      \ visit_start_date::varchar || 'T' || '00:00:00' ,\r\n  null ,\r\n  ipa_id ||
-      ': ' || 'appointment start' ,\r\n  array['report-cal-start-event'] \"classNames\",\r\n
-      \ '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\n\r\nUNION\r\n\r\nSELECT\r\n
-      \ false,\r\n  follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n
-      \ NULL,\r\n  ipa_id || ': ' || '(call) ' || replace(extra_log_type, '_', ' '),\r\n
-      \ array['report-cal-call-event'] \"classNames\",\r\n  '/masters/' || master_id
-      \"url\"\r\nFROM scheduled_calls\r\n\r\n\r\n;\r\n"
-    search_attrs: "\r\nfrom_date: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n
-      \   default: -6 months\r\n\r\nto_date: \r\n  date: \r\n    all: true\r\n    multiple:
-      single\r\n    default: +12 months\r\n    \r\n\r\ntype: \r\n  config_selector:
-      \r\n    label: Assessment Event Type (planned or feedback)\r\n    all: true\r\n
-      \   multiple: multiple\r\n    selections: \r\n      planned: planned_event\r\n
-      \     event feedback: station_event\r\n    default: \r\n      - planned_event\r\n\r\nconfirmed:
-      \r\n  general_selection: \r\n    label: Planned Assessment Event Status\r\n
-      \   item_type: activity_log__ipa_assignment_navigation_select_status\r\n    multiple:
-      multiple\r\n    default: \r\n      - unconfirmed\r\n      - confirmed\r\n      -
-      in progress\r\n\r\nstation: \r\n  general_selection: \r\n    label: Assessment
-      Event Station\r\n    item_type: activity_log__ipa_assignment_navigation_select_station\r\n
-      \   multiple: multiple\r\n    disabled: false\r\nipa_id: \r\n  number: \r\n
-      \   label: IPA ID\r\n    all: true\r\n    multiple: single\r\n\r\n\r\n"
-    admin_id: 4
-    disabled: false
-    created_at: '2019-06-24T10:37:11.993Z'
-    updated_at: '2019-09-23T11:31:01.173Z'
-    report_type: regular_report
-    auto: true
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa
-    short_name: ipa_appointments
-    options: "view_options:\r\n  view_as: calendar\r\n  search_button_label: calendar\r\n\r\ncomponent:\r\n
-      \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
-      \     background-color: red\r\n      border-color: red\r\n      text-align:
-      center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
-      gray\r\n    "
-    user_email: 
-  - id: 45
-    name: Participant Status
-    description: ''
-    sql: "create temp table temp_activities as\r\n\r\nselect \r\nmaster_id,\r\ncreated_at,\r\ncase
-      when extra_log_type = 'schedule_screening' then 'tracker: scheduled screening'\r\n
-      \ when extra_log_type in ('schedule_informant_screener', 'screening_follow_up',
-      'perform_screening_follow_up') then 'tracker: screening follow up'\r\n  when
-      extra_log_type = 'appointment' then 'tracker: appointment set'\r\n  when extra_log_type
-      = 'withdraw' then 'tracker: withdrew'\r\n  when extra_log_type = 'follow_up_surveys'
-      then 'tracker: completed'\r\n  else extra_log_type end \"extra_log_type\"\r\nfrom
-      activity_log_ipa_assignments\r\nwhere extra_log_type in (\r\n  'schedule_screening',
-      \r\n  'schedule_informant_screener',\r\n  'screening_follow_up',\r\n  'perform_screening_follow_up',\r\n
-      \ 'appointment',\r\n  'withdraw',\r\n  'follow_up_surveys'\r\n)\r\n\r\nUNION\r\n\r\nselect
-      \r\nmaster_id,\r\ncreated_at,\r\ncase when extra_log_type = 'finalize' then
-      \ 'phone screen: complete' \r\nelse 'phone screen: started' end \"extra_log_type\"\r\nfrom
-      activity_log_ipa_assignment_phone_screens\r\n\r\nUNION\r\n\r\nselect \r\nmaster_id,\r\ncreated_at,\r\ncase
-      when extra_log_type in (\r\n  'baseline_review'\r\n) then 'in/ex: baseline review'\r\n
-      when extra_log_type in (\r\n  'sign_baseline_staff',\r\n  'sign_baseline'\r\n)
-      then 'in/ex: baseline review complete'\r\n when extra_log_type in (\r\n  'phone_screen_review'\r\n)
-      then 'in/ex: phone screen review'\r\n\r\n when extra_log_type in (\r\n  'sign_phone_screen_staff',
-      \r\n  'sign_phone_screen_reviewer', \r\n  'sign_phone_screen'\r\n) then 'in/ex:
-      phone screen review complete'\r\n\r\nelse 'in/ex: phone screen review' end \"extra_log_type\"\r\n\r\nfrom
-      activity_log_ipa_assignment_inex_checklists\r\nwhere extra_log_type in (\r\n
-      \ 'phone_screen_review', \r\n  'sign_phone_screen_staff', \r\n  'sign_phone_screen_reviewer',
-      \r\n  'sign_phone_screen',\r\n  'baseline_review',\r\n  'sign_baseline_staff',\r\n
-      \ 'sign_baseline'\r\n  )\r\n\r\n\r\nUNION\r\n\r\nselect \r\nmaster_id,\r\ncreated_at,\r\ncase
-      \r\n  when extra_log_type = 'add_mrn' then 'navigation: added mrn'\r\n  when
-      extra_log_type = 'planned_event' then 'navigation: planned event'\r\n  when
-      extra_log_type = 'station_event' then 'navigation: completed event'\r\n  else
-      'navigation: ' || extra_log_type end \"extra_log_type\"\r\n\r\nfrom activity_log_ipa_assignment_navigations\r\nwhere
-      extra_log_type in (\r\n  'add_mrn', \r\n  'planned_event',\r\n  'station_event'\r\n)\r\n\r\nUNION\r\n\r\nselect
-      \r\nmaster_id,\r\ncreated_at,\r\ncase when extra_log_type = 'exit_interview'
-      then 'medical navigation: exit interview'\r\n  when extra_log_type = 'two_wk_followup'
-      then 'medical navigation: two week follow up'\r\n  when extra_log_type = 'four_wk_followup'
-      then 'medical navigation: four week follow up'\r\n  end \"extra_log_type\"\r\nfrom
-      activity_log_ipa_assignment_med_navs\r\nwhere \r\nextra_log_type in (\r\n  'exit_interview',\r\n
-      \ 'two_wk_followup',\r\n  'four_wk_followup'\r\n)\r\n\r\nUNION\r\n\r\nselect\r\nmaster_id,\r\nnow(),
-      -- Force the result to be the latest\r\n'phone screen: exited' \"extra_log_type\"\r\nfrom
-      ipa_ps_initial_screenings\r\nWHERE\r\n  select_is_good_time_to_speak = 'not
-      interested' \r\n  OR select_may_i_begin = 'not interested'\r\n  OR select_still_interested
-      = 'no'\r\n\r\nUNION\r\n  \r\nselect \r\n  master_id,\r\n  now(),\r\n  'follow
-      up: ineligible' \"extra_log_type\"\r\n  from ipa_screenings\r\n  where\r\n    ipa_screenings.eligible_for_study_blank_yes_no
-      = 'no'\r\n    OR ipa_screenings.still_interested_blank_yes_no = 'no'\r\n\r\n;\r\n\r\n\r\nselect
-      count(*) \"count\", ta.extra_log_type \"status\"\r\nfrom temp_activities ta\r\ninner
-      join \r\n  player_infos pi on pi.master_id = ta.master_id and (\r\n    pi.first_name
-      <> 'test' and pi.last_name <> 'test'\r\n  )\r\ninner join \r\n(\r\n  select
-      max(ta2.created_at) \"created_at\", ta2.master_id\r\n  from temp_activities
-      ta2\r\n  where ta2.master_id = master_id\r\n  group by ta2.master_id\r\n) tres\r\non
-      ta.master_id = tres.master_id and ta.created_at = tres.created_at\r\n\r\ngroup
-      by ta.extra_log_type\r\n;\r\n\r\n\r\n\r\n\r\n\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-07-09T09:22:54.211Z'
-    updated_at: '2019-07-09T10:24:54.802Z'
-    report_type: regular_report
-    auto: true
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa-dashboard
-    short_name: participant_status
-    options: "view_options:\r\n  view_as: chart\r\n  \r\ncomponent:\r\n  options:\r\n
-      \   type: pie\r\n    height: 600\r\n    width: 600\r\n    label_with_column:
-      status\r\n    dataset_options:\r\n\r\n      - backgroundColor: \r\n        -
-      rgba(204,0,0,0.4)\r\n        - rgba(0,204,0,0.4)\r\n        - rgba(0,0,204,0.4)\r\n
-      \       - rgba(102,102,0,0.4)\r\n        - rgba(0,102,102,0.4)\r\n        -
-      rgba(20,70,112,0.4)\r\n        - rgba(20,112,70,0.4)\r\n        - rgba(70,20,112,0.4)
-      \   \r\n        \r\n    options:\r\n      legend:\r\n        display: true\r\n"
-    user_email: 
-  - id: 46
-    name: Screenings & Enrollments
-    description: ''
-    sql: "create temp table temp_counts as\r\nselect count(*) \"screening_count\",
-      t.created_at \r\nfrom \r\n(\r\n  select \r\n  al.master_id, max(al.created_at)
-      \"created_at\"\r\n  from activity_log_ipa_assignment_phone_screens al\r\n  where
-      al.extra_log_type = 'finalize'\r\n  group by al.master_id\r\n) t\r\n\r\ninner
-      join player_infos pi on t.master_id = pi.master_id and pi.first_name <> 'test'
-      and pi.last_name <> 'test'\r\ngroup by t.created_at;\r\n\r\n\r\ncreate temp
-      table temp_count_apps as\r\nselect count(*) \"enrollment_count\", t.created_at
-      \r\nfrom \r\n(\r\n  select \r\n  al.master_id, max(al.created_at) \"created_at\"\r\n
-      \ from activity_log_ipa_assignments al\r\n  where al.extra_log_type = 'appointment'\r\n
-      \ group by al.master_id\r\n) t\r\n\r\ninner join player_infos pi on t.master_id
-      = pi.master_id and pi.first_name <> 'test' and pi.last_name <> 'test'\r\ngroup
-      by t.created_at;\r\n\r\n\r\ncreate temp table temp_ca as\r\nselect created_at\r\nfrom
-      temp_counts \r\nunion\r\nselect created_at\r\nfrom temp_count_apps;\r\n\r\nselect\r\n
-      \ all_c.created_at \"started when\",\r\n  sum(\"screening_count\") over(order
-      by all_c.created_at asc rows between unbounded preceding and current row) \"screenings\"
-      ,\r\n  sum(\"enrollment_count\") over(order by all_c.created_at asc rows between
-      unbounded preceding and current row) \"enrollments\"  \r\nfrom temp_ca all_c\r\nleft
-      outer join temp_counts cp on all_c.created_at = cp.created_at\r\nleft outer
-      join temp_count_apps ca on all_c.created_at = ca.created_at\r\n--order by \"started
-      when\";"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-07-09T10:23:54.442Z'
-    updated_at: '2019-10-21T11:14:39.288Z'
-    report_type: regular_report
-    auto: true
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa-dashboard
-    short_name: screenings_completed
-    options: "view_options:\r\n  view_as: chart\r\n  \r\ncomponent:\r\n  options:\r\n
-      \   type: line\r\n    height: 250\r\n    width: 800\r\n    responsive: true\r\n
-      \   label_with_column: started when\r\n    dataset_options:\r\n      - borderColor:
-      '#c00'\r\n        borderWidth: 3\r\n        backgroundColor: transparent\r\n
-      \       #rgba(204,0,0,0.4)\r\n        lineTension: 0.1\r\n        cubicInterpolationMode:
-      monotone\r\n      - borderColor: '#0c0'\r\n        borderWidth: 3\r\n        backgroundColor:
-      transparent\r\n        #rgba(0,204,0,0.4)\r\n        lineTension: 0.1\r\n        cubicInterpolationMode:
-      monotone\r\n\r\n    options:\r\n     scales:\r\n      yAxes:\r\n        - ticks:\r\n
-      \           min: 0\r\n          stacked: false\r\n      xAxes: \r\n        -
-      type: time\r\n#          stacked: true\r\n          display: true\r\n          time:\r\n
-      \           unit: week\r\n#            min: 2014-01-01\r\n            displayFormats:\r\n
-      \             day: MMM D, YY\r\n#            distribution: linear"
-    user_email: 
-  - id: 47
-    name: T-MoCA Scores
-    description: ''
-    sql: "select \r\n  count(*) \"count\", tmoca_score\r\nfrom ipa_ps_tmocas t\r\ninner
-      join player_infos pi\r\non pi.master_id = t.master_id and pi.first_name <> 'test'
-      and pi.last_name <> 'test'\r\ngroup by tmoca_score\r\norder by \"tmoca_score\"\r\n;\r\n"
-    search_attrs: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-07-09T11:14:24.173Z'
-    updated_at: '2019-07-09T11:54:17.033Z'
-    report_type: regular_report
-    auto: true
-    searchable: false
-    position: 
-    edit_model: ''
-    edit_field_names: ''
-    selection_fields: ''
-    item_type: ipa-dashboard
-    short_name: t_moca_scores
-    options: "view_options:\r\n  view_as: chart\r\n  \r\ncomponent:\r\n  options:\r\n
-      \   type: bar\r\n    height: 350\r\n    width: 800\r\n    responsive: true\r\n
-      \   label_with_column: tmoca_score\r\n    dataset_options:\r\n      - borderWidth:
-      3\r\n        backgroundColor: rgba(159, 166, 236, 1)\r\n\r\n    options:\r\n
-      \    scales:\r\n      yAxes:\r\n        - ticks:\r\n            min: 0\r\n            stepSize:
-      1\r\n          stacked: false\r\n\r\n"
-    user_email: 
+  associated_reports: []
   associated_general_selections:
   - id: 12
     name: nflpa
     value: nflpa
     item_type: player_infos_source
     created_at: '2018-03-14T18:53:28.577Z'
-    updated_at: '2019-01-17T11:51:01.419Z'
-    disabled: false
+    updated_at: '2019-11-21T11:04:37.945Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1600
+    description: 
     lock: true
     user_email: 
   - id: 13
-    name: NFLPA 2
+    name: nflpa2
     value: nflpa2
     item_type: player_infos_source
     created_at: '2018-03-14T18:53:28.586Z'
-    updated_at: '2019-06-24T10:37:11.348Z'
+    updated_at: '2019-11-21T11:04:37.972Z'
     disabled: 
     admin_id: 4
-    create_with: true
+    create_with: false
     edit_if_set: 
-    edit_always: 
-    position: 
+    edit_always: false
+    position: 1160
     description: 
     lock: true
     user_email: 
@@ -9366,13 +7578,13 @@ app_type:
     value: '10'
     item_type: player_contacts_rank
     created_at: '2018-03-14T18:53:28.598Z'
-    updated_at: '2018-05-29T18:27:09.031Z'
+    updated_at: '2019-11-21T11:00:54.365Z'
     disabled: 
     admin_id: 4
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1100
     description: 
     lock: 
     user_email: 
@@ -9381,13 +7593,13 @@ app_type:
     value: '5'
     item_type: player_contacts_rank
     created_at: '2018-03-14T18:53:28.608Z'
-    updated_at: '2018-05-29T18:27:09.020Z'
+    updated_at: '2019-11-21T11:00:54.369Z'
     disabled: 
     admin_id: 4
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1110
     description: 
     lock: 
     user_email: 
@@ -9396,13 +7608,13 @@ app_type:
     value: '0'
     item_type: player_contacts_rank
     created_at: '2018-03-14T18:53:28.617Z'
-    updated_at: '2019-06-24T10:37:11.363Z'
+    updated_at: '2019-11-21T11:04:37.987Z'
     disabled: 
     admin_id: 4
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1120
     description: 
     lock: 
     user_email: 
@@ -9411,13 +7623,13 @@ app_type:
     value: "-1"
     item_type: player_contacts_rank
     created_at: '2018-03-14T18:53:28.625Z'
-    updated_at: '2018-05-29T18:27:09.028Z'
+    updated_at: '2019-11-21T11:00:54.376Z'
     disabled: 
     admin_id: 4
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1130
     description: 
     lock: 
     user_email: 
@@ -9441,52 +7653,52 @@ app_type:
     value: nflpa
     item_type: player_contacts_source
     created_at: '2018-03-14T18:53:28.644Z'
-    updated_at: '2018-09-14T16:12:47.015Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.381Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1280
+    description: 
+    lock: true
     user_email: 
   - id: 20
-    name: Email
+    name: email
     value: email
     item_type: player_contacts_type
     created_at: '2018-03-14T18:53:28.655Z'
-    updated_at: '2018-09-14T16:08:15.855Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.417Z'
+    disabled: 
     admin_id: 4
     create_with: true
-    edit_if_set: false
-    edit_always: false
-    position: 
-    description: ''
-    lock: true
+    edit_if_set: 
+    edit_always: true
+    position: 1330
+    description: 
+    lock: 
     user_email: 
   - id: 21
-    name: Phone
+    name: phone
     value: phone
     item_type: player_contacts_type
     created_at: '2018-03-14T18:53:28.663Z'
-    updated_at: '2018-09-14T16:08:22.633Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.421Z'
+    disabled: 
     admin_id: 4
     create_with: true
-    edit_if_set: false
-    edit_always: false
-    position: 
-    description: ''
-    lock: true
+    edit_if_set: 
+    edit_always: true
+    position: 1350
+    description: 
+    lock: 
     user_email: 
   - id: 22
     name: NFL
     value: nfl
     item_type: addresses_source
     created_at: '2018-03-14T18:53:28.676Z'
-    updated_at: '2019-01-17T11:51:01.373Z'
+    updated_at: '2019-11-21T12:21:49.332Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9494,35 +7706,35 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 23
-    name: NFLPA
+    name: nflpa
     value: nflpa
     item_type: addresses_source
     created_at: '2018-03-14T18:53:28.685Z'
-    updated_at: '2019-01-17T11:51:01.380Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.387Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1450
+    description: 
+    lock: true
     user_email: 
   - id: 24
     name: primary
     value: '10'
     item_type: addresses_rank
     created_at: '2018-03-14T18:53:28.695Z'
-    updated_at: '2019-01-17T11:51:01.389Z'
+    updated_at: '2019-11-21T11:00:54.391Z'
     disabled: 
     admin_id: 4
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1060
     description: 
     lock: 
     user_email: 
@@ -9531,13 +7743,13 @@ app_type:
     value: '5'
     item_type: addresses_rank
     created_at: '2018-03-14T18:53:28.704Z'
-    updated_at: '2019-01-17T11:51:01.402Z'
+    updated_at: '2019-11-21T11:00:54.394Z'
     disabled: 
     admin_id: 4
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1070
     description: 
     lock: 
     user_email: 
@@ -9546,13 +7758,13 @@ app_type:
     value: '0'
     item_type: addresses_rank
     created_at: '2018-03-14T18:53:28.713Z'
-    updated_at: '2019-06-24T10:37:11.367Z'
+    updated_at: '2019-11-21T11:04:37.990Z'
     disabled: 
     admin_id: 4
-    create_with: 
+    create_with: true
     edit_if_set: 
-    edit_always: 
-    position: 
+    edit_always: true
+    position: 1080
     description: 
     lock: 
     user_email: 
@@ -9561,13 +7773,13 @@ app_type:
     value: "-1"
     item_type: addresses_rank
     created_at: '2018-03-14T18:53:28.722Z'
-    updated_at: '2019-01-17T11:51:01.413Z'
+    updated_at: '2019-11-21T11:00:54.401Z'
     disabled: 
     admin_id: 4
     create_with: true
     edit_if_set: 
     edit_always: true
-    position: 
+    position: 1090
     description: 
     lock: 
     user_email: 
@@ -9576,13 +7788,13 @@ app_type:
     value: cis-email
     item_type: player_contacts_source
     created_at: '2018-05-29T18:27:09.034Z'
-    updated_at: '2018-09-14T16:13:16.208Z'
+    updated_at: '2019-11-21T11:00:54.470Z'
     disabled: false
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
+    position: 1210
     description: ''
     lock: false
     user_email: 
@@ -9591,45 +7803,46 @@ app_type:
     value: nflpa2
     item_type: player_contacts_source
     created_at: '2018-05-29T18:27:09.038Z'
-    updated_at: '2018-09-14T16:12:42.803Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.454Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1290
+    description: 
+    lock: true
     user_email: 
   - id: 30
     name: integrate1
     value: integrate1
     item_type: player_contacts_source
     created_at: '2018-05-29T18:27:09.042Z'
-    updated_at: '2018-09-14T16:12:52.825Z'
+    updated_at: '2019-11-21T11:00:54.457Z'
     disabled: false
     admin_id: 4
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position: 1260
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 31
     name: integrate2
     value: integrate2
     item_type: player_contacts_source
     created_at: '2018-05-29T18:27:09.045Z'
-    updated_at: '2018-09-14T16:13:04.845Z'
+    updated_at: '2019-11-21T11:00:54.461Z'
     disabled: false
     admin_id: 4
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
-    description: ''
-    lock: false
+    position: 1270
+    description: This data is from the original NFLPA data but has been verified and
+      updated by FPHS staff during in the first data cleaning round.
+    lock: true
     user_email: 
   - id: 32
     name: CIS
@@ -9651,13 +7864,13 @@ app_type:
     value: cis-paper
     item_type: player_contacts_source
     created_at: '2018-05-29T18:27:09.051Z'
-    updated_at: '2018-09-14T16:12:22.639Z'
+    updated_at: '2019-11-21T11:00:54.466Z'
     disabled: false
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
+    position: 1220
     description: ''
     lock: false
     user_email: 
@@ -9666,15 +7879,15 @@ app_type:
     value: cis-paper
     item_type: player_infos_source
     created_at: '2018-05-29T18:27:09.082Z'
-    updated_at: '2018-05-30T12:15:09.318Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.436Z'
+    disabled: 
     admin_id: 4
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 1
-    description: ''
-    lock: false
+    position: 1560
+    description: 
+    lock: 
     user_email: 
   - id: 37
     name: Community
@@ -9692,56 +7905,56 @@ app_type:
     lock: 
     user_email: 
   - id: 38
-    name: CIS - Email
+    name: cis-email
     value: cis-email
     item_type: addresses_source
     created_at: '2018-05-30T11:57:47.220Z'
-    updated_at: '2019-01-17T11:51:01.495Z'
+    updated_at: '2019-11-21T12:21:30.116Z'
     disabled: false
     admin_id: 4
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 2
-    description: CIS - contact information provided by email
-    lock: false
+    position: 1380
+    description: ''
+    lock: true
     user_email: 
   - id: 39
     name: cis-redcap
     value: cis-redcap
     item_type: addresses_source
     created_at: '2018-05-30T11:58:04.235Z'
-    updated_at: '2018-09-19T12:13:54.164Z'
+    updated_at: '2019-11-21T12:21:08.074Z'
     disabled: false
     admin_id: 4
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position: 1410
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 40
-    name: Integrate
+    name: integrate1
     value: integrate1
     item_type: addresses_source
     created_at: '2018-05-30T11:58:25.733Z'
-    updated_at: '2019-01-17T11:51:01.463Z'
+    updated_at: '2019-11-21T11:00:54.424Z'
     disabled: false
     admin_id: 4
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position: 1430
     description: ''
-    lock: 
+    lock: true
     user_email: 
   - id: 41
     name: nflpa4
     value: nflpa4
     item_type: addresses_source
     created_at: '2018-05-30T11:58:44.450Z'
-    updated_at: '2018-09-19T12:14:29.554Z'
+    updated_at: '2019-11-21T11:00:54.584Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9749,14 +7962,14 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 42
     name: nflpa3
     value: nflpa3
     item_type: addresses_source
     created_at: '2018-05-30T11:59:03.651Z'
-    updated_at: '2018-09-19T12:14:37.363Z'
+    updated_at: '2019-11-21T11:00:54.587Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9764,14 +7977,14 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 43
     name: public source
     value: public source
     item_type: addresses_source
     created_at: '2018-05-30T11:59:19.773Z'
-    updated_at: '2018-09-19T12:14:47.113Z'
+    updated_at: '2019-11-21T12:20:57.237Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9779,14 +7992,14 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 44
     name: player referral
     value: player referral
     item_type: addresses_source
     created_at: '2018-05-30T11:59:33.725Z'
-    updated_at: '2018-09-19T12:14:54.003Z'
+    updated_at: '2019-11-21T12:20:46.502Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9794,14 +8007,14 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 45
     name: event
     value: event
     item_type: addresses_source
     created_at: '2018-05-30T11:59:46.283Z'
-    updated_at: '2018-09-19T12:15:00.551Z'
+    updated_at: '2019-11-21T12:20:39.057Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9809,95 +8022,95 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 46
-    name: CIS - Paper
+    name: cis-paper
     value: cis-paper
     item_type: addresses_source
     created_at: '2018-05-30T12:00:04.801Z'
-    updated_at: '2019-01-17T11:51:01.488Z'
+    updated_at: '2019-11-21T12:21:22.967Z'
     disabled: false
     admin_id: 4
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 1
-    description: Incoming CIS on paper as Scantron form or written mail
-    lock: false
+    position: 1390
+    description: ''
+    lock: true
     user_email: 
   - id: 47
     name: cis-phone
     value: cis-phone
     item_type: addresses_source
     created_at: '2018-05-30T12:00:16.562Z'
-    updated_at: '2018-09-19T12:15:22.173Z'
+    updated_at: '2019-11-21T12:21:16.843Z'
     disabled: false
     admin_id: 4
     create_with: false
     edit_if_set: false
     edit_always: false
-    position: 
+    position: 1400
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 48
-    name: Integrate
+    name: integrate2
     value: integrate2
     item_type: addresses_source
     created_at: '2018-05-30T12:00:41.046Z'
-    updated_at: '2019-01-17T11:51:01.470Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.428Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
-    lock: 
+    position: 1440
+    description: 
+    lock: true
     user_email: 
   - id: 49
     name: not set
     value: not set
     item_type: addresses_source
     created_at: '2018-05-30T12:01:06.297Z'
-    updated_at: '2018-09-19T12:15:34.525Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.605Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1470
+    description: 
     lock: false
     user_email: 
   - id: 50
-    name: NFLPA 2
+    name: nflpa2
     value: nflpa2
     item_type: addresses_source
     created_at: '2018-05-30T12:02:08.159Z'
-    updated_at: '2019-01-17T11:51:01.435Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.411Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 30
-    description: ''
-    lock: false
+    position: 1460
+    description: 
+    lock: true
     user_email: 
   - id: 51
     name: business
     value: business
     item_type: addresses_type
     created_at: '2018-05-30T12:02:40.393Z'
-    updated_at: '2018-05-30T12:02:40.393Z'
+    updated_at: '2019-11-21T12:22:59.322Z'
     disabled: false
     admin_id: 4
     create_with: true
     edit_if_set: false
     edit_always: true
-    position: 
+    position: 1521
     description: ''
     lock: false
     user_email: 
@@ -9906,29 +8119,29 @@ app_type:
     value: home
     item_type: addresses_type
     created_at: '2018-05-30T12:02:48.900Z'
-    updated_at: '2018-05-30T12:02:48.900Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.612Z'
+    disabled: 
     admin_id: 4
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1520
+    description: 
+    lock: 
     user_email: 
   - id: 53
     name: not set
     value: not set
     item_type: addresses_type
     created_at: '2018-05-30T12:03:00.756Z'
-    updated_at: '2018-05-30T12:03:00.756Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.616Z'
+    disabled: 
     admin_id: 4
-    create_with: true
-    edit_if_set: false
-    edit_always: true
-    position: 
-    description: ''
+    create_with: false
+    edit_if_set: true
+    edit_always: false
+    position: 1530
+    description: 
     lock: false
     user_email: 
   - id: 54
@@ -9936,13 +8149,13 @@ app_type:
     value: cis-redcap
     item_type: player_contacts_source
     created_at: '2018-05-30T12:04:46.016Z'
-    updated_at: '2018-09-14T16:13:12.799Z'
+    updated_at: '2019-11-21T11:00:54.485Z'
     disabled: false
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
+    position: 1240
     description: ''
     lock: false
     user_email: 
@@ -9951,7 +8164,7 @@ app_type:
     value: nflpa4
     item_type: player_contacts_source
     created_at: '2018-05-30T12:05:59.427Z'
-    updated_at: '2018-09-14T16:13:00.790Z'
+    updated_at: '2019-11-21T11:00:54.499Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9959,14 +8172,14 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 56
     name: nflpa3
     value: nflpa3
     item_type: player_contacts_source
     created_at: '2018-05-30T12:06:09.605Z'
-    updated_at: '2018-09-14T16:12:56.853Z'
+    updated_at: '2019-11-21T11:00:54.503Z'
     disabled: false
     admin_id: 4
     create_with: false
@@ -9974,18 +8187,18 @@ app_type:
     edit_always: false
     position: 
     description: ''
-    lock: false
+    lock: true
     user_email: 
   - id: 57
     name: player referral
     value: player referral
     item_type: player_contacts_source
     created_at: '2018-05-30T12:06:39.514Z'
-    updated_at: '2018-09-14T16:13:08.783Z'
+    updated_at: '2019-11-21T11:00:54.507Z'
     disabled: false
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
     position: 
     description: ''
@@ -9996,11 +8209,11 @@ app_type:
     value: public source
     item_type: player_contacts_source
     created_at: '2018-05-30T12:06:51.704Z'
-    updated_at: '2018-09-14T16:11:38.511Z'
+    updated_at: '2019-11-21T11:00:54.511Z'
     disabled: false
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
     position: 
     description: ''
@@ -10011,11 +8224,11 @@ app_type:
     value: event
     item_type: player_contacts_source
     created_at: '2018-05-30T12:07:23.555Z'
-    updated_at: '2018-09-14T16:12:18.098Z'
+    updated_at: '2019-11-21T11:00:54.514Z'
     disabled: false
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
     position: 
     description: ''
@@ -10026,13 +8239,13 @@ app_type:
     value: cis-phone
     item_type: player_contacts_source
     created_at: '2018-05-30T12:07:59.036Z'
-    updated_at: '2018-09-14T16:12:38.242Z'
+    updated_at: '2019-11-21T11:00:54.518Z'
     disabled: false
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
+    position: 1230
     description: ''
     lock: false
     user_email: 
@@ -10041,14 +8254,14 @@ app_type:
     value: not set
     item_type: player_contacts_source
     created_at: '2018-05-30T12:09:26.788Z'
-    updated_at: '2018-09-14T16:12:26.245Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.522Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1300
+    description: 
     lock: false
     user_email: 
   - id: 62
@@ -10056,14 +8269,14 @@ app_type:
     value: facebook
     item_type: player_contacts_type
     created_at: '2018-05-30T12:11:12.745Z'
-    updated_at: '2018-05-30T12:11:12.745Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.525Z'
+    disabled: 
     admin_id: 4
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1340
+    description: 
     lock: false
     user_email: 
   - id: 63
@@ -10071,14 +8284,14 @@ app_type:
     value: twitter
     item_type: player_contacts_type
     created_at: '2018-05-30T12:11:27.805Z'
-    updated_at: '2018-05-30T12:11:27.805Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.529Z'
+    disabled: 
     admin_id: 4
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1360
+    description: 
     lock: false
     user_email: 
   - id: 64
@@ -10101,14 +8314,14 @@ app_type:
     value: integrate1
     item_type: player_infos_source
     created_at: '2018-05-30T12:12:33.298Z'
-    updated_at: '2018-05-30T12:12:33.298Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.535Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1140
+    description: 
     lock: true
     user_email: 
   - id: 66
@@ -10116,14 +8329,14 @@ app_type:
     value: integrate2
     item_type: player_infos_source
     created_at: '2018-05-30T12:12:43.841Z'
-    updated_at: '2018-05-30T12:12:43.841Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.539Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1150
+    description: 
     lock: true
     user_email: 
   - id: 67
@@ -10131,14 +8344,14 @@ app_type:
     value: not set
     item_type: player_infos_source
     created_at: '2018-05-30T12:13:16.107Z'
-    updated_at: '2018-05-30T12:13:16.107Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.542Z'
+    disabled: 
     admin_id: 4
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1170
+    description: 
     lock: false
     user_email: 
   - id: 68
@@ -10146,29 +8359,29 @@ app_type:
     value: other
     item_type: player_infos_source
     created_at: '2018-05-30T12:13:39.390Z'
-    updated_at: '2018-05-30T12:13:39.390Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.546Z'
+    disabled: 
     admin_id: 4
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1180
+    description: 
+    lock: 
     user_email: 
   - id: 69
     name: redcap
     value: redcap
     item_type: player_infos_source
     created_at: '2018-05-30T12:14:12.367Z'
-    updated_at: '2018-05-30T12:14:12.367Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.550Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1190
+    description: 
     lock: true
     user_email: 
   - id: 70
@@ -10176,14 +8389,14 @@ app_type:
     value: cis
     item_type: player_infos_source
     created_at: '2018-05-30T12:14:34.406Z'
-    updated_at: '2018-05-30T12:14:34.406Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.554Z'
+    disabled: 
     admin_id: 4
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1540
+    description: 
     lock: false
     user_email: 
   - id: 71
@@ -10191,44 +8404,44 @@ app_type:
     value: cis-email
     item_type: player_infos_source
     created_at: '2018-05-30T12:14:57.563Z'
-    updated_at: '2018-05-30T12:14:57.563Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.558Z'
+    disabled: 
     admin_id: 4
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1550
+    description: 
+    lock: 
     user_email: 
   - id: 72
     name: cis-phone
     value: cis-phone
     item_type: player_infos_source
     created_at: '2018-05-30T12:15:39.291Z'
-    updated_at: '2018-05-30T12:15:39.291Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.561Z'
+    disabled: 
     admin_id: 4
     create_with: true
-    edit_if_set: false
+    edit_if_set: 
     edit_always: true
-    position: 
-    description: ''
-    lock: false
+    position: 1570
+    description: 
+    lock: 
     user_email: 
   - id: 73
     name: cis-redcap
     value: cis-redcap
     item_type: player_infos_source
     created_at: '2018-05-30T12:16:10.116Z'
-    updated_at: '2018-05-30T12:16:10.116Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.565Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1580
+    description: 
     lock: true
     user_email: 
   - id: 74
@@ -10236,14 +8449,14 @@ app_type:
     value: contactinfo
     item_type: player_infos_source
     created_at: '2018-05-30T12:16:27.877Z'
-    updated_at: '2018-05-30T12:16:27.877Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.568Z'
+    disabled: 
     admin_id: 4
     create_with: false
     edit_if_set: true
     edit_always: false
-    position: 
-    description: ''
+    position: 1590
+    description: 
     lock: false
     user_email: 
   - id: 75
@@ -10251,14 +8464,14 @@ app_type:
     value: usps
     item_type: player_infos_source
     created_at: '2018-05-30T12:17:18.403Z'
-    updated_at: '2018-05-30T12:17:18.403Z'
-    disabled: false
+    updated_at: '2019-11-21T11:00:54.572Z'
+    disabled: 
     admin_id: 4
     create_with: false
-    edit_if_set: false
+    edit_if_set: 
     edit_always: false
-    position: 
-    description: ''
+    position: 1610
+    description: 
     lock: true
     user_email: 
   - id: 76
@@ -14184,6 +12397,111 @@ app_type:
     description: ''
     lock: false
     user_email: 
+  - id: 405
+    name: escrow
+    value: '1'
+    item_type: player_contacts_rank
+    created_at: '2019-11-21T11:00:55.188Z'
+    updated_at: '2019-11-21T11:00:55.188Z'
+    disabled: false
+    admin_id: 4
+    create_with: false
+    edit_if_set: true
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 406
+    name: escrow-secondary
+    value: '2'
+    item_type: player_contacts_rank
+    created_at: '2019-11-21T11:00:55.193Z'
+    updated_at: '2019-11-21T11:00:55.193Z'
+    disabled: false
+    admin_id: 4
+    create_with: false
+    edit_if_set: true
+    edit_always: true
+    position: 
+    description: ''
+    lock: false
+    user_email: 
+  - id: 407
+    name: nflpa5
+    value: nflpa5
+    item_type: player_infos_source
+    created_at: '2019-11-21T11:00:55.199Z'
+    updated_at: '2019-11-21T11:00:55.199Z'
+    disabled: false
+    admin_id: 4
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 408
+    name: nflpa5
+    value: nflpa5
+    item_type: player_contacts_source
+    created_at: '2019-11-21T11:00:55.205Z'
+    updated_at: '2019-11-21T11:00:55.205Z'
+    disabled: false
+    admin_id: 4
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 409
+    name: nflpa5
+    value: nflpa5
+    item_type: addresses_source
+    created_at: '2019-11-21T11:00:55.210Z'
+    updated_at: '2019-11-21T11:00:55.210Z'
+    disabled: false
+    admin_id: 4
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 410
+    name: nflpa6
+    value: nflpa6
+    item_type: player_infos_source
+    created_at: '2019-11-21T11:00:55.215Z'
+    updated_at: '2019-11-21T11:00:55.215Z'
+    disabled: false
+    admin_id: 4
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
+  - id: 411
+    name: nflpa6
+    value: nflpa6
+    item_type: player_contacts_source
+    created_at: '2019-11-21T11:00:55.221Z'
+    updated_at: '2019-11-21T11:00:55.221Z'
+    disabled: false
+    admin_id: 4
+    create_with: false
+    edit_if_set: false
+    edit_always: false
+    position: 
+    description: ''
+    lock: true
+    user_email: 
   page_layouts:
   - id: 1
     app_type_id: 9
@@ -17946,6 +16264,33 @@ app_type:
     created_at: '2019-11-04T17:39:22.590Z'
     updated_at: '2019-11-04T17:39:22.590Z'
     user_email: linda.pitler@mgh.harvard.edu
+  - id: 1098
+    app_type_id: 9
+    role_name: baseline creator - inex
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-08T14:31:40.807Z'
+    updated_at: '2020-01-08T14:31:40.807Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 1099
+    app_type_id: 9
+    role_name: phone screener
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-08T14:32:02.038Z'
+    updated_at: '2020-01-08T14:32:02.038Z'
+    user_email: michael_doyle@hms.harvard.edu
+  - id: 1100
+    app_type_id: 9
+    role_name: staff - inex
+    user_id: 72
+    admin_id: 5
+    disabled: false
+    created_at: '2020-01-08T14:32:26.810Z'
+    updated_at: '2020-01-08T14:32:26.810Z'
+    user_email: michael_doyle@hms.harvard.edu
   associated_message_templates:
   - id: 7
     name: ipa ps intro
