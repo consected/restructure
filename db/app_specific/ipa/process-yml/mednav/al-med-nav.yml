@@ -76,6 +76,16 @@ _definitions:
 
 ######################
 
+  followup_fields: &followup_fields
+    - activity_date
+    - select_direction
+    - select_contact
+    - select_result
+    - select_next_step
+    - follow_up_when
+    - follow_up_time
+
+
   communication_fields: &communication_fields
     - select_activity
     - activity_date
@@ -114,6 +124,8 @@ _definitions:
         select_activity:
           - completed
 
+        select_direction:
+          - in person
 
   communication_field_options: &communication_field_options
     select_result:
@@ -124,65 +136,12 @@ _definitions:
     select_next_step:
       edit_as:
         alt_options:
-          "More Info Requested": more info requested
-          "No Follow Up": no follow up
-          "Email Back": email back
+          # "More Info Requested": more info requested
+          # "No Follow Up": no follow up
           "Call Back": call back
+          "Email Back": email back
 
 
-
-_default:
-  view_options:
-    hide_unless_creatable: true
-
-  showable_if: *enabled_if
-  creatable_if: *enabled_if
-  editable_if: *enabled_if
-
-
-
-
-exit_interview:
-  label: Exit Interview
-  references:
-    dynamic_model__ipa_exit_interview:
-      from: this
-      add: one_to_this
-
-
-two_wk_followup:
-  label: Two Week Follow Up
-  references:
-    dynamic_model__ipa_two_wk_followup:
-      from: this
-      add: one_to_this
-
-four_wk_followup:
-  label: Four Week Follow Up
-  references:
-    dynamic_model__ipa_four_wk_followup:
-      from: this
-      add: one_to_this
-
-
-#################################################
-participant_communication:
-  label: Participant Communication
-#################################################
-
-  fields: *communication_fields
-
-  show_if:
-    <<: *communication_show_if
-
-  references:
-    dynamic_model__ipa_mednav_followup:
-      from: this
-      add: one_to_this
-      prevent_disable: true
-
-  field_options:
-    <<: *communication_field_options
     select_contact:
       edit_as:
         field_type: select_record_from_player_contacts
@@ -194,18 +153,106 @@ participant_communication:
           "Incidental Finding": incidental finding
           "Schedule Follow Up": schedule follow up
           "Mark All Previous As Completed": completed
+
+    select_direction:
+      edit_as:
+        alt_options:
+          "In Person": in person
+          "By Phone": by phone
+
+
+  communication_caption_before: &communication_caption_before
+    select_activity: Select an action
+    activity_date: Date
+    select_contact: Phone or email address
+    select_direction: Was the follow-up / interview performed in person or by phone?
+    select_result: Is a follow up required, or is this communication complete?
+
+
+_default:
+  fields: *communication_fields
+
+  show_if:
+    <<: *communication_show_if
+
+  field_options:
+    <<: *communication_field_options
+
+  caption_before:
+    <<: *communication_caption_before
+
+  view_options:
+    hide_unless_creatable: true
+
+  showable_if: *enabled_if
+  creatable_if: *enabled_if
+  editable_if: *enabled_if
+
+
+
+#################################################
+exit_interview:
+  label: Exit Interview
+#################################################
+
+  fields: *followup_fields
+
+  references:
+    dynamic_model__ipa_exit_interview:
+      from: this
+      add: one_to_this
+
+
+
+#################################################
+two_wk_followup:
+  label: Two Week Follow Up
+#################################################
+
+  fields: *followup_fields
+
+  references:
+    dynamic_model__ipa_two_wk_followup:
+      from: this
+      add: one_to_this
+
+#################################################
+four_wk_followup:
+  label: Four Week Follow Up
+#################################################
+
+  fields: *followup_fields
+
+  references:
+    dynamic_model__ipa_four_wk_followup:
+      from: this
+      add: one_to_this
+
+
+#################################################
+participant_communication:
+  label: Participant Communication
+#################################################
+
+  references:
+    dynamic_model__ipa_mednav_followup:
+      from: this
+      add: one_to_this
+      prevent_disable: true
+
+  caption_before:
+    <<: *communication_caption_before
+    select_direction: Was the communication received by FPHS staff or sent to the subject?
+
+
+  field_options:
+    <<: *communication_field_options
     select_direction:
       edit_as:
         alt_options:
           "To Staff": to staff
           "To Subject": to subject
 
-  caption_before:
-    select_activity: Select an action:<ul><li>record a general communication</li><li>record an incidental finding call</li><li>schedule a follow up</li><li>mark all previous follow-ups completed</li></ul>
-    activity_date: Date
-    select_contact: The phone or email address
-    select_direction: Was the communication received by FPHS staff or sent to the subject?
-    select_result: Is a follow up required, or is this communication complete?
 
 
 #################################################
@@ -213,13 +260,8 @@ provider_communication:
   label: Provider Communication
 #################################################
 
-  fields: *communication_fields
-
-  show_if:
-    <<: *communication_show_if
-
   references:
-    dynamic_model__ipa_mednav_provider_contact:
+    dynamic_model__ipa_mednav_provider_comm:
       from: this
       add: one_to_this
       prevent_disable: true
@@ -237,13 +279,19 @@ provider_communication:
       edit_as:
         alt_options:
           "To Staff": to staff
-          "To Subject": to provider
+          "To Provider": to provider
+
+    select_contact:
+      edit_as:
+        field_type: contact
+
+
 
   caption_before:
     select_activity: Select an action
     activity_date: Date
     select_contact: Provider name
-    select_direction: Was the communication received by FPHS staff or to the provider?
+    select_direction: Was the communication received by FPHS staff or directed to the provider?
     select_result: Is a follow up required, or is this communication complete?
 
 
@@ -253,34 +301,73 @@ provider_report:
 #################################################
 
   fields:
-    - select_activity
     - activity_date
     - select_contact
-    - select_result
-    - select_next_step
-    - follow_up_when
-    - follow_up_time
+    - select_direction
 
-  show_if:
-    <<: *communication_show_if
+
+  references:
+    dynamic_model__ipa_mednav_provider_report:
+      from: this
+      add: one_to_this
+      prevent_disable: true
 
   field_options:
     <<: *communication_field_options
     select_activity:
       value: Sent report to provider
+    select_contact:
+      edit_as:
+        field_type: contact
+    select_direction:
+      edit_as:
+        alt_options:
+          Mail: mail
+          Fax: fax
+          Epic: epic
+
 
 
   caption_before:
-    select_activity: Action
-    activity_date: Date
+    activity_date: Date sent
     select_contact: Provider name
-    # select_result: Is a follow up required, or is this communication complete?
+    select_direction: Method sent
+
+
+#################################################
+incidental_findings:
+  label: Incidental Findings
+#################################################
+
+  fields:
+
+  references:
+    dynamic_model__ipa_incidental_finding:
+      from: this
+      add: one_to_this
+      prevent_disable: true
+
+  creatable_if:
+    <<: *enabled_if
+    not_any:
+      activity_log__ipa_assignment_med_navs:
+        extra_log_type: incidental_findings
+
+  view_options:
+    hide_unless_creatable: false
 
 
 #################################################
 files:
   label: Files
 #################################################
+
+  fields:
+    - notes
+
+  caption_before:
+    notes: Notes
+    submit: Save to create a container for files
 
   save_trigger:
     on_create:
