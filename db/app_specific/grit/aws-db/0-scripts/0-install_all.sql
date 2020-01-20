@@ -19,6 +19,7 @@ set search_path=grit,ml_app;
 \i db/app_specific/grit/aws-db/tracker/create_consent_mailings.sql
 \i db/app_specific/grit/aws-db/tracker/create_withdrawals_table.sql
 \i db/app_specific/grit/aws-db/tracker/create_mrn_external_identifier.sql
+\i db/app_specific/grit/aws-db/tracker/create_grit_assign_to_groups.sql
 
 -- # Phone Screen
 \i db/app_specific/grit/aws-db/phone-screen/create_activity_log_assignment_phone_screens_table.sql
