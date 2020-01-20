@@ -1,61 +1,6 @@
+# @library ipa enabled_if
+
 _definitions:
-  enabled_if: &enabled_if
-
-    # if performed a phone screening no consent to continue, disable after 14 days
-    not_all_not_interested:
-      any:
-        dynamic_model__ipa_ps_initial_screenings:
-          select_is_good_time_to_speak: not interested
-          select_may_i_begin: not interested
-          select_still_interested: 'no'
-
-      all_created_at:
-        dynamic_model__ipa_ps_initial_screenings:
-          created_at:
-            condition: <
-            value: -14 days
-
-    # if recorded a withdraw activity, disable after 14 days
-    not_all_withdraw:
-      any:
-        dynamic_model__ipa_withdrawals:
-          select_subject_withdrew_reason: withdrew
-          select_investigator_terminated:
-            - yes - due to ae
-            - yes - other reason
-          lost_to_follow_up_no_yes: 'yes'
-          no_longer_participating_no_yes: 'yes'
-      all_created_at:
-        dynamic_model__ipa_withdrawals:
-          created_at:
-            condition: <
-            value: -14 days
-
-    # if performed a screening follow up and not eligible, disable after 14 days
-    not_all_ineligible:
-      dynamic_model__ipa_screenings:
-        eligible_for_study_blank_yes_no: 'no'
-        created_at:
-          condition: <
-          value: -14 days
-
-    # if performed a screening follow up and not interested in participating, disable after 14 days
-    not_all_ps_followup_not_interested:
-      dynamic_model__ipa_screenings:
-        still_interested_blank_yes_no: 'no'
-        created_at:
-          condition: <
-          value: -14 days
-
-    # if the exit survey has been completed, disable after 14 days
-    not_all_complete:
-      activity_log__ipa_assignments:
-        extra_log_type: follow_up_surveys
-      dynamic_model__ipa_surveys:
-        select_survey_type: exit survey
-        created_at:
-          condition: <
-          value: -14 days
 
   ref_filestore_container: &ref_filestore_container
     nfs_store__manage__container: &ref_nfs_store__manage__container
@@ -103,11 +48,16 @@ adverse_event_record:
       <<: *create_filestore_container
 
       notify:
-        type: email
+      - type: email
         role: email - adverse event review
         layout_template: ipa notification layout
         content_template: ipa adverse event message
         subject: "IPA App: Adverse Event needs initial review"
+      - type: sms
+        role: sms - adverse event review
+        layout_template: standard sms layout
+        content_template: ipa sms notification
+        subject: Adverse Event
 
   references:
 
@@ -223,6 +173,12 @@ initial_review:
     - notes
 
   label: Completed Initial Review
+
+  field_options:
+    select_who:
+      edit_as:
+        field_type: select_user_with_role_user_-_adverse event
+
   caption_before:
     all_fields: <b>Review the Event and update the details and severity if necessary before continuing.</b>
     select_who: Who performed this review(if recording this action for somebody else)?
@@ -239,12 +195,12 @@ initial_review:
   save_trigger:
     on_create:
       notify:
-        type: email
+      - type: email
         role: email - adverse event pi
         layout_template: ipa notification layout
         content_template: ipa adverse event message
         subject: "IPA App: Adverse Event needs review"
-        if:
+        if: &notify_conditions_pi
           any:
             all:
               dynamic_model__ipa_adverse_events:
@@ -266,7 +222,12 @@ initial_review:
                 - possibly related
                 id:
                   parent_references: id
-
+      - type: sms
+        role: sms - adverse event pi
+        layout_template: standard sms layout
+        content_template: ipa sms notification
+        subject: Adverse Event
+        if: *notify_conditions_pi
 
 pi_review:
   label: Complete PI Review
@@ -291,12 +252,12 @@ pi_review:
   save_trigger:
     on_create:
       notify:
-        type: email
+      - type: email
         role: email - adverse event irb report
         layout_template: ipa notification layout
         content_template: ipa adverse event message
         subject: "IPA App: Adverse Event needs IRB report"
-        if:
+        if: &notify_conditions_irb_report
           any:
             all:
               dynamic_model__ipa_adverse_events:
@@ -319,6 +280,12 @@ pi_review:
                 id:
                   parent_references: id
 
+      - type: sms
+        role: sms - adverse event irb report
+        layout_template: standard sms layout
+        content_template: ipa sms notification
+        subject: Adverse Event
+        if: *notify_conditions_irb_report
 
 
 report_to_irb:

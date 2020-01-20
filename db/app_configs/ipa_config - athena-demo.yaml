@@ -185,19 +185,6 @@ app_type:
     updated_at: '2019-09-23T10:02:27.838Z'
     user_email: 
   valid_user_access_controls:
-  - id: 70
-    user_id: 
-    resource_type: table
-    resource_name: player_infos
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-03-19T17:58:43.642Z'
-    user_email: 
   - id: 71
     user_id: 
     resource_type: table
@@ -210,32 +197,6 @@ app_type:
     role_name: 
     created_at: 
     updated_at: 
-    user_email: 
-  - id: 72
-    user_id: 
-    resource_type: table
-    resource_name: player_contacts
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-03-19T17:58:43.708Z'
-    user_email: 
-  - id: 73
-    user_id: 
-    resource_type: table
-    resource_name: addresses
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-03-19T17:58:43.728Z'
     user_email: 
   - id: 74
     user_id: 
@@ -275,71 +236,6 @@ app_type:
     role_name: 
     created_at: 
     updated_at: '2019-05-21T10:43:08.619Z'
-    user_email: 
-  - id: 77
-    user_id: 
-    resource_type: table
-    resource_name: player_infos_item_flags
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-03-19T17:58:43.779Z'
-    user_email: 
-  - id: 78
-    user_id: 
-    resource_type: table
-    resource_name: addresses_item_flags
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: 
-    user_email: 
-  - id: 79
-    user_id: 
-    resource_type: table
-    resource_name: player_contacts_item_flags
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: 
-    user_email: 
-  - id: 80
-    user_id: 
-    resource_type: table
-    resource_name: trackers_item_flags
-    options: 
-    access: create
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-05-21T10:43:08.685Z'
-    user_email: 
-  - id: 81
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__bhs_assignments
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: 
     user_email: 
   - id: 82
     user_id: 
@@ -431,19 +327,6 @@ app_type:
     role_name: 
     created_at: 
     updated_at: '2019-05-21T10:43:08.638Z'
-    user_email: 
-  - id: 91
-    user_id: 
-    resource_type: table
-    resource_name: dynamic_model__emergency_contacts
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-03-19T17:58:43.869Z'
     user_email: 
   - id: 94
     user_id: 
@@ -614,32 +497,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:08.809Z'
     user_email: 
-  - id: 133
-    user_id: 
-    resource_type: table
-    resource_name: dynamic_model__ipa_transportations
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-03-19T17:58:44.039Z'
-    user_email: 
-  - id: 136
-    user_id: 
-    resource_type: table
-    resource_name: dynamic_model__ipa_hotels
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-03-19T17:58:44.051Z'
-    user_email: 
   - id: 139
     user_id: 
     resource_type: table
@@ -770,19 +627,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:08.894Z'
     user_email: 
-  - id: 157
-    user_id: 
-    resource_type: report
-    resource_name: ipa__search_ipa_subject
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.092Z'
-    user_email: 
   - id: 158
     user_id: 
     resource_type: table
@@ -814,13 +658,13 @@ app_type:
     resource_type: activity_log_type
     resource_name: activity_log__ipa_assignment__follow_up_surveys
     options: ''
-    access: create
+    access: 
     disabled: false
     admin_id: 2
     app_type_id: 3
     role_name: tracker
     created_at: 
-    updated_at: '2019-05-21T10:43:08.931Z'
+    updated_at: '2020-01-17T15:38:10.427Z'
     user_email: 
   - id: 162
     user_id: 
@@ -1043,19 +887,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:09.093Z'
     user_email: 
-  - id: 186
-    user_id: 
-    resource_type: general
-    resource_name: create_master
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 2
-    app_type_id: 3
-    role_name: ''
-    created_at: 
-    updated_at: 
-    user_email: 
   - id: 187
     user_id: 
     resource_type: activity_log_type
@@ -1107,19 +938,6 @@ app_type:
     role_name: user - navigation
     created_at: 
     updated_at: '2019-05-21T10:43:09.136Z'
-    user_email: 
-  - id: 191
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_navigation__general_event
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 2
-    app_type_id: 3
-    role_name: user - navigation
-    created_at: 
-    updated_at: 
     user_email: 
   - id: 192
     user_id: 
@@ -1329,32 +1147,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:09.285Z'
     user_email: 
-  - id: 226
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_protocol_deviation_pi_review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - protocol deviation
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.573Z'
-    user_email: 
-  - id: 227
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_adverse_event_pi_review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - adverse event
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.638Z'
-    user_email: 
   - id: 229
     user_id: 
     resource_type: general
@@ -1368,45 +1160,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:09.312Z'
     user_email: 
-  - id: 230
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_outstanding_activities
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.695Z'
-    user_email: 
-  - id: 231
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_protocol_deviation_initial_review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - protocol deviation
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.753Z'
-    user_email: 
-  - id: 232
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_adverse_event_initial_review
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - adverse event
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.811Z'
-    user_email: 
   - id: 233
     user_id: 
     resource_type: activity_log_type
@@ -1419,19 +1172,6 @@ app_type:
     role_name: tracker
     created_at: 
     updated_at: '2019-05-21T10:43:09.350Z'
-    user_email: 
-  - id: 234
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_adverse_events
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - adverse event
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.878Z'
     user_email: 
   - id: 240
     user_id: 
@@ -1459,19 +1199,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:09.379Z'
     user_email: 
-  - id: 242
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_in_process___exited
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.935Z'
-    user_email: 
   - id: 254
     user_id: 
     resource_type: table
@@ -1484,45 +1211,6 @@ app_type:
     role_name: user - inex
     created_at: 
     updated_at: '2019-05-21T10:43:09.397Z'
-    user_email: 
-  - id: 256
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_appointments___assessments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - navigation
-    created_at: 
-    updated_at: '2019-12-03T13:12:35.995Z'
-    user_email: 
-  - id: 258
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_protocol_deviations
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - protocol deviation
-    created_at: 
-    updated_at: '2019-12-03T13:12:36.061Z'
-    user_email: 
-  - id: 316
-    user_id: 
-    resource_type: table
-    resource_name: activity_log__ipa_assignment_session_filestores
-    options: 
-    access: 
-    disabled: 
-    admin_id: 2
-    app_type_id: 3
-    role_name: 
-    created_at: 
-    updated_at: 
     user_email: 
   - id: 319
     user_id: 
@@ -1784,19 +1472,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:09.604Z'
     user_email: 
-  - id: 354
-    user_id: 
-    resource_type: table
-    resource_name: dynamic_model__ipa_inex_checklist_histories
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 2
-    app_type_id: 3
-    role_name: audit
-    created_at: 
-    updated_at: '2019-05-21T10:43:09.614Z'
-    user_email: 
   - id: 462
     user_id: 
     resource_type: table
@@ -2018,19 +1693,6 @@ app_type:
     created_at: 
     updated_at: '2019-05-21T10:43:09.759Z'
     user_email: 
-  - id: 543
-    user_id: 
-    resource_type: report
-    resource_name: ipa__edit_ipa_tech_contacts
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - navigation
-    created_at: 
-    updated_at: '2019-12-03T13:12:36.182Z'
-    user_email: 
   - id: 544
     user_id: 
     resource_type: general
@@ -2056,45 +1718,6 @@ app_type:
     role_name: admin
     created_at: 
     updated_at: '2019-05-21T10:43:09.787Z'
-    user_email: 
-  - id: 546
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_appointments___assessments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: tracker
-    created_at: 
-    updated_at: '2019-12-03T13:12:36.240Z'
-    user_email: 
-  - id: 547
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_appointments___assessments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: pi
-    created_at: 
-    updated_at: '2019-12-03T13:12:36.298Z'
-    user_email: 
-  - id: 548
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_appointments___assessments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - inex
-    created_at: 
-    updated_at: '2019-12-03T13:12:36.365Z'
     user_email: 
   - id: 549
     user_id: 
@@ -2277,19 +1900,6 @@ app_type:
     role_name: reviewer - tms
     created_at: '2019-01-04T12:42:19.531Z'
     updated_at: '2019-05-21T10:43:09.938Z'
-    user_email: 
-  - id: 573
-    user_id: 
-    resource_type: activity_log_type
-    resource_name: activity_log__ipa_assignment_inex_checklist__tms_responses
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 2
-    app_type_id: 3
-    role_name: reviewer - inex
-    created_at: '2019-01-04T14:48:43.431Z'
-    updated_at: '2019-05-21T10:43:05.546Z'
     user_email: 
   - id: 574
     user_id: 
@@ -2550,19 +2160,6 @@ app_type:
     role_name: tracker
     created_at: '2019-03-19T17:58:50.156Z'
     updated_at: '2019-05-21T10:43:08.667Z'
-    user_email: 
-  - id: 604
-    user_id: 
-    resource_type: report
-    resource_name: ipa__search_ipa_subject
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - participant details
-    created_at: '2019-03-19T17:58:50.365Z'
-    updated_at: '2019-12-03T13:12:35.334Z'
     user_email: 
   - id: 605
     user_id: 
@@ -2901,32 +2498,6 @@ app_type:
     role_name: user - phone screen
     created_at: '2019-03-19T17:58:51.686Z'
     updated_at: '2019-05-21T10:43:10.304Z'
-    user_email: 
-  - id: 631
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_id_search
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: ''
-    created_at: '2019-03-19T17:58:51.720Z'
-    updated_at: '2019-12-03T13:12:36.126Z'
-    user_email: 
-  - id: 632
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_id_search
-    options: ''
-    access: 
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - participant details
-    created_at: '2019-03-19T18:05:15.961Z'
-    updated_at: '2019-12-03T13:12:32.883Z'
     user_email: 
   - id: 633
     user_id: 
@@ -3318,58 +2889,6 @@ app_type:
     created_at: '2019-05-21T10:43:10.468Z'
     updated_at: '2019-05-21T10:43:10.468Z'
     user_email: 
-  - id: 680
-    user_id: 
-    resource_type: report
-    resource_name: sleep__ready_for_sign_off___pi
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: pi
-    created_at: '2019-05-21T10:43:10.477Z'
-    updated_at: '2019-12-03T13:12:36.423Z'
-    user_email: 
-  - id: 682
-    user_id: 
-    resource_type: report
-    resource_name: sleep__ready_for_sign_off___staff
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: staff - inex
-    created_at: '2019-05-21T10:43:10.497Z'
-    updated_at: '2019-12-03T13:12:36.480Z'
-    user_email: 
-  - id: 684
-    user_id: 
-    resource_type: report
-    resource_name: sleep__ready_for_sign_off___pi
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: staff - inex
-    created_at: '2019-05-21T10:43:10.516Z'
-    updated_at: '2019-12-03T13:12:36.537Z'
-    user_email: 
-  - id: 690
-    user_id: 
-    resource_type: report
-    resource_name: ipa__awaiting_adl_informant_screener
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: user - inex
-    created_at: '2019-05-21T10:43:10.574Z'
-    updated_at: '2019-12-03T13:12:36.603Z'
-    user_email: 
   - id: 710
     user_id: 
     resource_type: activity_log_type
@@ -3460,19 +2979,6 @@ app_type:
     role_name: phone screener
     created_at: '2019-06-19T17:57:50.951Z'
     updated_at: '2019-06-19T17:57:50.951Z'
-    user_email: 
-  - id: 718
-    user_id: 
-    resource_type: report
-    resource_name: ipa__ipa_appointments
-    options: ''
-    access: read
-    disabled: false
-    admin_id: 1
-    app_type_id: 3
-    role_name: tracker
-    created_at: '2019-06-20T15:52:17.269Z'
-    updated_at: '2019-12-03T13:12:35.401Z'
     user_email: 
   - id: 719
     user_id: 
@@ -3630,18 +3136,915 @@ app_type:
     created_at: '2019-10-18T15:54:26.740Z'
     updated_at: '2019-10-18T15:54:26.740Z'
     user_email: 
-  - id: 1168
+  - id: 1474
     user_id: 
     resource_type: table
-    resource_name: dynamic_model__ipa_participant_exits
+    resource_name: nfs_store__manage__containers
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.250Z'
+    updated_at: '2020-01-17T12:35:31.250Z'
+    user_email: 
+  - id: 1475
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__stored_files
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.322Z'
+    updated_at: '2020-01-17T12:35:31.322Z'
+    user_email: 
+  - id: 1476
+    user_id: 
+    resource_type: table
+    resource_name: nfs_store__manage__archived_files
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.327Z'
+    updated_at: '2020-01-17T12:35:31.327Z'
+    user_email: 
+  - id: 1477
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__player_contact_phones
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.341Z'
+    updated_at: '2020-01-17T12:35:31.341Z'
+    user_email: 
+  - id: 1478
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_adl_informant_screeners
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.377Z'
+    updated_at: '2020-01-17T12:35:31.377Z'
+    user_email: 
+  - id: 1479
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_inex_checklists
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.383Z'
+    updated_at: '2020-01-17T12:35:31.383Z'
+    user_email: 
+  - id: 1480
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_tms_reviews
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.388Z'
+    updated_at: '2020-01-17T12:35:31.388Z'
+    user_email: 
+  - id: 1481
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_tmocas
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.393Z'
+    updated_at: '2020-01-17T12:35:31.393Z'
+    user_email: 
+  - id: 1482
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_sizes
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.398Z'
+    updated_at: '2020-01-17T12:35:31.398Z'
+    user_email: 
+  - id: 1483
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_informant_details
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.403Z'
+    updated_at: '2020-01-17T12:35:31.403Z'
+    user_email: 
+  - id: 1484
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_healths
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.408Z'
+    updated_at: '2020-01-17T12:35:31.408Z'
+    user_email: 
+  - id: 1485
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_tms_tests
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.413Z'
+    updated_at: '2020-01-17T12:35:31.413Z'
+    user_email: 
+  - id: 1486
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_mris
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.418Z'
+    updated_at: '2020-01-17T12:35:31.418Z'
+    user_email: 
+  - id: 1487
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_initial_screenings
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.423Z'
+    updated_at: '2020-01-17T12:35:31.423Z'
+    user_email: 
+  - id: 1488
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_ps_sleeps
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.428Z'
+    updated_at: '2020-01-17T12:35:31.428Z'
+    user_email: 
+  - id: 1489
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_protocol_deviations
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.436Z'
+    updated_at: '2020-01-17T12:35:31.436Z'
+    user_email: 
+  - id: 1490
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_adverse_events
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.441Z'
+    updated_at: '2020-01-17T12:35:31.441Z'
+    user_email: 
+  - id: 1491
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_appointments
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.446Z'
+    updated_at: '2020-01-17T12:35:31.446Z'
+    user_email: 
+  - id: 1492
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_screenings
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.451Z'
+    updated_at: '2020-01-17T12:35:31.451Z'
+    user_email: 
+  - id: 1493
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_consent_mailings
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.469Z'
+    updated_at: '2020-01-17T12:35:31.469Z'
+    user_email: 
+  - id: 1494
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_payments
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.474Z'
+    updated_at: '2020-01-17T12:35:31.474Z'
+    user_email: 
+  - id: 1495
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_surveys
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.479Z'
+    updated_at: '2020-01-17T12:35:31.479Z'
+    user_email: 
+  - id: 1496
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_withdrawals
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.487Z'
+    updated_at: '2020-01-17T12:35:31.487Z'
+    user_email: 
+  - id: 1497
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_station_contacts
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.492Z'
+    updated_at: '2020-01-17T12:35:31.492Z'
+    user_email: 
+  - id: 1498
+    user_id: 
+    resource_type: table
+    resource_name: mrn_numbers
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.502Z'
+    updated_at: '2020-01-17T12:35:31.502Z'
+    user_email: 
+  - id: 1499
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_protocol_deviations
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.511Z'
+    updated_at: '2020-01-17T12:35:31.511Z'
+    user_email: 
+  - id: 1500
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_phone_screens
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.517Z'
+    updated_at: '2020-01-17T12:35:31.517Z'
+    user_email: 
+  - id: 1501
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_inex_checklists
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.524Z'
+    updated_at: '2020-01-17T12:35:31.524Z'
+    user_email: 
+  - id: 1502
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignments
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.531Z'
+    updated_at: '2020-01-17T12:35:31.531Z'
+    user_email: 
+  - id: 1503
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_navigations
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.536Z'
+    updated_at: '2020-01-17T12:35:31.536Z'
+    user_email: 
+  - id: 1504
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_adverse_events
+    options: 
+    access: 
+    disabled: 
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.541Z'
+    updated_at: '2020-01-17T12:35:31.541Z'
+    user_email: 
+  - id: 1505
+    user_id: 
+    resource_type: report
+    resource_name: ipa__search_ipa_subject
     options: ''
     access: read
     disabled: false
     admin_id: 2
     app_type_id: 3
-    role_name: user - summary
-    created_at: '2019-11-12T10:21:31.482Z'
-    updated_at: '2019-11-12T10:21:31.482Z'
+    role_name: user - participant details
+    created_at: '2020-01-17T12:35:31.643Z'
+    updated_at: '2020-01-17T12:35:33.808Z'
+    user_email: 
+  - id: 1506
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_protocol_deviation_pi_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - protocol deviation
+    created_at: '2020-01-17T12:35:31.850Z'
+    updated_at: '2020-01-17T12:35:33.870Z'
+    user_email: 
+  - id: 1507
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_adverse_event_pi_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - adverse event
+    created_at: '2020-01-17T12:35:31.861Z'
+    updated_at: '2020-01-17T12:35:33.933Z'
+    user_email: 
+  - id: 1508
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_outstanding_activities
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.870Z'
+    updated_at: '2020-01-17T12:35:33.995Z'
+    user_email: 
+  - id: 1509
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_protocol_deviation_initial_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - protocol deviation
+    created_at: '2020-01-17T12:35:31.890Z'
+    updated_at: '2020-01-17T12:35:34.059Z'
+    user_email: 
+  - id: 1510
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_adverse_event_initial_review
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - adverse event
+    created_at: '2020-01-17T12:35:31.896Z'
+    updated_at: '2020-01-17T12:35:34.136Z'
+    user_email: 
+  - id: 1511
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_adverse_events
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - adverse event
+    created_at: '2020-01-17T12:35:31.906Z'
+    updated_at: '2020-01-17T12:35:34.200Z'
+    user_email: 
+  - id: 1512
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_in_process___exited
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: 
+    created_at: '2020-01-17T12:35:31.918Z'
+    updated_at: '2020-01-17T12:35:34.260Z'
+    user_email: 
+  - id: 1513
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_appointments___assessments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - navigation
+    created_at: '2020-01-17T12:35:31.928Z'
+    updated_at: '2020-01-17T12:35:34.321Z'
+    user_email: 
+  - id: 1514
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_protocol_deviations
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - protocol deviation
+    created_at: '2020-01-17T12:35:31.933Z'
+    updated_at: '2020-01-17T12:35:34.385Z'
+    user_email: 
+  - id: 1515
+    user_id: 
+    resource_type: general
+    resource_name: print
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: audit
+    created_at: '2020-01-17T12:35:32.074Z'
+    updated_at: '2020-01-17T12:35:32.074Z'
+    user_email: 
+  - id: 1516
+    user_id: 
+    resource_type: report
+    resource_name: ipa__edit_ipa_tech_contacts
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - navigation
+    created_at: '2020-01-17T12:35:32.152Z'
+    updated_at: '2020-01-17T12:35:34.450Z'
+    user_email: 
+  - id: 1517
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_appointments___assessments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-01-17T12:35:32.165Z'
+    updated_at: '2020-01-17T12:35:34.512Z'
+    user_email: 
+  - id: 1518
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_appointments___assessments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: pi
+    created_at: '2020-01-17T12:35:32.170Z'
+    updated_at: '2020-01-17T12:35:34.571Z'
+    user_email: 
+  - id: 1519
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_appointments___assessments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - inex
+    created_at: '2020-01-17T12:35:32.176Z'
+    updated_at: '2020-01-17T12:35:34.637Z'
+    user_email: 
+  - id: 1520
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_id_search
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: ''
+    created_at: '2020-01-17T12:35:32.371Z'
+    updated_at: '2020-01-17T12:35:34.696Z'
+    user_email: 
+  - id: 1521
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_id_search
+    options: ''
+    access: 
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - participant details
+    created_at: '2020-01-17T12:35:32.376Z'
+    updated_at: '2020-01-17T12:35:34.754Z'
+    user_email: 
+  - id: 1522
+    user_id: 
+    resource_type: report
+    resource_name: sleep__ready_for_sign_off___pi
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: pi
+    created_at: '2020-01-17T12:35:32.434Z'
+    updated_at: '2020-01-17T12:35:34.818Z'
+    user_email: 
+  - id: 1523
+    user_id: 
+    resource_type: report
+    resource_name: sleep__ready_for_sign_off___staff
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: staff - inex
+    created_at: '2020-01-17T12:35:32.445Z'
+    updated_at: '2020-01-17T12:35:34.890Z'
+    user_email: 
+  - id: 1524
+    user_id: 
+    resource_type: report
+    resource_name: sleep__ready_for_sign_off___pi
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: staff - inex
+    created_at: '2020-01-17T12:35:32.454Z'
+    updated_at: '2020-01-17T12:35:34.965Z'
+    user_email: 
+  - id: 1525
+    user_id: 
+    resource_type: report
+    resource_name: ipa__awaiting_adl_informant_screener
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - inex
+    created_at: '2020-01-17T12:35:32.477Z'
+    updated_at: '2020-01-17T12:35:35.034Z'
+    user_email: 
+  - id: 1526
+    user_id: 
+    resource_type: report
+    resource_name: ipa__ipa_appointments
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-01-17T12:35:32.582Z'
+    updated_at: '2020-01-17T12:35:35.095Z'
+    user_email: 
+  - id: 1527
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_phone_screen__informant_details_v2
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - phone screen
+    created_at: '2020-01-17T12:35:32.587Z'
+    updated_at: '2020-01-17T12:35:32.587Z'
+    user_email: 
+  - id: 1528
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_phone_screen__schedule_callback_v2
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - phone screen
+    created_at: '2020-01-17T12:35:32.592Z'
+    updated_at: '2020-01-17T12:35:32.592Z'
+    user_email: 
+  - id: 1529
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_phone_screen__section_2_v2
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - phone screen
+    created_at: '2020-01-17T12:35:32.597Z'
+    updated_at: '2020-01-17T12:35:32.597Z'
+    user_email: 
+  - id: 1530
+    user_id: 1
+    resource_type: general
+    resource_name: create_master
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: admin - ipa files
+    created_at: '2020-01-17T12:35:32.617Z'
+    updated_at: '2020-01-17T12:35:32.617Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 1531
+    user_id: 
+    resource_type: general
+    resource_name: view_dashboards
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - dashboards
+    created_at: '2020-01-17T12:35:32.626Z'
+    updated_at: '2020-01-17T12:35:32.626Z'
+    user_email: 
+  - id: 1535
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_phone_screen__tmoca_scores
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - phone screen
+    created_at: '2020-01-17T12:35:32.647Z'
+    updated_at: '2020-01-17T12:35:32.647Z'
+    user_email: 
+  - id: 1536
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_phone_screen__tmoca_continue
+    options: ''
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: user - phone screen
+    created_at: '2020-01-17T12:35:32.652Z'
+    updated_at: '2020-01-17T12:35:32.652Z'
+    user_email: 
+  - id: 1537
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: phone screener
+    created_at: '2020-01-17T12:35:32.690Z'
+    updated_at: '2020-01-17T12:35:32.690Z'
+    user_email: 
+  - id: 1538
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: phone screener
+    created_at: '2020-01-17T12:35:32.695Z'
+    updated_at: '2020-01-17T12:35:32.695Z'
+    user_email: 
+  - id: 1539
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__ipa_medical_details
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: phone screener
+    created_at: '2020-01-17T12:35:32.701Z'
+    updated_at: '2020-01-17T12:35:32.701Z'
+    user_email: 
+  - id: 1540
+    user_id: 
+    resource_type: table
+    resource_name: activity_log__ipa_assignment_summaries
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: phone screener
+    created_at: '2020-01-17T12:35:32.706Z'
+    updated_at: '2020-01-17T12:35:32.706Z'
+    user_email: 
+  - id: 1541
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__special_considerations
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: phone screener
+    created_at: '2020-01-17T12:35:32.712Z'
+    updated_at: '2020-01-17T12:35:32.712Z'
+    user_email: 
+  - id: 1542
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medications
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: phone screener
+    created_at: '2020-01-17T12:35:32.718Z'
+    updated_at: '2020-01-17T12:35:32.718Z'
+    user_email: 
+  - id: 1543
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment_summary__medical_history
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: phone screener
+    created_at: '2020-01-17T12:35:32.724Z'
+    updated_at: '2020-01-17T12:35:32.724Z'
+    user_email: 
+  - id: 1544
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__exit_l2fu
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-01-17T13:06:09.046Z'
+    updated_at: '2020-01-17T13:06:09.046Z'
+    user_email: 
+  - id: 1545
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__exit_opt_out
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-01-17T13:06:24.784Z'
+    updated_at: '2020-01-17T13:06:24.784Z'
+    user_email: 
+  - id: 1546
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__ipa_assignment__completed
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 3
+    role_name: tracker
+    created_at: '2020-01-17T13:06:38.361Z'
+    updated_at: '2020-01-17T13:06:38.361Z'
     user_email: 
   valid_associated_activity_logs:
   - id: 47
@@ -3651,46 +4054,24 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:52:25.127Z'
-    updated_at: '2019-05-21T10:42:35.969Z'
+    updated_at: '2020-01-17T13:41:24.006Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
-      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
-      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
-      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
-      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
-      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
-      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
-      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
-      exit survey\r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container:
-      &ref_nfs_store__manage__container\r\n      from: this\r\n      add: one_to_this\r\n
-      \     view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new:
-      not_embedded\r\n      creatable_if:\r\n        never: true\r\n\r\n  save_trigger:\r\n
-      \   on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container:\r\n
-      \       name: event documents\r\n        label: Event Documents\r\n        create_with_role:
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n_definitions:\r\n\r\n  ref_filestore_container:
+      &ref_filestore_container\r\n    nfs_store__manage__container: &ref_nfs_store__manage__container\r\n
+      \     from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit:
+      hide\r\n        show: filestore\r\n        new: not_embedded\r\n      creatable_if:\r\n
+      \       never: true\r\n\r\n  save_trigger:\r\n    on_create_filestore_container:
+      &create_filestore_container\r\n      create_filestore_container:\r\n        name:
+      event documents\r\n        label: Event Documents\r\n        create_with_role:
       nfs_store group 600\r\n\r\n\r\n\r\n_default:\r\n  showable_if: *enabled_if\r\n
       \ creatable_if: *enabled_if\r\n\r\n\r\n  view_options:\r\n    hide_unless_creatable:
       true,\r\n    always_embed_reference: dynamic_model__ipa_protocol_deviation\r\n\r\nexception_record:\r\n
-      \ label: Protocol Exception\r\n  \r\n  references:\r\n\r\n  # Always show the
+      \ label: Protocol Exception\r\n\r\n  references:\r\n\r\n  # Always show the
       record that contains event details\r\n  - dynamic_model__ipa_protocol_exception:\r\n
-      \     from: this\r\n      add: one_to_this\r\n      \r\n\r\ndeviation_record:\r\n
+      \     from: this\r\n      add: one_to_this\r\n\r\n\r\ndeviation_record:\r\n
       \ label: Protocol Deviation\r\n  fields:\r\n\r\n  editable_if:\r\n    not_all:\r\n
       \         activity_log__ipa_assignment_protocol_deviations:\r\n            extra_log_type:
       pi_review\r\n            id:\r\n              this_references: id\r\n\r\n  save_trigger:\r\n
@@ -3778,7 +4159,7 @@ app_type:
     main_log_name: ''
     process_name: protocol_deviations
     table_name: activity_log_ipa_assignment_protocol_deviations
-    category: 
+    category: ipa
     user_email: 
   - id: 48
     name: IPA Phone Screen
@@ -3787,36 +4168,14 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:56:40.356Z'
-    updated_at: '2019-09-23T10:06:58.064Z'
+    updated_at: '2020-01-17T13:44:33.978Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
-      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
-      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
-      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
-      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
-      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
-      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
-      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
-      exit survey\r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  # Rule for editable_if only\r\n  # Lock the forms on finalization\r\n
-      \ not_finalized: &not_finalized\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n_definitions:\r\n\r\n  # Rule
+      for editable_if only\r\n  # Lock the forms on finalization\r\n  not_finalized:
+      &not_finalized\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: finalize\r\n\r\n\r\n  ####\r\n  # Boilerplace for notifying
       roles\r\n  # Override the subject: and if: structures to refine operation\r\n
       \ ####\r\n\r\n  # Default email - just add roles or users\r\n  notify_email_default:
@@ -3932,7 +4291,7 @@ app_type:
       *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: start_phone_screen\r\n      dynamic_model__ipa_ps_initial_screenings:\r\n
       \       select_still_interested: \"yes\"\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
-      \       extra_log_type: section_2\r\n\r\n###############################\r\n#
+      \       extra_log_type: section_2\r\n\r\n\r\n\r\n###############################\r\n#
       \ General info (size, etc) V2\r\n###############################\r\nsection_2_v2:\r\n
       \ label: General Info\r\n  fields:\r\n  references:\r\n    dynamic_model__ipa_ps_size:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
@@ -3943,11 +4302,10 @@ app_type:
       \ fields:\r\n  references:\r\n    dynamic_model__ipa_ps_health:\r\n      from:
       this\r\n      add: one_to_this\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
       \   all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:\r\n
-      \         - section_2\r\n          - section_2_v2\r\n    not_all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
-      \       extra_log_type: health_1\r\n        disabled: false\r\n\r\nsleep_1:\r\n
-      \ label: Sleep\r\n  fields:\r\n  references:\r\n    dynamic_model__ipa_ps_sleep:\r\n
-      \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
+      \         - section_2\r\n          - section_2_v2\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
+      \       extra_log_type: health_1\r\n\r\nsleep_1:\r\n  label: Sleep\r\n  fields:\r\n
+      \ references:\r\n    dynamic_model__ipa_ps_sleep:\r\n      from: this\r\n      add:
+      one_to_this\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: health_1\r\n    not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: sleep_1\r\n\r\n\r\nmri_1:\r\n  label: MRI\r\n  fields:\r\n
       \ references:\r\n    dynamic_model__ipa_ps_mri:\r\n      from: this\r\n      add:
@@ -4013,7 +4371,7 @@ app_type:
       *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
       \       extra_log_type: tmoca_0\r\n        callback_required: \"ok to continue\"\r\n\r\n
       \   not_any:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
-      tmoca_1\r\n\r\n\r\ncompleted_questions:\r\n  label: Review Details\r\n  fields:\r\n\r\n\r\n
+      tmoca_1\r\n\r\n\r\ncompleted_questions:\r\n  label: Review Details\r\n  fields:\r\n\r\n
       \ references:\r\n    dynamic_model__ipa_ps_comp_review:\r\n      from: this\r\n
       \     add: one_to_this\r\n\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
       \   all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n        extra_log_type:
@@ -4148,20 +4506,19 @@ app_type:
       \       - activity_log__ipa_assignment_summary:\r\n            in: master\r\n
       \           with:\r\n              extra_log_type: medications\r\n\r\n        -
       activity_log__ipa_assignment_summary:\r\n            in: master\r\n            with:\r\n
-      \             extra_log_type: special_considerations\r\n      \r\n      update_reference:\r\n
+      \             extra_log_type: special_considerations\r\n\r\n      update_reference:\r\n
       \       - player_info:\r\n            if:\r\n              not_any:\r\n                player_infos:\r\n
       \                 birth_date:\r\n                    this: birth_date\r\n            first:\r\n
       \             player_infos:\r\n                update: return_result\r\n            with:\r\n
       \             birth_date:\r\n                dynamic_model__ipa_ps_sizes:\r\n
-      \                 birth_date: return_value\r\n                    \r\n\r\n  #
-      Notify the reviewers that the phone screen has been completed\r\n      notify:\r\n
-      \       - *notify_reviewer\r\n        - *notify_reviewer_sms\r\n#        - *notify_pi\r\n#
-      \       - *notify_pi_sms\r\n"
+      \                 birth_date: return_value\r\n\r\n\r\n\r\n  # Notify the reviewers
+      that the phone screen has been completed\r\n      notify:\r\n        - *notify_reviewer\r\n
+      \       - *notify_reviewer_sms\r\n#        - *notify_pi\r\n#        - *notify_pi_sms\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: phone_screen
     table_name: activity_log_ipa_assignment_phone_screens
-    category: ''
+    category: ipa
     user_email: 
   - id: 49
     name: Inclusion / Exclusion
@@ -4170,43 +4527,21 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:56:41.651Z'
-    updated_at: '2019-05-21T10:42:42.085Z'
+    updated_at: '2020-01-17T13:55:02.268Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
-      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
-      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
-      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
-      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
-      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
-      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
-      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
-      exit survey\r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  ####\r\n  # Boilerplace for notifying roles\r\n  # Override
-      the subject: and if: structures to refine operation\r\n  ####\r\n\r\n  # Default
-      email - just add roles or users\r\n  notify_email_default: &notify_email_default\r\n
-      \   type: email\r\n    layout_template: ipa notification layout\r\n    content_template:
-      ipa inex message\r\n    subject: \"IPA App: Inclusion / Exclusion checklist
-      message\"\r\n\r\n  # Default SMS - just add roles or users\r\n  notify_sms_default:
-      &notify_sms_default\r\n    type: sms\r\n    layout_template: standard sms layout\r\n
-      \   content_template: ipa sms notification\r\n    subject: \"Inclusion / Exclusion\"\r\n\r\n\r\n
-      \ # staff member that initiated the phone screen checklist\r\n  notify_ps_checklist_initiator:
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n\r\n_definitions:\r\n\r\n  ####\r\n
+      \ # Boilerplace for notifying roles\r\n  # Override the subject: and if: structures
+      to refine operation\r\n  ####\r\n\r\n  # Default email - just add roles or users\r\n
+      \ notify_email_default: &notify_email_default\r\n    type: email\r\n    layout_template:
+      ipa notification layout\r\n    content_template: ipa inex message\r\n    subject:
+      \"IPA App: Inclusion / Exclusion checklist message\"\r\n\r\n  # Default SMS
+      - just add roles or users\r\n  notify_sms_default: &notify_sms_default\r\n    type:
+      sms\r\n    layout_template: standard sms layout\r\n    content_template: ipa
+      sms notification\r\n    subject: \"Inclusion / Exclusion\"\r\n\r\n\r\n  # staff
+      member that initiated the phone screen checklist\r\n  notify_ps_checklist_initiator:
       &notify_ps_checklist_initiator\r\n    <<: *notify_email_default\r\n    users:\r\n
       \     activity_log__ipa_assignment_inex_checklists:\r\n        extra_log_type:
       phone_screen_review\r\n        user_id: return_value\r\n\r\n  # staff member
@@ -4305,7 +4640,7 @@ app_type:
       *contact_defaults\r\n    field_options:\r\n      prev_activity_type:\r\n        edit_as:\r\n
       \         field_type: fixed_type\r\n\r\n      contact_role:\r\n        edit_as:\r\n
       \         field_type: select_contact\r\n          alt_options:\r\n            Phone
-      Screen Interviewer: staff member          \r\n            MedNav: mednav reviewer\r\n
+      Screen Interviewer: staff member\r\n            MedNav: mednav reviewer\r\n
       \           PI: pi\r\n            TMS: tms\r\n\r\n    references:\r\n      -
       activity_log__ipa_assignment_inex_checklist:\r\n          label: New Message\r\n
       \         from: this\r\n          add: many\r\n          prevent_disable: true\r\n
@@ -4446,8 +4781,8 @@ app_type:
       sign_phone_screen\r\n    all:\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
       \       extra_log_type: finalize_phone_screen_checklist\r\n\r\n  # Notify initiator,
       clinical research coordinator and mednav that PI has signed\r\n  save_trigger:\r\n
-      \   on_create: *on_create_e_sign\r\n    \r\n    on_save:\r\n      notify:\r\n
-      \       - *notify_ps_checklist_initiator\r\n        - *notify_ps_checklist_initiator_sms\r\n
+      \   on_create: *on_create_e_sign\r\n\r\n    on_save:\r\n      notify:\r\n        -
+      *notify_ps_checklist_initiator\r\n        - *notify_ps_checklist_initiator_sms\r\n
       \       - *notify_reviewer\r\n        - *notify_reviewer_sms\r\n        - *notify_crc\r\n
       \       - *notify_crc_sms\r\n\r\n\r\n####\r\n# TMS Review\r\n####\r\ntms_responses:\r\n
       \ label: TMS Responses\r\n  references:\r\n    dynamic_model__ipa_tms_review:\r\n
@@ -4558,7 +4893,7 @@ app_type:
     main_log_name: ''
     process_name: inex_checklist
     table_name: activity_log_ipa_assignment_inex_checklists
-    category: 
+    category: ipa
     user_email: 
   - id: 50
     name: IPA Tracker
@@ -4567,21 +4902,22 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:56:43.064Z'
-    updated_at: '2019-09-23T10:17:39.775Z'
+    updated_at: '2020-01-17T13:33:18.708Z'
     action_when_attribute: activity_date
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:
-      \r\n            - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n_definitions:\r\n  enabled_if:
+      &enabled_if\r\n\r\n    # if performed a phone screening no consent to continue,
+      disable after 14 days\r\n    not_all_not_interested:\r\n      any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
+      \         select_is_good_time_to_speak: not interested\r\n          select_may_i_begin:
+      not interested\r\n          select_still_interested: 'no'\r\n\r\n      all_created_at:\r\n
+      \       dynamic_model__ipa_ps_initial_screenings:\r\n          created_at:\r\n
+      \           condition: <\r\n            value: -14 days\r\n\r\n    # if recorded
+      a withdraw activity, disable after 14 days\r\n    not_all_withdraw:\r\n      any:\r\n
+      \       dynamic_model__ipa_withdrawals:\r\n          select_subject_withdrew_reason:
+      withdrew\r\n          select_investigator_terminated:\r\n            - yes -
+      due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
       'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
       \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
       <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
@@ -4591,73 +4927,82 @@ app_type:
       up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
       \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
       'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
-      exit survey     \r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container:
-      \r\n      from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit:
-      hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n  save_trigger:\r\n
-      \   on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container:
-      \r\n        name: general files\r\n        label: General Files\r\n        create_with_role:
-      nfs_store group 600\r\n\r\n\r\n  \r\n\r\n_default:\r\n  view_options:\r\n    hide_unless_creatable:
-      true\r\n\r\n  showable_if: *enabled_if\r\n  creatable_if: *enabled_if\r\n  editable_if:
-      *enabled_if\r\n\r\n\r\nschedule_screening:\r\n  label: Schedule Screening\r\n
-      \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
+      days\r\n\r\n    # if an exit or lost to follow up before scheduled, disable
+      after 14 days\r\n    not_all_tracker_exits:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type:\r\n          - exit_opt_out\r\n          - exit_l2fu\r\n
+      \         # if the exit survey has been completed, do not disable after 14 days\r\n
+      \         #- completed\r\n        created_at:\r\n          condition: <\r\n
+      \         value: -14 days\r\n\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n
+      \   nfs_store__manage__container:\r\n      from: this\r\n      add: one_to_this\r\n
+      \     view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new:
+      not_embedded\r\n\r\n  save_trigger:\r\n    on_create_filestore_container: &create_filestore_container\r\n
+      \     create_filestore_container:\r\n        name: general files\r\n        label:
+      General Files\r\n        create_with_role: nfs_store group 600\r\n\r\n\r\n\r\n
+      \ any_exit_or_complete: &any_exit_or_complete\r\n    any_exit_or_complete:\r\n
+      \     any_exit: &any_exit\r\n        any_tracker_exits: &any_tracker_exit\r\n
+      \         activity_log__ipa_assignments:\r\n            extra_log_type:\r\n
+      \             - exit_opt_out\r\n              - exit_l2fu\r\n              -
+      completed\r\n        any_withdrawal: &any_withdrawal\r\n          dynamic_model__ipa_withdrawals:\r\n
+      \           no_longer_participating_no_yes: 'yes'\r\n            lost_to_follow_up_no_yes:
+      'yes'\r\n            select_subject_withdrew_reason: withdrew\r\n            select_investigator_terminated:\r\n
+      \             - yes - due to ae\r\n              - yes - other reason\r\n\r\n
+      \     all_completed: &all_completed\r\n        activity_log__ipa_assignments:\r\n
+      \         extra_log_type: completed\r\n\r\n\r\n\r\n\r\n_default:\r\n  view_options:\r\n
+      \   hide_unless_creatable: true\r\n\r\n  showable_if: *enabled_if\r\n  creatable_if:
+      *enabled_if\r\n  editable_if: *enabled_if\r\n\r\n\r\nschedule_screening:\r\n
+      \ label: Schedule Screening\r\n  fields:\r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
       \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
       \   select_who: Who will perform the phone screening?\r\n    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
-      Scheduled time (Eastern Time)\r\n    notes: Additional notes for the screener
-      \   \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: \r\n          - screening_follow_up\r\n\r\n  field_options:\r\n
+      Scheduled time (Eastern Time)\r\n    notes: Additional notes for the screener\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type:\r\n          - screening_follow_up\r\n\r\n  field_options:\r\n
       \   select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n
       \   select_record_from_player_contacts:\r\n      edit_as:\r\n        field_type:
       select_record_from_player_contact_phone\r\n\r\n  showable_if:\r\n    always:
       true\r\n\r\n\r\n\r\n\r\n\r\nschedule_informant_screener:\r\n  label: Schedule
-      Informant Screener\r\n  fields: \r\n    - select_who\r\n    - follow_up_when\r\n
+      Informant Screener\r\n  fields:\r\n    - select_who\r\n    - follow_up_when\r\n
       \   - follow_up_time\r\n    - notes\r\n  caption_before:\r\n    select_who:
       Who will perform the informant screening?\r\n    follow_up_when: Scheduled date\r\n
       \   follow_up_time: Scheduled time (Eastern Time)\r\n    notes: Additional notes\r\n
       \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignment_phone_screens:\r\n
-      \       extra_log_type: informant_details\r\n\r\n        \r\n    not_any:\r\n
-      \     activity_log__ipa_assignments:\r\n        extra_log_type: \r\n          -
-      perform_screening_follow_up  \r\n      activity_log__ipa_assignment_inex_checklists:\r\n
+      \       extra_log_type: informant_details\r\n\r\n\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type:\r\n          - perform_screening_follow_up\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
       \       extra_log_type: finalize_phone_screen_checklist\r\n\r\n\r\n  field_options:\r\n
       \   select_who:\r\n      edit_as:\r\n        field_type: select_user_with_role_phone_screener\r\n\r\n
       \ references:\r\n    ipa_ps_informant_detail:\r\n      from: master\r\n      add:
       one_to_master\r\n\r\n\r\n\r\n\r\n\r\nscreening_follow_up:\r\n  label: Schedule
-      Screening Follow Up\r\n  fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
+      Screening Follow Up\r\n  fields:\r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
       \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
       \   select_who: Who will perform the phone screening follow up?\r\n    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: Additional notes\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: screening_follow_up\r\n    not_all:\r\n      dynamic_model__ipa_screenings:\r\n
-      \       still_interested_blank_yes_no: \r\n          - 'yes'\r\n          -
-      'no'\r\n        \r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n
-      \       field_type: select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n
-      \     edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n
-      \     \r\nperform_screening_follow_up:\r\n  label: Perform Screening Follow
-      Up\r\n  references:\r\n    ipa_screening:\r\n      from: this\r\n      add:
-      one_to_this\r\n  caption_before:\r\n    all_fields: |\r\n      Record the eligibility
-      of the participant and any additional notes needed to perform the phone screening
-      follow up.\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: screening_follow_up\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
+      \       still_interested_blank_yes_no:\r\n          - 'yes'\r\n          - 'no'\r\n\r\n
+      \ field_options:\r\n    select_who:\r\n      edit_as:\r\n        field_type:
+      select_user_with_role_phone_screener\r\n    select_record_from_player_contacts:\r\n
+      \     edit_as:\r\n        field_type: select_record_from_player_contact_phone\r\n\r\n\r\nperform_screening_follow_up:\r\n
+      \ label: Perform Screening Follow Up\r\n  references:\r\n    ipa_screening:\r\n
+      \     from: this\r\n      add: one_to_this\r\n  caption_before:\r\n    all_fields:
+      |\r\n      Record the eligibility of the participant and any additional notes
+      needed to perform the phone screening follow up.\r\n  creatable_if:\r\n    <<:
+      *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
+      screening_follow_up\r\n      activity_log__ipa_assignment_inex_checklists:\r\n
       \       extra_log_type: finalize_phone_screen_checklist\r\n    not_all:\r\n
-      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
-      \r\n          - 'yes'\r\n          - 'no'\r\n        \r\n\r\n  # Always show,
-      so we know why a player's records may be locked down\r\n  showable_if: \r\n
-      \   always: true\r\n\r\n  save_trigger:\r\n    on_create:\r\n    \r\n      create_reference:\r\n
-      \     \r\n        - activity_log__ipa_assignment:\r\n            if: \r\n              all:\r\n
-      \               dynamic_model__ipa_screenings:\r\n                  id: \r\n
-      \                   this_references: id\r\n                  good_time_to_speak_blank_yes_no:
-      \r\n                    - left voicemail\r\n                    - 'no'                      \r\n
-      \                   \r\n            in: master\r\n            with:\r\n              extra_log_type:
-      screening_follow_up\r\n              select_who: current_user_email\r\n              follow_up_when:
-      \r\n                dynamic_model__ipa_screenings: \r\n                  id:\r\n
+      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:\r\n
+      \         - 'yes'\r\n          - 'no'\r\n\r\n\r\n  # Always show, so we know
+      why a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n
+      \ save_trigger:\r\n    on_create:\r\n\r\n      create_reference:\r\n\r\n        -
+      activity_log__ipa_assignment:\r\n            if:\r\n              all:\r\n                dynamic_model__ipa_screenings:\r\n
+      \                 id:\r\n                    this_references: id\r\n                  good_time_to_speak_blank_yes_no:\r\n
+      \                   - left voicemail\r\n                    - 'no'\r\n\r\n            in:
+      master\r\n            with:\r\n              extra_log_type: screening_follow_up\r\n
+      \             select_who: current_user_email\r\n              follow_up_when:\r\n
+      \               dynamic_model__ipa_screenings:\r\n                  id:\r\n
       \                   this_references: id\r\n                  callback_date:
-      return_value\r\n              follow_up_time: \r\n                dynamic_model__ipa_screenings:
-      \r\n                  id:\r\n                    this_references: id\r\n                  callback_time:
+      return_value\r\n              follow_up_time:\r\n                dynamic_model__ipa_screenings:\r\n
+      \                 id:\r\n                    this_references: id\r\n                  callback_time:
       return_value\r\n              notes: Screening follow up call when to voicemail
       or participant requested a call back\r\n              select_record_from_player_contacts:\r\n
       \               activity_log__ipa_assignments:\r\n                  extra_log_type:
@@ -4667,7 +5012,7 @@ app_type:
       \ creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: perform_screening_follow_up\r\n      dynamic_model__ipa_screenings:\r\n
       \       eligible_for_study_blank_yes_no: 'yes'\r\n        still_interested_blank_yes_no:
-      'yes'      \r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
+      'yes'\r\n    not_any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
       appointment\r\n\r\n  save_trigger:\r\n    on_create:\r\n      notify:\r\n      -
       type: email\r\n        role: email - ipa tracker new participant\r\n        layout_template:
       ipa notification layout\r\n        content_template: ipa message content\r\n
@@ -4676,20 +5021,20 @@ app_type:
       standard sms layout\r\n        content_template: ipa sms notification\r\n        subject:
       New IPA Participant\r\n\r\n\r\ncontact_info:\r\n  label: Emergency Contacts\r\n
       \ fields:\r\n\r\n  caption_before:\r\n    all_fields: One or more emergency
-      contacts should be added.  \r\n    submit: When multiple have been added do
-      not edit the block directly. \r\n    metadata: Expand items in the list above
-      to view and allow editing. To remove an item, edit it and select rank '0 - Not
-      Used'.  \r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n      from:
-      master\r\n      add: many   \r\n      prevent_disable: true\r\n\r\n  creatable_if:\r\n
+      contacts should be added.\r\n    submit: When multiple have been added do not
+      edit the block directly.\r\n    metadata: Expand items in the list above to
+      view and allow editing. To remove an item, edit it and select rank '0 - Not
+      Used'.\r\n  references:\r\n\r\n    dynamic_model__emergency_contact:\r\n      from:
+      master\r\n      add: many\r\n      prevent_disable: true\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: appointment\r\n\r\n\r\nmrn:\r\n  label: MRN\r\n  fields:\r\n\r\n
       \ references:\r\n    mrn_number:\r\n      from: master\r\n      add: many\r\n
-      \     prevent_disable: true\r\n      \r\n  creatable_if:\r\n    <<: *enabled_if\r\n
+      \     prevent_disable: true\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
       \   all:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
       appointment\r\n\r\n  save_trigger:\r\n    on_create:\r\n      notify:\r\n        type:
       email\r\n        role: clinical research coordinator\r\n        layout_template:
       ipa notification layout\r\n        content_template: ipa message content\r\n
-      \       subject: \"IPA App: Subject MRN assigned\"\r\n \r\n\r\ntransportation_and_housing:\r\n
+      \       subject: \"IPA App: Subject MRN assigned\"\r\n\r\n\r\ntransportation_and_housing:\r\n
       \ label: Transportation and Housing\r\n  fields:\r\n  references:\r\n    ipa_transportation:\r\n
       \     from: master\r\n      add: many\r\n      view_as:\r\n        new: not_embedded\r\n
       \       edit: not_embedded\r\n    ipa_hotel:\r\n      from: master\r\n      add:
@@ -4697,19 +5042,44 @@ app_type:
       not_embedded\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type: appointment\r\n\r\n  caption_before:\r\n    submit:
       Save this record to add or edit individual Transportation and Housing items.\r\n\r\n\r\nconsent_mailing:\r\n
-      \ label: Consent Mailing\r\n  fields: \r\n  references:\r\n    ipa_consent_mailing:\r\n
+      \ label: Consent Mailing\r\n  fields:\r\n  references:\r\n    ipa_consent_mailing:\r\n
       \     from: master\r\n      add: one_to_this\r\n\r\npayments:\r\n  label: Payments\r\n
       \ fields:\r\n  references:\r\n    ipa_payment:\r\n      from: master\r\n      add:
-      many\r\n      limit: 2\r\n      \r\n    ipa_reimbursement_reqs:\r\n      label:
-      Reimbursement Request\r\n      from: master\r\n      add: many    \r\n      \r\n
-      \ creatable_if:\r\n    <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
-      \       extra_log_type: screening_follow_up\r\n    \r\n\r\nwithdraw:\r\n  label:
-      Withdraw\r\n  fields:\r\n  references:\r\n    ipa_withdrawal:\r\n      from:
-      master\r\n      add: one_to_master\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
-      \   any:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      schedule_screening\r\n\r\n  # Always show, so we know why a player's records
-      may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\nfollow_up_surveys:\r\n
-      \ label: Follow Up Surveys\r\n  fields: \r\n  references:\r\n    ipa_survey:\r\n
+      many\r\n      limit: 2\r\n    ipa_reimbursement_reqs:\r\n      label: Reimbursement
+      Request\r\n      from: master\r\n      add: many\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type: screening_follow_up\r\n\r\n###################################\r\nexit_l2fu:\r\n
+      \ label: Lost to Follow Up\r\n###################################\r\n\r\n  fields:\r\n\r\n
+      \ caption_before:\r\n    all_fields: |\r\n      The subject was lost to follow
+      up before being scheduled for an appointment.\r\n\r\n      A staff member typically
+      sets this after a *phone screener* or\r\n      *phone screening follow up*  has
+      been scheduled 3 times without a response.\r\n\r\n      All records are locked
+      down after 14 days.\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    not_any_opt_out:\r\n
+      \     activity_log__ipa_assignments:\r\n        extra_log_type:\r\n          -
+      exit_l2fu\r\n          - appointment\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
+      \   always: true\r\n\r\n\r\n###################################\r\ncompleted:\r\n
+      \ label: Completed Study\r\n###################################\r\n\r\n  fields:\r\n\r\n
+      \ caption_before:\r\n    all_fields: |\r\n      The participant completed the
+      study.\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type: appointment\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
+      \   always: true\r\n\r\n\r\n###################################\r\nexit_opt_out:\r\n
+      \ label: Exit (Opt-Out)\r\n###################################\r\n\r\n  fields:\r\n\r\n
+      \ caption_before:\r\n    all_fields: |\r\n      The subject exited by opting
+      out before being scheduled for an appointment.\r\n\r\n      All records are
+      locked down after 14 days.\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n
+      \   not_any_opt_out:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:\r\n
+      \         - exit_opt_out\r\n          - appointment\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
+      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
+      \   always: true\r\n\r\n\r\n\r\n###################################\r\nwithdraw:\r\n
+      \ label: Withdraw\r\n###################################\r\n\r\n  fields:\r\n
+      \ references:\r\n    ipa_withdrawal:\r\n      from: master\r\n      add: one_to_master\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any_exit: *any_exit_or_complete\r\n
+      \   all_enrolled:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
+      appointment\r\n\r\n  # Always show, so we know why a player's records may be
+      locked down\r\n  showable_if:\r\n    always: true\r\n\r\nfollow_up_surveys:\r\n
+      \ label: Follow Up Surveys\r\n  fields:\r\n  references:\r\n    ipa_survey:\r\n
       \     from: master\r\n      add: many\r\n      limit: 2\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n    any:\r\n      activity_log__ipa_assignments:\r\n
       \       extra_log_type:\r\n          - appointment\r\n  # Always show, so we
@@ -4726,27 +5096,27 @@ app_type:
       performed the activity?\r\n    activity_date: When was the communication sent
       or received?\r\n    select_record_from_player_contacts: The phone or email address,
       or...\r\n    select_record_from_addresses: ... mailing address for the communication
-      or follow up \r\n    select_result: Is a follow up required, or is this communication
+      or follow up\r\n    select_result: Is a follow up required, or is this communication
       complete?\r\n    select_direction: Was the communication received by FPHS staff
       or sent to the subject?\r\n    notes: Notes regarding a communication or to
       assist with a follow up\r\n  show_if:\r\n    select_result:\r\n      select_activity:
-      general communications\r\n    \r\n    select_next_step:\r\n      any:\r\n        select_result:
+      general communications\r\n\r\n    select_next_step:\r\n      any:\r\n        select_result:
       follow up\r\n        select_activity: schedule follow up\r\n    follow_up_when:\r\n
       \     any:\r\n        select_result: follow up\r\n        select_activity: schedule
       follow up\r\n    follow_up_time:\r\n      any:\r\n        select_result: follow
       up\r\n        select_activity: schedule follow up\r\n\r\n    select_direction:\r\n
       \     select_activity: general communications\r\n    activity_date:\r\n      select_activity:
       general communications\r\n    select_who:\r\n      select_activity: general
-      communications\r\n      \r\n    select_record_from_player_contacts:\r\n      select_activity:
-      \r\n        - general communications\r\n        - schedule follow up\r\n    select_record_from_addresses:\r\n
-      \     select_activity: \r\n        - general communications\r\n        - schedule
+      communications\r\n\r\n    select_record_from_player_contacts:\r\n      select_activity:\r\n
+      \       - general communications\r\n        - schedule follow up\r\n    select_record_from_addresses:\r\n
+      \     select_activity:\r\n        - general communications\r\n        - schedule
       follow up\r\n\r\n\r\nfiles:\r\n  label: Files\r\n\r\n  save_trigger:\r\n    on_create:\r\n
-      \     <<: *create_filestore_container \r\n\r\n  references:\r\n    <<: *ref_filestore_container\r\n"
+      \     <<: *create_filestore_container\r\n\r\n  references:\r\n    <<: *ref_filestore_container\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: ''
     table_name: activity_log_ipa_assignments
-    category: ''
+    category: ipa
     user_email: 
   - id: 51
     name: Navigation
@@ -4755,37 +5125,12 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:56:44.416Z'
-    updated_at: '2019-05-21T10:42:48.354Z'
+    updated_at: '2020-01-17T13:52:06.493Z'
     action_when_attribute: alt_order
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
-      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
-      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
-      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
-      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
-      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
-      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
-      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
-      exit survey\r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container:\r\n
-      \     from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit:
-      hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n  save_trigger:\r\n
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n\r\n_definitions:\r\n\r\n  save_trigger:\r\n
       \   on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container:\r\n
       \       name: event documents\r\n        label: Event Documents\r\n        create_with_role:
       nfs_store group 600\r\n\r\n\r\n\r\n_default:\r\n  showable_if: *enabled_if\r\n
@@ -4793,11 +5138,11 @@ app_type:
       \   alt_order:\r\n      - event_date\r\n      - start_time\r\n  valid_if:\r\n
       \   on_save:\r\n      not_any:\r\n        this:\r\n          select_station:
       null\r\n          event_date: null\r\n          start_time: null\r\n\r\nadd_mrn:\r\n
-      \ label: MRNs\r\n  fields:\r\n  valid_if:\r\n  \r\n  caption_before:\r\n    submit:
-      Save activity to view / add participant MRNs\r\n      \r\n  references:\r\n
-      \   mrn_number:\r\n      from: master\r\n      add: many\r\n      prevent_disable:
-      true\r\n      view_as:\r\n        edit: not_embedded\r\n        new: not_embedded\r\n
-      \     \r\n  creatable_if: \r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignment_navigations:\r\n
+      \ label: MRNs\r\n  fields:\r\n  valid_if:\r\n\r\n  caption_before:\r\n    submit:
+      Save activity to view / add participant MRNs\r\n\r\n  references:\r\n    mrn_number:\r\n
+      \     from: master\r\n      add: many\r\n      prevent_disable: true\r\n      view_as:\r\n
+      \       edit: not_embedded\r\n        new: not_embedded\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignment_navigations:\r\n
       \       extra_log_type: add_mrn\r\n\r\nplanned_event:\r\n  label: Planned Event\r\n
       \ fields:\r\n  - select_event_type\r\n  - other_event_type\r\n  - select_station\r\n
       \ - location\r\n  - event_date\r\n  - start_time\r\n  - completion_time\r\n
@@ -4875,12 +5220,12 @@ app_type:
       \     from: this\r\n      add: many\r\n      add_with:\r\n        extra_log_type:
       adverse_event_record\r\n        event_occurred_when: \"{{event_date}}\"\r\n
       \       event_discovered_when: \"{{event_date}}\"\r\n\r\n  creatable_if:\r\n
-      \   never: true\r\n\r\n\r\n"
+      \   never: true\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: navigation
     table_name: activity_log_ipa_assignment_navigations
-    category: 
+    category: ipa
     user_email: 
   - id: 52
     name: Adverse Events
@@ -4889,40 +5234,18 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:56:45.856Z'
-    updated_at: '2019-01-15T15:32:02.141Z'
+    updated_at: '2020-01-17T13:39:57.022Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
-      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
-      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
-      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
-      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
-      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
-      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
-      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
-      exit survey\r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container:
-      &ref_nfs_store__manage__container\r\n      from: this\r\n      add: one_to_this\r\n
-      \     view_as:\r\n        edit: hide\r\n        show: filestore\r\n        new:
-      not_embedded\r\n      creatable_if:\r\n        never: true\r\n\r\n  save_trigger:\r\n
-      \   on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container:\r\n
-      \       name: event documents\r\n        label: Event Documents\r\n        create_with_role:
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n_definitions:\r\n\r\n  ref_filestore_container:
+      &ref_filestore_container\r\n    nfs_store__manage__container: &ref_nfs_store__manage__container\r\n
+      \     from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit:
+      hide\r\n        show: filestore\r\n        new: not_embedded\r\n      creatable_if:\r\n
+      \       never: true\r\n\r\n  save_trigger:\r\n    on_create_filestore_container:
+      &create_filestore_container\r\n      create_filestore_container:\r\n        name:
+      event documents\r\n        label: Event Documents\r\n        create_with_role:
       nfs_store group 600\r\n\r\n\r\n\r\n\r\n_default:\r\n  showable_if: *enabled_if\r\n
       \ creatable_if: *enabled_if\r\n\r\n\r\n  view_options:\r\n    hide_unless_creatable:
       true\r\n    always_embed_reference: dynamic_model__ipa_adverse_event\r\n\r\nadverse_event_record:\r\n
@@ -4976,25 +5299,26 @@ app_type:
       Initial review will be performed by a qualified person, such as an on-site RN,
       or an assigned person remotely\r\n# This activity does not block the PI review\r\ninitial_review:\r\n
       \ fields:\r\n    - select_who\r\n    - done_when\r\n    - notes\r\n\r\n  label:
-      Completed Initial Review\r\n  caption_before:\r\n    all_fields: <b>Review the
-      Event and update the details and severity if necessary before continuing.</b>\r\n
-      \   select_who: Who performed this review(if recording this action for somebody
-      else)?\r\n    done_when: When was this task performed?\r\n    notes: Record
-      any notes related to the review. If necessary, files may be uploaded below to
-      provide additional supporting information.\r\n\r\n    submit: Review the Adverse
-      Event and update the details and severity if necessary. When complete, click
-      <b>Complete</b>. If the incident is <b>internal</b> or <b>serious</b>, and <b>unexpected</b>
-      and <b>related</b> / <b>possibly related</b> the PI will be notified.\r\n  save_action:\r\n
-      \   label: Complete\r\n  showable_if:\r\n    never: true\r\n  creatable_if:\r\n
-      \   never: true\r\n  save_trigger:\r\n    on_create:\r\n      notify:\r\n      -
-      type: email\r\n        role: email - adverse event pi\r\n        layout_template:
-      ipa notification layout\r\n        content_template: ipa adverse event message\r\n
-      \       subject: \"IPA App: Adverse Event needs review\"\r\n        if: &notify_conditions_pi\r\n
-      \         any: \r\n            all:\r\n              dynamic_model__ipa_adverse_events:\r\n
-      \               select_location: internal\r\n                select_expectedness:
-      unexpected\r\n                select_relatedness:\r\n                - related\r\n
-      \               - possibly related\r\n                id:\r\n                  parent_references:
-      id\r\n\r\n\r\n            all2:\r\n              dynamic_model__ipa_adverse_events:\r\n
+      Completed Initial Review\r\n\r\n  field_options:\r\n    select_who:\r\n      edit_as:\r\n
+      \       field_type: select_user_with_role_user_-_adverse event\r\n\r\n  caption_before:\r\n
+      \   all_fields: <b>Review the Event and update the details and severity if necessary
+      before continuing.</b>\r\n    select_who: Who performed this review(if recording
+      this action for somebody else)?\r\n    done_when: When was this task performed?\r\n
+      \   notes: Record any notes related to the review. If necessary, files may be
+      uploaded below to provide additional supporting information.\r\n\r\n    submit:
+      Review the Adverse Event and update the details and severity if necessary. When
+      complete, click <b>Complete</b>. If the incident is <b>internal</b> or <b>serious</b>,
+      and <b>unexpected</b> and <b>related</b> / <b>possibly related</b> the PI will
+      be notified.\r\n  save_action:\r\n    label: Complete\r\n  showable_if:\r\n
+      \   never: true\r\n  creatable_if:\r\n    never: true\r\n  save_trigger:\r\n
+      \   on_create:\r\n      notify:\r\n      - type: email\r\n        role: email
+      - adverse event pi\r\n        layout_template: ipa notification layout\r\n        content_template:
+      ipa adverse event message\r\n        subject: \"IPA App: Adverse Event needs
+      review\"\r\n        if: &notify_conditions_pi\r\n          any:\r\n            all:\r\n
+      \             dynamic_model__ipa_adverse_events:\r\n                select_location:
+      internal\r\n                select_expectedness: unexpected\r\n                select_relatedness:\r\n
+      \               - related\r\n                - possibly related\r\n                id:\r\n
+      \                 parent_references: id\r\n\r\n\r\n            all2:\r\n              dynamic_model__ipa_adverse_events:\r\n
       \               select_severity: serious\r\n                select_expectedness:
       unexpected\r\n                select_relatedness:\r\n                - related\r\n
       \               - possibly related\r\n                id:\r\n                  parent_references:
@@ -5040,7 +5364,7 @@ app_type:
     main_log_name: ''
     process_name: adverse_events
     table_name: activity_log_ipa_assignment_adverse_events
-    category: 
+    category: ipa
     user_email: 
   - id: 56
     name: Medical Navigation
@@ -5049,43 +5373,15 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-05-08T13:24:43.903Z'
-    updated_at: '2019-05-21T10:42:54.286Z'
+    updated_at: '2020-01-17T13:49:38.421Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_definitions:\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
-      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
-      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
-      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
-      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
-      \         created_at:\r\n            condition: <\r\n            value: -14
-      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
-      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
-      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
-      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
-      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
-      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
-      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
-      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
-      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
-      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
-      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
-      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
-      days\r\n\r\n    # if the exit survey has been completed, disable after 14 days\r\n
-      \   not_all_complete:\r\n      activity_log__ipa_assignments:\r\n        extra_log_type:
-      follow_up_surveys\r\n      dynamic_model__ipa_surveys:\r\n        select_survey_type:
-      exit survey\r\n        created_at:\r\n          condition: <\r\n          value:
-      -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n    nfs_store__manage__container:\r\n
-      \     from: this\r\n      add: one_to_this\r\n      view_as:\r\n        edit:
-      hide\r\n        show: filestore\r\n        new: not_embedded\r\n\r\n  save_trigger:\r\n
-      \   on_create_filestore_container: &create_filestore_container\r\n      create_filestore_container:\r\n
-      \       name: general files\r\n        label: General Files\r\n        create_with_role:
-      nfs_store group 600\r\n\r\n\r\n######################\r\n\r\n  followup_fields:
-      &followup_fields\r\n    - activity_date\r\n    - select_direction\r\n    - select_contact\r\n
-      \   - select_result\r\n    - select_next_step\r\n    - follow_up_when\r\n    -
-      follow_up_time\r\n\r\n\r\n  communication_fields: &communication_fields\r\n
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n_definitions:\r\n\r\n######################\r\n\r\n
+      \ followup_fields: &followup_fields\r\n    - activity_date\r\n    - select_direction\r\n
+      \   - select_contact\r\n    - select_result\r\n    - select_next_step\r\n    -
+      follow_up_when\r\n    - follow_up_time\r\n\r\n\r\n  communication_fields: &communication_fields\r\n
       \   - select_activity\r\n    - activity_date\r\n    - select_contact\r\n    -
       select_direction\r\n    - select_result\r\n    - select_next_step\r\n    - follow_up_when\r\n
       \   - follow_up_time\r\n\r\n  communication_show_if: &communication_show_if\r\n
@@ -5097,7 +5393,7 @@ app_type:
       \       select_result: follow up\r\n        select_activity: schedule follow
       up\r\n    select_direction:\r\n      not_any:\r\n        select_activity:\r\n
       \         - schedule follow up\r\n          - completed\r\n    select_contact:\r\n
-      \     not_any:\r\n        select_activity:\r\n          - completed\r\n          \r\n
+      \     not_any:\r\n        select_activity:\r\n          - completed\r\n\r\n
       \       select_direction:\r\n          - in person\r\n\r\n  communication_field_options:
       &communication_field_options\r\n    select_result:\r\n      edit_as:\r\n        alt_options:\r\n
       \         \"Completed\": completed\r\n          \"Follow up\": follow up\r\n
@@ -5117,12 +5413,12 @@ app_type:
       in person or by phone?\r\n    select_result: Is a follow up required, or is
       this communication complete?\r\n\r\n\r\n_default:\r\n  fields: *communication_fields\r\n\r\n
       \ show_if:\r\n    <<: *communication_show_if\r\n\r\n  field_options:\r\n    <<:
-      *communication_field_options\r\n    \r\n  caption_before: \r\n    <<: *communication_caption_before\r\n\r\n
+      *communication_field_options\r\n\r\n  caption_before:\r\n    <<: *communication_caption_before\r\n\r\n
       \ view_options:\r\n    hide_unless_creatable: true\r\n\r\n  showable_if: *enabled_if\r\n
       \ creatable_if: *enabled_if\r\n  editable_if: *enabled_if\r\n\r\n\r\n\r\n#################################################\r\nexit_interview:\r\n
       \ label: Exit Interview\r\n#################################################\r\n\r\n
       \ fields: *followup_fields\r\n\r\n  references:\r\n    dynamic_model__ipa_exit_interview:\r\n
-      \     from: this\r\n      add: one_to_this\r\n      \r\n\r\n\r\n#################################################\r\ntwo_wk_followup:\r\n
+      \     from: this\r\n      add: one_to_this\r\n\r\n\r\n\r\n#################################################\r\ntwo_wk_followup:\r\n
       \ label: Two Week Follow Up\r\n#################################################\r\n\r\n
       \ fields: *followup_fields\r\n\r\n  references:\r\n    dynamic_model__ipa_two_wk_followup:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n#################################################\r\nfour_wk_followup:\r\n
@@ -5131,8 +5427,8 @@ app_type:
       \     from: this\r\n      add: one_to_this\r\n\r\n\r\n#################################################\r\nparticipant_communication:\r\n
       \ label: Participant Communication\r\n#################################################\r\n\r\n
       \ references:\r\n    dynamic_model__ipa_mednav_followup:\r\n      from: this\r\n
-      \     add: one_to_this\r\n      prevent_disable: true\r\n\r\n  caption_before:
-      \r\n    <<: *communication_caption_before\r\n    select_direction: Was the communication
+      \     add: one_to_this\r\n      prevent_disable: true\r\n\r\n  caption_before:\r\n
+      \   <<: *communication_caption_before\r\n    select_direction: Was the communication
       received by FPHS staff or sent to the subject?\r\n\r\n\r\n  field_options:\r\n
       \   <<: *communication_field_options\r\n    select_direction:\r\n      edit_as:\r\n
       \       alt_options:\r\n          \"To Staff\": to staff\r\n          \"To Subject\":
@@ -5157,25 +5453,24 @@ app_type:
       \   <<: *communication_field_options\r\n    select_activity:\r\n      value:
       Sent report to provider\r\n    select_contact:\r\n      edit_as:\r\n        field_type:
       contact\r\n    select_direction:\r\n      edit_as:\r\n        alt_options:\r\n
-      \         Mail: mail\r\n          Fax: fax\r\n          Epic: epic\r\n          \r\n\r\n\r\n
+      \         Mail: mail\r\n          Fax: fax\r\n          Epic: epic\r\n\r\n\r\n\r\n
       \ caption_before:\r\n    activity_date: Date sent\r\n    select_contact: Provider
       name\r\n    select_direction: Method sent\r\n\r\n\r\n#################################################\r\nincidental_findings:\r\n
       \ label: Incidental Findings\r\n#################################################\r\n\r\n
       \ fields:\r\n\r\n  references:\r\n    dynamic_model__ipa_incidental_finding:\r\n
-      \     from: this\r\n      add: one_to_this\r\n      prevent_disable: true\r\n
-      \         \r\n  creatable_if: \r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignment_med_navs:\r\n
+      \     from: this\r\n      add: one_to_this\r\n      prevent_disable: true\r\n\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n    not_any:\r\n      activity_log__ipa_assignment_med_navs:\r\n
       \       extra_log_type: incidental_findings\r\n\r\n  view_options:\r\n    hide_unless_creatable:
-      false\r\n    \r\n    \r\n#################################################\r\nfiles:\r\n
+      false\r\n\r\n\r\n#################################################\r\nfiles:\r\n
       \ label: Files\r\n#################################################\r\n\r\n
-      \ fields:\r\n    - notes\r\n  \r\n  caption_before:\r\n    notes: Notes\r\n
-      \   submit: Save to create a container for files\r\n    \r\n  save_trigger:\r\n
-      \   on_create:\r\n      <<: *create_filestore_container\r\n\r\n  references:\r\n
-      \   <<: *ref_filestore_container\r\n"
+      \ fields:\r\n    - notes\r\n\r\n  caption_before:\r\n    notes: Notes\r\n    submit:
+      Save to create a container for files\r\n\r\n  save_trigger:\r\n    on_create:\r\n
+      \     <<: *create_filestore_container\r\n\r\n  references:\r\n    <<: *ref_filestore_container\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: med_nav
     table_name: activity_log_ipa_assignment_med_navs
-    category: 
+    category: ipa
     user_email: 
   - id: 74
     name: IPA Summary
@@ -5184,113 +5479,114 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-09-23T10:02:28.092Z'
-    updated_at: '2019-10-30T08:50:48.114Z'
+    updated_at: '2020-01-17T12:34:56.657Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
     blank_log_name: ''
-    extra_log_types: "_default:\r\n\r\n  view_options:\r\n    show_embedded_at_top:
-      true\r\n    hide_unless_creatable: true\r\n    \r\n  fields:\r\n    - notes\r\n
-      \ \r\n  caption_before:\r\n    notes: Additional Notes\r\n  \r\n  field_options:\r\n
-      \   notes:\r\n      format: markdown\r\n  \r\n\r\nmedical_history:\r\n  \r\n\r\n
-      \ references:\r\n    dynamic_model__ipa_medical_detail:\r\n      label: Medical
+    extra_log_types: "# @library ipa enabled_if\r\n\r\n_default:\r\n\r\n  view_options:\r\n
+      \   show_embedded_at_top: true\r\n    hide_unless_creatable: true\r\n\r\n  fields:\r\n
+      \   - notes\r\n\r\n  caption_before:\r\n    notes: Additional Notes\r\n\r\n
+      \ field_options:\r\n    notes:\r\n      format: markdown\r\n\r\n  showable_if:
+      *enabled_if\r\n  creatable_if: *enabled_if\r\n  editable_if: *enabled_if\r\n\r\n\r\nmedical_history:\r\n\r\n\r\n
+      \ references:\r\n    dynamic_model__ipa_medical_details:\r\n      label: Medical
       History\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n
-      \       new: not_embedded      \r\n        #show: readonly\r\n      prevent_disable:
+      \       new: not_embedded\r\n        #show: readonly\r\n      prevent_disable:
       true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
       \       extra_log_type: medical_history\r\n\r\n  save_trigger:\r\n    on_create:\r\n
       \     create_reference:\r\n        - dynamic_model__ipa_medical_detail:\r\n
-      \           in: master_with_reference\r\n            with:\r\n              convulsion_or_seizure_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_tms_tests:\r\n                  convulsion_or_seizure_blank_yes_no_dont_know:
-      return_value\r\n              convulsion_or_seizure_details: \r\n                dynamic_model__ipa_ps_tms_tests:\r\n
-      \                 convulsion_or_seizure_details: return_value\r\n              sleep_disorder_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_sleeps:\r\n                  sleep_disorder_blank_yes_no_dont_know:
-      return_value\r\n              sleep_disorder_details: \r\n                dynamic_model__ipa_ps_sleeps:\r\n
-      \                 sleep_disorder_details: return_value\r\n              sleep_apnea_device_no_yes:
-      \r\n                dynamic_model__ipa_ps_sleeps:\r\n                  sleep_apnea_device_no_yes:
-      return_value\r\n              sleep_apnea_device_details: \r\n                dynamic_model__ipa_ps_sleeps:\r\n
-      \                 sleep_apnea_device_details: return_value\r\n              chronic_pain_blank_yes_no:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_blank_yes_no:
-      return_value\r\n              chronic_pain_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 chronic_pain_details: return_value\r\n              chronic_pain_meds_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_meds_blank_yes_no_dont_know:
-      return_value\r\n              chronic_pain_meds_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 chronic_pain_meds_details: return_value\r\n              hypertension_diagnosis_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_blank_yes_no_dont_know:
-      return_value\r\n              hypertension_medications_blank_yes_no: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 hypertension_medications_blank_yes_no: return_value\r\n              hypertension_diagnosis_details:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_details:
-      return_value\r\n              diabetes_diagnosis_blank_yes_no_dont_know: \r\n
+      \           in: master_with_reference\r\n            with:\r\n              convulsion_or_seizure_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_tms_tests:\r\n                  convulsion_or_seizure_blank_yes_no_dont_know:
+      return_value\r\n              convulsion_or_seizure_details:\r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 convulsion_or_seizure_details: return_value\r\n              sleep_disorder_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_sleeps:\r\n                  sleep_disorder_blank_yes_no_dont_know:
+      return_value\r\n              sleep_disorder_details:\r\n                dynamic_model__ipa_ps_sleeps:\r\n
+      \                 sleep_disorder_details: return_value\r\n              sleep_apnea_device_no_yes:\r\n
+      \               dynamic_model__ipa_ps_sleeps:\r\n                  sleep_apnea_device_no_yes:
+      return_value\r\n              sleep_apnea_device_details:\r\n                dynamic_model__ipa_ps_sleeps:\r\n
+      \                 sleep_apnea_device_details: return_value\r\n              chronic_pain_blank_yes_no:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_blank_yes_no:
+      return_value\r\n              chronic_pain_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 chronic_pain_details: return_value\r\n              chronic_pain_meds_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  chronic_pain_meds_blank_yes_no_dont_know:
+      return_value\r\n              chronic_pain_meds_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 chronic_pain_meds_details: return_value\r\n              hypertension_diagnosis_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              hypertension_medications_blank_yes_no:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 hypertension_medications_blank_yes_no: return_value\r\n              hypertension_diagnosis_details:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  hypertension_diagnosis_details:
+      return_value\r\n              diabetes_diagnosis_blank_yes_no_dont_know:\r\n
       \               dynamic_model__ipa_ps_healths:\r\n                  diabetes_diagnosis_blank_yes_no_dont_know:
-      return_value\r\n              diabetes_medications_blank_yes_no: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 diabetes_medications_blank_yes_no: return_value\r\n              diabetes_diagnosis_details:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  diabetes_diagnosis_details:
-      return_value\r\n              hemophilia_blank_yes_no_dont_know: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 hemophilia_blank_yes_no_dont_know: return_value\r\n              hemophilia_details:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  hemophilia_details:
-      return_value\r\n              high_cholesterol_diagnosis_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  high_cholesterol_diagnosis_blank_yes_no_dont_know:
-      return_value\r\n              high_cholesterol_medications_blank_yes_no: \r\n
+      return_value\r\n              diabetes_medications_blank_yes_no:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 diabetes_medications_blank_yes_no: return_value\r\n              diabetes_diagnosis_details:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  diabetes_diagnosis_details:
+      return_value\r\n              hemophilia_blank_yes_no_dont_know:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 hemophilia_blank_yes_no_dont_know: return_value\r\n              hemophilia_details:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  hemophilia_details:
+      return_value\r\n              high_cholesterol_diagnosis_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  high_cholesterol_diagnosis_blank_yes_no_dont_know:
+      return_value\r\n              high_cholesterol_medications_blank_yes_no:\r\n
       \               dynamic_model__ipa_ps_healths:\r\n                  high_cholesterol_medications_blank_yes_no:
-      return_value\r\n              high_cholesterol_diagnosis_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 high_cholesterol_diagnosis_details: return_value\r\n              caridiac_pacemaker_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  caridiac_pacemaker_blank_yes_no_dont_know:
-      return_value\r\n              caridiac_pacemaker_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 caridiac_pacemaker_details: return_value\r\n              other_heart_conditions_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  other_heart_conditions_blank_yes_no_dont_know:
-      return_value\r\n              other_heart_conditions_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 other_heart_conditions_details: return_value\r\n              memory_problems_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  memory_problems_blank_yes_no_dont_know:
-      return_value\r\n              memory_problems_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 memory_problems_details: return_value\r\n              mental_health_conditions_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  mental_health_conditions_blank_yes_no_dont_know:
-      return_value\r\n              mental_health_conditions_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 mental_health_conditions_details: return_value\r\n              mental_health_help_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  mental_health_help_blank_yes_no_dont_know:
-      return_value\r\n              mental_health_help_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 mental_health_help_details: return_value\r\n              neurological_problems_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_healths:\r\n                  neurological_problems_blank_yes_no_dont_know:
-      return_value\r\n              neurological_problems_details: \r\n                dynamic_model__ipa_ps_healths:\r\n
-      \                 neurological_problems_details: return_value\r\n              past_mri_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_mris:\r\n                  past_mri_yes_no_dont_know:
-      return_value\r\n              past_mri_details: \r\n                dynamic_model__ipa_ps_mris:\r\n
+      return_value\r\n              high_cholesterol_diagnosis_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 high_cholesterol_diagnosis_details: return_value\r\n              caridiac_pacemaker_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  caridiac_pacemaker_blank_yes_no_dont_know:
+      return_value\r\n              caridiac_pacemaker_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 caridiac_pacemaker_details: return_value\r\n              other_heart_conditions_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  other_heart_conditions_blank_yes_no_dont_know:
+      return_value\r\n              other_heart_conditions_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 other_heart_conditions_details: return_value\r\n              memory_problems_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  memory_problems_blank_yes_no_dont_know:
+      return_value\r\n              memory_problems_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 memory_problems_details: return_value\r\n              mental_health_conditions_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  mental_health_conditions_blank_yes_no_dont_know:
+      return_value\r\n              mental_health_conditions_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 mental_health_conditions_details: return_value\r\n              mental_health_help_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  mental_health_help_blank_yes_no_dont_know:
+      return_value\r\n              mental_health_help_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 mental_health_help_details: return_value\r\n              neurological_problems_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_healths:\r\n                  neurological_problems_blank_yes_no_dont_know:
+      return_value\r\n              neurological_problems_details:\r\n                dynamic_model__ipa_ps_healths:\r\n
+      \                 neurological_problems_details: return_value\r\n              past_mri_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_mris:\r\n                  past_mri_yes_no_dont_know:
+      return_value\r\n              past_mri_details:\r\n                dynamic_model__ipa_ps_mris:\r\n
       \                 past_mri_details: return_value\r\n              metal_implants_blank_yes_no_dont_know:\r\n
       \               dynamic_model__ipa_ps_mris:\r\n                  metal_implants_blank_yes_no_dont_know:
       return_value\r\n              metal_implants_details:\r\n                dynamic_model__ipa_ps_mris:\r\n
-      \                 metal_implants_details: return_value\r\n              dietary_restrictions_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_tms_tests:\r\n                  dietary_restrictions_blank_yes_no_dont_know:
+      \                 metal_implants_details: return_value\r\n              dietary_restrictions_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_tms_tests:\r\n                  dietary_restrictions_blank_yes_no_dont_know:
       return_value\r\n              dietary_restrictions_details:\r\n                dynamic_model__ipa_ps_tms_tests:\r\n
       \                 dietary_restrictions_details: return_value\r\n              radiation_blank_yes_no:\r\n
       \               dynamic_model__ipa_ps_mris:\r\n                  radiation_blank_yes_no:
       return_value\r\n              radiation_details:\r\n                dynamic_model__ipa_ps_mris:\r\n
-      \                 radiation_details: return_value\r\n\r\nmedications:\r\n  \r\n\r\n
+      \                 radiation_details: return_value\r\n\r\n\r\nmedications:\r\n\r\n\r\n
       \ references:\r\n    dynamic_model__ipa_medications:\r\n      label: Medications\r\n
       \     from: master\r\n      add: one_to_master\r\n      view_as:\r\n        #show:
       readonly\r\n        new: not_embedded\r\n      prevent_disable: true\r\n\r\n
       \ creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
       \       extra_log_type: medications\r\n\r\n  save_trigger:\r\n    on_create:\r\n
       \     create_reference:\r\n        - dynamic_model__ipa_medications:\r\n            in:
-      master_with_reference\r\n            with:\r\n              current_meds_blank_yes_no_dont_know:
-      \r\n                dynamic_model__ipa_ps_tms_tests:\r\n                  current_meds_blank_yes_no_dont_know:
-      return_value\r\n              current_meds_details: \r\n                dynamic_model__ipa_ps_tms_tests:\r\n
-      \                 current_meds_details: return_value\r\n                  \r\nspecial_considerations:\r\n
-      \ \r\n\r\n  references:\r\n    dynamic_model__ipa_special_considerations:\r\n
-      \     label: Medications\r\n      from: master\r\n      add: one_to_master\r\n
-      \     view_as:\r\n#        show: readonly\r\n        new: not_embedded\r\n\r\n
-      \     prevent_disable: true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
+      master_with_reference\r\n            with:\r\n              current_meds_blank_yes_no_dont_know:\r\n
+      \               dynamic_model__ipa_ps_tms_tests:\r\n                  current_meds_blank_yes_no_dont_know:
+      return_value\r\n              current_meds_details:\r\n                dynamic_model__ipa_ps_tms_tests:\r\n
+      \                 current_meds_details: return_value\r\n\r\nspecial_considerations:\r\n\r\n\r\n
+      \ references:\r\n    dynamic_model__ipa_special_considerations:\r\n      label:
+      Medications\r\n      from: master\r\n      add: one_to_master\r\n      view_as:\r\n#
+      \       show: readonly\r\n        new: not_embedded\r\n\r\n      prevent_disable:
+      true\r\n\r\n  creatable_if:\r\n    not_all:\r\n      activity_log__ipa_assignment_summaries:\r\n
       \       extra_log_type: special_considerations\r\n\r\n  save_trigger:\r\n    on_create:\r\n
       \     create_reference:\r\n        - dynamic_model__ipa_special_considerations:\r\n
-      \           in: master_with_reference\r\n            with:\r\n              #travel_with_wife_yes_no:
-      \r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n              #    travel_with_wife_yes_no:
-      return_value\r\n              #travel_with_wife_details: \r\n              #
+      \           in: master_with_reference\r\n            with:\r\n              #travel_with_wife_yes_no:\r\n
+      \             #  dynamic_model__ipa_ps_tms_tests:\r\n              #    travel_with_wife_yes_no:
+      return_value\r\n              #travel_with_wife_details:\r\n              #
       \ dynamic_model__ipa_ps_tms_tests:\r\n              #    travel_with_wife_details:
-      return_value\r\n              #mmse_yes_no: 'yes'\r\n              \r\n              tmoca_score:
-      \r\n                dynamic_model__ipa_ps_tmocas:\r\n                  tmoca_score:
-      return_value\r\n              #bringing_cpap_yes_no: \r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n
-      \             #    bringing_cpap_yes_no: return_value\r\n              #tms_exempt_yes_no:
-      \r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n              #    tms_exempt_yes_no:
+      return_value\r\n              #mmse_yes_no: 'yes'\r\n\r\n              tmoca_score:\r\n
+      \               dynamic_model__ipa_ps_tmocas:\r\n                  tmoca_score:
+      return_value\r\n              #bringing_cpap_yes_no:\r\n              #  dynamic_model__ipa_ps_tms_tests:\r\n
+      \             #    bringing_cpap_yes_no: return_value\r\n              #tms_exempt_yes_no:\r\n
+      \             #  dynamic_model__ipa_ps_tms_tests:\r\n              #    tms_exempt_yes_no:
       return_value\r\n              #taking_med_for_mri_pet_yes_no:\r\n              #
       \ dynamic_model__ipa_ps_tms_tests:\r\n              #    taking_med_for_mri_pet_yes_no:
-      return_value\r\n                  "
+      return_value\r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: summary
@@ -5558,24 +5854,6 @@ app_type:
       \     npi_disin: 1\r\n\r\n    npi_irritsev:\r\n      npi_irrit: 1\r\n    npi_motorsev:\r\n
       \     npi_motor: 1\r\n\r\n    npi_nightsev:\r\n      npi_night: 1\r\n\r\n    npi_appetsev:\r\n
       \     npi_appet: 1\r\n"
-    user_email: 
-  - id: 351
-    name: IPA Participant Exits
-    table_name: ipa_participant_exits
-    schema_name: 
-    primary_key_name: master_id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-11-12T10:14:54.266Z'
-    updated_at: '2019-11-12T10:30:32.549Z'
-    position: 
-    category: ipa-audit-history
-    table_key_name: ''
-    field_list: ''
-    result_order: ''
-    options: ''
     user_email: 
   - id: 224
     name: Incidental Findings
@@ -6036,6 +6314,49 @@ app_type:
       ''\r\n        ix_raynauds_ok_blank_yes_no: ''\r\n        ix_mi_ok_blank_yes_no:
       ''\r\n        ix_bicycle_ok_blank_yes_no: ''\r\n"
     user_email: 
+  - id: 189
+    name: IPA Subject Info
+    table_name: ipa_ps_sizes
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2018-05-31T14:52:15.259Z'
+    updated_at: '2020-01-17T12:34:54.790Z'
+    position: 
+    category: ipa-phone-screen
+    table_key_name: ''
+    field_list: birth_date, weight, height, hat_size, shirt_size, jacket_size, waist_size
+    result_order: ''
+    options: "default:\r\n  caption_before:\r\n    all_fields: |\r\n      Please answer
+      the following questions with honesty and to the best of your knowledge, as we
+      will use your responses to determine whether it is safe for you to participate
+      in the study.\r\n    birth_date: What is your date of birth?\r\n    weight:
+      How much do you weigh (in pounds)?\r\n    height: How tall are you?\r\n    hat_size:
+      What size hat do you wear?\r\n    shirt_size: What is your shirt size?\r\n    jacket_size:
+      What size jacket do you wear?\r\n    waist_size: What is your waist size (in
+      inches)?\r\n\r\n  field_options:\r\n    height:\r\n      edit_as: \r\n        field_type:
+      select_height\r\n        alt_options:\r\n          5'0\" or 60 inches: 60\r\n
+      \         5'1\" or 61 inches: 61\r\n          5'2\" or 62 inches: 62\r\n          5'3\"
+      or 63 inches: 63\r\n          5'4\" or 64 inches: 64\r\n          5'5\" or 65
+      inches: 65\r\n          5'6\" or 66 inches: 66\r\n          5'7\" or 67 inches:
+      67\r\n          5'8\" or 68 inches: 68\r\n          5'9\" or 69 inches: 69\r\n
+      \         5'10\" or 70 inches: 70\r\n          5'11\" or 71 inches: 71\r\n          6'0\"
+      or 72 inches: 72\r\n          6'1\" or 73 inches: 73\r\n          6'2\" or 74
+      inches: 74\r\n          6'3\" or 75 inches: 75\r\n          6'4\" or 76 inches:
+      76\r\n          6'5\" or 77 inches: 77\r\n          6'6\" or 78 inches: 78\r\n
+      \         6'7\" or 79 inches: 79\r\n          6'8\" or 80 inches: 80\r\n          6'9\"
+      or 81 inches: 81\r\n          6'10\" or 82 inches: 82\r\n          6'11\" or
+      83 inches: 83\r\n          7'1\" or 84 inches: 84\r\n          7'1\" or 85 inches:
+      85\r\n          7'2\" or 86 inches: 86\r\n          7'3\" or 87 inches: 87\r\n
+      \         7'4\" or 88 inches: 88\r\n          7'5\" or 89 inches: 89\r\n          7'6\"
+      or 90 inches: 90\r\n          7'7\" or 91 inches: 91\r\n          7'8\" or 92
+      inches: 92\r\n          7'9\" or 93 inches: 93\r\n          7'10\" or 94 inches:
+      94\r\n          7'11\" or 95 inches: 95\r\n\r\n\r\n  valid_if:\r\n    on_save:\r\n
+      \     not_all:\r\n        this:\r\n          birth_date: null\r\n"
+    user_email: 
   - id: 233
     name: IPA Phone Screen Review
     table_name: ipa_ps_comp_reviews
@@ -6066,48 +6387,6 @@ app_type:
       Will you have to take any study drugs not including your own medication?\r\n
       \  compensation_notes: Will you be compensated/paid for taking part in this
       study?\r\n   location_notes: Where does this study take place?\r\n   \r\n   "
-    user_email: 
-  - id: 189
-    name: IPA Subject Info
-    table_name: ipa_ps_sizes
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2018-05-31T14:52:15.259Z'
-    updated_at: '2019-06-25T08:27:40.361Z'
-    position: 
-    category: ipa-phone-screen
-    table_key_name: ''
-    field_list: birth_date, weight, height, hat_size, shirt_size, jacket_size, waist_size
-    result_order: ''
-    options: "default:\r\n  caption_before:\r\n    all_fields: |\r\n      Please answer
-      the following questions with honesty and to the best of your knowledge, as we
-      will use your responses to determine whether it is safe for you to participate
-      in the study.\r\n    birth_date: What is your date of birth?\r\n    weight:
-      How much do you weigh (in pounds)?\r\n    height: How tall are you?\r\n    hat_size:
-      What size hat do you wear?\r\n    shirt_size: What is your shirt size?\r\n    jacket_size:
-      What size jacket do you wear?\r\n    waist_size: What is your waist size (in
-      inches)?\r\n\r\n  field_options:\r\n    height:\r\n      edit_as: \r\n        field_type:
-      select_height\r\n        alt_options:\r\n          5'0\" or 60 inches: 60\r\n
-      \         5'1\" or 61 inches: 61\r\n          5'2\" or 62 inches: 62\r\n          5'3\"
-      or 63 inches: 63\r\n          5'4\" or 64 inches: 64\r\n          5'5\" or 65
-      inches: 65\r\n          5'6\" or 66 inches: 66\r\n          5'7\" or 67 inches:
-      67\r\n          5'8\" or 68 inches: 68\r\n          5'9\" or 69 inches: 69\r\n
-      \         5'10\" or 70 inches: 70\r\n          5'11\" or 71 inches: 71\r\n          6'0\"
-      or 72 inches: 72\r\n          6'1\" or 73 inches: 73\r\n          6'2\" or 74
-      inches: 74\r\n          6'3\" or 75 inches: 75\r\n          6'4\" or 76 inches:
-      76\r\n          6'5\" or 77 inches: 77\r\n          6'6\" or 78 inches: 78\r\n
-      \         6'7\" or 79 inches: 79\r\n          6'8\" or 80 inches: 80\r\n          6'9\"
-      or 81 inches: 81\r\n          6'10\" or 82 inches: 82\r\n          6'11\" or
-      83 inches: 83\r\n          7'1\" or 84 inches: 84\r\n          7'1\" or 85 inches:
-      85\r\n          7'2\" or 86 inches: 86\r\n          7'3\" or 87 inches: 87\r\n
-      \         7'4\" or 88 inches: 88\r\n          7'5\" or 89 inches: 89\r\n          7'6\"
-      or 90 inches: 90\r\n          7'7\" or 91 inches: 91\r\n          7'8\" or 92
-      inches: 92\r\n          7'9\" or 93 inches: 93\r\n          7'10\" or 94 inches:
-      94\r\n          7'11\" or 95 inches: 95\r\n"
     user_email: 
   - id: 185
     name: IPA TMS
@@ -6796,6 +7075,35 @@ app_type:
     result_order: ''
     options: 
     user_email: 
+  - id: 312
+    name: IPA Special Considerations
+    table_name: ipa_special_considerations
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-09-23T10:02:27.997Z'
+    updated_at: '2020-01-17T12:34:55.717Z'
+    position: 
+    category: ipa-records
+    table_key_name: ''
+    field_list: travel_with_wife_yes_no travel_with_wife_details tmoca_score mmse_yes_no
+      mmse_details bringing_cpap_yes_no tms_exempt_yes_no taking_med_for_mri_pet_yes_no
+    result_order: id
+    options: "default:\r\n\r\n  show_if:\r\n    travel_with_wife_details:\r\n      travel_with_wife_yes_no:
+      \"yes\"\r\n    mmse_yes_no:\r\n      tmoca_score:\r\n        - 1\r\n        -
+      2\r\n        - 3\r\n        - 4\r\n        - 5\r\n        - 6\r\n        - 7\r\n
+      \       - 8\r\n        - 9\r\n        - 10\r\n        - 11\r\n        - 12\r\n
+      \       - 13\r\n        - 14\r\n        - 15\r\n        - 16\r\n    mmse_details:\r\n
+      \     mmse_yes_no: 'yes'\r\n\r\n  caption_before:\r\n    travel_with_wife_yes_no:
+      \ Traveling with wife?\r\n    travel_with_wife_details: Name and additional
+      information\r\n    mmse_yes_no: MMSE\r\n    mmse_details: MMSE details\r\n    tmoca_score:
+      TMoCA Score\r\n    bringing_cpap_yes_no: Bringing CPAP?\r\n    tms_exempt_yes_no:
+      TMS exempt?\r\n    taking_med_for_mri_pet_yes_no: Taking medication for MRI/PET?\r\n
+      \ "
+    user_email: 
   - id: 311
     name: IPA Medical History
     table_name: ipa_medical_details
@@ -6806,7 +7114,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-09-23T10:02:27.866Z'
-    updated_at: '2019-10-30T09:36:00.352Z'
+    updated_at: '2020-01-17T12:34:55.614Z'
     position: 
     category: ipa-records
     table_key_name: ''
@@ -6826,123 +7134,118 @@ app_type:
       metal_implants_details metal_implants_mri_approval_details radiation_blank_yes_no
       radiation_details dietary_restrictions_blank_yes_no_dont_know dietary_restrictions_details
     result_order: id
-    options: "default:\r\n\r\n  show_if:\r\n    convulsion_or_seizure_details:\r\n
-      \     convulsion_or_seizure_blank_yes_no_dont_know: 'yes'\r\n    sleep_disorder_details:\r\n
-      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n    sleep_apnea_device_no_yes:\r\n
-      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n    sleep_apnea_device_details:\r\n
+    options: "default:\r\n\r\n  show_if:\r\n    convulsion_or_seizure_blank_yes_no_dont_know:\r\n
+      \     convulsion_or_seizure_blank_yes_no_dont_know: 'yes'\r\n    convulsion_or_seizure_details:\r\n
+      \     convulsion_or_seizure_blank_yes_no_dont_know: 'yes'\r\n      \r\n    sleep_disorder_blank_yes_no_dont_know:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"      \r\n    sleep_disorder_details:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"  \r\n    sleep_apnea_device_no_yes:\r\n
+      \     sleep_disorder_blank_yes_no_dont_know: \"yes\"      \r\n    sleep_apnea_device_details:\r\n
       \     sleep_disorder_blank_yes_no_dont_know: \"yes\"\r\n      sleep_apnea_device_no_yes:
-      \"yes\"\r\n    chronic_pain_details:\r\n      chronic_pain_blank_yes_no: 'yes'\r\n
-      \   chronic_pain_meds_blank_yes_no_dont_know:\r\n      chronic_pain_blank_yes_no:
+      \"yes\"\r\n    \r\n    chronic_pain_blank_yes_no:\r\n      chronic_pain_blank_yes_no:
+      'yes'      \r\n    chronic_pain_details:\r\n      chronic_pain_blank_yes_no:
+      'yes'\r\n    chronic_pain_meds_blank_yes_no_dont_know:\r\n      chronic_pain_blank_yes_no:
+      'yes'\r\n      \r\n    chronic_pain_meds_blank_yes_no_dont_know:\r\n      chronic_pain_meds_blank_yes_no_dont_know:
       'yes'\r\n    chronic_pain_meds_details:\r\n      chronic_pain_meds_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    hypertension_diagnosis_blank_yes_no_dont_know:\r\n      hypertension_diagnosis_blank_yes_no_dont_know:
       'yes'\r\n    hypertension_medications_blank_yes_no:\r\n      hypertension_diagnosis_blank_yes_no_dont_know:
       'yes'\r\n    hypertension_diagnosis_details:\r\n      hypertension_medications_blank_yes_no:
+      'yes'\r\n      \r\n    diabetes_diagnosis_blank_yes_no_dont_know:\r\n      diabetes_diagnosis_blank_yes_no_dont_know:
       'yes'\r\n    diabetes_medications_blank_yes_no:\r\n      diabetes_diagnosis_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    diabetes_diagnosis_details:\r\n      diabetes_medications_blank_yes_no:
-      'yes'\r\n\r\n    hemophilia_details:\r\n      hemophilia_blank_yes_no_dont_know:
-      'yes'\r\n    high_cholesterol_medications_blank_yes_no:\r\n      high_cholesterol_diagnosis_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    high_cholesterol_diagnosis_details:\r\n      high_cholesterol_medications_blank_yes_no:
-      'yes'\r\n    caridiac_pacemaker_details:\r\n      caridiac_pacemaker_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    other_heart_conditions_details:\r\n      other_heart_conditions_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    memory_problems_details:\r\n      memory_problems_blank_yes_no_dont_know:
-      'yes'\r\n    mental_health_conditions_details:\r\n      mental_health_conditions_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    mental_health_help_details:\r\n      mental_health_help_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    neurological_problems_details:\r\n      neurological_problems_blank_yes_no_dont_know:
-      'yes'\r\n    past_mri_details:\r\n      past_mri_yes_no_dont_know: 'yes'\r\n\r\n
-      \   metal_implants_details:\r\n      metal_implants_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    metal_implants_mri_approval_details:\r\n      metal_implants_blank_yes_no_dont_know:
-      'yes'\r\n\r\n    dietary_restrictions_details:\r\n      dietary_restrictions_blank_yes_no_dont_know:
-      \"yes\"\r\n\r\n    radiation_details:\r\n      radiation_blank_yes_no: \"yes\"\r\n\r\n
+      'yes'\r\n    diabetes_diagnosis_details:\r\n      diabetes_medications_blank_yes_no:
+      'yes'\r\n      \r\n\r\n    hemophilia_blank_yes_no_dont_know:\r\n      hemophilia_blank_yes_no_dont_know:
+      'yes'\r\n    hemophilia_details:\r\n      hemophilia_blank_yes_no_dont_know:
+      'yes'\r\n      \r\n    high_cholesterol_diagnosis_blank_yes_no_dont_know:\r\n
+      \     high_cholesterol_diagnosis_blank_yes_no_dont_know: 'yes'\r\n    high_cholesterol_medications_blank_yes_no:\r\n
+      \     high_cholesterol_diagnosis_blank_yes_no_dont_know: 'yes'\r\n    high_cholesterol_diagnosis_details:\r\n
+      \     high_cholesterol_medications_blank_yes_no: 'yes'\r\n      \r\n    caridiac_pacemaker_blank_yes_no_dont_know:\r\n
+      \     caridiac_pacemaker_blank_yes_no_dont_know: 'yes'\r\n    caridiac_pacemaker_details:\r\n
+      \     caridiac_pacemaker_blank_yes_no_dont_know: 'yes'\r\n\r\n    other_heart_conditions_blank_yes_no_dont_know:\r\n
+      \     other_heart_conditions_blank_yes_no_dont_know: 'yes'\r\n    other_heart_conditions_details:\r\n
+      \     other_heart_conditions_blank_yes_no_dont_know: 'yes'\r\n\r\n    memory_problems_blank_yes_no_dont_know:\r\n
+      \     memory_problems_blank_yes_no_dont_know: 'yes'\r\n    memory_problems_details:\r\n
+      \     memory_problems_blank_yes_no_dont_know: 'yes'\r\n      \r\n    mental_health_conditions_blank_yes_no_dont_know:\r\n
+      \     mental_health_conditions_blank_yes_no_dont_know: 'yes'\r\n    mental_health_conditions_details:\r\n
+      \     mental_health_conditions_blank_yes_no_dont_know: 'yes'\r\n\r\n    mental_health_help_blank_yes_no_dont_know:\r\n
+      \     mental_health_help_blank_yes_no_dont_know: 'yes'\r\n    mental_health_help_details:\r\n
+      \     mental_health_help_blank_yes_no_dont_know: 'yes'\r\n\r\n    neurological_problems_blank_yes_no_dont_know:\r\n
+      \     neurological_problems_blank_yes_no_dont_know: 'yes'\r\n    neurological_problems_details:\r\n
+      \     neurological_problems_blank_yes_no_dont_know: 'yes'\r\n      \r\n    past_mri_yes_no_dont_know:\r\n
+      \     past_mri_yes_no_dont_know: 'yes'\r\n    past_mri_details:\r\n      past_mri_yes_no_dont_know:
+      'yes'\r\n\r\n    metal_implants_blank_yes_no_dont_know:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n    metal_implants_details:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n\r\n    metal_implants_blank_yes_no_dont_know:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n    metal_implants_mri_approval_details:\r\n      metal_implants_blank_yes_no_dont_know:
+      'yes'\r\n\r\n    dietary_restrictions_blank_yes_no_dont_know:\r\n      dietary_restrictions_blank_yes_no_dont_know:
+      \"yes\"\r\n    dietary_restrictions_details:\r\n      dietary_restrictions_blank_yes_no_dont_know:
+      \"yes\"\r\n\r\n    radiation_blank_yes_no:\r\n      radiation_blank_yes_no:
+      \"yes\"\r\n    radiation_details:\r\n      radiation_blank_yes_no: \"yes\"\r\n\r\n
       \ caption_before:\r\n    all_fields:\r\n    convulsion_or_seizure_blank_yes_no_dont_know:
-      |\r\n      **Seizures**\r\n\r\n      Have you ever had a convulsion or a seizure?\r\n\r\n
-      \   convulsion_or_seizure_details: <i>IF YES</i>, how long ago, did you go to
-      the hospital, were you put on medication, was it determined why?\r\n\r\n    sleep_disorder_blank_yes_no_dont_know:
-      |\r\n      **Sleep Apnea**\r\n\r\n      Have you ever been diagnosed with sleep
-      apnea or\r\n      any other sleep disorders (e.g. narcolepsy)\r\n\r\n    sleep_disorder_details:
-      <i>IF YES</i> Can you please tell me more about this?\r\n    sleep_apnea_device_no_yes:
-      IF THEY HAVE SLEEP APNEA<br/>Do you use a CPAP machine or another device for
-      your sleep apnea?\r\n    sleep_apnea_device_details: <i>IF YES</i> How many
-      nights a week?  Do you take it with you when you travel?\r\n\r\n    chronic_pain_blank_yes_no:
-      |\r\n      **Pain**\r\n\r\n      Do you have chronic pain?\r\n\r\n    chronic_pain_details:
+      |\r\n      **Seizures**\r\n      Have you ever had a convulsion or a seizure?\r\n
+      \     \r\n    convulsion_or_seizure_details: |\r\n      *IF YES*, how long ago,
+      did you go to the hospital, \r\n      were you put on medication, was it determined
+      why?\r\n\r\n    sleep_disorder_blank_yes_no_dont_know: |\r\n      **Sleep Apnea**\r\n
+      \     Have you ever been diagnosed with sleep apnea or \r\n      any other sleep
+      disorders (e.g. narcolepsy)\r\n      \r\n    sleep_disorder_details: <i>IF YES</i>
+      Can you please tell me more about this?\r\n    sleep_apnea_device_no_yes: |\r\n
+      \     Do you use a CPAP machine or another device for your sleep apnea?\r\n
+      \     \r\n    sleep_apnea_device_details: |\r\n      *IF YES* How many nights
+      a week? Do you take it with you when you travel?\r\n\r\n    chronic_pain_blank_yes_no:
+      |\r\n      **Pain**\r\n      Do you have chronic pain?\r\n      \r\n    chronic_pain_details:
       <i>IF YES</i> Please describe how often and how intense.\r\n    chronic_pain_meds_blank_yes_no_dont_know:
       <i>IF YES TO CHRONIC PAIN</i><br/>Do you currently take any medication (prescription
       or over the counter) or utilize alternative therapies to manage your chronic
       pain?\r\n    chronic_pain_meds_details: <i>IF YES</i> Can you please tell me
       more about this?\r\n\r\n    hypertension_diagnosis_blank_yes_no_dont_know: |\r\n
-      \     **Hypertension**\r\n\r\n      Have you been diagnosed with high blood
-      pressure (hypertension)?\r\n\r\n    hypertension_medications_blank_yes_no: <i>IF
+      \     **Hypertension**\r\n      Have you been diagnosed with high blood pressure
+      (hypertension)?\r\n      \r\n    hypertension_medications_blank_yes_no: <i>IF
       YES</i> Have you ever or are you currently taking medications to manage these?\r\n
       \   hypertension_diagnosis_details: Can you please tell me what medications?\r\n\r\n
-      \   diabetes_diagnosis_blank_yes_no_dont_know: |\r\n      **Diabetes**\r\n\r\n
-      \     Have you ever been diagnosed with diabetes\r\n\r\n    diabetes_medications_blank_yes_no:
+      \   diabetes_diagnosis_blank_yes_no_dont_know: |\r\n      **Diabetes**\r\n      Have
+      you ever been diagnosed with diabetes\r\n      \r\n    diabetes_medications_blank_yes_no:
       <i>IF YES</i> Have you ever or are you currently taking medications to manage
       these?\r\n    diabetes_diagnosis_details: Can you please tell me what medications?\r\n\r\n
-      \   hemophilia_blank_yes_no_dont_know: |\r\n      **Blood Clotting Disorder**\r\n\r\n
-      \     Do you have any blood clotting disorders?\r\n\r\n    hemophilia_details:
+      \   hemophilia_blank_yes_no_dont_know: |\r\n      **Blood Clotting Disorder**\r\n
+      \     Do you have any blood clotting disorders?\r\n      \r\n    hemophilia_details:
       <i>IF YES</i> Do you currently take medication to control it?\r\n\r\n    high_cholesterol_diagnosis_blank_yes_no_dont_know:
-      |\r\n      **High Cholesterol**\r\n\r\n      Have you ever been diagnosed with
-      high cholesterol?\r\n\r\n    high_cholesterol_medications_blank_yes_no: <i>IF
+      |\r\n      **High Cholesterol**\r\n      Have you ever been diagnosed with high
+      cholesterol?\r\n      \r\n    high_cholesterol_medications_blank_yes_no: <i>IF
       YES</i> Have you ever or are you currently taking medications to manage these?\r\n
       \   high_cholesterol_diagnosis_details: Can you please tell me what medications?\r\n\r\n
       \   caridiac_pacemaker_blank_yes_no_dont_know: |\r\n      **Pacemaker or Intracardiac
-      Lines**\r\n\r\n      Do you have a cardiac pacemaker or intracardiac\r\n      lines,
-      epidural/subdural stimulator, etc.\r\n\r\n    caridiac_pacemaker_details: Details\r\n\r\n
-      \   other_heart_conditions_blank_yes_no_dont_know: |\r\n      **Other Heart
-      Conditions**\r\n\r\n      Have you been diagnosed with any other heart conditions\r\n
-      \     or problems (e.g. heart attack, irregular heartbeat, heart failure)?\r\n\r\n
-      \   other_heart_conditions_details: <i>IF YES</i> Please describe.\r\n\r\n    memory_problems_blank_yes_no_dont_know:
-      |\r\n      **Memory**\r\n\r\n      Do you have any problems with your memory?\r\n\r\n
-      \   memory_problems_details: <i>IF YES</i> Please describe and tell me how long
-      you have noticed a problem.\r\n\r\n    mental_health_conditions_blank_yes_no_dont_know:
-      |\r\n      **Mental Health**\r\n\r\n      Have you ever been diagnosed with
-      depression, anxiety,\r\n      bipolar disorder, or another mental health condition?\r\n\r\n
-      \   mental_health_conditions_details: <i>IF YES</i> Can you please tell me more
-      about this?\r\n    mental_health_help_blank_yes_no_dont_know: Have you ever
-      sought help from a mental health professional in the past?\r\n    mental_health_help_details:
-      <i>IF YES</i> Can you please tell me more about this?\r\n\r\n    neurological_problems_blank_yes_no_dont_know:
-      |\r\n      **Neurological Problems**\r\n\r\n      Do you have a history of any
-      neurological problems,\r\n      such as history of stroke, head injury, Parkinson’s
-      Disease, MS?\r\n\r\n    neurological_problems_details: Please describe.\r\n\r\n\r\n
-      \   past_mri_yes_no_dont_know: |\r\n      **Claustrophobia**\r\n\r\n      Did
-      you ever undergo an MRI in the past?\r\n\r\n    past_mri_details: <i>IF YES</i>
-      Were there any problems?\r\n\r\n    metal_implants_blank_yes_no_dont_know: |\r\n
-      \     **MRI - metal implants**\r\n\r\n      Do you have any metal implants such
-      as surgical clips, heart valves\r\n      with steel parts, metal fragments,
-      shrapnel or steel implants?\r\n\r\n    metal_implants_details: |\r\n      <i>IF
-      YES</i> Do you have a doctor card?\r\n\r\n    metal_implants_mri_approval_details:
-      |\r\n      MRI approvals and other details\r\n\r\n    radiation_blank_yes_no:
-      |\r\n      **Radiation**\r\n\r\n      Have you participated in other research
-      studies (not\r\n      including this study) involving radiation exposure within
-      the last 12 months?\r\n\r\n    radiation_details: |\r\n      IF YES, can you
-      please tell me what type of radiation\r\n      research assessments you have
-      undergone?\r\n\r\n    dietary_restrictions_blank_yes_no_dont_know: |\r\n      **Allegies**\r\n\r\n
-      \     Do you have any dietary restrictions or allergies?\r\n\r\n    dietary_restrictions_details:
-      <i>IF YES</i> Could you tell me what dietary restrictions/allergies you have?\r\n"
-    user_email: 
-  - id: 312
-    name: IPA Special Considerations
-    table_name: ipa_special_considerations
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-09-23T10:02:27.997Z'
-    updated_at: '2019-09-23T10:26:48.312Z'
-    position: 
-    category: ipa-records
-    table_key_name: ''
-    field_list: travel_with_wife_yes_no travel_with_wife_details mmse_yes_no mmse_details
-      tmoca_score bringing_cpap_yes_no tms_exempt_yes_no taking_med_for_mri_pet_yes_no
-    result_order: id
-    options: "default:\r\n\r\n  show_if:\r\n    travel_with_wife_details:\r\n      travel_with_wife_yes_no:
-      \"yes\"\r\n    tmoca_score:\r\n      mmse_yes_no: 'yes'\r\n    mmse_details:\r\n
-      \     mmse_yes_no: 'yes'\r\n\r\n  caption_before:\r\n    travel_with_wife_yes_no:
-      \ Traveling with wife?\r\n    travel_with_wife_details: Name and additional
-      information\r\n    mmse_yes_no: MMSE\r\n    mmse_details: MMSE details\r\n    tmoca_score:
-      TMoCA Score\r\n    bringing_cpap_yes_no: Bringing CPAP?\r\n    tms_exempt_yes_no:
-      TMS exempt?\r\n    taking_med_for_mri_pet_yes_no: Taking medication for MRI/PET?\r\n
-      \ "
+      Lines**\r\n      Do you have a cardiac pacemaker or intracardiac \r\n      lines,
+      epidural/subdural stimulator, etc.\r\n      \r\n    caridiac_pacemaker_details:
+      Details\r\n\r\n    other_heart_conditions_blank_yes_no_dont_know: |\r\n      **Other
+      Heart Conditions**\r\n      Have you been diagnosed with any other heart conditions
+      \r\n      or problems (e.g. heart attack, irregular heartbeat, heart failure)?\r\n
+      \     \r\n    other_heart_conditions_details: <i>IF YES</i> Please describe.\r\n\r\n
+      \   memory_problems_blank_yes_no_dont_know: |\r\n      **Memory**\r\n      Do
+      you have any problems with your memory?\r\n      \r\n    memory_problems_details:
+      <i>IF YES</i> Please describe and tell me how long you have noticed a problem.\r\n\r\n
+      \   mental_health_conditions_blank_yes_no_dont_know: |\r\n      **Mental Health**\r\n
+      \     Have you ever been diagnosed with depression, anxiety, \r\n      bipolar
+      disorder, or another mental health condition?\r\n      \r\n    mental_health_conditions_details:
+      <i>IF YES</i> Can you please tell me more about this?\r\n    mental_health_help_blank_yes_no_dont_know:
+      Have you ever sought help from a mental health professional in the past?\r\n
+      \   mental_health_help_details: <i>IF YES</i> Can you please tell me more about
+      this?\r\n\r\n    neurological_problems_blank_yes_no_dont_know: |\r\n      **Neurological
+      Problems**\r\n      Do you have a history of any neurological problems, \r\n
+      \     such as history of stroke, head injury, Parkinson’s Disease, MS?\r\n      \r\n
+      \   neurological_problems_details: Please describe.\r\n\r\n\r\n    past_mri_yes_no_dont_know:
+      |\r\n      **Claustrophobia**\r\n      Did you ever undergo an MRI in the past?\r\n
+      \     \r\n    past_mri_details: <i>IF YES</i> Were there any problems?\r\n\r\n
+      \   metal_implants_blank_yes_no_dont_know: |\r\n      **MRI - metal implants**\r\n
+      \     Do you have any metal implants such as surgical clips, heart valves\r\n
+      \     with steel parts, metal fragments, shrapnel or steel implants?\r\n\r\n
+      \   metal_implants_details: |\r\n      <i>IF YES</i> Do you have a doctor card?\r\n\r\n
+      \   metal_implants_mri_approval_details: |\r\n      MRI approvals and other
+      details\r\n\r\n    radiation_blank_yes_no: |\r\n      **Radiation**\r\n      Have
+      you participated in other research studies (not\r\n      including this study)
+      involving radiation exposure within the last 12 months?\r\n\r\n    radiation_details:
+      |\r\n      IF YES, can you please tell me what type of radiation\r\n      research
+      assessments you have undergone?\r\n\r\n    dietary_restrictions_blank_yes_no_dont_know:
+      |\r\n      **Allegies**\r\n      Do you have any dietary restrictions or allergies?\r\n
+      \     \r\n    dietary_restrictions_details: <i>IF YES</i> Could you tell me
+      what dietary restrictions/allergies you have?\r\n"
     user_email: 
   - id: 313
     name: IPA Medications
@@ -7037,16 +7340,16 @@ app_type:
     external_id_attribute: ipa_id
     external_id_view_formatter: ''
     external_id_edit_pattern: ''
-    prevent_edit: true
-    pregenerate_ids: true
+    prevent_edit: false
+    pregenerate_ids: false
     min_id: 1
-    max_id: 1000000
-    admin_id: 1
+    max_id: 999999999
+    admin_id: 2
     disabled: false
     created_at: '2018-05-31T14:52:24.275Z'
-    updated_at: '2019-10-22T10:59:17.664Z'
+    updated_at: '2020-01-17T12:34:55.901Z'
     alphanumeric: false
-    extra_fields: 
+    extra_fields: ''
     user_email: 
   associated_reports:
   - id: 42
@@ -7249,10 +7552,13 @@ app_type:
       wd\r\n    WHERE\r\n     select_subject_withdrew_reason = 'withdrew' OR\r\n     select_investigator_terminated
       IN ('yes - due to ae', 'yes - other reason') OR\r\n     lost_to_follow_up_no_yes
       = 'yes' OR\r\n     no_longer_participating_no_yes = 'yes'\r\n\r\n     UNION\r\n\r\n
-      \   --\r\n    -- Completed study\r\n    --\r\n    SELECT\r\n      master_id,\r\n
-      \     'completed exit survey' \"exit_type\"\r\n    FROM ipa_surveys surv\r\n
-      \   WHERE\r\n      select_survey_type = 'exit survey'\r\n\r\n  -- End left outer
-      join\r\n  ) dlo ON dlo.master_id = di.master_id\r\n\r\n-- End ranked selection\r\n)
+      \   --\r\n    -- Exited, L2FU (before scheduling) or Completed study\r\n    --\r\n
+      \   SELECT\r\n      master_id,\r\n      CASE extra_log_type\r\n      WHEN 'completed'
+      THEN 'completed study'\r\n      WHEN 'exit_opt_out' THEN 'opted out'\r\n      WHEN
+      'exit_l2fu' THEN 'lost to follow-up (before scheduling)'\r\n      END \"exit_type\"\r\n
+      \   FROM activity_log_ipa_assignments\r\n    WHERE\r\n      extra_log_type IN
+      ('completed', 'exit_opt_out', 'exit_l2fu')\r\n\r\n  -- End left outer join\r\n
+      \ ) dlo ON dlo.master_id = di.master_id\r\n\r\n-- End ranked selection\r\n)
       AS dt\r\n\r\n-- Include player details\r\ninner join player_infos pi on dt.master_id
       = pi.master_id\r\n-- Match IPA ID to master_id\r\ninner join ipa_assignments
       ipa on dt.master_id = ipa.master_id\r\n\r\nWHERE\r\n(\r\n  -- Either:\r\n  --
@@ -7309,7 +7615,7 @@ app_type:
       \   OR\r\n    :completed_or_withdrawn = 'not_in_study' AND dt.exit_type IS NOT
       NULL\r\n  )\r\n)\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
     search_attrs: "\r\nactivity_performed: \r\n  config_selector: \r\n    all: true\r\n
-      \   multiple: single\r\n    default: general-follow-up\r\n    selections:\r\n
+      \   multiple: single\r\n    default: general-follow-up\r\n    selections: &selections\r\n
       \     general communication - follow-up: general-follow-up\r\n      general
       communication - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
       \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
@@ -7324,32 +7630,18 @@ app_type:
       appointment: appointment-set\r\n      added emergency contacts: contact_info\r\n
       \     transportation and housing: transportation_and_housing\r\n      navigation
       planned event: has-planned-event\r\n      navigation event feedback: has-event-feedback\r\n
-      \     consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n
-      \     withdraw: withdraw\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector:
+      \     consent mailing: consent_mailing\r\n      exit (opt-out): exit_opt_out\r\n
+      \     lost to follow-up (before scheduling): exit_l2fu\r\n      withdraw: withdraw\r\n
+      \     complete: completed\r\n\r\n\r\nactivity_outstanding: \r\n  config_selector:
       \r\n    label: Activity outstanding (optional)\r\n    all: true\r\n    multiple:
-      single\r\n    default: general-completed\r\n    selections:\r\n      general
-      communication - follow-up: general-follow-up\r\n      general communication
-      - completed: general-completed\r\n      scheduled screening: schedule_screening\r\n
-      \     phone screen complete: phone-screen-complete\r\n      inclusion/exclusion
-      phone screen finalized (ready for sign-off): inex-phone-screen-finalized\r\n
-      \     inclusion/exclusion phone screen sign-off (PI): inex-phone-screen-so-pi\r\n
-      \     inclusion/exclusion phone screen sign-off (MedNav): inex-phone-screen-so-mednav\r\n
-      \     inclusion/exclusion phone screen sign-off (Staff): inex-phone-screen-so-staff\r\n
-      \     inclusion/exclusion tms ready for sign-off: inex-tms-responses\r\n      inclusion/exclusion
-      tms sign-off: inex-tms-so\r\n      inclusion/exclusion baseline review: inex-baseline-complete\r\n
-      \     payment made: payments\r\n      scheduled screening follow-up: screening_follow_up\r\n
-      \     performed screening follow-up: perform_screening_follow_up\r\n      set
-      appointment: appointment-set\r\n      added emergency contacts: contact_info\r\n
-      \     transportation and housing: transportation_and_housing\r\n      navigation
-      planned event: has-planned-event\r\n      navigation event feedback: has-event-feedback\r\n
-      \     consent mailing: consent_mailing\r\n      follow up surveys: follow_up_surveys\r\n
-      \     withdraw: withdraw\r\n\r\n\r\ncompleted_or_withdrawn: \r\n  config_selector:
-      \r\n    all: true\r\n    multiple: single\r\n    default: in_study\r\n    selections:
-      \r\n      in study: in_study\r\n      completed or withdrawn: not_in_study"
+      single\r\n    default: general-completed\r\n    selections:\r\n      <<: *selections\r\n\r\ncompleted_or_withdrawn:
+      \r\n  config_selector: \r\n    all: true\r\n    multiple: single\r\n    default:
+      in_study\r\n    selections: \r\n      in study: in_study\r\n      completed,
+      exited or withdrawn: not_in_study"
     admin_id: 2
     disabled: false
     created_at: '2018-06-04T17:22:35.951Z'
-    updated_at: '2019-06-25T08:29:28.523Z'
+    updated_at: '2020-01-17T14:41:24.359Z'
     report_type: search
     auto: false
     searchable: true
@@ -7359,7 +7651,7 @@ app_type:
     selection_fields: ''
     item_type: ipa
     short_name: ipa_outstanding_activities
-    options: 
+    options: ''
     user_email: 
   - id: 53
     name: IPA Protocol Deviation Initial Review
@@ -12902,7 +13194,7 @@ app_type:
     disabled: false
     admin_id: 2
     created_at: '2018-05-31T14:07:29.772Z'
-    updated_at: '2019-09-23T10:26:48.705Z'
+    updated_at: '2020-01-17T12:34:59.889Z'
     description: 
     user_email: 
   - id: 5
@@ -12915,7 +13207,7 @@ app_type:
     disabled: false
     admin_id: 2
     created_at: '2018-05-31T14:07:29.785Z'
-    updated_at: '2019-09-23T10:26:48.712Z'
+    updated_at: '2020-01-17T12:34:59.896Z'
     description: 
     user_email: 
   - id: 6
@@ -12923,13 +13215,13 @@ app_type:
     layout_name: master
     panel_name: details
     panel_label: Participant Details
-    panel_position: 9
+    panel_position: 10
     options: "contains:\r\n  categories: \r\n  - details\r\n\r\nview_options:\r\n
       \ initial_show: true\r\n\r\ntab:\r\n  parent: participant_details"
     disabled: false
     admin_id: 2
     created_at: '2018-05-31T14:07:29.800Z'
-    updated_at: '2019-09-23T10:26:48.749Z'
+    updated_at: '2020-01-17T12:34:59.878Z'
     description: 
     user_email: 
   - id: 7
@@ -12937,13 +13229,13 @@ app_type:
     layout_name: master
     panel_name: external-ids
     panel_label: External IDs
-    panel_position: 10
+    panel_position: 11
     options: "contains:\r\n  categories:\r\n  - external-ids\r\n\r\ntab:\r\n  parent:
       participant_details"
     disabled: false
     admin_id: 2
     created_at: '2018-05-31T14:07:29.810Z'
-    updated_at: '2019-09-23T10:26:48.755Z'
+    updated_at: '2020-01-17T12:34:59.883Z'
     description: 
     user_email: 
   - id: 8
@@ -12956,7 +13248,7 @@ app_type:
     disabled: false
     admin_id: 2
     created_at: '2018-05-31T14:07:29.820Z'
-    updated_at: '2019-09-23T10:26:48.719Z'
+    updated_at: '2020-01-17T12:34:59.903Z'
     description: 
     user_email: 
   - id: 9
@@ -12969,7 +13261,7 @@ app_type:
     disabled: false
     admin_id: 2
     created_at: '2018-05-31T14:07:29.834Z'
-    updated_at: '2019-09-23T10:26:48.726Z'
+    updated_at: '2020-01-17T12:34:59.909Z'
     description: 
     user_email: 
   - id: 10
@@ -12995,7 +13287,7 @@ app_type:
     disabled: false
     admin_id: 2
     created_at: '2018-05-31T14:07:29.854Z'
-    updated_at: '2019-09-23T10:26:48.733Z'
+    updated_at: '2020-01-17T12:34:59.915Z'
     description: 
     user_email: 
   - id: 12
@@ -13017,13 +13309,13 @@ app_type:
     layout_name: master
     panel_name: ipa-audit
     panel_label: Audit
-    panel_position: 11
+    panel_position: 12
     options: "contains:\r\n  categories:\r\n    - ipa-audit-history\r\n#  - ipa-in-ex-records\r\n\r\n#tab:\r\n#
       \ parent: participant_details"
     disabled: false
     admin_id: 2
     created_at: '2018-09-07T16:18:59.558Z'
-    updated_at: '2019-09-23T10:26:48.760Z'
+    updated_at: '2020-01-17T12:34:59.888Z'
     description: 
     user_email: 
   - id: 15
@@ -13036,7 +13328,7 @@ app_type:
     disabled: false
     admin_id: 2
     created_at: '2019-05-08T13:40:46.498Z'
-    updated_at: '2019-09-23T10:26:48.740Z'
+    updated_at: '2020-01-17T12:34:59.921Z'
     description: 
     user_email: 
   - id: 17
@@ -13045,13 +13337,12 @@ app_type:
     panel_name: all
     panel_label: Menu
     panel_position: 1
-    options: "nav:\r\n  links:\r\n    - label: Calendar\r\n      resource_name: IPA
-      Calendar\r\n      resource_type: report\r\n      url: /reports/ipa__ipa_appointments\r\n
-      \   \r\n    "
+    options: "nav:\r\n  links:\r\n    - label: Calendar\r\n      url: /reports/ipa__ipa_appointments\r\n
+      \     resource_type: report\r\n      resource_name: IPA Calendar"
     disabled: false
     admin_id: 2
     created_at: '2019-06-25T12:06:41.884Z'
-    updated_at: '2019-06-25T12:11:01.860Z'
+    updated_at: '2020-01-17T12:34:59.602Z'
     description: 
     user_email: 
   - id: 33
@@ -13060,11 +13351,11 @@ app_type:
     panel_name: ipa-summary
     panel_label: Participant Summary
     panel_position: 2
-    options: "contains: \r\n  resources:\r\n  - activity_log__ipa_assignment_summaries\r\n"
+    options: "contains: \r\n  resources:\r\n  - activity_log__ipa_assignment_summaries"
     disabled: false
     admin_id: 2
     created_at: '2019-09-23T10:02:28.231Z'
-    updated_at: '2019-11-12T10:26:31.605Z'
+    updated_at: '2020-01-17T12:34:59.923Z'
     description: ''
     user_email: 
   - id: 34
@@ -13073,16 +13364,24 @@ app_type:
     panel_name: summary
     panel_label: Participant Summary
     panel_position: 1
-    options: "container:\r\n  rows:\r\n    - styles:\r\n        min-height: 30vh\r\n
+    options: "container:\r\n  rows:\r\n    - styles:\r\n        min-height: 10vh\r\n
       \     cols:\r\n        - label: Participant Summary\r\n          header: |\r\n
       \           ## IPA ID: {{ids.ipa_id}}\r\n          \r\n          classes: col-md-24
       col-lg-24\r\n          resource: \r\n            name: activity_log__ipa_assignment_summary\r\n
-      \           \r\n            \r\n        \r\nview_css:\r\n  selectors:\r\n    .sp-main:\r\n
-      \     margin: 2% 5%"
+      \           \r\n            \r\n        \r\nview_css:\r\n  selectors:\r\n    div.sp-col-inner:\r\n
+      \     border: 0\r\n      box-shadow: none\r\n    .sp-main:\r\n      margin:
+      2% 5%\r\n    li.list-group-item.caption-before:\r\n      padding: 0.4em 0.5em
+      0.1em\r\n      min-height: 5px      \r\n    li.list-group-item.result-field-container:\r\n
+      \     padding: 0.1em 0.8em 0.2em \r\n      min-height: 5px\r\n    li.list-group-item.result-notes-container:\r\n
+      \     padding: 0.1em 0.8em 0.2em \r\n      min-height: 5px\r\n    .notes-block
+      .notes-text:\r\n      min-height: 5px\r\n    .sp-col-header h2:\r\n      font-size:
+      24px\r\n    .sp-col-header:\r\n      padding: 0 24px;\r\n      position: absolute\r\n
+      \     right: 0\r\n      display: inline-block\r\n      top: 0\r\n      border-top:
+      0"
     disabled: false
     admin_id: 2
     created_at: '2019-10-18T15:45:24.696Z'
-    updated_at: '2019-10-21T10:44:20.164Z'
+    updated_at: '2020-01-17T12:34:59.934Z'
     description: ''
     user_email: 
   - id: 35
@@ -13093,11 +13392,32 @@ app_type:
     panel_position: 2
     options: "nav:\r\n  label: actions\r\n  links:\r\n    - label: Print Summary\r\n
       \     resource_name: view_dashboards\r\n      resource_type: general\r\n      url:
-      /page_layouts/summary?filters[master_id]={{id}}"
+      /page_layouts/summary?filters[master_id]={{id}}\r\n      "
     disabled: false
     admin_id: 2
     created_at: '2019-10-18T15:46:19.327Z'
-    updated_at: '2019-10-18T15:46:19.327Z'
+    updated_at: '2020-01-17T12:34:59.941Z'
+    description: ''
+    user_email: 
+  - id: 51
+    app_type_id: 3
+    layout_name: standalone
+    panel_name: ipa-dashboard
+    panel_label: IPA Dashboard
+    panel_position: 1
+    options: "container:\r\n  rows:\r\n        \r\n  \r\n    - cols:\r\n        -
+      label: Participant Status\r\n          classes: col-md-12\r\n          report:\r\n
+      \           id: ipa-dashboard__participant_status\r\n\r\n        - label: T-MoCA
+      Scores\r\n          classes: col-md-12\r\n          report:\r\n            id:
+      ipa-dashboard__t_moca_scores\r\n\r\n\r\n    - cols:\r\n        - label: Screenings
+      & Enrollments\r\n          classes: col-md-offset-2 col-md-20\r\n          report:\r\n
+      \           id: ipa-dashboard__screenings_completed\r\n            \r\nview_css:\r\n
+      \ selectors:\r\n    .report-chart:\r\n      height: 30vh\r\n      min-height:
+      200px\r\n      \r\n      "
+    disabled: false
+    admin_id: 2
+    created_at: '2020-01-17T12:34:59.611Z'
+    updated_at: '2020-01-17T12:34:59.611Z'
     description: ''
     user_email: 
   user_roles:
@@ -14298,6 +14618,582 @@ app_type:
     created_at: '2019-10-18T15:48:41.140Z'
     updated_at: '2019-10-18T15:48:41.140Z'
     user_email: template@template
+  - id: 871
+    app_type_id: 3
+    role_name: user - protocol deviation
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:34:59.961Z'
+    updated_at: '2020-01-17T12:34:59.961Z'
+    user_email: template@template
+  - id: 872
+    app_type_id: 3
+    role_name: irb reporting
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.005Z'
+    updated_at: '2020-01-17T12:35:00.005Z'
+    user_email: template@template
+  - id: 873
+    app_type_id: 3
+    role_name: user - adverse event
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.064Z'
+    updated_at: '2020-01-17T12:35:00.064Z'
+    user_email: template@template
+  - id: 874
+    app_type_id: 3
+    role_name: tracker
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.078Z'
+    updated_at: '2020-01-17T12:35:00.078Z'
+    user_email: template@template
+  - id: 875
+    app_type_id: 3
+    role_name: user - navigation
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.092Z'
+    updated_at: '2020-01-17T12:35:00.092Z'
+    user_email: template@template
+  - id: 876
+    app_type_id: 3
+    role_name: user - phone screen
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.107Z'
+    updated_at: '2020-01-17T12:35:00.107Z'
+    user_email: template@template
+  - id: 877
+    app_type_id: 3
+    role_name: audit
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.122Z'
+    updated_at: '2020-01-17T12:35:00.122Z'
+    user_email: template@template
+  - id: 878
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.141Z'
+    updated_at: '2020-01-17T12:35:00.141Z'
+    user_email: template@template
+  - id: 879
+    app_type_id: 3
+    role_name: email - adverse event review
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.154Z'
+    updated_at: '2020-01-17T12:35:00.154Z'
+    user_email: template@template
+  - id: 880
+    app_type_id: 3
+    role_name: reviewer - adverse event
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.167Z'
+    updated_at: '2020-01-17T12:35:00.167Z'
+    user_email: template@template
+  - id: 881
+    app_type_id: 3
+    role_name: email - adverse event irb report
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.180Z'
+    updated_at: '2020-01-17T12:35:00.180Z'
+    user_email: template@template
+  - id: 882
+    app_type_id: 3
+    role_name: reviewer - protocol deviation
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:00.194Z'
+    updated_at: '2020-01-17T12:35:00.194Z'
+    user_email: template@template
+  - id: 883
+    app_type_id: 3
+    role_name: tracker
+    user_id: 113
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:05.743Z'
+    updated_at: '2020-01-17T12:35:05.743Z'
+    user_email: ipa-tracker-user@template
+  - id: 884
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 115
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:15.956Z'
+    updated_at: '2020-01-17T12:35:15.956Z'
+    user_email: ipa-inex-user@template
+  - id: 885
+    app_type_id: 3
+    role_name: user - navigation
+    user_id: 116
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:20.903Z'
+    updated_at: '2020-01-17T12:35:20.903Z'
+    user_email: ipa-navigation-user@template
+  - id: 886
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 117
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:25.385Z'
+    updated_at: '2020-01-17T12:35:25.385Z'
+    user_email: ipa-adverse-events-user@template
+  - id: 887
+    app_type_id: 3
+    role_name: user - protocol deviation
+    user_id: 118
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.325Z'
+    updated_at: '2020-01-17T12:35:30.325Z'
+    user_email: ipa-protocol-deviations-user@template
+  - id: 888
+    app_type_id: 3
+    role_name: phone screener
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.417Z'
+    updated_at: '2020-01-17T12:35:30.417Z'
+    user_email: template@template
+  - id: 889
+    app_type_id: 3
+    role_name: user - inex
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.435Z'
+    updated_at: '2020-01-17T12:35:30.435Z'
+    user_email: template@template
+  - id: 890
+    app_type_id: 3
+    role_name: user - participant details
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.453Z'
+    updated_at: '2020-01-17T12:35:30.453Z'
+    user_email: template@template
+  - id: 891
+    app_type_id: 3
+    role_name: user - protocol exception
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.473Z'
+    updated_at: '2020-01-17T12:35:30.473Z'
+    user_email: template@template
+  - id: 892
+    app_type_id: 3
+    role_name: user - protocol exception
+    user_id: 84
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.489Z'
+    updated_at: '2020-01-17T12:35:30.489Z'
+    user_email: sarah_cohan@hms.harvard.edu
+  - id: 893
+    app_type_id: 3
+    role_name: user - protocol exception
+    user_id: 116
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.512Z'
+    updated_at: '2020-01-17T12:35:30.512Z'
+    user_email: ipa-navigation-user@template
+  - id: 894
+    app_type_id: 3
+    role_name: scheduling
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.541Z'
+    updated_at: '2020-01-17T12:35:30.541Z'
+    user_email: template@template
+  - id: 895
+    app_type_id: 3
+    role_name: staff - inex
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.554Z'
+    updated_at: '2020-01-17T12:35:30.554Z'
+    user_email: template@template
+  - id: 896
+    app_type_id: 3
+    role_name: user - mednav
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.566Z'
+    updated_at: '2020-01-17T12:35:30.566Z'
+    user_email: template@template
+  - id: 897
+    app_type_id: 3
+    role_name: reset
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.579Z'
+    updated_at: '2020-01-17T12:35:30.579Z'
+    user_email: template@template
+  - id: 898
+    app_type_id: 3
+    role_name: reviewer - inex
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.597Z'
+    updated_at: '2020-01-17T12:35:30.597Z'
+    user_email: template@template
+  - id: 899
+    app_type_id: 3
+    role_name: tracker
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.607Z'
+    updated_at: '2020-01-17T12:35:30.607Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 900
+    app_type_id: 3
+    role_name: baseline creator - inex
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.616Z'
+    updated_at: '2020-01-17T12:35:30.616Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 901
+    app_type_id: 3
+    role_name: baseline creator - inex
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.622Z'
+    updated_at: '2020-01-17T12:35:30.622Z'
+    user_email: template@template
+  - id: 902
+    app_type_id: 3
+    role_name: user - navigation
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.631Z'
+    updated_at: '2020-01-17T12:35:30.631Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 903
+    app_type_id: 3
+    role_name: phone screener
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.640Z'
+    updated_at: '2020-01-17T12:35:30.640Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 904
+    app_type_id: 3
+    role_name: user - inex
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.649Z'
+    updated_at: '2020-01-17T12:35:30.649Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 905
+    app_type_id: 3
+    role_name: staff - inex
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.658Z'
+    updated_at: '2020-01-17T12:35:30.658Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 906
+    app_type_id: 3
+    role_name: user - adverse event
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.666Z'
+    updated_at: '2020-01-17T12:35:30.666Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 907
+    app_type_id: 3
+    role_name: reviewer - adverse event
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.675Z'
+    updated_at: '2020-01-17T12:35:30.675Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 908
+    app_type_id: 3
+    role_name: irb reporting
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.688Z'
+    updated_at: '2020-01-17T12:35:30.688Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 909
+    app_type_id: 3
+    role_name: email - adverse event irb report
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.697Z'
+    updated_at: '2020-01-17T12:35:30.697Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 910
+    app_type_id: 3
+    role_name: email - adverse event review
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.706Z'
+    updated_at: '2020-01-17T12:35:30.706Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 911
+    app_type_id: 3
+    role_name: sms - adverse event irb report
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.716Z'
+    updated_at: '2020-01-17T12:35:30.716Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 912
+    app_type_id: 3
+    role_name: sms - adverse event irb report
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.722Z'
+    updated_at: '2020-01-17T12:35:30.722Z'
+    user_email: template@template
+  - id: 913
+    app_type_id: 3
+    role_name: sms - adverse event review
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.732Z'
+    updated_at: '2020-01-17T12:35:30.732Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 914
+    app_type_id: 3
+    role_name: sms - adverse event review
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.737Z'
+    updated_at: '2020-01-17T12:35:30.737Z'
+    user_email: template@template
+  - id: 915
+    app_type_id: 3
+    role_name: user - protocol deviation
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.746Z'
+    updated_at: '2020-01-17T12:35:30.746Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 916
+    app_type_id: 3
+    role_name: reviewer - protocol deviation
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.761Z'
+    updated_at: '2020-01-17T12:35:30.761Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 917
+    app_type_id: 3
+    role_name: email - protocol deviation irb report
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.772Z'
+    updated_at: '2020-01-17T12:35:30.772Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 918
+    app_type_id: 3
+    role_name: email - protocol deviation irb report
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.777Z'
+    updated_at: '2020-01-17T12:35:30.777Z'
+    user_email: template@template
+  - id: 919
+    app_type_id: 3
+    role_name: email - protocol deviation review
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.786Z'
+    updated_at: '2020-01-17T12:35:30.786Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 920
+    app_type_id: 3
+    role_name: email - protocol deviation review
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.792Z'
+    updated_at: '2020-01-17T12:35:30.792Z'
+    user_email: template@template
+  - id: 921
+    app_type_id: 3
+    role_name: sms - protocol deviation irb report
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.804Z'
+    updated_at: '2020-01-17T12:35:30.804Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 922
+    app_type_id: 3
+    role_name: sms - protocol deviation irb report
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.809Z'
+    updated_at: '2020-01-17T12:35:30.809Z'
+    user_email: template@template
+  - id: 923
+    app_type_id: 3
+    role_name: sms - protocol deviation review
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.818Z'
+    updated_at: '2020-01-17T12:35:30.818Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 924
+    app_type_id: 3
+    role_name: sms - protocol deviation review
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.823Z'
+    updated_at: '2020-01-17T12:35:30.823Z'
+    user_email: template@template
+  - id: 925
+    app_type_id: 3
+    role_name: nfs_store group 600
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.832Z'
+    updated_at: '2020-01-17T12:35:30.832Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 926
+    app_type_id: 3
+    role_name: user - phone screen
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.842Z'
+    updated_at: '2020-01-17T12:35:30.842Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 927
+    app_type_id: 3
+    role_name: user - participant details
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.850Z'
+    updated_at: '2020-01-17T12:35:30.850Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 928
+    app_type_id: 3
+    role_name: user - protocol exception
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.860Z'
+    updated_at: '2020-01-17T12:35:30.860Z'
+    user_email: nicole_jones@hms.harvard.edu
+  - id: 929
+    app_type_id: 3
+    role_name: user - dashboards
+    user_id: 1
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.870Z'
+    updated_at: '2020-01-17T12:35:30.870Z'
+    user_email: phil_ayres@hms.harvard.edu
+  - id: 930
+    app_type_id: 3
+    role_name: user - dashboards
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.876Z'
+    updated_at: '2020-01-17T12:35:30.876Z'
+    user_email: template@template
+  - id: 931
+    app_type_id: 3
+    role_name: user - da
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:30.978Z'
+    updated_at: '2020-01-17T12:35:30.978Z'
+    user_email: template@template
+  - id: 932
+    app_type_id: 3
+    role_name: user - partic
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:31.017Z'
+    updated_at: '2020-01-17T12:35:31.017Z'
+    user_email: template@template
+  - id: 933
+    app_type_id: 3
+    role_name: user - reports
+    user_id: 82
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:31.054Z'
+    updated_at: '2020-01-17T12:35:31.054Z'
+    user_email: template@template
+  - id: 934
+    app_type_id: 3
+    role_name: user - summary
+    user_id: 85
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-17T12:35:31.065Z'
+    updated_at: '2020-01-17T12:35:31.065Z'
+    user_email: nicole_jones@hms.harvard.edu
   associated_message_templates:
   - id: 4
     name: ipa ps intro
@@ -14697,7 +15593,56 @@ app_type:
     updated_at: '2019-03-19T17:58:43.616Z'
     category: 
     user_email: 
-  associated_config_libraries: []
+  associated_config_libraries:
+  - id: 55
+    category: ipa
+    name: enabled_if
+    options: "_definitions:\r\n\r\n  enabled_if: &enabled_if\r\n\r\n    # if performed
+      a phone screening no consent to continue, disable after 14 days\r\n    not_all_not_interested:\r\n
+      \     any:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n          select_is_good_time_to_speak:
+      not interested\r\n          select_may_i_begin: not interested\r\n          select_still_interested:
+      'no'\r\n\r\n      all_created_at:\r\n        dynamic_model__ipa_ps_initial_screenings:\r\n
+      \         created_at:\r\n            condition: <\r\n            value: -14
+      days\r\n\r\n    # if recorded a withdraw activity, disable after 14 days\r\n
+      \   not_all_withdraw:\r\n      any:\r\n        dynamic_model__ipa_withdrawals:\r\n
+      \         select_subject_withdrew_reason: withdrew\r\n          select_investigator_terminated:\r\n
+      \           - yes - due to ae\r\n            - yes - other reason\r\n          lost_to_follow_up_no_yes:
+      'yes'\r\n          no_longer_participating_no_yes: 'yes'\r\n      all_created_at:\r\n
+      \       dynamic_model__ipa_withdrawals:\r\n          created_at:\r\n            condition:
+      <\r\n            value: -14 days\r\n\r\n    # if performed a screening follow
+      up and not eligible, disable after 14 days\r\n    not_all_ineligible:\r\n      dynamic_model__ipa_screenings:\r\n
+      \       eligible_for_study_blank_yes_no: 'no'\r\n        created_at:\r\n          condition:
+      <\r\n          value: -14 days\r\n\r\n    # if performed a screening follow
+      up and not interested in participating, disable after 14 days\r\n    not_all_ps_followup_not_interested:\r\n
+      \     dynamic_model__ipa_screenings:\r\n        still_interested_blank_yes_no:
+      'no'\r\n        created_at:\r\n          condition: <\r\n          value: -14
+      days\r\n\r\n    # if an exit or lost to follow up before scheduled, disable
+      after 14 days\r\n    not_all_tracker_exits:\r\n      activity_log__ipa_assignments:\r\n
+      \       extra_log_type:\r\n          - exit_opt_out\r\n          - exit_l2fu\r\n
+      \         # if the exit survey has been completed, do not disable after 14 days\r\n
+      \         #- completed\r\n        created_at:\r\n          condition: <\r\n
+      \         value: -14 days\r\n\r\n  ref_filestore_container: &ref_filestore_container\r\n
+      \   nfs_store__manage__container: &ref_nfs_store__manage__container\r\n      from:
+      this\r\n      add: one_to_this\r\n      view_as:\r\n        edit: hide\r\n        show:
+      filestore\r\n        new: not_embedded\r\n\r\n  save_trigger:\r\n    on_create_filestore_container:
+      &create_filestore_container\r\n      create_filestore_container:\r\n        name:
+      general files\r\n        label: General Files\r\n        create_with_role: nfs_store
+      group 600\r\n\r\n\r\n\r\n  any_exit_or_complete: &any_exit_or_complete\r\n    any_exit_or_complete:\r\n
+      \     any_exit: &any_exit\r\n        any_tracker_exits: &any_tracker_exit\r\n
+      \         activity_log__ipa_assignments:\r\n            extra_log_type:\r\n
+      \             - exit_opt_out\r\n              - exit_l2fu\r\n              -
+      completed\r\n        any_withdrawal: &any_withdrawal\r\n          dynamic_model__ipa_withdrawals:\r\n
+      \           no_longer_participating_no_yes: 'yes'\r\n            lost_to_follow_up_no_yes:
+      'yes'\r\n            select_subject_withdrew_reason: withdrew\r\n            select_investigator_terminated:\r\n
+      \             - yes - due to ae\r\n              - yes - other reason\r\n\r\n
+      \     all_completed: &all_completed\r\n        activity_log__ipa_assignments:\r\n
+      \         extra_log_type: completed\r\n"
+    format: yaml
+    disabled: false
+    admin_id: 2
+    created_at: '2020-01-17T12:34:54.040Z'
+    updated_at: '2020-01-17T13:56:52.813Z'
+    user_email: 
   associated_protocols: []
   associated_sub_processes: []
   associated_protocol_events: []

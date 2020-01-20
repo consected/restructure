@@ -219,14 +219,18 @@ FROM (
      UNION
 
     --
-    -- Completed study
+    -- Exited, L2FU (before scheduling) or Completed study
     --
     SELECT
       master_id,
-      'completed exit survey' "exit_type"
-    FROM ipa_surveys surv
+      CASE extra_log_type
+      WHEN 'completed' THEN 'completed study'
+      WHEN 'exit_opt_out' THEN 'opted out'
+      WHEN 'exit_l2fu' THEN 'lost to follow-up (before scheduling)'
+      END "exit_type"
+    FROM activity_log_ipa_assignments
     WHERE
-      select_survey_type = 'exit survey'
+      extra_log_type IN ('completed', 'exit_opt_out', 'exit_l2fu')
 
   -- End left outer join
   ) dlo ON dlo.master_id = di.master_id

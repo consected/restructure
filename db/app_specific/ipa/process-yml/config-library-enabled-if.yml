@@ -61,13 +61,15 @@ _definitions:
           value: -14 days
 
   ref_filestore_container: &ref_filestore_container
-    nfs_store__manage__container:
+    nfs_store__manage__container: &ref_nfs_store__manage__container
       from: this
       add: one_to_this
       view_as:
         edit: hide
         show: filestore
         new: not_embedded
+      creatable_if:
+        never: true
 
   save_trigger:
     on_create_filestore_container: &create_filestore_container

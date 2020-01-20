@@ -46,6 +46,7 @@ set search_path=ipa_ops,ml_app;
 \i db/app_specific/ipa/aws-db/trigger_perform_screening_actions.sql
 \i db/app_specific/ipa/aws-db/trigger_screening_follow_up.sql
 \i db/app_specific/ipa/aws-db/trigger_tmoca_score_calc.sql
+\i db/app_specific/ipa/aws-db/view_participant_exits_view.sql
 
 set search_path=ml_app;
 \i db/app_specific/ipa/aws-db/z-ml_app-sync-create_sync_subject_data_aws_db.sql
