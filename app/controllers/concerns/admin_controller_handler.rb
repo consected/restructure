@@ -137,6 +137,14 @@ module AdminControllerHandler
             render view_path('index')
           end
         }
+        format.csv {
+          res_a = []
+          res_a << objects_instance.attribute_names.to_csv
+          objects_instance.each do |row|
+            res_a << (row.attributes.map {|k, val|  val || ''}).to_csv
+          end
+          send_data res_a.join(""), filename: "admin.csv"
+        }
         format.all { render json: objects_instance.as_json(except: [:created_at, :updated_at, :id, :admin_id, :user_id])}
       end
     end

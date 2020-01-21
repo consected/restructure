@@ -55,6 +55,16 @@ class Admin::ManageUsersController < AdminController
       'user'
     end
 
+    def filters
+      res = {
+        app_type_id: Admin::AppType.all_by_name
+      }
+    end
+
+    def filters_on
+      [:app_type_id]
+    end
+
   private
 
     def permitted_params
