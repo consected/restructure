@@ -3443,7 +3443,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-12-03T13:59:02.357Z'
-    updated_at: '2020-01-20T19:00:33.194Z'
+    updated_at: '2020-01-23T11:22:33.829Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -3520,45 +3520,50 @@ app_type:
       true\r\n\r\n\r\n  creatable_if:\r\n    <<: *enabled_if\r\n            \r\n    not_any_exit:
       *any_exit_or_complete\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
       \       extra_log_type: msm_screening_appointment\r\n    all_transferred:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: transferred_to_msm\r\n\r\n\r\n\r\n###################################\r\nassign_id:\r\n
-      \ label: Assign ID\r\n###################################\r\n  \r\n  fields:\r\n\r\n
-      \ references:\r\n    msm_grit_id_number:\r\n      from: master\r\n      add:
-      one_to_master\r\n      prevent_disable: true\r\n      \r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: msm_screening_appointment\r\n            \r\n    not_any_exit:
-      *any_exit_or_complete\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: assign_id\r\n\r\n\r\n\r\n\r\n\r\n###################################\r\nenrolled:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: transferred_to_msm\r\n\r\n\r\n\r\n\r\n\r\n\r\n###################################\r\nenrolled:\r\n
       \ label: Participant Enrolled\r\n###################################\r\n  \r\n
-      \ fields:     \r\n  \r\n  caption_before:\r\n    all_fields:\r\n      edit_caption:
-      |\r\n        The participant has completed screening. If eligible, click **Save**\r\n
-      \       to enroll him in the study.\r\n        \r\n        If not eligible,
-      cancel this form and click the \r\n        **+ Ineligible** button above instead.\r\n
-      \       \r\n      show_caption: |\r\n        The participant has completed screening,
-      \r\n        is eligible and has been enrolled in the study.\r\n  \r\n  view_options:\r\n
+      \ fields:     \r\n\r\n  references:\r\n    msm_grit_id_number:\r\n      from:
+      master\r\n      add: one_to_master\r\n      prevent_disable: true\r\n    dynamic_model__grit_assign_to_group:\r\n
+      \     from: master\r\n      add: one_to_master\r\n    dynamic_model__grit_appointment:\r\n
+      \     from: master\r\n      add: one_to_master\r\n          \r\n      \r\n  caption_before:\r\n
+      \   all_fields:\r\n      edit_caption: |\r\n        The participant has completed
+      screening. If eligible click **Save** \r\n        to enroll the participant
+      in the study.\r\n        \r\n        After saving, add *MSM GRIT ID*, *Training
+      Date* and *Assigned Group*\r\n        \r\n      show_caption: |\r\n        The
+      participant has completed screening, \r\n        is eligible and has been enrolled
+      in the study.\r\n        \r\n    submit: |\r\n      If not eligible, cancel
+      this form and click the \r\n      **+ Ineligible** button above instead.\r\n\r\n
+      \   #reference_msm_grit_id_number: Add MSM Study ID\r\n  \r\n  view_options:\r\n
       \   hide_unless_creatable: true\r\n    show_cancel: true\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
       \   <<: *not_enrolled\r\n    all_screened:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: msm_screening_appointment\r\n      \r\n###################################\r\nassign_to_group:\r\n
-      \ label: Assign to Group\r\n###################################\r\n  \r\n  fields:\r\n\r\n
+      \       extra_log_type: msm_screening_appointment\r\n\r\n\r\n###################################\r\nassign_id:\r\n
+      \ label: Change MSM ID\r\n###################################\r\n  \r\n  fields:\r\n\r\n
+      \ references:\r\n    msm_grit_id_number:\r\n      from: master\r\n      add:
+      one_to_master\r\n      prevent_disable: true\r\n      \r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    <<: *all_enrolled            \r\n    not_any_exit:
+      *any_exit_or_complete\r\n\r\n\r\n\r\n###################################\r\nassign_to_group:\r\n
+      \ label: Change Group\r\n###################################\r\n  \r\n  fields:\r\n\r\n
       \ references:\r\n    dynamic_model__grit_assign_to_group:\r\n      from: master\r\n
       \     add: one_to_master\r\n      \r\n  \r\n  view_options:\r\n    always_embed_reference:
       dynamic_model__grit_assign_to_group\r\n    hide_unless_creatable: true\r\n\r\n
       \ creatable_if:\r\n    <<: *enabled_if\r\n            \r\n    not_any_exit:
-      *any_exit_or_complete\r\n    <<: *not_all_assigned_to_group\r\n    <<: *all_enrolled\r\n
+      *any_exit_or_complete\r\n#    <<: *not_all_assigned_to_group\r\n    <<: *all_enrolled\r\n
       \     \r\n\r\n\r\n###################################\r\nappointment:\r\n  label:
-      Training Date\r\n###################################\r\n  \r\n  fields:\r\n\r\n
+      Change Training Date\r\n###################################\r\n  \r\n  fields:\r\n\r\n
       \ references:\r\n    dynamic_model__grit_appointment:\r\n      from: master\r\n
       \     add: one_to_master\r\n      \r\n  \r\n  view_options:\r\n    always_embed_reference:
       dynamic_model__grit_appointment\r\n    hide_unless_creatable: true\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
-      \   <<: *not_set_appointment\r\n    <<: *all_assigned_to_group\r\n      \r\n\r\n\r\n\r\n\r\n###################################\r\npost_testing_1:\r\n
+      \   <<: *all_enrolled\r\n      \r\n\r\n\r\n\r\n\r\n###################################\r\npost_testing_1:\r\n
       \ label: Post Testing 1\r\n###################################  \r\n  fields:
       \r\n#    - select_who\r\n#    - select_record_from_player_contacts\r\n    -
       follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n#
       \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_set_appointment\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n
+      \   <<: *all_assigned_msm_id\r\n    <<: *all_set_appointment\r\n    <<: *all_assigned_to_group\r\n
       \   not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
       \     activity_log__grit_assignments:\r\n        extra_log_type: post_testing_1\r\n
       \       \r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\npost_testing_2:\r\n
@@ -3568,16 +3573,19 @@ app_type:
       \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_set_appointment\r\n
-      \       \r\n    not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n
-      \   not_any:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      post_testing_2\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n\r\n    \r\n###################################\r\ncompleted:\r\n
-      \ label: Completed Study\r\n###################################\r\n  \r\n  fields:\r\n
-      \ \r\n  caption_before:\r\n    all_fields: |\r\n      The participant completed
-      the study.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: post_testing_2\r\n    not_any_exit: *any_exit_or_complete\r\n\r\n
-      \ # Always show, so we know why a player's records may be locked down\r\n  showable_if:\r\n
-      \   always: true\r\n\r\n\r\n###################################\r\nexit_opt_out:\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n
+      \   <<: *all_assigned_msm_id\r\n    <<: *all_set_appointment\r\n    <<: *all_assigned_to_group
+      \   \r\n    not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: post_testing_2\r\n
+      \   # Only show to those assigned to group 2\r\n    all_group_2:\r\n      dynamic_model__grit_assign_to_groups:\r\n
+      \       select_group: group 2\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n\r\n
+      \   \r\n###################################\r\ncompleted:\r\n  label: Completed
+      Study\r\n###################################\r\n  \r\n  fields:\r\n  \r\n  caption_before:\r\n
+      \   all_fields: |\r\n      The participant completed the study.\r\n  \r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
+      \       extra_log_type: \r\n          - post_testing_1\r\n          - post_testing_2\r\n
+      \   not_any_exit: *any_exit_or_complete\r\n\r\n  # Always show, so we know why
+      a player's records may be locked down\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\nexit_opt_out:\r\n
       \ label: Exit (Opt-Out)\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: |\r\n      The subject exited by
       opting out before enrollment. \r\n      \r\n      All records are locked down
@@ -5054,6 +5062,62 @@ app_type:
       Describe in detail any corrective action taken. If necessary, upload additional
       files after saving this form.\r\n"
     user_email: 
+  - id: 378
+    name: GRIT Training Date
+    table_name: grit_appointments
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-12-03T13:59:01.161Z'
+    updated_at: '2020-01-23T10:54:59.750Z'
+    position: 1
+    category: grit-records
+    table_key_name: ''
+    field_list: placeholder_set_sd,visit_start_date,visit_end_date,select_status,notes
+    result_order: updated_at desc
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: visit_start_date\r\n\r\n
+      \ field_options:\r\n    select_status:\r\n      edit_as:\r\n        alt_options:
+      \r\n          - confirmed\r\n          - uncomfirmed\r\n    \r\n      \r\n    select_status:\r\n
+      \     edit_as:\r\n        field_type: status\r\n      value: confirmed\r\n\r\n
+      \ caption_before: \r\n    placeholder_set_sd: |\r\n      **The subject has been
+      enrolled. A training start date is required**\r\n      \r\n      Edit this form
+      to set the start date.\r\n      \r\n    visit_start_date: Training start date\r\n
+      \   visit_end_date: Expected training end date\r\n    select_status: Status\r\n
+      \   notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n    visit_end_date:\r\n
+      \     never: true\r\n    select_status:\r\n      never: true\r\n    placeholder_set_sd:\r\n
+      \     visit_start_date: \r\n        - ''\r\n        - null"
+    user_email: 
+  - id: 379
+    name: GRIT MSM Screening Details
+    table_name: grit_msm_screening_details
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2019-12-03T13:59:01.276Z'
+    updated_at: '2020-01-23T10:44:35.034Z'
+    position: 1
+    category: grit-records
+    table_key_name: ''
+    field_list: placeholder_set_sd,screening_date,select_status,notes
+    result_order: updated_at desc
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: screening_date\r\n\r\n
+      \ field_options:\r\n    select_status:\r\n      edit_as:\r\n        alt_options:
+      \r\n          - confirmed\r\n          - uncomfirmed\r\n    \r\n    visit_start_date:\r\n
+      \     value: today()\r\n      \r\n    select_status:\r\n      edit_as:\r\n        field_type:
+      status\r\n      value: confirmed\r\n\r\n  caption_before: \r\n    placeholder_set_sd:
+      | \r\n      **A session for screening, consent and pre-testing must be scheduled.**\r\n
+      \     \r\n      When an appointment date is available, ensure it is entered
+      below.\r\n      \r\n    screening_date: Appointment date for screening, consent
+      and pre-testing\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n
+      \   select_status:\r\n      never: true\r\n    placeholder_set_sd:\r\n      screening_date:
+      \r\n        - ''\r\n        - null"
+    user_email: 
   - id: 380
     name: GRIT Secure Notes
     table_name: grit_secure_notes
@@ -5075,61 +5139,6 @@ app_type:
       \     PII and PHI may be recorded \r\n      here. All notes form part of the
       participant's study records, and are\r\n      retained and viewable according
       to the study protocol rules.\r\n    \r\n  <<: *access_defaults\r\n"
-    user_email: 
-  - id: 379
-    name: GRIT MSM Screening Details
-    table_name: grit_msm_screening_details
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-12-03T13:59:01.276Z'
-    updated_at: '2019-12-03T13:59:01.276Z'
-    position: 1
-    category: grit-records
-    table_key_name: ''
-    field_list: placeholder_set_sd,screening_date,select_status,notes
-    result_order: updated_at desc
-    options: "default:\r\n\r\n  field_options:\r\n    select_status:\r\n      edit_as:\r\n
-      \       alt_options: \r\n          - confirmed\r\n          - uncomfirmed\r\n
-      \   \r\n    visit_start_date:\r\n      value: today()\r\n      \r\n    select_status:\r\n
-      \     edit_as:\r\n        field_type: status\r\n      value: confirmed\r\n\r\n
-      \ caption_before: \r\n    placeholder_set_sd: | \r\n      **A session for screening,
-      consent and pre-testing must be scheduled.**\r\n      \r\n      When an appointment
-      date is available, ensure it is entered below.\r\n      \r\n    screening_date:
-      Appointment date for screening, consent and pre-testing\r\n    notes: Additional
-      notes  \r\n  \r\n  \r\n  show_if:\r\n    select_status:\r\n      never: true\r\n
-      \   placeholder_set_sd:\r\n      screening_date: \r\n        - ''\r\n        -
-      null"
-    user_email: 
-  - id: 378
-    name: GRIT Assessment Details
-    table_name: grit_appointments
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 2
-    disabled: false
-    created_at: '2019-12-03T13:59:01.161Z'
-    updated_at: '2019-12-03T13:59:01.161Z'
-    position: 1
-    category: grit-records
-    table_key_name: ''
-    field_list: placeholder_set_sd,visit_start_date,visit_end_date,select_status,notes
-    result_order: updated_at desc
-    options: "default:\r\n\r\n  field_options:\r\n    select_status:\r\n      edit_as:\r\n
-      \       alt_options: \r\n          - confirmed\r\n          - uncomfirmed\r\n
-      \   \r\n      \r\n    select_status:\r\n      edit_as:\r\n        field_type:
-      status\r\n      value: confirmed\r\n\r\n  caption_before: \r\n    placeholder_set_sd:
-      |\r\n      **The subject has been enrolled. A training start date is required**\r\n
-      \     \r\n      Edit this form to set the start date.\r\n      \r\n    visit_start_date:
-      Training start date\r\n    visit_end_date: Expected training end date\r\n    select_status:
-      Status\r\n    notes: Additional notes  \r\n  \r\n  \r\n  show_if:\r\n    visit_end_date:\r\n
-      \     never: true\r\n    select_status:\r\n      never: true\r\n    placeholder_set_sd:\r\n
-      \     visit_start_date: \r\n        - ''\r\n        - null"
     user_email: 
   - id: 381
     name: GRIT Informed Consent Review
@@ -5246,17 +5255,17 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2020-01-20T18:31:17.208Z'
-    updated_at: '2020-01-20T18:44:39.622Z'
+    updated_at: '2020-01-23T10:56:09.323Z'
     position: 
     category: grit-records
     table_key_name: ''
     field_list: select_group
     result_order: updated_at desc
-    options: "default:\r\n\r\n  caption_before:\r\n    select_group: |\r\n      Which
-      group is the participant is assigned to?\r\n      \r\n\r\n  field_options:\r\n
-      \   select_group:\r\n      edit_as:\r\n        alt_options: \r\n          'Group
-      1: Immediate Training': group 1 - immediate training\r\n          'Group 2:
-      Delayed Training': group 2 - delayed training\r\n          \r\n    "
+    options: "default:\r\n\r\n  view_options:\r\n    data_attribute: select_group\r\n\r\n
+      \ caption_before:\r\n    select_group: |\r\n      Which group is the participant
+      is assigned to?\r\n      \r\n\r\n  field_options:\r\n    select_group:\r\n      edit_as:\r\n
+      \       alt_options: \r\n          'Group 1: Immediate Training': group 1\r\n
+      \         'Group 2: Delayed Training': group 2\r\n          \r\n    "
     user_email: 
   - id: 383
     name: GRIT Withdrawal
@@ -5632,43 +5641,47 @@ app_type:
     user_email: 
   - id: 237
     name: Subjects In Process & Exited
-    description: 'All subjects that have joined or exited the study: in process (phone
-      screening scheduled), enrolled, completed, withdrawn, ineligible, other exit
-      (not interested, etc). The search matches the latest status of a participant,
-      so as they pass through the process they will only be matched by one status.'
-    sql: "SELECT * from (\r\n  SELECT distinct dt.master_id, grit.grit_id, msm_grit.msm_grit_id,\r\n
-      \ CASE \r\n  WHEN extra_log_type = 'completed' THEN 'completed study'\r\n  --WHEN
-      extra_log_type = 'completed_intervention' THEN 'completed bbti'\r\n  WHEN extra_log_type
-      = 'withdraw' THEN 'withdrawn'\r\n  WHEN extra_log_type IN ('exit_not_consented',
-      'exit_ps', 'exit_ps_msm', 'exit_opt_out', 'exit_l2fu') THEN 'exited'\r\n  WHEN
-      extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'msm_ps_eligible'
-      THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'in process'\r\n
-      \ WHEN extra_log_type = 'appointment' THEN 'scheduled'\r\n  WHEN extra_log_type
-      = 'enrolled' THEN 'enrolled'\r\n  \r\n  ELSE extra_log_type\r\n  END \"status\",
-      \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id, al.created_at,
-      al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION BY al.master_id
-      \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n    FROM activity_log_grit_assignments
-      al\r\n    WHERE   \r\n    extra_log_type IN (\r\n      'schedule_screening',
-      \r\n      'msm_ps_eligible', \r\n      'ineligible', \r\n      'exit_not_consented',
-      \r\n      'exit_ps', \r\n      'exit_ps_msm',\r\n      'exit_opt_out',\r\n      'exit_l2fu',\r\n
-      \     'appointment',\r\n      'enrolled',\r\n      'completed',\r\n      --'completed_intervention',\r\n
-      \     'withdraw'\r\n    )\r\n  ) dt\r\n  INNER JOIN grit_assignments grit ON
-      dt.master_id = grit.master_id\r\n  LEFT OUTER JOIN msm_grit_id_numbers msm_grit
-      ON dt.master_id = msm_grit.master_id\r\n  WHERE r = 1 \r\n) dt2\r\nWHERE status
-      IN(:select_status)\r\nORDER BY status, created_at desc\r\n;\r\n"
+    description: 'All subjects that have joined or exited the study, based on certain
+      activities having been performed, such as: in process (phone screen scheduled),
+      enrolled, training scheduled and exited.'
+    sql: "SELECT distinct master_id, grit_id, msm_grit_id from (\r\n  SELECT distinct
+      dt.master_id, grit.grit_id, msm_grit.msm_grit_id,\r\n  CASE \r\n  WHEN extra_log_type
+      = 'completed' THEN 'completed study'\r\n  --WHEN extra_log_type = 'completed_intervention'
+      THEN 'completed bbti'\r\n  WHEN extra_log_type = 'withdraw' THEN 'withdrawn'\r\n
+      \ WHEN extra_log_type IN ('exit_not_consented', 'exit_ps', 'exit_ps_msm', 'exit_opt_out',
+      'exit_l2fu') THEN 'exited'\r\n  WHEN extra_log_type = 'ineligible' THEN 'ineligible'\r\n
+      \ WHEN extra_log_type = 'hms_ps_eligible' THEN 'hms eligible'\r\n  WHEN extra_log_type
+      = 'schedule_screening' THEN 'in process'\r\n  WHEN extra_log_type = 'transferred_to_msm'
+      THEN 'transferred to msm'  \r\n  WHEN extra_log_type = 'appointment' THEN 'scheduled'\r\n
+      \ WHEN extra_log_type = 'enrolled' THEN 'enrolled'\r\n  WHEN extra_log_type
+      = 'post_testing_1' THEN 'post testing 1 scheduled'\r\n  WHEN extra_log_type
+      = 'post_testing_2' THEN 'post testing 2 scheduled'\r\n  \r\n  ELSE extra_log_type\r\n
+      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id,
+      al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
+      BY al.master_id \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n
+      \   FROM activity_log_grit_assignments al\r\n    WHERE   \r\n    extra_log_type
+      IN (\r\n      'schedule_screening', \r\n      'hms_ps_eligible', \r\n      'ineligible',
+      \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_ps_msm',\r\n
+      \     'exit_opt_out',\r\n      'exit_l2fu',\r\n      'appointment',\r\n      'enrolled',\r\n
+      \     'completed',\r\n      'transferred_to_msm',\r\n      'withdraw',\r\n      'post_testing_1',\r\n
+      \     'post_testing_2'\r\n    ) \r\n  ) dt\r\n  INNER JOIN grit_assignments
+      grit ON dt.master_id = grit.master_id\r\n  LEFT OUTER JOIN msm_grit_id_numbers
+      msm_grit ON dt.master_id = msm_grit.master_id\r\n  -- WHERE r = 1 \r\n  \r\n)
+      dt2\r\nWHERE status IN(:select_status)\r\n\r\n--ORDER BY status, created_at
+      desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
-      \   default: \r\n      - eligible\r\n#      - ineligible\r\n#      - completed\r\n#
-      \     - withdrawn\r\n#      - exited\r\n      - enrolled\r\n      - in process\r\n
-      \   selections: \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
-      \     completed study: completed study\r\n      withdrawn: withdrawn\r\n      exited:
-      exited\r\n      enrolled: enrolled\r\n      scheduled: scheduled\r\n      post
+      \   default: \r\n      - enrolled\r\n    selections: \r\n      in process: in
+      process\r\n      hms eligible: hms eligible\r\n      transferred to msm: transferred
+      to msm\r\n      enrolled: enrolled\r\n      scheduled: scheduled\r\n      post
       testing 1 scheduled: post testing 1 scheduled\r\n      post testing 2 scheduled:
-      post testing 2 scheduled\r\n      in process: in process\r\n      \r\n      "
+      post testing 2 scheduled\r\n      completed study: completed study\r\n      ineligible:
+      ineligible\r\n      withdrawn: withdrawn\r\n      exited: exited\r\n      \r\n
+      \     "
     admin_id: 2
     disabled: false
     created_at: '2019-12-03T13:59:03.454Z'
-    updated_at: '2020-01-21T10:43:38.324Z'
+    updated_at: '2020-01-23T12:10:12.048Z'
     report_type: search
     auto: false
     searchable: true
@@ -5812,9 +5825,13 @@ app_type:
       \ true \"allDay\",\r\n  visit_start_date::varchar || 'T' || '00:00:00' \"start\",\r\n
       \ null \"end\",\r\n  'training start' \"title\",\r\n  array['report-cal-start-event']
       \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\nUNION\r\n\r\nSELECT\r\n
-      \ true \"allDay\",\r\n  follow_up_when::varchar || 'T' || '00:00:00' \"start\",\r\n
-      \ null \"end\",\r\n  replace(extra_log_type, '_', ' ') \"title\",\r\n  array['report-cal-post-testing-event']
-      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM post_testing\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ true \"allDay\",\r\n  screening_date::varchar || 'T' || '00:00:00' \"start\",\r\n
+      \ null \"end\",\r\n  'msm screening' \"title\",\r\n  array['report-cal-msm-screening-event']
+      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM grit_msm_screening_details
+      msm \r\n\r\n\r\nUNION\r\n\r\n\r\nSELECT\r\n  true \"allDay\",\r\n  follow_up_when::varchar
+      || 'T' || '00:00:00' \"start\",\r\n  null \"end\",\r\n  replace(extra_log_type,
+      '_', ' ') \"title\",\r\n  array['report-cal-post-testing-event'] \"classNames\",\r\n
+      \ '/masters/' || master_id \"url\"\r\nFROM post_testing\r\n\r\nUNION\r\n\r\nSELECT\r\n
       \ true ,\r\n  '2019-06-20' ,\r\n  null ,\r\n  'assessment start' ,\r\n  array['report-cal-start-event']
       \"classNames\",\r\n  null \"url\"\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
       \ follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n
@@ -5839,7 +5856,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-12-03T13:59:03.469Z'
-    updated_at: '2020-01-21T10:17:11.151Z'
+    updated_at: '2020-01-22T09:50:24.337Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -5857,7 +5874,8 @@ app_type:
       '#155fbb'\r\n      border-color: gray\r\n    report-cal-pi-call-event:\r\n      background-color:
       '#044'\r\n      border-color: gray\r\n    report-cal-post-testing-event:\r\n
       \     background-color: '#5f15bb'\r\n      border-color: gray\r\n      text-align:
-      center"
+      center\r\n    report-cal-msm-screening-event:\r\n      background-color: '#bb155f'\r\n
+      \     border-color: gray\r\n      text-align: center\r\n    "
     user_email: 
   - id: 241
     name: Ready for HMS Screening
@@ -10895,6 +10913,294 @@ app_type:
     created_at: '2020-01-10T17:34:56.479Z'
     updated_at: '2020-01-10T17:34:56.479Z'
     user_email: grit-msm@test
+  - id: 935
+    app_type_id: 18
+    role_name: email - adverse event review
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.528Z'
+    updated_at: '2020-01-22T10:33:24.528Z'
+    user_email: lreese@msm.edu
+  - id: 936
+    app_type_id: 18
+    role_name: pi
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.551Z'
+    updated_at: '2020-01-22T10:33:24.551Z'
+    user_email: lreese@msm.edu
+  - id: 937
+    app_type_id: 18
+    role_name: sms - pi
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.559Z'
+    updated_at: '2020-01-22T10:33:24.559Z'
+    user_email: lreese@msm.edu
+  - id: 938
+    app_type_id: 18
+    role_name: sms - pi follow up
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.567Z'
+    updated_at: '2020-01-22T10:33:24.567Z'
+    user_email: lreese@msm.edu
+  - id: 939
+    app_type_id: 18
+    role_name: user - adverse event
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.575Z'
+    updated_at: '2020-01-22T10:33:24.575Z'
+    user_email: lreese@msm.edu
+  - id: 940
+    app_type_id: 18
+    role_name: user - discussions
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.583Z'
+    updated_at: '2020-01-22T10:33:24.583Z'
+    user_email: lreese@msm.edu
+  - id: 941
+    app_type_id: 18
+    role_name: user - followup
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.591Z'
+    updated_at: '2020-01-22T10:33:24.591Z'
+    user_email: lreese@msm.edu
+  - id: 942
+    app_type_id: 18
+    role_name: user - phone screen
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.598Z'
+    updated_at: '2020-01-22T10:33:24.598Z'
+    user_email: lreese@msm.edu
+  - id: 943
+    app_type_id: 18
+    role_name: user - protocol deviation
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.605Z'
+    updated_at: '2020-01-22T10:33:24.605Z'
+    user_email: lreese@msm.edu
+  - id: 944
+    app_type_id: 18
+    role_name: user - protocol exception
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.612Z'
+    updated_at: '2020-01-22T10:33:24.612Z'
+    user_email: lreese@msm.edu
+  - id: 945
+    app_type_id: 18
+    role_name: nfs_store group 600
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.619Z'
+    updated_at: '2020-01-22T10:33:24.619Z'
+    user_email: lreese@msm.edu
+  - id: 946
+    app_type_id: 18
+    role_name: tracker
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.626Z'
+    updated_at: '2020-01-22T10:33:24.626Z'
+    user_email: lreese@msm.edu
+  - id: 947
+    app_type_id: 18
+    role_name: email - pi
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.633Z'
+    updated_at: '2020-01-22T10:33:24.633Z'
+    user_email: lreese@msm.edu
+  - id: 948
+    app_type_id: 18
+    role_name: email - pi follow up
+    user_id: 119
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:33:24.641Z'
+    updated_at: '2020-01-22T10:33:24.641Z'
+    user_email: lreese@msm.edu
+  - id: 949
+    app_type_id: 18
+    role_name: msm coordinator
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.095Z'
+    updated_at: '2020-01-22T10:34:27.095Z'
+    user_email: mharvey@msm.edu
+  - id: 950
+    app_type_id: 18
+    role_name: reviewer - adverse event
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.103Z'
+    updated_at: '2020-01-22T10:34:27.103Z'
+    user_email: mharvey@msm.edu
+  - id: 951
+    app_type_id: 18
+    role_name: reviewer - protocol deviation
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.110Z'
+    updated_at: '2020-01-22T10:34:27.110Z'
+    user_email: mharvey@msm.edu
+  - id: 952
+    app_type_id: 18
+    role_name: sms - msm phone screener
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.117Z'
+    updated_at: '2020-01-22T10:34:27.117Z'
+    user_email: mharvey@msm.edu
+  - id: 953
+    app_type_id: 18
+    role_name: tracker
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.124Z'
+    updated_at: '2020-01-22T10:34:27.124Z'
+    user_email: mharvey@msm.edu
+  - id: 954
+    app_type_id: 18
+    role_name: user - adverse event
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.132Z'
+    updated_at: '2020-01-22T10:34:27.132Z'
+    user_email: mharvey@msm.edu
+  - id: 955
+    app_type_id: 18
+    role_name: user - discussions
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.139Z'
+    updated_at: '2020-01-22T10:34:27.139Z'
+    user_email: mharvey@msm.edu
+  - id: 956
+    app_type_id: 18
+    role_name: user - followup
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.147Z'
+    updated_at: '2020-01-22T10:34:27.147Z'
+    user_email: mharvey@msm.edu
+  - id: 957
+    app_type_id: 18
+    role_name: user - participant details
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.155Z'
+    updated_at: '2020-01-22T10:34:27.155Z'
+    user_email: mharvey@msm.edu
+  - id: 958
+    app_type_id: 18
+    role_name: user - phone screen
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.163Z'
+    updated_at: '2020-01-22T10:34:27.163Z'
+    user_email: mharvey@msm.edu
+  - id: 959
+    app_type_id: 18
+    role_name: user - phone screen 2
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.170Z'
+    updated_at: '2020-01-22T10:34:27.170Z'
+    user_email: mharvey@msm.edu
+  - id: 960
+    app_type_id: 18
+    role_name: user - protocol deviation
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.178Z'
+    updated_at: '2020-01-22T10:34:27.178Z'
+    user_email: mharvey@msm.edu
+  - id: 961
+    app_type_id: 18
+    role_name: user - protocol exception
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.186Z'
+    updated_at: '2020-01-22T10:34:27.186Z'
+    user_email: mharvey@msm.edu
+  - id: 962
+    app_type_id: 18
+    role_name: email - protocol deviation irb report
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.194Z'
+    updated_at: '2020-01-22T10:34:27.194Z'
+    user_email: mharvey@msm.edu
+  - id: 963
+    app_type_id: 18
+    role_name: email - adverse event irb report
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.208Z'
+    updated_at: '2020-01-22T10:34:27.208Z'
+    user_email: mharvey@msm.edu
+  - id: 964
+    app_type_id: 18
+    role_name: email - msm phone screener
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.215Z'
+    updated_at: '2020-01-22T10:34:27.215Z'
+    user_email: mharvey@msm.edu
+  - id: 965
+    app_type_id: 18
+    role_name: irb reporting
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.223Z'
+    updated_at: '2020-01-22T10:34:27.223Z'
+    user_email: mharvey@msm.edu
+  - id: 966
+    app_type_id: 18
+    role_name: email - msm transfer
+    user_id: 120
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-22T10:34:27.231Z'
+    updated_at: '2020-01-22T10:34:27.231Z'
+    user_email: mharvey@msm.edu
   associated_message_templates:
   - id: 22
     name: standard sms layout
@@ -11275,19 +11581,22 @@ app_type:
       \     activity_log__grit_assignments:\r\n        extra_log_type: enrolled\r\n\r\n
       \ not_enrolled: &not_enrolled\r\n    not_all_enrolled:\r\n      activity_log__grit_assignments:\r\n
       \       extra_log_type: enrolled\r\n\r\n  all_set_appointment: &all_set_appointment\r\n
-      \   all_set_appointment:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
-      appointment\r\n\r\n  not_set_appointment: &not_set_appointment\r\n    not_all_set_appointment:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: appointment\r\n\r\n
-      \ all_assigned_to_group: &all_assigned_to_group\r\n    all_assigned_to_group:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: assign_to_group\r\n\r\n
-      \ not_all_assigned_to_group: &not_all_assigned_to_group\r\n    not_all_assigned_to_group:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: assign_to_group\r\n\r\n
-      \ \r\n  "
+      \   all_set_appointment: &set_appointment\r\n      dynamic_model__grit_msm_screening_details:\r\n
+      \       id:\r\n          condition: IS NOT NULL\r\n\r\n  not_set_appointment:
+      &not_set_appointment\r\n    not_all_set_appointment:\r\n      <<: *set_appointment\r\n\r\n
+      \ all_assigned_to_group: &all_assigned_to_group\r\n    all_assigned_to_group:
+      &assigned_to_group\r\n      dynamic_model__grit_assign_to_groups:\r\n        id:\r\n
+      \         condition: IS NOT NULL\r\n          \r\n\r\n  not_all_assigned_to_group:
+      &not_all_assigned_to_group\r\n    not_all_assigned_to_group:\r\n      <<: *assigned_to_group\r\n\r\n
+      \ all_assigned_msm_id: &all_assigned_msm_id\r\n    all_assigned_msm_id: &assigned_msm_id\r\n
+      \     msm_grit_id_numbers:\r\n        id:\r\n          condition: IS NOT NULL
+      \         \r\n\r\n  not_all_assigned_msm_id: &not_all_assigned_msm_id\r\n    not_all_assigned_msm_id:\r\n
+      \     <<: *assigned_msm_id\r\n\r\n  \r\n  "
     format: yaml
     disabled: false
     admin_id: 2
     created_at: '2019-12-03T13:58:59.878Z'
-    updated_at: '2020-01-20T18:56:13.779Z'
+    updated_at: '2020-01-23T11:20:09.840Z'
     user_email: 
   - id: 49
     category: grit
