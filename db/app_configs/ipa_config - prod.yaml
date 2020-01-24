@@ -142,14 +142,14 @@ app_type:
     user_email: 
   - id: 64
     name: master header prefix
-    value: 'Scheduled: {{dynamic_model__ipa_appointments.visit_start_date}}'
+    value: 'Scheduled: {{dynamic_model__ipa_appointments.visit_start_date}} {{dynamic_model__ipa_appointments.select_schedule::uppercase}}'
     disabled: false
     admin_id: 4
     user_id: 
     app_type_id: 9
     role_name: ''
     created_at: '2019-05-21T12:34:14.721Z'
-    updated_at: '2019-05-21T12:36:09.968Z'
+    updated_at: '2020-01-24T09:17:11.285Z'
     user_email: 
   - id: 66
     name: notes field format
@@ -6974,16 +6974,18 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-01-17T11:50:39.532Z'
-    updated_at: '2019-04-15T09:02:39.852Z'
+    updated_at: '2020-01-24T09:19:45.674Z'
     position: 1
     category: ipa-records
     table_key_name: ''
-    field_list: visit_start_date,visit_end_date,select_status,notes
+    field_list: visit_start_date,visit_end_date,select_schedule,select_status,notes
     result_order: updated_at desc
     options: "default:\r\n\r\n  field_options:\r\n    select_status:\r\n      edit_as:\r\n
       \       alt_options: \r\n          - confirmed\r\n          - uncomfirmed\r\n
-      \         \r\n  caption_before: \r\n    visit_start_date: Visit start date\r\n
-      \   visit_end_date: Visit end date\r\n    select_status: Status\r\n    notes:
+      \   select_schedule:\r\n      value: a\r\n      edit_as:\r\n        alt_options:
+      \r\n          Schedule A: a\r\n          Schedule B: b\r\n          \r\n  caption_before:
+      \r\n    visit_start_date: Visit start date\r\n    visit_end_date: Visit end
+      date\r\n    select_schedule: Schedule\r\n    select_status: Status\r\n    notes:
       Additional notes  \r\n  "
     user_email: 
   - id: 22

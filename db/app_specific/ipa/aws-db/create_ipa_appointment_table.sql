@@ -1,7 +1,7 @@
 
       BEGIN;
 
-      CREATE FUNCTION log_ipa_appointment_update() RETURNS trigger
+      CREATE OR REPLACE FUNCTION log_ipa_appointment_update() RETURNS trigger
           LANGUAGE plpgsql
           AS $$
               BEGIN
@@ -9,7 +9,10 @@
                   (
                       master_id,
                       visit_start_date,
-                      select_navigator,
+                      visit_end_date,
+                      select_status,
+                      select_schedule,
+                      notes,
                       user_id,
                       created_at,
                       updated_at,
@@ -18,7 +21,10 @@
                   SELECT
                       NEW.master_id,
                       NEW.visit_start_date,
-                      NEW.select_navigator,
+                      NEW.visit_end_date,
+                      NEW.select_status,
+                      NEW.select_schedule,
+                      NEW.notes,
                       NEW.user_id,
                       NEW.created_at,
                       NEW.updated_at,
@@ -28,11 +34,15 @@
               END;
           $$;
 
+
       CREATE TABLE ipa_appointment_history (
           id integer NOT NULL,
           master_id integer,
           visit_start_date date,
-          select_navigator varchar,
+          visit_end_date date,
+          select_status varchar,
+          select_schedule varchar,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL,
@@ -52,7 +62,11 @@
           id integer NOT NULL,
           master_id integer,
           visit_start_date date unique,
-          select_navigator varchar,
+          visit_end_date date,
+          select_status varchar,
+          select_status varchar,
+          select_schedule varchar,
+          notes varchar,
           user_id integer,
           created_at timestamp without time zone NOT NULL,
           updated_at timestamp without time zone NOT NULL
