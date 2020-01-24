@@ -61,6 +61,7 @@ end
 %>
 <% end %>
 </div>
+<% if current_admin %>
 <div class="extra-admin-controls panel panel-default">
   <div class="panel-body pull-right">
     <button class="btn btn-sm expand-all-expandables">expand all</button>
@@ -68,3 +69,4 @@ end
     <%= link_to "export csv", {filter: params[:filter], format: 'csv'}, class: "btn btn-sm export-csv" %>
   </div>
 </div>
+<% end %>
