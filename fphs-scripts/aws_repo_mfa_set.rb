@@ -11,8 +11,8 @@ if !aml || aml == ''
 end
 
 envs = {}
-aws_profile = 'fphsuser'
-aws_acct = '756598248234'
+aws_profile = 'fphsuser-zeus'
+aws_acct = '464408810187'
 
 res = `aws sts get-caller-identity | grep "#{aws_acct}"`
 while res == ''
