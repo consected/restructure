@@ -14,7 +14,7 @@ _fpa.reports = {
 
     window_scrolling: function(){
       $('html').on('wheel', function(e){
-        if(e.originalEvent.deltaY > 0) {
+        if(e.originalEvent.deltaY > 0 && $('.chosen-container-active').length == 0) {
           _fpa.reports.report_position_buttons('go-to-results');
           _fpa.reports.reset_window_scrolling();
         }
