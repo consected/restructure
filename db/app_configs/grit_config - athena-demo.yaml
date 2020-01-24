@@ -2970,6 +2970,58 @@ app_type:
     created_at: '2020-01-10T17:29:16.338Z'
     updated_at: '2020-01-10T17:29:16.338Z'
     user_email: 
+  - id: 1547
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_assign_to_groups
+    options: 
+    access: read
+    disabled: false
+    admin_id: 2
+    app_type_id: 18
+    role_name: _app_
+    created_at: '2020-01-20T18:31:17.283Z'
+    updated_at: '2020-01-20T18:31:17.283Z'
+    user_email: 
+  - id: 1548
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment__enrolled
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 18
+    role_name: tracker
+    created_at: '2020-01-20T18:33:44.992Z'
+    updated_at: '2020-01-20T18:33:44.992Z'
+    user_email: 
+  - id: 1549
+    user_id: 
+    resource_type: activity_log_type
+    resource_name: activity_log__grit_assignment__assign_to_group
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 18
+    role_name: tracker
+    created_at: '2020-01-20T18:33:54.134Z'
+    updated_at: '2020-01-20T18:33:54.134Z'
+    user_email: 
+  - id: 1550
+    user_id: 
+    resource_type: table
+    resource_name: dynamic_model__grit_assign_to_groups
+    options: ''
+    access: create
+    disabled: false
+    admin_id: 2
+    app_type_id: 18
+    role_name: tracker
+    created_at: '2020-01-20T18:34:25.656Z'
+    updated_at: '2020-01-20T18:34:25.656Z'
+    user_email: 
   valid_associated_activity_logs:
   - id: 75
     name: Protocol Deviations & Exceptions
@@ -3100,7 +3152,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-12-03T13:59:02.212Z'
-    updated_at: '2020-01-10T17:17:05.544Z'
+    updated_at: '2020-01-21T11:38:24.499Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -3211,28 +3263,32 @@ app_type:
       pain_questions\r\n\r\n################################################\r\nparticipation:\r\n
       \ label: Ability to Participate\r\n  \r\n  references:\r\n    dynamic_model__grit_ps_participation:\r\n
       \     from: this\r\n      add: one_to_this\r\n      \r\n  creatable_if:\r\n
-      \   <<: *enabled_if\r\n\r\n    all:\r\n      activity_log__grit_assignment_phone_screens:\r\n
+      \   <<: *enabled_if\r\n\r\n    not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n
+      \       extra_log_type: participation\r\n\r\n    all_pain:\r\n      activity_log__grit_assignment_phone_screens:\r\n
       \       extra_log_type: pain_questions\r\n      <<: *continue_after_pain_questions\r\n\r\n
-      \   not_any:\r\n      activity_log__grit_assignment_phone_screens:\r\n        extra_log_type:
-      participation\r\n      # If Audit C was ineligible, just skip this and move
-      on to ineligible\r\n      dynamic_model__grit_ps_audit_c_questions:\r\n        possibly_eligible_yes_no:
-      'no'\r\n\r\n\r\n################################################\r\nineligible:\r\n
+      \   all_audit_c:\r\n      activity_log__grit_assignment_phone_screens:\r\n        extra_log_type:
+      audit_c\r\n      <<: *continue_after_audit_c\r\n\r\n\r\n\r\n  save_trigger:\r\n
+      \   on_create:\r\n      create_reference:\r\n\r\n        ##### Screener Responses
+      with outcome default #####\r\n        - dynamic_model__grit_ps_screener_response:\r\n
+      \           in: master\r\n            with:\r\n              outcome: ineligible\r\n
+      \           if:\r\n              all_participation:\r\n                activity_log__grit_assignment_phone_screens:\r\n
+      \                 extra_log_type: participation\r\n                not_any:\r\n
+      \                 <<: *eligible_participation\r\n                not_any_2:\r\n
+      \                 <<: *possibly_eligible_participation\r\n\r\n################################################\r\nineligible:\r\n
       \ label: Ineligible\r\n\r\n  view_options:\r\n    hide_unless_creatable: true\r\n\r\n
       \ references:\r\n    dynamic_model__grit_ps_non_eligible:\r\n      from: this\r\n
       \     add: one_to_this\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n
       \ creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n      not_any:\r\n        activity_log__grit_assignment_phone_screens:\r\n
       \         extra_log_type: ineligible\r\n      not_all_show_eligible:\r\n        <<:
-      *all_show_eligible\r\n        <<: *not_any_possibly_eligible\r\n\r\n      any_responses_ineligible:
-      &any_responses_ineligible\r\n        <<: *any_possibly_eligible_no\r\n\r\n\r\n
-      \       all_audit_c:\r\n          activity_log__grit_assignment_phone_screens:\r\n
+      *all_show_eligible\r\n        <<: *not_any_possibly_eligible\r\n\r\n      not_all_participation:
+      \         \r\n        activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
+      participation\r\n\r\n      any_responses_ineligible: &any_responses_ineligible\r\n
+      \       <<: *any_possibly_eligible_no\r\n\r\n\r\n        all_audit_c:\r\n          activity_log__grit_assignment_phone_screens:\r\n
       \           extra_log_type: audit_c\r\n          not_any:\r\n            <<:
       *eligible_audit_c\r\n          not_any_2:\r\n            <<: *possibly_eligible_audit_c\r\n\r\n
       \       all_pain_questions:\r\n          activity_log__grit_assignment_phone_screens:\r\n
       \           extra_log_type: pain_questions\r\n          not_any:\r\n            <<:
-      *eligible_pain_questions\r\n          not_any_2:\r\n            <<: *possibly_eligible_pain_questions\r\n\r\n\r\n
-      \       all_participation:\r\n          activity_log__grit_assignment_phone_screens:\r\n
-      \           extra_log_type: participation\r\n          not_any:\r\n            <<:
-      *eligible_participation\r\n          not_any_2:\r\n            <<: *possibly_eligible_participation\r\n\r\n\r\n\r\n
+      *eligible_pain_questions\r\n          not_any_2:\r\n            <<: *possibly_eligible_pain_questions\r\n\r\n\r\n\r\n\r\n\r\n
       \ save_trigger:\r\n    on_create:\r\n      create_reference:\r\n\r\n        #####
       Screener Responses with outcome default #####\r\n        - dynamic_model__grit_ps_screener_response:\r\n
       \           in: master\r\n            with:\r\n              outcome: ineligible\r\n\r\n
@@ -3258,11 +3314,11 @@ app_type:
       \     from: this\r\n      add: one_to_this\r\n\r\n  showable_if:\r\n    always:
       true\r\n\r\n  creatable_if:\r\n    all:\r\n      <<: *enabled_if\r\n\r\n      all_done:\r\n
       \       activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
-      participation\r\n\r\n      not_any:\r\n        activity_log__grit_assignment_phone_screens:\r\n
-      \         extra_log_type: possibly_eligible\r\n\r\n      any_possible_eligible:\r\n
-      \       <<: *possibly_eligible_items\r\n\r\n      not_any_show_eligible:\r\n
-      \       <<: *all_show_eligible\r\n\r\n      not_any_ineligible:\r\n        <<:
-      *any_responses_ineligible\r\n\r\n#      not_:\r\n#        <<: *any_possibly_eligible_no\r\n\r\n
+      participation          \r\n        <<: *eligible_participation\r\n\r\n      not_any:\r\n
+      \       activity_log__grit_assignment_phone_screens:\r\n          extra_log_type:
+      possibly_eligible\r\n\r\n      any_possible_eligible:\r\n        <<: *possibly_eligible_items\r\n\r\n
+      \     not_any_show_eligible:\r\n        <<: *all_show_eligible\r\n\r\n      not_any_ineligible:\r\n
+      \       <<: *any_responses_ineligible\r\n\r\n#      not_:\r\n#        <<: *any_possibly_eligible_no\r\n\r\n
       \     any_continue_after_possibly_eligible:\r\n\r\n        all_audit_c:\r\n
       \         activity_log__grit_assignment_phone_screens:\r\n            extra_log_type:
       audit_c\r\n          <<: *continue_after_audit_c\r\n\r\n        all_pain_questions:\r\n
@@ -3387,7 +3443,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-12-03T13:59:02.357Z'
-    updated_at: '2019-12-04T14:05:08.463Z'
+    updated_at: '2020-01-20T19:00:33.194Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -3471,21 +3527,38 @@ app_type:
       \   <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
       \       extra_log_type: msm_screening_appointment\r\n            \r\n    not_any_exit:
       *any_exit_or_complete\r\n    not_any:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: assign_id\r\n\r\n\r\n\r\n\r\n###################################\r\nappointment:\r\n
+      \       extra_log_type: assign_id\r\n\r\n\r\n\r\n\r\n\r\n###################################\r\nenrolled:\r\n
       \ label: Participant Enrolled\r\n###################################\r\n  \r\n
-      \ fields:\r\n\r\n  references:\r\n    dynamic_model__grit_appointment:\r\n      from:
-      master\r\n      add: one_to_master\r\n      \r\n  \r\n  view_options:\r\n    always_embed_reference:
-      dynamic_model__grit_appointment\r\n    hide_unless_creatable: true\r\n\r\n  creatable_if:\r\n
+      \ fields:     \r\n  \r\n  caption_before:\r\n    all_fields:\r\n      edit_caption:
+      |\r\n        The participant has completed screening. If eligible, click **Save**\r\n
+      \       to enroll him in the study.\r\n        \r\n        If not eligible,
+      cancel this form and click the \r\n        **+ Ineligible** button above instead.\r\n
+      \       \r\n      show_caption: |\r\n        The participant has completed screening,
+      \r\n        is eligible and has been enrolled in the study.\r\n  \r\n  view_options:\r\n
+      \   hide_unless_creatable: true\r\n    show_cancel: true\r\n\r\n  creatable_if:\r\n
       \   <<: *enabled_if\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
       \   <<: *not_enrolled\r\n    all_screened:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: msm_screening_appointment\r\n      \r\n\r\n\r\n\r\n\r\n###################################\r\npost_testing_1:\r\n
+      \       extra_log_type: msm_screening_appointment\r\n      \r\n###################################\r\nassign_to_group:\r\n
+      \ label: Assign to Group\r\n###################################\r\n  \r\n  fields:\r\n\r\n
+      \ references:\r\n    dynamic_model__grit_assign_to_group:\r\n      from: master\r\n
+      \     add: one_to_master\r\n      \r\n  \r\n  view_options:\r\n    always_embed_reference:
+      dynamic_model__grit_assign_to_group\r\n    hide_unless_creatable: true\r\n\r\n
+      \ creatable_if:\r\n    <<: *enabled_if\r\n            \r\n    not_any_exit:
+      *any_exit_or_complete\r\n    <<: *not_all_assigned_to_group\r\n    <<: *all_enrolled\r\n
+      \     \r\n\r\n\r\n###################################\r\nappointment:\r\n  label:
+      Training Date\r\n###################################\r\n  \r\n  fields:\r\n\r\n
+      \ references:\r\n    dynamic_model__grit_appointment:\r\n      from: master\r\n
+      \     add: one_to_master\r\n      \r\n  \r\n  view_options:\r\n    always_embed_reference:
+      dynamic_model__grit_appointment\r\n    hide_unless_creatable: true\r\n\r\n  creatable_if:\r\n
+      \   <<: *enabled_if\r\n            \r\n    not_any_exit: *any_exit_or_complete\r\n
+      \   <<: *not_set_appointment\r\n    <<: *all_assigned_to_group\r\n      \r\n\r\n\r\n\r\n\r\n###################################\r\npost_testing_1:\r\n
       \ label: Post Testing 1\r\n###################################  \r\n  fields:
       \r\n#    - select_who\r\n#    - select_record_from_player_contacts\r\n    -
       follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n#
       \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_set_appointment\r\n
       \   not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
       \     activity_log__grit_assignments:\r\n        extra_log_type: post_testing_1\r\n
       \       \r\n  showable_if:\r\n    always: true\r\n\r\n\r\n###################################\r\npost_testing_2:\r\n
@@ -3495,10 +3568,10 @@ app_type:
       \   select_who: Who will perform the phone screening?\r\n#    select_record_from_player_contacts:
       Phone number to call\r\n    follow_up_when: Scheduled date\r\n    follow_up_time:
       Scheduled time (Eastern Time)\r\n    notes: |\r\n      Additional notes\r\n
-      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_enrolled\r\n\r\n
-      \   not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n    not_any:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: post_testing_2\r\n\r\n
-      \ showable_if:\r\n    always: true\r\n\r\n\r\n\r\n    \r\n###################################\r\ncompleted:\r\n
+      \     \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    <<: *all_set_appointment\r\n
+      \       \r\n    not_any_exit:          \r\n      <<: *any_exit_or_complete\r\n
+      \   not_any:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
+      post_testing_2\r\n\r\n  showable_if:\r\n    always: true\r\n\r\n\r\n\r\n    \r\n###################################\r\ncompleted:\r\n
       \ label: Completed Study\r\n###################################\r\n  \r\n  fields:\r\n
       \ \r\n  caption_before:\r\n    all_fields: |\r\n      The participant completed
       the study.\r\n  \r\n  creatable_if:\r\n    <<: *enabled_if\r\n    all:\r\n      activity_log__grit_assignments:\r\n
@@ -5163,6 +5236,28 @@ app_type:
       \     include_blank: yes\r\n    select_record_from_addresses:\r\n      include_blank:
       yes\r\n#    sent_when:\r\n#      value: today()\r\n"
     user_email: 
+  - id: 391
+    name: GRIT Assign to Group
+    table_name: grit_assign_to_groups
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 2
+    disabled: false
+    created_at: '2020-01-20T18:31:17.208Z'
+    updated_at: '2020-01-20T18:44:39.622Z'
+    position: 
+    category: grit-records
+    table_key_name: ''
+    field_list: select_group
+    result_order: updated_at desc
+    options: "default:\r\n\r\n  caption_before:\r\n    select_group: |\r\n      Which
+      group is the participant is assigned to?\r\n      \r\n\r\n  field_options:\r\n
+      \   select_group:\r\n      edit_as:\r\n        alt_options: \r\n          'Group
+      1: Immediate Training': group 1 - immediate training\r\n          'Group 2:
+      Delayed Training': group 2 - delayed training\r\n          \r\n    "
+    user_email: 
   - id: 383
     name: GRIT Withdrawal
     table_name: grit_withdrawals
@@ -5542,37 +5637,38 @@ app_type:
       (not interested, etc). The search matches the latest status of a participant,
       so as they pass through the process they will only be matched by one status.'
     sql: "SELECT * from (\r\n  SELECT distinct dt.master_id, grit.grit_id, msm_grit.msm_grit_id,\r\n
-      \ CASE \r\n  WHEN extra_log_type = 'completed' THEN 'completed study'\r\n  WHEN
+      \ CASE \r\n  WHEN extra_log_type = 'completed' THEN 'completed study'\r\n  --WHEN
       extra_log_type = 'completed_intervention' THEN 'completed bbti'\r\n  WHEN extra_log_type
       = 'withdraw' THEN 'withdrawn'\r\n  WHEN extra_log_type IN ('exit_not_consented',
       'exit_ps', 'exit_ps_msm', 'exit_opt_out', 'exit_l2fu') THEN 'exited'\r\n  WHEN
       extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'msm_ps_eligible'
       THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'in process'\r\n
-      \ WHEN extra_log_type = 'appointment' THEN 'enrolled'\r\n  ELSE extra_log_type\r\n
-      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id,
-      al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
-      BY al.master_id \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n
-      \   FROM activity_log_grit_assignments al\r\n    WHERE   \r\n    extra_log_type
-      IN (\r\n      'schedule_screening', \r\n      'msm_ps_eligible', \r\n      'ineligible',
-      \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_ps_msm',\r\n
-      \     'exit_opt_out',\r\n      'exit_l2fu',\r\n      'appointment',\r\n      'completed',\r\n
-      \     'completed_intervention',\r\n      'withdraw'\r\n    )\r\n  ) dt\r\n  INNER
-      JOIN grit_assignments grit ON dt.master_id = grit.master_id\r\n  LEFT OUTER
-      JOIN msm_grit_id_numbers msm_grit ON dt.master_id = msm_grit.master_id\r\n  WHERE
-      r = 1 \r\n) dt2\r\nWHERE status IN(:select_status)\r\nORDER BY status, created_at
-      desc\r\n;\r\n"
+      \ WHEN extra_log_type = 'appointment' THEN 'scheduled'\r\n  WHEN extra_log_type
+      = 'enrolled' THEN 'enrolled'\r\n  \r\n  ELSE extra_log_type\r\n  END \"status\",
+      \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id, al.created_at,
+      al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION BY al.master_id
+      \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n    FROM activity_log_grit_assignments
+      al\r\n    WHERE   \r\n    extra_log_type IN (\r\n      'schedule_screening',
+      \r\n      'msm_ps_eligible', \r\n      'ineligible', \r\n      'exit_not_consented',
+      \r\n      'exit_ps', \r\n      'exit_ps_msm',\r\n      'exit_opt_out',\r\n      'exit_l2fu',\r\n
+      \     'appointment',\r\n      'enrolled',\r\n      'completed',\r\n      --'completed_intervention',\r\n
+      \     'withdraw'\r\n    )\r\n  ) dt\r\n  INNER JOIN grit_assignments grit ON
+      dt.master_id = grit.master_id\r\n  LEFT OUTER JOIN msm_grit_id_numbers msm_grit
+      ON dt.master_id = msm_grit.master_id\r\n  WHERE r = 1 \r\n) dt2\r\nWHERE status
+      IN(:select_status)\r\nORDER BY status, created_at desc\r\n;\r\n"
     search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
       / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
       \   default: \r\n      - eligible\r\n#      - ineligible\r\n#      - completed\r\n#
       \     - withdrawn\r\n#      - exited\r\n      - enrolled\r\n      - in process\r\n
       \   selections: \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
-      \     completed study: completed study\r\n      completed bbti: completed bbti\r\n
-      \     withdrawn: withdrawn\r\n      exited: exited\r\n      enrolled: enrolled\r\n
-      \     in process: in process\r\n      \r\n      "
+      \     completed study: completed study\r\n      withdrawn: withdrawn\r\n      exited:
+      exited\r\n      enrolled: enrolled\r\n      scheduled: scheduled\r\n      post
+      testing 1 scheduled: post testing 1 scheduled\r\n      post testing 2 scheduled:
+      post testing 2 scheduled\r\n      in process: in process\r\n      \r\n      "
     admin_id: 2
     disabled: false
     created_at: '2019-12-03T13:59:03.454Z'
-    updated_at: '2019-12-03T13:59:03.454Z'
+    updated_at: '2020-01-21T10:43:38.324Z'
     report_type: search
     auto: false
     searchable: true
@@ -5676,22 +5772,32 @@ app_type:
       = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT NULL\r\n  AND (:from_date
       IS NULL or visit_start_date >= :from_date)\r\n  AND (:to_date IS NULL or visit_start_date
       <= :to_date)\r\n  AND (:grit_id IS NULL or grit.grit_id = :grit_id)\r\nGROUP
-      BY\r\nap.master_id, visit_start_date, pi.first_name, pi.last_name, grit.grit_id\r\n;\r\n\r\ncreate
-      temp table scheduled_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
+      BY\r\nap.master_id, visit_start_date, pi.first_name, pi.last_name, grit.grit_id\r\n;\r\n\r\n\r\ncreate
+      temp table post_testing\r\nas select\r\n  follow_up_when,\r\n  ap.master_id,\r\n
+      \ grit.grit_id,\r\n  pi.first_name,\r\n  pi.last_name,\r\n  extra_log_type,\r\n
+      \ max(ap.id) appointment_id\r\nfrom activity_log_grit_assignments ap\r\ninner
+      join player_infos pi on ap.master_id = pi.master_id\r\ninner join grit_assignments
+      grit on grit.master_id = ap.master_id\r\nwhere\r\n  follow_up_when IS NOT NULL\r\n
+      \ AND (:from_date IS NULL or follow_up_when >= :from_date)\r\n  AND (:to_date
+      IS NULL or follow_up_when <= :to_date)\r\n  AND (:grit_id IS NULL or grit.grit_id
+      = :grit_id)\r\n  AND extra_log_type in ('post_testing_1', 'post_testing_2')\r\nGROUP
+      BY\r\nap.master_id, follow_up_when, pi.first_name, pi.last_name, grit.grit_id,
+      extra_log_type\r\n;\r\n\r\n\r\ncreate temp table scheduled_calls\r\nas select\r\n
+      \ dt.follow_up_when,\r\n  dt.follow_up_time,\r\n  dt.master_id,\r\n  grit.grit_id,\r\n--
+      \ p.first_name,\r\n--  p.last_name,\r\n  dt.extra_log_type,\r\n  dt.select_who,\r\n
+      \ dt.select_next_step\r\nfrom\r\n  (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n
+      \     a.select_who,\r\n      a.follow_up_when,\r\n      a.follow_up_time,\r\n
+      \     a.notes,\r\n      a.select_next_step,\r\n      rank()\r\n    OVER (\r\n
+      \     PARTITION BY a.master_id, a.extra_log_type\r\n      ORDER BY a.created_at
+      DESC\r\n    ) AS r\r\n\r\n    from activity_log_grit_assignments a\r\n    where\r\n
+      \     follow_up_when is not null\r\n      AND (:from_date IS NULL OR follow_up_when
+      >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when <= :to_date
+      )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id = p.master_id\r\n\r\ninner
+      join grit_assignments grit\r\n  on dt.master_id = grit.master_id\r\n\r\nWHERE
+      r = 1\r\nAND (:grit_id IS NULL or grit.grit_id = :grit_id)\r\n;\r\n\r\n\r\ncreate
+      temp table pi_calls\r\nas select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n
       \ dt.master_id,\r\n  grit.grit_id,\r\n--  p.first_name,\r\n--  p.last_name,\r\n
       \ dt.extra_log_type,\r\n  dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n
-      \ (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n      a.select_who,\r\n
-      \     a.follow_up_when,\r\n      a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
-      \     rank()\r\n    OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n
-      \     ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_grit_assignments
-      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
-      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
-      <= :to_date )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id
-      = p.master_id\r\n\r\ninner join grit_assignments grit\r\n  on dt.master_id =
-      grit.master_id\r\n\r\nWHERE r = 1\r\nAND (:grit_id IS NULL or grit.grit_id =
-      :grit_id)\r\n;\r\n\r\n\r\ncreate temp table pi_calls\r\nas select\r\n  dt.follow_up_when,\r\n
-      \ dt.follow_up_time,\r\n  dt.master_id,\r\n  grit.grit_id,\r\n--  p.first_name,\r\n--
-      \ p.last_name,\r\n  dt.extra_log_type,\r\n  dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n
       \ (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n      'PI' select_who,\r\n
       \     a.follow_up_when,\r\n      a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
       \     rank()\r\n    OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n
@@ -5704,8 +5810,11 @@ app_type:
       :grit_id)\r\n;\r\n\r\n/*\r\ncreate temp table all_dates\r\nas\r\nselect follow_up_when
       from scheduled_calls\r\nunion\r\nselect visit_start_date from appointments\r\n;\r\n*/\r\n\r\nSELECT\r\n
       \ true \"allDay\",\r\n  visit_start_date::varchar || 'T' || '00:00:00' \"start\",\r\n
-      \ null \"end\",\r\n  'assessment start' \"title\",\r\n  array['report-cal-start-event']
-      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\nUNION\r\nSELECT\r\n
+      \ null \"end\",\r\n  'training start' \"title\",\r\n  array['report-cal-start-event']
+      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\nUNION\r\n\r\nSELECT\r\n
+      \ true \"allDay\",\r\n  follow_up_when::varchar || 'T' || '00:00:00' \"start\",\r\n
+      \ null \"end\",\r\n  replace(extra_log_type, '_', ' ') \"title\",\r\n  array['report-cal-post-testing-event']
+      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM post_testing\r\n\r\nUNION\r\n\r\nSELECT\r\n
       \ true ,\r\n  '2019-06-20' ,\r\n  null ,\r\n  'assessment start' ,\r\n  array['report-cal-start-event']
       \"classNames\",\r\n  null \"url\"\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
       \ follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n
@@ -5730,7 +5839,7 @@ app_type:
     admin_id: 2
     disabled: false
     created_at: '2019-12-03T13:59:03.469Z'
-    updated_at: '2019-12-03T13:59:03.469Z'
+    updated_at: '2020-01-21T10:17:11.151Z'
     report_type: regular_report
     auto: true
     searchable: false
@@ -5746,7 +5855,9 @@ app_type:
       center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
       gray\r\n    report-cal-call-event.schedule_screening_2:\r\n      background-color:
       '#155fbb'\r\n      border-color: gray\r\n    report-cal-pi-call-event:\r\n      background-color:
-      '#044'\r\n      border-color: gray\r\n"
+      '#044'\r\n      border-color: gray\r\n    report-cal-post-testing-event:\r\n
+      \     background-color: '#5f15bb'\r\n      border-color: gray\r\n      text-align:
+      center"
     user_email: 
   - id: 241
     name: Ready for HMS Screening
@@ -11161,14 +11272,22 @@ app_type:
       \ any_ineligible: &any_ineligible\r\n    any_ineligible:\r\n      dynamic_model__grit_ps_screener_responses:\r\n
       \       outcome: ineligible\r\n      dynamic_model__grit_ps_eligibility_followups:\r\n
       \       outcome: ineligible\r\n\r\n\r\n  all_enrolled: &all_enrolled\r\n    all_enrolled:\r\n
-      \     activity_log__grit_assignments:\r\n        extra_log_type: appointment\r\n\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: enrolled\r\n\r\n
       \ not_enrolled: &not_enrolled\r\n    not_all_enrolled:\r\n      activity_log__grit_assignments:\r\n
-      \       extra_log_type: appointment\r\n  \r\n  \r\n  "
+      \       extra_log_type: enrolled\r\n\r\n  all_set_appointment: &all_set_appointment\r\n
+      \   all_set_appointment:\r\n      activity_log__grit_assignments:\r\n        extra_log_type:
+      appointment\r\n\r\n  not_set_appointment: &not_set_appointment\r\n    not_all_set_appointment:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: appointment\r\n\r\n
+      \ all_assigned_to_group: &all_assigned_to_group\r\n    all_assigned_to_group:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: assign_to_group\r\n\r\n
+      \ not_all_assigned_to_group: &not_all_assigned_to_group\r\n    not_all_assigned_to_group:\r\n
+      \     activity_log__grit_assignments:\r\n        extra_log_type: assign_to_group\r\n\r\n
+      \ \r\n  "
     format: yaml
     disabled: false
     admin_id: 2
     created_at: '2019-12-03T13:58:59.878Z'
-    updated_at: '2019-12-03T17:46:02.879Z'
+    updated_at: '2020-01-20T18:56:13.779Z'
     user_email: 
   - id: 49
     category: grit
