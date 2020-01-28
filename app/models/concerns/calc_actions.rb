@@ -334,6 +334,8 @@ module CalcActions
                 @skip_merge = true
               elsif expected_val.keys.first == :validate
                 res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
+              else
+                raise FphsException.new "calc_this_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions."
               end
             else
               this_val = in_instance.attributes[field_name.to_s]
@@ -497,7 +499,7 @@ module CalcActions
                 else
                   @extra_conditions[0] += " #{BoolTypeString} "
                 end
-                
+
                 if val[:condition] == 'IS NOT NULL'
                   @extra_conditions[0] += "#{table_name}.#{field_name} IS NOT NULL"
                 else
@@ -591,10 +593,15 @@ module CalcActions
         # If this is a sub condition (the key is one of :all, :any, :not_any, :not_all)
         # go ahead and calculate the sub conditions results by instantiating a ConditionalActions class
         # with the scope as the current condition scope from the query
-        if is_selection_type c_type
+        st = is_selection_type c_type
+        if st
           ca = ConditionalActions.new({c_type => t_conds}, current_instance, current_scope: @condition_scope, return_failures: return_failures)
           res_a = ca.calc_action_if
-          res &&= res_a
+          if st.in?([:all, :not_any])
+            res &&= res_a
+          else
+            res ||= res_a
+          end
           @this_val ||= ca.this_val
           return unless res
         end

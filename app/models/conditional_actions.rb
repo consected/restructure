@@ -20,7 +20,9 @@ class ConditionalActions
   end
 
   def calc_action_if
-    do_calc_action_if
+    res = do_calc_action_if
+    Rails.logger.debug "calc_action_if result: #{res}"
+    res
   end
 
   # Get the value of a field with expected value set as 'return_value'

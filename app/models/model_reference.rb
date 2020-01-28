@@ -424,7 +424,7 @@ class ModelReference < ActiveRecord::Base
     def allows_create
       return true unless from_record
       unless force_create? || from_record.can_edit? || from_record.can_add_reference?
-        errors.add :reference, "can not be created from a read-only parent (from: #{self.from_record_type} id: #{self.from_record_id} to: #{self.from_record_type}) => (force? #{!!force_create?} || edit? #{!!from_record.can_edit?} || add reference? #{!!from_record.can_add_reference?})"
+        errors.add :reference, "can not be created from a read-only parent (from: #{self.from_record_type} id: #{self.from_record_id} to: #{self.to_record_type}) => (force? #{!!force_create?} || edit? #{!!from_record.can_edit?} || add reference? #{!!from_record.can_add_reference?})"
       end
       true
     end

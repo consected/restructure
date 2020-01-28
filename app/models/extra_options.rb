@@ -314,6 +314,7 @@ class ExtraOptions
   end
 
   def calc_creatable_if obj
+    Rails.logger.debug "Checking calc_creatable_if on #{obj} with #{self.creatable_if}"
     ca = ConditionalActions.new self.creatable_if, obj
     ca.calc_action_if
   end
@@ -321,6 +322,7 @@ class ExtraOptions
   def calc_reference_creatable_if ref_config, obj
     ci = ref_config[:creatable_if]
     return true unless ci
+    Rails.logger.debug "Checking calc_reference_creatable_if on #{obj} with #{ci}"
     ca = ConditionalActions.new ci, obj
     ca.calc_action_if
   end
@@ -328,6 +330,7 @@ class ExtraOptions
   def calc_reference_prevent_disable_if ref_config, obj
     ci = ref_config[:prevent_disable]
     return false unless ci
+    Rails.logger.debug "Checking calc_reference_prevent_disable_if on #{obj} with #{ci}"
     ca = ConditionalActions.new ci, obj
     ca.calc_action_if
   end
@@ -335,16 +338,19 @@ class ExtraOptions
   def calc_reference_allow_disable_if_not_editable_if ref_config, obj
     ci = ref_config[:allow_disable_if_not_editable]
     return false unless ci
+    Rails.logger.debug "Checking calc_reference_allow_disable_if_not_editable_if on #{obj} with #{ci}"
     ca = ConditionalActions.new ci, obj
     ca.calc_action_if
   end
 
   def calc_editable_if obj
+    Rails.logger.debug "Checking calc_editable_if on #{obj} with #{self.editable_if}"
     ca = ConditionalActions.new self.editable_if, obj
     ca.calc_action_if
   end
 
   def calc_add_reference_if obj
+    Rails.logger.debug "Checking calc_add_reference_if on #{obj} with #{self.add_reference_if}"
     ca = ConditionalActions.new self.add_reference_if, obj
     ca.calc_action_if
   end
@@ -356,7 +362,9 @@ class ExtraOptions
 
   def calc_valid_if action_type, obj, return_failures: nil
     raise FphsException.new "incorrect action type requested in calc_valid_if #{action_type}" unless action_type.to_s.in?(%w(create update save))
-    ca = ConditionalActions.new self.valid_if["on_#{action_type}".to_sym], obj, return_failures: return_failures
+    ci = self.valid_if["on_#{action_type}".to_sym]
+    Rails.logger.debug "Checking calc_valid_if on #{obj} with #{ci}"
+    ca = ConditionalActions.new ci, obj, return_failures: return_failures
     ca.calc_action_if
   end
 

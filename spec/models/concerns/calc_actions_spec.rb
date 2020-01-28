@@ -757,6 +757,95 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be false
 
+    # Need all: before named table
+    conf = {
+      # Negate the nested result
+      not_all_dms: {
+        all_pcs: {
+
+          any: {
+            # A player contact record exists in the master
+            player_contacts: {
+                id: pc.id
+            }
+
+          },
+
+          # A player contact record exists in the master
+#          all_pcs_with_data: {
+            player_contacts: {
+              id: pc.id,
+              data: pc.data
+            }
+#          }
+        }
+      }
+
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect{
+      res.calc_action_if
+    }.to raise_error FphsException
+
+    # Need all: before named table
+    conf = {
+      # Negate the nested result
+      not_all_dms: {
+        any_pcs: {
+
+          any: {
+            # A player contact record exists in the master
+            player_contacts: {
+                id: 0
+            }
+
+          },
+
+          # A player contact record exists in the master
+#          all_pcs_with_data: {
+            player_contacts: {
+              id: pc.id,
+              data: pc.data
+            }
+#          }
+        }
+      }
+
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect{
+      res.calc_action_if
+    }.to raise_error FphsException
+
+    # Check that calc_query_conditions handles nested any conditions OK
+    conf = {
+
+
+        any_pcs: {
+
+          player_contacts: {
+            id: pc.id,
+            data: pc.data
+          },
+
+          any: {
+            # A player contact record exists in the master
+            player_contacts: {
+                id: 0
+            }
+
+          }
+
+        }
+
+
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
   end
 
   it "checks if a certain the current user has a specific role" do
@@ -1110,18 +1199,20 @@ RSpec.describe "Calculate conditional actions", type: :model do
     # expect(@alnor.model_references.count).to eq 2 # two dynamic models only
 
     res = ConditionalActions.new conf, @alnor
-    # expect(res.calc_action_if).to be true
+    expect(res.calc_action_if).to be true
 
+    # Set the references to be disabled
+    # This only affects the conditions handled by this_reference: id
+    # since the initial condition is handled directly by an INNER JOIN query
+    # not through the model references
     @alnor.extra_log_type_config.editable_if = {always: true}
-
     @alnor.model_references.each do |r|
       r.update!(disabled: true, current_user: @user) unless r.disabled?
     end
 
-
     res_if = res.calc_action_if
 
-    expect(res_if).to be false
+    expect(res_if).to be true
 
   end
 

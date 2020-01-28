@@ -619,8 +619,10 @@ module ActivityLogHandler
   def can_edit?
     # First, check if the user can actually access this type of activity log to edit it
     res = master.current_user.has_access_to? :edit, :activity_log_type, extra_log_type_config.resource_name
-    Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} due to lack of access" unless res
-    return unless res
+    unless res
+      Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} due to lack of access"
+      return
+    end
 
     # either use the editable_if configuration if there is one,
     # or only allow the latest item to be used otherwise
@@ -641,11 +643,17 @@ module ActivityLogHandler
       old_obj.master = self.master
 
       res = eltc.calc_editable_if(old_obj)
-      return unless res
+      unless res
+        Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} due to editable_if calculation"
+        return
+      end
     else
       @latest_item ||= master.send(self.class.assoc_inverse).unscope(:order).order(id: :desc).limit(1).first
       res = (self.user_id == master.current_user.id && @latest_item.id == self.id)
-      return unless res
+      unless res
+        Rails.logger.info "Can not edit activity_log_type #{extra_log_type_config.resource_name} since it has been overridden by a later item"
+        return
+      end
     end
 
     # Finally continue with the standard checks if none of the previous have failed
