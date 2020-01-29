@@ -65,6 +65,23 @@ class Admin::ManageUsersController < AdminController
       [:app_type_id]
     end
 
+    # Run a special filter on app_type_id, so that we don't just get the
+    # users current app, but all they have access to
+    def filtered_primary_model pm=nil
+
+      pm = primary_model
+      a = params[:filter][:app_type_id] if params[:filter]
+      if a.present?
+        a = a.to_i
+        params[:filter].delete :app_type_id
+        ids = pm.all.select{|u| a.in?(u.accessible_app_types.map(&:id))}.map(&:id)
+
+        pm = pm.where(id: ids)
+      end
+
+      super(pm)
+    end
+
   private
 
     def permitted_params
