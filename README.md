@@ -71,15 +71,20 @@ updating the app search path.
 Adding App Types to Filestore
 ---
 
+A script is provided in the **scripts** repo under **app_scripts/filestore**
+
 The NfsStore expects a specific structure for new App Types.
 
-    FS_ROOT=/efs1
+    APP_TYPE_ID=11
+
+    FS_ROOT=/efs-prod
     FS_DIR=main
-    APPTYPE_DIR=app-type-<app_type_id>
+    APPTYPE_DIR=app-type-${APP_TYPE_ID}
 
     cd $FS_ROOT/$FS_DIR
-    mkdir -p $APPTYPE_DIR/containers
-    chmod 770 $APPTYPE_DIR/containers
-    chown nfsuser:nfs_store_all_access $APPTYPE_DIR/containers
+    mkdir -p $APPTYPE_DIR/containers    
+    chmod 770 $APPTYPE_DIR
+    chown nfsuser:nfs_store_all_access $APPTYPE_DIR
+    chown nfsuser:nfs_store_group_0 $APPTYPE_DIR/containers
 
 **Note** the *nfs_store_all_access* group owner can be changed to another owner, such as *nfs_store_group_0* if access is to be controlled by the OS and user role *nfs_store group 600*
