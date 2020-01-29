@@ -21,7 +21,7 @@ class ConditionalActions
 
   def calc_action_if
     res = do_calc_action_if
-    Rails.logger.debug "calc_action_if result: #{res}"
+    Rails.logger.debug "******** calc_action_if result: #{res}"
     res
   end
 

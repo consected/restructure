@@ -846,6 +846,111 @@ RSpec.describe "Calculate conditional actions", type: :model do
     res = ConditionalActions.new conf, @al
     expect(res.calc_action_if).to be true
 
+
+    # Check that calc_query_conditions handles nested any conditions OK
+    conf = {
+
+        all: {
+          activity_log__player_contact_phones: {
+            select_who: @al.select_who
+          }
+        },
+
+        any_pcs: {
+          all: {
+            player_contacts: {
+              data: 'not good'
+            }
+          },
+
+          not_any: {
+            # A player contact record exists in the master
+            player_contacts: {
+                id: pc.id
+            }
+
+          }
+
+        }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+
+    # Check that calc_query_conditions handles nested any conditions OK
+
+    # Validate the first chunk
+    conf = {
+
+        all: {
+          activity_log__player_contact_phones: {
+            select_who: @al2.select_who
+          },
+          player_contacts: {
+            data: pc.data
+          }
+        }
+    }
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be true
+
+    # Validate the second chunk
+    conf = {
+
+        any_done: {
+          all: {
+            activity_log__player_contact_phones: {
+              select_who: 'not good'
+            }
+          },
+
+          not_any: {
+            activity_log__player_contact_phones: {
+              select_who: @al.select_who
+            }
+
+          }
+
+        }
+    }
+
+    res = ConditionalActions.new conf, @al
+    expect(res.calc_action_if).to be false
+
+    # Both chunks together
+    conf = {
+
+        all: {
+          activity_log__player_contact_phones: {
+            select_who: @al2.select_who
+          },
+          player_contacts: {
+            data: pc.data
+          }
+        },
+
+        any_done: {
+          all: {
+            activity_log__player_contact_phones: {
+              select_who: 'not good'
+            }
+          },
+
+          not_any: {
+            activity_log__player_contact_phones: {
+              select_who: @al.select_who
+            }
+
+          }
+
+        }
+    }
+
+    res = ConditionalActions.new conf, @al
+    r = res.calc_action_if
+    expect(r).to be false
+
   end
 
   it "checks if a certain the current user has a specific role" do

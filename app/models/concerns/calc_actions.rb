@@ -133,13 +133,21 @@ module CalcActions
             cond_res = false
             res_q = false
             # equivalent of (cond1 OR cond2 OR cond3 ...)
-            @condition_values.each do |table, fields|
-              fields.each do |field_name, expected_val|
-                calc_query({table => {field_name => expected_val}}, @extra_conditions, 'OR')
-                res_q = calc_query_conditions
+
+            if @condition_values.empty?
+              # Reset the previous condition_scope, since it could be carrying unwanted joins from an all, not_any condition
+              @condition_scope = nil
+            else
+
+              @condition_values.each do |table, fields|
+                fields.each do |field_name, expected_val|
+                  calc_query({table => {field_name => expected_val}}, @extra_conditions, 'OR')
+                  res_q = calc_query_conditions
+                  break if res_q
+                end
                 break if res_q
               end
-              break if res_q
+
             end
 
             # If no matches - return all possible items that failed
@@ -166,15 +174,23 @@ module CalcActions
             cond_res = true
             # equivalent of NOT(cond1 OR cond2 OR cond3 ...)
             # also equivalent to  (NOT(cond1) AND NOT(cond2) AND NOT(cond3))
-            @condition_values.each do |table, fields|
-              fields.each do |field_name, expected_val|
-                calc_query({table => {field_name => expected_val}}, @extra_conditions, 'OR')
-                res_q = calc_query_conditions
-                merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
-                cond_res &&= !res_q
+
+            if @condition_values.empty?
+              # Reset the previous condition_scope, since it could be carrying unwanted joins from an all, not_any condition
+              @condition_scope = nil
+            else
+
+              @condition_values.each do |table, fields|
+                fields.each do |field_name, expected_val|
+                  calc_query({table => {field_name => expected_val}}, @extra_conditions, 'OR')
+                  res_q = calc_query_conditions
+                  merge_failures({condition_type => {table => {field_name => expected_val}}}) if res_q
+                  cond_res &&= !res_q
+                  break unless cond_res && !return_failures
+                end
                 break unless cond_res && !return_failures
               end
-              break unless cond_res && !return_failures
+
             end
 
             @non_query_conditions.each do |table, fields|
@@ -402,25 +418,41 @@ module CalcActions
 
           t_conds.each do |field_name, val|
 
+            # non query conditions are those aren't formulated with a series of
+            # inner joins on the master. They are handled as individual queries.
+
             non_query_condition = table_name.in?([:this, :user, :parent, :referring_record])
             if field_name == :return_constant
+              # Allow us to return a set value, typically if no other conditions are met
+              # This is a non query condition
               non_query_condition = true
+
             elsif val.is_a? Hash
+              # If the conditional value is actually a hash, then we need to
+              # get the value to be matched from another record
+
               val_item_key = val.first.first
 
+              # If a specific table was not set (we have a select type such as all, any)
+              # then we can assume that we are referring to 'this' current record
               if is_selection_type(val_item_key)
                 val_item_key = :this
                 val = {this: val}
               end
 
+
               if val_item_key == :this && !val.first.last.is_a?(Hash)
-                # non_query_condition = true
+                # Get a literal value from 'this' to be compared
                 val = @current_instance.attributes[val.first.last]
               elsif val_item_key == :parent && !val.first.last.is_a?(Hash)
-                # non_query_condition = true
+                # Get a literal value from the current instance's parent to be compared
                 val = @current_instance.parent_item.attributes[val.first.last]
               elsif val_item_key == :referring_record && !val.first.last.is_a?(Hash)
-                # non_query_condition = true
+                # Get a literal value from the current instance's referring_record.
+                # This is a record referring to the current instance.
+                # A referring record is either based on the context of the current request (from a controller)
+                # or if there is only a single model reference referring to the current instance,
+                # that is used instead
                 val = @current_instance.referring_record && @current_instance.referring_record.attributes[val.first.last]
               elsif val_item_key == :this_references
                 if val.first.last.is_a?(Hash)
@@ -599,11 +631,11 @@ module CalcActions
           res_a = ca.calc_action_if
           if st.in?([:all, :not_any])
             res &&= res_a
+            return unless res
           else
             res ||= res_a
           end
           @this_val ||= ca.this_val
-          return unless res
         end
       end
 
