@@ -69,6 +69,8 @@ set search_path=grit,ml_app;
 -- # Discussions
 \i db/app_specific/grit/aws-db/discussions/create_activity_log_assignment_discussions.sql
 
+-- # Subject Info views
+\i db/app_specific/grit/aws-db/subject-info/create_view_subject_infos.sql
 
 set search_path=ml_app;
 \i db/app_specific/grit/aws-db/z-sync/z-ml_app-sync-create_sync_subject_data_aws_db.sql
