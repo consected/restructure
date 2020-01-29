@@ -4,10 +4,18 @@ _definitions:
 
   # Rule for editable_if only
   # Lock the forms on finalization
+  is_finalized: &is_finalized
+    all:
+      any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: finalize
+      not_all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+
   not_finalized: &not_finalized
     not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: finalize
+      <<: *is_finalized
 
 
   ####
@@ -59,7 +67,12 @@ _default:
   creatable_if: *enabled_if
   editable_if: *not_finalized
   save_action:
-    on_create: create_next_creatable
+    on_create:
+      create_next_creatable:
+        if:
+          not_any:
+            activity_log__ipa_assignment_phone_screens:
+              extra_log_type: rescreen
 
 ################################
 start_phone_screen:
@@ -79,7 +92,7 @@ start_phone_screen:
 
   creatable_if:
     <<: *enabled_if
-    not_any:
+    not_any_still_interested:
       dynamic_model__ipa_ps_initial_screenings:
         select_still_interested: "yes"
 
@@ -174,15 +187,24 @@ tmoca_scores:
 
   creatable_if:
     <<: *enabled_if
+
     all:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: start_phone_screen
       dynamic_model__ipa_ps_initial_screenings:
         select_still_interested: "yes"
 
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: tmoca_scores
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type:
+           - tmoca_scores
+           - tmoca_0
+           - tmoca_1
+
 
 ###############################
 # Continue after T-MoCA?
@@ -340,15 +362,22 @@ section_2_v2:
 
   creatable_if:
     <<: *enabled_if
-    all:
+    any:
       activity_log__ipa_assignment_phone_screens:
-        extra_log_type: tmoca_continue
+        extra_log_type:
+          - tmoca_continue
+          - section_2
         callback_required:
           - ok to continue
           - call me back
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: section_2_v2
+
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: section_2_v2
 
 
 health_1:
@@ -365,9 +394,13 @@ health_1:
         extra_log_type:
           - section_2
           - section_2_v2
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: health_1
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: health_1
 
 sleep_1:
   label: Sleep
@@ -382,9 +415,13 @@ sleep_1:
     all:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: health_1
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: sleep_1
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: sleep_1
 
 
 mri_1:
@@ -400,9 +437,14 @@ mri_1:
     all:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: sleep_1
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: mri_1
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: mri_1
+
 
 
 tms_1:
@@ -417,9 +459,13 @@ tms_1:
     all:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: mri_1
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: tms_1
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: tms_1
 
 #######################
 # T-MoCA has moved
@@ -726,9 +772,15 @@ informant_details_v2:
           condition: <
           value: 17
 
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: informant_details_v2
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type:
+           - informant_details
+           - informant_details_v2
 
   save_trigger:
     on_create:
@@ -766,9 +818,13 @@ schedule_callback_v2:
     all:
       activity_log__ipa_assignment_phone_screens:
         extra_log_type: completed_questions
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: schedule_callback_v2
+    any_done:
+      all:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: rescreen
+      not_any:
+        activity_log__ipa_assignment_phone_screens:
+          extra_log_type: schedule_callback_v2
 
 
   save_trigger:
@@ -809,9 +865,10 @@ finalize:
         extra_log_type:
           - schedule_callback
           - schedule_callback_v2
-    not_any:
-      activity_log__ipa_assignment_phone_screens:
-        extra_log_type: finalize
+    <<: *not_finalized
+    not_any_inex_finalized:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
 
 
   # Override the default that hides activities after a certain stage,
@@ -831,21 +888,41 @@ finalize:
     on_create:
       create_reference:
         - activity_log__ipa_assignment_inex_checklist:
+            #if:
+            #  not_any:
+            #    activity_log__ipa_assignment_inex_checklists:
+            #      extra_log_type: tms_responses
+
             in: master
             with:
               extra_log_type: tms_responses
 
         - activity_log__ipa_assignment_summary:
+            if:
+              not_any:
+                activity_log__ipa_assignment_summaries:
+                  extra_log_type: medical_history
+
             in: master
             with:
               extra_log_type: medical_history
 
         - activity_log__ipa_assignment_summary:
+            if:
+              not_any:
+                activity_log__ipa_assignment_summaries:
+                  extra_log_type: medications
+
             in: master
             with:
               extra_log_type: medications
 
         - activity_log__ipa_assignment_summary:
+            if:
+              not_any:
+                activity_log__ipa_assignment_summaries:
+                  extra_log_type: special_considerations
+
             in: master
             with:
               extra_log_type: special_considerations
@@ -867,9 +944,40 @@ finalize:
 
 
 
+
   # Notify the reviewers that the phone screen has been completed
       notify:
         - *notify_reviewer
         - *notify_reviewer_sms
 #        - *notify_pi
 #        - *notify_pi_sms
+
+rescreen:
+
+  label: Rescreen
+  caption_before:
+    all_fields: |
+      Enable rescreening of the participant
+    submit: |
+      Save this entry to unlock the phone screen forms so that individual rescreen
+      responses can be recorded.
+
+      After saving this entry, select the each form to rescreen from the header above.
+      Save each form then select the next one to rescreen, or *Finalize* when complete.
+
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__ipa_assignment_phone_screens:
+        extra_log_type:
+          - finalize
+
+    not_any_inex_finalized:
+      activity_log__ipa_assignment_inex_checklists:
+        extra_log_type: finalize_phone_screen_checklist
+
+  # Override the default that hides activities after a certain stage,
+  # so that any user can see that the phone screen process has been completed
+  showable_if:
+    always: true
