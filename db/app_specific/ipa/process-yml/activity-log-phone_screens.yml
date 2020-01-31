@@ -955,6 +955,10 @@ finalize:
 rescreen:
 
   label: Rescreen
+
+  view_options:
+    hide_unless_creatable: true
+
   caption_before:
     all_fields: |
       Enable rescreening of the participant
