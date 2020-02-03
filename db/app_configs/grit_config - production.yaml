@@ -10121,6 +10121,195 @@ app_type:
     created_at: '2020-01-27T09:36:18.409Z'
     updated_at: '2020-01-27T09:36:18.409Z'
     user_email: nicole_jones@hms.harvard.edu
+  - id: 1268
+    app_type_id: 12
+    role_name: user - participant details
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.028Z'
+    updated_at: '2020-01-29T09:22:52.028Z'
+    user_email: test@test
+  - id: 1269
+    app_type_id: 12
+    role_name: nfs_store group 600
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.044Z'
+    updated_at: '2020-01-29T09:22:52.044Z'
+    user_email: test@test
+  - id: 1270
+    app_type_id: 12
+    role_name: user - phone screen
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.053Z'
+    updated_at: '2020-01-29T09:22:52.053Z'
+    user_email: test@test
+  - id: 1271
+    app_type_id: 12
+    role_name: msm coordinator
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.063Z'
+    updated_at: '2020-01-29T09:22:52.063Z'
+    user_email: test@test
+  - id: 1272
+    app_type_id: 12
+    role_name: user - followup
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.071Z'
+    updated_at: '2020-01-29T09:22:52.071Z'
+    user_email: test@test
+  - id: 1273
+    app_type_id: 12
+    role_name: user - protocol deviation
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.086Z'
+    updated_at: '2020-01-29T09:22:52.086Z'
+    user_email: test@test
+  - id: 1274
+    app_type_id: 12
+    role_name: user - adverse event
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.099Z'
+    updated_at: '2020-01-29T09:22:52.099Z'
+    user_email: test@test
+  - id: 1275
+    app_type_id: 12
+    role_name: user - discussions
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.107Z'
+    updated_at: '2020-01-29T09:22:52.107Z'
+    user_email: test@test
+  - id: 1276
+    app_type_id: 12
+    role_name: email - hms phone screener
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.115Z'
+    updated_at: '2020-01-29T09:22:52.115Z'
+    user_email: test@test
+  - id: 1277
+    app_type_id: 12
+    role_name: email - pi follow up
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.124Z'
+    updated_at: '2020-01-29T09:22:52.124Z'
+    user_email: test@test
+  - id: 1278
+    app_type_id: 12
+    role_name: email - pi
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.132Z'
+    updated_at: '2020-01-29T09:22:52.132Z'
+    user_email: test@test
+  - id: 1279
+    app_type_id: 12
+    role_name: reviewer - adverse event
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.140Z'
+    updated_at: '2020-01-29T09:22:52.140Z'
+    user_email: test@test
+  - id: 1280
+    app_type_id: 12
+    role_name: reviewer - protocol deviation
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.148Z'
+    updated_at: '2020-01-29T09:22:52.148Z'
+    user_email: test@test
+  - id: 1281
+    app_type_id: 12
+    role_name: user - protocol exception
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.159Z'
+    updated_at: '2020-01-29T09:22:52.159Z'
+    user_email: test@test
+  - id: 1282
+    app_type_id: 12
+    role_name: admin
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.168Z'
+    updated_at: '2020-01-29T09:22:52.168Z'
+    user_email: test@test
+  - id: 1283
+    app_type_id: 12
+    role_name: email - hms admin
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.176Z'
+    updated_at: '2020-01-29T09:22:52.176Z'
+    user_email: test@test
+  - id: 1284
+    app_type_id: 12
+    role_name: sms - hms admin
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.184Z'
+    updated_at: '2020-01-29T09:22:52.184Z'
+    user_email: test@test
+  - id: 1285
+    app_type_id: 12
+    role_name: phone screener
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.193Z'
+    updated_at: '2020-01-29T09:22:52.193Z'
+    user_email: test@test
+  - id: 1286
+    app_type_id: 12
+    role_name: tracker
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.202Z'
+    updated_at: '2020-01-29T09:22:52.202Z'
+    user_email: test@test
+  - id: 1287
+    app_type_id: 12
+    role_name: email - msm transfer
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.210Z'
+    updated_at: '2020-01-29T09:22:52.210Z'
+    user_email: test@test
+  - id: 1288
+    app_type_id: 12
+    role_name: hms coordinator
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:22:52.218Z'
+    updated_at: '2020-01-29T09:22:52.218Z'
+    user_email: test@test
   associated_message_templates:
   - id: 21
     name: standard sms layout
