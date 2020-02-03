@@ -514,7 +514,7 @@ app_type:
   - id: 647
     user_id:
     resource_type: report
-    resource_name: Search Sleep Study Subject
+    resource_name: sleep__search_sleep_subject
     options: ''
     access: read
     disabled: false
@@ -522,7 +522,7 @@ app_type:
     app_type_id: 11
     role_name: user - participant details
     created_at: '2019-11-21T11:01:24.488Z'
-    updated_at: '2019-11-21T11:01:24.488Z'
+    updated_at: '2020-01-29T09:39:24.612Z'
     user_email:
   - id: 648
     user_id:
@@ -930,7 +930,7 @@ app_type:
   - id: 679
     user_id:
     resource_type: report
-    resource_name: Protocol Deviation PI Review
+    resource_name: sleep__sleep_protocol_deviation_pi_review
     options: ''
     access: read
     disabled: false
@@ -938,12 +938,12 @@ app_type:
     app_type_id: 11
     role_name: user - protocol deviation
     created_at: '2019-11-21T11:01:24.672Z'
-    updated_at: '2019-11-21T11:01:24.672Z'
+    updated_at: '2020-01-29T09:37:34.151Z'
     user_email:
   - id: 680
     user_id:
     resource_type: report
-    resource_name: Adverse Event PI Review
+    resource_name: sleep__sleep_adverse_event_pi_review
     options: ''
     access: read
     disabled: false
@@ -951,7 +951,7 @@ app_type:
     app_type_id: 11
     role_name: user - adverse event
     created_at: '2019-11-21T11:01:24.678Z'
-    updated_at: '2019-11-21T11:01:24.678Z'
+    updated_at: '2020-01-29T09:35:41.491Z'
     user_email:
   - id: 681
     user_id:
@@ -969,7 +969,7 @@ app_type:
   - id: 682
     user_id:
     resource_type: report
-    resource_name: Protocol Deviation Initial Review
+    resource_name: sleep__sleep_protocol_deviation_initial_review
     options: ''
     access: read
     disabled: false
@@ -977,12 +977,12 @@ app_type:
     app_type_id: 11
     role_name: user - protocol deviation
     created_at: '2019-11-21T11:01:24.690Z'
-    updated_at: '2019-11-21T11:01:24.690Z'
+    updated_at: '2020-01-29T09:37:20.952Z'
     user_email:
   - id: 683
     user_id:
     resource_type: report
-    resource_name: Adverse Event Initial Review
+    resource_name: sleep__sleep_adverse_event_initial_review
     options: ''
     access: read
     disabled: false
@@ -990,7 +990,7 @@ app_type:
     app_type_id: 11
     role_name: user - adverse event
     created_at: '2019-11-21T11:01:24.696Z'
-    updated_at: '2019-11-21T11:01:24.696Z'
+    updated_at: '2020-01-29T09:35:25.238Z'
     user_email:
   - id: 684
     user_id:
@@ -1008,7 +1008,7 @@ app_type:
   - id: 685
     user_id:
     resource_type: report
-    resource_name: Adverse Events
+    resource_name: sleep__sleep_adverse_events
     options: ''
     access: read
     disabled: false
@@ -1016,12 +1016,12 @@ app_type:
     app_type_id: 11
     role_name: user - adverse event
     created_at: '2019-11-21T11:01:24.709Z'
-    updated_at: '2019-11-21T11:01:24.709Z'
+    updated_at: '2020-01-29T09:35:59.124Z'
     user_email:
   - id: 686
     user_id:
     resource_type: report
-    resource_name: Subjects In Process & Exited
+    resource_name: sleep__sleep_in_process___exited
     options: ''
     access: read
     disabled: false
@@ -1029,12 +1029,12 @@ app_type:
     app_type_id: 11
     role_name: ''
     created_at: '2019-11-21T11:01:24.715Z'
-    updated_at: '2019-11-21T11:01:24.715Z'
+    updated_at: '2020-01-29T09:40:43.871Z'
     user_email:
   - id: 687
     user_id:
     resource_type: report
-    resource_name: Protocol Deviations
+    resource_name: sleep__sleep_protocol_deviations
     options: ''
     access: read
     disabled: false
@@ -1042,7 +1042,7 @@ app_type:
     app_type_id: 11
     role_name: user - protocol deviation
     created_at: '2019-11-21T11:01:24.723Z'
-    updated_at: '2019-11-21T11:01:24.723Z'
+    updated_at: '2020-01-29T09:37:44.595Z'
     user_email:
   - id: 688
     user_id:
@@ -1671,7 +1671,7 @@ app_type:
   - id: 736
     user_id:
     resource_type: report
-    resource_name: Sleep Study ID Search
+    resource_name: sleep__sleep_id_search
     options: ''
     access: read
     disabled: false
@@ -1679,7 +1679,7 @@ app_type:
     app_type_id: 11
     role_name: ''
     created_at: '2019-11-21T11:01:25.047Z'
-    updated_at: '2019-11-21T11:01:25.047Z'
+    updated_at: '2020-01-29T09:40:18.420Z'
     user_email:
   - id: 737
     user_id:
@@ -1736,7 +1736,7 @@ app_type:
   - id: 741
     user_id:
     resource_type: report
-    resource_name: Ready for Sign Off - BWH PI
+    resource_name: sleep__sleep_ready_for_sign_off___pi
     options: ''
     access: read
     disabled: false
@@ -1744,12 +1744,12 @@ app_type:
     app_type_id: 11
     role_name: pi
     created_at: '2019-11-21T11:01:25.078Z'
-    updated_at: '2019-11-26T10:44:41.352Z'
+    updated_at: '2020-01-29T09:39:06.020Z'
     user_email:
   - id: 742
     user_id:
     resource_type: report
-    resource_name: Ready for Sign Off - BWH Staff
+    resource_name: sleep__sleep_ready_for_sign_off___staff
     options: ''
     access: read
     disabled: false
@@ -1757,7 +1757,7 @@ app_type:
     app_type_id: 11
     role_name: staff - inex
     created_at: '2019-11-21T11:01:25.083Z'
-    updated_at: '2019-11-26T10:44:51.370Z'
+    updated_at: '2020-01-29T09:39:11.417Z'
     user_email:
   - id: 743
     user_id:
@@ -2516,7 +2516,7 @@ app_type:
   - id: 801
     user_id:
     resource_type: report
-    resource_name: Sleep Calendar
+    resource_name: sleep__sleep_calendar
     options: ''
     access: read
     disabled: false
@@ -2524,12 +2524,12 @@ app_type:
     app_type_id: 11
     role_name: tracker
     created_at: '2019-11-21T11:01:25.414Z'
-    updated_at: '2019-11-21T11:01:25.414Z'
+    updated_at: '2020-01-29T09:39:38.640Z'
     user_email:
   - id: 802
     user_id:
     resource_type: report
-    resource_name: Sleep Calendar
+    resource_name: sleep__sleep_calendar
     options: ''
     access: read
     disabled: false
@@ -2537,7 +2537,7 @@ app_type:
     app_type_id: 11
     role_name: ''
     created_at: '2019-11-21T11:01:25.420Z'
-    updated_at: '2019-11-21T11:01:25.420Z'
+    updated_at: '2020-01-29T09:39:42.685Z'
     user_email:
   - id: 803
     user_id:
@@ -2880,7 +2880,7 @@ app_type:
   - id: 829
     user_id:
     resource_type: report
-    resource_name: Ready for HMS Screening
+    resource_name: sleep__ready_for_hms_screening
     options: ''
     access: read
     disabled: false
@@ -2888,12 +2888,12 @@ app_type:
     app_type_id: 11
     role_name: phone screener
     created_at: '2019-11-21T11:01:25.569Z'
-    updated_at: '2019-11-21T11:01:25.569Z'
+    updated_at: '2020-01-29T09:38:24.712Z'
     user_email:
   - id: 830
     user_id:
     resource_type: report
-    resource_name: Ready for BWH Screening
+    resource_name: sleep__ready_for_bwh_screening
     options: ''
     access: read
     disabled: false
@@ -2901,7 +2901,7 @@ app_type:
     app_type_id: 11
     role_name: phone screener 2
     created_at: '2019-11-21T11:01:25.574Z'
-    updated_at: '2019-11-21T11:01:25.574Z'
+    updated_at: '2020-01-29T09:38:05.999Z'
     user_email:
   - id: 831
     user_id:
@@ -3010,7 +3010,7 @@ app_type:
   - id: 839
     user_id:
     resource_type: report
-    resource_name: Ready for PI Follow Up
+    resource_name: sleep__ready_for_pi_follow_up
     options: ''
     access: read
     disabled: false
@@ -3018,7 +3018,7 @@ app_type:
     app_type_id: 11
     role_name: pi
     created_at: '2019-11-21T11:01:25.625Z'
-    updated_at: '2019-11-21T11:01:25.625Z'
+    updated_at: '2020-01-29T09:38:57.967Z'
     user_email:
   - id: 840
     user_id:
@@ -3439,7 +3439,7 @@ app_type:
   - id: 872
     user_id:
     resource_type: report
-    resource_name: Completed PI Eligibility Review
+    resource_name: sleep__pi_follow_up_complete
     options: ''
     access: read
     disabled: false
@@ -3447,12 +3447,12 @@ app_type:
     app_type_id: 11
     role_name: phone screener
     created_at: '2019-11-21T11:01:25.810Z'
-    updated_at: '2019-11-21T11:01:25.810Z'
+    updated_at: '2020-01-29T09:36:20.342Z'
     user_email:
   - id: 873
     user_id:
     resource_type: report
-    resource_name: Ready for Informed Consent
+    resource_name: sleep__ready_for_informed_consent
     options: ''
     access: read
     disabled: false
@@ -3460,12 +3460,12 @@ app_type:
     app_type_id: 11
     role_name: phone screener 2
     created_at: '2019-11-21T11:01:25.816Z'
-    updated_at: '2019-11-21T11:01:25.816Z'
+    updated_at: '2020-01-29T09:38:32.144Z'
     user_email:
   - id: 874
     user_id:
     resource_type: report
-    resource_name: Needs Follow Up Communication
+    resource_name: sleep__needs_follow_up_communication
     options: ''
     access: read
     disabled: false
@@ -3473,7 +3473,7 @@ app_type:
     app_type_id: 11
     role_name: tracker
     created_at: '2019-11-21T11:01:25.822Z'
-    updated_at: '2019-11-21T11:01:25.822Z'
+    updated_at: '2020-01-29T09:36:59.463Z'
     user_email:
   - id: 875
     user_id:
@@ -3582,7 +3582,7 @@ app_type:
   - id: 883
     user_id:
     resource_type: report
-    resource_name: Needs Follow Up Communication
+    resource_name: sleep__needs_follow_up_communication
     options: ''
     access: read
     disabled: false
@@ -3590,7 +3590,7 @@ app_type:
     app_type_id: 11
     role_name: admin
     created_at: '2019-11-21T11:01:25.873Z'
-    updated_at: '2019-11-21T11:01:25.873Z'
+    updated_at: '2020-01-29T09:36:33.320Z'
     user_email:
   - id: 884
     user_id: 1
@@ -3647,7 +3647,7 @@ app_type:
   - id: 888
     user_id:
     resource_type: report
-    resource_name: Ready for Informed Consent
+    resource_name: sleep__ready_for_informed_consent
     options: ''
     access: read
     disabled: false
@@ -3655,12 +3655,12 @@ app_type:
     app_type_id: 11
     role_name: tracker
     created_at: '2019-11-21T11:01:25.906Z'
-    updated_at: '2019-11-25T12:26:53.343Z'
+    updated_at: '2020-01-29T09:38:37.947Z'
     user_email:
   - id: 889
     user_id:
     resource_type: report
-    resource_name: Sleep Interventionist Assignments
+    resource_name: sleep__sleep_interventionist_assignments
     options: ''
     access: read
     disabled: false
@@ -3668,12 +3668,12 @@ app_type:
     app_type_id: 11
     role_name: interventionist
     created_at: '2019-11-21T11:01:25.911Z'
-    updated_at: '2019-11-21T11:01:25.911Z'
+    updated_at: '2020-01-29T09:39:48.948Z'
     user_email:
   - id: 890
     user_id:
     resource_type: report
-    resource_name: Sleep Interventionist Assignments Report
+    resource_name: sleep__sleep_interventionist_assignments_report
     options: ''
     access: read
     disabled: false
@@ -3681,12 +3681,12 @@ app_type:
     app_type_id: 11
     role_name: admin
     created_at: '2019-11-21T11:01:25.917Z'
-    updated_at: '2019-11-21T11:01:25.917Z'
+    updated_at: '2020-01-29T09:39:57.666Z'
     user_email:
   - id: 891
     user_id:
     resource_type: report
-    resource_name: Sleep Interventionist Assignments Report
+    resource_name: sleep__sleep_interventionist_assignments_report
     options: ''
     access: read
     disabled: false
@@ -3694,7 +3694,7 @@ app_type:
     app_type_id: 11
     role_name: phone screener 2
     created_at: '2019-11-21T11:01:25.923Z'
-    updated_at: '2019-11-21T11:01:25.923Z'
+    updated_at: '2020-01-29T09:40:01.865Z'
     user_email:
   - id: 892
     user_id:
@@ -3725,7 +3725,7 @@ app_type:
   - id: 894
     user_id:
     resource_type: report
-    resource_name: Sleep Study ID Search
+    resource_name: sleep__sleep_id_search
     options: ''
     access:
     disabled: false
@@ -3733,7 +3733,7 @@ app_type:
     app_type_id: 11
     role_name: user - participant details
     created_at: '2019-11-21T11:04:40.988Z'
-    updated_at: '2019-11-21T11:04:40.988Z'
+    updated_at: '2020-01-29T09:40:13.251Z'
     user_email:
   - id: 895
     user_id:
@@ -3751,7 +3751,7 @@ app_type:
   - id: 896
     user_id:
     resource_type: report
-    resource_name: Needs Follow Up Communication
+    resource_name: sleep__needs_follow_up_communication
     options: ''
     access:
     disabled: false
@@ -3759,7 +3759,7 @@ app_type:
     app_type_id: 11
     role_name: pi
     created_at: '2019-11-21T11:04:41.288Z'
-    updated_at: '2019-11-21T11:04:41.288Z'
+    updated_at: '2020-01-29T09:36:45.255Z'
     user_email:
   - id: 897
     user_id:
@@ -3803,7 +3803,7 @@ app_type:
   - id: 900
     user_id:
     resource_type: report
-    resource_name: Subjects In Process & Exited
+    resource_name: sleep__sleep_in_process___exited
     options: ''
     access:
     disabled: false
@@ -3811,12 +3811,12 @@ app_type:
     app_type_id: 11
     role_name: interventionist
     created_at: '2019-11-21T11:04:41.348Z'
-    updated_at: '2019-11-21T11:04:41.348Z'
+    updated_at: '2020-01-29T09:40:33.147Z'
     user_email:
   - id: 901
     user_id:
     resource_type: report
-    resource_name: Sleep Calendar
+    resource_name: sleep__sleep_calendar
     options: ''
     access:
     disabled: false
@@ -3824,7 +3824,7 @@ app_type:
     app_type_id: 11
     role_name: interventionist
     created_at: '2019-11-21T11:04:41.354Z'
-    updated_at: '2019-11-21T11:04:41.354Z'
+    updated_at: '2020-01-29T09:39:34.595Z'
     user_email:
   - id: 902
     user_id:
@@ -3842,7 +3842,7 @@ app_type:
   - id: 903
     user_id:
     resource_type: report
-    resource_name: Sleep Interventionist Assignments
+    resource_name: sleep__sleep_interventionist_assignments
     options: ''
     access:
     disabled: false
@@ -3850,12 +3850,12 @@ app_type:
     app_type_id: 11
     role_name: ''
     created_at: '2019-11-21T11:04:41.386Z'
-    updated_at: '2019-11-21T11:04:41.386Z'
+    updated_at: '2020-01-29T09:39:53.310Z'
     user_email:
   - id: 904
     user_id:
     resource_type: report
-    resource_name: Sleep Interventionist Assignments Report
+    resource_name: sleep__sleep_interventionist_assignments_report
     options: ''
     access:
     disabled: false
@@ -3863,12 +3863,12 @@ app_type:
     app_type_id: 11
     role_name: ''
     created_at: '2019-11-21T11:04:41.401Z'
-    updated_at: '2019-11-21T11:04:41.401Z'
+    updated_at: '2020-01-29T09:40:06.111Z'
     user_email:
   - id: 905
     user_id:
     resource_type: report
-    resource_name: Search Sleep Study Subject
+    resource_name: sleep__search_sleep_subject
     options: ''
     access:
     disabled: false
@@ -3876,7 +3876,7 @@ app_type:
     app_type_id: 11
     role_name: interventionist
     created_at: '2019-11-21T11:04:41.407Z'
-    updated_at: '2019-11-21T11:04:41.407Z'
+    updated_at: '2020-01-29T09:39:19.360Z'
     user_email:
   - id: 906
     user_id:
@@ -7354,14 +7354,836 @@ app_type:
     alphanumeric: false
     extra_fields: ''
     user_email:
-  associated_reports: []
+  associated_reports:
+  - id: 55
+    name: Ready for Sign Off - BWH PI
+    description: Participants with inclusion / exclusion checklist ready for sign
+      off by PI
+    sql: "SELECT\r\n   dt.master_id,\r\n   sleep.sleep_id,\r\n   dt.extra_log_type
+      activity,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n
+      \ SELECT\r\n    di.*,\r\n    rank() OVER (\r\n      PARTITION BY di.master_id\r\n
+      \     ORDER BY di.created_at DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n\r\n    SELECT\r\n
+      \     inex.master_id, \r\n      inex.extra_log_type,\r\n      al.extra_log_type
+      \"exit_type\",\r\n      inex.created_at\r\n    FROM activity_log_sleep_assignment_inex_checklists
+      inex\r\n    LEFT OUTER JOIN activity_log_sleep_assignments al\r\n    ON\r\n
+      \     al.master_id = inex.master_id\r\n      AND al.extra_log_type IN (\r\n
+      \       'ineligible', \r\n        'exit_not_consented', \r\n        'exit_ps',
+      \r\n        'exit_ps_bwh',\r\n        'exit_l2fu',\r\n        'completed',\r\n
+      \       'withdraw'\r\n      )\r\n    WHERE\r\n      inex.extra_log_type IN ('finalize_phone_screen_checklist',
+      'sign_phone_screen')\r\n\r\n    \r\n  ) AS di\r\n\r\n) AS dt\r\n\r\nINNER JOIN
+      sleep_assignments sleep on dt.master_id = sleep.master_id\r\n\r\nWHERE\r\n  r
+      = 1 AND dt.extra_log_type = 'finalize_phone_screen_checklist'\r\n  AND NOT (
+      r = 1 AND dt.extra_log_type = 'sign_phone_screen' )\r\n  AND dt.exit_type IS
+      NULL\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.230Z'
+    updated_at: '2019-11-26T10:44:22.411Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 22
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_ready_for_sign_off___pi
+    options: ''
+    user_email:
+  - id: 56
+    name: Ready for Sign Off - BWH Staff
+    description: Participants with inclusion / exclusion checklist ready for sign
+      off by BWH staff member (phone screener interviewer)
+    sql: "SELECT\r\n   dt.master_id,\r\n   sleep.sleep_id,\r\n   dt.extra_log_type
+      activity,\r\n   dt.exit_type,\r\n   dt.created_at,\r\n   dt.r\r\nFROM (\r\n\r\n
+      \ SELECT\r\n    di.*,\r\n    rank() OVER (\r\n      PARTITION BY di.master_id\r\n
+      \     ORDER BY di.created_at DESC\r\n    ) AS r\r\n  FROM\r\n  (\r\n\r\n    SELECT\r\n
+      \     inex.master_id, \r\n      inex.extra_log_type,\r\n      al.extra_log_type
+      \"exit_type\",\r\n      inex.created_at\r\n    FROM activity_log_sleep_assignment_inex_checklists
+      inex\r\n    LEFT OUTER JOIN activity_log_sleep_assignments al\r\n    ON\r\n
+      \     al.master_id = inex.master_id\r\n      AND al.extra_log_type IN (\r\n
+      \       'ineligible', \r\n        'exit_not_consented', \r\n        'exit_ps',
+      \r\n        'exit_ps_bwh',\r\n        'exit_l2fu',\r\n        'completed',\r\n
+      \       'withdraw'\r\n      )\r\n    WHERE\r\n      inex.extra_log_type IN ('phone_screen_review',
+      'sign_phone_screen_staff')\r\n\r\n    \r\n  ) AS di\r\n\r\n) AS dt\r\n\r\nINNER
+      JOIN sleep_assignments sleep on dt.master_id = sleep.master_id\r\n\r\nWHERE\r\n
+      \ r = 1 AND dt.extra_log_type = 'phone_screen_review'\r\n  AND NOT ( r = 1 AND
+      dt.extra_log_type = 'sign_phone_screen_staff' )\r\n  AND dt.exit_type IS NULL\r\n
+      \ AND dt.master_id IN (\r\n    SELECT master_id FROM activity_log_sleep_assignments
+      al2\r\n    WHERE\r\n      al2.master_id = dt.master_id\r\n      AND al2.extra_log_type
+      IN (\r\n        'appointment'\r\n      )\r\n  )\r\n\r\nORDER BY\r\n  dt.created_at
+      DESC\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.239Z'
+    updated_at: '2019-11-26T10:43:47.382Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 22
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_ready_for_sign_off___staff
+    options: ''
+    user_email:
+  - id: 57
+    name: Needs Follow Up Communication
+    description: Participants with an appointment set that are ready for specific
+      follow up activities.
+    sql: "select al0.master_id, max(al0.updated_at) \"updated_at\"\r\nfrom \r\n  activity_log_sleep_assignments
+      al0\r\n  \r\n-- Ensure this is a record appearing at the top level, not referenced
+      from \r\n-- a top level activity\r\nleft join model_references mr1\r\n  on mr1.to_record_master_id
+      = al0.master_id\r\n  and mr1.to_record_type = 'ActivityLog::SleepAssignment'\r\n
+      \ and mr1.to_record_id = al0.id\r\nleft join activity_log_sleep_assignments
+      al02\r\n  on mr1.from_record_master_id = al02.master_id\r\n  and mr1.from_record_type
+      = 'ActivityLog::SleepAssignment'\r\n  and mr1.from_record_id = al02.id\r\n  and
+      al02.extra_log_type = 'general'  \r\n  \r\nwhere \r\n  al0.extra_log_type =
+      'general'\r\n  and ( \r\n    al02.id is null \r\n    and\r\n    (\r\n      coalesce(al0.select_result,
+      'none') <> 'completed' \r\n      and coalesce(al0.select_activity, 'none') <>
+      'completed' \r\n    )\r\n    and\r\n      -- Check this does not have a referenced
+      record \r\n      -- marked as completed\r\n      al0.id not in \r\n      (\r\n
+      \       select al.id\r\n        from activity_log_sleep_assignments al\r\n        inner
+      join model_references mr\r\n          on mr.from_record_master_id = al.master_id\r\n
+      \         and mr.from_record_type = 'ActivityLog::SleepAssignment'\r\n          and
+      mr.from_record_id = al.id\r\n        inner join activity_log_sleep_assignments
+      al2\r\n          on mr.to_record_master_id = al2.master_id\r\n          and
+      mr.to_record_type = 'ActivityLog::SleepAssignment'\r\n          and mr.to_record_id
+      = al2.id\r\n          and al2.extra_log_type = 'general'\r\n        where \r\n
+      \         al.master_id = al0.master_id\r\n          and al.extra_log_type =
+      'general'\r\n          and  (\r\n            coalesce(al.select_result, 'none')
+      = 'completed' \r\n            or coalesce(al2.select_result, 'none') = 'completed'
+      \r\n            or coalesce(al.select_activity, 'none') = 'completed' \r\n            or
+      coalesce(al2.select_activity, 'none') = 'completed' \r\n          )\r\n      )\r\n
+      \   ) \r\n    \r\n  and al0.master_id not in (\r\n    select sa2.master_id \r\n
+      \   from activity_log_sleep_assignments sa2\r\n    where extra_log_type in ('exit_ps',
+      'exit_not_consented', 'ineligible', 'exit_ps_bwh', 'completed', 'exit_opt_out',
+      'exit_l2fu')\r\n    and created_at < (current_date - 14)\r\n  )\r\n  and al0.master_id
+      not in (\r\n    select dsw.master_id \r\n    from sleep_withdrawals dsw\r\n
+      \   where \r\n    select_subject_withdrew_reason = 'withdrew'\r\n    and created_at
+      < (current_date - 14)\r\n  )    \r\ngroup by al0.master_id\r\norder by \r\n
+      \ \"updated_at\" desc;"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.267Z'
+    updated_at: '2019-11-21T11:00:55.267Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 5
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: needs_follow_up_communication
+    options: ''
+    user_email:
+  - id: 58
+    name: Search Sleep Study Subject
+    description: "Search subjects by name, phone, email or ID.\r\nLeave the search
+      field empty to see all subjects."
+    sql: "select distinct m.id master_id, \r\npi.first_name, pi.middle_name, pi.last_name,
+      pi.nick_name,\r\na.street, a.street2, a.city, a.state, a.zip, \r\npc.data, pc.rec_type\r\nfrom
+      masters m\r\ninner join player_infos pi\r\non pi.master_id = m.id \r\ninner
+      join sleep_assignments b\r\non m.id = b.master_id\r\nleft join addresses a\r\non
+      m.id = a.master_id\r\nleft join player_contacts pc\r\non pc.master_id = m.id\r\nwhere
+      \r\n(:name is null \r\nor pi.first_name ~* :name\r\nor pi.last_name ~* :name\r\nor
+      pi.middle_name ~* :name\r\nor pi.nick_name ~* :name\r\nor( \r\n    pi.first_name
+      ~* coalesce(split_part(:name, ' ', 1),'none')\r\n    AND pi.last_name ~* coalesce(split_part(:name,
+      ' ', 2),'none')\r\n  )\r\n) OR\r\n(\r\nregexp_replace(pc.data, '\\W+', '', 'g')
+      ~* regexp_replace(:name, '\\W+', '', 'g')\r\n) OR\r\n(\r\nb.sleep_id::varchar
+      = :name\r\n)\r\n"
+    search_attrs: "name: \r\n  text: \r\n    all: true\r\n    multiple: single\r\n"
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.272Z'
+    updated_at: '2019-11-21T11:00:55.272Z'
+    report_type: search
+    auto: false
+    searchable: true
+    position: 0
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: search_sleep_subject
+    options: ''
+    user_email:
+  - id: 59
+    name: Protocol Deviation PI Review
+    description: 'Sleep Study Protocol Deviation records requiring review by the PI. '
+    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.*,\r\n   rank()\r\n
+      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
+      DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_protocol_deviations a\r\n\r\n
+      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_protocol_deviations
+      p\r\n ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n INNER
+      JOIN model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.from_record_id = a.id\r\n\r\n INNER JOIN activity_log_sleep_assignment_protocol_deviations
+      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n
+      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n AND a2.extra_log_type
+      in ('pi_review', 'initial_review')\r\n AND p.select_severity = 'major'\r\n\r\n\r\n)
+      AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n
+      \ r >= 1 AND dt.extra_log_type = 'initial_review'\r\nAND\r\n  r = 1 AND dt.extra_log_type
+      <> 'pi_review'\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.277Z'
+    updated_at: '2019-11-21T11:00:55.277Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 31
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_protocol_deviation_pi_review
+    options: ''
+    user_email:
+  - id: 60
+    name: Adverse Event PI Review
+    description: 'Sleep Study Adverse Event records requiring review by the PI. '
+    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.*,\r\n   rank()\r\n
+      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
+      DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_adverse_events a\r\n\r\n
+      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_adverse_events p\r\n ON \r\n
+      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
+      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
+      \  AND mr.to_record_id = p.id\r\n\r\n INNER JOIN model_references mr2\r\n ON\r\n
+      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
+      = a.id\r\n\r\n INNER JOIN activity_log_sleep_assignment_adverse_events a2\r\n
+      ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n WHERE \r\n
+      a.extra_log_type = 'adverse_event_record' \r\n AND a2.extra_log_type in ('pi_review',
+      'initial_review')\r\n AND p.select_relatedness IN ('related', 'possibly related')
+      AND p.select_expectedness = 'unexpected'\r\n AND (p.select_location = 'internal'
+      OR p.select_severity = 'serious')\r\n\r\n\r\n) AS dt\r\n\r\ninner join player_infos
+      pi on dt.master_id = pi.master_id\r\nWHERE\r\n  r >= 1 AND dt.extra_log_type
+      = 'initial_review'\r\nAND\r\n  r = 1 AND dt.extra_log_type <> 'pi_review'\r\n\r\nORDER
+      BY\r\n  dt.created_at DESC\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.282Z'
+    updated_at: '2019-11-21T11:00:55.282Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 41
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_adverse_event_pi_review
+    options: ''
+    user_email:
+  - id: 61
+    name: Protocol Deviation Initial Review
+    description: Sleep Study Protocol Deviation records requiring initial review prior
+      to sending to the PI
+    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a.master_id, a2.extra_log_type,
+      a.created_at,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at
+      DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_protocol_deviations
+      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_protocol_deviations
+      p\r\n ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n LEFT
+      JOIN model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.from_record_id = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_protocol_deviations
+      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n
+      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n AND a2.extra_log_type
+      IS NULL\r\n AND p.select_severity = 'major'\r\n\r\n\r\n) AS dt\r\n\r\ninner
+      join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n  r >= 1 AND
+      dt.extra_log_type IS NULL\r\n\r\nORDER BY\r\n  dt.created_at DESC\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.286Z'
+    updated_at: '2019-11-21T11:00:55.286Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 30
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_protocol_deviation_initial_review
+    options: ''
+    user_email:
+  - id: 62
+    name: Adverse Event Initial Review
+    description: Sleep Study Adverse Event records requiring initial review prior
+      to sending to the PI
+    sql: "SELECT \r\ndt.master_id\r\n\r\nFROM (\r\n SELECT a2.extra_log_type, a.created_at,
+      a.master_id,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at
+      DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_adverse_events
+      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_adverse_events p\r\n ON \r\n
+      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
+      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
+      \  AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN model_references mr2\r\n ON\r\n
+      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
+      = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_adverse_events a2\r\n
+      ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n WHERE \r\n
+      a.extra_log_type = 'adverse_event_record' \r\n AND a2.extra_log_type IS NULL\r\n\r\n\r\n)
+      AS dt\r\n\r\ninner join player_infos pi on dt.master_id = pi.master_id\r\nWHERE\r\n
+      \ r >= 1 AND dt.extra_log_type IS NULL\r\n\r\n\r\nORDER BY\r\n  dt.created_at
+      DESC\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.290Z'
+    updated_at: '2019-11-21T11:00:55.290Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 40
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_adverse_event_initial_review
+    options: ''
+    user_email:
+  - id: 63
+    name: Adverse Events
+    description: "Sleep Study Adverse Events report for fast review of events requiring
+      additional action or for summary reporting.\r\n\r\nThe activities are performed
+      in this order: initial submission, initial review, PI review (if required),
+      report to IRB (if PI review was required)\r\n\r\nNOTE: the Last Activity Performed
+      represents the last recorded activity for a specific adverse event. Therefore
+      to find outstanding tasks, for example items requiring Report to IRB, it is
+      necessary to search for the last activity that was performed, PI Review in this
+      example."
+    sql: "\r\nSELECT \r\ndt.master_id,\r\nipa.sleep_id,\r\ncoalesce(dt.created_at,
+      dt.submitted_at) \"last activity\",\r\ncoalesce(dt.extra_log_type, 'initial
+      submission') \"Last Activity Performed\",\r\n--pi.first_name,\r\n--pi.last_name,\r\nselect_severity,
+      select_location, select_relatedness, select_expectedness, event_occurred_when,
+      event_discovered_when,\r\ndt.primary_extra_log_type,\r\ndt.primary_activity\r\nFROM
+      (\r\n SELECT a.master_id , a.id \"primary_activity\", a.extra_log_type \"primary_extra_log_type\",
+      a.created_at \"submitted_at\", a2.created_at, a2.extra_log_type, p.select_severity,
+      p.select_location, p.select_relatedness, p.select_expectedness,\r\n   p.event_occurred_when,
+      p.event_discovered_when,\r\n   rank()\r\n OVER (\r\n  PARTITION BY a.id\r\n
+      \ ORDER BY a.created_at DESC, a2.created_at DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_adverse_events
+      a\r\n\r\n INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_adverse_events p\r\n ON \r\n
+      \  mr.to_record_type = 'DynamicModel::IpaAdverseEvent'\r\n   AND mr.from_record_type
+      = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr.from_record_id = a.id\r\n
+      \  AND mr.to_record_id = p.id\r\n\r\n LEFT JOIN model_references mr2\r\n ON\r\n
+      \  mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND mr2.from_record_id
+      = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_adverse_events a2\r\n
+      ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentAdverseEvent'\r\n   AND
+      mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n\r\n WHERE
+      \r\n a.extra_log_type = 'adverse_event_record' \r\n\r\n\r\n) AS dt\r\n\r\ninner
+      join player_infos pi on dt.master_id = pi.master_id\r\nINNER JOIN sleep_assignments
+      sleep ON dt.master_id = sleep.master_id\r\nWHERE r = 1 \r\nAND (:event_occurred_from
+      IS NULL OR event_occurred_when >= :event_occurred_from)\r\nAND (:event_occurred_to
+      IS NULL OR event_occurred_when <= :event_occurred_to)\r\nAND (:severity IS NULL
+      OR select_severity = :severity)\r\nAND (:location IS NULL OR select_location
+      = :location)\r\nAND ((:relatedness) IS NULL OR select_relatedness IN (:relatedness))\r\nAND
+      ((:expectedness) IS NULL OR select_expectedness = (:expectedness))\r\nAND ((:latest_activity)
+      IS NULL OR coalesce(dt.extra_log_type, 'initial submission') IN (:latest_activity))\r\n\r\nORDER
+      BY\r\n  dt.created_at DESC\r\n;\r\n"
+    search_attrs: "\r\nseverity: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_adverse_events_select_severity\r\n
+      \   multiple: single\r\n    default: serious\r\nlocation: \r\n  general_selection:
+      \r\n    item_type: dynamic_model__sleep_adverse_events_select_location\r\n    multiple:
+      single\r\n\r\nrelatedness: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_adverse_events_select_relatedness\r\n
+      \   multiple: multiple\r\n    default: \r\n      - related\r\n      - possibly
+      related\r\n\r\nexpectedness: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_adverse_events_select_expectedness\r\n
+      \   multiple: single\r\n\r\nevent_occurred_from: \r\n  date: \r\n    all: true\r\n
+      \   multiple: single\r\n    default: -15 days\r\nevent_occurred_to: \r\n  date:
+      \r\n    all: true\r\n    multiple: single\r\nlatest_activity: \r\n  config_selector:
+      \r\n    all: true\r\n    multiple: multiple\r\n    label: Latest Activity Performed\r\n
+      \   selections: \r\n      initial submission: initial submission\r\n      initial
+      review: initial_review\r\n      pi review: pi_review\r\n      report to irb:
+      report_to_irb"
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.295Z'
+    updated_at: '2019-11-21T11:00:55.295Z'
+    report_type: regular_report
+    auto: false
+    searchable: false
+    position:
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_adverse_events
+    options: ''
+    user_email:
+  - id: 64
+    name: Subjects In Process & Exited
+    description: 'All subjects that have joined or exited the study: in process (phone
+      screening scheduled), enrolled, completed, withdrawn, ineligible, other exit
+      (not interested, etc). The search matches the latest status of a participant,
+      so as they pass through the process they will only be matched by one status.'
+    sql: "SELECT * from (\r\n  SELECT distinct dt.master_id, sleep.sleep_id, bwh_sleep.bwh_sleep_id,\r\n
+      \ CASE \r\n  WHEN extra_log_type = 'completed' THEN 'completed study'\r\n  WHEN
+      extra_log_type = 'completed_intervention' THEN 'completed bbti'\r\n  WHEN extra_log_type
+      = 'withdraw' THEN 'withdrawn'\r\n  WHEN extra_log_type IN ('exit_not_consented',
+      'exit_ps', 'exit_ps_bwh', 'exit_opt_out', 'exit_l2fu') THEN 'exited'\r\n  WHEN
+      extra_log_type = 'ineligible' THEN 'ineligible'\r\n  WHEN extra_log_type = 'bwh_ps_eligible'
+      THEN 'eligible'\r\n  WHEN extra_log_type = 'schedule_screening' THEN 'in process'\r\n
+      \ WHEN extra_log_type = 'appointment' THEN 'enrolled'\r\n  ELSE extra_log_type\r\n
+      \ END \"status\", \r\n  dt.created_at \r\n  FROM \r\n  (\r\n    SELECT\r\n    al.master_id,
+      al.created_at, al.extra_log_type,    \r\n    rank()\r\n     OVER (\r\n      PARTITION
+      BY al.master_id \r\n      ORDER BY al.created_at DESC\r\n     ) AS r\r\n\r\n
+      \   FROM activity_log_sleep_assignments al\r\n    WHERE   \r\n    extra_log_type
+      IN (\r\n      'schedule_screening', \r\n      'bwh_ps_eligible', \r\n      'ineligible',
+      \r\n      'exit_not_consented', \r\n      'exit_ps', \r\n      'exit_ps_bwh',\r\n
+      \     'exit_opt_out',\r\n      'exit_l2fu',\r\n      'appointment',\r\n      'completed',\r\n
+      \     'completed_intervention',\r\n      'withdraw'\r\n    )\r\n  ) dt\r\n  INNER
+      JOIN sleep_assignments sleep ON dt.master_id = sleep.master_id\r\n  LEFT OUTER
+      JOIN bwh_sleep_id_numbers bwh_sleep ON dt.master_id = bwh_sleep.master_id\r\n
+      \ WHERE r = 1 \r\n) dt2\r\nWHERE status IN(:select_status)\r\nORDER BY status,
+      created_at desc\r\n;\r\n"
+    search_attrs: "\r\nselect_status: \r\n  config_selector:\r\n    label: Select
+      / de-select statuses to report  \r\n    all: true\r\n    multiple: multiple\r\n
+      \   default: \r\n      - eligible\r\n#      - ineligible\r\n#      - completed\r\n#
+      \     - withdrawn\r\n#      - exited\r\n      - enrolled\r\n      - in process\r\n
+      \   selections: \r\n      eligible: eligible\r\n      ineligible: ineligible\r\n
+      \     completed study: completed study\r\n      completed bbti: completed bbti\r\n
+      \     withdrawn: withdrawn\r\n      exited: exited\r\n      enrolled: enrolled\r\n
+      \     in process: in process\r\n      \r\n      "
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.301Z'
+    updated_at: '2019-11-25T14:45:02.189Z'
+    report_type: search
+    auto: false
+    searchable: true
+    position: 21
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_in_process___exited
+    options: ''
+    user_email:
+  - id: 65
+    name: Protocol Deviations
+    description: "Sleep Study Protocol Deviations report for fast review of events
+      requiring additional action or for summary reporting.\r\n\r\nThe activities
+      are performed in this order: initial submission, initial review, PI review (if
+      required), report to IRB (if PI review was required)\r\n\r\nNOTE: the Last Activity
+      Performed represents the last recorded activity for a specific protocol deviations.
+      Therefore to find outstanding tasks, for example items requiring Report to IRB,
+      it is necessary to search for the last activity that was performed, PI Review
+      in this example."
+    sql: "\r\nSELECT \r\ndt.master_id,\r\nipa.sleep_id,\r\ncoalesce(dt.created_at,
+      dt.submitted_at) \"last activity\",\r\ncoalesce(dt.extra_log_type, 'initial
+      submission') \"Last Activity Performed\",\r\n-- pi.first_name,\r\n-- pi.last_name,\r\nselect_severity,
+      deviation_occurred_when, deviation_discovered_when,\r\ndt.primary_extra_log_type,\r\ndt.primary_activity\r\nFROM
+      (\r\n SELECT a.master_id , a.id \"primary_activity\", a.extra_log_type \"primary_extra_log_type\",
+      a.created_at \"submitted_at\", a2.created_at, a2.extra_log_type, p.select_severity,
+      \r\n   p.deviation_occurred_when, p.deviation_discovered_when,\r\n   rank()\r\n
+      OVER (\r\n  PARTITION BY a.id\r\n  ORDER BY a.created_at DESC, a2.created_at
+      DESC\r\n ) AS r\r\n FROM activity_log_sleep_assignment_protocol_deviations a\r\n\r\n
+      INNER JOIN model_references mr\r\n ON\r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr.from_record_id = a.id\r\n\r\n INNER JOIN sleep_protocol_deviations
+      p\r\n ON \r\n   mr.to_record_type = 'DynamicModel::IpaProtocolDeviation'\r\n
+      \  AND mr.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr.from_record_id = a.id\r\n   AND mr.to_record_id = p.id\r\n\r\n LEFT
+      JOIN model_references mr2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.from_record_id = a.id\r\n\r\n LEFT JOIN activity_log_sleep_assignment_protocol_deviations
+      a2\r\n ON\r\n   mr2.from_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.to_record_type = 'ActivityLog::IpaAssignmentProtocolDeviation'\r\n
+      \  AND mr2.from_record_id = a.id\r\n   AND mr2.to_record_id = a2.id\r\n\r\n\r\n
+      WHERE \r\n a.extra_log_type = 'deviation_record' \r\n\r\n\r\n) AS dt\r\n\r\ninner
+      join player_infos pi on dt.master_id = pi.master_id\r\ninner join sleep_assignments
+      sleep on dt.master_id = sleep.master_id\r\nWHERE \r\nr = 1 \r\nAND (:deviation_occurred_from
+      IS NULL OR deviation_occurred_when >= :deviation_occurred_from)\r\nAND (:deviation_occurred_to
+      IS NULL OR deviation_occurred_when <= :deviation_occurred_to)\r\nAND (:severity
+      IS NULL OR select_severity = :severity)\r\nAND ((:latest_activity) IS NULL OR
+      coalesce(dt.extra_log_type, 'initial submission') IN (:latest_activity))\r\n\r\nORDER
+      BY\r\n  dt.created_at DESC\r\n;\r\n"
+    search_attrs: "\r\nseverity: \r\n  general_selection: \r\n    item_type: dynamic_model__sleep_protocol_deviations_select_severity\r\n
+      \   multiple: single\r\n    default: serious\r\n\r\ndeviation_occurred_from:
+      \r\n  date: \r\n    all: true\r\n    multiple: single\r\n    default: -15 days\r\ndeviation_occurred_to:
+      \r\n  date: \r\n    all: true\r\n    multiple: single\r\n\r\nlatest_activity:
+      \r\n  config_selector: \r\n    all: true\r\n    multiple: multiple\r\n    label:
+      Latest Activity Performed\r\n    selections: \r\n      initial submission: initial
+      submission\r\n      initial review: initial_review\r\n      pi review: pi_review\r\n
+      \     report to irb: report_to_irb\r\n    default:\r\n      - pi_review"
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.307Z'
+    updated_at: '2019-11-21T11:00:55.307Z'
+    report_type: regular_report
+    auto: false
+    searchable: false
+    position:
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_protocol_deviations
+    options: ''
+    user_email:
+  - id: 66
+    name: Sleep Study ID Search
+    description: Search for Sleep Study subject by ID.
+    sql: select * from sleep_assignments where sleep_id = :sleep_id
+    search_attrs: "\r\nsleep_id:\r\n  number:\r\n    all: true\r\n    multiple: single\r\n"
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.312Z'
+    updated_at: '2019-11-21T11:00:55.312Z'
+    report_type: search
+    auto: false
+    searchable: true
+    position: 2
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_id_search
+    options: ''
+    user_email:
+  - id: 67
+    name: Sleep Calendar
+    description: ''
+    sql: "\r\ncreate temp table appointments\r\nas select\r\nvisit_start_date,\r\nap.master_id,\r\nsleep.sleep_id,\r\npi.first_name,\r\npi.last_name,\r\nmax(ap.id)
+      appointment_id\r\nfrom sleep_appointments ap\r\ninner join activity_log_sleep_assignments
+      al\r\non al.master_id = ap.master_id\r\n\r\ninner join player_infos pi\r\non
+      ap.master_id = pi.master_id\r\n\r\ninner join sleep_assignments sleep\r\non
+      sleep.master_id = al.master_id\r\n\r\n\r\nwhere\r\n  visit_start_date IS NOT
+      NULL\r\n  AND (:from_date IS NULL or visit_start_date >= :from_date)\r\n  AND
+      (:to_date IS NULL or visit_start_date <= :to_date)\r\n  AND (:sleep_id IS NULL
+      or sleep.sleep_id = :sleep_id)\r\nGROUP BY\r\nap.master_id, visit_start_date,
+      pi.first_name, pi.last_name, sleep.sleep_id\r\n;\r\n\r\ncreate temp table scheduled_calls\r\nas
+      select\r\n  dt.follow_up_when,\r\n  dt.follow_up_time,\r\n  dt.master_id,\r\n
+      \ sleep.sleep_id,\r\n--  p.first_name,\r\n--  p.last_name,\r\n  dt.extra_log_type,\r\n
+      \ dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n  (\r\n    select a.master_id,\r\n
+      \     a.extra_log_type,\r\n      a.select_who,\r\n      a.follow_up_when,\r\n
+      \     a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n      rank()\r\n
+      \   OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n      ORDER
+      BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_sleep_assignments
+      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
+      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
+      <= :to_date )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id
+      = p.master_id\r\n\r\ninner join sleep_assignments sleep\r\n  on dt.master_id
+      = sleep.master_id\r\n\r\nWHERE r = 1\r\nAND (:sleep_id IS NULL or sleep.sleep_id
+      = :sleep_id)\r\n;\r\n\r\n\r\ncreate temp table pi_calls\r\nas select\r\n  dt.follow_up_when,\r\n
+      \ dt.follow_up_time,\r\n  dt.master_id,\r\n  sleep.sleep_id,\r\n--  p.first_name,\r\n--
+      \ p.last_name,\r\n  dt.extra_log_type,\r\n  dt.select_who,\r\n  dt.select_next_step\r\nfrom\r\n
+      \ (\r\n    select a.master_id,\r\n      a.extra_log_type,\r\n      'PI' select_who,\r\n
+      \     a.follow_up_when,\r\n      a.follow_up_time,\r\n      a.notes,\r\n      a.select_next_step,\r\n
+      \     rank()\r\n    OVER (\r\n      PARTITION BY a.master_id, a.extra_log_type\r\n
+      \     ORDER BY a.created_at DESC\r\n    ) AS r\r\n\r\n    from activity_log_sleep_assignment_med_navs
+      a\r\n    where\r\n      follow_up_when is not null\r\n      AND (:from_date
+      IS NULL OR follow_up_when >= :from_date)\r\n      AND (:to_date IS NULL OR follow_up_when
+      <= :to_date )\r\n  ) dt\r\n--inner join player_infos p\r\n--  on dt.master_id
+      = p.master_id\r\n\r\ninner join sleep_assignments sleep\r\n  on dt.master_id
+      = sleep.master_id\r\n\r\nWHERE r = 1\r\nAND (:sleep_id IS NULL or sleep.sleep_id
+      = :sleep_id)\r\n;\r\n\r\n/*\r\ncreate temp table all_dates\r\nas\r\nselect follow_up_when
+      from scheduled_calls\r\nunion\r\nselect visit_start_date from appointments\r\n;\r\n*/\r\n\r\nSELECT\r\n
+      \ true \"allDay\",\r\n  visit_start_date::varchar || 'T' || '00:00:00' \"start\",\r\n
+      \ null \"end\",\r\n  'assessment start' \"title\",\r\n  array['report-cal-start-event']
+      \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM appointments\r\n\r\nUNION\r\nSELECT\r\n
+      \ true ,\r\n  '2019-06-20' ,\r\n  null ,\r\n  'assessment start' ,\r\n  array['report-cal-start-event']
+      \"classNames\",\r\n  null \"url\"\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n
+      \ follow_up_when::varchar || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n
+      \ case when select_next_step = 'email back' then '(email)'\r\n  else '(call)'
+      end\r\n  || ' ' ||\r\n  case when extra_log_type = 'schedule_screening' then
+      'scheduled HMS screening'\r\n  when extra_log_type = 'schedule_screening_2'
+      then 'scheduled BWH screening'\r\n  when extra_log_type = 'screening_follow_up'
+      then 'scheduled informed consent'\r\n  else extra_log_type end\r\n  ,\r\n  array['report-cal-call-event',
+      extra_log_type] \"classNames\",\r\n  '/masters/' || master_id \"url\"\r\nFROM
+      scheduled_calls\r\n\r\nUNION\r\n\r\nSELECT\r\n  false,\r\n  follow_up_when::varchar
+      || 'T' || follow_up_time::varchar,\r\n  NULL,\r\n  case when select_next_step
+      = 'email back' then '(email)'\r\n  else '(call)' end\r\n  || ' ' ||\r\n  case
+      when extra_log_type = 'participant_follow_up' then 'PI follow up'\r\n  when
+      extra_log_type = 'participant_communication' then 'PI participant communication'\r\n
+      \ else extra_log_type end\r\n  ,\r\n  array['report-cal-pi-call-event'] \"classNames\",\r\n
+      \   '/masters/' || master_id || '#activity-log--sleep-assignment-med-navs-'
+      || master_id \"url\"\r\nFROM pi_calls\r\n;\r\n"
+    search_attrs: "\r\nfrom_date: \r\n  date: \r\n    all: true\r\n    multiple: single\r\n
+      \   default: -6 months\r\n\r\nto_date: \r\n  date: \r\n    all: true\r\n    multiple:
+      single\r\n    default: +12 months\r\n    \r\n\r\n\r\nsleep_id: \r\n  number:
+      \r\n    label: Sleep ID\r\n    all: true\r\n    multiple: single\r\n\r\n\r\n"
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.316Z'
+    updated_at: '2019-11-21T11:00:55.316Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position:
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_calendar
+    options: "view_options:\r\n  view_as: calendar\r\n  search_button_label: calendar\r\n\r\ncomponent:\r\n
+      \ options:\r\n#    height: 200\r\n\r\nview_css:\r\n  classes:\r\n    report-cal-start-event:\r\n
+      \     background-color: red\r\n      border-color: red\r\n      text-align:
+      center\r\n    report-cal-call-event:\r\n      background-color: '#080'\r\n      border-color:
+      gray\r\n    report-cal-call-event.schedule_screening_2:\r\n      background-color:
+      '#155fbb'\r\n      border-color: gray\r\n    report-cal-pi-call-event:\r\n      background-color:
+      '#044'\r\n      border-color: gray\r\n"
+    user_email:
+  - id: 68
+    name: Ready for HMS Screening
+    description: List of subjects where the HMS Phone Screen has not been performed.
+    sql: "select sa.master_id, sa.sleep_id\r\nfrom sleep_assignments sa\r\nwhere sa.master_id
+      not in (\r\n  select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screens
+      ps\r\n  where extra_log_type = 'finalize'\r\n)\r\nand sa.master_id not in (\r\n
+      \ select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n  where
+      \r\n  extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh','exit_opt_out',
+      'exit_l2fu')\r\n  and created_at < (current_date - 14)\r\n\r\n)\r\nand sa.master_id
+      not in (\r\n  select dsw.master_id \r\n  from sleep_withdrawals dsw\r\n  where
+      \r\n  select_subject_withdrew_reason = 'withdrew'\r\n  and created_at < (current_date
+      - 14)\r\n\r\n)\r\n;\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.321Z'
+    updated_at: '2019-11-21T11:00:55.321Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 1
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: ready_for_hms_screening
+    options: ''
+    user_email:
+  - id: 69
+    name: Ready for BWH Screening
+    description: List of subjects where the BWH Phone Screen has not been performed
+      (and HMS Phone Screen has)
+    sql: "select sa.master_id, sa.sleep_id\r\nfrom sleep_assignments sa\r\nwhere \r\nsa.master_id
+      in (\r\n  select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screens
+      ps\r\n  where extra_log_type = 'finalize'\r\n)\r\nand sa.master_id in (\r\n
+      \ select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n  where
+      extra_log_type = 'hms_ps_eligible'\r\n)\r\nAND\r\nsa.master_id not in (\r\n
+      \ select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screen2s
+      ps\r\n  where extra_log_type in ('finalize')\r\n)\r\nand sa.master_id not in
+      (\r\n  select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n
+      \ where extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh','exit_opt_out',
+      'exit_l2fu')\r\n)\r\nand sa.master_id not in (\r\n  select dsw.master_id \r\n
+      \ from sleep_withdrawals dsw\r\n  where \r\n  select_subject_withdrew_reason
+      = 'withdrew'\r\n)\r\n;\r\n\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.325Z'
+    updated_at: '2019-11-21T11:00:55.325Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 2
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: ready_for_bwh_screening
+    options: ''
+    user_email:
+  - id: 70
+    name: Ready for PI Follow Up
+    description: ''
+    sql: "SELECT a.master_id, a.extra_log_type, a.id\r\n--, a2.extra_log_type, a2.id,
+      mr2.*\r\nFROM activity_log_sleep_assignment_med_navs a\r\nWHERE \r\n  a.extra_log_type
+      in ('request_pi_follow_up', 'request_pi_ps_review')\r\n  AND a.id NOT IN (\r\n\r\n
+      \   SELECT a.id \r\n    FROM activity_log_sleep_assignment_med_navs a\r\n\r\n
+      \   LEFT JOIN model_references mr2\r\n    ON\r\n     mr2.from_record_type =
+      'ActivityLog::SleepAssignmentMedNav'\r\n     AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
+      \    AND mr2.from_record_id = a.id\r\n\r\n    LEFT JOIN activity_log_sleep_assignment_med_navs
+      a2\r\n    ON\r\n     mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
+      \    AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n     AND
+      mr2.from_record_id = a.id\r\n     AND mr2.to_record_id = a2.id\r\n\r\n    WHERE
+      \r\n    a.extra_log_type = 'request_pi_follow_up'\r\n    AND a2.extra_log_type
+      = 'participant_follow_up'\r\n    AND a2.select_result = 'completed'\r\n\r\n
+      \   OR\r\n    a.extra_log_type = 'request_pi_ps_review'\r\n    AND a2.extra_log_type
+      = 'pi_ps_review'\r\n  )\r\n/*  \r\n  and a.master_id not in (\r\n    select
+      sa2.master_id \r\n    from activity_log_sleep_assignments sa2\r\n    where extra_log_type
+      in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh', 'completed',
+      'exit_opt_out', 'exit_l2fu')\r\n    and created_at < (current_date - 14)\r\n
+      \ )\r\n*/  \r\n  and a.master_id not in (\r\n    select dsw.master_id \r\n    from
+      sleep_withdrawals dsw\r\n    where \r\n    select_subject_withdrew_reason =
+      'withdrew'\r\n    and created_at < (current_date - 14)\r\n  )\r\n\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.330Z'
+    updated_at: '2020-01-09T09:27:41.005Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 3
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: ready_for_pi_follow_up
+    options: ''
+    user_email:
+  - id: 71
+    name: Completed PI Eligibility Review
+    description: "### Completed PI Eligibility Review\r\n\r\nLists all participants
+      that meet the following conditions:\r\n\r\n- The PI set an eligibility decision
+      in a **Follow Up - PI Phone Screen Review**\r\n- **HMS Phone Screen** has not
+      yet been finalized.\r\n\r\nHMS Phone Screen interviewers should follow up with
+      these participants to inform them of their eligibility and if eligible trigger
+      the BWH Phone Screen.\r\n\r\n\r\n"
+    sql: "SELECT a.master_id, a.extra_log_type, a.id\r\n--, a2.extra_log_type, a2.id,
+      mr2.*\r\nFROM activity_log_sleep_assignment_med_navs a\r\nWHERE \r\n  a.extra_log_type
+      in ('request_pi_ps_review')\r\n  AND a.id IN (\r\n\r\n    SELECT a.id \r\n    FROM
+      activity_log_sleep_assignment_med_navs a\r\n\r\n    LEFT JOIN model_references
+      mr2\r\n    ON\r\n     mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
+      \    AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n     AND
+      mr2.from_record_id = a.id\r\n\r\n    LEFT JOIN activity_log_sleep_assignment_med_navs
+      a2\r\n    ON\r\n     mr2.from_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n
+      \    AND mr2.to_record_type = 'ActivityLog::SleepAssignmentMedNav'\r\n     AND
+      mr2.from_record_id = a.id\r\n     AND mr2.to_record_id = a2.id\r\n\r\n    WHERE
+      \r\n    --a.extra_log_type = 'request_pi_follow_up'\r\n    --AND a2.extra_log_type
+      = 'participant_follow_up'\r\n    --AND a2.select_result = 'completed'\r\n\r\n
+      \   --OR\r\n    a.extra_log_type = 'request_pi_ps_review'\r\n    AND a2.extra_log_type
+      = 'pi_ps_review'\r\n  )\r\n  \r\n  and a.master_id not in (\r\n    select saps.master_id
+      \r\n    from activity_log_sleep_assignment_phone_screens saps\r\n    where extra_log_type
+      in ('eligibility_followup', 'finalize')\r\n  )\r\n  \r\n  and a.master_id not
+      in (\r\n    select sa2.master_id \r\n    from activity_log_sleep_assignments
+      sa2\r\n    where extra_log_type in ('exit_ps', 'exit_not_consented', 'exit_ps_bwh',
+      'completed', 'exit_opt_out', 'exit_l2fu')\r\n    --and created_at < (current_date
+      - 14)\r\n  )\r\n  and a.master_id not in (\r\n    select dsw.master_id \r\n
+      \   from sleep_withdrawals dsw\r\n    where \r\n    select_subject_withdrew_reason
+      = 'withdrew'\r\n    --and created_at < (current_date - 14)\r\n  )\r\n\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.334Z'
+    updated_at: '2019-11-21T11:00:55.334Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 4
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: pi_follow_up_complete
+    options: ''
+    user_email:
+  - id: 72
+    name: Ready for Informed Consent
+    description: ''
+    sql: "select sa.master_id, sa.sleep_id\r\nfrom sleep_assignments sa\r\nwhere \r\nsa.master_id
+      in (\r\n  select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n
+      \ where extra_log_type = 'bwh_ps_eligible'\r\n)\r\nAND\r\nsa.master_id in (\r\n
+      \ select ps.master_id \r\n  from activity_log_sleep_assignment_phone_screen2s
+      ps\r\n  where extra_log_type in ('finalize')\r\n)\r\nand sa.master_id not in
+      (\r\n  select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n
+      \ where extra_log_type in ('appointment')\r\n)\r\nand sa.master_id not in (\r\n
+      \ select sa2.master_id \r\n  from activity_log_sleep_assignments sa2\r\n  where
+      extra_log_type in ('exit_ps', 'exit_not_consented', 'ineligible', 'exit_ps_bwh','exit_opt_out',
+      'exit_l2fu')\r\n)\r\nand sa.master_id not in (\r\n  select dsw.master_id \r\n
+      \ from sleep_withdrawals dsw\r\n  where \r\n  select_subject_withdrew_reason
+      = 'withdrew'\r\n)\r\n;\r\n\r\n"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.339Z'
+    updated_at: '2019-11-21T11:00:55.339Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 4
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: ready_for_informed_consent
+    options: ''
+    user_email:
+  - id: 74
+    name: Sleep Interventionist Assignments
+    description: "### Sleep Study participants assigned to you"
+    sql: "select sa.master_id, sa.sleep_id, \r\ncase coalesce(sapp.interventionist,
+      '')\r\nwhen '' then '(not assigned)' \r\nelse sapp.interventionist\r\nend\r\n,
+      visit_start_date \"start_date\" from sleep_assignments sa\r\ninner join sleep_appointments
+      sapp on sa.master_id = sapp.master_id\r\norder by interventionist desc\r\n;"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.347Z'
+    updated_at: '2019-11-21T11:00:55.347Z'
+    report_type: search
+    auto: true
+    searchable: true
+    position: 2
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_interventionist_assignments
+    options: ''
+    user_email:
+  - id: 75
+    name: Sleep Interventionist Assignments Report
+    description: ''
+    sql: "select sa.master_id, sa.sleep_id, \r\ncase coalesce(sapp.interventionist,
+      '')\r\nwhen '' then '(not assigned)' \r\nelse sapp.interventionist\r\nend\r\n,
+      visit_start_date \"start_date\" from sleep_assignments sa\r\ninner join sleep_appointments
+      sapp on sa.master_id = sapp.master_id\r\norder by interventionist desc\r\n;"
+    search_attrs: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:55.352Z'
+    updated_at: '2019-11-21T11:00:55.352Z'
+    report_type: regular_report
+    auto: true
+    searchable: false
+    position: 2
+    edit_model: ''
+    edit_field_names: ''
+    selection_fields: ''
+    item_type: sleep
+    short_name: sleep_interventionist_assignments_report
+    options: ''
+    user_email:
   associated_general_selections:
   - id: 12
     name: nflpa
     value: nflpa
     item_type: player_infos_source
     created_at: '2018-03-14T18:53:28.577Z'
-    updated_at: '2019-11-21T11:04:37.945Z'
+    updated_at: '2020-01-27T09:35:56.428Z'
     disabled:
     admin_id: 4
     create_with: false
@@ -7376,7 +8198,7 @@ app_type:
     value: nflpa2
     item_type: player_infos_source
     created_at: '2018-03-14T18:53:28.586Z'
-    updated_at: '2019-11-21T11:04:37.972Z'
+    updated_at: '2020-01-27T09:35:56.456Z'
     disabled:
     admin_id: 4
     create_with: false
@@ -7421,7 +8243,7 @@ app_type:
     value: '0'
     item_type: player_contacts_rank
     created_at: '2018-03-14T18:53:28.617Z'
-    updated_at: '2019-11-21T11:04:37.987Z'
+    updated_at: '2020-01-27T09:35:56.473Z'
     disabled:
     admin_id: 4
     create_with: true
@@ -7571,7 +8393,7 @@ app_type:
     value: '0'
     item_type: addresses_rank
     created_at: '2018-03-14T18:53:28.713Z'
-    updated_at: '2019-11-21T11:04:37.990Z'
+    updated_at: '2020-01-27T09:35:56.476Z'
     disabled:
     admin_id: 4
     create_with: true
@@ -12998,6 +13820,222 @@ app_type:
     created_at: '2020-01-13T15:03:58.779Z'
     updated_at: '2020-01-13T15:03:58.779Z'
     user_email: janicebiddle99@gmail.com
+  - id: 1289
+    app_type_id: 11
+    role_name: pi
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.216Z'
+    updated_at: '2020-01-29T09:23:14.216Z'
+    user_email: test@test
+  - id: 1290
+    app_type_id: 11
+    role_name: tracker
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.231Z'
+    updated_at: '2020-01-29T09:23:14.231Z'
+    user_email: test@test
+  - id: 1291
+    app_type_id: 11
+    role_name: phone screener
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.243Z'
+    updated_at: '2020-01-29T09:23:14.243Z'
+    user_email: test@test
+  - id: 1292
+    app_type_id: 11
+    role_name: user - participant details
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.261Z'
+    updated_at: '2020-01-29T09:23:14.261Z'
+    user_email: test@test
+  - id: 1293
+    app_type_id: 11
+    role_name: user - inex
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.276Z'
+    updated_at: '2020-01-29T09:23:14.276Z'
+    user_email: test@test
+  - id: 1294
+    app_type_id: 11
+    role_name: nfs_store group 600
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.292Z'
+    updated_at: '2020-01-29T09:23:14.292Z'
+    user_email: test@test
+  - id: 1295
+    app_type_id: 11
+    role_name: user - phone screen
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.310Z'
+    updated_at: '2020-01-29T09:23:14.310Z'
+    user_email: test@test
+  - id: 1296
+    app_type_id: 11
+    role_name: staff - inex
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.325Z'
+    updated_at: '2020-01-29T09:23:14.325Z'
+    user_email: test@test
+  - id: 1297
+    app_type_id: 11
+    role_name: user - phone screen 2
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.337Z'
+    updated_at: '2020-01-29T09:23:14.337Z'
+    user_email: test@test
+  - id: 1298
+    app_type_id: 11
+    role_name: phone screener 2
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.352Z'
+    updated_at: '2020-01-29T09:23:14.352Z'
+    user_email: test@test
+  - id: 1299
+    app_type_id: 11
+    role_name: user - mednav
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.365Z'
+    updated_at: '2020-01-29T09:23:14.365Z'
+    user_email: test@test
+  - id: 1300
+    app_type_id: 11
+    role_name: user - protocol deviation
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.377Z'
+    updated_at: '2020-01-29T09:23:14.377Z'
+    user_email: test@test
+  - id: 1301
+    app_type_id: 11
+    role_name: user - adverse event
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.394Z'
+    updated_at: '2020-01-29T09:23:14.394Z'
+    user_email: test@test
+  - id: 1302
+    app_type_id: 11
+    role_name: user - discussions
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.407Z'
+    updated_at: '2020-01-29T09:23:14.407Z'
+    user_email: test@test
+  - id: 1303
+    app_type_id: 11
+    role_name: email - hms phone screener
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.417Z'
+    updated_at: '2020-01-29T09:23:14.417Z'
+    user_email: test@test
+  - id: 1304
+    app_type_id: 11
+    role_name: email - bwh phone screener
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.431Z'
+    updated_at: '2020-01-29T09:23:14.431Z'
+    user_email: test@test
+  - id: 1305
+    app_type_id: 11
+    role_name: email - pi follow up
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.446Z'
+    updated_at: '2020-01-29T09:23:14.446Z'
+    user_email: test@test
+  - id: 1306
+    app_type_id: 11
+    role_name: email - pi
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.461Z'
+    updated_at: '2020-01-29T09:23:14.461Z'
+    user_email: test@test
+  - id: 1307
+    app_type_id: 11
+    role_name: reviewer - adverse event
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.476Z'
+    updated_at: '2020-01-29T09:23:14.476Z'
+    user_email: test@test
+  - id: 1308
+    app_type_id: 11
+    role_name: reviewer - protocol deviation
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.494Z'
+    updated_at: '2020-01-29T09:23:14.494Z'
+    user_email: test@test
+  - id: 1309
+    app_type_id: 11
+    role_name: user - protocol exception
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.512Z'
+    updated_at: '2020-01-29T09:23:14.512Z'
+    user_email: test@test
+  - id: 1310
+    app_type_id: 11
+    role_name: admin
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.537Z'
+    updated_at: '2020-01-29T09:23:14.537Z'
+    user_email: test@test
+  - id: 1311
+    app_type_id: 11
+    role_name: email - hms admin
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.550Z'
+    updated_at: '2020-01-29T09:23:14.550Z'
+    user_email: test@test
+  - id: 1312
+    app_type_id: 11
+    role_name: sms - hms admin
+    user_id: 58
+    admin_id: 4
+    disabled: false
+    created_at: '2020-01-29T09:23:14.563Z'
+    updated_at: '2020-01-29T09:23:14.563Z'
+    user_email: test@test
   associated_message_templates:
   - id: 21
     name: standard sms layout
