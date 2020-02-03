@@ -34,9 +34,11 @@ module FilterUtils
     app_type_id = current_user&.app_type_id
     if app_type_id
       f = params[:filter] && params[:filter][:app_type_id]
-      {
-        app_type_id: f  || app_type_id.to_s
-      }
+      if f.present?
+        { app_type_id: f }
+      else
+        { app_type_id: app_type_id.to_s }
+      end
     else
       {}
     end

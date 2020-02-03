@@ -72,14 +72,20 @@ class Admin::ManageUsersController < AdminController
       pm = primary_model
       a = params[:filter][:app_type_id] if params[:filter]
       if a.present?
+        # A filter was selected. Limit the results to just users that can access the specified app.
         a = a.to_i
-        params[:filter].delete :app_type_id
+        # Set the app_type_id param to nil, so the super method doesn't attempt to filter on it
+        params[:filter][:app_type_id] = nil
         ids = pm.all.select{|u| a.in?(u.accessible_app_types.map(&:id))}.map(&:id)
-
         pm = pm.where(id: ids)
       end
 
-      super(pm)
+      # Filter on everything (except the specified app_type_id, which has beem temporarily removed)
+      res = super(pm)
+
+      # Reset the filter params so that the buttons appear correctly
+      params[:filter][:app_type_id] = a.to_s if a.present?
+      res
     end
 
   private
