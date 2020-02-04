@@ -1,0 +1,139 @@
+_definitions:
+
+  ###################################
+  # HMS Phone Screen
+  ###################################
+
+  gave_consent_to_share: &gave_consent_to_share
+    any_gave_consent:
+      any_gave_consent_to_share_ineligible:
+        dynamic_model__grit_ps_non_eligibles:
+          consent_to_pass_info_to_msm_yes_no: 'yes'
+          consent_to_pass_info_to_msm_2_yes_no: 'yes'
+      any_gave_consent_to_share_possibly_eligible:
+        dynamic_model__grit_ps_possibly_eligibles:
+           any_questions_yes_no:
+             - 'yes'
+             - 'no'
+#          consent_to_pass_info_to_msm_yes_no: 'yes'
+#          consent_to_pass_info_to_msm_2_yes_no: 'yes'
+      all_gave_consent_to_share_eligible:
+#        dynamic_model__grit_ps_eligibles:
+#          consent_to_pass_info_to_msm_yes_no: 'yes'
+#          consent_to_pass_info_to_msm_2_yes_no: 'yes'
+        all:
+          dynamic_model__grit_ps_eligibles:
+            interested_yes_no: 'yes'
+        any:
+          dynamic_model__grit_ps_eligibles:
+            more_questions_yes_no: 'no'
+            select_still_interested: "yes - still interested"
+
+      all_gave_consent_to_share_eligible_followup:
+#        dynamic_model__grit_ps_eligibility_followups:
+#          consent_to_pass_info_to_msm_yes_no: 'yes'
+#          consent_to_pass_info_to_msm_2_yes_no: 'yes'
+        all:
+          dynamic_model__grit_ps_eligibility_followups:
+            interested_yes_no: 'yes'
+        any:
+          dynamic_model__grit_ps_eligibility_followups:
+            more_questions_yes_no: 'no'
+            select_still_interested: "yes - still interested"
+
+
+  gave_and_understood_consent: &gave_and_understood_consent
+    all_gave_and_understood_consent:
+      <<: *gave_consent_to_share
+      all:
+        dynamic_model__grit_ps_screener_responses:
+          comm_clearly_in_english_yes_no: 'yes'
+          give_informed_consent_yes_no_dont_know: 'yes'
+
+
+  # HMS Phone Screen - participant eligible and gave consent
+  all_eligible_and_gave_consent: &all_eligible_and_gave_consent
+    all_eligible_and_gave_consent:
+      <<: *gave_consent_to_share
+      any_eligible_outcome:
+        all_followup_eligible_and_interested:
+          all:
+            dynamic_model__grit_ps_eligibility_followups:
+              outcome: eligible
+              interested_yes_no: 'yes'
+          any:
+            dynamic_model__grit_ps_eligibility_followups:
+              more_questions_yes_no: 'no'
+              select_still_interested: "yes - still interested"
+
+        all_eligible_and_interested:
+          all:
+            dynamic_model__grit_ps_screener_responses:
+              outcome: eligible
+            dynamic_model__grit_ps_eligibles:
+              interested_yes_no: 'yes'
+          any:
+            dynamic_model__grit_ps_eligibles:
+              more_questions_yes_no: 'no'
+              select_still_interested: "yes - still interested"
+
+
+
+  all_eligible_and_gave_consent_hms_finalized: &all_eligible_and_gave_consent_hms_finalized
+    all_eligible_and_gave_consent_hms_finalized:
+      all_finalized:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: finalize
+
+      <<: *all_eligible_and_gave_consent
+
+
+
+  any_ineligible: &any_ineligible
+    any_ineligible:
+      dynamic_model__grit_ps_screener_responses:
+        outcome: ineligible
+      dynamic_model__grit_ps_eligibility_followups:
+        outcome: ineligible
+
+
+  all_enrolled: &all_enrolled
+    all_enrolled:
+      activity_log__grit_assignments:
+        extra_log_type: enrolled
+
+  not_enrolled: &not_enrolled
+    not_all_enrolled:
+      activity_log__grit_assignments:
+        extra_log_type: enrolled
+
+  all_set_appointment: &all_set_appointment
+    all_set_appointment: &set_appointment
+      dynamic_model__grit_msm_screening_details:
+        id:
+          condition: IS NOT NULL
+
+  not_set_appointment: &not_set_appointment
+    not_all_set_appointment:
+      <<: *set_appointment
+
+  all_assigned_to_group: &all_assigned_to_group
+    all_assigned_to_group: &assigned_to_group
+      dynamic_model__grit_assign_to_groups:
+        id:
+          condition: IS NOT NULL
+
+
+  not_all_assigned_to_group: &not_all_assigned_to_group
+    not_all_assigned_to_group:
+      <<: *assigned_to_group
+
+  all_assigned_msm_id: &all_assigned_msm_id
+    all_assigned_msm_id: &assigned_msm_id
+      msm_grit_id_numbers:
+        id:
+          condition: IS NOT NULL
+
+  not_all_assigned_msm_id: &not_all_assigned_msm_id
+    not_all_assigned_msm_id:
+      <<: *assigned_msm_id
