@@ -121,17 +121,47 @@ _definitions:
         any_no:
           dynamic_model__grit_ps_pain_questions:
             possibly_eligible_yes_no: 'no'
-#        all_audit_c:
-#          <<: *ineligible_audit_c
-#          not_any_no:
-#           dynamic_model__grit_ps_audit_c_questions:
-#             possibly_eligible_yes_no: 'no'
+        all_audit_c:
+          <<: *ineligible_audit_c
+          not_any_no:
+           dynamic_model__grit_ps_audit_c_questions:
+             possibly_eligible_yes_no: 'no'
         all_participation:
           <<: *ineligible_participation
           not_any_no:
            dynamic_model__grit_ps_participations:
              possibly_eligible_yes_no: 'no'
 
+  # Any forms had "possibly eligible" marked as no - not eligible, when
+  # responses were ineligible
+  any_responses_ineligible: &any_responses_ineligible
+    <<: *any_possibly_eligible_no
+
+
+    all_audit_c:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: audit_c
+      not_any:
+        <<: *eligible_audit_c
+      not_any_2:
+        <<: *possibly_eligible_audit_c
+
+    all_pain_questions:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: pain_questions
+      not_any:
+        <<: *eligible_pain_questions
+      not_any_2:
+        <<: *possibly_eligible_pain_questions
+
+
+    all_participation:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: participation
+      not_any:
+        <<: *eligible_participation
+      not_any_2:
+        <<: *possibly_eligible_participation
 
 
 _default:
@@ -159,9 +189,14 @@ start_phone_screen:
 
   creatable_if:
     <<: *enabled_if
-    not_any:
+
+    not_any_initial_exit:
       dynamic_model__grit_ps_initial_screenings:
-        select_still_interested: "yes"
+        select_is_good_time_to_speak: 'not interested'
+        select_still_interested: 'no'
+        still_interested_2_yes_no:
+          - 'no'
+          - 'yes'
 
 
   save_action:
@@ -205,6 +240,7 @@ start_phone_screen:
                       select_is_good_time_to_speak: 'not interested'
                       select_still_interested: 'no'
                       still_interested_2_yes_no: 'no'
+
 
             in: master
             with:
@@ -288,7 +324,7 @@ pain_questions:
     all:
       activity_log__grit_assignment_phone_screens:
         extra_log_type: audit_c
-#      <<: *continue_after_audit_c
+      <<: *continue_after_audit_c
 
     not_any:
       activity_log__grit_assignment_phone_screens:
@@ -305,22 +341,30 @@ participation:
 
   creatable_if:
     <<: *enabled_if
-
     not_any:
       activity_log__grit_assignment_phone_screens:
         extra_log_type: participation
 
-    all_pain:
+    not_any_responses_ineligible:
+      <<: *any_possibly_eligible_no
+
+    all_audit_c:
+      all:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: audit_c
+      any:
+        <<: *eligible_audit_c
+        all:
+          <<: *possibly_eligible_audit_c
+
+    all_pain_questions:
       all:
         activity_log__grit_assignment_phone_screens:
           extra_log_type: pain_questions
-      <<: *continue_after_pain_questions
-
-    all_audit_c:
-      all_done_audit_c:
-        activity_log__grit_assignment_phone_screens:
-          extra_log_type: audit_c
-      <<: *continue_after_audit_c
+      any:
+        <<: *eligible_pain_questions
+        all:
+          <<: *possibly_eligible_pain_questions
 
 
 
@@ -342,6 +386,7 @@ participation:
                   <<: *eligible_participation
                 not_any_2:
                   <<: *possibly_eligible_participation
+
 
 ################################################
 ineligible:
@@ -369,11 +414,7 @@ ineligible:
         <<: *all_show_eligible
         <<: *not_any_possibly_eligible
 
-      not_all_participation:
-        activity_log__grit_assignment_phone_screens:
-          extra_log_type: participation
-
-      any_responses_ineligible: &any_responses_ineligible
+      any_auditc_or_pain_ineligible:
         <<: *any_possibly_eligible_no
 
 
@@ -395,7 +436,18 @@ ineligible:
           not_any_2:
             <<: *possibly_eligible_pain_questions
 
+        # We never show ineligible if participation has been shown
+        # since the result is either eligible / possibly eligible,
+        # or if ineligible based on participation questions the interview
+        # ends at that form.
 
+#        all_participation:
+#          activity_log__grit_assignment_phone_screens:
+#            extra_log_type: participation
+#          not_any:
+#            <<: *eligible_participation
+#          not_any_2:
+#            <<: *possibly_eligible_participation
 
 
 
@@ -472,7 +524,6 @@ possibly_eligible:
       all_done:
         activity_log__grit_assignment_phone_screens:
           extra_log_type: participation
-        <<: *eligible_participation
 
       not_any:
         activity_log__grit_assignment_phone_screens:
@@ -533,21 +584,6 @@ possibly_eligible:
               any_consented_possibly_eligible: &consented_possibly_eligible
                 activity_log__grit_assignment_phone_screens:
                   extra_log_type: possibly_eligible
-      #          dynamic_model__grit_ps_possibly_eligibles:
-      #            consent_to_pass_info_to_msm_yes_no: 'yes'
-      #            consent_to_pass_info_to_msm_2_yes_no: 'yes'
-
-#        - dynamic_model__grit_ps_screener_response:
-#            in: master
-#            with:
-#              outcome: possibly eligible - no consent
-#            if:
-#              all:
-#                dynamic_model__grit_ps_possibly_eligibles:
-#                  consent_to_pass_info_to_msm_yes_no: 'no'
-#                  consent_to_pass_info_to_msm_2_yes_no: 'no'
-
-
 
 
 
@@ -656,6 +692,14 @@ screener_responses:
                 > The screener marked this form as Possibly Eligible
 
                 Additional notes will be provided by the screening interviewer.
+
+
+  save_action:
+    on_create:
+      create_next_creatable:
+        if:
+          not_any:
+            <<: *all_request_possibly_eligible_pi_review
 
 
 
@@ -827,7 +871,9 @@ finalize:
 
 
 
+
 test_condition:
   label: Test Condition
   creatable_if:
-      <<: *all_eligible_and_gave_consent
+    any:
+      <<: *gave_and_understood_consent
