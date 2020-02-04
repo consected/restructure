@@ -351,7 +351,11 @@ module CalcActions
               elsif expected_val.keys.first == :validate
                 res &&= calc_complex_validation expected_val[:validate], in_instance.attributes[field_name.to_s]
               else
-                raise FphsException.new "calc_this_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions."
+                raise FphsException.new <<EOF
+calc_this_condition field is not a selection type or :validate hash. Ensure you have an all, any, not_any, not_all before all nested expressions.
+
+#{@condition_config.to_yaml}
+EOF
               end
             else
               this_val = in_instance.attributes[field_name.to_s]

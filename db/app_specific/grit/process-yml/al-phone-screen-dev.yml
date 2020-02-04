@@ -1,0 +1,833 @@
+# @library grit enabled_if
+# @library grit ps_forms_eligibility
+# @library grit eligibility
+
+_definitions:
+
+  # Rule for editable_if only
+  # Lock the forms on finalization
+  not_finalized: &not_finalized
+    not_any:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: finalize
+
+
+  ####
+  # Boilerplace for notifying roles
+  # Override the subject: and if: structures to refine operation
+  ####
+
+  # Default email - just add roles or users
+  notify_email_default: &notify_email_default
+    type: email
+
+    layout_template: grit notification layout
+    content_template: grit notification message
+    extra_substitutions:
+      reason: ''
+      extra_text: |
+        The GRIT Study participant has completed the HMS phone screen.
+      panel_tab: activity-log--grit-assignment-phone-screens
+    subject: "GRIT Study: HMS Phone Screen Complete"
+
+
+  # Default SMS - just add roles or users
+  notify_sms_default: &notify_sms_default
+    type: sms
+    layout_template: standard sms layout
+    content_template: grit sms notification
+    subject: "HMS Phone Screen Complete"
+
+
+
+  # Notify MSM phone screener
+  notify_ps_complete: &notify_ps_complete
+    <<: *notify_email_default
+    role: email - msm phone screener
+
+  # MedNav reviewer SMS
+  notify_ps_complete_sms: &notify_ps_complete_sms
+    <<: *notify_sms_default
+    role: sms - msm phone screener
+
+  # PI
+  notify_pi: &notify_pi
+    <<: *notify_email_default
+    role: email - pi follow up
+
+
+  # PI SMS
+  notify_pi_sms: &notify_pi_sms
+    <<: *notify_sms_default
+    role: sms - pi follow up
+
+
+  continue_after_audit_c: &continue_after_audit_c
+    any_after_audit_c:
+      <<: *eligible_audit_c
+      all_possibly_eligible: &possibly_eligible_audit_c
+        dynamic_model__grit_ps_audit_c_questions:
+          possibly_eligible_yes_no: 'yes'
+
+  continue_after_pain_questions: &continue_after_pain_questions
+    any_after_pain_questions:
+      <<: *eligible_pain_questions
+      all_possibly_eligible: &possibly_eligible_pain_questions
+        dynamic_model__grit_ps_pain_questions:
+          possibly_eligible_yes_no: 'yes'
+
+  continue_after_participations: &continue_after_participations
+    any_after_participations:
+      <<: *eligible_participation
+      all_possibly_eligible: &possibly_eligible_participation
+        dynamic_model__grit_ps_participations:
+          possibly_eligible_yes_no: 'yes'
+
+
+  all_eligible: &all_eligible
+    all_eligible: &all_eligible_items
+      <<: *eligible_pain_questions
+      <<: *eligible_audit_c
+      <<: *eligible_participation
+
+  all_eligible_and_complete: &all_eligible_and_complete
+    all_eligible_and_complete:
+      <<: *all_eligible_items
+      all_has_eligible_done:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: eligible
+
+  not_any_possibly_eligible: &not_any_possibly_eligible
+    not_any_possibly_eligible: &possibly_eligible_items
+      any_possibly_1:
+          <<: *possibly_eligible_pain_questions
+      any_possibly_2:
+          <<: *possibly_eligible_audit_c
+      any_possibly_3:
+          <<: *possibly_eligible_participation
+
+  all_show_eligible: &all_show_eligible
+    all_show_eligible:
+      all:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: participation
+      <<: *all_eligible_items
+
+
+  any_possibly_eligible_no: &any_possibly_eligible_no
+    any_possibly_eligible_no:
+      all_basic:
+        <<: *ineligible_pain_questions
+        any_no:
+          dynamic_model__grit_ps_pain_questions:
+            possibly_eligible_yes_no: 'no'
+#        all_audit_c:
+#          <<: *ineligible_audit_c
+#          not_any_no:
+#           dynamic_model__grit_ps_audit_c_questions:
+#             possibly_eligible_yes_no: 'no'
+        all_participation:
+          <<: *ineligible_participation
+          not_any_no:
+           dynamic_model__grit_ps_participations:
+             possibly_eligible_yes_no: 'no'
+
+
+
+_default:
+  <<: *access_defaults
+  editable_if: *not_finalized
+
+  save_action:
+    on_create: create_next_creatable
+
+
+################################################
+start_phone_screen:
+  label: Start Phone Screening
+  fields:
+
+  references:
+    dynamic_model__grit_ps_initial_screening:
+      from: this
+      add: one_to_this
+
+  caption_before:
+    submit: If the subject is ready to continue, save this form and continue with the next form.
+  view_options:
+    show_embedded_at_top: true
+
+  creatable_if:
+    <<: *enabled_if
+    not_any:
+      dynamic_model__grit_ps_initial_screenings:
+        select_still_interested: "yes"
+
+
+  save_action:
+    on_create:
+      create_next_creatable:
+        if:
+          all:
+            dynamic_model__grit_ps_initial_screenings:
+              still_interested_2_yes_no: "yes"
+              id:
+                this_references: id
+      show_panel:
+        value: activity_log__grit_assignments
+        if:
+          not_all:
+            dynamic_model__grit_ps_initial_screenings:
+              select_still_interested: "yes"
+              still_interested_2_yes_no: "yes"
+              id:
+                this_references: id
+
+  showable_if:
+    always: true
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+        ###### Create tracker entry with exit (no consent) record ######
+        ###### Not ineligible, but also not eligible and consented ######
+        - activity_log__grit_assignment:
+            if:
+              all:
+                dynamic_model__grit_ps_initial_screenings:
+                  id:
+                    this_references: id
+                this:
+                  any:
+                    dynamic_model__grit_ps_initial_screenings:
+                      select_is_good_time_to_speak: 'not interested'
+                      select_still_interested: 'no'
+                      still_interested_2_yes_no: 'no'
+
+            in: master
+            with:
+              extra_log_type: exit_ps
+
+
+        - activity_log__grit_assignment:
+            if:
+              all:
+                dynamic_model__grit_ps_initial_screenings:
+                  id:
+                    this_references: id
+                this:
+                  any:
+                    dynamic_model__grit_ps_initial_screenings:
+                      select_is_good_time_to_speak:
+                        - left voicemail
+                        - not appropriate time
+                      select_still_interested: 'yes - call back'
+
+            in: master
+            with:
+              extra_log_type: schedule_screening
+              select_who: current_user_email
+              follow_up_when:
+                dynamic_model__grit_ps_initial_screenings:
+                  id:
+                    this_references: id
+                  follow_up_date: return_value
+              follow_up_time:
+                dynamic_model__grit_ps_initial_screenings:
+                  id:
+                    this_references: id
+                  follow_up_time: return_value
+              notes: |
+                Call went to voicemail, or participant requested to speak another time
+
+              select_record_from_player_contacts:
+                activity_log__grit_assignments:
+                  extra_log_type: schedule_screening
+                  select_record_from_player_contacts: return_value
+
+
+
+################################################
+audit_c:
+  label: Audit-C
+
+  references:
+    dynamic_model__grit_ps_audit_c_question:
+      from: this
+      add: one_to_this
+
+
+  creatable_if:
+    <<: *enabled_if
+    all:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: start_phone_screen
+      dynamic_model__grit_ps_initial_screenings:
+        still_interested_2_yes_no: 'yes'
+
+    not_any:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: audit_c
+
+
+
+################################################
+pain_questions:
+  label: Pain Inquiry
+
+  references:
+    dynamic_model__grit_ps_pain_question:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+
+    all:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: audit_c
+#      <<: *continue_after_audit_c
+
+    not_any:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: pain_questions
+
+################################################
+participation:
+  label: Ability to Participate
+
+  references:
+    dynamic_model__grit_ps_participation:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    <<: *enabled_if
+
+    not_any:
+      activity_log__grit_assignment_phone_screens:
+        extra_log_type: participation
+
+    all_pain:
+      all:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: pain_questions
+      <<: *continue_after_pain_questions
+
+    all_audit_c:
+      all_done_audit_c:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: audit_c
+      <<: *continue_after_audit_c
+
+
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+        ##### Screener Responses with outcome default #####
+        - dynamic_model__grit_ps_screener_response:
+            in: master
+            with:
+              outcome: ineligible
+            if:
+              all_participation:
+                all:
+                  activity_log__grit_assignment_phone_screens:
+                    extra_log_type: participation
+                not_any:
+                  <<: *eligible_participation
+                not_any_2:
+                  <<: *possibly_eligible_participation
+
+################################################
+ineligible:
+  label: Ineligible
+
+  view_options:
+    hide_unless_creatable: true
+
+  references:
+    dynamic_model__grit_ps_non_eligible:
+      from: this
+      add: one_to_this
+
+  showable_if:
+    always: true
+
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      not_any:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: ineligible
+      not_all_show_eligible:
+        <<: *all_show_eligible
+        <<: *not_any_possibly_eligible
+
+      not_all_participation:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: participation
+
+      any_responses_ineligible: &any_responses_ineligible
+        <<: *any_possibly_eligible_no
+
+
+        all_audit_c:
+          all:
+            activity_log__grit_assignment_phone_screens:
+              extra_log_type: audit_c
+          not_any:
+            <<: *eligible_audit_c
+          not_any_2:
+            <<: *possibly_eligible_audit_c
+
+        all_pain_questions:
+          all:
+            activity_log__grit_assignment_phone_screens:
+              extra_log_type: pain_questions
+          not_any:
+            <<: *eligible_pain_questions
+          not_any_2:
+            <<: *possibly_eligible_pain_questions
+
+
+
+
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+        ##### Screener Responses with outcome default #####
+        - dynamic_model__grit_ps_screener_response:
+            in: master
+            with:
+              outcome: ineligible
+
+         ###### Create tracker entry with screener responses ######
+#        - activity_log__grit_assignment_phone_screen:
+#            in: master
+#            with:
+#              extra_log_type: screener_responses
+
+        ##### Record consent in tracker since requested follow up and gave consent #####
+        - activity_log__grit_assignment:
+            in: master
+            if:
+              any_gave_consent_to_share_ineligible:
+                dynamic_model__grit_ps_non_eligibles:
+                  consent_to_pass_info_to_msm_yes_no: 'yes'
+                  consent_to_pass_info_to_msm_2_yes_no: 'yes'
+
+            with:
+              extra_log_type: consent_to_share_details
+              activity_date: now()
+              select_activity: Verbal consent during HMS Phone Screen
+              select_who: current_user_email
+
+
+
+        ##### Ineligible - requested PI follow up ######
+        - activity_log__grit_assignment_followup: &create_ref_request_pi_followup
+            in: this
+            add: many
+            if:
+              all:
+                any:
+                  dynamic_model__grit_ps_non_eligibles:
+                    contact_pi_yes_no: 'yes'
+                <<: *gave_consent_to_share
+
+            with:
+              extra_log_type: request_pi_followup
+              notes: |
+                HMS Phone Screen found this subject to be ineligible.
+                The subject requested a PI follow up.
+
+                Please review the HMS Phone Screen tab for complete information.
+
+
+
+################################################
+possibly_eligible:
+  label: Possibly Eligible
+
+  references:
+    dynamic_model__grit_ps_possibly_eligibles:
+      from: this
+      add: one_to_this
+
+  showable_if:
+    always: true
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+
+      all_done:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: participation
+        <<: *eligible_participation
+
+      not_any:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: possibly_eligible
+
+      any_possible_eligible:
+        <<: *possibly_eligible_items
+
+      not_any_show_eligible:
+        <<: *all_show_eligible
+
+      not_any_ineligible:
+        <<: *any_responses_ineligible
+
+#      not_:
+#        <<: *any_possibly_eligible_no
+
+      any_continue_after_possibly_eligible:
+
+        all_audit_c:
+          all_done_audit_c:
+            activity_log__grit_assignment_phone_screens:
+              extra_log_type: audit_c
+          <<: *continue_after_audit_c
+
+        all_pain_questions:
+          all:
+            activity_log__grit_assignment_phone_screens:
+              extra_log_type: pain_questions
+          <<: *continue_after_pain_questions
+
+        all_participation_questions:
+          all:
+            activity_log__grit_assignment_phone_screens:
+              extra_log_type: participations
+          <<: *continue_after_participations
+
+
+  caption_before:
+    submit: |
+      *Save this form after the call, then complete the **Screener Reponses**.
+      When that form has been created the PI will be informed that a
+      follow up is required.*
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+        ##### Screener Responses with outcome default #####
+        - dynamic_model__grit_ps_screener_response:
+            in: master
+            with:
+              outcome: possibly_eligible
+            if:
+              any_consented_possibly_eligible: &consented_possibly_eligible
+                activity_log__grit_assignment_phone_screens:
+                  extra_log_type: possibly_eligible
+      #          dynamic_model__grit_ps_possibly_eligibles:
+      #            consent_to_pass_info_to_msm_yes_no: 'yes'
+      #            consent_to_pass_info_to_msm_2_yes_no: 'yes'
+
+#        - dynamic_model__grit_ps_screener_response:
+#            in: master
+#            with:
+#              outcome: possibly eligible - no consent
+#            if:
+#              all:
+#                dynamic_model__grit_ps_possibly_eligibles:
+#                  consent_to_pass_info_to_msm_yes_no: 'no'
+#                  consent_to_pass_info_to_msm_2_yes_no: 'no'
+
+
+
+
+
+################################################
+eligible:
+  label: Eligible
+
+  showable_if:
+    always: true
+
+  references:
+    dynamic_model__grit_ps_eligible:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *all_show_eligible
+
+      not_any:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: eligible
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+        ##### Screener Responses with outcome default #####
+        dynamic_model__grit_ps_screener_response:
+          in: master
+          with:
+            outcome: eligible
+
+
+
+################################################
+screener_responses:
+  label: Screener Responses
+
+  view_options:
+    hide_unless_creatable: true
+
+  references:
+    dynamic_model__grit_ps_screener_response:
+      from: this
+      add: one_to_this
+
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      any_eligible_possibly:
+        all_eligible:
+          activity_log__grit_assignment_phone_screens:
+            extra_log_type: eligible
+        any: *consented_possibly_eligible
+
+      not_any:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: screener_responses
+
+  save_trigger:
+    on_create:
+
+      create_reference:
+
+        ##### Record consent in tracker since requested follow up and gave consent #####
+        - activity_log__grit_assignment: &create_ref_record_consent
+            in: master
+            if:
+              <<: *gave_and_understood_consent
+            with:
+              extra_log_type: consent_to_share_details
+              activity_date: now()
+              select_activity: Verbal consent during HMS Phone Screen
+              select_who: current_user_email
+
+
+        ##### Possibly eligible - requested PI review ######
+        - activity_log__grit_assignment_followup:
+            in: this
+            add: many
+            if: &all_request_possibly_eligible_pi_review
+              all:
+                any:
+                  dynamic_model__grit_ps_screener_responses:
+                    outcome: possibly_eligible
+                <<: *gave_and_understood_consent
+
+            with:
+              extra_log_type: request_pi_ps_review
+              notes: |
+                HMS Phone Screen found this subject to be possibly eligible.
+
+                A review is required before eligibility for MSM screening can be finalized.
+
+                Please review the HMS Phone Screen tab for complete information.
+                At least one of the screener blocks will have a header prompt:
+
+                > **NOTE TO PI**
+                >
+                > The screener marked this form as Possibly Eligible
+
+                Additional notes will be provided by the screening interviewer.
+
+
+
+################################################
+subject_contact:
+  label: Contact Participant
+
+  references:
+    dynamic_model__grit_ps_subject_contacts:
+      from: this
+      add: one_to_this
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *not_finalized
+      <<: *all_request_possibly_eligible_pi_review
+      not_all_eligibility_followup_done:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: eligibility_followup
+
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_action:
+
+
+################################################
+eligibility_followup:
+  label: Eligibility Follow Up
+
+  references:
+    dynamic_model__grit_ps_eligibility_followups:
+      from: this
+      add: one_to_this
+
+  showable_if:
+    always: true
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+      <<: *not_finalized
+      <<: *all_request_possibly_eligible_pi_review
+      not_any:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: eligibility_followup
+
+  view_options:
+    hide_unless_creatable: true
+
+  save_trigger:
+
+    on_create:
+      create_reference:
+        ##### Record consent to share details if the participant gave it
+        - activity_log__grit_assignment: *create_ref_record_consent
+        ##### Ineligible - requested PI follow up ######
+        - activity_log__grit_assignment_followup:
+            <<: *create_ref_request_pi_followup
+            if:
+              all:
+                all_ineligible_and_contact_pi:
+                  dynamic_model__grit_ps_eligibility_followups:
+                    outcome: 'ineligible'
+                    contact_pi_yes_no: 'yes'
+                <<: *gave_consent_to_share
+
+
+
+
+################################################
+finalize:
+  label: Finalize Entries
+
+  view_options:
+    hide_unless_creatable: true
+    show_cancel: true
+
+  caption_before:
+    all_fields: |
+      When finalized the phone screen forms are locked from editing.
+
+      If the subject is eligible and has consented
+      to passing information to MSM,
+      the MSM team will be notified automatically that the second phone screener is
+      ready to be performed.
+
+      Otherwise the MSM team will not be notified.
+
+
+    submit: |
+      Click the cancel button instead if review or
+      revision of the phone screen forms is still required.
+
+
+  creatable_if:
+    all:
+      <<: *enabled_if
+
+      any_next:
+        # If ineligible, or eligible and screener responses completed
+        any_ineligible_eligible_with_screener:
+          dynamic_model__grit_ps_screener_responses:
+            outcome:
+              - ineligible
+              - eligible
+              - possibly eligible - no consent
+
+          dynamic_model__grit_ps_eligibility_followups:
+            outcome:
+              - ineligible
+              - eligible
+
+      not_any:
+        activity_log__grit_assignment_phone_screens:
+          extra_log_type: finalize
+
+
+  # Override the default that hides activities after a certain stage,
+  # so that any user can see that the phone screen process has been completed
+  showable_if:
+    always: true
+
+
+  save_action:
+    on_create:
+      show_panel:
+        value: activity_log__grit_assignments
+      hide_panel:
+        value: activity_log__grit_assignment_phone_screens
+
+  save_trigger:
+    on_create:
+      create_reference:
+
+
+
+        ###### Create tracker entry with ineligible record ######
+        - activity_log__grit_assignment:
+            if:
+              <<: *any_ineligible
+            in: master
+            with:
+              extra_log_type: ineligible
+
+
+        ###### Create tracker entry with exit (no consent) record ######
+        ###### Not ineligible, but also not eligible and consented ######
+        - activity_log__grit_assignment:
+            if:
+              not_any:
+                <<: *any_ineligible
+                <<: *all_eligible_and_gave_consent
+            in: master
+            with:
+              extra_log_type: exit_ps
+
+
+        ###### Create tracker entry with HMS Eligible record ######
+        - activity_log__grit_assignment:
+            if:
+              <<: *all_eligible_and_gave_consent
+            in: master
+            with:
+              extra_log_type: hms_ps_eligible
+
+
+
+
+test_condition:
+  label: Test Condition
+  creatable_if:
+      <<: *all_eligible_and_gave_consent

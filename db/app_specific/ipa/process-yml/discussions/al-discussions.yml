@@ -1,0 +1,95 @@
+# @library ipa enabled_if
+# @library ipa filestore_container
+# @library ipa notification_base
+
+_definitions:
+
+####
+# App specific configurations.
+# EDIT this section to meet the requirements of the app
+####
+
+  role_selection_options: &role_selection_options
+    Phone Screen Interviewer: phone screen interviewer
+    Navigators: navigators
+    Clinical Research Coordinator: clinical research coordinator
+    Med Nav: med nav
+    TMS: tms
+    PI: pi
+
+
+  # Default email - just add roles or users
+  notify_email_default: &notify_email_default
+    type: email
+    layout_template: ipa notification layout
+    content_template: ipa notification message
+    subject: "IPA App: Discussion Message - {{referring_record.id}}"
+    extra_substitutions:
+      reason: 'New Discussion Message'
+      extra_text: |
+        Discussion Subject: *{{referring_record.notes}}*
+      panel_tab: activity-log--ipa-assignment-discussions
+
+
+
+  # Default SMS - just add roles or users
+  notify_sms_default: &notify_sms_default
+    type: sms
+    layout_template: standard sms layout
+    content_template: ipa sms notification
+    subject: "IPA Discussion"
+
+
+###############################################
+# Now load discussion specific libraries
+###############################################
+# @library ipa notify_roles
+# @library ipa discussions
+###############################################
+
+
+start_new_discussion:
+  label: '{{notes}}'
+  button_label: Start New Discussion
+  <<: *setup_discussion
+
+  field_options:
+    <<: *start_discussion_field_options
+    tag_select_contact_role:
+      edit_as:
+        alt_options: *role_selection_options
+
+  showable_if:
+    any:
+      all_creator:
+        this:
+          user_id:
+            user: id
+
+      all:
+        activity_log__ipa_assignment_discussions:
+          id:
+            this: id
+          tag_select_contact_role:
+            condition: '&&'
+            value: current_user_role_names
+
+
+  references:
+    - activity_log__ipa_assignment_discussion:
+        label: New Message
+        from: this
+        add: many
+        prevent_disable: true
+        add_with:
+          extra_log_type: general_discussion
+          prev_activity_type: general_discussion
+        filter_by:
+          extra_log_type: general_discussion
+
+
+
+general_discussion:
+  label: Message
+
+  <<: *discussion_message_defaults
