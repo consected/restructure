@@ -4661,7 +4661,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:53.909Z'
-    updated_at: '2019-11-21T11:00:53.909Z'
+    updated_at: '2020-02-03T17:44:47.148Z'
     action_when_attribute: updated_at
     field_list: ''
     blank_log_field_list: ''
@@ -4699,7 +4699,8 @@ app_type:
       \     to confirm information has been sent to BWH.\r\n      \r\n  creatable_if:\r\n
       \   all:\r\n      activity_log__sleep_assignments:\r\n        extra_log_type:
       consent_to_share_details\r\n    not_any:  \r\n      <<: *any_exit_or_complete\r\n
-      \     activity_log__sleep_assignments:\r\n        extra_log_type: confirmed_bwh_share\r\n\r\n\r\n\r\n\r\n###################################\r\nschedule_screening_2:\r\n
+      \     all_confirmed_bwh_share:\r\n        activity_log__sleep_assignments:\r\n
+      \         extra_log_type: confirmed_bwh_share\r\n\r\n\r\n\r\n\r\n###################################\r\nschedule_screening_2:\r\n
       \ label: Schedule BWH Screening\r\n###################################  \r\n
       \ fields: \r\n    - select_who\r\n    - select_record_from_player_contacts\r\n
       \   - follow_up_when\r\n    - follow_up_time\r\n    - notes\r\n  caption_before:\r\n
