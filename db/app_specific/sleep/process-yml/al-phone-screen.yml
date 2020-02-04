@@ -509,8 +509,9 @@ epworth_sleepiness_scale:
   creatable_if:
     <<: *enabled_if
     all:
-      activity_log__sleep_assignment_phone_screens:
-        extra_log_type: sleep_apenea
+      all:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: sleep_apenea
       <<: *administer_ess
 
     not_any:
@@ -559,8 +560,9 @@ audit_c:
     <<: *enabled_if
 
     all:
-      activity_log__sleep_assignment_phone_screens:
-        extra_log_type: sleep_apenea
+      all:
+        activity_log__sleep_assignment_phone_screens:
+          extra_log_type: sleep_apenea
       <<: *continue_after_ese_questions
 
     not_any:
@@ -620,30 +622,34 @@ ineligible:
         <<: *any_possibly_eligible_no
 
         all_basic_questions:
-          activity_log__sleep_assignment_phone_screens:
-            extra_log_type: basic_questions
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: basic_questions
           not_any:
             <<: *eligible_basic_questions
           not_any_2:
             <<: *possibly_eligible_basic_questions
 
         all_isi_questions:
-          activity_log__sleep_assignment_phone_screens:
-            extra_log_type: insomnia_severity_index
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: insomnia_severity_index
           not_any:
             <<: *eligible_isi_questions
           not_any_2:
             <<: *possibly_eligible_isi_questions
 
         all_sleep_apnea_and_ese:
-          activity_log__sleep_assignment_phone_screens:
-            extra_log_type: sleep_apenea
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: sleep_apenea
 
           any_done_sleep_apnea_and_ese:
             not_all:
               <<: *administer_ess
-            activity_log__sleep_assignment_phone_screens:
-              extra_log_type: epworth_sleepiness_scale
+            all:
+              activity_log__sleep_assignment_phone_screens:
+                extra_log_type: epworth_sleepiness_scale
 
           not_any:
             <<: *eligible_ese_questions
@@ -660,8 +666,9 @@ ineligible:
 #            <<: *possibly_eligible_audit_c
 
         all_dast2_mod:
-          activity_log__sleep_assignment_phone_screens:
-            extra_log_type: dast2_mod
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: dast2_mod
           not_any:
             <<: *eligible_dast2_mod
           not_any_2:
@@ -767,13 +774,15 @@ possibly_eligible:
           <<: *continue_after_basic_questions
 
         all_isi_questions:
-          activity_log__sleep_assignment_phone_screens:
-            extra_log_type: insomnia_severity_index
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: insomnia_severity_index
           <<: *continue_after_isi_questions
 
         all_sleep_apnea_and_ese:
-          activity_log__sleep_assignment_phone_screens:
-            extra_log_type: sleep_apenea
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: sleep_apenea
 
           any_done_sleep_apnea_and_ese:
             not_all:
@@ -793,8 +802,9 @@ possibly_eligible:
 #          <<: *continue_after_audit_c
 
         all_dast2_mod:
-          activity_log__sleep_assignment_phone_screens:
-            extra_log_type: dast2_mod
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: dast2_mod
           <<: *continue_after_dast2_mod
 
 
