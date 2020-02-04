@@ -4022,7 +4022,7 @@ app_type:
     admin_id: 4
     disabled: false
     created_at: '2019-11-21T11:00:53.752Z'
-    updated_at: '2020-02-04T13:35:39.611Z'
+    updated_at: '2020-02-04T18:49:33.957Z'
     action_when_attribute: created_at
     field_list: ''
     blank_log_field_list: ''
@@ -4200,14 +4200,13 @@ app_type:
       \         extra_log_type: sleep_apenea\r\n\r\n\r\n################################################\r\nepworth_sleepiness_scale:\r\n
       \ label: Epworth Sleepiness Scale\r\n\r\n  references:\r\n    dynamic_model__sleep_ese_question:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n    all:\r\n      all:\r\n        activity_log__sleep_assignment_phone_screens:\r\n
-      \         extra_log_type: sleep_apenea\r\n      <<: *administer_ess\r\n\r\n
-      \   not_any:\r\n      activity_log__sleep_assignment_phone_screens:\r\n        extra_log_type:
-      epworth_sleepiness_scale\r\n\r\n  save_trigger:\r\n    on_create:\r\n      create_reference:\r\n
-      \       ###### Create tracker entry to follow up and email Trust info ######\r\n
-      \       - activity_log__sleep_assignment:\r\n            if:\r\n              all:\r\n
-      \               dynamic_model__sleep_ese_questions:\r\n                  id:\r\n
-      \                   this_references: id\r\n                  trust_assessment_info_yes_no:
+      *enabled_if\r\n    <<: *administer_ess\r\n    all:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
+      \       extra_log_type: sleep_apenea\r\n\r\n    not_any:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
+      \       extra_log_type: epworth_sleepiness_scale\r\n\r\n  save_trigger:\r\n
+      \   on_create:\r\n      create_reference:\r\n        ###### Create tracker entry
+      to follow up and email Trust info ######\r\n        - activity_log__sleep_assignment:\r\n
+      \           if:\r\n              all:\r\n                dynamic_model__sleep_ese_questions:\r\n
+      \                 id:\r\n                    this_references: id\r\n                  trust_assessment_info_yes_no:
       'yes'\r\n\r\n            in: master\r\n            with:\r\n              extra_log_type:
       general\r\n              select_activity: schedule follow up\r\n              select_direction:
       to staff\r\n              select_next_step: more info requested\r\n              follow_up_when:
@@ -4218,8 +4217,8 @@ app_type:
       record this.\r\n\r\n\r\n\r\n################################################\r\naudit_c:\r\n
       \ label: Audit-C\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_audit_c_question:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    <<:
-      *enabled_if\r\n\r\n    all:\r\n      all:\r\n        activity_log__sleep_assignment_phone_screens:\r\n
-      \         extra_log_type: sleep_apenea\r\n      <<: *continue_after_ese_questions\r\n\r\n
+      *enabled_if\r\n    all:\r\n      activity_log__sleep_assignment_phone_screens:\r\n
+      \       extra_log_type: sleep_apenea\r\n    <<: *continue_after_ese_questions\r\n\r\n
       \   not_any:\r\n      activity_log__sleep_assignment_phone_screens:\r\n        extra_log_type:
       audit_c\r\n\r\n\r\n################################################\r\ndast2_mod:\r\n
       \ label: DAST-2 Modified\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_dast2_mod_question:\r\n
@@ -4351,7 +4350,9 @@ app_type:
       least one of the screener blocks will have a header prompt:\r\n\r\n                >
       **NOTE TO PI**\r\n                >\r\n                > The screener marked
       this form as Possibly Eligible\r\n\r\n                Additional notes will
-      be provided by the screening interviewer.\r\n\r\n\r\n\r\n################################################\r\nsubject_contact:\r\n
+      be provided by the screening interviewer.\r\n\r\n\r\n  save_action:\r\n    on_create:\r\n
+      \     create_next_creatable:\r\n        if:\r\n          all:\r\n            activity_log__sleep_assignment_phone_screens:\r\n
+      \             extra_log_type: eligible\r\n              \r\n################################################\r\nsubject_contact:\r\n
       \ label: Contact Participant\r\n\r\n  references:\r\n    dynamic_model__sleep_ps_subject_contacts:\r\n
       \     from: this\r\n      add: one_to_this\r\n\r\n  creatable_if:\r\n    all:\r\n
       \     <<: *enabled_if\r\n      <<: *not_finalized\r\n      <<: *all_request_possibly_eligible_pi_review\r\n
@@ -4480,7 +4481,15 @@ app_type:
       The participant was eligible or possibly eligible\r\n  #####\r\n      notify:\r\n
       \       - <<: *notify_ps_complete\r\n          if:\r\n            <<: *all_eligible_and_gave_consent\r\n\r\n
       \       - <<: *notify_ps_complete_sms\r\n          if:\r\n            <<: *all_eligible_and_gave_consent\r\n\r\n\r\ntest_condition:\r\n
-      \ label: Test Condition\r\n  creatable_if:\r\n    <<: *any_ineligible\r\n"
+      \ label: Test Condition\r\n  creatable_if:\r\n    all:\r\n\r\n      not_all_eligible_audit_c:\r\n
+      \       all:\r\n          dynamic_model__sleep_ps_audit_c_questions:\r\n            alcohol_frequency:\r\n
+      \             - 2\r\n              - 3\r\n              - 4\r\n\r\n        any:\r\n
+      \         all:\r\n            dynamic_model__sleep_ps_audit_c_questions:\r\n
+      \             six_or_more_frequency: ''\r\n              total_score:\r\n                -
+      6\r\n                - 7\r\n                - 8\r\n                - 9\r\n                -
+      10\r\n                - 11\r\n                - 12\r\n            \r\n          all_2:\r\n
+      \           dynamic_model__sleep_ps_audit_c_questions:\r\n              six_or_more_frequency:
+      4\r\n              \r\n        \r\n"
     hide_item_list_panel: true
     main_log_name: ''
     process_name: phone_screen
@@ -5788,6 +5797,63 @@ app_type:
       information to BWH\r\n\r\n    select_subject_eligibility: |\r\n      **Subject's
       eligibility for the study**\r\n"
     user_email: 
+  - id: 53
+    name: Sleep DAST-2
+    table_name: sleep_ps_dast2_mod_questions
+    schema_name: 
+    primary_key_name: id
+    foreign_key_name: master_id
+    description: ''
+    admin_id: 4
+    disabled: false
+    created_at: '2019-11-21T11:00:52.366Z'
+    updated_at: '2020-02-04T18:50:50.545Z'
+    position: 
+    category: sleep-phone-screen
+    table_key_name: ''
+    field_list: placeholder_pi_review audit_c_eligible_yes_no number_days_drug_usage
+      number_days_negative_feeling possibly_eligible_yes_no possibly_eligible_reason_notes
+      placeholder_thanks notes
+    result_order: ''
+    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    placeholder_pi_review:\r\n
+      \     show_caption: |\r\n        ### **NOTE TO PI** \r\n        \r\n        The
+      screener marked this form as **Possibly Eligible**\r\n  \r\n    number_days_negative_feeling:
+      |\r\n      How many days in the past 12 months have you felt bad or guilty\r\n
+      \     about your drug use? \r\n      \r\n      *If subject responds that they
+      do not use drugs, mark response as **0** *\r\n    number_days_drug_usage: |\r\n
+      \     How many days in the past 3 months have you used drugs (excluding marijuana
+      or CBD, and drugs prescribed by a clinician)?\r\n\r\n    possibly_eligible_yes_no:
+      |\r\n      *Based on the scores, the participant is ineligible. \r\n      If
+      you believe the participant may be eligible, select **yes** and continue\r\n
+      \     with the screening.*\r\n\r\n    possibly_eligible_reason_notes: Reason\r\n\r\n
+      \   placeholder_thanks: |\r\n      Thank you for answering our questions. Unfortunately,
+      at this \r\n      time you do not qualify for this particular study. We really
+      \r\n      appreciate your interest in research and helping to improve \r\n      the
+      health of former players nationwide. \r\n      We will be sure to contact you
+      about future studies \r\n      that you may be eligible for. \r\n      \r\n
+      \     *Click save to continue to the Ineligible responses form*\r\n\r\n  field_options:\r\n
+      \   possibly_eligible_yes_no: \r\n      value: 'no'\r\n\r\n    audit_c_eligible_yes_no:\r\n
+      \     value:\r\n        all:\r\n\r\n          not_all_eligible_audit_c:\r\n
+      \           all:\r\n              dynamic_model__sleep_ps_audit_c_questions:\r\n
+      \               alcohol_frequency:\r\n                  - 2\r\n                  -
+      3\r\n                  - 4\r\n\r\n            any:\r\n              all:\r\n
+      \               dynamic_model__sleep_ps_audit_c_questions:\r\n                  six_or_more_frequency:
+      ''\r\n                  total_score:\r\n                    - 6\r\n                    -
+      7\r\n                    - 8\r\n                    - 9\r\n                    -
+      10\r\n                    - 11\r\n                    - 12\r\n\r\n              all_2:\r\n
+      \               dynamic_model__sleep_ps_audit_c_questions:\r\n                  six_or_more_frequency:
+      4\r\n\r\n          all_return:\r\n            this:\r\n              return_constant:
+      'yes'\r\n\r\n\r\n\r\n  show_if:\r\n    audit_c_eligible_yes_no: \r\n      never:
+      true\r\n  \r\n    possibly_eligible_yes_no: &not_all_eligible_show\r\n      not_all:\r\n
+      \       audit_c_eligible_yes_no: 'yes'\r\n        number_days_negative_feeling:
+      \r\n          - '0'\r\n          - ''\r\n        number_days_drug_usage:\r\n
+      \         - '0'\r\n          - ''\r\n\r\n    possibly_eligible_reason_notes:\r\n
+      \     <<: *not_all_eligible_show\r\n      all:\r\n        possibly_eligible_yes_no:
+      'yes'\r\n\r\n    placeholder_pi_review:\r\n      <<: *not_all_eligible_show\r\n
+      \     all:\r\n        possibly_eligible_yes_no: 'yes'\r\n    \r\n    placeholder_thanks:\r\n
+      \     <<: *not_all_eligible_show\r\n      all:\r\n        possibly_eligible_yes_no:
+      'no'\r\n    "
+    user_email: 
   - id: 55
     name: Sleep Audit-C
     table_name: sleep_ps_audit_c_questions
@@ -6694,59 +6760,6 @@ app_type:
       \         - 'no'        \r\n      not_all:\r\n        any_questions_yes_no:
       'yes'\r\n        contact_pi_yes_no: 'yes'\r\n        consent_to_pass_info_to_bwh_yes_no:
       'no'\r\n        consent_to_pass_info_to_bwh_2_yes_no: 'no'\r\n      \r\n    "
-    user_email: 
-  - id: 53
-    name: Sleep DAST-2
-    table_name: sleep_ps_dast2_mod_questions
-    schema_name: 
-    primary_key_name: id
-    foreign_key_name: master_id
-    description: ''
-    admin_id: 4
-    disabled: false
-    created_at: '2019-11-21T11:00:52.366Z'
-    updated_at: '2019-11-21T11:00:52.366Z'
-    position: 
-    category: sleep-phone-screen
-    table_key_name: ''
-    field_list: placeholder_pi_review audit_c_eligible_yes_no number_days_drug_usage
-      number_days_negative_feeling possibly_eligible_yes_no possibly_eligible_reason_notes
-      placeholder_thanks notes
-    result_order: ''
-    options: "default:\r\n\r\n  caption_before:\r\n  \r\n    placeholder_pi_review:\r\n
-      \     show_caption: |\r\n        ### **NOTE TO PI** \r\n        \r\n        The
-      screener marked this form as **Possibly Eligible**\r\n  \r\n    number_days_negative_feeling:
-      |\r\n      How many days in the past 12 months have you felt bad or guilty\r\n
-      \     about your drug use? \r\n      \r\n      *If subject responds that they
-      do not use drugs, mark response as **0** *\r\n    number_days_drug_usage: |\r\n
-      \     How many days in the past 3 months have you used drugs (excluding marijuana
-      or CBD, and drugs prescribed by a clinician)?\r\n\r\n    possibly_eligible_yes_no:
-      |\r\n      *Based on the scores, the participant is ineligible. \r\n      If
-      you believe the participant may be eligible, select **yes** and continue\r\n
-      \     with the screening.*\r\n\r\n    possibly_eligible_reason_notes: Reason\r\n\r\n
-      \   placeholder_thanks: |\r\n      Thank you for answering our questions. Unfortunately,
-      at this \r\n      time you do not qualify for this particular study. We really
-      \r\n      appreciate your interest in research and helping to improve \r\n      the
-      health of former players nationwide. \r\n      We will be sure to contact you
-      about future studies \r\n      that you may be eligible for. \r\n      \r\n
-      \     *Click save to continue to the Ineligible responses form*\r\n\r\n  field_options:\r\n
-      \   possibly_eligible_yes_no: \r\n      value: 'no'\r\n    audit_c_eligible_yes_no:\r\n
-      \     value:\r\n        all:\r\n          not_all_eligible_audit_c:\r\n            not_any:\r\n
-      \             dynamic_model__sleep_ps_audit_c_questions: \r\n                total_score:
-      \r\n                  - 0\r\n                  - 1 \r\n                  - 2\r\n
-      \                 - 3\r\n            not_all:\r\n              dynamic_model__sleep_ps_audit_c_questions:\r\n
-      \               alcohol_frequency: 4\r\n                daily_alcohol: 0\r\n
-      \               six_or_more_frequency: 0\r\n\r\n          all_return:\r\n            this:\r\n
-      \             return_constant: 'yes'\r\n\r\n  show_if:\r\n    audit_c_eligible_yes_no:
-      \r\n      never: true\r\n  \r\n    possibly_eligible_yes_no: &not_all_eligible_show\r\n
-      \     not_all:\r\n        audit_c_eligible_yes_no: 'yes'\r\n        number_days_negative_feeling:
-      \r\n          - '0'\r\n          - ''\r\n        number_days_drug_usage:\r\n
-      \         - '0'\r\n          - ''\r\n\r\n    possibly_eligible_reason_notes:\r\n
-      \     <<: *not_all_eligible_show\r\n      all:\r\n        possibly_eligible_yes_no:
-      'yes'\r\n\r\n    placeholder_pi_review:\r\n      <<: *not_all_eligible_show\r\n
-      \     all:\r\n        possibly_eligible_yes_no: 'yes'\r\n    \r\n    placeholder_thanks:\r\n
-      \     <<: *not_all_eligible_show\r\n      all:\r\n        possibly_eligible_yes_no:
-      'no'\r\n    "
     user_email: 
   - id: 51
     name: Sleep Phone Screen Possibly Eligible

@@ -508,11 +508,10 @@ epworth_sleepiness_scale:
 
   creatable_if:
     <<: *enabled_if
+    <<: *administer_ess
     all:
-      all:
-        activity_log__sleep_assignment_phone_screens:
-          extra_log_type: sleep_apenea
-      <<: *administer_ess
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: sleep_apenea
 
     not_any:
       activity_log__sleep_assignment_phone_screens:
@@ -558,12 +557,10 @@ audit_c:
 
   creatable_if:
     <<: *enabled_if
-
     all:
-      all:
-        activity_log__sleep_assignment_phone_screens:
-          extra_log_type: sleep_apenea
-      <<: *continue_after_ese_questions
+      activity_log__sleep_assignment_phone_screens:
+        extra_log_type: sleep_apenea
+    <<: *continue_after_ese_questions
 
     not_any:
       activity_log__sleep_assignment_phone_screens:
@@ -959,6 +956,13 @@ screener_responses:
                 Additional notes will be provided by the screening interviewer.
 
 
+  save_action:
+    on_create:
+      create_next_creatable:
+        if:
+          all:
+            activity_log__sleep_assignment_phone_screens:
+              extra_log_type: eligible
 
 ################################################
 subject_contact:
@@ -1350,4 +1354,29 @@ finalize:
 test_condition:
   label: Test Condition
   creatable_if:
-    <<: *any_ineligible
+    all:
+
+      not_all_eligible_audit_c:
+        all:
+          dynamic_model__sleep_ps_audit_c_questions:
+            alcohol_frequency:
+              - 2
+              - 3
+              - 4
+
+        any:
+          all:
+            dynamic_model__sleep_ps_audit_c_questions:
+              six_or_more_frequency: ''
+              total_score:
+                - 6
+                - 7
+                - 8
+                - 9
+                - 10
+                - 11
+                - 12
+
+          all_2:
+            dynamic_model__sleep_ps_audit_c_questions:
+              six_or_more_frequency: 4
