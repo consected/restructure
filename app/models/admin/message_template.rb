@@ -181,6 +181,16 @@ class Admin::MessageTemplate < ActiveRecord::Base
           res = res.underscore
         elsif op == 'hyphenate'
           res = res.hyphenate
+        elsif op == 'join_with_space'
+          res = res.join(' ') if res.is_a? Array
+        elsif op == 'join_with_comma'
+          res = res.join(', ') if res.is_a? Array
+        elsif op == 'join_with_semicolon'
+          res = res.join('; ') if res.is_a? Array
+        elsif op == 'join_with_newline'
+          res = res.join("\n") if res.is_a? Array
+        elsif op == 'join_with_2newlines'
+          res = res.join("\n\n") if res.is_a? Array
         elsif op == 'markup'
           res = Kramdown::Document.new(res).to_html.html_safe
         elsif op.to_i != 0
