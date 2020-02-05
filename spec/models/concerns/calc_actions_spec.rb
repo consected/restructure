@@ -1137,6 +1137,44 @@ RSpec.describe "Calculate conditional actions", type: :model do
     expect(res.calc_action_if).to be true
 
 
+    # Check nested alls work as expected
+    confy = "
+      all:
+        all:
+          activity_log__player_contact_phones:
+            id: #{@al0.id}
+
+
+          any:
+            all:
+              addresses:
+                city: 'portland'
+                zip: x
+                id:
+                  this_references: id
+
+
+            all2:
+              addresses:
+                city: 'portland'
+                zip: #{a1.zip}
+                id:
+                  this_references: id
+
+        not_all:
+          activity_log__player_contact_phones:
+            extra_log_type: xxx
+            id:
+              this_references: id
+"
+    conf = YAML.load(confy)
+    conf = conf.deep_symbolize_keys
+
+    res = ConditionalActions.new conf, @al
+
+    expect(res.calc_action_if).to be true
+
+
 
     # # Try matching any across multiple relations
     m.player_contacts.create! rec_type: :phone, data: '(123)456-7891', rank: 5
@@ -1780,6 +1818,27 @@ RSpec.describe "Calculate conditional actions", type: :model do
     ca = ConditionalActions.new conf, @al
     res = ca.get_this_val
     expect(res).to eq 'random constant2'
+
+
+    conf = {
+      all: {
+        all_2: {
+          this: {
+
+            select_who: @al.select_who,
+            user_id: -1
+          }
+        },
+        all_3: {
+          this: {
+            return_constant: 'random constant2'
+          }
+        }
+      }
+    }
+    ca = ConditionalActions.new conf, @al
+    res = ca.get_this_val
+    expect(res).to eq nil
 
   end
 
