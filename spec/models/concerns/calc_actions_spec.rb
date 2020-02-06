@@ -953,6 +953,40 @@ RSpec.describe "Calculate conditional actions", type: :model do
 
   end
 
+  it "checks if a certain the current user has a specific id" do
+
+    # user_id for the activity log matches the current user's id
+    conf = {
+      all_creator: {
+        this: {
+          user_id: {
+            user: 'id'
+          }
+        }
+      }
+    }
+    res = ConditionalActions.new conf, @al
+    
+    expect(res.calc_action_if).to be true
+
+
+    conf = {
+      all: {
+        user: {
+          id: {
+            this: 'user_id'
+          }
+        }
+      }
+    }
+
+    res = ConditionalActions.new conf, @al
+
+    expect(res.calc_action_if).to eq true
+
+
+  end
+
   it "checks if a certain the current user has a specific role" do
 
     conf = {

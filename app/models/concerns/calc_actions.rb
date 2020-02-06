@@ -316,9 +316,11 @@ module CalcActions
           return true
         end
 
-        if table == :this || table == :parent || table == :referring_record
+        if table == :this || table == :parent || table == :referring_record || (table == :user && field_name != :role_name)
           if table == :this
             in_instance = current_instance
+          elsif table == :user
+            in_instance = @current_instance.master.current_user
           elsif table == :parent
             in_instance = current_instance.parent_item
           elsif table == :referring_record
@@ -376,20 +378,18 @@ EOF
             end
 
           end
-        elsif table == :user
-          if field_name == :role_name
-            user = @current_instance.master.current_user
-            role_names = user.user_roles.active.pluck(:role_name)
-            @this_val = role_names if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
-            expected_val = [expected_val] unless expected_val.is_a? Array
-            role_res = false
-            expected_val.each do |e|
-              role_res ||= role_names.include? e
-            end
-            res &&= role_res
-          else
-            res = false
+        elsif table == :user && field_name == :role_name
+          user = @current_instance.master.current_user
+          expected_val = [expected_val] unless expected_val.is_a? Array
+          
+          role_names = user.user_roles.active.pluck(:role_name)
+          @this_val = role_names if expected_val == 'return_value' || expected_val.is_a?(Array) && expected_val.include?('return_value')
+          role_res = false
+          expected_val.each do |e|
+            role_res ||= role_names.include? e
           end
+          res &&= role_res
+
         end
       end
       res
@@ -518,6 +518,19 @@ EOF
                     val << mr.to_record.attributes[att]
                   end
                 end
+              elsif val_item_key == :user
+                att = val.first.last
+                user = @current_instance.master.current_user
+                if att.is_a?(Hash)
+                  if att == :role_name
+                    role_names = user.user_roles.active.pluck(:role_name)
+                    val = role_names
+                  else
+                  end
+                else
+                  val = user.attributes[att]
+                end
+
               else
                 val.keys.each do |val_key|
                   if non_join_table_name?(val_key)
